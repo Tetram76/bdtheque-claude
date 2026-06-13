@@ -67,8 +67,10 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 > **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée.**
 
 - Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI).
+- Les contrôles de non-régression **doivent être exécutés localement avant le push** sur la branche de PR — pour détecter les régressions au plus tôt et ne pas attendre le CI distant.
+- Le CI (GitHub Actions) constitue le filet de sécurité final et le verrou technique sur le merge.
 - Cette règle sera **imposée techniquement** via le Ruleset GitHub (required status checks) dès que le premier workflow CI sera en place.
-- En attendant le CI, la vérification est une contrainte de processus : l'agent ne fusionne pas une PR sans avoir confirmé l'absence de régression.
+- En attendant le CI, la vérification est une contrainte de processus : l'agent exécute les tests localement avant tout push, et ne fusionne pas une PR sans confirmation de non-régression.
 
 ## Revue de code
 
