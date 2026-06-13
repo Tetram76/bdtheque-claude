@@ -279,7 +279,7 @@ Par défaut, seules les **éditions possédées** couvrent leur numéro de tome.
 
 - **Exclure les intégrales** : les intégrales présentes dans la collection ne couvrent plus leur plage de tomes. Les tomes correspondants restent manquants. Utile pour un utilisateur qui souhaite posséder chaque tome sous forme d'album individuel.
 - **Exclure les intentions d'achat** : les albums marqués en intention d'achat ne comblent plus les trous et apparaissent comme manquants. Sans cette option, la liste affiche uniquement les manquants non encore planifiés (utile pour identifier les prochains achats à programmer) ; avec cette option, elle affiche tous les manquants réels de la collection, intentions d'achat incluses.
-- **Inclure les non possédées** : par défaut, seules les éditions possédées couvrent leur numéro de tome. Cette option étend la couverture aux éditions cataloguées mais non possédées. Si l'option `Exclure les intentions d'achat` est également active, les éditions non possédées issues d'une intention d'achat restent exclues — `Exclure les intentions d'achat` est prioritaire.
+- **Inclure les non possédées** : par défaut, seules les éditions possédées couvrent leur numéro de tome. Cette option étend la couverture aux éditions cataloguées mais non possédées.
 
 ### Estimation de sortie d'un nouvel album
 
