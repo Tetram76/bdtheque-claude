@@ -130,7 +130,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 |---|---|---|---|
 | Titre | texte | oui | |
-| Clé de tri | texte | non | Calculée automatiquement depuis le titre (article initial supprimé) et stockée explicitement. |
+| Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre (article initial supprimé) et stockée explicitement. Toujours présente car le titre est obligatoire. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Statut | énuméré | non | `En cours` / `Terminée` / `Abandonnée`. `Terminée` signifie que tous les albums prévus par les auteurs ont été publiés. |
 | Nombre d'albums (théorique) | entier | non | Nombre total d'albums de la série selon l'utilisateur. Non calculé depuis la base — sert à évaluer la complétude de la collection. |
