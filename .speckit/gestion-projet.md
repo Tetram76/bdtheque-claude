@@ -9,6 +9,12 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 1. **Réécriture applicative** : réécrire une application client lourd existante en application web n-tiers.
 2. **Évaluation de l'agent** : évaluer la capacité de l'agent IA à produire une application complète en totale autonomie.
 
+## Périmètre de l'agent
+
+L'agent produit l'intégralité des livrables du projet, y compris :
+- le code de l'application,
+- le **contenu de l'aide contextuelle**.
+
 ---
 
 ## Repository
@@ -27,6 +33,8 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 
 - L'agent prend ses décisions en **totale autonomie**.
 - Lorsque les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher.
+- Les choix techniques ne sont **pas gravés dans le marbre** : tout choix peut être remis en cause si une nouvelle contrainte le justifie.
+- Lorsqu'un changement technique a un **impact visible sur le livrable** (comportement, interface, données, déploiement), la transition doit être **transparente pour l'utilisateur** : l'agent informe explicitement de ce qui change et de ce qui est impacté.
 
 ## Signature des commits
 
