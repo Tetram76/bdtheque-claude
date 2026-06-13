@@ -86,11 +86,17 @@ Cette règle s'applique à l'agent comme à tout contributeur. Elle ne peut pas 
 
 ## Conventions de commit
 
+Le projet suit le standard **[Conventional Commits](https://www.conventionalcommits.org/)**.
+
 Format : `<type>(<scope>): <description courte>`
 
 Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
+
+Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le message du commit squashé sur `main`.
 
 Exemples :
 - `feat(albums): ajout de la gestion des éditions`
 - `fix(devises): correction du taux de conversion franc français`
 - `chore(docker): mise à jour du Dockerfile backend`
+
+> **Note** : l'enforcement automatique du format (via ruleset GitHub) est réservé à GitHub Enterprise et n'est donc pas actif. Le respect de la convention est une contrainte de processus appliquée par l'agent.
