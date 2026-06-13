@@ -37,13 +37,9 @@ Le `frontend` communique avec l'`api` via le réseau Docker interne. L'`api` est
 
 ## Déploiement
 
-Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synology Container Manager).
+Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synology Container Manager). Les visuels (couvertures, planches, etc.) sont stockés sur un volume Docker monté sur le NAS, configurable via variable d'environnement.
 
-```bash
-docker compose up -d
-```
-
-Les visuels (couvertures, planches, etc.) sont stockés sur un volume Docker monté sur le NAS, configurable via variable d'environnement.
+> **Note :** les fichiers Docker (`Dockerfile`, `docker-compose.yml`) ne sont pas encore dans le dépôt — cette section sera complétée lors de la mise en place de l'infrastructure.
 
 ## Spécifications
 

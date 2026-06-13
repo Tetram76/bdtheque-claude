@@ -83,8 +83,8 @@ erDiagram
     ALBUM |o--o{ CONTRIBUTION : "créé par"
     AUTEUR ||--o{ CONTRIBUTION : "contribue"
     SERIE |o--o{ CONTRIBUTION : "template"
-    SERIE |o--|o EDITEUR : "template éditeur"
-    SERIE |o--|o COLLECTION_EDITEUR : "template collection"
+    SERIE }o--|o EDITEUR : "template éditeur"
+    SERIE }o--|o COLLECTION_EDITEUR : "template collection"
     ALBUM }o--o{ GENRE : "catégorisé"
     ALBUM }o--o{ UNIVERS : "rattaché à"
     SERIE }o--o{ GENRE : "catégorisé"
@@ -116,14 +116,14 @@ erDiagram
 | Type | énuméré | oui | `Régulier` (défaut) / `Intégrale`. |
 | Hors-série | booléen | oui | `false` par défaut. Indépendant du type : une intégrale peut être hors-série. |
 | Numéro de tome | entier | non | |
-| Tome de début | entier | non | Intégrales uniquement : premier tome couvert. |
-| Tome de fin | entier | non | Intégrales uniquement : dernier tome couvert. |
+| Tome de début | entier | conditionnel | Intégrales uniquement : premier tome couvert. Doit être renseigné si et seulement si le tome de fin l'est. |
+| Tome de fin | entier | conditionnel | Intégrales uniquement : dernier tome couvert. Doit être renseigné si et seulement si le tome de début l'est. |
 | Date de première publication | date partielle | non | Granularité : année seule, ou mois + année. Jamais de date complète (jour inconnu). |
 | Résumé | texte long | non | Résumé propre à l'album. |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
 | Note | énuméré (1–5) | non | Appréciation de l'utilisateur : 1 = Très mauvais, 2 = Mauvais, 3 = Moyen, 4 = Bien, 5 = Très bien. |
 
-> **Contrainte (intégrale) :** Les tomes référencés par la séquence (tome de début → tome de fin) n'ont pas à exister en tant qu'albums dans la base. Il n'y a aucune contrainte d'intégrité référentielle sur cette séquence.
+> **Contrainte (intégrale) :** Les tomes de début et de fin sont solidaires : soit les deux sont renseignés, soit aucun des deux. De plus, `tome de début ≤ tome de fin` est obligatoire. Les tomes référencés par la séquence n'ont pas à exister en tant qu'albums dans la base : il n'y a aucune contrainte d'intégrité référentielle sur cette séquence.
 
 ### Série
 

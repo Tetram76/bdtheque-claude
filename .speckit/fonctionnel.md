@@ -120,13 +120,14 @@ Le libellé peut optionnellement inclure le **titre de la série** (`AvecSerie`)
 
 #### Représentation du tome selon le type d'album
 
-| Type | Format du tome |
-|---|---|
-| Régulier | `T. {N}` (simple) ou `Tome {N}` (si pas de titre propre) |
-| Hors-série | `HS[ {N}]` (simple) ou `Hors-série[ {N}]` (si pas de titre) |
-| Intégrale | `INT.[ - {N}][ [{Début} à {Fin}]]` ou `Intégrale[ - {N}][ [{Début} à {Fin}]]` |
+| Type | Hors-série | Format du tome (simple) | Format du tome (sans titre propre) |
+|---|---|---|---|
+| Régulier | non | `T. {N}` | `Tome {N}` |
+| Régulier | oui | `HS[ {N}]` | `Hors-série[ {N}]` |
+| Intégrale | non | `INT.[ - {N}][ [{Début} à {Fin}]]` | `Intégrale[ - {N}][ [{Début} à {Fin}]]` |
+| Intégrale | oui | `INT.HS[ - {N}][ [{Début} à {Fin}]]` | `Intégrale hors-série[ - {N}][ [{Début} à {Fin}]]` |
 
-Le numéro de tome n'apparaît que s'il est renseigné. Pour les intégrales, la séquence `[Début à Fin]` n'apparaît que si au moins l'un des deux est renseigné.
+Le numéro de tome n'apparaît que s'il est renseigné. Pour les intégrales, la séquence `[Début à Fin]` n'apparaît que si les deux bornes sont renseignées.
 
 #### Deux formats configurables (préférence utilisateur)
 
@@ -137,6 +138,9 @@ Le numéro de tome n'apparaît que s'il est renseigné. Pour les intégrales, la
 ```
 - Si pas de titre : `{Série} - {Tome}`
 - Si pas de série : `{Titre} ({Tome})`
+- Si pas de tome : `{Titre} ({Série})`
+- Si pas de titre ni de tome : `{Série}`
+- Si pas de série ni de tome : `{Titre}`
 
 **Format 1 — `Tome - Album (Série)`**
 
@@ -145,6 +149,9 @@ Le numéro de tome n'apparaît que s'il est renseigné. Pour les intégrales, la
 ```
 - Si pas de titre : `{Tome} - {Série}`
 - Si pas de série : `{Tome} - {Titre}`
+- Si pas de tome : `{Titre} ({Série})`
+- Si pas de titre ni de tome : `{Série}`
+- Si pas de série ni de tome : `{Titre}`
 
 #### Fallback
 
