@@ -133,7 +133,7 @@ erDiagram
 | Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre (article initial supprimé) et stockée explicitement. Toujours présente car le titre est obligatoire. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Statut | énuméré | non | `En cours` / `Terminée` / `Abandonnée`. `Terminée` signifie que tous les albums prévus par les auteurs ont été publiés. |
-| Nombre d'albums (théorique) | entier | non | Nombre total d'albums de la série selon l'utilisateur. Non calculé depuis la base — sert à évaluer la complétude de la collection. |
+| Nombre de tomes numérotés (théorique) | entier | non | Nombre de tomes numérotés attendus dans la séquence principale de la série, selon l'utilisateur. Ne compte pas les hors-série ni les albums sans numéro de tome. Non calculé depuis la base — sert de borne supérieure pour la détection des albums manquants (queue théorique) et à évaluer la complétude de la collection. |
 | Complète | booléen | oui | `false` par défaut. Choix explicite de l'utilisateur, indépendant du nombre d'albums réellement présents dans la collection. |
 | Exclure des manquants | booléen | oui | `false` par défaut. Si `true`, la série est ignorée lors de la recherche des albums manquants. |
 | Résumé | texte long | non | Résumé propre à la série. |
@@ -169,6 +169,10 @@ erDiagram
 | Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. cote, numéro de rangement). |
 | Valeur estimée | calculée | — | Calculée dynamiquement, non stockée (voir `contraintes-techniques.md`). |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
+
+> **Contraintes d'intégrité :**
+> - Si `Mode d'acquisition` est `null` (édition non possédée, ex. issue d'une intention d'achat), alors `Date d'acquisition` et `Prix d'acquisition` doivent également être `null`.
+> - Si `Gratuite` est `true`, alors `Prix d'acquisition` doit être `null`.
 
 ### Auteur / Artiste
 

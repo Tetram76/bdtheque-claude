@@ -271,9 +271,9 @@ Un tome est considéré **manquant** pour une série si les conditions suivantes
 1. La série n'est pas exclue de la recherche des manquants (attribut `Exclure des manquants` sur la série).
 2. Le tome est absent de la collection selon **au moins une** des deux sources suivantes (indépendantes) :
    - **Trou de séquence** : le tome est absent de la séquence numérotée et compris entre 1 et le tome le plus élevé présent dans la séquence (borne supérieure inclusive). La séquence est construite à partir du **numéro de tome** des albums réguliers et des **plages [tome de début → tome de fin]** des intégrales (chaque tome couvert par la plage est considéré présent). Cette source ne produit aucun résultat si la séquence est vide.
-   - **Queue théorique** : le **nombre d'albums théorique** de la série est renseigné et le tome est absent de la séquence tout en étant inférieur ou égal à ce maximum. Si la séquence est vide (aucun tome possédé), tous les tomes de 1 au maximum théorique sont considérés manquants par cette source.
+   - **Queue théorique** : le **nombre de tomes numérotés théorique** de la série est renseigné et le tome est absent de la séquence tout en étant inférieur ou égal à ce maximum. Si la séquence est vide (aucun tome possédé), tous les tomes de 1 au maximum théorique sont considérés manquants par cette source.
 
-Les albums sans numéro de tome et les hors-série ne participent pas à la détection des manquants.
+Les albums réguliers sans numéro de tome et les hors-série ne participent pas à la détection des manquants. Une intégrale sans numéro de tome individuel peut néanmoins participer via sa plage [tome de début → tome de fin], si celle-ci est renseignée.
 
 Par défaut, seules les **éditions possédées** couvrent leur numéro de tome. Les intégrales possédées couvrent leur plage de tomes, et les albums marqués en intention d'achat sont considérés comme "pris en charge". Trois options permettent d'affiner ce calcul :
 
