@@ -20,6 +20,15 @@ Un album est considéré comme **faisant partie de la collection** uniquement s'
 
 Une édition peut exister dans la base sans être possédée (sans données d'acquisition). C'est le cas uniquement des éditions créées via une intention d'achat. Le `Mode d'acquisition` est optionnel en base, mais la saisie normale d'une édition continue à l'imposer : il n'est absent que lorsque l'édition est issue d'une intention d'achat non encore concrétisée.
 
+### Périmètre de la consultation
+
+La partie **Consultation** reflète exclusivement l'état de la collection. En conséquence :
+
+- Seules les **éditions possédées** (avec un `Mode d'acquisition` renseigné) sont visibles.
+- Les **albums sans édition possédée** n'apparaissent pas dans la consultation (ni dans les listes, ni dans les résultats de recherche, ni dans les fiches de série).
+
+Cette règle s'applique à toutes les vues de la consultation : listes, recherche, fiches détaillées, navigation inter-entités, statistiques.
+
 ### Initialisation d'une nouvelle édition depuis la série
 
 Lors de la création d'une nouvelle édition pour un album, si la série de l'album définit des valeurs template, les champs suivants sont pré-remplis :
@@ -202,6 +211,19 @@ Dans tous les cas, le champ montant est affiché et reste optionnel : même sans
 
 La saisie d'un ISBN vérifie le chiffre de contrôle (ISBN-10 ou ISBN-13) afin de détecter les erreurs de frappe. Cette vérification est **non bloquante** : l'utilisateur est averti en cas d'incohérence mais peut enregistrer la valeur telle quelle (certains éditeurs ont publié des albums avec un ISBN erroné).
 
+### Séquence de tomes d'une série
+
+La **séquence de tomes** d'une série représente l'ensemble des numéros de tomes attendus. Elle sert de référence pour identifier les manquants et calculer les rythmes de parution.
+
+Règles de construction :
+
+- N'inclut que les **tomes réguliers** et les **intégrales** — les **hors-série sont exclus** de la séquence.
+- Commence à **1**.
+- Les intégrales **couvrent** la plage `tome de début → tome de fin` (chaque entier de la plage est considéré présent).
+- Le **tome final** est défini par le numéro de tome (ou tome de fin pour les intégrales) catalogué le plus élevé.
+- Si le **nombre de tomes théorique** n'est pas indiqué sur la série, le tome final détermine la fin de la séquence.
+- Sinon, la fin de la séquence est le **maximum** entre le tome final catalogué et le nombre de tomes théorique.
+
 ### Estimation de la valeur des éditions
 
 - La **valeur estimée** d'une édition est calculée dynamiquement à partir des données de la collection, elle n'est pas stockée en base.
@@ -266,20 +288,18 @@ Ces fonctionnalités sont prévues dans une phase ultérieure.
 
 Accessible en **mode consultation** (public). Permet de savoir quels albums d'une série ne sont pas encore présents dans la collection.
 
-Un tome est considéré **manquant** pour une série si les conditions suivantes sont réunies :
+Un tome est **manquant** s'il est absent de la séquence de tomes de la série (voir [Séquence de tomes d'une série](#séquence-de-tomes-dune-série)).
 
-1. La série n'est pas exclue de la recherche des manquants (attribut `Exclure des manquants` sur la série).
-2. Le tome est absent de la collection selon **au moins une** des deux sources suivantes (indépendantes) :
-   - **Trou de séquence** : le tome est absent de la séquence numérotée et compris entre 1 et le tome le plus élevé présent dans la séquence (borne supérieure inclusive). La séquence est construite à partir du **numéro de tome** des albums réguliers et des **plages [tome de début → tome de fin]** des intégrales (chaque tome couvert par la plage est considéré présent). Cette source ne produit aucun résultat si la séquence est vide.
-   - **Queue théorique** : le **nombre de tomes numérotés théorique** de la série est renseigné et le tome est absent de la séquence tout en étant inférieur ou égal à ce maximum. Si la séquence est vide (aucun tome possédé), tous les tomes de 1 au maximum théorique sont considérés manquants par cette source.
+**Exclusions systématiques :**
+- les séries avec l'attribut **Exclure des manquants**
 
-Les albums réguliers sans numéro de tome et les hors-série ne participent pas à la détection des manquants. Une intégrale sans numéro de tome individuel peut néanmoins participer via sa plage [tome de début → tome de fin], si celle-ci est renseignée.
+**Affichage des manquants :**
 
-Par défaut, seules les **éditions possédées** couvrent leur numéro de tome. Les intégrales possédées couvrent leur plage de tomes, et les albums marqués en intention d'achat sont considérés comme "pris en charge". Trois options permettent d'affiner ce calcul :
+Les tomes manquants consécutifs sont regroupés et affichés sous forme d'intervalle (ex. `T. 3 à 5` plutôt que `T. 3`, `T. 4`, `T. 5`).
 
-- **Exclure les intégrales** : les intégrales présentes dans la collection ne couvrent plus leur plage de tomes. Les tomes correspondants restent manquants. Utile pour un utilisateur qui souhaite posséder chaque tome sous forme d'album individuel.
-- **Exclure les intentions d'achat** : les albums marqués en intention d'achat ne comblent plus les trous et apparaissent comme manquants. Sans cette option, la liste affiche uniquement les manquants non encore planifiés (utile pour identifier les prochains achats à programmer) ; avec cette option, elle affiche tous les manquants réels de la collection, intentions d'achat incluses.
-- **Inclure les non possédées** : par défaut, seules les éditions possédées couvrent leur numéro de tome. Cette option étend la couverture aux éditions cataloguées mais non possédées.
+**Options utilisateur :**
+- **Exclure les intégrales** : les intégrales ne couvrent plus leur plage (pour posséder chaque tome en album individuel).
+- **Exclure les intentions d'achat** : les intentions ne comblent plus les trous — affiche tous les manquants réels, intentions incluses.
 
 ### Estimation de sortie d'un nouvel album
 
