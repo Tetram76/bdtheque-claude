@@ -35,7 +35,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | Relation | Cardinalité | Remarques |
 |---|---|---|
 | Album → Édition | 0..n | Un album peut n'avoir aucune édition (non encore publié). |
-| Album → Série | 0..1 | Un album peut être hors-série (sans série rattachée). |
+| Album → Série | 0..1 | Un album peut n'appartenir à aucune série (album standalone). L'attribut `Hors-série` est indépendant : un album peut être hors-série tout en appartenant à une série. |
 | Album → Contribution | 0..n | Un album peut avoir plusieurs contributions. Chaque contribution a un rôle et un artiste obligatoire. |
 | Album → Genre | 0..n | Genres propres à l'album. Si l'album appartient à une série, les genres affichés sont l'union des genres de l'album et de ceux de la série. |
 | Album → Univers | 0..n | Univers propres à l'album. Si l'album appartient à une série, les univers affichés sont l'union des univers de l'album et de ceux de la série. |
@@ -111,7 +111,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 |---|---|---|---|
 | Titre | texte | conditionnel | Obligatoire si l'album n'appartient à aucune série. Optionnel si une série est rattachée (la série + le tome peuvent suffire à identifier l'album). |
-| Clé de tri | texte | non | Calculée automatiquement depuis le titre (article initial supprimé) et stockée explicitement. Absente si le titre est absent. |
+| Clé de tri | texte | non | Calculée automatiquement depuis le titre (article initial supprimé) et stockée explicitement. Absente si le titre est absent ; dans ce cas, la clé de tri de la série rattachée est utilisée comme valeur de substitution pour le tri et la navigation par initiale. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Type | énuméré | oui | `Régulier` (défaut) / `Intégrale`. |
 | Hors-série | booléen | oui | `false` par défaut. Indépendant du type : une intégrale peut être hors-série. |
@@ -164,8 +164,8 @@ erDiagram
 | Mode d'acquisition | énuméré | conditionnel | `Achat` / `Offerte` / `Échange` / `Gagnée` / `Héritée`. Obligatoire si l'édition est possédée. Conditionne le libellé de la date et du montant en interface (voir `fonctionnel.md`). |
 | D'occasion | booléen | non | `false` = neuve, `true` = occasion. |
 | Date d'acquisition | date | non | Date à laquelle l'utilisateur a obtenu l'édition. |
-| Prix d'acquisition | montant + devise | non | Optionnel. `null` = prix inconnu. Distinct du statut "Gratuite" (édition obtenue sans contrepartie financière). |
-| Gratuite | booléen | oui | `false` par défaut. Si `true`, le prix d'acquisition doit être `null` (contrainte d'intégrité). |
+| Prix d'acquisition | montant + devise | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. |
+| Gratuite | booléen | oui | `false` par défaut. Indique que l'utilisateur ne souhaite enregistrer aucun montant (ni prix payé ni valeur marchande). Si `true`, le prix d'acquisition doit être `null` (contrainte d'intégrité) ; le champ est désactivé et vidé en interface. |
 | Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. cote, numéro de rangement). |
 | Valeur estimée | calculée | — | Calculée dynamiquement, non stockée (voir `contraintes-techniques.md`). |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |

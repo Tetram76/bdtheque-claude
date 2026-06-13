@@ -264,7 +264,7 @@ Un tome est considéré **manquant** pour une série si les conditions suivantes
 1. La série n'est pas exclue de la recherche des manquants (attribut `Exclure des manquants` sur la série).
 2. Le tome est absent de la collection selon **au moins une** des deux sources suivantes (indépendantes) :
    - **Trou de séquence** : le tome est absent de la séquence numérotée de la série. La séquence est construite à partir du **numéro de tome** des albums réguliers et des **plages [tome de début → tome de fin]** des intégrales (chaque tome couvert par la plage est considéré présent).
-   - **Queue théorique** : le **nombre d'albums théorique** de la série est renseigné et le tome est compris entre le tome le plus élevé présent dans la séquence et ce maximum.
+   - **Queue théorique** : le **nombre d'albums théorique** de la série est renseigné et le tome est absent de la séquence tout en étant inférieur ou égal à ce maximum. Si la séquence est vide (aucun tome possédé), tous les tomes de 1 au maximum théorique sont considérés manquants par cette source.
 
 Les albums sans numéro de tome et les hors-série ne participent pas à la détection des manquants.
 
