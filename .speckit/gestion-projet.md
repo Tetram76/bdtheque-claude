@@ -70,6 +70,13 @@ Les Issues GitHub sont utilisées ponctuellement pour tracer :
 
 Des **releases GitHub** sont publiées pour marquer les jalons significatifs du projet. Chaque release correspond à un état stable et identifiable de l'application.
 
+## Règle absolue : interdiction de pousser directement sur `main`
+
+> **Il est INTERDIT de commiter ou pousser directement sur la branche `main`.**
+> Toute modification, sans exception, doit passer par une Pull Request.
+
+Cette règle s'applique à l'agent comme à tout contributeur. Elle ne peut pas être imposée techniquement (protection de branche indisponible sur dépôt privé gratuit) mais constitue une contrainte de processus stricte et non négociable.
+
 ## Stratégie de branches
 
 - `main` : branche stable, reflète l'état livrable du projet
