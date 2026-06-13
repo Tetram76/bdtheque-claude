@@ -47,8 +47,19 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - **Branche principale** : `main`
 - **Stratégie de merge** : squash merge uniquement (historique linéaire et lisible sur `main`)
 - **Suppression automatique** des branches de feature après merge
-- Wiki et Projects désactivés (non utilisés)
+- **Fonctionnalités actives** : Issues, Releases
+- **Fonctionnalités désactivées** : Wiki, Projects, Discussions (projet privé, aucune interaction communautaire)
 - **Protection de `main`** : indisponible sur dépôt privé en compte GitHub gratuit — non active.
+
+## Issues
+
+Les Issues GitHub sont utilisées ponctuellement pour tracer :
+- des **bugs** à corriger
+- des **fonctionnalités** à implémenter dans le futur
+
+## Releases
+
+Des **releases GitHub** sont publiées pour marquer les jalons significatifs du projet. Chaque release correspond à un état stable et identifiable de l'application.
 
 ## Stratégie de branches
 
