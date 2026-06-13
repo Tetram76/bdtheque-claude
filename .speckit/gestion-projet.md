@@ -51,6 +51,15 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - **Fonctionnalités désactivées** : Wiki, Projects, Discussions (projet privé, aucune interaction communautaire)
 - **Protection de `main`** : indisponible sur dépôt privé en compte GitHub gratuit — non active.
 
+## Revue de code
+
+Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent intervenir sur les Pull Requests. Règles d'application de leurs retours :
+
+- Les retours ne sont **pas une source de vérité** : ils sont systématiquement soumis à contre-vérification.
+- Un retour est **appliqué** s'il est pertinent et que le gain justifie le coût de la modification.
+- Un retour est **rejeté** s'il est jugé non pertinent, incorrect, ou si son coût (complexité, temps, lisibilité dégradée) est disproportionné par rapport au bénéfice obtenu.
+- La décision d'accepter ou rejeter un retour appartient à l'agent, dans le cadre de son autonomie décisionnelle.
+
 ## Issues
 
 Les Issues GitHub sont utilisées ponctuellement pour tracer :
