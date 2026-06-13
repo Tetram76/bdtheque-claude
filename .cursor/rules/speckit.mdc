@@ -1,0 +1,40 @@
+---
+description: Source de vérité absolue du projet — dossier .speckit et responsabilités de l'agent
+alwaysApply: true
+---
+
+# .speckit — Source de Vérité Absolue
+
+Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime sur toute autre information, historique de conversation, supposition ou connaissance générale de l'agent.
+
+## Fichiers et leur périmètre
+
+| Fichier | Contenu |
+|---|---|
+| `gestion-projet.md` | Gouvernance du projet : stockage, branches, conventions de commit, outillage, CI/CD. Tout ce qui ne concerne PAS l'application elle-même. |
+| `fonctionnel.md` | Fonctionnalités de l'application : cas d'usage, user stories, règles métier, flux. |
+| `modele-metier.md` | Modèle du domaine : entités, attributs, relations, contraintes d'intégrité, glossaire. |
+| `contraintes-techniques.md` | Choix et contraintes techniques de l'application et de son déploiement uniquement (stack, langages, frameworks, BDD, hébergement, sécurité). Rien de lié à la gestion de projet. |
+
+## Règles de consultation
+
+- **Lire les fichiers `.speckit/` en début de chaque conversation** et avant toute décision architecturale, technique ou fonctionnelle.
+- **Aucune décision ne peut contredire** ce qui y est documenté sans accord explicite de l'utilisateur.
+- En cas d'ambiguïté ou de silence sur un sujet, l'agent peut décider — mais doit documenter le choix dans le fichier concerné.
+
+## Mise à jour du .speckit
+
+Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que l'utilisateur fournit une exigence, une contrainte, une règle ou toute information relevant du périmètre d'un des fichiers. Ne jamais laisser une information pertinente uniquement dans le fil de conversation.
+
+**Format des mises à jour :**
+- Les fichiers `.speckit/` sont des **documents de référence**, pas des journaux. Ils ne doivent pas contenir d'historique, de dates, ni de traces de décisions successives.
+- Toute nouvelle information est **intégrée dans le contenu existant** : mise à jour d'une section, enrichissement d'une définition, ajout dans la liste appropriée — jamais ajoutée en bas de fichier comme une entrée de log.
+- Le fichier doit rester cohérent, lisible et structuré comme une documentation vivante.
+
+## Rôle de l'agent
+
+Ce projet vise à produire une **application n-tiers web** et tous les éléments nécessaires à sa mise en production.
+
+- L'agent prend **toutes les décisions** architecturales, techniques et d'implémentation nécessaires à la livraison d'une application fonctionnelle.
+- Les seules interventions de l'utilisateur sont la mise à jour des fichiers `.speckit/` pour exprimer ses besoins et exigences.
+- L'agent doit **toujours être en mesure de justifier** ses choix lorsqu'il est challengé. Toute décision importante doit être traçable dans `.speckit/contraintes-techniques.md` ou `gestion-projet.md`.
