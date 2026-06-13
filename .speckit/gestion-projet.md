@@ -42,4 +42,28 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - Le code doit être **propre et lisible** : l'utilisateur est développeur et lit le code produit.
 - **Règle de commentaires** : les commentaires expliquent le **pourquoi** (intention, contrainte, décision de conception), jamais le **quoi** (ce que le code fait — le code se lit de lui-même).
 
-<!-- À compléter : stratégie de branches, conventions de commit, CI/CD, revues de code, etc. -->
+## Configuration du repository GitHub
+
+- **Branche principale** : `main`
+- **Stratégie de merge** : squash merge uniquement (historique linéaire et lisible sur `main`)
+- **Suppression automatique** des branches de feature après merge
+- Wiki et Projects désactivés (non utilisés)
+- **Protection de `main`** : indisponible sur dépôt privé en compte GitHub gratuit — non active.
+
+## Stratégie de branches
+
+- `main` : branche stable, reflète l'état livrable du projet
+- `feat/<sujet>` : développement de fonctionnalités
+- `fix/<sujet>` : corrections de bugs
+- `chore/<sujet>` : maintenance (config, refacto, outillage, CI)
+
+## Conventions de commit
+
+Format : `<type>(<scope>): <description courte>`
+
+Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
+
+Exemples :
+- `feat(albums): ajout de la gestion des éditions`
+- `fix(devises): correction du taux de conversion franc français`
+- `chore(docker): mise à jour du Dockerfile backend`
