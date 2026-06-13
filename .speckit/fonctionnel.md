@@ -237,7 +237,9 @@ Règles de construction :
 - **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euro.
 - **Taux de change** :
   - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante.
-  - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux de change utilisé devra être configurable ou récupéré dynamiquement.
+  - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux appliqué dépend du contexte :
+    - **Estimation de la valeur de la collection** : taux de change **actuel** (récupéré dynamiquement).
+    - **Autres cas** : règle à définir au cas par cas.
 
 ## Design et charte graphique
 
@@ -303,7 +305,8 @@ Les tomes manquants consécutifs sont regroupés et affichés sous forme d'inter
 
 ### Estimation de sortie d'un nouvel album
 
-Accessible en **mode consultation** (public). Permet d'estimer la date de sortie du prochain tome d'une série, sur la base du rythme de parution observé. On parle d'**estimation** et non de prévision : le facteur humain rend toute prédiction précise impossible, et l'objectif est uniquement de donner un ordre de grandeur.
+Accessible en **mode consultation** (public). Permet d'estimer la date de sortie du prochain tome d'une série, sur la base du rythme de parution observé.
+On parle d'**estimation** et non de prévision : le facteur humain rend toute prédiction précise impossible, et l'objectif est uniquement de donner un ordre de grandeur.
 
 Règles de calcul :
 
@@ -314,7 +317,6 @@ Règles de calcul :
 - **Mois + année** : le mois en cours est considéré comme passé. Seuls les mois strictement postérieurs au mois courant sont exclus.
 - **Année seule** : l'année en cours est considérée comme passée. Seules les années strictement postérieures à l'année courante sont exclues.
 
-Dans les deux cas, la granularité ne permettant pas de savoir si l'album est déjà sorti, l'algorithme considère qu'il l'est.
 4. Le délai attendu avant le prochain tome est déduit à partir des **délais entre les parutions précédentes**, en tenant compte des éventuels **trous dans la séquence de tomes** (un tome manquant dans la collection ne doit pas fausser le calcul du rythme).
 5. Les **évolutions de rythme** (accélération ou décélération des parutions) doivent être prises en compte dans l'estimation.
 
