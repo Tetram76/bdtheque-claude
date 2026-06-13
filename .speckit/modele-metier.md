@@ -61,7 +61,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 
 | Relation | Cardinalité | Remarques |
 |---|---|---|
-| Univers → Univers parent | 0..1 | Relation récursive permettant une hiérarchie d'univers. |
+| Univers → Univers parent | 0..1 | Relation récursive permettant une hiérarchie d'univers. Acyclicité obligatoire : un univers ne peut pas être son propre ancêtre (auto-référence interdite, cycles interdits). |
 
 ### Intention d'achat
 
@@ -162,7 +162,7 @@ erDiagram
 | En couleur | booléen | oui | `true` par défaut. |
 | État | énuméré | non | `Excellent (neuf)` / `Très bon` / `Bon` / `Mauvais` / `Très mauvais`. |
 | Mode d'acquisition | énuméré | conditionnel | `Achat` / `Offerte` / `Échange` / `Gagnée` / `Héritée`. Obligatoire si l'édition est possédée. Conditionne le libellé de la date et du montant en interface (voir `fonctionnel.md`). |
-| D'occasion | booléen | non | `false` = neuve, `true` = occasion. |
+| D'occasion | booléen | oui | `false` = neuve, `true` = occasion. |
 | Date d'acquisition | date | non | Date à laquelle l'utilisateur a obtenu l'édition. |
 | Prix d'acquisition | montant + devise | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. |
 | Gratuite | booléen | oui | `false` par défaut. Indique que l'utilisateur ne souhaite enregistrer aucun montant (ni prix payé ni valeur marchande). Si `true`, le prix d'acquisition doit être `null` (contrainte d'intégrité) ; le champ est désactivé et vidé en interface. |
