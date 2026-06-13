@@ -1,6 +1,6 @@
 # Fonctionnel
 
-Ce fichier décrit les fonctionnalités de l'application.
+Ce fichier décrit les fonctionnalités de l'application, ainsi que les éléments de design et la charte graphique.
 
 ---
 
@@ -19,5 +19,9 @@ L'application est la réécriture d'une application client lourd existante sous 
 - **Taux de change** :
   - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante.
   - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux de change utilisé devra être configurable ou récupéré dynamiquement.
+
+## Design et charte graphique
+
+<!-- À compléter : charte graphique (couleurs, typographie, iconographie), principes UX, composants UI, maquettes, etc. -->
 
 <!-- À compléter : cas d'usage, user stories, autres règles métier, flux applicatifs, etc. -->
