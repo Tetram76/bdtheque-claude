@@ -49,7 +49,7 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - **Suppression automatique** des branches de feature après merge
 - **Fonctionnalités actives** : Issues, Releases
 - **Fonctionnalités désactivées** : Wiki, Projects, Discussions (projet privé, aucune interaction communautaire)
-- **Protection de `main`** : indisponible sur dépôt privé en compte GitHub gratuit — non active.
+- **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`) — il impose PR obligatoire, interdit les suppressions et les force-push. Le ruleset est présent mais **suspendu tant que le dépôt est privé** (limitation GitHub gratuit) ; il s'activera automatiquement si le dépôt est repassé en public.
 
 ## Revue de code
 
