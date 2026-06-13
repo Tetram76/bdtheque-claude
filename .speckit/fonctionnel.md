@@ -289,7 +289,7 @@ Ces fonctionnalités sont prévues dans une phase ultérieure.
 
 Accessible en **mode consultation** (public). Permet de savoir quels albums d'une série ne sont pas encore présents dans la collection.
 
-Un tome est **manquant** s'il est absent de la séquence théorique de tomes de la série (voir [Séquence de tomes d'une série](#séquence-de-tomes-dune-série)).
+Un tome est **manquant** s'il est absent de la séquence théorique de tomes de la série (voir [Séquence théorique de tomes d'une série](#séquence-théorique-de-tomes-dune-série)).
 
 Les intégrales **couvrent** la plage `tome de début → tome de fin` de la séquence (chaque tome de la plage est considéré présent).
 
