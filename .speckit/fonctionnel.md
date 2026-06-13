@@ -211,7 +211,7 @@ Dans tous les cas, le champ montant est affiché et reste optionnel : même sans
 
 La saisie d'un ISBN vérifie le chiffre de contrôle (ISBN-10 ou ISBN-13) afin de détecter les erreurs de frappe. Cette vérification est **non bloquante** : l'utilisateur est averti en cas d'incohérence mais peut enregistrer la valeur telle quelle (certains éditeurs ont publié des albums avec un ISBN erroné).
 
-### Séquence de tomes d'une série
+### Séquence théorique de tomes d'une série
 
 La **séquence de tomes** d'une série représente l'ensemble des numéros de tomes attendus. Elle sert de référence pour identifier les manquants et calculer les rythmes de parution.
 
@@ -219,7 +219,6 @@ Règles de construction :
 
 - N'inclut que les **tomes réguliers** et les **intégrales** — les **hors-série sont exclus** de la séquence.
 - Commence à **1**.
-- Les intégrales **couvrent** la plage `tome de début → tome de fin` (chaque entier de la plage est considéré présent).
 - Le **tome final** est défini par le numéro de tome (ou tome de fin pour les intégrales) catalogué le plus élevé.
 - Si le **nombre de tomes théorique** n'est pas indiqué sur la série, le tome final détermine la fin de la séquence.
 - Sinon, la fin de la séquence est le **maximum** entre le tome final catalogué et le nombre de tomes théorique.
@@ -290,7 +289,9 @@ Ces fonctionnalités sont prévues dans une phase ultérieure.
 
 Accessible en **mode consultation** (public). Permet de savoir quels albums d'une série ne sont pas encore présents dans la collection.
 
-Un tome est **manquant** s'il est absent de la séquence de tomes de la série (voir [Séquence de tomes d'une série](#séquence-de-tomes-dune-série)).
+Un tome est **manquant** s'il est absent de la séquence théorique de tomes de la série (voir [Séquence de tomes d'une série](#séquence-de-tomes-dune-série)).
+
+Les intégrales **couvrent** la plage `tome de début → tome de fin` de la séquence (chaque tome de la plage est considéré présent).
 
 **Exclusions systématiques :**
 - les séries avec l'attribut **Exclure des manquants**
