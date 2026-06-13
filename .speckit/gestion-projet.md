@@ -51,6 +51,14 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - **Fonctionnalités désactivées** : Wiki, Projects, Discussions (projet privé, aucune interaction communautaire)
 - **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`) — il impose PR obligatoire, interdit les suppressions et les force-push. Le ruleset est présent mais **suspendu tant que le dépôt est privé** (limitation GitHub gratuit) ; il s'activera automatiquement si le dépôt est repassé en public.
 
+## Règle de merge : non-régression obligatoire
+
+> **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée.**
+
+- Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI).
+- Cette règle sera **imposée techniquement** via le Ruleset GitHub (required status checks) dès que le premier workflow CI sera en place.
+- En attendant le CI, la vérification est une contrainte de processus : l'agent ne fusionne pas une PR sans avoir confirmé l'absence de régression.
+
 ## Revue de code
 
 Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent intervenir sur les Pull Requests. Règles d'application de leurs retours :
