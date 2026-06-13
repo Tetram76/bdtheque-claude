@@ -28,6 +28,12 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - L'agent prend ses décisions en **totale autonomie**.
 - Lorsque les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher.
 
+## Signature des commits
+
+- **Tous les commits doivent être signés et vérifiés** (GPG/SSH).
+- La signature est configurée globalement sur le poste (`commit.gpgsign=true`, clé GPG `CC10F185AA085B2DD98025986A5E6B8341983E31`).
+- La règle `required_signatures` est intégrée au Ruleset GitHub pour l'imposer côté serveur.
+
 ## Règles de travail de l'agent
 
 - La base de connaissance de l'agent est considérée **toujours potentiellement obsolète**. Avant toute décision technique (choix de bibliothèque, version, API, configuration, bonne pratique), l'agent **doit contre-vérifier** ses connaissances via des sources externes reconnues et fiables (documentation officielle, dépôts GitHub officiels, etc.).
@@ -49,7 +55,12 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - **Suppression automatique** des branches de feature après merge
 - **Fonctionnalités actives** : Issues, Releases
 - **Fonctionnalités désactivées** : Wiki, Projects, Discussions (projet privé, aucune interaction communautaire)
-- **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`) — il impose PR obligatoire, interdit les suppressions et les force-push. Le ruleset est présent mais **suspendu tant que le dépôt est privé** (limitation GitHub gratuit) ; il s'activera automatiquement si le dépôt est repassé en public.
+- **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`) avec les règles suivantes (actif si dépôt public, suspendu en privé — limitation GitHub gratuit) :
+  - PR obligatoire avant tout merge
+  - Force-push interdit
+  - Suppression de `main` interdite
+  - Squash merge uniquement
+  - **Commits signés obligatoires** (`required_signatures`)
 
 ## Règle de merge : non-régression obligatoire
 
