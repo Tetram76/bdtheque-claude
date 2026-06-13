@@ -279,7 +279,7 @@ Par défaut, seules les **éditions possédées** couvrent leur numéro de tome.
 
 - **Exclure les intégrales** : les intégrales présentes dans la collection ne couvrent plus leur plage de tomes. Les tomes correspondants restent manquants. Utile pour un utilisateur qui souhaite posséder chaque tome sous forme d'album individuel.
 - **Exclure les intentions d'achat** : les albums marqués en intention d'achat ne comblent plus les trous et apparaissent comme manquants. Sans cette option, la liste affiche uniquement les manquants non encore planifiés (utile pour identifier les prochains achats à programmer) ; avec cette option, elle affiche tous les manquants réels de la collection, intentions d'achat incluses.
-- **Inclure les non possédées** : par défaut, seules les éditions possédées couvrent leur numéro de tome. Cette option étend la couverture aux éditions cataloguées mais non possédées.
+- **Inclure les non possédées** : par défaut, seules les éditions possédées couvrent leur numéro de tome. Cette option étend la couverture aux éditions cataloguées mais non possédées. Si l'option `Exclure les intentions d'achat` est également active, les éditions non possédées issues d'une intention d'achat restent exclues — `Exclure les intentions d'achat` est prioritaire.
 
 ### Estimation de sortie d'un nouvel album
 
@@ -287,7 +287,7 @@ Accessible en **mode consultation** (public). Permet d'estimer la date de sortie
 
 Règles de calcul :
 
-1. L'estimation se fait **série par série**.
+1. L'estimation se fait **série par série**. Elle n'est calculée que pour les séries dont le statut est `En cours` — les séries `Terminée` (tous les albums prévus ont été publiés) et `Abandonnée` ne font l'objet d'aucune estimation.
 2. Elle se base sur les **dates de première publication** des albums réguliers de la série (les intégrales et hors-série sont exclus du calcul).
 3. Il faut **au moins 2 albums réguliers** avec une date de première publication **passée** pour pouvoir produire une estimation. Les albums dont la date de première publication est strictement dans le futur sont exclus du calcul du rythme. La règle s'adapte à la granularité de la date saisie :
 
