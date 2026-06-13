@@ -80,9 +80,9 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 erDiagram
     SERIE |o--o{ ALBUM : "contient"
     ALBUM ||--o{ EDITION : "publiée en"
-    ALBUM ||--o{ CONTRIBUTION : "créé par"
+    ALBUM |o--o{ CONTRIBUTION : "créé par"
     AUTEUR ||--o{ CONTRIBUTION : "contribue"
-    SERIE ||--o{ CONTRIBUTION : "template"
+    SERIE |o--o{ CONTRIBUTION : "template"
     SERIE |o--|o EDITEUR : "template éditeur"
     SERIE |o--|o COLLECTION_EDITEUR : "template collection"
     ALBUM }o--o{ GENRE : "catégorisé"
@@ -99,6 +99,8 @@ erDiagram
 ```
 
 > La **Collection utilisateur** n'est pas une entité en base. Elle est définie par le filtre `Mode d'acquisition IS NOT NULL` sur les éditions.
+
+> **Contrainte (Contribution) :** Une contribution appartient à exactement l'un des deux : un Album (contribution réelle) ou une Série (template). Les deux références ne peuvent pas être nulles simultanément, ni renseignées toutes les deux.
 
 ---
 

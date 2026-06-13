@@ -259,13 +259,12 @@ Ces fonctionnalités sont prévues dans une phase ultérieure.
 
 Accessible en **mode consultation** (public). Permet de savoir quels albums d'une série ne sont pas encore présents dans la collection.
 
-Un album est considéré **manquant** pour une série si toutes les conditions suivantes sont réunies :
+Un tome est considéré **manquant** pour une série si les conditions suivantes sont réunies :
 
 1. La série n'est pas exclue de la recherche des manquants (attribut `Exclure des manquants` sur la série).
-2. Il existe un **trou dans la séquence numérotée** de la série. La séquence est construite à partir de :
-   - Le **numéro de tome** des albums réguliers.
-   - La **plage [tome de début → tome de fin]** des intégrales (chaque tome couvert par la plage est considéré présent).
-3. Si le **nombre d'albums théorique** de la série est renseigné, il tient lieu de **tome maximum** : tout tome absent entre le tome le plus élevé présent dans la collection et ce maximum est également considéré manquant.
+2. Le tome est absent de la collection selon **au moins une** des deux sources suivantes (indépendantes) :
+   - **Trou de séquence** : le tome est absent de la séquence numérotée de la série. La séquence est construite à partir du **numéro de tome** des albums réguliers et des **plages [tome de début → tome de fin]** des intégrales (chaque tome couvert par la plage est considéré présent).
+   - **Queue théorique** : le **nombre d'albums théorique** de la série est renseigné et le tome est compris entre le tome le plus élevé présent dans la séquence et ce maximum.
 
 Les albums sans numéro de tome et les hors-série ne participent pas à la détection des manquants.
 
