@@ -36,7 +36,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 |---|---|---|
 | Album → Édition | 0..n | Un album peut n'avoir aucune édition (non encore publié). |
 | Album → Série | 0..1 | Un album peut être hors-série (sans série rattachée). |
-| Album → Contribution | 0..n | Un album peut avoir plusieurs contributions. Chaque contribution a un rôle et un artiste optionnel. |
+| Album → Contribution | 0..n | Un album peut avoir plusieurs contributions. Chaque contribution a un rôle et un artiste obligatoire. |
 | Album → Genre | 0..n | Genres propres à l'album. Si l'album appartient à une série, les genres affichés sont l'union des genres de l'album et de ceux de la série. |
 | Album → Univers | 0..n | Univers propres à l'album. Si l'album appartient à une série, les univers affichés sont l'union des univers de l'album et de ceux de la série. |
 
@@ -116,12 +116,12 @@ erDiagram
 | Numéro de tome | entier | non | |
 | Tome de début | entier | non | Intégrales uniquement : premier tome couvert. |
 | Tome de fin | entier | non | Intégrales uniquement : dernier tome couvert. |
-
-> **Contrainte (intégrale) :** Les tomes référencés par la séquence (tome de début → tome de fin) n'ont pas à exister en tant qu'albums dans la base. Il n'y a aucune contrainte d'intégrité référentielle sur cette séquence.
 | Date de première publication | date partielle | non | Granularité : année seule, ou mois + année. Jamais de date complète (jour inconnu). |
 | Résumé | texte long | non | Résumé propre à l'album. |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
 | Note | énuméré (1–5) | non | Appréciation de l'utilisateur : 1 = Très mauvais, 2 = Mauvais, 3 = Moyen, 4 = Bien, 5 = Très bien. |
+
+> **Contrainte (intégrale) :** Les tomes référencés par la séquence (tome de début → tome de fin) n'ont pas à exister en tant qu'albums dans la base. Il n'y a aucune contrainte d'intégrité référentielle sur cette séquence.
 
 ### Série
 
