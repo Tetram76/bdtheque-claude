@@ -132,6 +132,14 @@ Les Issues GitHub sont utilisées ponctuellement pour tracer :
 - des **bugs** à corriger
 - des **fonctionnalités** à implémenter dans le futur
 
+## Lien entre Pull Requests et Issues
+
+- Une Pull Request n'a **pas systématiquement** vocation à résoudre une ou plusieurs Issues.
+- Si le contenu d'une PR **répond** à une ou plusieurs Issues (correction d'un bug tracé, implémentation d'une fonctionnalité tracée), la PR **doit référencer** ces Issues (ex. mention `#<numéro>` dans la description).
+- Si une Issue est **entièrement traitée** par la PR, la référence utilise un mot-clé de fermeture automatique GitHub (`Closes`, `Fixes`, `Resolves #<numéro>`), afin que l'Issue soit **automatiquement clôturée au merge** de la PR.
+- Si une PR ne traite une Issue que **partiellement**, celle-ci est référencée sans mot-clé de fermeture (elle reste ouverte après le merge).
+- Un **template de Pull Request** (`.github/PULL_REQUEST_TEMPLATE.md`) rappelle cette règle et guide le renseignement du lien vers les Issues concernées.
+
 ## Releases
 
 Des **releases GitHub** sont publiées pour marquer les jalons significatifs du projet. Chaque release correspond à un état stable et identifiable de l'application.
@@ -158,7 +166,9 @@ Format : `<type>(<scope>): <description courte>`
 
 Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
 
-Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le message du commit squashé sur `main`.
+Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le titre du commit squashé sur `main`.
+
+La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
 
 Exemples :
 
