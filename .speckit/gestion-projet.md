@@ -4,6 +4,11 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 
 ---
 
+## Gouvernance documentaire
+
+- **Source de vérité absolue** : le dossier [`.speckit/`](.) — ce fichier ainsi que `fonctionnel.md`, `modele-metier.md` et `contraintes-techniques.md` — est la source de vérité absolue du projet. Il prime sur toute autre information : historique de conversation, supposition, connaissance générale de l'agent. Aucune décision ne peut le contredire sans accord explicite de l'utilisateur. En cas d'ambiguïté ou de silence sur un sujet, l'agent peut décider, mais documente alors son choix dans le fichier concerné.
+- **Autonomie de l'agent** : l'agent prend toutes les décisions architecturales, techniques, fonctionnelles et d'implémentation nécessaires à la livraison de l'application, en **totale autonomie** (modalités détaillées dans « Prise de décision » ci-dessous). Les seules interventions attendues de l'utilisateur sont la mise à jour des fichiers `.speckit/` pour exprimer ses besoins et exigences.
+
 ## Objectifs du projet
 
 1. **Réécriture applicative** : réécrire une application client lourd existante en application web n-tiers.

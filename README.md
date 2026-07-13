@@ -17,7 +17,7 @@ Application web de gestion de collection de bandes dessinées — réécriture d
 ## Stack
 
 | Composant | Technologie |
-|---|---|
+| --- | --- |
 | Frontend | Blazor Server (.NET 10) |
 | Backend API | ASP.NET Core Minimal API (.NET 10) |
 | ORM | EF Core 10 + Npgsql |
@@ -43,10 +43,12 @@ Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synolog
 
 ## Spécifications
 
-Les spécifications du projet sont dans le dossier [`.speckit/`](.speckit/) :
+Les spécifications du projet sont dans le dossier [`.speckit/`](.speckit/) constituent la **source de vérité absolue** du projet : toute décision d'architecture, de fonctionnel ou de gestion doit s'y conformer, et son contenu prime sur toute autre source (historique de discussion, suppositions, etc.).
+
+Le développement est mené par un agent IA disposant d'une **autonomie totale** sur les choix techniques et fonctionnels ; les fichiers `.speckit/` sont son unique canal d'expression des besoins et exigences.
 
 | Fichier | Contenu |
-|---|---|
+| --- | --- |
 | [`fonctionnel.md`](.speckit/fonctionnel.md) | Fonctionnalités, règles métier, flux |
 | [`modele-metier.md`](.speckit/modele-metier.md) | Entités, attributs, relations |
 | [`contraintes-techniques.md`](.speckit/contraintes-techniques.md) | Stack, architecture, déploiement |
