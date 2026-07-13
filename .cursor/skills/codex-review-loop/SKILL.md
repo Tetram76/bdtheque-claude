@@ -75,9 +75,13 @@ disabled for the repo). Keep this review's `.submitted_at` as
 Check for the 👍 approval reaction **from Codex, dated to this review**:
 
 ```bash
-gh api repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions \
+gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
   --jq '[.[] | select(.content=="+1" and (.user.login | test("codex"; "i")) and .created_at >= "<REVIEW_SUBMITTED_AT>")] | length'
 ```
+
+This endpoint also defaults to 30 reactions per page (max 100); `per_page=100`
+avoids missing a fresh Codex 👍 on a PR with many prior reactions, for the
+same reason as the reviews query above.
 
 A PR can carry a stale 👍 from an earlier head, or a human 👍 unrelated to
 Codex's verdict; filtering by author and by `.created_at >= <REVIEW_SUBMITTED_AT>`
