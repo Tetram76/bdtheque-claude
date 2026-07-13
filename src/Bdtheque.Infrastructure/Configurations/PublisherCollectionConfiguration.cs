@@ -1,0 +1,21 @@
+using Bdtheque.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Bdtheque.Infrastructure.Configurations;
+
+internal sealed class PublisherCollectionConfiguration : IEntityTypeConfiguration<PublisherCollection>
+{
+    public void Configure(EntityTypeBuilder<PublisherCollection> builder)
+    {
+        builder.HasKey(c => c.Id);
+
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(300);
+
+        builder.HasIndex(c => new { c.PublisherId, c.Name }).IsUnique();
+
+        // FK is already configured from the Publisher side; IsRequired is declared here
+        // for clarity and to be explicit that PublisherId is non-nullable.
+        builder.Property(c => c.PublisherId).IsRequired();
+    }
+}
