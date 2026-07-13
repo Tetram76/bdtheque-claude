@@ -76,8 +76,7 @@ Check for the 👍 approval reaction **from Codex, dated to this review**:
 
 ```bash
 gh api repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions \
-  --jq --arg since "<REVIEW_SUBMITTED_AT>" \
-  '[.[] | select(.content=="+1" and (.user.login | test("codex"; "i")) and .created_at >= $since)] | length'
+  --jq '[.[] | select(.content=="+1" and (.user.login | test("codex"; "i")) and .created_at >= "<REVIEW_SUBMITTED_AT>")] | length'
 ```
 
 A PR can carry a stale 👍 from an earlier head, or a human 👍 unrelated to
