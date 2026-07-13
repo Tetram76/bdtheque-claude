@@ -145,20 +145,33 @@ containing "codex").
 For each such thread, `path`/`line`/`diffHunk` locate the finding in the diff
 when the comment `body` doesn't repeat it.
 
-**a. Cross-check** — never apply a finding blindly:
+**a. Cross-check** — never apply a finding blindly, and never take it at face
+value just because it sounds plausible:
 
 - Is it relevant to this PR's actual objective?
 - Does it contradict or align with `.speckit/` (functional rules, data
   model, technical constraints, project governance)?
 - Is it factually correct (Codex can hallucinate; verify against the real
-  diff/code)?
+  diff/code)? **If the finding makes a claim about a command, API, or tool
+  behavior, that claim must be tested empirically (run it) or checked against
+  its official documentation — never accepted on reasoning alone.** A wrong
+  fix to a wrong finding just produces another finding next cycle.
 - Does the fix's cost (complexity, readability, time) justify the benefit?
 
-**b. If the finding is valid**, fix it in exactly one commit dedicated to that
-finding (do not batch multiple findings into one commit). Keep track of each
-thread's `<COMMENT_ID>` / `<THREAD_ID>` (from Step 2's query) and its outcome
-(fixed, with which commit — or rejected, with why) for Step 4. Do **not**
-reply to or resolve threads yet.
+Codex reviews the diff, so its findings are naturally scoped to the lines it
+looked at — but the same class of mistake often recurs elsewhere in the same
+file (e.g. the same command pattern reused with a different endpoint). Before
+fixing, scan the whole file/scope for other instances of the same issue, not
+just the one flagged. Fixing only the exact spot Codex pointed at, while an
+identical problem remains a few lines away, guarantees another round trip.
+
+**b. If the finding is valid**, fix it — and every other instance of the same
+underlying issue found by the scan above — in one dedicated commit per
+underlying finding (do not batch multiple *unrelated* findings into one
+commit, but do not split one finding's holistic fix across several either).
+Keep track of each thread's `<COMMENT_ID>` / `<THREAD_ID>` (from Step 2's
+query) and its outcome (fixed, with which commit — or rejected, with why) for
+Step 4. Do **not** reply to or resolve threads yet.
 
 ### Step 3 — Push, before any reply or resolution
 
