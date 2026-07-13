@@ -189,13 +189,27 @@ fixing, scan the whole file/scope for other instances of the same issue, not
 just the one flagged. Fixing only the exact spot Codex pointed at, while an
 identical problem remains a few lines away, guarantees another round trip.
 
+That scan finds *other instances of the same surface pattern*, which is not
+the same question as *why the pattern exists at all*. Before writing the
+fix, ask whether the finding is a symptom of a broader design weakness
+rather than an isolated mistake — e.g. repeated identity-matching bugs across
+a file may mean the design lacks a single source of truth for "is this
+Codex", not just several places that each need their string tightened. A
+locally-correct patch that leaves that weakness in place is a band-aid: it
+satisfies this one finding while leaving the file structurally prone to
+producing the next one. When the fix is only a band-aid, prefer addressing
+the underlying weakness directly (e.g. factor the repeated check into one
+place referenced everywhere, or restructure the flawed step), even if that
+means a larger change than the finding alone would suggest.
+
 **b. If the finding is valid**, fix it — and every other instance of the same
-underlying issue found by the scan above — in one dedicated commit per
-underlying finding (do not batch multiple *unrelated* findings into one
-commit, but do not split one finding's holistic fix across several either).
-Keep track of each thread's `<COMMENT_ID>` / `<THREAD_ID>` (from Step 2's
-query) and its outcome (fixed, with which commit — or rejected, with why) for
-Step 4. Do **not** reply to or resolve threads yet.
+underlying issue found by the scan above, and the deeper weakness if one was
+identified — in one dedicated commit per underlying finding (do not batch
+multiple *unrelated* findings into one commit, but do not split one finding's
+holistic fix across several either). Keep track of each thread's
+`<COMMENT_ID>` / `<THREAD_ID>` (from Step 2's query) and its outcome (fixed,
+with which commit — or rejected, with why) for Step 4. Do **not** reply to or
+resolve threads yet.
 
 ### Step 3 — Push, before any reply or resolution
 
