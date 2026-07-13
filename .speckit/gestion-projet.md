@@ -22,7 +22,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 
 - **Hébergement** : GitHub
 - **Nom du dépôt** : `Tetram76/bdtheque-claude`
-- **URL** : https://github.com/Tetram76/bdtheque-claude
+- **URL** : <https://github.com/Tetram76/bdtheque-claude>
 - La **gestion du repository GitHub** (configuration, branches, protections, CI/CD, etc.) relève du périmètre de l'agent et doit être maintenue conformément aux contraintes du projet.
 
 ## Maintenance du .speckit
