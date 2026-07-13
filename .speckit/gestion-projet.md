@@ -90,6 +90,12 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 - Étapes du pipeline : restauration, build en mode `Release`, exécution de la totalité des tests (`dotnet test`).
 - Ce workflow constitue le **check de statut requis** évoqué dans la règle de merge ci-dessous, dès qu'il est activé dans le Ruleset GitHub.
 
+## Vérification automatique du template de Pull Request
+
+- GitHub ne propose **aucun mécanisme natif** pour imposer le respect du template de PR (`.github/PULL_REQUEST_TEMPLATE.md`) : il ne fait que pré-remplir la description à la création. Le respect du template est donc **imposé techniquement par un workflow dédié** (`.github/workflows/pr-template-check.yml`), déclenché à chaque création ou modification d'une PR.
+- Ce workflow vérifie que les sections obligatoires du template (`## Résumé`, `## Plan de test`) sont **présentes et effectivement renseignées** (le texte de commentaire du template ne suffit pas). La section `## Issue(s) liée(s)` reste optionnelle, conformément au template.
+- Comme le workflow de CI, ce check devient un **check de statut requis bloquant** dès son activation dans le Ruleset GitHub (actuellement suspendu en dépôt privé — limitation GitHub gratuit, cf. ci-dessus).
+
 ## Règle de merge : non-régression et revue Codex obligatoires
 
 > **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée ET que Codex l'a approuvée.**
