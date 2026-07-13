@@ -170,6 +170,12 @@ gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
   -f body="<reply: what was fixed, or why the finding was rejected>"
 ```
 
+Never write the literal text `@codex` inside this reply. Per Codex's GitHub
+integration, any `@codex` mention followed by anything other than exactly
+`review` starts a cloud task using the PR as context (i.e. an unwanted fix
+attempt) — only the dedicated top-level PR comment in Step 5, containing
+exactly `@codex review` and nothing else, should ever contain that mention.
+
 **d. Resolve the thread**, once its reply is posted:
 
 ```bash
