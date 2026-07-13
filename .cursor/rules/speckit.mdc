@@ -10,7 +10,7 @@ Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime
 ## Fichiers et leur périmètre
 
 | Fichier | Contenu |
-|---|---|
+| --- | --- |
 | `gestion-projet.md` | Gouvernance du projet : stockage, branches, conventions de commit, outillage, CI/CD. Tout ce qui ne concerne PAS l'application elle-même. |
 | `fonctionnel.md` | Fonctionnalités de l'application : cas d'usage, user stories, règles métier, flux. |
 | `modele-metier.md` | Modèle du domaine : entités, attributs, relations, contraintes d'intégrité, glossaire. |
@@ -27,6 +27,7 @@ Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime
 Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que l'utilisateur fournit une exigence, une contrainte, une règle ou toute information relevant du périmètre d'un des fichiers. Ne jamais laisser une information pertinente uniquement dans le fil de conversation.
 
 **Format des mises à jour :**
+
 - Les fichiers `.speckit/` sont des **documents de référence**, pas des journaux. Ils ne doivent pas contenir d'historique, de dates, ni de traces de décisions successives.
 - Toute nouvelle information est **intégrée dans le contenu existant** : mise à jour d'une section, enrichissement d'une définition, ajout dans la liste appropriée — jamais ajoutée en bas de fichier comme une entrée de log.
 - Le fichier doit rester cohérent, lisible et structuré comme une documentation vivante.
