@@ -140,14 +140,16 @@ not the comment's `databaseId`.)
 
 ### Step 3-4 — Push and loop
 
-Push all fix commits made in this cycle, then return to Step 1: Codex
-re-reviews automatically on new commits pushed to the PR branch.
+If fix commits were made in this cycle, push them, then return to Step 1:
+Codex re-reviews automatically on new commits pushed to the PR branch.
 
-If no threads needed a fix (all already resolved, or no valid findings to
-act on) and the last review state is not `APPROVED`, still return to Step 1 —
-a comment-only reply on rejected findings can be enough for Codex to approve
-next round, but if nothing changed and no new review appears, stop and report
-the situation to the user instead of looping forever.
+If no fix commit was made (every finding was rejected, or all threads were
+already resolved) and the last review state is not `APPROVED`, Codex will
+**not** re-review on its own — replying to and resolving threads doesn't
+trigger it, only a new commit or an explicit request does. Post a PR comment
+containing exactly `@codex review` to request a fresh pass, then return to
+Step 1. If that still produces no new review and nothing changed, stop and
+report the situation to the user instead of looping forever.
 
 ### Exit
 
