@@ -37,11 +37,19 @@ public sealed class Universe : EntityBase
     /// Sets or clears the parent universe, enforcing acyclicity on the in-memory graph.
     /// </summary>
     /// <remarks>
-    /// This check walks the <see cref="Parent"/> chain that is already loaded in memory.
-    /// It reliably prevents cycles among entities that share the same object graph, but
-    /// cannot detect a cycle involving a parent that was not loaded from the database.
-    /// A definitive cycle check for partially-loaded graphs will be added in Phase 2
-    /// at the application-layer level (query all ancestors from the database before saving).
+    /// The check combines two complementary strategies:
+    /// <list type="bullet">
+    ///   <item>ID comparison: catches cycles involving the same entity represented as different
+    ///   object instances (e.g. loaded in separate DbContext sessions).</item>
+    ///   <item><see cref="ParentId"/> check at every step: catches cycles in mixed
+    ///   loaded/unloaded graphs — when the loaded part of the ancestor chain has a node
+    ///   whose stored <see cref="ParentId"/> points back to <c>this</c>, the cycle is
+    ///   detected even if the node's <see cref="Parent"/> navigation is not yet resolved.</item>
+    /// </list>
+    /// Cycles that span more than one unloaded navigation hop (e.g. A-&gt;B-&gt;C where both B
+    /// and C navigations are null) cannot be detected without querying the database.
+    /// A definitive cycle check for such partially-loaded graphs will be added in Phase 2
+    /// at the application-layer level (query all ancestor IDs from the database before saving).
     /// </remarks>
     public void SetParent(Universe? parent)
     {
@@ -52,24 +60,32 @@ public sealed class Universe : EntityBase
             return;
         }
 
-        if (ReferenceEquals(parent, this))
+        // Compare by ID to handle detached / differently-instanced entities representing the same row.
+        if (parent.Id == Id)
             throw new ArgumentException("A universe cannot be its own parent.", nameof(parent));
 
-        // Detect a direct 1-level cycle when the parent navigation is not loaded:
-        // if parent.ParentId points back to this entity, the proposed relation would create A → B → A.
-        // This covers the common case of reloading entities from the DB without eager-loading .Parent.
-        if (parent.ParentId == Id)
-            throw new ArgumentException(
-                "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
-
-        // Walk the in-memory ancestor chain to detect longer cycles among fully-loaded entities.
-        var ancestor = parent.Parent;
-        while (ancestor is not null)
+        // Walk the proposed parent's ancestor chain using both the loaded navigation and the
+        // stored ParentId. At each step:
+        //   • ParentId is checked first — catches cycles where the current node's parent is
+        //     not loaded in memory but its stored ID already points back to 'this'.
+        //   • The loaded Parent navigation is then followed to continue the walk.
+        // The loop terminates when both the navigation and the stored ID are absent (root node
+        // reached) or when we can no longer advance (navigation unloaded, ParentId unknown).
+        var ancestor = parent;
+        while (true)
         {
-            if (ReferenceEquals(ancestor, this))
+            if (ancestor.ParentId == Id)
                 throw new ArgumentException(
                     "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
+
+            if (ancestor.Parent is null)
+                break;
+
             ancestor = ancestor.Parent;
+
+            if (ancestor.Id == Id)
+                throw new ArgumentException(
+                    "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
         }
 
         Parent = parent;
