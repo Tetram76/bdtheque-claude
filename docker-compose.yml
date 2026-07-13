@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bdtheque}
+      POSTGRES_USER: ${POSTGRES_USER:-bdtheque}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?La variable POSTGRES_PASSWORD est obligatoire}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bdtheque} -d ${POSTGRES_DB:-bdtheque}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  # Logique métier, accès aux données, ML.NET. Jamais publié sur l'hôte : seul
+  # `frontend` peut l'atteindre, via le réseau `frontend-net` (cf. contraintes-techniques.md).
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__Bdtheque: Host=db;Port=5432;Database=${POSTGRES_DB:-bdtheque};Username=${POSTGRES_USER:-bdtheque};Password=${POSTGRES_PASSWORD:?La variable POSTGRES_PASSWORD est obligatoire}
+      InternalApiKey__Key: ${INTERNAL_API_KEY:?La variable INTERNAL_API_KEY est obligatoire}
+    volumes:
+      - ${VISUELS_HOST_PATH:-./data/visuels}:/app/visuels
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend-net
+
+  # Rendu Blazor Server, authentification de l'administration (cookie), unique
+  # conteneur exposé à l'utilisateur.
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      Api__BaseUrl: http://api:8080
+      InternalApiKey__Key: ${INTERNAL_API_KEY:?La variable INTERNAL_API_KEY est obligatoire}
+    volumes:
+      - ${VISUELS_HOST_PATH:-./data/visuels}:/app/visuels:ro
+    ports:
+      - "${FRONTEND_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - frontend-net
+
+networks:
+  # db n'est accessible que depuis `api`, jamais depuis `frontend`.
+  backend:
+  frontend-net:
+
+volumes:
+  db-data:

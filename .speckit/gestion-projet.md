@@ -77,6 +77,18 @@ L'agent produit l'intégralité des livrables du projet, y compris :
   - Squash merge uniquement
   - **Commits signés obligatoires** (`required_signatures`)
 
+## Outillage .NET
+
+- **Gestion centralisée des packages NuGet** via `Directory.Packages.props` (Central Package Management) : toutes les versions sont déclarées à la racine de la solution, les fichiers `.csproj` ne référencent que les noms de package.
+- **Tests unitaires et d'intégration** : `xunit`, exécutés via `dotnet test`. Couverture de code collectée avec `coverlet.collector`.
+- **Tests d'intégration de l'API** : `Microsoft.AspNetCore.Mvc.Testing` (`WebApplicationFactory`), base de données remplacée par SQLite en mémoire pour isoler les tests du conteneur PostgreSQL.
+
+## Intégration continue (CI)
+
+- **GitHub Actions** héberge le pipeline de non-régression (`.github/workflows/ci.yml`), déclenché sur chaque Pull Request et sur push vers `main`.
+- Étapes du pipeline : restauration, build en mode `Release`, exécution de la totalité des tests (`dotnet test`).
+- Ce workflow constitue le **check de statut requis** évoqué dans la règle de merge ci-dessous, dès qu'il est activé dans le Ruleset GitHub.
+
 ## Règle de merge : non-régression obligatoire
 
 > **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée.**

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>Bdtheque.Api</RootNamespace>
+    <UserSecretsId>bdtheque-api</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bdtheque.Contracts\Bdtheque.Contracts.csproj" />
+    <ProjectReference Include="..\Bdtheque.Domain\Bdtheque.Domain.csproj" />
+    <ProjectReference Include="..\Bdtheque.Infrastructure\Bdtheque.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+</Project>

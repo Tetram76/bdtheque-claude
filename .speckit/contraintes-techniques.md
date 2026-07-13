@@ -38,6 +38,20 @@ L'application est découpée en **3 conteneurs Docker** :
 
 Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le conteneur `api` est le seul à accéder à `db`.
 
+## Organisation du code
+
+La solution .NET est découpée en projets par responsabilité, sous `src/` :
+
+| Projet | Rôle |
+| --- | --- |
+| `Bdtheque.Domain` | Entités du modèle métier, enums, value objects. Aucune dépendance à EF Core ni à un framework web. |
+| `Bdtheque.Infrastructure` | Implémentation EF Core / Npgsql : `DbContext`, configurations d'entités, migrations. |
+| `Bdtheque.Contracts` | Contrats d'échange (DTOs) exposés par l'API et consommés par le frontend. Découplés des entités du domaine. |
+| `Bdtheque.Api` | Conteneur `api` : endpoints Minimal API, règles applicatives, service de taux de change, estimation ML.NET. |
+| `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor Server, authentification cookie, appels HTTP vers `Bdtheque.Api`. |
+
+Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
+
 ## Déploiement
 
 - Architecture **n-tiers avec isolation stricte** : chaque tier est déployé dans un **conteneur Docker dédié**.
@@ -78,8 +92,14 @@ Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le cont
 ## Authentification
 
 - L'accès à la partie Administration est protégé par un **compte administrateur unique** (login + mot de passe).
-- Implémentation via **ASP.NET Core Cookie Authentication** (sans ASP.NET Core Identity — pas de gestion multi-utilisateurs).
+- Implémentation via **ASP.NET Core Cookie Authentication** (sans ASP.NET Core Identity — pas de gestion multi-utilisateurs). Le cookie d'authentification est porté exclusivement par le conteneur `frontend` (Blazor Server), qui agit comme **BFF (Backend For Frontend)** : c'est lui qui affiche le formulaire de connexion, émet le cookie et protège ses propres pages/composants d'administration (`[Authorize]`).
 - Pas d'authentification sur la partie Consultation (accès public).
+- Le conteneur `api` n'est **jamais exposé publiquement** : il n'est joignable que par `frontend` via le réseau Docker interne. En défense en profondeur, `api` exige néanmoins un **secret interne partagé** (clé statique transmise via variable d'environnement, vérifiée par un middleware sur l'en-tête `X-Internal-Api-Key`) sur toutes ses requêtes. Ce secret n'est connu que de `frontend` et `api` ; il ne remplace pas l'authentification de l'utilisateur (qui reste du ressort de `frontend`), il empêche seulement qu'un appel direct à `api` contourne la protection applicative si l'isolation réseau venait à être mal configurée.
+
+## Documentation de l'API
+
+- L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
+- Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement uniquement.
 
 ## Gestion des taux de change
 
