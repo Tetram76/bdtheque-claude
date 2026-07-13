@@ -83,7 +83,7 @@ Le tri alphabétique des **séries**, **albums** et **artistes** repose sur une 
 Exemples :
 
 | Titre affiché | Clé de tri | Initiale |
-|---|---|---|
+| --- | --- | --- |
 | `Le Lotus bleu` | `Lotus bleu` | **L** |
 | `Les Schtroumpfs` | `Schtroumpfs` | **S** |
 | `L'Épervier` | `Épervier` | **É** |
@@ -113,7 +113,7 @@ L'**identifiant principal** d'un artiste est son pseudonyme s'il est renseigné,
 Exemples :
 
 | Données | Affiché | Clé de tri | Initiale |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Jean Van Hamme (sans pseudo) | `Jean Van Hamme` | `Van Hamme Jean` | **V** |
 | Pseudonyme `Moebius` | `Moebius` | `Moebius` | **M** |
 | Georges Remi + pseudo `Hergé` | `Hergé` | `Hergé` | **H** |
@@ -130,7 +130,7 @@ Le libellé peut optionnellement inclure le **titre de la série** (`AvecSerie`)
 #### Représentation du tome selon le type d'album
 
 | Type | Hors-série | Format du tome (simple) | Format du tome (sans titre propre) |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Régulier | non | `T. {N}` | `Tome {N}` |
 | Régulier | oui | `HS[ {N}]` | `Hors-série[ {N}]` |
 | Intégrale | non | `INT.[ - {N}][ [{Début} à {Fin}]]` | `Intégrale[ - {N}][ [{Début} à {Fin}]]` |
@@ -142,9 +142,10 @@ Le numéro de tome n'apparaît que s'il est renseigné. Pour les intégrales, la
 
 **Format 0 — `Album (Série - Tome)`** *(défaut)*
 
-```
+```text
 {Titre} ({Série} - {Tome})
 ```
+
 - Si pas de titre : `{Série} - {Tome}`
 - Si pas de série : `{Titre} ({Tome})`
 - Si pas de tome : `{Titre} ({Série})`
@@ -153,9 +154,10 @@ Le numéro de tome n'apparaît que s'il est renseigné. Pour les intégrales, la
 
 **Format 1 — `Tome - Album (Série)`**
 
-```
+```text
 {Tome} - {Titre} ({Série})
 ```
+
 - Si pas de titre : `{Tome} - {Série}`
 - Si pas de série : `{Tome} - {Titre}`
 - Si pas de tome : `{Titre} ({Série})`
@@ -169,7 +171,7 @@ Si toutes les composantes sont vides : `<Sans titre>`.
 #### Exemples (format 0, avec série)
 
 | Album | Résultat |
-|---|---|
+| --- | --- |
 | Titre + série + tome 5 | `Le Lotus bleu (Tintin - T. 5)` |
 | Sans titre, série + tome 5 | `Tintin - T. 5` |
 | Titre + hors-série 2 | `Titre (Série - HS 2)` |
@@ -179,7 +181,7 @@ Si toutes les composantes sont vides : `<Sans titre>`.
 
 Le libellé d'une édition est construit dynamiquement selon le modèle suivant :
 
-```
+```text
 {Éditeur}[ ({Collection})][ [{Année d'édition}]][ - ISBN {ISBN formaté}]
 ```
 
@@ -188,6 +190,7 @@ Le libellé d'une édition est construit dynamiquement selon le modèle suivant 
 - L'ISBN n'apparaît que s'il est connu, préfixé de `ISBN ` et séparé par ` - `.
 
 **Exemples :**
+
 - `Dargaud` *(aucune collection, année ni ISBN)*
 - `Dargaud (Lucky Luke) [1978]`
 - `Dargaud (Lucky Luke) [1978] - ISBN 978-2-205-01234-5`
@@ -198,7 +201,7 @@ Le libellé d'une édition est construit dynamiquement selon le modèle suivant 
 Le libellé de la date et du montant d'acquisition s'adapte au mode d'acquisition :
 
 | Mode | Libellé de la date | Libellé du montant |
-|---|---|---|
+| --- | --- | --- |
 | `Achat` | Date d'achat | Prix d'achat |
 | `Offerte` | Date d'acquisition | Valeur d'acquisition |
 | `Échange` | Date d'acquisition | Valeur d'acquisition |
@@ -294,6 +297,7 @@ Un tome est **manquant** s'il est absent de la séquence théorique de tomes de 
 Les intégrales **couvrent** la plage `tome de début → tome de fin` de la séquence (chaque tome de la plage est considéré présent).
 
 **Exclusions systématiques :**
+
 - les séries avec l'attribut **Exclure des manquants**
 
 **Affichage des manquants :**
@@ -301,6 +305,7 @@ Les intégrales **couvrent** la plage `tome de début → tome de fin` de la sé
 Les tomes manquants consécutifs sont regroupés et affichés sous forme d'intervalle (ex. `T. 3 à 5` plutôt que `T. 3`, `T. 4`, `T. 5`).
 
 **Options utilisateur :**
+
 - **Exclure les intégrales** : les intégrales ne couvrent plus leur plage (pour posséder chaque tome en album individuel).
 - **Exclure les intentions d'achat** : les intentions ne comblent plus les trous — affiche tous les manquants réels, intentions incluses.
 

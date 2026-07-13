@@ -8,7 +8,7 @@ Il ne concerne PAS les aspects gestion de projet (repo, branches, outillage dev,
 ## Application existante (référence)
 
 | Élément | Valeur |
-|---|---|
+| --- | --- |
 | Langage | Delphi (version inconnue) |
 | Base de données | Firebird 1.5 |
 | Type | Client lourd (desktop) |
@@ -18,7 +18,7 @@ Cette application est la **référence fonctionnelle** : le périmètre de la r�
 ## Stack cible
 
 | Élément | Valeur |
-|---|---|
+| --- | --- |
 | Langage | C# / .NET 10 (LTS) |
 | Frontend | Blazor Server (ASP.NET Core) |
 | Backend API | ASP.NET Core Minimal API |
@@ -31,7 +31,7 @@ Cette application est la **référence fonctionnelle** : le périmètre de la r�
 L'application est découpée en **3 conteneurs Docker** :
 
 | Conteneur | Rôle | Image de base |
-|---|---|---|
+| --- | --- | --- |
 | `frontend` | Blazor Server — UI et rendu des pages | `mcr.microsoft.com/dotnet/aspnet:10.0` |
 | `api` | ASP.NET Core Minimal API — logique métier, accès données, ML | `mcr.microsoft.com/dotnet/aspnet:10.0` |
 | `db` | PostgreSQL — persistance | `postgres:17-alpine` |
