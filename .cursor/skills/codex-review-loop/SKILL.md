@@ -66,15 +66,20 @@ Check `.commit_id` matches the current head SHA (`git rev-parse HEAD`) and
 `.submitted_at` is newer than the last push. If no matching review appears
 after the timeout, tell the user Codex review did not trigger and stop (check
 `@codex review` may need to be commented manually, or automatic review is
-disabled for the repo).
+disabled for the repo). Keep this review's `.submitted_at` as
+`<REVIEW_SUBMITTED_AT>` for the next check.
 
-Check for the 👍 approval reaction on the PR:
+Check for the 👍 approval reaction **from Codex, dated to this review**:
 
 ```bash
 gh api repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions \
-  --jq '[.[] | select(.content=="+1")] | length'
+  --jq --arg since "<REVIEW_SUBMITTED_AT>" \
+  '[.[] | select(.content=="+1" and (.user.login | test("codex"; "i")) and .created_at >= $since)] | length'
 ```
 
+A PR can carry a stale 👍 from an earlier head, or a human 👍 unrelated to
+Codex's verdict; filtering by author and by `.created_at >= <REVIEW_SUBMITTED_AT>`
+ensures the reaction actually approves the current-head review found above.
 If this is `> 0`, the review found nothing to fix — go to "Exit". Otherwise
 continue to Step 2.
 
