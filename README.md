@@ -39,7 +39,7 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 
 ## Organisation du code
 
-```
+```text
 .
 ├── Bdtheque.slnx                  # Solution .NET
 ├── Directory.Build.props          # Propriétés MSBuild communes (TFM, nullable, analyzers…)
