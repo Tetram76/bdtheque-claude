@@ -140,7 +140,10 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Universes");
+                    b.ToTable("Universes", t =>
+                        {
+                            t.HasCheckConstraint("CK_Universes_NoSelfParent", "\"ParentId\" IS NULL OR \"ParentId\" <> \"Id\"");
+                        });
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.PublisherCollection", b =>

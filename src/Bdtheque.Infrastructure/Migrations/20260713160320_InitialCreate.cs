@@ -65,6 +65,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Universes", x => x.Id);
+                    table.CheckConstraint("CK_Universes_NoSelfParent", "\"ParentId\" IS NULL OR \"ParentId\" <> \"Id\"");
                     table.ForeignKey(
                         name: "FK_Universes_Universes_ParentId",
                         column: x => x.ParentId,

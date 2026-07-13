@@ -48,6 +48,27 @@ public sealed class PublisherTests
         Assert.Null(publisher.Website);
     }
 
+    [Theory]
+    [InlineData("not-a-url")]
+    [InlineData("ftp://dargaud.com")]
+    [InlineData("just text")]
+    [InlineData("//missing-scheme.com")]
+    public void SetWebsite_InvalidUrl_Throws(string url)
+    {
+        var publisher = new Publisher("Dargaud");
+        Assert.Throws<ArgumentException>(() => publisher.SetWebsite(url));
+    }
+
+    [Theory]
+    [InlineData("https://dargaud.com")]
+    [InlineData("http://dargaud.com/path?q=1")]
+    public void SetWebsite_ValidUrl_Succeeds(string url)
+    {
+        var publisher = new Publisher("Dargaud");
+        publisher.SetWebsite(url);
+        Assert.Equal(url, publisher.Website);
+    }
+
     [Fact]
     public void SetName_TrimsValue()
     {

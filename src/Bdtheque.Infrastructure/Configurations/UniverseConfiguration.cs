@@ -21,5 +21,12 @@ internal sealed class UniverseConfiguration : IEntityTypeConfiguration<Universe>
             .HasForeignKey(u => u.ParentId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Defence-in-depth for raw-SQL writes: a universe cannot be its own parent.
+        // The domain's SetParent rejects self-reference, but this constraint enforces
+        // the same rule at the database level.
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Universes_NoSelfParent",
+            $"\"{nameof(Universe.ParentId)}\" IS NULL OR \"{nameof(Universe.ParentId)}\" <> \"{nameof(Universe.Id)}\""));
     }
 }
