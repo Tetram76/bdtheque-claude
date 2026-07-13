@@ -72,7 +72,9 @@ query{
         nodes{
           id
           isResolved
-          comments(first:1){ nodes{ databaseId author{login} body } }
+          comments(first:1){
+            nodes{ databaseId author{login} body path line startLine diffHunk }
+          }
         }
       }
     }
@@ -86,7 +88,8 @@ Filter to threads where `isResolved == false` and the first comment's
 `author.login` matches Codex (`chatgpt-codex-connector` or any login
 containing "codex").
 
-For each such thread:
+For each such thread, `path`/`line`/`diffHunk` locate the finding in the diff
+when the comment `body` doesn't repeat it.
 
 **a. Cross-check** — never apply a finding blindly:
 
