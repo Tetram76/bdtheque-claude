@@ -1,7 +1,6 @@
-# Pull Request
-
 <!-- Le merge se fait en squash : cette description devient le corps du commit sur main. Rédiger en conséquence. -->
 
+<!-- markdownlint-disable-next-line MD041 -->
 ## Résumé
 
 <!-- Description courte du contenu de la PR. -->
