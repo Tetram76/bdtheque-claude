@@ -31,4 +31,19 @@ public sealed class InternalApiKeyMiddlewareTests : IClassFixture<ApiWebApplicat
         // through to routing, unlike the 401 returned without the key.
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Theory]
+    [InlineData("/openapi/v1.json")]
+    [InlineData("/scalar/v1")]
+    public async Task Request_ToApiDocumentationPath_IsNotRejectedByMiddleware(string path)
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync(path);
+
+        // These routes are only mapped in Development (see Program.cs), so the 404 here
+        // still proves the middleware let the request through without the shared key,
+        // unlike the 401 returned for a regular path.
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

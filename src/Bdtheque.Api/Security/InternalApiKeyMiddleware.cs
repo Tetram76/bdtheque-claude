@@ -9,9 +9,16 @@ namespace Bdtheque.Api.Security;
 /// </summary>
 public sealed class InternalApiKeyMiddleware(RequestDelegate next, IOptions<InternalApiKeyOptions> options)
 {
+    /// <summary>
+    /// Paths exempted from the shared secret: `/health` is polled by orchestrators, while
+    /// `/openapi` and `/scalar` are only ever mapped in Development (see Program.cs) and
+    /// must stay reachable from a plain browser to be usable as interactive documentation.
+    /// </summary>
+    private static readonly string[] ExemptPathPrefixes = ["/health", "/openapi", "/scalar"];
+
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.Request.Path.StartsWithSegments("/health"))
+        if (ExemptPathPrefixes.Any(prefix => context.Request.Path.StartsWithSegments(prefix)))
         {
             await next(context);
             return;
