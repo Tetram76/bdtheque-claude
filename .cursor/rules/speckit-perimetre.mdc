@@ -9,7 +9,7 @@ alwaysApply: false
 Avant tout ajout ou modification, vérifier dans quel fichier l'information appartient.
 
 | Fichier | Contient | Ne contient PAS |
-|---|---|---|
+| --- | --- | --- |
 | `modele-metier.md` | Entités, attributs, relations, cardinalités, contraintes d'intégrité | Règles d'affichage, comportement applicatif, choix techniques |
 | `fonctionnel.md` | Règles métier applicatives, règles d'affichage/tri, cas d'usage, flux, UX | Structure des données, choix techniques |
 | `contraintes-techniques.md` | Stack, frameworks, algorithmes, déploiement, sécurité | Fonctionnel, gestion de projet |
