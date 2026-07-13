@@ -183,10 +183,11 @@ not the comment's `databaseId`.)
 If fix commits were made (and pushed in Step 3), return to Step 1: Codex
 re-reviews automatically on new commits pushed to the PR branch.
 
-If no fix commit was made (every finding was rejected, or all threads were
-already resolved) and Step 2 still found unresolved Codex threads to act on,
-Codex will **not** re-review on its own — replying to and resolving threads
-doesn't trigger it, only a new commit or an explicit request does. Post a PR
+If no fix commit was made in this cycle — every finding was rejected, all
+threads were already resolved, or Step 2 found no unresolved Codex thread at
+all (yet Step 1 still found no matching 👍) — Codex will **not** re-review on
+its own: replying to and resolving threads doesn't trigger it, only a new
+commit or an explicit request does. In every one of these cases, post a PR
 comment containing exactly `@codex review` to request a fresh pass, then
 return to Step 1. If that still produces no new review and nothing changed,
 stop and report the situation to the user instead of looping forever.
