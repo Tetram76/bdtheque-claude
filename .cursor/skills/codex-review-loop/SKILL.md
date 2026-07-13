@@ -60,10 +60,22 @@ gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
 The endpoint defaults to 30 reviews per page, and since Codex adds one on
 every push, a long-running PR can exceed that — comparing against a stale
 review would loop until timeout. `per_page=100` (the API's own max) avoids
-this in practice. `--paginate` would fetch beyond 100, but `gh api` rejects
-combining it with `--jq` unless `--slurp`-ing into one array, and `--slurp`
-itself is rejected together with `--jq`; if a PR ever exceeds 100 reviews,
-drop `--jq` and paginate with `--slurp` into a file, then filter separately.
+this in practice.
+
+If a PR ever exceeds 100 reviews, `--paginate` does work together with
+`--jq` (unlike `--slurp`, which `gh api` always rejects when combined with
+`--jq`) — but only for a filter that is safe to run independently on each
+page. The `sort_by(...) | last` aggregation above is **not** safe that way:
+under `--paginate`, `--jq` runs once per page, so it would print one "last"
+per page instead of the true last across the whole PR. Instead, keep `--jq`
+to a pure per-page filter and aggregate afterwards with a separate `jq`
+process:
+
+```bash
+gh api --paginate "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
+  --jq '.[] | select(.user.login | test("codex"; "i"))' \
+  | jq -s 'sort_by(.submitted_at) | last'
+```
 
 Check `.commit_id` matches the current head SHA (`git rev-parse HEAD`) and
 `.submitted_at` is newer than the last push. If no matching review appears
@@ -81,7 +93,10 @@ gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
 
 This endpoint also defaults to 30 reactions per page (max 100); `per_page=100`
 avoids missing a fresh Codex 👍 on a PR with many prior reactions, for the
-same reason as the reviews query above.
+same reason as the reviews query above. If a PR ever exceeds 100 reactions,
+apply the same fix as above: `--paginate` with a per-page-safe `--jq` (drop
+the aggregating `| length`, keep only the `select(...)`), piped into an
+external `jq -s 'length'` to count across all pages.
 
 A PR can carry a stale 👍 from an earlier head, or a 👍 from a human or an
 unrelated bot whose login happens to contain "codex"; this merge-gating
