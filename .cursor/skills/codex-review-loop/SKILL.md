@@ -77,18 +77,24 @@ gh api --paginate "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" 
   | jq -s 'sort_by(.submitted_at) | last'
 ```
 
-Check `.commit_id` matches the current head SHA (`git rev-parse HEAD`) and
-`.submitted_at` is newer than `<LAST_TRIGGER_AT>` — the timestamp of whichever
-event started this waiting cycle: the push that was just made (Step 3), or,
-on a cycle entered from Step 5 without a new push, the `@codex review`
-request comment's `created_at`. Without this check, re-entering Step 1 after
-a no-push re-review request would immediately match the same already-seen
-review again (same commit SHA, unchanged `submitted_at`), and the loop would
-spin on a stale review instead of waiting for the fresh one it just asked
-for. If no matching review appears after the timeout, tell the user Codex
-review did not trigger and stop (check `@codex review` may need to be
-commented manually, or automatic review is disabled for the repo). Keep this
-review's `.submitted_at` as `<REVIEW_SUBMITTED_AT>` for the next check.
+Check `.commit_id` matches the PR's actual head SHA — read with
+`gh pr view <PR_NUMBER> --json headRefOid -q .headRefOid`, **not**
+`git rev-parse HEAD`. The local checkout can be behind if another actor
+pushed to the PR branch, or if this workspace hasn't fetched since the last
+push; comparing against a locally-stale SHA would make the loop accept or
+wait on a review of a commit that is no longer the PR's real head. Also
+check `.submitted_at` is newer than `<LAST_TRIGGER_AT>` — the timestamp of
+whichever event started this waiting cycle: the push that was just made
+(Step 3), or, on a cycle entered from Step 5 without a new push, the
+re-review request comment's `created_at`. Without this check, re-entering
+Step 1 after a no-push re-review request would immediately match the same
+already-seen review again (same commit SHA, unchanged `submitted_at`), and
+the loop would spin on a stale review instead of waiting for the fresh one
+it just asked for. If no matching review appears after the timeout, tell the
+user Codex review did not trigger and stop (check `@codex review` may need
+to be commented manually, or automatic review is disabled for the repo).
+Keep this review's `.submitted_at` as `<REVIEW_SUBMITTED_AT>` for the next
+check.
 
 Check for the 👍 approval reaction **from Codex, dated to this review**:
 
