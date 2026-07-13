@@ -90,24 +90,40 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 - Étapes du pipeline : restauration, build en mode `Release`, exécution de la totalité des tests (`dotnet test`).
 - Ce workflow constitue le **check de statut requis** évoqué dans la règle de merge ci-dessous, dès qu'il est activé dans le Ruleset GitHub.
 
-## Règle de merge : non-régression obligatoire
+## Règle de merge : non-régression et revue Codex obligatoires
 
-> **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée.**
+> **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée ET que Codex l'a approuvée.**
 
-- Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI).
+- Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI) **et** à l'**approbation de la revue Codex** (voir « Revue de code » ci-dessous).
 - Les contrôles de non-régression **doivent être exécutés localement avant le push** sur la branche de PR — pour détecter les régressions au plus tôt et ne pas attendre le CI distant.
 - Le CI (GitHub Actions) constitue le filet de sécurité final et le verrou technique sur le merge.
 - Cette règle sera **imposée techniquement** via le Ruleset GitHub (required status checks) dès que le premier workflow CI sera en place.
-- En attendant le CI, la vérification est une contrainte de processus : l'agent exécute les tests localement avant tout push, et ne fusionne pas une PR sans confirmation de non-régression.
+- En attendant le CI, la vérification est une contrainte de processus : l'agent exécute les tests localement avant tout push, et ne fusionne pas une PR sans confirmation de non-régression ni approbation de Codex.
 
 ## Revue de code
 
-Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent intervenir sur les Pull Requests. Règles d'application de leurs retours :
+Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent intervenir sur les Pull Requests. Règles générales d'application de leurs retours :
 
 - Les retours ne sont **pas une source de vérité** : ils sont systématiquement soumis à contre-vérification.
 - Un retour est **appliqué** s'il est pertinent et que le gain justifie le coût de la modification.
 - Un retour est **rejeté** s'il est jugé non pertinent, incorrect, ou si son coût (complexité, temps, lisibilité dégradée) est disproportionné par rapport au bénéfice obtenu.
 - La décision d'accepter ou rejeter un retour appartient à l'agent, dans le cadre de son autonomie décisionnelle.
+
+### Revue Codex (bloquante)
+
+Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a rendu un avis d'approbation (👍) sur le dernier état de la PR.
+
+Traitement de chaque retour d'une revue Codex :
+
+1. **Contre-vérification** du retour (pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/`, des bonnes pratiques applicables) — selon les règles générales ci-dessus.
+2. **Commit dédié** pour chaque retour validé (un commit par retour appliqué).
+3. **Réponse systématique** à chaque retour, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
+4. **Résolution** de chaque conversation de revue une fois tous ses retours traités.
+5. **Attente de la revue suivante** : après le push des commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
+
+Ce cycle (revue → contre-vérification → commits → réponses → résolution des conversations → attente de la revue suivante) est répété jusqu'à approbation (👍) de Codex. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
+
+La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.cursor/skills/codex-review-loop/`.
 
 ## Issues
 
