@@ -1,5 +1,3 @@
-# Pull Request
-
 <!-- Le merge se fait en squash : cette description devient le corps du commit sur main. Rédiger en conséquence. -->
 
 ## Résumé
