@@ -54,7 +54,7 @@ the current head SHA:
 
 ```bash
 gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login | test("codex"; "i"))] | sort_by(.submitted_at) | last'
+  --jq '[.[] | select(.user.login=="chatgpt-codex-connector[bot]")] | sort_by(.submitted_at) | last'
 ```
 
 The endpoint defaults to 30 reviews per page, and since Codex adds one on
@@ -73,16 +73,22 @@ process:
 
 ```bash
 gh api --paginate "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
-  --jq '.[] | select(.user.login | test("codex"; "i"))' \
+  --jq '.[] | select(.user.login=="chatgpt-codex-connector[bot]")' \
   | jq -s 'sort_by(.submitted_at) | last'
 ```
 
 Check `.commit_id` matches the current head SHA (`git rev-parse HEAD`) and
-`.submitted_at` is newer than the last push. If no matching review appears
-after the timeout, tell the user Codex review did not trigger and stop (check
-`@codex review` may need to be commented manually, or automatic review is
-disabled for the repo). Keep this review's `.submitted_at` as
-`<REVIEW_SUBMITTED_AT>` for the next check.
+`.submitted_at` is newer than `<LAST_TRIGGER_AT>` — the timestamp of whichever
+event started this waiting cycle: the push that was just made (Step 3), or,
+on a cycle entered from Step 5 without a new push, the `@codex review`
+request comment's `created_at`. Without this check, re-entering Step 1 after
+a no-push re-review request would immediately match the same already-seen
+review again (same commit SHA, unchanged `submitted_at`), and the loop would
+spin on a stale review instead of waiting for the fresh one it just asked
+for. If no matching review appears after the timeout, tell the user Codex
+review did not trigger and stop (check `@codex review` may need to be
+commented manually, or automatic review is disabled for the repo). Keep this
+review's `.submitted_at` as `<REVIEW_SUBMITTED_AT>` for the next check.
 
 Check for the 👍 approval reaction **from Codex, dated to this review**:
 
@@ -98,13 +104,21 @@ apply the same fix as above: `--paginate` with a per-page-safe `--jq` (drop
 the aggregating `| length`, keep only the `select(...)`), piped into an
 external `jq -s 'length'` to count across all pages.
 
-A PR can carry a stale 👍 from an earlier head, or a 👍 from a human or an
-unrelated bot whose login happens to contain "codex"; this merge-gating
-check — unlike the looser detection filters below, used only to *find*
-Codex's own comments for processing — requires the **exact** bot login
-(`chatgpt-codex-connector[bot]`, as named in `.speckit/gestion-projet.md`)
-and `.created_at >= <REVIEW_SUBMITTED_AT>` so the gate can't be satisfied by
-an unrelated account or a stale reaction.
+A PR can carry a stale 👍 from an earlier head, or a 👍/comment/review from a
+human or an unrelated bot whose login happens to contain "codex" (a
+collaborator called e.g. `codex-fan`, or another integration). Every identity
+check in this skill — this reaction gate, the review lookup above, and the
+thread filter in Step 2 — therefore matches the **exact** bot login rather
+than a substring, so none of them can be satisfied, or have their result
+skewed (e.g. `<REVIEW_SUBMITTED_AT>` picking up someone else's later review),
+by an unrelated account. The exact string differs by API: REST endpoints
+(reviews, reactions — used above) report bot accounts as
+`chatgpt-codex-connector[bot]`, the login named in
+`.speckit/gestion-projet.md`; GraphQL's `author.login` on review thread
+comments (Step 2) reports the same bot without the `[bot]` suffix, as
+`chatgpt-codex-connector` — a documented inconsistency between GitHub's REST
+and GraphQL representations of App bots, confirmed against this PR's live
+data.
 If this is `> 0`, the review found nothing to fix — go to "Exit". Otherwise
 continue to Step 2.
 
@@ -139,8 +153,12 @@ and merge every page's `nodes` before filtering — otherwise threads beyond
 the first 100 are silently skipped.
 
 Filter to threads where `isResolved == false` and the first comment's
-`author.login` matches Codex (`chatgpt-codex-connector` or any login
-containing "codex").
+`author.login` is exactly `chatgpt-codex-connector` (see the login-format
+note under Step 1 for why this differs from the REST-reported
+`chatgpt-codex-connector[bot]`). An unrelated reviewer or bot whose login
+merely contains "codex" must not match here: Step 4 replies to and resolves
+every thread this filter selects, so a false match would auto-resolve a
+non-Codex reviewer's actual feedback.
 
 For each such thread, `path`/`line`/`diffHunk` locate the finding in the diff
 when the comment `body` doesn't repeat it.
@@ -226,9 +244,12 @@ threads were already resolved, or Step 2 found no unresolved Codex thread at
 all (yet Step 1 still found no matching 👍) — Codex will **not** re-review on
 its own: replying to and resolving threads doesn't trigger it, only a new
 commit or an explicit request does. In every one of these cases, post a PR
-comment containing exactly `@codex review` to request a fresh pass, then
-return to Step 1. If that still produces no new review and nothing changed,
-stop and report the situation to the user instead of looping forever.
+comment containing exactly `@codex review` to request a fresh pass, record
+that comment's `created_at` as the new `<LAST_TRIGGER_AT>` (Step 1 needs it
+to recognize the next review as actually new, rather than re-matching the
+same review this cycle already found insufficient), then return to Step 1.
+If that still produces no new review and nothing changed, stop and report
+the situation to the user instead of looping forever.
 
 ### Exit
 
