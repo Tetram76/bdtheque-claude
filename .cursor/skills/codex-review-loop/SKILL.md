@@ -30,14 +30,17 @@ Repeat until Codex approves the current head commit:
 
 ```text
 1. Wait for a Codex review on the current head commit.
-2. If Codex reacted with 👍 (no findings), stop — approved, see "Exit".
+2. If Codex reacted with 👍 for that review (no findings), stop — approved,
+   see "Exit".
 3. Otherwise, for each unresolved review thread from Codex:
    a. Cross-check the finding (see "Cross-check" below).
    b. If valid: make the fix in one dedicated commit.
+4. If any fix commits were made, push them — do not reply to or resolve any
+   thread until the push has succeeded.
+5. For each thread processed in step 3 (i.e. steps a/b):
    c. Reply to the thread (fix applied, or justified rejection).
    d. Resolve the thread.
-4. Push the fix commits (if any were made).
-5. If commits were pushed, go to 1 (Codex re-reviews automatically).
+6. If commits were pushed, go to 1 (Codex re-reviews automatically).
 ```
 
 **The approval signal is the 👍 reaction Codex leaves when a review has no
@@ -83,7 +86,7 @@ ensures the reaction actually approves the current-head review found above.
 If this is `> 0`, the review found nothing to fix — go to "Exit". Otherwise
 continue to Step 2.
 
-### Step 2 — List and process unresolved threads
+### Step 2 — List threads and make fixes
 
 List review threads and their resolution state:
 
@@ -130,17 +133,35 @@ when the comment `body` doesn't repeat it.
 - Does the fix's cost (complexity, readability, time) justify the benefit?
 
 **b. If the finding is valid**, fix it in exactly one commit dedicated to that
-finding (do not batch multiple findings into one commit).
+finding (do not batch multiple findings into one commit). Keep track of each
+thread's `<COMMENT_ID>` / `<THREAD_ID>` (from Step 2's query) and its outcome
+(fixed, with which commit — or rejected, with why) for Step 4. Do **not**
+reply to or resolve threads yet.
 
-**c. Reply to the thread** — always, whether accepted or rejected:
+### Step 3 — Push, before any reply or resolution
+
+If any fix commits were made in Step 2, push them now, and confirm the push
+succeeded (e.g. check the command's exit status and that the remote ref
+advanced) before moving on. If a dedicated fix commit exists locally but the
+push is rejected or interrupted (branch advanced remotely, credentials or
+network failure, etc.), replying to and resolving the corresponding thread
+next would close the conversation on the remote PR while the fix is not
+actually present there. So: resolve the push failure (retry, rebase, etc.)
+and confirm success before proceeding to Step 4 — never reply to or resolve a
+thread on the strength of a commit that isn't confirmed pushed.
+
+### Step 4 — Reply and resolve
+
+For each thread identified in Step 2:
+
+**c. Reply to the thread** — always, whether accepted or rejected
+(`<COMMENT_ID>` is the `databaseId` of the thread's first comment, from
+Step 2's query):
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
   -f body="<reply: what was fixed, or why the finding was rejected>"
 ```
-
-(`<COMMENT_ID>` is the `databaseId` of the thread's first comment, from
-Step 2's query.)
 
 **d. Resolve the thread**, once its reply is posted:
 
@@ -154,10 +175,10 @@ mutation{
 (`<THREAD_ID>` is the thread's `id` — the opaque GraphQL node id from Step 2,
 not the comment's `databaseId`.)
 
-### Step 3-4 — Push and loop
+### Step 5 — Loop or request re-review
 
-If fix commits were made in this cycle, push them, then return to Step 1:
-Codex re-reviews automatically on new commits pushed to the PR branch.
+If fix commits were made (and pushed in Step 3), return to Step 1: Codex
+re-reviews automatically on new commits pushed to the PR branch.
 
 If no fix commit was made (every finding was rejected, or all threads were
 already resolved) and Step 2 still found unresolved Codex threads to act on,
