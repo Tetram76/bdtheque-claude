@@ -62,6 +62,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 - L'agent est **seul décisionnaire** sur l'architecture et l'implémentation : toute refactorisation jugée nécessaire (lisibilité, maintenabilité, testabilité, séparation des responsabilités, etc.) doit être faite sans attendre de validation.
 - Le code doit être **propre et lisible** : l'utilisateur est développeur et lit le code produit.
 - **Règle de commentaires** : les commentaires expliquent le **pourquoi** (intention, contrainte, décision de conception), jamais le **quoi** (ce que le code fait — le code se lit de lui-même).
+- **Langue des fichiers techniques** : tout le contenu technique (code, noms de fonctions/classes/variables/constantes, commentaires, messages de log, noms de fichiers de configuration) est rédigé en **anglais**. Seule la documentation du projet (`.speckit/`, `README.md`, etc.) est rédigée en **français**. Les messages destinés à l'utilisateur final sont produits par le système de traduction du frontend (cf. `contraintes-techniques.md`), pas codés en dur dans une langue donnée.
 
 ## Configuration du repository GitHub
 
@@ -76,6 +77,18 @@ L'agent produit l'intégralité des livrables du projet, y compris :
   - Suppression de `main` interdite
   - Squash merge uniquement
   - **Commits signés obligatoires** (`required_signatures`)
+
+## Outillage .NET
+
+- **Gestion centralisée des packages NuGet** via `Directory.Packages.props` (Central Package Management) : toutes les versions sont déclarées à la racine de la solution, les fichiers `.csproj` ne référencent que les noms de package.
+- **Tests unitaires et d'intégration** : `xunit`, exécutés via `dotnet test`. Couverture de code collectée avec `coverlet.collector`.
+- **Tests d'intégration de l'API** : `Microsoft.AspNetCore.Mvc.Testing` (`WebApplicationFactory`), base de données remplacée par SQLite en mémoire pour isoler les tests du conteneur PostgreSQL.
+
+## Intégration continue (CI)
+
+- **GitHub Actions** héberge le pipeline de non-régression (`.github/workflows/ci.yml`), déclenché sur chaque Pull Request et sur push vers `main`.
+- Étapes du pipeline : restauration, build en mode `Release`, exécution de la totalité des tests (`dotnet test`).
+- Ce workflow constitue le **check de statut requis** évoqué dans la règle de merge ci-dessous, dès qu'il est activé dans le Ruleset GitHub.
 
 ## Règle de merge : non-régression obligatoire
 

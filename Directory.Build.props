@@ -1,0 +1,23 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- The French UI needs culture-aware date/currency formatting (fr-FR): the base
+         images (Ubuntu, not Alpine/chiseled) already ship ICU, so full globalization
+         support has no extra cost here. See contraintes-techniques.md. -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>BDthèque</Authors>
+    <Company>BDthèque</Company>
+    <Product>BDthèque</Product>
+  </PropertyGroup>
+
+</Project>

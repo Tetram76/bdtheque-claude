@@ -35,11 +35,58 @@ L'application est déployée en **3 conteneurs Docker** :
 
 Le `frontend` communique avec l'`api` via le réseau Docker interne. L'`api` est le seul tier à accéder à `db`.
 
+Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend-net` (`api` ↔ `frontend`). Seul `frontend` publie un port sur l'hôte ; `api` et `db` ne sont jamais exposés à l'extérieur du réseau Docker.
+
+## Organisation du code
+
+```
+.
+├── Bdtheque.slnx                  # Solution .NET
+├── Directory.Build.props          # Propriétés MSBuild communes (TFM, nullable, analyzers…)
+├── Directory.Packages.props       # Gestion centralisée des versions NuGet (CPM)
+├── global.json                    # Version du SDK .NET
+├── docker-compose.yml
+├── docker/
+│   ├── api/Dockerfile
+│   └── frontend/Dockerfile
+├── src/
+│   ├── Bdtheque.Domain/           # Entités, enums, value objects — aucune dépendance externe
+│   ├── Bdtheque.Contracts/        # DTOs échangés entre api et frontend
+│   ├── Bdtheque.Infrastructure/   # DbContext EF Core, configurations, migrations
+│   ├── Bdtheque.Api/              # Conteneur api : endpoints, sécurité, règles applicatives
+│   └── Bdtheque.Frontend/         # Conteneur frontend : composants Blazor Server, auth cookie
+├── tests/
+│   └── Bdtheque.Api.Tests/        # Tests d'intégration (WebApplicationFactory + SQLite)
+└── .speckit/                      # Source de vérité du projet (voir ci-dessous)
+```
+
+## Démarrage local
+
+### Prérequis
+
+- [.NET SDK 10](https://dotnet.microsoft.com/download) (version pilotée par [`global.json`](global.json))
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (pour `docker compose`)
+
+### Build et tests
+
+```bash
+dotnet restore Bdtheque.slnx
+dotnet build Bdtheque.slnx --configuration Release
+dotnet test Bdtheque.slnx --configuration Release
+```
+
+### Lancer la stack complète (Docker Compose)
+
+```bash
+cp .env.example .env   # puis renseigner POSTGRES_PASSWORD et INTERNAL_API_KEY
+docker compose up -d --build
+```
+
+L'application est ensuite accessible sur `http://localhost:8080` (port configurable via `FRONTEND_PORT` dans `.env`). L'état de chaque conteneur peut être vérifié via son endpoint `/health` (exposé uniquement en interne pour `api`, et sur le port publié pour `frontend`).
+
 ## Déploiement
 
-Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synology Container Manager). Les visuels (couvertures, planches, etc.) sont stockés sur un volume Docker monté sur le NAS, configurable via variable d'environnement.
-
-> **Note :** les fichiers Docker (`Dockerfile`, `docker-compose.yml`) ne sont pas encore dans le dépôt — cette section sera complétée lors de la mise en place de l'infrastructure.
+Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synology Container Manager). Les visuels (couvertures, planches, etc.) sont stockés sur un volume monté sur le NAS, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.
 
 ## Spécifications
 

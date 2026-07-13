@@ -68,6 +68,12 @@ Les visuels d'une édition sont présentés dans l'ordre suivant :
 1. Par type, dans cet ordre fixe : Couverture → Dédicace → Page de garde → Planche → 4e de couverture.
 2. Pour les visuels du même type : par ordre d'affichage, ajustable manuellement par l'utilisateur.
 
+### Langue et culture d'affichage
+
+L'utilisateur choisit une **culture d'affichage** (ex. français de France), pas seulement une langue : ce choix pilote la langue des textes de l'interface, mais aussi le **formatage des dates, nombres et montants** et l'**ordre de tri** des listes et résultats de recherche (voir « Tri et navigation par initiale » ci-dessous).
+
+Seule la culture **française** est proposée actuellement ; l'application est conçue pour pouvoir en proposer d'autres ultérieurement sans refonte.
+
 ### Tri et navigation par initiale
 
 #### Règle générale
