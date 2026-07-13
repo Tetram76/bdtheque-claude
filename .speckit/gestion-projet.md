@@ -109,6 +109,8 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 - Un retour est **appliqué** s'il est pertinent et que le gain justifie le coût de la modification.
 - Un retour est **rejeté** s'il est jugé non pertinent, incorrect, ou si son coût (complexité, temps, lisibilité dégradée) est disproportionné par rapport au bénéfice obtenu.
 - La décision d'accepter ou rejeter un retour appartient à l'agent, dans le cadre de son autonomie décisionnelle.
+- L'objectif de robustesse est une application **user-proof** (parcours réels, usages légitimes, erreurs utilisateur plausibles), pas un code **proof** contre tout scénario théorique ou détourné. Le code est écrit pour le contexte de cette application — il n'a pas vocation à devenir une librairie publique ni à être réutilisé hors projet.
+- Les scénarios invoqués par une revue (edge cases, abus, chemins d'exécution) doivent être **pertinents, valides et possibles** dans ce contexte applicatif ; un scénario hypothétique, irréaliste ou hors périmètre ne justifie pas une complexification du code.
 
 ### Revue Codex (bloquante)
 
@@ -116,7 +118,7 @@ Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur u
 
 Traitement de chaque retour d'une revue Codex :
 
-1. **Contre-vérification** du retour (pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/`, des bonnes pratiques applicables) — selon les règles générales ci-dessus.
+1. **Contre-vérification** du retour (pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/`, des bonnes pratiques applicables, et faisabilité du scénario dans le contexte réel de l'application) — selon les règles générales ci-dessus, y compris le critère user-proof.
 2. **Commit dédié** pour chaque retour validé (un commit par retour appliqué).
 3. **Réponse systématique** à chaque retour, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
 4. **Résolution** de chaque conversation de revue une fois tous ses retours traités.
