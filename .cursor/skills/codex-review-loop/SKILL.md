@@ -47,9 +47,13 @@ Poll (e.g. every 30-60s, timeout ~15 min) until a review from Codex exists for
 the current head SHA:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews \
+gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews --paginate \
   --jq '[.[] | select(.user.login | test("codex"; "i"))] | sort_by(.submitted_at) | last'
 ```
+
+`--paginate` is required: the endpoint defaults to 30 reviews per page, and
+since Codex adds one on every push, a long-running PR can exceed that —
+without it, this can keep comparing a stale review to HEAD until timeout.
 
 Check `.commit_id` matches the current head SHA (`git rev-parse HEAD`) and
 `.submitted_at` is newer than the last push. If no matching review appears
