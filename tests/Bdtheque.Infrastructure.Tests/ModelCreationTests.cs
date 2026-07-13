@@ -111,4 +111,34 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.NotNull(saved);
         Assert.Equal("Aventure", saved.Label);
     }
+
+    [Fact]
+    public async Task SetParent_WithPartiallyLoadedAncestorChain_ThrowsInvalidOperationException()
+    {
+        // Persist A ← B ← C (B's parent is A, C's parent is B).
+        // Then reload only A and C (without B) using AsNoTracking.
+        // Calling A.SetParent(C) must throw InvalidOperationException because C's ancestor
+        // chain is incomplete in memory: C.ParentId = B.Id but C.Parent = null.
+        // The method cannot verify acyclicity without B, so it refuses the assignment.
+        var a = new Universe("GrandParentA");
+        var b = new Universe("ParentB");
+        var c = new Universe("ChildC");
+        b.SetParent(a);
+        c.SetParent(b);
+        _fixture.Context.Universes.AddRange(a, b, c);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        // Load A and C independently, without B — C has ParentId = B.Id but Parent = null
+        var reloadedA = await _fixture.Context.Universes.AsNoTracking()
+            .FirstAsync(u => u.Id == a.Id);
+        var reloadedC = await _fixture.Context.Universes.AsNoTracking()
+            .FirstAsync(u => u.Id == c.Id);
+
+        Assert.Null(reloadedC.Parent);
+        Assert.Equal(b.Id, reloadedC.ParentId);
+
+        // Attempting A.SetParent(C) should throw because C's full ancestor chain is not in memory
+        Assert.Throws<InvalidOperationException>(() => reloadedA.SetParent(reloadedC));
+    }
 }
