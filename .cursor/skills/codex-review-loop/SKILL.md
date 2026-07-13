@@ -77,6 +77,7 @@ query{
   repository(owner:"<OWNER>",name:"<REPO>"){
     pullRequest(number:<PR_NUMBER>){
       reviewThreads(first:100){
+        pageInfo{ hasNextPage endCursor }
         nodes{
           id
           isResolved
@@ -91,6 +92,10 @@ query{
 ```
 
 (`<OWNER>`/`<REPO>` can be read from `gh repo view --json owner,name`.)
+`reviewThreads` is capped at 100 per page. If `pageInfo.hasNextPage` is
+`true`, re-run the query with `reviewThreads(first:100, after:"<endCursor>")`
+and merge every page's `nodes` before filtering — otherwise threads beyond
+the first 100 are silently skipped.
 
 Filter to threads where `isResolved == false` and the first comment's
 `author.login` matches Codex (`chatgpt-codex-connector` or any login
