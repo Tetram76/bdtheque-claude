@@ -28,8 +28,9 @@ Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que
 
 **Format des mises à jour :**
 
-- Les fichiers `.speckit/` sont des **documents de référence**, pas des journaux. Ils ne doivent pas contenir d'historique, de dates, ni de traces de décisions successives.
+- **Le speckit n'est pas un historique de décisions.** Les fichiers `.speckit/` sont des **documents de référence**, pas des journaux. Ils ne doivent contenir que l'état actuel et cible du projet — jamais d'historique, de dates, ni de traces de décisions successives ou de leur évolution.
 - Toute nouvelle information est **intégrée dans le contenu existant** : mise à jour d'une section, enrichissement d'une définition, ajout dans la liste appropriée — jamais ajoutée en bas de fichier comme une entrée de log.
+- En cas de changement de décision, l'**ancienne information est remplacée**, pas conservée à côté de la nouvelle avec une mention de type « anciennement », « auparavant » ou « suite à ».
 - Le fichier doit rester cohérent, lisible et structuré comme une documentation vivante.
 
 ## Rôle de l'agent
