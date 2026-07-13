@@ -111,7 +111,7 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 
 ### Revue Codex (bloquante)
 
-Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a rendu un avis d'approbation (👍) sur le dernier état de la PR.
+Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a réagi par un 👍 sur la PR pour le commit de tête, signe qu'une revue n'a rien trouvé à corriger.
 
 Traitement de chaque retour d'une revue Codex :
 
@@ -121,7 +121,7 @@ Traitement de chaque retour d'une revue Codex :
 4. **Résolution** de chaque conversation de revue une fois tous ses retours traités.
 5. **Attente de la revue suivante** : après le push des commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
 
-Ce cycle (revue → contre-vérification → commits → réponses → résolution des conversations → attente de la revue suivante) est répété jusqu'à approbation (👍) de Codex. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
+Ce cycle (revue → contre-vérification → commits → réponses → résolution des conversations → attente de la revue suivante) est répété jusqu'à réaction 👍 de Codex sur le commit de tête. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
 
 La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.cursor/skills/codex-review-loop/`.
 

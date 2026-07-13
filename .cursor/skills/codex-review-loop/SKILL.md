@@ -30,15 +30,18 @@ Repeat until Codex approves the current head commit:
 
 ```text
 1. Wait for a Codex review on the current head commit.
-2. For each unresolved review thread from Codex:
+2. If Codex reacted with 👍 (no findings), stop — approved, see "Exit".
+3. Otherwise, for each unresolved review thread from Codex:
    a. Cross-check the finding (see "Cross-check" below).
    b. If valid: make the fix in one dedicated commit.
    c. Reply to the thread (fix applied, or justified rejection).
    d. Resolve the thread.
-3. Push the fix commits (if any were made).
-4. If commits were pushed, go to 1 (Codex re-reviews automatically).
-5. If the latest Codex review state is APPROVED, stop.
+4. Push the fix commits (if any were made).
+5. If commits were pushed, go to 1 (Codex re-reviews automatically).
 ```
+
+**The approval signal is the 👍 reaction Codex leaves when a review has no
+findings.** Check for it every cycle (Step 1).
 
 ### Step 1 — Wait for the review
 
@@ -65,7 +68,15 @@ after the timeout, tell the user Codex review did not trigger and stop (check
 `@codex review` may need to be commented manually, or automatic review is
 disabled for the repo).
 
-If `.state == "APPROVED"`, the loop is done — go to "Exit".
+Check for the 👍 approval reaction on the PR:
+
+```bash
+gh api repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions \
+  --jq '[.[] | select(.content=="+1")] | length'
+```
+
+If this is `> 0`, the review found nothing to fix — go to "Exit". Otherwise
+continue to Step 2.
 
 ### Step 2 — List and process unresolved threads
 
@@ -144,15 +155,15 @@ If fix commits were made in this cycle, push them, then return to Step 1:
 Codex re-reviews automatically on new commits pushed to the PR branch.
 
 If no fix commit was made (every finding was rejected, or all threads were
-already resolved) and the last review state is not `APPROVED`, Codex will
-**not** re-review on its own — replying to and resolving threads doesn't
-trigger it, only a new commit or an explicit request does. Post a PR comment
-containing exactly `@codex review` to request a fresh pass, then return to
-Step 1. If that still produces no new review and nothing changed, stop and
-report the situation to the user instead of looping forever.
+already resolved) and Step 2 still found unresolved Codex threads to act on,
+Codex will **not** re-review on its own — replying to and resolving threads
+doesn't trigger it, only a new commit or an explicit request does. Post a PR
+comment containing exactly `@codex review` to request a fresh pass, then
+return to Step 1. If that still produces no new review and nothing changed,
+stop and report the situation to the user instead of looping forever.
 
 ### Exit
 
-Once the latest Codex review on the current head commit is `APPROVED`, the
-Codex gate is satisfied. Merging still requires the CI checks to also pass
-(see `.speckit/gestion-projet.md`).
+The Codex gate is satisfied once Codex has reacted 👍 to the PR for the
+current head commit. Merging still requires the CI checks to also pass (see
+`.speckit/gestion-projet.md`).
