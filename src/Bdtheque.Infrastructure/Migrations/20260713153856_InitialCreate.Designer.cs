@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20260713153020_InitialCreate")]
+    [Migration("20260713153856_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -54,7 +54,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.ToTable("Authors", t =>
                         {
-                            t.HasCheckConstraint("CK_Authors_LastNameOrPseudonym", "\"LastName\" IS NOT NULL OR \"Pseudonym\" IS NOT NULL");
+                            t.HasCheckConstraint("CK_Authors_LastNameOrPseudonym", "COALESCE(LENGTH(TRIM(\"LastName\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"Pseudonym\")), 0) > 0");
                         });
                 });
 

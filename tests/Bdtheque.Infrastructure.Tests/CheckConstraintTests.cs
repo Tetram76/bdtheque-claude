@@ -49,4 +49,26 @@ public sealed class CheckConstraintTests : IDisposable
         var count = await _fixture.Context.Authors.CountAsync(a => a.Id == id);
         Assert.Equal(1, count);
     }
+
+    [Fact]
+    public async Task AuthorCheckConstraint_BlankLastNameAndNullPseudonym_ThrowsAtDatabase()
+    {
+        // Blank strings bypass a simple IS NOT NULL check; the constraint uses LENGTH(TRIM(...))
+        // to also reject whitespace-only values inserted via raw SQL.
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\") VALUES ({0}, '', NULL)",
+                id));
+    }
+
+    [Fact]
+    public async Task AuthorCheckConstraint_BothBlankStrings_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\") VALUES ({0}, '   ', '')",
+                id));
+    }
 }

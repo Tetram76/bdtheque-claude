@@ -55,7 +55,14 @@ public sealed class Universe : EntityBase
         if (ReferenceEquals(parent, this))
             throw new ArgumentException("A universe cannot be its own parent.", nameof(parent));
 
-        // Walk the ancestor chain to detect cycles
+        // Detect a direct 1-level cycle when the parent navigation is not loaded:
+        // if parent.ParentId points back to this entity, the proposed relation would create A → B → A.
+        // This covers the common case of reloading entities from the DB without eager-loading .Parent.
+        if (parent.ParentId == Id)
+            throw new ArgumentException(
+                "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
+
+        // Walk the in-memory ancestor chain to detect longer cycles among fully-loaded entities.
         var ancestor = parent.Parent;
         while (ancestor is not null)
         {

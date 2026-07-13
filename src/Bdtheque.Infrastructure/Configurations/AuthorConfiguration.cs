@@ -19,8 +19,13 @@ internal sealed class AuthorConfiguration : IEntityTypeConfiguration<Author>
         // Database-level defence in depth mirroring the domain invariant.
         // The domain constructor already enforces this, so this constraint will
         // only trigger if data bypasses the domain model (e.g. raw SQL).
+        // COALESCE(LENGTH(TRIM(...)), 0) > 0 rejects null, empty, and whitespace-only values,
+        // covering raw-SQL bypasses that might insert blank strings instead of NULL.
+        // The domain's NullIfEmpty already normalises blanks to null, so this check is
+        // strictly defence-in-depth for out-of-band writes. The COALESCE/LENGTH/TRIM
+        // expression is valid in both PostgreSQL and SQLite.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Authors_LastNameOrPseudonym",
-            $"\"{nameof(Author.LastName)}\" IS NOT NULL OR \"{nameof(Author.Pseudonym)}\" IS NOT NULL"));
+            $"COALESCE(LENGTH(TRIM(\"{nameof(Author.LastName)}\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"{nameof(Author.Pseudonym)}\")), 0) > 0"));
     }
 }

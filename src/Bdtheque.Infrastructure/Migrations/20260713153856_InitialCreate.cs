@@ -25,7 +25,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Authors", x => x.Id);
-                    table.CheckConstraint("CK_Authors_LastNameOrPseudonym", "\"LastName\" IS NOT NULL OR \"Pseudonym\" IS NOT NULL");
+                    table.CheckConstraint("CK_Authors_LastNameOrPseudonym", "COALESCE(LENGTH(TRIM(\"LastName\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"Pseudonym\")), 0) > 0");
                 });
 
             migrationBuilder.CreateTable(
