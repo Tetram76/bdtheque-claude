@@ -86,9 +86,8 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 ## Internationalisation
 
 - Le code (classes, fonctions, variables, commentaires, etc.) est écrit en **anglais** (cf. `gestion-projet.md`), indépendamment de la langue de l'utilisateur final.
-- L'utilisateur sélectionne une **culture** (ex. `fr-FR`), pas seulement une langue : cette culture pilote à la fois la traduction des textes (ressources de localisation ASP.NET Core, `IStringLocalizer`), le formatage des données sensibles à la culture (dates, nombres, devises) et le **tri linguistique** des listes et résultats de recherche (ordre alphabétique correct, y compris pour les caractères accentués). Aucun texte utilisateur n'est codé en dur dans le code applicatif.
-- Seule la culture **`fr-FR`** est supportée actuellement, mais l'architecture (culture par requête, pas simple chaîne de langue) doit permettre d'ajouter d'autres cultures sans refonte.
-- Le mode **globalization-invariant** de .NET est incompatible avec cette exigence (il désactive le formatage et le tri culturels) : il ne doit pas être activé. Les images Docker utilisées (`aspnet:10.0`, base Ubuntu) embarquent déjà ICU, donc le support complet de la globalisation n'a aucun coût supplémentaire.
+- La **culture d'affichage** choisie par l'utilisateur (voir `fonctionnel.md`) est implémentée via les ressources de localisation ASP.NET Core (`IStringLocalizer`) pour la traduction des textes, combinées à la **culture .NET courante** (`CultureInfo`, positionnée par requête) pour le formatage des données et le tri linguistique. Aucun texte utilisateur n'est codé en dur dans le code applicatif.
+- Le mode **globalization-invariant** de .NET est incompatible avec le tri linguistique et le formatage culturel requis par le fonctionnel : il ne doit pas être activé. Les images Docker utilisées (`aspnet:10.0`, base Ubuntu) embarquent déjà ICU, donc le support complet de la globalisation n'a aucun coût supplémentaire.
 
 ## Compatibilité multi-supports
 
