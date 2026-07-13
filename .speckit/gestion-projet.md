@@ -171,6 +171,8 @@ Le **titre de la Pull Request** doit également respecter ce format — c'est lu
 
 La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
 
+- La description de chaque PR **doit respecter la structure du template** (`.github/PULL_REQUEST_TEMPLATE.md`) : toutes les sections sont renseignées, à l'exception de celles explicitement désignées comme supprimables dans le template lorsqu'elles ne s'appliquent pas (ex. « Issue(s) liée(s) » en l'absence d'Issue concernée).
+
 Exemples :
 
 - `feat(albums): ajout de la gestion des éditions`
