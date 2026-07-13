@@ -17,6 +17,13 @@ policy: a PR on this repo cannot be merged until the Codex bot
 
 Requires `gh` authenticated (`gh auth status`) with access to the repo.
 
+Placeholder convention below: `{owner}` / `{repo}` are literal — `gh api`
+auto-expands them from the current repo in REST endpoint paths only. Every
+`<ANGLE_BRACKET>` placeholder (`<PR_NUMBER>`, `<COMMENT_ID>`, `<THREAD_ID>`)
+is **not** auto-expanded anywhere (REST path, GraphQL body, or `-F`/`-f`
+value) and must be substituted with a real value before running the
+command.
+
 ## Loop
 
 Repeat until Codex approves the current head commit:
@@ -58,20 +65,22 @@ List review threads and their resolution state:
 
 ```bash
 gh api graphql -f query='
-query($owner:String!,$repo:String!,$pr:Int!){
-  repository(owner:$owner,name:$repo){
-    pullRequest(number:$pr){
+query{
+  repository(owner:"<OWNER>",name:"<REPO>"){
+    pullRequest(number:<PR_NUMBER>){
       reviewThreads(first:100){
         nodes{
           id
           isResolved
-          comments(first:1){ nodes{ id databaseId author{login} body } }
+          comments(first:1){ nodes{ databaseId author{login} body } }
         }
       }
     }
   }
-}' -F owner={owner} -F repo={repo} -F pr=<PR_NUMBER>
+}'
 ```
+
+(`<OWNER>`/`<REPO>` can be read from `gh repo view --json owner,name`.)
 
 Filter to threads where `isResolved == false` and the first comment's
 `author.login` matches Codex (`chatgpt-codex-connector` or any login
@@ -94,18 +103,24 @@ finding (do not batch multiple findings into one commit).
 **c. Reply to the thread** — always, whether accepted or rejected:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{pr}/comments/{comment_databaseId}/replies \
+gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
   -f body="<reply: what was fixed, or why the finding was rejected>"
 ```
+
+(`<COMMENT_ID>` is the `databaseId` of the thread's first comment, from
+Step 2's query.)
 
 **d. Resolve the thread**, once its reply is posted:
 
 ```bash
 gh api graphql -f query='
-mutation($threadId:ID!){
-  resolveReviewThread(input:{threadId:$threadId}){ thread{ isResolved } }
-}' -F threadId=<thread id from step 2 list>
+mutation{
+  resolveReviewThread(input:{threadId:"<THREAD_ID>"}){ thread{ isResolved } }
+}'
 ```
+
+(`<THREAD_ID>` is the thread's `id` — the opaque GraphQL node id from Step 2,
+not the comment's `databaseId`.)
 
 ### Step 3-4 — Push and loop
 
