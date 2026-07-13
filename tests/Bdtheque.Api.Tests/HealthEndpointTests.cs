@@ -9,15 +9,15 @@ public sealed class HealthEndpointTests : IClassFixture<ApiWebApplicationFactory
     public HealthEndpointTests(ApiWebApplicationFactory factory) => _factory = factory;
 
     [Fact]
-    public async Task GetHealth_RetourneOk_SansClePartagee()
+    public async Task GetHealth_ReturnsOk_WithoutSharedKey()
     {
-        // /health doit rester accessible aux orchestrateurs (Docker, Synology) sans
-        // exiger le secret interne (cf. InternalApiKeyMiddleware).
+        // /health must stay reachable by orchestrators (Docker, Synology) without
+        // requiring the internal secret (see InternalApiKeyMiddleware).
         var client = _factory.CreateClient();
 
         var response = await client.GetAsync("/health");
         var body = await response.Content.ReadAsStringAsync();
 
-        Assert.True(response.StatusCode == HttpStatusCode.OK, $"Statut {response.StatusCode} : {body}");
+        Assert.True(response.StatusCode == HttpStatusCode.OK, $"Status {response.StatusCode}: {body}");
     }
 }

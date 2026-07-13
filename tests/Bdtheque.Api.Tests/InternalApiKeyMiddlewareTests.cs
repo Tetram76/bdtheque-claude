@@ -10,25 +10,25 @@ public sealed class InternalApiKeyMiddlewareTests : IClassFixture<ApiWebApplicat
     public InternalApiKeyMiddlewareTests(ApiWebApplicationFactory factory) => _factory = factory;
 
     [Fact]
-    public async Task Requete_SansCleInterne_EstRejetee()
+    public async Task Request_WithoutInternalKey_IsRejected()
     {
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/n-importe-quoi");
+        var response = await client.GetAsync("/anything");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
-    public async Task Requete_AvecCleInterneCorrecte_NestPasRejeteeParLeMiddleware()
+    public async Task Request_WithCorrectInternalKey_IsNotRejectedByMiddleware()
     {
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add(InternalApiKeyOptions.HeaderName, ApiWebApplicationFactory.InternalApiKey);
 
-        var response = await client.GetAsync("/n-importe-quoi");
+        var response = await client.GetAsync("/anything");
 
-        // Aucune route n'existe à ce stade : le 404 prouve que le middleware a laissé
-        // passer la requête jusqu'au routage, contrairement au 401 sans la clé.
+        // No route exists at this stage: the 404 proves the middleware let the request
+        // through to routing, unlike the 401 returned without the key.
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

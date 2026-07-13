@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Données et persistance -->
+    <!-- Data and persistence -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
-    <!-- Épinglages transitifs : corrigent GHSA-2m69-gcr7-jv3q (SQLite natif vulnérable) -->
+    <!-- Transitive pins: fix GHSA-2m69-gcr7-jv3q (vulnerable native SQLite) -->
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
     <PackageVersion Include="SQLitePCLRaw.core" Version="3.0.3" />
     <PackageVersion Include="SQLitePCLRaw.provider.e_sqlite3" Version="3.0.3" />
@@ -18,8 +18,8 @@
 
     <!-- API -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
-    <!-- Épinglage transitif (ligne 2.x, compatible avec Microsoft.AspNetCore.OpenApi 10.0.9) :
-         corrige GHSA-v5pm-xwqc-g5wc (DoS par référence de schéma circulaire) -->
+    <!-- Transitive pin (2.x line, compatible with Microsoft.AspNetCore.OpenApi 10.0.9):
+         fixes GHSA-v5pm-xwqc-g5wc (DoS via circular schema reference) -->
     <PackageVersion Include="Microsoft.OpenApi" Version="2.10.0" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.9" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.16.11" />

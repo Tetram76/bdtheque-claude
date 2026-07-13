@@ -83,6 +83,11 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - La valeur estimée est calculée par un modèle **Random Forest** (voir `fonctionnel.md`).
 - Implémentation via **ML.NET**, embarquée dans le conteneur `api`.
 
+## Internationalisation
+
+- Le code (classes, fonctions, variables, commentaires, etc.) est écrit en **anglais** (cf. `gestion-projet.md`), indépendamment de la langue de l'utilisateur final.
+- Les textes affichés à l'utilisateur (`frontend`) sont produits par un **système de traduction** (ressources de localisation ASP.NET Core, `IStringLocalizer`), avec le **français** comme unique langue supportée actuellement. Aucun texte utilisateur n'est codé en dur dans le code applicatif.
+
 ## Compatibilité multi-supports
 
 - L'application doit être **responsive** : utilisable sur PC, tablette et smartphone.

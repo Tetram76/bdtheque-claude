@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// Remplace PostgreSQL par une base SQLite en mémoire, pour tester le câblage de
-/// l'application (DI, middlewares, health checks) sans dépendre d'un conteneur `db`.
+/// Replaces PostgreSQL with an in-memory SQLite database, to test the application wiring
+/// (DI, middlewares, health checks) without depending on a `db` container.
 /// </summary>
 public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {

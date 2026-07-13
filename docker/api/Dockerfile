@@ -3,8 +3,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copie des seuls fichiers projet d'abord : le cache Docker de `dotnet restore`
-# n'est invalidé que par un changement de dépendances, pas par un changement de code.
+# Copy only the project files first: the Docker cache for `dotnet restore`
+# is only invalidated by a dependency change, not a code change.
 COPY Directory.Build.props Directory.Packages.props global.json ./
 COPY src/Bdtheque.Domain/Bdtheque.Domain.csproj src/Bdtheque.Domain/
 COPY src/Bdtheque.Contracts/Bdtheque.Contracts.csproj src/Bdtheque.Contracts/
@@ -21,7 +21,7 @@ RUN dotnet publish src/Bdtheque.Api/Bdtheque.Api.csproj -c Release --no-restore 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
-# curl est nécessaire au HEALTHCHECK ci-dessous ; installé avant le passage à l'utilisateur non-root.
+# curl is required by the HEALTHCHECK below; installed before switching to the non-root user.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*

@@ -3,9 +3,9 @@ using Microsoft.Extensions.Options;
 namespace Bdtheque.Api.Security;
 
 /// <summary>
-/// Rejette toute requête ne portant pas l'en-tête interne attendu. Ne remplace pas
-/// l'authentification de l'utilisateur (portée par le cookie du conteneur `frontend`) :
-/// protège uniquement contre un appel direct à `api` qui contournerait l'isolation réseau.
+/// Rejects any request missing the expected internal header. Does not replace user
+/// authentication (owned by the `frontend` container's cookie): it only protects against
+/// a direct call to `api` bypassing network isolation.
 /// </summary>
 public sealed class InternalApiKeyMiddleware(RequestDelegate next, IOptions<InternalApiKeyOptions> options)
 {

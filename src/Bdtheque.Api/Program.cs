@@ -6,8 +6,8 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// L'environnement "Testing" (WebApplicationFactory) enregistre son propre fournisseur
-// EF Core (SQLite en mémoire) : un seul fournisseur ne peut être enregistré à la fois.
+// The "Testing" environment (WebApplicationFactory) registers its own EF Core
+// provider (in-memory SQLite): only one provider can be registered at a time.
 if (!builder.Environment.IsEnvironment("Testing"))
 {
     builder.Services.AddDbContext<BdthequeDbContext>(options =>
@@ -32,14 +32,14 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-// Défense en profondeur : `api` n'est joignable que par `frontend` sur le réseau Docker
-// interne, mais exige tout de même ce secret partagé (cf. contraintes-techniques.md).
+// Defense in depth: `api` is only reachable by `frontend` over the internal Docker
+// network, but still requires this shared secret (see contraintes-techniques.md).
 app.UseMiddleware<InternalApiKeyMiddleware>();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
-    // Le détail (message d'exception) reste interne aux logs : la réponse HTTP ne doit
-    // pas exposer de détails d'infrastructure (chaîne de connexion, etc.).
+    // Details (exception messages) stay in the logs only: the HTTP response must not
+    // leak infrastructure details (connection string, etc.).
     ResponseWriter = async (context, report) =>
     {
         context.Response.ContentType = "application/json";

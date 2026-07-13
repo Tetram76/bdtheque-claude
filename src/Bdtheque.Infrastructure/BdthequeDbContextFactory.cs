@@ -4,10 +4,9 @@ using Microsoft.EntityFrameworkCore.Design;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Permet aux outils design-time (`dotnet ef migrations`) de construire le
-/// <see cref="BdthequeDbContext"/> sans dépendre du démarrage complet de l'API.
-/// La chaîne de connexion utilisée ici ne sert qu'à la génération des migrations ;
-/// l'exécution réelle utilise celle configurée dans le conteneur `api`.
+/// Lets design-time tooling (`dotnet ef migrations`) build the <see cref="BdthequeDbContext"/>
+/// without depending on the full API startup. The connection string used here only serves
+/// migration generation; the real runtime uses the one configured in the `api` container.
 /// </summary>
 public sealed class BdthequeDbContextFactory : IDesignTimeDbContextFactory<BdthequeDbContext>
 {

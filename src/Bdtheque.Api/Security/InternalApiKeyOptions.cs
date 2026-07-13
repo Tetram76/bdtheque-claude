@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Bdtheque.Api.Security;
 
 /// <summary>
-/// Secret partagé entre `frontend` et `api` (cf. contraintes-techniques.md, section
-/// Authentification). Fourni via la variable d'environnement <c>Bdtheque__InternalApiKey__Key</c>.
+/// Secret shared between `frontend` and `api` (see contraintes-techniques.md,
+/// Authentification section). Supplied via the <c>Bdtheque__InternalApiKey__Key</c>
+/// environment variable.
 /// </summary>
 public sealed class InternalApiKeyOptions
 {

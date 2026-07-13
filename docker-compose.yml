@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-bdtheque}
       POSTGRES_USER: ${POSTGRES_USER:-bdtheque}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?La variable POSTGRES_PASSWORD est obligatoire}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -16,8 +16,8 @@ services:
     networks:
       - backend
 
-  # Logique métier, accès aux données, ML.NET. Jamais publié sur l'hôte : seul
-  # `frontend` peut l'atteindre, via le réseau `frontend-net` (cf. contraintes-techniques.md).
+  # Business logic, data access, ML.NET. Never published on the host: only
+  # `frontend` can reach it, over the `frontend-net` network (see contraintes-techniques.md).
   api:
     build:
       context: .
@@ -25,8 +25,8 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
-      ConnectionStrings__Bdtheque: Host=db;Port=5432;Database=${POSTGRES_DB:-bdtheque};Username=${POSTGRES_USER:-bdtheque};Password=${POSTGRES_PASSWORD:?La variable POSTGRES_PASSWORD est obligatoire}
-      InternalApiKey__Key: ${INTERNAL_API_KEY:?La variable INTERNAL_API_KEY est obligatoire}
+      ConnectionStrings__Bdtheque: Host=db;Port=5432;Database=${POSTGRES_DB:-bdtheque};Username=${POSTGRES_USER:-bdtheque};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      InternalApiKey__Key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
     volumes:
       - ${VISUELS_HOST_PATH:-./data/visuels}:/app/visuels
     depends_on:
@@ -36,8 +36,8 @@ services:
       - backend
       - frontend-net
 
-  # Rendu Blazor Server, authentification de l'administration (cookie), unique
-  # conteneur exposé à l'utilisateur.
+  # Blazor Server rendering, admin authentication (cookie), the only
+  # container exposed to the user.
   frontend:
     build:
       context: .
@@ -46,7 +46,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       Api__BaseUrl: http://api:8080
-      InternalApiKey__Key: ${INTERNAL_API_KEY:?La variable INTERNAL_API_KEY est obligatoire}
+      InternalApiKey__Key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
     volumes:
       - ${VISUELS_HOST_PATH:-./data/visuels}:/app/visuels:ro
     ports:
@@ -58,7 +58,7 @@ services:
       - frontend-net
 
 networks:
-  # db n'est accessible que depuis `api`, jamais depuis `frontend`.
+  # db is only reachable from `api`, never from `frontend`.
   backend:
   frontend-net:
 

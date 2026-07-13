@@ -6,7 +6,7 @@
 # dotenv files
 .env
 
-# Données locales de développement (volume des visuels monté par docker-compose)
+# Local development data (visuals volume mounted by docker-compose)
 /data/
 
 # User-specific files

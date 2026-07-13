@@ -8,14 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Le cookie d'authentification est porté exclusivement par ce conteneur (BFF) :
-// `api` n'a pas connaissance de l'utilisateur (cf. contraintes-techniques.md).
+// The authentication cookie is owned exclusively by this container (BFF):
+// `api` has no knowledge of the user (see contraintes-techniques.md).
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.Cookie.Name = "Bdtheque.Auth";
-        options.LoginPath = "/administration/connexion";
-        options.AccessDeniedPath = "/administration/connexion";
+        options.LoginPath = "/admin/login";
+        options.AccessDeniedPath = "/admin/login";
     });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
@@ -25,11 +25,11 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-// Client HTTP vers `api`, exclusivement joignable via le réseau Docker interne.
+// HTTP client for `api`, only reachable over the internal Docker network.
 builder.Services.AddHttpClient("Api", (services, client) =>
 {
     var apiOptions = services.GetRequiredService<IConfiguration>().GetSection("Api");
-    client.BaseAddress = new Uri(apiOptions["BaseUrl"] ?? throw new InvalidOperationException("Api:BaseUrl n'est pas configuré."));
+    client.BaseAddress = new Uri(apiOptions["BaseUrl"] ?? throw new InvalidOperationException("Api:BaseUrl is not configured."));
 
     var internalApiKey = services.GetRequiredService<IOptions<InternalApiKeyOptions>>().Value.Key;
     client.DefaultRequestHeaders.Add(InternalApiKeyOptions.HeaderName, internalApiKey);

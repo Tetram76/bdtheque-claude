@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Point d'entrée EF Core vers PostgreSQL. Ne contient volontairement aucun
-/// <see cref="DbSet{TEntity}"/> à ce stade : le modèle métier (entités, configurations,
-/// migrations) est un chantier fonctionnel distinct de la mise en place de l'architecture.
+/// EF Core entry point to PostgreSQL. Intentionally has no <see cref="DbSet{TEntity}"/>
+/// at this stage: the domain model (entities, configurations, migrations) is a separate
+/// functional workstream from setting up the architecture.
 /// </summary>
 public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> options) : DbContext(options)
 {
