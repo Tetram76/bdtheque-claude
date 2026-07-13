@@ -86,7 +86,9 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 ## Internationalisation
 
 - Le code (classes, fonctions, variables, commentaires, etc.) est écrit en **anglais** (cf. `gestion-projet.md`), indépendamment de la langue de l'utilisateur final.
-- Les textes affichés à l'utilisateur (`frontend`) sont produits par un **système de traduction** (ressources de localisation ASP.NET Core, `IStringLocalizer`), avec le **français** comme unique langue supportée actuellement. Aucun texte utilisateur n'est codé en dur dans le code applicatif.
+- L'utilisateur sélectionne une **culture** (ex. `fr-FR`), pas seulement une langue : cette culture pilote à la fois la traduction des textes (ressources de localisation ASP.NET Core, `IStringLocalizer`), le formatage des données sensibles à la culture (dates, nombres, devises) et le **tri linguistique** des listes et résultats de recherche (ordre alphabétique correct, y compris pour les caractères accentués). Aucun texte utilisateur n'est codé en dur dans le code applicatif.
+- Seule la culture **`fr-FR`** est supportée actuellement, mais l'architecture (culture par requête, pas simple chaîne de langue) doit permettre d'ajouter d'autres cultures sans refonte.
+- Le mode **globalization-invariant** de .NET est incompatible avec cette exigence (il désactive le formatage et le tri culturels) : il ne doit pas être activé. Les images Docker utilisées (`aspnet:10.0`, base Ubuntu) embarquent déjà ICU, donc le support complet de la globalisation n'a aucun coût supplémentaire.
 
 ## Compatibilité multi-supports
 
