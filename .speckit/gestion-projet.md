@@ -12,6 +12,7 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 ## Périmètre de l'agent
 
 L'agent produit l'intégralité des livrables du projet, y compris :
+
 - le code de l'application,
 - le **contenu de l'aide contextuelle**.
 
@@ -92,6 +93,7 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 ## Issues
 
 Les Issues GitHub sont utilisées ponctuellement pour tracer :
+
 - des **bugs** à corriger
 - des **fonctionnalités** à implémenter dans le futur
 
@@ -124,6 +126,7 @@ Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
 Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le message du commit squashé sur `main`.
 
 Exemples :
+
 - `feat(albums): ajout de la gestion des éditions`
 - `fix(devises): correction du taux de conversion franc français`
 - `chore(docker): mise à jour du Dockerfile backend`
