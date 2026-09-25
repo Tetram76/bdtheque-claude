@@ -1,8 +1,3 @@
----
-description: Source de vérité absolue du projet — dossier .speckit et responsabilités de l'agent
-alwaysApply: true
----
-
 # .speckit — Source de Vérité Absolue
 
 Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime sur toute autre information, historique de conversation, supposition ou connaissance générale de l'agent.

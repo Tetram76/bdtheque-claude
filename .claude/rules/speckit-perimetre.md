@@ -1,7 +1,6 @@
 ---
-description: Périmètre strict de chaque fichier .speckit — évite les placements incorrects
-globs: .speckit/*.md
-alwaysApply: false
+paths:
+  - ".speckit/*.md"
 ---
 
 # Périmètre des fichiers .speckit

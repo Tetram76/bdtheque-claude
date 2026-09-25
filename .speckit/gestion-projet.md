@@ -124,7 +124,7 @@ Traitement de chaque retour d'une revue Codex :
 
 Ce cycle (revue → contre-vérification → commits → réponses → résolution des conversations → attente de la revue suivante) est répété jusqu'à réaction 👍 de Codex sur le commit de tête. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
 
-La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.cursor/skills/codex-review-loop/`.
+La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.claude/skills/codex-review-loop/`.
 
 ## Issues
 
