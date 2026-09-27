@@ -324,7 +324,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     {
         var album = new Album("Le Lotus bleu", null);
         var author = new Author(null, null, "Hergé (ModelCreation, Album)");
-        var contribution = new Contribution(album, null, author, ContributionRole.Scenarist);
+        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Authors.Add(author);
@@ -348,7 +348,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     {
         var series = new Series("Tintin (ModelCreation)");
         var author = new Author(null, null, "Hergé (ModelCreation, Série)");
-        var contribution = new Contribution(null, series, author, ContributionRole.Illustrator);
+        var contribution = Contribution.ForSeriesTemplate(series, author, ContributionRole.Illustrator);
 
         _fixture.Context.Series.Add(series);
         _fixture.Context.Authors.Add(author);
@@ -372,7 +372,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         // Confirms the project-wide enum-as-string convention also applies to Contribution.Role.
         var album = new Album("Astérix (ModelCreation)", null);
         var author = new Author(null, null, "Goscinny (ModelCreation)");
-        var contribution = new Contribution(album, null, author, ContributionRole.Colorist);
+        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Colorist);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Authors.Add(author);

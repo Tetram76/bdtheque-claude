@@ -26,9 +26,10 @@ public sealed class Contribution : EntityBase
     // EF Core parameterless constructor
     private Contribution() { }
 
-    public Contribution(Album? album, Series? series, Author author, ContributionRole role)
+    // Private: only reachable through ForAlbum/ForSeriesTemplate below, which each pass exactly
+    // one non-null owner — so the album/series exclusivity has nothing left to validate here.
+    private Contribution(Album? album, Series? series, Author author, ContributionRole role)
     {
-        EnsureExactlyOneOwner(album, series);
         ArgumentNullException.ThrowIfNull(author);
         EnumGuard.EnsureDefined(role, nameof(role));
 
@@ -41,15 +42,26 @@ public sealed class Contribution : EntityBase
         Role = role;
     }
 
+    /// <summary>Creates a real contribution credited on a specific album.</summary>
+    public static Contribution ForAlbum(Album album, Author author, ContributionRole role)
+    {
+        ArgumentNullException.ThrowIfNull(album);
+        return new Contribution(album, null, author, role);
+    }
+
+    /// <summary>
+    /// Creates a template contribution on a series, copied onto an album attached to the series
+    /// when it has no contribution of its own yet.
+    /// </summary>
+    public static Contribution ForSeriesTemplate(Series series, Author author, ContributionRole role)
+    {
+        ArgumentNullException.ThrowIfNull(series);
+        return new Contribution(null, series, author, role);
+    }
+
     public void SetRole(ContributionRole role)
     {
         EnumGuard.EnsureDefined(role, nameof(role));
         Role = role;
-    }
-
-    private static void EnsureExactlyOneOwner(Album? album, Series? series)
-    {
-        if ((album is null) == (series is null))
-            throw new ArgumentException("A contribution must belong to exactly one of an album or a series.");
     }
 }
