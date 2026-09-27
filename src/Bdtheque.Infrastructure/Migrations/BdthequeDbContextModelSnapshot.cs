@@ -49,7 +49,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors", t =>
+                    b.ToTable("Authors", null, t =>
                         {
                             t.HasCheckConstraint("CK_Authors_LastNameOrPseudonym", "COALESCE(LENGTH(TRIM(\"LastName\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"Pseudonym\")), 0) > 0");
                         });
@@ -71,7 +71,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Label")
                         .IsUnique();
 
-                    b.ToTable("Genres", t =>
+                    b.ToTable("Genres", null, t =>
                         {
                             t.HasCheckConstraint("CK_Genres_LabelNotBlank", "COALESCE(LENGTH(TRIM(\"Label\")), 0) > 0");
                         });
@@ -97,7 +97,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Publishers", t =>
+                    b.ToTable("Publishers", null, t =>
                         {
                             t.HasCheckConstraint("CK_Publishers_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                         });
@@ -122,7 +122,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("PublisherId", "Name")
                         .IsUnique();
 
-                    b.ToTable("PublisherCollections", t =>
+                    b.ToTable("PublisherCollections", null, t =>
                         {
                             t.HasCheckConstraint("CK_PublisherCollections_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                         });
@@ -148,8 +148,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<string>("SortKey")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(510)
+                        .HasColumnType("character varying(510)");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)
@@ -207,7 +207,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasIndex("TemplatePublisherId");
 
-                    b.ToTable("Series", t =>
+                    b.ToTable("Series", null, t =>
                         {
                             t.HasCheckConstraint("CK_Series_SortKeyNotBlank", "COALESCE(LENGTH(TRIM(\"SortKey\")), 0) > 0");
 
@@ -240,7 +240,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Universes", t =>
+                    b.ToTable("Universes", null, t =>
                         {
                             t.HasCheckConstraint("CK_Universes_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
 

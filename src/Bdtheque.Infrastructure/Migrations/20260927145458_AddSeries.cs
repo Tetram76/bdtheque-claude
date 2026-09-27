@@ -17,7 +17,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    SortKey = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    SortKey = table.Column<string>(type: "character varying(510)", maxLength: 510, nullable: false),
                     IsManualSortKey = table.Column<bool>(type: "boolean", nullable: false),
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     TheoreticalVolumeCount = table.Column<int>(type: "integer", nullable: true),

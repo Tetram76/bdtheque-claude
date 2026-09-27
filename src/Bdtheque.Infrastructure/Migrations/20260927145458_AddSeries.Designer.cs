@@ -151,8 +151,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<string>("SortKey")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(510)
+                        .HasColumnType("character varying(510)");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)

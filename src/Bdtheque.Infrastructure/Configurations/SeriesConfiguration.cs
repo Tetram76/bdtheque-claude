@@ -6,12 +6,21 @@ namespace Bdtheque.Infrastructure.Configurations;
 
 internal sealed class SeriesConfiguration : IEntityTypeConfiguration<Series>
 {
+    private const int TitleMaxLength = 500;
+
+    // TitleSortKeyCalculator moves the leading article to a bracketed suffix instead of
+    // dropping it, which grows the computed key relative to the title (worst case: +3
+    // characters for the elided "L'" form — see its Compute remarks). SortKey must stay large
+    // enough to hold a max-length title's computed key, or SaveChanges would fail for a title
+    // that legitimately fits the Title column. Guarded by SortKeyMaxLength_AccommodatesWorstCaseArticleSuffixGrowth.
+    private const int SortKeyMaxLength = TitleMaxLength + 10;
+
     public void Configure(EntityTypeBuilder<Series> builder)
     {
         builder.HasKey(s => s.Id);
 
-        builder.Property(s => s.Title).IsRequired().HasMaxLength(500);
-        builder.Property(s => s.SortKey).IsRequired().HasMaxLength(500);
+        builder.Property(s => s.Title).IsRequired().HasMaxLength(TitleMaxLength);
+        builder.Property(s => s.SortKey).IsRequired().HasMaxLength(SortKeyMaxLength);
         builder.Property(s => s.Summary);
         builder.Property(s => s.PersonalNotes);
 

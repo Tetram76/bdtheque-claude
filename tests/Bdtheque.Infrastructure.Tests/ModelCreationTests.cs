@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -156,6 +157,24 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.NotNull(saved);
         Assert.Equal("Le Lotus bleu", saved.Title);
         Assert.Equal("Lotus bleu [Le]", saved.SortKey);
+    }
+
+    [Fact]
+    public void SortKeyMaxLength_AccommodatesWorstCaseArticleSuffixGrowth()
+    {
+        // TitleSortKeyCalculator grows the title (article moved to a bracketed suffix); the
+        // "L'" elided form grows it the most (+3 characters, see its Compute remarks). The
+        // SortKey column must stay large enough to hold a max-length title in that worst case,
+        // or SaveChanges would fail for a title that legitimately fits the Title column.
+        var entityType = _fixture.Context.Model.FindEntityType(typeof(Series))!;
+        var titleMaxLength = entityType.FindProperty(nameof(Series.Title))!.GetMaxLength()!.Value;
+        var sortKeyMaxLength = entityType.FindProperty(nameof(Series.SortKey))!.GetMaxLength()!.Value;
+
+        var worstCaseTitle = "L'" + new string('a', titleMaxLength - 2);
+        var worstCaseSortKey = TitleSortKeyCalculator.Compute(worstCaseTitle);
+
+        Assert.True(worstCaseSortKey.Length <= sortKeyMaxLength,
+            $"Sort key length {worstCaseSortKey.Length} exceeds the configured column max length {sortKeyMaxLength}.");
     }
 
     [Fact]
