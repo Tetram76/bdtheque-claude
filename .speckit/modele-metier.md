@@ -111,7 +111,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Titre | texte | conditionnel | Obligatoire si l'album n'appartient à aucune série. Optionnel si une série est rattachée (la série + le tome peuvent suffire à identifier l'album). |
-| Clé de tri | texte | non | Calculée automatiquement depuis le titre (article initial supprimé) et stockée explicitement. Absente si le titre est absent ; dans ce cas, la clé de tri de la série rattachée est utilisée comme valeur de substitution pour le tri et la navigation par initiale. |
+| Clé de tri | texte | non | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir `fonctionnel.md` § Tri et navigation par initiale). Absente si le titre est absent ; dans ce cas, la clé de tri de la série rattachée est utilisée comme valeur de substitution pour le tri et la navigation par initiale. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Type | énuméré | oui | `Régulier` (défaut) / `Intégrale`. |
 | Hors-série | booléen | oui | `false` par défaut. Indépendant du type : une intégrale peut être hors-série. |
@@ -130,7 +130,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Titre | texte | oui | |
-| Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre (article initial supprimé) et stockée explicitement. Toujours présente car le titre est obligatoire. |
+| Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir `fonctionnel.md` § Tri et navigation par initiale). Toujours présente car le titre est obligatoire. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Statut | énuméré | non | `En cours` / `Terminée` / `Abandonnée`. `Terminée` signifie que tous les albums prévus par les auteurs ont été publiés. |
 | Nombre de tomes numérotés (théorique) | entier | non | Nombre de tomes numérotés attendus dans la séquence principale de la série, selon l'utilisateur. Ne compte pas les hors-série ni les albums sans numéro de tome. Non calculé depuis la base — sert de borne supérieure pour la détection des albums manquants (queue théorique) et à évaluer la complétude de la collection. |
