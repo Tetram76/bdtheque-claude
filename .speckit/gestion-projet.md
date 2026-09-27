@@ -41,7 +41,9 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 
 - La décision d'agir seul ou de solliciter l'utilisateur dépend de la nature du point traité :
   - **Point technique** (architecture, implémentation, outillage, choix de bibliothèque, performance, sécurité, etc.) : l'agent décide en **totale autonomie**.
-  - **Point fonctionnel ou métier** (règle métier, comportement attendu, contenu applicatif — y compris le contenu de `fonctionnel.md`/`modele-metier.md`) : décision **explicite de l'utilisateur**. L'agent effectue la contre-vérification (pertinence, faits vérifiés) mais **ne tranche pas seul** — il soumet le point à l'utilisateur, **un point à la fois**, et applique la décision reçue avant de passer au point suivant.
+  - **Point fonctionnel ou métier** (règle métier, comportement attendu, contenu applicatif — y compris le contenu de `fonctionnel.md`/`modele-metier.md`) :
+    - Si le `.speckit` existant **permet déjà de trancher** (application d'une exigence déjà documentée, sans changement de règle) : l'agent décide en autonomie, en s'appuyant explicitement sur le passage du `.speckit` qui tranche.
+    - Si le point constitue un **véritable changement d'exigence**, ou reste **ambigu** au regard du `.speckit` existant : décision **explicite de l'utilisateur**. L'agent effectue la contre-vérification (pertinence, faits vérifiés) mais **ne tranche pas seul** — il soumet le point à l'utilisateur, **un point à la fois**, et applique la décision reçue avant de passer au point suivant.
   - Cette règle s'applique aussi bien au traitement des retours de revue de PR (cf. « Revue de code ») qu'à toute évolution du contenu fonctionnel/métier du `.speckit/` proposée à l'initiative de l'agent.
 - Lorsque, sur un point technique, les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher.
 - Les choix techniques ne sont **pas gravés dans le marbre** : tout choix peut être remis en cause si une nouvelle contrainte le justifie.
@@ -116,7 +118,7 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 - Les retours ne sont **pas une source de vérité** : ils sont systématiquement soumis à contre-vérification.
 - Un retour est **appliqué** s'il est pertinent et que le gain justifie le coût de la modification.
 - Un retour est **rejeté** s'il est jugé non pertinent, incorrect, ou si son coût (complexité, temps, lisibilité dégradée) est disproportionné par rapport au bénéfice obtenu.
-- La décision d'accepter ou de rejeter un retour suit la règle générale de « Prise de décision » ci-dessus : un retour **technique** relève de l'agent, un retour **fonctionnel ou métier** relève d'une décision explicite de l'utilisateur, soumise un point à la fois.
+- La décision d'accepter ou de rejeter un retour suit la règle générale de « Prise de décision » ci-dessus : un retour **technique** relève de l'agent ; un retour **fonctionnel ou métier** relève de l'agent si le `.speckit` existant permet déjà de trancher, ou d'une décision explicite de l'utilisateur (un point à la fois) s'il s'agit d'un véritable changement d'exigence ou d'une ambiguïté.
 - L'objectif de robustesse est une application **user-proof** (parcours réels, usages légitimes, erreurs utilisateur plausibles), pas un code **proof** contre tout scénario théorique ou détourné. Le code est écrit pour le contexte de cette application — il n'a pas vocation à devenir une librairie publique ni à être réutilisé hors projet.
 - Les scénarios invoqués par une revue (edge cases, abus, chemins d'exécution) doivent être **pertinents, valides et possibles** dans ce contexte applicatif ; un scénario hypothétique, irréaliste ou hors périmètre ne justifie pas une complexification du code.
 
