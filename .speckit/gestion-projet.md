@@ -6,8 +6,8 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 
 ## Gouvernance documentaire
 
-- **Source de vérité absolue** : le dossier [`.speckit/`](.) est la source de vérité absolue du projet. Il prime sur toute autre information : historique de conversation, supposition, connaissance générale de l'agent. Aucune décision ne peut le contredire sans accord explicite de l'utilisateur. En cas d'ambiguïté ou de silence sur un sujet, l'agent peut décider, mais documente alors son choix dans le fichier concerné.
-- **Autonomie de l'agent** : l'agent prend toutes les décisions architecturales, techniques, fonctionnelles et d'implémentation nécessaires à la livraison de l'application, en **totale autonomie** (modalités détaillées dans « Prise de décision » ci-dessous). Les seules interventions attendues de l'utilisateur sont la mise à jour des fichiers `.speckit/` pour exprimer ses besoins et exigences.
+- **Source de vérité absolue** : le dossier [`.speckit/`](.) est la source de vérité absolue du projet. Il prime sur toute autre information : historique de conversation, supposition, connaissance générale de l'agent. Aucune décision ne peut le contredire sans accord explicite de l'utilisateur. En cas d'ambiguïté ou de silence, la décision suit la distinction technique/fonctionnel de « Prise de décision » ci-dessous ; un choix pris seul par l'agent est documenté dans le fichier concerné.
+- **Autonomie de l'agent** : l'agent prend en **totale autonomie** les décisions techniques, ainsi que les décisions fonctionnelles ou métier que le `.speckit` existant permet déjà de trancher (modalités détaillées dans « Prise de décision » ci-dessous). Les autres décisions fonctionnelles ou métier (véritable changement d'exigence, ambiguïté) relèvent de l'utilisateur : soit par sa mise à jour directe des fichiers `.speckit/` pour exprimer ses besoins et exigences, soit par sa réponse explicite à un point soumis par l'agent.
 - **Suivi d'implémentation** : l'avancement du plan d'implémentation (phases, découpage en Pull Requests, statut) est tracé dans [`suivi-implementation.md`](suivi-implementation.md), distinct des quatre fichiers de spécification ci-dessus car il décrit l'état d'avancement du projet plutôt que son contenu cible.
 
 ## Objectifs du projet
@@ -35,12 +35,17 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 
 - Les fichiers `.speckit/` sont des **documents vivants** : l'agent peut les restructurer à tout moment (fusion, split, déplacement de sections, création de nouvelles sections) si cela améliore leur clarté ou leur cohérence.
 - Toute restructuration est faite sans validation préalable, dans le même esprit d'autonomie qui régit les décisions techniques.
-- **Le speckit n'est pas un historique de décisions** : les fichiers ne décrivent que l'état actuel et cible du projet, jamais son évolution passée. Ils ne contiennent ni historique, ni dates, ni traces de décisions successives. En cas de changement de décision, l'ancienne information est **remplacée**, jamais conservée à côté de la nouvelle avec une mention du type « anciennement », « auparavant » ou « suite à ».
+- Le speckit n'est pas un historique de décisions, à l'exception de `journal-evenements.md` (cf. `AGENTS.md` § « Mise à jour du .speckit » pour le détail de cette règle et de son exception — non dupliqué ici pour éviter toute divergence entre les deux fichiers).
 
 ## Prise de décision
 
-- L'agent prend ses décisions en **totale autonomie**.
-- Lorsque les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher.
+- La décision d'agir seul ou de solliciter l'utilisateur dépend de la nature du point traité :
+  - **Point technique** (architecture, implémentation, outillage, choix de bibliothèque, performance, sécurité, etc.) : l'agent décide en **totale autonomie**.
+  - **Point fonctionnel ou métier** (règle métier, comportement attendu, contenu applicatif — y compris le contenu de `fonctionnel.md`/`modele-metier.md`) :
+    - Si le `.speckit` existant **permet déjà de trancher** (application d'une exigence déjà documentée, sans changement de règle) : l'agent décide en autonomie, en s'appuyant explicitement sur le passage du `.speckit` qui tranche.
+    - Si le point constitue un **véritable changement d'exigence**, ou reste **ambigu** au regard du `.speckit` existant : décision **explicite de l'utilisateur**. L'agent effectue la contre-vérification (pertinence, faits vérifiés) mais **ne tranche pas seul** — il soumet le point à l'utilisateur, **un point à la fois**, et applique la décision reçue avant de passer au point suivant.
+  - Cette règle s'applique aussi bien au traitement des retours de revue de PR (cf. « Revue de code ») qu'à toute évolution du contenu fonctionnel/métier du `.speckit/` proposée à l'initiative de l'agent.
+- Lorsque, sur un point technique, les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher.
 - Les choix techniques ne sont **pas gravés dans le marbre** : tout choix peut être remis en cause si une nouvelle contrainte le justifie.
 - Lorsqu'un changement technique a un **impact visible sur le livrable** (comportement, interface, données, déploiement), la transition doit être **transparente pour l'utilisateur** : l'agent informe explicitement de ce qui change et de ce qui est impacté.
 
@@ -58,6 +63,11 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 ## Qualité du code
 
 - La **qualité du code est une préoccupation majeure** et permanente.
+- Le projet est guidé par les principes **KISS, DRY, YAGNI et SOLID**. Toute décision (architecture, conception, implémentation, revue) doit s'y conformer :
+  - **KISS** (*Keep It Simple, Stupid*) : privilégier la solution la plus simple qui répond au besoin réel, éviter la complexité non justifiée.
+  - **DRY** (*Don't Repeat Yourself*) : éviter la duplication de logique ou de connaissance ; factoriser lorsque c'est pertinent, sans sur-factoriser prématurément.
+  - **YAGNI** (*You Aren't Gonna Need It*) : ne pas implémenter de fonctionnalité, abstraction ou paramétrage anticipant un besoin futur non avéré.
+  - **SOLID** : respecter les cinq principes de conception orientée objet (responsabilité unique, ouvert/fermé, substitution de Liskov, ségrégation des interfaces, inversion des dépendances) dans l'organisation du code.
 - Le code doit suivre les **best practices communément admises** pour chaque technologie utilisée (conventions de nommage, patterns architecturaux, sécurité, performance, etc.). Ces best practices sont à vérifier via les sources officielles (cf. règle ci-dessus).
 - **Non-régression** : toute modification doit être accompagnée d'un moyen de vérifier qu'elle ne sera pas silencieusement annulée par une modification future. Le moyen de contrôle (test unitaire, test d'intégration, test de contrat, assertion, etc.) doit être **proportionné à la portée et au risque de la modification** : on n'écrit pas une suite de tests complète pour un changement trivial, mais toute logique métier ou technique non triviale doit être couverte.
 - L'agent est **seul décisionnaire** sur l'architecture et l'implémentation : toute refactorisation jugée nécessaire (lisibilité, maintenabilité, testabilité, séparation des responsabilités, etc.) doit être faite sans attendre de validation.
@@ -108,7 +118,7 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 - Les retours ne sont **pas une source de vérité** : ils sont systématiquement soumis à contre-vérification.
 - Un retour est **appliqué** s'il est pertinent et que le gain justifie le coût de la modification.
 - Un retour est **rejeté** s'il est jugé non pertinent, incorrect, ou si son coût (complexité, temps, lisibilité dégradée) est disproportionné par rapport au bénéfice obtenu.
-- La décision d'accepter ou rejeter un retour appartient à l'agent, dans le cadre de son autonomie décisionnelle.
+- La décision d'accepter ou de rejeter un retour suit la règle générale de « Prise de décision » ci-dessus : un retour **technique** relève de l'agent ; un retour **fonctionnel ou métier** relève de l'agent si le `.speckit` existant permet déjà de trancher, ou d'une décision explicite de l'utilisateur (un point à la fois) s'il s'agit d'un véritable changement d'exigence ou d'une ambiguïté.
 - L'objectif de robustesse est une application **user-proof** (parcours réels, usages légitimes, erreurs utilisateur plausibles), pas un code **proof** contre tout scénario théorique ou détourné. Le code est écrit pour le contexte de cette application — il n'a pas vocation à devenir une librairie publique ni à être réutilisé hors projet.
 - Les scénarios invoqués par une revue (edge cases, abus, chemins d'exécution) doivent être **pertinents, valides et possibles** dans ce contexte applicatif ; un scénario hypothétique, irréaliste ou hors périmètre ne justifie pas une complexification du code.
 
@@ -141,7 +151,6 @@ Les Issues GitHub sont utilisées ponctuellement pour tracer :
 - Si le contenu d'une PR **répond** à une ou plusieurs Issues (correction d'un bug tracé, implémentation d'une fonctionnalité tracée), la PR **doit référencer** ces Issues (ex. mention `#<numéro>` dans la description).
 - Si une Issue est **entièrement traitée** par la PR, la référence utilise un mot-clé de fermeture automatique GitHub (`Closes`, `Fixes`, `Resolves #<numéro>`), afin que l'Issue soit **automatiquement clôturée au merge** de la PR.
 - Si une PR ne traite une Issue que **partiellement**, celle-ci est référencée sans mot-clé de fermeture (elle reste ouverte après le merge).
-- Un **template de Pull Request** (`.github/PULL_REQUEST_TEMPLATE.md`) rappelle cette règle et guide le renseignement du lien vers les Issues concernées.
 
 ## Releases
 
@@ -172,8 +181,6 @@ Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
 Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le titre du commit squashé sur `main`.
 
 La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
-
-- La description de chaque PR **doit respecter la structure du template** (`.github/PULL_REQUEST_TEMPLATE.md`) : toutes les sections sont renseignées, à l'exception de celles explicitement désignées comme supprimables dans le template lorsqu'elles ne s'appliquent pas (ex. « Issue(s) liée(s) » en l'absence d'Issue concernée).
 
 Exemples :
 
