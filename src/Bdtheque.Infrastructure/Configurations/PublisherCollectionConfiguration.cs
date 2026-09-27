@@ -14,6 +14,12 @@ internal sealed class PublisherCollectionConfiguration : IEntityTypeConfiguratio
 
         builder.HasIndex(c => new { c.PublisherId, c.Name }).IsUnique();
 
+        // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
+        // IsRequired() only enforces NOT NULL, so a raw-SQL write could still persist ''.
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_PublisherCollections_NameNotBlank",
+            $"COALESCE(LENGTH(TRIM(\"{nameof(PublisherCollection.Name)}\")), 0) > 0"));
+
         // FK is already configured from the Publisher side; IsRequired is declared here
         // for clarity and to be explicit that PublisherId is non-nullable.
         builder.Property(c => c.PublisherId).IsRequired();

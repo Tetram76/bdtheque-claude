@@ -15,6 +15,12 @@ internal sealed class PublisherConfiguration : IEntityTypeConfiguration<Publishe
 
         builder.HasIndex(p => p.Name).IsUnique();
 
+        // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
+        // IsRequired() only enforces NOT NULL, so a raw-SQL write could still persist ''.
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Publishers_NameNotBlank",
+            $"COALESCE(LENGTH(TRIM(\"{nameof(Publisher.Name)}\")), 0) > 0"));
+
         builder.HasMany(p => p.Collections)
             .WithOne(c => c.Publisher)
             .HasForeignKey(c => c.PublisherId)

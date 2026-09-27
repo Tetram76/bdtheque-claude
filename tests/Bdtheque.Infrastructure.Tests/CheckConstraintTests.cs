@@ -71,4 +71,32 @@ public sealed class CheckConstraintTests : IDisposable
                 "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\") VALUES ({0}, '   ', '')",
                 id));
     }
+
+    [Theory]
+    [InlineData("Genres", "Label", "'   '")]
+    [InlineData("Universes", "Name", "''")]
+    [InlineData("Publishers", "Name", "'   '")]
+    public async Task RequiredTextCheckConstraint_BlankValue_ThrowsAtDatabase(string table, string column, string blankLiteral)
+    {
+        // Mirrors AuthorCheckConstraint_*BlankStrings*: IsRequired() alone only enforces
+        // NOT NULL, so raw SQL could otherwise persist a blank label/name.
+        var id = Guid.CreateVersion7();
+        var sql = $"INSERT INTO \"{table}\" (\"Id\", \"{column}\") VALUES ({{0}}, {blankLiteral})";
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(sql, id));
+    }
+
+    [Fact]
+    public async Task PublisherCollectionCheckConstraint_BlankName_ThrowsAtDatabase()
+    {
+        var publisherId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"Publishers\" (\"Id\", \"Name\") VALUES ({0}, 'Casterman')", publisherId);
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"PublisherCollections\" (\"Id\", \"Name\", \"PublisherId\") VALUES ({0}, '   ', {1})",
+                id, publisherId));
+    }
 }

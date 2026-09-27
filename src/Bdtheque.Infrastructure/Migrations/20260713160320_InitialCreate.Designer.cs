@@ -74,7 +74,10 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Label")
                         .IsUnique();
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", t =>
+                        {
+                            t.HasCheckConstraint("CK_Genres_LabelNotBlank", "COALESCE(LENGTH(TRIM(\"Label\")), 0) > 0");
+                        });
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Publisher", b =>
@@ -97,7 +100,10 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Publishers");
+                    b.ToTable("Publishers", t =>
+                        {
+                            t.HasCheckConstraint("CK_Publishers_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
+                        });
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.PublisherCollection", b =>
@@ -119,7 +125,10 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("PublisherId", "Name")
                         .IsUnique();
 
-                    b.ToTable("PublisherCollections");
+                    b.ToTable("PublisherCollections", t =>
+                        {
+                            t.HasCheckConstraint("CK_PublisherCollections_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
+                        });
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Universe", b =>
@@ -145,6 +154,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.ToTable("Universes", t =>
                         {
+                            t.HasCheckConstraint("CK_Universes_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                             t.HasCheckConstraint("CK_Universes_NoSelfParent", "\"ParentId\" IS NULL OR \"ParentId\" <> \"Id\"");
                         });
                 });

@@ -13,6 +13,12 @@ internal sealed class UniverseConfiguration : IEntityTypeConfiguration<Universe>
         builder.Property(u => u.Name).IsRequired().HasMaxLength(300);
         builder.Property(u => u.Description);
 
+        // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
+        // IsRequired() only enforces NOT NULL, so a raw-SQL write could still persist ''.
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Universes_NameNotBlank",
+            $"COALESCE(LENGTH(TRIM(\"{nameof(Universe.Name)}\")), 0) > 0"));
+
         // Restrict prevents silently deleting a parent while it still has children.
         // The domain's SetParent already prevents in-memory cycles; this FK enforces
         // structural integrity at the database level regardless of how data is written.

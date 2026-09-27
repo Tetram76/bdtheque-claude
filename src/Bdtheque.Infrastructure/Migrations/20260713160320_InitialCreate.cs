@@ -38,6 +38,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Genres", x => x.Id);
+                    table.CheckConstraint("CK_Genres_LabelNotBlank", "COALESCE(LENGTH(TRIM(\"Label\")), 0) > 0");
                 });
 
             migrationBuilder.CreateTable(
@@ -51,6 +52,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Publishers", x => x.Id);
+                    table.CheckConstraint("CK_Publishers_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                 });
 
             migrationBuilder.CreateTable(
@@ -65,6 +67,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Universes", x => x.Id);
+                    table.CheckConstraint("CK_Universes_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                     table.CheckConstraint("CK_Universes_NoSelfParent", "\"ParentId\" IS NULL OR \"ParentId\" <> \"Id\"");
                     table.ForeignKey(
                         name: "FK_Universes_Universes_ParentId",
@@ -85,6 +88,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PublisherCollections", x => x.Id);
+                    table.CheckConstraint("CK_PublisherCollections_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                     table.ForeignKey(
                         name: "FK_PublisherCollections_Publishers_PublisherId",
                         column: x => x.PublisherId,
