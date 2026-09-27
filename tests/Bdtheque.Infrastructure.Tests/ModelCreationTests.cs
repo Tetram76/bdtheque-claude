@@ -38,6 +38,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("Universes", tableNames);
         Assert.Contains("Series", tableNames);
         Assert.Contains("Albums", tableNames);
+        Assert.Contains("Contributions", tableNames);
         await Task.CompletedTask;
     }
 
@@ -316,5 +317,73 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
             .SingleAsync();
 
         Assert.Equal(nameof(AlbumType.Omnibus), rawValue);
+    }
+
+    [Fact]
+    public async Task AddContribution_ForAlbum_Persists()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var author = new Author(null, null, "Hergé (ModelCreation, Album)");
+        var contribution = new Contribution(album, null, author, ContributionRole.Scenarist);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Authors.Add(author);
+        _fixture.Context.Contributions.Add(contribution);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Contributions
+            .Include(c => c.Album)
+            .Include(c => c.Author)
+            .FirstAsync(c => c.Id == contribution.Id);
+
+        Assert.Equal("Le Lotus bleu", saved.Album!.Title);
+        Assert.Null(saved.Series);
+        Assert.Equal("Hergé (ModelCreation, Album)", saved.Author.Pseudonym);
+        Assert.Equal(ContributionRole.Scenarist, saved.Role);
+    }
+
+    [Fact]
+    public async Task AddContribution_ForSeriesTemplate_Persists()
+    {
+        var series = new Series("Tintin (ModelCreation)");
+        var author = new Author(null, null, "Hergé (ModelCreation, Série)");
+        var contribution = new Contribution(null, series, author, ContributionRole.Illustrator);
+
+        _fixture.Context.Series.Add(series);
+        _fixture.Context.Authors.Add(author);
+        _fixture.Context.Contributions.Add(contribution);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Contributions
+            .Include(c => c.Series)
+            .Include(c => c.Author)
+            .FirstAsync(c => c.Id == contribution.Id);
+
+        Assert.Equal("Tintin (ModelCreation)", saved.Series!.Title);
+        Assert.Null(saved.Album);
+        Assert.Equal(ContributionRole.Illustrator, saved.Role);
+    }
+
+    [Fact]
+    public async Task AddContribution_WithRole_PersistsEnumAsReadableString()
+    {
+        // Confirms the project-wide enum-as-string convention also applies to Contribution.Role.
+        var album = new Album("Astérix (ModelCreation)", null);
+        var author = new Author(null, null, "Goscinny (ModelCreation)");
+        var contribution = new Contribution(album, null, author, ContributionRole.Colorist);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Authors.Add(author);
+        _fixture.Context.Contributions.Add(contribution);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var rawValue = await _fixture.Context.Database
+            .SqlQuery<string>($"SELECT \"Role\" AS \"Value\" FROM \"Contributions\" WHERE \"Id\" = {contribution.Id}")
+            .SingleAsync();
+
+        Assert.Equal(nameof(ContributionRole.Colorist), rawValue);
     }
 }

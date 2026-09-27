@@ -301,4 +301,117 @@ public sealed class CheckConstraintTests : IDisposable
             "VALUES ({0}, 'Tintin', 'Tintin', false, false, false)", seriesId);
         return seriesId;
     }
+
+    private async Task<Guid> InsertAlbumAsync()
+    {
+        var albumId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
+            $"VALUES ({{0}}, 'Tintin', 'Tintin', false, '{nameof(AlbumType.Regular)}', false)", albumId);
+        return albumId;
+    }
+
+    private async Task<Guid> InsertAuthorAsync()
+    {
+        var authorId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"Authors\" (\"Id\", \"Pseudonym\") VALUES ({0}, 'Hergé')", authorId);
+        return authorId;
+    }
+
+    private const string InsertContributionSql =
+        "INSERT INTO \"Contributions\" (\"Id\", \"AlbumId\", \"SeriesId\", \"AuthorId\", \"Role\") " +
+        "VALUES ({0}, {1}, {2}, {3}, {4})";
+
+    [Fact]
+    public async Task ContributionCheckConstraint_NeitherAlbumNorSeries_ThrowsAtDatabase()
+    {
+        var authorId = await InsertAuthorAsync();
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertContributionSql, id, null!, null!, authorId, nameof(ContributionRole.Scenarist)));
+    }
+
+    [Fact]
+    public async Task ContributionCheckConstraint_BothAlbumAndSeries_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var seriesId = await InsertSeriesAsync();
+        var authorId = await InsertAuthorAsync();
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertContributionSql, id, albumId, seriesId, authorId, nameof(ContributionRole.Scenarist)));
+    }
+
+    [Fact]
+    public async Task ContributionCheckConstraint_AlbumOnly_Succeeds()
+    {
+        var albumId = await InsertAlbumAsync();
+        var authorId = await InsertAuthorAsync();
+        var id = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertContributionSql, id, albumId, null!, authorId, nameof(ContributionRole.Scenarist));
+
+        var count = await _fixture.Context.Contributions.CountAsync(c => c.Id == id);
+        Assert.Equal(1, count);
+    }
+
+    [Fact]
+    public async Task ContributionCheckConstraint_SeriesOnly_Succeeds()
+    {
+        var seriesId = await InsertSeriesAsync();
+        var authorId = await InsertAuthorAsync();
+        var id = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertContributionSql, id, null!, seriesId, authorId, nameof(ContributionRole.Scenarist));
+
+        var count = await _fixture.Context.Contributions.CountAsync(c => c.Id == id);
+        Assert.Equal(1, count);
+    }
+
+    [Fact]
+    public async Task ContributionUniqueIndex_DuplicateAlbumRoleAuthor_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var authorId = await InsertAuthorAsync();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, nameof(ContributionRole.Scenarist));
+
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, nameof(ContributionRole.Scenarist)));
+    }
+
+    [Fact]
+    public async Task ContributionUniqueIndex_DuplicateSeriesRoleAuthor_ThrowsAtDatabase()
+    {
+        var seriesId = await InsertSeriesAsync();
+        var authorId = await InsertAuthorAsync();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, nameof(ContributionRole.Illustrator));
+
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, nameof(ContributionRole.Illustrator)));
+    }
+
+    [Fact]
+    public async Task ContributionUniqueIndex_SameRoleAuthorDifferentOwnerType_Succeeds()
+    {
+        // Verifies the two partial unique indexes are independent: an album-owned and a
+        // series-owned contribution can share the same Role/AuthorId without colliding.
+        var albumId = await InsertAlbumAsync();
+        var seriesId = await InsertSeriesAsync();
+        var authorId = await InsertAuthorAsync();
+
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, nameof(ContributionRole.Colorist));
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, nameof(ContributionRole.Colorist));
+
+        var count = await _fixture.Context.Contributions.CountAsync(c => c.AuthorId == authorId);
+        Assert.Equal(2, count);
+    }
 }
