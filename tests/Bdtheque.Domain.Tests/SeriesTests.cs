@@ -10,7 +10,7 @@ public sealed class SeriesTests
         var series = new Series("Le Lotus bleu");
 
         Assert.Equal("Le Lotus bleu", series.Title);
-        Assert.Equal("Lotus bleu", series.SortKey);
+        Assert.Equal("Lotus bleu [Le]", series.SortKey);
         Assert.False(series.IsManualSortKey);
         Assert.False(series.IsComplete);
         Assert.False(series.ExcludeFromMissingVolumes);
@@ -35,7 +35,7 @@ public sealed class SeriesTests
         series.SetTitle("Les Schtroumpfs");
 
         Assert.Equal("Les Schtroumpfs", series.Title);
-        Assert.Equal("Schtroumpfs", series.SortKey);
+        Assert.Equal("Schtroumpfs [Les]", series.SortKey);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public sealed class SeriesTests
 
         series.ResetSortKey();
 
-        Assert.Equal("Schtroumpfs", series.SortKey);
+        Assert.Equal("Schtroumpfs [Les]", series.SortKey);
         Assert.False(series.IsManualSortKey);
     }
 

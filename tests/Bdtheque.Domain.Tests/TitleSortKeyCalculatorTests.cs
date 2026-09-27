@@ -5,18 +5,30 @@ namespace Bdtheque.Domain.Tests;
 public sealed class TitleSortKeyCalculatorTests
 {
     [Theory]
-    [InlineData("Le Lotus bleu", "Lotus bleu")]
-    [InlineData("Les Schtroumpfs", "Schtroumpfs")]
-    [InlineData("L'Épervier", "Épervier")]
-    [InlineData("L’Épervier", "Épervier")]
+    [InlineData("Le Lotus bleu", "Lotus bleu [Le]")]
+    [InlineData("Un Lotus bleu", "Lotus bleu [Un]")]
+    [InlineData("Les Schtroumpfs", "Schtroumpfs [Les]")]
+    [InlineData("L'Épervier", "Épervier [L']")]
+    [InlineData("L’Épervier", "Épervier [L’]")]
     [InlineData("Tintin", "Tintin")]
-    [InlineData("Un homme est mort", "homme est mort")]
-    [InlineData("Une aventure de Spirou", "aventure de Spirou")]
-    [InlineData("Des nouvelles de nulle part", "nouvelles de nulle part")]
-    [InlineData("La Marque jaune", "Marque jaune")]
-    public void Compute_KnownArticle_StripsArticle(string title, string expectedSortKey)
+    [InlineData("Une aventure de Spirou", "aventure de Spirou [Une]")]
+    [InlineData("Des nouvelles de nulle part", "nouvelles de nulle part [Des]")]
+    [InlineData("La Marque jaune", "Marque jaune [La]")]
+    public void Compute_KnownArticle_MovesArticleToSuffix(string title, string expectedSortKey)
     {
         Assert.Equal(expectedSortKey, TitleSortKeyCalculator.Compute(title));
+    }
+
+    [Fact]
+    public void Compute_TitlesDifferingOnlyByArticle_SortDeterministically()
+    {
+        // The whole point of the suffix form: two titles sharing the same significant word but a
+        // different leading article must never tie or sort arbitrarily relative to each other.
+        var leKey = TitleSortKeyCalculator.Compute("Le Lotus bleu");
+        var unKey = TitleSortKeyCalculator.Compute("Un Lotus bleu");
+
+        Assert.NotEqual(leKey, unKey);
+        Assert.True(string.CompareOrdinal(leKey, unKey) < 0);
     }
 
     [Theory]
@@ -29,15 +41,15 @@ public sealed class TitleSortKeyCalculatorTests
     }
 
     [Fact]
-    public void Compute_ArticleWordWithoutTrailingSpace_IsNotStripped()
+    public void Compute_ArticleWordWithoutTrailingSpace_IsNotMoved()
     {
-        // "Les" alone is the whole title: no word boundary after the article, so it must not be stripped.
+        // "Les" alone is the whole title: no word boundary after the article, so it must not move.
         Assert.Equal("Les", TitleSortKeyCalculator.Compute("Les"));
     }
 
     [Fact]
     public void Compute_TrimsSurroundingWhitespace()
     {
-        Assert.Equal("Lotus bleu", TitleSortKeyCalculator.Compute("  Le Lotus bleu  "));
+        Assert.Equal("Lotus bleu [Le]", TitleSortKeyCalculator.Compute("  Le Lotus bleu  "));
     }
 }

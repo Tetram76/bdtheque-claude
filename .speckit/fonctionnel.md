@@ -82,25 +82,26 @@ Le tri alphabétique des **séries**, **albums** et **artistes** repose sur une 
 
 #### Titres (séries et albums)
 
-- La clé de tri d'un titre est le titre **sans son article initial**.
-- L'**initiale de navigation** (navigation par lettre) est la première lettre de la clé de tri, soit le premier caractère **hors article**.
+- La clé de tri d'un titre place le mot significatif en tête et reporte l'**article initial en suffixe**, entre crochets (ex. `Lotus bleu [Le]`), plutôt que de le supprimer : ceci garantit un ordre **déterministe** entre deux titres qui ne diffèrent que par leur article (ex. `Un Lotus bleu` et `Le Lotus bleu` ne doivent jamais se trouver à une position arbitraire l'un par rapport à l'autre).
+- L'**initiale de navigation** (navigation par lettre) est la première lettre de la clé de tri, soit le premier caractère du mot significatif (**hors article**).
 - L'affichage du titre reste toujours en forme naturelle, article inclus en tête.
-- **Liste des articles retirés** (insensible à la casse) : `L'`/`L’` (forme élidée, sans espace), `Le`, `La`, `Les`, `Un`, `Une`, `Des` (formes suivies d'un espace). Seul un article suivi d'une frontière de mot est retiré : un titre commençant par les mêmes lettres sans être suivi d'un espace (ex. `Larousse`) n'est pas affecté.
+- **Articles reconnus** : `L'`, `Le`, `La`, `Les`, `Un`, `Une`, `Des`.
 
 Exemples :
 
 | Titre affiché | Clé de tri | Initiale |
 | --- | --- | --- |
-| `Le Lotus bleu` | `Lotus bleu` | **L** |
-| `Les Schtroumpfs` | `Schtroumpfs` | **S** |
-| `L'Épervier` | `Épervier` | **É** |
+| `Le Lotus bleu` | `Lotus bleu [Le]` | **L** |
+| `Un Lotus bleu` | `Lotus bleu [Un]` | **L** |
+| `Les Schtroumpfs` | `Schtroumpfs [Les]` | **S** |
+| `L'Épervier` | `Épervier [L']` | **É** |
 | `Tintin` | `Tintin` | **T** |
 
 Ce traitement est **non configurable** : il est obligatoire pour que la navigation par initiale soit viable.
 
 #### Calcul et stockage de la clé de tri
 
-La clé de tri des titres est **calculée automatiquement** (suppression de l'article initial par liste prédéfinie) et **stockée explicitement** en base. Elle est toujours visible dans le formulaire de saisie et modifiable par l'utilisateur.
+La clé de tri des titres est **calculée automatiquement** à partir du titre et **stockée explicitement** en base. Elle est toujours visible dans le formulaire de saisie et modifiable par l'utilisateur.
 
 La clé possède deux états :
 

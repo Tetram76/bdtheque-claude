@@ -155,7 +155,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         var saved = await _fixture.Context.Series.FindAsync(series.Id);
         Assert.NotNull(saved);
         Assert.Equal("Le Lotus bleu", saved.Title);
-        Assert.Equal("Lotus bleu", saved.SortKey);
+        Assert.Equal("Lotus bleu [Le]", saved.SortKey);
     }
 
     [Fact]
