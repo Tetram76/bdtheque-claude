@@ -67,7 +67,12 @@ public sealed class Series : EntityBase
         SortKey = TitleSortKeyCalculator.Compute(Title);
     }
 
-    public void SetStatus(SeriesStatus? status) => Status = status;
+    public void SetStatus(SeriesStatus? status)
+    {
+        if (status is not null)
+            EnumGuard.EnsureDefined(status.Value, nameof(status));
+        Status = status;
+    }
 
     public void SetTheoreticalVolumeCount(int? count)
     {
@@ -84,17 +89,47 @@ public sealed class Series : EntityBase
 
     public void SetPersonalNotes(string? notes) => PersonalNotes = NullIfEmpty(notes);
 
-    public void SetTemplateBinding(BindingType? binding) => TemplateBinding = binding;
+    public void SetTemplateBinding(BindingType? binding)
+    {
+        if (binding is not null)
+            EnumGuard.EnsureDefined(binding.Value, nameof(binding));
+        TemplateBinding = binding;
+    }
 
-    public void SetTemplateOrientation(BookOrientation? orientation) => TemplateOrientation = orientation;
+    public void SetTemplateOrientation(BookOrientation? orientation)
+    {
+        if (orientation is not null)
+            EnumGuard.EnsureDefined(orientation.Value, nameof(orientation));
+        TemplateOrientation = orientation;
+    }
 
-    public void SetTemplateReadingDirection(ReadingDirection? readingDirection) => TemplateReadingDirection = readingDirection;
+    public void SetTemplateReadingDirection(ReadingDirection? readingDirection)
+    {
+        if (readingDirection is not null)
+            EnumGuard.EnsureDefined(readingDirection.Value, nameof(readingDirection));
+        TemplateReadingDirection = readingDirection;
+    }
 
-    public void SetTemplateFormat(EditionFormat? format) => TemplateFormat = format;
+    public void SetTemplateFormat(EditionFormat? format)
+    {
+        if (format is not null)
+            EnumGuard.EnsureDefined(format.Value, nameof(format));
+        TemplateFormat = format;
+    }
 
-    public void SetTemplateEditionCategory(EditionCategory? category) => TemplateEditionCategory = category;
+    public void SetTemplateEditionCategory(EditionCategory? category)
+    {
+        if (category is not null)
+            EnumGuard.EnsureDefined(category.Value, nameof(category));
+        TemplateEditionCategory = category;
+    }
 
-    public void SetTemplateCondition(EditionCondition? condition) => TemplateCondition = condition;
+    public void SetTemplateCondition(EditionCondition? condition)
+    {
+        if (condition is not null)
+            EnumGuard.EnsureDefined(condition.Value, nameof(condition));
+        TemplateCondition = condition;
+    }
 
     public void SetTemplateIsColor(bool? isColor) => TemplateIsColor = isColor;
 
