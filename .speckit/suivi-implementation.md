@@ -26,11 +26,11 @@ Mise en place de la structure porteuse de l'application, indépendamment du mod�
 
 Implémentation des entités du modèle métier (`modele-metier.md`) dans `Bdtheque.Domain` et `Bdtheque.Infrastructure` (configurations EF Core + migrations), séquencée selon les dépendances entre entités. Le `DbContext` reçoit progressivement ses `DbSet`.
 
-**Statut : à faire.**
+**Statut : en cours.**
 
 | # | Branche | Titre (commit) | Contenu | Statut |
 | --- | --- | --- | --- | --- |
-| 1 | `feat/domain-referentiels` | `feat(domain): ajout des référentiels de base` | Entités `Auteur`, `Éditeur`, `Collection éditeur`, `Genre`, `Univers` ; configurations EF ; migration ; tests unitaires sur les contraintes (Auteur : Nom ou Pseudonyme requis ; Univers : acyclicité ; Collection éditeur : rattachement obligatoire à un Éditeur) | À faire |
+| 1 | `feat/domain-referentiels` | `feat(domain): ajout des référentiels de base` | Entités `Auteur`, `Éditeur`, `Collection éditeur`, `Genre`, `Univers` ; configurations EF ; migration ; tests unitaires sur les contraintes (Auteur : Nom ou Pseudonyme requis ; Univers : acyclicité ; Collection éditeur : rattachement obligatoire à un Éditeur) | Réalisée |
 | 2 | `feat/domain-serie` | `feat(domain): ajout de l'entité Série` | Entité `Série` (statut, champs template) ; jointures Série↔Genre, Série↔Univers ; configurations EF ; migration ; tests (clé de tri auto/manuelle, cohérence des templates Éditeur/Collection éditeur) | À faire |
 | 3 | `feat/domain-album` | `feat(domain): ajout de l'entité Album` | Entité `Album` (type, hors-série, tomes) ; jointures Album↔Genre, Album↔Univers ; configurations EF ; migration ; tests (titre conditionnel selon rattachement à une série, cohérence tome de début/fin pour les intégrales, clé de tri) | À faire |
 | 4 | `feat/domain-contribution` | `feat(domain): ajout de l'entité Contribution` | Entité `Contribution` (rôle, artiste) reliant un Auteur à un Album **ou** une Série ; configuration EF de la contrainte d'exclusivité ; migration ; tests sur cette exclusivité | À faire |
