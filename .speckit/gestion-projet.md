@@ -146,7 +146,6 @@ Les Issues GitHub sont utilisées ponctuellement pour tracer :
 - Si le contenu d'une PR **répond** à une ou plusieurs Issues (correction d'un bug tracé, implémentation d'une fonctionnalité tracée), la PR **doit référencer** ces Issues (ex. mention `#<numéro>` dans la description).
 - Si une Issue est **entièrement traitée** par la PR, la référence utilise un mot-clé de fermeture automatique GitHub (`Closes`, `Fixes`, `Resolves #<numéro>`), afin que l'Issue soit **automatiquement clôturée au merge** de la PR.
 - Si une PR ne traite une Issue que **partiellement**, celle-ci est référencée sans mot-clé de fermeture (elle reste ouverte après le merge).
-- Un **template de Pull Request** (`.github/PULL_REQUEST_TEMPLATE.md`) rappelle cette règle et guide le renseignement du lien vers les Issues concernées.
 
 ## Releases
 
@@ -178,7 +177,7 @@ Le **titre de la Pull Request** doit également respecter ce format — c'est lu
 
 La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
 
-- La description de chaque PR **doit respecter la structure du template** (`.github/PULL_REQUEST_TEMPLATE.md`) : toutes les sections sont renseignées, à l'exception de celles explicitement désignées comme supprimables dans le template lorsqu'elles ne s'appliquent pas (ex. « Issue(s) liée(s) » en l'absence d'Issue concernée).
+- Il n'existe **pas de template de Pull Request** dans ce repository : chaque description est rédigée librement, avec **contexte, changements effectués et impact**.
 
 Exemples :
 
