@@ -198,6 +198,18 @@ public sealed class CheckConstraintTests : IDisposable
     }
 
     [Fact]
+    public async Task AlbumCheckConstraint_ManualSortKeyWithoutTitle_ThrowsAtDatabase()
+    {
+        var seriesId = await InsertSeriesAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
+                "VALUES ({0}, NULL, NULL, true, 'Regular', false, {1})", id, seriesId));
+    }
+
+    [Fact]
     public async Task AlbumCheckConstraint_NonPositiveVolumeNumber_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();

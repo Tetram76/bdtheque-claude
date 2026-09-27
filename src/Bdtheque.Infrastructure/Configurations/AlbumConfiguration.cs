@@ -44,6 +44,15 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
             "CK_Albums_SortKeyNotBlank",
             $"\"{nameof(Album.SortKey)}\" IS NULL OR LENGTH(TRIM(\"{nameof(Album.SortKey)}\")) > 0"));
 
+        // Mirrors Album.SetSortKey (which requires a title) and SetTitle(null) (which resets
+        // this flag): the manual flag is meaningless without a title/sort key to override, and
+        // leaving it true on a title-less row would make a later, legitimate SetTitle skip
+        // recomputing the sort key (it trusts the flag), producing a titled album with no
+        // sort key at the next save.
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Albums_ManualSortKeyRequiresTitle",
+            $"\"{nameof(Album.IsManualSortKey)}\" = false OR \"{nameof(Album.Title)}\" IS NOT NULL"));
+
         // Mirrors Album.SetVolumeNumber / SetVolumeRange.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Albums_VolumeNumberPositive",

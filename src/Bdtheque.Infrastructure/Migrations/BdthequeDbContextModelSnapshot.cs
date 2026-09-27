@@ -113,6 +113,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.ToTable("Albums", t =>
                         {
+                            t.HasCheckConstraint("CK_Albums_ManualSortKeyRequiresTitle", "\"IsManualSortKey\" = false OR \"Title\" IS NOT NULL");
+
                             t.HasCheckConstraint("CK_Albums_PublicationMonthRange", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationMonth\" BETWEEN 1 AND 12");
 
                             t.HasCheckConstraint("CK_Albums_PublicationMonthRequiresYear", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationYear\" IS NOT NULL");

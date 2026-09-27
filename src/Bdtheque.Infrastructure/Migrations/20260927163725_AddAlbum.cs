@@ -34,6 +34,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Albums", x => x.Id);
+                    table.CheckConstraint("CK_Albums_ManualSortKeyRequiresTitle", "\"IsManualSortKey\" = false OR \"Title\" IS NOT NULL");
                     table.CheckConstraint("CK_Albums_PublicationMonthRange", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationMonth\" BETWEEN 1 AND 12");
                     table.CheckConstraint("CK_Albums_PublicationMonthRequiresYear", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationYear\" IS NOT NULL");
                     table.CheckConstraint("CK_Albums_PublicationYearPositive", "\"FirstPublicationYear\" IS NULL OR \"FirstPublicationYear\" > 0");
