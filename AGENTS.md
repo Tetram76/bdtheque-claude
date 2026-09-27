@@ -33,11 +33,7 @@ Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que
 
 ## Journal des évènements externes
 
-Le fichier `journal-evenements.md` est un **journal**, pas un document de référence : il déroge intentionnellement aux règles de la section précédente.
-
-- **Mise à jour uniquement sur demande explicite de l'utilisateur.** Contrairement aux autres fichiers `.speckit/`, l'agent ne doit **jamais** y ajouter d'entrée de sa propre initiative, même s'il a connaissance d'un évènement pertinent (ex. déploiement effectué au cours de la conversation). Il peut le signaler à l'utilisateur, mais l'ajout au journal attend sa demande explicite.
-- **Contenu** : évènements **externes au repo** susceptibles d'influencer son développement (déploiement d'une version en test/production, incident constaté, changement d'infrastructure ou d'environnement externe, etc.). Les décisions ou changements internes au code/projet n'y figurent pas — ils relèvent des fichiers de référence appropriés.
-- **Format** : chaque évènement est une entrée datée, ajoutée à la suite des précédentes (ordre chronologique) — contrairement aux autres fichiers, l'historique est ici la donnée elle-même et n'est jamais réécrit ni fusionné. Chaque entrée précise au minimum la date, la nature de l'évènement et son impact/portée pour le développement.
+Le fichier `journal-evenements.md` est un **journal**, pas un document de référence : il déroge intentionnellement aux règles de la section précédente (mise à jour immédiate, sans historique). Ses règles complètes (mise à jour, contenu, format) sont documentées dans le fichier lui-même plutôt que dupliquées ici.
 
 ## Rôle de l'agent
 
