@@ -38,10 +38,11 @@ public sealed class Universe : EntityBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The method walks the proposed parent's ancestor chain. At every step it checks the
-    /// stored <see cref="ParentId"/> (catches cycles where the navigation is not loaded but
-    /// the FK value already points back to <c>this</c>) and then the loaded
-    /// <see cref="Parent"/> navigation (catches cycles among fully-loaded entities).
+    /// The method walks the proposed parent's ancestor chain, tracking every visited ancestor
+    /// ID. At every step it rejects a repeated ID (catches cycles among ancestors, even ones
+    /// that do not involve <c>this</c>), then the stored <see cref="ParentId"/> (catches cycles
+    /// where the navigation is not loaded but the FK value already points back to <c>this</c>),
+    /// then follows the loaded <see cref="Parent"/> navigation.
     /// </para>
     /// <para>
     /// <b>Prerequisite:</b> the full ancestor chain of <paramref name="parent"/> must be
@@ -75,14 +76,25 @@ public sealed class Universe : EntityBase
             throw new ArgumentException("A universe cannot be its own parent.", nameof(parent));
 
         // Walk the ancestor chain. At each node:
-        //   1. If the node's ParentId points back to 'this', a cycle is detected.
-        //   2. If the node has a stored ParentId but no loaded Parent navigation, the chain
+        //   1. If the node repeats one already visited in this walk, a cycle is detected —
+        //      whether or not that node is 'this'. A loaded chain can contain a cycle among
+        //      ancestors that does not involve 'this' at all (e.g. corrupted data written by
+        //      raw SQL or the future Firebird import tool, which bypasses this method), and an
+        //      unbounded walk would otherwise loop forever instead of rejecting the parent.
+        //   2. If the node's ParentId points back to 'this', a cycle is detected even though
+        //      the corresponding Parent navigation is not loaded.
+        //   3. If the node has a stored ParentId but no loaded Parent navigation, the chain
         //      is incomplete: throw rather than silently skip — a skipped node may be an ancestor
         //      of 'this', which would produce a persisted cycle.
-        //   3. Otherwise, follow the loaded Parent to the next ancestor.
+        //   4. Otherwise, follow the loaded Parent to the next ancestor.
+        var visited = new HashSet<Guid> { Id };
         var ancestor = parent;
         while (true)
         {
+            if (!visited.Add(ancestor.Id))
+                throw new ArgumentException(
+                    "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
+
             if (ancestor.ParentId == Id)
                 throw new ArgumentException(
                     "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
@@ -98,10 +110,6 @@ public sealed class Universe : EntityBase
             }
 
             ancestor = ancestor.Parent;
-
-            if (ancestor.Id == Id)
-                throw new ArgumentException(
-                    "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
         }
 
         Parent = parent;
