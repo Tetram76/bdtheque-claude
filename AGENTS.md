@@ -10,6 +10,7 @@ Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime
 | `fonctionnel.md` | Fonctionnalités de l'application : cas d'usage, user stories, règles métier, flux. |
 | `modele-metier.md` | Modèle du domaine : entités, attributs, relations, contraintes d'intégrité, glossaire. |
 | `contraintes-techniques.md` | Choix et contraintes techniques de l'application et de son déploiement uniquement (stack, langages, frameworks, BDD, hébergement, sécurité). Rien de lié à la gestion de projet. |
+| `journal-evenements.md` | Journal des évènements externes au repo pouvant influencer son développement (ex. : déploiement d'une version en test/production, incident, changement d'infrastructure externe). Fichier journal à part — voir « Journal des évènements externes » ci-dessous, il déroge aux règles de mise à jour et de format des autres fichiers. |
 
 ## Règles de consultation
 
@@ -27,6 +28,16 @@ Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que
 - Toute nouvelle information est **intégrée dans le contenu existant** : mise à jour d'une section, enrichissement d'une définition, ajout dans la liste appropriée — jamais ajoutée en bas de fichier comme une entrée de log.
 - En cas de changement de décision, l'**ancienne information est remplacée**, pas conservée à côté de la nouvelle avec une mention de type « anciennement », « auparavant » ou « suite à ».
 - Le fichier doit rester cohérent, lisible et structuré comme une documentation vivante.
+
+**Ces règles de mise à jour (immédiate, sans historique) s'appliquent aux quatre fichiers de référence ci-dessus. Le fichier `journal-evenements.md` en est exclu — voir la section suivante.**
+
+## Journal des évènements externes
+
+Le fichier `journal-evenements.md` est un **journal**, pas un document de référence : il déroge intentionnellement aux règles de la section précédente.
+
+- **Mise à jour uniquement sur demande explicite de l'utilisateur.** Contrairement aux autres fichiers `.speckit/`, l'agent ne doit **jamais** y ajouter d'entrée de sa propre initiative, même s'il a connaissance d'un évènement pertinent (ex. déploiement effectué au cours de la conversation). Il peut le signaler à l'utilisateur, mais l'ajout au journal attend sa demande explicite.
+- **Contenu** : évènements **externes au repo** susceptibles d'influencer son développement (déploiement d'une version en test/production, incident constaté, changement d'infrastructure ou d'environnement externe, etc.). Les décisions ou changements internes au code/projet n'y figurent pas — ils relèvent des fichiers de référence appropriés.
+- **Format** : chaque évènement est une entrée datée, ajoutée à la suite des précédentes (ordre chronologique) — contrairement aux autres fichiers, l'historique est ici la donnée elle-même et n'est jamais réécrit ni fusionné. Chaque entrée précise au minimum la date, la nature de l'évènement et son impact/portée pour le développement.
 
 ## Rôle de l'agent
 
