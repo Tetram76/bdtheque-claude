@@ -1,4 +1,5 @@
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Enums;
 
 namespace Bdtheque.Domain.Tests;
 
@@ -166,6 +167,62 @@ public sealed class SeriesTests
         Assert.Null(series.TemplatePublisherId);
         Assert.Null(series.TemplatePublisherCollection);
         Assert.Null(series.TemplatePublisherCollectionId);
+    }
+
+    [Fact]
+    public void SetStatus_UndefinedValue_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetStatus((SeriesStatus)42));
+    }
+
+    [Fact]
+    public void SetTemplateBinding_UndefinedValue_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateBinding((BindingType)42));
+    }
+
+    [Fact]
+    public void SetTemplateOrientation_UndefinedValue_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateOrientation((BookOrientation)42));
+    }
+
+    [Fact]
+    public void SetTemplateReadingDirection_UndefinedValue_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateReadingDirection((ReadingDirection)42));
+    }
+
+    [Fact]
+    public void SetTemplateFormat_UndefinedValue_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateFormat((EditionFormat)42));
+    }
+
+    [Fact]
+    public void SetTemplateEditionCategory_UndefinedValue_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateEditionCategory((EditionCategory)42));
+    }
+
+    [Fact]
+    public void SetTemplateCondition_UndefinedValue_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateCondition((EditionCondition)42));
     }
 
     [Fact]

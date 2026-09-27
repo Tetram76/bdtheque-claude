@@ -9,11 +9,13 @@ public sealed class EnumGuardTests
     public void EnsureDefined_DefinedValue_DoesNotThrow()
     {
         EnumGuard.EnsureDefined(AlbumType.Omnibus, "value");
+        EnumGuard.EnsureDefined(SeriesStatus.InProgress, "value");
     }
 
     [Fact]
     public void EnsureDefined_UndefinedValue_Throws()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => EnumGuard.EnsureDefined((AlbumType)42, "value"));
+        Assert.Throws<ArgumentOutOfRangeException>(() => EnumGuard.EnsureDefined((SeriesStatus)42, "value"));
     }
 }
