@@ -188,6 +188,16 @@ public sealed class CheckConstraintTests : IDisposable
     }
 
     [Fact]
+    public async Task AlbumCheckConstraint_TitleWithoutSortKey_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", null!, nameof(AlbumType.Regular),
+                null!, null!, null!, null!, null!, null!));
+    }
+
+    [Fact]
     public async Task AlbumCheckConstraint_NonPositiveVolumeNumber_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();

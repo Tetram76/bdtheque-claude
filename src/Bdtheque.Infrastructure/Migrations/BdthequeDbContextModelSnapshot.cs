@@ -121,7 +121,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                             t.HasCheckConstraint("CK_Albums_SortKeyNotBlank", "\"SortKey\" IS NULL OR LENGTH(TRIM(\"SortKey\")) > 0");
 
-                            t.HasCheckConstraint("CK_Albums_SortKeyRequiresTitle", "\"Title\" IS NOT NULL OR \"SortKey\" IS NULL");
+                            t.HasCheckConstraint("CK_Albums_SortKeyPresenceMatchesTitle", "(\"Title\" IS NULL) = (\"SortKey\" IS NULL)");
 
                             t.HasCheckConstraint("CK_Albums_TitleNotBlank", "\"Title\" IS NULL OR LENGTH(TRIM(\"Title\")) > 0");
 

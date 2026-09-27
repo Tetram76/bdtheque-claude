@@ -38,7 +38,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     table.CheckConstraint("CK_Albums_PublicationMonthRequiresYear", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationYear\" IS NOT NULL");
                     table.CheckConstraint("CK_Albums_PublicationYearPositive", "\"FirstPublicationYear\" IS NULL OR \"FirstPublicationYear\" > 0");
                     table.CheckConstraint("CK_Albums_SortKeyNotBlank", "\"SortKey\" IS NULL OR LENGTH(TRIM(\"SortKey\")) > 0");
-                    table.CheckConstraint("CK_Albums_SortKeyRequiresTitle", "\"Title\" IS NOT NULL OR \"SortKey\" IS NULL");
+                    table.CheckConstraint("CK_Albums_SortKeyPresenceMatchesTitle", "(\"Title\" IS NULL) = (\"SortKey\" IS NULL)");
                     table.CheckConstraint("CK_Albums_TitleNotBlank", "\"Title\" IS NULL OR LENGTH(TRIM(\"Title\")) > 0");
                     table.CheckConstraint("CK_Albums_TitleRequiredWithoutSeries", "\"SeriesId\" IS NOT NULL OR LENGTH(TRIM(COALESCE(\"Title\", ''))) > 0");
                     table.CheckConstraint("CK_Albums_VolumeNumberPositive", "\"VolumeNumber\" IS NULL OR \"VolumeNumber\" > 0");

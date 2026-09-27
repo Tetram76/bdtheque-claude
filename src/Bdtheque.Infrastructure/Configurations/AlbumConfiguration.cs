@@ -33,10 +33,13 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
             "CK_Albums_TitleNotBlank",
             $"\"{nameof(Album.Title)}\" IS NULL OR LENGTH(TRIM(\"{nameof(Album.Title)}\")) > 0"));
 
-        // Mirrors Album.SetTitle: an absent title implies an absent sort key.
+        // Mirrors Album.SetTitle: title and sort key are present or absent together — never
+        // one without the other (a raw-SQL write or the future Firebird import tool could
+        // otherwise leave a titled album with no stored sort key, which ordering/navigation
+        // relies on, or a sort key with no title to justify it).
         builder.ToTable(t => t.HasCheckConstraint(
-            "CK_Albums_SortKeyRequiresTitle",
-            $"\"{nameof(Album.Title)}\" IS NOT NULL OR \"{nameof(Album.SortKey)}\" IS NULL"));
+            "CK_Albums_SortKeyPresenceMatchesTitle",
+            $"(\"{nameof(Album.Title)}\" IS NULL) = (\"{nameof(Album.SortKey)}\" IS NULL)"));
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Albums_SortKeyNotBlank",
             $"\"{nameof(Album.SortKey)}\" IS NULL OR LENGTH(TRIM(\"{nameof(Album.SortKey)}\")) > 0"));
