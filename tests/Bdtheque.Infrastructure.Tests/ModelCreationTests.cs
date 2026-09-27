@@ -37,6 +37,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("Genres", tableNames);
         Assert.Contains("Universes", tableNames);
         Assert.Contains("Series", tableNames);
+        Assert.Contains("Albums", tableNames);
         await Task.CompletedTask;
     }
 
@@ -243,5 +244,77 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
             .SingleAsync();
 
         Assert.Equal(nameof(SeriesStatus.InProgress), rawValue);
+    }
+
+    [Fact]
+    public async Task AddAlbum_AttachedToSeriesWithoutTitle_Persists()
+    {
+        var series = new Series("Tintin");
+        var album = new Album(null, series);
+        album.SetVolumeNumber(1);
+
+        _fixture.Context.Series.Add(series);
+        _fixture.Context.Albums.Add(album);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Albums
+            .Include(a => a.Series)
+            .FirstAsync(a => a.Id == album.Id);
+
+        Assert.Null(saved.Title);
+        Assert.Null(saved.SortKey);
+        Assert.Equal("Tintin", saved.Series!.Title);
+        Assert.Equal(1, saved.VolumeNumber);
+    }
+
+    [Fact]
+    public async Task AddAlbum_StandaloneOmnibusWithGenresAndUniverses_Persists()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        album.SetType(AlbumType.Omnibus);
+        album.SetVolumeRange(1, 6);
+        album.SetFirstPublicationDate(1978, 6);
+        var genre = new Genre("Aventure BD");
+        var universe = new Universe("Franco-Belge BD");
+        album.Genres.Add(genre);
+        album.Universes.Add(universe);
+
+        _fixture.Context.Albums.Add(album);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Albums
+            .Include(a => a.Genres)
+            .Include(a => a.Universes)
+            .FirstAsync(a => a.Id == album.Id);
+
+        Assert.Equal("Le Lotus bleu", saved.Title);
+        Assert.Equal("Lotus bleu [Le]", saved.SortKey);
+        Assert.Equal(AlbumType.Omnibus, saved.Type);
+        Assert.Equal(1, saved.StartVolumeNumber);
+        Assert.Equal(6, saved.EndVolumeNumber);
+        Assert.Equal(1978, saved.FirstPublicationYear);
+        Assert.Equal(6, saved.FirstPublicationMonth);
+        Assert.Contains(saved.Genres, g => g.Label == "Aventure BD");
+        Assert.Contains(saved.Universes, u => u.Name == "Franco-Belge BD");
+    }
+
+    [Fact]
+    public async Task AddAlbum_WithType_PersistsEnumAsReadableString()
+    {
+        // Confirms the project-wide enum-as-string convention also applies to Album.Type.
+        var album = new Album("Tintin", null);
+        album.SetType(AlbumType.Omnibus);
+
+        _fixture.Context.Albums.Add(album);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var rawValue = await _fixture.Context.Database
+            .SqlQuery<string>($"SELECT \"Type\" AS \"Value\" FROM \"Albums\" WHERE \"Id\" = {album.Id}")
+            .SingleAsync();
+
+        Assert.Equal(nameof(AlbumType.Omnibus), rawValue);
     }
 }
