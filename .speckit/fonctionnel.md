@@ -85,6 +85,7 @@ Le tri alphabétique des **séries**, **albums** et **artistes** repose sur une 
 - La clé de tri d'un titre est le titre **sans son article initial**.
 - L'**initiale de navigation** (navigation par lettre) est la première lettre de la clé de tri, soit le premier caractère **hors article**.
 - L'affichage du titre reste toujours en forme naturelle, article inclus en tête.
+- **Liste des articles retirés** (insensible à la casse) : `L'`/`L’` (forme élidée, sans espace), `Le`, `La`, `Les`, `Un`, `Une`, `Des` (formes suivies d'un espace). Seul un article suivi d'une frontière de mot est retiré : un titre commençant par les mêmes lettres sans être suivi d'un espace (ex. `Larousse`) n'est pas affecté.
 
 Exemples :
 

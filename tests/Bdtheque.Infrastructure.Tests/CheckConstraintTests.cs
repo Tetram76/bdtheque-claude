@@ -99,4 +99,51 @@ public sealed class CheckConstraintTests : IDisposable
                 "INSERT INTO \"PublisherCollections\" (\"Id\", \"Name\", \"PublisherId\") VALUES ({0}, '   ', {1})",
                 id, publisherId));
     }
+
+    [Theory]
+    [InlineData("Title")]
+    [InlineData("SortKey")]
+    public async Task SeriesCheckConstraint_BlankTitleOrSortKey_ThrowsAtDatabase(string blankColumn)
+    {
+        var id = Guid.CreateVersion7();
+        var otherColumn = blankColumn == "Title" ? "SortKey" : "Title";
+        var sql = $"INSERT INTO \"Series\" (\"Id\", \"{blankColumn}\", \"{otherColumn}\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\") " +
+                  $"VALUES ({{0}}, '   ', 'Valeur', false, false, false)";
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(sql, id));
+    }
+
+    [Fact]
+    public async Task SeriesCheckConstraint_NonPositiveTheoreticalVolumeCount_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"TheoreticalVolumeCount\") " +
+                "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, 0)",
+                id));
+    }
+
+    [Fact]
+    public async Task SeriesCheckConstraint_TemplateCollectionWithoutTemplatePublisher_ThrowsAtDatabase()
+    {
+        // Guards the single-table half of the template coherence rule. The cross-table half
+        // (the collection must belong to the template publisher) is enforced only by the
+        // domain layer (see Series.SetTemplate) — a composite FK would add real schema
+        // complexity for a raw-SQL bypass scenario that isn't plausible with a single admin user.
+        var publisherId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"Publishers\" (\"Id\", \"Name\") VALUES ({0}, 'Casterman')", publisherId);
+        var collectionId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"PublisherCollections\" (\"Id\", \"Name\", \"PublisherId\") VALUES ({0}, 'Tintin', {1})",
+            collectionId, publisherId);
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"TemplatePublisherCollectionId\") " +
+                "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, {1})",
+                id, collectionId));
+    }
 }

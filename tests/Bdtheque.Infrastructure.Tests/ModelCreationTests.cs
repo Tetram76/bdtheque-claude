@@ -1,4 +1,5 @@
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Infrastructure.Tests;
@@ -34,6 +35,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("PublisherCollections", tableNames);
         Assert.Contains("Genres", tableNames);
         Assert.Contains("Universes", tableNames);
+        Assert.Contains("Series", tableNames);
         await Task.CompletedTask;
     }
 
@@ -140,5 +142,87 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
 
         // Attempting A.SetParent(C) should throw because C's full ancestor chain is not in memory
         Assert.Throws<InvalidOperationException>(() => reloadedA.SetParent(reloadedC));
+    }
+
+    [Fact]
+    public async Task AddSeries_Persists()
+    {
+        var series = new Series("Le Lotus bleu");
+
+        _fixture.Context.Series.Add(series);
+        await _fixture.Context.SaveChangesAsync();
+
+        var saved = await _fixture.Context.Series.FindAsync(series.Id);
+        Assert.NotNull(saved);
+        Assert.Equal("Le Lotus bleu", saved.Title);
+        Assert.Equal("Lotus bleu", saved.SortKey);
+    }
+
+    [Fact]
+    public async Task AddSeries_WithGenresAndUniverses_Persists()
+    {
+        // Distinct labels from every other test in this shared-fixture class (Genre.Label and
+        // Publisher.Name are unique-indexed database-wide, and the fixture's database is shared
+        // across all tests in this class).
+        var series = new Series("Tintin");
+        var genre = new Genre("Policier");
+        var universe = new Universe("Franco-Belge");
+        series.Genres.Add(genre);
+        series.Universes.Add(universe);
+
+        _fixture.Context.Series.Add(series);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Series
+            .Include(s => s.Genres)
+            .Include(s => s.Universes)
+            .FirstAsync(s => s.Id == series.Id);
+
+        Assert.Contains(saved.Genres, g => g.Label == "Policier");
+        Assert.Contains(saved.Universes, u => u.Name == "Franco-Belge");
+    }
+
+    [Fact]
+    public async Task AddSeries_WithTemplatePublisherAndCollection_Persists()
+    {
+        var publisher = new Publisher("Éditions Fictives");
+        var collection = new PublisherCollection("Collection Alpha", publisher);
+        var series = new Series("Tintin");
+        series.SetTemplate(publisher, collection);
+
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.PublisherCollections.Add(collection);
+        _fixture.Context.Series.Add(series);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Series
+            .Include(s => s.TemplatePublisher)
+            .Include(s => s.TemplatePublisherCollection)
+            .FirstAsync(s => s.Id == series.Id);
+
+        Assert.Equal("Éditions Fictives", saved.TemplatePublisher!.Name);
+        Assert.Equal("Collection Alpha", saved.TemplatePublisherCollection!.Name);
+    }
+
+    [Fact]
+    public async Task AddSeries_WithStatus_PersistsEnumAsReadableString()
+    {
+        // Confirms the project-wide enum-as-string convention (ConfigureConventions):
+        // the raw column value must be the enum member name, not its numeric ordinal,
+        // so that reordering enum members later cannot silently corrupt existing rows.
+        var series = new Series("Tintin");
+        series.SetStatus(SeriesStatus.InProgress);
+
+        _fixture.Context.Series.Add(series);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var rawValue = await _fixture.Context.Database
+            .SqlQuery<string>($"SELECT \"Status\" AS \"Value\" FROM \"Series\" WHERE \"Id\" = {series.Id}")
+            .SingleAsync();
+
+        Assert.Equal(nameof(SeriesStatus.InProgress), rawValue);
     }
 }
