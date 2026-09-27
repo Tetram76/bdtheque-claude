@@ -170,7 +170,9 @@ For each such thread, `path`/`line`/`diffHunk` locate the finding in the diff
 when the comment `body` doesn't repeat it.
 
 **a. Cross-check** — never apply a finding blindly, and never take it at face
-value just because it sounds plausible:
+value just because it sounds plausible. Codex can go very deep into detail;
+depth alone is not validity. The bar is a **user-proof** application, not
+code that survives every theoretical or adversarial twist.
 
 - Is it relevant to this PR's actual objective?
 - Does it contradict or align with `.speckit/` (functional rules, data
@@ -180,7 +182,19 @@ value just because it sounds plausible:
   behavior, that claim must be tested empirically (run it) or checked against
   its official documentation — never accepted on reasoning alone.** A wrong
   fix to a wrong finding just produces another finding next cycle.
+- **Is the scenario possible in this app's real context?** Reject findings
+  whose premise requires misuse, impossible inputs, or execution paths that
+  users (or this app's legitimate callers) cannot reach. The code is
+  application-scoped — not a public or shared library — so do not harden for
+  reuse, arbitrary embedding, or abuse outside the app's threat model and UX.
+- **Is the scenario user-relevant?** Legitimate user mistakes, confusing
+  flows, and real integration boundaries count; hypothetical edge cases that
+  only matter if someone deliberately misuses or "breaks" the API do not.
 - Does the fix's cost (complexity, readability, time) justify the benefit?
+
+When rejecting a finding on these grounds, state clearly in the Step 4 reply
+*why* the scenario is out of scope (not possible, not user-relevant, or
+disproportionate) — not merely "won't fix".
 
 Codex reviews the diff, so its findings are naturally scoped to the lines it
 looked at — but the same class of mistake often recurs elsewhere in the same
