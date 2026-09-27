@@ -28,7 +28,9 @@ public static class TitleSortKeyCalculator
     {
         var trimmed = title.Trim();
 
-        if (trimmed.Length > 1 && (trimmed[0] == 'L' || trimmed[0] == 'l') && Apostrophes.Contains(trimmed[1]))
+        // > 2 (not > 1): at least one character must remain after the 2-character "L'" prefix,
+        // mirroring the same requirement enforced below for space-separated articles.
+        if (trimmed.Length > 2 && (trimmed[0] == 'L' || trimmed[0] == 'l') && Apostrophes.Contains(trimmed[1]))
             return BuildSortKey(trimmed, articleLength: 2);
 
         foreach (var article in SpaceSeparatedArticles)

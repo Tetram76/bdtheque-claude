@@ -47,6 +47,16 @@ public sealed class TitleSortKeyCalculatorTests
         Assert.Equal("Les", TitleSortKeyCalculator.Compute("Les"));
     }
 
+    [Theory]
+    [InlineData("L'")]
+    [InlineData("L’")]
+    public void Compute_ElidedArticleWithNoTextAfter_IsNotMoved(string title)
+    {
+        // No significant word remains after the apostrophe: relocating it would produce a sort
+        // key starting with whitespace (" [L']"), breaking the "first character = initial" rule.
+        Assert.Equal(title, TitleSortKeyCalculator.Compute(title));
+    }
+
     [Fact]
     public void Compute_TrimsSurroundingWhitespace()
     {
