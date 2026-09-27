@@ -16,7 +16,7 @@ Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime
 
 - **Lire les fichiers `.speckit/` en début de chaque conversation** et avant toute décision architecturale, technique ou fonctionnelle.
 - **Aucune décision ne peut contredire** ce qui y est documenté sans accord explicite de l'utilisateur.
-- En cas d'ambiguïté ou de silence sur un sujet, l'agent peut décider — mais doit documenter le choix dans le fichier concerné.
+- En cas d'ambiguïté ou de silence sur un sujet **technique**, l'agent peut décider — mais doit documenter le choix dans le fichier concerné. Sur un sujet **fonctionnel ou métier**, l'ambiguïté ou le silence est soumis à une décision explicite de l'utilisateur avant toute mise à jour du fichier concerné (cf. `gestion-projet.md` § « Prise de décision »).
 
 ## Mise à jour du .speckit
 
@@ -43,6 +43,6 @@ Le fichier `journal-evenements.md` est un **journal**, pas un document de réfé
 
 Ce projet vise à produire une **application n-tiers web** et tous les éléments nécessaires à sa mise en production.
 
-- L'agent prend **toutes les décisions** architecturales, techniques et d'implémentation nécessaires à la livraison d'une application fonctionnelle.
-- Les seules interventions de l'utilisateur sont la mise à jour des fichiers `.speckit/` pour exprimer ses besoins et exigences.
+- L'agent prend **toutes les décisions techniques** (architecturales, d'implémentation, d'outillage) nécessaires à la livraison d'une application fonctionnelle, en totale autonomie.
+- Les décisions **fonctionnelles ou métier** relèvent de l'utilisateur : soit par sa mise à jour directe des fichiers `.speckit/` pour exprimer ses besoins et exigences, soit par sa réponse explicite à un point soumis par l'agent (cf. `gestion-projet.md` § « Prise de décision »).
 - L'agent doit **toujours être en mesure de justifier** ses choix lorsqu'il est challengé. Toute décision importante doit être traçable dans `.speckit/contraintes-techniques.md` ou `gestion-projet.md`.
