@@ -3,6 +3,7 @@ using System;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    partial class BdthequeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260927145458_AddSeries")]
+    partial class AddSeries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors", null, t =>
+                    b.ToTable("Authors", t =>
                         {
                             t.HasCheckConstraint("CK_Authors_LastNameOrPseudonym", "COALESCE(LENGTH(TRIM(\"LastName\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"Pseudonym\")), 0) > 0");
                         });
@@ -71,7 +74,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Label")
                         .IsUnique();
 
-                    b.ToTable("Genres", null, t =>
+                    b.ToTable("Genres", t =>
                         {
                             t.HasCheckConstraint("CK_Genres_LabelNotBlank", "COALESCE(LENGTH(TRIM(\"Label\")), 0) > 0");
                         });
@@ -97,7 +100,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Publishers", null, t =>
+                    b.ToTable("Publishers", t =>
                         {
                             t.HasCheckConstraint("CK_Publishers_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                         });
@@ -122,7 +125,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("PublisherId", "Name")
                         .IsUnique();
 
-                    b.ToTable("PublisherCollections", null, t =>
+                    b.ToTable("PublisherCollections", t =>
                         {
                             t.HasCheckConstraint("CK_PublisherCollections_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
                         });
@@ -207,7 +210,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasIndex("TemplatePublisherId");
 
-                    b.ToTable("Series", null, t =>
+                    b.ToTable("Series", t =>
                         {
                             t.HasCheckConstraint("CK_Series_SortKeyNotBlank", "COALESCE(LENGTH(TRIM(\"SortKey\")), 0) > 0");
 
@@ -240,7 +243,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Universes", null, t =>
+                    b.ToTable("Universes", t =>
                         {
                             t.HasCheckConstraint("CK_Universes_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
 

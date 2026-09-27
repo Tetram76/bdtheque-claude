@@ -1,0 +1,121 @@
+using Bdtheque.Domain.Common;
+using Bdtheque.Domain.Entities.Common;
+using Bdtheque.Domain.Enums;
+
+namespace Bdtheque.Domain.Entities;
+
+/// <summary>
+/// A continuity grouping albums together (Série), acting as a source of default
+/// ("template") values for new editions and contributions attached to its albums.
+/// </summary>
+public sealed class Series : EntityBase
+{
+    public string Title { get; private set; } = string.Empty;
+    public string SortKey { get; private set; } = string.Empty;
+    public bool IsManualSortKey { get; private set; }
+
+    public SeriesStatus? Status { get; private set; }
+    public int? TheoreticalVolumeCount { get; private set; }
+    public bool IsComplete { get; private set; }
+    public bool ExcludeFromMissingVolumes { get; private set; }
+    public string? Summary { get; private set; }
+    public string? PersonalNotes { get; private set; }
+
+    public BindingType? TemplateBinding { get; private set; }
+    public BookOrientation? TemplateOrientation { get; private set; }
+    public ReadingDirection? TemplateReadingDirection { get; private set; }
+    public EditionFormat? TemplateFormat { get; private set; }
+    public EditionCategory? TemplateEditionCategory { get; private set; }
+    public EditionCondition? TemplateCondition { get; private set; }
+    public bool? TemplateIsColor { get; private set; }
+
+    public Guid? TemplatePublisherId { get; private set; }
+    public Publisher? TemplatePublisher { get; private set; }
+    public Guid? TemplatePublisherCollectionId { get; private set; }
+    public PublisherCollection? TemplatePublisherCollection { get; private set; }
+
+    public ICollection<Genre> Genres { get; private set; } = [];
+    public ICollection<Universe> Universes { get; private set; } = [];
+
+    // EF Core parameterless constructor
+    private Series() { }
+
+    public Series(string title)
+    {
+        SetTitle(title);
+    }
+
+    public void SetTitle(string title)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        Title = title.Trim();
+        if (!IsManualSortKey)
+            SortKey = TitleSortKeyCalculator.Compute(Title);
+    }
+
+    public void SetSortKey(string sortKey)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sortKey);
+        SortKey = sortKey.Trim();
+        IsManualSortKey = true;
+    }
+
+    /// <summary>Recomputes the sort key from the current title and returns to automatic mode.</summary>
+    public void ResetSortKey()
+    {
+        IsManualSortKey = false;
+        SortKey = TitleSortKeyCalculator.Compute(Title);
+    }
+
+    public void SetStatus(SeriesStatus? status) => Status = status;
+
+    public void SetTheoreticalVolumeCount(int? count)
+    {
+        if (count is <= 0)
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Theoretical volume count must be positive when specified.");
+        TheoreticalVolumeCount = count;
+    }
+
+    public void SetComplete(bool isComplete) => IsComplete = isComplete;
+
+    public void SetExcludeFromMissingVolumes(bool exclude) => ExcludeFromMissingVolumes = exclude;
+
+    public void SetSummary(string? summary) => Summary = NullIfEmpty(summary);
+
+    public void SetPersonalNotes(string? notes) => PersonalNotes = NullIfEmpty(notes);
+
+    public void SetTemplateBinding(BindingType? binding) => TemplateBinding = binding;
+
+    public void SetTemplateOrientation(BookOrientation? orientation) => TemplateOrientation = orientation;
+
+    public void SetTemplateReadingDirection(ReadingDirection? readingDirection) => TemplateReadingDirection = readingDirection;
+
+    public void SetTemplateFormat(EditionFormat? format) => TemplateFormat = format;
+
+    public void SetTemplateEditionCategory(EditionCategory? category) => TemplateEditionCategory = category;
+
+    public void SetTemplateCondition(EditionCondition? condition) => TemplateCondition = condition;
+
+    public void SetTemplateIsColor(bool? isColor) => TemplateIsColor = isColor;
+
+    /// <summary>
+    /// Sets the template publisher and, optionally, a template publisher collection, as a single
+    /// atomic operation: a collection can only be set together with the publisher it belongs to,
+    /// per the model constraint (a template collection requires a template publisher and must
+    /// belong to it).
+    /// </summary>
+    public void SetTemplate(Publisher? publisher, PublisherCollection? collection)
+    {
+        if (collection is not null && (publisher is null || collection.PublisherId != publisher.Id))
+            throw new ArgumentException(
+                "The template publisher collection must belong to the template publisher.", nameof(collection));
+
+        TemplatePublisher = publisher;
+        TemplatePublisherId = publisher?.Id;
+        TemplatePublisherCollection = collection;
+        TemplatePublisherCollectionId = collection?.Id;
+    }
+
+    private static string? NullIfEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+}

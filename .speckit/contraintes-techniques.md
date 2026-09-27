@@ -52,6 +52,11 @@ La solution .NET est découpée en projets par responsabilité, sous `src/` :
 
 Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
 
+## Conventions de persistance (EF Core)
+
+- **Énumérations** : toute propriété de type `enum` est persistée sous forme de **chaîne** (nom du membre), jamais sous forme d'entier. Configuré une fois pour tout le modèle via `ConfigureConventions` sur `BdthequeDbContext` (`Properties<Enum>().HaveConversion<string>()`). Objectif : un ré-ordonnancement ou un ajout de membre dans un enum ne doit jamais changer silencieusement le sens des lignes déjà persistées, ce qui serait le cas avec un stockage par entier.
+  - **Conséquence sur le tri** : ce stockage rend un `ORDER BY` direct sur la colonne **alphabétique**, pas conforme à l'ordre métier quand celui-ci ne l'est pas (ex. l'ordre fixe des types de visuel d'édition, cf. `fonctionnel.md`). Dans ce cas, le tri s'appuie explicitement sur le rang du membre (ordre de déclaration de l'enum), appliqué en mémoire pour les petites collections concernées plutôt que traduit en SQL.
+
 ## Déploiement
 
 - Architecture **n-tiers avec isolation stricte** : chaque tier est déployé dans un **conteneur Docker dédié**.
