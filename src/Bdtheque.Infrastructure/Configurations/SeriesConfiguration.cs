@@ -61,7 +61,7 @@ internal sealed class SeriesConfiguration : IEntityTypeConfiguration<Series>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Implicit many-to-many (no extra attribute on the link): explicit join table names
-        // keep them predictable once Album grows the same relations (Phase 1, PR #3).
+        // keep them predictable alongside Album's own Genre/Universe relations (AlbumConfiguration).
         builder.HasMany(s => s.Genres)
             .WithMany()
             .UsingEntity(j => j.ToTable("SeriesGenres"));

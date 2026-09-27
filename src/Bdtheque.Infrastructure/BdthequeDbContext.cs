@@ -11,6 +11,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<Genre> Genres => Set<Genre>();
     public DbSet<Universe> Universes => Set<Universe>();
     public DbSet<Series> Series => Set<Series>();
+    public DbSet<Album> Albums => Set<Album>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

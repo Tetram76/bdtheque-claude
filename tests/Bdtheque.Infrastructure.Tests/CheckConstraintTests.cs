@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Infrastructure.Tests;
@@ -145,5 +146,159 @@ public sealed class CheckConstraintTests : IDisposable
                 "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"TemplatePublisherCollectionId\") " +
                 "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, {1})",
                 id, collectionId));
+    }
+
+    private const string InsertAlbumSql =
+        "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", " +
+        "\"VolumeNumber\", \"StartVolumeNumber\", \"EndVolumeNumber\", \"FirstPublicationYear\", \"FirstPublicationMonth\", \"SeriesId\") " +
+        "VALUES ({0}, {1}, {2}, false, {3}, false, {4}, {5}, {6}, {7}, {8}, {9})";
+
+    [Fact]
+    public async Task AlbumCheckConstraint_NoTitleNoSeries_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, null!, null!, nameof(AlbumType.Regular),
+                null!, null!, null!, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_BlankTitleWithSeries_ThrowsAtDatabase()
+    {
+        var seriesId = await InsertSeriesAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "   ", null!, nameof(AlbumType.Regular),
+                null!, null!, null!, null!, null!, seriesId));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_SortKeyWithoutTitle_ThrowsAtDatabase()
+    {
+        var seriesId = await InsertSeriesAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, null!, "Orphan Key", nameof(AlbumType.Regular),
+                null!, null!, null!, null!, null!, seriesId));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_TitleWithoutSortKey_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", null!, nameof(AlbumType.Regular),
+                null!, null!, null!, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_ManualSortKeyWithoutTitle_ThrowsAtDatabase()
+    {
+        var seriesId = await InsertSeriesAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
+                "VALUES ({0}, NULL, NULL, true, 'Regular', false, {1})", id, seriesId));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_NonPositiveVolumeNumber_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                0, null!, null!, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_VolumeRangeOnlyStart_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Omnibus),
+                null!, 1, null!, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_VolumeRangeStartGreaterThanEnd_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Omnibus),
+                null!, 6, 1, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_VolumeRangeOnNonOmnibus_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                null!, 1, 6, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_PublicationMonthWithoutYear_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                null!, null!, null!, null!, 6, null!));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(13)]
+    public async Task AlbumCheckConstraint_PublicationMonthOutOfRange_ThrowsAtDatabase(int month)
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                null!, null!, null!, 1978, month, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_PublicationYearNonPositive_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                null!, null!, null!, 0, null!, null!));
+    }
+
+    [Fact]
+    public async Task AlbumCheckConstraint_ValidRegularAlbum_Succeeds()
+    {
+        var id = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+            5, null!, null!, 1978, 6, null!);
+
+        var count = await _fixture.Context.Albums.CountAsync(a => a.Id == id);
+        Assert.Equal(1, count);
+    }
+
+    private async Task<Guid> InsertSeriesAsync()
+    {
+        var seriesId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\") " +
+            "VALUES ({0}, 'Tintin', 'Tintin', false, false, false)", seriesId);
+        return seriesId;
     }
 }
