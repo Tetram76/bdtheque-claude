@@ -81,13 +81,20 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 - **Stratégie de merge** : squash merge uniquement (historique linéaire et lisible sur `main`)
 - **Suppression automatique** des branches de feature après merge
 - **Fonctionnalités actives** : Issues, Releases
-- **Fonctionnalités désactivées** : Wiki, Projects, Discussions (projet privé, aucune interaction communautaire)
-- **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`) avec les règles suivantes (actif si dépôt public, suspendu en privé — limitation GitHub gratuit) :
+- **Visibilité** : dépôt **public**.
+- **Fonctionnalités désactivées** : Wiki, Projects, Discussions (aucune interaction communautaire souhaitée)
+- **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`, **actif** — le dépôt étant public) avec les règles suivantes :
   - PR obligatoire avant tout merge
   - Force-push interdit
   - Suppression de `main` interdite
   - Squash merge uniquement
   - **Commits signés obligatoires** (`required_signatures`)
+- **Sécurité du dépôt** (`security_and_analysis`, disponible gratuitement car dépôt public) :
+  - **Secret scanning** : activé
+  - **Push protection** (blocage des push contenant un secret détecté) : activée
+  - **Dependabot security updates** : activé
+  - *Vérification de validité des secrets détectés* (`secret_scanning_validity_checks`) : désactivée. L'activation via l'API GitHub n'a aucun effet observable (pas d'erreur retournée, statut inchangé) ; cause non identifiée — à vérifier manuellement dans les paramètres GitHub du dépôt si besoin.
+- **Merge réservé à l'utilisateur, y compris pour de futurs collaborateurs** : le dépôt est la propriété d'un compte **personnel** (`Tetram76`), pas d'une organisation — la restriction de push/merge par utilisateur ou équipe (fonctionnalité GitHub de branch protection) n'est **pas disponible** sur ce type de dépôt, elle ne peut donc pas être imposée techniquement via un Ruleset ou une protection de branche. La garantie repose donc sur la gestion des droits d'accès : **aucun collaborateur ne doit recevoir un accès `Write` (ou supérieur)** au dépôt. Toute contribution externe future passe par un **fork** + Pull Request ; le merge de cette PR reste effectué par l'utilisateur (ou par l'agent agissant en son nom), jamais par le contributeur externe lui-même.
 
 ## Outillage .NET
 
@@ -161,7 +168,7 @@ Des **releases GitHub** sont publiées pour marquer les jalons significatifs du 
 > **Il est INTERDIT de commiter ou pousser directement sur la branche `main`.**
 > Toute modification, sans exception, doit passer par une Pull Request.
 
-Cette règle s'applique à l'agent comme à tout contributeur. Elle ne peut pas être imposée techniquement (protection de branche indisponible sur dépôt privé gratuit) mais constitue une contrainte de processus stricte et non négociable.
+Cette règle s'applique à l'agent comme à tout contributeur. Elle est **imposée techniquement** par le Ruleset GitHub (cf. « Configuration du repository GitHub » ci-dessus) et constitue par ailleurs une contrainte de processus stricte et non négociable.
 
 ## Stratégie de branches
 
