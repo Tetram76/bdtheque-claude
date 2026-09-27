@@ -7,7 +7,7 @@ Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime
 | Fichier | Contenu |
 | --- | --- |
 | `gestion-projet.md` | Gouvernance du projet : stockage, branches, conventions de commit, outillage, CI/CD. Tout ce qui ne concerne PAS l'application elle-même. |
-| `fonctionnel.md` | Fonctionnalités de l'application : cas d'usage, user stories, règles métier, flux. |
+| `fonctionnel.md` | Fonctionnalités de l'application : cas d'usage, user stories, règles métier, flux. Les règles sont formulées au niveau métier — le comportement attendu et les cas visibles de l'utilisateur — jamais leur détail d'implémentation (algorithme, mécanique de calcul, structures internes) : ces derniers vivent dans le code et ses tests. |
 | `modele-metier.md` | Modèle du domaine : entités, attributs, relations, contraintes d'intégrité, glossaire. |
 | `contraintes-techniques.md` | Choix et contraintes techniques de l'application et de son déploiement uniquement (stack, langages, frameworks, BDD, hébergement, sécurité). Rien de lié à la gestion de projet. |
 | `journal-evenements.md` | Journal des évènements externes au repo pouvant influencer son développement (ex. : déploiement d'une version en test/production, incident, changement d'infrastructure externe). Fichier journal à part — voir « Journal des évènements externes » ci-dessous, il déroge aux règles de mise à jour et de format des autres fichiers. |
