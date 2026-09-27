@@ -99,6 +99,7 @@ public sealed class Album : EntityBase
 
     public void SetType(AlbumType type)
     {
+        EnumGuard.EnsureDefined(type, nameof(type));
         if (type != AlbumType.Omnibus && (StartVolumeNumber is not null || EndVolumeNumber is not null))
             throw new InvalidOperationException(
                 "Cannot change the type away from Omnibus while a start/end volume range is set. " +
@@ -160,7 +161,12 @@ public sealed class Album : EntityBase
 
     public void SetPersonalNotes(string? notes) => PersonalNotes = NullIfEmpty(notes);
 
-    public void SetRating(AlbumRating? rating) => Rating = rating;
+    public void SetRating(AlbumRating? rating)
+    {
+        if (rating is not null)
+            EnumGuard.EnsureDefined(rating.Value, nameof(rating));
+        Rating = rating;
+    }
 
     private static string? NullIfEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

@@ -200,6 +200,14 @@ public sealed class AlbumTests
     }
 
     [Fact]
+    public void SetType_UndefinedValue_Throws()
+    {
+        var album = new Album("Tintin", null);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetType((AlbumType)42));
+    }
+
+    [Fact]
     public void SetType_AwayFromOmnibusWithRangeSet_Throws()
     {
         var album = new Album("Tintin", null);
@@ -306,6 +314,14 @@ public sealed class AlbumTests
 
         album.SetRating(null);
         Assert.Null(album.Rating);
+    }
+
+    [Fact]
+    public void SetRating_UndefinedValue_Throws()
+    {
+        var album = new Album("Tintin", null);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetRating((AlbumRating)99));
     }
 
     [Fact]
