@@ -26,6 +26,17 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
 
 var app = builder.Build();
 
+// The "Testing" environment provisions its own schema (see the DbContext registration
+// above); applying migrations here would target the wrong provider. In every other
+// environment, nothing else applies the schema before the container starts serving
+// traffic (no init container, no migration bundle), so a fresh deployment would
+// otherwise leave PostgreSQL empty while the health check only verifies connectivity.
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

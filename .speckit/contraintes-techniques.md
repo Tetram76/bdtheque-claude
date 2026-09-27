@@ -57,6 +57,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - Architecture **n-tiers avec isolation stricte** : chaque tier est déployé dans un **conteneur Docker dédié**.
 - Un tier = un conteneur (pas de cohabitation de responsabilités dans un même conteneur).
 - Orchestration via **Docker Compose**, compatible avec Synology Container Manager.
+- Les migrations EF Core sont appliquées **automatiquement au démarrage** du conteneur `api` (`Database.Migrate()`), hors environnement `Testing` qui provisionne son propre schéma. Pas de conteneur ou d'étape d'initialisation dédiée : un déploiement neuf sur une base vide crée le schéma dès le premier démarrage.
 
 ## Licences
 
