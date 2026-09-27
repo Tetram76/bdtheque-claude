@@ -10,6 +10,7 @@ public sealed class EnumGuardTests
     {
         EnumGuard.EnsureDefined(AlbumType.Omnibus, "value");
         EnumGuard.EnsureDefined(SeriesStatus.InProgress, "value");
+        EnumGuard.EnsureDefined(ContributionRole.Illustrator, "value");
     }
 
     [Fact]
@@ -17,5 +18,6 @@ public sealed class EnumGuardTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => EnumGuard.EnsureDefined((AlbumType)42, "value"));
         Assert.Throws<ArgumentOutOfRangeException>(() => EnumGuard.EnsureDefined((SeriesStatus)42, "value"));
+        Assert.Throws<ArgumentOutOfRangeException>(() => EnumGuard.EnsureDefined((ContributionRole)42, "value"));
     }
 }
