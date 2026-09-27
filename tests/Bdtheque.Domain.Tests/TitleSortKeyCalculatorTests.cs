@@ -52,4 +52,21 @@ public sealed class TitleSortKeyCalculatorTests
     {
         Assert.Equal("Lotus bleu [Le]", TitleSortKeyCalculator.Compute("  Le Lotus bleu  "));
     }
+
+    [Theory]
+    [InlineData("Le  Lotus bleu", "Lotus bleu [Le]")]
+    [InlineData("Le   Lotus bleu", "Lotus bleu [Le]")]
+    [InlineData("Les  Schtroumpfs", "Schtroumpfs [Les]")]
+    public void Compute_MultipleSeparatorSpacesAfterArticle_ConsumesAllOfThem(string title, string expectedSortKey)
+    {
+        // A leftover separator space would make the stored key start with whitespace instead of
+        // the significant word, breaking the "first character = initial" invariant.
+        Assert.Equal(expectedSortKey, TitleSortKeyCalculator.Compute(title));
+    }
+
+    [Fact]
+    public void Compute_MultipleSpacesAfterElidedArticle_ConsumesAllOfThem()
+    {
+        Assert.Equal("Épervier [L']", TitleSortKeyCalculator.Compute("L'  Épervier"));
+    }
 }

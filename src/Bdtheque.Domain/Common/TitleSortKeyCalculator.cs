@@ -29,16 +29,22 @@ public static class TitleSortKeyCalculator
         var trimmed = title.Trim();
 
         if (trimmed.Length > 1 && (trimmed[0] == 'L' || trimmed[0] == 'l') && Apostrophes.Contains(trimmed[1]))
-            return $"{trimmed[2..]} [{trimmed[..2]}]";
+            return BuildSortKey(trimmed, articleLength: 2);
 
         foreach (var article in SpaceSeparatedArticles)
         {
-            var prefixWithSpace = article + " ";
-            if (trimmed.Length > prefixWithSpace.Length
-                && trimmed.StartsWith(prefixWithSpace, StringComparison.OrdinalIgnoreCase))
-                return $"{trimmed[prefixWithSpace.Length..]} [{trimmed[..article.Length]}]";
+            if (trimmed.Length > article.Length
+                && trimmed.StartsWith(article, StringComparison.OrdinalIgnoreCase)
+                && char.IsWhiteSpace(trimmed[article.Length]))
+                return BuildSortKey(trimmed, article.Length);
         }
 
         return trimmed;
     }
+
+    // Separator whitespace after the article is entirely discarded (not just its first
+    // character): user-entered or migrated data can carry stray extra spaces, and a leftover
+    // one would make the stored key start with whitespace instead of the significant word.
+    private static string BuildSortKey(string trimmed, int articleLength) =>
+        $"{trimmed[articleLength..].TrimStart()} [{trimmed[..articleLength]}]";
 }
