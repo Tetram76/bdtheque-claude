@@ -14,7 +14,8 @@ Le dossier `.speckit/` est la **source de vérité absolue** du projet. Il prime
 
 ## Règles de consultation
 
-- **Lire les fichiers `.speckit/` en début de chaque conversation** et avant toute décision architecturale, technique ou fonctionnelle.
+- **Lire l'intégralité des fichiers `.speckit/` est la toute première action de chaque conversation** — avant toute autre lecture de fichier, recherche dans le code, réponse à l'utilisateur (y compris une simple question ou une clarification) ou action de quelque nature que ce soit. Cette lecture n'est ni différable ni conditionnée à la nature apparente de la demande : elle a lieu même si la demande semble triviale, hors-sujet par rapport au `.speckit`, ou déjà couverte par le contexte de conversation.
+- Cette lecture est **également requise avant toute décision architecturale, technique ou fonctionnelle** prise plus tard dans la conversation, même si le `.speckit` a déjà été lu en début de conversation.
 - **Aucune décision ne peut contredire** ce qui y est documenté sans accord explicite de l'utilisateur.
 - En cas d'ambiguïté ou de silence sur un sujet **technique**, l'agent peut décider — mais doit documenter le choix dans le fichier concerné. Sur un sujet **fonctionnel ou métier**, l'ambiguïté ou le silence est soumis à une décision explicite de l'utilisateur avant toute mise à jour du fichier concerné (cf. `gestion-projet.md` § « Prise de décision »).
 
