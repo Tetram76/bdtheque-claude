@@ -39,6 +39,6 @@ Le fichier `journal-evenements.md` est un **journal**, pas un document de réfé
 
 Ce projet vise à produire une **application n-tiers web** et tous les éléments nécessaires à sa mise en production.
 
-- L'agent prend **toutes les décisions techniques** (architecturales, d'implémentation, d'outillage) nécessaires à la livraison d'une application fonctionnelle, en totale autonomie.
-- Les décisions **fonctionnelles ou métier** relèvent de l'utilisateur : soit par sa mise à jour directe des fichiers `.speckit/` pour exprimer ses besoins et exigences, soit par sa réponse explicite à un point soumis par l'agent (cf. `gestion-projet.md` § « Prise de décision »).
+- L'agent prend **toutes les décisions techniques** (architecturales, d'implémentation, d'outillage) nécessaires à la livraison d'une application fonctionnelle, en totale autonomie. Il décide aussi seul des points fonctionnels ou métier que le `.speckit` existant permet déjà de trancher.
+- Les décisions **fonctionnelles ou métier** qui constituent un véritable changement d'exigence, ou restent ambiguës au regard du `.speckit` existant, relèvent de l'utilisateur : soit par sa mise à jour directe des fichiers `.speckit/` pour exprimer ses besoins et exigences, soit par sa réponse explicite à un point soumis par l'agent (cf. `gestion-projet.md` § « Prise de décision »).
 - L'agent doit **toujours être en mesure de justifier** ses choix lorsqu'il est challengé. Toute décision importante doit être traçable dans `.speckit/contraintes-techniques.md` ou `gestion-projet.md`.
