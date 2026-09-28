@@ -109,6 +109,11 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
 - Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement uniquement.
 
+## Représentation des devises et validation de l'ISBN
+
+- **Devise d'un montant** (ex. `Édition.Prix d'acquisition`) : stockée comme un **code ISO 4217 alpha-3** (`string`, 3 lettres majuscules), validé par le domaine sur sa seule **forme** (3 lettres majuscules), pas contre une liste fermée de devises. Une énumération C# figée aurait contredit l'exigence « n'importe quelle devise » de `fonctionnel.md` § Gestion des devises, qui n'est pas limitée aux quelques exemples cités (Franc français, Dollar américain) dans ce même fichier.
+- **Validation de l'ISBN** : le contrôle du chiffre de vérification (ISBN-10 / ISBN-13) est isolé dans `Bdtheque.Domain.Common.IsbnChecksumValidator`, utilisable indépendamment de l'entité `Édition`. Conformément à `fonctionnel.md` § Validation de l'ISBN (contrôle non bloquant), `Edition.SetIsbn` ne rejette jamais une valeur incorrecte : c'est aux couches applicatives (API/Frontend) d'appeler ce validateur pour avertir l'utilisateur sans empêcher l'enregistrement.
+
 ## Gestion des taux de change
 
 - Devises à taux **fixe** vis-à-vis de l'euro (ex. Franc français) : constantes en code.

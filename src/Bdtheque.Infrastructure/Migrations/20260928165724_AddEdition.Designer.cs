@@ -3,6 +3,7 @@ using System;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    partial class BdthequeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260928165724_AddEdition")]
+    partial class AddEdition
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,8 +79,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<string>("PersonalNotes")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Rating")
-                        .HasColumnType("integer");
+                    b.Property<string>("Rating")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid?>("SeriesId")
                         .HasColumnType("uuid");
@@ -96,8 +100,10 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("VolumeNumber")
                         .HasColumnType("integer");
@@ -130,7 +136,7 @@ namespace Bdtheque.Infrastructure.Migrations
 
                             t.HasCheckConstraint("CK_Albums_VolumeRangeBothOrNeither", "(\"StartVolumeNumber\" IS NULL) = (\"EndVolumeNumber\" IS NULL)");
 
-                            t.HasCheckConstraint("CK_Albums_VolumeRangeOmnibusOnly", "\"StartVolumeNumber\" IS NULL OR \"Type\" = 2");
+                            t.HasCheckConstraint("CK_Albums_VolumeRangeOmnibusOnly", "\"StartVolumeNumber\" IS NULL OR \"Type\" = 'Omnibus'");
 
                             t.HasCheckConstraint("CK_Albums_VolumeRangeOrder", "\"StartVolumeNumber\" IS NULL OR \"StartVolumeNumber\" <= \"EndVolumeNumber\"");
 
@@ -183,8 +189,10 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid?>("SeriesId")
                         .HasColumnType("uuid");
@@ -224,23 +232,28 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<DateOnly?>("AcquisitionDate")
                         .HasColumnType("date");
 
-                    b.Property<int?>("AcquisitionMode")
-                        .HasColumnType("integer");
+                    b.Property<string>("AcquisitionMode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid>("AlbumId")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("Binding")
-                        .HasColumnType("integer");
+                    b.Property<string>("Binding")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int?>("Category")
-                        .HasColumnType("integer");
+                    b.Property<string>("Category")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int?>("Condition")
-                        .HasColumnType("integer");
+                    b.Property<string>("Condition")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int?>("Format")
-                        .HasColumnType("integer");
+                    b.Property<string>("Format")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("IsColor")
                         .HasColumnType("boolean");
@@ -258,8 +271,9 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<int?>("Orientation")
-                        .HasColumnType("integer");
+                    b.Property<string>("Orientation")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("PageCount")
                         .HasColumnType("integer");
@@ -280,8 +294,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("PublisherId")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("ReadingDirection")
-                        .HasColumnType("integer");
+                    b.Property<string>("ReadingDirection")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -403,29 +418,35 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasMaxLength(510)
                         .HasColumnType("character varying(510)");
 
-                    b.Property<int?>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Summary")
                         .HasColumnType("text");
 
-                    b.Property<int?>("TemplateBinding")
-                        .HasColumnType("integer");
+                    b.Property<string>("TemplateBinding")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int?>("TemplateCondition")
-                        .HasColumnType("integer");
+                    b.Property<string>("TemplateCondition")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int?>("TemplateEditionCategory")
-                        .HasColumnType("integer");
+                    b.Property<string>("TemplateEditionCategory")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int?>("TemplateFormat")
-                        .HasColumnType("integer");
+                    b.Property<string>("TemplateFormat")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool?>("TemplateIsColor")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("TemplateOrientation")
-                        .HasColumnType("integer");
+                    b.Property<string>("TemplateOrientation")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid?>("TemplatePublisherCollectionId")
                         .HasColumnType("uuid");
@@ -433,8 +454,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid?>("TemplatePublisherId")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("TemplateReadingDirection")
-                        .HasColumnType("integer");
+                    b.Property<string>("TemplateReadingDirection")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("TheoreticalVolumeCount")
                         .HasColumnType("integer");

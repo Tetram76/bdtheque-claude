@@ -2,11 +2,10 @@ namespace Bdtheque.Domain.Common;
 
 /// <summary>
 /// Guards an enum-typed domain property against undefined values. Without this guard, a
-/// numeric value with no matching named member (e.g. from a future API layer binding an
-/// out-of-range integer) would bypass the project's enum-as-string persistence convention:
-/// <c>Enum.ToString()</c> falls back to the raw number when no name matches, so EF's string
-/// converter would persist it as e.g. "42" instead of a stable member name (see
-/// choix-implementation.md § Conventions de persistance).
+/// value with no matching named member (e.g. from a future API layer binding an arbitrary
+/// integer) would be persisted as-is under the project's enum-as-int convention (see
+/// choix-implementation.md § Conventions de persistance), even though it corresponds to no
+/// member any domain enum actually defines.
 /// </summary>
 public static class EnumGuard
 {

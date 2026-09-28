@@ -39,6 +39,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("Series", tableNames);
         Assert.Contains("Albums", tableNames);
         Assert.Contains("Contributions", tableNames);
+        Assert.Contains("Editions", tableNames);
         await Task.CompletedTask;
     }
 
@@ -228,11 +229,12 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddSeries_WithStatus_PersistsEnumAsReadableString()
+    public async Task AddSeries_WithStatus_PersistsEnumAsExplicitInt()
     {
-        // Confirms the project-wide enum-as-string convention (ConfigureConventions):
-        // the raw column value must be the enum member name, not its numeric ordinal,
-        // so that reordering enum members later cannot silently corrupt existing rows.
+        // Confirms the project-wide enum-as-int convention (ConfigureConventions): the raw
+        // column value is the member's explicit numeric value, not the CLR default ordinal —
+        // every domain enum assigns its values explicitly precisely so this holds regardless
+        // of declaration order (see contraintes-techniques.md).
         var series = new Series("Tintin");
         series.SetStatus(SeriesStatus.InProgress);
 
@@ -241,10 +243,10 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         _fixture.Context.ChangeTracker.Clear();
 
         var rawValue = await _fixture.Context.Database
-            .SqlQuery<string>($"SELECT \"Status\" AS \"Value\" FROM \"Series\" WHERE \"Id\" = {series.Id}")
+            .SqlQuery<int>($"SELECT \"Status\" AS \"Value\" FROM \"Series\" WHERE \"Id\" = {series.Id}")
             .SingleAsync();
 
-        Assert.Equal(nameof(SeriesStatus.InProgress), rawValue);
+        Assert.Equal((int)SeriesStatus.InProgress, rawValue);
     }
 
     [Fact]
@@ -302,9 +304,9 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddAlbum_WithType_PersistsEnumAsReadableString()
+    public async Task AddAlbum_WithType_PersistsEnumAsExplicitInt()
     {
-        // Confirms the project-wide enum-as-string convention also applies to Album.Type.
+        // Confirms the project-wide enum-as-int convention also applies to Album.Type.
         var album = new Album("Tintin", null);
         album.SetType(AlbumType.Omnibus);
 
@@ -313,10 +315,10 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         _fixture.Context.ChangeTracker.Clear();
 
         var rawValue = await _fixture.Context.Database
-            .SqlQuery<string>($"SELECT \"Type\" AS \"Value\" FROM \"Albums\" WHERE \"Id\" = {album.Id}")
+            .SqlQuery<int>($"SELECT \"Type\" AS \"Value\" FROM \"Albums\" WHERE \"Id\" = {album.Id}")
             .SingleAsync();
 
-        Assert.Equal(nameof(AlbumType.Omnibus), rawValue);
+        Assert.Equal((int)AlbumType.Omnibus, rawValue);
     }
 
     [Fact]
@@ -367,9 +369,9 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddContribution_WithRole_PersistsEnumAsReadableString()
+    public async Task AddContribution_WithRole_PersistsEnumAsExplicitInt()
     {
-        // Confirms the project-wide enum-as-string convention also applies to Contribution.Role.
+        // Confirms the project-wide enum-as-int convention also applies to Contribution.Role.
         var album = new Album("Astérix (ModelCreation)", null);
         var author = new Author(null, null, "Goscinny (ModelCreation)");
         var contribution = Contribution.ForAlbum(album, author, ContributionRole.Colorist);
@@ -381,9 +383,106 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         _fixture.Context.ChangeTracker.Clear();
 
         var rawValue = await _fixture.Context.Database
-            .SqlQuery<string>($"SELECT \"Role\" AS \"Value\" FROM \"Contributions\" WHERE \"Id\" = {contribution.Id}")
+            .SqlQuery<int>($"SELECT \"Role\" AS \"Value\" FROM \"Contributions\" WHERE \"Id\" = {contribution.Id}")
             .SingleAsync();
 
-        Assert.Equal(nameof(ContributionRole.Colorist), rawValue);
+        Assert.Equal((int)ContributionRole.Colorist, rawValue);
+    }
+
+    [Fact]
+    public async Task AddEdition_Minimal_Persists()
+    {
+        var album = new Album("Le Lotus bleu (ModelCreation)", null);
+        var publisher = new Publisher("Casterman (ModelCreation)");
+        var edition = new Edition(album, publisher);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Editions
+            .Include(e => e.Album)
+            .Include(e => e.Publisher)
+            .FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Equal("Le Lotus bleu (ModelCreation)", saved.Album.Title);
+        Assert.Equal("Casterman (ModelCreation)", saved.Publisher.Name);
+        Assert.True(saved.IsColor);
+        Assert.False(saved.IsDedicated);
+        Assert.Null(saved.AcquisitionMode);
+    }
+
+    [Fact]
+    public async Task AddEdition_Owned_WithCollectionAndPrice_Persists()
+    {
+        var album = new Album("Astérix (ModelCreation, Edition)", null);
+        var publisher = new Publisher("Dargaud (ModelCreation, Edition)");
+        var collection = new PublisherCollection("Astérix (ModelCreation)", publisher);
+        var edition = new Edition(album, publisher);
+        edition.SetPublisher(publisher, collection);
+        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.SetAcquisitionDate(new DateOnly(2020, 3, 15));
+        edition.SetAcquisitionPrice(9.9m, "EUR");
+        edition.SetPublicationYear(1978);
+        edition.SetIsbn("2-205-00217-0");
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.PublisherCollections.Add(collection);
+        _fixture.Context.Editions.Add(edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Editions
+            .Include(e => e.PublisherCollection)
+            .FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Equal("Astérix (ModelCreation)", saved.PublisherCollection!.Name);
+        Assert.Equal(AcquisitionMode.Purchase, saved.AcquisitionMode);
+        Assert.Equal(new DateOnly(2020, 3, 15), saved.AcquisitionDate);
+        Assert.Equal(9.9m, saved.AcquisitionAmount);
+        Assert.Equal("EUR", saved.AcquisitionCurrency);
+        Assert.Equal(1978, saved.PublicationYear);
+        Assert.Equal("2-205-00217-0", saved.Isbn);
+    }
+
+    [Fact]
+    public async Task AddEdition_WithAcquisitionMode_PersistsEnumAsExplicitInt()
+    {
+        // Confirms the project-wide enum-as-int convention also applies to Edition.AcquisitionMode.
+        var album = new Album("Gaston (ModelCreation)", null);
+        var publisher = new Publisher("Dupuis (ModelCreation)");
+        var edition = new Edition(album, publisher);
+        edition.SetAcquisitionMode(AcquisitionMode.Inherited);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var rawValue = await _fixture.Context.Database
+            .SqlQuery<int>($"SELECT \"AcquisitionMode\" AS \"Value\" FROM \"Editions\" WHERE \"Id\" = {edition.Id}")
+            .SingleAsync();
+
+        Assert.Equal((int)AcquisitionMode.Inherited, rawValue);
+    }
+
+    [Fact]
+    public void AcquisitionAmountScale_AccommodatesThreeDecimalCurrencies()
+    {
+        // SQLite (used by this fixture) has dynamic typing and does not enforce a configured
+        // precision/scale the way PostgreSQL does, so a round-trip test here could not catch a
+        // silent rounding regression — this asserts the EF model metadata itself. Some ISO 4217
+        // currencies (KWD, BHD, OMR, JOD, TND) have 3 minor-unit digits; fonctionnel.md §
+        // Gestion des devises requires supporting any currency, so a scale below 3 would let
+        // PostgreSQL silently round those amounts on save.
+        var entityType = _fixture.Context.Model.FindEntityType(typeof(Edition))!;
+        var property = entityType.FindProperty(nameof(Edition.AcquisitionAmount))!;
+
+        Assert.True(property.GetScale() >= 3,
+            $"AcquisitionAmount scale {property.GetScale()} is too small to preserve 3-decimal currencies without rounding.");
     }
 }

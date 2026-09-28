@@ -68,7 +68,7 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
             $"\"{nameof(Album.StartVolumeNumber)}\" IS NULL OR \"{nameof(Album.StartVolumeNumber)}\" <= \"{nameof(Album.EndVolumeNumber)}\""));
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Albums_VolumeRangeOmnibusOnly",
-            $"\"{nameof(Album.StartVolumeNumber)}\" IS NULL OR \"{nameof(Album.Type)}\" = '{nameof(AlbumType.Omnibus)}'"));
+            $"\"{nameof(Album.StartVolumeNumber)}\" IS NULL OR \"{nameof(Album.Type)}\" = {(int)AlbumType.Omnibus}"));
 
         // Mirrors Album.SetFirstPublicationDate.
         builder.ToTable(t => t.HasCheckConstraint(
