@@ -159,7 +159,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, null!, null!, nameof(AlbumType.Regular),
+                InsertAlbumSql, id, null!, null!, (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, null!));
     }
 
@@ -171,7 +171,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "   ", null!, nameof(AlbumType.Regular),
+                InsertAlbumSql, id, "   ", null!, (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, seriesId));
     }
 
@@ -183,7 +183,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, null!, "Orphan Key", nameof(AlbumType.Regular),
+                InsertAlbumSql, id, null!, "Orphan Key", (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, seriesId));
     }
 
@@ -193,7 +193,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", null!, nameof(AlbumType.Regular),
+                InsertAlbumSql, id, "Tintin", null!, (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, null!));
     }
 
@@ -206,7 +206,7 @@ public sealed class CheckConstraintTests : IDisposable
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
-                "VALUES ({0}, NULL, NULL, true, 'Regular', false, {1})", id, seriesId));
+                "VALUES ({0}, NULL, NULL, true, {1}, false, {2})", id, (int)AlbumType.Regular, seriesId));
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 0, null!, null!, null!, null!, null!));
     }
 
@@ -225,7 +225,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Omnibus),
+                InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Omnibus,
                 null!, 1, null!, null!, null!, null!));
     }
 
@@ -235,7 +235,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Omnibus),
+                InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Omnibus,
                 null!, 6, 1, null!, null!, null!));
     }
 
@@ -245,7 +245,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, 1, 6, null!, null!, null!));
     }
 
@@ -255,7 +255,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, null!, null!, null!, 6, null!));
     }
 
@@ -267,7 +267,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, null!, null!, 1978, month, null!));
     }
 
@@ -277,7 +277,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+                InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, null!, null!, 0, null!, null!));
     }
 
@@ -286,7 +286,7 @@ public sealed class CheckConstraintTests : IDisposable
     {
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertAlbumSql, id, "Tintin", "Tintin", nameof(AlbumType.Regular),
+            InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
             5, null!, null!, 1978, 6, null!);
 
         var count = await _fixture.Context.Albums.CountAsync(a => a.Id == id);
@@ -307,7 +307,7 @@ public sealed class CheckConstraintTests : IDisposable
         var albumId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
             "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
-            $"VALUES ({{0}}, 'Tintin', 'Tintin', false, '{nameof(AlbumType.Regular)}', false)", albumId);
+            "VALUES ({0}, 'Tintin', 'Tintin', false, {1}, false)", albumId, (int)AlbumType.Regular);
         return albumId;
     }
 
@@ -330,7 +330,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertContributionSql, id, null!, null!, authorId, nameof(ContributionRole.Scenarist)));
+                InsertContributionSql, id, null!, null!, authorId, (int)ContributionRole.Scenarist));
     }
 
     [Fact]
@@ -342,7 +342,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertContributionSql, id, albumId, seriesId, authorId, nameof(ContributionRole.Scenarist)));
+                InsertContributionSql, id, albumId, seriesId, authorId, (int)ContributionRole.Scenarist));
     }
 
     [Fact]
@@ -352,7 +352,7 @@ public sealed class CheckConstraintTests : IDisposable
         var authorId = await InsertAuthorAsync();
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertContributionSql, id, albumId, null!, authorId, nameof(ContributionRole.Scenarist));
+            InsertContributionSql, id, albumId, null!, authorId, (int)ContributionRole.Scenarist);
 
         var count = await _fixture.Context.Contributions.CountAsync(c => c.Id == id);
         Assert.Equal(1, count);
@@ -365,7 +365,7 @@ public sealed class CheckConstraintTests : IDisposable
         var authorId = await InsertAuthorAsync();
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertContributionSql, id, null!, seriesId, authorId, nameof(ContributionRole.Scenarist));
+            InsertContributionSql, id, null!, seriesId, authorId, (int)ContributionRole.Scenarist);
 
         var count = await _fixture.Context.Contributions.CountAsync(c => c.Id == id);
         Assert.Equal(1, count);
@@ -377,11 +377,11 @@ public sealed class CheckConstraintTests : IDisposable
         var albumId = await InsertAlbumAsync();
         var authorId = await InsertAuthorAsync();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, nameof(ContributionRole.Scenarist));
+            InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, (int)ContributionRole.Scenarist);
 
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, nameof(ContributionRole.Scenarist)));
+                InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, (int)ContributionRole.Scenarist));
     }
 
     [Fact]
@@ -390,11 +390,11 @@ public sealed class CheckConstraintTests : IDisposable
         var seriesId = await InsertSeriesAsync();
         var authorId = await InsertAuthorAsync();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, nameof(ContributionRole.Illustrator));
+            InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, (int)ContributionRole.Illustrator);
 
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, nameof(ContributionRole.Illustrator)));
+                InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, (int)ContributionRole.Illustrator));
     }
 
     [Fact]
@@ -407,9 +407,9 @@ public sealed class CheckConstraintTests : IDisposable
         var authorId = await InsertAuthorAsync();
 
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, nameof(ContributionRole.Colorist));
+            InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, (int)ContributionRole.Colorist);
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, nameof(ContributionRole.Colorist));
+            InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, (int)ContributionRole.Colorist);
 
         var count = await _fixture.Context.Contributions.CountAsync(c => c.AuthorId == authorId);
         Assert.Equal(2, count);
@@ -461,7 +461,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertEditionSql, id, albumId, publisherId, false, null!, null!, nameof(AcquisitionMode.Purchase), null!, 10, null!));
+                InsertEditionSql, id, albumId, publisherId, false, null!, null!, (int)AcquisitionMode.Purchase, null!, 10, null!));
     }
 
     [Fact]
@@ -473,7 +473,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertEditionSql, id, albumId, publisherId, false, null!, null!, nameof(AcquisitionMode.Purchase), null!, 0, "EUR"));
+                InsertEditionSql, id, albumId, publisherId, false, null!, null!, (int)AcquisitionMode.Purchase, null!, 0, "EUR"));
     }
 
     [Fact]
@@ -509,7 +509,7 @@ public sealed class CheckConstraintTests : IDisposable
         var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertEditionSql, id, albumId, publisherId, true, null!, null!, nameof(AcquisitionMode.Gift), null!, 10, "EUR"));
+                InsertEditionSql, id, albumId, publisherId, true, null!, null!, (int)AcquisitionMode.Gift, null!, 10, "EUR"));
     }
 
     [Fact]
