@@ -229,11 +229,12 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddSeries_WithStatus_PersistsEnumAsReadableString()
+    public async Task AddSeries_WithStatus_PersistsEnumAsExplicitInt()
     {
-        // Confirms the project-wide enum-as-string convention (ConfigureConventions):
-        // the raw column value must be the enum member name, not its numeric ordinal,
-        // so that reordering enum members later cannot silently corrupt existing rows.
+        // Confirms the project-wide enum-as-int convention (ConfigureConventions): the raw
+        // column value is the member's explicit numeric value, not the CLR default ordinal —
+        // every domain enum assigns its values explicitly precisely so this holds regardless
+        // of declaration order (see contraintes-techniques.md).
         var series = new Series("Tintin");
         series.SetStatus(SeriesStatus.InProgress);
 
@@ -242,10 +243,10 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         _fixture.Context.ChangeTracker.Clear();
 
         var rawValue = await _fixture.Context.Database
-            .SqlQuery<string>($"SELECT \"Status\" AS \"Value\" FROM \"Series\" WHERE \"Id\" = {series.Id}")
+            .SqlQuery<int>($"SELECT \"Status\" AS \"Value\" FROM \"Series\" WHERE \"Id\" = {series.Id}")
             .SingleAsync();
 
-        Assert.Equal(nameof(SeriesStatus.InProgress), rawValue);
+        Assert.Equal((int)SeriesStatus.InProgress, rawValue);
     }
 
     [Fact]
@@ -303,9 +304,9 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddAlbum_WithType_PersistsEnumAsReadableString()
+    public async Task AddAlbum_WithType_PersistsEnumAsExplicitInt()
     {
-        // Confirms the project-wide enum-as-string convention also applies to Album.Type.
+        // Confirms the project-wide enum-as-int convention also applies to Album.Type.
         var album = new Album("Tintin", null);
         album.SetType(AlbumType.Omnibus);
 
@@ -314,10 +315,10 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         _fixture.Context.ChangeTracker.Clear();
 
         var rawValue = await _fixture.Context.Database
-            .SqlQuery<string>($"SELECT \"Type\" AS \"Value\" FROM \"Albums\" WHERE \"Id\" = {album.Id}")
+            .SqlQuery<int>($"SELECT \"Type\" AS \"Value\" FROM \"Albums\" WHERE \"Id\" = {album.Id}")
             .SingleAsync();
 
-        Assert.Equal(nameof(AlbumType.Omnibus), rawValue);
+        Assert.Equal((int)AlbumType.Omnibus, rawValue);
     }
 
     [Fact]
@@ -368,9 +369,9 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddContribution_WithRole_PersistsEnumAsReadableString()
+    public async Task AddContribution_WithRole_PersistsEnumAsExplicitInt()
     {
-        // Confirms the project-wide enum-as-string convention also applies to Contribution.Role.
+        // Confirms the project-wide enum-as-int convention also applies to Contribution.Role.
         var album = new Album("Astérix (ModelCreation)", null);
         var author = new Author(null, null, "Goscinny (ModelCreation)");
         var contribution = Contribution.ForAlbum(album, author, ContributionRole.Colorist);
@@ -382,10 +383,10 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         _fixture.Context.ChangeTracker.Clear();
 
         var rawValue = await _fixture.Context.Database
-            .SqlQuery<string>($"SELECT \"Role\" AS \"Value\" FROM \"Contributions\" WHERE \"Id\" = {contribution.Id}")
+            .SqlQuery<int>($"SELECT \"Role\" AS \"Value\" FROM \"Contributions\" WHERE \"Id\" = {contribution.Id}")
             .SingleAsync();
 
-        Assert.Equal(nameof(ContributionRole.Colorist), rawValue);
+        Assert.Equal((int)ContributionRole.Colorist, rawValue);
     }
 
     [Fact]
@@ -448,9 +449,9 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddEdition_WithAcquisitionMode_PersistsEnumAsReadableString()
+    public async Task AddEdition_WithAcquisitionMode_PersistsEnumAsExplicitInt()
     {
-        // Confirms the project-wide enum-as-string convention also applies to Edition.AcquisitionMode.
+        // Confirms the project-wide enum-as-int convention also applies to Edition.AcquisitionMode.
         var album = new Album("Gaston (ModelCreation)", null);
         var publisher = new Publisher("Dupuis (ModelCreation)");
         var edition = new Edition(album, publisher);
@@ -463,10 +464,10 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         _fixture.Context.ChangeTracker.Clear();
 
         var rawValue = await _fixture.Context.Database
-            .SqlQuery<string>($"SELECT \"AcquisitionMode\" AS \"Value\" FROM \"Editions\" WHERE \"Id\" = {edition.Id}")
+            .SqlQuery<int>($"SELECT \"AcquisitionMode\" AS \"Value\" FROM \"Editions\" WHERE \"Id\" = {edition.Id}")
             .SingleAsync();
 
-        Assert.Equal(nameof(AcquisitionMode.Inherited), rawValue);
+        Assert.Equal((int)AcquisitionMode.Inherited, rawValue);
     }
 
     [Fact]

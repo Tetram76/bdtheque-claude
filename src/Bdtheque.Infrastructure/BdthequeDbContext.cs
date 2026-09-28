@@ -22,9 +22,13 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        // Project-wide convention: persist every enum as its member name rather than its
-        // numeric ordinal, so that reordering or inserting enum members later cannot silently
-        // change the meaning of already-persisted rows (see contraintes-techniques.md).
-        configurationBuilder.Properties<Enum>().HaveConversion<string>().HaveMaxLength(50);
+        // Project-wide convention: persist every enum as its underlying int. Every enum member
+        // across the domain carries an explicit numeric value (never left implicit), so
+        // reordering or inserting members later cannot silently change the meaning of
+        // already-persisted rows — the same guarantee a string conversion would give, without
+        // coupling persisted data (and the occasional CHECK constraint referencing a member by
+        // name, e.g. AlbumConfiguration) to a C# identifier that renaming would silently break
+        // (see contraintes-techniques.md).
+        configurationBuilder.Properties<Enum>().HaveConversion<int>();
     }
 }
