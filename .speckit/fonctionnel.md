@@ -249,7 +249,7 @@ Règles de construction :
 - **Taux de change** :
   - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante.
   - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux appliqué dépend du contexte :
-    - **Estimation de la valeur de la collection** : taux de change **actuel** (récupéré dynamiquement).
+    - **Estimation de la valeur de la collection** : taux de change **actuel**, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)**.
     - **Autres cas** : règle à définir au cas par cas.
 
 ## Design et charte graphique
