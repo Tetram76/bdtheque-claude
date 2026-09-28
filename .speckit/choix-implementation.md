@@ -1,6 +1,6 @@
 # Choix d'Implémentation
 
-Ce fichier ne recense **pas la totalité** des choix d'implémentation du projet, mais uniquement ceux pour lesquels une **réelle délibération entre plusieurs options** a eu lieu — typiquement une alternative explicitement envisagée puis écartée, avec son argumentation. Un point sans cette délibération explicite reste dans `contraintes-techniques.md` par défaut, même s'il s'agit techniquement d'un choix plutôt que d'une exigence externe : trancher entre les deux sans trace écrite de délibération relève de la supposition, pas d'un fait vérifié.
+Ce fichier recense les choix d'implémentation retenus par l'agent **de sa propre initiative** (architecture, bibliothèque, algorithme non imposé, etc.), qu'il y ait eu ou non délibération explicite entre plusieurs options. `contraintes-techniques.md` reste réservé aux contraintes **imposées** — par l'utilisateur, des normes/lois, ou une réalité externe non négociable : l'agent n'y ajoute rien de sa propre initiative.
 
 Ces choix ne sont pas imposés : ils peuvent être remis en cause si une meilleure option apparaît ou si une nouvelle contrainte le justifie (cf. `gestion-projet.md` § « Prise de décision »).
 
