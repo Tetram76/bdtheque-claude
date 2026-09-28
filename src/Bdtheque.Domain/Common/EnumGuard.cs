@@ -4,7 +4,7 @@ namespace Bdtheque.Domain.Common;
 /// Guards an enum-typed domain property against undefined values. Without this guard, a
 /// value with no matching named member (e.g. from a future API layer binding an arbitrary
 /// integer) would be persisted as-is under the project's enum-as-int convention (see
-/// contraintes-techniques.md § Conventions de persistance), even though it corresponds to no
+/// choix-implementation.md § Conventions de persistance), even though it corresponds to no
 /// member any domain enum actually defines.
 /// </summary>
 public static class EnumGuard

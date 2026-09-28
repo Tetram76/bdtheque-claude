@@ -1,6 +1,7 @@
 # Fonctionnel
 
 Ce fichier décrit les fonctionnalités de l'application, ainsi que les éléments de design et la charte graphique.
+Il ne doit contenir **aucun détail d'implémentation laissé à la discrétion de l'agent** (stack, architecture, mécanique de calcul, structure de données, bibliothèque, etc.) : ceux-ci relèvent de `contraintes-techniques.md` ou `choix-implementation.md`. En revanche, un élément d'apparence technique mais **explicitement imposé par l'utilisateur comme règle métier** (ex. l'algorithme d'estimation retenu) reste documenté ici, en plus de sa contrepartie dans `contraintes-techniques.md`. Les règles sont formulées au niveau métier — le comportement attendu et les cas visibles de l'utilisateur.
 
 ---
 
@@ -220,7 +221,7 @@ Dans tous les cas, le champ montant est affiché et reste optionnel : même sans
 
 ### Validation de l'ISBN
 
-La saisie d'un ISBN vérifie le chiffre de contrôle (ISBN-10 ou ISBN-13) afin de détecter les erreurs de frappe. Cette vérification est **non bloquante** : l'utilisateur est averti en cas d'incohérence mais peut enregistrer la valeur telle quelle (certains éditeurs ont publié des albums avec un ISBN erroné).
+Les formats **ISBN-10** et **ISBN-13/EAN-13** sont tous deux supportés. La saisie d'un ISBN vérifie le chiffre de contrôle correspondant afin de détecter les erreurs de frappe. Cette vérification est **non bloquante** : l'utilisateur est averti en cas d'incohérence mais peut enregistrer la valeur telle quelle (certains éditeurs ont publié des albums avec un ISBN erroné).
 
 ### Séquence théorique de tomes d'une série
 
@@ -248,7 +249,7 @@ Règles de construction :
 - **Taux de change** :
   - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante.
   - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux appliqué dépend du contexte :
-    - **Estimation de la valeur de la collection** : taux de change **actuel** (récupéré dynamiquement).
+    - **Estimation de la valeur de la collection** : taux de change **actuel**, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)**.
     - **Autres cas** : règle à définir au cas par cas.
 
 ## Design et charte graphique
@@ -286,7 +287,7 @@ L'application se compose de trois parties distinctes :
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser).
 2. **Administration** — protégée par **authentification** :
    - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, etc.
-   - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, parsing de sites web, etc. (les sources concrètes restent à définir).
+   - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. (les sources concrètes restent à définir).
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).

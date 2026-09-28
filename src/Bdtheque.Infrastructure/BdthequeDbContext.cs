@@ -28,7 +28,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
         // already-persisted rows — the same guarantee a string conversion would give, without
         // coupling persisted data (and the occasional CHECK constraint referencing a member by
         // name, e.g. AlbumConfiguration) to a C# identifier that renaming would silently break
-        // (see contraintes-techniques.md).
+        // (see choix-implementation.md).
         configurationBuilder.Properties<Enum>().HaveConversion<int>();
     }
 }

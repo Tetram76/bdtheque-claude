@@ -1,7 +1,8 @@
 # Contraintes Techniques
 
-Ce fichier décrit les choix et contraintes techniques de l'application et de son déploiement.
-Il ne concerne PAS les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
+Ce fichier récence les **choix et contraintes techniques** de l'application et de son déploiement — qu'ils soient **imposés** (par l'utilisateur, des normes/lois, ou une réalité externe non négociable comme un système existant à migrer ou un environnement d'hébergement donné) ou simplement **retenus par l'agent** sans délibération explicite entre options. C'est la destination par défaut de tout choix technique.
+Seul le cas rare d'une **réelle délibération entre plusieurs options** (alternative explicitement envisagée puis écartée, avec son argumentation) est documenté à part, dans `choix-implementation.md`. En cas de doute sur cette frontière, l'information reste ici par défaut.
+Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
 
 ---
 
@@ -51,11 +52,6 @@ La solution .NET est découpée en projets par responsabilité, sous `src/` :
 | `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor Server, authentification cookie, appels HTTP vers `Bdtheque.Api`. |
 
 Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
-
-## Conventions de persistance (EF Core)
-
-- **Énumérations** : toute propriété de type `enum` est persistée sous forme d'**entier**, et chaque membre de chaque enum du domaine porte une **valeur numérique explicite** (`= N`), jamais implicite. Configuré une fois pour tout le modèle via `ConfigureConventions` sur `BdthequeDbContext` (`Properties<Enum>().HaveConversion<int>()`). Objectif : un ré-ordonnancement ou un ajout de membre dans un enum ne doit jamais changer silencieusement le sens des lignes déjà persistées — l'explicitness des valeurs neutralise ce risque aussi bien qu'un stockage en chaîne. Un test de garde (`EnumValueUniquenessTests`, `Bdtheque.Domain.Tests`) vérifie par réflexion que chaque membre actuel de chaque enum du domaine correspond à une entrée d'un registre append-only (`EnumValueLedger`) qui ne perd jamais la trace d'une valeur, y compris après le retrait du membre C# qui la portait — une unicité vérifiée sur les seuls membres actuellement déclarés ne suffirait pas : elle ne détecterait pas la réaffectation d'une valeur retirée à un nouveau membre sans lien avec l'ancien, qui réinterpréterait silencieusement les lignes déjà persistées.
-  - **Alternative écartée (chaîne = nom du membre)** : ce choix a été le choix initial du projet, puis reconsidéré. Son avantage (lisibilité directe des valeurs en base pour un mainteneur solo) reste réel mais modeste, et n'est appuyé par aucune contrainte documentée ailleurs dans le `.speckit/` — la base ne restreint d'ailleurs les valeurs valides ni pour un stockage chaîne ni pour un stockage entier (aucune contrainte CHECK de type `IN (...)` sur les colonnes d'enum). Ce choix couplait en pratique le nom des membres C# à la donnée persistée : un renommage n'est pas seulement une évolution du code, il devient une migration de données implicite, sans aucun filet — la définition de l'enum ne peut plus, par construction, détecter qu'une ancienne valeur textuelle traîne encore en base sous un nom disparu. Ce couplage se matérialisait même au niveau du schéma : une contrainte CHECK (`AlbumConfiguration`, `CK_Albums_VolumeRangeOmnibusOnly`) référençait un nom de membre via `nameof(AlbumType.Omnibus)` directement dans le SQL généré. L'argument de la lisibilité en base a par ailleurs un coût non compensé : il empêchait un `ORDER BY` SQL direct pour les enums dont l'ordre métier n'est pas alphabétique (ex. l'ordre fixe des types de visuel d'édition, cf. `fonctionnel.md`), obligeant un tri en mémoire — coût que l'entier explicite (valeurs assignées dans l'ordre métier) supprime. L'argument tiré de la future migration Firebird ne tient pas non plus : cette migration est une traduction explicite entre un référentiel piloté par l'ancienne base (Firebird) et un référentiel désormais piloté par le Domain C# ; le migrateur traduit une valeur Firebird vers un membre d'enum quel que soit son mode de persistance, la représentation retenue côté nouveau modèle n'allège ni n'alourdit cette traduction. Chaque setter d'énumération valide néanmoins la définition de la valeur reçue via `EnumGuard.EnsureDefined` (`Bdtheque.Domain.Common`), pour qu'une valeur hors plage (ex. liaison d'un entier arbitraire depuis l'API) ne soit jamais persistée telle quelle, quel que soit le mode de stockage retenu.
 
 ## Déploiement
 
@@ -112,11 +108,6 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 - L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
 - Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement uniquement.
-
-## Représentation des devises et validation de l'ISBN
-
-- **Devise d'un montant** (ex. `Édition.Prix d'acquisition`) : stockée comme un **code ISO 4217 alpha-3** (`string`, 3 lettres majuscules), validé par le domaine sur sa seule **forme** (3 lettres majuscules), pas contre une liste fermée de devises. Une énumération C# figée aurait contredit l'exigence « n'importe quelle devise » de `fonctionnel.md` § Gestion des devises, qui n'est pas limitée aux quelques exemples cités (Franc français, Dollar américain) dans ce même fichier.
-- **Validation de l'ISBN** : le contrôle du chiffre de vérification (ISBN-10 / ISBN-13) est isolé dans `Bdtheque.Domain.Common.IsbnChecksumValidator`, utilisable indépendamment de l'entité `Édition`. Conformément à `fonctionnel.md` § Validation de l'ISBN (contrôle non bloquant), `Edition.SetIsbn` ne rejette jamais une valeur incorrecte : c'est aux couches applicatives (API/Frontend) d'appeler ce validateur pour avertir l'utilisateur sans empêcher l'enregistrement.
 
 ## Gestion des taux de change
 

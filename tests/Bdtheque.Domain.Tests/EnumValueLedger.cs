@@ -7,7 +7,7 @@ namespace Bdtheque.Domain.Tests;
 /// each domain enum — including retired members whose C# declaration has since been removed.
 /// Never remove, rename, or renumber an entry here when a member is removed from its enum: doing
 /// so would let a later member silently reuse a value that already means something different in
-/// already-persisted rows (see contraintes-techniques.md § Conventions de persistance). Add a new
+/// already-persisted rows (see choix-implementation.md § Conventions de persistance). Add a new
 /// entry whenever a new member is introduced; a retired member's entry stays forever so its value
 /// remains reserved.
 /// </summary>
