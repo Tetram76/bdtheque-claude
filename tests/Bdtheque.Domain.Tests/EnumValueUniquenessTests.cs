@@ -4,7 +4,7 @@ namespace Bdtheque.Domain.Tests;
 
 /// <summary>
 /// Guards the project-wide convention of persisting enums as their explicit int value
-/// (see contraintes-techniques.md § Conventions de persistance). Checking uniqueness among only
+/// (see choix-implementation.md § Conventions de persistance). Checking uniqueness among only
 /// the currently declared members is not enough: it would miss a member removed and a later,
 /// unrelated member reusing its retired value, which would silently reinterpret already-persisted
 /// rows without EF or the database ever noticing. These tests cross-check every current member
