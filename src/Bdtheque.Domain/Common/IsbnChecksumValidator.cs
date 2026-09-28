@@ -44,6 +44,15 @@ public static class IsbnChecksumValidator
 
     private static bool IsValidIsbn13(char[] characters)
     {
+        // Every ISBN-13 is an EAN-13, but not every EAN-13 is an ISBN-13: only the "Bookland"
+        // prefixes 978/979 identify one. Without this check, a checksum-valid but non-book
+        // EAN-13 (e.g. pasted from the wrong source) would be reported as a valid ISBN.
+        var hasBooklandPrefix =
+            (characters[0] == '9' && characters[1] == '7' && characters[2] == '8') ||
+            (characters[0] == '9' && characters[1] == '7' && characters[2] == '9');
+        if (!hasBooklandPrefix)
+            return false;
+
         var sum = 0;
         for (var i = 0; i < 13; i++)
         {

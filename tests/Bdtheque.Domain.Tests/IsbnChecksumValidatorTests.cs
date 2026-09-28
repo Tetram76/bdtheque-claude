@@ -36,6 +36,22 @@ public sealed class IsbnChecksumValidatorTests
         Assert.False(IsbnChecksumValidator.IsValid("9780306406158"));
     }
 
+    [Fact]
+    public void IsValid_ChecksumValidEan13WithNonIsbnPrefix_ReturnsFalse()
+    {
+        // "4006381333931" is a real, checksum-valid EAN-13 (a German retail barcode) but is not
+        // an ISBN: only the Bookland prefixes 978/979 identify an EAN-13 as an ISBN-13. A
+        // checksum-only check would wrongly accept it, masking a genuine data-entry mistake
+        // (e.g. a non-book barcode pasted into the ISBN field).
+        Assert.False(IsbnChecksumValidator.IsValid("4006381333931"));
+    }
+
+    [Fact]
+    public void IsValid_Isbn13WithBookland979Prefix_ReturnsTrue()
+    {
+        Assert.True(IsbnChecksumValidator.IsValid("9791234567896"));
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
