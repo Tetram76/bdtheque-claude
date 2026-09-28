@@ -238,6 +238,7 @@ Règles de construction :
 ### Estimation de la valeur des éditions
 
 - La **valeur estimée** d'une édition est calculée dynamiquement à partir des données de la collection, elle n'est pas stockée en base.
+- Le modèle d'estimation retenu est un **Random Forest**.
 
 ### Gestion des devises
 
