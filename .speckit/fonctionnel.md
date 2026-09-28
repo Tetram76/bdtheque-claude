@@ -286,7 +286,7 @@ L'application se compose de trois parties distinctes :
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser).
 2. **Administration** — protégée par **authentification** :
    - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, etc.
-   - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, parsing de sites web, etc. (les sources concrètes restent à définir).
+   - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. (les sources concrètes restent à définir).
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
