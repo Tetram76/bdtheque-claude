@@ -23,7 +23,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     {
         // Project-wide convention: persist every enum as its member name rather than its
         // numeric ordinal, so that reordering or inserting enum members later cannot silently
-        // change the meaning of already-persisted rows (see contraintes-techniques.md).
+        // change the meaning of already-persisted rows (see choix-implementation.md).
         configurationBuilder.Properties<Enum>().HaveConversion<string>().HaveMaxLength(50);
     }
 }

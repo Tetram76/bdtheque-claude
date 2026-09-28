@@ -99,5 +99,6 @@ Le développement est mené par un agent IA disposant d'une **autonomie totale**
 | [`fonctionnel.md`](.speckit/fonctionnel.md) | Fonctionnalités, règles métier, flux |
 | [`modele-metier.md`](.speckit/modele-metier.md) | Entités, attributs, relations |
 | [`contraintes-techniques.md`](.speckit/contraintes-techniques.md) | Stack, architecture, déploiement |
+| [`choix-implementation.md`](.speckit/choix-implementation.md) | Choix techniques ayant fait l'objet d'une délibération explicite entre options |
 | [`gestion-projet.md`](.speckit/gestion-projet.md) | Branches, commits, CI/CD |
 | [`suivi-implementation.md`](.speckit/suivi-implementation.md) | Avancement du plan d'implémentation (phases, PR, statut) |

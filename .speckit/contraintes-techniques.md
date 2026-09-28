@@ -1,7 +1,8 @@
 # Contraintes Techniques
 
-Ce fichier décrit les choix et contraintes techniques de l'application et de son déploiement.
-Il ne concerne PAS les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
+Ce fichier récence les contraintes techniques **imposées** à l'application et à son déploiement — par l'utilisateur (propriétaire du projet), par des normes ou lois, ou par une réalité externe non négociable (ex. système existant à migrer, environnement d'hébergement donné).
+Il n'a pas vocation à noter les **choix d'implémentation non évidents** retenus pour satisfaire ces contraintes lorsqu'une réelle délibération entre options a eu lieu : ceux-ci sont documentés dans `choix-implementation.md`. En cas de doute sur la frontière entre les deux, l'information reste ici par défaut — seul un point où plusieurs options ont été explicitement pesées l'une contre l'autre en va.
+Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
 
 ---
 
@@ -51,12 +52,6 @@ La solution .NET est découpée en projets par responsabilité, sous `src/` :
 | `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor Server, authentification cookie, appels HTTP vers `Bdtheque.Api`. |
 
 Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
-
-## Conventions de persistance (EF Core)
-
-- **Énumérations** : toute propriété de type `enum` est persistée sous forme de **chaîne** (nom du membre), jamais sous forme d'entier. Configuré une fois pour tout le modèle via `ConfigureConventions` sur `BdthequeDbContext` (`Properties<Enum>().HaveConversion<string>()`). Objectif : un ré-ordonnancement ou un ajout de membre dans un enum ne doit jamais changer silencieusement le sens des lignes déjà persistées, ce qui serait le cas avec un stockage par entier implicite.
-  - **Alternative écartée (entier avec valeurs explicites)** : assigner une valeur numérique explicite à chaque membre (`= N`) neutraliserait aussi le risque de ré-ordonnancement, sans le surcoût de stockage/longueur d'une chaîne. Cette alternative est écartée car son seul point faible — la réutilisation d'un numéro retiré — est moins probable que le point faible symétrique du stockage en chaîne (un renommage de membre, qui invalide silencieusement les valeurs déjà stockées sous ce nom) : ce projet a déjà renommé plusieurs membres d'énumération en cours de développement pour en clarifier le nom anglais. Le format chaîne reste par ailleurs directement lisible en base, un atout pour un projet à maintenance solo et pour la future migration Firebird (cf. § Migration des données). Chaque setter d'énumération valide néanmoins la définition de la valeur reçue via `EnumGuard.EnsureDefined` (`Bdtheque.Domain.Common`), pour qu'une valeur hors plage (ex. liaison d'un entier arbitraire depuis l'API) ne soit jamais persistée telle quelle, quel que soit le mode de stockage retenu.
-  - **Conséquence sur le tri** : ce stockage rend un `ORDER BY` direct sur la colonne **alphabétique**, pas conforme à l'ordre métier quand celui-ci ne l'est pas (ex. l'ordre fixe des types de visuel d'édition, cf. `fonctionnel.md`). Dans ce cas, le tri s'appuie explicitement sur le rang du membre (ordre de déclaration de l'enum), appliqué en mémoire pour les petites collections concernées plutôt que traduit en SQL.
 
 ## Déploiement
 

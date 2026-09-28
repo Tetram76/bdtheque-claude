@@ -1,6 +1,7 @@
 # Fonctionnel
 
 Ce fichier décrit les fonctionnalités de l'application, ainsi que les éléments de design et la charte graphique.
+Il ne doit contenir **aucune considération technique ni détail d'implémentation** (stack, algorithme, mécanique de calcul, structure de données, bibliothèque, etc.) : ceux-ci relèvent de `contraintes-techniques.md` ou `choix-implementation.md`. Les règles sont formulées exclusivement au niveau métier — le comportement attendu et les cas visibles de l'utilisateur.
 
 ---
 
@@ -237,7 +238,6 @@ Règles de construction :
 ### Estimation de la valeur des éditions
 
 - La **valeur estimée** d'une édition est calculée dynamiquement à partir des données de la collection, elle n'est pas stockée en base.
-- Le modèle d'estimation retenu est un **Random Forest**.
 
 ### Gestion des devises
 

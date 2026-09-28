@@ -7,9 +7,10 @@ Le dossier `.speckit/` est la **source de vérité absolue et contraignante** du
 | Fichier | Contenu |
 | --- | --- |
 | `gestion-projet.md` | Gouvernance du projet : stockage, branches, conventions de commit, outillage, CI/CD. Tout ce qui ne concerne PAS l'application elle-même. |
-| `fonctionnel.md` | Fonctionnalités de l'application : cas d'usage, user stories, règles métier, flux. Les règles sont formulées au niveau métier — le comportement attendu et les cas visibles de l'utilisateur — jamais leur détail d'implémentation (algorithme, mécanique de calcul, structures internes) : ces derniers vivent dans le code et ses tests. |
+| `fonctionnel.md` | Fonctionnalités de l'application : cas d'usage, user stories, règles métier, flux. Les règles sont formulées exclusivement au niveau métier — le comportement attendu et les cas visibles de l'utilisateur — **sans aucune considération technique ni détail d'implémentation** (stack, algorithme, mécanique de calcul, structures internes, bibliothèque, etc.) : ces derniers vivent dans le code, ses tests, `contraintes-techniques.md` ou `choix-implementation.md`. |
 | `modele-metier.md` | Modèle du domaine : entités, attributs, relations, contraintes d'intégrité, glossaire. |
-| `contraintes-techniques.md` | Choix et contraintes techniques de l'application et de son déploiement uniquement (stack, langages, frameworks, BDD, hébergement, sécurité). Rien de lié à la gestion de projet. |
+| `contraintes-techniques.md` | Choix et contraintes techniques de l'application et de son déploiement (stack, langages, frameworks, BDD, hébergement, sécurité). Contient par défaut tout choix technique, y compris ceux faits par l'agent, sauf le cas rare couvert par `choix-implementation.md`. Rien de lié à la gestion de projet. |
+| `choix-implementation.md` | **Uniquement** les choix d'implémentation ayant fait l'objet d'une **délibération explicite entre options** (alternative envisagée puis écartée, avec son argumentation) — pas un inventaire des choix techniques en général, ceux-ci restent dans `contraintes-techniques.md`. Non imposés : remis en cause possible si une meilleure option apparaît. |
 | `journal-evenements.md` | Journal des évènements externes au repo pouvant influencer son développement (ex. : déploiement d'une version en test/production, incident, changement d'infrastructure externe). Fichier journal à part — voir « Journal des évènements externes » ci-dessous, il déroge aux règles de mise à jour et de format des autres fichiers. |
 
 ## Règles de consultation
@@ -30,7 +31,7 @@ Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que
 - En cas de changement de décision, l'**ancienne information est remplacée**, pas conservée à côté de la nouvelle avec une mention de type « anciennement », « auparavant » ou « suite à ».
 - Le fichier doit rester cohérent, lisible et structuré comme une documentation vivante.
 
-**Ces règles de mise à jour (immédiate, sans historique) s'appliquent aux quatre fichiers de référence ci-dessus. Le fichier `journal-evenements.md` en est exclu — voir la section suivante.**
+**Ces règles de mise à jour (immédiate, sans historique) s'appliquent aux cinq fichiers de référence ci-dessus. Le fichier `journal-evenements.md` en est exclu — voir la section suivante.**
 
 ## Journal des évènements externes
 
