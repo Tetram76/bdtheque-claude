@@ -97,10 +97,6 @@ L'agent produit l'intégralité des livrables du projet, y compris :
   - *Vérification de validité des secrets détectés* (`secret_scanning_validity_checks`) : désactivée, cause non identifiée — à vérifier manuellement dans les paramètres GitHub du dépôt si besoin.
 - **Merge réservé à l'utilisateur, y compris pour de futurs collaborateurs** : le dépôt est la propriété d'un compte **personnel** (`Tetram76`), pas d'une organisation — la restriction de push/merge par utilisateur ou équipe (fonctionnalité GitHub de branch protection) n'est **pas disponible** sur ce type de dépôt, elle ne peut donc pas être imposée techniquement via un Ruleset ou une protection de branche. La garantie repose donc sur la gestion des droits d'accès : **aucun collaborateur ne doit recevoir un accès `Write` (ou supérieur)** au dépôt. Toute contribution externe future passe par un **fork** + Pull Request ; le merge de cette PR reste effectué par l'utilisateur (ou par l'agent agissant en son nom), jamais par le contributeur externe lui-même.
 
-## Outillage de l'agent (Claude Code)
-
-- Le plugin **superpowers** est **interdit** dans ce projet : aucun de ses skills, aucune de ses règles, ni par invocation explicite ni par auto-déclenchement. Motif : le plugin gère mal le nettoyage de ses worktrees après fusion/discard de branche, laissant des worktrees orphelins dans `.claude/worktrees/`.
-
 ## Outillage .NET
 
 - **Gestion centralisée des packages NuGet** via `Directory.Packages.props` (Central Package Management) : toutes les versions sont déclarées à la racine de la solution, les fichiers `.csproj` ne référencent que les noms de package.
