@@ -1,7 +1,7 @@
 # Fonctionnel
 
 Ce fichier décrit les fonctionnalités de l'application, ainsi que les éléments de design et la charte graphique.
-Il ne doit contenir **aucune considération technique ni détail d'implémentation** (stack, algorithme, mécanique de calcul, structure de données, bibliothèque, etc.) : ceux-ci relèvent de `contraintes-techniques.md` ou `choix-implementation.md`. Les règles sont formulées exclusivement au niveau métier — le comportement attendu et les cas visibles de l'utilisateur.
+Il ne doit contenir **aucun détail d'implémentation laissé à la discrétion de l'agent** (stack, architecture, mécanique de calcul, structure de données, bibliothèque, etc.) : ceux-ci relèvent de `contraintes-techniques.md` ou `choix-implementation.md`. En revanche, un élément d'apparence technique mais **explicitement imposé par l'utilisateur comme règle métier** (ex. l'algorithme d'estimation retenu) reste documenté ici, en plus de sa contrepartie dans `contraintes-techniques.md`. Les règles sont formulées au niveau métier — le comportement attendu et les cas visibles de l'utilisateur.
 
 ---
 
