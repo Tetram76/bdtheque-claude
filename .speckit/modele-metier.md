@@ -151,7 +151,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Année d'édition | entier (année) | non | Année de publication de cette édition. |
-| ISBN | texte | non | La saisie doit permettre de détecter les erreurs de frappe (contrôle du chiffre de vérification). |
+| ISBN | texte | non | Formats **ISBN-10** et **ISBN-13/EAN-13** tous deux supportés. La saisie doit permettre de détecter les erreurs de frappe (contrôle du chiffre de vérification). |
 | Reliure | énuméré | non | `Brochée` / `Reliée`. |
 | Orientation | énuméré | non | `Portrait` / `Italienne`. |
 | Sens de lecture | énuméré | non | `Gauche à droite` / `Droite à gauche`. |
@@ -164,7 +164,7 @@ erDiagram
 | Mode d'acquisition | énuméré | conditionnel | `Achat` / `Offerte` / `Échange` / `Gagnée` / `Héritée`. Obligatoire si l'édition est possédée. Conditionne le libellé de la date et du montant en interface (voir `fonctionnel.md`). |
 | D'occasion | booléen | oui | `false` = neuve, `true` = occasion. |
 | Date d'acquisition | date | non | Date à laquelle l'utilisateur a obtenu l'édition. |
-| Prix d'acquisition | montant + devise | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. |
+| Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. La devise n'est validée que sur sa **forme** (3 lettres majuscules), jamais contre une liste fermée : `fonctionnel.md` § Gestion des devises accepte n'importe quelle devise. |
 | Gratuite | booléen | oui | `false` par défaut. Indique que l'utilisateur ne souhaite enregistrer aucun montant (ni prix payé ni valeur marchande). Si `true`, le prix d'acquisition doit être `null` (contrainte d'intégrité) ; le champ est désactivé et vidé en interface. |
 | Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. cote, numéro de rangement). |
 | Valeur estimée | calculée | — | Calculée dynamiquement, non stockée (voir `contraintes-techniques.md`). |
