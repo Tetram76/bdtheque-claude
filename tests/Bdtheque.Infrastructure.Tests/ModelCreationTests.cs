@@ -39,6 +39,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("Series", tableNames);
         Assert.Contains("Albums", tableNames);
         Assert.Contains("Contributions", tableNames);
+        Assert.Contains("Editions", tableNames);
         await Task.CompletedTask;
     }
 
@@ -385,5 +386,102 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
             .SingleAsync();
 
         Assert.Equal(nameof(ContributionRole.Colorist), rawValue);
+    }
+
+    [Fact]
+    public async Task AddEdition_Minimal_Persists()
+    {
+        var album = new Album("Le Lotus bleu (ModelCreation)", null);
+        var publisher = new Publisher("Casterman (ModelCreation)");
+        var edition = new Edition(album, publisher);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Editions
+            .Include(e => e.Album)
+            .Include(e => e.Publisher)
+            .FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Equal("Le Lotus bleu (ModelCreation)", saved.Album.Title);
+        Assert.Equal("Casterman (ModelCreation)", saved.Publisher.Name);
+        Assert.True(saved.IsColor);
+        Assert.False(saved.IsDedicated);
+        Assert.Null(saved.AcquisitionMode);
+    }
+
+    [Fact]
+    public async Task AddEdition_Owned_WithCollectionAndPrice_Persists()
+    {
+        var album = new Album("Astérix (ModelCreation, Edition)", null);
+        var publisher = new Publisher("Dargaud (ModelCreation, Edition)");
+        var collection = new PublisherCollection("Astérix (ModelCreation)", publisher);
+        var edition = new Edition(album, publisher);
+        edition.SetPublisher(publisher, collection);
+        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.SetAcquisitionDate(new DateOnly(2020, 3, 15));
+        edition.SetAcquisitionPrice(9.9m, "EUR");
+        edition.SetPublicationYear(1978);
+        edition.SetIsbn("2-205-00217-0");
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.PublisherCollections.Add(collection);
+        _fixture.Context.Editions.Add(edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Editions
+            .Include(e => e.PublisherCollection)
+            .FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Equal("Astérix (ModelCreation)", saved.PublisherCollection!.Name);
+        Assert.Equal(AcquisitionMode.Purchase, saved.AcquisitionMode);
+        Assert.Equal(new DateOnly(2020, 3, 15), saved.AcquisitionDate);
+        Assert.Equal(9.9m, saved.AcquisitionAmount);
+        Assert.Equal("EUR", saved.AcquisitionCurrency);
+        Assert.Equal(1978, saved.PublicationYear);
+        Assert.Equal("2-205-00217-0", saved.Isbn);
+    }
+
+    [Fact]
+    public async Task AddEdition_WithAcquisitionMode_PersistsEnumAsReadableString()
+    {
+        // Confirms the project-wide enum-as-string convention also applies to Edition.AcquisitionMode.
+        var album = new Album("Gaston (ModelCreation)", null);
+        var publisher = new Publisher("Dupuis (ModelCreation)");
+        var edition = new Edition(album, publisher);
+        edition.SetAcquisitionMode(AcquisitionMode.Inherited);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var rawValue = await _fixture.Context.Database
+            .SqlQuery<string>($"SELECT \"AcquisitionMode\" AS \"Value\" FROM \"Editions\" WHERE \"Id\" = {edition.Id}")
+            .SingleAsync();
+
+        Assert.Equal(nameof(AcquisitionMode.Inherited), rawValue);
+    }
+
+    [Fact]
+    public void AcquisitionAmountScale_AccommodatesThreeDecimalCurrencies()
+    {
+        // SQLite (used by this fixture) has dynamic typing and does not enforce a configured
+        // precision/scale the way PostgreSQL does, so a round-trip test here could not catch a
+        // silent rounding regression — this asserts the EF model metadata itself. Some ISO 4217
+        // currencies (KWD, BHD, OMR, JOD, TND) have 3 minor-unit digits; fonctionnel.md §
+        // Gestion des devises requires supporting any currency, so a scale below 3 would let
+        // PostgreSQL silently round those amounts on save.
+        var entityType = _fixture.Context.Model.FindEntityType(typeof(Edition))!;
+        var property = entityType.FindProperty(nameof(Edition.AcquisitionAmount))!;
+
+        Assert.True(property.GetScale() >= 3,
+            $"AcquisitionAmount scale {property.GetScale()} is too small to preserve 3-decimal currencies without rounding.");
     }
 }
