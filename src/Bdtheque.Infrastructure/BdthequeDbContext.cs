@@ -13,6 +13,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<Series> Series => Set<Series>();
     public DbSet<Album> Albums => Set<Album>();
     public DbSet<Contribution> Contributions => Set<Contribution>();
+    public DbSet<Edition> Editions => Set<Edition>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -414,4 +414,115 @@ public sealed class CheckConstraintTests : IDisposable
         var count = await _fixture.Context.Contributions.CountAsync(c => c.AuthorId == authorId);
         Assert.Equal(2, count);
     }
+
+    private async Task<Guid> InsertPublisherAsync(string name = "Casterman")
+    {
+        var publisherId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"Publishers\" (\"Id\", \"Name\") VALUES ({0}, {1})", publisherId, name);
+        return publisherId;
+    }
+
+    private const string InsertEditionSql =
+        "INSERT INTO \"Editions\" (\"Id\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\", " +
+        "\"PublicationYear\", \"PageCount\", \"AcquisitionMode\", \"AcquisitionDate\", \"AcquisitionAmount\", \"AcquisitionCurrency\") " +
+        "VALUES ({0}, {1}, {2}, false, true, false, {3}, {4}, {5}, {6}, {7}, {8}, {9})";
+
+    [Fact]
+    public async Task EditionCheckConstraint_NonPositivePublicationYear_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionSql, id, albumId, publisherId, false, 0, null!, null!, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_NonPositivePageCount_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionSql, id, albumId, publisherId, false, null!, 0, null!, null!, null!, null!));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_AmountWithoutCurrency_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionSql, id, albumId, publisherId, false, null!, null!, nameof(AcquisitionMode.Purchase), null!, 10, null!));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_NonPositiveAmount_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionSql, id, albumId, publisherId, false, null!, null!, nameof(AcquisitionMode.Purchase), null!, 0, "EUR"));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_DateWithoutAcquisitionMode_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionSql, id, albumId, publisherId, false, null!, null!, null!, new DateOnly(2020, 1, 1), null!, null!));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_AmountWithoutAcquisitionMode_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionSql, id, albumId, publisherId, false, null!, null!, null!, null!, 10, "EUR"));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_FreeWithAmount_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionSql, id, albumId, publisherId, true, null!, null!, nameof(AcquisitionMode.Gift), null!, 10, "EUR"));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_ValidMinimalRow_Succeeds()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        var id = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertEditionSql, id, albumId, publisherId, false, null!, null!, null!, null!, null!, null!);
+
+        var count = await _fixture.Context.Editions.CountAsync(e => e.Id == id);
+        Assert.Equal(1, count);
+    }
 }
