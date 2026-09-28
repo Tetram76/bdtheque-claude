@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20260928164819_AddEdition")]
+    [Migration("20260928165724_AddEdition")]
     partial class AddEdition
     {
         /// <inheritdoc />
@@ -222,8 +222,8 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<decimal?>("AcquisitionAmount")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)");
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
 
                     b.Property<string>("AcquisitionCurrency")
                         .HasMaxLength(3)

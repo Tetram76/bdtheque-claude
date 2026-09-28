@@ -33,7 +33,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     AcquisitionMode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     IsSecondHand = table.Column<bool>(type: "boolean", nullable: false),
                     AcquisitionDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    AcquisitionAmount = table.Column<decimal>(type: "numeric(12,2)", precision: 12, scale: 2, nullable: true),
+                    AcquisitionAmount = table.Column<decimal>(type: "numeric(14,4)", precision: 14, scale: 4, nullable: true),
                     AcquisitionCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true),
                     IsFree = table.Column<bool>(type: "boolean", nullable: false),
                     PersonalReference = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),

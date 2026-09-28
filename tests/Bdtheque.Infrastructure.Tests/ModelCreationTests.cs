@@ -468,4 +468,20 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
 
         Assert.Equal(nameof(AcquisitionMode.Inherited), rawValue);
     }
+
+    [Fact]
+    public void AcquisitionAmountScale_AccommodatesThreeDecimalCurrencies()
+    {
+        // SQLite (used by this fixture) has dynamic typing and does not enforce a configured
+        // precision/scale the way PostgreSQL does, so a round-trip test here could not catch a
+        // silent rounding regression — this asserts the EF model metadata itself. Some ISO 4217
+        // currencies (KWD, BHD, OMR, JOD, TND) have 3 minor-unit digits; fonctionnel.md §
+        // Gestion des devises requires supporting any currency, so a scale below 3 would let
+        // PostgreSQL silently round those amounts on save.
+        var entityType = _fixture.Context.Model.FindEntityType(typeof(Edition))!;
+        var property = entityType.FindProperty(nameof(Edition.AcquisitionAmount))!;
+
+        Assert.True(property.GetScale() >= 3,
+            $"AcquisitionAmount scale {property.GetScale()} is too small to preserve 3-decimal currencies without rounding.");
+    }
 }

@@ -14,7 +14,10 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
         builder.Property(e => e.PersonalReference).HasMaxLength(200);
         builder.Property(e => e.PersonalNotes);
         builder.Property(e => e.AcquisitionCurrency).HasMaxLength(3);
-        builder.Property(e => e.AcquisitionAmount).HasPrecision(12, 2);
+        // Scale 4 (not 2) so that ISO 4217 currencies with three minor-unit digits (e.g. KWD,
+        // BHD, OMR, JOD, TND) aren't silently rounded on persistence — fonctionnel.md §
+        // Gestion des devises requires supporting any currency, not just 2-decimal ones.
+        builder.Property(e => e.AcquisitionAmount).HasPrecision(14, 4);
 
         // Mirrors Edition.SetPublicationYear / SetPageCount.
         builder.ToTable(t => t.HasCheckConstraint(
