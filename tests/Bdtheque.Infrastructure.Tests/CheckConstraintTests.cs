@@ -525,4 +525,54 @@ public sealed class CheckConstraintTests : IDisposable
         var count = await _fixture.Context.Editions.CountAsync(e => e.Id == id);
         Assert.Equal(1, count);
     }
+
+    private async Task<Guid> InsertEditionAsync()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+        var editionId = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"Editions\" (\"Id\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\") " +
+            "VALUES ({0}, {1}, {2}, false, true, false, false)", editionId, albumId, publisherId);
+        return editionId;
+    }
+
+    private const string InsertEditionVisualSql =
+        "INSERT INTO \"EditionVisuals\" (\"Id\", \"EditionId\", \"Type\", \"MediaReference\", \"DisplayOrder\") " +
+        "VALUES ({0}, {1}, {2}, {3}, {4})";
+
+    [Fact]
+    public async Task EditionVisualCheckConstraint_BlankMediaReference_ThrowsAtDatabase()
+    {
+        var editionId = await InsertEditionAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "   ", 0));
+    }
+
+    [Fact]
+    public async Task EditionVisualCheckConstraint_NegativeDisplayOrder_ThrowsAtDatabase()
+    {
+        var editionId = await InsertEditionAsync();
+
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", -1));
+    }
+
+    [Fact]
+    public async Task EditionVisualCheckConstraint_ValidRow_Succeeds()
+    {
+        var editionId = await InsertEditionAsync();
+
+        var id = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", 0);
+
+        var count = await _fixture.Context.EditionVisuals.CountAsync(v => v.Id == id);
+        Assert.Equal(1, count);
+    }
 }

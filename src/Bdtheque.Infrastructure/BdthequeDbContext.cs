@@ -14,6 +14,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<Album> Albums => Set<Album>();
     public DbSet<Contribution> Contributions => Set<Contribution>();
     public DbSet<Edition> Editions => Set<Edition>();
+    public DbSet<EditionVisual> EditionVisuals => Set<EditionVisual>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

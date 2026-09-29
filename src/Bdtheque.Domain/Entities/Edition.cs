@@ -42,6 +42,8 @@ public sealed class Edition : EntityBase
     public string? PersonalReference { get; private set; }
     public string? PersonalNotes { get; private set; }
 
+    public ICollection<EditionVisual> Visuals { get; private set; } = [];
+
     // EF Core parameterless constructor
     private Edition() { }
 
@@ -210,6 +212,18 @@ public sealed class Edition : EntityBase
     public void SetPersonalReference(string? reference) => PersonalReference = NullIfEmpty(reference);
 
     public void SetPersonalNotes(string? notes) => PersonalNotes = NullIfEmpty(notes);
+
+    /// <summary>
+    /// Returns <see cref="Visuals"/> in the fixed presentation order required by
+    /// fonctionnel.md § Ordre des visuels d'une édition: by <see cref="EditionVisual.Type"/> —
+    /// whose explicit int values are assigned in that same fixed order, see
+    /// <see cref="Enums.VisualType"/> — then by <see cref="EditionVisual.DisplayOrder"/> within
+    /// the same type. This is the single place that applies the rule: EF Core does not order a
+    /// loaded collection navigation on its own, so callers must go through this method rather
+    /// than enumerate <see cref="Visuals"/> directly.
+    /// </summary>
+    public IEnumerable<EditionVisual> GetOrderedVisuals() =>
+        Visuals.OrderBy(v => v.Type).ThenBy(v => v.DisplayOrder);
 
     // ISO 4217 gives every currency a 3-letter uppercase alphabetic code; validating the shape
     // (rather than a hand-maintained list of codes) matches "any currency" from fonctionnel.md
