@@ -73,7 +73,8 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("PersonalNotes")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int?>("Rating")
                         .HasColumnType("integer");
@@ -83,17 +84,20 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<string>("SortKey")
                         .HasMaxLength(510)
-                        .HasColumnType("character varying(510)");
+                        .HasColumnType("character varying(510)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int?>("StartVolumeNumber")
                         .HasColumnType("integer");
 
                     b.Property<string>("Summary")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("Title")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("character varying(500)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -143,23 +147,28 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Biography")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("FirstName")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("LastName")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("Nationality")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("Pseudonym")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.HasKey("Id");
 
@@ -215,7 +224,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<string>("AcquisitionCurrency")
                         .HasMaxLength(3)
-                        .HasColumnType("character varying(3)");
+                        .HasColumnType("character varying(3)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<DateOnly?>("AcquisitionDate")
                         .HasColumnType("date");
@@ -252,7 +262,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<string>("Isbn")
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("character varying(20)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int?>("Orientation")
                         .HasColumnType("integer");
@@ -261,11 +272,13 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("PersonalNotes")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("PersonalReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int?>("PublicationYear")
                         .HasColumnType("integer");
@@ -317,7 +330,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<string>("MediaReference")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
+                        .HasColumnType("character varying(2048)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -342,7 +356,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.HasKey("Id");
 
@@ -363,11 +378,13 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
+                        .HasColumnType("character varying(300)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("Website")
                         .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
+                        .HasColumnType("character varying(2048)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.HasKey("Id");
 
@@ -388,7 +405,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
+                        .HasColumnType("character varying(300)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<Guid>("PublisherId")
                         .HasColumnType("uuid");
@@ -444,18 +462,21 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("PersonalNotes")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("SortKey")
                         .IsRequired()
                         .HasMaxLength(510)
-                        .HasColumnType("character varying(510)");
+                        .HasColumnType("character varying(510)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int?>("Status")
                         .HasColumnType("integer");
 
                     b.Property<string>("Summary")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<int?>("TemplateBinding")
                         .HasColumnType("integer");
@@ -490,7 +511,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("character varying(500)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.HasKey("Id");
 
@@ -518,12 +540,14 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
+                        .HasColumnType("character varying(300)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid");

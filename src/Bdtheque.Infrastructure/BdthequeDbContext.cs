@@ -45,5 +45,15 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
         // name, e.g. AlbumConfiguration) to a C# identifier that renaming would silently break
         // (see choix-implementation.md).
         configurationBuilder.Properties<Enum>().HaveConversion<int>();
+
+        // Every text column sorts in French linguistic order (fonctionnel.md § Langue et culture
+        // d'affichage): the database default collation of the postgres image compares bytes,
+        // which puts lowercase and accented initials after "Z". Declared on the columns rather
+        // than relied upon from the database default, so the order travels with the schema
+        // whatever locale the database was initialized with (see choix-implementation.md).
+        configurationBuilder.Properties<string>().UseCollation(FrenchCollation);
     }
+
+    /// <summary>ICU collation for French, predefined by PostgreSQL when built with ICU.</summary>
+    public const string FrenchCollation = "fr-FR-x-icu";
 }

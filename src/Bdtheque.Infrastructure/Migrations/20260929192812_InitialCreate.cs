@@ -16,11 +16,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    FirstName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    Pseudonym = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    Biography = table.Column<string>(type: "text", nullable: true),
-                    Nationality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
+                    LastName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
+                    FirstName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
+                    Pseudonym = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
+                    Biography = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
+                    Nationality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true, collation: "fr-FR-x-icu")
                 },
                 constraints: table =>
                 {
@@ -33,7 +33,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Label = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
+                    Label = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr-FR-x-icu")
                 },
                 constraints: table =>
                 {
@@ -46,8 +46,8 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
-                    Website = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true)
+                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
+                    Website = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true, collation: "fr-FR-x-icu")
                 },
                 constraints: table =>
                 {
@@ -60,8 +60,8 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
+                    Description = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     ParentId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
@@ -82,7 +82,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
                     PublisherId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -102,15 +102,15 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    SortKey = table.Column<string>(type: "character varying(510)", maxLength: 510, nullable: false),
+                    Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false, collation: "fr-FR-x-icu"),
+                    SortKey = table.Column<string>(type: "character varying(510)", maxLength: 510, nullable: false, collation: "fr-FR-x-icu"),
                     IsManualSortKey = table.Column<bool>(type: "boolean", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: true),
                     TheoreticalVolumeCount = table.Column<int>(type: "integer", nullable: true),
                     IsComplete = table.Column<bool>(type: "boolean", nullable: false),
                     ExcludeFromMissingVolumes = table.Column<bool>(type: "boolean", nullable: false),
-                    Summary = table.Column<string>(type: "text", nullable: true),
-                    PersonalNotes = table.Column<string>(type: "text", nullable: true),
+                    Summary = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
+                    PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     TemplateBinding = table.Column<int>(type: "integer", nullable: true),
                     TemplateOrientation = table.Column<int>(type: "integer", nullable: true),
                     TemplateReadingDirection = table.Column<int>(type: "integer", nullable: true),
@@ -147,8 +147,8 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    SortKey = table.Column<string>(type: "character varying(510)", maxLength: 510, nullable: true),
+                    Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true, collation: "fr-FR-x-icu"),
+                    SortKey = table.Column<string>(type: "character varying(510)", maxLength: 510, nullable: true, collation: "fr-FR-x-icu"),
                     IsManualSortKey = table.Column<bool>(type: "boolean", nullable: false),
                     SeriesId = table.Column<Guid>(type: "uuid", nullable: true),
                     Type = table.Column<int>(type: "integer", nullable: false),
@@ -158,8 +158,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     EndVolumeNumber = table.Column<int>(type: "integer", nullable: true),
                     FirstPublicationYear = table.Column<int>(type: "integer", nullable: true),
                     FirstPublicationMonth = table.Column<int>(type: "integer", nullable: true),
-                    Summary = table.Column<string>(type: "text", nullable: true),
-                    PersonalNotes = table.Column<string>(type: "text", nullable: true),
+                    Summary = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
+                    PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     Rating = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -325,7 +325,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     PublisherId = table.Column<Guid>(type: "uuid", nullable: false),
                     PublisherCollectionId = table.Column<Guid>(type: "uuid", nullable: true),
                     PublicationYear = table.Column<int>(type: "integer", nullable: true),
-                    Isbn = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Isbn = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true, collation: "fr-FR-x-icu"),
                     Binding = table.Column<int>(type: "integer", nullable: true),
                     Orientation = table.Column<int>(type: "integer", nullable: true),
                     ReadingDirection = table.Column<int>(type: "integer", nullable: true),
@@ -339,10 +339,10 @@ namespace Bdtheque.Infrastructure.Migrations
                     IsSecondHand = table.Column<bool>(type: "boolean", nullable: false),
                     AcquisitionDate = table.Column<DateOnly>(type: "date", nullable: true),
                     AcquisitionAmount = table.Column<decimal>(type: "numeric(14,4)", precision: 14, scale: 4, nullable: true),
-                    AcquisitionCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true),
+                    AcquisitionCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true, collation: "fr-FR-x-icu"),
                     IsFree = table.Column<bool>(type: "boolean", nullable: false),
-                    PersonalReference = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    PersonalNotes = table.Column<string>(type: "text", nullable: true)
+                    PersonalReference = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
+                    PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu")
                 },
                 constraints: table =>
                 {
@@ -380,7 +380,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     EditionId = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
-                    MediaReference = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    MediaReference = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false, collation: "fr-FR-x-icu"),
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
