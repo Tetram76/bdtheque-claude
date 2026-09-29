@@ -42,7 +42,10 @@ public sealed class Edition : EntityBase
     public string? PersonalReference { get; private set; }
     public string? PersonalNotes { get; private set; }
 
-    public ICollection<EditionVisual> Visuals { get; private set; } = [];
+    // Read-only from outside: a visual is only ever created through AddVisual, so it can never
+    // be moved to another edition. Enumerate it through GetOrderedVisuals for display.
+    private readonly List<EditionVisual> _visuals = [];
+    public IReadOnlyCollection<EditionVisual> Visuals => _visuals;
 
     // EF Core parameterless constructor
     private Edition() { }
@@ -227,10 +230,19 @@ public sealed class Edition : EntityBase
     /// <see cref="Enums.VisualType"/> — then by <see cref="EditionVisual.DisplayOrder"/> within
     /// the same type. This is the single place that applies the rule: EF Core does not order a
     /// loaded collection navigation on its own, so callers must go through this method rather
-    /// than enumerate <see cref="Visuals"/> directly.
+    /// than enumerate <see cref="Visuals"/> directly. Visuals tied on both keys are ordered by
+    /// <see cref="Entities.Common.EntityBase.Id"/>, so that the database's arbitrary row order
+    /// never shuffles them from one load to the next.
     /// </summary>
     public IEnumerable<EditionVisual> GetOrderedVisuals() =>
-        Visuals.OrderBy(v => v.Type).ThenBy(v => v.DisplayOrder);
+        _visuals.OrderBy(v => v.Type).ThenBy(v => v.DisplayOrder).ThenBy(v => v.Id);
+
+    public EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder)
+    {
+        var visual = new EditionVisual(this, type, mediaReference, displayOrder);
+        _visuals.Add(visual);
+        return visual;
+    }
 
     // ISO 4217 gives every currency a 3-letter uppercase alphabetic code; validating the shape
     // (rather than a hand-maintained list of codes) matches "any currency" from fonctionnel.md

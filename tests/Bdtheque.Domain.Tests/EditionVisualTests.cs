@@ -12,7 +12,7 @@ public sealed class EditionVisualTests
     {
         var edition = CreateEdition();
 
-        var visual = new EditionVisual(edition, VisualType.Cover, "covers/lotus-bleu.jpg", 1);
+        var visual = edition.AddVisual(VisualType.Cover, "covers/lotus-bleu.jpg", 1);
 
         Assert.Same(edition, visual.Edition);
         Assert.Equal(edition.Id, visual.EditionId);
@@ -23,15 +23,9 @@ public sealed class EditionVisualTests
     }
 
     [Fact]
-    public void Constructor_NullEdition_Throws()
-    {
-        Assert.Throws<ArgumentNullException>(() => new EditionVisual(null!, VisualType.Cover, "cover.jpg", 0));
-    }
-
-    [Fact]
     public void Constructor_UndefinedType_Throws()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new EditionVisual(CreateEdition(), (VisualType)42, "cover.jpg", 0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => CreateEdition().AddVisual((VisualType)42, "cover.jpg", 0));
     }
 
     [Theory]
@@ -40,19 +34,19 @@ public sealed class EditionVisualTests
     [InlineData("   ")]
     public void Constructor_EmptyMediaReference_Throws(string? mediaReference)
     {
-        DomainAssert.Violates(DomainRules.EditionVisualMediaReferenceRequired, () => new EditionVisual(CreateEdition(), VisualType.Cover, mediaReference!, 0));
+        DomainAssert.Violates(DomainRules.EditionVisualMediaReferenceRequired, () => CreateEdition().AddVisual(VisualType.Cover, mediaReference!, 0));
     }
 
     [Fact]
     public void Constructor_NegativeDisplayOrder_Throws()
     {
-        DomainAssert.Violates(DomainRules.EditionVisualDisplayOrderNotNegative, () => new EditionVisual(CreateEdition(), VisualType.Cover, "cover.jpg", -1));
+        DomainAssert.Violates(DomainRules.EditionVisualDisplayOrderNotNegative, () => CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", -1));
     }
 
     [Fact]
     public void Constructor_TrimsMediaReference()
     {
-        var visual = new EditionVisual(CreateEdition(), VisualType.Cover, "  cover.jpg  ", 0);
+        var visual = CreateEdition().AddVisual(VisualType.Cover, "  cover.jpg  ", 0);
 
         Assert.Equal("cover.jpg", visual.MediaReference);
     }
@@ -60,7 +54,7 @@ public sealed class EditionVisualTests
     [Fact]
     public void SetType_UndefinedValue_Throws()
     {
-        var visual = new EditionVisual(CreateEdition(), VisualType.Cover, "cover.jpg", 0);
+        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => visual.SetType((VisualType)42));
     }
@@ -68,7 +62,7 @@ public sealed class EditionVisualTests
     [Fact]
     public void SetType_ValidValue_Succeeds()
     {
-        var visual = new EditionVisual(CreateEdition(), VisualType.Cover, "cover.jpg", 0);
+        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
 
         visual.SetType(VisualType.Plate);
 
@@ -81,7 +75,7 @@ public sealed class EditionVisualTests
     [InlineData("   ")]
     public void SetMediaReference_Empty_Throws(string? mediaReference)
     {
-        var visual = new EditionVisual(CreateEdition(), VisualType.Cover, "cover.jpg", 0);
+        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
 
         DomainAssert.Violates(DomainRules.EditionVisualMediaReferenceRequired, () => visual.SetMediaReference(mediaReference!));
     }
@@ -89,7 +83,7 @@ public sealed class EditionVisualTests
     [Fact]
     public void SetMediaReference_TrimsAndStores()
     {
-        var visual = new EditionVisual(CreateEdition(), VisualType.Cover, "cover.jpg", 0);
+        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
 
         visual.SetMediaReference("  plates/01.jpg  ");
 
@@ -99,7 +93,7 @@ public sealed class EditionVisualTests
     [Fact]
     public void SetDisplayOrder_Negative_Throws()
     {
-        var visual = new EditionVisual(CreateEdition(), VisualType.Cover, "cover.jpg", 0);
+        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
 
         DomainAssert.Violates(DomainRules.EditionVisualDisplayOrderNotNegative, () => visual.SetDisplayOrder(-1));
     }
@@ -107,7 +101,7 @@ public sealed class EditionVisualTests
     [Fact]
     public void SetDisplayOrder_ValidValue_Succeeds()
     {
-        var visual = new EditionVisual(CreateEdition(), VisualType.Cover, "cover.jpg", 0);
+        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
 
         visual.SetDisplayOrder(3);
 
