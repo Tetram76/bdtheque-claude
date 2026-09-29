@@ -359,6 +359,15 @@ Pour un même album, les deux cas sont **mutuellement exclusifs** : l'album est 
 
 Un cas d'usage permettra de **convertir** une intention portant sur l'album en intention portant sur une édition, et inversement, dans le respect de cette exclusivité.
 
+#### Réalisation d'une intention
+
+La **confirmation d'un achat** est un **acte explicite** de l'utilisateur, effectué depuis un écran ou un menu dédié.
+
+Une intention d'achat réalisée est **supprimée** :
+
+- une intention portant sur l'**album** est réalisée, donc supprimée, par l'achat de n'importe laquelle de ses éditions (cf. cas d'usage 1) ;
+- une intention portant sur une **édition** est réalisée, donc supprimée, par l'achat de cette édition. Lorsqu'un album fait l'objet de plusieurs intentions (sur plusieurs de ses éditions), **seules les intentions des éditions achetées** sont supprimées ; les autres sont conservées.
+
 Les autres règles métier sont à définir.
 
 <!-- À compléter : cas d'usage, user stories, autres règles métier, flux applicatifs, etc. -->
