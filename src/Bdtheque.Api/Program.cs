@@ -6,13 +6,8 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// The "Testing" environment (WebApplicationFactory) registers its own EF Core
-// provider (in-memory SQLite): only one provider can be registered at a time.
-if (!builder.Environment.IsEnvironment("Testing"))
-{
-    builder.Services.AddDbContext<BdthequeDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("Bdtheque")));
-}
+builder.Services.AddDbContext<BdthequeDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Bdtheque")));
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<BdthequeDbContext>();
@@ -26,14 +21,11 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
 
 var app = builder.Build();
 
-// The "Testing" environment provisions its own schema (see the DbContext registration
-// above); applying migrations here would target the wrong provider. In every other
-// environment, nothing else applies the schema before the container starts serving
-// traffic (no init container, no migration bundle), so a fresh deployment would
-// otherwise leave PostgreSQL empty while the health check only verifies connectivity.
-if (!app.Environment.IsEnvironment("Testing"))
+// Nothing else applies the schema before the container starts serving traffic (no init
+// container, no migration bundle), so a fresh deployment would otherwise leave PostgreSQL
+// empty while the health check only verifies connectivity.
+using (var migrationScope = app.Services.CreateScope())
 {
-    using var migrationScope = app.Services.CreateScope();
     migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.Migrate();
 }
 

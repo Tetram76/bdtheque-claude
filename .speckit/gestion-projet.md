@@ -101,12 +101,14 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 
 - **Gestion centralisée des packages NuGet** via `Directory.Packages.props` (Central Package Management) : toutes les versions sont déclarées à la racine de la solution, les fichiers `.csproj` ne référencent que les noms de package.
 - **Tests unitaires et d'intégration** : `xunit`, exécutés via `dotnet test`. Couverture de code collectée avec `coverlet.collector`.
-- **Tests d'intégration de l'API** : `Microsoft.AspNetCore.Mvc.Testing` (`WebApplicationFactory`), base de données remplacée par SQLite en mémoire pour isoler les tests du conteneur PostgreSQL.
+- **Tests de persistance et d'intégration de l'API sur PostgreSQL réel** : `Testcontainers.PostgreSql` démarre, par exécution de tests, un conteneur de la **même image** que le service `db` de `docker-compose.yml` (alignement vérifié par un test) ; le schéma y est produit par les **migrations** (jamais par `EnsureCreated`), et chaque test dispose de sa propre base, clonée d'une base modèle migrée une fois (`CREATE DATABASE … TEMPLATE`). Les tests de l'API (`Microsoft.AspNetCore.Mvc.Testing`, `WebApplicationFactory`) démarrent sur une base vide, comme un premier déploiement. Docker est donc requis pour exécuter les tests, localement comme en CI.
+  - **Alternative écartée (SQLite en mémoire)** : un autre moteur que celui de production ne vérifie ni les migrations réellement appliquées, ni la collation (tri linguistique), ni la précision des `decimal`, ni la forme exacte des contraintes PostgreSQL — précisément ce que ces tests doivent garantir. Son seul avantage (pas de dépendance à Docker) ne compense pas des tests verts sur un schéma qui n'est pas celui livré.
+- **Contrôle de cohérence modèle ↔ migrations** : la CI exécute `dotnet ef migrations has-pending-model-changes`, qui échoue si une modification du modèle EF a été commitée sans sa migration.
 
 ## Intégration continue (CI)
 
 - **GitHub Actions** héberge le pipeline de non-régression (`.github/workflows/ci.yml`), déclenché sur chaque Pull Request et sur push vers `main`.
-- Étapes du pipeline : restauration, build en mode `Release`, exécution de la totalité des tests (`dotnet test`).
+- Étapes du pipeline : restauration, build en mode `Release`, contrôle de cohérence modèle ↔ migrations, exécution de la totalité des tests (`dotnet test`, sur PostgreSQL via Testcontainers — Docker est disponible sur les runners `ubuntu-latest`).
 - Ce workflow constitue le **check de statut requis** évoqué dans la règle de merge ci-dessous, dès qu'il est activé dans le Ruleset GitHub.
 
 ## Règle de merge : non-régression et revue Codex obligatoires

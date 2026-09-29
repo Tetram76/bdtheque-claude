@@ -28,6 +28,13 @@ jobs:
       - name: Build (Release)
         run: dotnet build Bdtheque.slnx --configuration Release --no-restore
 
+      # A model change committed without its migration would otherwise go unnoticed: the tests
+      # run the migrations, not the model, so they would still pass against the stale schema.
+      - name: Check migrations are in sync with the model
+        run: |
+          dotnet tool restore
+          dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
+
       - name: Run tests
         run: dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
 
