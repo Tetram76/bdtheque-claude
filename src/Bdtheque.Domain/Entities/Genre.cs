@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities.Common;
 
 namespace Bdtheque.Domain.Entities;
@@ -17,9 +18,6 @@ public sealed class Genre : EntityBase
         SetLabel(label);
     }
 
-    public void SetLabel(string label)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(label);
-        Label = label.Trim();
-    }
+    public void SetLabel(string label) =>
+        Label = DomainText.Required(label, DomainRules.GenreLabelRequired, "A genre must have a label.");
 }

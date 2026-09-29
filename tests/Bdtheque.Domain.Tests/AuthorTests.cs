@@ -22,7 +22,7 @@ public sealed class AuthorTests
     [InlineData("  ", null, "  ")]
     public void Constructor_NeitherLastNameNorPseudonym_Throws(string? lastName, string? firstName, string? pseudonym)
     {
-        Assert.Throws<ArgumentException>(() => new Author(lastName, firstName, pseudonym));
+        DomainAssert.Violates(DomainRules.AuthorLastNameOrPseudonymRequired, () => new Author(lastName, firstName, pseudonym));
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public sealed class AuthorTests
     {
         var author = new Author("Hugo", null, null);
 
-        Assert.Throws<ArgumentException>(() => author.UpdateIdentity(null, null, null));
+        DomainAssert.Violates(DomainRules.AuthorLastNameOrPseudonymRequired, () => author.UpdateIdentity(null, null, null));
     }
 
     [Fact]

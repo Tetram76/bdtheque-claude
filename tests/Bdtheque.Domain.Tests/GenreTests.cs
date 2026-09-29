@@ -19,8 +19,7 @@ public sealed class GenreTests
     [InlineData("   ")]
     public void Constructor_EmptyLabel_Throws(string? label)
     {
-        // null input yields ArgumentNullException (subtype of ArgumentException); all are valid guards
-        Assert.ThrowsAny<ArgumentException>(() => new Genre(label!));
+        DomainAssert.Violates(DomainRules.GenreLabelRequired, () => new Genre(label!));
     }
 
     [Fact]

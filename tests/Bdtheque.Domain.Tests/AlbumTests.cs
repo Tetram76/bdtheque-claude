@@ -39,7 +39,7 @@ public sealed class AlbumTests
     [InlineData("   ")]
     public void Constructor_BlankTitleAndNoSeries_Throws(string? title)
     {
-        Assert.Throws<ArgumentException>(() => new Album(title, null));
+        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => new Album(title, null));
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Le Lotus bleu", null);
 
-        Assert.Throws<ArgumentException>(() => album.SetTitle(null));
+        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => album.SetTitle(null));
     }
 
     [Fact]
@@ -92,7 +92,17 @@ public sealed class AlbumTests
         var series = new Series("Tintin");
         var album = new Album(null, series);
 
-        Assert.Throws<InvalidOperationException>(() => album.SetSortKey("Custom Key"));
+        DomainAssert.Violates(DomainRules.AlbumManualSortKeyRequiresTitle, () => album.SetSortKey("Custom Key"));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void SetSortKey_Blank_Throws(string sortKey)
+    {
+        var album = new Album("Tintin", null);
+
+        DomainAssert.Violates(DomainRules.AlbumSortKeyRequired, () => album.SetSortKey(sortKey));
     }
 
     [Fact]
@@ -125,7 +135,7 @@ public sealed class AlbumTests
         var series = new Series("Tintin");
         var album = new Album(null, series);
 
-        Assert.Throws<ArgumentException>(() => album.SetSeries(null));
+        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => album.SetSeries(null));
     }
 
     [Theory]
@@ -135,7 +145,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetVolumeNumber(number));
+        DomainAssert.Violates(DomainRules.AlbumVolumeNumberPositive, () => album.SetVolumeNumber(number));
     }
 
     [Fact]
@@ -154,7 +164,7 @@ public sealed class AlbumTests
         var album = new Album("Tintin", null);
         album.SetType(AlbumType.Omnibus);
 
-        Assert.Throws<ArgumentException>(() => album.SetVolumeRange(1, null));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeBothOrNeither, () => album.SetVolumeRange(1, null));
     }
 
     [Fact]
@@ -163,7 +173,7 @@ public sealed class AlbumTests
         var album = new Album("Tintin", null);
         album.SetType(AlbumType.Omnibus);
 
-        Assert.Throws<ArgumentException>(() => album.SetVolumeRange(5, 1));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOrder, () => album.SetVolumeRange(5, 1));
     }
 
     [Fact]
@@ -171,7 +181,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        Assert.Throws<InvalidOperationException>(() => album.SetVolumeRange(1, 6));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetVolumeRange(1, 6));
     }
 
     [Fact]
@@ -214,7 +224,7 @@ public sealed class AlbumTests
         album.SetType(AlbumType.Omnibus);
         album.SetVolumeRange(1, 6);
 
-        Assert.Throws<InvalidOperationException>(() => album.SetType(AlbumType.Regular));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetType(AlbumType.Regular));
     }
 
     [Fact]
@@ -247,7 +257,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        Assert.Throws<ArgumentException>(() => album.SetFirstPublicationDate(null, 6));
+        DomainAssert.Violates(DomainRules.AlbumPublicationMonthRequiresYear, () => album.SetFirstPublicationDate(null, 6));
     }
 
     [Theory]
@@ -257,7 +267,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetFirstPublicationDate(1978, month));
+        DomainAssert.Violates(DomainRules.AlbumPublicationMonthRange, () => album.SetFirstPublicationDate(1978, month));
     }
 
     [Theory]
@@ -267,7 +277,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetFirstPublicationDate(year, null));
+        DomainAssert.Violates(DomainRules.AlbumPublicationYearPositive, () => album.SetFirstPublicationDate(year, null));
     }
 
     [Fact]

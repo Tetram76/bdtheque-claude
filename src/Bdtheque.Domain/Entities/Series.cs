@@ -47,16 +47,14 @@ public sealed class Series : EntityBase
 
     public void SetTitle(string title)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(title);
-        Title = title.Trim();
+        Title = DomainText.Required(title, DomainRules.SeriesTitleRequired, "A series must have a title.");
         if (!IsManualSortKey)
             SortKey = TitleSortKeyCalculator.Compute(Title);
     }
 
     public void SetSortKey(string sortKey)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(sortKey);
-        SortKey = sortKey.Trim();
+        SortKey = DomainText.Required(sortKey, DomainRules.SeriesSortKeyRequired, "A manual sort key must not be blank.");
         IsManualSortKey = true;
     }
 
@@ -77,7 +75,8 @@ public sealed class Series : EntityBase
     public void SetTheoreticalVolumeCount(int? count)
     {
         if (count is <= 0)
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Theoretical volume count must be positive when specified.");
+            throw new DomainRuleViolationException(
+                DomainRules.SeriesTheoreticalVolumeCountPositive, "Theoretical volume count must be positive when specified.");
         TheoreticalVolumeCount = count;
     }
 
@@ -85,9 +84,9 @@ public sealed class Series : EntityBase
 
     public void SetExcludeFromMissingVolumes(bool exclude) => ExcludeFromMissingVolumes = exclude;
 
-    public void SetSummary(string? summary) => Summary = NullIfEmpty(summary);
+    public void SetSummary(string? summary) => Summary = DomainText.NullIfBlank(summary);
 
-    public void SetPersonalNotes(string? notes) => PersonalNotes = NullIfEmpty(notes);
+    public void SetPersonalNotes(string? notes) => PersonalNotes = DomainText.NullIfBlank(notes);
 
     public void SetTemplateBinding(BindingType? binding)
     {
@@ -142,15 +141,12 @@ public sealed class Series : EntityBase
     public void SetTemplate(Publisher? publisher, PublisherCollection? collection)
     {
         if (collection is not null && (publisher is null || collection.PublisherId != publisher.Id))
-            throw new ArgumentException(
-                "The template publisher collection must belong to the template publisher.", nameof(collection));
+            throw new DomainRuleViolationException(
+                DomainRules.PublisherCollectionNotOfPublisher, "The template publisher collection must belong to the template publisher.");
 
         TemplatePublisher = publisher;
         TemplatePublisherId = publisher?.Id;
         TemplatePublisherCollection = collection;
         TemplatePublisherCollectionId = collection?.Id;
     }
-
-    private static string? NullIfEmpty(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

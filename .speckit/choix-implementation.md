@@ -24,6 +24,18 @@ Ces choix ne sont pas imposés : ils peuvent être remis en cause si une meilleu
 - **Tant qu'aucune base n'a été déployée** (aucun déploiement consigné dans `journal-evenements.md`), le schéma est porté par une **migration unique** (`InitialCreate`), régénérée plutôt qu'enrichie de migrations successives : une migration intermédiaire ne protège alors aucune donnée et ne fait qu'ajouter du code de conversion jamais exécuté sur des données réelles. Une régénération n'est acceptée que si le schéma produit est **identique** à celui des migrations qu'elle remplace (comparaison des `pg_dump --schema-only`).
 - **Dès le premier déploiement consigné**, les migrations deviennent **append-only** : chaque évolution du modèle ajoute une migration, aucune migration existante n'est modifiée ni regroupée.
 
+## Erreurs métier et erreurs techniques
+
+- Pour que l'utilisateur distingue une erreur métier d'une erreur technique (`fonctionnel.md` § Présentation des erreurs), le domaine signale **toute violation d'une règle métier** par un type dédié, `DomainRuleViolationException` (`Bdtheque.Domain.Common`), porteur d'un **code de règle stable** (`DomainRules`). Le texte présenté à l'utilisateur est produit à partir de ce code par la localisation du frontend ; le message de l'exception ne sert qu'aux journaux.
+- Est **métier** toute erreur qu'une saisie de l'utilisateur peut provoquer et qu'il peut corriger (champ obligatoire vide, incohérence entre champs, cycle d'univers, intention d'achat en double…). Est **technique** toute erreur qu'aucune saisie ne peut provoquer : référence obligatoire `null`, valeur d'énumération non définie, chaîne d'ancêtres non chargée, donnée déjà corrompue en base — ces cas restent des exceptions .NET standard.
+- Un code publié n'est jamais renommé ni réaffecté à une autre règle (clé de localisation) ; leur unicité est vérifiée par un test.
+  - **Alternative écartée (exceptions .NET standard, `ArgumentException` / `InvalidOperationException`)** : levées aussi par le framework et par les erreurs de programmation, elles ne permettent pas de reconnaître une erreur métier.
+  - **Alternative écartée (type résultat au lieu d'exceptions)** : imposerait de propager un résultat à travers chaque setter et chaque appelant pour un gain nul ici — une violation interrompt toujours l'opération en cours, et l'API la traduira en une réponse unique.
+
+## Concurrence d'accès
+
+- Le contrôle de concurrence optimiste reposera sur la colonne système **`xmin`** de PostgreSQL (jeton de version natif, présent sur chaque table, sans colonne ni migration à ajouter), transmise au client avec l'entité lue et vérifiée à l'enregistrement. Sa mise en place intervient avec le premier point d'entrée de modification de l'API (Phase 2) : aucune évolution du domaine ni du schéma n'est nécessaire d'ici là. Motif : les circuits Blazor Server sont de longue durée, et deux onglets ou appareils (PC, téléphone) ouverts sur la même fiche écraseraient sinon silencieusement la modification de l'autre.
+
 ## Représentation de la devise
 
 - **Devise d'un montant** (ex. `Édition.Prix d'acquisition`, cf. `modele-metier.md`) : stockée comme un **code ISO 4217 alpha-3** (`string`, 3 lettres majuscules), validée par le domaine sur sa seule **forme**, pas contre une liste fermée de devises.

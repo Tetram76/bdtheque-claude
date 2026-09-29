@@ -59,12 +59,13 @@ public sealed class Album : EntityBase
     private static void EnsureTitleOrSeries(string? title, Series? series)
     {
         if (string.IsNullOrWhiteSpace(title) && series is null)
-            throw new ArgumentException("An album must have a title when it is not attached to a series.");
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumTitleRequiredWithoutSeries, "An album must have a title when it is not attached to a series.");
     }
 
     public void SetTitle(string? title)
     {
-        var normalized = NullIfEmpty(title);
+        var normalized = DomainText.NullIfBlank(title);
         EnsureTitleOrSeries(normalized, Series);
         Title = normalized;
 
@@ -91,9 +92,9 @@ public sealed class Album : EntityBase
     public void SetSortKey(string sortKey)
     {
         if (Title is null)
-            throw new InvalidOperationException("Cannot set a manual sort key on an album with no title.");
-        ArgumentException.ThrowIfNullOrWhiteSpace(sortKey);
-        SortKey = sortKey.Trim();
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumManualSortKeyRequiresTitle, "Cannot set a manual sort key on an album with no title.");
+        SortKey = DomainText.Required(sortKey, DomainRules.AlbumSortKeyRequired, "A manual sort key must not be blank.");
         IsManualSortKey = true;
     }
 
@@ -108,7 +109,8 @@ public sealed class Album : EntityBase
     {
         EnumGuard.EnsureDefined(type, nameof(type));
         if (type != AlbumType.Omnibus && (StartVolumeNumber is not null || EndVolumeNumber is not null))
-            throw new InvalidOperationException(
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumVolumeRangeOmnibusOnly,
                 "Cannot change the type away from Omnibus while a start/end volume range is set. " +
                 "Clear the range first with SetVolumeRange(null, null).");
         Type = type;
@@ -119,7 +121,7 @@ public sealed class Album : EntityBase
     public void SetVolumeNumber(int? number)
     {
         if (number is <= 0)
-            throw new ArgumentOutOfRangeException(nameof(number), number, "Volume number must be positive when specified.");
+            throw new DomainRuleViolationException(DomainRules.AlbumVolumeNumberPositive, "Volume number must be positive when specified.");
         VolumeNumber = number;
     }
 
@@ -131,16 +133,19 @@ public sealed class Album : EntityBase
     public void SetVolumeRange(int? start, int? end)
     {
         if ((start is null) != (end is null))
-            throw new ArgumentException("Start and end volume numbers must be provided together, or not at all.");
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumVolumeRangeBothOrNeither, "Start and end volume numbers must be provided together, or not at all.");
 
         if (start is not null)
         {
             if (Type != AlbumType.Omnibus)
-                throw new InvalidOperationException("A volume range is only applicable to omnibus (Intégrale) albums.");
+                throw new DomainRuleViolationException(
+                    DomainRules.AlbumVolumeRangeOmnibusOnly, "A volume range is only applicable to omnibus (Intégrale) albums.");
             if (start <= 0)
-                throw new ArgumentOutOfRangeException(nameof(start), start, "Start volume number must be positive.");
+                throw new DomainRuleViolationException(DomainRules.AlbumVolumeRangeStartPositive, "Start volume number must be positive.");
             if (start > end)
-                throw new ArgumentException("Start volume number must not exceed the end volume number.", nameof(start));
+                throw new DomainRuleViolationException(
+                    DomainRules.AlbumVolumeRangeOrder, "Start volume number must not exceed the end volume number.");
         }
 
         StartVolumeNumber = start;
@@ -154,19 +159,21 @@ public sealed class Album : EntityBase
     public void SetFirstPublicationDate(int? year, int? month)
     {
         if (month is not null && year is null)
-            throw new ArgumentException("A publication month requires a publication year.", nameof(month));
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumPublicationMonthRequiresYear, "A publication month requires a publication year.");
         if (month is < 1 or > 12)
-            throw new ArgumentOutOfRangeException(nameof(month), month, "Publication month must be between 1 and 12.");
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumPublicationMonthRange, "Publication month must be between 1 and 12.");
         if (year is <= 0)
-            throw new ArgumentOutOfRangeException(nameof(year), year, "Publication year must be positive.");
+            throw new DomainRuleViolationException(DomainRules.AlbumPublicationYearPositive, "Publication year must be positive.");
 
         FirstPublicationYear = year;
         FirstPublicationMonth = month;
     }
 
-    public void SetSummary(string? summary) => Summary = NullIfEmpty(summary);
+    public void SetSummary(string? summary) => Summary = DomainText.NullIfBlank(summary);
 
-    public void SetPersonalNotes(string? notes) => PersonalNotes = NullIfEmpty(notes);
+    public void SetPersonalNotes(string? notes) => PersonalNotes = DomainText.NullIfBlank(notes);
 
     public void SetRating(AlbumRating? rating)
     {
@@ -182,8 +189,11 @@ public sealed class Album : EntityBase
     /// </summary>
     public PurchaseIntent AddPurchaseIntent()
     {
+        EnsureNotTargetedAsWhole();
         if (_purchaseIntents.Count > 0)
-            throw new InvalidOperationException("This album is already targeted by a purchase intent, on itself or on one of its editions.");
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentEditionsAlreadyTargeted,
+                "An intent on the whole album excludes the intents already recorded on its editions.");
 
         return AddIntent(null);
     }
@@ -196,14 +206,23 @@ public sealed class Album : EntityBase
     public PurchaseIntent AddPurchaseIntent(Edition edition)
     {
         ArgumentNullException.ThrowIfNull(edition);
+        // A programming error, not a business one: an intent is only ever offered on this
+        // album's own editions, so no user input can reach this with a foreign edition.
         if (edition.AlbumId != Id)
             throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
-        if (_purchaseIntents.Any(p => p.EditionId is null))
-            throw new InvalidOperationException("This album is already targeted as a whole by a purchase intent.");
+        EnsureNotTargetedAsWhole();
         if (_purchaseIntents.Any(p => p.EditionId == edition.Id))
-            throw new InvalidOperationException("This edition is already targeted by a purchase intent.");
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentEditionAlreadyTargeted, "This edition is already targeted by a purchase intent.");
 
         return AddIntent(edition);
+    }
+
+    private void EnsureNotTargetedAsWhole()
+    {
+        if (_purchaseIntents.Any(p => p.EditionId is null))
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentAlbumAlreadyTargeted, "This album is already targeted as a whole by a purchase intent.");
     }
 
     private PurchaseIntent AddIntent(Edition? edition)
@@ -212,7 +231,4 @@ public sealed class Album : EntityBase
         _purchaseIntents.Add(intent);
         return intent;
     }
-
-    private static string? NullIfEmpty(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

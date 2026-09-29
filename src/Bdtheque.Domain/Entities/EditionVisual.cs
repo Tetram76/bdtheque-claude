@@ -40,11 +40,9 @@ public sealed class EditionVisual : EntityBase
         Type = type;
     }
 
-    public void SetMediaReference(string mediaReference)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(mediaReference);
-        MediaReference = mediaReference.Trim();
-    }
+    public void SetMediaReference(string mediaReference) =>
+        MediaReference = DomainText.Required(
+            mediaReference, DomainRules.EditionVisualMediaReferenceRequired, "A visual must reference its media.");
 
     /// <summary>
     /// Sets the display rank among visuals of the same type (fonctionnel.md § Ordre des
@@ -53,7 +51,7 @@ public sealed class EditionVisual : EntityBase
     public void SetDisplayOrder(int displayOrder)
     {
         if (displayOrder < 0)
-            throw new ArgumentOutOfRangeException(nameof(displayOrder), displayOrder, "Display order must not be negative.");
+            throw new DomainRuleViolationException(DomainRules.EditionVisualDisplayOrderNotNegative, "Display order must not be negative.");
         DisplayOrder = displayOrder;
     }
 }

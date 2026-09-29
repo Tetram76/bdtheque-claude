@@ -601,7 +601,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
 
         var reloaded = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
 
-        Assert.Throws<InvalidOperationException>(() => reloaded.AddPurchaseIntent());
+        Assert.Equal(DomainRules.PurchaseIntentEditionsAlreadyTargeted,
+            Assert.Throws<DomainRuleViolationException>(() => reloaded.AddPurchaseIntent()).Rule);
     }
 
     [Fact]
@@ -611,7 +612,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
 
         var reloaded = await _fixture.Context.Albums.FindAsync(album.Id);
 
-        Assert.Throws<InvalidOperationException>(() => reloaded!.AddPurchaseIntent());
+        Assert.Equal(DomainRules.PurchaseIntentEditionsAlreadyTargeted,
+            Assert.Throws<DomainRuleViolationException>(() => reloaded!.AddPurchaseIntent()).Rule);
     }
 
     [Fact]
@@ -629,7 +631,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
             .Include(e => e.Album)
             .FirstAsync(e => e.Id == edition.Id);
 
-        Assert.Throws<InvalidOperationException>(() => reloadedEdition.Album.AddPurchaseIntent(reloadedEdition));
+        Assert.Equal(DomainRules.PurchaseIntentAlbumAlreadyTargeted,
+            Assert.Throws<DomainRuleViolationException>(() => reloadedEdition.Album.AddPurchaseIntent(reloadedEdition)).Rule);
     }
 
     [Fact]

@@ -67,7 +67,8 @@ public sealed class Edition : EntityBase
     {
         ArgumentNullException.ThrowIfNull(publisher);
         if (collection is not null && collection.PublisherId != publisher.Id)
-            throw new ArgumentException("The publisher collection must belong to the given publisher.", nameof(collection));
+            throw new DomainRuleViolationException(
+                DomainRules.PublisherCollectionNotOfPublisher, "The publisher collection must belong to the given publisher.");
 
         Publisher = publisher;
         PublisherId = publisher.Id;
@@ -78,7 +79,7 @@ public sealed class Edition : EntityBase
     public void SetPublicationYear(int? year)
     {
         if (year is <= 0)
-            throw new ArgumentOutOfRangeException(nameof(year), year, "Publication year must be positive when specified.");
+            throw new DomainRuleViolationException(DomainRules.EditionPublicationYearPositive, "Publication year must be positive when specified.");
         PublicationYear = year;
     }
 
@@ -87,12 +88,12 @@ public sealed class Edition : EntityBase
     /// advisory only (fonctionnel.md § Validation de l'ISBN) — see <see cref="IsbnChecksumValidator"/>
     /// for the non-blocking check a caller should run to warn the user.
     /// </summary>
-    public void SetIsbn(string? isbn) => Isbn = NullIfEmpty(isbn);
+    public void SetIsbn(string? isbn) => Isbn = DomainText.NullIfBlank(isbn);
 
     public void SetPageCount(int? count)
     {
         if (count is <= 0)
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Page count must be positive when specified.");
+            throw new DomainRuleViolationException(DomainRules.EditionPageCountPositive, "Page count must be positive when specified.");
         PageCount = count;
     }
 
@@ -152,7 +153,8 @@ public sealed class Edition : EntityBase
         if (mode is not null)
             EnumGuard.EnsureDefined(mode.Value, nameof(mode));
         if (mode is null && (AcquisitionDate is not null || AcquisitionAmount is not null))
-            throw new InvalidOperationException(
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionModeRequired,
                 "Cannot clear the acquisition mode while an acquisition date or price is set. " +
                 "Clear them first with SetAcquisitionDate(null) and SetAcquisitionPrice(null, null).");
 
@@ -164,7 +166,8 @@ public sealed class Edition : EntityBase
     public void SetAcquisitionDate(DateOnly? date)
     {
         if (date is not null && AcquisitionMode is null)
-            throw new InvalidOperationException("An acquisition mode must be set before an acquisition date.");
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionModeRequired, "An acquisition mode must be set before an acquisition date.");
         AcquisitionDate = date;
     }
 
@@ -176,17 +179,21 @@ public sealed class Edition : EntityBase
     public void SetAcquisitionPrice(decimal? amount, string? currencyCode)
     {
         if ((amount is null) != (currencyCode is null))
-            throw new ArgumentException("An acquisition amount and its currency must be provided together, or not at all.");
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionAmountCurrencyTogether, "An acquisition amount and its currency must be provided together, or not at all.");
 
         if (amount is not null)
         {
             if (IsFree)
-                throw new InvalidOperationException(
+                throw new DomainRuleViolationException(
+                    DomainRules.EditionFreeExcludesPrice,
                     "Cannot set an acquisition price while the edition is marked free. Clear it first with SetFree(false).");
             if (AcquisitionMode is null)
-                throw new InvalidOperationException("An acquisition mode must be set before an acquisition price.");
+                throw new DomainRuleViolationException(
+                    DomainRules.EditionAcquisitionModeRequired, "An acquisition mode must be set before an acquisition price.");
             if (amount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(amount), amount, "Acquisition amount must be positive when specified.");
+                throw new DomainRuleViolationException(
+                    DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.");
             EnsureValidCurrencyCode(currencyCode!);
         }
 
@@ -209,9 +216,9 @@ public sealed class Edition : EntityBase
         }
     }
 
-    public void SetPersonalReference(string? reference) => PersonalReference = NullIfEmpty(reference);
+    public void SetPersonalReference(string? reference) => PersonalReference = DomainText.NullIfBlank(reference);
 
-    public void SetPersonalNotes(string? notes) => PersonalNotes = NullIfEmpty(notes);
+    public void SetPersonalNotes(string? notes) => PersonalNotes = DomainText.NullIfBlank(notes);
 
     /// <summary>
     /// Returns <see cref="Visuals"/> in the fixed presentation order required by
@@ -231,9 +238,7 @@ public sealed class Edition : EntityBase
     private static void EnsureValidCurrencyCode(string currencyCode)
     {
         if (currencyCode.Length != 3 || !currencyCode.All(c => c is >= 'A' and <= 'Z'))
-            throw new ArgumentException("Currency code must be a 3-letter uppercase ISO 4217 code.", nameof(currencyCode));
+            throw new DomainRuleViolationException(
+                DomainRules.EditionCurrencyCodeInvalid, "Currency code must be a 3-letter uppercase ISO 4217 code.");
     }
-
-    private static string? NullIfEmpty(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

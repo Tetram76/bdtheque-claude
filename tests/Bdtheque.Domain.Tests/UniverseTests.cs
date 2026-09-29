@@ -21,8 +21,7 @@ public sealed class UniverseTests
     [InlineData("   ")]
     public void Constructor_EmptyName_Throws(string? name)
     {
-        // null input yields ArgumentNullException (subtype of ArgumentException); all are valid guards
-        Assert.ThrowsAny<ArgumentException>(() => new Universe(name!));
+        DomainAssert.Violates(DomainRules.UniverseNameRequired, () => new Universe(name!));
     }
 
     [Fact]
@@ -55,7 +54,7 @@ public sealed class UniverseTests
     {
         var universe = new Universe("Self");
 
-        Assert.Throws<ArgumentException>(() => universe.SetParent(universe));
+        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => universe.SetParent(universe));
     }
 
     [Fact]
@@ -66,7 +65,7 @@ public sealed class UniverseTests
         b.SetParent(a);
 
         // A → B already; making B parent of A would create A → B → A
-        Assert.Throws<ArgumentException>(() => a.SetParent(b));
+        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => a.SetParent(b));
     }
 
     [Fact]
@@ -79,7 +78,7 @@ public sealed class UniverseTests
         c.SetParent(b);
 
         // Chain: A → B → C; making C parent of A would create A → B → C → A
-        Assert.Throws<ArgumentException>(() => a.SetParent(c));
+        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => a.SetParent(c));
     }
 
     [Fact]
@@ -112,7 +111,8 @@ public sealed class UniverseTests
         // forming a cycle that does not involve 'this' at all. EF Core can materialize such
         // private-setter navigation properties directly when hydrating from the database.
         // Without visited-node tracking, the ancestor walk in SetParent would loop forever
-        // instead of rejecting the parent.
+        // instead of rejecting the parent. The existing cycle is corrupted data the user cannot
+        // fix through this call, hence a technical error rather than a business rule violation.
         var a = new Universe("A");
         var b = new Universe("B");
         var c = new Universe("C");
@@ -122,7 +122,7 @@ public sealed class UniverseTests
         SetPrivate(c, nameof(Universe.Parent), b);
         SetPrivate(c, nameof(Universe.ParentId), b.Id);
 
-        Assert.Throws<ArgumentException>(() => a.SetParent(b));
+        Assert.Throws<InvalidOperationException>(() => a.SetParent(b));
     }
 
     private static void SetPrivate(Universe entity, string propertyName, object? value) =>
@@ -144,6 +144,6 @@ public sealed class UniverseTests
         // We achieve this by creating a fresh B-like universe with only the ParentId set
         // via the public SetParent API (which sets both Parent and ParentId).
         // After this, a.SetParent(b) should detect cycle because b.ParentId == a.Id.
-        Assert.Throws<ArgumentException>(() => a.SetParent(b));
+        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => a.SetParent(b));
     }
 }
