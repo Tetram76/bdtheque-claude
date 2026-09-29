@@ -729,4 +729,48 @@ public sealed class ModelCreationTests : IAsyncLifetime
             new[] { firstEdition.Id, secondEdition.Id }.Order(),
             saved.PurchaseIntents.Select(p => p.EditionId!.Value).Order());
     }
+
+    [Fact]
+    public async Task SetAcquisitionMode_OnTargetedEditionQueriedWithoutInclude_Throws()
+    {
+        // The guard relies on Edition.PurchaseIntent: it must be loaded with the edition however
+        // the edition is queried, or the guard would silently let the invariant be broken.
+        var album = new Album("Yakari", null);
+        var publisher = new Publisher("Le Lombard");
+        var edition = new Edition(album, publisher);
+        album.AddPurchaseIntent(edition);
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Editions.FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Equal(DomainRules.EditionTargetedByPurchaseIntent,
+            Assert.Throws<DomainRuleViolationException>(() => reloaded.SetAcquisitionMode(AcquisitionMode.Purchase)).Rule);
+    }
+
+    [Fact]
+    public async Task ConfirmPurchase_OnAlbumLoadedFromDatabase_DeletesRealizedIntentOnly()
+    {
+        var album = new Album("Yakari", null);
+        var publisher = new Publisher("Le Lombard");
+        var bought = new Edition(album, publisher);
+        var stillWanted = new Edition(album, publisher);
+        album.AddPurchaseIntent(bought);
+        var remaining = album.AddPurchaseIntent(stillWanted);
+        _fixture.Context.AddRange(album, publisher, bought, stillWanted);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloadedAlbum = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
+        var reloadedEdition = await _fixture.Context.Editions.FirstAsync(e => e.Id == bought.Id);
+        reloadedAlbum.ConfirmPurchase(reloadedEdition, AcquisitionMode.Purchase);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        Assert.Equal([remaining.Id], await _fixture.Context.PurchaseIntents.Select(p => p.Id).ToListAsync());
+        var saved = await _fixture.Context.Editions.FirstAsync(e => e.Id == bought.Id);
+        Assert.Equal(AcquisitionMode.Purchase, saved.AcquisitionMode);
+        Assert.Null(saved.PurchaseIntent);
+    }
 }

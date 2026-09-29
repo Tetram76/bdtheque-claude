@@ -24,6 +24,9 @@ public static class DomainRules
     public const string PurchaseIntentEditionAlreadyTargeted = "PurchaseIntent.EditionAlreadyTargeted";
     public const string PurchaseIntentEditionAlreadyOwned = "PurchaseIntent.EditionAlreadyOwned";
 
+    public const string EditionAlreadyOwned = "Edition.AlreadyOwned";
+    public const string EditionTargetedByPurchaseIntent = "Edition.TargetedByPurchaseIntent";
+
     public const string AuthorLastNameOrPseudonymRequired = "Author.LastNameOrPseudonymRequired";
 
     public const string EditionPublicationYearPositive = "Edition.PublicationYearPositive";

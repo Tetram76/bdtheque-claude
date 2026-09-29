@@ -42,6 +42,11 @@ public sealed class Edition : EntityBase
     public string? PersonalReference { get; private set; }
     public string? PersonalNotes { get; private set; }
 
+    // The intent targeting this edition, if any — maintained by the Album aggregate (which owns
+    // every intent) and always loaded with the edition, so that SetAcquisitionMode can refuse to
+    // turn a targeted edition into an owned one outside Album.ConfirmPurchase.
+    public PurchaseIntent? PurchaseIntent { get; private set; }
+
     // Read-only from outside: a visual is only ever created through AddVisual, so it can never
     // be moved to another edition. Enumerate it through GetOrderedVisuals for display.
     private readonly List<EditionVisual> _visuals = [];
@@ -155,6 +160,12 @@ public sealed class Edition : EntityBase
     {
         if (mode is not null)
             EnumGuard.EnsureDefined(mode.Value, nameof(mode));
+        // An owned edition is never targeted by an intent (modele-metier.md § Intention d'achat):
+        // buying a targeted edition goes through Album.ConfirmPurchase, which realizes the intent.
+        if (mode is not null && PurchaseIntent is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionTargetedByPurchaseIntent,
+                "This edition is targeted by a purchase intent: confirm its purchase to acquire it.");
         if (mode is null && (AcquisitionDate is not null || AcquisitionAmount is not null))
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionModeRequired,
@@ -236,6 +247,8 @@ public sealed class Edition : EntityBase
     /// </summary>
     public IEnumerable<EditionVisual> GetOrderedVisuals() =>
         _visuals.OrderBy(v => v.Type).ThenBy(v => v.DisplayOrder).ThenBy(v => v.Id);
+
+    internal void SetPurchaseIntent(PurchaseIntent? intent) => PurchaseIntent = intent;
 
     public EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder)
     {

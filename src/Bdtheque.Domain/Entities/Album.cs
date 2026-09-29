@@ -216,11 +216,7 @@ public sealed class Album : EntityBase
     /// </summary>
     public PurchaseIntent AddPurchaseIntent(Edition edition)
     {
-        ArgumentNullException.ThrowIfNull(edition);
-        // A programming error, not a business one: an intent is only ever offered on this
-        // album's own editions, so no user input can reach this with a foreign edition.
-        if (edition.AlbumId != Id)
-            throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
+        EnsureOwnEdition(edition);
         // An edition already bought cannot become an intent again: a second copy is recorded as
         // a new edition of the album, which then carries the intent (fonctionnel.md § Intention
         // d'achat).
@@ -235,6 +231,38 @@ public sealed class Album : EntityBase
         return AddIntent(edition);
     }
 
+    /// <summary>
+    /// Confirms the purchase of one of this album's editions (fonctionnel.md § Intention d'achat
+    /// › Réalisation d'une intention): the intent it realizes — the one on this edition, or else
+    /// the one on the whole album — is removed, and the edition becomes owned. Other editions'
+    /// intents are kept. This is the only way to acquire an edition targeted by an intent.
+    /// </summary>
+    public void ConfirmPurchase(Edition edition, AcquisitionMode mode)
+    {
+        EnsureOwnEdition(edition);
+        if (edition.AcquisitionMode is not null)
+            throw new DomainRuleViolationException(DomainRules.EditionAlreadyOwned, "This edition is already owned.");
+
+        var realized = _purchaseIntents.Find(p => p.EditionId == edition.Id)
+                       ?? _purchaseIntents.Find(p => p.EditionId is null);
+        if (realized is not null)
+        {
+            _purchaseIntents.Remove(realized);
+            realized.Edition?.SetPurchaseIntent(null);
+        }
+
+        edition.SetAcquisitionMode(mode);
+    }
+
+    // A programming error, not a business one: only this album's own editions are ever offered
+    // for its intents and purchases, so no user input can reach this with a foreign edition.
+    private void EnsureOwnEdition(Edition edition)
+    {
+        ArgumentNullException.ThrowIfNull(edition);
+        if (edition.AlbumId != Id)
+            throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
+    }
+
     private void EnsureNotTargetedAsWhole()
     {
         if (_purchaseIntents.Any(p => p.EditionId is null))
@@ -246,6 +274,7 @@ public sealed class Album : EntityBase
     {
         var intent = new PurchaseIntent(this, edition);
         _purchaseIntents.Add(intent);
+        edition?.SetPurchaseIntent(intent);
         return intent;
     }
 }

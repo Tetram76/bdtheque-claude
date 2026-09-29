@@ -10,15 +10,18 @@ internal sealed class PurchaseIntentConfiguration : IEntityTypeConfiguration<Pur
     {
         builder.HasKey(p => p.Id);
 
+        // Cascade: an intent is owned by its album aggregate, which alone creates and removes it
+        // (Album.ConfirmPurchase removes a realized one) — it has no existence without its album.
         builder.HasOne(p => p.Album)
             .WithMany(a => a.PurchaseIntents)
             .HasForeignKey(p => p.AlbumId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
+        // One-to-one: an edition is targeted by at most one intent (unique index below).
         builder.HasOne(p => p.Edition)
-            .WithMany()
-            .HasForeignKey(p => p.EditionId)
+            .WithOne(e => e.PurchaseIntent)
+            .HasForeignKey<PurchaseIntent>(p => p.EditionId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 

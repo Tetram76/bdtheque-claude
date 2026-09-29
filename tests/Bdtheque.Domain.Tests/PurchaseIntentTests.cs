@@ -114,3 +114,83 @@ public sealed class PurchaseIntentTests
         Assert.Throws<ArgumentNullException>(() => album.AddPurchaseIntent(null!));
     }
 }
+
+public sealed class PurchaseConfirmationTests
+{
+    private static readonly Publisher Casterman = new("Casterman");
+
+    [Fact]
+    public void SetAcquisitionMode_OnEditionTargetedByIntent_Throws()
+    {
+        // The acquisition of a targeted edition must go through the purchase confirmation,
+        // which realizes (removes) the intent: an owned edition is never targeted.
+        var album = new Album("Le Lotus bleu", null);
+        var edition = new Edition(album, Casterman);
+        album.AddPurchaseIntent(edition);
+
+        DomainAssert.Violates(
+            DomainRules.EditionTargetedByPurchaseIntent, () => edition.SetAcquisitionMode(AcquisitionMode.Purchase));
+        Assert.Null(edition.AcquisitionMode);
+    }
+
+    [Fact]
+    public void ConfirmPurchase_TargetedEdition_RemovesOnlyItsIntentAndRecordsAcquisition()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var bought = new Edition(album, Casterman);
+        var stillWanted = new Edition(album, Casterman);
+        album.AddPurchaseIntent(bought);
+        var remaining = album.AddPurchaseIntent(stillWanted);
+
+        album.ConfirmPurchase(bought, AcquisitionMode.Purchase);
+
+        Assert.Equal(AcquisitionMode.Purchase, bought.AcquisitionMode);
+        Assert.Null(bought.PurchaseIntent);
+        Assert.Equal([remaining], album.PurchaseIntents);
+    }
+
+    [Fact]
+    public void ConfirmPurchase_AlbumTargetedAsWhole_RemovesTheAlbumIntent()
+    {
+        // Any edition satisfies an intent on the album (fonctionnel.md § Intention d'achat).
+        var album = new Album("Le Lotus bleu", null);
+        album.AddPurchaseIntent();
+        var edition = new Edition(album, Casterman);
+
+        album.ConfirmPurchase(edition, AcquisitionMode.Gift);
+
+        Assert.Equal(AcquisitionMode.Gift, edition.AcquisitionMode);
+        Assert.Empty(album.PurchaseIntents);
+    }
+
+    [Fact]
+    public void ConfirmPurchase_WithoutIntent_RecordsAcquisition()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var edition = new Edition(album, Casterman);
+
+        album.ConfirmPurchase(edition, AcquisitionMode.Purchase);
+
+        Assert.Equal(AcquisitionMode.Purchase, edition.AcquisitionMode);
+    }
+
+    [Fact]
+    public void ConfirmPurchase_EditionAlreadyOwned_Throws()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var edition = new Edition(album, Casterman);
+        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+
+        DomainAssert.Violates(DomainRules.EditionAlreadyOwned, () => album.ConfirmPurchase(edition, AcquisitionMode.Gift));
+        Assert.Equal(AcquisitionMode.Purchase, edition.AcquisitionMode);
+    }
+
+    [Fact]
+    public void ConfirmPurchase_EditionOfAnotherAlbum_Throws()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var otherEdition = new Edition(new Album("Tintin au Tibet", null), Casterman);
+
+        Assert.Throws<ArgumentException>(() => album.ConfirmPurchase(otherEdition, AcquisitionMode.Purchase));
+    }
+}
