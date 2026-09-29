@@ -60,9 +60,8 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Cross-table half of the constraint (the collection must belong to this publisher) is
-        // intentionally left to the domain layer only, as with Series' own template collection —
-        // see SeriesConfiguration's remarks: a composite FK would add real schema complexity for
-        // a raw-SQL bypass scenario that isn't plausible with a single admin user.
+        // intentionally left to the domain layer only, as with Series' own template collection
+        // (see choix-implementation.md § Cohérence entre tables).
         builder.HasOne(e => e.PublisherCollection)
             .WithMany()
             .HasForeignKey(e => e.PublisherCollectionId)

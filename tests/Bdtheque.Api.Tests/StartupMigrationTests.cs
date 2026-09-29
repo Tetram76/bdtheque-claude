@@ -14,7 +14,7 @@ public sealed class StartupMigrationTests : IClassFixture<ApiWebApplicationFacto
     public async Task Startup_OnEmptyDatabase_AppliesEveryMigration()
     {
         // A fresh deployment must get its schema from the api container's own startup
-        // (contraintes-techniques.md § Déploiement): nothing else provisions it.
+        // (choix-implementation.md § Application du schéma au démarrage): nothing else provisions it.
         _ = _factory.Server;
 
         using var scope = _factory.Services.CreateScope();

@@ -36,7 +36,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Defense in depth: `api` is only reachable by `frontend` over the internal Docker
-// network, but still requires this shared secret (see contraintes-techniques.md).
+// network, but still requires this shared secret (see choix-implementation.md).
 app.UseMiddleware<InternalApiKeyMiddleware>();
 
 app.MapHealthChecks("/health", new HealthCheckOptions

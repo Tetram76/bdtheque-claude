@@ -266,7 +266,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         // Confirms the project-wide enum-as-int convention (ConfigureConventions): the raw
         // column value is the member's explicit numeric value, not the CLR default ordinal —
         // every domain enum assigns its values explicitly precisely so this holds regardless
-        // of declaration order (see contraintes-techniques.md).
+        // of declaration order (see choix-implementation.md).
         var series = new Series("Tintin");
         series.SetStatus(SeriesStatus.InProgress);
 

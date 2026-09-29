@@ -1,7 +1,6 @@
 # Contraintes Techniques
 
-Ce fichier récence les **choix et contraintes techniques** de l'application et de son déploiement — qu'ils soient **imposés** (par l'utilisateur, des normes/lois, ou une réalité externe non négociable comme un système existant à migrer ou un environnement d'hébergement donné) ou simplement **retenus par l'agent** sans délibération explicite entre options. C'est la destination par défaut de tout choix technique.
-Seul le cas rare d'une **réelle délibération entre plusieurs options** (alternative explicitement envisagée puis écartée, avec son argumentation) est documenté à part, dans `choix-implementation.md`. En cas de doute sur cette frontière, l'information reste ici par défaut.
+Ce fichier recense les **contraintes techniques imposées** à l'application et à son déploiement — par l'utilisateur, des normes/lois, ou une réalité externe non négociable (système existant à migrer, environnement d'hébergement donné, etc.). L'agent n'y ajoute rien de sa propre initiative : ses propres choix techniques, délibérés entre plusieurs options ou non, sont documentés dans `choix-implementation.md`.
 Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
 
 ---
@@ -35,30 +34,15 @@ L'application est découpée en **3 conteneurs Docker** :
 | --- | --- | --- |
 | `frontend` | Blazor Server — UI et rendu des pages | `mcr.microsoft.com/dotnet/aspnet:10.0` |
 | `api` | ASP.NET Core Minimal API — logique métier, accès données, ML | `mcr.microsoft.com/dotnet/aspnet:10.0` |
-| `db` | PostgreSQL — persistance | `postgres:18-alpine` |
+| `db` | PostgreSQL — persistance | `postgres` (image officielle ; version et variante : cf. `choix-implementation.md`) |
 
 Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le conteneur `api` est le seul à accéder à `db`.
-
-## Organisation du code
-
-La solution .NET est découpée en projets par responsabilité, sous `src/` :
-
-| Projet | Rôle |
-| --- | --- |
-| `Bdtheque.Domain` | Entités du modèle métier, enums, value objects. Aucune dépendance à EF Core ni à un framework web. |
-| `Bdtheque.Infrastructure` | Implémentation EF Core / Npgsql : `DbContext`, configurations d'entités, migrations. |
-| `Bdtheque.Contracts` | Contrats d'échange (DTOs) exposés par l'API et consommés par le frontend. Découplés des entités du domaine. |
-| `Bdtheque.Api` | Conteneur `api` : endpoints Minimal API, règles applicatives, service de taux de change, estimation ML.NET. |
-| `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor Server, authentification cookie, appels HTTP vers `Bdtheque.Api`. |
-
-Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
 
 ## Déploiement
 
 - Architecture **n-tiers avec isolation stricte** : chaque tier est déployé dans un **conteneur Docker dédié**.
 - Un tier = un conteneur (pas de cohabitation de responsabilités dans un même conteneur).
 - Orchestration via **Docker Compose**, compatible avec Synology Container Manager.
-- Les migrations EF Core sont appliquées **automatiquement au démarrage** du conteneur `api` (`Database.Migrate()`), y compris sous test. Pas de conteneur ou d'étape d'initialisation dédiée : un déploiement neuf sur une base vide crée le schéma dès le premier démarrage.
 
 ## Licences
 
@@ -85,12 +69,6 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - La valeur estimée est calculée par un modèle **Random Forest** (voir `fonctionnel.md`).
 - Implémentation via **ML.NET**, embarquée dans le conteneur `api`.
 
-## Internationalisation
-
-- Le code (classes, fonctions, variables, commentaires, etc.) est écrit en **anglais** (cf. `gestion-projet.md`), indépendamment de la langue de l'utilisateur final.
-- La **culture d'affichage** choisie par l'utilisateur (voir `fonctionnel.md`) est implémentée via les ressources de localisation ASP.NET Core (`IStringLocalizer`) pour la traduction des textes, combinées à la **culture .NET courante** (`CultureInfo`, positionnée par requête) pour le formatage des données et le tri linguistique. Aucun texte utilisateur n'est codé en dur dans le code applicatif.
-- Le mode **globalization-invariant** de .NET est incompatible avec le tri linguistique et le formatage culturel requis par le fonctionnel : il ne doit pas être activé. Les images Docker utilisées (`aspnet:10.0`, base Ubuntu) embarquent déjà ICU, donc le support complet de la globalisation n'a aucun coût supplémentaire.
-
 ## Compatibilité multi-supports
 
 - L'application doit être **responsive** : utilisable sur PC, tablette et smartphone.
@@ -100,14 +78,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 ## Authentification
 
 - L'accès à la partie Administration est protégé par un **compte administrateur unique** (login + mot de passe).
-- Implémentation via **ASP.NET Core Cookie Authentication** (sans ASP.NET Core Identity — pas de gestion multi-utilisateurs). Le cookie d'authentification est porté exclusivement par le conteneur `frontend` (Blazor Server), qui agit comme **BFF (Backend For Frontend)** : c'est lui qui affiche le formulaire de connexion, émet le cookie et protège ses propres pages/composants d'administration (`[Authorize]`).
 - Pas d'authentification sur la partie Consultation (accès public).
-- Le conteneur `api` n'est **jamais exposé publiquement** : il n'est joignable que par `frontend` via le réseau Docker interne. En défense en profondeur, `api` exige néanmoins un **secret interne partagé** (clé statique transmise via variable d'environnement, vérifiée par un middleware sur l'en-tête `X-Internal-Api-Key`) sur toutes ses requêtes. Ce secret n'est connu que de `frontend` et `api` ; il ne remplace pas l'authentification de l'utilisateur (qui reste du ressort de `frontend`), il empêche seulement qu'un appel direct à `api` contourne la protection applicative si l'isolation réseau venait à être mal configurée.
-
-## Documentation de l'API
-
-- L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
-- Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement uniquement.
 
 ## Gestion des taux de change
 
