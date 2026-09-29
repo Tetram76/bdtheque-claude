@@ -34,7 +34,7 @@ L'application est découpée en **3 conteneurs Docker** :
 | --- | --- | --- |
 | `frontend` | Blazor Server — UI et rendu des pages | `mcr.microsoft.com/dotnet/aspnet:10.0` |
 | `api` | ASP.NET Core Minimal API — logique métier, accès données, ML | `mcr.microsoft.com/dotnet/aspnet:10.0` |
-| `db` | PostgreSQL — persistance | `postgres:18-alpine` |
+| `db` | PostgreSQL — persistance | `postgres` (image officielle ; version et variante : cf. `choix-implementation.md`) |
 
 Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le conteneur `api` est le seul à accéder à `db`.
 
