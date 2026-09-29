@@ -293,6 +293,15 @@ L'application se compose de trois parties distinctes :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
    - Le contenu peut être **riche** : texte, captures d'écran, tableaux, exemples, etc. — pas seulement de courts textes explicatifs.
 
+## Présentation des erreurs
+
+Toute erreur présentée à l'utilisateur doit lui permettre de distinguer **très facilement**, au premier coup d'œil, s'il s'agit :
+
+- d'une **erreur métier** : l'action demandée enfreint une règle de gestion de l'application (ex. une donnée obligatoire manquante, une incohérence entre deux champs, une intention d'achat déjà existante pour cet album). L'utilisateur peut la résoudre lui-même en corrigeant sa saisie ou sa demande ;
+- d'une **erreur technique** : l'application n'a pas pu traiter la demande pour une raison indépendante de la saisie de l'utilisateur (dysfonctionnement, service indisponible, etc.).
+
+Cette distinction s'applique à toutes les parties de l'application (consultation, administration, aide contextuelle).
+
 ## Fonctionnalités de second plan
 
 Ces fonctionnalités sont prévues dans une phase ultérieure.
