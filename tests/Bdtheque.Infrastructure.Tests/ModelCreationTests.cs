@@ -14,14 +14,16 @@ namespace Bdtheque.Infrastructure.Tests;
 /// persistence works against it, on the production database engine (see
 /// <see cref="BdthequeDbContextFixture"/>).
 /// </summary>
-public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
+public sealed class ModelCreationTests : IAsyncLifetime
 {
-    private readonly BdthequeDbContextFixture _fixture;
+    // One database and one context per test (xunit creates a class instance per test): a
+    // shared context would let a failed SaveChanges leave tracked entities behind and break
+    // every later test, and shared data would make tests depend on one another.
+    private readonly BdthequeDbContextFixture _fixture = new();
 
-    public ModelCreationTests(BdthequeDbContextFixture fixture)
-    {
-        _fixture = fixture;
-    }
+    public Task InitializeAsync() => _fixture.InitializeAsync();
+
+    public Task DisposeAsync() => _fixture.DisposeAsync();
 
     [Fact]
     public async Task Migrations_CreateATableForEveryMappedEntity()
@@ -355,7 +357,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     public async Task AddContribution_ForAlbum_Persists()
     {
         var album = new Album("Le Lotus bleu", null);
-        var author = new Author(null, null, "Hergé (ModelCreation, Album)");
+        var author = new Author(null, null, "Hergé");
         var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
 
         _fixture.Context.Albums.Add(album);
@@ -371,7 +373,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
 
         Assert.Equal("Le Lotus bleu", saved.Album!.Title);
         Assert.Null(saved.Series);
-        Assert.Equal("Hergé (ModelCreation, Album)", saved.Author.Pseudonym);
+        Assert.Equal("Hergé", saved.Author.Pseudonym);
         Assert.Equal(ContributionRole.Scenarist, saved.Role);
     }
 
@@ -379,7 +381,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     public async Task AddContribution_ForSeriesTemplate_Persists()
     {
         var series = new Series("Tintin (ModelCreation)");
-        var author = new Author(null, null, "Hergé (ModelCreation, Série)");
+        var author = new Author(null, null, "Hergé");
         var contribution = Contribution.ForSeriesTemplate(series, author, ContributionRole.Illustrator);
 
         _fixture.Context.Series.Add(series);
@@ -447,8 +449,8 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddEdition_Owned_WithCollectionAndPrice_Persists()
     {
-        var album = new Album("Astérix (ModelCreation, Edition)", null);
-        var publisher = new Publisher("Dargaud (ModelCreation, Edition)");
+        var album = new Album("Astérix", null);
+        var publisher = new Publisher("Dargaud");
         var collection = new PublisherCollection("Astérix (ModelCreation)", publisher);
         var edition = new Edition(album, publisher);
         edition.SetPublisher(publisher, collection);
@@ -506,8 +508,8 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         // Some ISO 4217 currencies (KWD, BHD, OMR, JOD, TND) have 3 minor-unit digits;
         // fonctionnel.md § Gestion des devises requires supporting any currency, so a column
         // scale below 3 would let PostgreSQL silently round those amounts on save.
-        var album = new Album("Tintin (ModelCreation, Scale)", null);
-        var publisher = new Publisher("Casterman (ModelCreation, Scale)");
+        var album = new Album("Tintin", null);
+        var publisher = new Publisher("Casterman");
         var edition = new Edition(album, publisher);
         edition.SetAcquisitionMode(AcquisitionMode.Purchase);
         edition.SetAcquisitionPrice(12.345m, "KWD");
@@ -523,8 +525,8 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddEditionVisual_Persists()
     {
-        var album = new Album("Astérix (ModelCreation, Visual)", null);
-        var publisher = new Publisher("Dargaud (ModelCreation, Visual)");
+        var album = new Album("Astérix", null);
+        var publisher = new Publisher("Dargaud");
         var edition = new Edition(album, publisher);
         var visual = new EditionVisual(edition, VisualType.Cover, "covers/asterix-01.jpg", 1);
 
@@ -548,8 +550,8 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddEditionVisual_ViaEditionVisualsCollection_Persists()
     {
-        var album = new Album("Gaston (ModelCreation, Visual)", null);
-        var publisher = new Publisher("Dupuis (ModelCreation, Visual)");
+        var album = new Album("Gaston", null);
+        var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
         edition.Visuals.Add(new EditionVisual(edition, VisualType.BackCover, "back-covers/gaston-01.jpg", 0));
 
@@ -571,8 +573,8 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     public async Task AddEditionVisual_WithType_PersistsEnumAsExplicitInt()
     {
         // Confirms the project-wide enum-as-int convention also applies to EditionVisual.Type.
-        var album = new Album("Spirou (ModelCreation, Visual)", null);
-        var publisher = new Publisher("Dupuis (ModelCreation, Visual2)");
+        var album = new Album("Spirou", null);
+        var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
         var visual = new EditionVisual(edition, VisualType.Endpaper, "endpapers/spirou-01.jpg", 0);
 
@@ -595,7 +597,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddPurchaseIntent_WholeAlbum_OnAlbumQueriedWithoutInclude_WhenEditionTargeted_Throws()
     {
-        var album = await PersistAlbumWithEditionIntentAsync("Yakari (ModelCreation, Query)");
+        var album = await PersistAlbumWithEditionIntentAsync("Yakari");
 
         var reloaded = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
 
@@ -605,7 +607,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddPurchaseIntent_WholeAlbum_OnAlbumFound_WhenEditionTargeted_Throws()
     {
-        var album = await PersistAlbumWithEditionIntentAsync("Yakari (ModelCreation, Find)");
+        var album = await PersistAlbumWithEditionIntentAsync("Yakari");
 
         var reloaded = await _fixture.Context.Albums.FindAsync(album.Id);
 
@@ -615,8 +617,8 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddPurchaseIntent_Edition_OnAlbumReachedThroughEdition_WhenWholeAlbumTargeted_Throws()
     {
-        var album = new Album("Yakari (ModelCreation, Navigation)", null);
-        var publisher = new Publisher("Le Lombard (ModelCreation, Navigation)");
+        var album = new Album("Yakari", null);
+        var publisher = new Publisher("Le Lombard");
         var edition = new Edition(album, publisher);
         album.AddPurchaseIntent();
         _fixture.Context.AddRange(album, publisher, edition);
@@ -635,7 +637,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     {
         // The nominal flow: an existing album is loaded, then gains an intent. The intent is
         // only reachable through the album's collection, so EF discovers it at SaveChanges.
-        var album = new Album("Yakari (ModelCreation, Existing)", null);
+        var album = new Album("Yakari", null);
         _fixture.Context.Albums.Add(album);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
@@ -651,7 +653,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     private async Task<Album> PersistAlbumWithEditionIntentAsync(string title)
     {
         var album = new Album(title, null);
-        var publisher = new Publisher($"Le Lombard ({title})");
+        var publisher = new Publisher("Le Lombard");
         var edition = new Edition(album, publisher);
         album.AddPurchaseIntent(edition);
         _fixture.Context.AddRange(album, publisher, edition);
@@ -663,7 +665,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddPurchaseIntent_WholeAlbum_PersistsThroughAlbumAggregate()
     {
-        var album = new Album("Blake et Mortimer (ModelCreation, Intent)", null);
+        var album = new Album("Blake et Mortimer", null);
         var intent = album.AddPurchaseIntent();
 
         _fixture.Context.Albums.Add(album);
@@ -682,8 +684,8 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     [Fact]
     public async Task AddPurchaseIntent_Editions_PersistThroughAlbumAggregate()
     {
-        var album = new Album("Thorgal (ModelCreation, Intent)", null);
-        var publisher = new Publisher("Le Lombard (ModelCreation, Intent)");
+        var album = new Album("Thorgal", null);
+        var publisher = new Publisher("Le Lombard");
         var firstEdition = new Edition(album, publisher);
         var secondEdition = new Edition(album, publisher);
         album.AddPurchaseIntent(firstEdition);
