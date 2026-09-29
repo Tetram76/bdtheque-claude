@@ -42,6 +42,8 @@ public sealed class Edition : EntityBase
     public string? PersonalReference { get; private set; }
     public string? PersonalNotes { get; private set; }
 
+    public ICollection<EditionVisual> Visuals { get; private set; } = [];
+
     // EF Core parameterless constructor
     private Edition() { }
 

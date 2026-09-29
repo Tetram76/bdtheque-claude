@@ -28,5 +28,7 @@ internal static class EnumValueLedger
             [typeof(ReadingDirection)] = [("LeftToRight", 1), ("RightToLeft", 2)],
             [typeof(SeriesStatus)] = [("InProgress", 1), ("Completed", 2), ("Abandoned", 3)],
             [typeof(AcquisitionMode)] = [("Purchase", 1), ("Gift", 2), ("Trade", 3), ("Won", 4), ("Inherited", 5)],
+            [typeof(VisualType)] =
+                [("Cover", 1), ("Dedication", 2), ("Endpaper", 3), ("Plate", 4), ("BackCover", 5)],
         };
 }

@@ -40,6 +40,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("Albums", tableNames);
         Assert.Contains("Contributions", tableNames);
         Assert.Contains("Editions", tableNames);
+        Assert.Contains("EditionVisuals", tableNames);
         await Task.CompletedTask;
     }
 
@@ -484,5 +485,75 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
 
         Assert.True(property.GetScale() >= 3,
             $"AcquisitionAmount scale {property.GetScale()} is too small to preserve 3-decimal currencies without rounding.");
+    }
+
+    [Fact]
+    public async Task AddEditionVisual_Persists()
+    {
+        var album = new Album("Astérix (ModelCreation, Visual)", null);
+        var publisher = new Publisher("Dargaud (ModelCreation, Visual)");
+        var edition = new Edition(album, publisher);
+        var visual = new EditionVisual(edition, VisualType.Cover, "covers/asterix-01.jpg", 1);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        _fixture.Context.EditionVisuals.Add(visual);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.EditionVisuals
+            .Include(v => v.Edition)
+            .FirstAsync(v => v.Id == visual.Id);
+
+        Assert.Equal(VisualType.Cover, saved.Type);
+        Assert.Equal("covers/asterix-01.jpg", saved.MediaReference);
+        Assert.Equal(1, saved.DisplayOrder);
+        Assert.Equal(edition.Id, saved.EditionId);
+    }
+
+    [Fact]
+    public async Task AddEditionVisual_ViaEditionVisualsCollection_Persists()
+    {
+        var album = new Album("Gaston (ModelCreation, Visual)", null);
+        var publisher = new Publisher("Dupuis (ModelCreation, Visual)");
+        var edition = new Edition(album, publisher);
+        edition.Visuals.Add(new EditionVisual(edition, VisualType.BackCover, "back-covers/gaston-01.jpg", 0));
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Editions
+            .Include(e => e.Visuals)
+            .FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Single(saved.Visuals);
+        Assert.Equal(VisualType.BackCover, saved.Visuals.Single().Type);
+    }
+
+    [Fact]
+    public async Task AddEditionVisual_WithType_PersistsEnumAsExplicitInt()
+    {
+        // Confirms the project-wide enum-as-int convention also applies to EditionVisual.Type.
+        var album = new Album("Spirou (ModelCreation, Visual)", null);
+        var publisher = new Publisher("Dupuis (ModelCreation, Visual2)");
+        var edition = new Edition(album, publisher);
+        var visual = new EditionVisual(edition, VisualType.Endpaper, "endpapers/spirou-01.jpg", 0);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        _fixture.Context.EditionVisuals.Add(visual);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var rawValue = await _fixture.Context.Database
+            .SqlQuery<int>($"SELECT \"Type\" AS \"Value\" FROM \"EditionVisuals\" WHERE \"Id\" = {visual.Id}")
+            .SingleAsync();
+
+        Assert.Equal((int)VisualType.Endpaper, rawValue);
     }
 }
