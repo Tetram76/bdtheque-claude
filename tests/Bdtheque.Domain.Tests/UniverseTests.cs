@@ -21,7 +21,6 @@ public sealed class UniverseTests
     [InlineData("   ")]
     public void Constructor_EmptyName_Throws(string? name)
     {
-        // null input yields ArgumentNullException (subtype of ArgumentException); all are valid guards
         DomainAssert.Violates(DomainRules.UniverseNameRequired, () => new Universe(name!));
     }
 

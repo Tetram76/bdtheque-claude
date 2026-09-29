@@ -29,7 +29,6 @@ public sealed class PublisherCollectionTests
     public void Constructor_EmptyName_Throws(string? name)
     {
         var publisher = new Publisher("Dargaud");
-        // null input yields ArgumentNullException (subtype of ArgumentException); all are valid guards
         DomainAssert.Violates(DomainRules.PublisherCollectionNameRequired, () => new PublisherCollection(name!, publisher));
     }
 
