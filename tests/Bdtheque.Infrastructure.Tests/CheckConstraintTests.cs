@@ -1,27 +1,49 @@
 using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Verifies that the database-level CHECK constraint on <c>Authors</c> is enforced.
-/// These tests bypass the domain model (which also enforces the rule) and write raw SQL,
-/// ensuring that the constraint acts as a genuine defence-in-depth layer.
+/// Verifies that the database-level constraints (CHECK constraints and unique indexes) are
+/// enforced. These tests bypass the domain model (which also enforces each rule) and write raw
+/// SQL, ensuring that every constraint acts as a genuine defence-in-depth layer.
 /// </summary>
-public sealed class CheckConstraintTests : IDisposable
+/// <remarks>
+/// Each rejection asserts the name of the violated constraint, and each row is built to violate
+/// that one constraint only: a bare "some exception was thrown" would keep passing if the insert
+/// started failing for an unrelated reason (e.g. a new NOT NULL column), silently leaving the
+/// constraint under test unverified.
+/// </remarks>
+public sealed class CheckConstraintTests : IAsyncLifetime
 {
     // Each test gets its own isolated database so that a failing insert in one test
     // cannot affect the state seen by another.
     private readonly BdthequeDbContextFixture _fixture = new();
 
-    public void Dispose() => _fixture.Dispose();
+    public Task InitializeAsync() => _fixture.InitializeAsync();
+
+    public Task DisposeAsync() => _fixture.DisposeAsync();
+
+    private static async Task AssertViolatesAsync(string constraintName, Func<Task> write)
+    {
+        var exception = await Assert.ThrowsAsync<PostgresException>(write);
+        Assert.Equal(constraintName, exception.ConstraintName);
+    }
+
+    private static async Task AssertViolatesNotNullAsync(string columnName, Func<Task> write)
+    {
+        var exception = await Assert.ThrowsAsync<PostgresException>(write);
+        Assert.Equal(PostgresErrorCodes.NotNullViolation, exception.SqlState);
+        Assert.Equal(columnName, exception.ColumnName);
+    }
 
     [Fact]
     public async Task AuthorCheckConstraint_NullLastNameAndPseudonym_ThrowsAtDatabase()
     {
         // Insert directly via raw SQL to bypass the domain-layer guard
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\") VALUES ({0}, NULL, NULL)",
                 id));
@@ -57,7 +79,7 @@ public sealed class CheckConstraintTests : IDisposable
         // Blank strings bypass a simple IS NOT NULL check; the constraint uses LENGTH(TRIM(...))
         // to also reject whitespace-only values inserted via raw SQL.
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\") VALUES ({0}, '', NULL)",
                 id));
@@ -67,23 +89,23 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AuthorCheckConstraint_BothBlankStrings_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\") VALUES ({0}, '   ', '')",
                 id));
     }
 
     [Theory]
-    [InlineData("Genres", "Label", "'   '")]
-    [InlineData("Universes", "Name", "''")]
-    [InlineData("Publishers", "Name", "'   '")]
-    public async Task RequiredTextCheckConstraint_BlankValue_ThrowsAtDatabase(string table, string column, string blankLiteral)
+    [InlineData("Genres", "Label", "'   '", "CK_Genres_LabelNotBlank")]
+    [InlineData("Universes", "Name", "''", "CK_Universes_NameNotBlank")]
+    [InlineData("Publishers", "Name", "'   '", "CK_Publishers_NameNotBlank")]
+    public async Task RequiredTextCheckConstraint_BlankValue_ThrowsAtDatabase(string table, string column, string blankLiteral, string constraint)
     {
         // Mirrors AuthorCheckConstraint_*BlankStrings*: IsRequired() alone only enforces
         // NOT NULL, so raw SQL could otherwise persist a blank label/name.
         var id = Guid.CreateVersion7();
         var sql = $"INSERT INTO \"{table}\" (\"Id\", \"{column}\") VALUES ({{0}}, {blankLiteral})";
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync(constraint, () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(sql, id));
     }
 
@@ -95,22 +117,22 @@ public sealed class CheckConstraintTests : IDisposable
             "INSERT INTO \"Publishers\" (\"Id\", \"Name\") VALUES ({0}, 'Casterman')", publisherId);
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_PublisherCollections_NameNotBlank", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"PublisherCollections\" (\"Id\", \"Name\", \"PublisherId\") VALUES ({0}, '   ', {1})",
                 id, publisherId));
     }
 
     [Theory]
-    [InlineData("Title")]
-    [InlineData("SortKey")]
-    public async Task SeriesCheckConstraint_BlankTitleOrSortKey_ThrowsAtDatabase(string blankColumn)
+    [InlineData("Title", "CK_Series_TitleNotBlank")]
+    [InlineData("SortKey", "CK_Series_SortKeyNotBlank")]
+    public async Task SeriesCheckConstraint_BlankTitleOrSortKey_ThrowsAtDatabase(string blankColumn, string constraint)
     {
         var id = Guid.CreateVersion7();
         var otherColumn = blankColumn == "Title" ? "SortKey" : "Title";
         var sql = $"INSERT INTO \"Series\" (\"Id\", \"{blankColumn}\", \"{otherColumn}\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\") " +
                   $"VALUES ({{0}}, '   ', 'Valeur', false, false, false)";
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync(constraint, () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(sql, id));
     }
 
@@ -118,7 +140,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task SeriesCheckConstraint_NonPositiveTheoreticalVolumeCount_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Series_TheoreticalVolumeCountPositive", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"TheoreticalVolumeCount\") " +
                 "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, 0)",
@@ -141,7 +163,7 @@ public sealed class CheckConstraintTests : IDisposable
             collectionId, publisherId);
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Series_TemplateCollectionRequiresPublisher", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"TemplatePublisherCollectionId\") " +
                 "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, {1})",
@@ -157,7 +179,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_NoTitleNoSeries_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_TitleRequiredWithoutSeries", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, null!, null!, (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, null!));
@@ -169,9 +191,11 @@ public sealed class CheckConstraintTests : IDisposable
         var seriesId = await InsertSeriesAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        // A sort key is supplied so that the blank title is the only rule broken: a NULL sort key
+        // would also break CK_Albums_SortKeyPresenceMatchesTitle.
+        await AssertViolatesAsync("CK_Albums_TitleNotBlank", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertAlbumSql, id, "   ", null!, (int)AlbumType.Regular,
+                InsertAlbumSql, id, "   ", "Tintin", (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, seriesId));
     }
 
@@ -181,7 +205,7 @@ public sealed class CheckConstraintTests : IDisposable
         var seriesId = await InsertSeriesAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_SortKeyPresenceMatchesTitle", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, null!, "Orphan Key", (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, seriesId));
@@ -191,7 +215,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_TitleWithoutSortKey_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_SortKeyPresenceMatchesTitle", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", null!, (int)AlbumType.Regular,
                 null!, null!, null!, null!, null!, null!));
@@ -203,7 +227,7 @@ public sealed class CheckConstraintTests : IDisposable
         var seriesId = await InsertSeriesAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_ManualSortKeyRequiresTitle", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
                 "VALUES ({0}, NULL, NULL, true, {1}, false, {2})", id, (int)AlbumType.Regular, seriesId));
@@ -213,7 +237,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_NonPositiveVolumeNumber_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_VolumeNumberPositive", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 0, null!, null!, null!, null!, null!));
@@ -223,7 +247,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_VolumeRangeOnlyStart_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_VolumeRangeBothOrNeither", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Omnibus,
                 null!, 1, null!, null!, null!, null!));
@@ -233,7 +257,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_VolumeRangeStartGreaterThanEnd_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_VolumeRangeOrder", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Omnibus,
                 null!, 6, 1, null!, null!, null!));
@@ -243,7 +267,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_VolumeRangeOnNonOmnibus_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_VolumeRangeOmnibusOnly", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, 1, 6, null!, null!, null!));
@@ -253,7 +277,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_PublicationMonthWithoutYear_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_PublicationMonthRequiresYear", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, null!, null!, null!, 6, null!));
@@ -265,7 +289,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_PublicationMonthOutOfRange_ThrowsAtDatabase(int month)
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_PublicationMonthRange", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, null!, null!, 1978, month, null!));
@@ -275,7 +299,7 @@ public sealed class CheckConstraintTests : IDisposable
     public async Task AlbumCheckConstraint_PublicationYearNonPositive_ThrowsAtDatabase()
     {
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Albums_PublicationYearPositive", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertAlbumSql, id, "Tintin", "Tintin", (int)AlbumType.Regular,
                 null!, null!, null!, 0, null!, null!));
@@ -328,7 +352,7 @@ public sealed class CheckConstraintTests : IDisposable
     {
         var authorId = await InsertAuthorAsync();
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Contributions_ExactlyOneOfAlbumOrSeries", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertContributionSql, id, null!, null!, authorId, (int)ContributionRole.Scenarist));
     }
@@ -340,7 +364,7 @@ public sealed class CheckConstraintTests : IDisposable
         var seriesId = await InsertSeriesAsync();
         var authorId = await InsertAuthorAsync();
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Contributions_ExactlyOneOfAlbumOrSeries", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertContributionSql, id, albumId, seriesId, authorId, (int)ContributionRole.Scenarist));
     }
@@ -379,7 +403,7 @@ public sealed class CheckConstraintTests : IDisposable
         await _fixture.Context.Database.ExecuteSqlRawAsync(
             InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, (int)ContributionRole.Scenarist);
 
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("IX_Contributions_AlbumId_Role_AuthorId", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertContributionSql, Guid.CreateVersion7(), albumId, null!, authorId, (int)ContributionRole.Scenarist));
     }
@@ -392,7 +416,7 @@ public sealed class CheckConstraintTests : IDisposable
         await _fixture.Context.Database.ExecuteSqlRawAsync(
             InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, (int)ContributionRole.Illustrator);
 
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("IX_Contributions_SeriesId_Role_AuthorId", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertContributionSql, Guid.CreateVersion7(), null!, seriesId, authorId, (int)ContributionRole.Illustrator));
     }
@@ -435,7 +459,7 @@ public sealed class CheckConstraintTests : IDisposable
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Editions_PublicationYearPositive", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, 0, null!, null!, null!, null!, null!));
     }
@@ -447,7 +471,7 @@ public sealed class CheckConstraintTests : IDisposable
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Editions_PageCountPositive", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, null!, 0, null!, null!, null!, null!));
     }
@@ -459,7 +483,7 @@ public sealed class CheckConstraintTests : IDisposable
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Editions_AcquisitionAmountCurrencyTogether", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, null!, null!, (int)AcquisitionMode.Purchase, null!, 10, null!));
     }
@@ -471,7 +495,7 @@ public sealed class CheckConstraintTests : IDisposable
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Editions_AcquisitionAmountPositive", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, null!, null!, (int)AcquisitionMode.Purchase, null!, 0, "EUR"));
     }
@@ -483,7 +507,7 @@ public sealed class CheckConstraintTests : IDisposable
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Editions_AcquisitionModeRequiredForDateOrPrice", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, null!, null!, null!, new DateOnly(2020, 1, 1), null!, null!));
     }
@@ -495,7 +519,7 @@ public sealed class CheckConstraintTests : IDisposable
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Editions_AcquisitionModeRequiredForDateOrPrice", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, null!, null!, null!, null!, 10, "EUR"));
     }
@@ -507,7 +531,7 @@ public sealed class CheckConstraintTests : IDisposable
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_Editions_FreeRequiresNoAmount", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, true, null!, null!, (int)AcquisitionMode.Gift, null!, 10, "EUR"));
     }
@@ -548,7 +572,7 @@ public sealed class CheckConstraintTests : IDisposable
         var editionId = await InsertEditionAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_EditionVisuals_MediaReferenceNotBlank", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "   ", 0));
     }
@@ -559,7 +583,7 @@ public sealed class CheckConstraintTests : IDisposable
         var editionId = await InsertEditionAsync();
 
         var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("CK_EditionVisuals_DisplayOrderNotNegative", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", -1));
     }
@@ -585,7 +609,7 @@ public sealed class CheckConstraintTests : IDisposable
     {
         // AlbumId is set for both kinds of intent (see PurchaseIntent remarks).
         var editionId = await InsertEditionAsync();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesNotNullAsync("AlbumId", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), null!, editionId));
     }
 
@@ -595,7 +619,7 @@ public sealed class CheckConstraintTests : IDisposable
         var albumId = await InsertAlbumAsync();
         await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, null!);
 
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("IX_PurchaseIntents_AlbumId_WholeAlbum", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, null!));
     }
 
@@ -606,7 +630,7 @@ public sealed class CheckConstraintTests : IDisposable
         var editionId = await InsertEditionAsync(albumId, await InsertPublisherAsync());
         await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, editionId);
 
-        await Assert.ThrowsAnyAsync<Exception>(() =>
+        await AssertViolatesAsync("IX_PurchaseIntents_EditionId", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, editionId));
     }
 

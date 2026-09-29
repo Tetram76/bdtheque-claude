@@ -10,9 +10,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Verifies that the EF Core model builds and that basic persistence works against
-/// an in-memory SQLite database. These tests catch mis-configuration in entity
-/// configurations or the DbContext wiring without requiring a running PostgreSQL instance.
+/// Verifies that the migrations produce a schema matching the EF Core model, and that basic
+/// persistence works against it, on the production database engine (see
+/// <see cref="BdthequeDbContextFixture"/>).
 /// </summary>
 public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
 {
@@ -24,29 +24,20 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task EnsureCreated_BuildsModelWithoutError()
+    public async Task Migrations_CreateATableForEveryMappedEntity()
     {
-        // The fixture already called EnsureCreated; verify the schema exists
-        // by checking that all expected tables are present.
-        var tableNames = _fixture.Context.Model
+        var mappedTables = _fixture.Context.Model
             .GetEntityTypes()
-            .Select(e => e.GetTableName())
-            .Where(t => t is not null)
-            .OrderBy(t => t)
+            .Select(e => e.GetTableName()!)
+            .Distinct()
+            .Order()
             .ToList();
 
-        Assert.Contains("Authors", tableNames);
-        Assert.Contains("Publishers", tableNames);
-        Assert.Contains("PublisherCollections", tableNames);
-        Assert.Contains("Genres", tableNames);
-        Assert.Contains("Universes", tableNames);
-        Assert.Contains("Series", tableNames);
-        Assert.Contains("Albums", tableNames);
-        Assert.Contains("Contributions", tableNames);
-        Assert.Contains("Editions", tableNames);
-        Assert.Contains("EditionVisuals", tableNames);
-        Assert.Contains("PurchaseIntents", tableNames);
-        await Task.CompletedTask;
+        var migratedTables = await _fixture.Context.Database
+            .SqlQuery<string>($"SELECT table_name AS \"Value\" FROM information_schema.tables WHERE table_schema = 'public'")
+            .ToListAsync();
+
+        Assert.All(mappedTables, table => Assert.Contains(table, migratedTables));
     }
 
     [Fact]
@@ -510,19 +501,23 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public void AcquisitionAmountScale_AccommodatesThreeDecimalCurrencies()
+    public async Task AcquisitionAmount_ThreeDecimalCurrency_RoundTripsWithoutRounding()
     {
-        // SQLite (used by this fixture) has dynamic typing and does not enforce a configured
-        // precision/scale the way PostgreSQL does, so a round-trip test here could not catch a
-        // silent rounding regression — this asserts the EF model metadata itself. Some ISO 4217
-        // currencies (KWD, BHD, OMR, JOD, TND) have 3 minor-unit digits; fonctionnel.md §
-        // Gestion des devises requires supporting any currency, so a scale below 3 would let
-        // PostgreSQL silently round those amounts on save.
-        var entityType = _fixture.Context.Model.FindEntityType(typeof(Edition))!;
-        var property = entityType.FindProperty(nameof(Edition.AcquisitionAmount))!;
+        // Some ISO 4217 currencies (KWD, BHD, OMR, JOD, TND) have 3 minor-unit digits;
+        // fonctionnel.md § Gestion des devises requires supporting any currency, so a column
+        // scale below 3 would let PostgreSQL silently round those amounts on save.
+        var album = new Album("Tintin (ModelCreation, Scale)", null);
+        var publisher = new Publisher("Casterman (ModelCreation, Scale)");
+        var edition = new Edition(album, publisher);
+        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.SetAcquisitionPrice(12.345m, "KWD");
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
 
-        Assert.True(property.GetScale() >= 3,
-            $"AcquisitionAmount scale {property.GetScale()} is too small to preserve 3-decimal currencies without rounding.");
+        var saved = await _fixture.Context.Editions.SingleAsync(e => e.Id == edition.Id);
+
+        Assert.Equal(12.345m, saved.AcquisitionAmount);
     }
 
     [Fact]

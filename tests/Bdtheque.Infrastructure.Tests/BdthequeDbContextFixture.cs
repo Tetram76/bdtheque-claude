@@ -1,36 +1,26 @@
 using Bdtheque.Infrastructure;
-using Microsoft.Data.Sqlite;
+using Bdtheque.Testing;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Provides a shared, in-memory SQLite <see cref="BdthequeDbContext"/> for integration tests.
-/// Uses a kept-alive <see cref="SqliteConnection"/> so that the schema persists for the
-/// lifetime of the fixture, matching the pattern used in <c>Bdtheque.Api.Tests</c>.
+/// Provides a <see cref="BdthequeDbContext"/> on its own freshly migrated PostgreSQL database
+/// (see <see cref="PostgreSqlTestServer"/>).
 /// </summary>
-public sealed class BdthequeDbContextFixture : IDisposable
+public sealed class BdthequeDbContextFixture : IAsyncLifetime
 {
-    private readonly SqliteConnection _connection;
+    public BdthequeDbContext Context { get; private set; } = null!;
 
-    public BdthequeDbContext Context { get; }
-
-    public BdthequeDbContextFixture()
+    public async Task InitializeAsync()
     {
-        _connection = new SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
+        var connectionString = await PostgreSqlTestServer.CreateMigratedDatabaseAsync();
         var options = new DbContextOptionsBuilder<BdthequeDbContext>()
-            .UseSqlite(_connection)
+            .UseNpgsql(connectionString)
             .Options;
 
         Context = new BdthequeDbContext(options);
-        Context.Database.EnsureCreated();
     }
 
-    public void Dispose()
-    {
-        Context.Dispose();
-        _connection.Dispose();
-    }
+    public async Task DisposeAsync() => await Context.DisposeAsync();
 }

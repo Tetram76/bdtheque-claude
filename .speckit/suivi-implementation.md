@@ -38,6 +38,20 @@ Implémentation des entités du modèle métier (`modele-metier.md`) dans `Bdthe
 | 6 | `feat/domain-visuel-edition` | `feat(domain): ajout de l'entité Visuel d'édition` | Entité `Visuel d'édition` (type, ordre d'affichage) ; configuration EF du tri par type puis ordre ; migration ; tests associés | Réalisée |
 | 7 | `feat/domain-intention-achat` | `feat(domain): ajout de l'entité Intention d'achat` | Entité `Intention d'achat`, portée par l'agrégat `Album` (intention sur l'album **ou** sur ses éditions, une intention par cible) ; configuration EF (index uniques) ; migration ; tests sur ces règles | Réalisée |
 
+### Consolidation avant la Phase 2
+
+Corrections issues de la revue complète de la Phase 1, à réaliser avant d'ouvrir la Phase 2.
+
+**Statut : en cours.**
+
+| # | Branche | Titre (commit) | Contenu | Statut |
+| --- | --- | --- | --- | --- |
+| 1 | `chore/tests-postgresql` | `test(infrastructure): exécute les tests de persistance sur PostgreSQL réel` | Testcontainers à la place de SQLite (migrations réellement appliquées, base clonée par test) ; suppression du cas particulier `Testing` de l'API ; assertions sur le nom de la contrainte violée ; contrôle modèle ↔ migrations en CI | En cours |
+| 2 | `chore/postgresql-18` | `chore(docker): passe à PostgreSQL 18 et regroupe les migrations` | Image `postgres:18-alpine` (production et tests) ; migrations regroupées en une `InitialCreate` unique, aucun déploiement n'ayant eu lieu | À faire |
+| 3 | `fix/collation-tri` | `fix(infrastructure): tri linguistique des clés de tri en base` | Collation ICU française sur les colonnes de tri (la collation par défaut de l'image trie en ordre binaire) | À faire |
+| 4 | `refactor/domain-consolidation` | `refactor(domain): encapsule les collections et distingue les erreurs métier` | Collections de navigation en lecture seule (règles du domaine non contournables par le suivi de relations EF) ; type d'exception dédié aux violations de règles métier ; ordre des visuels déterministe ; jeton de concurrence optimiste | À faire |
+| 5 | `docs/phase1-revue` | `docs: corrige la documentation relevée par la revue de la Phase 1` | Commentaires faux ou périmés ; justification des contraintes laissées au seul domaine intégrée au `.speckit` ; en-tête de `contraintes-techniques.md` aligné sur `AGENTS.md` | À faire |
+
 ---
 
 ## Phase 2 — Contracts et API

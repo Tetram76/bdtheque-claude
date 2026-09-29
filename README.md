@@ -56,7 +56,10 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 │   ├── Bdtheque.Api/              # Conteneur api : endpoints, sécurité, règles applicatives
 │   └── Bdtheque.Frontend/         # Conteneur frontend : composants Blazor Server, auth cookie
 ├── tests/
-│   └── Bdtheque.Api.Tests/        # Tests d'intégration (WebApplicationFactory + SQLite)
+│   ├── Bdtheque.Domain.Tests/         # Tests unitaires du domaine
+│   ├── Bdtheque.Infrastructure.Tests/ # Tests de persistance (migrations, contraintes) sur PostgreSQL
+│   ├── Bdtheque.Api.Tests/            # Tests d'intégration de l'API (WebApplicationFactory + PostgreSQL)
+│   └── Bdtheque.Testing/              # Support partagé : conteneur PostgreSQL de test (Testcontainers)
 └── .speckit/                      # Source de vérité du projet (voir ci-dessous)
 ```
 
@@ -68,6 +71,8 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (pour `docker compose`)
 
 ### Build et tests
+
+Docker doit être démarré : les tests de persistance et d'API s'exécutent sur un conteneur PostgreSQL éphémère (Testcontainers).
 
 ```bash
 dotnet restore Bdtheque.slnx

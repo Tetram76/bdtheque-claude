@@ -22,8 +22,7 @@ internal sealed class AuthorConfiguration : IEntityTypeConfiguration<Author>
         // COALESCE(LENGTH(TRIM(...)), 0) > 0 rejects null, empty, and whitespace-only values,
         // covering raw-SQL bypasses that might insert blank strings instead of NULL.
         // The domain's NullIfEmpty already normalises blanks to null, so this check is
-        // strictly defence-in-depth for out-of-band writes. The COALESCE/LENGTH/TRIM
-        // expression is valid in both PostgreSQL and SQLite.
+        // strictly defence-in-depth for out-of-band writes.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Authors_LastNameOrPseudonym",
             $"COALESCE(LENGTH(TRIM(\"{nameof(Author.LastName)}\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"{nameof(Author.Pseudonym)}\")), 0) > 0"));

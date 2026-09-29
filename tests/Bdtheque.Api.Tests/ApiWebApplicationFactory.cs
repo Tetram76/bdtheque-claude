@@ -1,46 +1,37 @@
-using Bdtheque.Infrastructure;
+using Bdtheque.Testing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// Replaces PostgreSQL with an in-memory SQLite database, to test the application wiring
-/// (DI, middlewares, health checks) without depending on a `db` container.
+/// Hosts the API exactly as the <c>api</c> container runs it, against an empty PostgreSQL
+/// database of its own: startup therefore goes through the same migration step as a first
+/// deployment (see <see cref="PostgreSqlTestServer"/>).
 /// </summary>
-public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
+public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public const string InternalApiKey = "test-internal-api-key";
 
-    private readonly SqliteConnection _connection = new("DataSource=:memory:");
+    private string _connectionString = null!;
+
+    public async Task InitializeAsync() =>
+        _connectionString = await PostgreSqlTestServer.CreateEmptyDatabaseAsync();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        _connection.Open();
-
-        builder.UseEnvironment("Testing");
+        // Production, not the factory's default Development: the tests must exercise what is
+        // deployed (e.g. the API documentation endpoints are not mapped there).
+        builder.UseEnvironment("Production");
 
         builder.ConfigureAppConfiguration((_, configBuilder) =>
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
+                ["ConnectionStrings:Bdtheque"] = _connectionString,
                 ["InternalApiKey:Key"] = InternalApiKey,
             }));
-
-        builder.ConfigureServices(services =>
-            services.AddDbContext<BdthequeDbContext>(options => options.UseSqlite(_connection)));
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-
-        if (disposing)
-        {
-            _connection.Dispose();
-        }
-    }
+    Task IAsyncLifetime.DisposeAsync() => base.DisposeAsync().AsTask();
 }
