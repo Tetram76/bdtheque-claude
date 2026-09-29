@@ -23,7 +23,7 @@ public static class PostgreSqlTestServer
     /// Must match the <c>db</c> service image in docker-compose.yml — pinned by
     /// <c>PostgreSqlTestServerTests.Image_MatchesDockerComposeDbService</c>.
     /// </summary>
-    public const string Image = "postgres:17-alpine";
+    public const string Image = "postgres:18-alpine";
 
     private const string TemplateDatabase = "bdtheque_template";
 

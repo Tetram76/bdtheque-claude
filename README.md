@@ -21,7 +21,7 @@ Application web de gestion de collection de bandes dessinées — réécriture d
 | Frontend | Blazor Server (.NET 10) |
 | Backend API | ASP.NET Core Minimal API (.NET 10) |
 | ORM | EF Core 10 + Npgsql |
-| Base de données | PostgreSQL 17 |
+| Base de données | PostgreSQL 18 |
 | ML | ML.NET (embarqué dans l'API) |
 | Conteneurisation | Docker Compose |
 
