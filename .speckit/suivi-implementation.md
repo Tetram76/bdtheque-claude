@@ -26,7 +26,7 @@ Mise en place de la structure porteuse de l'application, indépendamment du mod�
 
 Implémentation des entités du modèle métier (`modele-metier.md`) dans `Bdtheque.Domain` et `Bdtheque.Infrastructure` (configurations EF Core + migrations), séquencée selon les dépendances entre entités. Le `DbContext` reçoit progressivement ses `DbSet`.
 
-**Statut : en cours.**
+**Statut : réalisée.**
 
 | # | Branche | Titre (commit) | Contenu | Statut |
 | --- | --- | --- | --- | --- |
@@ -36,7 +36,7 @@ Implémentation des entités du modèle métier (`modele-metier.md`) dans `Bdthe
 | 4 | `feat/domain-contribution` | `feat(domain): ajout de l'entité Contribution` | Entité `Contribution` (rôle, artiste) reliant un Auteur à un Album **ou** une Série ; configuration EF de la contrainte d'exclusivité ; migration ; tests sur cette exclusivité | Réalisée |
 | 5 | `feat/domain-edition` | `feat(domain): ajout de l'entité Édition` | Entité `Édition` (reliure, orientation, sens de lecture, format, catégorie, état, mode d'acquisition) ; configurations EF des contraintes d'intégrité (mode d'acquisition ↔ date/prix, gratuite ↔ prix nul) ; migration ; tests sur ces contraintes | Réalisée |
 | 6 | `feat/domain-visuel-edition` | `feat(domain): ajout de l'entité Visuel d'édition` | Entité `Visuel d'édition` (type, ordre d'affichage) ; configuration EF du tri par type puis ordre ; migration ; tests associés | Réalisée |
-| 7 | `feat/domain-intention-achat` | `feat(domain): ajout de l'entité Intention d'achat` | Entité `Intention d'achat` ; configuration EF de la contrainte d'exclusivité (Album **ou** Édition) ; migration ; tests sur cette exclusivité. Fonctionnalité de second plan (`fonctionnel.md`) : peut être reportée après la Phase 2 | À faire |
+| 7 | `feat/domain-intention-achat` | `feat(domain): ajout de l'entité Intention d'achat` | Entité `Intention d'achat` ; configuration EF de la contrainte d'exclusivité (Album **ou** Édition) et de l'unicité par cible ; migration ; tests sur ces contraintes | Réalisée |
 
 ---
 

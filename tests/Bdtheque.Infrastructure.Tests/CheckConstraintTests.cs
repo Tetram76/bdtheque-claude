@@ -575,4 +575,80 @@ public sealed class CheckConstraintTests : IDisposable
         var count = await _fixture.Context.EditionVisuals.CountAsync(v => v.Id == id);
         Assert.Equal(1, count);
     }
+
+    private const string InsertPurchaseIntentSql =
+        "INSERT INTO \"PurchaseIntents\" (\"Id\", \"AlbumId\", \"EditionId\") VALUES ({0}, {1}, {2})";
+
+    [Fact]
+    public async Task PurchaseIntentCheckConstraint_NeitherAlbumNorEdition_ThrowsAtDatabase()
+    {
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, null!, null!));
+    }
+
+    [Fact]
+    public async Task PurchaseIntentCheckConstraint_BothAlbumAndEdition_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var editionId = await InsertEditionAsync();
+        var id = Guid.CreateVersion7();
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, albumId, editionId));
+    }
+
+    [Fact]
+    public async Task PurchaseIntentCheckConstraint_AlbumOnly_Succeeds()
+    {
+        var albumId = await InsertAlbumAsync();
+        var id = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, albumId, null!);
+
+        var count = await _fixture.Context.PurchaseIntents.CountAsync(p => p.Id == id);
+        Assert.Equal(1, count);
+    }
+
+    [Fact]
+    public async Task PurchaseIntentUniqueIndex_DuplicateAlbum_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, null!);
+
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, null!));
+    }
+
+    [Fact]
+    public async Task PurchaseIntentUniqueIndex_DuplicateEdition_ThrowsAtDatabase()
+    {
+        var editionId = await InsertEditionAsync();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), null!, editionId);
+
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), null!, editionId));
+    }
+
+    [Fact]
+    public async Task PurchaseIntentUniqueIndex_DistinctTargets_Succeeds()
+    {
+        // The uniqueness is per target, not per kind of target: distinct albums each keep their own intent.
+        var firstAlbumId = await InsertAlbumAsync();
+        var secondAlbumId = await InsertAlbumAsync();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), firstAlbumId, null!);
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), secondAlbumId, null!);
+
+        var count = await _fixture.Context.PurchaseIntents.CountAsync(p => p.EditionId == null);
+        Assert.Equal(2, count);
+    }
+
+    [Fact]
+    public async Task PurchaseIntentCheckConstraint_EditionOnly_Succeeds()
+    {
+        var editionId = await InsertEditionAsync();
+        var id = Guid.CreateVersion7();
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, null!, editionId);
+
+        var count = await _fixture.Context.PurchaseIntents.CountAsync(p => p.Id == id);
+        Assert.Equal(1, count);
+    }
 }

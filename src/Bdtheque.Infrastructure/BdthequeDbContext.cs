@@ -15,6 +15,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<Contribution> Contributions => Set<Contribution>();
     public DbSet<Edition> Editions => Set<Edition>();
     public DbSet<EditionVisual> EditionVisuals => Set<EditionVisual>();
+    public DbSet<PurchaseIntent> PurchaseIntents => Set<PurchaseIntent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

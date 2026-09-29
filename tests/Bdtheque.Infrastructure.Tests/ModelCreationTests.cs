@@ -41,6 +41,7 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("Contributions", tableNames);
         Assert.Contains("Editions", tableNames);
         Assert.Contains("EditionVisuals", tableNames);
+        Assert.Contains("PurchaseIntents", tableNames);
         await Task.CompletedTask;
     }
 
@@ -555,5 +556,47 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
             .SingleAsync();
 
         Assert.Equal((int)VisualType.Endpaper, rawValue);
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_ForAlbum_Persists()
+    {
+        var album = new Album("Blake et Mortimer (ModelCreation, Intent)", null);
+        var intent = PurchaseIntent.ForAlbum(album);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.PurchaseIntents.Add(intent);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.PurchaseIntents
+            .Include(p => p.Album)
+            .FirstAsync(p => p.Id == intent.Id);
+
+        Assert.Equal("Blake et Mortimer (ModelCreation, Intent)", saved.Album!.Title);
+        Assert.Null(saved.EditionId);
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_ForEdition_Persists()
+    {
+        var album = new Album("Thorgal (ModelCreation, Intent)", null);
+        var publisher = new Publisher("Le Lombard (ModelCreation, Intent)");
+        var edition = new Edition(album, publisher);
+        var intent = PurchaseIntent.ForEdition(edition);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.Add(edition);
+        _fixture.Context.PurchaseIntents.Add(intent);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.PurchaseIntents
+            .Include(p => p.Edition)
+            .FirstAsync(p => p.Id == intent.Id);
+
+        Assert.Equal(edition.Id, saved.Edition!.Id);
+        Assert.Null(saved.AlbumId);
     }
 }
