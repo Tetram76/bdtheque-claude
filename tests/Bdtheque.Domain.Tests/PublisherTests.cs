@@ -21,7 +21,7 @@ public sealed class PublisherTests
     public void Constructor_EmptyName_Throws(string? name)
     {
         // null input yields ArgumentNullException (subtype of ArgumentException); all are valid guards
-        Assert.ThrowsAny<ArgumentException>(() => new Publisher(name!));
+        DomainAssert.Violates(DomainRules.PublisherNameRequired, () => new Publisher(name!));
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class PublisherTests
     public void SetWebsite_InvalidUrl_Throws(string url)
     {
         var publisher = new Publisher("Dargaud");
-        Assert.Throws<ArgumentException>(() => publisher.SetWebsite(url));
+        DomainAssert.Violates(DomainRules.PublisherWebsiteInvalid, () => publisher.SetWebsite(url));
     }
 
     [Theory]

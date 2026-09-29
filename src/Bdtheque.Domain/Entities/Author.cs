@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities.Common;
 
 namespace Bdtheque.Domain.Entities;
@@ -19,30 +20,21 @@ public sealed class Author : EntityBase
 
     public Author(string? lastName, string? firstName, string? pseudonym)
     {
-        ValidateIdentity(lastName, pseudonym);
-        LastName = NullIfEmpty(lastName);
-        FirstName = NullIfEmpty(firstName);
-        Pseudonym = NullIfEmpty(pseudonym);
+        UpdateIdentity(lastName, firstName, pseudonym);
     }
 
     public void UpdateIdentity(string? lastName, string? firstName, string? pseudonym)
     {
-        ValidateIdentity(lastName, pseudonym);
-        LastName = NullIfEmpty(lastName);
-        FirstName = NullIfEmpty(firstName);
-        Pseudonym = NullIfEmpty(pseudonym);
-    }
-
-    public void UpdateBiography(string? biography) => Biography = NullIfEmpty(biography);
-
-    public void UpdateNationality(string? nationality) => Nationality = NullIfEmpty(nationality);
-
-    private static void ValidateIdentity(string? lastName, string? pseudonym)
-    {
         if (string.IsNullOrWhiteSpace(lastName) && string.IsNullOrWhiteSpace(pseudonym))
-            throw new ArgumentException("An author must have at least a last name or a pseudonym.");
+            throw new DomainRuleViolationException(
+                DomainRules.AuthorLastNameOrPseudonymRequired, "An author must have at least a last name or a pseudonym.");
+
+        LastName = DomainText.NullIfBlank(lastName);
+        FirstName = DomainText.NullIfBlank(firstName);
+        Pseudonym = DomainText.NullIfBlank(pseudonym);
     }
 
-    private static string? NullIfEmpty(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    public void UpdateBiography(string? biography) => Biography = DomainText.NullIfBlank(biography);
+
+    public void UpdateNationality(string? nationality) => Nationality = DomainText.NullIfBlank(nationality);
 }

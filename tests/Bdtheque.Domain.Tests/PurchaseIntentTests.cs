@@ -52,7 +52,7 @@ public sealed class PurchaseIntentTests
         var album = new Album("Le Lotus bleu", null);
         album.AddPurchaseIntent();
 
-        Assert.Throws<InvalidOperationException>(() => album.AddPurchaseIntent());
+        DomainAssert.Violates(DomainRules.PurchaseIntentAlbumAlreadyTargeted, () => album.AddPurchaseIntent());
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public sealed class PurchaseIntentTests
         var edition = new Edition(album, Casterman);
         album.AddPurchaseIntent(edition);
 
-        Assert.Throws<InvalidOperationException>(() => album.AddPurchaseIntent(edition));
+        DomainAssert.Violates(DomainRules.PurchaseIntentEditionAlreadyTargeted, () => album.AddPurchaseIntent(edition));
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class PurchaseIntentTests
         var album = new Album("Le Lotus bleu", null);
         album.AddPurchaseIntent(new Edition(album, Casterman));
 
-        Assert.Throws<InvalidOperationException>(() => album.AddPurchaseIntent());
+        DomainAssert.Violates(DomainRules.PurchaseIntentEditionsAlreadyTargeted, () => album.AddPurchaseIntent());
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public sealed class PurchaseIntentTests
         var album = new Album("Le Lotus bleu", null);
         album.AddPurchaseIntent();
 
-        Assert.Throws<InvalidOperationException>(() => album.AddPurchaseIntent(new Edition(album, Casterman)));
+        DomainAssert.Violates(DomainRules.PurchaseIntentAlbumAlreadyTargeted, () => album.AddPurchaseIntent(new Edition(album, Casterman)));
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities.Common;
 
 namespace Bdtheque.Domain.Entities;
@@ -24,9 +25,6 @@ public sealed class PublisherCollection : EntityBase
         PublisherId = publisher.Id;
     }
 
-    public void SetName(string name)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Name = name.Trim();
-    }
+    public void SetName(string name) =>
+        Name = DomainText.Required(name, DomainRules.PublisherCollectionNameRequired, "A publisher collection must have a name.");
 }

@@ -64,7 +64,7 @@ public sealed class EditionTests
         var otherPublisher = new Publisher("Dargaud");
         var foreignCollection = new PublisherCollection("Lucky Luke", otherPublisher);
 
-        Assert.Throws<ArgumentException>(() => edition.SetPublisher(CreatePublisher(), foreignCollection));
+        DomainAssert.Violates(DomainRules.PublisherCollectionNotOfPublisher, () => edition.SetPublisher(CreatePublisher(), foreignCollection));
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetPublicationYear(year));
+        DomainAssert.Violates(DomainRules.EditionPublicationYearPositive, () => edition.SetPublicationYear(year));
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetPageCount(count));
+        DomainAssert.Violates(DomainRules.EditionPageCountPositive, () => edition.SetPageCount(count));
     }
 
     [Fact]
@@ -220,7 +220,7 @@ public sealed class EditionTests
         edition.SetAcquisitionMode(AcquisitionMode.Gift);
         edition.SetAcquisitionDate(new DateOnly(2020, 1, 1));
 
-        Assert.Throws<InvalidOperationException>(() => edition.SetAcquisitionMode(null));
+        DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => edition.SetAcquisitionMode(null));
     }
 
     [Fact]
@@ -230,7 +230,7 @@ public sealed class EditionTests
         edition.SetAcquisitionMode(AcquisitionMode.Purchase);
         edition.SetAcquisitionPrice(12.5m, "EUR");
 
-        Assert.Throws<InvalidOperationException>(() => edition.SetAcquisitionMode(null));
+        DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => edition.SetAcquisitionMode(null));
     }
 
     [Fact]
@@ -253,7 +253,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<InvalidOperationException>(() => edition.SetAcquisitionDate(new DateOnly(2020, 1, 1)));
+        DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => edition.SetAcquisitionDate(new DateOnly(2020, 1, 1)));
     }
 
     [Fact]
@@ -272,7 +272,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<InvalidOperationException>(() => edition.SetAcquisitionPrice(10m, "EUR"));
+        DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => edition.SetAcquisitionPrice(10m, "EUR"));
     }
 
     [Fact]
@@ -281,7 +281,7 @@ public sealed class EditionTests
         var edition = new Edition(CreateAlbum(), CreatePublisher());
         edition.SetAcquisitionMode(AcquisitionMode.Purchase);
 
-        Assert.Throws<ArgumentException>(() => edition.SetAcquisitionPrice(10m, null));
+        DomainAssert.Violates(DomainRules.EditionAcquisitionAmountCurrencyTogether, () => edition.SetAcquisitionPrice(10m, null));
     }
 
     [Fact]
@@ -290,7 +290,7 @@ public sealed class EditionTests
         var edition = new Edition(CreateAlbum(), CreatePublisher());
         edition.SetAcquisitionMode(AcquisitionMode.Purchase);
 
-        Assert.Throws<ArgumentException>(() => edition.SetAcquisitionPrice(null, "EUR"));
+        DomainAssert.Violates(DomainRules.EditionAcquisitionAmountCurrencyTogether, () => edition.SetAcquisitionPrice(null, "EUR"));
     }
 
     [Theory]
@@ -301,7 +301,7 @@ public sealed class EditionTests
         var edition = new Edition(CreateAlbum(), CreatePublisher());
         edition.SetAcquisitionMode(AcquisitionMode.Purchase);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetAcquisitionPrice(amount, "EUR"));
+        DomainAssert.Violates(DomainRules.EditionAcquisitionAmountPositive, () => edition.SetAcquisitionPrice(amount, "EUR"));
     }
 
     [Theory]
@@ -314,7 +314,7 @@ public sealed class EditionTests
         var edition = new Edition(CreateAlbum(), CreatePublisher());
         edition.SetAcquisitionMode(AcquisitionMode.Purchase);
 
-        Assert.Throws<ArgumentException>(() => edition.SetAcquisitionPrice(10m, currency));
+        DomainAssert.Violates(DomainRules.EditionCurrencyCodeInvalid, () => edition.SetAcquisitionPrice(10m, currency));
     }
 
     [Fact]
@@ -349,7 +349,7 @@ public sealed class EditionTests
         edition.SetAcquisitionMode(AcquisitionMode.Gift);
         edition.SetFree(true);
 
-        Assert.Throws<InvalidOperationException>(() => edition.SetAcquisitionPrice(10m, "EUR"));
+        DomainAssert.Violates(DomainRules.EditionFreeExcludesPrice, () => edition.SetAcquisitionPrice(10m, "EUR"));
     }
 
     [Fact]

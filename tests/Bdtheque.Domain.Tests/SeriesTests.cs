@@ -25,7 +25,7 @@ public sealed class SeriesTests
     [InlineData("   ")]
     public void Constructor_BlankTitle_Throws(string? title)
     {
-        Assert.ThrowsAny<ArgumentException>(() => new Series(title!));
+        DomainAssert.Violates(DomainRules.SeriesTitleRequired, () => new Series(title!));
     }
 
     [Fact]
@@ -37,6 +37,16 @@ public sealed class SeriesTests
 
         Assert.Equal("Les Schtroumpfs", series.Title);
         Assert.Equal("Schtroumpfs [Les]", series.SortKey);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void SetSortKey_Blank_Throws(string sortKey)
+    {
+        var series = new Series("Tintin");
+
+        DomainAssert.Violates(DomainRules.SeriesSortKeyRequired, () => series.SetSortKey(sortKey));
     }
 
     [Fact]
@@ -81,7 +91,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTheoreticalVolumeCount(count));
+        DomainAssert.Violates(DomainRules.SeriesTheoreticalVolumeCountPositive, () => series.SetTheoreticalVolumeCount(count));
     }
 
     [Fact]
@@ -113,7 +123,7 @@ public sealed class SeriesTests
         var otherPublisher = new Publisher("Dupuis");
         var collection = new PublisherCollection("Tintin", otherPublisher);
 
-        Assert.Throws<ArgumentException>(() => series.SetTemplate(publisher, collection));
+        DomainAssert.Violates(DomainRules.PublisherCollectionNotOfPublisher, () => series.SetTemplate(publisher, collection));
     }
 
     [Fact]
@@ -123,7 +133,7 @@ public sealed class SeriesTests
         var publisher = new Publisher("Casterman");
         var collection = new PublisherCollection("Tintin", publisher);
 
-        Assert.Throws<ArgumentException>(() => series.SetTemplate(null, collection));
+        DomainAssert.Violates(DomainRules.PublisherCollectionNotOfPublisher, () => series.SetTemplate(null, collection));
     }
 
     [Fact]

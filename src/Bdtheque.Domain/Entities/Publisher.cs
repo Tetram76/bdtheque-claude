@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities.Common;
 
 namespace Bdtheque.Domain.Entities;
@@ -20,24 +21,17 @@ public sealed class Publisher : EntityBase
         SetName(name);
     }
 
-    public void SetName(string name)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Name = name.Trim();
-    }
+    public void SetName(string name) =>
+        Name = DomainText.Required(name, DomainRules.PublisherNameRequired, "A publisher must have a name.");
 
     public void SetWebsite(string? website)
     {
-        if (string.IsNullOrWhiteSpace(website))
-        {
-            Website = null;
-            return;
-        }
-
-        var trimmed = website.Trim();
-        if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
-            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-            throw new ArgumentException($"'{trimmed}' is not a valid absolute web URL (http or https required).", nameof(website));
+        var trimmed = DomainText.NullIfBlank(website);
+        if (trimmed is not null
+            && (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)))
+            throw new DomainRuleViolationException(
+                DomainRules.PublisherWebsiteInvalid, $"'{trimmed}' is not a valid absolute web URL (http or https required).");
 
         Website = trimmed;
     }

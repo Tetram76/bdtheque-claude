@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities.Common;
 
 namespace Bdtheque.Domain.Entities;
@@ -24,14 +25,10 @@ public sealed class Universe : EntityBase
         SetName(name);
     }
 
-    public void SetName(string name)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Name = name.Trim();
-    }
+    public void SetName(string name) =>
+        Name = DomainText.Required(name, DomainRules.UniverseNameRequired, "A universe must have a name.");
 
-    public void SetDescription(string? description) =>
-        Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+    public void SetDescription(string? description) => Description = DomainText.NullIfBlank(description);
 
     /// <summary>
     /// Sets or clears the parent universe, enforcing acyclicity on the in-memory graph.
@@ -54,13 +51,14 @@ public sealed class Universe : EntityBase
     /// or a recursive ancestor query) before calling this method.
     /// </para>
     /// </remarks>
-    /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="parent"/> is the same universe (self-reference) or when
-    /// the in-memory ancestor chain reveals a cycle.
+    /// <exception cref="DomainRuleViolationException">
+    /// <see cref="DomainRules.UniverseHierarchyCycle"/>: <paramref name="parent"/> is this
+    /// universe itself or one of its descendants.
     /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when an ancestor in the chain has a stored <see cref="ParentId"/> but its
-    /// <see cref="Parent"/> navigation is not loaded, making a complete cycle check impossible.
+    /// <see cref="Parent"/> navigation is not loaded, making a complete cycle check impossible,
+    /// or when the ancestors of <paramref name="parent"/> already form a cycle (corrupted data).
     /// </exception>
     public void SetParent(Universe? parent)
     {
@@ -73,31 +71,31 @@ public sealed class Universe : EntityBase
 
         // Compare by ID to handle detached / differently-instanced entities representing the same row.
         if (parent.Id == Id)
-            throw new ArgumentException("A universe cannot be its own parent.", nameof(parent));
+            throw CycleViolation();
 
         // Walk the ancestor chain. At each node:
-        //   1. If the node repeats one already visited in this walk, a cycle is detected —
-        //      whether or not that node is 'this'. A loaded chain can contain a cycle among
-        //      ancestors that does not involve 'this' at all (e.g. corrupted data written by
-        //      raw SQL or the future Firebird import tool, which bypasses this method), and an
-        //      unbounded walk would otherwise loop forever instead of rejecting the parent.
-        //   2. If the node's ParentId points back to 'this', a cycle is detected even though
-        //      the corresponding Parent navigation is not loaded.
+        //   1. If the node is 'this', or its ParentId points back to 'this' (even though the
+        //      corresponding Parent navigation is not loaded), the requested parent is one of
+        //      this universe's descendants: the user's choice would create a cycle.
+        //   2. If the node repeats another one already visited, the ancestors already form a
+        //      cycle that does not involve 'this' at all (e.g. corrupted data written by raw SQL
+        //      or the future Firebird import tool, which bypasses this method): an unbounded
+        //      walk would otherwise loop forever. The user cannot fix that through this call,
+        //      hence a technical error.
         //   3. If the node has a stored ParentId but no loaded Parent navigation, the chain
         //      is incomplete: throw rather than silently skip — a skipped node may be an ancestor
         //      of 'this', which would produce a persisted cycle.
         //   4. Otherwise, follow the loaded Parent to the next ancestor.
-        var visited = new HashSet<Guid> { Id };
+        var visited = new HashSet<Guid>();
         var ancestor = parent;
         while (true)
         {
-            if (!visited.Add(ancestor.Id))
-                throw new ArgumentException(
-                    "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
+            if (ancestor.Id == Id || ancestor.ParentId == Id)
+                throw CycleViolation();
 
-            if (ancestor.ParentId == Id)
-                throw new ArgumentException(
-                    "Setting this parent would create a cycle in the universe hierarchy.", nameof(parent));
+            if (!visited.Add(ancestor.Id))
+                throw new InvalidOperationException(
+                    $"The ancestors of universe '{parent.Name}' (Id = {parent.Id}) already form a cycle.");
 
             if (ancestor.Parent is null)
             {
@@ -115,4 +113,7 @@ public sealed class Universe : EntityBase
         Parent = parent;
         ParentId = parent.Id;
     }
+
+    private static DomainRuleViolationException CycleViolation() =>
+        new(DomainRules.UniverseHierarchyCycle, "A universe cannot be its own ancestor.");
 }

@@ -30,7 +30,7 @@ public sealed class PublisherCollectionTests
     {
         var publisher = new Publisher("Dargaud");
         // null input yields ArgumentNullException (subtype of ArgumentException); all are valid guards
-        Assert.ThrowsAny<ArgumentException>(() => new PublisherCollection(name!, publisher));
+        DomainAssert.Violates(DomainRules.PublisherCollectionNameRequired, () => new PublisherCollection(name!, publisher));
     }
 
     [Fact]
