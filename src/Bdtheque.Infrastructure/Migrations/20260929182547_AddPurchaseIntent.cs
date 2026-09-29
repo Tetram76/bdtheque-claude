@@ -16,13 +16,12 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    AlbumId = table.Column<Guid>(type: "uuid", nullable: true),
+                    AlbumId = table.Column<Guid>(type: "uuid", nullable: false),
                     EditionId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PurchaseIntents", x => x.Id);
-                    table.CheckConstraint("CK_PurchaseIntents_ExactlyOneOfAlbumOrEdition", "(\"AlbumId\" IS NOT NULL) <> (\"EditionId\" IS NOT NULL)");
                     table.ForeignKey(
                         name: "FK_PurchaseIntents_Albums_AlbumId",
                         column: x => x.AlbumId,
@@ -40,16 +39,20 @@ namespace Bdtheque.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseIntents_AlbumId",
                 table: "PurchaseIntents",
+                column: "AlbumId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PurchaseIntents_AlbumId_WholeAlbum",
+                table: "PurchaseIntents",
                 column: "AlbumId",
                 unique: true,
-                filter: "\"AlbumId\" IS NOT NULL");
+                filter: "\"EditionId\" IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseIntents_EditionId",
                 table: "PurchaseIntents",
                 column: "EditionId",
-                unique: true,
-                filter: "\"EditionId\" IS NOT NULL");
+                unique: true);
         }
 
         /// <inheritdoc />

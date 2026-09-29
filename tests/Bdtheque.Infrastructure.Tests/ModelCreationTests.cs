@@ -559,44 +559,46 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
     }
 
     [Fact]
-    public async Task AddPurchaseIntent_ForAlbum_Persists()
+    public async Task AddPurchaseIntent_WholeAlbum_PersistsThroughAlbumAggregate()
     {
         var album = new Album("Blake et Mortimer (ModelCreation, Intent)", null);
-        var intent = PurchaseIntent.ForAlbum(album);
+        var intent = album.AddPurchaseIntent();
 
         _fixture.Context.Albums.Add(album);
-        _fixture.Context.PurchaseIntents.Add(intent);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
-        var saved = await _fixture.Context.PurchaseIntents
-            .Include(p => p.Album)
-            .FirstAsync(p => p.Id == intent.Id);
+        var saved = await _fixture.Context.Albums
+            .Include(a => a.PurchaseIntents)
+            .FirstAsync(a => a.Id == album.Id);
 
-        Assert.Equal("Blake et Mortimer (ModelCreation, Intent)", saved.Album!.Title);
-        Assert.Null(saved.EditionId);
+        var savedIntent = Assert.Single(saved.PurchaseIntents);
+        Assert.Equal(intent.Id, savedIntent.Id);
+        Assert.Null(savedIntent.EditionId);
     }
 
     [Fact]
-    public async Task AddPurchaseIntent_ForEdition_Persists()
+    public async Task AddPurchaseIntent_Editions_PersistThroughAlbumAggregate()
     {
         var album = new Album("Thorgal (ModelCreation, Intent)", null);
         var publisher = new Publisher("Le Lombard (ModelCreation, Intent)");
-        var edition = new Edition(album, publisher);
-        var intent = PurchaseIntent.ForEdition(edition);
+        var firstEdition = new Edition(album, publisher);
+        var secondEdition = new Edition(album, publisher);
+        album.AddPurchaseIntent(firstEdition);
+        album.AddPurchaseIntent(secondEdition);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);
-        _fixture.Context.Editions.Add(edition);
-        _fixture.Context.PurchaseIntents.Add(intent);
+        _fixture.Context.Editions.AddRange(firstEdition, secondEdition);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
-        var saved = await _fixture.Context.PurchaseIntents
-            .Include(p => p.Edition)
-            .FirstAsync(p => p.Id == intent.Id);
+        var saved = await _fixture.Context.Albums
+            .Include(a => a.PurchaseIntents)
+            .FirstAsync(a => a.Id == album.Id);
 
-        Assert.Equal(edition.Id, saved.Edition!.Id);
-        Assert.Null(saved.AlbumId);
+        Assert.Equal(
+            new[] { firstEdition.Id, secondEdition.Id }.Order(),
+            saved.PurchaseIntents.Select(p => p.EditionId!.Value).Order());
     }
 }

@@ -10,16 +10,10 @@ internal sealed class PurchaseIntentConfiguration : IEntityTypeConfiguration<Pur
     {
         builder.HasKey(p => p.Id);
 
-        // Database-level defence in depth mirroring the domain invariant (see PurchaseIntent
-        // constructor): a raw-SQL write could otherwise leave both or neither target set.
-        builder.ToTable(t => t.HasCheckConstraint(
-            "CK_PurchaseIntents_ExactlyOneOfAlbumOrEdition",
-            $"(\"{nameof(PurchaseIntent.AlbumId)}\" IS NOT NULL) <> (\"{nameof(PurchaseIntent.EditionId)}\" IS NOT NULL)"));
-
         builder.HasOne(p => p.Album)
-            .WithMany()
+            .WithMany(a => a.PurchaseIntents)
             .HasForeignKey(p => p.AlbumId)
-            .IsRequired(false)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.Edition)
@@ -28,15 +22,21 @@ internal sealed class PurchaseIntentConfiguration : IEntityTypeConfiguration<Pur
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // A given album or edition is targeted by at most one intent (see modele-metier.md §
-        // Intention d'achat). Filtered to non-null rows, mirroring ContributionConfiguration, so
-        // each index only covers the intents of its own kind.
-        builder.HasIndex(p => p.AlbumId)
+        // Database-level defence in depth for the single-row half of the per-album rules
+        // (see Album.AddPurchaseIntent): at most one whole-album intent per album, at most one
+        // intent per edition. The cross-row half — a whole-album intent excluding intents on the
+        // album's editions — and the edition belonging to AlbumId are enforced by the album
+        // aggregate only (see choix-implementation.md).
+        // Named so it does not replace the plain AlbumId foreign-key index: being filtered, it
+        // cannot serve lookups of the album's edition intents (loading the aggregate, Restrict
+        // checks when deleting an album).
+        builder.HasIndex(p => p.AlbumId, "IX_PurchaseIntents_AlbumId_WholeAlbum")
             .IsUnique()
-            .HasFilter($"\"{nameof(PurchaseIntent.AlbumId)}\" IS NOT NULL");
+            .HasFilter($"\"{nameof(PurchaseIntent.EditionId)}\" IS NULL");
+
+        builder.HasIndex(p => p.AlbumId);
 
         builder.HasIndex(p => p.EditionId)
-            .IsUnique()
-            .HasFilter($"\"{nameof(PurchaseIntent.EditionId)}\" IS NOT NULL");
+            .IsUnique();
     }
 }

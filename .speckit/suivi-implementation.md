@@ -36,7 +36,7 @@ Implémentation des entités du modèle métier (`modele-metier.md`) dans `Bdthe
 | 4 | `feat/domain-contribution` | `feat(domain): ajout de l'entité Contribution` | Entité `Contribution` (rôle, artiste) reliant un Auteur à un Album **ou** une Série ; configuration EF de la contrainte d'exclusivité ; migration ; tests sur cette exclusivité | Réalisée |
 | 5 | `feat/domain-edition` | `feat(domain): ajout de l'entité Édition` | Entité `Édition` (reliure, orientation, sens de lecture, format, catégorie, état, mode d'acquisition) ; configurations EF des contraintes d'intégrité (mode d'acquisition ↔ date/prix, gratuite ↔ prix nul) ; migration ; tests sur ces contraintes | Réalisée |
 | 6 | `feat/domain-visuel-edition` | `feat(domain): ajout de l'entité Visuel d'édition` | Entité `Visuel d'édition` (type, ordre d'affichage) ; configuration EF du tri par type puis ordre ; migration ; tests associés | Réalisée |
-| 7 | `feat/domain-intention-achat` | `feat(domain): ajout de l'entité Intention d'achat` | Entité `Intention d'achat` ; configuration EF de la contrainte d'exclusivité (Album **ou** Édition) et de l'unicité par cible ; migration ; tests sur ces contraintes | Réalisée |
+| 7 | `feat/domain-intention-achat` | `feat(domain): ajout de l'entité Intention d'achat` | Entité `Intention d'achat`, portée par l'agrégat `Album` (intention sur l'album **ou** sur ses éditions, une intention par cible) ; configuration EF (index uniques) ; migration ; tests sur ces règles | Réalisée |
 
 ---
 

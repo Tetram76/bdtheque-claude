@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20260929181832_AddPurchaseIntent")]
+    [Migration("20260929182547_AddPurchaseIntent")]
     partial class AddPurchaseIntent
     {
         /// <inheritdoc />
@@ -421,7 +421,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("AlbumId")
+                    b.Property<Guid>("AlbumId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("EditionId")
@@ -429,18 +429,16 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AlbumId")
-                        .IsUnique()
-                        .HasFilter("\"AlbumId\" IS NOT NULL");
+                    b.HasIndex("AlbumId");
 
                     b.HasIndex("EditionId")
-                        .IsUnique()
-                        .HasFilter("\"EditionId\" IS NOT NULL");
+                        .IsUnique();
 
-                    b.ToTable("PurchaseIntents", t =>
-                        {
-                            t.HasCheckConstraint("CK_PurchaseIntents_ExactlyOneOfAlbumOrEdition", "(\"AlbumId\" IS NOT NULL) <> (\"EditionId\" IS NOT NULL)");
-                        });
+                    b.HasIndex(new[] { "AlbumId" }, "IX_PurchaseIntents_AlbumId_WholeAlbum")
+                        .IsUnique()
+                        .HasFilter("\"EditionId\" IS NULL");
+
+                    b.ToTable("PurchaseIntents");
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Series", b =>
@@ -702,9 +700,10 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.PurchaseIntent", b =>
                 {
                     b.HasOne("Bdtheque.Domain.Entities.Album", "Album")
-                        .WithMany()
+                        .WithMany("PurchaseIntents")
                         .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Bdtheque.Domain.Entities.Edition", "Edition")
                         .WithMany()
@@ -771,6 +770,11 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasForeignKey("UniversesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.Album", b =>
+                {
+                    b.Navigation("PurchaseIntents");
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Edition", b =>

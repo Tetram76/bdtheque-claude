@@ -526,10 +526,11 @@ public sealed class CheckConstraintTests : IDisposable
         Assert.Equal(1, count);
     }
 
-    private async Task<Guid> InsertEditionAsync()
+    private async Task<Guid> InsertEditionAsync() =>
+        await InsertEditionAsync(await InsertAlbumAsync(), await InsertPublisherAsync());
+
+    private async Task<Guid> InsertEditionAsync(Guid albumId, Guid publisherId)
     {
-        var albumId = await InsertAlbumAsync();
-        var publisherId = await InsertPublisherAsync();
         var editionId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
             "INSERT INTO \"Editions\" (\"Id\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\") " +
@@ -580,36 +581,16 @@ public sealed class CheckConstraintTests : IDisposable
         "INSERT INTO \"PurchaseIntents\" (\"Id\", \"AlbumId\", \"EditionId\") VALUES ({0}, {1}, {2})";
 
     [Fact]
-    public async Task PurchaseIntentCheckConstraint_NeitherAlbumNorEdition_ThrowsAtDatabase()
+    public async Task PurchaseIntentConstraint_NullAlbum_ThrowsAtDatabase()
     {
-        var id = Guid.CreateVersion7();
-        await Assert.ThrowsAnyAsync<Exception>(() =>
-            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, null!, null!));
-    }
-
-    [Fact]
-    public async Task PurchaseIntentCheckConstraint_BothAlbumAndEdition_ThrowsAtDatabase()
-    {
-        var albumId = await InsertAlbumAsync();
+        // AlbumId is set for both kinds of intent (see PurchaseIntent remarks).
         var editionId = await InsertEditionAsync();
-        var id = Guid.CreateVersion7();
         await Assert.ThrowsAnyAsync<Exception>(() =>
-            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, albumId, editionId));
+            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), null!, editionId));
     }
 
     [Fact]
-    public async Task PurchaseIntentCheckConstraint_AlbumOnly_Succeeds()
-    {
-        var albumId = await InsertAlbumAsync();
-        var id = Guid.CreateVersion7();
-        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, albumId, null!);
-
-        var count = await _fixture.Context.PurchaseIntents.CountAsync(p => p.Id == id);
-        Assert.Equal(1, count);
-    }
-
-    [Fact]
-    public async Task PurchaseIntentUniqueIndex_DuplicateAlbum_ThrowsAtDatabase()
+    public async Task PurchaseIntentUniqueIndex_DuplicateWholeAlbum_ThrowsAtDatabase()
     {
         var albumId = await InsertAlbumAsync();
         await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, null!);
@@ -621,34 +602,28 @@ public sealed class CheckConstraintTests : IDisposable
     [Fact]
     public async Task PurchaseIntentUniqueIndex_DuplicateEdition_ThrowsAtDatabase()
     {
-        var editionId = await InsertEditionAsync();
-        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), null!, editionId);
+        var albumId = await InsertAlbumAsync();
+        var editionId = await InsertEditionAsync(albumId, await InsertPublisherAsync());
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, editionId);
 
         await Assert.ThrowsAnyAsync<Exception>(() =>
-            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), null!, editionId));
+            _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, editionId));
     }
 
     [Fact]
-    public async Task PurchaseIntentUniqueIndex_DistinctTargets_Succeeds()
+    public async Task PurchaseIntentUniqueIndex_DistinctEditionsOfSameAlbum_Succeeds()
     {
-        // The uniqueness is per target, not per kind of target: distinct albums each keep their own intent.
-        var firstAlbumId = await InsertAlbumAsync();
-        var secondAlbumId = await InsertAlbumAsync();
-        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), firstAlbumId, null!);
-        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), secondAlbumId, null!);
+        // The whole-album unique index is filtered on EditionId IS NULL: it must not stop
+        // several editions of the same album from each carrying their own intent.
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+        var firstEditionId = await InsertEditionAsync(albumId, publisherId);
+        var secondEditionId = await InsertEditionAsync(albumId, publisherId);
 
-        var count = await _fixture.Context.PurchaseIntents.CountAsync(p => p.EditionId == null);
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, firstEditionId);
+        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, Guid.CreateVersion7(), albumId, secondEditionId);
+
+        var count = await _fixture.Context.PurchaseIntents.CountAsync(p => p.AlbumId == albumId);
         Assert.Equal(2, count);
-    }
-
-    [Fact]
-    public async Task PurchaseIntentCheckConstraint_EditionOnly_Succeeds()
-    {
-        var editionId = await InsertEditionAsync();
-        var id = Guid.CreateVersion7();
-        await _fixture.Context.Database.ExecuteSqlRawAsync(InsertPurchaseIntentSql, id, null!, editionId);
-
-        var count = await _fixture.Context.PurchaseIntents.CountAsync(p => p.Id == id);
-        Assert.Equal(1, count);
     }
 }

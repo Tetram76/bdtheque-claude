@@ -3,13 +3,20 @@ using Bdtheque.Domain.Entities.Common;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// A wish to acquire (Intention d'achat) either an <see cref="Entities.Album"/> in any edition,
-/// or one specific <see cref="Entities.Edition"/> — never both, never neither.
+/// A wish to acquire (Intention d'achat) either an <see cref="Entities.Album"/> as a whole —
+/// any edition will do — or one specific <see cref="Entities.Edition"/> of it. Created only
+/// through <see cref="Album.AddPurchaseIntent()"/>, which enforces the per-album rules.
 /// </summary>
+/// <remarks>
+/// <see cref="AlbumId"/> is set for both kinds of intent (for an edition intent, it is the
+/// edition's album): the target is the edition when <see cref="EditionId"/> is set, the album
+/// otherwise. Storing the album in both cases is what lets the album aggregate — and the
+/// database — see every intent concerning it (see choix-implementation.md).
+/// </remarks>
 public sealed class PurchaseIntent : EntityBase
 {
-    public Guid? AlbumId { get; private set; }
-    public Album? Album { get; private set; }
+    public Guid AlbumId { get; private set; }
+    public Album Album { get; private set; } = null!;
 
     public Guid? EditionId { get; private set; }
     public Edition? Edition { get; private set; }
@@ -17,27 +24,11 @@ public sealed class PurchaseIntent : EntityBase
     // EF Core parameterless constructor
     private PurchaseIntent() { }
 
-    // Private: only reachable through ForAlbum/ForEdition below, which each pass exactly one
-    // non-null target — so the album/edition exclusivity has nothing left to validate here.
-    private PurchaseIntent(Album? album, Edition? edition)
+    internal PurchaseIntent(Album album, Edition? edition)
     {
         Album = album;
-        AlbumId = album?.Id;
+        AlbumId = album.Id;
         Edition = edition;
         EditionId = edition?.Id;
-    }
-
-    /// <summary>Creates an intent satisfied by any edition of the given album.</summary>
-    public static PurchaseIntent ForAlbum(Album album)
-    {
-        ArgumentNullException.ThrowIfNull(album);
-        return new PurchaseIntent(album, null);
-    }
-
-    /// <summary>Creates an intent targeting one specific edition.</summary>
-    public static PurchaseIntent ForEdition(Edition edition)
-    {
-        ArgumentNullException.ThrowIfNull(edition);
-        return new PurchaseIntent(null, edition);
     }
 }
