@@ -4,7 +4,7 @@ namespace Bdtheque.Api.Security;
 
 /// <summary>
 /// Secret shared between `frontend` and `api` (see contraintes-techniques.md,
-/// Authentification section). Supplied via the <c>Bdtheque__InternalApiKey__Key</c>
+/// Authentification section). Supplied via the <c>InternalApiKey__Key</c>
 /// environment variable.
 /// </summary>
 public sealed class InternalApiKeyOptions

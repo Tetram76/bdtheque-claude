@@ -10,7 +10,7 @@ internal sealed class SeriesConfiguration : IEntityTypeConfiguration<Series>
 
     // TitleSortKeyCalculator moves the leading article to a bracketed suffix instead of
     // dropping it, which grows the computed key relative to the title (worst case: +3
-    // characters for the elided "L'" form — see its Compute remarks). SortKey must stay large
+    // characters for the elided "L'" form: "L'X" becomes "X [L']" — see its BuildSortKey). SortKey must stay large
     // enough to hold a max-length title's computed key, or SaveChanges would fail for a title
     // that legitimately fits the Title column. Guarded by SortKeyMaxLength_AccommodatesWorstCaseArticleSuffixGrowth.
     private const int SortKeyMaxLength = TitleMaxLength + 10;
@@ -42,8 +42,7 @@ internal sealed class SeriesConfiguration : IEntityTypeConfiguration<Series>
 
         // Mirrors the single-table half of the domain guard in Series.SetTemplate. The
         // cross-table half (the collection must belong to this publisher) is intentionally
-        // left to the domain layer only — see the SeriesConfiguration remarks in the PR
-        // description / CheckConstraintTests for the rationale.
+        // left to the domain layer only (see choix-implementation.md § Cohérence entre tables).
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Series_TemplateCollectionRequiresPublisher",
             $"\"{nameof(Series.TemplatePublisherCollectionId)}\" IS NULL OR \"{nameof(Series.TemplatePublisherId)}\" IS NOT NULL"));

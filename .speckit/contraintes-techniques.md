@@ -1,7 +1,6 @@
 # Contraintes Techniques
 
-Ce fichier récence les **choix et contraintes techniques** de l'application et de son déploiement — qu'ils soient **imposés** (par l'utilisateur, des normes/lois, ou une réalité externe non négociable comme un système existant à migrer ou un environnement d'hébergement donné) ou simplement **retenus par l'agent** sans délibération explicite entre options. C'est la destination par défaut de tout choix technique.
-Seul le cas rare d'une **réelle délibération entre plusieurs options** (alternative explicitement envisagée puis écartée, avec son argumentation) est documenté à part, dans `choix-implementation.md`. En cas de doute sur cette frontière, l'information reste ici par défaut.
+Ce fichier recense les **contraintes techniques imposées** à l'application et à son déploiement — par l'utilisateur, des normes/lois, ou une réalité externe non négociable (système existant à migrer, environnement d'hébergement donné, etc.). L'agent n'y ajoute rien de sa propre initiative : ses propres choix techniques, délibérés entre plusieurs options ou non, sont documentés dans `choix-implementation.md`.
 Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
 
 ---
