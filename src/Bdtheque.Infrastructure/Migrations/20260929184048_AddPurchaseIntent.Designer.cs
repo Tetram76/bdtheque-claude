@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20260929182547_AddPurchaseIntent")]
+    [Migration("20260929184048_AddPurchaseIntent")]
     partial class AddPurchaseIntent
     {
         /// <inheritdoc />
@@ -58,7 +58,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Album", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<int?>("EndVolumeNumber")
@@ -144,7 +143,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Author", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Biography")
@@ -177,7 +175,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Contribution", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("AlbumId")
@@ -213,7 +210,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Edition", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<decimal?>("AcquisitionAmount")
@@ -313,7 +309,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.EditionVisual", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<int>("DisplayOrder")
@@ -345,7 +340,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Genre", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Label")
@@ -367,7 +361,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Publisher", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
@@ -393,7 +386,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.PublisherCollection", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
@@ -418,7 +410,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.PurchaseIntent", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("AlbumId")
@@ -444,7 +435,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Series", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<bool>("ExcludeFromMissingVolumes")
@@ -528,7 +518,6 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Universe", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")

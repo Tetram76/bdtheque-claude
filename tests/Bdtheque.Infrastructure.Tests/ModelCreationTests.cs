@@ -3,7 +3,9 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Bdtheque.Infrastructure.Tests;
 
@@ -58,6 +60,23 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
             .Select(t => t.FindProperty(nameof(EntityBase.Id))!)
             .Where(p => p.ValueGenerated != ValueGenerated.Never)
             .Select(p => p.DeclaringType.ShortName())
+            .ToList();
+
+        Assert.Empty(generatedKeys);
+    }
+
+    [Fact]
+    public void MigrationsSnapshot_EntityKeys_AreNeverGenerated()
+    {
+        // has-pending-model-changes ignores this annotation (it produces no DDL), so a snapshot
+        // generated before the key convention would go unnoticed until the next migration
+        // silently carried the unrelated diff. Join tables have composite keys and no Id.
+        var snapshotModel = _fixture.Context.GetService<IMigrationsAssembly>().ModelSnapshot!.Model;
+
+        var generatedKeys = snapshotModel.GetEntityTypes()
+            .Select(t => t.FindProperty(nameof(EntityBase.Id)))
+            .Where(p => p is not null && p.ValueGenerated != ValueGenerated.Never)
+            .Select(p => p!.DeclaringType.Name)
             .ToList();
 
         Assert.Empty(generatedKeys);
