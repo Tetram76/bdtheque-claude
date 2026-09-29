@@ -1,7 +1,11 @@
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Bdtheque.Infrastructure.Tests;
 
@@ -41,7 +45,41 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("Contributions", tableNames);
         Assert.Contains("Editions", tableNames);
         Assert.Contains("EditionVisuals", tableNames);
+        Assert.Contains("PurchaseIntents", tableNames);
         await Task.CompletedTask;
+    }
+
+    [Fact]
+    public void EntityKeys_AreNeverGeneratedByEfCore()
+    {
+        // EntityBase assigns Id in the domain. A key EF believes it generates makes any new child
+        // discovered through a loaded parent's navigation look like an existing row (UPDATE of
+        // 0 rows instead of INSERT) — see AddPurchaseIntent_OnAlbumLoadedFromDatabase_Persists.
+        var generatedKeys = _fixture.Context.Model.GetEntityTypes()
+            .Where(t => typeof(EntityBase).IsAssignableFrom(t.ClrType))
+            .Select(t => t.FindProperty(nameof(EntityBase.Id))!)
+            .Where(p => p.ValueGenerated != ValueGenerated.Never)
+            .Select(p => p.DeclaringType.ShortName())
+            .ToList();
+
+        Assert.Empty(generatedKeys);
+    }
+
+    [Fact]
+    public void MigrationsSnapshot_EntityKeys_AreNeverGenerated()
+    {
+        // has-pending-model-changes ignores this annotation (it produces no DDL), so a snapshot
+        // generated before the key convention would go unnoticed until the next migration
+        // silently carried the unrelated diff. Join tables have composite keys and no Id.
+        var snapshotModel = _fixture.Context.GetService<IMigrationsAssembly>().ModelSnapshot!.Model;
+
+        var generatedKeys = snapshotModel.GetEntityTypes()
+            .Select(t => t.FindProperty(nameof(EntityBase.Id)))
+            .Where(p => p is not null && p.ValueGenerated != ValueGenerated.Never)
+            .Select(p => p!.DeclaringType.Name)
+            .ToList();
+
+        Assert.Empty(generatedKeys);
     }
 
     [Fact]
@@ -555,5 +593,119 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
             .SingleAsync();
 
         Assert.Equal((int)VisualType.Endpaper, rawValue);
+    }
+
+    // Album.AddPurchaseIntent checks its rules against the loaded PurchaseIntents: these tests
+    // pin that the aggregate is complete however the album is loaded, with no explicit Include.
+    [Fact]
+    public async Task AddPurchaseIntent_WholeAlbum_OnAlbumQueriedWithoutInclude_WhenEditionTargeted_Throws()
+    {
+        var album = await PersistAlbumWithEditionIntentAsync("Yakari (ModelCreation, Query)");
+
+        var reloaded = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
+
+        Assert.Throws<InvalidOperationException>(() => reloaded.AddPurchaseIntent());
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_WholeAlbum_OnAlbumFound_WhenEditionTargeted_Throws()
+    {
+        var album = await PersistAlbumWithEditionIntentAsync("Yakari (ModelCreation, Find)");
+
+        var reloaded = await _fixture.Context.Albums.FindAsync(album.Id);
+
+        Assert.Throws<InvalidOperationException>(() => reloaded!.AddPurchaseIntent());
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_Edition_OnAlbumReachedThroughEdition_WhenWholeAlbumTargeted_Throws()
+    {
+        var album = new Album("Yakari (ModelCreation, Navigation)", null);
+        var publisher = new Publisher("Le Lombard (ModelCreation, Navigation)");
+        var edition = new Edition(album, publisher);
+        album.AddPurchaseIntent();
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloadedEdition = await _fixture.Context.Editions
+            .Include(e => e.Album)
+            .FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Throws<InvalidOperationException>(() => reloadedEdition.Album.AddPurchaseIntent(reloadedEdition));
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_OnAlbumLoadedFromDatabase_Persists()
+    {
+        // The nominal flow: an existing album is loaded, then gains an intent. The intent is
+        // only reachable through the album's collection, so EF discovers it at SaveChanges.
+        var album = new Album("Yakari (ModelCreation, Existing)", null);
+        _fixture.Context.Albums.Add(album);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
+        var intent = reloaded.AddPurchaseIntent();
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        Assert.True(await _fixture.Context.PurchaseIntents.AnyAsync(p => p.Id == intent.Id));
+    }
+
+    private async Task<Album> PersistAlbumWithEditionIntentAsync(string title)
+    {
+        var album = new Album(title, null);
+        var publisher = new Publisher($"Le Lombard ({title})");
+        var edition = new Edition(album, publisher);
+        album.AddPurchaseIntent(edition);
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+        return album;
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_WholeAlbum_PersistsThroughAlbumAggregate()
+    {
+        var album = new Album("Blake et Mortimer (ModelCreation, Intent)", null);
+        var intent = album.AddPurchaseIntent();
+
+        _fixture.Context.Albums.Add(album);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Albums
+            .Include(a => a.PurchaseIntents)
+            .FirstAsync(a => a.Id == album.Id);
+
+        var savedIntent = Assert.Single(saved.PurchaseIntents);
+        Assert.Equal(intent.Id, savedIntent.Id);
+        Assert.Null(savedIntent.EditionId);
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_Editions_PersistThroughAlbumAggregate()
+    {
+        var album = new Album("Thorgal (ModelCreation, Intent)", null);
+        var publisher = new Publisher("Le Lombard (ModelCreation, Intent)");
+        var firstEdition = new Edition(album, publisher);
+        var secondEdition = new Edition(album, publisher);
+        album.AddPurchaseIntent(firstEdition);
+        album.AddPurchaseIntent(secondEdition);
+
+        _fixture.Context.Albums.Add(album);
+        _fixture.Context.Publishers.Add(publisher);
+        _fixture.Context.Editions.AddRange(firstEdition, secondEdition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Albums
+            .Include(a => a.PurchaseIntents)
+            .FirstAsync(a => a.Id == album.Id);
+
+        Assert.Equal(
+            new[] { firstEdition.Id, secondEdition.Id }.Order(),
+            saved.PurchaseIntents.Select(p => p.EditionId!.Value).Order());
     }
 }

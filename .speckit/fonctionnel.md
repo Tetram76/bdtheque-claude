@@ -344,6 +344,12 @@ Deux cas d'usage distincts :
 1. **Album** : l'utilisateur souhaite acquérir un album en particulier, sans contrainte sur l'édition. L'intention porte sur l'album ; n'importe quelle édition satisfera l'intention.
 2. **Édition spécifique** : l'utilisateur souhaite acquérir une édition précise d'un album (éditeur, collection, année, etc.), qu'il possède déjà cet album dans une autre édition ou non.
 
-Ces deux cas sont représentés par une entité **Intention d'achat** distincte, liée soit à un Album soit à une Édition. Les autres règles métier sont à définir.
+Ces deux cas sont représentés par une entité **Intention d'achat** distincte, liée soit à un Album soit à une Édition.
+
+Pour un même album, les deux cas sont **mutuellement exclusifs** : l'album est visé soit par une intention portant sur l'album lui-même, soit par des intentions portant sur une ou plusieurs de ses éditions (une intention par édition), jamais les deux à la fois.
+
+Un cas d'usage permettra de **convertir** une intention portant sur l'album en intention portant sur une édition, et inversement, dans le respect de cette exclusivité.
+
+Les autres règles métier sont à définir.
 
 <!-- À compléter : cas d'usage, user stories, autres règles métier, flux applicatifs, etc. -->

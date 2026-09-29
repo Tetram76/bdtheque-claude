@@ -94,5 +94,10 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
         builder.HasMany(a => a.Universes)
             .WithMany()
             .UsingEntity(j => j.ToTable("AlbumUniverses"));
+
+        // Album.AddPurchaseIntent checks the per-album rules against this collection: an album
+        // loaded without its intents would silently accept a forbidden combination. Always
+        // loading the aggregate with its root, however the album is queried, removes that trap.
+        builder.Navigation(a => a.PurchaseIntents).AutoInclude();
     }
 }

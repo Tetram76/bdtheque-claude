@@ -34,6 +34,13 @@ public sealed class Album : EntityBase
     public ICollection<Genre> Genres { get; private set; } = [];
     public ICollection<Universe> Universes { get; private set; } = [];
 
+    // Read-only from outside: every intent concerning this album goes through AddPurchaseIntent,
+    // the single place that can see them all and enforce the per-album rules. The persistence
+    // layer always loads this collection with the album, so the rules never run against a
+    // partially loaded aggregate.
+    private readonly List<PurchaseIntent> _purchaseIntents = [];
+    public IReadOnlyCollection<PurchaseIntent> PurchaseIntents => _purchaseIntents;
+
     // EF Core parameterless constructor
     private Album() { }
 
@@ -166,6 +173,44 @@ public sealed class Album : EntityBase
         if (rating is not null)
             EnumGuard.EnsureDefined(rating.Value, nameof(rating));
         Rating = rating;
+    }
+
+    /// <summary>
+    /// Records an intent to acquire this album in any edition. Refused if the album already has
+    /// an intent of any kind: a whole-album intent excludes intents on its editions
+    /// (modele-metier.md § Intention d'achat).
+    /// </summary>
+    public PurchaseIntent AddPurchaseIntent()
+    {
+        if (_purchaseIntents.Count > 0)
+            throw new InvalidOperationException("This album is already targeted by a purchase intent, on itself or on one of its editions.");
+
+        return AddIntent(null);
+    }
+
+    /// <summary>
+    /// Records an intent to acquire one specific edition of this album. Several editions of the
+    /// same album may each be targeted, but never while the album itself is
+    /// (modele-metier.md § Intention d'achat).
+    /// </summary>
+    public PurchaseIntent AddPurchaseIntent(Edition edition)
+    {
+        ArgumentNullException.ThrowIfNull(edition);
+        if (edition.AlbumId != Id)
+            throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
+        if (_purchaseIntents.Any(p => p.EditionId is null))
+            throw new InvalidOperationException("This album is already targeted as a whole by a purchase intent.");
+        if (_purchaseIntents.Any(p => p.EditionId == edition.Id))
+            throw new InvalidOperationException("This edition is already targeted by a purchase intent.");
+
+        return AddIntent(edition);
+    }
+
+    private PurchaseIntent AddIntent(Edition? edition)
+    {
+        var intent = new PurchaseIntent(this, edition);
+        _purchaseIntents.Add(intent);
+        return intent;
     }
 
     private static string? NullIfEmpty(string? value) =>
