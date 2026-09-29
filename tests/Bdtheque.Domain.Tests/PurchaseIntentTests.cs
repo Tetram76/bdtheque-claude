@@ -186,6 +186,21 @@ public sealed class PurchaseConfirmationTests
     }
 
     [Fact]
+    public void ConfirmPurchase_UndefinedMode_ThrowsWithoutRemovingTheIntent()
+    {
+        // A rejected confirmation must leave the aggregate untouched: a caller saving the context
+        // afterwards would otherwise delete an intent whose purchase was never recorded.
+        var album = new Album("Le Lotus bleu", null);
+        var edition = new Edition(album, Casterman);
+        var intent = album.AddPurchaseIntent(edition);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => album.ConfirmPurchase(edition, (AcquisitionMode)42));
+        Assert.Equal([intent], album.PurchaseIntents);
+        Assert.Same(intent, edition.PurchaseIntent);
+        Assert.Null(edition.AcquisitionMode);
+    }
+
+    [Fact]
     public void ConfirmPurchase_EditionOfAnotherAlbum_Throws()
     {
         var album = new Album("Le Lotus bleu", null);

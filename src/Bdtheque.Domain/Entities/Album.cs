@@ -239,7 +239,10 @@ public sealed class Album : EntityBase
     /// </summary>
     public void ConfirmPurchase(Edition edition, AcquisitionMode mode)
     {
+        // Every check runs before anything is mutated: a rejected confirmation must leave the
+        // aggregate untouched, or a later save would delete an intent never actually realized.
         EnsureOwnEdition(edition);
+        EnumGuard.EnsureDefined(mode, nameof(mode));
         if (edition.AcquisitionMode is not null)
             throw new DomainRuleViolationException(DomainRules.EditionAlreadyOwned, "This edition is already owned.");
 
