@@ -11,6 +11,40 @@ Ces choix ne sont pas imposés : ils peuvent être remis en cause si une meilleu
 - **Énumérations** : toute propriété de type `enum` est persistée sous forme d'**entier**, et chaque membre de chaque enum du domaine porte une **valeur numérique explicite** (`= N`), jamais implicite. Configuré une fois pour tout le modèle via `ConfigureConventions` sur `BdthequeDbContext` (`Properties<Enum>().HaveConversion<int>()`). Objectif : un ré-ordonnancement ou un ajout de membre dans un enum ne doit jamais changer silencieusement le sens des lignes déjà persistées — le caractère explicite des valeurs neutralise ce risque aussi bien qu'un stockage en chaîne. Un test de garde (`EnumValueUniquenessTests`, `Bdtheque.Domain.Tests`) vérifie par réflexion que chaque membre actuel de chaque enum du domaine correspond à une entrée d'un registre append-only (`EnumValueLedger`) qui ne perd jamais la trace d'une valeur, y compris après le retrait du membre C# qui la portait — une unicité vérifiée sur les seuls membres actuellement déclarés ne suffirait pas : elle ne détecterait pas la réaffectation d'une valeur retirée à un nouveau membre sans lien avec l'ancien, qui réinterpréterait silencieusement les lignes déjà persistées.
   - **Alternative écartée (chaîne = nom du membre)** : son avantage (lisibilité directe des valeurs en base pour un mainteneur solo) est réel mais modeste, et n'est appuyé par aucune contrainte documentée ailleurs dans le `.speckit/` — la base ne restreint d'ailleurs les valeurs valides ni pour un stockage chaîne ni pour un stockage entier (aucune contrainte CHECK de type `IN (...)` sur les colonnes d'enum). Elle couplerait le nom des membres C# à la donnée persistée : un renommage ne serait plus seulement une évolution du code mais une migration de données implicite, sans aucun filet — la définition de l'enum ne pourrait plus, par construction, détecter qu'une ancienne valeur textuelle traîne encore en base sous un nom disparu. Ce couplage atteindrait même le schéma : une contrainte CHECK comme `CK_Albums_VolumeRangeOmnibusOnly` (`AlbumConfiguration`) référencerait un nom de membre dans le SQL généré. Elle empêcherait enfin un `ORDER BY` SQL direct pour les enums dont l'ordre métier n'est pas alphabétique (ex. l'ordre fixe des types de visuel d'édition, cf. `fonctionnel.md`), imposant un tri en mémoire — coût que l'entier explicite (valeurs assignées dans l'ordre métier) supprime. L'argument tiré de la future migration Firebird ne tient pas non plus : cette migration est une traduction explicite entre un référentiel piloté par l'ancienne base (Firebird) et un référentiel désormais piloté par le Domain C# ; le migrateur traduit une valeur Firebird vers un membre d'enum quel que soit son mode de persistance, la représentation retenue côté nouveau modèle n'allège ni n'alourdit cette traduction. Chaque setter d'énumération valide néanmoins la définition de la valeur reçue via `EnumGuard.EnsureDefined` (`Bdtheque.Domain.Common`), pour qu'une valeur hors plage (ex. liaison d'un entier arbitraire depuis l'API) ne soit jamais persistée telle quelle, quel que soit le mode de stockage retenu.
 
+## Organisation du code
+
+La solution .NET est découpée en projets par responsabilité, sous `src/` :
+
+| Projet | Rôle |
+| --- | --- |
+| `Bdtheque.Domain` | Entités du modèle métier, enums, value objects. Aucune dépendance à EF Core ni à un framework web. |
+| `Bdtheque.Infrastructure` | Implémentation EF Core / Npgsql : `DbContext`, configurations d'entités, migrations. |
+| `Bdtheque.Contracts` | Contrats d'échange (DTOs) exposés par l'API et consommés par le frontend. Découplés des entités du domaine. |
+| `Bdtheque.Api` | Conteneur `api` : endpoints Minimal API, règles applicatives, service de taux de change, estimation ML.NET. |
+| `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor Server, authentification cookie, appels HTTP vers `Bdtheque.Api`. |
+
+Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
+
+## Application du schéma au démarrage
+
+- Les migrations EF Core sont appliquées **automatiquement au démarrage** du conteneur `api` (`Database.Migrate()`). Pas de conteneur ou d'étape d'initialisation dédiée : un déploiement neuf sur une base vide crée le schéma dès le premier démarrage.
+
+## Internationalisation
+
+- Le code (classes, fonctions, variables, commentaires, etc.) est écrit en **anglais** (cf. `gestion-projet.md`), indépendamment de la langue de l'utilisateur final.
+- La **culture d'affichage** choisie par l'utilisateur (voir `fonctionnel.md`) est implémentée via les ressources de localisation ASP.NET Core (`IStringLocalizer`) pour la traduction des textes, combinées à la **culture .NET courante** (`CultureInfo`, positionnée par requête) pour le formatage des données et le tri linguistique. Aucun texte utilisateur n'est codé en dur dans le code applicatif.
+- Le mode **globalization-invariant** de .NET est incompatible avec le tri linguistique et le formatage culturel requis par le fonctionnel : il ne doit pas être activé (`InvariantGlobalization=false`, `Directory.Build.props`). Les images Docker utilisées (`aspnet:10.0`, base Ubuntu) embarquent déjà ICU, donc le support complet de la globalisation n'a aucun coût supplémentaire.
+
+## Authentification : mise en œuvre
+
+- Le compte administrateur unique (`contraintes-techniques.md` § Authentification) est implémenté via **ASP.NET Core Cookie Authentication** (sans ASP.NET Core Identity — pas de gestion multi-utilisateurs). Le cookie d'authentification est porté exclusivement par le conteneur `frontend` (Blazor Server), qui agit comme **BFF (Backend For Frontend)** : c'est lui qui affiche le formulaire de connexion, émet le cookie et protège ses propres pages/composants d'administration (`[Authorize]`).
+- Le conteneur `api` n'est **jamais exposé publiquement** : il n'est joignable que par `frontend` via le réseau Docker interne. En défense en profondeur, `api` exige néanmoins un **secret interne partagé** (clé statique transmise via variable d'environnement, vérifiée par un middleware sur l'en-tête `X-Internal-Api-Key`) sur toutes ses requêtes. Ce secret n'est connu que de `frontend` et `api` ; il ne remplace pas l'authentification de l'utilisateur (qui reste du ressort de `frontend`), il empêche seulement qu'un appel direct à `api` contourne la protection applicative si l'isolation réseau venait à être mal configurée.
+
+## Documentation de l'API
+
+- L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
+- Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement uniquement.
+
 ## Version de PostgreSQL
 
 - Le moteur PostgreSQL est imposé (`contraintes-techniques.md`) ; sa version et sa variante d'image sont un choix : **`postgres:18-alpine`**, utilisée à l'identique en production (`docker-compose.yml`) et par les tests (Testcontainers, alignement vérifié par un test).
