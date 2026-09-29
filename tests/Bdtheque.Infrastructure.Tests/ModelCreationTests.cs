@@ -558,6 +558,58 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Equal((int)VisualType.Endpaper, rawValue);
     }
 
+    // Album.AddPurchaseIntent checks its rules against the loaded PurchaseIntents: these tests
+    // pin that the aggregate is complete however the album is loaded, with no explicit Include.
+    [Fact]
+    public async Task AddPurchaseIntent_WholeAlbum_OnAlbumQueriedWithoutInclude_WhenEditionTargeted_Throws()
+    {
+        var album = await PersistAlbumWithEditionIntentAsync("Yakari (ModelCreation, Query)");
+
+        var reloaded = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
+
+        Assert.Throws<InvalidOperationException>(() => reloaded.AddPurchaseIntent());
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_WholeAlbum_OnAlbumFound_WhenEditionTargeted_Throws()
+    {
+        var album = await PersistAlbumWithEditionIntentAsync("Yakari (ModelCreation, Find)");
+
+        var reloaded = await _fixture.Context.Albums.FindAsync(album.Id);
+
+        Assert.Throws<InvalidOperationException>(() => reloaded!.AddPurchaseIntent());
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_Edition_OnAlbumReachedThroughEdition_WhenWholeAlbumTargeted_Throws()
+    {
+        var album = new Album("Yakari (ModelCreation, Navigation)", null);
+        var publisher = new Publisher("Le Lombard (ModelCreation, Navigation)");
+        var edition = new Edition(album, publisher);
+        album.AddPurchaseIntent();
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloadedEdition = await _fixture.Context.Editions
+            .Include(e => e.Album)
+            .FirstAsync(e => e.Id == edition.Id);
+
+        Assert.Throws<InvalidOperationException>(() => reloadedEdition.Album.AddPurchaseIntent(reloadedEdition));
+    }
+
+    private async Task<Album> PersistAlbumWithEditionIntentAsync(string title)
+    {
+        var album = new Album(title, null);
+        var publisher = new Publisher($"Le Lombard ({title})");
+        var edition = new Edition(album, publisher);
+        album.AddPurchaseIntent(edition);
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+        return album;
+    }
+
     [Fact]
     public async Task AddPurchaseIntent_WholeAlbum_PersistsThroughAlbumAggregate()
     {

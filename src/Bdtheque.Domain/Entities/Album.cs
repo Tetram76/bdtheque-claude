@@ -35,8 +35,9 @@ public sealed class Album : EntityBase
     public ICollection<Universe> Universes { get; private set; } = [];
 
     // Read-only from outside: every intent concerning this album goes through AddPurchaseIntent,
-    // the single place that can see them all and enforce the per-album rules. Callers must load
-    // this collection before adding to it, or those rules would be checked against an empty list.
+    // the single place that can see them all and enforce the per-album rules. The persistence
+    // layer always loads this collection with the album, so the rules never run against a
+    // partially loaded aggregate.
     private readonly List<PurchaseIntent> _purchaseIntents = [];
     public IReadOnlyCollection<PurchaseIntent> PurchaseIntents => _purchaseIntents;
 
