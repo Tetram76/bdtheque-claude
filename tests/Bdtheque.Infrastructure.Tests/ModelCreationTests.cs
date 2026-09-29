@@ -1,7 +1,9 @@
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Bdtheque.Infrastructure.Tests;
 
@@ -43,6 +45,22 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
         Assert.Contains("EditionVisuals", tableNames);
         Assert.Contains("PurchaseIntents", tableNames);
         await Task.CompletedTask;
+    }
+
+    [Fact]
+    public void EntityKeys_AreNeverGeneratedByEfCore()
+    {
+        // EntityBase assigns Id in the domain. A key EF believes it generates makes any new child
+        // discovered through a loaded parent's navigation look like an existing row (UPDATE of
+        // 0 rows instead of INSERT) — see AddPurchaseIntent_OnAlbumLoadedFromDatabase_Persists.
+        var generatedKeys = _fixture.Context.Model.GetEntityTypes()
+            .Where(t => typeof(EntityBase).IsAssignableFrom(t.ClrType))
+            .Select(t => t.FindProperty(nameof(EntityBase.Id))!)
+            .Where(p => p.ValueGenerated != ValueGenerated.Never)
+            .Select(p => p.DeclaringType.ShortName())
+            .ToList();
+
+        Assert.Empty(generatedKeys);
     }
 
     [Fact]
@@ -596,6 +614,24 @@ public sealed class ModelCreationTests : IClassFixture<BdthequeDbContextFixture>
             .FirstAsync(e => e.Id == edition.Id);
 
         Assert.Throws<InvalidOperationException>(() => reloadedEdition.Album.AddPurchaseIntent(reloadedEdition));
+    }
+
+    [Fact]
+    public async Task AddPurchaseIntent_OnAlbumLoadedFromDatabase_Persists()
+    {
+        // The nominal flow: an existing album is loaded, then gains an intent. The intent is
+        // only reachable through the album's collection, so EF discovers it at SaveChanges.
+        var album = new Album("Yakari (ModelCreation, Existing)", null);
+        _fixture.Context.Albums.Add(album);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
+        var intent = reloaded.AddPurchaseIntent();
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        Assert.True(await _fixture.Context.PurchaseIntents.AnyAsync(p => p.Id == intent.Id));
     }
 
     private async Task<Album> PersistAlbumWithEditionIntentAsync(string title)

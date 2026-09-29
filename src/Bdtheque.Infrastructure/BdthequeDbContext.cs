@@ -1,4 +1,5 @@
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Entities.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Infrastructure;
@@ -20,6 +21,18 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BdthequeDbContext).Assembly);
+
+        // EntityBase assigns every Id in the domain, while EF Core's convention treats Guid keys
+        // as generated on add. With a generated key already set, EF assumes the row exists: a new
+        // child reached through a loaded parent's navigation (e.g. Album.AddPurchaseIntent) would
+        // be sent as an UPDATE of 0 rows instead of an INSERT.
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+                     .Where(t => typeof(EntityBase).IsAssignableFrom(t.ClrType)))
+        {
+            modelBuilder.Entity(entityType.ClrType)
+                .Property(nameof(EntityBase.Id))
+                .ValueGeneratedNever();
+        }
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
