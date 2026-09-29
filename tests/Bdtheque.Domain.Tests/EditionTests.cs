@@ -428,4 +428,26 @@ public sealed class EditionTests
 
         Assert.Equal("Achat au marché", edition.PersonalNotes);
     }
+
+    [Fact]
+    public void GetOrderedVisuals_MultipleTypesAndOrders_ReturnsInFixedOrder()
+    {
+        // fonctionnel.md § Ordre des visuels d'une édition: by type in a fixed order
+        // (Couverture → Dédicace → Page de garde → Planche → 4e de couverture), then by
+        // display order within the same type. Added out of order and across types on
+        // purpose so a naive Visuals enumeration (unordered) would fail this assertion.
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        var plate2 = new EditionVisual(edition, VisualType.Plate, "plate-2.jpg", 2);
+        var backCover = new EditionVisual(edition, VisualType.BackCover, "back-cover.jpg", 0);
+        var cover = new EditionVisual(edition, VisualType.Cover, "cover.jpg", 0);
+        var plate1 = new EditionVisual(edition, VisualType.Plate, "plate-1.jpg", 1);
+        edition.Visuals.Add(plate2);
+        edition.Visuals.Add(backCover);
+        edition.Visuals.Add(cover);
+        edition.Visuals.Add(plate1);
+
+        var ordered = edition.GetOrderedVisuals().ToList();
+
+        Assert.Equal([cover, plate1, plate2, backCover], ordered);
+    }
 }
