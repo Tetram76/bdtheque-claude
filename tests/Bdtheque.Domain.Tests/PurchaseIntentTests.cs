@@ -1,4 +1,5 @@
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Enums;
 
 namespace Bdtheque.Domain.Tests;
 
@@ -44,6 +45,19 @@ public sealed class PurchaseIntentTests
         album.AddPurchaseIntent(new Edition(album, Casterman));
 
         Assert.Equal(2, album.PurchaseIntents.Count);
+    }
+
+    [Fact]
+    public void AddPurchaseIntent_EditionAlreadyOwned_Throws()
+    {
+        // fonctionnel.md § Intention d'achat: an edition already bought cannot become an intent
+        // again — a second copy is a new edition of the album, on which the intent is placed.
+        var album = new Album("Le Lotus bleu", null);
+        var edition = new Edition(album, Casterman);
+        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+
+        DomainAssert.Violates(DomainRules.PurchaseIntentEditionAlreadyOwned, () => album.AddPurchaseIntent(edition));
+        Assert.Empty(album.PurchaseIntents);
     }
 
     [Fact]

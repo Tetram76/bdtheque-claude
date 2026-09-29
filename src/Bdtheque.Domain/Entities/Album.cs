@@ -221,6 +221,12 @@ public sealed class Album : EntityBase
         // album's own editions, so no user input can reach this with a foreign edition.
         if (edition.AlbumId != Id)
             throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
+        // An edition already bought cannot become an intent again: a second copy is recorded as
+        // a new edition of the album, which then carries the intent (fonctionnel.md § Intention
+        // d'achat).
+        if (edition.AcquisitionMode is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentEditionAlreadyOwned, "An edition already owned cannot be targeted by a purchase intent.");
         EnsureNotTargetedAsWhole();
         if (_purchaseIntents.Any(p => p.EditionId == edition.Id))
             throw new DomainRuleViolationException(
