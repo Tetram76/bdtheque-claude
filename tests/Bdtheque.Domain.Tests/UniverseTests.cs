@@ -50,6 +50,24 @@ public sealed class UniverseTests
     }
 
     [Fact]
+    public void SetParent_MovesChildBetweenParentsChildren()
+    {
+        var first = new Universe("First");
+        var second = new Universe("Second");
+        var child = new Universe("Child");
+
+        child.SetParent(first);
+        Assert.Contains(child, first.Children);
+
+        child.SetParent(second);
+        Assert.DoesNotContain(child, first.Children);
+        Assert.Contains(child, second.Children);
+
+        child.SetParent(null);
+        Assert.DoesNotContain(child, second.Children);
+    }
+
+    [Fact]
     public void SetParent_Self_Throws()
     {
         var universe = new Universe("Self");

@@ -22,9 +22,10 @@ public sealed class EditionVisual : EntityBase
     // EF Core parameterless constructor
     private EditionVisual() { }
 
-    public EditionVisual(Edition edition, VisualType type, string mediaReference, int displayOrder)
+    // Only reachable through Edition.AddVisual, the single place that registers it with its
+    // edition.
+    internal EditionVisual(Edition edition, VisualType type, string mediaReference, int displayOrder)
     {
-        ArgumentNullException.ThrowIfNull(edition);
         EnumGuard.EnsureDefined(type, nameof(type));
 
         Edition = edition;

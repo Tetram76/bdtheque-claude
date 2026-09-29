@@ -15,7 +15,10 @@ public sealed class Universe : EntityBase
     public Guid? ParentId { get; private set; }
     public Universe? Parent { get; private set; }
 
-    public ICollection<Universe> Children { get; private set; } = [];
+    // Read-only from outside and maintained by SetParent only: adding a child here directly
+    // would let EF Core re-parent it without the acyclicity check.
+    private readonly List<Universe> _children = [];
+    public IReadOnlyCollection<Universe> Children => _children;
 
     // EF Core parameterless constructor
     private Universe() { }
@@ -64,8 +67,7 @@ public sealed class Universe : EntityBase
     {
         if (parent is null)
         {
-            Parent = null;
-            ParentId = null;
+            AttachTo(null);
             return;
         }
 
@@ -110,8 +112,15 @@ public sealed class Universe : EntityBase
             ancestor = ancestor.Parent;
         }
 
+        AttachTo(parent);
+    }
+
+    private void AttachTo(Universe? parent)
+    {
+        Parent?._children.RemoveById(this);
+        parent?._children.AddOnce(this);
         Parent = parent;
-        ParentId = parent.Id;
+        ParentId = parent?.Id;
     }
 
     private static DomainRuleViolationException CycleViolation() =>

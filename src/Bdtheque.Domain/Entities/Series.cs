@@ -34,8 +34,11 @@ public sealed class Series : EntityBase
     public Guid? TemplatePublisherCollectionId { get; private set; }
     public PublisherCollection? TemplatePublisherCollection { get; private set; }
 
-    public ICollection<Genre> Genres { get; private set; } = [];
-    public ICollection<Universe> Universes { get; private set; } = [];
+    // Read-only from outside: AddGenre/AddUniverse keep each association unique.
+    private readonly List<Genre> _genres = [];
+    public IReadOnlyCollection<Genre> Genres => _genres;
+    private readonly List<Universe> _universes = [];
+    public IReadOnlyCollection<Universe> Universes => _universes;
 
     // EF Core parameterless constructor
     private Series() { }
@@ -87,6 +90,14 @@ public sealed class Series : EntityBase
     public void SetSummary(string? summary) => Summary = DomainText.NullIfBlank(summary);
 
     public void SetPersonalNotes(string? notes) => PersonalNotes = DomainText.NullIfBlank(notes);
+
+    public void AddGenre(Genre genre) => _genres.AddOnce(genre);
+
+    public void RemoveGenre(Genre genre) => _genres.RemoveById(genre);
+
+    public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
+
+    public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
 
     public void SetTemplateBinding(BindingType? binding)
     {

@@ -335,15 +335,40 @@ public sealed class AlbumTests
     }
 
     [Fact]
+    public void AddGenre_SameGenreTwice_KeepsASingleEntry()
+    {
+        // A duplicate would violate the join table's primary key at the next save.
+        var owner = new Album("Tintin", null);
+        var genre = new Genre("Aventure");
+
+        owner.AddGenre(genre);
+        owner.AddGenre(genre);
+
+        Assert.Single(owner.Genres);
+    }
+
+    [Fact]
+    public void AddUniverse_SameUniverseTwice_KeepsASingleEntry()
+    {
+        var owner = new Album("Tintin", null);
+        var universe = new Universe("Franco-belge");
+
+        owner.AddUniverse(universe);
+        owner.AddUniverse(universe);
+
+        Assert.Single(owner.Universes);
+    }
+
+    [Fact]
     public void Genres_AddAndRemove_UpdatesCollection()
     {
         var album = new Album("Tintin", null);
         var genre = new Genre("Aventure");
 
-        album.Genres.Add(genre);
+        album.AddGenre(genre);
         Assert.Contains(genre, album.Genres);
 
-        album.Genres.Remove(genre);
+        album.RemoveGenre(genre);
         Assert.DoesNotContain(genre, album.Genres);
     }
 
@@ -353,10 +378,10 @@ public sealed class AlbumTests
         var album = new Album("Tintin", null);
         var universe = new Universe("Franco-belge");
 
-        album.Universes.Add(universe);
+        album.AddUniverse(universe);
         Assert.Contains(universe, album.Universes);
 
-        album.Universes.Remove(universe);
+        album.RemoveUniverse(universe);
         Assert.DoesNotContain(universe, album.Universes);
     }
 }

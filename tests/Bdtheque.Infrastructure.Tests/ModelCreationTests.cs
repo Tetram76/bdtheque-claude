@@ -103,7 +103,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     public async Task AddPublisherWithCollection_Persists()
     {
         var publisher = new Publisher("Casterman");
-        var collection = new PublisherCollection("Tintin", publisher);
+        var collection = publisher.AddCollection("Tintin");
 
         _fixture.Context.Publishers.Add(publisher);
         _fixture.Context.PublisherCollections.Add(collection);
@@ -221,8 +221,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var series = new Series("Tintin");
         var genre = new Genre("Policier");
         var universe = new Universe("Franco-Belge");
-        series.Genres.Add(genre);
-        series.Universes.Add(universe);
+        series.AddGenre(genre);
+        series.AddUniverse(universe);
 
         _fixture.Context.Series.Add(series);
         await _fixture.Context.SaveChangesAsync();
@@ -241,7 +241,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     public async Task AddSeries_WithTemplatePublisherAndCollection_Persists()
     {
         var publisher = new Publisher("Éditions Fictives");
-        var collection = new PublisherCollection("Collection Alpha", publisher);
+        var collection = publisher.AddCollection("Collection Alpha");
         var series = new Series("Tintin");
         series.SetTemplate(publisher, collection);
 
@@ -312,8 +312,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
         album.SetFirstPublicationDate(1978, 6);
         var genre = new Genre("Aventure BD");
         var universe = new Universe("Franco-Belge BD");
-        album.Genres.Add(genre);
-        album.Universes.Add(universe);
+        album.AddGenre(genre);
+        album.AddUniverse(universe);
 
         _fixture.Context.Albums.Add(album);
         await _fixture.Context.SaveChangesAsync();
@@ -380,7 +380,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     [Fact]
     public async Task AddContribution_ForSeriesTemplate_Persists()
     {
-        var series = new Series("Tintin (ModelCreation)");
+        var series = new Series("Tintin");
         var author = new Author(null, null, "Hergé");
         var contribution = Contribution.ForSeriesTemplate(series, author, ContributionRole.Illustrator);
 
@@ -395,7 +395,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
             .Include(c => c.Author)
             .FirstAsync(c => c.Id == contribution.Id);
 
-        Assert.Equal("Tintin (ModelCreation)", saved.Series!.Title);
+        Assert.Equal("Tintin", saved.Series!.Title);
         Assert.Null(saved.Album);
         Assert.Equal(ContributionRole.Illustrator, saved.Role);
     }
@@ -404,8 +404,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
     public async Task AddContribution_WithRole_PersistsEnumAsExplicitInt()
     {
         // Confirms the project-wide enum-as-int convention also applies to Contribution.Role.
-        var album = new Album("Astérix (ModelCreation)", null);
-        var author = new Author(null, null, "Goscinny (ModelCreation)");
+        var album = new Album("Astérix", null);
+        var author = new Author(null, null, "Goscinny");
         var contribution = Contribution.ForAlbum(album, author, ContributionRole.Colorist);
 
         _fixture.Context.Albums.Add(album);
@@ -424,8 +424,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
     [Fact]
     public async Task AddEdition_Minimal_Persists()
     {
-        var album = new Album("Le Lotus bleu (ModelCreation)", null);
-        var publisher = new Publisher("Casterman (ModelCreation)");
+        var album = new Album("Le Lotus bleu", null);
+        var publisher = new Publisher("Casterman");
         var edition = new Edition(album, publisher);
 
         _fixture.Context.Albums.Add(album);
@@ -439,8 +439,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
             .Include(e => e.Publisher)
             .FirstAsync(e => e.Id == edition.Id);
 
-        Assert.Equal("Le Lotus bleu (ModelCreation)", saved.Album.Title);
-        Assert.Equal("Casterman (ModelCreation)", saved.Publisher.Name);
+        Assert.Equal("Le Lotus bleu", saved.Album.Title);
+        Assert.Equal("Casterman", saved.Publisher.Name);
         Assert.True(saved.IsColor);
         Assert.False(saved.IsDedicated);
         Assert.Null(saved.AcquisitionMode);
@@ -451,7 +451,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     {
         var album = new Album("Astérix", null);
         var publisher = new Publisher("Dargaud");
-        var collection = new PublisherCollection("Astérix (ModelCreation)", publisher);
+        var collection = publisher.AddCollection("Astérix");
         var edition = new Edition(album, publisher);
         edition.SetPublisher(publisher, collection);
         edition.SetAcquisitionMode(AcquisitionMode.Purchase);
@@ -471,7 +471,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
             .Include(e => e.PublisherCollection)
             .FirstAsync(e => e.Id == edition.Id);
 
-        Assert.Equal("Astérix (ModelCreation)", saved.PublisherCollection!.Name);
+        Assert.Equal("Astérix", saved.PublisherCollection!.Name);
         Assert.Equal(AcquisitionMode.Purchase, saved.AcquisitionMode);
         Assert.Equal(new DateOnly(2020, 3, 15), saved.AcquisitionDate);
         Assert.Equal(9.9m, saved.AcquisitionAmount);
@@ -484,8 +484,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
     public async Task AddEdition_WithAcquisitionMode_PersistsEnumAsExplicitInt()
     {
         // Confirms the project-wide enum-as-int convention also applies to Edition.AcquisitionMode.
-        var album = new Album("Gaston (ModelCreation)", null);
-        var publisher = new Publisher("Dupuis (ModelCreation)");
+        var album = new Album("Gaston", null);
+        var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
         edition.SetAcquisitionMode(AcquisitionMode.Inherited);
 
@@ -528,7 +528,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Astérix", null);
         var publisher = new Publisher("Dargaud");
         var edition = new Edition(album, publisher);
-        var visual = new EditionVisual(edition, VisualType.Cover, "covers/asterix-01.jpg", 1);
+        var visual = edition.AddVisual(VisualType.Cover, "covers/asterix-01.jpg", 1);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);
@@ -548,16 +548,37 @@ public sealed class ModelCreationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddEditionVisual_ViaEditionVisualsCollection_Persists()
+    public async Task AddGenre_OnAlbumLoadedFromDatabase_Persists()
     {
+        var album = new Album("Gaston", null);
+        var genre = new Genre("Humour");
+        _fixture.Context.AddRange(album, genre);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Albums.Include(a => a.Genres).FirstAsync(a => a.Id == album.Id);
+        reloaded.AddGenre(await _fixture.Context.Genres.FindAsync(genre.Id) ?? throw new InvalidOperationException());
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Albums.Include(a => a.Genres).FirstAsync(a => a.Id == album.Id);
+        Assert.Equal(genre.Id, Assert.Single(saved.Genres).Id);
+    }
+
+    [Fact]
+    public async Task AddVisual_OnEditionLoadedFromDatabase_Persists()
+    {
+        // The nominal flow: the visual is only reachable through the edition's read-only
+        // collection, so EF must discover it there (backing field) at SaveChanges.
         var album = new Album("Gaston", null);
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
-        edition.Visuals.Add(new EditionVisual(edition, VisualType.BackCover, "back-covers/gaston-01.jpg", 0));
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
 
-        _fixture.Context.Albums.Add(album);
-        _fixture.Context.Publishers.Add(publisher);
-        _fixture.Context.Editions.Add(edition);
+        var reloaded = await _fixture.Context.Editions.Include(e => e.Visuals).FirstAsync(e => e.Id == edition.Id);
+        reloaded.AddVisual(VisualType.BackCover, "back-covers/gaston-01.jpg", 0);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
@@ -576,7 +597,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Spirou", null);
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
-        var visual = new EditionVisual(edition, VisualType.Endpaper, "endpapers/spirou-01.jpg", 0);
+        var visual = edition.AddVisual(VisualType.Endpaper, "endpapers/spirou-01.jpg", 0);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);

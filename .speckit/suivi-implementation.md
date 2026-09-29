@@ -50,7 +50,7 @@ Corrections issues de la revue complète de la Phase 1, à réaliser avant d'ouv
 | 2 | `chore/postgresql-18` | `chore(docker): passe à PostgreSQL 18 et regroupe les migrations` | Image `postgres:18-alpine` (production et tests) ; migrations regroupées en une `InitialCreate` unique, aucun déploiement n'ayant eu lieu | Réalisée |
 | 3 | `fix/collation-tri` | `fix(infrastructure): tri linguistique des colonnes texte en base` | Collation ICU française sur toutes les colonnes texte (la collation par défaut de l'image trie en ordre binaire) | Réalisée |
 | 4 | `refactor/domain-business-errors` | `refactor(domain): distingue les erreurs métier des erreurs techniques` | Exception dédiée aux violations de règles métier, porteuse d'un code de règle stable ; erreurs de programmation et données corrompues maintenues en exceptions techniques | Réalisée |
-| 5 | `refactor/domain-collections` | `refactor(domain): encapsule les collections de navigation` | Collections de navigation en lecture seule (règles du domaine non contournables par le suivi de relations EF) ; ordre des visuels déterministe | À faire |
+| 5 | `refactor/domain-collections` | `refactor(domain): encapsule les collections de navigation` | Collections de navigation en lecture seule (règles du domaine non contournables par le suivi de relations EF) ; ordre des visuels déterministe | Réalisée |
 | 6 | `docs/phase1-revue` | `docs: corrige la documentation relevée par la revue de la Phase 1` | Commentaires faux ou périmés ; justification des contraintes laissées au seul domaine intégrée au `.speckit` ; en-tête de `contraintes-techniques.md` aligné sur `AGENTS.md` | À faire |
 
 ---

@@ -8,7 +8,7 @@ public sealed class PublisherCollectionTests
     public void Constructor_ValidArguments_Succeeds()
     {
         var publisher = new Publisher("Dargaud");
-        var collection = new PublisherCollection("Lucky Comics", publisher);
+        var collection = publisher.AddCollection("Lucky Comics");
 
         Assert.Equal("Lucky Comics", collection.Name);
         Assert.Same(publisher, collection.Publisher);
@@ -17,9 +17,13 @@ public sealed class PublisherCollectionTests
     }
 
     [Fact]
-    public void Constructor_NullPublisher_Throws()
+    public void AddCollection_AppearsInPublisherCollections()
     {
-        Assert.Throws<ArgumentNullException>(() => new PublisherCollection("Lucky Comics", null!));
+        var publisher = new Publisher("Dargaud");
+
+        var collection = publisher.AddCollection("Lucky Comics");
+
+        Assert.Contains(collection, publisher.Collections);
     }
 
     [Theory]
@@ -29,14 +33,14 @@ public sealed class PublisherCollectionTests
     public void Constructor_EmptyName_Throws(string? name)
     {
         var publisher = new Publisher("Dargaud");
-        DomainAssert.Violates(DomainRules.PublisherCollectionNameRequired, () => new PublisherCollection(name!, publisher));
+        DomainAssert.Violates(DomainRules.PublisherCollectionNameRequired, () => publisher.AddCollection(name!));
     }
 
     [Fact]
     public void SetName_TrimsValue()
     {
         var publisher = new Publisher("Dargaud");
-        var collection = new PublisherCollection("  Lucky  ", publisher);
+        var collection = publisher.AddCollection("  Lucky  ");
 
         Assert.Equal("Lucky", collection.Name);
     }

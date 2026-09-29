@@ -121,7 +121,7 @@ public sealed class SeriesTests
         var series = new Series("Tintin");
         var publisher = new Publisher("Casterman");
         var otherPublisher = new Publisher("Dupuis");
-        var collection = new PublisherCollection("Tintin", otherPublisher);
+        var collection = otherPublisher.AddCollection("Tintin");
 
         DomainAssert.Violates(DomainRules.PublisherCollectionNotOfPublisher, () => series.SetTemplate(publisher, collection));
     }
@@ -131,7 +131,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
         var publisher = new Publisher("Casterman");
-        var collection = new PublisherCollection("Tintin", publisher);
+        var collection = publisher.AddCollection("Tintin");
 
         DomainAssert.Violates(DomainRules.PublisherCollectionNotOfPublisher, () => series.SetTemplate(null, collection));
     }
@@ -141,7 +141,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
         var publisher = new Publisher("Casterman");
-        var collection = new PublisherCollection("Tintin", publisher);
+        var collection = publisher.AddCollection("Tintin");
 
         series.SetTemplate(publisher, collection);
 
@@ -168,7 +168,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
         var publisher = new Publisher("Casterman");
-        var collection = new PublisherCollection("Tintin", publisher);
+        var collection = publisher.AddCollection("Tintin");
         series.SetTemplate(publisher, collection);
 
         series.SetTemplate(null, null);
@@ -236,15 +236,40 @@ public sealed class SeriesTests
     }
 
     [Fact]
+    public void AddGenre_SameGenreTwice_KeepsASingleEntry()
+    {
+        // A duplicate would violate the join table's primary key at the next save.
+        var owner = new Series("Tintin");
+        var genre = new Genre("Aventure");
+
+        owner.AddGenre(genre);
+        owner.AddGenre(genre);
+
+        Assert.Single(owner.Genres);
+    }
+
+    [Fact]
+    public void AddUniverse_SameUniverseTwice_KeepsASingleEntry()
+    {
+        var owner = new Series("Tintin");
+        var universe = new Universe("Franco-belge");
+
+        owner.AddUniverse(universe);
+        owner.AddUniverse(universe);
+
+        Assert.Single(owner.Universes);
+    }
+
+    [Fact]
     public void Genres_AddAndRemove_UpdatesCollection()
     {
         var series = new Series("Tintin");
         var genre = new Genre("Aventure");
 
-        series.Genres.Add(genre);
+        series.AddGenre(genre);
         Assert.Contains(genre, series.Genres);
 
-        series.Genres.Remove(genre);
+        series.RemoveGenre(genre);
         Assert.DoesNotContain(genre, series.Genres);
     }
 
@@ -254,10 +279,10 @@ public sealed class SeriesTests
         var series = new Series("Tintin");
         var universe = new Universe("Franco-belge");
 
-        series.Universes.Add(universe);
+        series.AddUniverse(universe);
         Assert.Contains(universe, series.Universes);
 
-        series.Universes.Remove(universe);
+        series.RemoveUniverse(universe);
         Assert.DoesNotContain(universe, series.Universes);
     }
 }

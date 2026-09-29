@@ -17,9 +17,10 @@ public sealed class PublisherCollection : EntityBase
     // EF Core parameterless constructor
     private PublisherCollection() { }
 
-    public PublisherCollection(string name, Publisher publisher)
+    // Only reachable through Publisher.AddCollection, the single place that registers it with
+    // its publisher.
+    internal PublisherCollection(string name, Publisher publisher)
     {
-        ArgumentNullException.ThrowIfNull(publisher);
         SetName(name);
         Publisher = publisher;
         PublisherId = publisher.Id;

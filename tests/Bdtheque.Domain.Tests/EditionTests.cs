@@ -48,7 +48,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
         var publisher = new Publisher("Dargaud");
-        var collection = new PublisherCollection("Lucky Luke", publisher);
+        var collection = publisher.AddCollection("Lucky Luke");
 
         edition.SetPublisher(publisher, collection);
 
@@ -62,7 +62,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
         var otherPublisher = new Publisher("Dargaud");
-        var foreignCollection = new PublisherCollection("Lucky Luke", otherPublisher);
+        var foreignCollection = otherPublisher.AddCollection("Lucky Luke");
 
         DomainAssert.Violates(DomainRules.PublisherCollectionNotOfPublisher, () => edition.SetPublisher(CreatePublisher(), foreignCollection));
     }
@@ -437,17 +437,46 @@ public sealed class EditionTests
         // display order within the same type. Added out of order and across types on
         // purpose so a naive Visuals enumeration (unordered) would fail this assertion.
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        var plate2 = new EditionVisual(edition, VisualType.Plate, "plate-2.jpg", 2);
-        var backCover = new EditionVisual(edition, VisualType.BackCover, "back-cover.jpg", 0);
-        var cover = new EditionVisual(edition, VisualType.Cover, "cover.jpg", 0);
-        var plate1 = new EditionVisual(edition, VisualType.Plate, "plate-1.jpg", 1);
-        edition.Visuals.Add(plate2);
-        edition.Visuals.Add(backCover);
-        edition.Visuals.Add(cover);
-        edition.Visuals.Add(plate1);
+        var plate2 = edition.AddVisual(VisualType.Plate, "plate-2.jpg", 2);
+        var backCover = edition.AddVisual(VisualType.BackCover, "back-cover.jpg", 0);
+        var cover = edition.AddVisual(VisualType.Cover, "cover.jpg", 0);
+        var plate1 = edition.AddVisual(VisualType.Plate, "plate-1.jpg", 1);
 
         var ordered = edition.GetOrderedVisuals().ToList();
 
         Assert.Equal([cover, plate1, plate2, backCover], ordered);
+    }
+
+    [Fact]
+    public void GetOrderedVisuals_SameTypeAndDisplayOrder_DoesNotDependOnLoadOrder()
+    {
+        // EF Core materializes a collection in whatever order the database returns its rows (no
+        // ORDER BY): two visuals tied on type and display order must still always come out in
+        // the same order, or the page would shuffle them from one load to the next.
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.AddVisual(VisualType.Plate, "plate-a.jpg", 1);
+        edition.AddVisual(VisualType.Plate, "plate-b.jpg", 1);
+
+        var firstLoad = edition.GetOrderedVisuals().ToList();
+        ReverseLoadedVisuals(edition);
+        var secondLoad = edition.GetOrderedVisuals().ToList();
+
+        Assert.Equal(firstLoad, secondLoad);
+    }
+
+    [Fact]
+    public void AddVisual_AppearsInVisuals()
+    {
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+
+        var visual = edition.AddVisual(VisualType.Cover, "cover.jpg", 0);
+
+        Assert.Contains(visual, edition.Visuals);
+    }
+
+    private static void ReverseLoadedVisuals(Edition edition)
+    {
+        var field = typeof(Edition).GetField("_visuals", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        ((List<EditionVisual>)field.GetValue(edition)!).Reverse();
     }
 }

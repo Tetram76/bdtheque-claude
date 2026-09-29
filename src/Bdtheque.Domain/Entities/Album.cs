@@ -31,8 +31,11 @@ public sealed class Album : EntityBase
     public string? PersonalNotes { get; private set; }
     public AlbumRating? Rating { get; private set; }
 
-    public ICollection<Genre> Genres { get; private set; } = [];
-    public ICollection<Universe> Universes { get; private set; } = [];
+    // Read-only from outside: AddGenre/AddUniverse keep each association unique.
+    private readonly List<Genre> _genres = [];
+    public IReadOnlyCollection<Genre> Genres => _genres;
+    private readonly List<Universe> _universes = [];
+    public IReadOnlyCollection<Universe> Universes => _universes;
 
     // Read-only from outside: every intent concerning this album goes through AddPurchaseIntent,
     // the single place that can see them all and enforce the per-album rules. The persistence
@@ -174,6 +177,14 @@ public sealed class Album : EntityBase
     public void SetSummary(string? summary) => Summary = DomainText.NullIfBlank(summary);
 
     public void SetPersonalNotes(string? notes) => PersonalNotes = DomainText.NullIfBlank(notes);
+
+    public void AddGenre(Genre genre) => _genres.AddOnce(genre);
+
+    public void RemoveGenre(Genre genre) => _genres.RemoveById(genre);
+
+    public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
+
+    public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
 
     public void SetRating(AlbumRating? rating)
     {
