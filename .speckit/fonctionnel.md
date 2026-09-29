@@ -370,6 +370,8 @@ Une intention d'achat réalisée est **supprimée** :
 
 Une édition **déjà possédée** ne peut pas faire l'objet d'une intention d'achat : une édition achetée ne redevient jamais une intention. Pour acquérir un second exemplaire d'une même édition, l'utilisateur ajoute à l'album une **nouvelle édition** aux mêmes caractéristiques (une fonction de duplication d'édition pourra faciliter cette saisie) et place son intention sur cette nouvelle édition.
 
+La saisie d'une intention d'achat présente le **minimum de champs** à renseigner : les caractéristiques propres à l'exemplaire possédé (gratuité, occasion, etc.) n'y figurent pas et ne font l'objet d'aucune règle particulière pour une édition non possédée.
+
 Les autres règles métier sont à définir.
 
 <!-- À compléter : cas d'usage, user stories, autres règles métier, flux applicatifs, etc. -->
