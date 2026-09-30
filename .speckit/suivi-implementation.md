@@ -57,12 +57,42 @@ Corrections issues de la revue complète de la Phase 1, à réaliser avant d'ouv
 
 ## Phase 2 — Contracts et API
 
-Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` (CRUD administration + lecture consultation, règles applicatives).
+Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` — administration (`/admin` : saisie, suppression selon `fonctionnel.md` § Suppression des entités) et consultation (`/catalog` : listes, navigation par initiale, recherche, fiches). Choix techniques : `choix-implementation.md` § Organisation de l'API et sections suivantes.
 
-**Statut : à faire.** Découpage précis à établir une fois la Phase 1 stabilisée (dépend des décisions prises sur la forme exacte des entités). Séquencement prévisionnel par groupe d'entités, dans le même ordre que la Phase 1.
+Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de devises, estimations.
+
+**Statut : à faire.**
+
+| # | Branche | Titre (commit) | Contenu | Statut |
+| --- | --- | --- | --- | --- |
+| 1 | `feat/api-socle` | `feat(api): socle des endpoints et des réponses d'erreur` | Réponses ProblemDetails par catégorie (métier / fonctionnelle / introuvable / technique) via un gestionnaire d'exceptions unique ; traduction des violations d'index unique et de clé étrangère en codes de règle ; conventions des groupes `/admin` et `/catalog` ; sérialisation JSON (énumérations en chaîne) ; énumérations des contrats et test de parité avec le domaine ; jeton de concurrence `xmin` sur les racines d'agrégat, racine marquée modifiée à toute écriture sur l'agrégat ; outillage des tests d'intégration de l'API | À faire |
+| 2 | `feat/domain-navigation` | `feat(domain): entrée de navigation par initiale et clé de tri des auteurs` | Clé de tri stockée des auteurs ; entrée de navigation (`A`–`Z`, `#`) calculée et stockée pour séries, albums et auteurs ; index ; migration `InitialCreate` régénérée ; tests | À faire |
+| 3 | `feat/infrastructure-suppression` | `feat(infrastructure): aligne les suppressions en base sur les règles de suppression` | `ON DELETE CASCADE` pour les compositions (album → éditions, contributions ; édition → visuels, intention ; série → contributions template), `RESTRICT` pour les références ; migration régénérée ; tests sur PostgreSQL | À faire |
+| 4 | `feat/api-genres-univers` | `feat(api): administration des genres et des univers` | CRUD Genre et Univers (hiérarchie, acyclicité, unicité du libellé de genre) ; impact et règles de suppression | À faire |
+| 5 | `feat/api-editeurs` | `feat(api): administration des éditeurs et de leurs collections` | CRUD Éditeur et Collection éditeur (unicités) ; impact et règles de suppression | À faire |
+| 6 | `feat/api-auteurs` | `feat(api): administration des auteurs` | CRUD Auteur ; impact et règles de suppression | À faire |
+| 7 | `feat/api-series` | `feat(api): administration des séries` | CRUD Série : clé de tri auto/manuelle, templates d'édition, genres, univers, contributions template ; impact et règles de suppression | À faire |
+| 8 | `feat/api-albums` | `feat(api): administration des albums` | CRUD Album : rattachement à une série avec recopie des contributions de la série, contributions, genres, univers, clé de tri auto/manuelle, méthodes atomiques (type et plage de tomes) ; suppression avec ses compositions | À faire |
+| 9 | `feat/api-editions` | `feat(api): administration des éditions` | Pré-remplissage depuis les templates de la série ; création d'une édition possédée via `Album.RecordAcquisition` ; méthodes atomiques (acquisition, éditeur et collection) ; contrôle non bloquant de l'ISBN ; suppression avec ses compositions | À faire |
+| 10 | `feat/api-visuels` | `feat(api): téléversement et gestion des visuels d'édition` | Téléversement validé par décodage, original et version d'affichage WebP (SkiaSharp), ordre d'affichage, suppression des fichiers après validation de la transaction | À faire |
+| 11 | `feat/api-intentions-achat` | `feat(api): intentions d'achat` | Intention sur un album ou sur une nouvelle édition (saisie minimale), confirmation d'achat, conversion album ↔ édition, suppression, liste publique | À faire |
+| 12 | `feat/api-catalogue-listes` | `feat(api): listes et recherche de la consultation` | Listes paginées (séries, albums, auteurs, éditeurs, genres, univers), navigation par initiale, indicateur d'appartenance à la collection, recherche insensible à la casse et aux accents, filtres croisés (recherche avancée) | À faire |
+| 13 | `feat/api-catalogue-fiches` | `feat(api): fiches détaillées de la consultation` | Fiches album (genres et univers affichés : union avec la série), série (ordre des albums), auteur (bibliographie), éditeur, édition (visuels ordonnés), navigation inter-entités | À faire |
 
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle.
 
-**Statut : à faire.** Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, dashboard, formulaires admin) plutôt que par entité.
+**Statut : à faire.** Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, formulaires admin) plutôt que par entité.
+
+## Phase 4 — Statistiques, devises et estimation de valeur
+
+Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euro (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel.md` § Calcul des estimations).
+
+**Statut : à faire.** Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
+
+## Phase 5 — Fonctionnalités de second plan
+
+Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel.md` § Fonctionnalités de second plan).
+
+**Statut : à faire.** Découpage à établir à l'ouverture de la phase.

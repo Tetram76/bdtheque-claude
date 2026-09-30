@@ -54,6 +54,48 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
 - Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement uniquement.
 
+## Organisation de l'API
+
+- **Endpoints** : un groupe d'endpoints (`MapGroup`) par ressource, dont les handlers sont des méthodes statiques utilisant directement le `BdthequeDbContext` : EF Core joue déjà le rôle de dépôt et d'unité de travail. Le mapping entre DTO et domaine est écrit à la main, dans le groupe de la ressource.
+  - **Alternative écartée (MediatR, AutoMapper)** : passés sous double licence RPL 1.5 / commerciale en 2025, incompatible avec `contraintes-techniques.md` § Licences ; ils n'apporteraient de toute façon qu'une indirection de plus pour une API à un seul client.
+  - **Alternative écartée (couche repository au-dessus d'EF Core)** : une abstraction de plus sans second fournisseur de persistance à masquer.
+- **Deux familles de routes** : `/admin/…` (saisie : lecture pour édition, création, modification, suppression) et `/catalog/…` (consultation : listes, recherche, fiches). Chacune a ses propres DTO : un DTO de consultation est une vue de lecture (données de navigation, genres et univers affichés, appartenance à la collection…), un DTO d'administration reflète les champs saisissables. `api` ne connaît pas l'utilisateur (cf. § Authentification : mise en œuvre) : c'est `frontend` qui réserve l'accès aux routes `/admin` à l'administrateur authentifié.
+- **Appartenance à la collection** : exposée par les DTO de consultation des albums et des éditions (indicateur), et calculée par une expression unique réutilisée par toutes les requêtes — jamais recodée requête par requête. Le futur filtre « collection uniquement » (`fonctionnel.md` § Périmètre de la consultation) s'appuiera sur cette même expression.
+- **Modification** : `PUT` de l'état complet du formulaire. Les champs interdépendants (mode, date et prix d'acquisition ; gratuité et prix ; type d'album et plage de tomes ; éditeur et collection éditeur) sont appliqués par des **méthodes atomiques du domaine** qui reçoivent l'ensemble de ces champs, plutôt que par un enchaînement de setters dont l'API devrait connaître l'ordre valide.
+  - **Alternative écartée (`PATCH`)** : les formulaires d'administration envoient toujours la fiche entière ; un correctif partiel multiplierait les combinaisons à valider sans cas d'usage.
+- **Pagination** : par décalage (page, taille, nombre total), sur des tris adossés aux clés de tri indexées. Une collection compte au plus quelques milliers d'albums.
+  - **Alternative écartée (pagination par clé)** : plus performante sur de très gros volumes, mais complique la navigation directe vers une page et le calcul du total, sans gain à cette échelle.
+- **Contrats** (`Bdtheque.Contracts`) : `record` immuables. Les énumérations exposées sont **dupliquées** dans les contrats (mêmes noms, mêmes valeurs), la parité étant vérifiée par un test : le frontend ne référence jamais `Bdtheque.Domain`. Elles sont sérialisées en **chaîne** dans le JSON (lisibilité de la documentation OpenAPI).
+- **Chargement de la hiérarchie des univers** : toute opération qui modifie le parent d'un univers charge l'ensemble du référentiel des univers (table de petite taille), ce qui satisfait le prérequis de `Universe.SetParent` (chaîne d'ancêtres complète en mémoire) sans requête récursive.
+- **Tests** : tests d'intégration de l'API sur PostgreSQL réel (`gestion-projet.md` § Outillage .NET), une instance de l'API et sa base par classe de tests, chaque test créant ses propres données.
+
+## Suppression des entités : mise en œuvre
+
+- Les règles de `fonctionnel.md` § Suppression des entités sont appliquées par l'API **avant** la suppression : pour chaque lien de type *Référence*, l'API compte les fiches qui l'utilisent et refuse la suppression (erreur métier portant ce nombre) s'il en existe. Un point d'entrée d'**impact de suppression** fournit ces comptes, ainsi que ceux des *Associations* et *Compositions* concernées, pour que le frontend construise le message de confirmation.
+  - Ce contrôle préalable est **indispensable** et non une simple commodité : sur une relation optionnelle dont les dépendants sont chargés en mémoire, EF Core met leur clé étrangère à `null` au lieu d'échouer, quel que soit le `ON DELETE` configuré (ex. supprimer une série dont les albums sont chargés les détacherait silencieusement).
+- Le schéma reflète les mêmes règles : `ON DELETE RESTRICT` pour chaque *Référence* (filet de sécurité, traduit en erreur métier s'il se déclenche malgré le contrôle préalable), `ON DELETE CASCADE` pour chaque *Composition* (album → éditions, contributions, intentions ; édition → visuels, intention ; série → contributions template ; éditeur → collections) et pour les tables de jointure des *Associations* (genres, univers).
+- **Fichiers des visuels** : une cascade en base ne supprime pas les fichiers. Avant toute suppression qui emporte des visuels (visuel, édition, album), l'API relève leurs médias et ne les supprime du volume qu'**après** la validation de la transaction : un échec de la suppression laisse les fichiers intacts ; un échec de la suppression d'un fichier ne laisse qu'un fichier orphelin, sans incidence sur les données.
+
+## Navigation par initiale : mise en œuvre
+
+- L'**entrée de navigation** (`A`–`Z` ou `#`, cf. `fonctionnel.md` § Entrées de la navigation par initiale) est **calculée par le domaine** à partir de la clé de tri et **stockée** à côté d'elle (colonne indexée), sur les séries, les albums et les auteurs. Un album sans titre, donc sans clé de tri, se range sous l'entrée de sa série. Le calcul (décomposition Unicode, retrait des diacritiques, majuscule, sinon `#`) est testé unitairement dans le domaine.
+  - **Alternative écartée (calcul en SQL à chaque requête)** : reproduirait en SQL une normalisation déjà écrite en C#, deux implémentations à maintenir identiques, et empêcherait l'usage d'un index.
+- Les **auteurs** reçoivent la même clé de tri stockée que les titres (`fonctionnel.md` § Artistes), calculée par le domaine à partir de l'identité, non modifiable manuellement : sans elle, le tri et la pagination des artistes ne pourraient pas être faits par la base.
+
+## Recherche
+
+- Recherche par **inclusion** (« contient »), insensible à la casse et aux accents, via la collation non déterministe `fr_case_accent_insensitive` (§ Collation des colonnes texte) appliquée à la requête : PostgreSQL 18 accepte `LIKE` sur une collation non déterministe. Aucun index dédié : un parcours séquentiel de quelques milliers de lignes reste instantané.
+  - **Alternative écartée (`pg_trgm` / `unaccent`, recherche plein texte)** : extensions et index supplémentaires pour un gain nul à ce volume ; la recherche plein texte découpe en mots et racines, ce qui ne correspond pas à la recherche d'un fragment de titre ou de nom.
+- La **recherche avancée** (`fonctionnel.md` § Structure de l'application) est portée par des **filtres croisés** sur les listes de consultation (albums d'un auteur, d'une série, d'un éditeur, d'un genre, d'un univers…), combinables avec la recherche textuelle.
+
+## Visuels : stockage et traitement
+
+- Un visuel est **téléversé** vers `api` (formulaire multipart), qui l'écrit sur le volume des visuels (`contraintes-techniques.md` § Stockage des visuels). Le fichier est validé en le **décodant** comme image, jamais sur la seule foi du type annoncé par le client.
+- `api` conserve l'**original** et produit une **version d'affichage** réduite au format WebP, servie par défaut : les scans originaux sont trop lourds pour une navigation sur smartphone (`contraintes-techniques.md` § Compatibilité multi-supports). Les noms de fichiers sont dérivés de l'identifiant du visuel et ne sont jamais réutilisés : `frontend` peut les servir avec un cache HTTP de longue durée.
+- Bibliothèque de traitement d'image : **SkiaSharp** (licence MIT, projet de la .NET Foundation), avec ses bibliothèques natives Linux sans dépendance système (`SkiaSharp.NativeAssets.Linux.NoDependencies`).
+  - **Alternative écartée (ImageSharp)** : licence *Six Labors Split*, et clé de licence exigée à la compilation depuis la version 4.
+  - **Alternative écartée (servir uniquement l'original)** : plusieurs mégaoctets par couverture dans une grille d'albums sur réseau mobile.
+
 ## Version de PostgreSQL
 
 - Le moteur PostgreSQL est imposé (`contraintes-techniques.md`) ; sa version et sa variante d'image sont un choix : **`postgres:18-alpine`**, utilisée à l'identique en production (`docker-compose.yml`) et par les tests (Testcontainers, alignement vérifié par un test).
@@ -86,7 +128,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - **Tant qu'aucune base n'a été déployée** (aucun déploiement consigné dans `journal-evenements.md`), le schéma est porté par une **migration unique** (`InitialCreate`), régénérée plutôt qu'enrichie de migrations successives : une migration intermédiaire ne protège alors aucune donnée et ne fait qu'ajouter du code de conversion jamais exécuté sur des données réelles. Une régénération n'est acceptée que si le schéma produit est **identique** à celui des migrations qu'elle remplace (comparaison des `pg_dump --schema-only`).
 - **Dès le premier déploiement consigné**, les migrations deviennent **append-only** : chaque évolution du modèle ajoute une migration, aucune migration existante n'est modifiée ni regroupée.
 
-## Erreurs métier et erreurs techniques
+## Erreurs métier, fonctionnelles et techniques
 
 - Pour que l'utilisateur distingue une erreur métier d'une erreur technique (`fonctionnel.md` § Présentation des erreurs), le domaine signale **toute violation d'une règle métier** par un type dédié, `DomainRuleViolationException` (`Bdtheque.Domain.Common`), porteur d'un **code de règle stable** (`DomainRules`). Le texte présenté à l'utilisateur est produit à partir de ce code par la localisation du frontend ; le message de l'exception ne sert qu'aux journaux.
 - Est **métier** toute erreur qu'une saisie de l'utilisateur peut provoquer et qu'il peut corriger (champ obligatoire vide, incohérence entre champs, cycle d'univers, intention d'achat en double…). Est **technique** toute erreur qu'aucune saisie ne peut provoquer : référence obligatoire `null`, valeur d'énumération non définie, chaîne d'ancêtres non chargée, donnée déjà corrompue en base — ces cas restent des exceptions .NET standard.
@@ -94,10 +136,21 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - Une règle d'unicité garantie par la base (ex. libellé de genre, nom d'éditeur) ne peut pas être vérifiée par le domaine seul, qui ne voit pas les autres lignes : c'est l'API qui traduira la violation de l'index unique correspondant en erreur **métier** (avec son code de règle), jamais en erreur technique.
   - **Alternative écartée (exceptions .NET standard, `ArgumentException` / `InvalidOperationException`)** : levées aussi par le framework et par les erreurs de programmation, elles ne permettent pas de reconnaître une erreur métier.
   - **Alternative écartée (type résultat au lieu d'exceptions)** : imposerait de propager un résultat à travers chaque setter et chaque appelant pour un gain nul ici — une violation interrompt toujours l'opération en cours, et l'API la traduira en une réponse unique.
+- **Réponse de l'API** : toute erreur est une réponse **ProblemDetails** (RFC 9457) dont le champ `type` identifie la catégorie, seule information dont le frontend a besoin pour la présentation distinctive exigée :
+  - **métier** → `422 Unprocessable Content`, avec le code de règle (`ruleCode`) et, le cas échéant, les données utiles au message (ex. nombre de fiches qui bloquent une suppression) ;
+  - **fonctionnelle** → `409 Conflict` (modification concurrente, cf. § Concurrence d'accès) ;
+  - **introuvable** → `404 Not Found` (fiche supprimée entre-temps, identifiant inconnu) ;
+  - **technique** → `500`, sans aucun détail interne dans la réponse (journaux uniquement).
+  - Un gestionnaire d'exceptions unique (`IExceptionHandler`) produit ces réponses ; aucun endpoint ne construit lui-même une réponse d'erreur.
+- **Violations de contraintes en base** : une violation d'index unique (`23505`) ou de clé étrangère (`23503`) est traduite en erreur **métier** par une table *nom de contrainte → code de règle* ; une contrainte absente de cette table reste une erreur technique (elle révèle un contrôle manquant, pas une saisie à corriger). Les codes correspondants sont déclarés dans `DomainRules`, registre unique des codes.
+- **Pas de validation déclarative des DTO** (`AddValidation`, attributs `[Required]`…) : le domaine est l'**unique source** des règles de saisie. La validation native des Minimal API répondrait en `400` sans code de règle — une erreur métier y serait indiscernable d'une erreur technique — et dupliquerait chaque règle.
 
 ## Concurrence d'accès
 
-- Le contrôle de concurrence optimiste reposera sur la colonne système **`xmin`** de PostgreSQL (jeton de version natif, présent sur chaque table, sans colonne ni migration à ajouter), transmise au client avec l'entité lue et vérifiée à l'enregistrement. Sa mise en place intervient avec le premier point d'entrée de modification de l'API (Phase 2) : aucune évolution du domaine ni du schéma n'est nécessaire d'ici là. Motif : un formulaire d'administration peut rester ouvert longtemps avant d'être enregistré, et deux onglets ou appareils (PC, téléphone) ouverts sur la même fiche écraseraient sinon silencieusement la modification de l'autre.
+- Le contrôle de concurrence optimiste repose sur la colonne système **`xmin`** de PostgreSQL (jeton de version natif, présent sur chaque table, sans colonne ni migration à ajouter). Motif : un formulaire d'administration peut rester ouvert longtemps avant d'être enregistré, et deux onglets ou appareils (PC, téléphone) ouverts sur la même fiche écraseraient sinon silencieusement la modification de l'autre.
+- **Mise en œuvre** : une propriété fantôme `uint` configurée en `IsRowVersion()` dans `Bdtheque.Infrastructure` (le fournisseur Npgsql la mappe sur `xmin`), sans évolution du domaine. Elle est transmise au client dans les DTO de lecture (`Version`) et renvoyée avec toute modification ou suppression ; un écart produit une erreur **fonctionnelle** (`409`).
+- **Portée : la racine d'agrégat.** Seule la version de la racine (ex. `Album`) est transmise et vérifiée. Toute écriture sur un agrégat — y compris un ajout de genre, de contribution ou d'intention d'achat, qui ne touche pas la ligne de la racine — **marque la racine comme modifiée**, pour que son `xmin` change à chaque modification de l'agrégat. Sans cela, deux modifications concurrentes portant sur les éléments d'un agrégat ne seraient jamais détectées.
+  - **Alternative écartée (ETag / `If-Match`)** : plus conforme à HTTP, mais l'API n'a qu'un client, qui partage les contrats ; un champ du DTO est plus simple à porter par un formulaire.
 
 ## Représentation de la devise
 
@@ -121,4 +174,4 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Validation de l'ISBN
 
-- Le contrôle du chiffre de vérification (ISBN-10 / ISBN-13, cf. `modele-metier.md` § Édition) est isolé dans `Bdtheque.Domain.Common.IsbnChecksumValidator`, utilisable indépendamment de l'entité `Édition`. Conformément à `fonctionnel.md` § Validation de l'ISBN (contrôle non bloquant), `Edition.SetIsbn` ne rejette jamais une valeur incorrecte : c'est aux couches applicatives (API/Frontend) d'appeler ce validateur pour avertir l'utilisateur sans empêcher l'enregistrement.
+- Le contrôle du chiffre de vérification (ISBN-10 / ISBN-13, cf. `modele-metier.md` § Édition) est isolé dans `Bdtheque.Domain.Common.IsbnChecksumValidator`, utilisable indépendamment de l'entité `Édition`. Conformément à `fonctionnel.md` § Validation de l'ISBN (contrôle non bloquant), `Edition.SetIsbn` ne rejette jamais une valeur incorrecte. L'API expose le résultat de ce validateur dans les DTO d'édition, et par un point d'entrée de contrôle utilisable pendant la saisie : le frontend avertit l'utilisateur sans empêcher l'enregistrement, et sans référencer `Bdtheque.Domain`.

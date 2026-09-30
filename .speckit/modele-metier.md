@@ -172,7 +172,7 @@ erDiagram
 | Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**, cf. `choix-implementation.md` § Représentation de la devise) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. |
 | Gratuite | booléen | oui | `false` par défaut. Indique que l'utilisateur ne souhaite enregistrer aucun montant (ni prix payé ni valeur marchande). Si `true`, le prix d'acquisition doit être `null` (contrainte d'intégrité) ; le champ est désactivé et vidé en interface. |
 | Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. cote, numéro de rangement). |
-| Valeur estimée | calculée | — | Calculée dynamiquement, non stockée (voir `contraintes-techniques.md`). |
+| Valeur estimée | calculée | — | Calculée dynamiquement, non stockée (voir `fonctionnel.md` § Calcul des estimations). |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
 
 > **Contraintes d'intégrité :**

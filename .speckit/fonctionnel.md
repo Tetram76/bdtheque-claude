@@ -23,12 +23,13 @@ Une édition peut exister dans la base sans être possédée (sans données d'ac
 
 ### Périmètre de la consultation
 
-La partie **Consultation** reflète exclusivement l'état de la collection. En conséquence :
+La base est à la fois l'**inventaire de la collection** et une **base documentaire**. En conséquence, dans la partie **Consultation** :
 
-- Seules les **éditions possédées** (avec un `Mode d'acquisition` renseigné) sont visibles.
-- Les **albums sans édition possédée** n'apparaissent pas dans la consultation (ni dans les listes, ni dans les résultats de recherche, ni dans les fiches de série).
-
-Cette règle s'applique à toutes les vues de la consultation : listes, recherche, fiches détaillées, navigation inter-entités, statistiques.
+- Toute fiche est **consultable et trouvable dès qu'elle existe en base**, qu'elle relève ou non de la collection : albums sans édition possédée, éditions non possédées, séries, auteurs, éditeurs, etc. Cette règle s'applique aux listes, à la recherche, aux fiches détaillées et à la navigation inter-entités.
+- Dans une fiche, tout élément connu est visible (ex. tous les albums d'une série, toute la bibliographie d'un auteur, toutes les éditions d'un album).
+- L'**appartenance à la collection** est **signalée visuellement** sur les albums et les éditions, pour que l'inventaire reste lisible au sein de la base documentaire.
+- Les **statistiques** portent exclusivement sur la **collection** (albums et éditions possédés), jamais sur l'ensemble de la base.
+- Un **filtre** permettra de limiter l'affichage de la consultation à la collection (fonctionnement à préciser).
 
 ### Initialisation d'une nouvelle édition depuis la série
 
@@ -81,6 +82,13 @@ Seule la culture **française** est proposée actuellement ; l'application est c
 
 Le tri alphabétique des **séries**, **albums** et **artistes** repose sur une **clé de tri** distincte de la valeur affichée. L'affichage respecte toujours la forme naturelle ; seule la clé de tri est transformée.
 
+#### Entrées de la navigation par initiale
+
+La navigation par initiale propose les entrées **A** à **Z** et une entrée **#** :
+
+- Une initiale accentuée ou en minuscule est rangée sous sa **lettre de base** en majuscule : `É`, `È`, `Ê` → **E** ; `à` → **A** ; `Ç` → **C**. À l'intérieur d'une entrée, l'ordre de tri linguistique habituel s'applique.
+- Une initiale **non alphabétique** (chiffre, ponctuation, symbole) est rangée sous **#** (ex. `13`, `2001 Nights`).
+
 #### Titres (séries et albums)
 
 - La clé de tri d'un titre place le mot significatif en tête et reporte l'**article initial en suffixe**, entre crochets (ex. `Lotus bleu [Le]`), plutôt que de le supprimer : ceci garantit un ordre **déterministe** entre deux titres qui ne diffèrent que par leur article (ex. `Un Lotus bleu` et `Le Lotus bleu` ne doivent jamais se trouver à une position arbitraire l'un par rapport à l'autre).
@@ -90,13 +98,14 @@ Le tri alphabétique des **séries**, **albums** et **artistes** repose sur une 
 
 Exemples :
 
-| Titre affiché | Clé de tri | Initiale |
-| --- | --- | --- |
-| `Le Lotus bleu` | `Lotus bleu [Le]` | **L** |
-| `Un Lotus bleu` | `Lotus bleu [Un]` | **L** |
-| `Les Schtroumpfs` | `Schtroumpfs [Les]` | **S** |
-| `L'Épervier` | `Épervier [L']` | **É** |
-| `Tintin` | `Tintin` | **T** |
+| Titre affiché | Clé de tri | Initiale | Entrée de navigation |
+| --- | --- | --- | --- |
+| `Le Lotus bleu` | `Lotus bleu [Le]` | **L** | **L** |
+| `Un Lotus bleu` | `Lotus bleu [Un]` | **L** | **L** |
+| `Les Schtroumpfs` | `Schtroumpfs [Les]` | **S** | **S** |
+| `L'Épervier` | `Épervier [L']` | **É** | **E** |
+| `Tintin` | `Tintin` | **T** | **T** |
+| `13` | `13` | **1** | **#** |
 
 Ce traitement est **non configurable** : il est obligatoire pour que la navigation par initiale soit viable.
 
@@ -235,9 +244,42 @@ Règles de construction :
 - Si le **nombre de tomes théorique** n'est pas indiqué sur la série, le tome final détermine la fin de la séquence.
 - Sinon, la fin de la séquence est le **maximum** entre le tome final catalogué et le nombre de tomes théorique.
 
+### Suppression des entités
+
+Toute suppression est soumise à la **confirmation** de l'utilisateur. Son effet dépend de la nature de chaque lien qui unit l'entité supprimée au reste des données :
+
+- **Référence** — une autre fiche désigne l'entité par l'un de ses attributs : la suppression est **refusée** tant que la référence existe (erreur métier indiquant combien de fiches l'utilisent).
+- **Association** — simple lien sans donnée propre : la suppression est **autorisée** ; les associations disparaissent avec l'entité. La confirmation indique combien de fiches sont concernées.
+- **Composition** — élément qui fait partie de l'entité : il est **supprimé avec elle** ; la confirmation annonce ce qui va disparaître.
+
+La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
+
+| Entité supprimée | Lien | Type | Effet |
+| --- | --- | --- | --- |
+| Genre | Genres d'albums et de séries | Association | Le genre est retiré de ces albums et séries. |
+| Univers | Univers d'albums et de séries | Association | L'univers est retiré de ces albums et séries. |
+| Univers | Univers parent de sous-univers | Référence | Refusée tant que l'univers a des sous-univers. |
+| Auteur | Contributions sur des albums ou des séries | Référence | Refusée tant que l'auteur est crédité. |
+| Éditeur | Éditeur d'éditions | Référence | Refusée. |
+| Éditeur | Éditeur template d'une série | Référence | Refusée. |
+| Éditeur | Ses collections éditeur | Composition | Supprimées avec lui. |
+| Collection éditeur | Collection d'éditions | Référence | Refusée. |
+| Collection éditeur | Collection template d'une série | Référence | Refusée. |
+| Série | Albums rattachés | Référence | Refusée tant que la série contient des albums. |
+| Série | Ses contributions template | Composition | Supprimées avec elle. |
+| Album | Ses éditions (avec leurs visuels et intentions d'achat), ses contributions, son intention d'achat | Composition | Supprimés avec lui. |
+| Édition | Ses visuels, son intention d'achat | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
+| Visuel d'édition, Contribution, Intention d'achat | — | — | Suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
+
+### Calcul des estimations
+
+Toute **estimation** produite par l'application (valeur estimée d'une édition, estimation de sortie d'un nouvel album) est **toujours calculée dynamiquement**, à partir de l'**état courant** de la base : elle n'est jamais stockée, ni figée à partir d'un état antérieur des données.
+
+Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner les estimations au fil du temps**, dans la mesure où les données ajoutées le permettent.
+
 ### Estimation de la valeur des éditions
 
-- La **valeur estimée** d'une édition est calculée dynamiquement à partir des données de la collection, elle n'est pas stockée en base.
+- La **valeur estimée** d'une édition suit la règle de [Calcul des estimations](#calcul-des-estimations) : elle est calculée à partir des données de la collection, et n'est pas stockée en base.
 - Le modèle d'estimation retenu est un **Random Forest**.
 
 ### Gestion des devises
@@ -279,7 +321,7 @@ Les statistiques du dashboard incluent notamment (liste non exhaustive) :
 L'application se compose de trois parties distinctes :
 
 1. **Consultation** — accessible **publiquement** (sans authentification) :
-   - Affichage de la **fiche détaillée** de chaque entité : toutes les informations publiques disponibles sont présentées.
+   - Affichage de la **fiche détaillée** de chaque entité : toutes les informations publiques disponibles sont présentées. Les notes personnelles, la numérotation personnelle, les données d'acquisition (mode, date, prix, occasion, gratuité) et l'appréciation sont des informations **publiques**.
    - **Navigation inter-entités** : depuis la fiche d'une entité, il est possible de naviguer vers les fiches des entités associées (ex. album → série, album → édition, album → auteur, auteur → bibliographie, etc.).
    - **Recherche facilement accessible** à tout moment depuis n'importe quelle page de la partie consultation.
    - **Recherche simple** : par type d'entité (ex. rechercher des albums, des auteurs, des séries, etc.).
@@ -298,6 +340,7 @@ L'application se compose de trois parties distinctes :
 Toute erreur présentée à l'utilisateur doit lui permettre de distinguer **très facilement**, au premier coup d'œil, s'il s'agit :
 
 - d'une **erreur métier** : l'action demandée enfreint une règle de gestion de l'application (ex. une donnée obligatoire manquante, une incohérence entre deux champs, une intention d'achat déjà existante pour cet album). L'utilisateur peut la résoudre lui-même en corrigeant sa saisie ou sa demande ;
+- d'une **erreur fonctionnelle** : la demande n'enfreint aucune règle de gestion et l'application fonctionne normalement, mais la demande ne peut pas aboutir en l'état des données au moment où elle est traitée. Cas type : l'enregistrement d'une fiche **modifiée entre-temps** (depuis un autre onglet ou un autre appareil), refusé pour ne pas écraser silencieusement cette autre modification. L'utilisateur peut la résoudre lui-même en tenant compte du nouvel état des données. Cette catégorie regroupe les erreurs de même nature ;
 - d'une **erreur technique** : l'application n'a pas pu traiter la demande pour une raison indépendante de la saisie de l'utilisateur (dysfonctionnement, service indisponible, etc.).
 
 Cette distinction s'applique à toutes les parties de l'application (consultation, administration, aide contextuelle).
@@ -331,6 +374,8 @@ Les tomes manquants consécutifs sont regroupés et affichés sous forme d'inter
 
 Accessible en **mode consultation** (public). Permet d'estimer la date de sortie du prochain tome d'une série, sur la base du rythme de parution observé.
 On parle d'**estimation** et non de prévision : le facteur humain rend toute prédiction précise impossible, et l'objectif est uniquement de donner un ordre de grandeur.
+
+Comme toute estimation, elle suit la règle de [Calcul des estimations](#calcul-des-estimations).
 
 Règles de calcul :
 
