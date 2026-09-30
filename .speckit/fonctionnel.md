@@ -273,7 +273,8 @@ La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 | Série | Ses contributions template | Composition | Supprimées avec elle. |
 | Album | Ses éditions (avec leurs visuels et intentions d'achat), ses contributions, son intention d'achat | Composition | Supprimés avec lui. |
 | Édition | Ses visuels, son intention d'achat | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
-| Visuel d'édition, Contribution, Intention d'achat | — | — | Suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
+| Intention d'achat portant sur une édition | L'édition visée (non possédée), avec ses visuels | Composition | Supprimée avec elle : une édition non possédée n'existe que par son intention (cf. § Intention d'achat). |
+| Visuel d'édition, Contribution, Intention d'achat portant sur l'album | — | — | Suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
 
 ### Calcul des estimations
 
@@ -407,6 +408,8 @@ Ces deux cas sont représentés par une entité **Intention d'achat** distincte,
 Pour un même album, les deux cas sont **mutuellement exclusifs** : l'album est visé soit par une intention portant sur l'album lui-même, soit par des intentions portant sur une ou plusieurs de ses éditions (une intention par édition), jamais les deux à la fois.
 
 Un cas d'usage permettra de **convertir** une intention portant sur l'album en intention portant sur une édition, et inversement, dans le respect de cette exclusivité.
+
+Une édition **non possédée** et l'intention qui la vise sont **indissociables** : l'une ne va pas sans l'autre. Supprimer l'une supprime l'autre, après confirmation (cf. § Suppression des entités) ; de même, convertir une intention portant sur une édition en intention portant sur l'album supprime l'édition visée, après confirmation. Une édition non possédée ne peut donc jamais exister sans intention d'achat.
 
 #### Réalisation d'une intention
 
