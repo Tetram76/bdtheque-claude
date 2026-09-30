@@ -57,12 +57,42 @@ Corrections issues de la revue complète de la Phase 1, à réaliser avant d'ouv
 
 ## Phase 2 — Contracts et API
 
-Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` (CRUD administration + lecture consultation, règles applicatives).
+Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` — administration (`/admin` : saisie, suppression selon `fonctionnel.md` § Suppression des entités) et consultation (`/catalog` : listes, navigation par initiale, recherche, fiches). Choix techniques : `choix-implementation.md` § Organisation de l'API et sections suivantes.
 
-**Statut : à faire.** Découpage précis à établir une fois la Phase 1 stabilisée (dépend des décisions prises sur la forme exacte des entités). Séquencement prévisionnel par groupe d'entités, dans le même ordre que la Phase 1.
+Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de devises, estimations.
+
+**Statut : à faire.**
+
+| # | Branche | Titre (commit) | Contenu | Statut |
+| --- | --- | --- | --- | --- |
+| 1 | `feat/api-socle` | `feat(api): socle des endpoints et des réponses d'erreur` | Réponses ProblemDetails par catégorie (métier / fonctionnelle / technique) via un gestionnaire d'exceptions unique et, pour les erreurs émises sans exception (liaison de requête, route inconnue, clé interne absente), les pages de code d'état ; traduction des violations de contraintes selon l'opération (`choix-implementation.md` § Erreurs métier, fonctionnelles et techniques) : index unique → erreur métier avec code de règle, clé étrangère lors d'une création ou modification → erreur fonctionnelle (la clé étrangère lors d'une suppression relève du mécanisme de suppression, PR 4) ; erreurs métier détectées par l'API signalées avec un code de `DomainRules` ; conventions des groupes `/admin` et `/catalog` ; sérialisation JSON (énumérations en chaîne) ; énumérations des contrats et test de parité avec le domaine ; jeton de concurrence `xmin` sur les racines d'agrégat, racine verrouillée en premier puis marquée modifiée à toute écriture sur l'agrégat (ordre de verrouillage racine → enfant) ; outillage des tests d'intégration de l'API | À faire |
+| 2 | `feat/domain-navigation` | `feat(domain): entrée de navigation par initiale et clé de tri des auteurs` | Clé de tri stockée des auteurs ; entrée de navigation (`A`–`Z`, `#`, `@`) calculée et stockée pour séries, albums et auteurs ; index ; migration `InitialCreate` régénérée ; tests | À faire |
+| 3 | `feat/infrastructure-suppression` | `feat(infrastructure): aligne les suppressions en base sur les règles de suppression` | `ON DELETE CASCADE` pour les compositions (album → éditions, contributions ; édition → visuels, intention ; série → contributions template), `RESTRICT` pour les références ; migration régénérée ; tests sur PostgreSQL | À faire |
+| 4 | `feat/api-genres-univers` | `feat(api): administration des genres et des univers` | CRUD Genre et Univers (hiérarchie, acyclicité, unicité du libellé de genre) ; **mécanisme commun de suppression**, réutilisé par les PR suivantes (`choix-implementation.md` § Suppression des entités : mise en œuvre) : impact par type d'entité avec empreinte, verrou de ligne, recalcul et comparaison dans la transaction, refus métier des références (y compris clé étrangère levée à la suppression), erreur fonctionnelle si l'impact a changé | À faire |
+| 5 | `feat/api-editeurs` | `feat(api): administration des éditeurs et de leurs collections` | CRUD Éditeur et Collection éditeur (unicités) ; impact et règles de suppression | À faire |
+| 6 | `feat/api-auteurs` | `feat(api): administration des auteurs` | CRUD Auteur ; impact et règles de suppression | À faire |
+| 7 | `feat/api-series` | `feat(api): administration des séries` | CRUD Série : clé de tri auto/manuelle, templates d'édition, genres, univers, contributions template ; impact et règles de suppression | À faire |
+| 8 | `feat/api-albums` | `feat(api): administration des albums` | CRUD Album : rattachement à une série avec recopie des contributions de la série, contributions, genres, univers, clé de tri auto/manuelle, méthodes atomiques (type et plage de tomes) ; suppression avec ses compositions | À faire |
+| 9 | `feat/api-editions` | `feat(api): administration des éditions` | Pré-remplissage depuis les templates de la série ; création d'une édition possédée via `Album.RecordAcquisition` ; méthodes atomiques (acquisition, éditeur et collection) ; refus de retirer le mode d'acquisition d'une édition possédée (le domaine l'autorise encore) ; contrôle non bloquant de l'ISBN ; suppression avec ses compositions | À faire |
+| 10 | `feat/api-visuels` | `feat(api): téléversement et gestion des visuels d'édition` | Téléversement validé par décodage (fichier refusé : erreur métier), original et version d'affichage WebP (SkiaSharp), ordre d'affichage, suppression des fichiers après validation de la transaction, compensation d'une création échouée et réconciliation périodique des fichiers orphelins | À faire |
+| 11 | `feat/api-intentions-achat` | `feat(api): intentions d'achat` | Intention sur un album ou sur une nouvelle édition (saisie minimale), confirmation d'achat, conversion album ↔ édition, suppression (une intention sur une édition et son édition non possédée sont indissociables : supprimer ou convertir l'intention supprime l'édition, avec confirmation), liste publique | À faire |
+| 12 | `feat/api-catalogue-listes` | `feat(api): listes et recherche de la consultation` | Listes paginées et recherche couvrant **chaque entité consultable** (`fonctionnel.md` § Périmètre de la consultation) : séries, albums, éditions (y compris par ISBN), auteurs, éditeurs, collections éditeur, genres, univers ; navigation par initiale (un album sans titre suit la clé et l'entrée **courantes** de sa série, y compris après leur modification), indicateur d'appartenance à la collection, recherche insensible à la casse et aux accents, filtres croisés (recherche avancée) | À faire |
+| 13 | `feat/api-catalogue-fiches` | `feat(api): fiches détaillées de la consultation` | Une fiche pour **chaque entité consultable** : album (genres et univers affichés : union avec la série ; intentions d'achat), série (ordre des albums), édition (visuels ordonnés, appartenance à la collection), auteur (bibliographie), éditeur (collections, éditions), collection éditeur (éditions), genre et univers (albums et séries rattachés ; hiérarchie des univers) ; navigation inter-entités. Les **visuels** et les **intentions d'achat** n'ont pas de fiche distincte, toutes leurs informations étant présentées par la fiche qui les porte : un visuel n'a pour données que son type, son rang et son média (présentés dans la fiche de l'édition, avec accès à l'image originale), une intention que sa cible (présentée dans la fiche de l'album ou de l'édition visée, et dans la liste publique des intentions, qui mène à cette fiche) | À faire |
 
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle.
 
-**Statut : à faire.** Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, dashboard, formulaires admin) plutôt que par entité.
+**Statut : à faire.** Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, formulaires admin) plutôt que par entité.
+
+## Phase 4 — Statistiques, devises et estimation de valeur
+
+Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euro (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel.md` § Calcul des estimations).
+
+**Statut : à faire.** Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
+
+## Phase 5 — Fonctionnalités de second plan
+
+Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel.md` § Fonctionnalités de second plan).
+
+**Statut : à faire.** Découpage à établir à l'ouverture de la phase.
