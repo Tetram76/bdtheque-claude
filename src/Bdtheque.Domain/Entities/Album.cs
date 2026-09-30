@@ -232,14 +232,14 @@ public sealed class Album : EntityBase
     }
 
     /// <summary>
-    /// Confirms the purchase of one of this album's editions (fonctionnel.md § Intention d'achat
-    /// › Réalisation d'une intention): the intent it realizes — the one on this edition, or else
-    /// the one on the whole album — is removed, and the edition becomes owned. Other editions'
-    /// intents are kept. This is the only way to acquire an edition targeted by an intent.
+    /// Records the acquisition of one of this album's editions — the only way for an edition to
+    /// become owned, since only this aggregate sees every intent it may realize (fonctionnel.md §
+    /// Intention d'achat › Réalisation d'une intention): the intent on this edition, or else the
+    /// one on the whole album, is removed; other editions' intents are kept.
     /// </summary>
-    public void ConfirmPurchase(Edition edition, AcquisitionMode mode)
+    public void RecordAcquisition(Edition edition, AcquisitionMode mode)
     {
-        // Every check runs before anything is mutated: a rejected confirmation must leave the
+        // Every check runs before anything is mutated: a rejected acquisition must leave the
         // aggregate untouched, or a later save would delete an intent never actually realized.
         EnsureOwnEdition(edition);
         EnumGuard.EnsureDefined(mode, nameof(mode));
@@ -249,12 +249,9 @@ public sealed class Album : EntityBase
         var realized = _purchaseIntents.Find(p => p.EditionId == edition.Id)
                        ?? _purchaseIntents.Find(p => p.EditionId is null);
         if (realized is not null)
-        {
             _purchaseIntents.Remove(realized);
-            realized.Edition?.SetPurchaseIntent(null);
-        }
 
-        edition.SetAcquisitionMode(mode);
+        edition.Acquire(mode);
     }
 
     // A programming error, not a business one: only this album's own editions are ever offered
@@ -277,7 +274,6 @@ public sealed class Album : EntityBase
     {
         var intent = new PurchaseIntent(this, edition);
         _purchaseIntents.Add(intent);
-        edition?.SetPurchaseIntent(intent);
         return intent;
     }
 }

@@ -67,10 +67,5 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             .HasForeignKey(e => e.PublisherCollectionId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
-
-        // Edition.SetAcquisitionMode refuses to make a targeted edition owned: an edition loaded
-        // without its intent would silently let that invariant be broken. Always loading it with
-        // the edition, however the edition is queried, removes that trap (as for Album.PurchaseIntents).
-        builder.Navigation(e => e.PurchaseIntent).AutoInclude();
     }
 }

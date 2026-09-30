@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20260929200850_InitialCreate")]
+    [Migration("20260930162932_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -719,8 +719,8 @@ namespace Bdtheque.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Bdtheque.Domain.Entities.Edition", "Edition")
-                        .WithOne("PurchaseIntent")
-                        .HasForeignKey("Bdtheque.Domain.Entities.PurchaseIntent", "EditionId")
+                        .WithMany()
+                        .HasForeignKey("EditionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Album");
@@ -792,8 +792,6 @@ namespace Bdtheque.Infrastructure.Migrations
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Edition", b =>
                 {
-                    b.Navigation("PurchaseIntent");
-
                     b.Navigation("Visuals");
                 });
 

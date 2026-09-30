@@ -454,7 +454,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var collection = publisher.AddCollection("Astérix");
         var edition = new Edition(album, publisher);
         edition.SetPublisher(publisher, collection);
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetAcquisitionDate(new DateOnly(2020, 3, 15));
         edition.SetAcquisitionPrice(9.9m, "EUR");
         edition.SetPublicationYear(1978);
@@ -487,7 +487,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Gaston", null);
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
-        edition.SetAcquisitionMode(AcquisitionMode.Inherited);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Inherited);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);
@@ -511,7 +511,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Tintin", null);
         var publisher = new Publisher("Casterman");
         var edition = new Edition(album, publisher);
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetAcquisitionPrice(12.345m, "KWD");
         _fixture.Context.AddRange(album, publisher, edition);
         await _fixture.Context.SaveChangesAsync();
@@ -731,26 +731,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task SetAcquisitionMode_OnTargetedEditionQueriedWithoutInclude_Throws()
-    {
-        // The guard relies on Edition.PurchaseIntent: it must be loaded with the edition however
-        // the edition is queried, or the guard would silently let the invariant be broken.
-        var album = new Album("Yakari", null);
-        var publisher = new Publisher("Le Lombard");
-        var edition = new Edition(album, publisher);
-        album.AddPurchaseIntent(edition);
-        _fixture.Context.AddRange(album, publisher, edition);
-        await _fixture.Context.SaveChangesAsync();
-        _fixture.Context.ChangeTracker.Clear();
-
-        var reloaded = await _fixture.Context.Editions.FirstAsync(e => e.Id == edition.Id);
-
-        Assert.Equal(DomainRules.EditionTargetedByPurchaseIntent,
-            Assert.Throws<DomainRuleViolationException>(() => reloaded.SetAcquisitionMode(AcquisitionMode.Purchase)).Rule);
-    }
-
-    [Fact]
-    public async Task ConfirmPurchase_OnAlbumLoadedFromDatabase_DeletesRealizedIntentOnly()
+    public async Task RecordAcquisition_OnAlbumLoadedFromDatabase_DeletesRealizedIntentOnly()
     {
         var album = new Album("Yakari", null);
         var publisher = new Publisher("Le Lombard");
@@ -764,13 +745,12 @@ public sealed class ModelCreationTests : IAsyncLifetime
 
         var reloadedAlbum = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
         var reloadedEdition = await _fixture.Context.Editions.FirstAsync(e => e.Id == bought.Id);
-        reloadedAlbum.ConfirmPurchase(reloadedEdition, AcquisitionMode.Purchase);
+        reloadedAlbum.RecordAcquisition(reloadedEdition, AcquisitionMode.Purchase);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
         Assert.Equal([remaining.Id], await _fixture.Context.PurchaseIntents.Select(p => p.Id).ToListAsync());
         var saved = await _fixture.Context.Editions.FirstAsync(e => e.Id == bought.Id);
         Assert.Equal(AcquisitionMode.Purchase, saved.AcquisitionMode);
-        Assert.Null(saved.PurchaseIntent);
     }
 }

@@ -18,10 +18,9 @@ internal sealed class PurchaseIntentConfiguration : IEntityTypeConfiguration<Pur
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
-        // One-to-one: an edition is targeted by at most one intent (unique index below).
         builder.HasOne(p => p.Edition)
-            .WithOne(e => e.PurchaseIntent)
-            .HasForeignKey<PurchaseIntent>(p => p.EditionId)
+            .WithMany()
+            .HasForeignKey(p => p.EditionId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
