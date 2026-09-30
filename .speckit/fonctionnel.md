@@ -84,10 +84,11 @@ Le tri alphabétique des **séries**, **albums** et **artistes** repose sur une 
 
 #### Entrées de la navigation par initiale
 
-La navigation par initiale propose les entrées **A** à **Z** et une entrée **#** :
+La navigation par initiale propose les entrées **A** à **Z**, une entrée **#** et une entrée **@** :
 
-- Une initiale accentuée ou en minuscule est rangée sous sa **lettre de base** en majuscule : `É`, `È`, `Ê` → **E** ; `à` → **A** ; `Ç` → **C**. À l'intérieur d'une entrée, l'ordre de tri linguistique habituel s'applique.
-- Une initiale **non alphabétique** (chiffre, ponctuation, symbole) est rangée sous **#** (ex. `13`, `2001 Nights`).
+- Une initiale qui est une lettre latine, accentuée ou en minuscule, est rangée sous sa **lettre de base** en majuscule : `É`, `È`, `Ê` → **E** ; `à` → **A** ; `Ç` → **C** ; `Œ` → **O**. À l'intérieur d'une entrée, l'ordre de tri linguistique habituel s'applique.
+- Une initiale **numérique** (chiffre) est rangée sous **#** (ex. `13`, `2001 Nights`).
+- Toute **autre** initiale (ponctuation, symbole, lettre d'un autre alphabet que le latin) est rangée sous **@** (ex. `...Et après`, `Ωmega`).
 
 #### Titres (séries et albums)
 
@@ -106,6 +107,7 @@ Exemples :
 | `L'Épervier` | `Épervier [L']` | **É** | **E** |
 | `Tintin` | `Tintin` | **T** | **T** |
 | `13` | `13` | **1** | **#** |
+| `...Et après` | `...Et après` | **.** | **@** |
 
 Ce traitement est **non configurable** : il est obligatoire pour que la navigation par initiale soit viable.
 
