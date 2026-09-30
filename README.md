@@ -18,7 +18,7 @@ Application web de gestion de collection de bandes dessinées — réécriture d
 
 | Composant | Technologie |
 | --- | --- |
-| Frontend | Blazor Server (.NET 10) |
+| Frontend | Blazor, rendu côté serveur (.NET 10) |
 | Backend API | ASP.NET Core Minimal API (.NET 10) |
 | ORM | EF Core 10 + Npgsql |
 | Base de données | PostgreSQL 18 |
@@ -29,7 +29,7 @@ Application web de gestion de collection de bandes dessinées — réécriture d
 
 L'application est déployée en **3 conteneurs Docker** :
 
-- `frontend` — Blazor Server (rendu des pages, interface utilisateur)
+- `frontend` — Blazor, rendu côté serveur (pages, interface utilisateur)
 - `api` — Minimal API (logique métier, accès données, modèle ML)
 - `db` — PostgreSQL (persistance)
 
@@ -54,7 +54,7 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 │   ├── Bdtheque.Contracts/        # DTOs échangés entre api et frontend
 │   ├── Bdtheque.Infrastructure/   # DbContext EF Core, configurations, migrations
 │   ├── Bdtheque.Api/              # Conteneur api : endpoints, sécurité, règles applicatives
-│   └── Bdtheque.Frontend/         # Conteneur frontend : composants Blazor Server, auth cookie
+│   └── Bdtheque.Frontend/         # Conteneur frontend : composants Blazor, auth cookie
 ├── tests/
 │   ├── Bdtheque.Domain.Tests/         # Tests unitaires du domaine
 │   ├── Bdtheque.Infrastructure.Tests/ # Tests de persistance (migrations, contraintes) sur PostgreSQL
