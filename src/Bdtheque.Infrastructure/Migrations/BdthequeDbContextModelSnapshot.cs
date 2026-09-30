@@ -712,7 +712,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasOne("Bdtheque.Domain.Entities.Album", "Album")
                         .WithMany("PurchaseIntents")
                         .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Bdtheque.Domain.Entities.Edition", "Edition")

@@ -216,17 +216,51 @@ public sealed class Album : EntityBase
     /// </summary>
     public PurchaseIntent AddPurchaseIntent(Edition edition)
     {
-        ArgumentNullException.ThrowIfNull(edition);
-        // A programming error, not a business one: an intent is only ever offered on this
-        // album's own editions, so no user input can reach this with a foreign edition.
-        if (edition.AlbumId != Id)
-            throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
+        EnsureOwnEdition(edition);
+        // An edition already bought cannot become an intent again: a second copy is recorded as
+        // a new edition of the album, which then carries the intent (fonctionnel.md § Intention
+        // d'achat).
+        if (edition.AcquisitionMode is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentEditionAlreadyOwned, "An edition already owned cannot be targeted by a purchase intent.");
         EnsureNotTargetedAsWhole();
         if (_purchaseIntents.Any(p => p.EditionId == edition.Id))
             throw new DomainRuleViolationException(
                 DomainRules.PurchaseIntentEditionAlreadyTargeted, "This edition is already targeted by a purchase intent.");
 
         return AddIntent(edition);
+    }
+
+    /// <summary>
+    /// Records the acquisition of one of this album's editions — the only way for an edition to
+    /// become owned, since only this aggregate sees every intent it may realize (fonctionnel.md §
+    /// Intention d'achat › Réalisation d'une intention): the intent on this edition, or else the
+    /// one on the whole album, is removed; other editions' intents are kept.
+    /// </summary>
+    public void RecordAcquisition(Edition edition, AcquisitionMode mode)
+    {
+        // Every check runs before anything is mutated: a rejected acquisition must leave the
+        // aggregate untouched, or a later save would delete an intent never actually realized.
+        EnsureOwnEdition(edition);
+        EnumGuard.EnsureDefined(mode, nameof(mode));
+        if (edition.AcquisitionMode is not null)
+            throw new DomainRuleViolationException(DomainRules.EditionAlreadyOwned, "This edition is already owned.");
+
+        var realized = _purchaseIntents.Find(p => p.EditionId == edition.Id)
+                       ?? _purchaseIntents.Find(p => p.EditionId is null);
+        if (realized is not null)
+            _purchaseIntents.Remove(realized);
+
+        edition.Acquire(mode);
+    }
+
+    // A programming error, not a business one: only this album's own editions are ever offered
+    // for its intents and purchases, so no user input can reach this with a foreign edition.
+    private void EnsureOwnEdition(Edition edition)
+    {
+        ArgumentNullException.ThrowIfNull(edition);
+        if (edition.AlbumId != Id)
+            throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
     }
 
     private void EnsureNotTargetedAsWhole()

@@ -412,7 +412,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         column: x => x.AlbumId,
                         principalTable: "Albums",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PurchaseIntents_Editions_EditionId",
                         column: x => x.EditionId,

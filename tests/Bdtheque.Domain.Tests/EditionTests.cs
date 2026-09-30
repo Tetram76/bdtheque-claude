@@ -204,20 +204,32 @@ public sealed class EditionTests
     }
 
     [Fact]
-    public void SetAcquisitionMode_ValidValue_Succeeds()
+    public void SetAcquisitionMode_OnOwnedEdition_ChangesMode()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
 
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.SetAcquisitionMode(AcquisitionMode.Gift);
 
-        Assert.Equal(AcquisitionMode.Purchase, edition.AcquisitionMode);
+        Assert.Equal(AcquisitionMode.Gift, edition.AcquisitionMode);
+    }
+
+    [Fact]
+    public void SetAcquisitionMode_OnEditionNotOwned_Throws()
+    {
+        // Acquiring an edition may realize an intent on it or on its album, which only the
+        // album aggregate sees: it must go through Album.RecordAcquisition.
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+
+        Assert.Throws<InvalidOperationException>(() => edition.SetAcquisitionMode(AcquisitionMode.Purchase));
+        Assert.Null(edition.AcquisitionMode);
     }
 
     [Fact]
     public void SetAcquisitionMode_ToNullWithDateSet_Throws()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Gift);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Gift);
         edition.SetAcquisitionDate(new DateOnly(2020, 1, 1));
 
         DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => edition.SetAcquisitionMode(null));
@@ -227,7 +239,7 @@ public sealed class EditionTests
     public void SetAcquisitionMode_ToNullWithPriceSet_Throws()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetAcquisitionPrice(12.5m, "EUR");
 
         DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => edition.SetAcquisitionMode(null));
@@ -237,7 +249,7 @@ public sealed class EditionTests
     public void SetAcquisitionMode_ToNullAfterClearingDateAndPrice_Succeeds()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetAcquisitionDate(new DateOnly(2020, 1, 1));
         edition.SetAcquisitionPrice(12.5m, "EUR");
 
@@ -260,7 +272,7 @@ public sealed class EditionTests
     public void SetAcquisitionDate_WithAcquisitionMode_Succeeds()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
 
         edition.SetAcquisitionDate(new DateOnly(2020, 1, 1));
 
@@ -279,7 +291,7 @@ public sealed class EditionTests
     public void SetAcquisitionPrice_AmountWithoutCurrency_Throws()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
 
         DomainAssert.Violates(DomainRules.EditionAcquisitionAmountCurrencyTogether, () => edition.SetAcquisitionPrice(10m, null));
     }
@@ -288,7 +300,7 @@ public sealed class EditionTests
     public void SetAcquisitionPrice_CurrencyWithoutAmount_Throws()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
 
         DomainAssert.Violates(DomainRules.EditionAcquisitionAmountCurrencyTogether, () => edition.SetAcquisitionPrice(null, "EUR"));
     }
@@ -299,7 +311,7 @@ public sealed class EditionTests
     public void SetAcquisitionPrice_NonPositiveAmount_Throws(decimal amount)
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
 
         DomainAssert.Violates(DomainRules.EditionAcquisitionAmountPositive, () => edition.SetAcquisitionPrice(amount, "EUR"));
     }
@@ -312,7 +324,7 @@ public sealed class EditionTests
     public void SetAcquisitionPrice_InvalidCurrencyShape_Throws(string currency)
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
 
         DomainAssert.Violates(DomainRules.EditionCurrencyCodeInvalid, () => edition.SetAcquisitionPrice(10m, currency));
     }
@@ -321,7 +333,7 @@ public sealed class EditionTests
     public void SetAcquisitionPrice_ValidAmountAndCurrency_Succeeds()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
 
         edition.SetAcquisitionPrice(12.5m, "USD");
 
@@ -333,7 +345,7 @@ public sealed class EditionTests
     public void SetAcquisitionPrice_ClearBoth_Succeeds()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetAcquisitionPrice(12.5m, "USD");
 
         edition.SetAcquisitionPrice(null, null);
@@ -346,7 +358,7 @@ public sealed class EditionTests
     public void SetAcquisitionPrice_WhileFree_Throws()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Gift);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Gift);
         edition.SetFree(true);
 
         DomainAssert.Violates(DomainRules.EditionFreeExcludesPrice, () => edition.SetAcquisitionPrice(10m, "EUR"));
@@ -356,7 +368,7 @@ public sealed class EditionTests
     public void SetFree_True_ClearsExistingPrice()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Gift);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Gift);
         edition.SetAcquisitionPrice(30m, "EUR");
 
         edition.SetFree(true);
@@ -370,7 +382,7 @@ public sealed class EditionTests
     public void SetFree_False_AllowsSettingPriceAgain()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.SetAcquisitionMode(AcquisitionMode.Gift);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Gift);
         edition.SetFree(true);
 
         edition.SetFree(false);

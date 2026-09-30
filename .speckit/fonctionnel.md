@@ -368,6 +368,10 @@ Une intention d'achat réalisée est **supprimée** :
 - une intention portant sur l'**album** est réalisée, donc supprimée, par l'achat de n'importe laquelle de ses éditions (cf. cas d'usage 1) ;
 - une intention portant sur une **édition** est réalisée, donc supprimée, par l'achat de cette édition. Lorsqu'un album fait l'objet de plusieurs intentions (sur plusieurs de ses éditions), **seules les intentions des éditions achetées** sont supprimées ; les autres sont conservées.
 
+Une édition **déjà possédée** ne peut pas faire l'objet d'une intention d'achat : une édition achetée ne redevient jamais une intention. Pour acquérir un second exemplaire d'une même édition, l'utilisateur ajoute à l'album une **nouvelle édition** aux mêmes caractéristiques (une fonction de duplication d'édition pourra faciliter cette saisie) et place son intention sur cette nouvelle édition.
+
+La saisie d'une intention d'achat présente le **minimum de champs** à renseigner : les caractéristiques propres à l'exemplaire possédé (gratuité, occasion, etc.) n'y figurent pas et ne font l'objet d'aucune règle particulière pour une édition non possédée.
+
 Les autres règles métier sont à définir.
 
 <!-- À compléter : cas d'usage, user stories, autres règles métier, flux applicatifs, etc. -->

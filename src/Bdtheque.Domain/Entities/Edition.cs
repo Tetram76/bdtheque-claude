@@ -155,6 +155,12 @@ public sealed class Edition : EntityBase
     {
         if (mode is not null)
             EnumGuard.EnsureDefined(mode.Value, nameof(mode));
+        // Acquiring an edition (no mode yet -> a mode) may realize an intent on it or on its album,
+        // which only the album aggregate sees: it must go through Album.RecordAcquisition. Changing
+        // the mode of an owned edition, or clearing it, stays here.
+        if (mode is not null && AcquisitionMode is null)
+            throw new InvalidOperationException(
+                "An edition is acquired through Album.RecordAcquisition, which realizes the intents it satisfies.");
         if (mode is null && (AcquisitionDate is not null || AcquisitionAmount is not null))
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionModeRequired,
@@ -236,6 +242,13 @@ public sealed class Edition : EntityBase
     /// </summary>
     public IEnumerable<EditionVisual> GetOrderedVisuals() =>
         _visuals.OrderBy(v => v.Type).ThenBy(v => v.DisplayOrder).ThenBy(v => v.Id);
+
+    // Only reachable through Album.RecordAcquisition (see SetAcquisitionMode).
+    internal void Acquire(AcquisitionMode mode)
+    {
+        EnumGuard.EnsureDefined(mode, nameof(mode));
+        AcquisitionMode = mode;
+    }
 
     public EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder)
     {

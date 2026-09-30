@@ -454,7 +454,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var collection = publisher.AddCollection("Astérix");
         var edition = new Edition(album, publisher);
         edition.SetPublisher(publisher, collection);
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetAcquisitionDate(new DateOnly(2020, 3, 15));
         edition.SetAcquisitionPrice(9.9m, "EUR");
         edition.SetPublicationYear(1978);
@@ -487,7 +487,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Gaston", null);
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
-        edition.SetAcquisitionMode(AcquisitionMode.Inherited);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Inherited);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);
@@ -511,7 +511,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Tintin", null);
         var publisher = new Publisher("Casterman");
         var edition = new Edition(album, publisher);
-        edition.SetAcquisitionMode(AcquisitionMode.Purchase);
+        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetAcquisitionPrice(12.345m, "KWD");
         _fixture.Context.AddRange(album, publisher, edition);
         await _fixture.Context.SaveChangesAsync();
@@ -728,5 +728,29 @@ public sealed class ModelCreationTests : IAsyncLifetime
         Assert.Equal(
             new[] { firstEdition.Id, secondEdition.Id }.Order(),
             saved.PurchaseIntents.Select(p => p.EditionId!.Value).Order());
+    }
+
+    [Fact]
+    public async Task RecordAcquisition_OnAlbumLoadedFromDatabase_DeletesRealizedIntentOnly()
+    {
+        var album = new Album("Yakari", null);
+        var publisher = new Publisher("Le Lombard");
+        var bought = new Edition(album, publisher);
+        var stillWanted = new Edition(album, publisher);
+        album.AddPurchaseIntent(bought);
+        var remaining = album.AddPurchaseIntent(stillWanted);
+        _fixture.Context.AddRange(album, publisher, bought, stillWanted);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloadedAlbum = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
+        var reloadedEdition = await _fixture.Context.Editions.FirstAsync(e => e.Id == bought.Id);
+        reloadedAlbum.RecordAcquisition(reloadedEdition, AcquisitionMode.Purchase);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        Assert.Equal([remaining.Id], await _fixture.Context.PurchaseIntents.Select(p => p.Id).ToListAsync());
+        var saved = await _fixture.Context.Editions.FirstAsync(e => e.Id == bought.Id);
+        Assert.Equal(AcquisitionMode.Purchase, saved.AcquisitionMode);
     }
 }
