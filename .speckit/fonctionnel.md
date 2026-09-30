@@ -248,11 +248,13 @@ Règles de construction :
 
 Toute suppression est soumise à la **confirmation** de l'utilisateur. Son effet dépend de la nature de chaque lien qui unit l'entité supprimée au reste des données :
 
-- **Référence** — une autre fiche désigne l'entité par l'un de ses attributs : la suppression est **refusée** tant que la référence existe (erreur métier indiquant combien de fiches l'utilisent).
-- **Association** — simple lien sans donnée propre : la suppression est **autorisée** ; les associations disparaissent avec l'entité. La confirmation indique combien de fiches sont concernées.
-- **Composition** — élément qui fait partie de l'entité : il est **supprimé avec elle** ; la confirmation annonce ce qui va disparaître.
+- **Référence** — une autre fiche désigne l'entité par l'un de ses attributs : la suppression est **refusée** tant que la référence existe (erreur métier indiquant l'impact, cf. ci-dessous).
+- **Association** — simple lien sans donnée propre : la suppression est **autorisée** ; les associations disparaissent avec l'entité.
+- **Composition** — élément qui fait partie de l'entité : il est **supprimé avec elle**.
 
 La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
+
+**Impact de la suppression** : le message de confirmation — comme l'erreur d'une suppression refusée — indique l'impact de la suppression, c'est-à-dire le **nombre de fiches impactées, distingué par type d'entité** (ex. « utilisé par 12 albums et 3 séries », « supprime 2 éditions et 5 visuels ») : fiches qui perdent leur association avec l'entité supprimée, fiches supprimées avec elle, ou fiches qui bloquent la suppression.
 
 | Entité supprimée | Lien | Type | Effet |
 | --- | --- | --- | --- |
