@@ -20,7 +20,7 @@ Cette application est la **référence fonctionnelle** : le périmètre de la r�
 | Élément | Valeur |
 | --- | --- |
 | Langage | C# / .NET 10 (LTS) |
-| Frontend | Blazor Server (ASP.NET Core) |
+| Frontend | Interface web (technologie : cf. `choix-implementation.md` § Frontend) |
 | Backend API | ASP.NET Core Minimal API |
 | ORM | EF Core 10 + Npgsql |
 | Base de données | PostgreSQL |
@@ -32,7 +32,7 @@ L'application est découpée en **3 conteneurs Docker** :
 
 | Conteneur | Rôle | Image de base |
 | --- | --- | --- |
-| `frontend` | Blazor Server — UI et rendu des pages | `mcr.microsoft.com/dotnet/aspnet:10.0` |
+| `frontend` | UI et rendu des pages | `mcr.microsoft.com/dotnet/aspnet:10.0` |
 | `api` | ASP.NET Core Minimal API — logique métier, accès données, ML | `mcr.microsoft.com/dotnet/aspnet:10.0` |
 | `db` | PostgreSQL — persistance | `postgres` (image officielle ; version et variante : cf. `choix-implementation.md`) |
 
@@ -73,7 +73,6 @@ Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le cont
 
 - L'application doit être **responsive** : utilisable sur PC, tablette et smartphone.
 - Le rendu et la navigation doivent s'adapter à toutes les tailles d'écran (approche *mobile-first*).
-- Implémentation via un framework CSS responsive intégré à Blazor (ex. Bootstrap ou MudBlazor — cf. choix de composants UI).
 
 ## Authentification
 

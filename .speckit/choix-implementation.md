@@ -21,9 +21,18 @@ La solution .NET est découpée en projets par responsabilité, sous `src/` :
 | `Bdtheque.Infrastructure` | Implémentation EF Core / Npgsql : `DbContext`, configurations d'entités, migrations. |
 | `Bdtheque.Contracts` | Contrats d'échange (DTOs) exposés par l'API et consommés par le frontend. Découplés des entités du domaine. |
 | `Bdtheque.Api` | Conteneur `api` : endpoints Minimal API, règles applicatives, service de taux de change, estimation ML.NET. |
-| `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor Server, authentification cookie, appels HTTP vers `Bdtheque.Api`. |
+| `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor (rendu côté serveur), authentification cookie, appels HTTP vers `Bdtheque.Api`. |
 
 Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
+
+## Frontend
+
+- **Blazor** (Blazor Web App, ASP.NET Core / .NET 10), hébergé par le conteneur `frontend`. Le rendu a lieu **côté serveur** : c'est la seule famille compatible avec l'architecture imposée, où `frontend` appelle `api` par le réseau Docker interne et où `api` n'est jamais exposé (`contraintes-techniques.md`) — le navigateur ne dialogue qu'avec `frontend`. Blazor garde le même langage et les mêmes contrats (`Bdtheque.Contracts`) que l'API, sans chaîne d'outillage JavaScript.
+  - **Alternative écartée (Blazor WebAssembly, ou SPA JavaScript type React/Vue)** : le navigateur appellerait l'API lui-même, ce qui imposerait d'exposer `api` ou de faire relayer chaque appel par `frontend` ; pour une SPA JavaScript, s'y ajouteraient un second langage et sa chaîne d'outillage. WebAssembly impose en outre un téléchargement initial lourd, pénalisant sur smartphone.
+  - **Alternative écartée (Razor Pages / MVC)** : également rendu côté serveur et compatible avec l'architecture, mais sans modèle de composants réutilisables ni interactivité ponctuelle sans JavaScript, utiles aux formulaires d'administration.
+- **Mode de rendu : statique côté serveur (static SSR) par défaut**, l'interactivité (`InteractiveServer`) n'étant activée que sur les composants qui en ont besoin (formulaires d'administration, recherche). Motifs : la consultation publique, essentiellement en lecture et consultée sur smartphone (`contraintes-techniques.md` § Compatibilité multi-supports), n'a pas besoin d'une connexion SignalR permanente par visiteur — coûteuse en mémoire sur le NAS et interrompue à chaque changement de réseau mobile ; et la documentation ASP.NET Core réserve au rendu statique les pages qui lisent ou écrivent des cookies, comme la page de connexion de l'administration (cf. § Authentification : mise en œuvre).
+  - **Alternative écartée (interactivité globale)** : une connexion permanente par visiteur pour des pages majoritairement statiques, et une exclusion explicite à gérer pour chaque page à cookie (`[ExcludeFromInteractiveRouting]`).
+- **Styles** : un framework CSS responsive intégré à Blazor (ex. Bootstrap ou MudBlazor), à choisir avec les composants d'interface (Phase 3), au service de l'exigence *mobile-first* et de la charte graphique (`fonctionnel.md` § Design et charte graphique).
 
 ## Application du schéma au démarrage
 
@@ -37,7 +46,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Authentification : mise en œuvre
 
-- Le compte administrateur unique (`contraintes-techniques.md` § Authentification) est implémenté via **ASP.NET Core Cookie Authentication** (sans ASP.NET Core Identity — pas de gestion multi-utilisateurs). Le cookie d'authentification est porté exclusivement par le conteneur `frontend` (Blazor Server), qui agit comme **BFF (Backend For Frontend)** : c'est lui qui affiche le formulaire de connexion, émet le cookie et protège ses propres pages/composants d'administration (`[Authorize]`).
+- Le compte administrateur unique (`contraintes-techniques.md` § Authentification) est implémenté via **ASP.NET Core Cookie Authentication** (sans ASP.NET Core Identity — pas de gestion multi-utilisateurs). Le cookie d'authentification est porté exclusivement par le conteneur `frontend` (Blazor), qui agit comme **BFF (Backend For Frontend)** : c'est lui qui affiche le formulaire de connexion, émet le cookie et protège ses propres pages/composants d'administration (`[Authorize]`).
 - Le conteneur `api` n'est **jamais exposé publiquement** : il n'est joignable que par `frontend` via le réseau Docker interne. En défense en profondeur, `api` exige néanmoins un **secret interne partagé** (clé statique transmise via variable d'environnement, vérifiée par un middleware sur l'en-tête `X-Internal-Api-Key`) sur toutes ses requêtes. Ce secret n'est connu que de `frontend` et `api` ; il ne remplace pas l'authentification de l'utilisateur (qui reste du ressort de `frontend`), il empêche seulement qu'un appel direct à `api` contourne la protection applicative si l'isolation réseau venait à être mal configurée.
 
 ## Documentation de l'API
@@ -88,7 +97,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Concurrence d'accès
 
-- Le contrôle de concurrence optimiste reposera sur la colonne système **`xmin`** de PostgreSQL (jeton de version natif, présent sur chaque table, sans colonne ni migration à ajouter), transmise au client avec l'entité lue et vérifiée à l'enregistrement. Sa mise en place intervient avec le premier point d'entrée de modification de l'API (Phase 2) : aucune évolution du domaine ni du schéma n'est nécessaire d'ici là. Motif : les circuits Blazor Server sont de longue durée, et deux onglets ou appareils (PC, téléphone) ouverts sur la même fiche écraseraient sinon silencieusement la modification de l'autre.
+- Le contrôle de concurrence optimiste reposera sur la colonne système **`xmin`** de PostgreSQL (jeton de version natif, présent sur chaque table, sans colonne ni migration à ajouter), transmise au client avec l'entité lue et vérifiée à l'enregistrement. Sa mise en place intervient avec le premier point d'entrée de modification de l'API (Phase 2) : aucune évolution du domaine ni du schéma n'est nécessaire d'ici là. Motif : un formulaire d'administration peut rester ouvert longtemps avant d'être enregistré, et deux onglets ou appareils (PC, téléphone) ouverts sur la même fiche écraseraient sinon silencieusement la modification de l'autre.
 
 ## Représentation de la devise
 
