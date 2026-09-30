@@ -86,9 +86,9 @@ Le tri alphabétique des **séries**, **albums** et **artistes** repose sur une 
 
 La navigation par initiale propose les entrées **A** à **Z**, une entrée **#** et une entrée **@** :
 
-- Une initiale qui est une lettre latine, accentuée ou en minuscule, est rangée sous sa **lettre de base** en majuscule : `É`, `È`, `Ê` → **E** ; `à` → **A** ; `Ç` → **C** ; `Œ` → **O**. À l'intérieur d'une entrée, l'ordre de tri linguistique habituel s'applique.
+- Une initiale qui est une lettre ayant une **lettre de base** de `A` à `Z` dans l'ordre alphabétique (lettre accentuée, en minuscule, ligature…) est rangée sous cette lettre de base en majuscule : `É`, `È`, `Ê` → **E** ; `à` → **A** ; `Ç` → **C** ; `Œ` → **O**. À l'intérieur d'une entrée, l'ordre de tri linguistique habituel s'applique.
 - Une initiale **numérique** (chiffre) est rangée sous **#** (ex. `13`, `2001 Nights`).
-- Toute **autre** initiale (ponctuation, symbole, lettre d'un autre alphabet que le latin) est rangée sous **@** (ex. `...Et après`, `Ωmega`).
+- Toute **autre** initiale (ponctuation, symbole, lettre sans lettre de base de `A` à `Z`, comme celles d'un autre alphabet que le latin) est rangée sous **@** (ex. `...Et après`, `Ωmega`).
 
 #### Titres (séries et albums)
 
