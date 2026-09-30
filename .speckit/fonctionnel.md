@@ -326,7 +326,7 @@ Les statistiques du dashboard incluent notamment (liste non exhaustive) :
 L'application se compose de trois parties distinctes :
 
 1. **Consultation** — accessible **publiquement** (sans authentification) :
-   - Affichage de la **fiche détaillée** de chaque entité : toutes les informations publiques disponibles sont présentées. Les notes personnelles, la numérotation personnelle, les données d'acquisition (mode, date, prix, occasion, gratuité) et l'appréciation sont des informations **publiques**.
+   - Affichage de la **fiche détaillée** de chaque entité : toutes les informations publiques disponibles sont présentées. Les notes personnelles, la numérotation personnelle, les données d'acquisition (mode, date, prix, occasion, gratuité) et l'appréciation sont des informations **publiques**. Exception : les **visuels d'édition** et les **intentions d'achat** n'ont pas de fiche propre, toutes leurs informations étant présentées par la fiche qui les porte — un visuel dans la fiche de son édition (avec accès à l'image originale), une intention dans la fiche de l'album ou de l'édition visée, ainsi que dans la liste publique des intentions, qui mène à cette fiche.
    - **Navigation inter-entités** : depuis la fiche d'une entité, il est possible de naviguer vers les fiches des entités associées (ex. album → série, album → édition, album → auteur, auteur → bibliographie, etc.).
    - **Recherche facilement accessible** à tout moment depuis n'importe quelle page de la partie consultation.
    - **Recherche simple** : par type d'entité (ex. rechercher des albums, des auteurs, des séries, etc.).
