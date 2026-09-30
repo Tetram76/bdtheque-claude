@@ -10,7 +10,10 @@ internal sealed class GenreConfiguration : IEntityTypeConfiguration<Genre>
     {
         builder.HasKey(g => g.Id);
 
-        builder.Property(g => g.Label).IsRequired().HasMaxLength(200);
+        // A genre label is unique regardless of case and accents (modele-metier.md § Genre): the unique index
+        // below compares through this column's case- and accent-insensitive collation.
+        builder.Property(g => g.Label).IsRequired().HasMaxLength(200)
+            .UseCollation(BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation);
 
         builder.HasIndex(g => g.Label).IsUnique();
 

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20260930162932_InitialCreate")]
+    [Migration("20260930163647_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace Bdtheque.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:CollationDefinition:fr_case_accent_insensitive", "fr-FR-u-ks-level1,fr-FR-u-ks-level1,icu,False")
                 .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -360,7 +361,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
-                        .UseCollation("fr-FR-x-icu");
+                        .UseCollation("fr_case_accent_insensitive");
 
                     b.HasKey("Id");
 

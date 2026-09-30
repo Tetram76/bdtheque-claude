@@ -208,6 +208,8 @@ erDiagram
 | Nom | texte | oui |
 | Site web | URL | non |
 
+> **Contrainte :** le nom d'un éditeur est **unique tel que saisi** : deux éditeurs ne peuvent pas porter exactement le même nom, mais des noms ne différant que par la casse (ex. `Dargaud` et `dargaud`) restent distincts.
+
 ### Collection éditeur
 
 | Attribut | Type | Obligatoire |
@@ -219,6 +221,8 @@ erDiagram
 | Attribut | Type | Obligatoire |
 | --- | --- | --- |
 | Libellé | texte | oui |
+
+> **Contrainte :** le libellé d'un genre est **unique sans tenir compte de la casse ni des accents** : `Aventure`, `aventure` et `AVENTURE` désignent le même genre, de même que `Épopée` et `Epopee`.
 
 ### Univers
 

@@ -20,6 +20,12 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Same French order as FrenchCollation, but ignoring case and accents when comparing
+        // (ks-level1: base letters only), for the columns whose uniqueness ignores them.
+        // Nondeterministic, so equality — hence unique indexes — follows it too.
+        modelBuilder.HasCollation(
+            CaseAndAccentInsensitiveFrenchCollation, locale: "fr-FR-u-ks-level1", provider: "icu", deterministic: false);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BdthequeDbContext).Assembly);
 
         // EntityBase assigns every Id in the domain, while EF Core's convention treats Guid keys
@@ -56,4 +62,10 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
 
     /// <summary>ICU collation for French, predefined by PostgreSQL when built with ICU.</summary>
     public const string FrenchCollation = "fr-FR-x-icu";
+
+    /// <summary>
+    /// Case- and accent-insensitive variant of <see cref="FrenchCollation"/>, created by
+    /// the migrations (see <see cref="OnModelCreating"/>).
+    /// </summary>
+    public const string CaseAndAccentInsensitiveFrenchCollation = "fr_case_accent_insensitive";
 }
