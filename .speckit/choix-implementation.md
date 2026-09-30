@@ -152,6 +152,11 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - **Portée : la racine d'agrégat.** Seule la version de la racine (ex. `Album`) est transmise et vérifiée. Toute écriture sur un agrégat — y compris un ajout de genre, de contribution ou d'intention d'achat, qui ne touche pas la ligne de la racine — **marque la racine comme modifiée**, pour que son `xmin` change à chaque modification de l'agrégat. Sans cela, deux modifications concurrentes portant sur les éléments d'un agrégat ne seraient jamais détectées.
   - **Alternative écartée (ETag / `If-Match`)** : plus conforme à HTTP, mais l'API n'a qu'un client, qui partage les contrats ; un champ du DTO est plus simple à porter par un formulaire.
 
+## Version de l'API Frankfurter
+
+- Le service de taux de change est imposé (`contraintes-techniques.md` § Gestion des taux de change) ; sa version est un choix : **v2** (`https://api.frankfurter.dev/v2/…`), version courante du service.
+  - **Alternative écartée (v1)** : dépréciée au profit de la v2 ; elle reste disponible, mais n'évoluera plus.
+
 ## Représentation de la devise
 
 - **Devise d'un montant** (ex. `Édition.Prix d'acquisition`, cf. `modele-metier.md`) : stockée comme un **code ISO 4217 alpha-3** (`string`, 3 lettres majuscules), validée par le domaine sur sa seule **forme**, pas contre une liste fermée de devises.
