@@ -65,4 +65,10 @@ public static class DomainRules
 
     /// <summary>A universe set as its own ancestor, directly (own parent) or through its descendants.</summary>
     public const string UniverseHierarchyCycle = "Universe.HierarchyCycle";
+
+    /// <summary>
+    /// A deletion refused because other records still reference the deleted one (fonctionnel.md §
+    /// Suppression des entités); the error carries the impact naming them.
+    /// </summary>
+    public const string DeletionBlockedByReferences = "Deletion.BlockedByReferences";
 }

@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text.Json;
+using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Errors;
+using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
@@ -32,6 +34,27 @@ public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFact
             HttpStatusCode.UnprocessableContent, ProblemTypes.Business);
 
         Assert.Equal(DomainRules.GenreLabelRequired, problem.GetProperty(ProblemTypes.RuleCodeExtension).GetString());
+    }
+
+    [Fact]
+    public async Task RefusedDeletion_IsABusinessProblemCarryingItsImpact()
+    {
+        var impact = new DeletionImpact([new ImpactCount(EntityKind.Universe, 2)], [new ImpactCount(EntityKind.Album, 1)], [], "fingerprint");
+
+        var problem = await HandleAsync(new DeletionRefusedException(impact), HttpStatusCode.UnprocessableContent, ProblemTypes.Business);
+
+        Assert.Equal(DomainRules.DeletionBlockedByReferences, problem.GetProperty(ProblemTypes.RuleCodeExtension).GetString());
+        ProblemAssert.SameImpact(impact, ProblemAssert.ImpactOf(problem));
+    }
+
+    [Fact]
+    public async Task DeletionWhoseImpactChanged_IsAFunctionalProblemCarryingTheNewImpact()
+    {
+        var impact = new DeletionImpact([], [new ImpactCount(EntityKind.Series, 3)], [], "fingerprint");
+
+        var problem = await HandleAsync(new DeletionImpactChangedException(impact), HttpStatusCode.Conflict, ProblemTypes.Functional);
+
+        ProblemAssert.SameImpact(impact, ProblemAssert.ImpactOf(problem));
     }
 
     [Fact]
