@@ -6,7 +6,7 @@ namespace Bdtheque.Domain.Entities;
 /// <summary>
 /// An entity that publishes editions (Éditeur).
 /// </summary>
-public sealed class Publisher : EntityBase
+public sealed class Publisher : EntityBase, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
     public string? Website { get; private set; }

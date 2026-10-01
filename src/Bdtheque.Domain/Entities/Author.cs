@@ -7,7 +7,7 @@ namespace Bdtheque.Domain.Entities;
 /// A person or collective credited on albums (Auteur / Artiste).
 /// At least one of <see cref="LastName"/> or <see cref="Pseudonym"/> must be non-empty.
 /// </summary>
-public sealed class Author : EntityBase
+public sealed class Author : EntityBase, IAggregateRoot
 {
     public string? LastName { get; private set; }
     public string? FirstName { get; private set; }

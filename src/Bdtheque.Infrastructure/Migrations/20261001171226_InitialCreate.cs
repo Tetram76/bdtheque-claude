@@ -23,7 +23,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     FirstName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
                     Pseudonym = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
                     Biography = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
-                    Nationality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true, collation: "fr-FR-x-icu")
+                    Nationality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true, collation: "fr-FR-x-icu"),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,7 +37,8 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Label = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr_case_accent_insensitive")
+                    Label = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr_case_accent_insensitive"),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,7 +52,8 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
-                    Website = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true, collation: "fr-FR-x-icu")
+                    Website = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true, collation: "fr-FR-x-icu"),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -65,7 +68,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
                     Description = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
-                    ParentId = table.Column<Guid>(type: "uuid", nullable: true)
+                    ParentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -122,7 +126,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     TemplateCondition = table.Column<int>(type: "integer", nullable: true),
                     TemplateIsColor = table.Column<bool>(type: "boolean", nullable: true),
                     TemplatePublisherId = table.Column<Guid>(type: "uuid", nullable: true),
-                    TemplatePublisherCollectionId = table.Column<Guid>(type: "uuid", nullable: true)
+                    TemplatePublisherCollectionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -163,7 +168,8 @@ namespace Bdtheque.Infrastructure.Migrations
                     FirstPublicationMonth = table.Column<int>(type: "integer", nullable: true),
                     Summary = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
-                    Rating = table.Column<int>(type: "integer", nullable: true)
+                    Rating = table.Column<int>(type: "integer", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {

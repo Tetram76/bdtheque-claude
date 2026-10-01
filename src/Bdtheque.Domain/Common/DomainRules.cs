@@ -48,6 +48,15 @@ public static class DomainRules
     public const string PublisherCollectionNotOfPublisher = "PublisherCollection.NotOfPublisher";
     public const string PublisherCollectionNameRequired = "PublisherCollection.NameRequired";
 
+    // Uniqueness rules: enforced by unique indexes, since the domain cannot see the other rows. The
+    // API translates the violation of each index into its code (see Bdtheque.Api's UniqueIndexRules).
+    public const string GenreLabelAlreadyUsed = "Genre.LabelAlreadyUsed";
+    public const string PublisherNameAlreadyUsed = "Publisher.NameAlreadyUsed";
+    public const string PublisherCollectionNameAlreadyUsed = "PublisherCollection.NameAlreadyUsed";
+
+    /// <summary>The same author credited twice with the same role on an album, or on a series template.</summary>
+    public const string ContributionAlreadyCredited = "Contribution.AlreadyCredited";
+
     public const string SeriesTitleRequired = "Series.TitleRequired";
     public const string SeriesSortKeyRequired = "Series.SortKeyRequired";
     public const string SeriesTheoreticalVolumeCountPositive = "Series.TheoreticalVolumeCountPositive";

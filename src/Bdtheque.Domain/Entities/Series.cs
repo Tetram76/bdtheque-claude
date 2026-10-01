@@ -8,7 +8,7 @@ namespace Bdtheque.Domain.Entities;
 /// A continuity grouping albums together (Série), acting as a source of default
 /// ("template") values for new editions and contributions attached to its albums.
 /// </summary>
-public sealed class Series : EntityBase
+public sealed class Series : EntityBase, IAggregateRoot
 {
     public string Title { get; private set; } = string.Empty;
     public string SortKey { get; private set; } = string.Empty;
