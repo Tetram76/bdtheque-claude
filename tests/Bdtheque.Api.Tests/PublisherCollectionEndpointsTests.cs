@@ -55,6 +55,30 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
     }
 
     [Fact]
+    public async Task Create_WithANameLongerThanTheColumn_IsABusinessError()
+    {
+        var publisher = await CreatePublisherAsync("Éditeur aux collections longues");
+
+        var response = await _client.PostAsJsonAsync(
+            $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest(new string('C', 301), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+    }
+
+    [Fact]
+    public async Task Update_WithANameLongerThanTheColumn_IsABusinessError()
+    {
+        var publisher = await CreatePublisherAsync("Éditeur aux renommages longs");
+        var collection = await CreateAsync(publisher, "Court");
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/publishers/{publisher.Id}/collections/{collection.Id}",
+            new UpdatePublisherCollectionRequest(new string('D', 301), collection.PublisherVersion));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+    }
+
+    [Fact]
     public async Task Create_WithANameAlreadyUsedByThePublisher_IsABusinessError()
     {
         var publisher = await CreatePublisherAsync("Casterman");

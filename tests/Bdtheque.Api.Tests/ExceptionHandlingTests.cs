@@ -88,6 +88,17 @@ public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFact
             HttpStatusCode.NotFound, ProblemTypes.Functional);
 
     [Fact]
+    public async Task TextTooLongForItsColumn_IsABusinessProblem()
+    {
+        // The user can shorten what was typed; the column lengths are the persistence limits of every entity.
+        var problem = await HandleAsync(
+            new DbUpdateException("Save failed", new PostgresException("value too long", "ERROR", "ERROR", PostgresErrorCodes.StringDataRightTruncation)),
+            HttpStatusCode.UnprocessableContent, ProblemTypes.Business);
+
+        Assert.Equal(DomainRules.TextTooLong, problem.GetProperty(ProblemTypes.RuleCodeExtension).GetString());
+    }
+
+    [Fact]
     public async Task OtherConstraintViolation_IsATechnicalProblem() =>
         await HandleAsync(DatabaseError(PostgresErrorCodes.CheckViolation, "CK_Genres_LabelNotBlank"), HttpStatusCode.InternalServerError, ProblemTypes.Technical);
 

@@ -44,6 +44,34 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
+    public async Task Create_WithANameLongerThanTheColumn_IsABusinessError()
+    {
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest(new string('A', 301), null));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+    }
+
+    [Fact]
+    public async Task Create_WithAWebsiteLongerThanTheColumn_IsABusinessError()
+    {
+        var response = await _client.PostAsJsonAsync(
+            "/admin/publishers", new CreatePublisherRequest("Éditeur au site interminable", "https://example.com/" + new string('a', 2040)));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+    }
+
+    [Fact]
+    public async Task Update_WithANameLongerThanTheColumn_IsABusinessError()
+    {
+        var publisher = await CreateAsync("Éditeur à rallonger");
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new string('B', 301), null, publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+    }
+
+    [Fact]
     public async Task Create_WithAnInvalidWebsite_IsABusinessError()
     {
         var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest("Glénat", "pas une url"));

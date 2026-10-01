@@ -68,6 +68,11 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
             when violation.ConstraintName is not null && UniqueIndexRules.ByIndexName.TryGetValue(violation.ConstraintName, out var rule) =>
             (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, rule),
 
+        // A text longer than its column, whichever entity and field: a mistake the user can correct by
+        // shortening it, whereas the limits themselves live in the schema only (no copy in the domain).
+        DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.StringDataRightTruncation } } =>
+            (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, DomainRules.TextTooLong),
+
         // A creation or a modification: the referenced record was deleted in the meantime, as for an
         // unknown identifier. A deletion never raises this code: references are ON DELETE RESTRICT,
         // reported as RestrictViolation, which the deletion translates itself, being the only one
