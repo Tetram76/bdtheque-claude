@@ -1,3 +1,5 @@
+using Bdtheque.Api.Deletion;
+using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Domain.Common;
 using Bdtheque.Infrastructure;
@@ -31,16 +33,31 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         var problem = new ProblemDetails { Status = status, Type = type };
         if (ruleCode is not null)
             problem.Extensions[ProblemTypes.RuleCodeExtension] = ruleCode;
+        // What the message has to announce beyond the category: the records concerned by the deletion.
+        if (ImpactOf(exception) is { } impact)
+            problem.Extensions[ProblemTypes.ImpactExtension] = impact;
 
         httpContext.Response.StatusCode = status;
         // The exception is deliberately not passed on: nothing internal reaches the response.
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext { HttpContext = httpContext, ProblemDetails = problem });
     }
 
+    private static DeletionImpact? ImpactOf(Exception exception) => exception switch
+    {
+        DeletionRefusedException refused => refused.Impact,
+        DeletionImpactChangedException changed => changed.Impact,
+        _ => null,
+    };
+
     private static (int Status, string Type, string? RuleCode) Categorize(Exception exception) => exception switch
     {
         DomainRuleViolationException violation =>
             (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, violation.Rule),
+
+        DeletionRefusedException =>
+            (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, DomainRules.DeletionBlockedByReferences),
+
+        DeletionImpactChangedException => (StatusCodes.Status409Conflict, ProblemTypes.Functional, null),
 
         EntityNotFoundException => (StatusCodes.Status404NotFound, ProblemTypes.Functional, null),
 

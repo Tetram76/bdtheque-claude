@@ -25,4 +25,11 @@ public static class ProblemTypes
     /// from which the frontend's localization produces the user-facing text.
     /// </summary>
     public const string RuleCodeExtension = "ruleCode";
+
+    /// <summary>
+    /// Extension member of the problem of a refused deletion (<see cref="Business"/>) or of one whose
+    /// impact changed since it was confirmed (<see cref="Functional"/>), holding the current impact of
+    /// the deletion (<see cref="Deletion.DeletionImpact"/>).
+    /// </summary>
+    public const string ImpactExtension = "impact";
 }

@@ -1,3 +1,4 @@
+using Bdtheque.Api.Endpoints;
 using Bdtheque.Api.Errors;
 using Bdtheque.Api.Security;
 using Bdtheque.Contracts.Errors;
@@ -57,6 +58,10 @@ if (app.Environment.IsDevelopment())
 // Defense in depth: `api` is only reachable by `frontend` over the internal Docker
 // network, but still requires this shared secret (see choix-implementation.md).
 app.UseMiddleware<InternalApiKeyMiddleware>();
+
+var admin = app.MapAdmin();
+admin.MapGenres();
+admin.MapUniverses();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {

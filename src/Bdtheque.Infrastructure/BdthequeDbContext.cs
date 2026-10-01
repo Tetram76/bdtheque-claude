@@ -59,6 +59,13 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     /// </summary>
     public const string VersionProperty = "Version";
 
+    /// <summary>
+    /// Current version of a tracked aggregate root — after <c>SaveChanges</c>, the one its write
+    /// produced, read back from the database.
+    /// </summary>
+    public uint VersionOf<TRoot>(TRoot root) where TRoot : EntityBase, IAggregateRoot =>
+        Entry(root).Property<uint>(VersionProperty).CurrentValue;
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         // Project-wide convention: persist every enum as its underlying int. Every enum member
