@@ -34,7 +34,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 ## Maintenance du .speckit
 
 - Les fichiers `.speckit/` sont des **documents vivants** : l'agent peut les restructurer à tout moment (fusion, split, déplacement de sections, création de nouvelles sections) si cela améliore leur clarté ou leur cohérence.
-- Toute restructuration est faite sans validation préalable, dans le même esprit d'autonomie qui régit les décisions techniques.
+- Toute restructuration est faite sans validation préalable, dans le même esprit d'autonomie qui régit les décisions techniques. Elle porte sur la **forme** uniquement : elle ne modifie, n'ajoute ni ne retire aucun contenu dont l'utilisateur est seul décisionnaire (cf. `AGENTS.md` § « Qui décide du contenu »).
 - Le speckit n'est pas un historique de décisions, à l'exception de `journal-evenements.md` (cf. `AGENTS.md` § « Mise à jour du .speckit » pour le détail de cette règle et de son exception — non dupliqué ici pour éviter toute divergence entre les deux fichiers).
 
 ## Prise de décision
