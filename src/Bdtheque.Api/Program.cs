@@ -63,6 +63,7 @@ var admin = app.MapAdmin();
 admin.MapGenres();
 admin.MapUniverses();
 admin.MapPublishers();
+admin.MapAuthors();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
