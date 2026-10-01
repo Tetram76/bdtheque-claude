@@ -56,6 +56,8 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Organisation de l'API
 
+- **Style d'API : Minimal API** (ASP.NET Core), approche recommandée par Microsoft pour les nouveaux projets (documentation ASP.NET Core, *APIs overview*) : routes déclarées directement, sans classes de contrôleur, avec moins de code d'infrastructure et un surcoût d'exécution moindre.
+  - **Alternative écartée (contrôleurs MVC, `ControllerBase`)** : ils n'apportent que des extensions dont l'API n'a pas l'usage — liaison de modèle personnalisée (`IModelBinder`), validation déclarative avancée (écartée, cf. § Erreurs métier, fonctionnelles et techniques), *application parts*, OData.
 - **Endpoints** : un groupe d'endpoints (`MapGroup`) par ressource, dont les handlers sont des méthodes statiques utilisant directement le `BdthequeDbContext` : EF Core joue déjà le rôle de dépôt et d'unité de travail. Le mapping entre DTO et domaine est écrit à la main, dans le groupe de la ressource.
   - **Alternative écartée (MediatR, AutoMapper)** : passés sous double licence RPL 1.5 / commerciale en 2025, incompatible avec `contraintes-techniques.md` § Licences ; ils n'apporteraient de toute façon qu'une indirection de plus pour une API à un seul client.
   - **Alternative écartée (couche repository au-dessus d'EF Core)** : une abstraction de plus sans second fournisseur de persistance à masquer.
