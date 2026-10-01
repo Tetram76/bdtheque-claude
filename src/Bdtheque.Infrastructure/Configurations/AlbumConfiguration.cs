@@ -19,10 +19,21 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
 
         builder.Property(a => a.Title).HasMaxLength(TitleMaxLength);
         builder.Property(a => a.SortKey).HasMaxLength(SortKeyMaxLength);
+        builder.Property(a => a.NavigationEntry).HasMaxLength(NavigationEntryColumn.MaxLength);
         builder.Property(a => a.Summary);
         builder.Property(a => a.PersonalNotes);
 
+        // Full list ordered by sort key; navigation filters on the entry, then orders by sort key.
         builder.HasIndex(a => a.SortKey);
+        builder.HasIndex(a => new { a.NavigationEntry, a.SortKey });
+        builder.ToTable(t => t.HasCheckConstraint("CK_Albums_NavigationEntryValid", NavigationEntryColumn.ValidValuesSql));
+
+        // Mirrors Album.ApplySortKey: the entry is derived from the album's own sort key, so both
+        // are present or absent together (an album with no title takes its series' values at read
+        // time, never stored copies).
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Albums_NavigationEntryPresenceMatchesSortKey",
+            $"(\"{nameof(Album.SortKey)}\" IS NULL) = (\"{nameof(Album.NavigationEntry)}\" IS NULL)"));
 
         // Mirrors the domain guard in Album.EnsureTitleOrSeries: a title is required unless
         // the album is attached to a series.

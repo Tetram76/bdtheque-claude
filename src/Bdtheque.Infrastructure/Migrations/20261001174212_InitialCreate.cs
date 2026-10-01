@@ -24,12 +24,16 @@ namespace Bdtheque.Infrastructure.Migrations
                     Pseudonym = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
                     Biography = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     Nationality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true, collation: "fr-FR-x-icu"),
+                    SortKey = table.Column<string>(type: "character varying(401)", maxLength: 401, nullable: false, collation: "fr-FR-x-icu"),
+                    NavigationEntry = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, collation: "fr-FR-x-icu"),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Authors", x => x.Id);
                     table.CheckConstraint("CK_Authors_LastNameOrPseudonym", "COALESCE(LENGTH(TRIM(\"LastName\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"Pseudonym\")), 0) > 0");
+                    table.CheckConstraint("CK_Authors_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
+                    table.CheckConstraint("CK_Authors_SortKeyNotBlank", "COALESCE(LENGTH(TRIM(\"SortKey\")), 0) > 0");
                 });
 
             migrationBuilder.CreateTable(
@@ -112,6 +116,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false, collation: "fr-FR-x-icu"),
                     SortKey = table.Column<string>(type: "character varying(510)", maxLength: 510, nullable: false, collation: "fr-FR-x-icu"),
                     IsManualSortKey = table.Column<bool>(type: "boolean", nullable: false),
+                    NavigationEntry = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, collation: "fr-FR-x-icu"),
                     Status = table.Column<int>(type: "integer", nullable: true),
                     TheoreticalVolumeCount = table.Column<int>(type: "integer", nullable: true),
                     IsComplete = table.Column<bool>(type: "boolean", nullable: false),
@@ -132,6 +137,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Series", x => x.Id);
+                    table.CheckConstraint("CK_Series_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
                     table.CheckConstraint("CK_Series_SortKeyNotBlank", "COALESCE(LENGTH(TRIM(\"SortKey\")), 0) > 0");
                     table.CheckConstraint("CK_Series_TemplateCollectionRequiresPublisher", "\"TemplatePublisherCollectionId\" IS NULL OR \"TemplatePublisherId\" IS NOT NULL");
                     table.CheckConstraint("CK_Series_TheoreticalVolumeCountPositive", "\"TheoreticalVolumeCount\" IS NULL OR \"TheoreticalVolumeCount\" > 0");
@@ -158,6 +164,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true, collation: "fr-FR-x-icu"),
                     SortKey = table.Column<string>(type: "character varying(510)", maxLength: 510, nullable: true, collation: "fr-FR-x-icu"),
                     IsManualSortKey = table.Column<bool>(type: "boolean", nullable: false),
+                    NavigationEntry = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: true, collation: "fr-FR-x-icu"),
                     SeriesId = table.Column<Guid>(type: "uuid", nullable: true),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     IsSpecialIssue = table.Column<bool>(type: "boolean", nullable: false),
@@ -175,6 +182,8 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Albums", x => x.Id);
                     table.CheckConstraint("CK_Albums_ManualSortKeyRequiresTitle", "\"IsManualSortKey\" = false OR \"Title\" IS NOT NULL");
+                    table.CheckConstraint("CK_Albums_NavigationEntryPresenceMatchesSortKey", "(\"SortKey\" IS NULL) = (\"NavigationEntry\" IS NULL)");
+                    table.CheckConstraint("CK_Albums_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
                     table.CheckConstraint("CK_Albums_PublicationMonthRange", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationMonth\" BETWEEN 1 AND 12");
                     table.CheckConstraint("CK_Albums_PublicationMonthRequiresYear", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationYear\" IS NOT NULL");
                     table.CheckConstraint("CK_Albums_PublicationYearPositive", "\"FirstPublicationYear\" IS NULL OR \"FirstPublicationYear\" > 0");
@@ -436,6 +445,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 column: "GenresId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Albums_NavigationEntry_SortKey",
+                table: "Albums",
+                columns: new[] { "NavigationEntry", "SortKey" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Albums_SeriesId",
                 table: "Albums",
                 column: "SeriesId");
@@ -449,6 +463,16 @@ namespace Bdtheque.Infrastructure.Migrations
                 name: "IX_AlbumUniverses_UniversesId",
                 table: "AlbumUniverses",
                 column: "UniversesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Authors_NavigationEntry_SortKey",
+                table: "Authors",
+                columns: new[] { "NavigationEntry", "SortKey" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Authors_SortKey",
+                table: "Authors",
+                column: "SortKey");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contributions_AlbumId_Role_AuthorId",
@@ -524,6 +548,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 table: "PurchaseIntents",
                 column: "EditionId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Series_NavigationEntry_SortKey",
+                table: "Series",
+                columns: new[] { "NavigationEntry", "SortKey" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Series_SortKey",

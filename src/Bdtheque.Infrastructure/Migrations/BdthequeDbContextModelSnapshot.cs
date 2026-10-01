@@ -73,6 +73,11 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<bool>("IsSpecialIssue")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("NavigationEntry")
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .UseCollation("fr-FR-x-icu");
+
                     b.Property<string>("PersonalNotes")
                         .HasColumnType("text")
                         .UseCollation("fr-FR-x-icu");
@@ -118,9 +123,15 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasIndex("SortKey");
 
+                    b.HasIndex("NavigationEntry", "SortKey");
+
                     b.ToTable("Albums", t =>
                         {
                             t.HasCheckConstraint("CK_Albums_ManualSortKeyRequiresTitle", "\"IsManualSortKey\" = false OR \"Title\" IS NOT NULL");
+
+                            t.HasCheckConstraint("CK_Albums_NavigationEntryPresenceMatchesSortKey", "(\"SortKey\" IS NULL) = (\"NavigationEntry\" IS NULL)");
+
+                            t.HasCheckConstraint("CK_Albums_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
 
                             t.HasCheckConstraint("CK_Albums_PublicationMonthRange", "\"FirstPublicationMonth\" IS NULL OR \"FirstPublicationMonth\" BETWEEN 1 AND 12");
 
@@ -172,9 +183,21 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .UseCollation("fr-FR-x-icu");
 
+                    b.Property<string>("NavigationEntry")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .UseCollation("fr-FR-x-icu");
+
                     b.Property<string>("Pseudonym")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<string>("SortKey")
+                        .IsRequired()
+                        .HasMaxLength(401)
+                        .HasColumnType("character varying(401)")
                         .UseCollation("fr-FR-x-icu");
 
                     b.Property<uint>("Version")
@@ -185,9 +208,17 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SortKey");
+
+                    b.HasIndex("NavigationEntry", "SortKey");
+
                     b.ToTable("Authors", t =>
                         {
                             t.HasCheckConstraint("CK_Authors_LastNameOrPseudonym", "COALESCE(LENGTH(TRIM(\"LastName\")), 0) > 0 OR COALESCE(LENGTH(TRIM(\"Pseudonym\")), 0) > 0");
+
+                            t.HasCheckConstraint("CK_Authors_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
+
+                            t.HasCheckConstraint("CK_Authors_SortKeyNotBlank", "COALESCE(LENGTH(TRIM(\"SortKey\")), 0) > 0");
                         });
                 });
 
@@ -486,6 +517,12 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<bool>("IsManualSortKey")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("NavigationEntry")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .UseCollation("fr-FR-x-icu");
+
                     b.Property<string>("PersonalNotes")
                         .HasColumnType("text")
                         .UseCollation("fr-FR-x-icu");
@@ -553,8 +590,12 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasIndex("TemplatePublisherId");
 
+                    b.HasIndex("NavigationEntry", "SortKey");
+
                     b.ToTable("Series", t =>
                         {
+                            t.HasCheckConstraint("CK_Series_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
+
                             t.HasCheckConstraint("CK_Series_SortKeyNotBlank", "COALESCE(LENGTH(TRIM(\"SortKey\")), 0) > 0");
 
                             t.HasCheckConstraint("CK_Series_TemplateCollectionRequiresPublisher", "\"TemplatePublisherCollectionId\" IS NULL OR \"TemplatePublisherId\" IS NOT NULL");

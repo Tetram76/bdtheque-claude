@@ -21,10 +21,14 @@ internal sealed class SeriesConfiguration : IEntityTypeConfiguration<Series>
 
         builder.Property(s => s.Title).IsRequired().HasMaxLength(TitleMaxLength);
         builder.Property(s => s.SortKey).IsRequired().HasMaxLength(SortKeyMaxLength);
+        builder.Property(s => s.NavigationEntry).IsRequired().HasMaxLength(NavigationEntryColumn.MaxLength);
         builder.Property(s => s.Summary);
         builder.Property(s => s.PersonalNotes);
 
+        // Full list ordered by sort key; navigation filters on the entry, then orders by sort key.
         builder.HasIndex(s => s.SortKey);
+        builder.HasIndex(s => new { s.NavigationEntry, s.SortKey });
+        builder.ToTable(t => t.HasCheckConstraint("CK_Series_NavigationEntryValid", NavigationEntryColumn.ValidValuesSql));
 
         // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
         // IsRequired() only enforces NOT NULL, so a raw-SQL write could still persist ''.

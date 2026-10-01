@@ -384,4 +384,74 @@ public sealed class AlbumTests
         album.RemoveUniverse(universe);
         Assert.DoesNotContain(universe, album.Universes);
     }
+
+    [Fact]
+    public void Constructor_WithTitle_ComputesNavigationEntryFromSortKey()
+    {
+        var album = new Album("Le Lotus bleu", null);
+
+        Assert.Equal("L", album.NavigationEntry);
+    }
+
+    [Fact]
+    public void Constructor_WithoutTitle_LeavesNavigationEntryNull()
+    {
+        // The entry follows the album's own sort key: the series' entry is substituted at read
+        // time, never copied onto the album (choix-implementation.md § Navigation par initiale).
+        var album = new Album(null, new Series("Tintin"));
+
+        Assert.Null(album.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetTitle_WhenNotManual_RecomputesNavigationEntry()
+    {
+        var album = new Album("Tintin", null);
+
+        album.SetTitle("2001 Nights");
+
+        Assert.Equal("#", album.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetTitle_Cleared_ClearsNavigationEntry()
+    {
+        var album = new Album("Le Lotus bleu", new Series("Tintin"));
+
+        album.SetTitle(null);
+
+        Assert.Null(album.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetSortKey_RecomputesNavigationEntry()
+    {
+        var album = new Album("Tintin", null);
+
+        album.SetSortKey("Ωmega");
+
+        Assert.Equal("@", album.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetTitle_AfterManualSortKey_KeepsNavigationEntryOfManualSortKey()
+    {
+        var album = new Album("Tintin", null);
+        album.SetSortKey("Astérix");
+
+        album.SetTitle("Les Schtroumpfs");
+
+        Assert.Equal("A", album.NavigationEntry);
+    }
+
+    [Fact]
+    public void ResetSortKey_RecomputesNavigationEntry()
+    {
+        var album = new Album("Les Schtroumpfs", null);
+        album.SetSortKey("Astérix");
+
+        album.ResetSortKey();
+
+        Assert.Equal("S", album.NavigationEntry);
+    }
 }
