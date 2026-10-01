@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 
 namespace Bdtheque.Domain.Common;
 
@@ -36,9 +37,12 @@ public static class NavigationEntryCalculator
         // outside the Basic Multilingual Plane is a single initial.
         var initial = StringInfo.GetNextTextElement(sortKey);
 
-        if (char.IsDigit(initial[0]))
+        // Classified on its first code point, never on a UTF-16 code unit, which would only be
+        // the high surrogate of a character outside the Basic Multilingual Plane (e.g. "𝟙").
+        var codePoint = Rune.GetRuneAt(initial, 0);
+        if (Rune.IsDigit(codePoint))
             return DigitEntry;
-        if (!char.IsLetter(initial, 0))
+        if (!Rune.IsLetter(codePoint))
             return OtherEntry;
 
         for (var letter = 'Z'; letter >= 'A'; letter--)

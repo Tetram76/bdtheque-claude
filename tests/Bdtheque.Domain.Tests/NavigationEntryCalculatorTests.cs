@@ -60,6 +60,8 @@ public sealed class NavigationEntryCalculatorTests
     [InlineData("0")]
     [InlineData("2001 Nights")]
     [InlineData("9")]
+    [InlineData("٣ أيام")]
+    [InlineData("𝟙 histoire")]
     public void Compute_DigitInitial_ReturnsHash(string sortKey)
     {
         Assert.Equal("#", NavigationEntryCalculator.Compute(sortKey));
