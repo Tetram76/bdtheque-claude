@@ -20,6 +20,5 @@ Avant tout ajout ou modification, vérifier dans quel fichier l'information appa
 - Ordre de tri des albums dans une liste → `fonctionnel.md` (règle d'affichage)
 - Mécanique de calcul d'une clé de tri (insensibilité à la casse, gestion des frontières de mot, etc.) → code + tests, pas `fonctionnel.md` (implémentation d'une règle déjà énoncée)
 - Attribut `hors_serie` sur Album → `modele-metier.md` (attribut d'entité)
-- Algorithme Random Forest pour l'estimation de valeur → `contraintes-techniques.md` **et** `fonctionnel.md` (contrainte imposée par l'utilisateur comme règle métier, pas un choix laissé à l'agent — cf. `fonctionnel.md` § Périmètre)
-- Persistance des enums en entier explicite plutôt qu'en chaîne → `choix-implementation.md` (alternative — la chaîne — explicitement envisagée puis écartée, avec argumentation détaillée)
+- Algorithme Random Forest pour l'estimation de valeur → `fonctionnel.md` uniquement (choix métier imposé par l'utilisateur, pas une contrainte technique) ; la bibliothèque qui l'implémente (ML.NET) et les versions de la stack → `choix-implementation.md` - Persistance des enums en entier explicite plutôt qu'en chaîne → `choix-implementation.md` (alternative — la chaîne — explicitement envisagée puis écartée, avec argumentation détaillée)
 - Convention de nommage des branches → `gestion-projet.md`

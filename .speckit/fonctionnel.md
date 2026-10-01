@@ -1,7 +1,7 @@
 # Fonctionnel
 
 Ce fichier décrit les fonctionnalités de l'application, ainsi que les éléments de design et la charte graphique.
-Il ne doit contenir **aucun détail d'implémentation laissé à la discrétion de l'agent** (stack, architecture, mécanique de calcul, structure de données, bibliothèque, etc.) : ceux-ci relèvent de `contraintes-techniques.md` ou `choix-implementation.md`. En revanche, un élément d'apparence technique mais **explicitement imposé par l'utilisateur comme règle métier** (ex. l'algorithme d'estimation retenu) reste documenté ici, en plus de sa contrepartie dans `contraintes-techniques.md`. Les règles sont formulées au niveau métier — le comportement attendu et les cas visibles de l'utilisateur.
+Il ne doit contenir **aucun détail d'implémentation laissé à la discrétion de l'agent** (stack, architecture, mécanique de calcul, structure de données, bibliothèque, etc.) : ceux-ci relèvent de `contraintes-techniques.md` ou `choix-implementation.md`. En revanche, un élément d'apparence technique mais **explicitement imposé par l'utilisateur comme règle métier** (ex. l'algorithme d'estimation retenu) reste documenté ici. Les règles sont formulées au niveau métier — le comportement attendu et les cas visibles de l'utilisateur.
 
 ---
 
@@ -296,7 +296,7 @@ Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner 
 - **Taux de change** :
   - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante.
   - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux appliqué dépend du contexte :
-    - **Estimation de la valeur de la collection** : taux de change **actuel**, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)**.
+    - **Estimation de la valeur de la collection** : taux de change **actuel**, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)** (open source, gratuite, sans clé API).
     - **Autres cas** : règle à définir au cas par cas.
 
 ## Design et charte graphique

@@ -13,6 +13,12 @@ Le dossier `.speckit/` est la **source de vérité absolue et contraignante** du
 | `choix-implementation.md` | Choix d'implémentation retenus par l'agent **de sa propre initiative** (architecture, bibliothèque, algorithme non imposé, etc.), qu'il y ait eu ou non délibération explicite entre options. Non imposés : remis en cause possible si une meilleure option apparaît. |
 | `journal-evenements.md` | Journal des évènements externes au repo pouvant influencer son développement (ex. : déploiement d'une version en test/production, incident, changement d'infrastructure externe). Fichier journal à part — voir « Journal des évènements externes » ci-dessous, il déroge aux règles de mise à jour et de format des autres fichiers. |
 
+## Qui décide du contenu
+
+- **`contraintes-techniques.md` et `fonctionnel.md`** : l'utilisateur est le **seul décisionnaire** de leur contenu. L'agent n'y modifie, n'y ajoute et n'en retire rien de sa propre initiative : tout changement exige l'accord explicite préalable de l'utilisateur.
+- **`modele-metier.md`** : l'utilisateur en est le **décisionnaire principal**, puisqu'il choisit les données à utiliser et les règles qui les régissent (entités, attributs, relations, contraintes d'intégrité) : l'agent n'y modifie rien de cet ordre sans son accord explicite. L'agent peut en revanche le **compléter avec des informations plus techniques** (ex. type de stockage d'un attribut, précisions de représentation) sans accord préalable, à condition de ne modifier ni les données ni les règles choisies par l'utilisateur.
+- **`choix-implementation.md`** : l'agent peut **à tout moment remettre en cause** ce qui y est noté (changer, remplacer ou retirer un choix) sans accord préalable, dès lors que cela respecte `contraintes-techniques.md` et `fonctionnel.md`, qui prévalent. Il documente alors le nouveau choix (cf. `gestion-projet.md` § « Prise de décision » pour l'information de l'utilisateur lorsque l'impact est visible sur le livrable).
+
 ## Règles de consultation
 
 - **Lire l'intégralité des fichiers `.speckit/` est la toute première action de chaque conversation** — avant toute autre lecture de fichier, recherche dans le code, réponse à l'utilisateur (y compris une simple question ou une clarification) ou action de quelque nature que ce soit. Cette lecture n'est ni différable ni conditionnée à la nature apparente de la demande : elle a lieu même si la demande semble triviale, hors-sujet par rapport au `.speckit`, ou déjà couverte par le contexte de conversation.

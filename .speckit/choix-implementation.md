@@ -100,12 +100,25 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Visuels : stockage et traitement
 
-- Un visuel est **téléversé** vers `api` (formulaire multipart), qui l'écrit sur le volume des visuels (`contraintes-techniques.md` § Stockage des visuels). Le fichier est validé en le **décodant** comme image, jamais sur la seule foi du type annoncé par le client. Un fichier refusé — illisible comme image, ou plus lourd que la taille maximale acceptée, contrôlée par `api` elle-même — est une saisie que l'administrateur peut corriger : c'est une erreur **métier**, avec son code de règle (cf. § Erreurs métier, fonctionnelles et techniques), jamais une erreur technique.
+- Le volume des visuels (`contraintes-techniques.md` § Stockage des visuels) est accessible en **écriture** depuis `api` (téléversement) et en **lecture** depuis `frontend` (affichage).
+- Un visuel est **téléversé** vers `api` (formulaire multipart), qui l'écrit sur ce volume. Le fichier est validé en le **décodant** comme image, jamais sur la seule foi du type annoncé par le client. Un fichier refusé — illisible comme image, ou plus lourd que la taille maximale acceptée, contrôlée par `api` elle-même — est une saisie que l'administrateur peut corriger : c'est une erreur **métier**, avec son code de règle (cf. § Erreurs métier, fonctionnelles et techniques), jamais une erreur technique.
 - **Cohérence entre fichiers et base** : fichiers et lignes en base ne peuvent pas être écrits de façon atomique. Toute validation et toute conversion ont lieu **en mémoire, avant** toute écriture ; les fichiers sont écrits juste avant l'enregistrement en base, et supprimés aussitôt si cet enregistrement échoue (compensation immédiate). Les cas que cette compensation ne peut pas couvrir (arrêt brutal du processus, échec de suppression d'un fichier) sont rattrapés par une **réconciliation** unique, tâche de fond d'`api` exécutée au démarrage puis **périodiquement** (une fois par jour : un orphelin ne coûte que de la place disque) — un orphelin encore trop récent lors d'un passage est ainsi repris au suivant : tout fichier du volume qui ne correspond à aucun visuel en base et date de plus d'une heure (délai qui écarte un téléversement en cours) est supprimé. Aucun chemin d'échec, à la création comme à la suppression, ne laisse donc de fichier orphelin durablement.
 - `api` conserve l'**original** et produit une **version d'affichage** réduite au format WebP, servie par défaut : les scans originaux sont trop lourds pour une navigation sur smartphone (`contraintes-techniques.md` § Compatibilité multi-supports). Les noms de fichiers sont dérivés de l'identifiant du visuel et ne sont jamais réutilisés : `frontend` peut les servir avec un cache HTTP de longue durée.
 - Bibliothèque de traitement d'image : **SkiaSharp** (licence MIT, projet de la .NET Foundation), avec ses bibliothèques natives Linux sans dépendance système (`SkiaSharp.NativeAssets.Linux.NoDependencies`).
   - **Alternative écartée (ImageSharp)** : licence *Six Labors Split*, et clé de licence exigée à la compilation depuis la version 4.
   - **Alternative écartée (servir uniquement l'original)** : plusieurs mégaoctets par couverture dans une grille d'albums sur réseau mobile.
+
+## Images de base des conteneurs
+
+- La seule contrainte est l'usage de conteneurs (`contraintes-techniques.md` § Architecture des tiers) ; les images sont un choix.
+- **`frontend` et `api`** : `mcr.microsoft.com/dotnet/aspnet:10.0`, image runtime officielle de Microsoft correspondant à la version de .NET retenue.
+- **`db`** : image officielle `postgres`, version et variante : cf. § Version de PostgreSQL.
+
+## Versions et bibliothèques
+
+- **Aucune version n'est imposée** : `contraintes-techniques.md` n'impose jamais un numéro de version. Les versions retenues sont des choix : **.NET 10** (LTS) et **EF Core 10**, alignés.
+- **Le pilote PostgreSQL n'est pas imposé** (seule la base l'est) : le fournisseur EF Core retenu est **Npgsql** (`Npgsql.EntityFrameworkCore.PostgreSQL` 10).
+- **Estimation de la valeur des éditions** : le modèle **Random Forest** est imposé comme règle métier (`fonctionnel.md` § Estimation de la valeur des éditions). Sa bibliothèque d'implémentation, **ML.NET**, embarquée dans le conteneur `api`, est un choix : même langage et même runtime que le reste de l'application, sans service externe.
 
 ## Version de PostgreSQL
 
@@ -173,8 +186,9 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Version de l'API Frankfurter
 
-- Le service de taux de change est imposé (`contraintes-techniques.md` § Gestion des taux de change) ; sa version est un choix : **v2** (`https://api.frankfurter.dev/v2/…`), version courante du service.
+- Le service de taux de change (Frankfurter) est imposé (`fonctionnel.md` § Gestion des devises) ; sa version est un choix : **v2** (`https://api.frankfurter.dev/v2/…`), version courante du service.
   - **Alternative écartée (v1)** : dépréciée au profit de la v2 ; elle reste disponible, mais n'évoluera plus.
+- Les taux **variables** sont mis en cache côté `api` pour éviter les appels répétés au service ; les taux **fixes** (ex. Franc français) sont des constantes en code.
 
 ## Représentation de la devise
 
