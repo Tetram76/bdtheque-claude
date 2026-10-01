@@ -1,4 +1,6 @@
+using Bdtheque.Api.Errors;
 using Bdtheque.Api.Security;
+using Bdtheque.Contracts.Errors;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,18 @@ builder.Services.AddHealthChecks()
 
 builder.Services.AddOpenApi();
 
+// Every error response is a ProblemDetails whose type is one of the three error categories, and
+// no other (choix-implementation.md § Erreurs métier, fonctionnelles et techniques).
+// ApiExceptionHandler categorizes the exceptions; whatever the framework or a middleware emits
+// without one (unbindable request, unknown route, missing internal key…) gets the technical
+// category here, no user input being able to produce it.
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+{
+    if (context.ProblemDetails.Type is not (ProblemTypes.Business or ProblemTypes.Functional or ProblemTypes.Technical))
+        context.ProblemDetails.Type = ProblemTypes.Technical;
+});
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+
 builder.Services.AddOptions<InternalApiKeyOptions>()
     .Bind(builder.Configuration.GetSection(InternalApiKeyOptions.SectionName))
     .ValidateDataAnnotations()
@@ -28,6 +42,11 @@ using (var migrationScope = app.Services.CreateScope())
 {
     migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.Migrate();
 }
+
+app.UseExceptionHandler();
+// Gives a ProblemDetails body to the error responses emitted without one; a response that already
+// has a body (ApiExceptionHandler's, or /health's own report) is left untouched.
+app.UseStatusCodePages();
 
 if (app.Environment.IsDevelopment())
 {

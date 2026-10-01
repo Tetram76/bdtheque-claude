@@ -8,7 +8,7 @@ namespace Bdtheque.Domain.Entities;
 /// A work of comics tracked in the catalogue (Album), either standalone or attached to a
 /// <see cref="Entities.Series"/>.
 /// </summary>
-public sealed class Album : EntityBase
+public sealed class Album : EntityBase, IAggregateRoot
 {
     public string? Title { get; private set; }
     public string? SortKey { get; private set; }

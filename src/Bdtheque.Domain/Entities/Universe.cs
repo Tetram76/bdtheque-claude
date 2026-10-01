@@ -7,7 +7,7 @@ namespace Bdtheque.Domain.Entities;
 /// A fictional setting to which albums and series can belong, optionally nested (Univers).
 /// The parent–child hierarchy is acyclic: an universe cannot be its own ancestor.
 /// </summary>
-public sealed class Universe : EntityBase
+public sealed class Universe : EntityBase, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; private set; }

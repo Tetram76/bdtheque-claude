@@ -6,7 +6,7 @@ namespace Bdtheque.Domain.Entities;
 /// <summary>
 /// A content category that can be applied to albums and series (Genre).
 /// </summary>
-public sealed class Genre : EntityBase
+public sealed class Genre : EntityBase, IAggregateRoot
 {
     public string Label { get; private set; } = string.Empty;
 

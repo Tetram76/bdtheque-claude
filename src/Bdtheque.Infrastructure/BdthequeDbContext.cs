@@ -39,7 +39,25 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
                 .Property(nameof(EntityBase.Id))
                 .ValueGeneratedNever();
         }
+
+        // Optimistic concurrency on whole aggregates (choix-implementation.md § Concurrence
+        // d'accès): the root's xmin, a native PostgreSQL row version needing no column of its own,
+        // stands for the aggregate. A shadow property keeps this persistence concern out of the
+        // domain.
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+                     .Where(t => typeof(IAggregateRoot).IsAssignableFrom(t.ClrType)))
+        {
+            modelBuilder.Entity(entityType.ClrType)
+                .Property<uint>(VersionProperty)
+                .IsRowVersion();
+        }
     }
+
+    /// <summary>
+    /// Shadow property holding the version of an aggregate, on its root only (mapped to
+    /// <c>xmin</c>). Read it with <c>EF.Property&lt;uint&gt;(root, VersionProperty)</c>.
+    /// </summary>
+    public const string VersionProperty = "Version";
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

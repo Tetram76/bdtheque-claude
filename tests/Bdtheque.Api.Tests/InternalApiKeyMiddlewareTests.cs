@@ -1,5 +1,4 @@
 using System.Net;
-using Bdtheque.Api.Security;
 
 namespace Bdtheque.Api.Tests;
 
@@ -22,8 +21,7 @@ public sealed class InternalApiKeyMiddlewareTests : IClassFixture<ApiWebApplicat
     [Fact]
     public async Task Request_WithCorrectInternalKey_IsNotRejectedByMiddleware()
     {
-        var client = _factory.CreateClient();
-        client.DefaultRequestHeaders.Add(InternalApiKeyOptions.HeaderName, ApiWebApplicationFactory.InternalApiKey);
+        var client = _factory.CreateApiClient();
 
         var response = await client.GetAsync("/anything");
 

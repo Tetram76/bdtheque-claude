@@ -1,3 +1,4 @@
+using Bdtheque.Api.Security;
 using Bdtheque.Testing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -18,6 +19,14 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
 
     public async Task InitializeAsync() =>
         _connectionString = await PostgreSqlTestServer.CreateEmptyDatabaseAsync();
+
+    /// <summary>A client calling the API as <c>frontend</c> does, with the internal shared key.</summary>
+    public HttpClient CreateApiClient()
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add(InternalApiKeyOptions.HeaderName, InternalApiKey);
+        return client;
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
