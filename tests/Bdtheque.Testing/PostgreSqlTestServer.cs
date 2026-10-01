@@ -38,6 +38,18 @@ public static class PostgreSqlTestServer
     /// </summary>
     public static Task<string> CreateEmptyDatabaseAsync() => CreateDatabaseAsync("template0");
 
+    /// <summary>
+    /// Closes the pooled connections of a test database once its owner is done with it. Each
+    /// test database has its own connection string, hence its own pool, never reused afterwards:
+    /// left open, their idle connections pile up across tests until PostgreSQL refuses new
+    /// clients (<c>max_connections</c>).
+    /// </summary>
+    public static void ReleaseConnections(string connectionString)
+    {
+        using var connection = new NpgsqlConnection(connectionString);
+        NpgsqlConnection.ClearPool(connection);
+    }
+
     private static async Task<string> CreateDatabaseAsync(string template)
     {
         var container = await Container.Value;

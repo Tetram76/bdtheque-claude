@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Bdtheque.Testing;
+using Npgsql;
 
 namespace Bdtheque.Infrastructure.Tests;
 
@@ -16,6 +17,30 @@ public sealed partial class PostgreSqlTestServerTests
 
         Assert.True(composeImage.Success, "No 'image:' line found for the db service in docker-compose.yml.");
         Assert.Equal(PostgreSqlTestServer.Image, composeImage.Groups["image"].Value);
+    }
+
+    [Fact]
+    public async Task ReleaseConnections_ClosesThePooledConnectionsOfTheDatabase()
+    {
+        var connectionString = await PostgreSqlTestServer.CreateMigratedDatabaseAsync();
+        await using (var pooled = new NpgsqlConnection(connectionString))
+            await pooled.OpenAsync();
+        Assert.Equal(1, await CountOtherSessionsAsync(connectionString));
+
+        PostgreSqlTestServer.ReleaseConnections(connectionString);
+
+        Assert.Equal(0, await CountOtherSessionsAsync(connectionString));
+    }
+
+    // Counted from an unpooled session, which is excluded from the count.
+    private static async Task<long> CountOtherSessionsAsync(string connectionString)
+    {
+        var unpooled = new NpgsqlConnectionStringBuilder(connectionString) { Pooling = false }.ConnectionString;
+        await using var connection = new NpgsqlConnection(unpooled);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand(
+            "SELECT count(*) FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid()", connection);
+        return (long)(await command.ExecuteScalarAsync())!;
     }
 
     private static string FindRepositoryRoot()
