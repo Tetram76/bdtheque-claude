@@ -21,7 +21,7 @@ Cette application est la **référence fonctionnelle** : le périmètre de la r�
 | --- | --- |
 | Langage | C# / .NET 10 (LTS) |
 | Frontend | Interface web (technologie : cf. `choix-implementation.md` § Frontend) |
-| Backend API | ASP.NET Core Minimal API |
+| Backend API | ASP.NET Core (style d'API : cf. `choix-implementation.md` § Organisation de l'API) |
 | ORM | EF Core 10 + Npgsql |
 | Base de données | PostgreSQL |
 | ML / estimation de valeur | ML.NET (embarqué dans le conteneur `api`) |
@@ -33,7 +33,7 @@ L'application est découpée en **3 conteneurs Docker** :
 | Conteneur | Rôle | Image de base |
 | --- | --- | --- |
 | `frontend` | UI et rendu des pages | `mcr.microsoft.com/dotnet/aspnet:10.0` |
-| `api` | ASP.NET Core Minimal API — logique métier, accès données, ML | `mcr.microsoft.com/dotnet/aspnet:10.0` |
+| `api` | API ASP.NET Core — logique métier, accès données, ML | `mcr.microsoft.com/dotnet/aspnet:10.0` |
 | `db` | PostgreSQL — persistance | `postgres` (image officielle ; version et variante : cf. `choix-implementation.md`) |
 
 Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le conteneur `api` est le seul à accéder à `db`.
