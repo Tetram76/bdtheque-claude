@@ -46,7 +46,10 @@ internal static class UniverseEndpoints
         var universe = new Universe(request.Name);
         universe.SetDescription(request.Description);
         if (request.ParentId is { } parentId)
+        {
+            await UniverseHierarchy.LockAsync(context, cancellationToken);
             universe.SetParent(await LoadWithAncestorsAsync(context, parentId, cancellationToken));
+        }
 
         context.Universes.Add(universe);
         await context.SaveChangesAsync(cancellationToken);
@@ -58,6 +61,11 @@ internal static class UniverseEndpoints
         Guid id, UpdateUniverseRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        // Before the row lock: two crossed moves (A under C, C under A) would otherwise each hold the
+        // row whose foreign key check the other needs, while waiting for the hierarchy — a deadlock.
+        // Whether the parent actually changes is only known once loaded, hence any parent assignment.
+        if (request.ParentId is not null)
+            await UniverseHierarchy.LockAsync(context, cancellationToken);
         var universe = await context.LoadAggregateForWriteAsync<Universe>(id, request.Version, cancellationToken: cancellationToken);
         universe.SetName(request.Name);
         universe.SetDescription(request.Description);
@@ -76,12 +84,11 @@ internal static class UniverseEndpoints
     /// <summary>
     /// Loads a universe with its whole ancestor chain, which <see cref="Universe.SetParent"/> needs to
     /// rule out a cycle: the universes form a small referential, loaded whole rather than walked
-    /// recursively (choix-implementation.md § Organisation de l'API). Read under the hierarchy lock,
-    /// so that the check sees every change of parent committed before it.
+    /// recursively (choix-implementation.md § Organisation de l'API). The caller holds the hierarchy
+    /// lock, so that the check sees every change of parent committed before it.
     /// </summary>
     private static async Task<Universe> LoadWithAncestorsAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
     {
-        await UniverseHierarchy.LockAsync(context, cancellationToken);
         var universes = await context.Universes.ToListAsync(cancellationToken);
         return universes.SingleOrDefault(u => u.Id == id) ?? throw new EntityNotFoundException(typeof(Universe), id);
     }

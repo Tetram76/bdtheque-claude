@@ -12,6 +12,11 @@ namespace Bdtheque.Infrastructure;
 /// together persist a cycle (e.g. A under C while C goes under B, B being under A). Every change of
 /// parent therefore takes this single lock before reading the hierarchy it checks, so that it sees
 /// every change committed before it.
+/// <para>
+/// It is the first lock of the write, before any row lock: otherwise two crossed moves (A under C,
+/// C under A) would each hold the row whose foreign key check the other needs, while waiting for
+/// this lock — a deadlock.
+/// </para>
 /// </remarks>
 public static class UniverseHierarchy
 {

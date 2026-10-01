@@ -115,6 +115,34 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
+    public async Task Update_CrossedWithTheReverseMove_RefusesTheCycleWithoutDeadlock()
+    {
+        // A under C and C under A, requested together: both must queue on the hierarchy before
+        // locking their own row, or each would hold the row the other's foreign key check needs.
+        var a = await CreateAsync("A");
+        var c = await CreateAsync("C");
+        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var otherChange = new NpgsqlConnection(
+            scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.GetConnectionString());
+        await otherChange.OpenAsync();
+        await using var transaction = await otherChange.BeginTransactionAsync();
+        await ExecuteAsync(otherChange, $"SELECT pg_advisory_xact_lock({UniverseHierarchy.LockKey})");
+
+        var moves = new[]
+        {
+            _client.PutAsJsonAsync($"/admin/universes/{a.Id}", new UpdateUniverseRequest("A", null, c.Id, a.Version)),
+            _client.PutAsJsonAsync($"/admin/universes/{c.Id}", new UpdateUniverseRequest("C", null, a.Id, c.Version)),
+        };
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        await transaction.CommitAsync();
+        var responses = await Task.WhenAll(moves);
+
+        Assert.Equal([HttpStatusCode.OK, HttpStatusCode.UnprocessableContent], responses.Select(r => r.StatusCode).Order());
+        await ProblemAssert.IsBusinessProblemAsync(
+            responses.Single(r => r.StatusCode != HttpStatusCode.OK), DomainRules.UniverseHierarchyCycle);
+    }
+
+    [Fact]
     public async Task Update_UnderAnUnknownParent_IsAFunctionalError()
     {
         var universe = await CreateAsync("Thorgal");
