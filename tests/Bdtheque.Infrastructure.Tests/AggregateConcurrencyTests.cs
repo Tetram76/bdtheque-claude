@@ -109,6 +109,20 @@ public sealed class AggregateConcurrencyTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task LoadForWrite_AfterEntitiesWereAlreadyTracked_IsAProgrammingError()
+    {
+        // A tracking query never refreshes an instance already tracked: an aggregate read before its
+        // lock could carry values (and a version) older than the locked row, and its rewrite would
+        // silently overwrite a concurrent modification.
+        var (albumId, version) = await SeedAlbumAsync();
+        await _fixture.Context.Albums.SingleAsync(a => a.Id == albumId);
+
+        await using var transaction = await _fixture.Context.Database.BeginTransactionAsync();
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _fixture.Context.LoadAggregateForWriteAsync<Album>(albumId, version));
+    }
+
+    [Fact]
     public async Task LoadForWrite_OutsideATransaction_IsAProgrammingError()
     {
         // Without a transaction the row lock would be released as soon as the SELECT returns.
