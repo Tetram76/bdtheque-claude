@@ -13,6 +13,7 @@ public sealed class Series : EntityBase, IAggregateRoot
     public string Title { get; private set; } = string.Empty;
     public string SortKey { get; private set; } = string.Empty;
     public bool IsManualSortKey { get; private set; }
+    public string NavigationEntry { get; private set; } = string.Empty;
 
     public SeriesStatus? Status { get; private set; }
     public int? TheoreticalVolumeCount { get; private set; }
@@ -52,12 +53,12 @@ public sealed class Series : EntityBase, IAggregateRoot
     {
         Title = DomainText.Required(title, DomainRules.SeriesTitleRequired, "A series must have a title.");
         if (!IsManualSortKey)
-            SortKey = TitleSortKeyCalculator.Compute(Title);
+            ApplySortKey(TitleSortKeyCalculator.Compute(Title));
     }
 
     public void SetSortKey(string sortKey)
     {
-        SortKey = DomainText.Required(sortKey, DomainRules.SeriesSortKeyRequired, "A manual sort key must not be blank.");
+        ApplySortKey(DomainText.Required(sortKey, DomainRules.SeriesSortKeyRequired, "A manual sort key must not be blank."));
         IsManualSortKey = true;
     }
 
@@ -65,7 +66,14 @@ public sealed class Series : EntityBase, IAggregateRoot
     public void ResetSortKey()
     {
         IsManualSortKey = false;
-        SortKey = TitleSortKeyCalculator.Compute(Title);
+        ApplySortKey(TitleSortKeyCalculator.Compute(Title));
+    }
+
+    // Single write path of the sort key: the stored navigation entry can never lag behind it.
+    private void ApplySortKey(string sortKey)
+    {
+        SortKey = sortKey;
+        NavigationEntry = NavigationEntryCalculator.Compute(sortKey);
     }
 
     public void SetStatus(SeriesStatus? status)

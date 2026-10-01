@@ -42,5 +42,9 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
             }));
     }
 
-    Task IAsyncLifetime.DisposeAsync() => base.DisposeAsync().AsTask();
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await base.DisposeAsync();
+        PostgreSqlTestServer.ReleaseConnections(_connectionString);
+    }
 }

@@ -88,6 +88,37 @@ public sealed class ModelCreationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task AddAuthor_PersistsSortKeyAndNavigationEntry()
+    {
+        var author = new Author("Van Hamme", "Jean", null);
+        _fixture.Context.Authors.Add(author);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var saved = await _fixture.Context.Authors.SingleAsync(a => a.Id == author.Id);
+        Assert.Equal("Van Hamme Jean", saved.SortKey);
+        Assert.Equal("V", saved.NavigationEntry);
+    }
+
+    [Fact]
+    public void AuthorSortKeyMaxLength_AccommodatesLastAndFirstName()
+    {
+        // The longest sort key an author can get is "Last First", both at their maximum length:
+        // SaveChanges must never fail for names that legitimately fit their own columns.
+        var entityType = _fixture.Context.Model.FindEntityType(typeof(Author))!;
+        var lastNameMaxLength = entityType.FindProperty(nameof(Author.LastName))!.GetMaxLength()!.Value;
+        var firstNameMaxLength = entityType.FindProperty(nameof(Author.FirstName))!.GetMaxLength()!.Value;
+        var pseudonymMaxLength = entityType.FindProperty(nameof(Author.Pseudonym))!.GetMaxLength()!.Value;
+        var sortKeyMaxLength = entityType.FindProperty(nameof(Author.SortKey))!.GetMaxLength()!.Value;
+
+        var worstCase = new Author(new string('a', lastNameMaxLength), new string('b', firstNameMaxLength), null);
+
+        Assert.True(worstCase.SortKey.Length <= sortKeyMaxLength,
+            $"Sort key length {worstCase.SortKey.Length} exceeds the configured column max length {sortKeyMaxLength}.");
+        Assert.True(pseudonymMaxLength <= sortKeyMaxLength);
+    }
+
+    [Fact]
     public async Task AddAuthor_WithPseudonymOnly_Persists()
     {
         var author = new Author(null, null, "Hergé");
@@ -192,6 +223,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         Assert.NotNull(saved);
         Assert.Equal("Le Lotus bleu", saved.Title);
         Assert.Equal("Lotus bleu [Le]", saved.SortKey);
+        Assert.Equal("L", saved.NavigationEntry);
     }
 
     [Fact]
@@ -299,6 +331,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
 
         Assert.Null(saved.Title);
         Assert.Null(saved.SortKey);
+        Assert.Null(saved.NavigationEntry);
         Assert.Equal("Tintin", saved.Series!.Title);
         Assert.Equal(1, saved.VolumeNumber);
     }
@@ -326,6 +359,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
 
         Assert.Equal("Le Lotus bleu", saved.Title);
         Assert.Equal("Lotus bleu [Le]", saved.SortKey);
+        Assert.Equal("L", saved.NavigationEntry);
         Assert.Equal(AlbumType.Omnibus, saved.Type);
         Assert.Equal(1, saved.StartVolumeNumber);
         Assert.Equal(6, saved.EndVolumeNumber);

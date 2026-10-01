@@ -10,17 +10,23 @@ namespace Bdtheque.Infrastructure.Tests;
 /// </summary>
 public sealed class BdthequeDbContextFixture : IAsyncLifetime
 {
+    private string _connectionString = null!;
+
     public BdthequeDbContext Context { get; private set; } = null!;
 
     public async Task InitializeAsync()
     {
-        var connectionString = await PostgreSqlTestServer.CreateMigratedDatabaseAsync();
+        _connectionString = await PostgreSqlTestServer.CreateMigratedDatabaseAsync();
         var options = new DbContextOptionsBuilder<BdthequeDbContext>()
-            .UseNpgsql(connectionString)
+            .UseNpgsql(_connectionString)
             .Options;
 
         Context = new BdthequeDbContext(options);
     }
 
-    public async Task DisposeAsync() => await Context.DisposeAsync();
+    public async Task DisposeAsync()
+    {
+        await Context.DisposeAsync();
+        PostgreSqlTestServer.ReleaseConnections(_connectionString);
+    }
 }

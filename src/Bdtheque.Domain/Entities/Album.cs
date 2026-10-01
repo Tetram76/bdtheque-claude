@@ -14,6 +14,11 @@ public sealed class Album : EntityBase, IAggregateRoot
     public string? SortKey { get; private set; }
     public bool IsManualSortKey { get; private set; }
 
+    // Follows the album's own sort key only: for an album with no title, the series' entry is
+    // substituted at read time, never copied here, where it would go stale whenever the series
+    // changes (choix-implementation.md § Navigation par initiale : mise en œuvre).
+    public string? NavigationEntry { get; private set; }
+
     public Guid? SeriesId { get; private set; }
     public Series? Series { get; private set; }
 
@@ -76,12 +81,12 @@ public sealed class Album : EntityBase, IAggregateRoot
         {
             // Absent title implies an absent sort key (modele-metier.md § Album): the caller
             // falls back to the attached series' own sort key for sorting/navigation instead.
-            SortKey = null;
+            ApplySortKey(null);
             IsManualSortKey = false;
         }
         else if (!IsManualSortKey)
         {
-            SortKey = TitleSortKeyCalculator.Compute(Title);
+            ApplySortKey(TitleSortKeyCalculator.Compute(Title));
         }
     }
 
@@ -97,7 +102,7 @@ public sealed class Album : EntityBase, IAggregateRoot
         if (Title is null)
             throw new DomainRuleViolationException(
                 DomainRules.AlbumManualSortKeyRequiresTitle, "Cannot set a manual sort key on an album with no title.");
-        SortKey = DomainText.Required(sortKey, DomainRules.AlbumSortKeyRequired, "A manual sort key must not be blank.");
+        ApplySortKey(DomainText.Required(sortKey, DomainRules.AlbumSortKeyRequired, "A manual sort key must not be blank."));
         IsManualSortKey = true;
     }
 
@@ -105,7 +110,14 @@ public sealed class Album : EntityBase, IAggregateRoot
     public void ResetSortKey()
     {
         IsManualSortKey = false;
-        SortKey = Title is null ? null : TitleSortKeyCalculator.Compute(Title);
+        ApplySortKey(Title is null ? null : TitleSortKeyCalculator.Compute(Title));
+    }
+
+    // Single write path of the sort key: the stored navigation entry can never lag behind it.
+    private void ApplySortKey(string? sortKey)
+    {
+        SortKey = sortKey;
+        NavigationEntry = sortKey is null ? null : NavigationEntryCalculator.Compute(sortKey);
     }
 
     public void SetType(AlbumType type)

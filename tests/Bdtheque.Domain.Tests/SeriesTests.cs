@@ -285,4 +285,54 @@ public sealed class SeriesTests
         series.RemoveUniverse(universe);
         Assert.DoesNotContain(universe, series.Universes);
     }
+
+    [Fact]
+    public void Constructor_ComputesNavigationEntryFromSortKey()
+    {
+        var series = new Series("L'Épervier");
+
+        Assert.Equal("E", series.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetTitle_WhenNotManual_RecomputesNavigationEntry()
+    {
+        var series = new Series("Tintin");
+
+        series.SetTitle("13");
+
+        Assert.Equal("#", series.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetSortKey_RecomputesNavigationEntry()
+    {
+        var series = new Series("Tintin");
+
+        series.SetSortKey("...Et après");
+
+        Assert.Equal("@", series.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetTitle_AfterManualSortKey_KeepsNavigationEntryOfManualSortKey()
+    {
+        var series = new Series("Tintin");
+        series.SetSortKey("Astérix");
+
+        series.SetTitle("Les Schtroumpfs");
+
+        Assert.Equal("A", series.NavigationEntry);
+    }
+
+    [Fact]
+    public void ResetSortKey_RecomputesNavigationEntry()
+    {
+        var series = new Series("Les Schtroumpfs");
+        series.SetSortKey("Astérix");
+
+        series.ResetSortKey();
+
+        Assert.Equal("S", series.NavigationEntry);
+    }
 }
