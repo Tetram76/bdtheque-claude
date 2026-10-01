@@ -13,4 +13,6 @@ public enum EntityKind
     Album,
     Series,
     Universe,
+    Edition,
+    PublisherCollection,
 }

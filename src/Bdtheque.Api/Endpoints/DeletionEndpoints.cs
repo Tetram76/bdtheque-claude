@@ -23,4 +23,26 @@ internal static class DeletionEndpoints
             return TypedResults.NoContent();
         });
     }
+
+    /// <summary>
+    /// Maps the deletion of a child of the group's aggregate (e.g. <c>/publishers/{rootId}/collections/{id}</c>),
+    /// on the same two routes as <see cref="MapDeletion{TRoot}"/>; the group declares the root
+    /// identifier as <c>{rootId}</c>. The version is the root's, which guards every write on the
+    /// aggregate (choix-implementation.md § Concurrence d'accès).
+    /// </summary>
+    public static void MapChildDeletion<TRoot, TChild>(
+        this RouteGroupBuilder group, Func<IQueryable<TRoot>, IQueryable<TRoot>> shape,
+        Func<TRoot, IEnumerable<TChild>> children, IReadOnlyList<DeletionLink> links)
+        where TRoot : EntityBase, IAggregateRoot
+        where TChild : EntityBase
+    {
+        group.MapGet("/{id:guid}/deletion-impact", (Guid rootId, Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
+            AggregateDeletion.GetChildImpactAsync(context, rootId, id, shape, children, links, cancellationToken));
+
+        group.MapDelete("/{id:guid}", async (Guid rootId, Guid id, uint version, string fingerprint, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        {
+            await AggregateDeletion.DeleteChildAsync(context, rootId, id, version, fingerprint, shape, children, links, cancellationToken);
+            return TypedResults.NoContent();
+        });
+    }
 }

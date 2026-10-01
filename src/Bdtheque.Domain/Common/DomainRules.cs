@@ -67,6 +67,12 @@ public static class DomainRules
     public const string UniverseHierarchyCycle = "Universe.HierarchyCycle";
 
     /// <summary>
+    /// A text longer than its column (the persistence limit of every text field of the model): the
+    /// database enforces it and the API translates the violation, like a uniqueness rule.
+    /// </summary>
+    public const string TextTooLong = "Text.TooLong";
+
+    /// <summary>
     /// A deletion refused because other records still reference the deleted one (fonctionnel.md §
     /// Suppression des entités); the error carries the impact naming them.
     /// </summary>
