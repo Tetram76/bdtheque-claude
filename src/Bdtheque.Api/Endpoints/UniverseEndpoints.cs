@@ -42,6 +42,7 @@ internal static class UniverseEndpoints
     private static async Task<Created<UniverseForm>> CreateAsync(
         CreateUniverseRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
     {
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var universe = new Universe(request.Name);
         universe.SetDescription(request.Description);
         if (request.ParentId is { } parentId)
@@ -49,6 +50,7 @@ internal static class UniverseEndpoints
 
         context.Universes.Add(universe);
         await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return TypedResults.Created($"/admin/universes/{universe.Id}", ToForm(context, universe));
     }
 
@@ -74,10 +76,12 @@ internal static class UniverseEndpoints
     /// <summary>
     /// Loads a universe with its whole ancestor chain, which <see cref="Universe.SetParent"/> needs to
     /// rule out a cycle: the universes form a small referential, loaded whole rather than walked
-    /// recursively (choix-implementation.md § Organisation de l'API).
+    /// recursively (choix-implementation.md § Organisation de l'API). Read under the hierarchy lock,
+    /// so that the check sees every change of parent committed before it.
     /// </summary>
     private static async Task<Universe> LoadWithAncestorsAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
     {
+        await UniverseHierarchy.LockAsync(context, cancellationToken);
         var universes = await context.Universes.ToListAsync(cancellationToken);
         return universes.SingleOrDefault(u => u.Id == id) ?? throw new EntityNotFoundException(typeof(Universe), id);
     }

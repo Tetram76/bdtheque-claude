@@ -8,6 +8,7 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Bdtheque.Api.Tests;
 
@@ -90,6 +91,30 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
+    public async Task Update_ConcurrentWithAnotherHierarchyChange_ChecksTheCycleAgainstIt()
+    {
+        // B under A, C at the top. Moving A under C while C is concurrently moved under B would, if
+        // each change were checked without seeing the other, persist the cycle A → C → B → A.
+        var a = await CreateAsync("A");
+        var b = await CreateAsync("B", a.Id);
+        var c = await CreateAsync("C");
+        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var otherChange = new NpgsqlConnection(
+            scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.GetConnectionString());
+        await otherChange.OpenAsync();
+        await using var transaction = await otherChange.BeginTransactionAsync();
+        await ExecuteAsync(otherChange, $"SELECT pg_advisory_xact_lock({UniverseHierarchy.LockKey})");
+
+        var move = _client.PutAsJsonAsync($"/admin/universes/{a.Id}", new UpdateUniverseRequest("A", null, c.Id, a.Version));
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        Assert.False(move.IsCompleted, "A hierarchy change must wait for the one in progress.");
+        await ExecuteAsync(otherChange, $"UPDATE \"Universes\" SET \"ParentId\" = '{b.Id}' WHERE \"Id\" = '{c.Id}'");
+        await transaction.CommitAsync();
+
+        await ProblemAssert.IsBusinessProblemAsync(await move, DomainRules.UniverseHierarchyCycle);
+    }
+
+    [Fact]
     public async Task Update_UnderAnUnknownParent_IsAFunctionalError()
     {
         var universe = await CreateAsync("Thorgal");
@@ -161,6 +186,12 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
 
     private static string DeleteUri(UniverseForm universe, string fingerprint) =>
         $"/admin/universes/{universe.Id}?version={universe.Version}&fingerprint={Uri.EscapeDataString(fingerprint)}";
+
+    private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
+    {
+        await using var command = new NpgsqlCommand(sql, connection);
+        await command.ExecuteNonQueryAsync();
+    }
 
     private async Task<UniverseForm> CreateAsync(string name, Guid? parentId = null)
     {
