@@ -62,6 +62,7 @@ app.UseMiddleware<InternalApiKeyMiddleware>();
 var admin = app.MapAdmin();
 admin.MapGenres();
 admin.MapUniverses();
+admin.MapPublishers();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {

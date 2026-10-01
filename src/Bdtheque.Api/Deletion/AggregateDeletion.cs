@@ -28,6 +28,25 @@ internal static class AggregateDeletion
     }
 
     /// <summary>
+    /// Impact of deleting a child of an existing aggregate (e.g. a collection of a publisher), the
+    /// aggregate being identified by its root.
+    /// </summary>
+    /// <exception cref="EntityNotFoundException">The root does not exist, or has no such child.</exception>
+    public static async Task<DeletionImpact> GetChildImpactAsync<TRoot, TChild>(
+        BdthequeDbContext context, Guid rootId, Guid childId, Func<IQueryable<TRoot>, IQueryable<TRoot>> shape,
+        Func<TRoot, IEnumerable<TChild>> children, IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken)
+        where TRoot : EntityBase, IAggregateRoot
+        where TChild : EntityBase
+    {
+        var root = await shape(context.Set<TRoot>().AsNoTracking()).SingleOrDefaultAsync(r => r.Id == rootId, cancellationToken)
+                   ?? throw new EntityNotFoundException(typeof(TRoot), rootId);
+        if (!children(root).Any(c => c.Id == childId))
+            throw new EntityNotFoundException(typeof(TChild), childId);
+
+        return await ComputeImpactAsync(context, childId, links, cancellationToken);
+    }
+
+    /// <summary>
     /// Counts the records each link selects, by nature of link and entity type, and fingerprints
     /// their identities: counts alone would stay equal if one association disappeared while another
     /// appeared.
@@ -72,21 +91,47 @@ internal static class AggregateDeletion
     /// <exception cref="DbUpdateConcurrencyException">The aggregate was modified since <paramref name="version"/>.</exception>
     /// <exception cref="DeletionRefusedException">Records reference the aggregate.</exception>
     /// <exception cref="DeletionImpactChangedException">The impact is no longer the one confirmed.</exception>
-    public static async Task DeleteAsync<TRoot>(
+    public static Task DeleteAsync<TRoot>(
         BdthequeDbContext context, Guid id, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
         CancellationToken cancellationToken)
+        where TRoot : EntityBase, IAggregateRoot =>
+        DeleteCoreAsync<TRoot, TRoot>(context, id, version, fingerprint, links, shape: null, root => root, cancellationToken);
+
+    /// <summary>
+    /// Deletes a child of an aggregate (e.g. a collection of a publisher) under the same guarantees
+    /// as <see cref="DeleteAsync{TRoot}"/>: the root is locked first and its version checked — the
+    /// version guarding every write on the aggregate — then the child is deleted, and the root
+    /// marked modified.
+    /// </summary>
+    /// <exception cref="EntityNotFoundException">The root does not exist, or has no such child.</exception>
+    public static Task DeleteChildAsync<TRoot, TChild>(
+        BdthequeDbContext context, Guid rootId, Guid childId, uint version, string fingerprint,
+        Func<IQueryable<TRoot>, IQueryable<TRoot>> shape, Func<TRoot, IEnumerable<TChild>> children,
+        IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
+        where TChild : EntityBase =>
+        DeleteCoreAsync<TRoot, TChild>(
+            context, rootId, version, fingerprint, links, shape,
+            root => children(root).SingleOrDefault(c => c.Id == childId) ?? throw new EntityNotFoundException(typeof(TChild), childId),
+            cancellationToken);
+
+    private static async Task DeleteCoreAsync<TRoot, TTarget>(
+        BdthequeDbContext context, Guid rootId, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
+        Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape, Func<TRoot, TTarget> target, CancellationToken cancellationToken)
+        where TRoot : EntityBase, IAggregateRoot
+        where TTarget : EntityBase
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var root = await context.LoadAggregateForWriteAsync<TRoot>(id, version, cancellationToken: cancellationToken);
+        var root = await context.LoadAggregateForWriteAsync(rootId, version, shape, cancellationToken);
+        var deleted = target(root);
 
-        var impact = await ComputeImpactAsync(context, id, links, cancellationToken);
+        var impact = await ComputeImpactAsync(context, deleted.Id, links, cancellationToken);
         if (impact.BlockedBy.Count > 0)
             throw new DeletionRefusedException(impact);
         if (!string.Equals(impact.Fingerprint, fingerprint, StringComparison.Ordinal))
             throw new DeletionImpactChangedException(impact);
 
-        context.Remove(root);
+        context.Remove(deleted);
         try
         {
             await context.SaveChangesAsync(cancellationToken);
@@ -98,7 +143,7 @@ internal static class AggregateDeletion
             // aborted the transaction, hence the impact recomputed outside of it.
             await transaction.RollbackAsync(cancellationToken);
             context.ChangeTracker.Clear();
-            throw new DeletionRefusedException(await ComputeImpactAsync(context, id, links, cancellationToken));
+            throw new DeletionRefusedException(await ComputeImpactAsync(context, deleted.Id, links, cancellationToken));
         }
 
         await transaction.CommitAsync(cancellationToken);
