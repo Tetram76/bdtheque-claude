@@ -51,9 +51,10 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
             when violation.ConstraintName is not null && UniqueIndexRules.ByIndexName.TryGetValue(violation.ConstraintName, out var rule) =>
             (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, rule),
 
-        // Default translation, for a creation or a modification: the referenced record was deleted
-        // in the meantime, as for an unknown identifier. A deletion translates its own foreign key
-        // violations, being the only one to know that a reference is what blocks it.
+        // A creation or a modification: the referenced record was deleted in the meantime, as for an
+        // unknown identifier. A deletion never raises this code: references are ON DELETE RESTRICT,
+        // reported as RestrictViolation, which the deletion translates itself, being the only one
+        // able to recompute the impact that blocks it.
         DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation } } =>
             (StatusCodes.Status404NotFound, ProblemTypes.Functional, null),
 

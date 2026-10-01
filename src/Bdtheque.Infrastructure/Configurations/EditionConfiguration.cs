@@ -47,11 +47,13 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             "CK_Editions_FreeRequiresNoAmount",
             $"\"{nameof(Edition.IsFree)}\" = false OR \"{nameof(Edition.AcquisitionAmount)}\" IS NULL"));
 
+        // An edition is part of its album and goes with it; publisher and collection are mere
+        // references, whose deletion is refused while an edition uses them.
         builder.HasOne(e => e.Album)
             .WithMany()
             .HasForeignKey(e => e.AlbumId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(e => e.Publisher)
             .WithMany()
