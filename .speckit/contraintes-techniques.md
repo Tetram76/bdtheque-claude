@@ -19,24 +19,25 @@ Cette application est la **référence fonctionnelle** : le périmètre de la r�
 
 | Élément | Valeur |
 | --- | --- |
-| Langage | C# / .NET 10 (LTS) |
+| Langage | C# / .NET |
 | Frontend | Interface web (technologie : cf. `choix-implementation.md` § Frontend) |
 | Backend API | ASP.NET Core (style d'API : cf. `choix-implementation.md` § Organisation de l'API) |
-| ORM | EF Core 10 + Npgsql |
+| ORM | EF Core |
 | Base de données | PostgreSQL |
-| ML / estimation de valeur | ML.NET (embarqué dans le conteneur `api`) |
 
 ## Architecture des tiers
 
 L'application est découpée en **3 conteneurs Docker** :
 
-| Conteneur | Rôle | Image de base |
-| --- | --- | --- |
-| `frontend` | UI et rendu des pages | `mcr.microsoft.com/dotnet/aspnet:10.0` |
-| `api` | API ASP.NET Core — logique métier, accès données, ML | `mcr.microsoft.com/dotnet/aspnet:10.0` |
-| `db` | PostgreSQL — persistance | `postgres` (image officielle ; version et variante : cf. `choix-implementation.md`) |
+| Conteneur | Rôle |
+| --- | --- |
+| `frontend` | UI et rendu des pages |
+| `api` | API ASP.NET Core — logique métier, accès données, ML |
+| `db` | PostgreSQL — persistance |
 
-Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le conteneur `api` est le seul à accéder à `db`.
+Les images de base des conteneurs sont des choix d'implémentation : cf. `choix-implementation.md` § Images de base des conteneurs.
+
+Seul le conteneur `frontend` est exposé : `api` n'est jamais exposé, le `frontend` l'appelle via HTTP interne (réseau Docker). Le conteneur `api` est le seul à accéder à `db`.
 
 ## Déploiement
 
@@ -64,11 +65,6 @@ Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le cont
 - L'application est hébergée sur un **NAS Synology**.
 - Le déploiement Docker doit être compatible avec l'environnement Docker fourni par Synology (Container Manager).
 
-## Estimation de la valeur des éditions
-
-- La valeur estimée est calculée par un modèle **Random Forest** (voir `fonctionnel.md`).
-- Implémentation via **ML.NET**, embarquée dans le conteneur `api`.
-
 ## Compatibilité multi-supports
 
 - L'application doit être **responsive** : utilisable sur PC, tablette et smartphone.
@@ -79,13 +75,7 @@ Le conteneur `frontend` appelle `api` via HTTP interne (réseau Docker). Le cont
 - L'accès à la partie Administration est protégé par un **compte administrateur unique** (login + mot de passe).
 - Pas d'authentification sur la partie Consultation (accès public).
 
-## Gestion des taux de change
-
-- Devises à taux **fixe** vis-à-vis de l'euro (ex. Franc français) : constantes en code.
-- Devises à taux **variable** (ex. Dollar américain) : taux récupérés depuis l'API **[Frankfurter](https://www.frankfurter.app/)** (open source, gratuite, sans clé API). Les taux sont mis en cache côté `api` pour éviter les appels répétés.
-
 ## Stockage des visuels
 
 - Les fichiers visuels (couvertures, planches, etc.) sont stockés sur un **volume Docker** monté sur le NAS.
-- Le volume est accessible en écriture depuis `api` (upload) et en lecture depuis `frontend` (affichage).
 - Le chemin de montage est configurable via variable d'environnement Docker Compose.
