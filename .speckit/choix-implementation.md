@@ -110,7 +110,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Images de base des conteneurs
 
-- La seule contrainte est l'usage de conteneurs (`contraintes-techniques.md` § Architecture des tiers) ; les images sont un choix.
+- L'usage de conteneurs est imposé (`contraintes-techniques.md` § Architecture des tiers) ; le choix des images est libre, sous réserve des contraintes générales qui s'appliquent à tout composant : licences (§ Licences) et compatibilité avec l'environnement Docker de Synology (§ Hébergement).
 - **`frontend` et `api`** : `mcr.microsoft.com/dotnet/aspnet:10.0`, image runtime officielle de Microsoft correspondant à la version de .NET retenue.
 - **`db`** : image officielle `postgres`, version et variante : cf. § Version de PostgreSQL.
 
