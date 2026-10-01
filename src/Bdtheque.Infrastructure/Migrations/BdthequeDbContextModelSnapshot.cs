@@ -717,7 +717,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasOne("Bdtheque.Domain.Entities.Album", "Album")
                         .WithMany()
                         .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Bdtheque.Domain.Entities.Author", "Author")
                         .WithMany()
@@ -728,7 +728,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasOne("Bdtheque.Domain.Entities.Series", "Series")
                         .WithMany()
                         .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Album");
 
@@ -742,7 +742,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasOne("Bdtheque.Domain.Entities.Album", "Album")
                         .WithMany()
                         .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Bdtheque.Domain.Entities.PublisherCollection", "PublisherCollection")
@@ -796,7 +796,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasOne("Bdtheque.Domain.Entities.Edition", "Edition")
                         .WithMany()
                         .HasForeignKey("EditionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Album");
 

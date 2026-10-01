@@ -18,11 +18,13 @@ internal sealed class PurchaseIntentConfiguration : IEntityTypeConfiguration<Pur
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Cascade as well: an unowned edition and its intent are inseparable, so deleting the
+        // edition takes its intent with it (fonctionnel.md § Intention d'achat).
         builder.HasOne(p => p.Edition)
             .WithMany()
             .HasForeignKey(p => p.EditionId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Database-level defence in depth for the single-row half of the per-album rules
         // (see Album.AddPurchaseIntent): at most one whole-album intent per album, at most one
@@ -30,8 +32,8 @@ internal sealed class PurchaseIntentConfiguration : IEntityTypeConfiguration<Pur
         // album's editions — and the edition belonging to AlbumId are enforced by the album
         // aggregate only (see choix-implementation.md).
         // Named so it does not replace the plain AlbumId foreign-key index: being filtered, it
-        // cannot serve lookups of the album's edition intents (loading the aggregate, Restrict
-        // checks when deleting an album).
+        // cannot serve lookups of the album's edition intents (loading the aggregate, cascade
+        // when deleting an album).
         builder.HasIndex(p => p.AlbumId, "IX_PurchaseIntents_AlbumId_WholeAlbum")
             .IsUnique()
             .HasFilter($"\"{nameof(PurchaseIntent.EditionId)}\" IS NULL");

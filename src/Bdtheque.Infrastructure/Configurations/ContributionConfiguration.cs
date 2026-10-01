@@ -16,17 +16,20 @@ internal sealed class ContributionConfiguration : IEntityTypeConfiguration<Contr
             "CK_Contributions_ExactlyOneOfAlbumOrSeries",
             $"(\"{nameof(Contribution.AlbumId)}\" IS NOT NULL) <> (\"{nameof(Contribution.SeriesId)}\" IS NOT NULL)"));
 
+        // Cascade from the owner, Restrict from the author: a contribution is part of its album
+        // (or series template), whereas it merely references its author, whose deletion is
+        // refused while still credited (fonctionnel.md § Suppression des entités).
         builder.HasOne(c => c.Album)
             .WithMany()
             .HasForeignKey(c => c.AlbumId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(c => c.Series)
             .WithMany()
             .HasForeignKey(c => c.SeriesId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(c => c.Author)
             .WithMany()

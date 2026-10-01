@@ -319,7 +319,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         column: x => x.AlbumId,
                         principalTable: "Albums",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Contributions_Authors_AuthorId",
                         column: x => x.AuthorId,
@@ -331,7 +331,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         column: x => x.SeriesId,
                         principalTable: "Series",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -376,7 +376,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         column: x => x.AlbumId,
                         principalTable: "Albums",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Editions_PublisherCollections_PublisherCollectionId",
                         column: x => x.PublisherCollectionId,
@@ -436,7 +436,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         column: x => x.EditionId,
                         principalTable: "Editions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
