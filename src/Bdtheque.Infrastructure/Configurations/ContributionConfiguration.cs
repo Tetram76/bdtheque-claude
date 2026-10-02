@@ -26,7 +26,7 @@ internal sealed class ContributionConfiguration : IEntityTypeConfiguration<Contr
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(c => c.Series)
-            .WithMany()
+            .WithMany(s => s.TemplateContributions)
             .HasForeignKey(c => c.SeriesId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);

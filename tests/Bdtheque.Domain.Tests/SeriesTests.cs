@@ -335,4 +335,52 @@ public sealed class SeriesTests
 
         Assert.Equal("S", series.NavigationEntry);
     }
+
+    [Fact]
+    public void AddTemplateContribution_CreditsTheAuthorOnTheSeriesTemplate()
+    {
+        var series = new Series("Tintin");
+        var author = new Author("Hergé", null, null);
+
+        var contribution = series.AddTemplateContribution(author, ContributionRole.Illustrator);
+
+        Assert.Same(contribution, Assert.Single(series.TemplateContributions));
+        Assert.Equal((series.Id, null, author.Id, ContributionRole.Illustrator),
+            (contribution.SeriesId, contribution.AlbumId, contribution.AuthorId, contribution.Role));
+    }
+
+    [Fact]
+    public void AddTemplateContribution_SameAuthorWithAnotherRole_IsAccepted()
+    {
+        var series = new Series("Tintin");
+        var author = new Author("Hergé", null, null);
+        series.AddTemplateContribution(author, ContributionRole.Illustrator);
+
+        series.AddTemplateContribution(author, ContributionRole.Scenarist);
+
+        Assert.Equal(2, series.TemplateContributions.Count);
+    }
+
+    [Fact]
+    public void AddTemplateContribution_SameAuthorAndRoleTwice_Throws()
+    {
+        var series = new Series("Tintin");
+        var author = new Author("Hergé", null, null);
+        series.AddTemplateContribution(author, ContributionRole.Illustrator);
+
+        DomainAssert.Violates(
+            DomainRules.ContributionAlreadyCredited,
+            () => series.AddTemplateContribution(author, ContributionRole.Illustrator));
+    }
+
+    [Fact]
+    public void RemoveTemplateContribution_DropsItFromTheTemplate()
+    {
+        var series = new Series("Tintin");
+        var contribution = series.AddTemplateContribution(new Author("Hergé", null, null), ContributionRole.Illustrator);
+
+        series.RemoveTemplateContribution(contribution);
+
+        Assert.Empty(series.TemplateContributions);
+    }
 }

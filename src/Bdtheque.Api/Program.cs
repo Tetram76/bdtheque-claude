@@ -64,6 +64,7 @@ admin.MapGenres();
 admin.MapUniverses();
 admin.MapPublishers();
 admin.MapAuthors();
+admin.MapSeries();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
