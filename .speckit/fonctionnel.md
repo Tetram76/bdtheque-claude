@@ -348,7 +348,11 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 - **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
 - **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
 
-Les règles d'accès sont celles de l'application : ce qui relève de la consultation et des statistiques est public ; ce qui relève de l'administration — dont toute écriture en base — exige que l'agent s'authentifie comme **compte administrateur**, seul compte autorisé à modifier les données.
+Niveaux d'accès :
+
+- **Recherche et consultation** : publiques — l'authentification n'est pas requise, mais n'est pas interdite pour autant.
+- **Analyses et statistiques** : deux niveaux d'accès, **public** et **privé** (réservé au compte administrateur). Le niveau est choisi **au cas par cas**, en fonction des données accédées et exposées par chaque analyse ou statistique.
+- **Écriture en base** (aide à la saisie) : l'agent doit s'authentifier comme **compte administrateur**, seul compte autorisé à modifier les données.
 
 <!-- À préciser : périmètre exact de l'aide à la saisie, cas d'usage détaillés, analyses et statistiques attendues. -->
 
