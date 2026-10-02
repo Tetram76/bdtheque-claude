@@ -62,7 +62,8 @@ active obligatoire »):
 - It exits only on a terminal state of **its** PR: new feedback from Codex
   (review, inline or top-level comment), PR merged/closed, the 👍 from
   `chatgpt-codex-connector[bot]` dated after `<LAST_TRIGGER_AT>` once every CI
-  check has completed (the merge needs both), GitHub queries failing 5 times
+  check has completed — at least one check registered, an empty rollup being
+  CI not started (the merge needs both) —, GitHub queries failing 5 times
   in a row, or timeout (about one hour). It prints why (`exit: …`) and the
   final CI conclusions.
 - A top-level Codex comment (e.g. "You have reached your Codex usage limits",
@@ -106,16 +107,17 @@ for i in $(seq 1 60); do
      ic=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
           ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")") &&
      sp=$(gh pr view <PR_NUMBER> --json state,statusCheckRollup \
-          -q '"\(.state) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"')
+          -q '"\(.state) \(.statusCheckRollup|length) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"')
   then
-    fails=0 st=${sp% *} pending=${sp#* }
-    echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st pending_checks=$pending"
+    fails=0; read -r st checks pending <<< "$sp"
+    echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st checks=$checks pending=$pending"
     if [ "$rv" -ne 0 ] || [ "$cm" -ne 0 ] || [ "$ic" -ne 0 ]; then
       reason="new Codex feedback"; break
     fi
     if [ "$st" != OPEN ]; then reason="PR $st"; break; fi
-    # approval is terminal only once every check has completed
-    if [ "$up" -ne 0 ] && [ "$pending" -eq 0 ]; then
+    # approval is terminal only once CI has run: checks registered (an empty
+    # rollup means CI has not started, not that it is done) and all completed
+    if [ "$up" -ne 0 ] && [ "$checks" -gt 0 ] && [ "$pending" -eq 0 ]; then
       reason="approved, CI done"; break
     fi
   else
@@ -146,8 +148,9 @@ entered from Step 5 without a new push, the `@codex review` comment's
   waiting for the 👍 — never answer it with `@codex review`, which would pay
   for a needless extra review.
 - `PR MERGED` / `PR CLOSED`, `GitHub queries keep failing`, or `timeout` (no
-  review was triggered: `@codex review` may need to be commented manually, or
-  automatic review is disabled for the repo) → tell the user and stop.
+  review was triggered — `@codex review` may need to be commented manually, or
+  automatic review is disabled for the repo — or, if the 👍 is there, CI never
+  started) → tell the user and stop.
 
 A PR can carry a stale 👍 from an earlier head, or a 👍/comment/review from a
 human or an unrelated bot whose login happens to contain "codex" (a
