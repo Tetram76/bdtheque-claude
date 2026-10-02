@@ -107,7 +107,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
   - Suppression de `main` interdite
   - Squash merge uniquement
   - **Commits signés obligatoires** (`required_signatures`)
-  - **Checks de la CI requis** (`required_status_checks`) : les trois jobs du workflow CI — `Build & tests (.NET)`, `Build Docker image (api)`, `Build Docker image (frontend)` — produits par l'application GitHub Actions. La branche n'a pas à être à jour avec `main` avant le merge : les PR sont fusionnées en squash une à une, et exiger cette mise à jour imposerait une resynchronisation systématique sans gain proportionné.
+  - **Checks de la CI requis** (`required_status_checks`) : chaque job du workflow CI est un check requis (cf. § « Intégration continue (CI) »). La branche n'a pas à être à jour avec `main` avant le merge : les PR sont fusionnées en squash une à une, et exiger cette mise à jour imposerait une resynchronisation systématique sans gain proportionné.
 - **Sécurité du dépôt** (`security_and_analysis`, disponible gratuitement car dépôt public) :
   - **Secret scanning** : activé
   - **Push protection** (blocage des push contenant un secret détecté) : activée
