@@ -72,11 +72,11 @@ active obligatoire »):
   which no review follows) only hands control back so it gets read; it is
   **never** an approval — only the 👍 is.
 - Never say "I'm watching" without a running watcher, and never end a turn
-  with a pending PR that has none. A PR suspended by a Codex usage limit is
-  not pending (see Step 1): it gets no watcher. When a watcher ends: handle
-  the state, then **re-arm** one for every PR still pending before handing
-  back, with `<HANDLED_UNTIL>` set to the time the event was handled. On
-  timeout, tell the user.
+  with a pending PR that has none. A suspended PR — Codex usage limit,
+  timeout, or GitHub queries that keep failing (see Step 1) — is not pending:
+  it gets no watcher. When a watcher ends: handle the state, then **re-arm**
+  one for every PR still pending before handing back, with `<HANDLED_UNTIL>`
+  set to the time the event was handled.
 
 ```bash
 # Two timestamps, because a 👍 is a *state* and a review/comment is an *event*:
@@ -170,10 +170,12 @@ entered from Step 5 without a new push, the `@codex review` comment's
   feedback if any, then request a review of the current head with a
   top-level `@codex review` comment and re-arm with that comment as trigger:
   Codex does not start a new review on its own for a push made during one.
-- `PR MERGED` / `PR CLOSED`, `GitHub queries keep failing`, or `timeout` (no
-  review was triggered — `@codex review` may need to be commented manually, or
-  automatic review is disabled for the repo — or, if the 👍 is there, CI never
-  started) → tell the user and stop.
+- `PR MERGED` / `PR CLOSED` → tell the user and stop.
+- `GitHub queries keep failing`, or `timeout` (no review was triggered —
+  `@codex review` may need to be commented manually, or automatic review is
+  disabled for the repo — or, if the 👍 is there, CI never started) → the PR
+  is **suspended**: tell the user and stop, with no watcher (a new one would
+  only wait in vain); resume only when the user asks.
 
 A PR can carry a stale 👍 from an earlier head, or a 👍/comment/review from a
 human or an unrelated bot whose login happens to contain "codex" (a
