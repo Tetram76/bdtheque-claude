@@ -27,7 +27,7 @@ Cette application est la **référence fonctionnelle** : le périmètre de la r�
 
 ## Architecture des tiers
 
-L'application est découpée en **3 conteneurs Docker** :
+L'application repose sur un **socle de 3 conteneurs Docker**, fondation à laquelle d'autres conteneurs peuvent s'ajouter (ex. l'outil pour agents IA, cf. § Indépendance de l'outil pour agents IA) :
 
 | Conteneur | Rôle |
 | --- | --- |
