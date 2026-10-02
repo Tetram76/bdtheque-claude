@@ -72,9 +72,12 @@ active obligatoire »):
 ```bash
 # <HEAD_PUSHED_AT>: ISO timestamp of the head commit's push / last @codex review
 for i in $(seq 1 60); do
-  up=$(gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \n    --jq '[.[]|select(.content=="+1" and .user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
-  rv=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \n    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .submitted_at>="<HEAD_PUSHED_AT>")]|length')
-  cm=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments?per_page=100" \n    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
+  up=$(gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
+    --jq '[.[]|select(.content=="+1" and .user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
+  rv=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
+    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .submitted_at>="<HEAD_PUSHED_AT>")]|length')
+  cm=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments?per_page=100" \
+    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
   st=$(gh pr view <PR_NUMBER> --json state -q .state)
   echo "thumbs=$up reviews=$rv inline=$cm state=$st"
   { [ "$up" != 0 ] || [ "$rv" != 0 ] || [ "$cm" != 0 ] || [ "$st" != OPEN ]; } && break
