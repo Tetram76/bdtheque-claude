@@ -331,7 +331,7 @@ L'application se compose de trois parties distinctes :
    - **Recherche facilement accessible** à tout moment depuis n'importe quelle page de la partie consultation.
    - **Recherche simple** : par type d'entité (ex. rechercher des albums, des auteurs, des séries, etc.).
    - **Recherche avancée** : exploite les **liens entre entités** pour des requêtes cross-domaines (ex. albums d'un auteur donné, séries d'un éditeur, etc.).
-   - **États et statistiques** : rapports et indicateurs sur la collection (à préciser).
+   - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
    - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, etc.
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. (les sources concrètes restent à définir).
@@ -339,6 +339,14 @@ L'application se compose de trois parties distinctes :
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
    - Le contenu peut être **riche** : texte, captures d'écran, tableaux, exemples, etc. — pas seulement de courts textes explicatifs.
+
+## Règles d'accès
+
+Ces règles sont **globales** : elles s'appliquent à l'interface web comme à l'interface pour agents IA, une fonctionnalité ayant les mêmes restrictions d'accès quelle que soit l'interface qui la propose.
+
+- **Recherche et consultation** : publiques. L'authentification n'est pas requise, mais n'est pas interdite pour autant.
+- **Analyses et statistiques** : deux niveaux d'accès, **public** et **privé** (réservé au compte administrateur). Le niveau est choisi **au cas par cas**, en fonction des données accédées et exposées par chaque analyse ou statistique.
+- **Écriture de données** (saisie, modification, suppression, paramétrage) : réservée au **compte administrateur**, seul compte autorisé à modifier les données.
 
 ## Interface pour agents IA
 
@@ -348,11 +356,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 - **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
 - **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
 
-Niveaux d'accès :
-
-- **Recherche et consultation** : publiques — l'authentification n'est pas requise, mais n'est pas interdite pour autant.
-- **Analyses et statistiques** : deux niveaux d'accès, **public** et **privé** (réservé au compte administrateur). Le niveau est choisi **au cas par cas**, en fonction des données accédées et exposées par chaque analyse ou statistique.
-- **Écriture en base** (aide à la saisie) : l'agent doit s'authentifier comme **compte administrateur**, seul compte autorisé à modifier les données.
+Les règles d'accès sont celles de l'application (cf. § Règles d'accès) : l'outil n'a pas de règles propres, et les fonctionnalités équivalentes de l'interface web ont les mêmes restrictions.
 
 <!-- À préciser : périmètre exact de l'aide à la saisie, cas d'usage détaillés, analyses et statistiques attendues. -->
 
