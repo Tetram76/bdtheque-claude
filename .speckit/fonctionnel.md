@@ -346,11 +346,11 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 
 - **Aide à la saisie** : assister l'agent (et, à travers lui, l'utilisateur) dans la saisie des données de l'application.
 - **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
-- **Analyses statistiques** : produire des statistiques et analyses sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
+- **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
 
 Les règles d'accès sont celles de l'application : ce qui relève de la consultation et des statistiques est public ; ce qui relève de l'administration exige l'authentification du compte administrateur.
 
-<!-- À préciser : périmètre exact de l'aide à la saisie (suggestions seules ou écriture effective), cas d'usage détaillés, analyses statistiques attendues. -->
+<!-- À préciser : périmètre exact de l'aide à la saisie (suggestions seules ou écriture effective), cas d'usage détaillés, analyses et statistiques attendues. -->
 
 ## Présentation des erreurs
 
