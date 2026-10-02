@@ -127,7 +127,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 
 - **GitHub Actions** héberge le pipeline de non-régression (`.github/workflows/ci.yml`), déclenché sur chaque Pull Request et sur push vers `main`.
 - Étapes du pipeline : restauration, build en mode `Release`, contrôle de cohérence modèle ↔ migrations, exécution de la totalité des tests (`dotnet test`, sur PostgreSQL via Testcontainers — Docker est disponible sur les runners `ubuntu-latest`).
-- Ce workflow constitue le **check de statut requis** de la règle de merge ci-dessous : ses jobs sont imposés par le Ruleset GitHub (cf. § « Configuration du repository GitHub »). Le Ruleset les désigne par leur nom : renommer, ajouter ou retirer un job du workflow exige de mettre à jour le Ruleset dans le même mouvement, faute de quoi un check requis ne se présente jamais et toute fusion est bloquée.
+- Ce workflow constitue le **check de statut requis** de la règle de merge ci-dessous : ses jobs sont imposés par le Ruleset GitHub (cf. § « Configuration du repository GitHub »). Le Ruleset les désigne par leur nom : toute modification de la liste des jobs du workflow est reportée dans le Ruleset dans le même mouvement. Sans cela, un job ajouté n'est pas requis — son échec n'empêche pas la fusion —, et un job renommé ou retiré reste attendu sous son ancien nom sans jamais se présenter, ce qui bloque toute fusion.
 
 ## Règle de merge : non-régression et revue Codex obligatoires
 
