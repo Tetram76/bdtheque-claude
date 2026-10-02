@@ -77,6 +77,14 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 - La base de connaissance de l'agent est considérée **toujours potentiellement obsolète**. Avant toute décision technique (choix de bibliothèque, version, API, configuration, bonne pratique), l'agent **doit contre-vérifier** ses connaissances via des sources externes reconnues et fiables (documentation officielle, dépôts GitHub officiels, etc.).
 - Aucune décision technique ne peut reposer uniquement sur la mémoire de l'agent.
 
+## Budget IA
+
+Le projet dispose d'un **budget IA limité**, pour l'agent (Claude) comme pour la revue Codex : l'**efficacité** est une contrainte de travail permanente. Budget limité ne veut pas dire travail à l'économie : tout le travail est réalisé **intégralement**, dans le respect des demandes de l'utilisateur et des contraintes du projet. L'efficacité porte sur la manière de travailler, jamais sur le résultat ni sur l'application des règles de ce `.speckit/` : aucune demande n'est partiellement traitée et aucune règle (lecture du `.speckit/`, contre-vérification, TDD, non-régression, revue Codex) n'est allégée au nom du budget.
+
+- **Pas d'itération exploratoire** : « itérer juste pour voir » n'est pas viable. Chaque action sert un objectif identifié ; l'agent établit les faits (lecture du code, exécution locale, documentation) **avant** d'agir, plutôt que d'essayer puis de corriger.
+- **Un push, une revue Codex** : tout push sur une PR déclenche une revue Codex (cf. § « Revue Codex (bloquante) »). Avant de pousser, l'agent relit l'intégralité du diff, exécute localement les contrôles de non-régression et met à jour la description de la PR, pour qu'un **seul push** porte un état complet et vérifié. Jamais de push intermédiaire « pour voir ce qu'en dit Codex ».
+- **Sollicitations proportionnées** : un sous-agent ou une relance de Codex (`@codex review`) n'intervient que lorsque les règles du projet l'exigent ou qu'il apporte un gain réel ; jamais par confort ou par précaution non justifiée.
+
 ## Qualité du code
 
 - La **qualité du code est une préoccupation majeure** et permanente.
