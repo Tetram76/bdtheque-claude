@@ -191,6 +191,8 @@ Le **titre de la Pull Request** doit également respecter ce format — c'est lu
 
 La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
 
+La description de toute Pull Request **suit toujours le template** du projet `.github` (dépôt [`Tetram76/.github`](https://github.com/Tetram76/.github), fichier `.github/pull_request_template.md`), sections et consignes comprises. Ce template n'étant pas copié dans le dépôt, il est relu à chaque PR.
+
 Exemples :
 
 - `feat(albums): ajout de la gestion des éditions`
