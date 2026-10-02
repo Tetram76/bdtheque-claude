@@ -101,4 +101,4 @@ Identification des albums manquants d'une série ; estimation de sortie d'un nou
 
 Serveur MCP exposant l'aide à la saisie, la recherche/consultation et les analyses et statistiques (`fonctionnel.md` § Interface pour agents IA ; `choix-implementation.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2) et des statistiques (Phase 4).
 
-**Statut : à faire.** Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie précisé.
+**Statut : à faire.** Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie et le mécanisme d'authentification de l'agent précisés.
