@@ -6,8 +6,7 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 
 ## Gouvernance documentaire
 
-- **Source de vérité absolue** : le dossier [`.speckit/`](.) est la source de vérité absolue du projet. Il prime sur toute autre information : historique de conversation, supposition, connaissance générale de l'agent. Aucune décision ne peut le contredire sans accord explicite de l'utilisateur. En cas d'ambiguïté ou de silence, la décision suit la distinction technique/fonctionnel de « Prise de décision » ci-dessous ; un choix pris seul par l'agent est documenté dans le fichier concerné.
-- **Autonomie de l'agent** : l'agent prend en **totale autonomie** les décisions techniques, ainsi que les décisions fonctionnelles ou métier que le `.speckit` existant permet déjà de trancher (modalités détaillées dans « Prise de décision » ci-dessous). Les autres décisions fonctionnelles ou métier (véritable changement d'exigence, ambiguïté) relèvent de l'utilisateur : soit par sa mise à jour directe des fichiers `.speckit/` pour exprimer ses besoins et exigences, soit par sa réponse explicite à un point soumis par l'agent.
+- **Source de vérité absolue** et **autonomie de l'agent** : cf. `AGENTS.md` (qui décide, règles de consultation et de mise à jour) et § « Prise de décision » ci-dessous (répartition technique / fonctionnel).
 - **Suivi d'implémentation** : l'avancement du plan d'implémentation (phases, découpage en Pull Requests, statut) est tracé dans [`suivi-implementation.md`](suivi-implementation.md), distinct des cinq fichiers de spécification ci-dessus car il décrit l'état d'avancement du projet plutôt que son contenu cible. **Toute Pull Request qui livre une fonctionnalité du plan d'implémentation doit inclure, dans le même commit ou la même PR, la mise à jour de `suivi-implementation.md` reflétant son statut réel** (passage à « Réalisée », ajustement du statut de la phase, découpage précisé si la PR clarifie des lignes encore vagues). Une PR qui livre une ligne du plan sans mettre à jour ce fichier est **incomplète** et ne doit pas être proposée au merge en l'état.
 
 ## Objectifs du projet
@@ -40,12 +39,12 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 ## Prise de décision
 
 - La décision d'agir seul ou de solliciter l'utilisateur dépend de la nature du point traité :
-  - **Point technique** (architecture, implémentation, outillage, choix de bibliothèque, performance, sécurité, etc.) : l'agent décide en **totale autonomie**.
+  - **Point technique** (architecture, implémentation, outillage, choix de bibliothèque, performance, sécurité, etc.) : l'agent décide en **totale autonomie** ; cette autonomie **exclut de lui poser une question technique** au seul motif d'un doute, de plusieurs options ou d'un `.speckit` incomplet : l'agent décide et documente son choix dans `choix-implementation.md`, sans demander confirmation.
   - **Point fonctionnel ou métier** (règle métier, comportement attendu, contenu applicatif — y compris le contenu de `fonctionnel.md`/`modele-metier.md`) :
     - Si le `.speckit` existant **permet déjà de trancher** (application d'une exigence déjà documentée, sans changement de règle) : l'agent décide en autonomie, en s'appuyant explicitement sur le passage du `.speckit` qui tranche.
     - Si le point constitue un **véritable changement d'exigence**, ou reste **ambigu** au regard du `.speckit` existant : décision **explicite de l'utilisateur**. L'agent effectue la contre-vérification (pertinence, faits vérifiés) mais **ne tranche pas seul** — il soumet le point à l'utilisateur, **un point à la fois**, et applique la décision reçue avant de passer au point suivant.
   - Cette règle s'applique aussi bien au traitement des retours de revue de PR (cf. « Revue de code ») qu'à toute évolution du contenu fonctionnel/métier du `.speckit/` proposée à l'initiative de l'agent.
-- Lorsque, sur un point technique, les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher.
+- Lorsque, sur un point technique, les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher — exception étroite, qui ne couvre ni le simple doute ni la présence de plusieurs options dès que l'une est objectivement préférable.
 - Les choix techniques ne sont **pas gravés dans le marbre** : tout choix peut être remis en cause si une nouvelle contrainte le justifie.
 - Lorsqu'un changement technique a un **impact visible sur le livrable** (comportement, interface, données, déploiement), la transition doit être **transparente pour l'utilisateur** : l'agent informe explicitement de ce qui change et de ce qui est impacté.
 
