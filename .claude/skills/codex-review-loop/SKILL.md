@@ -78,9 +78,11 @@ for i in $(seq 1 60); do
     --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .submitted_at>="<HEAD_PUSHED_AT>")]|length')
   cm=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments?per_page=100" \
     --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
+  ic=$(gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments?per_page=100" \
+    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
   st=$(gh pr view <PR_NUMBER> --json state -q .state)
-  echo "thumbs=$up reviews=$rv inline=$cm state=$st"
-  { [ "$up" != 0 ] || [ "$rv" != 0 ] || [ "$cm" != 0 ] || [ "$st" != OPEN ]; } && break
+  echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st"
+  { [ "$up" != 0 ] || [ "$rv" != 0 ] || [ "$cm" != 0 ] || [ "$ic" != 0 ] || [ "$st" != OPEN ]; } && break
   sleep 60
 done
 gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
