@@ -70,10 +70,11 @@ active obligatoire »):
   which no review follows) only hands control back so it gets read; it is
   **never** an approval — only the 👍 is.
 - Never say "I'm watching" without a running watcher, and never end a turn
-  with a pending PR that has none. When a watcher ends: handle the state, then
-  **re-arm** one for every PR still pending before handing back, with
-  `<HANDLED_UNTIL>` set to the time the event was handled. On timeout, tell
-  the user.
+  with a pending PR that has none. A PR suspended by a Codex usage limit is
+  not pending (see Step 1): it gets no watcher. When a watcher ends: handle
+  the state, then **re-arm** one for every PR still pending before handing
+  back, with `<HANDLED_UNTIL>` set to the time the event was handled. On
+  timeout, tell the user.
 
 ```bash
 # Two timestamps, because a 👍 is a *state* and a review/comment is an *event*:
@@ -82,9 +83,9 @@ active obligatoire »):
 #                   head, and stays true.
 # <HANDLED_UNTIL>   Codex events (reviews, comments) older than this were
 #                   already handled. Starts equal to <LAST_TRIGGER_AT>; when
-#                   re-arming without a new trigger (e.g. after reading a
-#                   usage-limit comment, or an approving comment while CI still
-#                   runs), set it to the time you finished handling, otherwise
+#                   re-arming without a new trigger (e.g. after reading feedback
+#                   with nothing to fix while the 👍 or CI is still awaited),
+#                   set it to the time you finished handling, otherwise
 #                   the same event ends every new watcher at once.
 # A failed query (expired auth, network, rate limit) must never be read as
 # data — "0 events" or "PR not open": every query is checked, a failure is
@@ -143,7 +144,9 @@ entered from Step 5 without a new push, the `@codex review` comment's
   merge needs it green).
 - `new Codex feedback` → if it opened review threads: Step 2. Anything else
   (a top-level comment, or a review without threads): read it. A usage-limit
-  message means no review is coming: tell the user and stop. Feedback
+  message **suspends** the PR: no review is coming until Codex's budget is
+  back, so tell the user and stop — no watcher, and no `@codex review`, which
+  would only be refused again; resume only when the user asks. Feedback
   reporting nothing to fix: re-arm with `<HANDLED_UNTIL>` set to now and keep
   waiting for the 👍 — never answer it with `@codex review`, which would pay
   for a needless extra review.
