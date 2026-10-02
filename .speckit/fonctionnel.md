@@ -315,7 +315,9 @@ L'interface doit offrir un rendu **visuellement premium**, clairement au-dessus 
 
 La page d'accueil est un **dashboard public** présentant les statistiques principales de la collection. Elle n'est pas personnalisée (pas d'authentification sur la partie consultation). Certaines statistiques pourront être présentées sous forme de **graphiques** lorsque c'est pertinent.
 
-Les statistiques du dashboard incluent notamment (liste non exhaustive) :
+Le détail exact du dashboard reste à définir. Étant public, il n'affiche que des statistiques de niveau **public** (cf. § Règles d'accès) : il est considéré comme **purement public**, sans variante pour une session authentifiée.
+
+Les statistiques du dashboard incluent notamment, sous réserve de ce niveau d'accès (liste non exhaustive) :
 
 - **Compteurs globaux** : nombre total d'albums, nombre total de séries.
 - **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur.
