@@ -109,6 +109,13 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
   - **Alternative écartée (ImageSharp)** : licence *Six Labors Split*, et clé de licence exigée à la compilation depuis la version 4.
   - **Alternative écartée (servir uniquement l'original)** : plusieurs mégaoctets par couverture dans une grille d'albums sur réseau mobile.
 
+## Outil pour agents IA
+
+- **Protocole : MCP** (*Model Context Protocol*), standard ouvert pris en charge par les agents IA courants, avec le **SDK C# officiel** `ModelContextProtocol` / `ModelContextProtocol.AspNetCore` (licence Apache 2.0, maintenu en collaboration avec Microsoft ; cf. `contraintes-techniques.md` § Licences). Transport **Streamable HTTP**, transport distant par défaut du SDK.
+- **Hébergement** : dans le conteneur `frontend`, seul conteneur exposé (`contraintes-techniques.md` § Architecture des tiers), qui appelle `api` par le réseau interne comme pour l'interface web ; aucun conteneur supplémentaire, et `api` reste non exposé. Les outils s'appuient sur les mêmes endpoints d'`api` (`/catalog`, `/admin`) que l'interface, sans logique métier dupliquée.
+- Le mécanisme d'authentification de l'accès administrateur par un agent et le détail des outils sont à définir à l'ouverture de la phase correspondante (`suivi-implementation.md`).
+  - **Alternative écartée (API REST seule, décrite par OpenAPI)** : exploitable par un agent, mais sans découverte standardisée des outils ni de leurs paramètres ; MCP est conçu pour cet usage.
+
 ## Images de base des conteneurs
 
 - L'usage de conteneurs est imposé (`contraintes-techniques.md` § Architecture des tiers) ; le choix des images est libre, sous réserve des contraintes générales qui s'appliquent à tout composant : licences (§ Licences) et compatibilité avec l'environnement Docker de Synology (§ Hébergement).

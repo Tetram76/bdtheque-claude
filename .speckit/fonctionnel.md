@@ -340,6 +340,18 @@ L'application se compose de trois parties distinctes :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
    - Le contenu peut être **riche** : texte, captures d'écran, tableaux, exemples, etc. — pas seulement de courts textes explicatifs.
 
+## Interface pour agents IA
+
+L'application met à disposition d'un **agent IA** un outil lui permettant d'interagir avec elle, en complément de l'interface web. L'outil offre trois familles de fonctionnalités :
+
+- **Aide à la saisie** : assister l'agent (et, à travers lui, l'utilisateur) dans la saisie des données de l'application.
+- **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
+- **Analyses statistiques** : produire des statistiques et analyses sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
+
+Les règles d'accès sont celles de l'application : ce qui relève de la consultation et des statistiques est public ; ce qui relève de l'administration exige l'authentification du compte administrateur.
+
+<!-- À préciser : périmètre exact de l'aide à la saisie (suggestions seules ou écriture effective), cas d'usage détaillés, analyses statistiques attendues. -->
+
 ## Présentation des erreurs
 
 Toute erreur présentée à l'utilisateur doit lui permettre de distinguer **très facilement**, au premier coup d'œil, s'il s'agit :
