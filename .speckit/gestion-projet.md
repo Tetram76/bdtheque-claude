@@ -190,6 +190,7 @@ Chaque chantier listé dans [`suivi-implementation.md`](suivi-implementation.md)
 - **Chantiers hors suivi** : un chantier mené hors du plan d'implémentation peut faire l'objet d'un ticket, sans que ce soit obligatoire. Seuls les chantiers listés dans le suivi **doivent** avoir un ticket.
 - **Création** : les tickets sont créés au moment du **découpage de la phase** en chantiers.
 - **Pull Request** : la PR est associée à son ticket et le **ferme automatiquement au merge** (mot-clé `Closes #<numéro>` dans la description, cf. § « Lien entre Pull Requests et Issues »). Le ticket est donc clôturé quand la PR est fusionnée.
+- **Traçabilité** : le commit final de la PR sur `main` doit permettre de remonter, directement ou indirectement, jusqu'au ticket. La description de la PR devenant le corps du commit squashé (cf. § « Conventions de commit »), elle **contient la référence au ticket** (`Closes #<numéro>`) ; le commit renvoie ainsi au ticket, directement par cette référence et indirectement par la PR dont il porte le numéro.
 - **Statut** : l'état d'un chantier (à faire / fait) est **défini par l'état de son ticket** (ouvert / fermé). Le suivi ne mentionne pas cet état.
 - **Contenu du suivi** : pour chaque chantier, le suivi indique le **numéro du ticket** et en décrit succinctement le contenu (en pratique, son titre).
 - **Cohérence suivi ↔ tickets** : toute correction apportée au découpage dans le suivi est **reportée dans le ticket concerné**, dans le respect de la définition du contenu d'un ticket ci-dessous.
