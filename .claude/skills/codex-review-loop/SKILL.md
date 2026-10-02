@@ -300,8 +300,9 @@ resolve threads yet.
 Never push while a Codex review is running — its 👀 is on the PR:
 
 ```bash
-gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
-  --jq '[.[]|select(.content=="eyes" and .user.login=="chatgpt-codex-connector[bot]")]|length'
+# same all-page counting as the watcher
+gh api --paginate "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
+  --jq '.[]|select(.content=="eyes" and .user.login=="chatgpt-codex-connector[bot]")' | wc -l
 ```
 
 If this is `> 0`, wait for the verdict first (watcher): a push made during a
