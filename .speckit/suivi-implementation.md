@@ -63,7 +63,7 @@ Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de dev
 | ~~#76~~ | Administration des genres et des univers |
 | ~~#77~~ | Administration des éditeurs et de leurs collections |
 | ~~#78~~ | Administration des auteurs |
-| #79 | Administration des séries |
+| ~~#79~~ | Administration des séries |
 | #80 | Administration des albums |
 | #81 | Administration des éditions |
 | #82 | Téléversement et gestion des visuels d'édition |

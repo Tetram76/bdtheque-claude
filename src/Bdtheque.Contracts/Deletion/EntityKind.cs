@@ -15,4 +15,5 @@ public enum EntityKind
     Universe,
     Edition,
     PublisherCollection,
+    Contribution,
 }
