@@ -64,8 +64,9 @@ active obligatoire »):
   `chatgpt-codex-connector[bot]` dated after `<LAST_TRIGGER_AT>` once every CI
   check has completed — at least one check registered, an empty rollup being
   CI not started (the merge needs both) —, a change of the PR's head commit,
-  a Codex review started before `<LAST_TRIGGER_AT>` still in progress (its
-  verdict will be about an older head), GitHub queries failing 5 times in a
+  the end of a Codex review started before `<LAST_TRIGGER_AT>` (it keeps
+  watching while that review runs; its verdict is about an older head, so
+  its 👍 never counts as approval), GitHub queries failing 5 times in a
   row, or timeout (about one hour). It prints why (`exit: …`) and the final
   CI conclusions.
 - A top-level Codex comment (e.g. "You have reached your Codex usage limits",
@@ -104,7 +105,7 @@ set -o pipefail
 # page, and reviews come oldest first): the --jq filter must be per-page safe.
 count() { local n; n=$(gh api --paginate "$1?per_page=100" --jq "$2" | wc -l) && echo "$n"; }
 bot='.user.login=="chatgpt-codex-connector[bot]"'
-reason=timeout fails=0
+reason=timeout fails=0 saw_old=0
 for i in $(seq 1 60); do
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
   # an issue for the API), not a ticket's
@@ -128,7 +129,10 @@ for i in $(seq 1 60); do
     fi
     if [ "$st" != OPEN ]; then reason="PR $st"; break; fi
     if [ "$head" != "<HEAD_SHA>" ]; then reason="head changed"; break; fi
-    if [ "$old" -ne 0 ]; then reason="earlier review still running"; break; fi
+    # a review started before the trigger is still running: keep watching,
+    # and remember it — the 👍 that ends it is about an older head
+    if [ "$old" -ne 0 ]; then saw_old=1; sleep 60; continue; fi
+    if [ "$saw_old" -eq 1 ]; then reason="earlier review ended"; break; fi
     # approval is terminal only once CI has run: checks registered (an empty
     # rollup means CI has not started, not that it is done) and all completed
     if [ "$up" -ne 0 ] && [ "$checks" -gt 0 ] && [ "$pending" -eq 0 ]; then
@@ -165,11 +169,12 @@ entered from Step 5 without a new push, the `@codex review` comment's
   for a needless extra review.
 - `head changed` (someone pushed) → re-arm with that push as the new trigger
   and head.
-- `earlier review still running` (a push landed while Codex was reviewing an
-  older head) → wait for that review to end (its 👀 disappears), handle its
-  feedback if any, then request a review of the current head with a
-  top-level `@codex review` comment and re-arm with that comment as trigger:
-  Codex does not start a new review on its own for a push made during one.
+- `earlier review ended` (a push landed while Codex was reviewing an older
+  head; the watcher waited for that review to finish) → request a review of
+  the current head with a top-level `@codex review` comment and re-arm with
+  that comment as trigger: Codex does not start a new review on its own for a
+  push made during one. If that older review left feedback instead, the
+  watcher exits on `new Codex feedback`: handle it (Step 2) first.
 - `PR MERGED` / `PR CLOSED` → tell the user and stop.
 - `GitHub queries keep failing`, or `timeout` (no review was triggered —
   `@codex review` may need to be commented manually, or automatic review is
