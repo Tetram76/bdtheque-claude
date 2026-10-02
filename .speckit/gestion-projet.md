@@ -6,8 +6,27 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 
 ## Gouvernance documentaire
 
-- **Source de vérité absolue** et **autonomie de l'agent** : cf. `AGENTS.md` (qui décide, règles de consultation et de mise à jour) et § « Prise de décision » ci-dessous (répartition technique / fonctionnel).
-- **Suivi d'implémentation** : l'avancement du plan d'implémentation (phases, découpage en Pull Requests, statut) est tracé dans [`suivi-implementation.md`](suivi-implementation.md), distinct des cinq fichiers de spécification ci-dessus car il décrit l'état d'avancement du projet plutôt que son contenu cible. **Toute Pull Request qui livre une fonctionnalité du plan d'implémentation doit inclure, dans le même commit ou la même PR, la mise à jour de `suivi-implementation.md` reflétant son statut réel** (passage à « Réalisée », ajustement du statut de la phase, découpage précisé si la PR clarifie des lignes encore vagues). Une PR qui livre une ligne du plan sans mettre à jour ce fichier est **incomplète** et ne doit pas être proposée au merge en l'état.
+- **Source de vérité absolue** : le dossier [`.speckit/`](.) est la source de vérité absolue et contraignante du projet. Il prime sur toute autre information : historique de conversation, supposition, connaissance générale de l'agent, y compris `AGENTS.md`, qui n'en est que le point d'entrée. Chaque règle qu'il contient — gouvernance, fonctionnel, modèle métier ou contraintes techniques — a la **même force obligatoire**, sans distinction de « majeur » ou « mineur » : un manquement, même ponctuel ou sur un point jugé secondaire, est une violation, pas un détail.
+- **Primauté sans entrave** : cette primauté ne doit pas entraver l'efficacité de l'agent. Elle s'applique dans le respect des contraintes et des modalités que le speckit définit lui-même, notamment l'autonomie de l'agent sur les points techniques (§ « Prise de décision »).
+- **Aucune contradiction** : aucune décision, ligne de code ou réponse ne peut contredire le `.speckit` sans accord explicite de l'utilisateur — sans exception, sans oubli, sans arbitrage silencieux de l'agent au profit de sa propre appréciation. En cas d'ambiguïté ou de silence : technique → l'agent décide et documente son choix dans le fichier concerné ; fonctionnel ou métier → décision de l'utilisateur (§ « Prise de décision »).
+- **Rôle de l'agent** : ce projet vise à produire une **application n-tiers web** et tous les éléments nécessaires à sa mise en production. L'agent décide **seul** des points techniques et des points fonctionnels ou métier déjà tranchés par le `.speckit` (§ « Prise de décision »), et doit **toujours être en mesure de justifier** ses choix lorsqu'il est challengé : une contrainte imposée est traçable dans `contraintes-techniques.md`, un choix propre à l'agent dans `choix-implementation.md`, une règle de gouvernance dans ce fichier.
+- **Suivi d'implémentation** : l'avancement du plan d'implémentation (phases, découpage en Pull Requests, statut) est tracé dans [`suivi-implementation.md`](suivi-implementation.md), distinct des cinq fichiers de spécification car il décrit l'état d'avancement du projet plutôt que son contenu cible. **Toute Pull Request qui livre une fonctionnalité du plan d'implémentation doit inclure, dans le même commit ou la même PR, la mise à jour de `suivi-implementation.md` reflétant son statut réel** (passage à « Réalisée », ajustement du statut de la phase, découpage précisé si la PR clarifie des lignes encore vagues). Une PR qui livre une ligne du plan sans mettre à jour ce fichier est **incomplète** et ne doit pas être proposée au merge en l'état.
+
+### Qui décide du contenu
+
+- **`contraintes-techniques.md` et `fonctionnel.md`** : l'utilisateur est le **seul décisionnaire** de leur contenu. L'agent n'y modifie, n'y ajoute et n'en retire rien de sa propre initiative : tout changement exige l'accord explicite préalable de l'utilisateur.
+- **`modele-metier.md`** : l'utilisateur en est le **décisionnaire principal**, puisqu'il choisit les données à utiliser et les règles qui les régissent (entités, attributs, relations, contraintes d'intégrité) : l'agent n'y modifie rien de cet ordre sans son accord explicite. L'agent peut en revanche le **compléter avec des informations plus techniques** (ex. type de stockage d'un attribut, précisions de représentation) sans accord préalable, à condition de ne modifier ni les données ni les règles choisies par l'utilisateur.
+- **`choix-implementation.md`** : l'agent peut **à tout moment remettre en cause** ce qui y est noté (changer, remplacer ou retirer un choix) sans accord préalable, dès lors que cela respecte `contraintes-techniques.md` et `fonctionnel.md`, qui prévalent. Il documente alors le nouveau choix (cf. § « Prise de décision » pour l'information de l'utilisateur lorsque l'impact est visible sur le livrable).
+
+### Mise à jour du .speckit
+
+Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que l'utilisateur fournit une exigence, une contrainte, une règle ou toute information relevant du périmètre d'un des fichiers. Ne jamais laisser une information pertinente uniquement dans le fil de conversation.
+
+- **Le speckit n'est pas un historique de décisions.** Les fichiers `.speckit/` sont des **documents de référence**, pas des journaux : ils ne contiennent que l'état actuel et cible du projet — jamais d'historique, de dates, ni de traces de décisions successives ou de leur évolution.
+- Toute nouvelle information est **intégrée dans le contenu existant** (mise à jour d'une section, enrichissement d'une définition, ajout dans la liste appropriée), jamais ajoutée en bas de fichier comme une entrée de log.
+- En cas de changement de décision, l'**ancienne information est remplacée**, pas conservée à côté de la nouvelle avec une mention de type « anciennement », « auparavant » ou « suite à ».
+- Le fichier doit rester cohérent, lisible et structuré comme une documentation vivante.
+- **Exception : `journal-evenements.md`** est un journal, pas un document de référence : il déroge à ces règles, qui sont documentées dans le fichier lui-même.
 
 ## Objectifs du projet
 
@@ -33,8 +52,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 ## Maintenance du .speckit
 
 - Les fichiers `.speckit/` sont des **documents vivants** : l'agent peut les restructurer à tout moment (fusion, split, déplacement de sections, création de nouvelles sections) si cela améliore leur clarté ou leur cohérence.
-- Toute restructuration est faite sans validation préalable, dans le même esprit d'autonomie qui régit les décisions techniques. Elle porte sur la **forme** uniquement : elle ne modifie, n'ajoute ni ne retire aucun contenu dont l'utilisateur est seul décisionnaire (cf. `AGENTS.md` § « Qui décide du contenu »).
-- Le speckit n'est pas un historique de décisions, à l'exception de `journal-evenements.md` (cf. `AGENTS.md` § « Mise à jour du .speckit » pour le détail de cette règle et de son exception — non dupliqué ici pour éviter toute divergence entre les deux fichiers).
+- Toute restructuration est faite sans validation préalable, dans le même esprit d'autonomie qui régit les décisions techniques. Elle porte sur la **forme** uniquement : elle ne modifie, n'ajoute ni ne retire aucun contenu dont l'utilisateur est seul décisionnaire (cf. § « Qui décide du contenu » ci-dessus).
 
 ## Prise de décision
 
