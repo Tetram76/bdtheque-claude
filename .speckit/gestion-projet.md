@@ -10,7 +10,7 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 - **Primauté sans entrave** : cette primauté ne doit pas entraver l'efficacité de l'agent. Elle s'applique dans le respect des contraintes et des modalités que le speckit définit lui-même, notamment l'autonomie de l'agent sur les points techniques (§ « Prise de décision »).
 - **Aucune contradiction** : aucune décision, ligne de code ou réponse ne peut contredire le `.speckit` sans accord explicite de l'utilisateur — sans exception, sans oubli, sans arbitrage silencieux de l'agent au profit de sa propre appréciation. En cas d'ambiguïté ou de silence : technique → l'agent décide et documente son choix dans le fichier concerné ; fonctionnel ou métier → décision de l'utilisateur (§ « Prise de décision »).
 - **Rôle de l'agent** : ce projet vise à produire une **application n-tiers web** et tous les éléments nécessaires à sa mise en production. L'agent décide **seul** des points techniques et des points fonctionnels ou métier déjà tranchés par le `.speckit` (§ « Prise de décision »), et doit **toujours être en mesure de justifier** ses choix lorsqu'il est challengé : une contrainte imposée est traçable dans `contraintes-techniques.md`, un choix propre à l'agent dans `choix-implementation.md`, une règle de gouvernance dans ce fichier.
-- **Suivi d'implémentation** : l'avancement du plan d'implémentation (phases, découpage en Pull Requests, statut) est tracé dans [`suivi-implementation.md`](suivi-implementation.md), distinct des cinq fichiers de spécification car il décrit l'état d'avancement du projet plutôt que son contenu cible. **Toute Pull Request qui livre une fonctionnalité du plan d'implémentation doit inclure, dans le même commit ou la même PR, la mise à jour de `suivi-implementation.md` reflétant son statut réel** (passage à « Réalisée », ajustement du statut de la phase, découpage précisé si la PR clarifie des lignes encore vagues). Une PR qui livre une ligne du plan sans mettre à jour ce fichier est **incomplète** et ne doit pas être proposée au merge en l'état.
+- **Suivi d'implémentation** : le plan d'implémentation (phases, découpage en chantiers) est décrit dans [`suivi-implementation.md`](suivi-implementation.md), distinct des cinq fichiers de spécification car il décrit le découpage du projet plutôt que son contenu cible. L'**état d'avancement** d'un chantier y est celui de son ticket GitHub, signalé par la mise en forme du numéro du ticket (cf. § « Suivi par tickets »). Toute Pull Request qui précise ou corrige le découpage d'un chantier inclut, dans le même commit ou la même PR, la mise à jour de `suivi-implementation.md` **et** du ticket correspondant.
 
 ### Qui décide du contenu
 
@@ -177,17 +177,43 @@ La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de 
 
 ## Issues
 
-Les Issues GitHub sont utilisées ponctuellement pour tracer :
+Les Issues GitHub (« tickets ») servent à :
 
-- des **bugs** à corriger
-- des **fonctionnalités** à implémenter dans le futur
+- tracer **chaque chantier** du plan d'implémentation (cf. § « Suivi par tickets » ci-dessous) ;
+- tracer ponctuellement des **bugs** à corriger ou des **fonctionnalités** à implémenter dans le futur, hors plan d'implémentation.
+
+## Suivi par tickets
+
+Chaque chantier listé dans [`suivi-implementation.md`](suivi-implementation.md) **doit** faire l'objet d'un ticket GitHub.
+
+- **Correspondance** : un ticket correspond à une seule Pull Request ; une Pull Request correspond à zéro ou un ticket (jamais plusieurs). « Ticket » désigne toute Issue GitHub : la règle vaut pour les chantiers du plan comme pour les bugs et fonctionnalités tracés hors plan.
+- **Chantiers hors suivi** : un chantier mené hors du plan d'implémentation peut faire l'objet d'un ticket, sans que ce soit obligatoire. Seuls les chantiers listés dans le suivi **doivent** avoir un ticket, à l'exception des chantiers de consolidation (ci-dessous).
+- **Création** : les tickets sont créés au moment du **découpage de la phase** en chantiers.
+- **Consolidation d'une phase** : lors de la consolidation d'une phase, un ticket est créé pour **chaque chantier identifié**, sans que le suivi ait besoin d'être mis à jour : ces chantiers ont un ticket obligatoire même s'ils ne sont pas listés dans le suivi.
+- **Pull Request** : la PR est associée à son ticket et le **ferme automatiquement au merge** (mot-clé `Closes #<numéro>` dans la description, cf. § « Lien entre Pull Requests et Issues »). Le ticket est donc clôturé quand la PR est fusionnée.
+- **Commentaire de clôture** : à la fusion de la PR, un commentaire est ajouté au ticket pour indiquer **comment l'implémentation a répondu au ticket** (ce qui a été réalisé au regard du contenu du ticket, y compris les écarts éventuels).
+- **Traçabilité jusqu'au ticket** : le commit final de la PR doit permettre de remonter, directement ou indirectement, jusqu'au ticket, par les seuls mécanismes natifs de GitHub (aucun dispositif ad hoc). La description de la PR devenant le corps du commit squashé (cf. § « Conventions de commit »), le mot-clé de fermeture qu'elle contient figure dans le commit : GitHub y résout le ticket, et le suffixe `(#<PR>)` ajouté au titre par le squash merge mène à la PR. La référence au ticket est donc **toujours dans la description de la PR**, jamais seulement dans un commentaire ou dans le titre.
+- **Statut** : l'état d'un chantier (à faire / fait) est **défini par l'état de son ticket** (ouvert / fermé). Le suivi le reflète uniquement par la mise en forme du numéro du ticket : **barré** (`~~#<numéro>~~`) lorsque le ticket est fermé, normal lorsqu'il est ouvert ; aucune autre colonne ou mention de statut.
+- **Contenu du suivi** : pour chaque chantier, le suivi indique le **numéro du ticket** et en décrit succinctement le contenu (en pratique, son titre).
+- **Cohérence suivi ↔ tickets** : toute correction apportée au découpage dans le suivi est **reportée dans le ticket concerné**, dans le respect de la définition du contenu d'un ticket ci-dessous.
+
+### Contenu d'un ticket
+
+Le ticket est plus précis que la ligne du suivi, sans pour autant être un plan d'implémentation. Il reprend **tout ce qui est connu au moment du découpage de la phase et peut influencer l'implémentation du chantier** :
+
+- la liste des **éléments à implémenter** ;
+- les **contraintes** applicables (règles du `.speckit/`, dépendances avec d'autres chantiers, périmètre exclu) ;
+- les **éléments techniques déjà statués** pendant ou avant le découpage de la phase.
+
+Le ticket **ne décrit jamais comment implémenter** le chantier : la rédaction d'un ticket n'implique **pas** la création du plan d'implémentation, qui relève de l'agent au moment de réaliser le chantier.
 
 ## Lien entre Pull Requests et Issues
 
-- Une Pull Request n'a **pas systématiquement** vocation à résoudre une ou plusieurs Issues.
-- Si le contenu d'une PR **répond** à une ou plusieurs Issues (correction d'un bug tracé, implémentation d'une fonctionnalité tracée), la PR **doit référencer** ces Issues (ex. mention `#<numéro>` dans la description).
-- Si une Issue est **entièrement traitée** par la PR, la référence utilise un mot-clé de fermeture automatique GitHub (`Closes`, `Fixes`, `Resolves #<numéro>`), afin que l'Issue soit **automatiquement clôturée au merge** de la PR.
-- Si une PR ne traite une Issue que **partiellement**, celle-ci est référencée sans mot-clé de fermeture (elle reste ouverte après le merge).
+- Une Pull Request référence **zéro ou un** ticket (cf. § « Suivi par tickets »), jamais plusieurs ; un ticket n'est traité que par une seule PR.
+- Une PR qui réalise un chantier du plan d'implémentation est associée à **son ticket**, qu'elle ferme au merge. Hors plan d'implémentation, une PR peut n'avoir aucun ticket.
+- Si une PR **répond** à un ticket (correction d'un bug tracé, implémentation d'une fonctionnalité tracée), elle **doit le référencer** (ex. mention `#<numéro>` dans la description).
+- Le ticket étant **entièrement traité** par sa PR, la référence utilise un mot-clé de fermeture automatique GitHub (`Closes`, `Fixes`, `Resolves #<numéro>`), afin qu'il soit **automatiquement clôturé au merge** de la PR.
+- Un ticket qui ne pourrait être traité que **partiellement** par une PR est à découper en plusieurs tickets, chacun traité entièrement par sa propre PR.
 
 ## Releases
 
@@ -218,6 +244,8 @@ Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
 Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le titre du commit squashé sur `main`.
 
 La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
+
+**Ce réglage ne doit pas être modifié** : il porte à la fois la qualité de l'historique et la traçabilité jusqu'au ticket (cf. § « Suivi par tickets »). Avec une autre valeur, le corps du commit squashé n'est plus la description de la PR (`COMMIT_MESSAGES` : concaténation des messages des commits intermédiaires ; `BLANK` : corps vide). Le mot-clé de fermeture (`Closes #<numéro>`) n'apparaît alors plus dans le commit final : celui-ci ne mène plus directement au ticket, seul le suffixe `(#<PR>)` du titre mène à la PR, et il faut passer par elle pour retrouver le ticket. La description, rédigée comme un message de commit, ne figure plus non plus dans l'historique de `main`. Toute modification de ce réglage exige donc de revoir ces règles.
 
 La description de toute Pull Request **suit toujours le template** du projet `.github` : le dépôt [`Tetram76/.github`](https://github.com/Tetram76/.github) du compte, qui porte les fichiers de santé communautaire par défaut de tous ses dépôts, dont `.github/pull_request_template.md`. Sections et consignes du template sont à suivre. Il n'est pas copié dans ce dépôt : il est relu à chaque PR.
 
