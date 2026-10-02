@@ -30,9 +30,8 @@ Repeat until Codex approves the current head commit (or the
 signature-false-positive exit applies, see "Exit"):
 
 ```text
-1. Wait for a Codex review on the current head commit.
-2. If Codex reacted with 👍 for that review (no findings), stop — approved,
-   see "Exit".
+1. Wait for Codex on the current head commit (watcher, Step 1).
+2. If Codex approved it (👍) and CI has completed, stop — see "Exit".
 3. Otherwise, for each unresolved review thread from Codex:
    a. Cross-check the finding (see "Cross-check" below).
    b. If valid: establish the root cause and fix it at the root (never a
@@ -46,8 +45,9 @@ signature-false-positive exit applies, see "Exit"):
 6. If commits were pushed, go to 1 (Codex re-reviews automatically).
 ```
 
-**The approval signal is the 👍 reaction Codex leaves when a review has no
-findings.** Check for it every cycle (Step 1).
+**The approval signal is the 👍 reaction Codex leaves on the PR description
+when it has nothing to report** — often without posting any review. The
+watcher (Step 1) checks for it every cycle.
 
 ### Watching (mandatory, applies to every step that waits)
 
@@ -59,11 +59,12 @@ active obligatoire »):
 - **One background watcher per PR** (`run_in_background`), never one script
   shared by several PRs: a shared script exits on the first PR's signal and
   silently stops watching the others.
-- It exits only on a terminal state of **its** PR: 👍 from
-  `chatgpt-codex-connector[bot]` dated after the head commit's push, a new
-  review/inline comment/issue comment from Codex, PR merged/closed, or timeout.
-  It also prints the final CI conclusions (`gh pr view <PR_NUMBER> --json
-  statusCheckRollup`), since the merge needs both.
+- It exits only on a terminal state of **its** PR: new feedback from Codex
+  (review, inline or top-level comment), PR merged/closed, the 👍 from
+  `chatgpt-codex-connector[bot]` dated after `<LAST_TRIGGER_AT>` once every CI
+  check has completed (the merge needs both), GitHub queries failing 5 times
+  in a row, or timeout (about one hour). It prints why (`exit: …`) and the
+  final CI conclusions.
 - A top-level Codex comment (e.g. "You have reached your Codex usage limits",
   which no review follows) only hands control back so it gets read; it is
   **never** an approval — only the 👍 is.
@@ -75,12 +76,13 @@ active obligatoire »):
 
 ```bash
 # Two timestamps, because a 👍 is a *state* and a review/comment is an *event*:
-# <HEAD_PUSHED_AT>  push of the head commit / last @codex review. A 👍 dated
-#                   after it approves the current head, and stays true.
+# <LAST_TRIGGER_AT> the push of the head commit, or the last `@codex review`
+#                   comment (Step 5). A 👍 dated after it approves the current
+#                   head, and stays true.
 # <HANDLED_UNTIL>   Codex events (reviews, comments) older than this were
-#                   already handled. Starts equal to <HEAD_PUSHED_AT>; when
-#                   re-arming without a new push (e.g. after reading a
-#                   usage-limit comment, or an approving review while CI still
+#                   already handled. Starts equal to <LAST_TRIGGER_AT>; when
+#                   re-arming without a new trigger (e.g. after reading a
+#                   usage-limit comment, or an approving comment while CI still
 #                   runs), set it to the time you finished handling, otherwise
 #                   the same event ends every new watcher at once.
 # A failed query (expired auth, network, rate limit) must never be read as
@@ -96,7 +98,7 @@ for i in $(seq 1 60); do
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
   # an issue for the API), not a ticket's
   if up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
-          ".[]|select(.content==\"+1\" and $bot and .created_at>=\"<HEAD_PUSHED_AT>\")") &&
+          ".[]|select(.content==\"+1\" and $bot and .created_at>=\"<LAST_TRIGGER_AT>\")") &&
      rv=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews" \
           ".[]|select($bot and .submitted_at>=\"<HANDLED_UNTIL>\")") &&
      cm=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments" \
@@ -126,87 +128,39 @@ echo "exit: $reason"
 gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
 ```
 
-### Step 1 — Wait for the review
+### Step 1 — Wait for Codex
 
-Codex reacts with 👀 within seconds and posts a review within a few minutes.
-Poll (e.g. every 30-60s, timeout ~15 min) until a review from Codex exists for
-the current head SHA:
+Codex reacts with 👀 within seconds; within a few minutes it either approves
+the head commit with a bare 👍 — often without posting any review — or posts
+a review with findings. So never wait for a review to appear: run the watcher
+above, `<LAST_TRIGGER_AT>` being the push just made (Step 3) or, on a cycle
+entered from Step 5 without a new push, the `@codex review` comment's
+`created_at`. Then act on its exit reason:
 
-```bash
-gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login=="chatgpt-codex-connector[bot]")] | sort_by(.submitted_at) | last'
-```
-
-The endpoint defaults to 30 reviews per page, and since Codex adds one on
-every push, a long-running PR can exceed that — comparing against a stale
-review would loop until timeout. `per_page=100` (the API's own max) avoids
-this in practice.
-
-If a PR ever exceeds 100 reviews, `--paginate` does work together with
-`--jq` (unlike `--slurp`, which `gh api` always rejects when combined with
-`--jq`) — but only for a filter that is safe to run independently on each
-page. The `sort_by(...) | last` aggregation above is **not** safe that way:
-under `--paginate`, `--jq` runs once per page, so it would print one "last"
-per page instead of the true last across the whole PR. Instead, keep `--jq`
-to a pure per-page filter and aggregate afterwards with a separate `jq`
-process:
-
-```bash
-gh api --paginate "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
-  --jq '.[] | select(.user.login=="chatgpt-codex-connector[bot]")' \
-  | jq -s 'sort_by(.submitted_at) | last'
-```
-
-Check `.commit_id` matches the PR's actual head SHA — read with
-`gh pr view <PR_NUMBER> --json headRefOid -q .headRefOid`, **not**
-`git rev-parse HEAD`. The local checkout can be behind if another actor
-pushed to the PR branch, or if this workspace hasn't fetched since the last
-push; comparing against a locally-stale SHA would make the loop accept or
-wait on a review of a commit that is no longer the PR's real head. Also
-check `.submitted_at` is newer than `<LAST_TRIGGER_AT>` — the timestamp of
-whichever event started this waiting cycle: the push that was just made
-(Step 3), or, on a cycle entered from Step 5 without a new push, the
-re-review request comment's `created_at`. Without this check, re-entering
-Step 1 after a no-push re-review request would immediately match the same
-already-seen review again (same commit SHA, unchanged `submitted_at`), and
-the loop would spin on a stale review instead of waiting for the fresh one
-it just asked for. If no matching review appears after the timeout, tell the
-user Codex review did not trigger and stop (check `@codex review` may need
-to be commented manually, or automatic review is disabled for the repo).
-Keep this review's `.submitted_at` as `<REVIEW_SUBMITTED_AT>` for the next
-check.
-
-Check for the 👍 approval reaction **from Codex, dated to this review**:
-
-```bash
-gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
-  --jq '[.[] | select(.content=="+1" and .user.login=="chatgpt-codex-connector[bot]" and .created_at >= "<REVIEW_SUBMITTED_AT>")] | length'
-```
-
-This endpoint also defaults to 30 reactions per page (max 100); `per_page=100`
-avoids missing a fresh Codex 👍 on a PR with many prior reactions, for the
-same reason as the reviews query above. If a PR ever exceeds 100 reactions,
-apply the same fix as above: `--paginate` with a per-page-safe `--jq` (drop
-the aggregating `| length`, keep only the `select(...)`), piped into an
-external `jq -s 'length'` to count across all pages.
+- `approved, CI done` → "Exit" (if a CI check failed, handle it first: the
+  merge needs it green).
+- `new Codex feedback` → review threads: Step 2. A top-level comment: read
+  it. A usage-limit message means no review is coming: tell the user and
+  stop. A comment reporting nothing to fix: re-arm with `<HANDLED_UNTIL>` set
+  to now and keep waiting for the 👍.
+- `PR MERGED` / `PR CLOSED`, `GitHub queries keep failing`, or `timeout` (no
+  review was triggered: `@codex review` may need to be commented manually, or
+  automatic review is disabled for the repo) → tell the user and stop.
 
 A PR can carry a stale 👍 from an earlier head, or a 👍/comment/review from a
 human or an unrelated bot whose login happens to contain "codex" (a
-collaborator called e.g. `codex-fan`, or another integration). Every identity
-check in this skill — this reaction gate, the review lookup above, and the
-thread filter in Step 2 — therefore matches the **exact** bot login rather
-than a substring, so none of them can be satisfied, or have their result
-skewed (e.g. `<REVIEW_SUBMITTED_AT>` picking up someone else's later review),
-by an unrelated account. The exact string differs by API: REST endpoints
-(reviews, reactions — used above) report bot accounts as
-`chatgpt-codex-connector[bot]`, the login named in
+collaborator called e.g. `codex-fan`, or another integration). The watcher
+filters on the trigger time for the first case, and every identity check in
+this skill — the watcher's queries and the thread filter in Step 2 —
+matches the **exact** bot login rather than a substring, so none of them can
+be satisfied by an unrelated account. The exact string differs by API: REST
+endpoints (reviews, reactions, comments — used by the watcher) report bot
+accounts as `chatgpt-codex-connector[bot]`, the login named in
 `.speckit/gestion-projet.md`; GraphQL's `author.login` on review thread
 comments (Step 2) reports the same bot without the `[bot]` suffix, as
 `chatgpt-codex-connector` — a documented inconsistency between GitHub's REST
 and GraphQL representations of App bots, confirmed against this PR's live
 data.
-If this is `> 0`, the review found nothing to fix — go to "Exit". Otherwise
-continue to Step 2.
 
 ### Step 2 — List threads and make fixes
 
