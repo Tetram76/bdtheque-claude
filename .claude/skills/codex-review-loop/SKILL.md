@@ -139,10 +139,12 @@ entered from Step 5 without a new push, the `@codex review` comment's
 
 - `approved, CI done` → "Exit" (if a CI check failed, handle it first: the
   merge needs it green).
-- `new Codex feedback` → review threads: Step 2. A top-level comment: read
-  it. A usage-limit message means no review is coming: tell the user and
-  stop. A comment reporting nothing to fix: re-arm with `<HANDLED_UNTIL>` set
-  to now and keep waiting for the 👍.
+- `new Codex feedback` → if it opened review threads: Step 2. Anything else
+  (a top-level comment, or a review without threads): read it. A usage-limit
+  message means no review is coming: tell the user and stop. Feedback
+  reporting nothing to fix: re-arm with `<HANDLED_UNTIL>` set to now and keep
+  waiting for the 👍 — never answer it with `@codex review`, which would pay
+  for a needless extra review.
 - `PR MERGED` / `PR CLOSED`, `GitHub queries keep failing`, or `timeout` (no
   review was triggered: `@codex review` may need to be commented manually, or
   automatic review is disabled for the repo) → tell the user and stop.
