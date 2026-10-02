@@ -355,6 +355,7 @@ Ces règles sont **globales** : elles s'appliquent à l'interface web comme à l
 L'application met à disposition d'un **agent IA** un outil lui permettant d'interagir avec elle, en complément de l'interface web. L'outil offre trois familles de fonctionnalités :
 
 - **Aide à la saisie** : assister l'utilisateur dans la saisie des données de l'application. L'agent peut aussi **écrire en base**, mais uniquement **à la demande de l'utilisateur**.
+  - **Fonction principale attendue** : répondre à la demande « à partir de cet ISBN, compléter ou saisir la fiche de l'album et de l'édition (visuels inclus), de la série si l'album en fait partie, et des auteurs ».
 - **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
 - **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
 
