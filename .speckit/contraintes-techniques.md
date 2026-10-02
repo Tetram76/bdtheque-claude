@@ -1,6 +1,6 @@
 # Contraintes Techniques
 
-Ce fichier recense les **contraintes techniques imposées** à l'application et à son déploiement — par l'utilisateur, des normes/lois, ou une réalité externe non négociable (système existant à migrer, environnement d'hébergement donné, etc.). L'agent n'y ajoute rien de sa propre initiative : ses propres choix techniques, délibérés entre plusieurs options ou non, sont documentés dans `choix-implementation.md`.
+Ce fichier recense les **contraintes techniques imposées** à l'application et à son déploiement — par l'utilisateur, des normes/lois, ou une réalité externe non négociable (système existant à migrer, environnement d'hébergement donné, etc.). Il peut aussi mentionner, explicitement, des **non-contraintes** (ouvertures de réflexion voulues par l'utilisateur). L'agent n'y ajoute rien de sa propre initiative : ses propres choix techniques, délibérés entre plusieurs options ou non, sont documentés dans `choix-implementation.md`.
 Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
 
 ---
@@ -42,6 +42,11 @@ Seul le conteneur `frontend` est exposé : `api` n'est jamais exposé, le `front
 ## Indépendance de l'outil pour agents IA
 
 L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour agents IA) doit être **indépendante de l'API** : déployer l'API ne doit pas impliquer de déployer l'outil pour agents IA.
+
+**Non-contraintes** (ouvertures de réflexion explicites, laissées au choix de l'agent) :
+
+- Le déploiement de l'outil sous forme de **conteneur**, comme le reste de l'application, est souhaitable mais **non imposé**.
+- L'**exposition** de l'outil au-delà de `frontend` (seul conteneur exposé, cf. § Architecture des tiers) est **à envisager** si la contrainte d'exposition impose une surcharge disproportionnée, mais **non souhaitée** dans l'idéal.
 
 ## Déploiement
 
