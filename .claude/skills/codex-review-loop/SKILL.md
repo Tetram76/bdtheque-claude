@@ -300,10 +300,15 @@ resolve threads yet.
 Never push while a Codex review is running — its 👀 is on the PR:
 
 ```bash
-# same all-page counting as the watcher
+# same all-page counting as the watcher; pipefail, so that a failed query
+# fails the command instead of printing a misleading 0
+set -o pipefail
 gh api --paginate "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
   --jq '.[]|select(.content=="eyes" and .user.login=="chatgpt-codex-connector[bot]")' | wc -l
 ```
+
+If the command fails, whether a review is running is unknown: do not push,
+retry the check.
 
 If this is `> 0`, wait for the verdict first (watcher): a push made during a
 review gets no review of its own, and the 👍 that ends the running review
