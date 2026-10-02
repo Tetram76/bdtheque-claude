@@ -134,7 +134,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 > **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée ET que Codex l'a approuvée.**
 
 - Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI) **et** à l'**approbation de la revue Codex** (voir « Revue de code » ci-dessous).
-- Les contrôles de non-régression **doivent être exécutés localement avant le push** sur la branche de PR — pour détecter les régressions au plus tôt et ne pas attendre le CI distant.
+- Les contrôles de non-régression **doivent être exécutés localement avant tout push** sur la branche de PR qui modifie un élément qu'ils vérifient (code, projets et configuration de la solution, workflow CI, fichiers Docker) — pour détecter les régressions au plus tôt et ne pas attendre le CI distant. Un push qui ne modifie que de la documentation (`.speckit/`, fichiers Markdown, skills) en est dispensé : aucun de ces contrôles ne la vérifie, et le CI reste le filet de sécurité.
 - Le CI (GitHub Actions) constitue le filet de sécurité final et le verrou technique sur le merge.
 - La réussite de la CI est **imposée techniquement** par le Ruleset GitHub (required status checks) : une PR dont un check requis n'a pas réussi ne peut pas être fusionnée.
 - L'approbation de Codex n'est imposée par aucun mécanisme GitHub : elle reste une contrainte de processus, que l'agent vérifie avant tout merge.
