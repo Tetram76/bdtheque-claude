@@ -133,18 +133,26 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 
 ### Revue Codex (bloquante)
 
-Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a réagi par un 👍 sur la PR pour le commit de tête, signe qu'une revue n'a rien trouvé à corriger.
+Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a donné sa **validation finale** par une réaction 👍 sur la **description de la PR** pour le commit de tête, signe qu'une revue n'a rien trouvé à corriger.
 
-Traitement de chaque retour d'une revue Codex :
+#### Statut des retours de Codex
 
-1. **Contre-vérification** du retour (pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/`, des bonnes pratiques applicables, et faisabilité du scénario dans le contexte réel de l'application) — selon les règles générales ci-dessus, y compris le critère « à l'épreuve de l'utilisateur ».
-2. **Commit dédié** pour chaque retour validé (un commit par retour appliqué).
-3. **Réponse systématique** à chaque retour, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
-4. **Appréciation** de chaque commentaire de Codex par une réaction : 👍 s'il était utile, 👎 sinon (Codex le demande dans chacun de ses commentaires).
-5. **Résolution** de chaque conversation de revue une fois tous ses retours traités.
-6. **Attente de la revue suivante** : après le push des commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
+Codex ne connaît pas le contexte : il se contente de relire les diffs. L'agent qui traite les retours est le **seul à connaître le contexte**, donc le seul à pouvoir décider ; et, comme pour toute décision technique (cf. § Prise de décision), il en est le **seul décisionnaire**. Les retours de Codex ne sont que des **indications**, à intégrer à sa réflexion — jamais des ordres.
 
-Ce cycle (revue → contre-vérification → commits → réponses → appréciation → résolution des conversations → attente de la revue suivante) est répété jusqu'à réaction 👍 de Codex sur le commit de tête. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
+#### Traiter un retour
+
+1. **Contre-vérifier**, toujours et sans exception : pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/` et des bonnes pratiques applicables, faisabilité du scénario dans le contexte réel de l'application, critère « à l'épreuve de l'utilisateur » (cf. règles générales ci-dessus). Un retour non vérifié n'est ni appliqué ni rejeté.
+2. **Corriger à la racine** un retour validé : établir la **cause racine** du problème, et la corriger, jamais un correctif de surface (« sparadrap ») qui ne traite que le symptôme relevé. Un **commit dédié** par retour appliqué.
+3. **Répondre à chaque retour**, toujours, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
+4. **Apprécier chaque commentaire** de Codex, toujours, par une réaction : 👍 s'il était utile, 👎 sinon (Codex le demande dans chacun de ses commentaires).
+5. **Résoudre** chaque conversation de revue une fois tous ses retours traités.
+
+#### Cycle
+
+Le traitement est répété **tant que Codex émet des retours**, jusqu'à sa validation finale (👍 sur la description de la PR pour le commit de tête). Le merge n'intervient qu'ensuite, en complément de la réussite du CI.
+
+- Après le push de commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
+- Si **tous les retours sont rejetés sans ajouter de commit**, Codex ne relance pas la revue : l'agent la **force** par un commentaire `@codex review` sur la PR.
 
 La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.claude/skills/codex-review-loop/`.
 
@@ -192,7 +200,7 @@ Le **titre de la Pull Request** doit également respecter ce format — c'est lu
 
 La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
 
-La description de toute Pull Request **suit toujours le template** du projet `.github` (dépôt [`Tetram76/.github`](https://github.com/Tetram76/.github), fichier `.github/pull_request_template.md`), sections et consignes comprises. Ce template n'étant pas copié dans le dépôt, il est relu à chaque PR.
+La description de toute Pull Request **suit toujours le template** du projet `.github` : le dépôt [`Tetram76/.github`](https://github.com/Tetram76/.github) du compte, qui porte les fichiers de santé communautaire par défaut de tous ses dépôts, dont `.github/pull_request_template.md`. Sections et consignes du template sont à suivre. Il n'est pas copié dans ce dépôt : il est relu à chaque PR.
 
 Exemples :
 

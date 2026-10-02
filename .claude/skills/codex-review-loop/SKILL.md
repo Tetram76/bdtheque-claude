@@ -34,11 +34,13 @@ Repeat until Codex approves the current head commit:
    see "Exit".
 3. Otherwise, for each unresolved review thread from Codex:
    a. Cross-check the finding (see "Cross-check" below).
-   b. If valid: make the fix in one dedicated commit.
+   b. If valid: establish the root cause and fix it at the root (never a
+      band-aid), in one dedicated commit.
 4. If any fix commits were made, push them — do not reply to or resolve any
    thread until the push has succeeded.
 5. For each thread processed in step 3 (i.e. steps a/b):
-   c. Reply to the thread (fix applied, or justified rejection).
+   c. Reply to the thread (fix applied, or justified rejection), rate the
+      Codex comment (👍/👎).
    d. Resolve the thread.
 6. If commits were pushed, go to 1 (Codex re-reviews automatically).
 ```
@@ -255,6 +257,13 @@ integration, any `@codex` mention followed by anything other than exactly
 `review` starts a cloud task using the PR as context (i.e. an unwanted fix
 attempt) — only the dedicated top-level PR comment in Step 5, containing
 exactly `@codex review` and nothing else, should ever contain that mention.
+
+**c'. Rate Codex's comment** — always, as Codex asks in every comment: 👍
+(`+1`) if the finding was useful, 👎 (`-1`) if not:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/comments/<COMMENT_ID>/reactions -f content="+1"
+```
 
 **d. Resolve the thread**, once its reply is posted:
 
