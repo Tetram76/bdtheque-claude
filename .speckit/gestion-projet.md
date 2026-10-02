@@ -140,10 +140,11 @@ Traitement de chaque retour d'une revue Codex :
 1. **Contre-vérification** du retour (pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/`, des bonnes pratiques applicables, et faisabilité du scénario dans le contexte réel de l'application) — selon les règles générales ci-dessus, y compris le critère « à l'épreuve de l'utilisateur ».
 2. **Commit dédié** pour chaque retour validé (un commit par retour appliqué).
 3. **Réponse systématique** à chaque retour, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
-4. **Résolution** de chaque conversation de revue une fois tous ses retours traités.
-5. **Attente de la revue suivante** : après le push des commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
+4. **Appréciation** de chaque commentaire de Codex par une réaction : 👍 s'il était utile, 👎 sinon (Codex le demande dans chacun de ses commentaires).
+5. **Résolution** de chaque conversation de revue une fois tous ses retours traités.
+6. **Attente de la revue suivante** : après le push des commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
 
-Ce cycle (revue → contre-vérification → commits → réponses → résolution des conversations → attente de la revue suivante) est répété jusqu'à réaction 👍 de Codex sur le commit de tête. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
+Ce cycle (revue → contre-vérification → commits → réponses → appréciation → résolution des conversations → attente de la revue suivante) est répété jusqu'à réaction 👍 de Codex sur le commit de tête. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
 
 La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.claude/skills/codex-review-loop/`.
 
