@@ -26,7 +26,8 @@ command.
 
 ## Loop
 
-Repeat until Codex approves the current head commit:
+Repeat until Codex approves the current head commit (or the
+signature-false-positive exit applies, see "Exit"):
 
 ```text
 1. Wait for a Codex review on the current head commit.
@@ -34,11 +35,13 @@ Repeat until Codex approves the current head commit:
    see "Exit".
 3. Otherwise, for each unresolved review thread from Codex:
    a. Cross-check the finding (see "Cross-check" below).
-   b. If valid: make the fix in one dedicated commit.
+   b. If valid: establish the root cause and fix it at the root (never a
+      band-aid), in one dedicated commit.
 4. If any fix commits were made, push them — do not reply to or resolve any
    thread until the push has succeeded.
 5. For each thread processed in step 3 (i.e. steps a/b):
-   c. Reply to the thread (fix applied, or justified rejection).
+   c. Reply to the thread (fix applied, or justified rejection), rate the
+      Codex comment (👍/👎).
    d. Resolve the thread.
 6. If commits were pushed, go to 1 (Codex re-reviews automatically).
 ```
@@ -256,6 +259,13 @@ integration, any `@codex` mention followed by anything other than exactly
 attempt) — only the dedicated top-level PR comment in Step 5, containing
 exactly `@codex review` and nothing else, should ever contain that mention.
 
+**c'. Rate Codex's comment** — always, as Codex asks in every comment: 👍
+(`+1`) if the finding was useful, 👎 (`-1`) if not:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/comments/<COMMENT_ID>/reactions -f content="+1"
+```
+
 **d. Resolve the thread**, once its reply is posted:
 
 ```bash
@@ -285,8 +295,19 @@ same review this cycle already found insufficient), then return to Step 1.
 If that still produces no new review and nothing changed, stop and report
 the situation to the user instead of looping forever.
 
+**Signature false positive.** Codex may report unsigned commits. If GitHub
+shows the commits as "Verified", it is a false positive: handle it like any
+rejected finding (justified reply, 👎, resolve), consider that Codex has
+nothing else to report, and request a fresh pass with `@codex review`. At most
+**3** such requests: if Codex still raises only that same false positive, with
+no other comment, see "Exit".
+
 ### Exit
 
 The Codex gate is satisfied once Codex has reacted 👍 to the PR for the
 current head commit. Merging still requires the CI checks to also pass (see
 `.speckit/gestion-projet.md`).
+
+Exception: after 3 requests where Codex repeated only a verified signature
+false positive (see Step 5) with no other comment, the PR is considered
+validated by Codex even without the 👍.

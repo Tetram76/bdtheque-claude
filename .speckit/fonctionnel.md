@@ -315,7 +315,9 @@ L'interface doit offrir un rendu **visuellement premium**, clairement au-dessus 
 
 La page d'accueil est un **dashboard public** présentant les statistiques principales de la collection. Elle n'est pas personnalisée (pas d'authentification sur la partie consultation). Certaines statistiques pourront être présentées sous forme de **graphiques** lorsque c'est pertinent.
 
-Les statistiques du dashboard incluent notamment (liste non exhaustive) :
+Le détail exact du dashboard reste à définir. Étant public, il n'affiche que des statistiques de niveau **public** (cf. § Règles d'accès) : il est considéré comme **purement public** dans un premier temps, sans variante pour une session authentifiée. Afficher aussi des données privées dans une session authentifiée est une ouverture **envisagée**, si une raison particulière le justifiait, mais **rien n'est statué** : elle n'est pas à implémenter tant qu'elle n'est pas décidée (YAGNI).
+
+Les statistiques du dashboard incluent notamment, sous réserve de ce niveau d'accès (liste non exhaustive) :
 
 - **Compteurs globaux** : nombre total d'albums, nombre total de séries.
 - **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur.
@@ -331,7 +333,7 @@ L'application se compose de trois parties distinctes :
    - **Recherche facilement accessible** à tout moment depuis n'importe quelle page de la partie consultation.
    - **Recherche simple** : par type d'entité (ex. rechercher des albums, des auteurs, des séries, etc.).
    - **Recherche avancée** : exploite les **liens entre entités** pour des requêtes cross-domaines (ex. albums d'un auteur donné, séries d'un éditeur, etc.).
-   - **États et statistiques** : rapports et indicateurs sur la collection (à préciser).
+   - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
    - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, etc.
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. (les sources concrètes restent à définir).
@@ -339,6 +341,28 @@ L'application se compose de trois parties distinctes :
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
    - Le contenu peut être **riche** : texte, captures d'écran, tableaux, exemples, etc. — pas seulement de courts textes explicatifs.
+
+## Règles d'accès
+
+Ces règles sont **globales** : elles s'appliquent à l'interface web comme à l'interface pour agents IA, une fonctionnalité ayant les mêmes restrictions d'accès quelle que soit l'interface qui la propose.
+
+- **Recherche et consultation** : publiques. L'authentification n'est pas requise, mais n'est pas interdite pour autant.
+- **Analyses et statistiques** : deux niveaux d'accès, **public** et **privé** (réservé au compte administrateur). Le niveau est choisi **au cas par cas**, en fonction des données accédées et exposées par chaque analyse ou statistique.
+- **Écriture de données** (saisie, modification, suppression, paramétrage) : réservée au **compte administrateur**, seul compte autorisé à modifier les données.
+
+## Interface pour agents IA
+
+L'application met à disposition d'un **agent IA** un outil lui permettant d'interagir avec elle, en complément de l'interface web. Cet outil n'est pas lié à une fonction du frontend : il est utilisable par **n'importe quel agent conversationnel**. L'intégration d'un **agent IA dans le frontend** est par ailleurs **envisagée** ; rien n'est statué à ce stade (YAGNI). L'outil offre trois familles de fonctionnalités :
+
+- **Aide à la saisie** : assister l'utilisateur dans la saisie des données de l'application. L'agent peut aussi **écrire en base**, mais uniquement **à la demande de l'utilisateur**.
+  - **Fonction principale attendue** : répondre à la demande « à partir de cet ISBN, compléter ou saisir la fiche de l'album et de l'édition (visuels inclus), de la série si l'album en fait partie, et des auteurs ». L'**éditeur** et la **collection éditeur** de l'édition font aussi partie des données à saisir ou compléter.
+  - Les données proviennent de **plusieurs sources externes** (jamais d'une seule). La **source principale** reste le **site de l'éditeur** ; les sources concrètes seront arrêtées à l'ouverture de la phase d'implémentation.
+- **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
+- **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
+
+Les règles d'accès sont celles de l'application (cf. § Règles d'accès) : l'outil n'a pas de règles propres, et les fonctionnalités équivalentes de l'interface web ont les mêmes restrictions.
+
+<!-- À préciser : périmètre exact de l'aide à la saisie, cas d'usage détaillés, analyses et statistiques attendues. -->
 
 ## Présentation des erreurs
 

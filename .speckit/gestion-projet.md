@@ -6,9 +6,27 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 
 ## Gouvernance documentaire
 
-- **Source de vérité absolue** : le dossier [`.speckit/`](.) est la source de vérité absolue du projet. Il prime sur toute autre information : historique de conversation, supposition, connaissance générale de l'agent. Aucune décision ne peut le contredire sans accord explicite de l'utilisateur. En cas d'ambiguïté ou de silence, la décision suit la distinction technique/fonctionnel de « Prise de décision » ci-dessous ; un choix pris seul par l'agent est documenté dans le fichier concerné.
-- **Autonomie de l'agent** : l'agent prend en **totale autonomie** les décisions techniques, ainsi que les décisions fonctionnelles ou métier que le `.speckit` existant permet déjà de trancher (modalités détaillées dans « Prise de décision » ci-dessous). Les autres décisions fonctionnelles ou métier (véritable changement d'exigence, ambiguïté) relèvent de l'utilisateur : soit par sa mise à jour directe des fichiers `.speckit/` pour exprimer ses besoins et exigences, soit par sa réponse explicite à un point soumis par l'agent.
-- **Suivi d'implémentation** : l'avancement du plan d'implémentation (phases, découpage en Pull Requests, statut) est tracé dans [`suivi-implementation.md`](suivi-implementation.md), distinct des cinq fichiers de spécification ci-dessus car il décrit l'état d'avancement du projet plutôt que son contenu cible. **Toute Pull Request qui livre une fonctionnalité du plan d'implémentation doit inclure, dans le même commit ou la même PR, la mise à jour de `suivi-implementation.md` reflétant son statut réel** (passage à « Réalisée », ajustement du statut de la phase, découpage précisé si la PR clarifie des lignes encore vagues). Une PR qui livre une ligne du plan sans mettre à jour ce fichier est **incomplète** et ne doit pas être proposée au merge en l'état.
+- **Source de vérité absolue** : le dossier [`.speckit/`](.) est la source de vérité absolue et contraignante du projet. Il prime sur toute autre information : historique de conversation, supposition, connaissance générale de l'agent, y compris `AGENTS.md`, qui n'en est que le point d'entrée. Chaque règle qu'il contient — gouvernance, fonctionnel, modèle métier ou contraintes techniques — a la **même force obligatoire**, sans distinction de « majeur » ou « mineur » : un manquement, même ponctuel ou sur un point jugé secondaire, est une violation, pas un détail.
+- **Primauté sans entrave** : cette primauté ne doit pas entraver l'efficacité de l'agent. Elle s'applique dans le respect des contraintes et des modalités que le speckit définit lui-même, notamment l'autonomie de l'agent sur les points techniques (§ « Prise de décision »).
+- **Aucune contradiction** : aucune décision, ligne de code ou réponse ne peut contredire le `.speckit` sans accord explicite de l'utilisateur — sans exception, sans oubli, sans arbitrage silencieux de l'agent au profit de sa propre appréciation. En cas d'ambiguïté ou de silence : technique → l'agent décide et documente son choix dans le fichier concerné ; fonctionnel ou métier → décision de l'utilisateur (§ « Prise de décision »).
+- **Rôle de l'agent** : ce projet vise à produire une **application n-tiers web** et tous les éléments nécessaires à sa mise en production. L'agent décide **seul** des points techniques et des points fonctionnels ou métier déjà tranchés par le `.speckit` (§ « Prise de décision »), et doit **toujours être en mesure de justifier** ses choix lorsqu'il est challengé : une contrainte imposée est traçable dans `contraintes-techniques.md`, un choix propre à l'agent dans `choix-implementation.md`, une règle de gouvernance dans ce fichier.
+- **Suivi d'implémentation** : l'avancement du plan d'implémentation (phases, découpage en Pull Requests, statut) est tracé dans [`suivi-implementation.md`](suivi-implementation.md), distinct des cinq fichiers de spécification car il décrit l'état d'avancement du projet plutôt que son contenu cible. **Toute Pull Request qui livre une fonctionnalité du plan d'implémentation doit inclure, dans le même commit ou la même PR, la mise à jour de `suivi-implementation.md` reflétant son statut réel** (passage à « Réalisée », ajustement du statut de la phase, découpage précisé si la PR clarifie des lignes encore vagues). Une PR qui livre une ligne du plan sans mettre à jour ce fichier est **incomplète** et ne doit pas être proposée au merge en l'état.
+
+### Qui décide du contenu
+
+- **`contraintes-techniques.md` et `fonctionnel.md`** : l'utilisateur est le **seul décisionnaire** de leur contenu. L'agent n'y modifie, n'y ajoute et n'en retire rien de sa propre initiative : tout changement exige l'accord explicite préalable de l'utilisateur.
+- **`modele-metier.md`** : l'utilisateur en est le **décisionnaire principal**, puisqu'il choisit les données à utiliser et les règles qui les régissent (entités, attributs, relations, contraintes d'intégrité) : l'agent n'y modifie rien de cet ordre sans son accord explicite. L'agent peut en revanche le **compléter avec des informations plus techniques** (ex. type de stockage d'un attribut, précisions de représentation) sans accord préalable, à condition de ne modifier ni les données ni les règles choisies par l'utilisateur.
+- **`choix-implementation.md`** : l'agent peut **à tout moment remettre en cause** ce qui y est noté (changer, remplacer ou retirer un choix) sans accord préalable, dès lors que cela respecte `contraintes-techniques.md` et `fonctionnel.md`, qui prévalent. Il documente alors le nouveau choix (cf. § « Prise de décision » pour l'information de l'utilisateur lorsque l'impact est visible sur le livrable).
+
+### Mise à jour du .speckit
+
+Mettre à jour le fichier concerné **immédiatement et sans attendre** dès que l'utilisateur fournit une exigence, une contrainte, une règle ou toute information relevant du périmètre d'un des fichiers. Ne jamais laisser une information pertinente uniquement dans le fil de conversation.
+
+- **Le speckit n'est pas un historique de décisions.** Les fichiers `.speckit/` sont des **documents de référence**, pas des journaux : ils ne contiennent que l'état actuel et cible du projet — jamais d'historique, de dates, ni de traces de décisions successives ou de leur évolution.
+- Toute nouvelle information est **intégrée dans le contenu existant** (mise à jour d'une section, enrichissement d'une définition, ajout dans la liste appropriée), jamais ajoutée en bas de fichier comme une entrée de log.
+- En cas de changement de décision, l'**ancienne information est remplacée**, pas conservée à côté de la nouvelle avec une mention de type « anciennement », « auparavant » ou « suite à ».
+- Le fichier doit rester cohérent, lisible et structuré comme une documentation vivante.
+- **Exception : `journal-evenements.md`** est un journal, pas un document de référence : il déroge à ces règles, qui sont documentées dans le fichier lui-même.
 
 ## Objectifs du projet
 
@@ -34,18 +52,17 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 ## Maintenance du .speckit
 
 - Les fichiers `.speckit/` sont des **documents vivants** : l'agent peut les restructurer à tout moment (fusion, split, déplacement de sections, création de nouvelles sections) si cela améliore leur clarté ou leur cohérence.
-- Toute restructuration est faite sans validation préalable, dans le même esprit d'autonomie qui régit les décisions techniques. Elle porte sur la **forme** uniquement : elle ne modifie, n'ajoute ni ne retire aucun contenu dont l'utilisateur est seul décisionnaire (cf. `AGENTS.md` § « Qui décide du contenu »).
-- Le speckit n'est pas un historique de décisions, à l'exception de `journal-evenements.md` (cf. `AGENTS.md` § « Mise à jour du .speckit » pour le détail de cette règle et de son exception — non dupliqué ici pour éviter toute divergence entre les deux fichiers).
+- Toute restructuration est faite sans validation préalable, dans le même esprit d'autonomie qui régit les décisions techniques. Elle porte sur la **forme** uniquement : elle ne modifie, n'ajoute ni ne retire aucun contenu dont l'utilisateur est seul décisionnaire (cf. § « Qui décide du contenu » ci-dessus).
 
 ## Prise de décision
 
 - La décision d'agir seul ou de solliciter l'utilisateur dépend de la nature du point traité :
-  - **Point technique** (architecture, implémentation, outillage, choix de bibliothèque, performance, sécurité, etc.) : l'agent décide en **totale autonomie**.
+  - **Point technique** (architecture, implémentation, outillage, choix de bibliothèque, performance, sécurité, etc.) : l'agent décide en **totale autonomie** ; cette autonomie **exclut de lui poser une question technique** au seul motif d'un doute, de plusieurs options ou d'un `.speckit` incomplet : l'agent décide et documente son choix dans `choix-implementation.md`, sans demander confirmation.
   - **Point fonctionnel ou métier** (règle métier, comportement attendu, contenu applicatif — y compris le contenu de `fonctionnel.md`/`modele-metier.md`) :
     - Si le `.speckit` existant **permet déjà de trancher** (application d'une exigence déjà documentée, sans changement de règle) : l'agent décide en autonomie, en s'appuyant explicitement sur le passage du `.speckit` qui tranche.
     - Si le point constitue un **véritable changement d'exigence**, ou reste **ambigu** au regard du `.speckit` existant : décision **explicite de l'utilisateur**. L'agent effectue la contre-vérification (pertinence, faits vérifiés) mais **ne tranche pas seul** — il soumet le point à l'utilisateur, **un point à la fois**, et applique la décision reçue avant de passer au point suivant.
   - Cette règle s'applique aussi bien au traitement des retours de revue de PR (cf. « Revue de code ») qu'à toute évolution du contenu fonctionnel/métier du `.speckit/` proposée à l'initiative de l'agent.
-- Lorsque, sur un point technique, les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher.
+- Lorsque, sur un point technique, les pour et les contre s'équilibrent et qu'il n'existe objectivement pas de meilleur choix, l'agent **peut solliciter l'avis de l'utilisateur** avant de trancher — exception étroite, qui ne couvre ni le simple doute ni la présence de plusieurs options dès que l'une est objectivement préférable.
 - Les choix techniques ne sont **pas gravés dans le marbre** : tout choix peut être remis en cause si une nouvelle contrainte le justifie.
 - Lorsqu'un changement technique a un **impact visible sur le livrable** (comportement, interface, données, déploiement), la transition doit être **transparente pour l'utilisateur** : l'agent informe explicitement de ce qui change et de ce qui est impacté.
 
@@ -134,17 +151,27 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 
 ### Revue Codex (bloquante)
 
-Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a réagi par un 👍 sur la PR pour le commit de tête, signe qu'une revue n'a rien trouvé à corriger.
+Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a donné sa **validation finale** par une réaction 👍 sur la **description de la PR** pour le commit de tête, signe qu'une revue n'a rien trouvé à corriger.
 
-Traitement de chaque retour d'une revue Codex :
+#### Statut des retours de Codex
 
-1. **Contre-vérification** du retour (pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/`, des bonnes pratiques applicables, et faisabilité du scénario dans le contexte réel de l'application) — selon les règles générales ci-dessus, y compris le critère « à l'épreuve de l'utilisateur ».
-2. **Commit dédié** pour chaque retour validé (un commit par retour appliqué).
-3. **Réponse systématique** à chaque retour, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
-4. **Résolution** de chaque conversation de revue une fois tous ses retours traités.
-5. **Attente de la revue suivante** : après le push des commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
+Codex ne connaît pas le contexte : il se contente de relire les diffs. L'agent qui traite les retours est le **seul à connaître le contexte**, donc le seul à pouvoir décider ; et, comme pour toute décision technique (cf. § Prise de décision), il en est le **seul décisionnaire**. Les retours de Codex ne sont que des **indications**, à intégrer à sa réflexion — jamais des ordres.
 
-Ce cycle (revue → contre-vérification → commits → réponses → résolution des conversations → attente de la revue suivante) est répété jusqu'à réaction 👍 de Codex sur le commit de tête. Le merge n'intervient qu'une fois cette approbation obtenue, en complément de la réussite du CI.
+#### Traiter un retour
+
+1. **Contre-vérifier**, toujours et sans exception : pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/` et des bonnes pratiques applicables, faisabilité du scénario dans le contexte réel de l'application, critère « à l'épreuve de l'utilisateur » (cf. règles générales ci-dessus). Un retour non vérifié n'est ni appliqué ni rejeté.
+2. **Corriger à la racine** un retour validé : établir la **cause racine** du problème, et la corriger, jamais un correctif de surface (« sparadrap ») qui ne traite que le symptôme relevé. Un **commit dédié** par retour appliqué.
+3. **Répondre à chaque retour**, toujours, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
+4. **Apprécier chaque commentaire** de Codex, toujours, par une réaction : 👍 s'il était utile, 👎 sinon (Codex le demande dans chacun de ses commentaires).
+5. **Résoudre** chaque conversation de revue une fois tous ses retours traités.
+
+#### Cycle
+
+Le traitement est répété **tant que Codex émet des retours**, jusqu'à sa validation finale (👍 sur la description de la PR pour le commit de tête). Le merge n'intervient qu'ensuite, en complément de la réussite du CI.
+
+- Après le push de commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
+- Si **tous les retours sont rejetés sans ajouter de commit**, Codex ne relance pas la revue : l'agent la **force** par un commentaire `@codex review` sur la PR.
+- **Faux positif sur la signature des commits** : Codex peut signaler des commits non signés. Si la vérification (statut « Verified » côté GitHub) établit un faux positif, il se traite comme tout retour rejeté (réponse justifiée, appréciation 👎, résolution), et Codex est alors considéré comme n'ayant **plus rien d'autre à remonter**. L'agent relance la revue (`@codex review`) jusqu'à **3 fois** ; si Codex persiste sur ce seul faux positif, **sans autre commentaire**, la PR est considérée comme **validée par Codex**, en l'absence du 👍.
 
 La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.claude/skills/codex-review-loop/`.
 
@@ -191,6 +218,8 @@ Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
 Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le titre du commit squashé sur `main`.
 
 La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
+
+La description de toute Pull Request **suit toujours le template** du projet `.github` : le dépôt [`Tetram76/.github`](https://github.com/Tetram76/.github) du compte, qui porte les fichiers de santé communautaire par défaut de tous ses dépôts, dont `.github/pull_request_template.md`. Sections et consignes du template sont à suivre. Il n'est pas copié dans ce dépôt : il est relu à chaque PR.
 
 Exemples :
 
