@@ -83,31 +83,46 @@ active obligatoire »):
 #                   usage-limit comment, or an approving review while CI still
 #                   runs), set it to the time you finished handling, otherwise
 #                   the same event ends every new watcher at once.
+# A failed query (expired auth, network, rate limit) must never be read as
+# data — "0 events" or "PR not open": every query is checked, a failure is
+# retried, and a lasting one ends the watcher with its own reason.
+set -o pipefail
 # Counts matches across ALL pages (an endpoint returns at most 100 items per
 # page, and reviews come oldest first): the --jq filter must be per-page safe.
-count() { gh api --paginate "$1?per_page=100" --jq "$2" | wc -l; }
+count() { local n; n=$(gh api --paginate "$1?per_page=100" --jq "$2" | wc -l) && echo "$n"; }
 bot='.user.login=="chatgpt-codex-connector[bot]"'
+reason=timeout fails=0
 for i in $(seq 1 60); do
-  up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
-    ".[]|select(.content==\"+1\" and $bot and .created_at>=\"<HEAD_PUSHED_AT>\")")
-  rv=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews" \
-    ".[]|select($bot and .submitted_at>=\"<HANDLED_UNTIL>\")")
-  cm=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments" \
-    ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")")
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
   # an issue for the API), not a ticket's
-  ic=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
-    ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")")
-  st=$(gh pr view <PR_NUMBER> --json state -q .state)
-  echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st"
-  # new feedback or PR closed: hand back at once
-  { [ "$rv" -ne 0 ] || [ "$cm" -ne 0 ] || [ "$ic" -ne 0 ] || [ "$st" != OPEN ]; } && break
-  # approval is terminal only once every check has completed
-  pending=$(gh pr view <PR_NUMBER> --json statusCheckRollup \
-    -q '[.statusCheckRollup[]|select(.status!="COMPLETED")]|length')
-  [ "$up" -ne 0 ] && [ "$pending" = 0 ] && break
+  if up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
+          ".[]|select(.content==\"+1\" and $bot and .created_at>=\"<HEAD_PUSHED_AT>\")") &&
+     rv=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews" \
+          ".[]|select($bot and .submitted_at>=\"<HANDLED_UNTIL>\")") &&
+     cm=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments" \
+          ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")") &&
+     ic=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
+          ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")") &&
+     sp=$(gh pr view <PR_NUMBER> --json state,statusCheckRollup \
+          -q '"\(.state) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"')
+  then
+    fails=0 st=${sp% *} pending=${sp#* }
+    echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st pending_checks=$pending"
+    if [ "$rv" -ne 0 ] || [ "$cm" -ne 0 ] || [ "$ic" -ne 0 ]; then
+      reason="new Codex feedback"; break
+    fi
+    if [ "$st" != OPEN ]; then reason="PR $st"; break; fi
+    # approval is terminal only once every check has completed
+    if [ "$up" -ne 0 ] && [ "$pending" -eq 0 ]; then
+      reason="approved, CI done"; break
+    fi
+  else
+    fails=$((fails + 1)); echo "GitHub query failed ($fails in a row)"
+    if [ "$fails" -ge 5 ]; then reason="GitHub queries keep failing"; break; fi
+  fi
   sleep 60
 done
+echo "exit: $reason"
 gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
 ```
 
