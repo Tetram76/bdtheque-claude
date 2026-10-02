@@ -69,11 +69,20 @@ active obligatoire »):
   **never** an approval — only the 👍 is.
 - Never say "I'm watching" without a running watcher, and never end a turn
   with a pending PR that has none. When a watcher ends: handle the state, then
-  **re-arm** one for every PR still pending before handing back. On timeout,
-  tell the user.
+  **re-arm** one for every PR still pending before handing back, with
+  `<HANDLED_UNTIL>` set to the time the event was handled. On timeout, tell
+  the user.
 
 ```bash
-# <HEAD_PUSHED_AT>: ISO timestamp of the head commit's push / last @codex review
+# Two timestamps, because a 👍 is a *state* and a review/comment is an *event*:
+# <HEAD_PUSHED_AT>  push of the head commit / last @codex review. A 👍 dated
+#                   after it approves the current head, and stays true.
+# <HANDLED_UNTIL>   Codex events (reviews, comments) older than this were
+#                   already handled. Starts equal to <HEAD_PUSHED_AT>; when
+#                   re-arming without a new push (e.g. after reading a
+#                   usage-limit comment, or an approving review while CI still
+#                   runs), set it to the time you finished handling, otherwise
+#                   the same event ends every new watcher at once.
 # Counts matches across ALL pages (an endpoint returns at most 100 items per
 # page, and reviews come oldest first): the --jq filter must be per-page safe.
 count() { gh api --paginate "$1?per_page=100" --jq "$2" | wc -l; }
@@ -82,13 +91,13 @@ for i in $(seq 1 60); do
   up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
     ".[]|select(.content==\"+1\" and $bot and .created_at>=\"<HEAD_PUSHED_AT>\")")
   rv=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews" \
-    ".[]|select($bot and .submitted_at>=\"<HEAD_PUSHED_AT>\")")
+    ".[]|select($bot and .submitted_at>=\"<HANDLED_UNTIL>\")")
   cm=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments" \
-    ".[]|select($bot and .created_at>=\"<HEAD_PUSHED_AT>\")")
+    ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")")
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
   # an issue for the API), not a ticket's
   ic=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
-    ".[]|select($bot and .created_at>=\"<HEAD_PUSHED_AT>\")")
+    ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")")
   st=$(gh pr view <PR_NUMBER> --json state -q .state)
   echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st"
   # new feedback or PR closed: hand back at once
