@@ -49,6 +49,40 @@ signature-false-positive exit applies, see "Exit"):
 **The approval signal is the 👍 reaction Codex leaves when a review has no
 findings.** Check for it every cycle (Step 1).
 
+### Watching (mandatory, applies to every step that waits)
+
+Nothing notifies the session when Codex approves (bare 👍, and the dedicated
+comment is not systematic), so waiting is done by a **live watcher**, never by
+intention. Rules (policy: `.speckit/gestion-projet.md` § Cycle, « Surveillance
+active obligatoire »):
+
+- **One background watcher per PR** (`run_in_background`), never one script
+  shared by several PRs: a shared script exits on the first PR's signal and
+  silently stops watching the others.
+- It exits only on a terminal state of **its** PR: 👍 from
+  `chatgpt-codex-connector[bot]` dated after the head commit's push, a new
+  review/inline comment/issue comment from Codex, PR merged/closed, or timeout.
+  It also prints the final CI conclusions (`gh pr view <PR_NUMBER> --json
+  statusCheckRollup`), since the merge needs both.
+- Never say "I'm watching" without a running watcher, and never end a turn
+  with a pending PR that has none. When a watcher ends: handle the state, then
+  **re-arm** one for every PR still pending before handing back. On timeout,
+  tell the user.
+
+```bash
+# <HEAD_PUSHED_AT>: ISO timestamp of the head commit's push / last @codex review
+for i in $(seq 1 60); do
+  up=$(gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \n    --jq '[.[]|select(.content=="+1" and .user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
+  rv=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \n    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .submitted_at>="<HEAD_PUSHED_AT>")]|length')
+  cm=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments?per_page=100" \n    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
+  st=$(gh pr view <PR_NUMBER> --json state -q .state)
+  echo "thumbs=$up reviews=$rv inline=$cm state=$st"
+  { [ "$up" != 0 ] || [ "$rv" != 0 ] || [ "$cm" != 0 ] || [ "$st" != OPEN ]; } && break
+  sleep 60
+done
+gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
+```
+
 ### Step 1 — Wait for the review
 
 Codex reacts with 👀 within seconds and posts a review within a few minutes.
