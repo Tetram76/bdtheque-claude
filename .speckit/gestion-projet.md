@@ -186,7 +186,7 @@ Les Issues GitHub (« tickets ») servent à :
 
 Chaque chantier listé dans [`suivi-implementation.md`](suivi-implementation.md) **doit** faire l'objet d'un ticket GitHub.
 
-- **Correspondance** : un ticket correspond à une seule Pull Request ; une Pull Request correspond à zéro ou un ticket (jamais plusieurs).
+- **Correspondance** : un ticket de chantier correspond à une seule Pull Request ; une Pull Request correspond à zéro ou un ticket de chantier (jamais plusieurs). Cette limite ne porte que sur les tickets de chantier : une PR peut en outre référencer d'autres Issues, par exemple des bugs tracés (cf. § « Lien entre Pull Requests et Issues »).
 - **Chantiers hors suivi** : un chantier mené hors du plan d'implémentation peut faire l'objet d'un ticket, sans que ce soit obligatoire. Seuls les chantiers listés dans le suivi **doivent** avoir un ticket.
 - **Création** : les tickets sont créés au moment du **découpage de la phase** en chantiers.
 - **Pull Request** : la PR est associée à son ticket et le **ferme automatiquement au merge** (mot-clé `Closes #<numéro>` dans la description, cf. § « Lien entre Pull Requests et Issues »). Le ticket est donc clôturé quand la PR est fusionnée.
@@ -211,7 +211,7 @@ Le ticket **ne décrit jamais comment implémenter** le chantier : la rédaction
 - Hors plan d'implémentation, une PR peut n'avoir aucun ticket et n'a **pas systématiquement** vocation à résoudre une ou plusieurs Issues.
 - Si le contenu d'une PR **répond** à une ou plusieurs Issues (correction d'un bug tracé, implémentation d'une fonctionnalité tracée), la PR **doit référencer** ces Issues (ex. mention `#<numéro>` dans la description).
 - Si une Issue est **entièrement traitée** par la PR, la référence utilise un mot-clé de fermeture automatique GitHub (`Closes`, `Fixes`, `Resolves #<numéro>`), afin que l'Issue soit **automatiquement clôturée au merge** de la PR.
-- Si une PR ne traite une Issue que **partiellement**, celle-ci est référencée sans mot-clé de fermeture (elle reste ouverte après le merge). Cette situation ne concerne pas un ticket de chantier, qu'une PR traite toujours entièrement (1 ticket = 1 PR).
+- Si une PR ne traite une Issue que **partiellement**, celle-ci est référencée sans mot-clé de fermeture (elle reste ouverte après le merge). Cette situation ne concerne pas un ticket de chantier, qu'une PR traite toujours entièrement (1 ticket de chantier = 1 PR).
 
 ## Releases
 
