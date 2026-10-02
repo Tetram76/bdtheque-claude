@@ -199,6 +199,8 @@ Chaque chantier listé dans [`suivi-implementation.md`](suivi-implementation.md)
 
 ### Contenu d'un ticket
 
+Le **titre** d'un ticket est un libellé libre, qui décrit le chantier : il ne suit **pas** la convention Conventional Commits, réservée aux commits et aux titres de Pull Request (cf. § « Conventions de commit »).
+
 Le ticket est plus précis que la ligne du suivi, sans pour autant être un plan d'implémentation. Il reprend **tout ce qui est connu au moment du découpage de la phase et peut influencer l'implémentation du chantier** :
 
 - la liste des **éléments à implémenter** ;
