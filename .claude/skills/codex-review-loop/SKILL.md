@@ -78,11 +78,17 @@ for i in $(seq 1 60); do
     --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .submitted_at>="<HEAD_PUSHED_AT>")]|length')
   cm=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments?per_page=100" \
     --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
+  # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is an issue for the API), not a ticket's
   ic=$(gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments?per_page=100" \
     --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
   st=$(gh pr view <PR_NUMBER> --json state -q .state)
   echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st"
-  { [ "$up" != 0 ] || [ "$rv" != 0 ] || [ "$cm" != 0 ] || [ "$ic" != 0 ] || [ "$st" != OPEN ]; } && break
+  # new feedback or PR closed: hand back at once
+  { [ "$rv" != 0 ] || [ "$cm" != 0 ] || [ "$ic" != 0 ] || [ "$st" != OPEN ]; } && break
+  # approval is terminal only once every check has completed
+  pending=$(gh pr view <PR_NUMBER> --json statusCheckRollup \
+    -q '[.statusCheckRollup[]|select(.status!="COMPLETED")]|length')
+  [ "$up" != 0 ] && [ "$pending" = 0 ] && break
   sleep 60
 done
 gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
