@@ -352,7 +352,7 @@ Ces règles sont **globales** : elles s'appliquent à l'interface web comme à l
 
 ## Interface pour agents IA
 
-L'application met à disposition d'un **agent IA** un outil lui permettant d'interagir avec elle, en complément de l'interface web. L'outil offre trois familles de fonctionnalités :
+L'application met à disposition d'un **agent IA** un outil lui permettant d'interagir avec elle, en complément de l'interface web. Cet outil n'est pas lié à une fonction du frontend : il est utilisable par **n'importe quel agent conversationnel**. L'intégration d'un **agent IA dans le frontend** est par ailleurs **envisagée** ; rien n'est statué à ce stade (YAGNI). L'outil offre trois familles de fonctionnalités :
 
 - **Aide à la saisie** : assister l'utilisateur dans la saisie des données de l'application. L'agent peut aussi **écrire en base**, mais uniquement **à la demande de l'utilisateur**.
   - **Fonction principale attendue** : répondre à la demande « à partir de cet ISBN, compléter ou saisir la fiche de l'album et de l'édition (visuels inclus), de la série si l'album en fait partie, et des auteurs ». L'**éditeur** et la **collection éditeur** de l'édition font aussi partie des données à saisir ou compléter.
