@@ -39,6 +39,10 @@ Les images de base des conteneurs sont des choix d'implémentation : cf. `choix-
 
 Seul le conteneur `frontend` est exposé : `api` n'est jamais exposé, le `frontend` l'appelle via HTTP interne (réseau Docker). Le conteneur `api` est le seul à accéder à `db`.
 
+## Indépendance de l'outil pour agents IA
+
+L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour agents IA) doit être **indépendante de l'API** : déployer l'API ne doit pas impliquer de déployer l'outil pour agents IA.
+
 ## Déploiement
 
 - Architecture **n-tiers avec isolation stricte** : chaque tier est déployé dans un **conteneur Docker dédié**.
