@@ -107,6 +107,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
   - Suppression de `main` interdite
   - Squash merge uniquement
   - **Commits signés obligatoires** (`required_signatures`)
+  - **Checks de la CI requis** (`required_status_checks`) : les trois jobs du workflow CI — `Build & tests (.NET)`, `Build Docker image (api)`, `Build Docker image (frontend)` — produits par l'application GitHub Actions. La branche n'a pas à être à jour avec `main` avant le merge : les PR sont fusionnées en squash une à une, et exiger cette mise à jour imposerait une resynchronisation systématique sans gain proportionné.
 - **Sécurité du dépôt** (`security_and_analysis`, disponible gratuitement car dépôt public) :
   - **Secret scanning** : activé
   - **Push protection** (blocage des push contenant un secret détecté) : activée
@@ -126,7 +127,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 
 - **GitHub Actions** héberge le pipeline de non-régression (`.github/workflows/ci.yml`), déclenché sur chaque Pull Request et sur push vers `main`.
 - Étapes du pipeline : restauration, build en mode `Release`, contrôle de cohérence modèle ↔ migrations, exécution de la totalité des tests (`dotnet test`, sur PostgreSQL via Testcontainers — Docker est disponible sur les runners `ubuntu-latest`).
-- Ce workflow constitue le **check de statut requis** évoqué dans la règle de merge ci-dessous, dès qu'il est activé dans le Ruleset GitHub.
+- Ce workflow constitue le **check de statut requis** de la règle de merge ci-dessous : ses jobs sont imposés par le Ruleset GitHub (cf. § « Configuration du repository GitHub »). Le Ruleset les désigne par leur nom : renommer, ajouter ou retirer un job du workflow exige de mettre à jour le Ruleset dans le même mouvement, faute de quoi un check requis ne se présente jamais et toute fusion est bloquée.
 
 ## Règle de merge : non-régression et revue Codex obligatoires
 
@@ -135,8 +136,8 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 - Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI) **et** à l'**approbation de la revue Codex** (voir « Revue de code » ci-dessous).
 - Les contrôles de non-régression **doivent être exécutés localement avant le push** sur la branche de PR — pour détecter les régressions au plus tôt et ne pas attendre le CI distant.
 - Le CI (GitHub Actions) constitue le filet de sécurité final et le verrou technique sur le merge.
-- Cette règle sera **imposée techniquement** via le Ruleset GitHub (required status checks) dès que le premier workflow CI sera en place.
-- En attendant le CI, la vérification est une contrainte de processus : l'agent exécute les tests localement avant tout push, et ne fusionne pas une PR sans confirmation de non-régression ni approbation de Codex.
+- La réussite de la CI est **imposée techniquement** par le Ruleset GitHub (required status checks) : une PR dont un check requis n'a pas réussi ne peut pas être fusionnée.
+- L'approbation de Codex n'est imposée par aucun mécanisme GitHub : elle reste une contrainte de processus, que l'agent vérifie avant tout merge.
 
 ## Revue de code
 
