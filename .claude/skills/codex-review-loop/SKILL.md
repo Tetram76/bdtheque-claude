@@ -71,24 +71,29 @@ active obligatoire »):
 
 ```bash
 # <HEAD_PUSHED_AT>: ISO timestamp of the head commit's push / last @codex review
+# Counts matches across ALL pages (an endpoint returns at most 100 items per
+# page, and reviews come oldest first): the --jq filter must be per-page safe.
+count() { gh api --paginate "$1?per_page=100" --jq "$2" | wc -l; }
+bot='.user.login=="chatgpt-codex-connector[bot]"'
 for i in $(seq 1 60); do
-  up=$(gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
-    --jq '[.[]|select(.content=="+1" and .user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
-  rv=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews?per_page=100" \
-    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .submitted_at>="<HEAD_PUSHED_AT>")]|length')
-  cm=$(gh api "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments?per_page=100" \
-    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
-  # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is an issue for the API), not a ticket's
-  ic=$(gh api "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments?per_page=100" \
-    --jq '[.[]|select(.user.login=="chatgpt-codex-connector[bot]" and .created_at>="<HEAD_PUSHED_AT>")]|length')
+  up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
+    ".[]|select(.content==\"+1\" and $bot and .created_at>=\"<HEAD_PUSHED_AT>\")")
+  rv=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews" \
+    ".[]|select($bot and .submitted_at>=\"<HEAD_PUSHED_AT>\")")
+  cm=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments" \
+    ".[]|select($bot and .created_at>=\"<HEAD_PUSHED_AT>\")")
+  # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
+  # an issue for the API), not a ticket's
+  ic=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
+    ".[]|select($bot and .created_at>=\"<HEAD_PUSHED_AT>\")")
   st=$(gh pr view <PR_NUMBER> --json state -q .state)
   echo "thumbs=$up reviews=$rv inline=$cm issue=$ic state=$st"
   # new feedback or PR closed: hand back at once
-  { [ "$rv" != 0 ] || [ "$cm" != 0 ] || [ "$ic" != 0 ] || [ "$st" != OPEN ]; } && break
+  { [ "$rv" -ne 0 ] || [ "$cm" -ne 0 ] || [ "$ic" -ne 0 ] || [ "$st" != OPEN ]; } && break
   # approval is terminal only once every check has completed
   pending=$(gh pr view <PR_NUMBER> --json statusCheckRollup \
     -q '[.statusCheckRollup[]|select(.status!="COMPLETED")]|length')
-  [ "$up" != 0 ] && [ "$pending" = 0 ] && break
+  [ "$up" -ne 0 ] && [ "$pending" = 0 ] && break
   sleep 60
 done
 gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
