@@ -356,6 +356,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 
 - **Aide à la saisie** : assister l'utilisateur dans la saisie des données de l'application. L'agent peut aussi **écrire en base**, mais uniquement **à la demande de l'utilisateur**.
   - **Fonction principale attendue** : répondre à la demande « à partir de cet ISBN, compléter ou saisir la fiche de l'album et de l'édition (visuels inclus), de la série si l'album en fait partie, et des auteurs ».
+  - Les données proviennent de **plusieurs sources externes** (jamais d'une seule). La **source principale** reste le **site de l'éditeur** ; les sources concrètes seront arrêtées à l'ouverture de la phase d'implémentation.
 - **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
 - **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
 
