@@ -171,6 +171,7 @@ Le traitement est répété **tant que Codex émet des retours**, jusqu'à sa va
 
 - Après le push de commits, Codex relance une revue (avec un léger délai) ; l'agent attend son résultat avant de poursuivre.
 - Si **tous les retours sont rejetés sans ajouter de commit**, Codex ne relance pas la revue : l'agent la **force** par un commentaire `@codex review` sur la PR.
+- **Faux positif sur la signature des commits** : Codex peut signaler des commits non signés. Si la vérification (statut « Verified » côté GitHub) établit un faux positif, il se traite comme tout retour rejeté (réponse justifiée, appréciation 👎, résolution), et Codex est alors considéré comme n'ayant **plus rien d'autre à remonter**. L'agent relance la revue (`@codex review`) jusqu'à **3 fois** ; si Codex persiste sur ce seul faux positif, **sans autre commentaire**, la PR est considérée comme **validée par Codex**, en l'absence du 👍.
 
 La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.claude/skills/codex-review-loop/`.
 
