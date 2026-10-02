@@ -191,13 +191,19 @@ Chaque chantier listé dans [`suivi-implementation.md`](suivi-implementation.md)
 - **Création** : les tickets sont créés au moment du **découpage de la phase** en chantiers.
 - **Consolidation d'une phase** : lors de la consolidation d'une phase, un ticket est créé pour **chaque chantier identifié**, sans que le suivi ait besoin d'être mis à jour : ces chantiers ont un ticket obligatoire même s'ils ne sont pas listés dans le suivi.
 - **Pull Request** : la PR est associée à son ticket et le **ferme automatiquement au merge** (mot-clé `Closes #<numéro>` dans la description, cf. § « Lien entre Pull Requests et Issues »). Le ticket est donc clôturé quand la PR est fusionnée.
-- **Commentaire de clôture** : à la fusion de la PR, un commentaire est ajouté au ticket pour indiquer **comment l'implémentation a répondu au ticket** (ce qui a été réalisé au regard du contenu du ticket, y compris les écarts éventuels).
+- **Commentaire de clôture** : à la fusion de la PR, un commentaire est ajouté au ticket pour indiquer **comment l'implémentation a répondu au ticket**. Il est **détaillé** et suit le contenu du ticket :
+  - **Réalisation** : la PR (numéro, commit squashé), puis, **élément par élément du ticket**, ce qui a été réalisé (comportements, règles appliquées, éléments ajoutés) ;
+  - **Décisions et écarts** : les décisions prises pendant l'implémentation et les écarts au regard du ticket ; l'absence d'écart est signalée explicitement ;
+  - **Références** : les sections du `.speckit/` concernées et la PR.
+  - Les **tests** ne sont mentionnés que lorsqu'un cas particulier important le justifie : refactorisation, ajout d'un mécanisme générique de test, ou **cas d'usage volontairement écarté des tests** (le commentaire en indique alors la **raison**). Jamais en simple liste de ce qui a été testé.
 - **Traçabilité jusqu'au ticket** : le commit final de la PR doit permettre de remonter, directement ou indirectement, jusqu'au ticket, par les seuls mécanismes natifs de GitHub (aucun dispositif ad hoc). La description de la PR devenant le corps du commit squashé (cf. § « Conventions de commit »), le mot-clé de fermeture qu'elle contient figure dans le commit : GitHub y résout le ticket, et le suffixe `(#<PR>)` ajouté au titre par le squash merge mène à la PR. La référence au ticket est donc **toujours dans la description de la PR**, jamais seulement dans un commentaire ou dans le titre.
 - **Statut** : l'état d'un chantier (à faire / fait) est **défini par l'état de son ticket** (ouvert / fermé). Le suivi le reflète uniquement par la mise en forme du numéro du ticket : **barré** (`~~#<numéro>~~`) lorsque le ticket est fermé, normal lorsqu'il est ouvert ; aucune autre colonne ou mention de statut.
 - **Contenu du suivi** : pour chaque chantier, le suivi indique le **numéro du ticket** et en décrit succinctement le contenu (en pratique, son titre).
 - **Cohérence suivi ↔ tickets** : toute correction apportée au découpage dans le suivi est **reportée dans le ticket concerné**, dans le respect de la définition du contenu d'un ticket ci-dessous.
 
 ### Contenu d'un ticket
+
+Le **titre** d'un ticket est un libellé libre, qui décrit le chantier : il ne suit **pas** la convention Conventional Commits, réservée aux commits et aux titres de Pull Request (cf. § « Conventions de commit »).
 
 Le ticket est plus précis que la ligne du suivi, sans pour autant être un plan d'implémentation. Il reprend **tout ce qui est connu au moment du découpage de la phase et peut influencer l'implémentation du chantier** :
 
