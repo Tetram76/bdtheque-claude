@@ -64,6 +64,9 @@ active obligatoire »):
   review/inline comment/issue comment from Codex, PR merged/closed, or timeout.
   It also prints the final CI conclusions (`gh pr view <PR_NUMBER> --json
   statusCheckRollup`), since the merge needs both.
+- A top-level Codex comment (e.g. "You have reached your Codex usage limits",
+  which no review follows) only hands control back so it gets read; it is
+  **never** an approval — only the 👍 is.
 - Never say "I'm watching" without a running watcher, and never end a turn
   with a pending PR that has none. When a watcher ends: handle the state, then
   **re-arm** one for every PR still pending before handing back. On timeout,
