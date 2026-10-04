@@ -86,11 +86,7 @@ Pages de consultation (public) et d'administration (authentifié), composants pa
 
 Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, formulaires admin) plutôt que par entité.
 
-Chantier déjà identifié, à intégrer au découpage :
-
-| Ticket | Titre |
-| --- | --- |
-| #104 | Formulaires : valeurs proposées à la saisie, valeur initiale et ancien franc |
+Contenu déjà identifié, à intégrer aux tickets issus du découpage de la phase, et non implémenté tel quel : #104 (formulaires : valeurs proposées à la saisie, valeur initiale et ancien franc).
 
 ## Phase 4 — Statistiques, devises et estimation de valeur
 
@@ -98,11 +94,7 @@ Dashboard public et statistiques (sur la collection uniquement) ; conversion des
 
 Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
-Chantier déjà identifié, à intégrer au découpage :
-
-| Ticket | Titre |
-| --- | --- |
-| #105 | Valorisation des montants en euros du jour |
+Contenu déjà identifié, à intégrer aux tickets issus du découpage de la phase, et non implémenté tel quel : #105 (valorisation des montants en euros du jour).
 
 ## Phase 5 — Fonctionnalités de second plan
 
@@ -110,11 +102,7 @@ Identification des albums manquants d'une série ; estimation de sortie d'un nou
 
 Découpage à établir à l'ouverture de la phase.
 
-Chantier déjà identifié, à intégrer au découpage :
-
-| Ticket | Titre |
-| --- | --- |
-| #106 | Exclusion de séries des estimations de sortie |
+Contenu déjà identifié, à intégrer aux tickets issus du découpage de la phase, et non implémenté tel quel : #106 (exclusion de séries des estimations de sortie).
 
 ## Phase 6 — Outil pour agents IA
 
