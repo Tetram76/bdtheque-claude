@@ -292,7 +292,7 @@ Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner 
 - **Saisie et affichage des données de base** : peuvent être faits dans n'importe quelle devise. Une fiche affiche chaque montant **deux fois** : la valeur saisie, dans sa devise, et sa valeur en **euros du jour**.
 - **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), puis **corrigé de l'inflation** entre cette date et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
 - **Analyses et statistiques** : toujours affichées en **euros du jour**.
-- **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euro.
+- **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euros du jour.
 - **Date de référence d'un montant** : première date connue, dans cet ordre :
   - **prix d'acquisition** : date d'acquisition, puis année d'édition, puis date de première publication de l'album ;
   - **valeur initiale** : année d'édition, puis date de première publication de l'album.
