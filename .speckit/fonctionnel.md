@@ -300,6 +300,7 @@ Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner 
 - **Taux de change** : tout montant est **stocké dans sa devise** de saisie, jamais converti à l'enregistrement. Lorsqu'il doit être exprimé en euro, quel que soit l'usage (statistiques, valeur de la collection, estimation de valeur), il est converti au taux de change en vigueur à sa **date de référence** :
   - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante, identique quelle que soit la date.
   - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux est celui de la date de référence, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)** (open source, gratuite, sans clé API). Lorsque la date de référence est partielle, le taux appliqué est le **taux moyen** de la période connue : celui du **mois** pour un mois et une année, celui de l'**année** pour une année seule.
+  - **Montant non convertible** : un montant pour lequel aucun taux n'est disponible à sa date de référence (date antérieure à l'historique de la devise) peut être saisi et reste affiché dans sa devise, mais il n'est pas pris en compte dans les calculs exprimés en euro.
 
 ## Design et charte graphique
 
