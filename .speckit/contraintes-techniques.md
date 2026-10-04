@@ -1,7 +1,7 @@
 # Contraintes Techniques
 
 Ce fichier recense les **contraintes techniques imposées** à l'application et à son déploiement — par l'utilisateur, des normes/lois, ou une réalité externe non négociable (système existant à migrer, environnement d'hébergement donné, etc.). Il peut aussi mentionner, explicitement, des **non-contraintes** (ouvertures de réflexion voulues par l'utilisateur). L'agent n'y ajoute rien de sa propre initiative : ses propres choix techniques, délibérés entre plusieurs options ou non, sont documentés dans `choix-implementation.md`.
-Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outillage dev, etc.) — ceux-ci relèvent de `gestion-projet.md`.
+Il ne concerne pas non plus les aspects gestion de projet (repo, branches, processus de développement, etc.) — ceux-ci relèvent de `gestion-projet.md`.
 
 ---
 
@@ -9,9 +9,11 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outil
 
 | Élément | Valeur |
 | --- | --- |
-| Langage | Delphi (version inconnue) |
-| Base de données | Firebird 1.5 |
+| Langage | Delphi 10.3 Rio (10.3.3) |
+| Base de données | Firebird 2.5 |
+| Connexion à la base (production) | Firebird embarqué (*embedded*) |
 | Type | Client lourd (desktop) |
+| Dépôt des sources | <https://github.com/Tetram76/tetram> (dossier `bdtheque/`) |
 
 Cette application est la **référence fonctionnelle** : le périmètre de la réécriture web doit couvrir ses fonctionnalités.
 
@@ -62,7 +64,7 @@ L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour 
 
 ## Migration des données
 
-- Des données existantes sont stockées dans la base Firebird 1.5 de l'application client lourd.
+- Des données existantes sont stockées dans la base Firebird 2.5 de l'application client lourd.
 - Une **migration de données** depuis Firebird vers la base cible devra être possible lorsque la nouvelle application sera suffisamment mature.
 - La conception du modèle de données cible doit tenir compte de cette migration future : préserver la sémantique des données existantes et ne pas rendre la migration inutilement complexe.
 - La migration pourra être **incrémentale** (imports successifs et partiels) : l'outil de migration devra **fusionner** les données importées avec les données déjà présentes dans la base cible lorsqu'il y a correspondance (pas de doublons, mise à jour des éléments existants).

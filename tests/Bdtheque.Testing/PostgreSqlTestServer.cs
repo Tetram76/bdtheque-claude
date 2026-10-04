@@ -9,7 +9,7 @@ namespace Bdtheque.Testing;
 /// Runs every persistence test against the same PostgreSQL image as production, so that what
 /// is tested is what ships: the real migrations (not <c>EnsureCreated</c>), and PostgreSQL's own
 /// collations, numeric precision and constraint enforcement — none of which another engine can
-/// stand in for (see gestion-projet.md § Outillage .NET).
+/// stand in for (see choix-implementation.md § Outillage de développement .NET).
 /// </summary>
 /// <remarks>
 /// One container is started per test process, then the migrations are applied once to a
