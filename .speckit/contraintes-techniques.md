@@ -11,6 +11,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outil
 | --- | --- |
 | Langage | Delphi (version inconnue) |
 | Base de données | Firebird 2.5 |
+| Connexion à la base (production) | Firebird embarqué (*embedded*) |
 | Type | Client lourd (desktop) |
 
 Cette application est la **référence fonctionnelle** : le périmètre de la réécriture web doit couvrir ses fonctionnalités.
