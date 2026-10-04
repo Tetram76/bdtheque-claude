@@ -247,6 +247,8 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 - **Devise d'un montant** (ex. `Édition.Prix d'acquisition`, cf. `modele-metier.md`) : stockée comme un **code ISO 4217 alpha-3** (`string`, 3 lettres majuscules), validée par le domaine sur sa seule **forme**, pas contre une liste fermée de devises.
   - **Alternative écartée (énumération C# figée)** : contredirait l'exigence « n'importe quelle devise » de `fonctionnel.md` § Gestion des devises, qui n'est pas limitée aux quelques exemples cités (Franc français, Dollar américain) dans ce même fichier.
+- **Ancien franc** (`fonctionnel.md` § Gestion des devises) : ISO 4217 ne lui attribue aucun code, et le code du franc (`FRF`) perdrait le rapport de 100 à 1. Il est stocké sous le code réservé **`QZF`**, de même forme que les codes ISO : son préfixe `QZ` appartient à la plage `QM`–`QZ` des codes que l'ISO 3166-1 réserve aux utilisateurs et n'attribuera jamais, dont dérivent les codes pays des devises ISO 4217 ; aucun code officiel ne peut donc lui être identique. La conversion traite `QZF` comme `FRF` divisé par 100.
+  - **Alternative écartée (`FRF` accompagné d'un indicateur « ancien franc »)** : une seconde donnée attachée à chaque montant, pour une seule devise, là où un code distinct garde une représentation unique pour tous les montants.
 
 ## Collections de navigation du domaine
 
