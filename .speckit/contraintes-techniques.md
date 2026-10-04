@@ -71,6 +71,20 @@ L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour 
 - La migration est **unidirectionnelle** : aucun retour en arrière, aucune synchronisation vers l'application client lourd.
 - Un outil ou script de migration dédié devra être prévu le moment venu.
 
+### Base existante
+
+Caractéristiques de la base Firebird de l'application existante, que la migration doit prendre en compte (moyens d'accès retenus : cf. `choix-implementation.md` § Accès à la base existante (Firebird)) :
+
+| Élément | Valeur |
+| --- | --- |
+| Fichier | `BD.GDB`, copie de la base de production fournie hors dépôt (dossier `bdtheque-legacy`, voisin du dépôt), non versionnée |
+| Format | ODS 11 (Firebird 2.5), pages de 16 Ko |
+| Tables | `ALBUMS`, `ALBUMS_UNIVERS`, `AUTEURS`, `AUTEURS_PARABD`, `AUTEURS_SERIES`, `COLLECTIONS`, `CONVERSIONS`, `COTES`, `COTES_PARABD`, `COUVERTURES`, `CRITERES`, `EDITEURS`, `EDITIONS`, `EMPRUNTEURS`, `GENRES`, `GENRESERIES`, `IMPORT_ASSOCIATIONS`, `LISTES`, `OPTIONS`, `OPTIONS_SCRIPTS`, `PARABD`, `PARABD_UNIVERS`, `PERSONNES`, `PHOTOS`, `SERIES`, `SERIES_UNIVERS`, `STATUT`, `SUPPRESSIONS`, `UNIVERS` |
+| Texte | Jeu de caractères `UTF8` |
+
+- **Collations propres à la base** : `UTF8_FR`, `UTF8_FR_CI` et `UTF8_FR_CI_AI`, dérivées de `UNICODE` avec `LOCALE=fr_FR`, portent l'attribut `COLL-VERSION=58.0.6.50` : elles ont été créées avec une version d'ICU différente de l'ICU 3.0 livré par les kits officiels Firebird 2.5.9. Avec ces kits, Firebird refuse toute requête sur une table qui les utilise (`COLLATION … is not installed`), et ne sait créer aucune collation portant une `LOCALE`.
+- **Initiale stockée des albums** (`ALBUMS.INITIALETITREALBUM`, `CHAR(1)` en `UTF8`) : initiale **brute** du titre, non normalisée — casse et accents conservés (`É` et `é` sont deux valeurs distinctes), chaque chiffre est une valeur à part entière, `#` figure parmi les valeurs, et la colonne peut être vide (`NULL`). Elle ne correspond donc pas aux entrées de navigation de `fonctionnel.md` § Entrées de la navigation par initiale.
+
 ## Hébergement
 
 - L'application est hébergée sur un **NAS Synology**.
