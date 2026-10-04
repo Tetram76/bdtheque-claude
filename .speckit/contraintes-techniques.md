@@ -71,6 +71,23 @@ L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour 
 - La migration est **unidirectionnelle** : aucun retour en arrière, aucune synchronisation vers l'application client lourd.
 - Un outil ou script de migration dédié devra être prévu le moment venu.
 
+### Base existante
+
+Caractéristiques de la base Firebird de l'application existante, que la migration doit prendre en compte (moyens d'accès retenus : cf. `choix-implementation.md` § Accès à la base existante (Firebird)) :
+
+| Élément | Valeur |
+| --- | --- |
+| Fichier | Copie de la base de production, fournie seule et hors dépôt, sous un nom non fixé (ex. `BD.GDB`), éventuellement accompagnée de `BDT_UDF.dll` |
+| Format | ODS 11.2 (Firebird 2.5), pages de 16 Ko |
+| Tables | `ALBUMS`, `ALBUMS_UNIVERS`, `AUTEURS`, `AUTEURS_PARABD`, `AUTEURS_SERIES`, `COLLECTIONS`, `CONVERSIONS`, `COTES`, `COTES_PARABD`, `COUVERTURES`, `CRITERES`, `EDITEURS`, `EDITIONS`, `EMPRUNTEURS`, `GENRES`, `GENRESERIES`, `IMPORT_ASSOCIATIONS`, `LISTES`, `OPTIONS`, `OPTIONS_SCRIPTS`, `PARABD`, `PARABD_UNIVERS`, `PERSONNES`, `PHOTOS`, `SERIES`, `SERIES_UNIVERS`, `STATUT`, `SUPPRESSIONS`, `UNIVERS` |
+| Texte | Jeu de caractères `UTF8` |
+
+- **Collations propres à la base** : `UTF8_FR`, `UTF8_FR_CI` et `UTF8_FR_CI_AI`, dérivées de `UNICODE` avec `LOCALE=fr_FR`, portent l'attribut `COLL-VERSION=58.0.6.50`, celui d'**ICU 52**. L'application existante livre cet ICU 52 avec Firebird (dossier `bdtheque/delphi/trunk/deploy/` du dépôt des sources ; ses DLL 64 bits ont la taille de celles du build officiel ICU4C 52.1 Win64 msvc10), et son `intl/fbintl.conf` le déclare pour le module `builtin` (`icu_versions 5.2`). Avec l'ICU 3.0 des kits officiels Firebird 2.5.9, Firebird refuse toute requête sur une table qui utilise ces collations (`COLLATION … is not installed`).
+- **Fonctions externes (UDF)** : la base déclare 20 UDF de la bibliothèque propre à l'application, `BDT_UDF.dll` (dépôt des sources : `bdtheque/delphi/trunk/src/BDT_UDF.DLL/`, sans binaire compilé ; la DLL peut être fournie avec la base). Certaines agissent sur le système de fichiers (`UDF_DELETEFILE`, `UDF_SAVEBLOBTOFILE`, `UDF_LOADBLOBFROMFILE`, `UDF_FINDFILEFIRST`…).
+- **Vues et procédures stockées** : 20 vues (`VW_*`) et des procédures stockées qui portent une partie de la logique de l'application (listes par initiale, albums manquants, prévisions de sorties…). Certaines procédures construisent leur requête en concaténant un paramètre `FILTRE` ; d'autres enveloppent les UDF de fichiers (`DELETEFILE`, `SAVEBLOBTOFILE`, `LOADBLOBFROMFILE`, `DIRECTORYCONTENT`, `SEARCHFILENAME`).
+- **Titres stockés sous forme de tri** (`ALBUMS.TITREALBUM`, `SERIES.TITRESERIE`) : l'article initial est reporté en suffixe entre crochets (`fils d'Asterix [Le]`, `étoile du désert [L']`), selon la même convention que la clé de tri de `fonctionnel.md` § Titres (séries et albums). La forme affichée est reconstituée par l'UDF `UDF_FORMATTITLE` (`Le fils d'Asterix`).
+- **Initiale stockée** (`ALBUMS.INITIALETITREALBUM`, `CHAR(1)` en `UTF8`) : initiale **brute** du titre, non normalisée — casse et accents conservés (`É` et `é` sont deux valeurs distinctes), chaque chiffre est une valeur à part entière, `#` figure parmi les valeurs, et la colonne est vide (`NULL`) pour un album sans titre propre, que l'application range sous l'initiale de sa série (`coalesce(initialetitrealbum, initialetitreserie)`, procédure `INITIALES_ALBUMS`). Elle ne correspond donc pas aux entrées de navigation de `fonctionnel.md` § Entrées de la navigation par initiale.
+
 ## Hébergement
 
 - L'application est hébergée sur un **NAS Synology**.
