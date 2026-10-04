@@ -82,7 +82,7 @@ L'agent produit l'intégralité des livrables du projet, y compris :
 Le projet dispose d'un **budget IA limité**, pour l'agent (Claude) comme pour la revue Codex : l'**efficacité** est une contrainte de travail permanente. Budget limité ne veut pas dire travail à l'économie : tout le travail est réalisé **intégralement**, dans le respect des demandes de l'utilisateur et des contraintes du projet. L'efficacité porte sur la manière de travailler, jamais sur le résultat ni sur l'application des règles de ce `.speckit/` : aucune demande n'est partiellement traitée et aucune règle (lecture du `.speckit/`, contre-vérification, TDD, non-régression, revue Codex) n'est allégée au nom du budget.
 
 - **Pas d'itération exploratoire** : « itérer juste pour voir » n'est pas viable. Chaque action sert un objectif identifié ; l'agent établit les faits (lecture du code, exécution locale, documentation) **avant** d'agir, plutôt que d'essayer puis de corriger.
-- **Un push, une revue Codex** : tout push sur une PR déclenche une revue Codex (cf. § « Revue Codex (bloquante) »). Avant de pousser, l'agent relit l'intégralité du diff, exécute localement les contrôles de non-régression et met à jour la description de la PR, pour qu'un **seul push** porte un état complet et vérifié. Jamais de push intermédiaire « pour voir ce qu'en dit Codex ».
+- **Un push, une revue Codex** : tout push sur une PR qui n'est pas en brouillon déclenche une revue Codex (cf. § « Revue Codex (bloquante) », dont § « Ouverture de la PR »). Avant de pousser, l'agent relit l'intégralité du diff, exécute localement les contrôles de non-régression et met à jour la description de la PR, pour qu'un **seul push** porte un état complet et vérifié. Jamais de push intermédiaire « pour voir ce qu'en dit Codex ».
 - **Sollicitations proportionnées** : un sous-agent ou une relance de Codex (`@codex review`) n'intervient que lorsque les règles du projet l'exigent ou qu'il apporte un gain réel ; jamais par confort ou par précaution non justifiée.
 
 ## Qualité du code
@@ -152,11 +152,17 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent inte
 
 ### Revue Codex (bloquante)
 
-Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request. À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a donné sa **validation finale** par une réaction 👍 sur la **description de la PR** pour le commit de tête, signe qu'une revue n'a rien trouvé à corriger.
+Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur une Pull Request qui n'est pas en brouillon (*draft*). À la différence des autres agents de revue, son approbation est une **condition bloquante du merge** : une PR ne peut être fusionnée que si Codex a donné sa **validation finale** par une réaction 👍 sur la **description de la PR** pour le commit de tête, signe qu'une revue n'a rien trouvé à corriger.
+
+#### Ouverture de la PR
+
+Codex revoit ce qui est poussé, que le travail soit achevé ou non : une PR ouverte trop tôt lui fait revoir un contenu incomplet, et consomme sa revue en pure perte (cf. § Budget IA). Une PR n'est donc **créée** — ou, si elle a été créée en brouillon, **passée en « prête pour la revue »** — qu'une fois le **contenu de sa branche complet**. Tant que ce contenu est en cours d'élaboration ou de discussion, il reste local, ou sur une PR en brouillon.
+
+Le passage d'un brouillon en « prête pour la revue » ne déclenche pas nécessairement de revue Codex, aucun commit n'étant poussé à ce moment-là. L'agent vérifie donc que Codex a démarré sa revue (réaction 👀 sur la description de la PR) ; à défaut, après quelques minutes, il la demande par un commentaire `@codex review`.
 
 #### Statut des retours de Codex
 
-Codex ne connaît pas le contexte : il se contente de relire les diffs. L'agent qui traite les retours est le **seul à connaître le contexte**, donc le seul à pouvoir décider ; et, comme pour toute décision technique (cf. § Prise de décision), il en est le **seul décisionnaire**. Les retours de Codex ne sont que des **indications**, à intégrer à sa réflexion — jamais des ordres.
+Codex ne connaît **ni le contexte du projet** (`.speckit/`, architecture, conventions, choix déjà statués), **ni l'objectif de la PR** : il se contente de relire les diffs. L'agent qui traite les retours est le **seul à connaître ces contextes**, donc le seul à pouvoir décider ; et, comme pour toute décision technique (cf. § Prise de décision), il en est le **seul décisionnaire**. Il est donc primordial de **confronter chaque retour** au contexte du projet et à l'objectif de la PR. Dans tous les cas, les retours de Codex ne sont que des **indications**, à intégrer à sa réflexion — jamais des consignes à suivre à la lettre.
 
 #### Traiter un retour
 
