@@ -15,6 +15,14 @@ Policy source of truth: `.speckit/gestion-projet.md` → "Revue de code" /
 policy: a PR on this repo cannot be merged until the Codex bot
 (`chatgpt-codex-connector[bot]`) has approved the current head commit.
 
+Codex reviews every push to a non-draft PR: open a non-draft PR (or mark a
+draft ready for review) only once the branch content is complete; until then,
+the work stays local or on a draft PR (policy: § « Ouverture de la PR »).
+Marking a draft ready may not trigger a review (nothing is pushed): a few minutes after marking it ready, check for any Codex activity
+since then — 👀 on the PR description (review running), or a 👍, review or
+comment (review already finished; the 👀 is transient). Only if there is none,
+request a review with a `@codex review` comment.
+
 Requires `gh` authenticated (`gh auth status`) with access to the repo.
 
 Placeholder convention below: `{owner}` / `{repo}` are literal — `gh api`
@@ -240,7 +248,10 @@ For each such thread, `path`/`line`/`diffHunk` locate the finding in the diff
 when the comment `body` doesn't repeat it.
 
 **a. Cross-check** — never apply a finding blindly, and never take it at face
-value just because it sounds plausible. Codex can go very deep into detail;
+value just because it sounds plausible. Codex reviews the diff only: it knows
+neither the project context (`.speckit/`, architecture, settled choices) nor
+the PR's objective, so its findings are indications to confront with both —
+never instructions to follow to the letter. Codex can go very deep into detail;
 depth alone is not validity. The bar is a **user-proof** application, not
 code that survives every theoretical or adversarial twist.
 
