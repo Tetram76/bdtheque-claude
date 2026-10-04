@@ -47,6 +47,14 @@ Corrections issues de la revue complète de la Phase 1, à réaliser avant d'ouv
 | ~~#71~~ | Encapsulation des collections de navigation |
 | ~~#72~~ | Correction de la documentation relevée par la revue de la Phase 1 |
 
+### Ajustement issu de la reprise des données
+
+Répercussion dans le modèle de domaine des ajustements du `.speckit/` issus de la confrontation avec la base existante (ticket global #101), à réaliser avant les chantiers restants de la Phase 2.
+
+| Ticket | Titre |
+| --- | --- |
+| #102 | Ajustement du modèle de domaine issu de la reprise des données |
+
 ---
 
 ## Phase 2 — Contracts et API
@@ -64,6 +72,7 @@ Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de dev
 | ~~#77~~ | Administration des éditeurs et de leurs collections |
 | ~~#78~~ | Administration des auteurs |
 | ~~#79~~ | Administration des séries |
+| #103 | Ajustement de l'API des séries issu de la reprise des données |
 | #80 | Administration des albums |
 | #81 | Administration des éditions |
 | #82 | Téléversement et gestion des visuels d'édition |
@@ -77,17 +86,35 @@ Pages de consultation (public) et d'administration (authentifié), composants pa
 
 Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, formulaires admin) plutôt que par entité.
 
+Chantier déjà identifié, à intégrer au découpage :
+
+| Ticket | Titre |
+| --- | --- |
+| #104 | Formulaires : valeurs proposées à la saisie, valeur initiale et ancien franc |
+
 ## Phase 4 — Statistiques, devises et estimation de valeur
 
 Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euro (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel.md` § Calcul des estimations).
 
 Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
+Chantier déjà identifié, à intégrer au découpage :
+
+| Ticket | Titre |
+| --- | --- |
+| #105 | Valorisation des montants en euros du jour |
+
 ## Phase 5 — Fonctionnalités de second plan
 
 Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel.md` § Fonctionnalités de second plan).
 
 Découpage à établir à l'ouverture de la phase.
+
+Chantier déjà identifié, à intégrer au découpage :
+
+| Ticket | Titre |
+| --- | --- |
+| #106 | Exclusion de séries des estimations de sortie |
 
 ## Phase 6 — Outil pour agents IA
 
