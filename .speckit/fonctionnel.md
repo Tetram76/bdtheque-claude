@@ -225,7 +225,7 @@ Le libellé de la date et du montant d'acquisition s'adapte au mode d'acquisitio
 | `Gagnée` | Date d'acquisition | Valeur d'acquisition |
 | `Héritée` | Date d'acquisition | Valeur d'acquisition |
 
-Dans tous les cas, le champ montant est affiché et reste optionnel : même sans transaction financière, une édition peut avoir une valeur marchande connue. Si l'édition est marquée **Gratuite**, le champ montant est désactivé et vidé. Une édition achetée (mode `Achat`) ne peut pas être marquée gratuite.
+Dans tous les cas, le champ montant est affiché et reste optionnel : même sans transaction financière, une édition peut avoir une valeur marchande connue. Si l'édition est marquée **Gratuite**, le champ montant est désactivé et vidé, de même que la valeur initiale. Une édition achetée (mode `Achat`) ne peut pas être marquée gratuite.
 
 ### Validation de l'ISBN
 
