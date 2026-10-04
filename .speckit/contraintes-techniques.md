@@ -9,7 +9,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 
 | Élément | Valeur |
 | --- | --- |
-| Langage | Delphi XE7 |
+| Langage | Delphi 10.3 Rio (10.3.3) |
 | Base de données | Firebird 2.5 |
 | Connexion à la base (production) | Firebird embarqué (*embedded*) |
 | Type | Client lourd (desktop) |
