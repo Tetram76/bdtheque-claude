@@ -10,7 +10,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, outil
 | Élément | Valeur |
 | --- | --- |
 | Langage | Delphi (version inconnue) |
-| Base de données | Firebird 1.5 |
+| Base de données | Firebird 2.5 |
 | Type | Client lourd (desktop) |
 
 Cette application est la **référence fonctionnelle** : le périmètre de la réécriture web doit couvrir ses fonctionnalités.
@@ -62,7 +62,7 @@ L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour 
 
 ## Migration des données
 
-- Des données existantes sont stockées dans la base Firebird 1.5 de l'application client lourd.
+- Des données existantes sont stockées dans la base Firebird 2.5 de l'application client lourd.
 - Une **migration de données** depuis Firebird vers la base cible devra être possible lorsque la nouvelle application sera suffisamment mature.
 - La conception du modèle de données cible doit tenir compte de cette migration future : préserver la sémantique des données existantes et ne pas rendre la migration inutilement complexe.
 - La migration pourra être **incrémentale** (imports successifs et partiels) : l'outil de migration devra **fusionner** les données importées avec les données déjà présentes dans la base cible lorsqu'il y a correspondance (pas de doublons, mise à jour des éléments existants).
