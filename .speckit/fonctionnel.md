@@ -39,7 +39,7 @@ Lors de la création d'une nouvelle édition pour un album, si la série de l'al
 - Catégorie d'édition, état, reliure, orientation, sens de lecture, format
 - En couleur
 
-Ces valeurs restent modifiables : l'édition est source de vérité, la série n'est qu'un point de départ.
+Le template de la série fait foi : un champ sans valeur dans le template n'est pas pré-rempli. Pour un album **sans série**, les champs sont pré-remplis avec leur **valeur par défaut** (cf. `modele-metier.md` § Édition). Ce pré-remplissage ne concerne que le formulaire de saisie, jamais la base. Ces valeurs restent modifiables : l'édition est source de vérité, la série n'est qu'un point de départ.
 
 ### Initialisation des contributions depuis la série
 
@@ -140,16 +140,13 @@ Exemples :
 
 ### Libellé d'un album
 
-Un libellé d'album existe en deux **modes** :
+Le libellé d'un album utilise son titre en forme naturelle (cf. § Tri et navigation par initiale).
 
-- **Simple** : le titre de l'album est utilisé tel quel.
-- **Complet** : le titre est mis en forme selon une convention de saisie (gestion des articles, ordre de tri). *Cette convention est à définir ultérieurement.*
-
-Le libellé peut optionnellement inclure le **titre de la série** (`AvecSerie`), utilisé quand le contexte ne rend pas la série évidente (ex. résultat de recherche multi-séries). Quand la série est incluse et que l'album n'a pas de titre propre, le titre de la série tient lieu de titre.
+Il peut optionnellement inclure le **titre de la série**, utilisé quand le contexte ne rend pas la série évidente (ex. résultat de recherche multi-séries). Quand la série est incluse et que l'album n'a pas de titre propre, le titre de la série tient lieu de titre.
 
 #### Représentation du tome selon le type d'album
 
-| Type | Hors-série | Format du tome (simple) | Format du tome (sans titre propre) |
+| Type | Hors-série | Format du tome (avec titre propre) | Format du tome (sans titre propre) |
 | --- | --- | --- | --- |
 | Régulier | non | `T. {N}` | `Tome {N}` |
 | Régulier | oui | `HS[ {N}]` | `Hors-série[ {N}]` |
@@ -228,7 +225,7 @@ Le libellé de la date et du montant d'acquisition s'adapte au mode d'acquisitio
 | `Gagnée` | Date d'acquisition | Valeur d'acquisition |
 | `Héritée` | Date d'acquisition | Valeur d'acquisition |
 
-Dans tous les cas, le champ montant est affiché et reste optionnel : même sans transaction financière, une édition peut avoir une valeur marchande connue. Si l'édition est marquée **Gratuite**, le champ montant est désactivé et vidé.
+Dans tous les cas, le champ montant est affiché et reste optionnel : même sans transaction financière, une édition peut avoir une valeur marchande connue. Si l'édition est marquée **Gratuite**, le champ montant est désactivé et vidé, de même que la valeur initiale. Une édition achetée (mode `Achat`) ne peut pas être marquée gratuite.
 
 ### Validation de l'ISBN
 
@@ -284,20 +281,28 @@ Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner 
 
 ### Estimation de la valeur des éditions
 
-- La **valeur estimée** d'une édition suit la règle de [Calcul des estimations](#calcul-des-estimations) : elle est calculée à partir des données de la collection, et n'est pas stockée en base.
+- La **valeur estimée** d'une édition est l'estimation de son **prix d'acquisition** lorsqu'il n'est pas renseigné. Seules les éditions **possédées**, **non gratuites** et **sans prix d'acquisition** en ont une : une édition dont le prix d'acquisition est connu n'est jamais estimée.
+- Elle sert à valoriser la collection : la **valeur totale estimée** est la somme des prix d'acquisition connus et des valeurs estimées.
+- Elle suit la règle de [Calcul des estimations](#calcul-des-estimations) : elle est calculée à partir des données de la collection, et n'est pas stockée en base.
 - Le modèle d'estimation retenu est un **Random Forest**.
 
 ### Gestion des devises
 
 - L'application gère des **prix, montants et valeurs** (ex. valeur d'achat, valeur estimée d'un album, etc.).
-- **Saisie et affichage des données de base** : peuvent être faits dans n'importe quelle devise.
-- **Analyses et statistiques** : toujours affichées en **euro (€)**.
-- **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euro.
-- **Taux de change** :
-  - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante.
-  - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux appliqué dépend du contexte :
-    - **Estimation de la valeur de la collection** : taux de change **actuel**, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)** (open source, gratuite, sans clé API).
-    - **Autres cas** : règle à définir au cas par cas.
+- **Saisie et affichage des données de base** : peuvent être faits dans n'importe quelle devise. Une fiche affiche chaque montant **deux fois** : la valeur saisie, dans sa devise, et sa valeur en **euros du jour**.
+- **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), puis **corrigé de l'inflation** entre cette date et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
+- **Analyses et statistiques** : toujours affichées en **euros du jour**.
+- **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euros du jour.
+- **Date de référence d'un montant** : première date connue, dans cet ordre :
+  - **prix d'acquisition** : date d'acquisition, puis année d'édition, puis date de première publication de l'album ;
+  - **valeur initiale** : année d'édition, puis date de première publication de l'album.
+
+  Un montant ne peut pas être enregistré sans date de référence, **quelle que soit sa devise**.
+- **Taux de change** : tout montant est **stocké dans sa devise** de saisie, jamais converti à l'enregistrement. Lorsqu'il doit être exprimé en euro, quel que soit l'usage (statistiques, valeur de la collection, estimation de valeur), il est converti au taux de change en vigueur à sa **date de référence** :
+  - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante, identique quelle que soit la date.
+  - **Ancien franc** : proposé comme devise à la saisie, pour les prix français antérieurs au nouveau franc de 1960 ; il est converti à raison de 100 anciens francs pour 1 franc, puis comme le franc.
+  - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux est celui de la date de référence, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)** (open source, gratuite, sans clé API). Lorsque la date de référence est partielle, le taux appliqué est le **taux moyen** de la période connue : celui du **mois** pour un mois et une année, celui de l'**année** pour une année seule.
+  - **Montant non convertible** : un montant pour lequel aucun taux de change ou coefficient d'inflation n'est disponible à sa date de référence (date antérieure à l'historique de la devise ou à 1901) peut être saisi et reste affiché dans sa devise, mais il n'est pas pris en compte dans les calculs exprimés en euro.
 
 ## Design et charte graphique
 
@@ -408,7 +413,7 @@ Comme toute estimation, elle suit la règle de [Calcul des estimations](#calcul-
 
 Règles de calcul :
 
-1. L'estimation se fait **série par série**. Elle n'est calculée que pour les séries dont le statut est `En cours` — les séries `Terminée` (tous les albums prévus ont été publiés) et `Abandonnée` ne font l'objet d'aucune estimation.
+1. L'estimation se fait **série par série**. Elle n'est calculée que pour les séries dont le statut est `En cours` — les séries `Terminée` (tous les albums prévus ont été publiés) et `Abandonnée` ne font l'objet d'aucune estimation — et qui n'ont pas l'attribut **Exclure des estimations de sortie**.
 2. Elle se base sur les **dates de première publication** des albums réguliers de la série (les intégrales et hors-série sont exclus du calcul).
 3. Il faut **au moins 2 albums réguliers** avec une date de première publication **passée** pour pouvoir produire une estimation. Les albums dont la date de première publication est strictement dans le futur sont exclus du calcul du rythme. La règle s'adapte à la granularité de la date saisie :
 

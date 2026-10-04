@@ -5,7 +5,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 
 ---
 
-## Application existante (référence)
+## Application existante
 
 | Élément | Valeur |
 | --- | --- |
@@ -14,8 +14,6 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 | Connexion à la base (production) | Firebird embarqué (*embedded*) |
 | Type | Client lourd (desktop) |
 | Dépôt des sources | <https://github.com/Tetram76/tetram> (dossier `bdtheque/`) |
-
-Cette application est la **référence fonctionnelle** : le périmètre de la réécriture web doit couvrir ses fonctionnalités.
 
 ## Stack cible
 
@@ -62,7 +60,11 @@ L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour 
 - Licences acceptées : **open source** (MIT, Apache 2.0, GPL, etc.) et **Community Edition** gratuites.
 - Pour les projets open source : n'utiliser que des projets **reconnus, activement maintenus et largement adoptés** par la communauté. Exclure les projets confidentiels, abandonnés ou à faible adoption.
 
-## Migration des données
+## Sources de données externes
+
+Les données récupérées auprès de sources externes (taux de change Frankfurter, coefficients d'inflation INSEE, cf. `fonctionnel.md` § Gestion des devises) sont **mises en cache** par l'application, pour ne pas être récupérées à chaque utilisation.
+
+## Reprise des données
 
 - Des données existantes sont stockées dans la base Firebird 2.5 de l'application client lourd.
 - Une **migration de données** depuis Firebird vers la base cible devra être possible lorsque la nouvelle application sera suffisamment mature.
@@ -87,6 +89,30 @@ Caractéristiques de la base Firebird de l'application existante, que la migrati
 - **Vues et procédures stockées** : 20 vues (`VW_*`) et des procédures stockées qui portent une partie de la logique de l'application (listes par initiale, albums manquants, prévisions de sorties…). Certaines procédures construisent leur requête en concaténant un paramètre `FILTRE` ; d'autres enveloppent les UDF de fichiers (`DELETEFILE`, `SAVEBLOBTOFILE`, `LOADBLOBFROMFILE`, `DIRECTORYCONTENT`, `SEARCHFILENAME`).
 - **Titres stockés sous forme de tri** (`ALBUMS.TITREALBUM`, `SERIES.TITRESERIE`) : l'article initial est reporté en suffixe entre crochets (`fils d'Asterix [Le]`, `étoile du désert [L']`), selon la même convention que la clé de tri de `fonctionnel.md` § Titres (séries et albums). La forme affichée est reconstituée par l'UDF `UDF_FORMATTITLE` (`Le fils d'Asterix`).
 - **Initiale stockée** (`ALBUMS.INITIALETITREALBUM`, `CHAR(1)` en `UTF8`) : initiale **brute** du titre, non normalisée — casse et accents conservés (`É` et `é` sont deux valeurs distinctes), chaque chiffre est une valeur à part entière, `#` figure parmi les valeurs, et la colonne est vide (`NULL`) pour un album sans titre propre, que l'application range sous l'initiale de sa série (`coalesce(initialetitrealbum, initialetitreserie)`, procédure `INITIALES_ALBUMS`). Elle ne correspond donc pas aux entrées de navigation de `fonctionnel.md` § Entrées de la navigation par initiale.
+
+### Données non reprises
+
+| Données | Tables de la base existante | Motif |
+| --- | --- | --- |
+| Objets para-BD (avec leurs auteurs, univers, cotes et photos) | `PARABD`, `AUTEURS_PARABD`, `PARABD_UNIVERS`, `COTES_PARABD`, `PHOTOS` | Absents de la nouvelle application |
+| Prêts (emprunteurs, suivi des prêts d'éditions) | `EMPRUNTEURS`, `STATUT`, colonnes `EDITIONS.PRETE` et `EDITIONS.STOCK` | Absents de la nouvelle application |
+| Cotes des éditions (historique daté de leur valeur de marché) | `COTES`, colonnes `EDITIONS.ANNEECOTE` et `EDITIONS.PRIXCOTE` | Absentes de la nouvelle application |
+| Taux de conversion saisis | `CONVERSIONS` | Taux fixes constants et taux variables issus de Frankfurter (`fonctionnel.md` § Gestion des devises) |
+| Listes de valeurs modifiables | `LISTES` | Énumérations fixes dans la nouvelle application (`modele-metier.md`) ; seules les valeurs portées par les fiches sont reprises, traduites vers ces énumérations |
+| Paramétrage et critères de recherche du client lourd | `OPTIONS`, `OPTIONS_SCRIPTS`, `CRITERES` | Propres au client lourd |
+| Visuel rattaché à un album sans édition | Lignes de `COUVERTURES` sans `ID_EDITION` | Un visuel appartient toujours à une édition (`modele-metier.md` § Visuel d'édition) |
+| Correspondances d'import (libellé d'une source externe → fiche) | `IMPORT_ASSOCIATIONS` | Absentes de la nouvelle application |
+| Journal des suppressions | `SUPPRESSIONS` | Les suppressions faites dans la base existante ne sont pas répercutées par la reprise |
+| Sites web des séries, des auteurs et des univers | Colonnes `SERIES.SITEWEB`, `PERSONNES.SITEWEB`, `UNIVERS.SITEWEB` | Absents de la nouvelle application |
+| Note d'une série | Colonne `SERIES.NOTATION` | Absente de la nouvelle application |
+| Version originale | Colonnes `EDITIONS.VO`, `SERIES.VO` | Absente de la nouvelle application |
+| Clés phonétiques des titres | Colonnes `SOUNDEX*` | Pas de recherche phonétique dans la nouvelle application |
+
+### Correspondances particulières
+
+| Données de la base existante | Reprise | Motif |
+| --- | --- | --- |
+| Éditions gratuites non offertes (`EDITIONS.GRATUIT = 1`, `EDITIONS.OFFERT = 0`) | Mode d'acquisition `Offerte`, gratuité conservée | Une édition achetée ne peut pas être gratuite (`modele-metier.md` § Édition) |
 
 ## Hébergement
 

@@ -111,6 +111,13 @@ erDiagram
 
 ## Attributs des entités
 
+### Attributs communs à toutes les entités
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Date de création | date et heure | oui | Renseignée automatiquement à la création de la fiche, jamais saisie. |
+| Date de dernière modification | date et heure | oui | Renseignée automatiquement à chaque modification de la fiche, jamais saisie. |
+
 ### Album
 
 | Attribut | Type | Obligatoire | Remarques |
@@ -141,6 +148,7 @@ erDiagram
 | Nombre de tomes numérotés (théorique) | entier | non | Nombre de tomes numérotés attendus dans la séquence principale de la série, selon l'utilisateur. Ne compte pas les hors-série ni les albums sans numéro de tome. Non calculé depuis la base — sert de borne supérieure pour la détection des albums manquants (queue théorique) et à évaluer la complétude de la collection. |
 | Complète | booléen | oui | `false` par défaut. Choix explicite de l'utilisateur, indépendant du nombre d'albums réellement présents dans la collection. |
 | Exclure des manquants | booléen | oui | `false` par défaut. Si `true`, la série est ignorée lors de la recherche des albums manquants. |
+| Exclure des estimations de sortie | booléen | oui | `false` par défaut. Si `true`, la série ne fait l'objet d'aucune estimation de sortie, quel que soit son statut. |
 | Résumé | texte long | non | Résumé propre à la série. |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
 | *(template)* Reliure | énuméré | non | Valeur par défaut pour les nouvelles éditions. |
@@ -151,34 +159,42 @@ erDiagram
 | *(template)* État | énuméré | non | Valeur par défaut pour les nouvelles éditions. |
 | *(template)* En couleur | booléen | non | Valeur par défaut pour les nouvelles éditions. |
 
+> Le formulaire de création d'une série pré-remplit ses valeurs template avec les **valeurs par défaut** des attributs correspondants de l'édition (cf. § Édition) ; elles restent modifiables, et ne sont pas portées par la base (aucune clause `DEFAULT`).
+
 ### Édition
 
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Année d'édition | entier (année) | non | Année de publication de cette édition. |
 | ISBN | texte | non | Formats **ISBN-10** et **ISBN-13/EAN-13** tous deux supportés. La saisie doit permettre de détecter les erreurs de frappe (contrôle du chiffre de vérification). |
-| Reliure | énuméré | non | `Brochée` / `Reliée`. |
-| Orientation | énuméré | non | `Portrait` / `Italienne`. |
-| Sens de lecture | énuméré | non | `Gauche à droite` / `Droite à gauche`. |
-| Format | énuméré | non | `Poche` / `Moyen (A5)` / `Normal (A4)` / `Grand (> A4)` / `Spécial`. |
+| Reliure | énuméré | non | `Brochée` / `Cartonnée`. Proposé à la saisie : `Cartonnée`. |
+| Orientation | énuméré | non | `Portrait` / `Italienne`. Proposé à la saisie : `Portrait`. |
+| Sens de lecture | énuméré | non | `Gauche à droite` / `Droite à gauche`. Proposé à la saisie : `Gauche à droite`. |
+| Format | énuméré | non | `Poche` / `Moyen (A5)` / `Normal (A4)` / `Grand (> A4)` / `Spécial`. Proposé à la saisie : `Normal (A4)`. |
 | Nombre de pages | entier | non | |
-| Catégorie | énuméré | non | `Première édition` / `Édition spéciale` / `Tirage de tête`. |
+| Catégorie | énuméré | non | `Édition originale` / `Édition spéciale` / `Tirage de tête`. |
 | Dédicacée | booléen | oui | `false` par défaut. |
 | En couleur | booléen | oui | `true` par défaut. |
-| État | énuméré | non | `Excellent (neuf)` / `Très bon` / `Bon` / `Mauvais` / `Très mauvais`. |
+| État | énuméré | non | `Excellent (état neuf)` / `Très bon` / `Bon` / `Moyen` / `Mauvais` / `Très mauvais`. « Excellent » plutôt que « Neuf » : une édition qui n'a pas été achetée neuve peut être dans cet état. Proposé à la saisie : `Excellent (état neuf)`. |
 | Mode d'acquisition | énuméré | conditionnel | `Achat` / `Offerte` / `Échange` / `Gagnée` / `Héritée`. Obligatoire si l'édition est possédée. Conditionne le libellé de la date et du montant en interface (voir `fonctionnel.md`). |
 | D'occasion | booléen | oui | `false` = neuve, `true` = occasion. |
 | Date d'acquisition | date | non | Date à laquelle l'utilisateur a obtenu l'édition. |
-| Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**, cf. `choix-implementation.md` § Représentation de la devise) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. |
-| Gratuite | booléen | oui | `false` par défaut. Indique que l'utilisateur ne souhaite enregistrer aucun montant (ni prix payé ni valeur marchande). Si `true`, le prix d'acquisition doit être `null` (contrainte d'intégrité) ; le champ est désactivé et vidé en interface. |
+| Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**, cf. `choix-implementation.md` § Représentation de la devise, ou **ancien franc**, cf. `fonctionnel.md` § Gestion des devises) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour une édition achetée, c'est le prix payé au moment de l'acquisition. Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. `fonctionnel.md` § Gestion des devises). |
+| Gratuite | booléen | oui | `false` par défaut. Indique que l'édition **n'a pas de valeur** : aucun montant n'est enregistré (ni prix payé, ni valeur marchande, ni valeur initiale) et aucune valeur n'est estimée. Interdit pour une édition achetée. Si `true`, le prix d'acquisition et la valeur initiale doivent être `null` (contrainte d'intégrité) ; ces champs sont désactivés et vidés en interface. |
+| Valeur initiale | montant + devise (même représentation que le prix d'acquisition, ancien franc compris) | non | Prix de vente de l'édition à sa parution. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. `fonctionnel.md` § Gestion des devises). |
 | Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. cote, numéro de rangement). |
-| Valeur estimée | calculée | — | Calculée dynamiquement, non stockée (voir `fonctionnel.md` § Calcul des estimations). |
+| Valeur estimée | calculée | — | Estimation du prix d'acquisition d'une édition possédée, non gratuite, dont le prix d'acquisition n'est pas renseigné (voir `fonctionnel.md` § Estimation de la valeur des éditions). Calculée dynamiquement, non stockée. |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
+
+> **Valeurs par défaut des attributs énumérés** (État, Reliure, Orientation, Sens de lecture, Format) : ce sont uniquement des valeurs **proposées à la saisie**, qui pré-remplissent le formulaire de création. Elles ne sont **pas portées par la base** (aucune clause `DEFAULT` sur les colonnes correspondantes) ni appliquées à l'enregistrement : un attribut laissé vide est enregistré vide.
 
 > **Contraintes d'intégrité :**
 >
-> - Si `Mode d'acquisition` est `null` (édition non possédée, ex. issue d'une intention d'achat), alors `Date d'acquisition` et `Prix d'acquisition` doivent également être `null`.
-> - Si `Gratuite` est `true`, alors `Prix d'acquisition` doit être `null`.
+> - Si `Mode d'acquisition` est `null` (édition non possédée, ex. issue d'une intention d'achat), alors `Date d'acquisition`, `Prix d'acquisition` et `Valeur initiale` doivent également être `null` : une édition non possédée n'a pas de valeur.
+> - Si `Gratuite` est `true`, alors `Prix d'acquisition` et `Valeur initiale` doivent être `null` : une édition gratuite n'a pas de valeur.
+> - Si `Mode d'acquisition` est `Achat`, alors `Gratuite` doit être `false` : une édition achetée ne peut pas être gratuite.
+> - Si `Prix d'acquisition` est renseigné, au moins une de ses dates de référence doit être connue : `Date d'acquisition`, `Année d'édition` ou `Date de première publication` de l'album.
+> - Si `Valeur initiale` est renseignée, `Année d'édition` ou `Date de première publication` de l'album doit être connue.
 
 ### Auteur / Artiste
 
@@ -235,7 +251,7 @@ erDiagram
 
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
-| Type de visuel | énuméré | oui | Couverture / Dédicace / Page de garde / Planche / 4e de couverture. |
+| Type de visuel | énuméré | oui | Couverture / Dédicace / Page de garde / Planche / 4e de couverture. `Couverture` proposé par défaut à la saisie (formulaire pré-rempli), non porté par la base (aucune clause `DEFAULT`). |
 | Fichier / URL | texte | oui | Référence au média stocké. |
 | Ordre d'affichage | entier | oui | Rang au sein des visuels du même type, ajustable manuellement par l'utilisateur. |
 
