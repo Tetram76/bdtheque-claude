@@ -26,6 +26,15 @@ La solution .NET est découpée en projets par responsabilité, sous `src/` :
 
 Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet.md`.
 
+## Outillage de développement .NET
+
+- **Gestion centralisée des packages NuGet** via `Directory.Packages.props` (Central Package Management) : toutes les versions sont déclarées à la racine de la solution, les fichiers `.csproj` ne référencent que les noms de package.
+- **Tests unitaires et d'intégration** : `xunit`, exécutés via `dotnet test`. Couverture de code collectée avec `coverlet.collector`.
+- **Tests de persistance et d'intégration de l'API sur PostgreSQL réel** : `Testcontainers.PostgreSql` démarre, par exécution de tests, un conteneur de la **même image** que le service `db` de `docker-compose.yml` (alignement vérifié par un test) ; le schéma y est produit par les **migrations** (jamais par `EnsureCreated`), et chaque test dispose de sa propre base, clonée d'une base modèle migrée une fois (`CREATE DATABASE … TEMPLATE`), dont les connexions sont libérées à la fin du test (une base par test, donc un pool de connexions par test : conservées, elles épuiseraient `max_connections`). Les tests de l'API (`Microsoft.AspNetCore.Mvc.Testing`, `WebApplicationFactory`) démarrent sur une base vide, comme un premier déploiement. Docker est donc requis pour exécuter les tests, localement comme en CI.
+  - **Alternative écartée (SQLite en mémoire)** : un autre moteur que celui de production ne vérifie ni les migrations réellement appliquées, ni la collation (tri linguistique), ni la précision des `decimal`, ni la forme exacte des contraintes PostgreSQL — précisément ce que ces tests doivent garantir. Son seul avantage (pas de dépendance à Docker) ne compense pas des tests verts sur un schéma qui n'est pas celui livré.
+- **Contrôle de cohérence modèle ↔ migrations** : la CI exécute `dotnet ef migrations has-pending-model-changes`, qui échoue si une modification du modèle EF a été commitée sans sa migration.
+- **Étapes du pipeline CI** (`gestion-projet.md` § Intégration continue (CI)) : restauration, build en mode `Release`, contrôle de cohérence modèle ↔ migrations, exécution de la totalité des tests (`dotnet test`, sur PostgreSQL via Testcontainers — Docker est disponible sur les runners `ubuntu-latest`).
+
 ## Frontend
 
 - **Blazor** (Blazor Web App, ASP.NET Core / .NET 10), hébergé par le conteneur `frontend`. Le rendu a lieu **côté serveur** : c'est la seule famille compatible avec l'architecture imposée, où `frontend` appelle `api` par le réseau Docker interne et où `api` n'est jamais exposé (`contraintes-techniques.md`) — le navigateur ne dialogue qu'avec `frontend`. Blazor garde le même langage et les mêmes contrats (`Bdtheque.Contracts`) que l'API, sans chaîne d'outillage JavaScript.
@@ -72,7 +81,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - **Contrats** (`Bdtheque.Contracts`) : `record` immuables. Les énumérations exposées sont **dupliquées** dans les contrats (mêmes noms, mêmes valeurs), la parité étant vérifiée par un test : ni le frontend ni l'outil pour agents IA ne référencent jamais `Bdtheque.Domain`. Elles sont sérialisées en **chaîne** dans le JSON (lisibilité de la documentation OpenAPI), par un convertisseur déclaré sur chaque énumération des contrats (`[JsonConverter(typeof(JsonStringEnumConverter<T>))]`) : le contrat porte lui-même son format, que le frontend relit sans reproduire la configuration du sérialiseur de l'API.
   - **Alternative écartée (convertisseur global dans les options JSON de l'API)** : chaque client de l'API (`frontend`, `mcp`) devrait déclarer le même convertisseur dans ses propres options, faute de quoi la désérialisation d'une énumération échouerait — autant de configurations à maintenir alignées que de clients.
 - **Chargement de la hiérarchie des univers** : toute opération qui modifie le parent d'un univers charge l'ensemble du référentiel des univers (table de petite taille), ce qui satisfait le prérequis de `Universe.SetParent` (chaîne d'ancêtres complète en mémoire) sans requête récursive.
-- **Tests** : tests d'intégration de l'API sur PostgreSQL réel (`gestion-projet.md` § Outillage .NET), une instance de l'API et sa base par classe de tests, chaque test créant ses propres données.
+- **Tests** : tests d'intégration de l'API sur PostgreSQL réel (§ Outillage de développement .NET), une instance de l'API et sa base par classe de tests, chaque test créant ses propres données.
 
 ## Suppression des entités : mise en œuvre
 
