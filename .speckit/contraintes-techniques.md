@@ -78,7 +78,7 @@ Caractéristiques de la base Firebird de l'application existante, que la migrati
 | Élément | Valeur |
 | --- | --- |
 | Fichier | `BD.GDB`, copie de la base de production fournie hors dépôt |
-| Format | ODS 11 (Firebird 2.5), pages de 16 Ko |
+| Format | ODS 11.2 (Firebird 2.5), pages de 16 Ko |
 | Tables | `ALBUMS`, `ALBUMS_UNIVERS`, `AUTEURS`, `AUTEURS_PARABD`, `AUTEURS_SERIES`, `COLLECTIONS`, `CONVERSIONS`, `COTES`, `COTES_PARABD`, `COUVERTURES`, `CRITERES`, `EDITEURS`, `EDITIONS`, `EMPRUNTEURS`, `GENRES`, `GENRESERIES`, `IMPORT_ASSOCIATIONS`, `LISTES`, `OPTIONS`, `OPTIONS_SCRIPTS`, `PARABD`, `PARABD_UNIVERS`, `PERSONNES`, `PHOTOS`, `SERIES`, `SERIES_UNIVERS`, `STATUT`, `SUPPRESSIONS`, `UNIVERS` |
 | Texte | Jeu de caractères `UTF8` |
 
