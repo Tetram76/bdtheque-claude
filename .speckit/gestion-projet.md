@@ -156,7 +156,7 @@ Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur u
 
 #### Ouverture de la PR
 
-Codex revoit ce qui est poussé, que le travail soit achevé ou non : une PR ouverte trop tôt lui fait revoir un contenu incomplet, et consomme sa revue en pure perte (cf. § Budget IA). Une PR n'est donc **créée** — ou, si elle a été créée en brouillon, **passée en « prête pour la revue »** — qu'une fois le **contenu de sa branche complet**. Tant que ce contenu est en cours d'élaboration ou de discussion, il reste local, ou sur une PR en brouillon.
+Codex revoit ce qui est poussé, que le travail soit achevé ou non : une PR ouverte trop tôt lui fait revoir un contenu incomplet, et consomme sa revue en pure perte (cf. § Budget IA). Une PR n'est donc **créée hors brouillon** — ou **passée de brouillon à « prête pour la revue »** — qu'une fois le **contenu de sa branche complet**. Tant que ce contenu est en cours d'élaboration ou de discussion, il reste local, ou sur une PR en brouillon.
 
 Le passage d'un brouillon en « prête pour la revue » ne déclenche pas nécessairement de revue Codex, aucun commit n'étant poussé à ce moment-là. L'agent vérifie donc que Codex a démarré sa revue (réaction 👀 sur la description de la PR) ; à défaut, après quelques minutes, il la demande par un commentaire `@codex review`.
 

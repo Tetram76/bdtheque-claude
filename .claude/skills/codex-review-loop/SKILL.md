@@ -15,9 +15,9 @@ Policy source of truth: `.speckit/gestion-projet.md` → "Revue de code" /
 policy: a PR on this repo cannot be merged until the Codex bot
 (`chatgpt-codex-connector[bot]`) has approved the current head commit.
 
-Codex reviews every push to a non-draft PR: open the PR (or mark a draft
-ready for review) only once the branch content is complete (policy: § « Ouverture
-de la PR »). Marking a draft ready may not trigger a review (nothing is
+Codex reviews every push to a non-draft PR: open a non-draft PR (or mark a
+draft ready for review) only once the branch content is complete; until then,
+the work stays local or on a draft PR (policy: § « Ouverture de la PR »). Marking a draft ready may not trigger a review (nothing is
 pushed): if no 👀 from Codex appears on the PR description within a few
 minutes, request one with a `@codex review` comment.
 
