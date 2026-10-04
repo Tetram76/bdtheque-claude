@@ -194,6 +194,15 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
   - **Alternative écartée (image Docker Firebird 2.5, ex. `jacobalberty/firebird:2.5-ss`)** : Firebird ne publie aucune image officielle pour la 2.5, et l'image communautaire est plus lourde que le kit officiel.
   - **Alternative écartée (serveur `fbserver.exe -a` du kit complet)** : fonctionne, mais lance un serveur à l'écoute sur le port 3050, là où le mode embarqué, celui de la production, n'exige rien.
   - **Alternative écartée (effacement des attributs spécifiques des collations sur la copie, avec l'ICU 3.0 du kit)** : rend la base lisible, mais modifie ses métadonnées et remplace l'ordre français de la production par l'ordre `UNICODE` générique.
+- **Pistes déjà explorées**, à ne pas refaire si cette méthode doit être complétée (résultat constaté → indication) :
+  - **Kit complet seul** (`Firebird-2.5.9.27139-0_x64.zip`, sans le kit embarqué) : `unavailable database` → ce kit ne contient pas `fbembed.dll`, son `fbclient.dll` n'est qu'un client réseau ; l'accès embarqué exige le kit `_embed`.
+  - **ICU 3.0 des kits** : `COLLATION UTF8_FR_CI_AI for CHARACTER SET UTF8 is not installed` sur toute requête touchant une table qui utilise ces collations, même un `count(*)` → l'obstacle est la version d'ICU, pas les données.
+  - **Recréer une collation avec `LOCALE` sous ICU 3.0** (`fr_FR` puis `fr`, sur une base vierge) : `Invalid collation attributes`, alors que la même collation sans `LOCALE` est acceptée → l'ICU 3.0 des kits ne gère aucune locale ; aucun ajustement de collation ne remplace ICU 52.
+  - **Binaires Windows d'ICU 52 sur GitHub** (`unicode-org/icu`) : pas de tag `release-52-1`, et `release-52-2` ne fournit que les sources → seule la distribution SourceForge (`ICU4C/52.1`) fournit les binaires officiels.
+  - **Autres builds d'ICU 52.1** : un build non officiel compilé avec Visual Studio 2010 (dossier `bin64`) charge aussi les collations d'origine → la version des collations dépend des données ICU, communes à tous les builds 52.1, et non du compilateur.
+  - **Version ODS lue directement dans l'en-tête du fichier** : seul l'ODS majeur (11) est lu, qui ne distingue pas Firebird 2.0, 2.1 et 2.5 → `gstat -h` donne la version complète (11.2).
+  - **Plusieurs UDF `CSTRING(32767)` dans une même ligne** : `block size exceeds implementation restriction` → une UDF par requête.
+  - **Classe de caractères dans `LIKE`** (`'%[[]%'`, syntaxe SQL Server) : aucune ligne → dans Firebird, `[` est littéral dans `LIKE` (`'%[%'`).
 
 ## Erreurs métier, fonctionnelles et techniques
 
