@@ -60,6 +60,10 @@ L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour 
 - Licences acceptées : **open source** (MIT, Apache 2.0, GPL, etc.) et **Community Edition** gratuites.
 - Pour les projets open source : n'utiliser que des projets **reconnus, activement maintenus et largement adoptés** par la communauté. Exclure les projets confidentiels, abandonnés ou à faible adoption.
 
+## Sources de données externes
+
+Les données récupérées auprès de sources externes (taux de change Frankfurter, coefficients d'inflation INSEE, cf. `fonctionnel.md` § Gestion des devises) sont **mises en cache** par l'application, pour ne pas être récupérées à chaque utilisation.
+
 ## Reprise des données
 
 - Des données existantes sont stockées dans la base Firebird 2.5 de l'application client lourd.

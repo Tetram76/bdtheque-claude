@@ -241,7 +241,7 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 - Le service de taux de change (Frankfurter) est imposé (`fonctionnel.md` § Gestion des devises) ; sa version est un choix : **v2** (`https://api.frankfurter.dev/v2/…`), version courante du service.
   - **Alternative écartée (v1)** : dépréciée au profit de la v2 ; elle reste disponible, mais n'évoluera plus.
-- Les taux **variables** sont mis en cache côté `api` pour éviter les appels répétés au service ; les taux **fixes** (ex. Franc français) sont des constantes en code.
+- Les taux **variables** sont mis en cache côté `api` (`contraintes-techniques.md` § Sources de données externes) ; les taux **fixes** (ex. Franc français) sont des constantes en code.
 
 ## Représentation de la devise
 
