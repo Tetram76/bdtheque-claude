@@ -13,7 +13,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 | Base de données | Firebird 2.5 |
 | Connexion à la base (production) | Firebird embarqué (*embedded*) |
 | Type | Client lourd (desktop) |
-| Dépôt des sources | <https://github.com/Tetram76/bdtheque> |
+| Dépôt des sources | <https://github.com/Tetram76/tetram> (dossier `bdtheque/`) |
 
 Cette application est la **référence fonctionnelle** : le périmètre de la réécriture web doit couvrir ses fonctionnalités.
 
