@@ -289,8 +289,9 @@ Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner 
 ### Gestion des devises
 
 - L'application gère des **prix, montants et valeurs** (ex. valeur d'achat, valeur estimée d'un album, etc.).
-- **Saisie et affichage des données de base** : peuvent être faits dans n'importe quelle devise.
-- **Analyses et statistiques** : toujours affichées en **euro (€)**.
+- **Saisie et affichage des données de base** : peuvent être faits dans n'importe quelle devise. Une fiche affiche chaque montant **deux fois** : la valeur saisie, dans sa devise, et sa valeur en **euros du jour**.
+- **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), puis **corrigé de l'inflation** entre cette date et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
+- **Analyses et statistiques** : toujours affichées en **euros du jour**.
 - **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euro.
 - **Date de référence d'un montant** : première date connue, dans cet ordre :
   - **prix d'acquisition** : date d'acquisition, puis année d'édition, puis date de première publication de l'album ;
@@ -300,7 +301,7 @@ Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner 
 - **Taux de change** : tout montant est **stocké dans sa devise** de saisie, jamais converti à l'enregistrement. Lorsqu'il doit être exprimé en euro, quel que soit l'usage (statistiques, valeur de la collection, estimation de valeur), il est converti au taux de change en vigueur à sa **date de référence** :
   - Certaines devises ont un taux **fixe et définitif** vis-à-vis de l'euro (ex. Franc français : 6,55957 FF = 1 €) → le taux est une constante, identique quelle que soit la date.
   - D'autres devises ont un taux **variable** (ex. Dollar américain) → le taux est celui de la date de référence, récupéré depuis l'API **[Frankfurter](https://www.frankfurter.app/)** (open source, gratuite, sans clé API). Lorsque la date de référence est partielle, le taux appliqué est le **taux moyen** de la période connue : celui du **mois** pour un mois et une année, celui de l'**année** pour une année seule.
-  - **Montant non convertible** : un montant pour lequel aucun taux n'est disponible à sa date de référence (date antérieure à l'historique de la devise) peut être saisi et reste affiché dans sa devise, mais il n'est pas pris en compte dans les calculs exprimés en euro.
+  - **Montant non convertible** : un montant pour lequel aucun taux de change ou coefficient d'inflation n'est disponible à sa date de référence (date antérieure à l'historique de la devise ou à 1901) peut être saisi et reste affiché dans sa devise, mais il n'est pas pris en compte dans les calculs exprimés en euro.
 
 ## Design et charte graphique
 
