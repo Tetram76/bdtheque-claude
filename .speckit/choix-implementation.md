@@ -176,6 +176,15 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 
 ## Accès à la base existante (Firebird)
 
+- **Archives à récupérer** (sources officielles ; seules la base et `BDT_UDF.dll` sont fournies) :
+
+  | Archive | Source | Usage |
+  | --- | --- | --- |
+  | `Firebird-2.5.9.27139-0_x64_embed.zip` | <https://github.com/FirebirdSQL/firebird/releases/download/R2_5_9/Firebird-2.5.9.27139-0_x64_embed.zip> | Moteur Firebird embarqué |
+  | `Firebird-2.5.9.27139-0_x64.zip` | <https://github.com/FirebirdSQL/firebird/releases/download/R2_5_9/Firebird-2.5.9.27139-0_x64.zip> | `isql.exe` et `gstat.exe` uniquement |
+  | `icu4c-52_1-Win64-msvc10.zip` | <https://sourceforge.net/projects/icu/files/ICU4C/52.1/icu4c-52_1-Win64-msvc10.zip/download> | ICU 52 des collations d'origine |
+  | `vcredist_x64.exe` (Visual C++ 2010 SP1 x64, 10.0.40219.325) | <https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe> | Runtime d'ICU 52, à installer s'il est absent du poste |
+
 - **Firebird 2.5.9 embarqué**, kit officiel `Firebird-2.5.9.27139-0_x64_embed.zip` (releases GitHub `FirebirdSQL/firebird`, tag `R2_5_9`) : même moteur et même mode d'accès que l'application existante en production (`contraintes-techniques.md` § Application existante (référence)), sans installation, sans service ni port réseau. Le kit embarqué ne contient ni `isql` ni `gstat` : ils sont repris du kit complet de la même release (`Firebird-2.5.9.27139-0_x64.zip`) et copiés dans le dossier du kit embarqué, où `fbembed.dll` est dupliquée en `fbclient.dll` (bibliothèque que charge `isql`). La variable d'environnement `FIREBIRD` désigne ce dossier, et la base est ouverte par son chemin local, sans nom d'hôte.
 - **ICU 52, comme l'application existante** (`contraintes-techniques.md` § Base existante) : les DLL `icudt52.dll`, `icuin52.dll` et `icuuc52.dll` du dossier `bin64` du build officiel `icu4c-52_1-Win64-msvc10.zip` (distribution officielle d'ICU sur SourceForge, `ICU4C/52.1` ; les releases GitHub d'ICU ne fournissent pas de binaires Windows pour cette version) sont copiées dans le dossier du kit, et `intl/fbintl.conf` y déclare `icu_versions 5.2` pour le module `builtin`, comme celui de l'application. Les collations d'origine se chargent alors telles quelles : la base n'est pas modifiée et les requêtes suivent l'ordre français de la production. Ce build requiert le redistribuable Visual C++ 2010 x64 complet : `icuin52.dll` importe `msvcp100.dll` et `msvcr100.dll`, `icuuc52.dll` importe `msvcr100.dll`.
 - **Seules la base et `BDT_UDF.dll` sont fournies**, la base sous un nom non fixé : kits Firebird et ICU sont téléchargés depuis leurs sources officielles ci-dessus, et la base est ouverte par son chemin, quels que soient son nom et son extension.
