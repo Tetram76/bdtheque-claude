@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bdtheque.Api.Security;
 using Bdtheque.Testing;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +16,13 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
 {
     public const string InternalApiKey = "test-internal-api-key";
 
+    /// <summary>Heaviest visual accepted by the API under test, kept small so that a test can exceed it cheaply.</summary>
+    public const long MaxVisualFileSizeBytes = 256 * 1024;
+
     private string _connectionString = null!;
+
+    /// <summary>The visuals volume of this API instance, an empty temporary directory of its own.</summary>
+    public string VisualsRoot { get; } = Path.Combine(Path.GetTempPath(), $"bdtheque-visuals-{Guid.NewGuid():N}");
 
     public async Task InitializeAsync() =>
         _connectionString = await PostgreSqlTestServer.CreateEmptyDatabaseAsync();
@@ -39,6 +46,8 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
             {
                 ["ConnectionStrings:Bdtheque"] = _connectionString,
                 ["InternalApiKey:Key"] = InternalApiKey,
+                ["Visuals:RootPath"] = VisualsRoot,
+                ["Visuals:MaxFileSizeBytes"] = MaxVisualFileSizeBytes.ToString(CultureInfo.InvariantCulture),
             }));
     }
 
@@ -46,5 +55,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
     {
         await base.DisposeAsync();
         PostgreSqlTestServer.ReleaseConnections(_connectionString);
+        if (Directory.Exists(VisualsRoot))
+            Directory.Delete(VisualsRoot, recursive: true);
     }
 }

@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Deletion;
+using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -52,9 +54,13 @@ internal static class AggregateDeletion
     /// appeared.
     /// </summary>
     public static async Task<DeletionImpact> ComputeImpactAsync(
+        BdthequeDbContext context, Guid id, IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken) =>
+        ImpactOf(await CollectRecordsAsync(context, id, links, cancellationToken));
+
+    // Sorted, so that both the counts and the fingerprint come out in a stable order.
+    private static async Task<SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>>> CollectRecordsAsync(
         BdthequeDbContext context, Guid id, IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken)
     {
-        // Sorted, so that both the counts and the fingerprint come out in a stable order.
         var records = new SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>>();
         foreach (var link in links)
         {
@@ -67,6 +73,11 @@ internal static class AggregateDeletion
             linked.UnionWith(ids);
         }
 
+        return records;
+    }
+
+    private static DeletionImpact ImpactOf(SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>> records)
+    {
         return new DeletionImpact(
             CountsOf(LinkNature.Reference),
             CountsOf(LinkNature.Association),
@@ -87,16 +98,21 @@ internal static class AggregateDeletion
     /// it — creating a link to the root must lock its row too (<c>FOR KEY SHARE</c>, to check the
     /// foreign key) and waits, then fails once the root is gone. The deletion can therefore not
     /// remove anything that was not confirmed.
+    /// <para>
+    /// The files of the visuals the deletion takes along, which no cascade in the database reaches,
+    /// are deleted from <paramref name="storage"/> once the transaction is committed: a failed
+    /// deletion leaves them intact, and a file that cannot be deleted is merely an orphan.
+    /// </para>
     /// </remarks>
     /// <exception cref="EntityNotFoundException">No aggregate has this identifier.</exception>
     /// <exception cref="DbUpdateConcurrencyException">The aggregate was modified since <paramref name="version"/>.</exception>
     /// <exception cref="DeletionRefusedException">Records reference the aggregate.</exception>
     /// <exception cref="DeletionImpactChangedException">The impact is no longer the one confirmed.</exception>
     public static Task DeleteAsync<TRoot>(
-        BdthequeDbContext context, Guid id, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
+        BdthequeDbContext context, VisualStorage storage, Guid id, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
         CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot =>
-        DeleteCoreAsync<TRoot, TRoot>(context, id, version, fingerprint, links, shape: null, root => root, cancellationToken);
+        DeleteCoreAsync<TRoot, TRoot>(context, storage, id, version, fingerprint, links, shape: null, root => root, cancellationToken);
 
     /// <summary>
     /// Deletes a child of an aggregate (e.g. a collection of a publisher) under the same guarantees
@@ -106,18 +122,18 @@ internal static class AggregateDeletion
     /// </summary>
     /// <exception cref="EntityNotFoundException">The root does not exist, or has no such child.</exception>
     public static Task DeleteChildAsync<TRoot, TChild>(
-        BdthequeDbContext context, Guid rootId, Guid childId, uint version, string fingerprint,
+        BdthequeDbContext context, VisualStorage storage, Guid rootId, Guid childId, uint version, string fingerprint,
         Func<IQueryable<TRoot>, IQueryable<TRoot>> shape, Func<TRoot, IEnumerable<TChild>> children,
         IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
         where TChild : EntityBase =>
         DeleteCoreAsync<TRoot, TChild>(
-            context, rootId, version, fingerprint, links, shape,
+            context, storage, rootId, version, fingerprint, links, shape,
             root => children(root).SingleOrDefault(c => c.Id == childId) ?? throw new EntityNotFoundException(typeof(TChild), childId),
             cancellationToken);
 
     private static async Task DeleteCoreAsync<TRoot, TTarget>(
-        BdthequeDbContext context, Guid rootId, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
+        BdthequeDbContext context, VisualStorage storage, Guid rootId, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
         Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape, Func<TRoot, TTarget> target, CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
         where TTarget : EntityBase
@@ -126,11 +142,21 @@ internal static class AggregateDeletion
         var root = await context.LoadAggregateForWriteAsync(rootId, version, shape, cancellationToken);
         var deleted = target(root);
 
-        var impact = await ComputeImpactAsync(context, deleted.Id, links, cancellationToken);
+        var records = await CollectRecordsAsync(context, deleted.Id, links, cancellationToken);
+        var impact = ImpactOf(records);
         if (impact.BlockedBy.Count > 0)
             throw new DeletionRefusedException(impact);
         if (!string.Equals(impact.Fingerprint, fingerprint, StringComparison.Ordinal))
             throw new DeletionImpactChangedException(impact);
+
+        // The visuals the deletion takes along: the deleted record itself, or the visuals it is
+        // composed of — those its impact announces, so that the files follow what was confirmed.
+        IReadOnlyCollection<Guid> visualIds = deleted is EditionVisual
+            ? [deleted.Id]
+            : records.GetValueOrDefault((LinkNature.Composition, EntityKind.EditionVisual)) ?? [];
+        var media = visualIds.Count == 0
+            ? []
+            : await context.EditionVisuals.Where(v => visualIds.Contains(v.Id)).Select(v => v.MediaReference).ToListAsync(cancellationToken);
 
         context.Remove(deleted);
         try
@@ -148,6 +174,7 @@ internal static class AggregateDeletion
         }
 
         await transaction.CommitAsync(cancellationToken);
+        storage.Delete(media);
     }
 
     private static string Fingerprint(SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>> records)

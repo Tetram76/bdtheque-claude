@@ -1,6 +1,7 @@
 using Bdtheque.Api.Endpoints;
 using Bdtheque.Api.Errors;
 using Bdtheque.Api.Security;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -33,6 +34,17 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
     .Bind(builder.Configuration.GetSection(InternalApiKeyOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+
+// The visuals volume (choix-implementation.md § Visuels : stockage et traitement), and the daily
+// removal of the files no visual references any more — resolvable on its own to be run on demand.
+builder.Services.AddOptions<VisualStorageOptions>()
+    .Bind(builder.Configuration.GetSection(VisualStorageOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddSingleton<VisualStorage>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<VisualReconciliation>();
+builder.Services.AddHostedService(services => services.GetRequiredService<VisualReconciliation>());
 
 var app = builder.Build();
 
@@ -67,6 +79,7 @@ admin.MapAuthors();
 admin.MapSeries();
 admin.MapAlbums();
 admin.MapEditions();
+admin.MapEditionVisuals();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {

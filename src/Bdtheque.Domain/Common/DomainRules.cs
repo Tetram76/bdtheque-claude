@@ -56,6 +56,15 @@ public static class DomainRules
     public const string EditionVisualMediaReferenceRequired = "EditionVisual.MediaReferenceRequired";
     public const string EditionVisualDisplayOrderNotNegative = "EditionVisual.DisplayOrderNotNegative";
 
+    // Upload rules: only the API, which receives the file, can check them (choix-implementation.md §
+    // Visuels : stockage et traitement), but they remain input the administrator can correct.
+
+    /// <summary>An uploaded file that does not decode as an image of a supported format (JPEG, PNG, WebP, GIF).</summary>
+    public const string EditionVisualFileNotSupportedImage = "EditionVisual.FileNotSupportedImage";
+
+    /// <summary>An uploaded file heavier than the maximum size the API accepts.</summary>
+    public const string EditionVisualFileTooLarge = "EditionVisual.FileTooLarge";
+
     public const string GenreLabelRequired = "Genre.LabelRequired";
 
     public const string PublisherNameRequired = "Publisher.NameRequired";

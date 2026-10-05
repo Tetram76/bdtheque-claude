@@ -1,4 +1,5 @@
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Infrastructure;
 
@@ -17,9 +18,9 @@ internal static class DeletionEndpoints
         group.MapGet("/{id:guid}/deletion-impact", (Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
             AggregateDeletion.GetImpactAsync<TRoot>(context, id, links, cancellationToken));
 
-        group.MapDelete("/{id:guid}", async (Guid id, uint version, string fingerprint, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        group.MapDelete("/{id:guid}", async (Guid id, uint version, string fingerprint, BdthequeDbContext context, VisualStorage storage, CancellationToken cancellationToken) =>
         {
-            await AggregateDeletion.DeleteAsync<TRoot>(context, id, version, fingerprint, links, cancellationToken);
+            await AggregateDeletion.DeleteAsync<TRoot>(context, storage, id, version, fingerprint, links, cancellationToken);
             return TypedResults.NoContent();
         });
     }
@@ -39,9 +40,9 @@ internal static class DeletionEndpoints
         group.MapGet("/{id:guid}/deletion-impact", (Guid rootId, Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
             AggregateDeletion.GetChildImpactAsync(context, rootId, id, shape, children, links, cancellationToken));
 
-        group.MapDelete("/{id:guid}", async (Guid rootId, Guid id, uint version, string fingerprint, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        group.MapDelete("/{id:guid}", async (Guid rootId, Guid id, uint version, string fingerprint, BdthequeDbContext context, VisualStorage storage, CancellationToken cancellationToken) =>
         {
-            await AggregateDeletion.DeleteChildAsync(context, rootId, id, version, fingerprint, shape, children, links, cancellationToken);
+            await AggregateDeletion.DeleteChildAsync(context, storage, rootId, id, version, fingerprint, shape, children, links, cancellationToken);
             return TypedResults.NoContent();
         });
     }
