@@ -87,7 +87,7 @@ public sealed class DeleteRuleTests : IAsyncLifetime
         var universe = new Universe("Franco-Belge");
         album.AddGenre(genre);
         album.AddUniverse(universe);
-        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
+        var contribution = album.AddContribution(author, ContributionRole.Scenarist);
         var ownedEdition = new Edition(album, publisher);
         album.RecordAcquisition(ownedEdition, AcquisitionMode.Purchase);
         ownedEdition.AddVisual(VisualType.Cover, "cover.jpg", 0);
@@ -146,7 +146,7 @@ public sealed class DeleteRuleTests : IAsyncLifetime
         var universe = new Universe("Franco-Belge");
         series.AddGenre(genre);
         series.AddUniverse(universe);
-        var contribution = Contribution.ForSeriesTemplate(series, author, ContributionRole.Illustrator);
+        var contribution = series.AddTemplateContribution(author, ContributionRole.Illustrator);
         _fixture.Context.AddRange(series, author, genre, universe, contribution);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
@@ -177,7 +177,7 @@ public sealed class DeleteRuleTests : IAsyncLifetime
     {
         var album = new Album("Le Lotus bleu", null);
         var author = new Author("Remi", "Georges", "Hergé");
-        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
+        var contribution = album.AddContribution(author, ContributionRole.Scenarist);
         _fixture.Context.AddRange(album, author, contribution);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();

@@ -56,15 +56,29 @@ public sealed class Album : EntityBase, IAggregateRoot
     private readonly List<Edition> _editions = [];
     public IReadOnlyCollection<Edition> Editions => _editions;
 
+    // Read-only from outside: only the album's own operations credit an author. The copy of the
+    // series' contributions depends on the album having none, which the persistence layer
+    // guarantees by always loading this collection with the album.
+    private readonly List<Contribution> _contributions = [];
+    public IReadOnlyCollection<Contribution> Contributions => _contributions;
+
     // EF Core parameterless constructor
     private Album() { }
 
-    public Album(string? title, Series? series)
+    /// <summary>
+    /// Creates an album, attached to <paramref name="series"/> if any: having no contribution yet,
+    /// it receives those of the series template (fonctionnel.md § Initialisation des contributions
+    /// depuis la série).
+    /// </summary>
+    public Album(string? title, Series? series) : this(title, series, []) { }
+
+    /// <summary>
+    /// Creates an album credited with <paramref name="contributions"/>; without any, an album
+    /// attached to a series receives those of the series template.
+    /// </summary>
+    public Album(string? title, Series? series, IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions)
     {
-        EnsureTitleOrSeries(title, series);
-        Series = series;
-        SeriesId = series?.Id;
-        SetTitle(title);
+        SetTitleSeriesAndContributions(title, series, contributions);
     }
 
     /// <summary>
@@ -82,7 +96,53 @@ public sealed class Album : EntityBase, IAggregateRoot
     {
         var normalized = DomainText.NullIfBlank(title);
         EnsureTitleOrSeries(normalized, Series);
-        Title = normalized;
+        ApplyTitle(normalized);
+    }
+
+    public void SetSeries(Series? series)
+    {
+        EnsureTitleOrSeries(Title, series);
+        AttachSeries(series);
+    }
+
+    /// <summary>
+    /// Sets the title, the series and the contributions together, as the form sends them: each
+    /// depends on another — the title is required without a series, and attaching an album with no
+    /// contribution copies those of the series — so that separate setters would succeed or fail
+    /// depending on the order they are called in. Nothing is changed if any of them is refused.
+    /// </summary>
+    /// <param name="contributions">
+    /// The album's contributions, replacing the current ones; a contribution already credited is
+    /// kept as it is. Empty while the album is attached to another series than its current one,
+    /// they are copied from the template of that series.
+    /// </param>
+    public void SetTitleSeriesAndContributions(
+        string? title, Series? series, IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions)
+    {
+        ArgumentNullException.ThrowIfNull(contributions);
+        var normalizedTitle = DomainText.NullIfBlank(title);
+        EnsureTitleOrSeries(normalizedTitle, series);
+        foreach (var (author, role) in contributions)
+        {
+            ArgumentNullException.ThrowIfNull(author, nameof(contributions));
+            EnumGuard.EnsureDefined(role, nameof(contributions));
+        }
+
+        var credits = contributions.Select(c => (AuthorId: c.Author.Id, c.Role)).ToList();
+        if (credits.Count != credits.Distinct().Count())
+            throw new DomainRuleViolationException(
+                DomainRules.ContributionAlreadyCredited, "An author cannot be credited twice with the same role on the album.");
+
+        _contributions.RemoveAll(c => !credits.Contains((c.AuthorId, c.Role)));
+        foreach (var (author, role) in contributions.Where(c => !IsCredited(c.Author, c.Role)))
+            _contributions.Add(Contribution.ForAlbum(this, author, role));
+        AttachSeries(series);
+        ApplyTitle(normalizedTitle);
+    }
+
+    private void ApplyTitle(string? title)
+    {
+        Title = title;
 
         if (Title is null)
         {
@@ -97,11 +157,20 @@ public sealed class Album : EntityBase, IAggregateRoot
         }
     }
 
-    public void SetSeries(Series? series)
+    // Attaching to another series than the current one, while the album has no contribution, gives
+    // it the contributions of the series template as a starting point; staying in the same series
+    // copies nothing, so that contributions removed since never come back.
+    private void AttachSeries(Series? series)
     {
-        EnsureTitleOrSeries(Title, series);
+        var attaching = series is not null && series.Id != SeriesId;
         Series = series;
         SeriesId = series?.Id;
+        if (!attaching || _contributions.Count > 0)
+            return;
+
+        // The template's authors must be loaded: the copy credits the same authors.
+        foreach (var template in series!.TemplateContributions)
+            _contributions.Add(Contribution.ForAlbum(this, template.Author, template.Role));
     }
 
     public void SetSortKey(string sortKey)
@@ -127,17 +196,6 @@ public sealed class Album : EntityBase, IAggregateRoot
         NavigationEntry = sortKey is null ? null : NavigationEntryCalculator.Compute(sortKey);
     }
 
-    public void SetType(AlbumType type)
-    {
-        EnumGuard.EnsureDefined(type, nameof(type));
-        if (type != AlbumType.Omnibus && (StartVolumeNumber is not null || EndVolumeNumber is not null))
-            throw new DomainRuleViolationException(
-                DomainRules.AlbumVolumeRangeOmnibusOnly,
-                "Cannot change the type away from Omnibus while a start/end volume range is set. " +
-                "Clear the range first with SetVolumeRange(null, null).");
-        Type = type;
-    }
-
     public void SetSpecialIssue(bool isSpecialIssue) => IsSpecialIssue = isSpecialIssue;
 
     public void SetVolumeNumber(int? number)
@@ -148,19 +206,21 @@ public sealed class Album : EntityBase, IAggregateRoot
     }
 
     /// <summary>
-    /// Sets the start/end volume range covered by an omnibus edition. Both values must be
-    /// provided together or not at all, and the range is only meaningful for
-    /// <see cref="AlbumType.Omnibus"/> albums (modele-metier.md § Album).
+    /// Sets the type and the start/end volume range covered by an omnibus, together: the range is
+    /// only meaningful for <see cref="AlbumType.Omnibus"/> albums, so that changing one without the
+    /// other would be refused in one order or the other. Both bounds must be provided together or
+    /// not at all (modele-metier.md § Album).
     /// </summary>
-    public void SetVolumeRange(int? start, int? end)
+    public void SetTypeAndVolumeRange(AlbumType type, int? start, int? end)
     {
+        EnumGuard.EnsureDefined(type, nameof(type));
         if ((start is null) != (end is null))
             throw new DomainRuleViolationException(
                 DomainRules.AlbumVolumeRangeBothOrNeither, "Start and end volume numbers must be provided together, or not at all.");
 
         if (start is not null)
         {
-            if (Type != AlbumType.Omnibus)
+            if (type != AlbumType.Omnibus)
                 throw new DomainRuleViolationException(
                     DomainRules.AlbumVolumeRangeOmnibusOnly, "A volume range is only applicable to omnibus (Intégrale) albums.");
             if (start <= 0)
@@ -170,6 +230,7 @@ public sealed class Album : EntityBase, IAggregateRoot
                     DomainRules.AlbumVolumeRangeOrder, "Start volume number must not exceed the end volume number.");
         }
 
+        Type = type;
         StartVolumeNumber = start;
         EndVolumeNumber = end;
     }
@@ -209,6 +270,30 @@ public sealed class Album : EntityBase, IAggregateRoot
     public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
 
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
+
+    /// <summary>Credits an author with a role on the album, once per author and role.</summary>
+    public Contribution AddContribution(Author author, ContributionRole role)
+    {
+        ArgumentNullException.ThrowIfNull(author);
+        // Same comparison as the partial unique index of the album: reported here too so that the
+        // mistake is caught before the database, whatever the order the changes are saved in.
+        if (IsCredited(author, role))
+            throw new DomainRuleViolationException(
+                DomainRules.ContributionAlreadyCredited, "This author is already credited with this role on the album.");
+
+        var contribution = Contribution.ForAlbum(this, author, role);
+        _contributions.Add(contribution);
+        return contribution;
+    }
+
+    public void RemoveContribution(Contribution contribution)
+    {
+        ArgumentNullException.ThrowIfNull(contribution);
+        _contributions.RemoveAll(c => c.Id == contribution.Id);
+    }
+
+    private bool IsCredited(Author author, ContributionRole role) =>
+        _contributions.Exists(c => c.AuthorId == author.Id && c.Role == role);
 
     public void SetRating(AlbumRating? rating)
     {

@@ -6,12 +6,12 @@ namespace Bdtheque.Domain.Tests;
 public sealed class ContributionTests
 {
     [Fact]
-    public void ForAlbum_Valid_Succeeds()
+    public void AddContribution_OnAnAlbum_CreditsTheAuthorOnTheAlbumOnly()
     {
         var album = new Album("Le Lotus bleu", null);
         var author = new Author(null, null, "Hergé");
 
-        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
+        var contribution = album.AddContribution(author, ContributionRole.Scenarist);
 
         Assert.Same(album, contribution.Album);
         Assert.Equal(album.Id, contribution.AlbumId);
@@ -24,12 +24,12 @@ public sealed class ContributionTests
     }
 
     [Fact]
-    public void ForSeriesTemplate_Valid_Succeeds()
+    public void AddTemplateContribution_OnASeries_CreditsTheAuthorOnTheSeriesOnly()
     {
         var series = new Series("Tintin");
         var author = new Author(null, null, "Hergé");
 
-        var contribution = Contribution.ForSeriesTemplate(series, author, ContributionRole.Illustrator);
+        var contribution = series.AddTemplateContribution(author, ContributionRole.Illustrator);
 
         Assert.Same(series, contribution.Series);
         Assert.Equal(series.Id, contribution.SeriesId);
@@ -39,44 +39,27 @@ public sealed class ContributionTests
     }
 
     [Fact]
-    public void ForAlbum_NullAlbum_Throws()
-    {
-        var author = new Author(null, null, "Hergé");
-
-        Assert.Throws<ArgumentNullException>(() => Contribution.ForAlbum(null!, author, ContributionRole.Scenarist));
-    }
-
-    [Fact]
-    public void ForSeriesTemplate_NullSeries_Throws()
-    {
-        var author = new Author(null, null, "Hergé");
-
-        Assert.Throws<ArgumentNullException>(() => Contribution.ForSeriesTemplate(null!, author, ContributionRole.Illustrator));
-    }
-
-    [Fact]
-    public void ForAlbum_NullAuthor_Throws()
+    public void AddContribution_NullAuthor_Throws()
     {
         var album = new Album("Le Lotus bleu", null);
 
-        Assert.Throws<ArgumentNullException>(() => Contribution.ForAlbum(album, null!, ContributionRole.Scenarist));
+        Assert.Throws<ArgumentNullException>(() => album.AddContribution(null!, ContributionRole.Scenarist));
     }
 
     [Fact]
-    public void ForAlbum_UndefinedRole_Throws()
+    public void AddContribution_UndefinedRole_Throws()
     {
         var album = new Album("Le Lotus bleu", null);
         var author = new Author(null, null, "Hergé");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => Contribution.ForAlbum(album, author, (ContributionRole)42));
+        Assert.Throws<ArgumentOutOfRangeException>(() => album.AddContribution(author, (ContributionRole)42));
     }
 
     [Fact]
     public void SetRole_ValidRole_Updates()
     {
         var album = new Album("Le Lotus bleu", null);
-        var author = new Author(null, null, "Hergé");
-        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
+        var contribution = album.AddContribution(new Author(null, null, "Hergé"), ContributionRole.Scenarist);
 
         contribution.SetRole(ContributionRole.Illustrator);
 
@@ -87,8 +70,7 @@ public sealed class ContributionTests
     public void SetRole_UndefinedRole_Throws()
     {
         var album = new Album("Le Lotus bleu", null);
-        var author = new Author(null, null, "Hergé");
-        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
+        var contribution = album.AddContribution(new Author(null, null, "Hergé"), ContributionRole.Scenarist);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => contribution.SetRole((ContributionRole)42));
     }

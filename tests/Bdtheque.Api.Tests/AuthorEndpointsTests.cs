@@ -207,7 +207,7 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
             var album = new Album(UniqueName(), null);
             context.Albums.Add(album);
             foreach (var role in roles.Take(rolesPerRecord))
-                context.Contributions.Add(Contribution.ForAlbum(album, author, role));
+                album.AddContribution(author, role);
         }
 
         for (var i = 0; i < series; i++)
@@ -215,7 +215,7 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
             var oneSeries = new Series(UniqueName());
             context.Series.Add(oneSeries);
             foreach (var role in roles.Take(rolesPerRecord))
-                context.Contributions.Add(Contribution.ForSeriesTemplate(oneSeries, author, role));
+                oneSeries.AddTemplateContribution(author, role);
         }
 
         await context.SaveChangesAsync();

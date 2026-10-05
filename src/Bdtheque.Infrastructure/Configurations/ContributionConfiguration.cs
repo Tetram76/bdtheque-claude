@@ -20,7 +20,7 @@ internal sealed class ContributionConfiguration : IEntityTypeConfiguration<Contr
         // (or series template), whereas it merely references its author, whose deletion is
         // refused while still credited (fonctionnel.md § Suppression des entités).
         builder.HasOne(c => c.Album)
-            .WithMany()
+            .WithMany(a => a.Contributions)
             .HasForeignKey(c => c.AlbumId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);

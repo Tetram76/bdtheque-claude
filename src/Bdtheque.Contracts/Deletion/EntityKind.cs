@@ -14,6 +14,8 @@ public enum EntityKind
     Series,
     Universe,
     Edition,
+    EditionVisual,
     PublisherCollection,
     Contribution,
+    PurchaseIntent,
 }

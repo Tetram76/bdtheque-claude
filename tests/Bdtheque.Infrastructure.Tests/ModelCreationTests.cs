@@ -352,8 +352,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     public async Task AddAlbum_StandaloneOmnibusWithGenresAndUniverses_Persists()
     {
         var album = new Album("Le Lotus bleu", null);
-        album.SetType(AlbumType.Omnibus);
-        album.SetVolumeRange(1, 6);
+        album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, 6);
         album.SetFirstPublicationDate(1978, 6);
         var genre = new Genre("Aventure BD");
         var universe = new Universe("Franco-Belge BD");
@@ -386,7 +385,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     {
         // Confirms the project-wide enum-as-int convention also applies to Album.Type.
         var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
+        album.SetTypeAndVolumeRange(AlbumType.Omnibus, null, null);
 
         _fixture.Context.Albums.Add(album);
         await _fixture.Context.SaveChangesAsync();
@@ -404,7 +403,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     {
         var album = new Album("Le Lotus bleu", null);
         var author = new Author(null, null, "Hergé");
-        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Scenarist);
+        var contribution = album.AddContribution(author, ContributionRole.Scenarist);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Authors.Add(author);
@@ -428,7 +427,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     {
         var series = new Series("Tintin");
         var author = new Author(null, null, "Hergé");
-        var contribution = Contribution.ForSeriesTemplate(series, author, ContributionRole.Illustrator);
+        var contribution = series.AddTemplateContribution(author, ContributionRole.Illustrator);
 
         _fixture.Context.Series.Add(series);
         _fixture.Context.Authors.Add(author);
@@ -452,7 +451,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         // Confirms the project-wide enum-as-int convention also applies to Contribution.Role.
         var album = new Album("Astérix", null);
         var author = new Author(null, null, "Goscinny");
-        var contribution = Contribution.ForAlbum(album, author, ContributionRole.Colorist);
+        var contribution = album.AddContribution(author, ContributionRole.Colorist);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Authors.Add(author);
@@ -592,6 +591,31 @@ public sealed class ModelCreationTests : IAsyncLifetime
         Assert.Equal([edition.Id], reloaded.Editions.Select(e => e.Id));
         var violation = Assert.Throws<DomainRuleViolationException>(() => reloaded.SetFirstPublicationDate(null, null));
         Assert.Equal(DomainRules.EditionAcquisitionPriceReferenceDateRequired, violation.Rule);
+    }
+
+    [Fact]
+    public async Task Album_LoadedFromDatabase_ComesWithItsContributions()
+    {
+        // Attaching an album to a series copies the series' contributions only if the album has
+        // none: an album loaded without them would receive the copy on top of its own credits.
+        var album = new Album("Spirou", null);
+        var author = new Author("Franquin", "André", null);
+        album.AddContribution(author, ContributionRole.Illustrator);
+        var series = new Series("Spirou et Fantasio");
+        series.AddTemplateContribution(author, ContributionRole.Scenarist);
+        _fixture.Context.AddRange(album, author, series);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Albums.SingleAsync(a => a.Id == album.Id);
+        var reloadedSeries = await _fixture.Context.Series
+            .Include(s => s.TemplateContributions).ThenInclude(c => c.Author)
+            .SingleAsync(s => s.Id == series.Id);
+        reloaded.SetSeries(reloadedSeries);
+        await _fixture.Context.SaveChangesAsync();
+
+        var saved = await _fixture.Context.Contributions.Where(c => c.AlbumId == album.Id).ToListAsync();
+        Assert.Equal([(author.Id, ContributionRole.Illustrator)], saved.Select(c => (c.AuthorId, c.Role)));
     }
 
     [Fact]

@@ -799,7 +799,7 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Contribution", b =>
                 {
                     b.HasOne("Bdtheque.Domain.Entities.Album", "Album")
-                        .WithMany()
+                        .WithMany("Contributions")
                         .HasForeignKey("AlbumId")
                         .OnDelete(DeleteBehavior.Cascade);
 
@@ -946,6 +946,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Album", b =>
                 {
+                    b.Navigation("Contributions");
+
                     b.Navigation("Editions");
 
                     b.Navigation("PurchaseIntents");
