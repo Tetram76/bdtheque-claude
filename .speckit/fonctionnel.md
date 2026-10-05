@@ -341,7 +341,7 @@ L'application se compose de trois parties distinctes :
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
    - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, etc.
-   - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. (les sources concrètes restent à définir).
+   - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
@@ -361,7 +361,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 
 - **Aide à la saisie** : assister l'utilisateur dans la saisie des données de l'application. L'agent peut aussi **écrire en base**, mais uniquement **à la demande de l'utilisateur**.
   - **Fonction principale attendue** : répondre à la demande « à partir de cet ISBN, compléter ou saisir la fiche de l'album et de l'édition (visuels inclus), de la série si l'album en fait partie, et des auteurs ». L'**éditeur** et la **collection éditeur** de l'édition font aussi partie des données à saisir ou compléter.
-  - Les données proviennent de **plusieurs sources externes** (jamais d'une seule). La **source principale** reste le **site de l'éditeur** ; les sources concrètes seront arrêtées à l'ouverture de la phase d'implémentation.
+  - Les données proviennent de **plusieurs sources externes** (jamais d'une seule). La **source principale** reste le **site de l'éditeur** ; le **catalogue général de la BnF** (API SRU, cf. § Structure de l'application, Administration) est une **source d'information complémentaire**. Les autres sources seront arrêtées à l'ouverture de la phase d'implémentation.
 - **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
 - **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
 
