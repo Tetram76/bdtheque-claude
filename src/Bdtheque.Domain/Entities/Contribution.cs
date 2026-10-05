@@ -42,8 +42,11 @@ public sealed class Contribution : EntityBase
         Role = role;
     }
 
+    // Both factories are internal: a contribution belongs to its owner, which alone creates it
+    // (Album.AddContribution, Series.AddTemplateContribution) and so sees every credit it holds.
+
     /// <summary>Creates a real contribution credited on a specific album.</summary>
-    public static Contribution ForAlbum(Album album, Author author, ContributionRole role)
+    internal static Contribution ForAlbum(Album album, Author author, ContributionRole role)
     {
         ArgumentNullException.ThrowIfNull(album);
         return new Contribution(album, null, author, role);
@@ -53,7 +56,7 @@ public sealed class Contribution : EntityBase
     /// Creates a template contribution on a series, copied onto an album attached to the series
     /// when it has no contribution of its own yet.
     /// </summary>
-    public static Contribution ForSeriesTemplate(Series series, Author author, ContributionRole role)
+    internal static Contribution ForSeriesTemplate(Series series, Author author, ContributionRole role)
     {
         ArgumentNullException.ThrowIfNull(series);
         return new Contribution(null, series, author, role);

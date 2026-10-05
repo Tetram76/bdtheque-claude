@@ -59,7 +59,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
                 BookOrientation.Landscape, ReadingDirection.RightToLeft, EditionFormat.Special, false),
             GenreIds = [genre.Id],
             UniverseIds = [universe.Id],
-            Contributions = [new SeriesContribution(author.Id, ContributionRole.Scenarist), new SeriesContribution(author.Id, ContributionRole.Illustrator)],
+            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist), new ContributionContent(author.Id, ContributionRole.Illustrator)],
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
@@ -151,7 +151,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     public async Task Create_WithTheSameContributionTwice_IsABusinessError()
     {
         var author = await CreateAuthorAsync();
-        var credit = new SeriesContribution(author.Id, ContributionRole.Colorist);
+        var credit = new ContributionContent(author.Id, ContributionRole.Colorist);
 
         var response = await _client.PostAsJsonAsync("/admin/series", Content(UniqueTitle()) with { Contributions = [credit, credit] });
 
@@ -172,7 +172,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         {
             "genre" => content with { GenreIds = [unknown] },
             "universe" => content with { UniverseIds = [unknown] },
-            "author" => content with { Contributions = [new SeriesContribution(unknown, ContributionRole.Scenarist)] },
+            "author" => content with { Contributions = [new ContributionContent(unknown, ContributionRole.Scenarist)] },
             "publisher" => WithTemplate(content, unknown, null),
             _ => WithTemplate(content, (await CreatePublisherAsync()).Id, unknown),
         };
@@ -207,8 +207,8 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             UniverseIds = [droppedUniverse.Id],
             Contributions =
             [
-                new SeriesContribution(keptAuthor.Id, ContributionRole.Scenarist),
-                new SeriesContribution(droppedAuthor.Id, ContributionRole.Scenarist),
+                new ContributionContent(keptAuthor.Id, ContributionRole.Scenarist),
+                new ContributionContent(droppedAuthor.Id, ContributionRole.Scenarist),
             ],
         });
         var publisher = await CreatePublisherAsync();
@@ -225,9 +225,9 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             // The kept author keeps a role and gains another, the added one is credited, the dropped one is not.
             Contributions =
             [
-                new SeriesContribution(keptAuthor.Id, ContributionRole.Scenarist),
-                new SeriesContribution(keptAuthor.Id, ContributionRole.Illustrator),
-                new SeriesContribution(addedAuthor.Id, ContributionRole.Colorist),
+                new ContributionContent(keptAuthor.Id, ContributionRole.Scenarist),
+                new ContributionContent(keptAuthor.Id, ContributionRole.Illustrator),
+                new ContributionContent(addedAuthor.Id, ContributionRole.Colorist),
             ],
             EditionTemplate = created.Content.EditionTemplate with { PublisherId = publisher.Id, Binding = BindingType.Paperback },
         };
@@ -266,12 +266,12 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     public async Task Update_WithABusinessErrorOnAReference_KeepsTheSeriesUntouched()
     {
         var author = await CreateAuthorAsync();
-        var created = await CreateAsync(Content(UniqueTitle()) with { Contributions = [new SeriesContribution(author.Id, ContributionRole.Scenarist)] });
+        var created = await CreateAsync(Content(UniqueTitle()) with { Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist)] });
         var otherAuthor = await CreateAuthorAsync();
         var invalid = created.Content with
         {
             Title = UniqueTitle(),
-            Contributions = [new SeriesContribution(otherAuthor.Id, ContributionRole.Scenarist)],
+            Contributions = [new ContributionContent(otherAuthor.Id, ContributionRole.Scenarist)],
             TheoreticalVolumeCount = -1,
         };
 
@@ -310,7 +310,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var author = await CreateAuthorAsync();
         var created = await CreateAsync(Content(UniqueTitle()) with
         {
-            Contributions = [new SeriesContribution(author.Id, ContributionRole.Scenarist), new SeriesContribution(author.Id, ContributionRole.Colorist)],
+            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist), new ContributionContent(author.Id, ContributionRole.Colorist)],
         });
         await SeedAlbumsAsync(created.Id, 3);
 
@@ -338,7 +338,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var created = await CreateAsync(Content(UniqueTitle()) with
         {
             GenreIds = [genre.Id],
-            Contributions = [new SeriesContribution(author.Id, ContributionRole.Scenarist)],
+            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist)],
         });
         var impact = await _client.GetFromJsonAsync<DeletionImpact>($"/admin/series/{created.Id}/deletion-impact");
 
@@ -388,7 +388,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     // The associations come back in a stable order, whichever order the form listed them in.
     private static List<Guid> Sorted(IReadOnlyList<Guid> ids) => ids.Order().ToList();
 
-    private static List<SeriesContribution> Sorted(IReadOnlyList<SeriesContribution> contributions) =>
+    private static List<ContributionContent> Sorted(IReadOnlyList<ContributionContent> contributions) =>
         contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId).ToList();
 
     private static SeriesContent Content(string title) =>

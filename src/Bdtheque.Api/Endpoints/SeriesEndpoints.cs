@@ -3,7 +3,6 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
-using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -99,15 +98,10 @@ internal static class SeriesEndpoints
         series.SetTemplateIsColor(template.IsColor);
         await ApplyTemplatePublisherAsync(series, template, context, cancellationToken);
 
-        var genres = await LoadAsync(context.Genres, content.GenreIds, cancellationToken);
-        foreach (var removed in series.Genres.Where(g => genres.TrueForAll(x => x.Id != g.Id)).ToList())
-            series.RemoveGenre(removed);
-        genres.ForEach(series.AddGenre);
-
-        var universes = await LoadAsync(context.Universes, content.UniverseIds, cancellationToken);
-        foreach (var removed in series.Universes.Where(u => universes.TrueForAll(x => x.Id != u.Id)).ToList())
-            series.RemoveUniverse(removed);
-        universes.ForEach(series.AddUniverse);
+        var genres = await FormReferences.LoadAsync(context.Genres, content.GenreIds, cancellationToken);
+        FormReferences.ReplaceAssociations(series.Genres, genres, series.AddGenre, series.RemoveGenre);
+        var universes = await FormReferences.LoadAsync(context.Universes, content.UniverseIds, cancellationToken);
+        FormReferences.ReplaceAssociations(series.Universes, universes, series.AddUniverse, series.RemoveUniverse);
 
         await ApplyContributionsAsync(series, content.Contributions, context, cancellationToken);
     }
@@ -131,32 +125,22 @@ internal static class SeriesEndpoints
     // The contributions already credited are kept as they are, so that saving a series whose
     // contributions did not change writes none of them.
     private static async Task ApplyContributionsAsync(
-        Series series, IReadOnlyList<SeriesContribution> requested, BdthequeDbContext context, CancellationToken cancellationToken)
+        Series series, IReadOnlyList<ContributionContent> requested, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         var wanted = requested.Select(c => (c.AuthorId, Role: EnumMapping.Map<DomainEnums.ContributionRole>(c.Role)!.Value)).ToList();
         if (wanted.Count != wanted.Distinct().Count())
             throw new DomainRuleViolationException(
                 DomainRules.ContributionAlreadyCredited, "An author cannot be credited twice with the same role on the series template.");
 
-        var authors = await LoadAsync(context.Authors, wanted.Select(w => w.AuthorId).ToList(), cancellationToken);
+        var credits = await FormReferences.LoadContributionsAsync(context, requested, cancellationToken);
         foreach (var stale in series.TemplateContributions.Where(c => !wanted.Contains((c.AuthorId, c.Role))).ToList())
         {
             series.RemoveTemplateContribution(stale);
             context.Contributions.Remove(stale);
         }
 
-        foreach (var (authorId, role) in wanted.Where(w => !series.TemplateContributions.Any(c => (c.AuthorId, c.Role) == w)))
-            series.AddTemplateContribution(authors.Single(a => a.Id == authorId), role);
-    }
-
-    private static async Task<List<TEntity>> LoadAsync<TEntity>(
-        DbSet<TEntity> set, IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
-        where TEntity : EntityBase
-    {
-        var distinctIds = ids.Distinct().ToList();
-        var entities = await set.Where(e => distinctIds.Contains(e.Id)).ToListAsync(cancellationToken);
-        var missing = distinctIds.Except(entities.Select(e => e.Id)).ToList();
-        return missing.Count == 0 ? entities : throw new EntityNotFoundException(typeof(TEntity), missing[0]);
+        foreach (var (author, role) in credits.Where(w => !series.TemplateContributions.Any(c => (c.AuthorId, c.Role) == (w.Author.Id, w.Role))))
+            series.AddTemplateContribution(author, role);
     }
 
     private static SeriesForm ToForm(BdthequeDbContext context, Series series) =>
@@ -183,9 +167,6 @@ internal static class SeriesEndpoints
                     series.TemplateIsColor),
                 series.Genres.Select(g => g.Id).Order().ToList(),
                 series.Universes.Select(u => u.Id).Order().ToList(),
-                series.TemplateContributions
-                    .OrderBy(c => c.Role).ThenBy(c => c.AuthorId)
-                    .Select(c => new SeriesContribution(c.AuthorId, EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value))
-                    .ToList()),
+                FormReferences.ToContents(series.TemplateContributions)),
             context.VersionOf(series));
 }

@@ -73,7 +73,7 @@ Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de dev
 | ~~#78~~ | Administration des auteurs |
 | ~~#79~~ | Administration des séries |
 | ~~#103~~ | Ajustement de l'API des séries issu de la reprise des données |
-| #80 | Administration des albums |
+| ~~#80~~ | Administration des albums |
 | #81 | Administration des éditions |
 | #82 | Téléversement et gestion des visuels d'édition |
 | #83 | Intentions d'achat |

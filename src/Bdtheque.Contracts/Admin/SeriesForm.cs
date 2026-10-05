@@ -35,7 +35,7 @@ public sealed record SeriesContent(
     SeriesEditionTemplate EditionTemplate,
     IReadOnlyList<Guid> GenreIds,
     IReadOnlyList<Guid> UniverseIds,
-    IReadOnlyList<SeriesContribution> Contributions);
+    IReadOnlyList<ContributionContent> Contributions);
 
 /// <summary>
 /// Default values of a new edition of an album of the series (fonctionnel.md § Initialisation d'une
@@ -52,9 +52,6 @@ public sealed record SeriesEditionTemplate(
     ReadingDirection? ReadingDirection,
     EditionFormat? Format,
     bool? IsColor);
-
-/// <summary>An author credited with a role on the template of a series.</summary>
-public sealed record SeriesContribution(Guid AuthorId, ContributionRole Role);
 
 /// <param name="Version">Version of the series the form was read at.</param>
 public sealed record UpdateSeriesRequest(SeriesContent Content, uint Version);

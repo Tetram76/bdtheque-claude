@@ -64,7 +64,7 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
             "CK_Albums_ManualSortKeyRequiresTitle",
             $"\"{nameof(Album.IsManualSortKey)}\" = false OR \"{nameof(Album.Title)}\" IS NOT NULL"));
 
-        // Mirrors Album.SetVolumeNumber / SetVolumeRange.
+        // Mirrors Album.SetVolumeNumber / SetTypeAndVolumeRange.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Albums_VolumeNumberPositive",
             $"\"{nameof(Album.VolumeNumber)}\" IS NULL OR \"{nameof(Album.VolumeNumber)}\" > 0"));
@@ -115,5 +115,10 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
         // keep a reference date: an album loaded without them would let it be cleared. The relation
         // itself is configured from the edition (EditionConfiguration).
         builder.Navigation(a => a.Editions).AutoInclude();
+
+        // Same trap for the attachment to a series, which copies the series' contributions only if
+        // the album has none: an album loaded without them would receive the copy on top of its own
+        // credits. The relation itself is configured from the contribution (ContributionConfiguration).
+        builder.Navigation(a => a.Contributions).AutoInclude();
     }
 }

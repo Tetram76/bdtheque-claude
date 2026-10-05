@@ -159,92 +159,86 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetVolumeRange_OnlyStart_Throws()
+    public void SetTypeAndVolumeRange_OnlyStart_Throws()
     {
         var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeBothOrNeither, () => album.SetVolumeRange(1, null));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeBothOrNeither, () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, null));
     }
 
     [Fact]
-    public void SetVolumeRange_StartGreaterThanEnd_Throws()
+    public void SetTypeAndVolumeRange_StartGreaterThanEnd_Throws()
     {
         var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOrder, () => album.SetVolumeRange(5, 1));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOrder, () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, 5, 1));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void SetTypeAndVolumeRange_NonPositiveStart_Throws(int start)
+    {
+        var album = new Album("Tintin", null);
+
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeStartPositive, () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, start, 6));
     }
 
     [Fact]
-    public void SetVolumeRange_OnRegularAlbum_Throws()
+    public void SetTypeAndVolumeRange_RangeOnARegularAlbum_Throws()
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetVolumeRange(1, 6));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetTypeAndVolumeRange(AlbumType.Regular, 1, 6));
     }
 
     [Fact]
-    public void SetVolumeRange_OnOmnibusAlbum_Succeeds()
+    public void SetTypeAndVolumeRange_OmnibusWithARange_Succeeds()
     {
         var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
 
-        album.SetVolumeRange(1, 6);
+        album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, 6);
 
-        Assert.Equal(1, album.StartVolumeNumber);
-        Assert.Equal(6, album.EndVolumeNumber);
+        Assert.Equal((AlbumType.Omnibus, 1, 6), (album.Type, album.StartVolumeNumber, album.EndVolumeNumber));
     }
 
     [Fact]
-    public void SetVolumeRange_ClearBoth_Succeeds()
+    public void SetTypeAndVolumeRange_BackToRegularClearingTheRange_SucceedsInASingleCall()
     {
+        // The form sends the type and the range together: whichever order separate setters would
+        // apply them in, one of them would see an omnibus range on a regular album.
         var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
-        album.SetVolumeRange(1, 6);
+        album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, 6);
 
-        album.SetVolumeRange(null, null);
+        album.SetTypeAndVolumeRange(AlbumType.Regular, null, null);
 
-        Assert.Null(album.StartVolumeNumber);
-        Assert.Null(album.EndVolumeNumber);
+        Assert.Equal((AlbumType.Regular, (int?)null, (int?)null), (album.Type, album.StartVolumeNumber, album.EndVolumeNumber));
     }
 
     [Fact]
-    public void SetType_UndefinedValue_Throws()
+    public void SetTypeAndVolumeRange_Rejected_LeavesTheAlbumUntouched()
     {
         var album = new Album("Tintin", null);
+        album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, 6);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetType((AlbumType)42));
+        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetTypeAndVolumeRange(AlbumType.Regular, 2, 3));
+
+        Assert.Equal((AlbumType.Omnibus, 1, 6), (album.Type, album.StartVolumeNumber, album.EndVolumeNumber));
     }
 
     [Fact]
-    public void SetType_AwayFromOmnibusWithRangeSet_Throws()
+    public void SetTypeAndVolumeRange_UndefinedType_Throws()
     {
         var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
-        album.SetVolumeRange(1, 6);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetType(AlbumType.Regular));
-    }
-
-    [Fact]
-    public void SetType_AwayFromOmnibusAfterClearingRange_Succeeds()
-    {
-        var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
-        album.SetVolumeRange(1, 6);
-        album.SetVolumeRange(null, null);
-
-        album.SetType(AlbumType.Regular);
-
-        Assert.Equal(AlbumType.Regular, album.Type);
+        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetTypeAndVolumeRange((AlbumType)42, null, null));
     }
 
     [Fact]
     public void SetSpecialIssue_IsIndependentOfType()
     {
         var album = new Album("Tintin", null);
-        album.SetType(AlbumType.Omnibus);
+        album.SetTypeAndVolumeRange(AlbumType.Omnibus, null, null);
 
         album.SetSpecialIssue(true);
 
@@ -454,4 +448,243 @@ public sealed class AlbumTests
 
         Assert.Equal("S", album.NavigationEntry);
     }
+
+    [Fact]
+    public void AddContribution_RegistersItWithTheAlbum()
+    {
+        var album = new Album("Tintin", null);
+
+        var contribution = album.AddContribution(new Author(null, null, "Hergé"), ContributionRole.Scenarist);
+
+        Assert.Same(contribution, Assert.Single(album.Contributions));
+    }
+
+    [Fact]
+    public void AddContribution_SameAuthorAndRoleTwice_Throws()
+    {
+        var album = new Album("Tintin", null);
+        var author = new Author(null, null, "Hergé");
+        album.AddContribution(author, ContributionRole.Scenarist);
+
+        DomainAssert.Violates(DomainRules.ContributionAlreadyCredited, () => album.AddContribution(author, ContributionRole.Scenarist));
+    }
+
+    [Fact]
+    public void AddContribution_SameAuthorWithAnotherRole_IsAccepted()
+    {
+        var album = new Album("Tintin", null);
+        var author = new Author(null, null, "Hergé");
+        album.AddContribution(author, ContributionRole.Scenarist);
+
+        album.AddContribution(author, ContributionRole.Illustrator);
+
+        Assert.Equal(2, album.Contributions.Count);
+    }
+
+    [Fact]
+    public void RemoveContribution_DropsItFromTheAlbum()
+    {
+        var album = new Album("Tintin", null);
+        var contribution = album.AddContribution(new Author(null, null, "Hergé"), ContributionRole.Scenarist);
+
+        album.RemoveContribution(contribution);
+
+        Assert.Empty(album.Contributions);
+    }
+
+    [Fact]
+    public void Constructor_InASeriesWithTemplateContributions_CopiesThemOntoTheAlbum()
+    {
+        var (series, scenarist, illustrator) = SeriesWithTemplate();
+
+        var album = new Album(null, series);
+
+        Assert.Equal(
+            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
+            Credits(album));
+        Assert.All(album.Contributions, c => Assert.Equal((album.Id, (Guid?)null), (c.AlbumId!.Value, c.SeriesId)));
+    }
+
+    [Fact]
+    public void Constructor_WithContributionsOfItsOwn_DoesNotCopyTheSeriesTemplate()
+    {
+        var (series, _, _) = SeriesWithTemplate();
+        var colorist = new Author(null, null, "Studio");
+
+        var album = new Album(null, series, [(colorist, ContributionRole.Colorist)]);
+
+        Assert.Equal([(colorist.Id, ContributionRole.Colorist)], Credits(album));
+    }
+
+    [Fact]
+    public void SetSeries_AttachingAnAlbumWithoutContributions_CopiesTheSeriesTemplate()
+    {
+        var (series, scenarist, illustrator) = SeriesWithTemplate();
+        var album = new Album("Le Lotus bleu", null);
+
+        album.SetSeries(series);
+
+        Assert.Equal(
+            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
+            Credits(album));
+    }
+
+    [Fact]
+    public void SetSeries_AttachingAnAlbumWithContributions_KeepsThemAsTheyAre()
+    {
+        var (series, _, _) = SeriesWithTemplate();
+        var album = new Album("Le Lotus bleu", null);
+        var colorist = new Author(null, null, "Studio");
+        album.AddContribution(colorist, ContributionRole.Colorist);
+
+        album.SetSeries(series);
+
+        Assert.Equal([(colorist.Id, ContributionRole.Colorist)], Credits(album));
+    }
+
+    [Fact]
+    public void SetSeries_ToTheSameSeries_DoesNotCopyTheTemplateAgain()
+    {
+        // The album is the source of truth once attached: contributions removed since must not
+        // come back at the next save of the album.
+        var (series, _, _) = SeriesWithTemplate();
+        var album = new Album(null, series);
+        foreach (var contribution in album.Contributions.ToList())
+            album.RemoveContribution(contribution);
+
+        album.SetSeries(series);
+
+        Assert.Empty(album.Contributions);
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_ClearingTheTitleWhileAttachingASeries_SucceedsInASingleCall()
+    {
+        // Separate setters would fail in one order or the other: the title is required until the
+        // series is attached, and the series cannot be detached while the title is empty.
+        var series = new Series("Tintin");
+        var album = new Album("Le Lotus bleu", null);
+
+        album.SetTitleSeriesAndContributions(null, series, []);
+
+        Assert.Equal((null, series.Id), (album.Title, album.SeriesId));
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_SettingTheTitleWhileDetachingTheSeries_SucceedsInASingleCall()
+    {
+        var album = new Album(null, new Series("Tintin"));
+
+        album.SetTitleSeriesAndContributions("Le Lotus bleu", null, []);
+
+        Assert.Equal(("Le Lotus bleu", (Guid?)null, "Lotus bleu [Le]"), (album.Title, album.SeriesId, album.SortKey));
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_WithoutTitleNorSeries_ThrowsAndLeavesTheAlbumUntouched()
+    {
+        var series = new Series("Tintin");
+        var album = new Album("Le Lotus bleu", series);
+        var author = new Author(null, null, "Hergé");
+
+        DomainAssert.Violates(
+            DomainRules.AlbumTitleRequiredWithoutSeries,
+            () => album.SetTitleSeriesAndContributions(" ", null, [(author, ContributionRole.Scenarist)]));
+
+        Assert.Equal(("Le Lotus bleu", (Guid?)series.Id), (album.Title, album.SeriesId));
+        Assert.Empty(album.Contributions);
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_SameCreditTwice_ThrowsAndLeavesTheAlbumUntouched()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var author = new Author(null, null, "Hergé");
+
+        DomainAssert.Violates(
+            DomainRules.ContributionAlreadyCredited,
+            () => album.SetTitleSeriesAndContributions("Tintin", null, [(author, ContributionRole.Scenarist), (author, ContributionRole.Scenarist)]));
+
+        Assert.Equal("Le Lotus bleu", album.Title);
+        Assert.Empty(album.Contributions);
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_ReplacesTheContributions_KeepingTheUnchangedOnes()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var kept = new Author(null, null, "Hergé");
+        var dropped = new Author(null, null, "Jacobs");
+        var added = new Author(null, null, "Studio");
+        var keptContribution = album.AddContribution(kept, ContributionRole.Scenarist);
+        album.AddContribution(dropped, ContributionRole.Illustrator);
+
+        album.SetTitleSeriesAndContributions("Le Lotus bleu", null, [(kept, ContributionRole.Scenarist), (added, ContributionRole.Colorist)]);
+
+        Assert.Equal([(kept.Id, ContributionRole.Scenarist), (added.Id, ContributionRole.Colorist)], Credits(album));
+        Assert.Contains(keptContribution, album.Contributions);
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_AttachingWithNoContribution_CopiesTheSeriesTemplate()
+    {
+        // The album's contributions are those of the form: emptied by the form while the album is
+        // attached to a series, they are taken from the series as a starting point.
+        var (series, scenarist, illustrator) = SeriesWithTemplate();
+        var album = new Album("Le Lotus bleu", null);
+        album.AddContribution(new Author(null, null, "Studio"), ContributionRole.Colorist);
+
+        album.SetTitleSeriesAndContributions("Le Lotus bleu", series, []);
+
+        Assert.Equal(
+            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
+            Credits(album));
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_AttachingWithContributions_KeepsThoseOfTheForm()
+    {
+        var (series, _, _) = SeriesWithTemplate();
+        var album = new Album("Le Lotus bleu", null);
+        var colorist = new Author(null, null, "Studio");
+
+        album.SetTitleSeriesAndContributions("Le Lotus bleu", series, [(colorist, ContributionRole.Colorist)]);
+
+        Assert.Equal([(colorist.Id, ContributionRole.Colorist)], Credits(album));
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_StayingInTheSameSeriesWithNoContribution_LeavesNone()
+    {
+        var (series, _, _) = SeriesWithTemplate();
+        var album = new Album(null, series);
+
+        album.SetTitleSeriesAndContributions(null, series, []);
+
+        Assert.Empty(album.Contributions);
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_KeepsAManualSortKeyWhenTheTitleChanges()
+    {
+        var album = new Album("Tintin", null);
+        album.SetSortKey("Custom Key");
+
+        album.SetTitleSeriesAndContributions("Les Schtroumpfs", null, []);
+
+        Assert.Equal(("Custom Key", true), (album.SortKey, album.IsManualSortKey));
+    }
+
+    private static (Series Series, Author Scenarist, Author Illustrator) SeriesWithTemplate()
+    {
+        var series = new Series("Tintin");
+        var scenarist = new Author(null, null, "Hergé");
+        var illustrator = new Author(null, null, "Jacobs");
+        series.AddTemplateContribution(scenarist, ContributionRole.Scenarist);
+        series.AddTemplateContribution(illustrator, ContributionRole.Illustrator);
+        return (series, scenarist, illustrator);
+    }
+
+    private static List<(Guid AuthorId, ContributionRole Role)> Credits(Album album) =>
+        album.Contributions.Select(c => (c.AuthorId, c.Role)).OrderBy(c => c.Role).ToList();
 }
