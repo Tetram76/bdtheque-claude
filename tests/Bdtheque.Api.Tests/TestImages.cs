@@ -64,6 +64,46 @@ internal static class TestImages
         return [.. jpeg[..2], .. segment, .. jpeg[2..]];
     }
 
+    /// <summary>
+    /// A PNG declaring the given dimensions, whose pixel data is a single empty row: enough for its
+    /// header to be read, without the test ever building an image of that size.
+    /// </summary>
+    public static byte[] PngHeader(int width, int height)
+    {
+        var header = new byte[13];
+        BinaryPrimitives.WriteInt32BigEndian(header, width);
+        BinaryPrimitives.WriteInt32BigEndian(header.AsSpan(4), height);
+        header[8] = 8; // bit depth
+        header[9] = 2; // truecolour
+        // An empty zlib stream: the decoding would fail, the header alone is meant to be read.
+        byte[] data = [0x78, 0x9C, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01];
+        byte[] signature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+        return [.. signature, .. Chunk("IHDR", header), .. Chunk("IDAT", data), .. Chunk("IEND", [])];
+
+        static byte[] Chunk(string type, byte[] content)
+        {
+            var chunk = new byte[12 + content.Length];
+            BinaryPrimitives.WriteInt32BigEndian(chunk, content.Length);
+            System.Text.Encoding.ASCII.GetBytes(type).CopyTo(chunk, 4);
+            content.CopyTo(chunk, 8);
+            BinaryPrimitives.WriteUInt32BigEndian(chunk.AsSpan(8 + content.Length), Crc32(chunk.AsSpan(4, 4 + content.Length)));
+            return chunk;
+        }
+
+        static uint Crc32(ReadOnlySpan<byte> bytes)
+        {
+            var crc = 0xFFFFFFFFu;
+            foreach (var b in bytes)
+            {
+                crc ^= b;
+                for (var bit = 0; bit < 8; bit++)
+                    crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+            }
+
+            return ~crc;
+        }
+    }
+
     /// <summary>A 1×1 BMP, a format Skia decodes but that is not accepted for a visual.</summary>
     public static byte[] Bitmap1x1()
     {

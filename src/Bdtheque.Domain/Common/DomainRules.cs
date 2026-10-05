@@ -65,6 +65,12 @@ public static class DomainRules
     /// <summary>An uploaded file heavier than the maximum size the API accepts.</summary>
     public const string EditionVisualFileTooLarge = "EditionVisual.FileTooLarge";
 
+    /// <summary>
+    /// An uploaded image whose dimensions exceed what the API decodes: the memory of the decoding is
+    /// bounded by its pixels, not by the weight of the file.
+    /// </summary>
+    public const string EditionVisualImageDimensionsTooLarge = "EditionVisual.ImageDimensionsTooLarge";
+
     public const string GenreLabelRequired = "Genre.LabelRequired";
 
     public const string PublisherNameRequired = "Publisher.NameRequired";

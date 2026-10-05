@@ -77,6 +77,28 @@ public sealed class VisualImageTests
     }
 
     [Fact]
+    public void Prepare_ImageTooLargeToDecode_IsABusinessErrorRefusedBeforeDecoding()
+    {
+        // A PNG is decoded at full size, whatever its weight: its dimensions alone bound the memory of
+        // the decoding. Only the header of this one is real, so nothing is allocated if it is refused
+        // before decoding.
+        var png = TestImages.PngHeader(10_000, 9_000);
+
+        var violation = Assert.Throws<DomainRuleViolationException>(() => VisualImage.Prepare(png));
+
+        Assert.Equal(DomainRules.EditionVisualImageDimensionsTooLarge, violation.Rule);
+    }
+
+    [Fact]
+    public void Prepare_HugeJpeg_IsDecodedAtAReducedScale()
+    {
+        // JPEG decodes natively at a reduced scale: its full size is never allocated, so it is accepted.
+        var prepared = VisualImage.Prepare(TestImages.Encode(12_000, 8_000, SKEncodedImageFormat.Jpeg));
+
+        Assert.Equal(new SKSizeI(VisualImage.DisplayMaxEdge, 800), TestImages.SizeOf(prepared.Display));
+    }
+
+    [Fact]
     public void EnsureSize_AboveTheMaximum_IsABusinessError()
     {
         VisualImage.EnsureSize(1000, maxBytes: 1000);

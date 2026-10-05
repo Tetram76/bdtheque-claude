@@ -22,6 +22,12 @@ internal static class VisualImage
 
     private const int DisplayQuality = 80;
 
+    /// <summary>
+    /// Most pixels decoded for one visual (about 320 MB in memory): an A3 page scanned at 600 dpi still
+    /// fits. Only PNG and GIF can reach it, JPEG and WebP decoding at a reduced scale.
+    /// </summary>
+    public const long MaxDecodedPixels = 80_000_000;
+
     // Formats every browser shows, the original being served as is; the extension follows the
     // decoded format.
     private static readonly Dictionary<SKEncodedImageFormat, string> SupportedFormats = new()
@@ -53,23 +59,42 @@ internal static class VisualImage
         if (!SupportedFormats.TryGetValue(codec.EncodedFormat, out var extension))
             throw NotSupportedImage($"Images in {codec.EncodedFormat} are not accepted.");
 
-        using var decoded = Decode(codec);
-        using var oriented = Orient(decoded, codec.EncodedOrigin);
-        using var display = Reduce(oriented);
-        using var image = SKImage.FromBitmap(display);
-        using var encoded = image.Encode(SKEncodedImageFormat.Webp, DisplayQuality);
-        return new PreparedVisual(content, extension, encoded.ToArray());
+        // Reduced before being straightened, the long edge being the same either way: only the decoded
+        // bitmap is ever at full size. Each step returns its input when it has nothing to do.
+        var display = Decode(codec);
+        try
+        {
+            display = Replace(display, Reduce(display));
+            display = Replace(display, Orient(display, codec.EncodedOrigin));
+            using var image = SKImage.FromBitmap(display);
+            using var encoded = image.Encode(SKEncodedImageFormat.Webp, DisplayQuality);
+            return new PreparedVisual(content, extension, encoded.ToArray());
+        }
+        finally
+        {
+            display.Dispose();
+        }
     }
 
     /// <summary>
     /// Decodes the whole image, at the smallest scale the codec offers that still covers the display
     /// version (JPEG and WebP decode natively at a reduced scale, sparing the memory of a full scan).
     /// </summary>
+    /// <exception cref="DomainRuleViolationException">
+    /// The image would decode to more than <see cref="MaxDecodedPixels"/> pixels, or is incomplete.
+    /// </exception>
     private static SKBitmap Decode(SKCodec codec)
     {
         var size = codec.Info.Size;
         var scale = Math.Min(1f, (float)DisplayMaxEdge / Math.Max(size.Width, size.Height));
         var info = codec.Info.WithSize(codec.GetScaledDimensions(scale)).WithColorType(SKColorType.Rgba8888).WithAlphaType(SKAlphaType.Premul);
+
+        // Checked before allocating: a PNG or a GIF, which have no reduced-scale decoding, are decoded
+        // at full size whatever the weight of their file.
+        if ((long)info.Width * info.Height > MaxDecodedPixels)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionVisualImageDimensionsTooLarge,
+                $"The image would decode to {info.Width}×{info.Height} pixels, more than the {MaxDecodedPixels} accepted.");
 
         var bitmap = new SKBitmap(info);
         // Anything short of a full decoding (e.g. a truncated file) refuses the file: its display
@@ -104,7 +129,7 @@ internal static class VisualImage
             _ => null,
         };
         if (matrix is null)
-            return bitmap.Copy();
+            return bitmap;
 
         // The last four origins swap width and height.
         var oriented = origin >= SKEncodedOrigin.LeftTop
@@ -121,13 +146,21 @@ internal static class VisualImage
     {
         var longest = Math.Max(bitmap.Width, bitmap.Height);
         if (longest <= DisplayMaxEdge)
-            return bitmap.Copy();
+            return bitmap;
 
         var ratio = (double)DisplayMaxEdge / longest;
         var size = new SKSizeI(
             Math.Max(1, (int)Math.Round(bitmap.Width * ratio)), Math.Max(1, (int)Math.Round(bitmap.Height * ratio)));
         return bitmap.Resize(size, new SKSamplingOptions(SKCubicResampler.Mitchell))
                ?? throw new InvalidOperationException("The display version could not be produced.");
+    }
+
+    // Disposes the bitmap a step replaced, keeping the one it returned.
+    private static SKBitmap Replace(SKBitmap current, SKBitmap next)
+    {
+        if (!ReferenceEquals(current, next))
+            current.Dispose();
+        return next;
     }
 
     private static DomainRuleViolationException NotSupportedImage(string reason) =>
