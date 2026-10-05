@@ -1,4 +1,5 @@
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -32,8 +33,10 @@ public sealed class AggregateDeletionTests : IClassFixture<ApiWebApplicationFact
         context.ChangeTracker.Clear();
         var impact = await AggregateDeletion.ComputeImpactAsync(context, parent.Id, [], CancellationToken.None);
 
+        var storage = _factory.Services.GetRequiredService<VisualStorage>();
+
         await Assert.ThrowsAsync<DeletionRefusedException>(
-            () => AggregateDeletion.DeleteAsync<Universe>(context, parent.Id, version, impact.Fingerprint, [], CancellationToken.None));
+            () => AggregateDeletion.DeleteAsync<Universe>(context, storage, parent.Id, version, impact.Fingerprint, [], CancellationToken.None));
 
         context.ChangeTracker.Clear();
         Assert.True(await context.Universes.AnyAsync(u => u.Id == parent.Id));

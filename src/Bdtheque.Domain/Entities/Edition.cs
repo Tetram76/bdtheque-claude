@@ -273,6 +273,42 @@ public sealed class Edition : EntityBase
         return visual;
     }
 
+    /// <summary>Adds a visual after the visuals of the same type, as a newly uploaded one comes last.</summary>
+    public EditionVisual AppendVisual(VisualType type, string mediaReference) =>
+        AddVisual(type, mediaReference, _visuals.Where(v => v.Type == type).Select(v => v.DisplayOrder + 1).DefaultIfEmpty(0).Max());
+
+    /// <summary>
+    /// Rearranges the visuals as the user ordered them (fonctionnel.md § Ordre des visuels d'une
+    /// édition): each visual takes the given type, and its rank among the visuals of that type is
+    /// its position in <paramref name="arrangement"/>. Nothing is changed if the arrangement is refused.
+    /// </summary>
+    /// <param name="arrangement">Every visual of the edition, exactly once.</param>
+    /// <exception cref="ArgumentException">
+    /// The arrangement does not list each visual of the edition exactly once: a programming error,
+    /// the client sending back the visuals it read at the current version of the album.
+    /// </exception>
+    public void ArrangeVisuals(IReadOnlyList<(Guid VisualId, VisualType Type)> arrangement)
+    {
+        ArgumentNullException.ThrowIfNull(arrangement);
+        var visuals = _visuals.ToDictionary(v => v.Id);
+        if (arrangement.Count != visuals.Count
+            || arrangement.Select(a => a.VisualId).Distinct().Count() != visuals.Count
+            || !arrangement.All(a => visuals.ContainsKey(a.VisualId)))
+            throw new ArgumentException("The arrangement must list each visual of the edition exactly once.", nameof(arrangement));
+        foreach (var (_, type) in arrangement)
+            EnumGuard.EnsureDefined(type, nameof(arrangement));
+
+        foreach (var group in arrangement.GroupBy(a => a.Type))
+        {
+            var rank = 0;
+            foreach (var (visualId, type) in group)
+            {
+                visuals[visualId].SetType(type);
+                visuals[visualId].SetDisplayOrder(rank++);
+            }
+        }
+    }
+
     // ISO 4217 gives every currency a 3-letter uppercase alphabetic code; validating the shape
     // (rather than a hand-maintained list of codes) matches "any currency" from fonctionnel.md
     // § Gestion des devises without artificially restricting which ones are accepted — including

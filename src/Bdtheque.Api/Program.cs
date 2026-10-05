@@ -1,6 +1,7 @@
 using Bdtheque.Api.Endpoints;
 using Bdtheque.Api.Errors;
 using Bdtheque.Api.Security;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -34,6 +35,17 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+// The visuals volume (choix-implementation.md § Visuels : stockage et traitement), and the daily
+// removal of the files no visual references any more — resolvable on its own to be run on demand.
+builder.Services.AddOptions<VisualStorageOptions>()
+    .Bind(builder.Configuration.GetSection(VisualStorageOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddSingleton<VisualStorage>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<VisualReconciliation>();
+builder.Services.AddHostedService(services => services.GetRequiredService<VisualReconciliation>());
+
 var app = builder.Build();
 
 // Nothing else applies the schema before the container starts serving traffic (no init
@@ -43,6 +55,14 @@ using (var migrationScope = app.Services.CreateScope())
 {
     migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.Migrate();
 }
+
+// The deployment can guarantee neither that the visuals volume is writable nor that it is mounted
+// from outside the container: the second is warned about, the first checked (refusing to start).
+// Warned first: without a mount, the folder is usually not writable either, and the warning names
+// the actual cause.
+var visualStorage = app.Services.GetRequiredService<VisualStorage>();
+visualStorage.WarnIfNotMounted();
+visualStorage.EnsureWritable();
 
 app.UseExceptionHandler();
 // Gives a ProblemDetails body to the error responses emitted without one; a response that already
@@ -67,6 +87,7 @@ admin.MapAuthors();
 admin.MapSeries();
 admin.MapAlbums();
 admin.MapEditions();
+admin.MapEditionVisuals();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {

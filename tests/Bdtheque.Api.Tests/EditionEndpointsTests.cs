@@ -531,7 +531,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         return (await response.Content.ReadFromJsonAsync<TForm>())!;
     }
 
-    // Visuals and intents have no endpoint yet: seeded through the domain.
+    // Seeded through the domain: intents have no endpoint yet, and these visuals need no file.
     private async Task SeedVisualsAsync(Guid editionId, int count)
     {
         await using var scope = _factory.Services.CreateAsyncScope();
