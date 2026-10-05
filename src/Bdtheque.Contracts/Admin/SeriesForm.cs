@@ -29,6 +29,7 @@ public sealed record SeriesContent(
     int? TheoreticalVolumeCount,
     bool IsComplete,
     bool ExcludeFromMissingVolumes,
+    bool ExcludeFromReleaseEstimates,
     string? Summary,
     string? PersonalNotes,
     SeriesEditionTemplate EditionTemplate,

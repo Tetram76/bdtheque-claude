@@ -85,6 +85,7 @@ internal static class SeriesEndpoints
         series.SetTheoreticalVolumeCount(content.TheoreticalVolumeCount);
         series.SetComplete(content.IsComplete);
         series.SetExcludeFromMissingVolumes(content.ExcludeFromMissingVolumes);
+        series.SetExcludeFromReleaseEstimates(content.ExcludeFromReleaseEstimates);
         series.SetSummary(content.Summary);
         series.SetPersonalNotes(content.PersonalNotes);
 
@@ -167,6 +168,7 @@ internal static class SeriesEndpoints
                 series.TheoreticalVolumeCount,
                 series.IsComplete,
                 series.ExcludeFromMissingVolumes,
+                series.ExcludeFromReleaseEstimates,
                 series.Summary,
                 series.PersonalNotes,
                 new SeriesEditionTemplate(

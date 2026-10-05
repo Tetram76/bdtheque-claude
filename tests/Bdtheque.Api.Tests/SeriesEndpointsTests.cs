@@ -51,6 +51,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             TheoreticalVolumeCount = 12,
             IsComplete = true,
             ExcludeFromMissingVolumes = true,
+            ExcludeFromReleaseEstimates = true,
             Summary = " Résumé ",
             PersonalNotes = " Notes ",
             EditionTemplate = new SeriesEditionTemplate(
@@ -217,6 +218,8 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             Status = SeriesStatus.Completed,
             TheoreticalVolumeCount = 7,
             IsComplete = true,
+            ExcludeFromMissingVolumes = true,
+            ExcludeFromReleaseEstimates = true,
             GenreIds = [keptGenre.Id, addedGenre.Id],
             UniverseIds = [addedUniverse.Id],
             // The kept author keeps a role and gains another, the added one is credited, the dropped one is not.
@@ -247,6 +250,9 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         {
             Status = SeriesStatus.Abandoned,
             TheoreticalVolumeCount = 3,
+            IsComplete = true,
+            ExcludeFromMissingVolumes = true,
+            ExcludeFromReleaseEstimates = true,
             Summary = "Résumé",
             GenreIds = [genre.Id],
         });
@@ -386,7 +392,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId).ToList();
 
     private static SeriesContent Content(string title) =>
-        new(title, null, null, null, false, false, null, null,
+        new(title, null, null, null, false, false, false, null, null,
             new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []);
 
     private static SeriesContent WithTemplate(SeriesContent content, Guid? publisherId, Guid? collectionId) =>
