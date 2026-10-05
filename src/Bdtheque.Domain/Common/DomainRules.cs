@@ -35,6 +35,22 @@ public static class DomainRules
     public const string EditionAcquisitionAmountPositive = "Edition.AcquisitionAmountPositive";
     public const string EditionCurrencyCodeInvalid = "Edition.CurrencyCodeInvalid";
     public const string EditionFreeExcludesPrice = "Edition.FreeExcludesPrice";
+    public const string EditionFreeExcludesInitialValue = "Edition.FreeExcludesInitialValue";
+    public const string EditionPurchaseCannotBeFree = "Edition.PurchaseCannotBeFree";
+    public const string EditionInitialValueAmountCurrencyTogether = "Edition.InitialValueAmountCurrencyTogether";
+    public const string EditionInitialValueAmountPositive = "Edition.InitialValueAmountPositive";
+
+    /// <summary>
+    /// An acquisition price with none of its reference dates known (acquisition date, edition year,
+    /// album's first publication), or a write that would clear the last one (fonctionnel.md § Gestion des devises).
+    /// </summary>
+    public const string EditionAcquisitionPriceReferenceDateRequired = "Edition.AcquisitionPriceReferenceDateRequired";
+
+    /// <summary>
+    /// An initial value with none of its reference dates known (edition year, album's first
+    /// publication), or a write that would clear the last one (fonctionnel.md § Gestion des devises).
+    /// </summary>
+    public const string EditionInitialValueReferenceDateRequired = "Edition.InitialValueReferenceDateRequired";
 
     public const string EditionVisualMediaReferenceRequired = "EditionVisual.MediaReferenceRequired";
     public const string EditionVisualDisplayOrderNotNegative = "EditionVisual.DisplayOrderNotNegative";

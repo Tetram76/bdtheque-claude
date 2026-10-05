@@ -227,6 +227,18 @@ public sealed class ModelCreationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task AddSeries_ExcludedFromReleaseEstimates_RoundTrips()
+    {
+        var series = new Series("Blake et Mortimer");
+        series.SetExcludeFromReleaseEstimates(true);
+        _fixture.Context.Series.Add(series);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        Assert.True((await _fixture.Context.Series.SingleAsync()).ExcludeFromReleaseEstimates);
+    }
+
+    [Fact]
     public void SortKeyMaxLength_AccommodatesWorstCaseArticleSuffixGrowth()
     {
         // TitleSortKeyCalculator grows the title (article moved to a bracketed suffix); the
@@ -546,7 +558,9 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var publisher = new Publisher("Casterman");
         var edition = new Edition(album, publisher);
         edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
+        edition.SetPublicationYear(2015);
         edition.SetAcquisitionPrice(12.345m, "KWD");
+        edition.SetInitialValue(6.789m, "KWD");
         _fixture.Context.AddRange(album, publisher, edition);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
@@ -554,6 +568,30 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var saved = await _fixture.Context.Editions.SingleAsync(e => e.Id == edition.Id);
 
         Assert.Equal(12.345m, saved.AcquisitionAmount);
+        Assert.Equal(6.789m, saved.InitialValueAmount);
+        Assert.Equal("KWD", saved.InitialValueCurrency);
+    }
+
+    [Fact]
+    public async Task Album_LoadedFromDatabase_ComesWithItsEditions()
+    {
+        // Album.SetFirstPublicationDate checks the amounts of its editions: an album loaded without
+        // them would silently let the last reference date of a price be cleared.
+        var album = new Album("Spirou", null);
+        album.SetFirstPublicationDate(1950, null);
+        var publisher = new Publisher("Dupuis");
+        var edition = new Edition(album, publisher);
+        album.RecordAcquisition(edition, AcquisitionMode.Purchase);
+        edition.SetAcquisitionPrice(5m, "FRF");
+        _fixture.Context.AddRange(album, publisher, edition);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Albums.SingleAsync(a => a.Id == album.Id);
+
+        Assert.Equal([edition.Id], reloaded.Editions.Select(e => e.Id));
+        var violation = Assert.Throws<DomainRuleViolationException>(() => reloaded.SetFirstPublicationDate(null, null));
+        Assert.Equal(DomainRules.EditionAcquisitionPriceReferenceDateRequired, violation.Rule);
     }
 
     [Fact]

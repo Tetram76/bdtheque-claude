@@ -9,7 +9,8 @@ namespace Bdtheque.Domain.Tests;
 /// so would let a later member silently reuse a value that already means something different in
 /// already-persisted rows (see choix-implementation.md § Conventions de persistance). Add a new
 /// entry whenever a new member is introduced; a retired member's entry stays forever so its value
-/// remains reserved.
+/// remains reserved. This holds from the first deployment recorded in journal-evenements.md: until
+/// then no row is persisted anywhere, and values may still be renumbered to keep the business order.
 /// </summary>
 internal static class EnumValueLedger
 {
@@ -23,7 +24,7 @@ internal static class EnumValueLedger
             [typeof(ContributionRole)] = [("Scenarist", 1), ("Illustrator", 2), ("Colorist", 3)],
             [typeof(EditionCategory)] = [("FirstEdition", 1), ("SpecialEdition", 2), ("LimitedEdition", 3)],
             [typeof(EditionCondition)] =
-                [("Excellent", 1), ("VeryGood", 2), ("Good", 3), ("Poor", 4), ("VeryPoor", 5)],
+                [("Excellent", 1), ("VeryGood", 2), ("Good", 3), ("Average", 4), ("Poor", 5), ("VeryPoor", 6)],
             [typeof(EditionFormat)] = [("Pocket", 1), ("Medium", 2), ("Standard", 3), ("Large", 4), ("Special", 5)],
             [typeof(ReadingDirection)] = [("LeftToRight", 1), ("RightToLeft", 2)],
             [typeof(SeriesStatus)] = [("InProgress", 1), ("Completed", 2), ("Abandoned", 3)],

@@ -5,7 +5,14 @@ namespace Bdtheque.Domain.Tests;
 
 public sealed class EditionTests
 {
-    private static Album CreateAlbum() => new("Le Lotus bleu", null);
+    // Dated, so that an amount always has a reference date to fall back on: the rules tied to the
+    // reference date of an amount are covered by EditionValueTests.
+    private static Album CreateAlbum()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        album.SetFirstPublicationDate(1936, null);
+        return album;
+    }
 
     private static Publisher CreatePublisher() => new("Casterman");
 

@@ -66,6 +66,47 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public uint VersionOf<TRoot>(TRoot root) where TRoot : EntityBase, IAggregateRoot =>
         Entry(root).Property<uint>(VersionProperty).CurrentValue;
 
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        StampAuditDates();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        StampAuditDates();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    // Creation and last modification dates are set here, never entered (modele-metier.md §
+    // Attributs communs à toutes les entités): the single place every save goes through. A write on
+    // an aggregate marks its root modified (AggregateWriteExtensions), so the root's modification
+    // date follows any change to its children or associations.
+    private void StampAuditDates()
+    {
+        ChangeTracker.DetectChanges();
+        var now = DateTimeOffset.UtcNow;
+        // Truncated to PostgreSQL's microsecond precision, so the tracked value is the stored one.
+        now = now.AddTicks(-(now.Ticks % (TimeSpan.TicksPerMillisecond / 1000)));
+
+        foreach (var entry in ChangeTracker.Entries<EntityBase>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Property(e => e.CreatedAt).CurrentValue = now;
+                    entry.Property(e => e.ModifiedAt).CurrentValue = now;
+                    break;
+                case EntityState.Modified:
+                    entry.Property(e => e.ModifiedAt).CurrentValue = now;
+                    // Restores whatever value was loaded, and keeps it out of the UPDATE.
+                    entry.Property(e => e.CreatedAt).CurrentValue = entry.Property(e => e.CreatedAt).OriginalValue;
+                    entry.Property(e => e.CreatedAt).IsModified = false;
+                    break;
+            }
+        }
+    }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         // Project-wide convention: persist every enum as its underlying int. Every enum member

@@ -19,6 +19,7 @@ public sealed class Series : EntityBase, IAggregateRoot
     public int? TheoreticalVolumeCount { get; private set; }
     public bool IsComplete { get; private set; }
     public bool ExcludeFromMissingVolumes { get; private set; }
+    public bool ExcludeFromReleaseEstimates { get; private set; }
     public string? Summary { get; private set; }
     public string? PersonalNotes { get; private set; }
 
@@ -98,6 +99,8 @@ public sealed class Series : EntityBase, IAggregateRoot
     public void SetComplete(bool isComplete) => IsComplete = isComplete;
 
     public void SetExcludeFromMissingVolumes(bool exclude) => ExcludeFromMissingVolumes = exclude;
+
+    public void SetExcludeFromReleaseEstimates(bool exclude) => ExcludeFromReleaseEstimates = exclude;
 
     public void SetSummary(string? summary) => Summary = DomainText.NullIfBlank(summary);
 
