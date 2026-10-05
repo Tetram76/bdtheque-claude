@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20261001180414_InitialCreate")]
+    [Migration("20261005170429_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -61,6 +61,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int?>("EndVolumeNumber")
                         .HasColumnType("integer");
 
@@ -75,6 +78,9 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<bool>("IsSpecialIssue")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NavigationEntry")
                         .HasMaxLength(1)
@@ -171,6 +177,9 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("text")
                         .UseCollation("fr-FR-x-icu");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FirstName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -180,6 +189,9 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .UseCollation("fr-FR-x-icu");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Nationality")
                         .HasMaxLength(100)
@@ -235,6 +247,12 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Role")
                         .HasColumnType("integer");
@@ -292,8 +310,20 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<int?>("Condition")
                         .HasColumnType("integer");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int?>("Format")
                         .HasColumnType("integer");
+
+                    b.Property<decimal?>("InitialValueAmount")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<string>("InitialValueCurrency")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .UseCollation("fr-FR-x-icu");
 
                     b.Property<bool>("IsColor")
                         .HasColumnType("boolean");
@@ -311,6 +341,9 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .UseCollation("fr-FR-x-icu");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("Orientation")
                         .HasColumnType("integer");
@@ -353,13 +386,19 @@ namespace Bdtheque.Infrastructure.Migrations
 
                             t.HasCheckConstraint("CK_Editions_AcquisitionAmountPositive", "\"AcquisitionAmount\" IS NULL OR \"AcquisitionAmount\" > 0");
 
-                            t.HasCheckConstraint("CK_Editions_AcquisitionModeRequiredForDateOrPrice", "\"AcquisitionMode\" IS NOT NULL OR (\"AcquisitionDate\" IS NULL AND \"AcquisitionAmount\" IS NULL)");
+                            t.HasCheckConstraint("CK_Editions_AcquisitionModeRequiredForDateOrAmounts", "\"AcquisitionMode\" IS NOT NULL OR (\"AcquisitionDate\" IS NULL AND \"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
 
-                            t.HasCheckConstraint("CK_Editions_FreeRequiresNoAmount", "\"IsFree\" = false OR \"AcquisitionAmount\" IS NULL");
+                            t.HasCheckConstraint("CK_Editions_FreeRequiresNoAmount", "\"IsFree\" = false OR (\"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
+
+                            t.HasCheckConstraint("CK_Editions_InitialValueAmountCurrencyTogether", "(\"InitialValueAmount\" IS NULL) = (\"InitialValueCurrency\" IS NULL)");
+
+                            t.HasCheckConstraint("CK_Editions_InitialValueAmountPositive", "\"InitialValueAmount\" IS NULL OR \"InitialValueAmount\" > 0");
 
                             t.HasCheckConstraint("CK_Editions_PageCountPositive", "\"PageCount\" IS NULL OR \"PageCount\" > 0");
 
                             t.HasCheckConstraint("CK_Editions_PublicationYearPositive", "\"PublicationYear\" IS NULL OR \"PublicationYear\" > 0");
+
+                            t.HasCheckConstraint("CK_Editions_PurchaseNotFree", "\"IsFree\" = false OR \"AcquisitionMode\" IS DISTINCT FROM 1");
                         });
                 });
 
@@ -367,6 +406,9 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer");
@@ -379,6 +421,9 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)")
                         .UseCollation("fr-FR-x-icu");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -400,11 +445,17 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .UseCollation("fr_case_accent_insensitive");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<uint>("Version")
                         .IsConcurrencyToken()
@@ -427,6 +478,12 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -461,6 +518,12 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
@@ -489,8 +552,14 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("AlbumId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid?>("EditionId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -511,7 +580,13 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("ExcludeFromMissingVolumes")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("ExcludeFromReleaseEstimates")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsComplete")
@@ -519,6 +594,9 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.Property<bool>("IsManualSortKey")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NavigationEntry")
                         .IsRequired()
@@ -614,9 +692,15 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .UseCollation("fr-FR-x-icu");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -729,7 +813,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Bdtheque.Domain.Entities.Series", "Series")
-                        .WithMany()
+                        .WithMany("TemplateContributions")
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade);
 
@@ -743,7 +827,7 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Edition", b =>
                 {
                     b.HasOne("Bdtheque.Domain.Entities.Album", "Album")
-                        .WithMany()
+                        .WithMany("Editions")
                         .HasForeignKey("AlbumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -865,6 +949,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Album", b =>
                 {
+                    b.Navigation("Editions");
+
                     b.Navigation("PurchaseIntents");
                 });
 
@@ -876,6 +962,11 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Publisher", b =>
                 {
                     b.Navigation("Collections");
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.Series", b =>
+                {
+                    b.Navigation("TemplateContributions");
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Universe", b =>

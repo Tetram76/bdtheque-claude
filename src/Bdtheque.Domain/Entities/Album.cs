@@ -49,6 +49,13 @@ public sealed class Album : EntityBase, IAggregateRoot
     private readonly List<PurchaseIntent> _purchaseIntents = [];
     public IReadOnlyCollection<PurchaseIntent> PurchaseIntents => _purchaseIntents;
 
+    // Read-only from outside: an edition registers itself here on construction, and can never be
+    // moved to another album. The album's first publication date is a reference date of their
+    // amounts, which SetFirstPublicationDate checks against this collection: the persistence layer
+    // always loads it with the album, for the same reason as the intents.
+    private readonly List<Edition> _editions = [];
+    public IReadOnlyCollection<Edition> Editions => _editions;
+
     // EF Core parameterless constructor
     private Album() { }
 
@@ -181,6 +188,11 @@ public sealed class Album : EntityBase, IAggregateRoot
                 DomainRules.AlbumPublicationMonthRange, "Publication month must be between 1 and 12.");
         if (year is <= 0)
             throw new DomainRuleViolationException(DomainRules.AlbumPublicationYearPositive, "Publication year must be positive.");
+        if (year is null)
+        {
+            foreach (var edition in _editions)
+                edition.EnsureAmountsDatedWithoutAlbumDate();
+        }
 
         FirstPublicationYear = year;
         FirstPublicationMonth = month;
@@ -257,6 +269,7 @@ public sealed class Album : EntityBase, IAggregateRoot
         EnumGuard.EnsureDefined(mode, nameof(mode));
         if (edition.AcquisitionMode is not null)
             throw new DomainRuleViolationException(DomainRules.EditionAlreadyOwned, "This edition is already owned.");
+        edition.EnsureNotFreePurchase(mode);
 
         var realized = _purchaseIntents.Find(p => p.EditionId == edition.Id)
                        ?? _purchaseIntents.Find(p => p.EditionId is null);
@@ -274,6 +287,9 @@ public sealed class Album : EntityBase, IAggregateRoot
         if (edition.AlbumId != Id)
             throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
     }
+
+    // Only reachable from the Edition constructor, the single way to create an edition of this album.
+    internal void Register(Edition edition) => _editions.Add(edition);
 
     private void EnsureNotTargetedAsWhole()
     {

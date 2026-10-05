@@ -26,7 +26,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     Nationality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true, collation: "fr-FR-x-icu"),
                     SortKey = table.Column<string>(type: "character varying(401)", maxLength: 401, nullable: false, collation: "fr-FR-x-icu"),
                     NavigationEntry = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, collation: "fr-FR-x-icu"),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,7 +44,9 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Label = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr_case_accent_insensitive"),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,7 +61,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
                     Website = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true, collation: "fr-FR-x-icu"),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -73,7 +79,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
                     Description = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     ParentId = table.Column<Guid>(type: "uuid", nullable: true),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,7 +102,9 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
-                    PublisherId = table.Column<Guid>(type: "uuid", nullable: false)
+                    PublisherId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -121,6 +131,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     TheoreticalVolumeCount = table.Column<int>(type: "integer", nullable: true),
                     IsComplete = table.Column<bool>(type: "boolean", nullable: false),
                     ExcludeFromMissingVolumes = table.Column<bool>(type: "boolean", nullable: false),
+                    ExcludeFromReleaseEstimates = table.Column<bool>(type: "boolean", nullable: false),
                     Summary = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     TemplateBinding = table.Column<int>(type: "integer", nullable: true),
@@ -132,7 +143,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     TemplateIsColor = table.Column<bool>(type: "boolean", nullable: true),
                     TemplatePublisherId = table.Column<Guid>(type: "uuid", nullable: true),
                     TemplatePublisherCollectionId = table.Column<Guid>(type: "uuid", nullable: true),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,7 +189,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     Summary = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     Rating = table.Column<int>(type: "integer", nullable: true),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -308,7 +323,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     AlbumId = table.Column<Guid>(type: "uuid", nullable: true),
                     SeriesId = table.Column<Guid>(type: "uuid", nullable: true),
                     AuthorId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false)
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -359,18 +376,25 @@ namespace Bdtheque.Infrastructure.Migrations
                     AcquisitionAmount = table.Column<decimal>(type: "numeric(14,4)", precision: 14, scale: 4, nullable: true),
                     AcquisitionCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true, collation: "fr-FR-x-icu"),
                     IsFree = table.Column<bool>(type: "boolean", nullable: false),
+                    InitialValueAmount = table.Column<decimal>(type: "numeric(14,4)", precision: 14, scale: 4, nullable: true),
+                    InitialValueCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true, collation: "fr-FR-x-icu"),
                     PersonalReference = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
-                    PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu")
+                    PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Editions", x => x.Id);
                     table.CheckConstraint("CK_Editions_AcquisitionAmountCurrencyTogether", "(\"AcquisitionAmount\" IS NULL) = (\"AcquisitionCurrency\" IS NULL)");
                     table.CheckConstraint("CK_Editions_AcquisitionAmountPositive", "\"AcquisitionAmount\" IS NULL OR \"AcquisitionAmount\" > 0");
-                    table.CheckConstraint("CK_Editions_AcquisitionModeRequiredForDateOrPrice", "\"AcquisitionMode\" IS NOT NULL OR (\"AcquisitionDate\" IS NULL AND \"AcquisitionAmount\" IS NULL)");
-                    table.CheckConstraint("CK_Editions_FreeRequiresNoAmount", "\"IsFree\" = false OR \"AcquisitionAmount\" IS NULL");
+                    table.CheckConstraint("CK_Editions_AcquisitionModeRequiredForDateOrAmounts", "\"AcquisitionMode\" IS NOT NULL OR (\"AcquisitionDate\" IS NULL AND \"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
+                    table.CheckConstraint("CK_Editions_FreeRequiresNoAmount", "\"IsFree\" = false OR (\"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
+                    table.CheckConstraint("CK_Editions_InitialValueAmountCurrencyTogether", "(\"InitialValueAmount\" IS NULL) = (\"InitialValueCurrency\" IS NULL)");
+                    table.CheckConstraint("CK_Editions_InitialValueAmountPositive", "\"InitialValueAmount\" IS NULL OR \"InitialValueAmount\" > 0");
                     table.CheckConstraint("CK_Editions_PageCountPositive", "\"PageCount\" IS NULL OR \"PageCount\" > 0");
                     table.CheckConstraint("CK_Editions_PublicationYearPositive", "\"PublicationYear\" IS NULL OR \"PublicationYear\" > 0");
+                    table.CheckConstraint("CK_Editions_PurchaseNotFree", "\"IsFree\" = false OR \"AcquisitionMode\" IS DISTINCT FROM 1");
                     table.ForeignKey(
                         name: "FK_Editions_Albums_AlbumId",
                         column: x => x.AlbumId,
@@ -399,7 +423,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     EditionId = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     MediaReference = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false, collation: "fr-FR-x-icu"),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -420,7 +446,9 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     AlbumId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EditionId = table.Column<Guid>(type: "uuid", nullable: true)
+                    EditionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

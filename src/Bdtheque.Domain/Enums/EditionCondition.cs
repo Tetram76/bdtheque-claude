@@ -6,6 +6,7 @@ public enum EditionCondition
     Excellent = 1,
     VeryGood = 2,
     Good = 3,
-    Poor = 4,
-    VeryPoor = 5,
+    Average = 4,
+    Poor = 5,
+    VeryPoor = 6,
 }

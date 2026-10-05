@@ -110,5 +110,10 @@ internal sealed class AlbumConfiguration : IEntityTypeConfiguration<Album>
         // loaded without its intents would silently accept a forbidden combination. Always
         // loading the aggregate with its root, however the album is queried, removes that trap.
         builder.Navigation(a => a.PurchaseIntents).AutoInclude();
+
+        // Same trap for Album.SetFirstPublicationDate, which checks that the amounts of its editions
+        // keep a reference date: an album loaded without them would let it be cleared. The relation
+        // itself is configured from the edition (EditionConfiguration).
+        builder.Navigation(a => a.Editions).AutoInclude();
     }
 }

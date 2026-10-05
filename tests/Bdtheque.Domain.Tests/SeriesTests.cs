@@ -15,8 +15,19 @@ public sealed class SeriesTests
         Assert.False(series.IsManualSortKey);
         Assert.False(series.IsComplete);
         Assert.False(series.ExcludeFromMissingVolumes);
+        Assert.False(series.ExcludeFromReleaseEstimates);
         Assert.Null(series.Status);
         Assert.NotEqual(Guid.Empty, series.Id);
+    }
+
+    [Fact]
+    public void SetExcludeFromReleaseEstimates_UpdatesValue()
+    {
+        var series = new Series("Blake et Mortimer");
+
+        series.SetExcludeFromReleaseEstimates(true);
+
+        Assert.True(series.ExcludeFromReleaseEstimates);
     }
 
     [Theory]

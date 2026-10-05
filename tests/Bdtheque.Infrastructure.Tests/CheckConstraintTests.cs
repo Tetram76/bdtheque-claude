@@ -45,7 +45,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, NULL, NULL, 'Dupont', 'D')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), NULL, NULL, 'Dupont', 'D')",
                 id));
     }
 
@@ -54,7 +54,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, 'Dupont', NULL, 'Dupont', 'D')",
+            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Dupont', NULL, 'Dupont', 'D')",
             id);
 
         var count = await _fixture.Context.Authors.CountAsync(a => a.Id == id);
@@ -66,7 +66,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, NULL, 'Moebius', 'Dupont', 'D')",
+            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), NULL, 'Moebius', 'Dupont', 'D')",
             id);
 
         var count = await _fixture.Context.Authors.CountAsync(a => a.Id == id);
@@ -81,7 +81,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, '', NULL, 'Dupont', 'D')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), '', NULL, 'Dupont', 'D')",
                 id));
     }
 
@@ -91,7 +91,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, '   ', '', 'Dupont', 'D')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), '   ', '', 'Dupont', 'D')",
                 id));
     }
 
@@ -104,7 +104,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         // Mirrors AuthorCheckConstraint_*BlankStrings*: IsRequired() alone only enforces
         // NOT NULL, so raw SQL could otherwise persist a blank label/name.
         var id = Guid.CreateVersion7();
-        var sql = $"INSERT INTO \"{table}\" (\"Id\", \"{column}\") VALUES ({{0}}, {blankLiteral})";
+        var sql = $"INSERT INTO \"{table}\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"{column}\") VALUES ({{0}}, now(), now(), {blankLiteral})";
         await AssertViolatesAsync(constraint, () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(sql, id));
     }
@@ -114,12 +114,12 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var publisherId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Publishers\" (\"Id\", \"Name\") VALUES ({0}, 'Casterman')", publisherId);
+            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\") VALUES ({0}, now(), now(), 'Casterman')", publisherId);
 
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_PublisherCollections_NameNotBlank", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"PublisherCollections\" (\"Id\", \"Name\", \"PublisherId\") VALUES ({0}, '   ', {1})",
+                "INSERT INTO \"PublisherCollections\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\", \"PublisherId\") VALUES ({0}, now(), now(), '   ', {1})",
                 id, publisherId));
     }
 
@@ -130,8 +130,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var id = Guid.CreateVersion7();
         var otherColumn = blankColumn == "Title" ? "SortKey" : "Title";
-        var sql = $"INSERT INTO \"Series\" (\"Id\", \"{blankColumn}\", \"{otherColumn}\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"NavigationEntry\") " +
-                  $"VALUES ({{0}}, '   ', 'Valeur', false, false, false, 'V')";
+        var sql = $"INSERT INTO \"Series\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"{blankColumn}\", \"{otherColumn}\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"ExcludeFromReleaseEstimates\", \"NavigationEntry\") " +
+                  $"VALUES ({{0}}, now(), now(), '   ', 'Valeur', false, false, false, false, 'V')";
         await AssertViolatesAsync(constraint, () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(sql, id));
     }
@@ -142,8 +142,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Series_TheoreticalVolumeCountPositive", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"NavigationEntry\", \"TheoreticalVolumeCount\") " +
-                "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, 'T', 0)",
+                "INSERT INTO \"Series\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"ExcludeFromReleaseEstimates\", \"NavigationEntry\", \"TheoreticalVolumeCount\") " +
+                "VALUES ({0}, now(), now(), 'Tintin', 'Tintin', false, false, false, false, 'T', 0)",
                 id));
     }
 
@@ -156,17 +156,17 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         // complexity for a raw-SQL bypass scenario that isn't plausible with a single admin user.
         var publisherId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Publishers\" (\"Id\", \"Name\") VALUES ({0}, 'Casterman')", publisherId);
+            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\") VALUES ({0}, now(), now(), 'Casterman')", publisherId);
         var collectionId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"PublisherCollections\" (\"Id\", \"Name\", \"PublisherId\") VALUES ({0}, 'Tintin', {1})",
+            "INSERT INTO \"PublisherCollections\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\", \"PublisherId\") VALUES ({0}, now(), now(), 'Tintin', {1})",
             collectionId, publisherId);
 
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Series_TemplateCollectionRequiresPublisher", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"NavigationEntry\", \"TemplatePublisherCollectionId\") " +
-                "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, 'T', {1})",
+                "INSERT INTO \"Series\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"ExcludeFromReleaseEstimates\", \"NavigationEntry\", \"TemplatePublisherCollectionId\") " +
+                "VALUES ({0}, now(), now(), 'Tintin', 'Tintin', false, false, false, false, 'T', {1})",
                 id, collectionId));
     }
 
@@ -174,9 +174,9 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     // constraint of its own in the tests below: every sort key used starts with an ASCII letter.
     // The cast matches the type deduced for {2} from its SortKey column.
     private const string InsertAlbumSql =
-        "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", " +
+        "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", " +
         "\"VolumeNumber\", \"StartVolumeNumber\", \"EndVolumeNumber\", \"FirstPublicationYear\", \"FirstPublicationMonth\", \"SeriesId\") " +
-        "VALUES ({0}, {1}, {2}, UPPER(LEFT(CAST({2} AS character varying), 1)), false, {3}, false, {4}, {5}, {6}, {7}, {8}, {9})";
+        "VALUES ({0}, now(), now(), {1}, {2}, UPPER(LEFT(CAST({2} AS character varying), 1)), false, {3}, false, {4}, {5}, {6}, {7}, {8}, {9})";
 
     [Fact]
     public async Task AlbumCheckConstraint_NoTitleNoSeries_ThrowsAtDatabase()
@@ -232,8 +232,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Albums_ManualSortKeyRequiresTitle", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
-                "VALUES ({0}, NULL, NULL, true, {1}, false, {2})", id, (int)AlbumType.Regular, seriesId));
+                "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
+                "VALUES ({0}, now(), now(), NULL, NULL, true, {1}, false, {2})", id, (int)AlbumType.Regular, seriesId));
     }
 
     [Fact]
@@ -330,11 +330,11 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         // A–Z, # and @ are entries (fonctionnel.md § Entrées de la navigation par initiale).
         var sql = table switch
         {
-            "Series" => "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"NavigationEntry\") " +
-                        "VALUES ({0}, 'Épervier', 'Épervier', false, false, false, 'é')",
-            "Albums" => "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
-                        $"VALUES ({{0}}, 'Épervier', 'Épervier', 'é', false, {(int)AlbumType.Regular}, false)",
-            _ => "INSERT INTO \"Authors\" (\"Id\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, 'Émile', 'Émile', 'é')",
+            "Series" => "INSERT INTO \"Series\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"ExcludeFromReleaseEstimates\", \"NavigationEntry\") " +
+                        "VALUES ({0}, now(), now(), 'Épervier', 'Épervier', false, false, false, false, 'é')",
+            "Albums" => "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
+                        $"VALUES ({{0}}, now(), now(), 'Épervier', 'Épervier', 'é', false, {(int)AlbumType.Regular}, false)",
+            _ => "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Émile', 'Émile', 'é')",
         };
 
         await AssertViolatesAsync(constraint, () =>
@@ -350,8 +350,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
 
         await AssertViolatesAsync("CK_Albums_NavigationEntryPresenceMatchesSortKey", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Albums\" (\"Id\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
-                "VALUES ({0}, 'T', false, {1}, false, {2})", Guid.CreateVersion7(), (int)AlbumType.Regular, seriesId));
+                "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\", \"SeriesId\") " +
+                "VALUES ({0}, now(), now(), 'T', false, {1}, false, {2})", Guid.CreateVersion7(), (int)AlbumType.Regular, seriesId));
     }
 
     [Fact]
@@ -359,8 +359,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         await AssertViolatesAsync("CK_Albums_NavigationEntryPresenceMatchesSortKey", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
-                "VALUES ({0}, 'Tintin', 'Tintin', false, {1}, false)", Guid.CreateVersion7(), (int)AlbumType.Regular));
+                "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
+                "VALUES ({0}, now(), now(), 'Tintin', 'Tintin', false, {1}, false)", Guid.CreateVersion7(), (int)AlbumType.Regular));
     }
 
     [Fact]
@@ -368,7 +368,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         await AssertViolatesAsync("CK_Authors_SortKeyNotBlank", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, 'Hergé', '   ', 'H')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Hergé', '   ', 'H')",
                 Guid.CreateVersion7()));
     }
 
@@ -376,8 +376,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var seriesId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Series\" (\"Id\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"NavigationEntry\") " +
-            "VALUES ({0}, 'Tintin', 'Tintin', false, false, false, 'T')", seriesId);
+            "INSERT INTO \"Series\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"ExcludeFromReleaseEstimates\", \"NavigationEntry\") " +
+            "VALUES ({0}, now(), now(), 'Tintin', 'Tintin', false, false, false, false, 'T')", seriesId);
         return seriesId;
     }
 
@@ -385,8 +385,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var albumId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Albums\" (\"Id\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
-            "VALUES ({0}, 'Tintin', 'Tintin', 'T', false, {1}, false)", albumId, (int)AlbumType.Regular);
+            "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
+            "VALUES ({0}, now(), now(), 'Tintin', 'Tintin', 'T', false, {1}, false)", albumId, (int)AlbumType.Regular);
         return albumId;
     }
 
@@ -394,13 +394,13 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var authorId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Authors\" (\"Id\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, 'Hergé', 'Hergé', 'H')", authorId);
+            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Hergé', 'Hergé', 'H')", authorId);
         return authorId;
     }
 
     private const string InsertContributionSql =
-        "INSERT INTO \"Contributions\" (\"Id\", \"AlbumId\", \"SeriesId\", \"AuthorId\", \"Role\") " +
-        "VALUES ({0}, {1}, {2}, {3}, {4})";
+        "INSERT INTO \"Contributions\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"SeriesId\", \"AuthorId\", \"Role\") " +
+        "VALUES ({0}, now(), now(), {1}, {2}, {3}, {4})";
 
     [Fact]
     public async Task ContributionCheckConstraint_NeitherAlbumNorSeries_ThrowsAtDatabase()
@@ -498,14 +498,14 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var publisherId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Publishers\" (\"Id\", \"Name\") VALUES ({0}, {1})", publisherId, name);
+            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\") VALUES ({0}, now(), now(), {1})", publisherId, name);
         return publisherId;
     }
 
     private const string InsertEditionSql =
-        "INSERT INTO \"Editions\" (\"Id\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\", " +
+        "INSERT INTO \"Editions\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\", " +
         "\"PublicationYear\", \"PageCount\", \"AcquisitionMode\", \"AcquisitionDate\", \"AcquisitionAmount\", \"AcquisitionCurrency\") " +
-        "VALUES ({0}, {1}, {2}, false, true, false, {3}, {4}, {5}, {6}, {7}, {8}, {9})";
+        "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, {3}, {4}, {5}, {6}, {7}, {8}, {9})";
 
     [Fact]
     public async Task EditionCheckConstraint_NonPositivePublicationYear_ThrowsAtDatabase()
@@ -562,7 +562,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await AssertViolatesAsync("CK_Editions_AcquisitionModeRequiredForDateOrPrice", () =>
+        await AssertViolatesAsync("CK_Editions_AcquisitionModeRequiredForDateOrAmounts", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, null!, null!, null!, new DateOnly(2020, 1, 1), null!, null!));
     }
@@ -574,7 +574,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var publisherId = await InsertPublisherAsync();
 
         var id = Guid.CreateVersion7();
-        await AssertViolatesAsync("CK_Editions_AcquisitionModeRequiredForDateOrPrice", () =>
+        await AssertViolatesAsync("CK_Editions_AcquisitionModeRequiredForDateOrAmounts", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, false, null!, null!, null!, null!, 10, "EUR"));
     }
@@ -589,6 +589,75 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         await AssertViolatesAsync("CK_Editions_FreeRequiresNoAmount", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
                 InsertEditionSql, id, albumId, publisherId, true, null!, null!, (int)AcquisitionMode.Gift, null!, 10, "EUR"));
+    }
+
+    // Dated by its publication year, so that only the constraint under test can fail.
+    private const string InsertEditionWithInitialValueSql =
+        "INSERT INTO \"Editions\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", " +
+        "\"IsSecondHand\", \"IsFree\", \"PublicationYear\", \"AcquisitionMode\", \"InitialValueAmount\", \"InitialValueCurrency\") " +
+        "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, {3}, 2000, {4}, {5}, {6})";
+
+    [Theory]
+    [InlineData(10, null, "CK_Editions_InitialValueAmountCurrencyTogether")]
+    [InlineData(null, "EUR", "CK_Editions_InitialValueAmountCurrencyTogether")]
+    [InlineData(0, "EUR", "CK_Editions_InitialValueAmountPositive")]
+    public async Task EditionCheckConstraint_InvalidInitialValue_ThrowsAtDatabase(int? amount, string? currency, string constraint)
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        await AssertViolatesAsync(constraint, () =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionWithInitialValueSql, Guid.CreateVersion7(), albumId, publisherId, false,
+                (int)AcquisitionMode.Purchase, amount!, currency!));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_InitialValueWithoutAcquisitionMode_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        await AssertViolatesAsync("CK_Editions_AcquisitionModeRequiredForDateOrAmounts", () =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionWithInitialValueSql, Guid.CreateVersion7(), albumId, publisherId, false, null!, 10, "EUR"));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_FreeWithInitialValue_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        await AssertViolatesAsync("CK_Editions_FreeRequiresNoAmount", () =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionWithInitialValueSql, Guid.CreateVersion7(), albumId, publisherId, true,
+                (int)AcquisitionMode.Gift, 10, "EUR"));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_FreePurchase_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        await AssertViolatesAsync("CK_Editions_PurchaseNotFree", () =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionWithInitialValueSql, Guid.CreateVersion7(), albumId, publisherId, true,
+                (int)AcquisitionMode.Purchase, null!, null!));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_ValidInitialValue_Succeeds()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+        var id = Guid.CreateVersion7();
+
+        await _fixture.Context.Database.ExecuteSqlRawAsync(
+            InsertEditionWithInitialValueSql, id, albumId, publisherId, false, (int)AcquisitionMode.Gift, 10, "QZF");
+
+        Assert.Equal(1, await _fixture.Context.Editions.CountAsync(e => e.Id == id));
     }
 
     [Fact]
@@ -612,14 +681,14 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var editionId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Editions\" (\"Id\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\") " +
-            "VALUES ({0}, {1}, {2}, false, true, false, false)", editionId, albumId, publisherId);
+            "INSERT INTO \"Editions\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\") " +
+            "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, false)", editionId, albumId, publisherId);
         return editionId;
     }
 
     private const string InsertEditionVisualSql =
-        "INSERT INTO \"EditionVisuals\" (\"Id\", \"EditionId\", \"Type\", \"MediaReference\", \"DisplayOrder\") " +
-        "VALUES ({0}, {1}, {2}, {3}, {4})";
+        "INSERT INTO \"EditionVisuals\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"EditionId\", \"Type\", \"MediaReference\", \"DisplayOrder\") " +
+        "VALUES ({0}, now(), now(), {1}, {2}, {3}, {4})";
 
     [Fact]
     public async Task EditionVisualCheckConstraint_BlankMediaReference_ThrowsAtDatabase()
@@ -657,7 +726,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     }
 
     private const string InsertPurchaseIntentSql =
-        "INSERT INTO \"PurchaseIntents\" (\"Id\", \"AlbumId\", \"EditionId\") VALUES ({0}, {1}, {2})";
+        "INSERT INTO \"PurchaseIntents\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"EditionId\") VALUES ({0}, now(), now(), {1}, {2})";
 
     [Fact]
     public async Task PurchaseIntentConstraint_NullAlbum_ThrowsAtDatabase()
