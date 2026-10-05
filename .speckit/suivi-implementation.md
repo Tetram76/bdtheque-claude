@@ -53,7 +53,7 @@ Répercussion dans le modèle de domaine des ajustements du `.speckit/` issus de
 
 | Ticket | Titre |
 | --- | --- |
-| #102 | Ajustement du modèle de domaine issu de la reprise des données |
+| ~~#102~~ | Ajustement du modèle de domaine issu de la reprise des données |
 
 ---
 
