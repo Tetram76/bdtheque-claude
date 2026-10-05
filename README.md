@@ -93,6 +93,14 @@ L'application est ensuite accessible sur `http://localhost:8080` (port configura
 
 Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synology Container Manager). Les visuels (couvertures, planches, etc.) sont stockés sur un volume monté sur le NAS, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.
 
+Ce dossier doit exister et être **accessible en écriture pour l'utilisateur du conteneur `api`** (UID `1654`, qui n'est pas root) ; sans quoi `api` refuse de démarrer, en indiquant le dossier en cause dans son journal. Docker crée un dossier absent au nom de root : il faut donc le créer et lui donner ce droit avant le premier démarrage, par exemple :
+
+```bash
+mkdir -p ./data/visuels && sudo chown 1654:1654 ./data/visuels
+```
+
+Sur un NAS Synology, le droit peut aussi être accordé au dossier partagé par ses permissions (ACL). Si aucun dossier de l'hôte n'est monté, `api` le signale par un avertissement : les visuels seraient perdus à chaque recréation du conteneur.
+
 ## Spécifications
 
 Les spécifications du projet sont dans le dossier [`.speckit/`](.speckit/) constituent la **source de vérité absolue** du projet : toute décision d'architecture, de fonctionnel ou de gestion doit s'y conformer, et son contenu prime sur toute autre source (historique de discussion, suppositions, etc.).

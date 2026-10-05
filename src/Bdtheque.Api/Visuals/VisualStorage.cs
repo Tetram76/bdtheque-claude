@@ -30,6 +30,50 @@ internal sealed class VisualStorage(IOptions<VisualStorageOptions> options, ILog
     /// <summary>The part of a file name, or of a media reference, that both files of a visual share.</summary>
     public static string StemOf(string fileName) => Path.GetFileNameWithoutExtension(fileName);
 
+    /// <summary>
+    /// Checks at startup that the volume can be written, creating its folders: nothing in the
+    /// deployment guarantees it — <c>api</c> does not run as root, while Docker creates a missing
+    /// host folder as root, and a NAS shared folder belongs to a NAS user. Failing here reports the
+    /// misconfiguration at deployment, rather than at the first upload.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The volume cannot be written.</exception>
+    public void EnsureWritable()
+    {
+        foreach (var folder in new[] { OriginalsFolder, DisplayFolder })
+        {
+            var path = Path.Combine(_root, folder);
+            try
+            {
+                Directory.CreateDirectory(path);
+                // Creating a folder that already exists checks nothing: a file is written to make sure.
+                var probe = Path.Combine(path, $".write-check-{Guid.NewGuid():N}");
+                File.WriteAllBytes(probe, []);
+                File.Delete(probe);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                throw new InvalidOperationException(
+                    $"The visuals volume cannot be written at '{path}'. Give write access to the user of the 'api' "
+                    + $"container (UID {Environment.GetEnvironmentVariable("APP_UID") ?? "of the process"}) on the folder "
+                    + "mounted there (VISUELS_HOST_PATH).",
+                    exception);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Warns when the volume is not mounted from outside the container, which nothing can impose
+    /// either: its files would then live in the container, and be lost whenever it is recreated.
+    /// </summary>
+    public void WarnIfNotMounted()
+    {
+        if (MountInfo.IsOnMount(_root) == false)
+            logger.LogWarning(
+                "The visuals volume '{Root}' is not mounted from outside the container: its files will be lost "
+                + "whenever the container is recreated. Mount a host folder there (VISUELS_HOST_PATH).",
+                _root);
+    }
+
     /// <summary>Writes both files of a visual; neither is left behind if the second cannot be written.</summary>
     public async Task WriteAsync(string mediaReference, PreparedVisual visual, CancellationToken cancellationToken)
     {

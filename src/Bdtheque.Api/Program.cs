@@ -56,6 +56,14 @@ using (var migrationScope = app.Services.CreateScope())
     migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.Migrate();
 }
 
+// The deployment can guarantee neither that the visuals volume is writable nor that it is mounted
+// from outside the container: the second is warned about, the first checked (refusing to start).
+// Warned first: without a mount, the folder is usually not writable either, and the warning names
+// the actual cause.
+var visualStorage = app.Services.GetRequiredService<VisualStorage>();
+visualStorage.WarnIfNotMounted();
+visualStorage.EnsureWritable();
+
 app.UseExceptionHandler();
 // Gives a ProblemDetails body to the error responses emitted without one; a response that already
 // has a body (ApiExceptionHandler's, or /health's own report) is left untouched.
