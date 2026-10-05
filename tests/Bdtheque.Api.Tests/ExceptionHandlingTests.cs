@@ -39,7 +39,7 @@ public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFact
     [Fact]
     public async Task RefusedDeletion_IsABusinessProblemCarryingItsImpact()
     {
-        var impact = new DeletionImpact([new ImpactCount(EntityKind.Universe, 2)], [new ImpactCount(EntityKind.Album, 1)], [], "fingerprint");
+        var impact = new DeletionImpact([new ImpactCount(EntityKind.Universe, 2)], [new ImpactCount(EntityKind.Album, 1)], [], [], "fingerprint");
 
         var problem = await HandleAsync(new DeletionRefusedException(impact), HttpStatusCode.UnprocessableContent, ProblemTypes.Business);
 
@@ -50,7 +50,7 @@ public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFact
     [Fact]
     public async Task DeletionWhoseImpactChanged_IsAFunctionalProblemCarryingTheNewImpact()
     {
-        var impact = new DeletionImpact([], [new ImpactCount(EntityKind.Series, 3)], [], "fingerprint");
+        var impact = new DeletionImpact([], [new ImpactCount(EntityKind.Series, 3)], [], [], "fingerprint");
 
         var problem = await HandleAsync(new DeletionImpactChangedException(impact), HttpStatusCode.Conflict, ProblemTypes.Functional);
 

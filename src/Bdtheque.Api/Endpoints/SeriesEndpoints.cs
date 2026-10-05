@@ -96,7 +96,9 @@ internal static class SeriesEndpoints
         series.SetTemplateReadingDirection(EnumMapping.Map<DomainEnums.ReadingDirection>(template.ReadingDirection));
         series.SetTemplateFormat(EnumMapping.Map<DomainEnums.EditionFormat>(template.Format));
         series.SetTemplateIsColor(template.IsColor);
-        await ApplyTemplatePublisherAsync(series, template, context, cancellationToken);
+        var (publisher, collection) = await FormReferences.LoadPublisherAsync(
+            context, template.PublisherId, template.PublisherCollectionId, cancellationToken);
+        series.SetTemplate(publisher, collection);
 
         var genres = await FormReferences.LoadAsync(context.Genres, content.GenreIds, cancellationToken);
         FormReferences.ReplaceAssociations(series.Genres, genres, series.AddGenre, series.RemoveGenre);
@@ -104,22 +106,6 @@ internal static class SeriesEndpoints
         FormReferences.ReplaceAssociations(series.Universes, universes, series.AddUniverse, series.RemoveUniverse);
 
         await ApplyContributionsAsync(series, content.Contributions, context, cancellationToken);
-    }
-
-    // The publisher and its collection go through the single domain operation that checks that the
-    // collection belongs to the publisher: a mismatch is the business error of the domain.
-    private static async Task ApplyTemplatePublisherAsync(
-        Series series, SeriesEditionTemplate template, BdthequeDbContext context, CancellationToken cancellationToken)
-    {
-        var publisher = template.PublisherId is { } publisherId
-            ? await context.Publishers.SingleOrDefaultAsync(p => p.Id == publisherId, cancellationToken)
-              ?? throw new EntityNotFoundException(typeof(Publisher), publisherId)
-            : null;
-        var collection = template.PublisherCollectionId is { } collectionId
-            ? await context.PublisherCollections.SingleOrDefaultAsync(c => c.Id == collectionId, cancellationToken)
-              ?? throw new EntityNotFoundException(typeof(PublisherCollection), collectionId)
-            : null;
-        series.SetTemplate(publisher, collection);
     }
 
     // The contributions already credited are kept as they are, so that saving a series whose

@@ -341,27 +341,44 @@ public sealed class Album : EntityBase, IAggregateRoot
     }
 
     /// <summary>
+    /// Records the acquisition of one of this album's editions with <paramref name="mode"/> alone, as
+    /// the confirmation of a purchase does: the edition, not owned, has neither date nor amount yet.
+    /// </summary>
+    public void RecordAcquisition(Edition edition, AcquisitionMode mode)
+    {
+        ArgumentNullException.ThrowIfNull(edition);
+        RecordAcquisition(edition, new EditionAcquisition(mode, null, null, null, edition.IsFree, null, null));
+    }
+
+    /// <summary>
     /// Records the acquisition of one of this album's editions — the only way for an edition to
     /// become owned, since only this aggregate sees every intent it may realize (fonctionnel.md §
     /// Intention d'achat › Réalisation d'une intention): the intent on this edition, or else the
     /// one on the whole album, is removed; other editions' intents are kept.
     /// </summary>
-    public void RecordAcquisition(Edition edition, AcquisitionMode mode)
+    /// <param name="acquisition">
+    /// The acquisition and value of the edition, whose mode is required: entering an edition
+    /// requires it, only an intent creating an edition not owned (fonctionnel.md § Appartenance à la
+    /// collection).
+    /// </param>
+    public void RecordAcquisition(Edition edition, EditionAcquisition acquisition)
     {
         // Every check runs before anything is mutated: a rejected acquisition must leave the
         // aggregate untouched, or a later save would delete an intent never actually realized.
         EnsureOwnEdition(edition);
-        EnumGuard.EnsureDefined(mode, nameof(mode));
+        ArgumentNullException.ThrowIfNull(acquisition);
+        if (acquisition.Mode is null)
+            throw new DomainRuleViolationException(DomainRules.EditionAcquisitionModeRequired, "An acquisition requires its mode.");
         if (edition.AcquisitionMode is not null)
             throw new DomainRuleViolationException(DomainRules.EditionAlreadyOwned, "This edition is already owned.");
-        edition.EnsureNotFreePurchase(mode);
+        edition.EnsureValid(acquisition, edition.PublicationYear);
 
         var realized = _purchaseIntents.Find(p => p.EditionId == edition.Id)
                        ?? _purchaseIntents.Find(p => p.EditionId is null);
         if (realized is not null)
             _purchaseIntents.Remove(realized);
 
-        edition.Acquire(mode);
+        edition.Apply(acquisition);
     }
 
     // A programming error, not a business one: only this album's own editions are ever offered

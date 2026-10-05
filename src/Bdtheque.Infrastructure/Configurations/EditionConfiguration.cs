@@ -30,7 +30,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             "CK_Editions_PageCountPositive",
             $"\"{nameof(Edition.PageCount)}\" IS NULL OR \"{nameof(Edition.PageCount)}\" > 0"));
 
-        // Mirrors Edition.SetAcquisitionPrice: amount and currency are present or absent together.
+        // Mirrors Edition.EnsureValid: amount and currency are present or absent together.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Editions_AcquisitionAmountCurrencyTogether",
             $"(\"{nameof(Edition.AcquisitionAmount)}\" IS NULL) = (\"{nameof(Edition.AcquisitionCurrency)}\" IS NULL)"));
@@ -38,7 +38,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             "CK_Editions_AcquisitionAmountPositive",
             $"\"{nameof(Edition.AcquisitionAmount)}\" IS NULL OR \"{nameof(Edition.AcquisitionAmount)}\" > 0"));
 
-        // Mirrors Edition.SetInitialValue, same rules as the acquisition price.
+        // Same rules for the initial value as for the acquisition price.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Editions_InitialValueAmountCurrencyTogether",
             $"(\"{nameof(Edition.InitialValueAmount)}\" IS NULL) = (\"{nameof(Edition.InitialValueCurrency)}\" IS NULL)"));

@@ -8,6 +8,10 @@ namespace Bdtheque.Contracts.Deletion;
 /// <param name="BlockedBy">Records referencing the deleted one: the deletion is refused while any exists.</param>
 /// <param name="AssociationsRemoved">Records that lose their association with the deleted one.</param>
 /// <param name="DeletedWith">Records deleted along with it.</param>
+/// <param name="LeavingCollection">
+/// Albums that leave the collection, the deletion taking along their last owned edition: they are
+/// neither deleted nor detached, which no other count reveals.
+/// </param>
 /// <param name="Fingerprint">
 /// Identifies the exact records concerned, not only their counts. Sent back with the deletion, which
 /// is refused if the impact has changed since the user confirmed it.
@@ -16,6 +20,7 @@ public sealed record DeletionImpact(
     IReadOnlyList<ImpactCount> BlockedBy,
     IReadOnlyList<ImpactCount> AssociationsRemoved,
     IReadOnlyList<ImpactCount> DeletedWith,
+    IReadOnlyList<ImpactCount> LeavingCollection,
     string Fingerprint);
 
 /// <summary>Number of records of one entity type concerned by a deletion.</summary>

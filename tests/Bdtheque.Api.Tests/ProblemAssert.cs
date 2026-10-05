@@ -41,6 +41,7 @@ internal static class ProblemAssert
         Assert.Equal(expected.BlockedBy, actual.BlockedBy);
         Assert.Equal(expected.AssociationsRemoved, actual.AssociationsRemoved);
         Assert.Equal(expected.DeletedWith, actual.DeletedWith);
+        Assert.Equal(expected.LeavingCollection, actual.LeavingCollection);
         Assert.Equal(expected.Fingerprint, actual.Fingerprint);
     }
 }
