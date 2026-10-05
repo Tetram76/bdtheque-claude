@@ -286,13 +286,22 @@ Objectif : tirer parti de l'enrichissement progressif de la base pour **affiner 
 - Elle suit la règle de [Calcul des estimations](#calcul-des-estimations) : elle est calculée à partir des données de la collection, et n'est pas stockée en base.
 - Le modèle d'estimation retenu est un **Random Forest**.
 
+### Coût de remplacement de la collection
+
+Statistique **envisagée** : rien n'est statué, elle n'est pas à implémenter tant qu'elle n'est pas décidée (YAGNI).
+
+- Le **coût de remplacement** de la collection est ce que coûterait aujourd'hui l'acquisition de toutes ses éditions : la valeur de chaque édition y est remplacée par son **prix actuel**.
+- **Problème non résolu** : obtenir ces prix actuels. Le volume de la collection rend impraticable une recherche du prix de chaque édition, et certaines éditions ne sont plus en vente.
+- **Piste envisagée** : établir des **groupes d'éditions** selon des critères **hors dates** (par exemple à la manière d'un Random Forest), récupérer les prix actuels de quelques éditions de chaque groupe, puis **extrapoler** ces prix aux autres éditions du même groupe.
+
 ### Gestion des devises
 
 - L'application gère des **prix, montants et valeurs** (ex. valeur d'achat, valeur estimée d'un album, etc.).
 - **Saisie et affichage des données de base** : peuvent être faits dans n'importe quelle devise. Une fiche affiche chaque montant **deux fois** : la valeur saisie, dans sa devise, et sa valeur en **euros du jour**.
-- **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), puis **corrigé de l'inflation** entre cette date et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
-- **Analyses et statistiques** : toujours affichées en **euros du jour**.
-- **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euros du jour.
+- **Euros courants** : un montant exprimé en euros courants est **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), **sans correction de l'inflation**.
+- **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord exprimé en **euros courants**, puis **corrigé de l'inflation** entre sa date de référence et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
+- **Analyses et statistiques** : chaque montant est affiché **en parallèle** dans les deux versions, pour mettre en relation l'**investissement réalisé** (euros courants) et son **équivalent en pouvoir d'achat** à la date du jour (euros du jour). Un montant non convertible (cf. *Taux de change* ci-dessous) n'entre dans aucune des deux : elles portent toujours sur les mêmes données.
+- **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euro, dans ces deux versions.
 - **Date de référence d'un montant** : première date connue, dans cet ordre :
   - **prix d'acquisition** : date d'acquisition, puis année d'édition, puis date de première publication de l'album ;
   - **valeur initiale** : année d'édition, puis date de première publication de l'album.
