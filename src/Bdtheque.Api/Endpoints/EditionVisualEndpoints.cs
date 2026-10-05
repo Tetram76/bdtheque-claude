@@ -87,13 +87,17 @@ internal static class EditionVisualEndpoints
         try
         {
             await context.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
         }
         catch
         {
             storage.Delete(mediaReference);
             throw;
         }
+
+        // Not compensated: a commit that fails may have committed all the same (e.g. connection lost
+        // while committing), and deleting the files would strip a saved visual of them. Left to the
+        // reconciliation, which decides from the database.
+        await transaction.CommitAsync(cancellationToken);
 
         return TypedResults.Created($"/admin/albums/{rootId}/editions/{editionId}/visuals", ToForm(edition, context.VersionOf(album)));
     }

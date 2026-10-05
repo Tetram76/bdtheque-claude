@@ -145,6 +145,37 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     }
 
     [Fact]
+    public async Task Upload_FailingAtCommit_LeavesItsFilesToTheReconciliation()
+    {
+        // Whether a failed commit committed is uncertain (e.g. connection lost while committing):
+        // deleting the files could strip a saved visual of them. They are left to the reconciliation,
+        // which decides from the database. The failure is produced by a deferred trigger, run at commit.
+        var edition = await CreateEditionAsync();
+        var files = VolumeFiles();
+        await ExecuteSqlAsync(
+            $"""
+             CREATE FUNCTION refuse_at_commit_{edition.Id:N}() RETURNS trigger LANGUAGE plpgsql AS $$
+             BEGIN RAISE EXCEPTION 'refused'; END $$;
+             CREATE CONSTRAINT TRIGGER refuse_at_commit_{edition.Id:N} AFTER INSERT ON "EditionVisuals"
+             DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
+             WHEN (NEW."EditionId" = '{edition.Id}') EXECUTE FUNCTION refuse_at_commit_{edition.Id:N}();
+             """);
+        try
+        {
+            var response = await PostUploadAsync(edition, SmallJpeg(), VisualType.Cover, edition.AlbumVersion);
+
+            await ProblemAssert.IsProblemAsync(response, HttpStatusCode.InternalServerError, ProblemTypes.Technical);
+            Assert.Equal(2, VolumeFiles().Except(files).Count());
+            Assert.Empty((await GetVisualsAsync(edition)).Visuals);
+        }
+        finally
+        {
+            await ExecuteSqlAsync(
+                $"""DROP TRIGGER refuse_at_commit_{edition.Id:N} ON "EditionVisuals"; DROP FUNCTION refuse_at_commit_{edition.Id:N}();""");
+        }
+    }
+
+    [Fact]
     public async Task Arrange_SetsTheTypesAndTheOrderOfTheVisuals()
     {
         var edition = await CreateEditionAsync();
