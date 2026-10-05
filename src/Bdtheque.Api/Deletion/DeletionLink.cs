@@ -21,4 +21,10 @@ internal enum LinkNature
 
     /// <summary>The linked records are part of the deleted one, and deleted with it.</summary>
     Composition,
+
+    /// <summary>
+    /// The linked albums leave the collection, the deletion taking along their last owned edition:
+    /// an effect that neither deletes nor detaches them, but that the confirmation announces too.
+    /// </summary>
+    LeavingCollection,
 }

@@ -28,6 +28,7 @@ public static class DomainRules
 
     public const string AuthorLastNameOrPseudonymRequired = "Author.LastNameOrPseudonymRequired";
 
+    public const string EditionPublisherRequired = "Edition.PublisherRequired";
     public const string EditionPublicationYearPositive = "Edition.PublicationYearPositive";
     public const string EditionPageCountPositive = "Edition.PageCountPositive";
     public const string EditionAcquisitionModeRequired = "Edition.AcquisitionModeRequired";

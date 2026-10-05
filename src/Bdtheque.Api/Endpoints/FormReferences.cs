@@ -26,6 +26,26 @@ internal static class FormReferences
         return missing.Count == 0 ? entities : throw new EntityNotFoundException(typeof(TEntity), missing[0]);
     }
 
+    /// <summary>
+    /// Loads the publisher and the publisher collection a form references, each of which must still
+    /// exist when given. Whether the collection belongs to the publisher is left to the domain
+    /// operation that receives both: a mismatch is a business error.
+    /// </summary>
+    /// <exception cref="EntityNotFoundException">The publisher or the collection no longer exists.</exception>
+    public static async Task<(Publisher? Publisher, PublisherCollection? Collection)> LoadPublisherAsync(
+        BdthequeDbContext context, Guid? publisherId, Guid? collectionId, CancellationToken cancellationToken)
+    {
+        var publisher = publisherId is { } pid
+            ? await context.Publishers.SingleOrDefaultAsync(p => p.Id == pid, cancellationToken)
+              ?? throw new EntityNotFoundException(typeof(Publisher), pid)
+            : null;
+        var collection = collectionId is { } cid
+            ? await context.PublisherCollections.SingleOrDefaultAsync(c => c.Id == cid, cancellationToken)
+              ?? throw new EntityNotFoundException(typeof(PublisherCollection), cid)
+            : null;
+        return (publisher, collection);
+    }
+
     /// <summary>Replaces the current associations (genres, universes…) by the wanted ones.</summary>
     public static void ReplaceAssociations<TEntity>(
         IReadOnlyCollection<TEntity> current, IReadOnlyList<TEntity> wanted, Action<TEntity> add, Action<TEntity> remove)

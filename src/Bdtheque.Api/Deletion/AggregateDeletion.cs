@@ -71,6 +71,7 @@ internal static class AggregateDeletion
             CountsOf(LinkNature.Reference),
             CountsOf(LinkNature.Association),
             CountsOf(LinkNature.Composition),
+            CountsOf(LinkNature.LeavingCollection),
             Fingerprint(records));
 
         List<ImpactCount> CountsOf(LinkNature nature) =>

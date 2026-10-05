@@ -398,6 +398,8 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
                 new ImpactCount(EntityKind.PurchaseIntent, 1),
             ],
             impact.DeletedWith);
+        // Deleted with all its editions, the album does not merely leave the collection.
+        Assert.Empty(impact.LeavingCollection);
         Assert.NotEmpty(impact.Fingerprint);
     }
 
@@ -518,7 +520,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         return (await response.Content.ReadFromJsonAsync<TForm>())!;
     }
 
-    // Editions, visuals and intents have no endpoint yet: seeded through the domain. One owned
+    // Visuals and intents have no endpoint yet: seeded through the domain, with their editions. One owned
     // edition with two visuals, one wished edition with one visual and its intent.
     private async Task<Guid> SeedEditionsAsync(Guid albumId)
     {

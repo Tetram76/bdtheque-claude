@@ -499,10 +499,9 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var collection = publisher.AddCollection("Astérix");
         var edition = new Edition(album, publisher);
         edition.SetPublisher(publisher, collection);
-        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
-        edition.SetAcquisitionDate(new DateOnly(2020, 3, 15));
-        edition.SetAcquisitionPrice(9.9m, "EUR");
         edition.SetPublicationYear(1978);
+        edition.Album.RecordAcquisition(
+            edition, new EditionAcquisition(AcquisitionMode.Purchase, new DateOnly(2020, 3, 15), 9.9m, "EUR", false, null, null));
         edition.SetIsbn("2-205-00217-0");
 
         _fixture.Context.Albums.Add(album);
@@ -556,10 +555,9 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Tintin", null);
         var publisher = new Publisher("Casterman");
         var edition = new Edition(album, publisher);
-        edition.Album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         edition.SetPublicationYear(2015);
-        edition.SetAcquisitionPrice(12.345m, "KWD");
-        edition.SetInitialValue(6.789m, "KWD");
+        edition.Album.RecordAcquisition(
+            edition, new EditionAcquisition(AcquisitionMode.Purchase, null, 12.345m, "KWD", false, 6.789m, "KWD"));
         _fixture.Context.AddRange(album, publisher, edition);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
@@ -580,8 +578,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         album.SetFirstPublicationDate(1950, null);
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
-        album.RecordAcquisition(edition, AcquisitionMode.Purchase);
-        edition.SetAcquisitionPrice(5m, "FRF");
+        album.RecordAcquisition(edition, new EditionAcquisition(AcquisitionMode.Purchase, null, 5m, "FRF", false, null, null));
         _fixture.Context.AddRange(album, publisher, edition);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();

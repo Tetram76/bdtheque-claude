@@ -52,26 +52,27 @@ public sealed class Edition : EntityBase
     // EF Core parameterless constructor
     private Edition() { }
 
-    public Edition(Album album, Publisher publisher)
+    /// <summary>Creates an edition of <paramref name="album"/>, not owned until its acquisition is recorded.</summary>
+    public Edition(Album album, Publisher? publisher)
     {
         ArgumentNullException.ThrowIfNull(album);
-        ArgumentNullException.ThrowIfNull(publisher);
+        SetPublisher(publisher, null);
 
         Album = album;
         AlbumId = album.Id;
-        Publisher = publisher;
-        PublisherId = publisher.Id;
         album.Register(this);
     }
 
     /// <summary>
     /// Sets the publisher and, optionally, a publisher collection, as a single atomic
     /// operation: a collection can only be set together with the publisher it belongs to
-    /// (modele-metier.md § Édition).
+    /// (modele-metier.md § Édition). The publisher is required, a form left without one being an
+    /// input mistake.
     /// </summary>
-    public void SetPublisher(Publisher publisher, PublisherCollection? collection)
+    public void SetPublisher(Publisher? publisher, PublisherCollection? collection)
     {
-        ArgumentNullException.ThrowIfNull(publisher);
+        if (publisher is null)
+            throw new DomainRuleViolationException(DomainRules.EditionPublisherRequired, "An edition must have a publisher.");
         if (collection is not null && collection.PublisherId != publisher.Id)
             throw new DomainRuleViolationException(
                 DomainRules.PublisherCollectionNotOfPublisher, "The publisher collection must belong to the given publisher.");
@@ -82,12 +83,45 @@ public sealed class Edition : EntityBase
         PublisherCollectionId = collection?.Id;
     }
 
+    /// <summary>
+    /// Sets the edition year alone, which must leave every amount with a reference date. A form,
+    /// which may at once replace the edition year by the acquisition date as reference date of the
+    /// price, goes through <see cref="SetPublicationYearAndAcquisition"/>.
+    /// </summary>
     public void SetPublicationYear(int? year)
     {
-        if (year is <= 0)
-            throw new DomainRuleViolationException(DomainRules.EditionPublicationYearPositive, "Publication year must be positive when specified.");
+        EnsurePublicationYearPositive(year);
         EnsureAmountsDated(AcquisitionAmount, InitialValueAmount, AcquisitionDate, year, IsAlbumDated);
         PublicationYear = year;
+    }
+
+    /// <summary>
+    /// Sets the edition year, the acquisition and the value together, as the form sends them: the
+    /// edition year and the acquisition date are both reference dates of the price, so that writing
+    /// them one after the other would fail in one order or the other. Nothing is changed if any of
+    /// them is refused.
+    /// </summary>
+    /// <remarks>
+    /// An edition is acquired through <see cref="Album.RecordAcquisition(Edition, EditionAcquisition)"/>
+    /// only, and an owned edition stays owned until deleted: a bought edition never becomes an
+    /// intent again (fonctionnel.md § Intention d'achat).
+    /// </remarks>
+    public void SetPublicationYearAndAcquisition(int? publicationYear, EditionAcquisition acquisition)
+    {
+        ArgumentNullException.ThrowIfNull(acquisition);
+        // Acquiring may realize an intent on this edition or on its album, which only the album
+        // aggregate sees: a programming error to reach it from here.
+        if (AcquisitionMode is null && acquisition.Mode is not null)
+            throw new InvalidOperationException(
+                "An edition is acquired through Album.RecordAcquisition, which realizes the intents it satisfies.");
+        if (AcquisitionMode is not null && acquisition.Mode is null)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionModeRequired, "An owned edition keeps an acquisition mode until it is deleted.");
+        EnsurePublicationYearPositive(publicationYear);
+        EnsureValid(acquisition, publicationYear);
+
+        PublicationYear = publicationYear;
+        Apply(acquisition);
     }
 
     /// <summary>
@@ -150,128 +184,7 @@ public sealed class Edition : EntityBase
         Condition = condition;
     }
 
-    /// <summary>
-    /// Sets the acquisition mode. An edition is part of the collection only once this is set
-    /// (fonctionnel.md § Appartenance à la collection); clearing it back to <see langword="null"/>
-    /// requires the acquisition date, price and initial value to be cleared first, since an edition
-    /// not owned has no value (modele-metier.md § Édition).
-    /// </summary>
-    public void SetAcquisitionMode(AcquisitionMode? mode)
-    {
-        if (mode is not null)
-            EnumGuard.EnsureDefined(mode.Value, nameof(mode));
-        // Acquiring an edition (no mode yet -> a mode) may realize an intent on it or on its album,
-        // which only the album aggregate sees: it must go through Album.RecordAcquisition. Changing
-        // the mode of an owned edition, or clearing it, stays here.
-        if (mode is not null && AcquisitionMode is null)
-            throw new InvalidOperationException(
-                "An edition is acquired through Album.RecordAcquisition, which realizes the intents it satisfies.");
-        if (mode is null && (AcquisitionDate is not null || AcquisitionAmount is not null || InitialValueAmount is not null))
-            throw new DomainRuleViolationException(
-                DomainRules.EditionAcquisitionModeRequired,
-                "Cannot clear the acquisition mode while an acquisition date, price or initial value is set. " +
-                "Clear them first with SetAcquisitionDate(null), SetAcquisitionPrice(null, null) and SetInitialValue(null, null).");
-        if (mode is not null)
-            EnsureNotFreePurchase(mode.Value);
-
-        AcquisitionMode = mode;
-    }
-
     public void SetSecondHand(bool isSecondHand) => IsSecondHand = isSecondHand;
-
-    public void SetAcquisitionDate(DateOnly? date)
-    {
-        if (date is not null && AcquisitionMode is null)
-            throw new DomainRuleViolationException(
-                DomainRules.EditionAcquisitionModeRequired, "An acquisition mode must be set before an acquisition date.");
-        EnsureAmountsDated(AcquisitionAmount, InitialValueAmount, date, PublicationYear, IsAlbumDated);
-        AcquisitionDate = date;
-    }
-
-    /// <summary>
-    /// Sets the acquisition price as a single amount + currency pair (modele-metier.md §
-    /// Édition): both are provided together or cleared together. Requires an acquisition mode and
-    /// a reference date (fonctionnel.md § Gestion des devises), and is mutually exclusive with
-    /// <see cref="IsFree"/> (see <see cref="SetFree"/>).
-    /// </summary>
-    public void SetAcquisitionPrice(decimal? amount, string? currencyCode)
-    {
-        if ((amount is null) != (currencyCode is null))
-            throw new DomainRuleViolationException(
-                DomainRules.EditionAcquisitionAmountCurrencyTogether, "An acquisition amount and its currency must be provided together, or not at all.");
-
-        if (amount is not null)
-        {
-            if (IsFree)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionFreeExcludesPrice,
-                    "Cannot set an acquisition price while the edition is marked free. Clear it first with SetFree(false).");
-            if (AcquisitionMode is null)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionAcquisitionModeRequired, "An acquisition mode must be set before an acquisition price.");
-            if (amount <= 0)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.");
-            EnsureValidCurrencyCode(currencyCode!);
-            EnsureAmountsDated(amount, null, AcquisitionDate, PublicationYear, IsAlbumDated);
-        }
-
-        AcquisitionAmount = amount;
-        AcquisitionCurrency = currencyCode;
-    }
-
-    /// <summary>
-    /// Sets the initial value — the selling price of the edition when it was published — as a
-    /// single amount + currency pair, under the same rules as the acquisition price, except for its
-    /// reference date: the edition year, or else the album's first publication (fonctionnel.md §
-    /// Gestion des devises).
-    /// </summary>
-    public void SetInitialValue(decimal? amount, string? currencyCode)
-    {
-        if ((amount is null) != (currencyCode is null))
-            throw new DomainRuleViolationException(
-                DomainRules.EditionInitialValueAmountCurrencyTogether, "An initial value amount and its currency must be provided together, or not at all.");
-
-        if (amount is not null)
-        {
-            if (IsFree)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionFreeExcludesInitialValue,
-                    "Cannot set an initial value while the edition is marked free. Clear it first with SetFree(false).");
-            if (AcquisitionMode is null)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionAcquisitionModeRequired, "An acquisition mode must be set before an initial value.");
-            if (amount <= 0)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionInitialValueAmountPositive, "Initial value amount must be positive when specified.");
-            EnsureValidCurrencyCode(currencyCode!);
-            EnsureAmountsDated(null, amount, AcquisitionDate, PublicationYear, IsAlbumDated);
-        }
-
-        InitialValueAmount = amount;
-        InitialValueCurrency = currencyCode;
-    }
-
-    /// <summary>
-    /// Marks the edition as free, i.e. it has no value: no amount is recorded at all — neither a
-    /// price, nor a known market value, nor an initial value. Per fonctionnel.md § Libellés
-    /// contextuels sur l'édition, these fields are then disabled and emptied in the UI; the domain
-    /// mirrors that by clearing them here. A purchased edition cannot be free.
-    /// </summary>
-    public void SetFree(bool isFree)
-    {
-        if (isFree && AcquisitionMode is Enums.AcquisitionMode.Purchase)
-            throw new DomainRuleViolationException(DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.");
-
-        IsFree = isFree;
-        if (isFree)
-        {
-            AcquisitionAmount = null;
-            AcquisitionCurrency = null;
-            InitialValueAmount = null;
-            InitialValueCurrency = null;
-        }
-    }
 
     public void SetPersonalReference(string? reference) => PersonalReference = DomainText.NullIfBlank(reference);
 
@@ -291,11 +204,66 @@ public sealed class Edition : EntityBase
     public IEnumerable<EditionVisual> GetOrderedVisuals() =>
         _visuals.OrderBy(v => v.Type).ThenBy(v => v.DisplayOrder).ThenBy(v => v.Id);
 
-    // Only reachable through Album.RecordAcquisition (see SetAcquisitionMode).
-    internal void Acquire(AcquisitionMode mode)
+    // Only run once EnsureValid has accepted the acquisition: by SetPublicationYearAndAcquisition, or
+    // by Album.RecordAcquisition, the only way to acquire the edition.
+    internal void Apply(EditionAcquisition acquisition)
     {
-        EnumGuard.EnsureDefined(mode, nameof(mode));
-        AcquisitionMode = mode;
+        AcquisitionMode = acquisition.Mode;
+        AcquisitionDate = acquisition.Date;
+        AcquisitionAmount = acquisition.PriceAmount;
+        AcquisitionCurrency = acquisition.PriceCurrency;
+        IsFree = acquisition.IsFree;
+        InitialValueAmount = acquisition.InitialValueAmount;
+        InitialValueCurrency = acquisition.InitialValueCurrency;
+    }
+
+    /// <summary>
+    /// Checks the acquisition and value an edition would have after the write under way, with
+    /// <paramref name="publicationYear"/> as its edition year (modele-metier.md § Édition, contraintes
+    /// d'intégrité). Also run by <see cref="Album.RecordAcquisition(Edition, EditionAcquisition)"/>
+    /// before it touches anything.
+    /// </summary>
+    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear)
+    {
+        if (acquisition.Mode is not null)
+            EnumGuard.EnsureDefined(acquisition.Mode.Value, nameof(acquisition));
+        if ((acquisition.PriceAmount is null) != (acquisition.PriceCurrency is null))
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionAmountCurrencyTogether, "An acquisition amount and its currency must be provided together, or not at all.");
+        if ((acquisition.InitialValueAmount is null) != (acquisition.InitialValueCurrency is null))
+            throw new DomainRuleViolationException(
+                DomainRules.EditionInitialValueAmountCurrencyTogether, "An initial value amount and its currency must be provided together, or not at all.");
+
+        // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
+        // until the edition is acquired (fonctionnel.md § Intention d'achat).
+        if (acquisition.Mode is null
+            && (acquisition.Date is not null || acquisition.PriceAmount is not null || acquisition.InitialValueAmount is not null))
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionModeRequired, "An acquisition date, price or initial value requires an acquisition mode.");
+
+        // A free edition has no value at all: neither price paid, nor market value, nor initial value.
+        if (acquisition.IsFree)
+        {
+            if (acquisition.PriceAmount is not null)
+                throw new DomainRuleViolationException(DomainRules.EditionFreeExcludesPrice, "A free edition has no acquisition price.");
+            if (acquisition.InitialValueAmount is not null)
+                throw new DomainRuleViolationException(DomainRules.EditionFreeExcludesInitialValue, "A free edition has no initial value.");
+            if (acquisition.Mode == Enums.AcquisitionMode.Purchase)
+                throw new DomainRuleViolationException(DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.");
+        }
+
+        if (acquisition.PriceAmount is <= 0)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.");
+        if (acquisition.PriceCurrency is not null)
+            EnsureValidCurrencyCode(acquisition.PriceCurrency);
+        if (acquisition.InitialValueAmount is <= 0)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionInitialValueAmountPositive, "Initial value amount must be positive when specified.");
+        if (acquisition.InitialValueCurrency is not null)
+            EnsureValidCurrencyCode(acquisition.InitialValueCurrency);
+
+        EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, IsAlbumDated);
     }
 
     public EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder)
@@ -317,12 +285,10 @@ public sealed class Edition : EntityBase
                 DomainRules.EditionCurrencyCodeInvalid, "Currency code must be a 3-letter uppercase ISO 4217 code.");
     }
 
-    // Also run by Album.RecordAcquisition before it touches anything: freeness is left free of
-    // rules while the edition is not owned, and only conflicts with the purchase that acquires it.
-    internal void EnsureNotFreePurchase(AcquisitionMode mode)
+    private static void EnsurePublicationYearPositive(int? year)
     {
-        if (mode == Enums.AcquisitionMode.Purchase && IsFree)
-            throw new DomainRuleViolationException(DomainRules.EditionPurchaseCannotBeFree, "A free edition cannot be purchased.");
+        if (year is <= 0)
+            throw new DomainRuleViolationException(DomainRules.EditionPublicationYearPositive, "Publication year must be positive when specified.");
     }
 
     // Run by Album.SetFirstPublicationDate before it clears its date: the album's date is the last
