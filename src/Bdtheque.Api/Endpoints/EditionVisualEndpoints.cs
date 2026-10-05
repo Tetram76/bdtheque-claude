@@ -4,7 +4,6 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ContractEnums = Bdtheque.Contracts.Enums;
@@ -27,13 +26,8 @@ internal static class EditionVisualEndpoints
     {
         var visuals = admin.MapGroup("/albums/{rootId:guid}/editions/{editionId:guid}/visuals");
         visuals.MapGet("/", GetAsync);
-        visuals.MapPost("/", UploadAsync)
-            // An internal API called by `frontend` only, with the shared key: no browser cookie to forge.
-            .DisableAntiforgery()
-            // The size of the file is checked by the API itself, as a business rule: no server or form
-            // limit may refuse it first as a technical error.
-            .WithMetadata(new DisableRequestSizeLimitAttribute())
-            .WithFormOptions(multipartBodyLengthLimit: long.MaxValue);
+        // The form is read as a stream by the handler (VisualUploadReader), never bound by the framework.
+        visuals.MapPost("/", UploadAsync).Accepts<IFormFile>("multipart/form-data");
         visuals.MapPut("/", ArrangeAsync);
 
         visuals.MapGet("/{id:guid}/deletion-impact", (Guid rootId, Guid editionId, Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
@@ -59,28 +53,23 @@ internal static class EditionVisualEndpoints
     }
 
     /// <summary>
-    /// Uploads a visual, placed after the visuals of its type. The file is validated and converted in
-    /// memory before anything is written; its files are written just before the row, and deleted
-    /// right away if the row cannot be saved (choix-implementation.md § Visuels : stockage et traitement).
+    /// Uploads a visual (form fields: <see cref="UploadVisualFields"/>), placed after the visuals of its
+    /// type. The file is read, validated and converted in memory before anything is written; its files
+    /// are written just before the row, and deleted right away if the row cannot be saved
+    /// (choix-implementation.md § Visuels : stockage et traitement).
     /// </summary>
     private static async Task<Created<EditionVisualsForm>> UploadAsync(
-        Guid rootId, Guid editionId,
-        [FromForm(Name = UploadVisualFields.File)] IFormFile file,
-        [FromForm(Name = UploadVisualFields.Type)] ContractEnums.VisualType type,
-        [FromForm(Name = UploadVisualFields.AlbumVersion)] uint albumVersion,
+        Guid rootId, Guid editionId, HttpRequest request,
         BdthequeDbContext context, VisualStorage storage, IOptions<VisualStorageOptions> options, CancellationToken cancellationToken)
     {
-        VisualImage.EnsureSize(file.Length, options.Value.MaxFileSizeBytes);
-        var content = new byte[file.Length];
-        await using (var stream = file.OpenReadStream())
-            await stream.ReadExactlyAsync(content, cancellationToken);
-        var prepared = VisualImage.Prepare(content);
+        var upload = await VisualUploadReader.ReadAsync(request, options.Value.MaxFileSizeBytes, cancellationToken);
+        var prepared = VisualImage.Prepare(upload.File);
 
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var album = await context.LoadAggregateForWriteAsync<Album>(rootId, albumVersion, WithVisuals, cancellationToken);
+        var album = await context.LoadAggregateForWriteAsync<Album>(rootId, upload.AlbumVersion, WithVisuals, cancellationToken);
         var edition = EditionOf(album, editionId);
         var mediaReference = VisualStorage.NewMediaReference(prepared);
-        var visual = edition.AppendVisual(EnumMapping.Map<DomainEnums.VisualType>(type)!.Value, mediaReference);
+        var visual = edition.AppendVisual(EnumMapping.Map<DomainEnums.VisualType>(upload.Type)!.Value, mediaReference);
         context.EditionVisuals.Add(visual);
 
         await storage.WriteAsync(mediaReference, prepared, cancellationToken);

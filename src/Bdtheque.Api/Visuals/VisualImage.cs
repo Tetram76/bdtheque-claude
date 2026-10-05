@@ -38,13 +38,9 @@ internal static class VisualImage
         [SKEncodedImageFormat.Gif] = "gif",
     };
 
-    /// <summary>Refuses a file heavier than <paramref name="maxBytes"/>, before it is even read.</summary>
-    public static void EnsureSize(long length, long maxBytes)
-    {
-        if (length > maxBytes)
-            throw new DomainRuleViolationException(
-                DomainRules.EditionVisualFileTooLarge, $"The file weighs {length} bytes, more than the {maxBytes} accepted.");
-    }
+    /// <summary>The refusal of a file heavier than <paramref name="maxBytes"/>, raised as soon as its reading exceeds them.</summary>
+    public static DomainRuleViolationException FileTooLarge(long maxBytes) =>
+        new(DomainRules.EditionVisualFileTooLarge, $"The file weighs more than the {maxBytes} bytes accepted.");
 
     /// <summary>
     /// Decodes <paramref name="content"/> as an image — never trusting the type the client announced —

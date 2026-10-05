@@ -97,14 +97,4 @@ public sealed class VisualImageTests
 
         Assert.Equal(new SKSizeI(VisualImage.DisplayMaxEdge, 800), TestImages.SizeOf(prepared.Display));
     }
-
-    [Fact]
-    public void EnsureSize_AboveTheMaximum_IsABusinessError()
-    {
-        VisualImage.EnsureSize(1000, maxBytes: 1000);
-
-        var violation = Assert.Throws<DomainRuleViolationException>(() => VisualImage.EnsureSize(1001, maxBytes: 1000));
-
-        Assert.Equal(DomainRules.EditionVisualFileTooLarge, violation.Rule);
-    }
 }

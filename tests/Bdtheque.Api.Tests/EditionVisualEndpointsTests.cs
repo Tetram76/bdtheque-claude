@@ -92,6 +92,44 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     }
 
     [Fact]
+    public async Task Upload_OfExactlyTheMaximumWeight_IsNotRefusedForItsWeight()
+    {
+        var edition = await CreateEditionAsync();
+
+        var response = await PostUploadAsync(
+            edition, new byte[ApiWebApplicationFactory.MaxVisualFileSizeBytes], VisualType.Cover, edition.AlbumVersion);
+
+        // Read in full, then refused as what it is: not an image.
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionVisualFileNotSupportedImage);
+    }
+
+    [Fact]
+    public async Task Upload_WithoutItsFile_IsATechnicalError()
+    {
+        // The frontend builds the form: a missing field is no input the user can correct.
+        var edition = await CreateEditionAsync();
+        var form = new MultipartFormDataContent
+        {
+            { new StringContent(nameof(VisualType.Cover)), UploadVisualFields.Type },
+            { new StringContent(edition.AlbumVersion.ToString()), UploadVisualFields.AlbumVersion },
+        };
+
+        var response = await _client.PostAsync(VisualsUri(edition), form);
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.BadRequest, ProblemTypes.Technical);
+    }
+
+    [Fact]
+    public async Task Upload_NotAMultipartForm_IsATechnicalError()
+    {
+        var edition = await CreateEditionAsync();
+
+        var response = await _client.PostAsJsonAsync(VisualsUri(edition), new { type = "Cover" });
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.UnsupportedMediaType, ProblemTypes.Technical);
+    }
+
+    [Fact]
     public async Task Upload_FromAStaleAlbumVersion_IsAFunctionalErrorAndWritesNothing()
     {
         var edition = await CreateEditionAsync();
