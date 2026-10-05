@@ -139,6 +139,10 @@ Le projet dispose d'un **budget IA limité**, pour l'agent (Claude) comme pour l
 - La réussite de la CI est **imposée techniquement** par le Ruleset GitHub (required status checks) : une PR dont un check requis n'a pas réussi ne peut pas être fusionnée.
 - L'approbation de Codex n'est imposée par aucun mécanisme GitHub : elle reste une contrainte de processus, que l'agent vérifie avant tout merge.
 
+## Verrouillage des Pull Requests fusionnées
+
+Une fois une Pull Request fusionnée, ses commentaires sont **verrouillés** avec la raison **« Resolved »** (`lock_reason: resolved` de l'API GitHub, qui traite une PR comme un ticket), la PR étant résolue. Le verrouillage vient **après** la dernière contribution à la PR. Il s'applique à toute PR fusionnée, qu'elle soit associée ou non à un ticket ; le verrouillage du ticket qu'elle ferme suit sa propre règle (cf. § « Suivi par tickets »).
+
 ## Revue de code
 
 Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent intervenir sur les Pull Requests. Règles générales d'application de leurs retours :
