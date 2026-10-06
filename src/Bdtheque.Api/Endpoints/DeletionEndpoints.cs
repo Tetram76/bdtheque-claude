@@ -31,9 +31,10 @@ internal static class DeletionEndpoints
     /// identifier as <c>{rootId}</c>. The version is the root's, which guards every write on the
     /// aggregate (choix-implementation.md § Concurrence d'accès).
     /// </summary>
+    /// <param name="delete">The operation of the aggregate deleting the child, if more than its removal.</param>
     public static void MapChildDeletion<TRoot, TChild>(
         this RouteGroupBuilder group, Func<IQueryable<TRoot>, IQueryable<TRoot>> shape,
-        Func<TRoot, IEnumerable<TChild>> children, IReadOnlyList<DeletionLink> links)
+        Func<TRoot, IEnumerable<TChild>> children, IReadOnlyList<DeletionLink> links, Action<TRoot, TChild>? delete = null)
         where TRoot : EntityBase, IAggregateRoot
         where TChild : EntityBase
     {
@@ -42,7 +43,7 @@ internal static class DeletionEndpoints
 
         group.MapDelete("/{id:guid}", async (Guid rootId, Guid id, uint version, string fingerprint, BdthequeDbContext context, VisualStorage storage, CancellationToken cancellationToken) =>
         {
-            await AggregateDeletion.DeleteChildAsync(context, storage, rootId, id, version, fingerprint, shape, children, links, cancellationToken);
+            await AggregateDeletion.DeleteChildAsync(context, storage, rootId, id, version, fingerprint, shape, children, links, delete, cancellationToken);
             return TypedResults.NoContent();
         });
     }

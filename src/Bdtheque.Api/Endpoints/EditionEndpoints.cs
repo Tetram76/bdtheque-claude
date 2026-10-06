@@ -43,13 +43,14 @@ internal static class EditionEndpoints
         editions.MapGet("/{id:guid}", GetAsync);
         editions.MapPost("/", CreateAsync);
         editions.MapPut("/{id:guid}", UpdateAsync);
+        editions.MapPost("/{id:guid}/acquisition", AcquireAsync);
         // The editions are always loaded with their album (AlbumConfiguration).
         editions.MapChildDeletion<Album, Edition>(query => query, album => album.Editions, DeletionLinks);
 
         admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn)));
     }
 
-    private static async Task<NewEditionForm> GetNewAsync(Guid rootId, BdthequeDbContext context, CancellationToken cancellationToken)
+    internal static async Task<NewEditionForm> GetNewAsync(Guid rootId, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         // Tracked, for the version of the aggregate (BdthequeDbContext.VersionOf); read only, hence
         // without the children of the aggregate.
@@ -74,21 +75,56 @@ internal static class EditionEndpoints
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
+
+        var edition = await AddEditionAsync(context, album, request.Content, cancellationToken);
+        // Entering an edition records its acquisition, which realizes the intent it satisfies.
+        album.RecordAcquisition(edition, ToAcquisition(request.Content));
+
+        await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return TypedResults.Created($"/admin/albums/{rootId}/editions/{edition.Id}", ToForm(edition, context.VersionOf(album)));
+    }
+
+    /// <summary>
+    /// Confirms the purchase of an edition targeted by an intent (fonctionnel.md § Réalisation d'une
+    /// intention): the whole form is applied, with the acquisition, which realizes the intent.
+    /// </summary>
+    private static async Task<EditionForm> AcquireAsync(
+        Guid rootId, Guid id, AcquireEditionRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
+        var edition = album.Editions.SingleOrDefault(e => e.Id == id) ?? throw new EntityNotFoundException(typeof(Edition), id);
         var content = request.Content;
+        var (publisher, collection) = await FormReferences.LoadPublisherAsync(
+            context, content.PublisherId, content.PublisherCollectionId, cancellationToken);
+
+        ApplyDetails(edition, content, publisher, collection);
+        // Not owned until then, the edition has no amount its year could leave undated.
+        edition.SetPublicationYear(content.PublicationYear);
+        album.RecordAcquisition(edition, ToAcquisition(content));
+
+        await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return ToForm(edition, context.VersionOf(album));
+    }
+
+    /// <summary>
+    /// Adds to the album an edition entered with <paramref name="content"/>, not owned until its
+    /// acquisition is recorded: the caller records it, or targets the edition by an intent.
+    /// </summary>
+    internal static async Task<Edition> AddEditionAsync(
+        BdthequeDbContext context, Album album, EditionContent content, CancellationToken cancellationToken)
+    {
         var (publisher, collection) = await FormReferences.LoadPublisherAsync(
             context, content.PublisherId, content.PublisherCollectionId, cancellationToken);
 
         var edition = new Edition(album, publisher);
         ApplyDetails(edition, content, publisher, collection);
-        // Not owned until then, the edition has no amount its year could leave undated.
+        // Not owned yet, the edition has no amount its year could leave undated.
         edition.SetPublicationYear(content.PublicationYear);
-        // Entering an edition records its acquisition, which realizes the intent it satisfies.
-        album.RecordAcquisition(edition, ToAcquisition(content));
         context.Editions.Add(edition);
-
-        await context.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        return TypedResults.Created($"/admin/albums/{rootId}/editions/{edition.Id}", ToForm(edition, context.VersionOf(album)));
+        return edition;
     }
 
     private static async Task<EditionForm> UpdateAsync(

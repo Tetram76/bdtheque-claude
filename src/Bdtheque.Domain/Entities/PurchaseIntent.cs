@@ -4,8 +4,9 @@ namespace Bdtheque.Domain.Entities;
 
 /// <summary>
 /// A wish to acquire (Intention d'achat) either an <see cref="Entities.Album"/> as a whole —
-/// any edition will do — or one specific <see cref="Entities.Edition"/> of it. Created only
-/// through <see cref="Album.AddPurchaseIntent()"/>, which enforces the per-album rules.
+/// any edition will do — or one specific <see cref="Entities.Edition"/> of it. Created only by the
+/// album aggregate (<see cref="Album.AddPurchaseIntent()"/> and its conversions), which enforces the
+/// per-album rules.
 /// </summary>
 /// <remarks>
 /// <see cref="AlbumId"/> is set for both kinds of intent (for an edition intent, it is the
