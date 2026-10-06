@@ -70,6 +70,7 @@ internal static class CatalogExpressions
             .ThenBy(c => c.Author.SortKey)
             .ThenBy(c => c.Id)
             .Select(c => new ContributionItem(
+                c.Id,
                 new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym),
                 EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value,
                 c.CreatedAt,

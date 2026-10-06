@@ -30,7 +30,7 @@ public sealed record AlbumDetail(
     DateTimeOffset ModifiedAt);
 
 /// <summary>An author credited with a role; a contribution has no record of its own.</summary>
-public sealed record ContributionItem(AuthorListItem Author, ContributionRole Role, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
+public sealed record ContributionItem(Guid Id, AuthorListItem Author, ContributionRole Role, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
 
 /// <param name="IsInCollection">Whether the edition is owned (fonctionnel.md § Appartenance à la collection).</param>
 /// <summary>
@@ -120,7 +120,10 @@ public sealed record AuthorDetail(
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);
 
-/// <summary>An album of a bibliography, with every role the author is credited with on it.</summary>
+/// <summary>
+/// An album of a bibliography, with every role the author is credited with on it: an index leading to
+/// the record of the album, which carries the contributions themselves, whole.
+/// </summary>
 public sealed record BibliographyItem(AlbumSummary Album, IReadOnlyList<ContributionRole> Roles);
 
 /// <param name="Collections">Its collections, by name. Its editions are listed by <c>/catalog/editions?publisherId=…</c>.</param>

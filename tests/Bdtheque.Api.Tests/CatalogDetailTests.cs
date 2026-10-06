@@ -58,7 +58,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
                 (new AuthorListItem(franquin.Id, "Franquin", "André", null), ContributionRole.Illustrator),
             ],
             detail.Contributions.Select(c => (c.Author, c.Role)));
-        Assert.All(detail.Contributions, c => Assert.Equal((detail.CreatedAt, detail.CreatedAt), (c.CreatedAt, c.ModifiedAt)));
+        AssertCreatedWith(detail.CreatedAt, detail.Contributions);
         Assert.Equal(
             [
                 (new EditionSummary(owned.Id, dupuis.Id, dupuis.Name, null, null, 1960, null), true, (Guid?)null),
@@ -125,7 +125,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
                 (new AuthorListItem(morris.Id, "De Bevere", "Maurice", null), ContributionRole.Illustrator),
             ],
             detail.Contributions.Select(c => (c.Author, c.Role)));
-        Assert.All(detail.Contributions, c => Assert.Equal((detail.CreatedAt, detail.CreatedAt), (c.CreatedAt, c.ModifiedAt)));
+        AssertCreatedWith(detail.CreatedAt, detail.Contributions);
         Assert.Equal([new GenreListItem(genre.Id, genre.Label)], detail.Genres);
         Assert.Equal([new UniverseListItem(universe.Id, "Far West", null, null)], detail.Universes);
         Assert.Equal(("Lucky Luke", (SeriesStatus?)null, (int?)null, false), (detail.Title, detail.Status, detail.TheoreticalVolumeCount, detail.IsComplete));
@@ -311,6 +311,13 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
                 await GetAlbumVersionAsync(albumId)));
         var intent = intents.Intents.Single(i => i.EditionId is not null);
         return (intent.EditionId!.Value, intent.Id);
+    }
+
+    /// <summary>Contributions created with the record carrying them, untouched since, each identified.</summary>
+    private static void AssertCreatedWith(DateTimeOffset carrierCreatedAt, IReadOnlyList<ContributionItem> contributions)
+    {
+        Assert.All(contributions, c => Assert.Equal((carrierCreatedAt, carrierCreatedAt), (c.CreatedAt, c.ModifiedAt)));
+        Assert.Equal(contributions.Count, contributions.Select(c => c.Id).Where(id => id != Guid.Empty).Distinct().Count());
     }
 
     /// <summary>A record carried by another, created after it and untouched since.</summary>
