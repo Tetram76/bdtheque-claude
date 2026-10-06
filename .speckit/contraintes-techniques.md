@@ -117,7 +117,7 @@ Caractéristiques de la base Firebird de l'application existante, que la migrati
 
 ## Hébergement
 
-- L'application est hébergée sur un **NAS Synology DS920+** (processeur Intel, architecture x86_64).
+- L'application est hébergée sur un **NAS Synology RS1221+** (processeur AMD Ryzen V1500B, architecture x86_64).
 - Le déploiement Docker doit être compatible avec l'environnement Docker fourni par Synology (Container Manager).
 
 ## Compatibilité multi-supports
