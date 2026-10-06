@@ -107,12 +107,12 @@ Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/do
 
 | Tag | Contenu |
 | --- | --- |
-| `daily` | Publication quotidienne, depuis la tête de `main` |
+| `nightly` | Publication quotidienne, depuis la tête de `main` |
 | `X.Y.Z`, `X.Y` | Release `vX.Y.Z` |
 | `main` | État courant de la branche `main` (hors release) |
 | `sha-<commit>` | Commit précis, immuable |
 
-Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`daily` par défaut).
+Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut).
 
 ### Procédure (Synology Container Manager)
 
