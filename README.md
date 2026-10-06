@@ -109,7 +109,7 @@ Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/do
 | --- | --- |
 | `nightly` | Publication quotidienne, depuis la tête de `main` |
 | `<branche>` (ex. `main`) | Dernière publication à la demande de cette branche |
-| `sha-<commit>` | Publication à la demande d'un commit précis, immuable |
+| `sha-<commit>` | Première publication à la demande d'un commit précis, immuable (une nouvelle publication du même commit ne déplace que le tag de branche) |
 
 Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire.
 

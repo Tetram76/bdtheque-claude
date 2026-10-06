@@ -34,6 +34,19 @@ jobs:
 
       # A nightly build only gets `nightly`. An on-demand build gets the name of its branch and an
       # immutable `sha-<commit>` tag.
+      # `sha-<commit>` is immutable: a new on-demand run on an already published commit (e.g. to
+      # pick up base image updates) only moves the branch tag.
+      - name: Check whether this commit is already published
+        id: commit
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          IMAGE: tetram76/bdtheque-${{ matrix.image }}
+        run: |
+          if docker buildx imagetools inspect "$IMAGE:sha-${GITHUB_SHA::7}" > /dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$IMAGE:sha-${GITHUB_SHA::7} already exists: kept as is."
+          fi
+
       - name: Compute tags and labels
         id: meta
         uses: docker/metadata-action@v6
@@ -44,7 +57,7 @@ jobs:
           tags: |
             type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
             type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' }}
-            type=sha,enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=sha,enable=${{ github.event_name == 'workflow_dispatch' && steps.commit.outputs.published != 'true' }}
 
       # Only one `nightly` image may exist (contraintes-techniques.md): the image the new one
       # replaces is recorded here, then deleted once the tag has moved. A missing image (first
