@@ -91,13 +91,13 @@ admin.MapEditionVisuals();
 admin.MapPurchaseIntents();
 
 var catalog = app.MapCatalog();
-catalog.MapSeriesList();
-catalog.MapAlbumList();
-catalog.MapEditionList();
-catalog.MapAuthorList();
-catalog.MapPublisherLists();
-catalog.MapGenreList();
-catalog.MapUniverseList();
+catalog.MapSeriesCatalog();
+catalog.MapAlbumCatalog();
+catalog.MapEditionCatalog();
+catalog.MapAuthorCatalog();
+catalog.MapPublisherCatalog();
+catalog.MapGenreCatalog();
+catalog.MapUniverseCatalog();
 catalog.MapPurchaseIntentList();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
