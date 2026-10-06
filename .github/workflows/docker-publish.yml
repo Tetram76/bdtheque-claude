@@ -7,7 +7,7 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
-  # Daily `latest` image (contraintes-techniques.md). Scheduled runs use the head of `main`.
+  # Daily `daily` image (contraintes-techniques.md). Scheduled runs use the head of `main`.
   schedule:
     - cron: "17 3 * * *"
 
@@ -37,7 +37,7 @@ jobs:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # `latest` is only the daily build; `main` follows the head of the main branch; a `vX.Y.Z`
+      # `daily` is the daily build; `main` follows the head of the main branch; a `vX.Y.Z`
       # tag gives `X.Y.Z` and `X.Y`; every image also gets an immutable `sha-<commit>` tag.
       - name: Compute tags and labels
         id: meta
@@ -47,7 +47,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=raw,value=latest,enable=${{ github.event_name == 'schedule' }}
+            type=raw,value=daily,enable=${{ github.event_name == 'schedule' }}
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
