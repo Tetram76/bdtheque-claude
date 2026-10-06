@@ -46,14 +46,52 @@ jobs:
             type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' }}
             type=sha,enable=${{ github.event_name == 'workflow_dispatch' }}
 
+      # Only one `nightly` image may exist (contraintes-techniques.md): the image the new one
+      # replaces is recorded here, then deleted once the tag has moved. A missing image (first
+      # nightly) leaves nothing to delete.
+      - name: Record the current nightly image
+        id: previous
+        if: github.event_name == 'schedule'
+        run: |
+          if digest=$(docker buildx imagetools inspect "tetram76/bdtheque-${{ matrix.image }}:nightly" --format '{{json .Manifest}}' | jq -r .digest); then
+            echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No nightly image yet: nothing to replace."
+          fi
+
       - name: Build and push ${{ matrix.image }} image
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/${{ matrix.image }}/Dockerfile
           platforms: linux/amd64
           push: true
+          # Without attestations the image is a single manifest, deleted in one call: an image
+          # index would leave its child manifests behind, untagged.
+          provenance: false
+          sbom: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+      # Docker Hub registry API: only an untagged manifest can be deleted, by digest, with a token
+      # holding the `delete` scope (hence a Read, Write & Delete access token).
+      - name: Delete the replaced nightly image
+        if: github.event_name == 'schedule' && steps.previous.outputs.digest != '' && steps.previous.outputs.digest != steps.build.outputs.digest
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          REPOSITORY: tetram76/bdtheque-${{ matrix.image }}
+          DIGEST: ${{ steps.previous.outputs.digest }}
+        run: |
+          token=$(curl -fsS -u "tetram76:$DOCKERHUB_TOKEN" \
+            "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPOSITORY:delete" | jq -r .token)
+          status=$(curl -sS -o /dev/null -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" \
+            "https://registry-1.docker.io/v2/$REPOSITORY/manifests/$DIGEST")
+          case "$status" in
+            202) echo "Deleted $REPOSITORY@$DIGEST." ;;
+            # Documented by Docker Hub: the deletion goes on in the background.
+            500) echo "::warning::Deletion of $REPOSITORY@$DIGEST accepted, completed in the background." ;;
+            *) echo "::error::Deletion of $REPOSITORY@$DIGEST failed (HTTP $status)."; exit 1 ;;
+          esac
