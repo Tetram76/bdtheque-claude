@@ -32,21 +32,24 @@ jobs:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # A nightly build only gets `nightly`. An on-demand build gets the name of its branch and an
-      # immutable `sha-<commit>` tag.
       # `sha-<commit>` is immutable: a new on-demand run on an already published commit (e.g. to
-      # pick up base image updates) only moves the branch tag.
+      # pick up base image updates) only moves the branch tag. A registry error fails the job
+      # rather than letting the tag be overwritten.
       - name: Check whether this commit is already published
         id: commit
         if: github.event_name == 'workflow_dispatch'
         env:
-          IMAGE: tetram76/bdtheque-${{ matrix.image }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          REPOSITORY: tetram76/bdtheque-${{ matrix.image }}
         run: |
-          if docker buildx imagetools inspect "$IMAGE:sha-${GITHUB_SHA::7}" > /dev/null 2>&1; then
+          digest=$(.github/scripts/registry-digest.sh "$REPOSITORY" "sha-${GITHUB_SHA::7}")
+          if [ -n "$digest" ]; then
             echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::$IMAGE:sha-${GITHUB_SHA::7} already exists: kept as is."
+            echo "::notice::$REPOSITORY:sha-${GITHUB_SHA::7} already exists: kept as is."
           fi
 
+      # A nightly build only gets `nightly`. An on-demand build gets the name of its branch and,
+      # unless already published, the `sha-<commit>` tag.
       - name: Compute tags and labels
         id: meta
         uses: docker/metadata-action@v6
@@ -61,24 +64,27 @@ jobs:
 
       # Only one `nightly` image may exist (contraintes-techniques.md): the image the new one
       # replaces is recorded here, then deleted once the tag has moved. A missing image (first
-      # nightly) leaves nothing to delete. A nightly image already built from the head of `main`
-      # (revision label set by metadata-action) is kept as is: nothing new to publish.
+      # nightly) leaves nothing to delete; a registry error fails the job, since the replaced image
+      # could not be deleted without its digest. A nightly image already built from the head of
+      # `main` (revision label set by metadata-action) is kept as is: nothing new to publish.
       - name: Record the current nightly image
         id: previous
         if: github.event_name == 'schedule'
         env:
-          IMAGE: tetram76/bdtheque-${{ matrix.image }}:nightly
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          REPOSITORY: tetram76/bdtheque-${{ matrix.image }}
         run: |
-          if digest=$(docker buildx imagetools inspect "$IMAGE" --format '{{json .Manifest}}' | jq -r .digest); then
-            echo "digest=$digest" >> "$GITHUB_OUTPUT"
-            revision=$(docker buildx imagetools inspect "$IMAGE" --format '{{json .Image}}' \
-              | jq -r '.config.Labels["org.opencontainers.image.revision"] // empty')
-            if [ "$revision" = "$GITHUB_SHA" ]; then
-              echo "up-to-date=true" >> "$GITHUB_OUTPUT"
-              echo "::notice::$IMAGE is already built from $GITHUB_SHA: nothing to publish."
-            fi
-          else
+          digest=$(.github/scripts/registry-digest.sh "$REPOSITORY" nightly)
+          if [ -z "$digest" ]; then
             echo "::notice::No nightly image yet: nothing to replace."
+            exit 0
+          fi
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          revision=$(docker buildx imagetools inspect "$REPOSITORY@$digest" --format '{{json .Image}}' \
+            | jq -r '.config.Labels["org.opencontainers.image.revision"] // empty')
+          if [ "$revision" = "$GITHUB_SHA" ]; then
+            echo "up-to-date=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$REPOSITORY:nightly is already built from $GITHUB_SHA: nothing to publish."
           fi
 
       - name: Build and push ${{ matrix.image }} image
