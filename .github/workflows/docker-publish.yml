@@ -12,6 +12,12 @@ on:
 permissions:
   contents: read
 
+# Runs share the Docker Hub tags: two overlapping nightly runs would each record the same image to
+# replace, and the image pushed by the first would be left untagged and never deleted.
+concurrency:
+  group: docker-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Publish Docker image (${{ matrix.image }})
