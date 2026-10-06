@@ -45,7 +45,7 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 ├── Directory.Build.props          # Propriétés MSBuild communes (TFM, nullable, analyzers…)
 ├── Directory.Packages.props       # Gestion centralisée des versions NuGet (CPM)
 ├── global.json                    # Version du SDK .NET
-├── docker-compose.yml
+├── docker-compose.yml           # Déploiement (images Docker Hub) et build local
 ├── docker/
 │   ├── api/Dockerfile
 │   └── frontend/Dockerfile
@@ -80,18 +80,53 @@ dotnet build Bdtheque.slnx --configuration Release
 dotnet test Bdtheque.slnx --configuration Release
 ```
 
-### Lancer la stack complète (Docker Compose)
+### Lancer la stack complète depuis les sources (Docker Compose)
 
 ```bash
 cp .env.example .env   # puis renseigner POSTGRES_PASSWORD et INTERNAL_API_KEY
+mkdir -p ./data/visuels && sudo chown 1654:1654 ./data/visuels   # cf. « Dossier des visuels »
 docker compose up -d --build
 ```
+
+`--build` construit les images depuis les sources (sous les mêmes noms que les images publiées, cf. ci-dessous) au lieu de les télécharger.
 
 L'application est ensuite accessible sur `http://localhost:8080` (port configurable via `FRONTEND_PORT` dans `.env`). L'état de chaque conteneur peut être vérifié via son endpoint `/health` (exposé uniquement en interne pour `api`, et sur le port publié pour `frontend`).
 
 ## Déploiement
 
-Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synology Container Manager). Les visuels (couvertures, planches, etc.) sont stockés sur un volume monté sur le NAS, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.
+Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container Manager). Il n'utilise pas les sources : les images de l'application sont téléchargées depuis **Docker Hub**.
+
+### Images publiées
+
+| Image | Conteneur |
+| --- | --- |
+| [`tetram76/bdtheque-api`](https://hub.docker.com/r/tetram76/bdtheque-api) | `api` |
+| [`tetram76/bdtheque-frontend`](https://hub.docker.com/r/tetram76/bdtheque-frontend) | `frontend` |
+
+Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml), pour les architectures `linux/amd64` et `linux/arm64`, avec les tags suivants :
+
+| Tag | Contenu |
+| --- | --- |
+| `latest` | Dernière release |
+| `X.Y.Z`, `X.Y` | Release `vX.Y.Z` |
+| `main` | État courant de la branche `main` (hors release) |
+| `sha-<commit>` | Commit précis, immuable |
+
+Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`latest` par défaut). Tant qu'aucune release n'a été publiée, seul `main` existe.
+
+### Procédure (Synology Container Manager)
+
+1. Créer sur le NAS un dossier pour le projet (ex. `/volume1/docker/bdtheque`) et y copier [`docker-compose.yml`](docker-compose.yml) et [`.env.example`](.env.example), renommé en `.env`.
+2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), `BDTHEQUE_TAG`, `FRONTEND_PORT` et `VISUELS_HOST_PATH`.
+3. Préparer le dossier des visuels (ci-dessous).
+4. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.
+5. Vérifier que l'application répond sur `http://<NAS>:<FRONTEND_PORT>/health`.
+
+**Mise à jour** : modifier `BDTHEQUE_TAG` si besoin, puis télécharger les nouvelles images et recréer les conteneurs, en SSH depuis le dossier du projet : `docker compose pull && docker compose up -d`. Le schéma de la base est mis à jour automatiquement au démarrage d'`api` ; les données (volume `db-data`) et les visuels sont conservés.
+
+### Dossier des visuels
+
+Les visuels (couvertures, planches, etc.) sont stockés sur un dossier du NAS monté dans les conteneurs, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.
 
 Ce dossier doit exister et être **accessible en écriture pour l'utilisateur du conteneur `api`** (UID `1654`, qui n'est pas root) ; sans quoi `api` refuse de démarrer, en indiquant le dossier en cause dans son journal. Docker crée un dossier absent au nom de root : il faut donc le créer et lui donner ce droit avant le premier démarrage, par exemple :
 

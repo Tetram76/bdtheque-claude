@@ -19,6 +19,7 @@ services:
   # Business logic, data access, ML.NET. Never published on the host: only
   # `frontend` can reach it, over the `frontend-net` network (see choix-implementation.md).
   api:
+    image: tetram76/bdtheque-api:${BDTHEQUE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/api/Dockerfile
@@ -39,6 +40,7 @@ services:
   # Blazor Server rendering, admin authentication (cookie), the only
   # container exposed to the user.
   frontend:
+    image: tetram76/bdtheque-frontend:${BDTHEQUE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/frontend/Dockerfile

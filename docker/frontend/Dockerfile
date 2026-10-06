@@ -1,16 +1,19 @@
 # syntax=docker/dockerfile:1
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# The SDK runs on the build machine's own architecture and cross-publishes for the target one:
+# running `dotnet restore` under QEMU emulation is very slow and unreliable.
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG TARGETARCH
 WORKDIR /src
 
 COPY Directory.Build.props Directory.Packages.props global.json ./
 COPY src/Bdtheque.Contracts/Bdtheque.Contracts.csproj src/Bdtheque.Contracts/
 COPY src/Bdtheque.Frontend/Bdtheque.Frontend.csproj src/Bdtheque.Frontend/
-RUN dotnet restore src/Bdtheque.Frontend/Bdtheque.Frontend.csproj
+RUN dotnet restore src/Bdtheque.Frontend/Bdtheque.Frontend.csproj -a $TARGETARCH
 
 COPY src/Bdtheque.Contracts/ src/Bdtheque.Contracts/
 COPY src/Bdtheque.Frontend/ src/Bdtheque.Frontend/
-RUN dotnet publish src/Bdtheque.Frontend/Bdtheque.Frontend.csproj -c Release --no-restore -o /app
+RUN dotnet publish src/Bdtheque.Frontend/Bdtheque.Frontend.csproj -c Release -a $TARGETARCH --no-restore -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app

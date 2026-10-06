@@ -149,6 +149,15 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
 - **`frontend` et `api`** : `mcr.microsoft.com/dotnet/aspnet:10.0`, image runtime officielle de Microsoft correspondant à la version de .NET retenue.
 - **`db`** : image officielle `postgres`, version et variante : cf. § Version de PostgreSQL.
 
+## Publication des images Docker
+
+- **Images publiées** (`contraintes-techniques.md` § Déploiement) : `tetram76/bdtheque-api` et `tetram76/bdtheque-frontend`, une par conteneur construit à partir des sources. `db` utilise l'image officielle `postgres` telle quelle (§ Version de PostgreSQL), sans image propre au projet.
+- **Déploiement sans les sources** : `docker-compose.yml` désigne chaque service construit à la fois par son image publiée (`image`, tag choisi par `BDTHEQUE_TAG`, `latest` par défaut) et par son `Dockerfile` (`build`). Sur le NAS, le projet Compose n'a besoin que de ce fichier et de son `.env` : les images sont téléchargées. En développement, `docker compose up --build` construit les mêmes images depuis les sources. Un seul fichier Compose décrit ainsi les deux usages, sans configuration à tenir alignée entre deux fichiers.
+- **Tags** : `main` suit la tête de `main` ; une release `vX.Y.Z` (`gestion-projet.md` § Releases) donne `X.Y.Z`, `X.Y` et `latest` ; chaque image reçoit aussi un tag immuable `sha-<commit>`. Calculés par `docker/metadata-action`.
+- **Architectures** : `linux/amd64` et `linux/arm64`, le modèle du NAS n'étant pas fixé (`contraintes-techniques.md` § Hébergement) et Container Manager existant pour les deux. Le SDK .NET s'exécute sur l'architecture de la machine de build et **publie en croisé** pour l'architecture cible (`FROM --platform=$BUILDPLATFORM`, `dotnet restore`/`publish -a $TARGETARCH`, qui accepte les noms d'architecture de Docker depuis le SDK .NET 8) : seules les commandes de l'étape finale (installation de `curl` pour le contrôle de santé) s'exécutent sous émulation QEMU.
+  - **Alternative écartée (SDK exécuté sous émulation)** : `dotnet restore` sous QEMU est très lent et peu fiable.
+- **Publication** : workflow dédié `docker-publish.yml`, sur push vers `main` et sur tag `v*`. Il ne publie que des commits déjà sur `main`, donc validés par les checks requis de leur PR, dont la construction des images pour les **mêmes architectures** (job `docker-build` du CI) : une PR ne peut pas casser la publication. Il ne fait pas partie du workflow CI, dont chaque job est un check requis (`gestion-projet.md` § Intégration continue (CI)), car il ne s'exécute jamais sur une PR.
+
 ## Versions et bibliothèques
 
 - **Aucune version n'est imposée** : `contraintes-techniques.md` n'impose jamais un numéro de version. Les versions retenues sont des choix : **.NET 10** (LTS) et **EF Core 10**, alignés.
