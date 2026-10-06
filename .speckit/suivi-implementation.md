@@ -78,7 +78,7 @@ Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de dev
 | ~~#82~~ | Téléversement et gestion des visuels d'édition |
 | ~~#83~~ | Intentions d'achat |
 | ~~#84~~ | Listes et recherche de la consultation |
-| #85 | Fiches détaillées de la consultation |
+| ~~#85~~ | Fiches détaillées de la consultation |
 
 ## Phase 3 — Frontend Blazor
 

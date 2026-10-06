@@ -6,6 +6,7 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using ContractEnums = Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Api.Endpoints;
 
@@ -36,7 +37,37 @@ internal static class AuthorEndpoints
         authors.MapDeletion<Author>(DeletionLinks);
     }
 
-    public static void MapAuthorList(this RouteGroupBuilder catalog) => catalog.MapGet("/authors", ListAsync);
+    public static void MapAuthorCatalog(this RouteGroupBuilder catalog)
+    {
+        catalog.MapGet("/authors", ListAsync);
+        catalog.MapGet("/authors/{id:guid}", GetDetailAsync);
+    }
+
+    /// <summary>
+    /// An author with the bibliography: the albums credited on — the source of truth of contributions,
+    /// the template of a series being only the starting point of the data entry —, each with its roles.
+    /// </summary>
+    private static async Task<AuthorDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        var author = await context.Authors.AsNoTracking()
+                         .Where(a => a.Id == id)
+                         .Select(a => new { a.LastName, a.FirstName, a.Pseudonym, a.Biography, a.Nationality, a.CreatedAt, a.ModifiedAt })
+                         .SingleOrDefaultAsync(cancellationToken)
+                     ?? throw new EntityNotFoundException(typeof(Author), id);
+
+        var bibliography = await context.Albums.AsNoTracking()
+            .Where(a => a.Contributions.Any(c => c.AuthorId == id))
+            .OrderByAlbum(a => a)
+            .Select(CatalogExpressions.Expand((Album a) => new BibliographyItem(
+                a.ToSummary(),
+                a.Contributions.Where(c => c.AuthorId == id).OrderBy(c => c.Role)
+                    .Select(c => EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value).ToList())))
+            .ToListAsync(cancellationToken);
+
+        return new AuthorDetail(
+            id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality, bibliography, author.CreatedAt,
+            author.ModifiedAt);
+    }
 
     /// <summary>
     /// The authors found by any part of their name: last name, first name, pseudonym, or full name, as

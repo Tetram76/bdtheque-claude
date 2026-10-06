@@ -55,11 +55,35 @@ internal static class PublisherEndpoints
             query => query.Include(p => p.Collections), publisher => publisher.Collections, CollectionDeletionLinks);
     }
 
-    public static void MapPublisherLists(this RouteGroupBuilder catalog)
+    public static void MapPublisherCatalog(this RouteGroupBuilder catalog)
     {
         catalog.MapGet("/publishers", ListAsync);
+        catalog.MapGet("/publishers/{id:guid}", GetDetailAsync);
         catalog.MapGet("/publisher-collections", ListAllCollectionsAsync);
+        catalog.MapGet("/publisher-collections/{id:guid}", GetCollectionDetailAsync);
     }
+
+    private static async Task<PublisherDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        await context.Publishers.AsNoTracking()
+            .Where(p => p.Id == id)
+            .Select(p => new PublisherDetail(
+                p.Id,
+                p.Name,
+                p.Website,
+                p.Collections.OrderBy(c => c.Name).ThenBy(c => c.Id)
+                    .Select(c => new PublisherCollectionListItem(c.Id, c.Name, p.Id, p.Name)).ToList(),
+                p.CreatedAt,
+                p.ModifiedAt))
+            .SingleOrDefaultAsync(cancellationToken)
+        ?? throw new EntityNotFoundException(typeof(Publisher), id);
+
+    private static async Task<PublisherCollectionDetail> GetCollectionDetailAsync(
+        Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        await context.PublisherCollections.AsNoTracking()
+            .Where(c => c.Id == id)
+            .Select(c => new PublisherCollectionDetail(c.Id, c.Name, c.PublisherId, c.Publisher.Name, c.CreatedAt, c.ModifiedAt))
+            .SingleOrDefaultAsync(cancellationToken)
+        ?? throw new EntityNotFoundException(typeof(PublisherCollection), id);
 
     private static Task<Page<PublisherListItem>> ListAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>

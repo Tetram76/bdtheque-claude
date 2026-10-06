@@ -30,7 +30,18 @@ internal static class GenreEndpoints
         genres.MapDeletion<Genre>(DeletionLinks);
     }
 
-    public static void MapGenreList(this RouteGroupBuilder catalog) => catalog.MapGet("/genres", ListAsync);
+    public static void MapGenreCatalog(this RouteGroupBuilder catalog)
+    {
+        catalog.MapGet("/genres", ListAsync);
+        catalog.MapGet("/genres/{id:guid}", GetDetailAsync);
+    }
+
+    private static async Task<GenreDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        await context.Genres.AsNoTracking()
+            .Where(g => g.Id == id)
+            .Select(g => new GenreDetail(g.Id, g.Label, g.CreatedAt, g.ModifiedAt))
+            .SingleOrDefaultAsync(cancellationToken)
+        ?? throw new EntityNotFoundException(typeof(Genre), id);
 
     private static Task<Page<GenreListItem>> ListAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>

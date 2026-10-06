@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -52,7 +53,68 @@ internal static class EditionEndpoints
         admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn)));
     }
 
-    public static void MapEditionList(this RouteGroupBuilder catalog) => catalog.MapGet("/editions", ListAsync);
+    public static void MapEditionCatalog(this RouteGroupBuilder catalog)
+    {
+        catalog.MapGet("/editions", ListAsync);
+        catalog.MapGet("/editions/{id:guid}", GetDetailAsync);
+    }
+
+    /// <summary>
+    /// An edition with its album, its membership of the collection, its intent, and its visuals, which
+    /// have no record of their own, in their presentation order.
+    /// </summary>
+    private static async Task<EditionDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // The entity, with its visuals, for the order of the visuals, which the domain alone applies.
+        var edition = await context.Editions.AsNoTracking()
+                          .Include(e => e.Visuals)
+                          .Where(e => e.Id == id)
+                          .Select(CatalogExpressions.Expand((Edition e) => new
+                          {
+                              Album = e.Album.ToSummary(),
+                              Edition = e.ToSummary(),
+                              Entity = e,
+                              IsInCollection = e.IsOwned(),
+                              IsTargetedByPurchaseIntent = e.IsTargetedByPurchaseIntent(),
+                          }))
+                          .AsSplitQuery()
+                          .SingleOrDefaultAsync(cancellationToken)
+                      ?? throw new EntityNotFoundException(typeof(Edition), id);
+        var e = edition.Entity;
+        var visuals = e.GetOrderedVisuals()
+            .Select(v => new EditionVisualItem(
+                v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder, VisualStorage.OriginalPath(v.MediaReference),
+                VisualStorage.DisplayPath(v.MediaReference)))
+            .ToList();
+
+        return new EditionDetail(
+            edition.Album,
+            edition.Edition,
+            EnumMapping.Map<ContractEnums.BindingType>(e.Binding),
+            EnumMapping.Map<ContractEnums.BookOrientation>(e.Orientation),
+            EnumMapping.Map<ContractEnums.ReadingDirection>(e.ReadingDirection),
+            EnumMapping.Map<ContractEnums.EditionFormat>(e.Format),
+            e.PageCount,
+            EnumMapping.Map<ContractEnums.EditionCategory>(e.Category),
+            e.IsDedicated,
+            e.IsColor,
+            EnumMapping.Map<ContractEnums.EditionCondition>(e.Condition),
+            EnumMapping.Map<ContractEnums.AcquisitionMode>(e.AcquisitionMode),
+            e.IsSecondHand,
+            e.AcquisitionDate,
+            e.AcquisitionAmount,
+            e.AcquisitionCurrency,
+            e.IsFree,
+            e.InitialValueAmount,
+            e.InitialValueCurrency,
+            e.PersonalReference,
+            e.PersonalNotes,
+            edition.IsInCollection,
+            edition.IsTargetedByPurchaseIntent,
+            visuals,
+            e.CreatedAt,
+            e.ModifiedAt);
+    }
 
     private static readonly Expression<Func<Edition, EditionListItem>> ListItem =
         CatalogExpressions.Expand((Edition e) => new EditionListItem(e.Album.ToSummary(), e.ToSummary(), e.IsOwned()));

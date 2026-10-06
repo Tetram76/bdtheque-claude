@@ -40,9 +40,46 @@ internal static class AlbumEndpoints
         albums.MapDeletion<Album>(DeletionLinks);
     }
 
-    public static void MapAlbumList(this RouteGroupBuilder catalog) => catalog.MapGet("/albums", ListAsync);
+    public static void MapAlbumCatalog(this RouteGroupBuilder catalog)
+    {
+        catalog.MapGet("/albums", ListAsync);
+        catalog.MapGet("/albums/{id:guid}", GetDetailAsync);
+    }
 
     private static readonly Expression<Func<Album, AlbumSummary>> ListItem = CatalogExpressions.Expand((Album a) => a.ToSummary());
+
+    /// <summary>
+    /// An album with what it is linked with: the genres and universes displayed — those of the album and
+    /// of its series, without duplicates (fonctionnel.md § Genres et univers d'un album) —, its
+    /// contributions, and every edition, each with its membership of the collection and its intent.
+    /// </summary>
+    private static async Task<AlbumDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        await context.Albums.AsNoTracking()
+            .Where(a => a.Id == id)
+            .Select(CatalogExpressions.Expand((Album a) => new AlbumDetail(
+                a.ToSummary(),
+                a.FirstPublicationYear,
+                a.FirstPublicationMonth,
+                a.Summary,
+                a.PersonalNotes,
+                EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating),
+                context.Genres
+                    .Where(g => a.Genres.Any(o => o.Id == g.Id) || a.Series!.Genres.Any(o => o.Id == g.Id))
+                    .OrderBy(g => g.Label).ThenBy(g => g.Id)
+                    .Select(g => new GenreListItem(g.Id, g.Label)).ToList(),
+                context.Universes
+                    .Where(u => a.Universes.Any(o => o.Id == u.Id) || a.Series!.Universes.Any(o => o.Id == u.Id))
+                    .OrderBy(u => u.Name).ThenBy(u => u.Id)
+                    .Select(u => u.ToListItem()).ToList(),
+                a.Contributions.ToItems().ToList(),
+                a.Editions.OrderBy(e => e.PublicationYear).ThenBy(e => e.Id)
+                    .Select(e => new AlbumEditionItem(e.ToSummary(), e.IsOwned(), e.IsTargetedByPurchaseIntent())).ToList(),
+                a.PurchaseIntents.Any(p => p.EditionId == null),
+                a.CreatedAt,
+                a.ModifiedAt)))
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(cancellationToken)
+        ?? throw new EntityNotFoundException(typeof(Album), id);
 
     /// <summary>
     /// The albums found by their title or that of their series, part of their label (fonctionnel.md §

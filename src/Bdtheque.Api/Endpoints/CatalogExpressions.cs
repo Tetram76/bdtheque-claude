@@ -3,12 +3,13 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Query;
 using ContractEnums = Bdtheque.Contracts.Enums;
+using DomainEnums = Bdtheque.Domain.Enums;
 
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// Expressions shared by the lists of the consultation — what the labels of an album and of an edition
-/// are built from, the membership of the collection, the order of the albums —, written once and
+/// Expressions shared by the lists and records of the consultation — what the labels of an album and of
+/// an edition are built from, the membership of the collection, the order of the albums —, written once and
 /// inserted into each query (choix-implementation.md § Recherche).
 /// </summary>
 /// <remarks>
@@ -20,6 +21,15 @@ internal static class CatalogExpressions
 {
     /// <summary>Marker of <see cref="CollectionMembership.IsOwned"/>, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static bool IsOwned(this Edition edition) => throw NotExpanded();
+
+    /// <summary>Marker of whether a purchase intent targets the edition, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static bool IsTargetedByPurchaseIntent(this Edition edition) => throw NotExpanded();
+
+    /// <summary>Marker of the entry of a universe, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static UniverseListItem ToListItem(this Universe universe) => throw NotExpanded();
+
+    /// <summary>Marker of contributions as presented, by role then by author, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static IEnumerable<ContributionItem> ToItems(this IEnumerable<Contribution> contributions) => throw NotExpanded();
 
     /// <summary>Marker of the summary of an album, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumSummary ToSummary(this Album album) => throw NotExpanded();
@@ -48,6 +58,22 @@ internal static class CatalogExpressions
         e.PublicationYear,
         e.Isbn);
 
+    private static readonly Expression<Func<Universe, UniverseListItem>> UniverseListItemOf =
+        u => new UniverseListItem(u.Id, u.Name, u.ParentId, u.Parent != null ? u.Parent.Name : null);
+
+    private static readonly Expression<Func<IEnumerable<Contribution>, IEnumerable<ContributionItem>>> ContributionItemsOf =
+        contributions => contributions
+            .OrderBy(c => c.Role)
+            .ThenBy(c => c.Author.SortKey)
+            .ThenBy(c => c.Id)
+            .Select(c => new ContributionItem(
+                new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym),
+                EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value));
+
+    // The intents of an album carry its identifier, those on its editions included.
+    private static readonly Expression<Func<Edition, bool>> IsTargetedByPurchaseIntentOf =
+        e => e.Album.PurchaseIntents.Any(p => p.EditionId == e.Id);
+
     /// <summary>Replaces every marker method of <paramref name="expression"/> by the expression it stands for.</summary>
     public static Expression<Func<TSource, TResult>> Expand<TSource, TResult>(Expression<Func<TSource, TResult>> expression) =>
         (Expression<Func<TSource, TResult>>)new MarkerExpander().Visit(expression);
@@ -62,6 +88,21 @@ internal static class CatalogExpressions
             .ThenBy(Of(album, a => a.VolumeNumber))
             .ThenBy(Of(album, a => a.Id));
 
+    /// <summary>
+    /// Sorts the albums of a series in its order (fonctionnel.md § Ordre des albums dans une série): the
+    /// albums not special issues first, then the special issues; in each, by volume — its first one for
+    /// an omnibus —, failing which by first publication, the albums without volume coming after those
+    /// with one (PostgreSQL sorts nulls last); then by sort key and album, for a total order.
+    /// </summary>
+    public static IOrderedQueryable<Album> OrderInSeries(this IQueryable<Album> albums) =>
+        albums
+            .OrderBy(a => a.IsSpecialIssue)
+            .ThenBy(a => a.Type == DomainEnums.AlbumType.Omnibus ? a.StartVolumeNumber : a.VolumeNumber)
+            .ThenBy(a => a.FirstPublicationYear)
+            .ThenBy(a => a.FirstPublicationMonth)
+            .ThenBy(a => a.SortKey)
+            .ThenBy(a => a.Id);
+
     private static Expression<Func<T, TKey>> Of<T, TKey>(Expression<Func<T, Album>> album, Expression<Func<Album, TKey>> key) =>
         Expression.Lambda<Func<T, TKey>>(ReplacingExpressionVisitor.Replace(key.Parameters[0], album.Body, key.Body), album.Parameters);
 
@@ -75,6 +116,9 @@ internal static class CatalogExpressions
             LambdaExpression? expression = node.Method.DeclaringType != typeof(CatalogExpressions) ? null : node.Method.Name switch
             {
                 nameof(IsOwned) => CollectionMembership.IsOwned,
+                nameof(IsTargetedByPurchaseIntent) => IsTargetedByPurchaseIntentOf,
+                nameof(ToListItem) => UniverseListItemOf,
+                nameof(ToItems) => ContributionItemsOf,
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
                 _ => null,

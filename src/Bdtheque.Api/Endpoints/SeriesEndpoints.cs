@@ -35,7 +35,55 @@ internal static class SeriesEndpoints
         series.MapDeletion<Series>(DeletionLinks);
     }
 
-    public static void MapSeriesList(this RouteGroupBuilder catalog) => catalog.MapGet("/series", ListAsync);
+    public static void MapSeriesCatalog(this RouteGroupBuilder catalog)
+    {
+        catalog.MapGet("/series", ListAsync);
+        catalog.MapGet("/series/{id:guid}", GetDetailAsync);
+    }
+
+    /// <summary>
+    /// A series with its albums, in its order, and what describes it of its template: its publisher,
+    /// collection and authors (fonctionnel.md § Structure de l'application).
+    /// </summary>
+    private static async Task<SeriesDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        var series = await context.Series.AsNoTracking()
+                         .Where(s => s.Id == id)
+                         .Select(CatalogExpressions.Expand((Series s) => new
+                         {
+                             s.Title,
+                             s.Status,
+                             s.TheoreticalVolumeCount,
+                             s.IsComplete,
+                             s.Summary,
+                             s.PersonalNotes,
+                             Publisher = s.TemplatePublisher == null ? null : new PublisherListItem(s.TemplatePublisher.Id, s.TemplatePublisher.Name),
+                             PublisherCollection = s.TemplatePublisherCollection == null
+                                 ? null
+                                 : new PublisherCollectionListItem(
+                                     s.TemplatePublisherCollection.Id, s.TemplatePublisherCollection.Name,
+                                     s.TemplatePublisherCollection.PublisherId, s.TemplatePublisherCollection.Publisher.Name),
+                             Genres = s.Genres.OrderBy(g => g.Label).ThenBy(g => g.Id).Select(g => new GenreListItem(g.Id, g.Label)).ToList(),
+                             Universes = s.Universes.OrderBy(u => u.Name).ThenBy(u => u.Id).Select(u => u.ToListItem()).ToList(),
+                             Contributions = s.TemplateContributions.ToItems().ToList(),
+                             s.CreatedAt,
+                             s.ModifiedAt,
+                         }))
+                         .AsSplitQuery()
+                         .SingleOrDefaultAsync(cancellationToken)
+                     ?? throw new EntityNotFoundException(typeof(Series), id);
+
+        var albums = await context.Albums.AsNoTracking()
+            .Where(a => a.SeriesId == id)
+            .OrderInSeries()
+            .Select(CatalogExpressions.Expand((Album a) => a.ToSummary()))
+            .ToListAsync(cancellationToken);
+
+        return new SeriesDetail(
+            id, series.Title, EnumMapping.Map<ContractEnums.SeriesStatus>(series.Status), series.TheoreticalVolumeCount, series.IsComplete,
+            series.Summary, series.PersonalNotes, series.Publisher, series.PublisherCollection, series.Genres, series.Universes,
+            series.Contributions, albums, series.CreatedAt, series.ModifiedAt);
+    }
 
     /// <summary>
     /// The series found by their title, narrowed by the cross filters (choix-implementation.md §
