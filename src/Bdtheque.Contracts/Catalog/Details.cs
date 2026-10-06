@@ -108,7 +108,11 @@ public sealed record EditionDetail(
 public sealed record EditionVisualItem(
     Guid Id, VisualType Type, int DisplayOrder, string OriginalPath, string DisplayPath, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
 
-/// <param name="Bibliography">The albums the author is credited on, in the order of the albums.</param>
+/// <param name="Bibliography">
+/// The whole bibliography, a single list reconciling the series and the albums the author took part in
+/// (fonctionnel.md § Structure de l'application): the series and the albums without series together, by
+/// sort key.
+/// </param>
 public sealed record AuthorDetail(
     Guid Id,
     string? LastName,
@@ -116,15 +120,24 @@ public sealed record AuthorDetail(
     string? Pseudonym,
     string? Biography,
     string? Nationality,
-    IReadOnlyList<BibliographyItem> Bibliography,
+    IReadOnlyList<BibliographyEntry> Bibliography,
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);
 
 /// <summary>
-/// An album of a bibliography, with every role the author is credited with on it: an index leading to
-/// the record of the album, which carries the contributions themselves, whole.
+/// An entry of a bibliography: either a series, or an album without series, exactly one of the two. The
+/// entries are an index leading to the records, which carry the contributions themselves, whole.
 /// </summary>
-public sealed record BibliographyItem(AlbumSummary Album, IReadOnlyList<ContributionRole> Roles);
+public sealed record BibliographyEntry(SeriesBibliographyItem? Series, AlbumBibliographyItem? Album);
+
+/// <summary>A series of a bibliography, credited on the series itself or on one of its albums.</summary>
+/// <param name="Roles">The roles credited on the series itself; empty for an author credited on its albums only.</param>
+/// <param name="Albums">The albums of the series the author took part in, in the order of the series.</param>
+public sealed record SeriesBibliographyItem(
+    SeriesListItem Series, IReadOnlyList<ContributionRole> Roles, IReadOnlyList<AlbumBibliographyItem> Albums);
+
+/// <summary>An album of a bibliography, with every role the author is credited with on it.</summary>
+public sealed record AlbumBibliographyItem(AlbumSummary Album, IReadOnlyList<ContributionRole> Roles);
 
 /// <param name="Collections">Its collections, by name. Its editions are listed by <c>/catalog/editions?publisherId=…</c>.</param>
 public sealed record PublisherDetail(
