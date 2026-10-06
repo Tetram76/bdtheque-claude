@@ -48,19 +48,29 @@ jobs:
 
       # Only one `nightly` image may exist (contraintes-techniques.md): the image the new one
       # replaces is recorded here, then deleted once the tag has moved. A missing image (first
-      # nightly) leaves nothing to delete.
+      # nightly) leaves nothing to delete. A nightly image already built from the head of `main`
+      # (revision label set by metadata-action) is kept as is: nothing new to publish.
       - name: Record the current nightly image
         id: previous
         if: github.event_name == 'schedule'
+        env:
+          IMAGE: tetram76/bdtheque-${{ matrix.image }}:nightly
         run: |
-          if digest=$(docker buildx imagetools inspect "tetram76/bdtheque-${{ matrix.image }}:nightly" --format '{{json .Manifest}}' | jq -r .digest); then
+          if digest=$(docker buildx imagetools inspect "$IMAGE" --format '{{json .Manifest}}' | jq -r .digest); then
             echo "digest=$digest" >> "$GITHUB_OUTPUT"
+            revision=$(docker buildx imagetools inspect "$IMAGE" --format '{{json .Image}}' \
+              | jq -r '.config.Labels["org.opencontainers.image.revision"] // empty')
+            if [ "$revision" = "$GITHUB_SHA" ]; then
+              echo "up-to-date=true" >> "$GITHUB_OUTPUT"
+              echo "::notice::$IMAGE is already built from $GITHUB_SHA: nothing to publish."
+            fi
           else
             echo "::notice::No nightly image yet: nothing to replace."
           fi
 
       - name: Build and push ${{ matrix.image }} image
         id: build
+        if: steps.previous.outputs.up-to-date != 'true'
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -79,7 +89,7 @@ jobs:
       # Docker Hub registry API: only an untagged manifest can be deleted, by digest, with a token
       # holding the `delete` scope (hence a Read, Write & Delete access token).
       - name: Delete the replaced nightly image
-        if: github.event_name == 'schedule' && steps.previous.outputs.digest != '' && steps.previous.outputs.digest != steps.build.outputs.digest
+        if: github.event_name == 'schedule' && steps.previous.outputs.up-to-date != 'true' && steps.previous.outputs.digest != '' && steps.previous.outputs.digest != steps.build.outputs.digest
         env:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           REPOSITORY: tetram76/bdtheque-${{ matrix.image }}
