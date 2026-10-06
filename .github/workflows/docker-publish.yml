@@ -50,7 +50,7 @@ jobs:
         id: commit
         if: github.event_name == 'workflow_dispatch'
         run: |
-          tag="sha-${GITHUB_SHA::7}"
+          tag="sha-$GITHUB_SHA"
           api=$(.github/scripts/registry-digest.sh "$API_REPOSITORY" "$tag")
           frontend=$(.github/scripts/registry-digest.sh "$FRONTEND_REPOSITORY" "$tag")
           if [ -n "$api" ] && [ -n "$frontend" ]; then
@@ -91,7 +91,7 @@ jobs:
           fi
 
       # A nightly build only gets `nightly`. An on-demand build gets the name of its branch and,
-      # unless already published, the `sha-<commit>` tag.
+      # unless already published, the `sha-<commit>` tag, with the full commit hash (as probed above).
       - name: Compute tags and labels
         id: meta
         if: steps.previous.outputs.up-to-date != 'true'
@@ -105,7 +105,7 @@ jobs:
           tags: |
             type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
             type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' }}
-            type=sha,enable=${{ github.event_name == 'workflow_dispatch' && steps.commit.outputs.published != 'true' }}
+            type=sha,format=long,enable=${{ github.event_name == 'workflow_dispatch' && steps.commit.outputs.published != 'true' }}
 
       - name: Split tags by image
         id: tags
