@@ -1,3 +1,4 @@
+using System.Data;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
@@ -44,10 +45,15 @@ internal static class AuthorEndpoints
     }
 
     /// <summary>
-    /// An author with the whole bibliography (fonctionnel.md § Structure de l'application), as two
-    /// separate lists, each entry with the roles held: the albums credited on, and the series among whose
-    /// authors the author is — its template contributions, presented as the authors of the series.
+    /// An author with the whole bibliography (fonctionnel.md § Structure de l'application): a single list
+    /// reconciling the series credited on — on the series itself, or on one of its albums — with the
+    /// albums of each, and the albums without series, each with the roles held.
     /// </summary>
+    /// <remarks>
+    /// The series and the albums without series come together, by sort key, as typed entries: the place
+    /// of the albums without series is not settled yet, and any placement can be drawn from this order (a
+    /// filter keeps their alphabetical order).
+    /// </remarks>
     private static async Task<AuthorDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         var author = await context.Authors.AsNoTracking()
@@ -56,22 +62,46 @@ internal static class AuthorEndpoints
                          .SingleOrDefaultAsync(cancellationToken)
                      ?? throw new EntityNotFoundException(typeof(Author), id);
 
-        var albums = await context.Albums.AsNoTracking()
-            .Where(a => a.Contributions.Any(c => c.AuthorId == id))
-            .OrderByAlbum(a => a)
-            .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToSummary(), a.Contributions.RolesOf(id))))
+        // A single snapshot for the three reads below, which are assembled into one another: an entry is
+        // never without its series or album, whatever is written meanwhile.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var credited = context.Albums.AsNoTracking().Where(a => a.Contributions.Any(c => c.AuthorId == id));
+        var creditedSeries = context.Series.AsNoTracking()
+            .Where(s => s.TemplateContributions.Any(c => c.AuthorId == id) || credited.Any(a => a.SeriesId == s.Id));
+
+        // Ordered by the database, along the French collation of the sort keys. An album without series
+        // has a title, hence a sort key.
+        var entries = await creditedSeries
+            .Select(s => new { SortKey = s.SortKey, SeriesId = (Guid?)s.Id, AlbumId = (Guid?)null })
+            .Concat(credited.Where(a => a.SeriesId == null).Select(a => new { SortKey = a.SortKey!, SeriesId = (Guid?)null, AlbumId = (Guid?)a.Id }))
+            .OrderBy(e => e.SortKey)
+            .ThenBy(e => e.SeriesId)
+            .ThenBy(e => e.AlbumId)
             .ToListAsync(cancellationToken);
 
-        var series = await context.Series.AsNoTracking()
-            .Where(s => s.TemplateContributions.Any(c => c.AuthorId == id))
-            .OrderBy(s => s.SortKey)
-            .ThenBy(s => s.Id)
-            .Select(CatalogExpressions.Expand((Series s) => new SeriesBibliographyItem(
-                new SeriesListItem(s.Id, s.Title), s.TemplateContributions.RolesOf(id))))
-            .ToListAsync(cancellationToken);
+        var series = await creditedSeries
+            .Select(CatalogExpressions.Expand((Series s) => new
+            {
+                s.Id,
+                Item = new SeriesListItem(s.Id, s.Title),
+                Roles = s.TemplateContributions.RolesOf(id),
+            }))
+            .ToDictionaryAsync(s => s.Id, cancellationToken);
+        var albums = (await credited
+                .OrderInSeries()
+                .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToSummary(), a.Contributions.RolesOf(id))))
+                .ToListAsync(cancellationToken))
+            .ToLookup(a => a.Album.SeriesId);
+
+        var bibliography = entries
+            .Select(e => e.SeriesId is { } seriesId
+                ? new BibliographyEntry(
+                    new SeriesBibliographyItem(series[seriesId].Item, series[seriesId].Roles, albums[seriesId].ToList()), null)
+                : new BibliographyEntry(null, albums[null].Single(a => a.Album.Id == e.AlbumId)))
+            .ToList();
 
         return new AuthorDetail(
-            id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality, albums, series, author.CreatedAt,
+            id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality, bibliography, author.CreatedAt,
             author.ModifiedAt);
     }
 

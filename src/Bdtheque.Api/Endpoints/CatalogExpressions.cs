@@ -109,14 +109,15 @@ internal static class CatalogExpressions
             .ThenBy(Of(album, a => a.Id));
 
     /// <summary>
-    /// Sorts the albums of a series in its order (fonctionnel.md § Ordre des albums dans une série): the
-    /// albums not special issues first, then the special issues; in each, by volume — its first one for
-    /// an omnibus —, failing which by first publication, the albums without volume coming after those
-    /// with one (PostgreSQL sorts nulls last); then by sort key and album, for a total order.
+    /// Sorts albums by series, each series in its order (fonctionnel.md § Ordre des albums dans une
+    /// série): the albums not special issues first, then the special issues; in each, by volume — its
+    /// first one for an omnibus —, failing which by first publication, the albums without volume coming
+    /// after those with one (PostgreSQL sorts nulls last); then by sort key and album, for a total order.
     /// </summary>
     public static IOrderedQueryable<Album> OrderInSeries(this IQueryable<Album> albums) =>
         albums
-            .OrderBy(a => a.IsSpecialIssue)
+            .OrderBy(a => a.SeriesId)
+            .ThenBy(a => a.IsSpecialIssue)
             .ThenBy(a => a.Type == DomainEnums.AlbumType.Omnibus ? a.StartVolumeNumber : a.VolumeNumber)
             .ThenBy(a => a.FirstPublicationYear)
             .ThenBy(a => a.FirstPublicationMonth)

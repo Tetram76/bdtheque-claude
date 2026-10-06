@@ -178,44 +178,51 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     }
 
     [Fact]
-    public async Task Author_PresentsTheAlbumsCreditedOnInTheirOrderWithTheRoles()
+    public async Task Author_PresentsTheBibliographyAsASingleListReconcilingSeriesAndAlbums()
     {
-        var author = await CreateAuthorAsync("Hergé", null);
-        var other = await CreateAuthorAsync("Jacobs", "Edgar P.");
-        var temple = await CreateAlbumAsync("Le Temple du Soleil", null, contributions:
+        var author = await CreateAuthorAsync("Janolle", "Alain");
+        var other = await CreateAuthorAsync("Mangin", "Valérie");
+        // Credited on the series itself and on one of its albums.
+        var babel = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Babel", contributions: [new(author.Id, ContributionRole.Scenarist)]));
+        var babel1 = await CreateAlbumAsync("Le chemin des étoiles", babel.Id, volume: 1, contributions: [new(author.Id, ContributionRole.Illustrator)]);
+        // Credited on some albums of the series only, in the order of the series.
+        var nemesis = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Nemesis"));
+        var nemesis2 = await CreateAlbumAsync("Babalon working", nemesis.Id, volume: 2, contributions: [new(author.Id, ContributionRole.Illustrator)]);
+        var nemesis1 = await CreateAlbumAsync("Level eleven", nemesis.Id, volume: 1, contributions: [new(author.Id, ContributionRole.Illustrator)]);
+        await CreateAlbumAsync("Critical mass", nemesis.Id, volume: 3, contributions: [new(other.Id, ContributionRole.Illustrator)]);
+        // Credited on the series itself only.
+        var oumpah = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Oumpah-Pah", contributions: [new(author.Id, ContributionRole.Illustrator)]));
+        // An album without series, with several roles.
+        var oneShot = await CreateAlbumAsync("Les Contes du Cosmos", null, contributions:
             [new(author.Id, ContributionRole.Illustrator), new(author.Id, ContributionRole.Scenarist), new(other.Id, ContributionRole.Colorist)]);
-        var lotus = await CreateAlbumAsync("Le Lotus bleu", null, contributions: [new(author.Id, ContributionRole.Scenarist)]);
-        await CreateAlbumAsync("Le Secret de l'Espadon", null, contributions: [new(other.Id, ContributionRole.Scenarist)]);
+        // Records the author took no part in.
+        var unrelated = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Aldébaran", contributions: [new(other.Id, ContributionRole.Scenarist)]));
+        await CreateAlbumAsync("La Catastrophe", unrelated.Id, volume: 1, contributions: [new(other.Id, ContributionRole.Scenarist)]);
+        await CreateAlbumAsync("Album sans lien", null, contributions: [new(other.Id, ContributionRole.Scenarist)]);
 
         var detail = await GetAsync<AuthorDetail>($"/catalog/authors/{author.Id}");
 
-        Assert.Equal(("Hergé", (string?)null), (detail.LastName, detail.FirstName));
-        Assert.Equal([lotus.Id, temple.Id], detail.Albums.Select(b => b.Album.Id));
-        Assert.Equal([ContributionRole.Scenarist], detail.Albums[0].Roles);
-        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], detail.Albums[1].Roles);
-        Assert.Empty(detail.Series);
-    }
-
-    [Fact]
-    public async Task Author_PresentsTheSeriesAmongWhoseAuthorsTheyAreBySortKeyWithTheRoles()
-    {
-        var author = await CreateAuthorAsync("Uderzo", "Albert");
-        var other = await CreateAuthorAsync("Goscinny", "René");
-        var oumpah = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf(
-            "Oumpah-Pah", contributions: [new(author.Id, ContributionRole.Illustrator), new(other.Id, ContributionRole.Scenarist)]));
-        var asterix = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf(
-            "Astérix", contributions: [new(author.Id, ContributionRole.Illustrator), new(author.Id, ContributionRole.Scenarist)]));
-        await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Le Petit Nicolas", contributions: [new(other.Id, ContributionRole.Scenarist)]));
-
-        var detail = await GetAsync<AuthorDetail>($"/catalog/authors/{author.Id}");
-
+        Assert.Equal(("Janolle", "Alain"), (detail.LastName, detail.FirstName));
+        // Series and albums without series together, by sort key: "Babel" < "Contes du Cosmos [Les]" < "Nemesis" < "Oumpah-Pah".
         Assert.Equal(
-            [new SeriesListItem(asterix.Id, "Astérix"), new SeriesListItem(oumpah.Id, "Oumpah-Pah")],
-            detail.Series.Select(s => s.Series));
-        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], detail.Series[0].Roles);
-        Assert.Equal([ContributionRole.Illustrator], detail.Series[1].Roles);
-        // Template contributions credit the series only, never its albums.
-        Assert.Empty(detail.Albums);
+            [(babel.Id, (Guid?)null), (null, oneShot.Id), (nemesis.Id, null), (oumpah.Id, null)],
+            detail.Bibliography.Select(e => (e.Series?.Series.Id, e.Album?.Album.Id)));
+
+        var babelEntry = detail.Bibliography[0].Series!;
+        Assert.Equal(new SeriesListItem(babel.Id, "Babel"), babelEntry.Series);
+        Assert.Equal([ContributionRole.Scenarist], babelEntry.Roles);
+        Assert.Equal([(babel1.Id, ContributionRole.Illustrator)], babelEntry.Albums.Select(a => (a.Album.Id, Assert.Single(a.Roles))));
+
+        var oneShotEntry = detail.Bibliography[1].Album!;
+        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], oneShotEntry.Roles);
+
+        var nemesisEntry = detail.Bibliography[2].Series!;
+        Assert.Empty(nemesisEntry.Roles);
+        Assert.Equal([nemesis1.Id, nemesis2.Id], nemesisEntry.Albums.Select(a => a.Album.Id));
+
+        var oumpahEntry = detail.Bibliography[3].Series!;
+        Assert.Equal([ContributionRole.Illustrator], oumpahEntry.Roles);
+        Assert.Empty(oumpahEntry.Albums);
     }
 
     [Fact]
