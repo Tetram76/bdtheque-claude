@@ -3,7 +3,7 @@ name: Docker publish
 # Publishes the application images to Docker Hub (account `tetram76`, see contraintes-techniques.md).
 # Images are only published nightly and on demand (contraintes-techniques.md), never on each merge.
 on:
-  # Nightly image. Scheduled runs use the head of `main`.
+  # Nightly images. Scheduled runs use the head of `main`.
   schedule:
     - cron: "17 3 * * *"
   # On-demand build of the branch chosen when the workflow is run.
@@ -12,19 +12,24 @@ on:
 permissions:
   contents: read
 
-# Runs share the Docker Hub tags: two overlapping nightly runs would each record the same image to
-# replace, and the image pushed by the first would be left untagged and never deleted.
+# Runs share the Docker Hub tags: two overlapping nightly runs would each record the same images to
+# replace, and the images pushed by the first would be left untagged and never deleted.
 concurrency:
   group: docker-publish
   cancel-in-progress: false
 
+env:
+  API_REPOSITORY: tetram76/bdtheque-api
+  FRONTEND_REPOSITORY: tetram76/bdtheque-frontend
+
 jobs:
+  # A single job for both images: `docker-compose.yml` deploys them under the same tag, so neither
+  # is pushed before both are built. A failed build then leaves the published pair untouched.
   publish:
-    name: Publish Docker image (${{ matrix.image }})
+    name: Publish Docker images
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image: [api, frontend]
+    env:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -39,28 +44,62 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # `sha-<commit>` is immutable: a new on-demand run on an already published commit (e.g. to
-      # pick up base image updates) only moves the branch tag. A registry error fails the job
-      # rather than letting the tag be overwritten.
+      # pick up base image updates) only moves the branch tag. A registry error, or a commit
+      # published for one image only, fails the job rather than letting a tag be overwritten.
       - name: Check whether this commit is already published
         id: commit
         if: github.event_name == 'workflow_dispatch'
-        env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          REPOSITORY: tetram76/bdtheque-${{ matrix.image }}
         run: |
-          digest=$(.github/scripts/registry-digest.sh "$REPOSITORY" "sha-${GITHUB_SHA::7}")
-          if [ -n "$digest" ]; then
+          tag="sha-${GITHUB_SHA::7}"
+          api=$(.github/scripts/registry-digest.sh "$API_REPOSITORY" "$tag")
+          frontend=$(.github/scripts/registry-digest.sh "$FRONTEND_REPOSITORY" "$tag")
+          if [ -n "$api" ] && [ -n "$frontend" ]; then
             echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::$REPOSITORY:sha-${GITHUB_SHA::7} already exists: kept as is."
+            echo "::notice::$tag already exists: kept as is."
+          elif [ -n "$api$frontend" ]; then
+            echo "::error::$tag exists for only one image: delete it on Docker Hub, then run again."
+            exit 1
+          fi
+
+      # Only one `nightly` image may exist per repository (contraintes-techniques.md): the images
+      # the new ones replace are recorded here, then deleted once the tag has moved. A missing image
+      # (first nightly) leaves nothing to delete; a registry error fails the job, since a replaced
+      # image could not be deleted without its digest. When both nightly images are already built
+      # from the head of `main` (revision label set by metadata-action), nothing is published.
+      - name: Record the current nightly images
+        id: previous
+        if: github.event_name == 'schedule'
+        run: |
+          up_to_date=true
+          for image in api frontend; do
+            variable="${image^^}_REPOSITORY"
+            repository=${!variable}
+            digest=$(.github/scripts/registry-digest.sh "$repository" nightly)
+            if [ -z "$digest" ]; then
+              echo "::notice::No $repository:nightly yet: nothing to replace."
+              up_to_date=false
+              continue
+            fi
+            echo "$image-digest=$digest" >> "$GITHUB_OUTPUT"
+            revision=$(docker buildx imagetools inspect "$repository@$digest" --format '{{json .Image}}' \
+              | jq -r '.config.Labels["org.opencontainers.image.revision"] // empty')
+            [ "$revision" = "$GITHUB_SHA" ] || up_to_date=false
+          done
+          if [ "$up_to_date" = true ]; then
+            echo "up-to-date=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::The nightly images are already built from $GITHUB_SHA: nothing to publish."
           fi
 
       # A nightly build only gets `nightly`. An on-demand build gets the name of its branch and,
       # unless already published, the `sha-<commit>` tag.
       - name: Compute tags and labels
         id: meta
+        if: steps.previous.outputs.up-to-date != 'true'
         uses: docker/metadata-action@v6
         with:
-          images: tetram76/bdtheque-${{ matrix.image }}
+          images: |
+            ${{ env.API_REPOSITORY }}
+            ${{ env.FRONTEND_REPOSITORY }}
           flavor: |
             latest=false
           tags: |
@@ -68,65 +107,93 @@ jobs:
             type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' }}
             type=sha,enable=${{ github.event_name == 'workflow_dispatch' && steps.commit.outputs.published != 'true' }}
 
-      # Only one `nightly` image may exist (contraintes-techniques.md): the image the new one
-      # replaces is recorded here, then deleted once the tag has moved. A missing image (first
-      # nightly) leaves nothing to delete; a registry error fails the job, since the replaced image
-      # could not be deleted without its digest. A nightly image already built from the head of
-      # `main` (revision label set by metadata-action) is kept as is: nothing new to publish.
-      - name: Record the current nightly image
-        id: previous
-        if: github.event_name == 'schedule'
+      - name: Split tags by image
+        id: tags
+        if: steps.previous.outputs.up-to-date != 'true'
         env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          REPOSITORY: tetram76/bdtheque-${{ matrix.image }}
+          TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          digest=$(.github/scripts/registry-digest.sh "$REPOSITORY" nightly)
-          if [ -z "$digest" ]; then
-            echo "::notice::No nightly image yet: nothing to replace."
-            exit 0
-          fi
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-          revision=$(docker buildx imagetools inspect "$REPOSITORY@$digest" --format '{{json .Image}}' \
-            | jq -r '.config.Labels["org.opencontainers.image.revision"] // empty')
-          if [ "$revision" = "$GITHUB_SHA" ]; then
-            echo "up-to-date=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::$REPOSITORY:nightly is already built from $GITHUB_SHA: nothing to publish."
-          fi
+          {
+            echo "api<<EOF"; grep "^$API_REPOSITORY:" <<< "$TAGS"; echo "EOF"
+            echo "frontend<<EOF"; grep "^$FRONTEND_REPOSITORY:" <<< "$TAGS"; echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Build and push ${{ matrix.image }} image
-        id: build
+      # Build both images before pushing either: the push steps below rebuild from the builder's
+      # cache, so they only upload.
+      - name: Build api image
         if: steps.previous.outputs.up-to-date != 'true'
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: docker/${{ matrix.image }}/Dockerfile
+          file: docker/api/Dockerfile
+          platforms: linux/amd64
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Build frontend image
+        if: steps.previous.outputs.up-to-date != 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/frontend/Dockerfile
+          platforms: linux/amd64
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+      # Without attestations each image is a single manifest, deleted in one call: an image index
+      # would leave its child manifests behind, untagged.
+      - name: Push api image
+        id: push-api
+        if: steps.previous.outputs.up-to-date != 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/api/Dockerfile
           platforms: linux/amd64
           push: true
-          # Without attestations the image is a single manifest, deleted in one call: an image
-          # index would leave its child manifests behind, untagged.
           provenance: false
           sbom: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.tags.outputs.api }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+      - name: Push frontend image
+        id: push-frontend
+        if: steps.previous.outputs.up-to-date != 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/frontend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ steps.tags.outputs.frontend }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       # Docker Hub registry API: only an untagged manifest can be deleted, by digest, with a token
       # holding the `delete` scope (hence a Read, Write & Delete access token).
-      - name: Delete the replaced nightly image
-        if: github.event_name == 'schedule' && steps.previous.outputs.up-to-date != 'true' && steps.previous.outputs.digest != '' && steps.previous.outputs.digest != steps.build.outputs.digest
+      - name: Delete the replaced nightly images
+        if: github.event_name == 'schedule' && steps.previous.outputs.up-to-date != 'true'
         env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          REPOSITORY: tetram76/bdtheque-${{ matrix.image }}
-          DIGEST: ${{ steps.previous.outputs.digest }}
+          API_PREVIOUS: ${{ steps.previous.outputs.api-digest }}
+          API_CURRENT: ${{ steps.push-api.outputs.digest }}
+          FRONTEND_PREVIOUS: ${{ steps.previous.outputs.frontend-digest }}
+          FRONTEND_CURRENT: ${{ steps.push-frontend.outputs.digest }}
         run: |
-          token=$(curl -fsS -u "tetram76:$DOCKERHUB_TOKEN" \
-            "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPOSITORY:delete" | jq -r .token)
-          status=$(curl -sS -o /dev/null -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" \
-            "https://registry-1.docker.io/v2/$REPOSITORY/manifests/$DIGEST")
-          case "$status" in
-            202) echo "Deleted $REPOSITORY@$DIGEST." ;;
-            # Documented by Docker Hub: the deletion goes on in the background.
-            500) echo "::warning::Deletion of $REPOSITORY@$DIGEST accepted, completed in the background." ;;
-            *) echo "::error::Deletion of $REPOSITORY@$DIGEST failed (HTTP $status)."; exit 1 ;;
-          esac
+          for image in API FRONTEND; do
+            repository_variable="${image}_REPOSITORY" previous_variable="${image}_PREVIOUS" current_variable="${image}_CURRENT"
+            repository=${!repository_variable} previous=${!previous_variable} current=${!current_variable}
+            if [ -z "$previous" ] || [ "$previous" = "$current" ]; then
+              continue
+            fi
+            token=$(curl -fsS -u "tetram76:$DOCKERHUB_TOKEN" \
+              "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$repository:delete" | jq -er .token)
+            status=$(curl -sS -o /dev/null -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" \
+              "https://registry-1.docker.io/v2/$repository/manifests/$previous")
+            case "$status" in
+              202) echo "Deleted $repository@$previous." ;;
+              # Documented by Docker Hub: the deletion goes on in the background.
+              500) echo "::warning::Deletion of $repository@$previous accepted, completed in the background." ;;
+              *) echo "::error::Deletion of $repository@$previous failed (HTTP $status)."; exit 1 ;;
+            esac
+          done
