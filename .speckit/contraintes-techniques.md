@@ -53,6 +53,7 @@ L'implémentation de l'outil pour agents IA (`fonctionnel.md` § Interface pour 
 - Architecture **n-tiers avec isolation stricte** : chaque tier est déployé dans un **conteneur Docker dédié**.
 - Un tier = un conteneur (pas de cohabitation de responsabilités dans un même conteneur).
 - Orchestration via **Docker Compose**, compatible avec Synology Container Manager.
+- Les **images Docker** de l'application sont publiées sur **Docker Hub**, sous le compte [`tetram76`](https://hub.docker.com/repositories/tetram76), avec pour nom de projet **`bdtheque`** (et non le nom du dépôt, `bdtheque-claude`). Les dépôts Docker Hub sont **privés**. Une image est publiée **quotidiennement** à partir de la branche `main`, sous le tag **`nightly`**, sauf si `main` n'a pas changé depuis la précédente publication quotidienne (aucune image n'est alors republiée) ; cette publication garantit qu'il n'existe qu'**une seule image `nightly`** sur Docker Hub. En dehors de cette publication quotidienne, les images ne sont publiées qu'**à la demande** (jamais à chaque fusion).
 
 ## Licences
 
@@ -116,7 +117,7 @@ Caractéristiques de la base Firebird de l'application existante, que la migrati
 
 ## Hébergement
 
-- L'application est hébergée sur un **NAS Synology**.
+- L'application est hébergée sur un **NAS Synology RS1221+** (processeur AMD Ryzen V1500B, architecture x86_64).
 - Le déploiement Docker doit être compatible avec l'environnement Docker fourni par Synology (Container Manager).
 
 ## Compatibilité multi-supports

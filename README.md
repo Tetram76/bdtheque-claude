@@ -45,7 +45,7 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 ├── Directory.Build.props          # Propriétés MSBuild communes (TFM, nullable, analyzers…)
 ├── Directory.Packages.props       # Gestion centralisée des versions NuGet (CPM)
 ├── global.json                    # Version du SDK .NET
-├── docker-compose.yml
+├── docker-compose.yml           # Déploiement (images Docker Hub) et build local
 ├── docker/
 │   ├── api/Dockerfile
 │   └── frontend/Dockerfile
@@ -80,18 +80,55 @@ dotnet build Bdtheque.slnx --configuration Release
 dotnet test Bdtheque.slnx --configuration Release
 ```
 
-### Lancer la stack complète (Docker Compose)
+### Lancer la stack complète depuis les sources (Docker Compose)
 
 ```bash
 cp .env.example .env   # puis renseigner POSTGRES_PASSWORD et INTERNAL_API_KEY
+mkdir -p ./data/visuels && sudo chown 1654:1654 ./data/visuels   # cf. « Dossier des visuels »
 docker compose up -d --build
 ```
+
+`--build` construit les images depuis les sources (sous les mêmes noms que les images publiées, cf. ci-dessous) au lieu de les télécharger.
 
 L'application est ensuite accessible sur `http://localhost:8080` (port configurable via `FRONTEND_PORT` dans `.env`). L'état de chaque conteneur peut être vérifié via son endpoint `/health` (exposé uniquement en interne pour `api`, et sur le port publié pour `frontend`).
 
 ## Déploiement
 
-Le déploiement cible un **NAS Synology** via Docker Compose (compatible Synology Container Manager). Les visuels (couvertures, planches, etc.) sont stockés sur un volume monté sur le NAS, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.
+Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container Manager). Il n'utilise pas les sources : les images de l'application sont téléchargées depuis **Docker Hub**.
+
+### Images publiées
+
+| Image | Conteneur |
+| --- | --- |
+| [`tetram76/bdtheque-api`](https://hub.docker.com/r/tetram76/bdtheque-api) | `api` |
+| [`tetram76/bdtheque-frontend`](https://hub.docker.com/r/tetram76/bdtheque-frontend) | `frontend` |
+
+Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml), pour l'architecture du NAS (`linux/amd64`), avec les tags suivants :
+
+| Tag | Contenu |
+| --- | --- |
+| `nightly` | Publication quotidienne, depuis la tête de `main` |
+| `<branche>` (ex. `main`) | Dernière publication à la demande de cette branche |
+| `sha-<commit>` | Première publication à la demande d'un commit précis, immuable (une nouvelle publication du même commit ne déplace que le tag de branche) |
+
+Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire.
+
+Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut).
+
+### Procédure (Synology Container Manager)
+
+1. Créer sur le NAS un dossier pour le projet (ex. `/volume1/docker/bdtheque`) et y copier [`docker-compose.yml`](docker-compose.yml) et [`.env.example`](.env.example), renommé en `.env`.
+2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), `BDTHEQUE_TAG`, `FRONTEND_PORT` et `VISUELS_HOST_PATH`.
+3. Préparer le dossier des visuels (ci-dessous).
+4. Les dépôts Docker Hub étant **privés**, authentifier le NAS auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès en **lecture seule** (*Personal Access Token*, droits *Read-only*), sans quoi le téléchargement des images est refusé. En SSH : `sudo docker login -u tetram76` (le jeton tient lieu de mot de passe).
+5. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.
+6. Vérifier que l'application répond sur `http://<NAS>:<FRONTEND_PORT>/health`.
+
+**Mise à jour** : modifier `BDTHEQUE_TAG` si besoin, puis télécharger les nouvelles images et recréer les conteneurs, en SSH depuis le dossier du projet : `docker compose pull && docker compose up -d`. Le schéma de la base est mis à jour automatiquement au démarrage d'`api` ; les données (volume `db-data`) et les visuels sont conservés.
+
+### Dossier des visuels
+
+Les visuels (couvertures, planches, etc.) sont stockés sur un dossier du NAS monté dans les conteneurs, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.
 
 Ce dossier doit exister et être **accessible en écriture pour l'utilisateur du conteneur `api`** (UID `1654`, qui n'est pas root) ; sans quoi `api` refuse de démarrer, en indiquant le dossier en cause dans son journal. Docker crée un dossier absent au nom de root : il faut donc le créer et lui donner ce droit avant le premier démarrage, par exemple :
 
