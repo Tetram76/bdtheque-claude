@@ -90,6 +90,7 @@ internal static class EditionEndpoints
         return new EditionDetail(
             edition.Album,
             edition.Edition,
+            e.Isbn is null ? null : IsbnChecksumValidator.IsValid(e.Isbn),
             EnumMapping.Map<ContractEnums.BindingType>(e.Binding),
             EnumMapping.Map<ContractEnums.BookOrientation>(e.Orientation),
             EnumMapping.Map<ContractEnums.ReadingDirection>(e.ReadingDirection),

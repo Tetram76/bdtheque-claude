@@ -157,7 +157,8 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
 
         Assert.Equal(new AlbumSummary(album.Id, "Le Lotus bleu", null, null, AlbumType.Regular, false, null, null, null, true), detail.Album);
         Assert.Equal(new EditionSummary(edition.Id, publisher.Id, publisher.Name, null, null, 1946, "978-2-203-00104-9"), detail.Edition);
-        Assert.Equal((AcquisitionMode.Purchase, true), (detail.AcquisitionMode, detail.IsInCollection));
+        // Stored as entered, the ISBN carries the warning of its inconsistent check digit (6 expected).
+        Assert.Equal((AcquisitionMode.Purchase, true, false), (detail.AcquisitionMode, detail.IsInCollection, detail.IsbnChecksumValid));
         Assert.Null(detail.PurchaseIntent);
         Assert.Equal([cover, plate, backCover], detail.Visuals.Select(v => v with { CreatedAt = default, ModifiedAt = default }));
         Assert.All(detail.Visuals, v => AssertCreatedAfter(detail.CreatedAt, (v.CreatedAt, v.ModifiedAt)));
@@ -172,7 +173,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
 
         var detail = await GetAsync<EditionDetail>($"/catalog/editions/{intended}");
 
-        Assert.Equal((null, false, intent), ((AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection, detail.PurchaseIntent?.Id));
+        Assert.Equal((null, false, intent, null), ((AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection, detail.PurchaseIntent?.Id, detail.IsbnChecksumValid));
         Assert.Empty(detail.Visuals);
     }
 

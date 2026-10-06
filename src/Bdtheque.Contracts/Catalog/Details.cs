@@ -63,6 +63,10 @@ public sealed record SeriesDetail(
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);
 
+/// <param name="IsbnChecksumValid">
+/// Whether the check digit of the ISBN is consistent, <c>null</c> without ISBN: a warning only, an
+/// inconsistent ISBN being stored as entered (fonctionnel.md § Validation de l'ISBN).
+/// </param>
 /// <param name="AcquisitionAmount">Together with <paramref name="AcquisitionCurrency"/> (ISO 4217 code, or <c>QZF</c> for the old franc).</param>
 /// <param name="InitialValueAmount">Together with <paramref name="InitialValueCurrency"/>.</param>
 /// <param name="IsInCollection">Whether the edition is owned (fonctionnel.md § Appartenance à la collection).</param>
@@ -71,6 +75,7 @@ public sealed record SeriesDetail(
 public sealed record EditionDetail(
     AlbumSummary Album,
     EditionSummary Edition,
+    bool? IsbnChecksumValid,
     BindingType? Binding,
     BookOrientation? Orientation,
     ReadingDirection? ReadingDirection,
