@@ -1,15 +1,13 @@
 name: Docker publish
 
 # Publishes the application images to Docker Hub (account `tetram76`, see contraintes-techniques.md).
-# Only commits already on `main` are published: they passed the required CI checks of their pull
-# request, the Docker builds included.
+# Images are only published nightly and on demand (contraintes-techniques.md), never on each merge.
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
-  # Nightly image (contraintes-techniques.md). Scheduled runs use the head of `main`.
+  # Nightly image. Scheduled runs use the head of `main`.
   schedule:
     - cron: "17 3 * * *"
+  # On-demand build of the branch chosen when the workflow is run.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,8 +35,8 @@ jobs:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # `nightly` is the nightly build; `main` follows the head of the main branch; a `vX.Y.Z`
-      # tag gives `X.Y.Z` and `X.Y`; every image also gets an immutable `sha-<commit>` tag.
+      # A nightly build only gets `nightly`. An on-demand build gets the name of its branch and an
+      # immutable `sha-<commit>` tag.
       - name: Compute tags and labels
         id: meta
         uses: docker/metadata-action@v6
@@ -48,10 +46,8 @@ jobs:
             latest=false
           tags: |
             type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
+            type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=sha,enable=${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Build and push ${{ matrix.image }} image
         uses: docker/build-push-action@v7

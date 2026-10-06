@@ -108,9 +108,10 @@ Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/do
 | Tag | Contenu |
 | --- | --- |
 | `nightly` | Publication quotidienne, depuis la tête de `main` |
-| `X.Y.Z`, `X.Y` | Release `vX.Y.Z` |
-| `main` | État courant de la branche `main` (hors release) |
-| `sha-<commit>` | Commit précis, immuable |
+| `<branche>` (ex. `main`) | Dernière publication à la demande de cette branche |
+| `sha-<commit>` | Publication à la demande d'un commit précis, immuable |
+
+Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire.
 
 Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut).
 
