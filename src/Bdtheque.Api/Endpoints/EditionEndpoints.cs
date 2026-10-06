@@ -1,5 +1,7 @@
+using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
@@ -49,6 +51,39 @@ internal static class EditionEndpoints
 
         admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn)));
     }
+
+    public static void MapEditionList(this RouteGroupBuilder catalog) => catalog.MapGet("/editions", ListAsync);
+
+    private static readonly Expression<Func<Edition, EditionListItem>> ListItem =
+        CatalogExpressions.Expand((Edition e) => new EditionListItem(e.Album.ToSummary(), e.ToSummary(), e.IsOwned()));
+
+    /// <summary>
+    /// The editions found by their ISBN, separators ignored on both sides — an ISBN is entered as
+    /// printed, with or without them —, narrowed by the cross filters (choix-implementation.md §
+    /// Recherche), in the order of their albums, then by year.
+    /// </summary>
+    private static Task<Page<EditionListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, Guid? albumId = null, Guid? publisherId = null,
+        Guid? publisherCollectionId = null, int page = 1, int pageSize = Paging.DefaultSize)
+    {
+        var editions = context.Editions.AsNoTracking()
+            .WhereContains(q is null ? null : WithoutIsbnSeparators(q), e => e.Isbn!.Replace("-", "").Replace(" ", ""));
+        if (albumId is not null)
+            editions = editions.Where(e => e.AlbumId == albumId);
+        if (publisherId is not null)
+            editions = editions.Where(e => e.PublisherId == publisherId);
+        if (publisherCollectionId is not null)
+            editions = editions.Where(e => e.PublisherCollectionId == publisherCollectionId);
+
+        return editions
+            .OrderByAlbum(e => e.Album)
+            .ThenBy(e => e.PublicationYear)
+            .ThenBy(e => e.Id)
+            .ToPageAsync(page, pageSize, ListItem, cancellationToken);
+    }
+
+    private static string WithoutIsbnSeparators(string isbn) =>
+        isbn.Replace("-", "", StringComparison.Ordinal).Replace(" ", "", StringComparison.Ordinal);
 
     internal static async Task<NewEditionForm> GetNewAsync(Guid rootId, BdthequeDbContext context, CancellationToken cancellationToken)
     {

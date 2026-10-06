@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
@@ -7,7 +8,6 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using ContractEnums = Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Api.Endpoints;
 
@@ -121,43 +121,16 @@ internal static class PurchaseIntentEndpoints
         return ToForm(album, context.VersionOf(album));
     }
 
-    /// <summary>
-    /// The public list of the intents, in the order of their albums — by sort key, that of the series
-    /// standing in for an album without a title of its own (modele-metier.md § Album) —, then by volume.
-    /// </summary>
+    private static readonly Expression<Func<PurchaseIntent, PurchaseIntentListItem>> ListItem = CatalogExpressions.Expand(
+        (PurchaseIntent p) => new PurchaseIntentListItem(p.Id, p.Album.ToSummary(), p.Edition == null ? null : p.Edition.ToSummary()));
+
+    /// <summary>The public list of the intents, in the order of their albums.</summary>
     private static Task<Page<PurchaseIntentListItem>> ListAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, int page = 1, int pageSize = Paging.DefaultSize) =>
         context.PurchaseIntents.AsNoTracking()
-            .OrderBy(p => p.Album.SortKey ?? p.Album.Series!.SortKey)
-            .ThenBy(p => p.Album.VolumeNumber)
-            .ThenBy(p => p.AlbumId)
+            .OrderByAlbum(p => p.Album)
             .ThenBy(p => p.Id)
-            .ToPageAsync(
-                page, pageSize,
-                p => new PurchaseIntentListItem(
-                    p.Id,
-                    new AlbumSummary(
-                        p.AlbumId,
-                        p.Album.Title,
-                        p.Album.SeriesId,
-                        p.Album.Series != null ? p.Album.Series.Title : null,
-                        EnumMapping.Map<ContractEnums.AlbumType>(p.Album.Type)!.Value,
-                        p.Album.IsSpecialIssue,
-                        p.Album.VolumeNumber,
-                        p.Album.StartVolumeNumber,
-                        p.Album.EndVolumeNumber,
-                        context.Editions.Where(CollectionMembership.IsOwned).Any(e => e.AlbumId == p.AlbumId)),
-                    p.Edition == null
-                        ? null
-                        : new EditionSummary(
-                            p.Edition.Id,
-                            p.Edition.PublisherId,
-                            p.Edition.Publisher.Name,
-                            p.Edition.PublisherCollectionId,
-                            p.Edition.PublisherCollection != null ? p.Edition.PublisherCollection.Name : null,
-                            p.Edition.PublicationYear,
-                            p.Edition.Isbn)),
-                cancellationToken);
+            .ToPageAsync(page, pageSize, ListItem, cancellationToken);
 
     // Entered with the minimum of fields: the traits of the copy keep the values of an edition not
     // owned (fonctionnel.md § Réalisation d'une intention).

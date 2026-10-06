@@ -1,5 +1,6 @@
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
@@ -32,6 +33,39 @@ internal static class SeriesEndpoints
         series.MapPost("/", CreateAsync);
         series.MapPut("/{id:guid}", UpdateAsync);
         series.MapDeletion<Series>(DeletionLinks);
+    }
+
+    public static void MapSeriesList(this RouteGroupBuilder catalog) => catalog.MapGet("/series", ListAsync);
+
+    /// <summary>
+    /// The series found by their title, narrowed by the cross filters (choix-implementation.md §
+    /// Recherche): credited and published through their albums, the source of truth of contributions and
+    /// editions — the template of a series is only the starting point of the data entry.
+    /// </summary>
+    private static async Task<Page<SeriesListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, Guid? authorId = null,
+        Guid? publisherId = null, Guid? genreId = null, Guid? universeId = null, int page = 1, int pageSize = Paging.DefaultSize)
+    {
+        CatalogFilters.EnsureNavigationEntry(entry);
+        var series = context.Series.AsNoTracking().WhereContains(q, s => s.Title);
+        if (entry is not null)
+            series = series.Where(s => s.NavigationEntry == entry);
+        if (authorId is not null)
+            series = series.Where(s => context.Albums.Any(a => a.SeriesId == s.Id && a.Contributions.Any(c => c.AuthorId == authorId)));
+        if (publisherId is not null)
+            series = series.Where(s => context.Albums.Any(a => a.SeriesId == s.Id && a.Editions.Any(e => e.PublisherId == publisherId)));
+        if (genreId is not null)
+            series = series.Where(s => s.Genres.Any(g => g.Id == genreId));
+        if (universeId is not null)
+        {
+            var universeIds = await CatalogFilters.UniverseAndDescendantsAsync(context, universeId.Value, cancellationToken);
+            series = series.Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)));
+        }
+
+        return await series
+            .OrderBy(s => s.SortKey)
+            .ThenBy(s => s.Id)
+            .ToPageAsync(page, pageSize, s => new SeriesListItem(s.Id, s.Title), cancellationToken);
     }
 
     private static async Task<SeriesForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)

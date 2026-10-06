@@ -1,5 +1,7 @@
+using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -36,6 +38,46 @@ internal static class AlbumEndpoints
         albums.MapPost("/", CreateAsync);
         albums.MapPut("/{id:guid}", UpdateAsync);
         albums.MapDeletion<Album>(DeletionLinks);
+    }
+
+    public static void MapAlbumList(this RouteGroupBuilder catalog) => catalog.MapGet("/albums", ListAsync);
+
+    private static readonly Expression<Func<Album, AlbumSummary>> ListItem = CatalogExpressions.Expand((Album a) => a.ToSummary());
+
+    /// <summary>
+    /// The albums found by their title or that of their series, part of their label (fonctionnel.md §
+    /// Libellé d'un album), narrowed by the cross filters (choix-implementation.md § Recherche). An album
+    /// without a title of its own is filed under the current sort key and entry of its series.
+    /// </summary>
+    private static async Task<Page<AlbumSummary>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, Guid? seriesId = null,
+        Guid? authorId = null, Guid? publisherId = null, Guid? publisherCollectionId = null, Guid? genreId = null,
+        Guid? universeId = null, int page = 1, int pageSize = Paging.DefaultSize)
+    {
+        CatalogFilters.EnsureNavigationEntry(entry);
+        var albums = context.Albums.AsNoTracking().WhereContains(q, a => a.Title, a => a.Series!.Title);
+        if (entry is not null)
+            albums = albums.Where(a => (a.NavigationEntry ?? a.Series!.NavigationEntry) == entry);
+        if (seriesId is not null)
+            albums = albums.Where(a => a.SeriesId == seriesId);
+        if (authorId is not null)
+            albums = albums.Where(a => a.Contributions.Any(c => c.AuthorId == authorId));
+        if (publisherId is not null)
+            albums = albums.Where(a => a.Editions.Any(e => e.PublisherId == publisherId));
+        if (publisherCollectionId is not null)
+            albums = albums.Where(a => a.Editions.Any(e => e.PublisherCollectionId == publisherCollectionId));
+        // The genres and universes of an album in a series are those of the album and of the series
+        // (fonctionnel.md § Genres et univers d'un album).
+        if (genreId is not null)
+            albums = albums.Where(a => a.Genres.Any(g => g.Id == genreId) || a.Series!.Genres.Any(g => g.Id == genreId));
+        if (universeId is not null)
+        {
+            var universeIds = await CatalogFilters.UniverseAndDescendantsAsync(context, universeId.Value, cancellationToken);
+            albums = albums.Where(a =>
+                a.Universes.Any(u => universeIds.Contains(u.Id)) || a.Series!.Universes.Any(u => universeIds.Contains(u.Id)));
+        }
+
+        return await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, ListItem, cancellationToken);
     }
 
     private static async Task<AlbumForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)

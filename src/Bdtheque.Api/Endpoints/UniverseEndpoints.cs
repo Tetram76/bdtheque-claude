@@ -1,5 +1,6 @@
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -31,6 +32,17 @@ internal static class UniverseEndpoints
         universes.MapPut("/{id:guid}", UpdateAsync);
         universes.MapDeletion<Universe>(DeletionLinks);
     }
+
+    public static void MapUniverseList(this RouteGroupBuilder catalog) => catalog.MapGet("/universes", ListAsync);
+
+    private static Task<Page<UniverseListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
+        context.Universes.AsNoTracking()
+            .WhereContains(q, u => u.Name)
+            .OrderBy(u => u.Name)
+            .ThenBy(u => u.Id)
+            .ToPageAsync(
+                page, pageSize, u => new UniverseListItem(u.Id, u.Name, u.ParentId, u.Parent != null ? u.Parent.Name : null), cancellationToken);
 
     private static async Task<UniverseForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
         await context.Universes

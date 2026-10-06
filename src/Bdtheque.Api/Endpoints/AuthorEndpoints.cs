@@ -1,5 +1,6 @@
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -33,6 +34,28 @@ internal static class AuthorEndpoints
         authors.MapPost("/", CreateAsync);
         authors.MapPut("/{id:guid}", UpdateAsync);
         authors.MapDeletion<Author>(DeletionLinks);
+    }
+
+    public static void MapAuthorList(this RouteGroupBuilder catalog) => catalog.MapGet("/authors", ListAsync);
+
+    /// <summary>
+    /// The authors found by any part of their name: last name, first name, pseudonym, or full name, as
+    /// displayed ("First Last") or as sorted ("Last First", fonctionnel.md § Artistes).
+    /// </summary>
+    private static Task<Page<AuthorListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize)
+    {
+        CatalogFilters.EnsureNavigationEntry(entry);
+        var authors = context.Authors.AsNoTracking()
+            .WhereContains(q, a => a.LastName, a => a.FirstName, a => a.Pseudonym, a => a.FirstName + " " + a.LastName, a => a.SortKey);
+        if (entry is not null)
+            authors = authors.Where(a => a.NavigationEntry == entry);
+
+        return authors
+            .OrderBy(a => a.SortKey)
+            .ThenBy(a => a.Id)
+            .ToPageAsync(page, pageSize, a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym), cancellationToken);
     }
 
     private static async Task<AuthorForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
