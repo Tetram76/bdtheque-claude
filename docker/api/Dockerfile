@@ -1,9 +1,6 @@
 # syntax=docker/dockerfile:1
 
-# The SDK runs on the build machine's own architecture and cross-publishes for the target one:
-# running `dotnet restore` under QEMU emulation is very slow and unreliable.
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG TARGETARCH
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy only the project files first: the Docker cache for `dotnet restore`
@@ -13,13 +10,13 @@ COPY src/Bdtheque.Domain/Bdtheque.Domain.csproj src/Bdtheque.Domain/
 COPY src/Bdtheque.Contracts/Bdtheque.Contracts.csproj src/Bdtheque.Contracts/
 COPY src/Bdtheque.Infrastructure/Bdtheque.Infrastructure.csproj src/Bdtheque.Infrastructure/
 COPY src/Bdtheque.Api/Bdtheque.Api.csproj src/Bdtheque.Api/
-RUN dotnet restore src/Bdtheque.Api/Bdtheque.Api.csproj -a $TARGETARCH
+RUN dotnet restore src/Bdtheque.Api/Bdtheque.Api.csproj
 
 COPY src/Bdtheque.Domain/ src/Bdtheque.Domain/
 COPY src/Bdtheque.Contracts/ src/Bdtheque.Contracts/
 COPY src/Bdtheque.Infrastructure/ src/Bdtheque.Infrastructure/
 COPY src/Bdtheque.Api/ src/Bdtheque.Api/
-RUN dotnet publish src/Bdtheque.Api/Bdtheque.Api.csproj -c Release -a $TARGETARCH --no-restore -o /app
+RUN dotnet publish src/Bdtheque.Api/Bdtheque.Api.csproj -c Release --no-restore -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app

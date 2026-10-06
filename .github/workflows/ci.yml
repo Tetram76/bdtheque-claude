@@ -56,22 +56,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Only the final stage's own commands (curl install) run emulated: the .NET build
-      # cross-publishes natively (see the Dockerfiles).
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v4
-
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      # Same platforms as the published images (docker-publish.yml), so that a pull request
-      # cannot break the publication of either architecture.
+      # Same platform as the published images (docker-publish.yml), so that a pull request
+      # cannot break their publication.
       - name: Build ${{ matrix.image }} image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/${{ matrix.image }}/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: false
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}

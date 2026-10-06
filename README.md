@@ -103,7 +103,7 @@ Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container
 | [`tetram76/bdtheque-api`](https://hub.docker.com/r/tetram76/bdtheque-api) | `api` |
 | [`tetram76/bdtheque-frontend`](https://hub.docker.com/r/tetram76/bdtheque-frontend) | `frontend` |
 
-Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml), pour les architectures `linux/amd64` et `linux/arm64`, avec les tags suivants :
+Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml), pour l'architecture du NAS (`linux/amd64`), avec les tags suivants :
 
 | Tag | Contenu |
 | --- | --- |
