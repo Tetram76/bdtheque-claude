@@ -1,5 +1,6 @@
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -52,6 +53,36 @@ internal static class PublisherEndpoints
         collections.MapPut("/{id:guid}", UpdateCollectionAsync);
         collections.MapChildDeletion<Publisher, PublisherCollection>(
             query => query.Include(p => p.Collections), publisher => publisher.Collections, CollectionDeletionLinks);
+    }
+
+    public static void MapPublisherLists(this RouteGroupBuilder catalog)
+    {
+        catalog.MapGet("/publishers", ListAsync);
+        catalog.MapGet("/publisher-collections", ListAllCollectionsAsync);
+    }
+
+    private static Task<Page<PublisherListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
+        context.Publishers.AsNoTracking()
+            .WhereContains(q, p => p.Name)
+            .OrderBy(p => p.Name)
+            .ThenBy(p => p.Id)
+            .ToPageAsync(page, pageSize, p => new PublisherListItem(p.Id, p.Name), cancellationToken);
+
+    /// <summary>The collections of all publishers, or of one of them (choix-implementation.md § Recherche).</summary>
+    private static Task<Page<PublisherCollectionListItem>> ListAllCollectionsAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, Guid? publisherId = null, int page = 1,
+        int pageSize = Paging.DefaultSize)
+    {
+        var collections = context.PublisherCollections.AsNoTracking().WhereContains(q, c => c.Name);
+        if (publisherId is not null)
+            collections = collections.Where(c => c.PublisherId == publisherId);
+
+        return collections
+            .OrderBy(c => c.Name)
+            .ThenBy(c => c.Publisher.Name)
+            .ThenBy(c => c.Id)
+            .ToPageAsync(page, pageSize, c => new PublisherCollectionListItem(c.Id, c.Name, c.PublisherId, c.Publisher.Name), cancellationToken);
     }
 
     private static async Task<PublisherForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>

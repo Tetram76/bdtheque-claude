@@ -1,5 +1,6 @@
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -28,6 +29,16 @@ internal static class GenreEndpoints
         genres.MapPut("/{id:guid}", UpdateAsync);
         genres.MapDeletion<Genre>(DeletionLinks);
     }
+
+    public static void MapGenreList(this RouteGroupBuilder catalog) => catalog.MapGet("/genres", ListAsync);
+
+    private static Task<Page<GenreListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
+        context.Genres.AsNoTracking()
+            .WhereContains(q, g => g.Label)
+            .OrderBy(g => g.Label)
+            .ThenBy(g => g.Id)
+            .ToPageAsync(page, pageSize, g => new GenreListItem(g.Id, g.Label), cancellationToken);
 
     private static async Task<GenreForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
         await context.Genres

@@ -54,6 +54,10 @@ Les genres et univers affichés pour un album dépendent de son rattachement à 
 
 Les genres et univers sont optionnels sur l'album comme sur la série.
 
+### Hiérarchie des univers
+
+Un élément rattaché à un univers est **de facto rattaché aux univers parents** de cet univers, à tous les niveaux de la hiérarchie : les éléments rattachés à un univers comprennent ceux qui sont rattachés à ses sous-univers (ex. une recherche des albums d'un univers remonte aussi ceux de ses sous-univers).
+
 ### Ordre des albums dans une série
 
 Les albums d'une série sont toujours présentés dans l'ordre suivant :
