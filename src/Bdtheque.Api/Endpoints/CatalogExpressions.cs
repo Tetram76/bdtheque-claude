@@ -9,7 +9,7 @@ namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// Expressions shared by the lists and records of the consultation — what the labels of an album and of
-/// an edition are built from, the membership of the collection, the order of the albums —, written once and
+/// an edition are built from, the membership of the collection, the purchase intents, the order of the albums —, written once and
 /// inserted into each query (choix-implementation.md § Recherche).
 /// </summary>
 /// <remarks>
@@ -22,8 +22,11 @@ internal static class CatalogExpressions
     /// <summary>Marker of <see cref="CollectionMembership.IsOwned"/>, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static bool IsOwned(this Edition edition) => throw NotExpanded();
 
-    /// <summary>Marker of whether a purchase intent targets the edition, for <see cref="Expand{TSource, TResult}"/> only.</summary>
-    public static bool IsTargetedByPurchaseIntent(this Edition edition) => throw NotExpanded();
+    /// <summary>Marker of a purchase intent as presented, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static PurchaseIntentItem ToItem(this PurchaseIntent intent) => throw NotExpanded();
+
+    /// <summary>Marker of the purchase intent targeting the edition, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static PurchaseIntentItem? PurchaseIntentOf(this Edition edition) => throw NotExpanded();
 
     /// <summary>Marker of the entry of a universe, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static UniverseListItem ToListItem(this Universe universe) => throw NotExpanded();
@@ -68,11 +71,16 @@ internal static class CatalogExpressions
             .ThenBy(c => c.Id)
             .Select(c => new ContributionItem(
                 new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym),
-                EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value));
+                EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value,
+                c.CreatedAt,
+                c.ModifiedAt));
+
+    private static readonly Expression<Func<PurchaseIntent, PurchaseIntentItem>> PurchaseIntentItemOf =
+        p => new PurchaseIntentItem(p.Id, p.CreatedAt, p.ModifiedAt);
 
     // The intents of an album carry its identifier, those on its editions included.
-    private static readonly Expression<Func<Edition, bool>> IsTargetedByPurchaseIntentOf =
-        e => e.Album.PurchaseIntents.Any(p => p.EditionId == e.Id);
+    private static readonly Expression<Func<Edition, PurchaseIntentItem?>> PurchaseIntentOfEdition =
+        e => e.Album.PurchaseIntents.Where(p => p.EditionId == e.Id).Select(p => p.ToItem()).FirstOrDefault();
 
     /// <summary>Replaces every marker method of <paramref name="expression"/> by the expression it stands for.</summary>
     public static Expression<Func<TSource, TResult>> Expand<TSource, TResult>(Expression<Func<TSource, TResult>> expression) =>
@@ -116,7 +124,8 @@ internal static class CatalogExpressions
             LambdaExpression? expression = node.Method.DeclaringType != typeof(CatalogExpressions) ? null : node.Method.Name switch
             {
                 nameof(IsOwned) => CollectionMembership.IsOwned,
-                nameof(IsTargetedByPurchaseIntent) => IsTargetedByPurchaseIntentOf,
+                nameof(ToItem) => PurchaseIntentItemOf,
+                nameof(PurchaseIntentOf) => PurchaseIntentOfEdition,
                 nameof(ToListItem) => UniverseListItemOf,
                 nameof(ToItems) => ContributionItemsOf,
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,

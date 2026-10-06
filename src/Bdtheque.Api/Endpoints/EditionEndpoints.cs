@@ -75,7 +75,7 @@ internal static class EditionEndpoints
                               Edition = e.ToSummary(),
                               Entity = e,
                               IsInCollection = e.IsOwned(),
-                              IsTargetedByPurchaseIntent = e.IsTargetedByPurchaseIntent(),
+                              PurchaseIntent = e.PurchaseIntentOf(),
                           }))
                           .AsSplitQuery()
                           .SingleOrDefaultAsync(cancellationToken)
@@ -84,7 +84,7 @@ internal static class EditionEndpoints
         var visuals = e.GetOrderedVisuals()
             .Select(v => new EditionVisualItem(
                 v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder, VisualStorage.OriginalPath(v.MediaReference),
-                VisualStorage.DisplayPath(v.MediaReference)))
+                VisualStorage.DisplayPath(v.MediaReference), v.CreatedAt, v.ModifiedAt))
             .ToList();
 
         return new EditionDetail(
@@ -110,7 +110,7 @@ internal static class EditionEndpoints
             e.PersonalReference,
             e.PersonalNotes,
             edition.IsInCollection,
-            edition.IsTargetedByPurchaseIntent,
+            edition.PurchaseIntent,
             visuals,
             e.CreatedAt,
             e.ModifiedAt);

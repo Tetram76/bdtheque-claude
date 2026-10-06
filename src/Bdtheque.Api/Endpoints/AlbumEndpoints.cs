@@ -73,8 +73,8 @@ internal static class AlbumEndpoints
                     .Select(u => u.ToListItem()).ToList(),
                 a.Contributions.ToItems().ToList(),
                 a.Editions.OrderBy(e => e.PublicationYear).ThenBy(e => e.Id)
-                    .Select(e => new AlbumEditionItem(e.ToSummary(), e.IsOwned(), e.IsTargetedByPurchaseIntent())).ToList(),
-                a.PurchaseIntents.Any(p => p.EditionId == null),
+                    .Select(e => new AlbumEditionItem(e.ToSummary(), e.IsOwned(), e.PurchaseIntentOf())).ToList(),
+                a.PurchaseIntents.Where(p => p.EditionId == null).Select(p => p.ToItem()).FirstOrDefault(),
                 a.CreatedAt,
                 a.ModifiedAt)))
             .AsSplitQuery()

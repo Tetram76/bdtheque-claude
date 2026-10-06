@@ -36,7 +36,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
             AlbumRating.VeryGood, [aventure.Id, humour.Id], [champignac.Id],
             [new(jije.Id, ContributionRole.Scenarist), new(franquin.Id, ContributionRole.Illustrator), new(franquin.Id, ContributionRole.Scenarist)]));
         var owned = await CreateOwnedEditionAsync(album.Id, dupuis.Id, 1960);
-        var intended = await CreateIntendedEditionAsync(album.Id, dupuis.Id, 2010);
+        var (intended, intent) = await CreateIntendedEditionAsync(album.Id, dupuis.Id, 2010);
 
         var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}");
 
@@ -50,34 +50,37 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal(
             [new UniverseListItem(champignac.Id, "Champignac", spirou.Id, "Spirou"), new UniverseListItem(spirou.Id, "Spirou", null, null)],
             detail.Universes);
-        // By role, then by author.
+        // By role, then by author; created with the album, untouched since.
         Assert.Equal(
             [
-                new ContributionItem(new AuthorListItem(franquin.Id, "Franquin", "André", null), ContributionRole.Scenarist),
-                new ContributionItem(new AuthorListItem(jije.Id, "Gillain", "Joseph", null), ContributionRole.Scenarist),
-                new ContributionItem(new AuthorListItem(franquin.Id, "Franquin", "André", null), ContributionRole.Illustrator),
+                (new AuthorListItem(franquin.Id, "Franquin", "André", null), ContributionRole.Scenarist),
+                (new AuthorListItem(jije.Id, "Gillain", "Joseph", null), ContributionRole.Scenarist),
+                (new AuthorListItem(franquin.Id, "Franquin", "André", null), ContributionRole.Illustrator),
             ],
-            detail.Contributions);
+            detail.Contributions.Select(c => (c.Author, c.Role)));
+        Assert.All(detail.Contributions, c => Assert.Equal((detail.CreatedAt, detail.CreatedAt), (c.CreatedAt, c.ModifiedAt)));
         Assert.Equal(
             [
-                new AlbumEditionItem(new EditionSummary(owned.Id, dupuis.Id, dupuis.Name, null, null, 1960, null), true, false),
-                new AlbumEditionItem(new EditionSummary(intended, dupuis.Id, dupuis.Name, null, null, 2010, null), false, true),
+                (new EditionSummary(owned.Id, dupuis.Id, dupuis.Name, null, null, 1960, null), true, (Guid?)null),
+                (new EditionSummary(intended, dupuis.Id, dupuis.Name, null, null, 2010, null), false, intent),
             ],
-            detail.Editions);
-        Assert.False(detail.IsTargetedByPurchaseIntent);
+            detail.Editions.Select(e => (e.Edition, e.IsInCollection, e.PurchaseIntent?.Id)));
+        AssertCreatedAfter(detail.CreatedAt, detail.Editions[1].PurchaseIntent!);
+        Assert.Null(detail.PurchaseIntent);
     }
 
     [Fact]
     public async Task Album_NotInTheCollection_SaysSoAndShowsItsIntentOnTheWholeAlbum()
     {
         var album = await CreateAlbumAsync("Album sans édition", null);
-        await PostAsync<PurchaseIntentsForm>(
+        var intents = await PostAsync<PurchaseIntentsForm>(
             $"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, album.Version));
 
         var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}");
 
         Assert.False(detail.Album.IsInCollection);
-        Assert.True(detail.IsTargetedByPurchaseIntent);
+        Assert.Equal(Assert.Single(intents.Intents).Id, detail.PurchaseIntent!.Id);
+        AssertCreatedAfter(detail.CreatedAt, detail.PurchaseIntent);
         Assert.Empty(detail.Editions);
         Assert.Empty(detail.Genres);
     }
@@ -118,10 +121,11 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal(new PublisherCollectionListItem(collection.Id, "Lucky Luke", dargaud.Id, dargaud.Name), detail.PublisherCollection);
         Assert.Equal(
             [
-                new ContributionItem(new AuthorListItem(goscinny.Id, "Goscinny", "René", null), ContributionRole.Scenarist),
-                new ContributionItem(new AuthorListItem(morris.Id, "De Bevere", "Maurice", null), ContributionRole.Illustrator),
+                (new AuthorListItem(goscinny.Id, "Goscinny", "René", null), ContributionRole.Scenarist),
+                (new AuthorListItem(morris.Id, "De Bevere", "Maurice", null), ContributionRole.Illustrator),
             ],
-            detail.Contributions);
+            detail.Contributions.Select(c => (c.Author, c.Role)));
+        Assert.All(detail.Contributions, c => Assert.Equal((detail.CreatedAt, detail.CreatedAt), (c.CreatedAt, c.ModifiedAt)));
         Assert.Equal([new GenreListItem(genre.Id, genre.Label)], detail.Genres);
         Assert.Equal([new UniverseListItem(universe.Id, "Far West", null, null)], detail.Universes);
         Assert.Equal(("Lucky Luke", (SeriesStatus?)null, (int?)null, false), (detail.Title, detail.Status, detail.TheoreticalVolumeCount, detail.IsComplete));
@@ -153,8 +157,10 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
 
         Assert.Equal(new AlbumSummary(album.Id, "Le Lotus bleu", null, null, AlbumType.Regular, false, null, null, null, true), detail.Album);
         Assert.Equal(new EditionSummary(edition.Id, publisher.Id, publisher.Name, null, null, 1946, "978-2-203-00104-9"), detail.Edition);
-        Assert.Equal((AcquisitionMode.Purchase, true, false), (detail.AcquisitionMode, detail.IsInCollection, detail.IsTargetedByPurchaseIntent));
-        Assert.Equal([cover, plate, backCover], detail.Visuals);
+        Assert.Equal((AcquisitionMode.Purchase, true), (detail.AcquisitionMode, detail.IsInCollection));
+        Assert.Null(detail.PurchaseIntent);
+        Assert.Equal([cover, plate, backCover], detail.Visuals.Select(v => v with { CreatedAt = default, ModifiedAt = default }));
+        Assert.All(detail.Visuals, v => AssertCreatedAfter(detail.CreatedAt, (v.CreatedAt, v.ModifiedAt)));
     }
 
     [Fact]
@@ -162,11 +168,11 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     {
         var publisher = await CreatePublisherAsync("Glénat");
         var album = await CreateAlbumAsync("Album visé", null);
-        var intended = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2020);
+        var (intended, intent) = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2020);
 
         var detail = await GetAsync<EditionDetail>($"/catalog/editions/{intended}");
 
-        Assert.Equal((null, false, true), ((AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection, detail.IsTargetedByPurchaseIntent));
+        Assert.Equal((null, false, intent), ((AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection, detail.PurchaseIntent?.Id));
         Assert.Empty(detail.Visuals);
     }
 
@@ -294,18 +300,29 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
                     AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null),
                 await GetAlbumVersionAsync(albumId)));
 
-    /// <returns>The identifier of the edition targeted by the intent, not owned.</returns>
-    private async Task<Guid> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? publicationYear)
+    /// <returns>The edition targeted by the intent, not owned, and the intent.</returns>
+    private async Task<(Guid Edition, Guid Intent)> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? publicationYear)
     {
         var intents = await PostAsync<PurchaseIntentsForm>(
             $"/admin/albums/{albumId}/purchase-intents",
             new CreatePurchaseIntentRequest(
                 new PurchaseIntentEditionContent(publisherId, null, publicationYear, null, null, null, null, null, null, null, true),
                 await GetAlbumVersionAsync(albumId)));
-        return intents.Intents.Single(i => i.EditionId is not null).EditionId!.Value;
+        var intent = intents.Intents.Single(i => i.EditionId is not null);
+        return (intent.EditionId!.Value, intent.Id);
     }
 
-    /// <returns>The visual uploaded, as the consultation presents it.</returns>
+    /// <summary>A record carried by another, created after it and untouched since.</summary>
+    private static void AssertCreatedAfter(DateTimeOffset carrierCreatedAt, PurchaseIntentItem intent) =>
+        AssertCreatedAfter(carrierCreatedAt, (intent.CreatedAt, intent.ModifiedAt));
+
+    private static void AssertCreatedAfter(DateTimeOffset carrierCreatedAt, (DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt) dates)
+    {
+        Assert.True(dates.CreatedAt > carrierCreatedAt);
+        Assert.Equal(dates.CreatedAt, dates.ModifiedAt);
+    }
+
+    /// <returns>The visual uploaded, as the consultation presents it, without its dates.</returns>
     private async Task<EditionVisualItem> UploadAsync(Guid albumId, Guid editionId, VisualType type)
     {
         var form = new MultipartFormDataContent
@@ -317,7 +334,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var response = await _client.PostAsync($"/admin/albums/{albumId}/editions/{editionId}/visuals", form);
         response.EnsureSuccessStatusCode();
         var visual = (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals.Single(v => v.Type == type);
-        return new EditionVisualItem(visual.Id, visual.Type, visual.DisplayOrder, visual.OriginalPath, visual.DisplayPath);
+        return new EditionVisualItem(visual.Id, visual.Type, visual.DisplayOrder, visual.OriginalPath, visual.DisplayPath, default, default);
     }
 
     private async Task<uint> GetAlbumVersionAsync(Guid albumId) =>
