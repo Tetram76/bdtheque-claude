@@ -325,19 +325,60 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// </summary>
     public PurchaseIntent AddPurchaseIntent(Edition edition)
     {
-        EnsureOwnEdition(edition);
-        // An edition already bought cannot become an intent again: a second copy is recorded as
-        // a new edition of the album, which then carries the intent (fonctionnel.md § Intention
-        // d'achat).
-        if (edition.AcquisitionMode is not null)
-            throw new DomainRuleViolationException(
-                DomainRules.PurchaseIntentEditionAlreadyOwned, "An edition already owned cannot be targeted by a purchase intent.");
+        EnsureTargetable(edition);
         EnsureNotTargetedAsWhole();
-        if (_purchaseIntents.Any(p => p.EditionId == edition.Id))
-            throw new DomainRuleViolationException(
-                DomainRules.PurchaseIntentEditionAlreadyTargeted, "This edition is already targeted by a purchase intent.");
 
         return AddIntent(edition);
+    }
+
+    /// <summary>
+    /// Removes an intent of this album. An intent on an edition takes the edition along: an edition
+    /// not owned and its intent are inseparable (fonctionnel.md § Intention d'achat).
+    /// </summary>
+    public void RemovePurchaseIntent(PurchaseIntent intent)
+    {
+        EnsureOwnIntent(intent);
+        _purchaseIntents.Remove(intent);
+        if (intent.EditionId is { } editionId)
+            _editions.RemoveAll(e => e.Id == editionId);
+    }
+
+    /// <summary>
+    /// Converts the intent on the whole album into an intent on <paramref name="edition"/>, an edition
+    /// of the album neither owned nor targeted yet (fonctionnel.md § Intention d'achat).
+    /// </summary>
+    /// <exception cref="ArgumentException">The intent does not target the whole album.</exception>
+    public PurchaseIntent ConvertPurchaseIntentToEdition(PurchaseIntent intent, Edition edition)
+    {
+        EnsureOwnIntent(intent);
+        // The client only offers this conversion for an intent on the whole album.
+        if (intent.EditionId is not null)
+            throw new ArgumentException("Only an intent on the whole album converts into an intent on an edition.", nameof(intent));
+        EnsureTargetable(edition);
+
+        _purchaseIntents.Remove(intent);
+        return AddIntent(edition);
+    }
+
+    /// <summary>
+    /// Converts an intent on an edition into an intent on the whole album, which removes the edition
+    /// targeted, not owned (fonctionnel.md § Intention d'achat). Refused while other editions of the
+    /// album are targeted: an intent on the whole album excludes them.
+    /// </summary>
+    /// <exception cref="ArgumentException">The intent already targets the whole album.</exception>
+    public PurchaseIntent ConvertPurchaseIntentToAlbum(PurchaseIntent intent)
+    {
+        EnsureOwnIntent(intent);
+        // The client only offers this conversion for an intent on an edition.
+        if (intent.EditionId is null)
+            throw new ArgumentException("Only an intent on an edition converts into an intent on the whole album.", nameof(intent));
+        if (_purchaseIntents.Count > 1)
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentEditionsAlreadyTargeted,
+                "An intent on the whole album excludes the intents recorded on the other editions.");
+
+        RemovePurchaseIntent(intent);
+        return AddIntent(null);
     }
 
     /// <summary>
@@ -388,6 +429,29 @@ public sealed class Album : EntityBase, IAggregateRoot
         ArgumentNullException.ThrowIfNull(edition);
         if (edition.AlbumId != Id)
             throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
+    }
+
+    // A programming error, not a business one: the client only sends back the intents it read on
+    // this album.
+    private void EnsureOwnIntent(PurchaseIntent intent)
+    {
+        ArgumentNullException.ThrowIfNull(intent);
+        if (!_purchaseIntents.Contains(intent))
+            throw new ArgumentException("The intent does not belong to this album.", nameof(intent));
+    }
+
+    private void EnsureTargetable(Edition edition)
+    {
+        EnsureOwnEdition(edition);
+        // An edition already bought cannot become an intent again: a second copy is recorded as
+        // a new edition of the album, which then carries the intent (fonctionnel.md § Intention
+        // d'achat).
+        if (edition.AcquisitionMode is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentEditionAlreadyOwned, "An edition already owned cannot be targeted by a purchase intent.");
+        if (_purchaseIntents.Any(p => p.EditionId == edition.Id))
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentEditionAlreadyTargeted, "This edition is already targeted by a purchase intent.");
     }
 
     // Only reachable from the Edition constructor, the single way to create an edition of this album.

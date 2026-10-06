@@ -71,6 +71,14 @@ public sealed record CreateEditionRequest(EditionContent Content, uint AlbumVers
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>
 public sealed record UpdateEditionRequest(EditionContent Content, uint AlbumVersion);
 
+/// <summary>
+/// Confirms the purchase of an edition targeted by an intent (fonctionnel.md § Réalisation d'une
+/// intention): the edition, with its acquisition, which realizes the intent.
+/// </summary>
+/// <param name="Content">The whole edition, whose acquisition mode is required.</param>
+/// <param name="AlbumVersion">Version of the album the form was read at.</param>
+public sealed record AcquireEditionRequest(EditionContent Content, uint AlbumVersion);
+
 /// <summary>Result of the check of an ISBN during entry (fonctionnel.md § Validation de l'ISBN).</summary>
 /// <param name="IsChecksumValid">Whether the check digit is consistent: a warning only, never a refusal.</param>
 public sealed record IsbnCheck(bool IsChecksumValid);

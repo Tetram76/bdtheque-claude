@@ -112,7 +112,8 @@ internal static class AggregateDeletion
         BdthequeDbContext context, VisualStorage storage, Guid id, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
         CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot =>
-        DeleteCoreAsync<TRoot, TRoot>(context, storage, id, version, fingerprint, links, shape: null, root => root, cancellationToken);
+        DeleteCoreAsync<TRoot, TRoot>(
+            context, storage, id, version, fingerprint, links, shape: null, root => root, delete: null, cancellationToken);
 
     /// <summary>
     /// Deletes a child of an aggregate (e.g. a collection of a publisher) under the same guarantees
@@ -120,21 +121,28 @@ internal static class AggregateDeletion
     /// version guarding every write on the aggregate — then the child is deleted, and the root
     /// marked modified.
     /// </summary>
+    /// <param name="delete">
+    /// The operation of the aggregate deleting the child, when its removal does more than delete its
+    /// row (e.g. an intent on an edition takes the edition along); by default, the child is removed.
+    /// Its effect must be the one the impact announces, which the user confirmed.
+    /// </param>
+    /// <returns>The root, as written.</returns>
     /// <exception cref="EntityNotFoundException">The root does not exist, or has no such child.</exception>
-    public static Task DeleteChildAsync<TRoot, TChild>(
+    public static Task<TRoot> DeleteChildAsync<TRoot, TChild>(
         BdthequeDbContext context, VisualStorage storage, Guid rootId, Guid childId, uint version, string fingerprint,
         Func<IQueryable<TRoot>, IQueryable<TRoot>> shape, Func<TRoot, IEnumerable<TChild>> children,
-        IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken)
+        IReadOnlyList<DeletionLink> links, Action<TRoot, TChild>? delete, CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
         where TChild : EntityBase =>
-        DeleteCoreAsync<TRoot, TChild>(
+        DeleteCoreAsync(
             context, storage, rootId, version, fingerprint, links, shape,
             root => children(root).SingleOrDefault(c => c.Id == childId) ?? throw new EntityNotFoundException(typeof(TChild), childId),
-            cancellationToken);
+            delete, cancellationToken);
 
-    private static async Task DeleteCoreAsync<TRoot, TTarget>(
+    private static async Task<TRoot> DeleteCoreAsync<TRoot, TTarget>(
         BdthequeDbContext context, VisualStorage storage, Guid rootId, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
-        Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape, Func<TRoot, TTarget> target, CancellationToken cancellationToken)
+        Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape, Func<TRoot, TTarget> target, Action<TRoot, TTarget>? delete,
+        CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
         where TTarget : EntityBase
     {
@@ -158,7 +166,10 @@ internal static class AggregateDeletion
             ? []
             : await context.EditionVisuals.Where(v => visualIds.Contains(v.Id)).Select(v => v.MediaReference).ToListAsync(cancellationToken);
 
-        context.Remove(deleted);
+        if (delete is null)
+            context.Remove(deleted);
+        else
+            delete(root, deleted);
         try
         {
             await context.SaveChangesAsync(cancellationToken);
@@ -175,6 +186,7 @@ internal static class AggregateDeletion
 
         await transaction.CommitAsync(cancellationToken);
         storage.Delete(media);
+        return root;
     }
 
     private static string Fingerprint(SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>> records)

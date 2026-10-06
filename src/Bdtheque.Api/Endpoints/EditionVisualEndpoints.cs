@@ -37,7 +37,8 @@ internal static class EditionVisualEndpoints
             CancellationToken cancellationToken) =>
         {
             await AggregateDeletion.DeleteChildAsync(
-                context, storage, rootId, id, version, fingerprint, WithVisuals, VisualsOf(editionId), DeletionLinks, cancellationToken);
+                context, storage, rootId, id, version, fingerprint, WithVisuals, VisualsOf(editionId), DeletionLinks, delete: null,
+                cancellationToken);
             return TypedResults.NoContent();
         });
     }

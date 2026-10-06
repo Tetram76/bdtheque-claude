@@ -88,6 +88,10 @@ admin.MapSeries();
 admin.MapAlbums();
 admin.MapEditions();
 admin.MapEditionVisuals();
+admin.MapPurchaseIntents();
+
+var catalog = app.MapCatalog();
+catalog.MapPurchaseIntentList();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
