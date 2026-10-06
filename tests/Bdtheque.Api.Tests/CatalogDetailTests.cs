@@ -190,9 +190,32 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var detail = await GetAsync<AuthorDetail>($"/catalog/authors/{author.Id}");
 
         Assert.Equal(("Hergé", (string?)null), (detail.LastName, detail.FirstName));
-        Assert.Equal([lotus.Id, temple.Id], detail.Bibliography.Select(b => b.Album.Id));
-        Assert.Equal([ContributionRole.Scenarist], detail.Bibliography[0].Roles);
-        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], detail.Bibliography[1].Roles);
+        Assert.Equal([lotus.Id, temple.Id], detail.Albums.Select(b => b.Album.Id));
+        Assert.Equal([ContributionRole.Scenarist], detail.Albums[0].Roles);
+        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], detail.Albums[1].Roles);
+        Assert.Empty(detail.Series);
+    }
+
+    [Fact]
+    public async Task Author_PresentsTheSeriesAmongWhoseAuthorsTheyAreBySortKeyWithTheRoles()
+    {
+        var author = await CreateAuthorAsync("Uderzo", "Albert");
+        var other = await CreateAuthorAsync("Goscinny", "René");
+        var oumpah = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf(
+            "Oumpah-Pah", contributions: [new(author.Id, ContributionRole.Illustrator), new(other.Id, ContributionRole.Scenarist)]));
+        var asterix = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf(
+            "Astérix", contributions: [new(author.Id, ContributionRole.Illustrator), new(author.Id, ContributionRole.Scenarist)]));
+        await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Le Petit Nicolas", contributions: [new(other.Id, ContributionRole.Scenarist)]));
+
+        var detail = await GetAsync<AuthorDetail>($"/catalog/authors/{author.Id}");
+
+        Assert.Equal(
+            [new SeriesListItem(asterix.Id, "Astérix"), new SeriesListItem(oumpah.Id, "Oumpah-Pah")],
+            detail.Series.Select(s => s.Series));
+        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], detail.Series[0].Roles);
+        Assert.Equal([ContributionRole.Illustrator], detail.Series[1].Roles);
+        // Template contributions credit the series only, never its albums.
+        Assert.Empty(detail.Albums);
     }
 
     [Fact]

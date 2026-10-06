@@ -44,8 +44,9 @@ internal static class AuthorEndpoints
     }
 
     /// <summary>
-    /// An author with the bibliography: the albums credited on — the source of truth of contributions,
-    /// the template of a series being only the starting point of the data entry —, each with its roles.
+    /// An author with the whole bibliography (fonctionnel.md § Structure de l'application), as two
+    /// separate lists, each entry with the roles held: the albums credited on, and the series among whose
+    /// authors the author is — its template contributions, presented as the authors of the series.
     /// </summary>
     private static async Task<AuthorDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
@@ -55,17 +56,22 @@ internal static class AuthorEndpoints
                          .SingleOrDefaultAsync(cancellationToken)
                      ?? throw new EntityNotFoundException(typeof(Author), id);
 
-        var bibliography = await context.Albums.AsNoTracking()
+        var albums = await context.Albums.AsNoTracking()
             .Where(a => a.Contributions.Any(c => c.AuthorId == id))
             .OrderByAlbum(a => a)
-            .Select(CatalogExpressions.Expand((Album a) => new BibliographyItem(
-                a.ToSummary(),
-                a.Contributions.Where(c => c.AuthorId == id).OrderBy(c => c.Role)
-                    .Select(c => EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value).ToList())))
+            .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToSummary(), a.Contributions.RolesOf(id))))
+            .ToListAsync(cancellationToken);
+
+        var series = await context.Series.AsNoTracking()
+            .Where(s => s.TemplateContributions.Any(c => c.AuthorId == id))
+            .OrderBy(s => s.SortKey)
+            .ThenBy(s => s.Id)
+            .Select(CatalogExpressions.Expand((Series s) => new SeriesBibliographyItem(
+                new SeriesListItem(s.Id, s.Title), s.TemplateContributions.RolesOf(id))))
             .ToListAsync(cancellationToken);
 
         return new AuthorDetail(
-            id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality, bibliography, author.CreatedAt,
+            id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality, albums, series, author.CreatedAt,
             author.ModifiedAt);
     }
 

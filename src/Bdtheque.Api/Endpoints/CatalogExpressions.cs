@@ -34,6 +34,10 @@ internal static class CatalogExpressions
     /// <summary>Marker of contributions as presented, by role then by author, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static IEnumerable<ContributionItem> ToItems(this IEnumerable<Contribution> contributions) => throw NotExpanded();
 
+    /// <summary>Marker of the roles an author holds among contributions, in role order, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static List<ContractEnums.ContributionRole> RolesOf(this IEnumerable<Contribution> contributions, Guid authorId) =>
+        throw NotExpanded();
+
     /// <summary>Marker of the summary of an album, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumSummary ToSummary(this Album album) => throw NotExpanded();
 
@@ -75,6 +79,13 @@ internal static class CatalogExpressions
                 EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value,
                 c.CreatedAt,
                 c.ModifiedAt));
+
+    private static readonly Expression<Func<IEnumerable<Contribution>, Guid, List<ContractEnums.ContributionRole>>> RolesOfAuthor =
+        (contributions, authorId) => contributions
+            .Where(c => c.AuthorId == authorId)
+            .OrderBy(c => c.Role)
+            .Select(c => EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value)
+            .ToList();
 
     private static readonly Expression<Func<PurchaseIntent, PurchaseIntentItem>> PurchaseIntentItemOf =
         p => new PurchaseIntentItem(p.Id, p.CreatedAt, p.ModifiedAt);
@@ -129,6 +140,7 @@ internal static class CatalogExpressions
                 nameof(PurchaseIntentOf) => PurchaseIntentOfEdition,
                 nameof(ToListItem) => UniverseListItemOf,
                 nameof(ToItems) => ContributionItemsOf,
+                nameof(RolesOf) => RolesOfAuthor,
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
                 _ => null,
@@ -138,7 +150,10 @@ internal static class CatalogExpressions
 
             // Visited again: a shared expression may itself call markers (the summary of an album, the
             // membership of its editions).
-            return Visit(ReplacingExpressionVisitor.Replace(expression.Parameters[0], Visit(node.Arguments[0]), expression.Body));
+            var body = expression.Body;
+            for (var i = 0; i < expression.Parameters.Count; i++)
+                body = ReplacingExpressionVisitor.Replace(expression.Parameters[i], Visit(node.Arguments[i]), body);
+            return Visit(body);
         }
     }
 }
