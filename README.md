@@ -112,15 +112,16 @@ Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/do
 | `main` | État courant de la branche `main` (hors release) |
 | `sha-<commit>` | Commit précis, immuable |
 
-Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`latest` par défaut). Tant qu'aucune release n'a été publiée, seul `main` existe.
+Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`latest` par défaut). Tant qu'aucune release n'a été publiée, seul `main` existe.
 
 ### Procédure (Synology Container Manager)
 
 1. Créer sur le NAS un dossier pour le projet (ex. `/volume1/docker/bdtheque`) et y copier [`docker-compose.yml`](docker-compose.yml) et [`.env.example`](.env.example), renommé en `.env`.
 2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), `BDTHEQUE_TAG`, `FRONTEND_PORT` et `VISUELS_HOST_PATH`.
 3. Préparer le dossier des visuels (ci-dessous).
-4. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.
-5. Vérifier que l'application répond sur `http://<NAS>:<FRONTEND_PORT>/health`.
+4. Les dépôts Docker Hub étant **privés**, authentifier le NAS auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès en **lecture seule** (*Personal Access Token*, droits *Read-only*), sans quoi le téléchargement des images est refusé. En SSH : `sudo docker login -u tetram76` (le jeton tient lieu de mot de passe).
+5. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.
+6. Vérifier que l'application répond sur `http://<NAS>:<FRONTEND_PORT>/health`.
 
 **Mise à jour** : modifier `BDTHEQUE_TAG` si besoin, puis télécharger les nouvelles images et recréer les conteneurs, en SSH depuis le dossier du projet : `docker compose pull && docker compose up -d`. Le schéma de la base est mis à jour automatiquement au démarrage d'`api` ; les données (volume `db-data`) et les visuels sont conservés.
 
