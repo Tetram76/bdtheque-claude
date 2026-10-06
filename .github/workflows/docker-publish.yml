@@ -7,6 +7,9 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+  # Daily `latest` image (contraintes-techniques.md). Scheduled runs use the head of `main`.
+  schedule:
+    - cron: "17 3 * * *"
 
 permissions:
   contents: read
@@ -34,14 +37,17 @@ jobs:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # `main` follows the head of the main branch; a `vX.Y.Z` tag gives `X.Y.Z`, `X.Y` and
-      # `latest`; every image also gets an immutable `sha-<commit>` tag.
+      # `latest` is only the daily build; `main` follows the head of the main branch; a `vX.Y.Z`
+      # tag gives `X.Y.Z` and `X.Y`; every image also gets an immutable `sha-<commit>` tag.
       - name: Compute tags and labels
         id: meta
         uses: docker/metadata-action@v6
         with:
           images: tetram76/bdtheque-${{ matrix.image }}
+          flavor: |
+            latest=false
           tags: |
+            type=raw,value=latest,enable=${{ github.event_name == 'schedule' }}
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
