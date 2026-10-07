@@ -4,6 +4,7 @@
     <Project Path="src/Bdtheque.Contracts/Bdtheque.Contracts.csproj" />
     <Project Path="src/Bdtheque.Domain/Bdtheque.Domain.csproj" />
     <Project Path="src/Bdtheque.Frontend/Bdtheque.Frontend.csproj" />
+    <Project Path="src/Bdtheque.HealthProbe/Bdtheque.HealthProbe.csproj" />
     <Project Path="src/Bdtheque.Infrastructure/Bdtheque.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">

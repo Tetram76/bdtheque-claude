@@ -3,7 +3,14 @@
   <PropertyGroup>
     <RootNamespace>Bdtheque.Api</RootNamespace>
     <UserSecretsId>bdtheque-api</UserSecretsId>
+    <!-- No static file to serve: no static web assets manifest in the published output. -->
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Settings of a local run from the sources (`dotnet run`), meaningless in a container. -->
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Bdtheque.Contracts\Bdtheque.Contracts.csproj" />

@@ -22,9 +22,14 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <!-- The documentation files only serve the compiler and the development tools, never the running
-         application: kept out of the published output, hence out of the Docker images. -->
+    <!-- The published output — the content of the Docker images — holds only what the running
+         application uses (contraintes-techniques.md § Déploiement): no documentation files, which
+         only serve the compiler and the development tools; no web.config, which only IIS reads; no
+         native launcher, the images starting the application with `dotnet`. The debugging symbols
+         are left out by the Dockerfiles, which compile without them, so that local builds keep them. -->
     <PublishDocumentationFiles>false</PublishDocumentationFiles>
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+    <UseAppHost>false</UseAppHost>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 

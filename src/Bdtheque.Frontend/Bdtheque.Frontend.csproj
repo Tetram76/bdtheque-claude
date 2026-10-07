@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Settings of a local run from the sources (`dotnet run`), meaningless in a container. -->
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bdtheque.Contracts\Bdtheque.Contracts.csproj" />
   </ItemGroup>
 

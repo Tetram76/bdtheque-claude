@@ -54,7 +54,8 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 │   ├── Bdtheque.Contracts/        # DTOs échangés entre api et frontend
 │   ├── Bdtheque.Infrastructure/   # DbContext EF Core, configurations, migrations
 │   ├── Bdtheque.Api/              # Conteneur api : endpoints, sécurité, règles applicatives
-│   └── Bdtheque.Frontend/         # Conteneur frontend : composants Blazor, auth cookie
+│   ├── Bdtheque.Frontend/         # Conteneur frontend : composants Blazor, auth cookie
+│   └── Bdtheque.HealthProbe/      # Sonde du bilan de santé des images (sans shell ni curl)
 ├── tests/
 │   ├── Bdtheque.Domain.Tests/         # Tests unitaires du domaine
 │   ├── Bdtheque.Infrastructure.Tests/ # Tests de persistance (migrations, contraintes) sur PostgreSQL
