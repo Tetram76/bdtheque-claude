@@ -35,21 +35,25 @@ public sealed class EditionVisual : EntityBase
         SetDisplayOrder(displayOrder);
     }
 
-    public void SetType(VisualType type)
+    // Type and rank change through Edition.ArrangeVisuals only, which ranks the visuals of each type
+    // without gap nor duplicate.
+    internal void SetType(VisualType type)
     {
         EnumGuard.EnsureDefined(type, nameof(type));
         Type = type;
     }
 
-    public void SetMediaReference(string mediaReference) =>
+    // A media is never replaced: another file is uploaded as another visual.
+    private void SetMediaReference(string mediaReference) =>
         MediaReference = DomainText.Required(
             mediaReference, DomainRules.EditionVisualMediaReferenceRequired, "A visual must reference its media.");
 
     /// <summary>
     /// Sets the display rank among visuals of the same type (fonctionnel.md § Ordre des
-    /// visuels d'une édition) — adjustable manually by the user to reorder them.
+    /// visuels d'une édition) — adjustable manually by the user to reorder them, through
+    /// <see cref="Entities.Edition.ArrangeVisuals"/>.
     /// </summary>
-    public void SetDisplayOrder(int displayOrder)
+    internal void SetDisplayOrder(int displayOrder)
     {
         if (displayOrder < 0)
             throw new DomainRuleViolationException(DomainRules.EditionVisualDisplayOrderNotNegative, "Display order must not be negative.");

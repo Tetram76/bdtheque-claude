@@ -43,24 +43,24 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetTitle_WhenNotManual_RecomputesSortKey()
+    public void Title_WhenNotManual_RecomputesSortKey()
     {
         var album = new Album("Tintin", null);
 
-        album.SetTitle("Les Schtroumpfs");
+        SetTitle(album, "Les Schtroumpfs");
 
         Assert.Equal("Les Schtroumpfs", album.Title);
         Assert.Equal("Schtroumpfs [Les]", album.SortKey);
     }
 
     [Fact]
-    public void SetTitle_ClearedWithSeriesAttached_ClearsSortKeyAndManualFlag()
+    public void Title_ClearedWithSeriesAttached_ClearsSortKeyAndManualFlag()
     {
         var series = new Series("Tintin");
         var album = new Album("Le Lotus bleu", series);
         album.SetSortKey("Custom Key");
 
-        album.SetTitle(null);
+        SetTitle(album, null);
 
         Assert.Null(album.Title);
         Assert.Null(album.SortKey);
@@ -68,11 +68,11 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetTitle_ClearedWithoutSeries_Throws()
+    public void Title_ClearedWithoutSeries_Throws()
     {
         var album = new Album("Le Lotus bleu", null);
 
-        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => album.SetTitle(null));
+        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => SetTitle(album, null));
     }
 
     [Fact]
@@ -118,24 +118,24 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetSeries_ToNullWithTitle_Succeeds()
+    public void Series_ToNullWithTitle_Succeeds()
     {
         var series = new Series("Tintin");
         var album = new Album("Le Lotus bleu", series);
 
-        album.SetSeries(null);
+        SetSeries(album, null);
 
         Assert.Null(album.Series);
         Assert.Null(album.SeriesId);
     }
 
     [Fact]
-    public void SetSeries_ToNullWithoutTitle_Throws()
+    public void Series_ToNullWithoutTitle_Throws()
     {
         var series = new Series("Tintin");
         var album = new Album(null, series);
 
-        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => album.SetSeries(null));
+        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => SetSeries(album, null));
     }
 
     [Theory]
@@ -398,21 +398,21 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetTitle_WhenNotManual_RecomputesNavigationEntry()
+    public void Title_WhenNotManual_RecomputesNavigationEntry()
     {
         var album = new Album("Tintin", null);
 
-        album.SetTitle("2001 Nights");
+        SetTitle(album, "2001 Nights");
 
         Assert.Equal("#", album.NavigationEntry);
     }
 
     [Fact]
-    public void SetTitle_Cleared_ClearsNavigationEntry()
+    public void Title_Cleared_ClearsNavigationEntry()
     {
         var album = new Album("Le Lotus bleu", new Series("Tintin"));
 
-        album.SetTitle(null);
+        SetTitle(album, null);
 
         Assert.Null(album.NavigationEntry);
     }
@@ -428,12 +428,12 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetTitle_AfterManualSortKey_KeepsNavigationEntryOfManualSortKey()
+    public void Title_AfterManualSortKey_KeepsNavigationEntryOfManualSortKey()
     {
         var album = new Album("Tintin", null);
         album.SetSortKey("Astérix");
 
-        album.SetTitle("Les Schtroumpfs");
+        SetTitle(album, "Les Schtroumpfs");
 
         Assert.Equal("A", album.NavigationEntry);
     }
@@ -474,12 +474,12 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetSeries_AttachingAnAlbumWithoutContributions_CopiesTheSeriesTemplate()
+    public void Series_AttachingAnAlbumWithoutContributions_CopiesTheSeriesTemplate()
     {
         var (series, scenarist, illustrator) = SeriesWithTemplate();
         var album = new Album("Le Lotus bleu", null);
 
-        album.SetSeries(series);
+        SetSeries(album, series);
 
         Assert.Equal(
             [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
@@ -487,19 +487,19 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetSeries_AttachingAnAlbumWithContributions_KeepsThemAsTheyAre()
+    public void Series_AttachingAnAlbumWithContributions_KeepsThemAsTheyAre()
     {
         var (series, _, _) = SeriesWithTemplate();
         var colorist = new Author(null, null, "Studio");
         var album = new Album("Le Lotus bleu", null, [(colorist, ContributionRole.Colorist)]);
 
-        album.SetSeries(series);
+        SetSeries(album, series);
 
         Assert.Equal([(colorist.Id, ContributionRole.Colorist)], Credits(album));
     }
 
     [Fact]
-    public void SetSeries_ToTheSameSeries_DoesNotCopyTheTemplateAgain()
+    public void Series_ToTheSameSeries_DoesNotCopyTheTemplateAgain()
     {
         // The album is the source of truth once attached: contributions removed since must not
         // come back at the next save of the album.
@@ -507,7 +507,7 @@ public sealed class AlbumTests
         var album = new Album(null, series);
         album.SetTitleSeriesAndContributions(null, series, []);
 
-        album.SetSeries(series);
+        SetSeries(album, series);
 
         Assert.Empty(album.Contributions);
     }
@@ -647,6 +647,16 @@ public sealed class AlbumTests
         series.SetTemplateContributions([(scenarist, ContributionRole.Scenarist), (illustrator, ContributionRole.Illustrator)]);
         return (series, scenarist, illustrator);
     }
+
+    // Through the single operation the application uses, the album keeping its other two values.
+    private static void SetTitle(Album album, string? title) =>
+        album.SetTitleSeriesAndContributions(title, album.Series, CreditsOf(album));
+
+    private static void SetSeries(Album album, Series? series) =>
+        album.SetTitleSeriesAndContributions(album.Title, series, CreditsOf(album));
+
+    private static List<(Author Author, ContributionRole Role)> CreditsOf(Album album) =>
+        album.Contributions.Select(c => (c.Author, c.Role)).ToList();
 
     private static List<(Guid AuthorId, ContributionRole Role)> Credits(Album album) =>
         album.Contributions.Select(c => (c.AuthorId, c.Role)).OrderBy(c => c.Role).ToList();

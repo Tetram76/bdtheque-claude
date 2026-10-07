@@ -90,11 +90,11 @@ public sealed class DeleteRuleTests : IAsyncLifetime
         album.SetTitleSeriesAndContributions(album.Title, series, [(author, ContributionRole.Scenarist)]);
         var ownedEdition = new Edition(album, publisher);
         album.RecordAcquisition(ownedEdition, AcquisitionMode.Purchase);
-        ownedEdition.AddVisual(VisualType.Cover, "cover.jpg", 0);
+        ownedEdition.AppendVisual(VisualType.Cover, "cover.jpg");
         // An intent on an edition reaches the album through both of its foreign keys: deleting
         // the album must succeed whichever cascade path PostgreSQL follows first.
         var wishedEdition = new Edition(album, publisher);
-        wishedEdition.AddVisual(VisualType.Cover, "wished-cover.jpg", 0);
+        wishedEdition.AppendVisual(VisualType.Cover, "wished-cover.jpg");
         album.AddPurchaseIntent(wishedEdition);
         _fixture.Context.AddRange(series, album, author, publisher, genre, universe, ownedEdition, wishedEdition);
         await _fixture.Context.SaveChangesAsync();
@@ -121,7 +121,7 @@ public sealed class DeleteRuleTests : IAsyncLifetime
         var album = new Album("Le Lotus bleu", null);
         var publisher = new Publisher("Casterman");
         var wishedEdition = new Edition(album, publisher);
-        wishedEdition.AddVisual(VisualType.Cover, "cover.jpg", 0);
+        wishedEdition.AppendVisual(VisualType.Cover, "cover.jpg");
         album.AddPurchaseIntent(wishedEdition);
         var otherEdition = new Edition(album, publisher);
         album.RecordAcquisition(otherEdition, AcquisitionMode.Purchase);
