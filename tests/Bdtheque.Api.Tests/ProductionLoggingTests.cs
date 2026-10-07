@@ -38,11 +38,14 @@ public sealed class ProductionLoggingTests : IClassFixture<ApiWebApplicationFact
         var (logs, client) = CapturingLogs();
         var label = $"Genre {Guid.NewGuid():N}";
         (await client.PostAsJsonAsync("/admin/genres", new CreateGenreRequest(label))).EnsureSuccessStatusCode();
+        // Only what the refused request logs: the startup may legitimately warn (e.g. a visuals
+        // volume not mounted from the host, as on a Linux test machine).
+        var before = logs.Entries.Count;
 
         var response = await client.PostAsJsonAsync("/admin/genres", new CreateGenreRequest(label));
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
-        Assert.DoesNotContain(logs.Entries, e => e.Level >= LogLevel.Warning);
+        Assert.DoesNotContain(logs.Entries.Skip(before), e => e.Level >= LogLevel.Warning);
     }
 
     private (CapturingLoggerProvider Logs, HttpClient Client) CapturingLogs()
