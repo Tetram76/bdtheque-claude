@@ -80,8 +80,9 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation } } =>
             (StatusCodes.Status404NotFound, ProblemTypes.Functional, null),
 
-        // Only thrown outside Production (RouteHandlerOptions.ThrowOnBadRequest): a request the
-        // frontend built wrongly, whatever the user typed.
+        // A request the frontend built wrongly, whatever the user typed: thrown by the framework
+        // outside Production (RouteHandlerOptions.ThrowOnBadRequest), and in every environment by the
+        // handlers that read their request themselves (e.g. VisualUploadReader).
         BadHttpRequestException badRequest => (badRequest.StatusCode, ProblemTypes.Technical, null),
 
         _ => (StatusCodes.Status500InternalServerError, ProblemTypes.Technical, null),

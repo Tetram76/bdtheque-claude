@@ -13,6 +13,13 @@
          globalization support has no extra cost here. See choix-implementation.md. -->
     <InvariantGlobalization>false</InvariantGlobalization>
     <Deterministic>true</Deterministic>
+    <!-- The XML comments are checked by the compiler, a comment that refers to a parameter, type or
+         member that no longer exists failing the build: nothing else would notice it going stale.
+         Documenting every member (CS1591) or every parameter (CS1573) is not required, the comments
+         explaining the why rather than the what. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
+    <WarningsAsErrors>$(WarningsAsErrors);CS1570;CS1572;CS1574;CS1580;CS1581;CS1584;CS1587;CS1711;CS1734;CS1735</WarningsAsErrors>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
