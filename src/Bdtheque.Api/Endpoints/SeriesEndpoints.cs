@@ -87,21 +87,31 @@ internal static class SeriesEndpoints
 
     /// <summary>
     /// The series found by their title, narrowed by the cross filters (choix-implementation.md §
-    /// Recherche): credited and published through their albums, the source of truth of contributions and
-    /// editions — the template of a series is only the starting point of the data entry.
+    /// Recherche): credited, published or collected on the series itself — its contributions, publisher
+    /// and collection are data of the series as much as a template (modele-metier.md § Série —
+    /// relations) — or through its albums.
     /// </summary>
     private static async Task<Page<SeriesListItem>> ListAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, Guid? authorId = null,
-        Guid? publisherId = null, Guid? genreId = null, Guid? universeId = null, int page = 1, int pageSize = Paging.DefaultSize)
+        Guid? publisherId = null, Guid? publisherCollectionId = null, Guid? genreId = null, Guid? universeId = null, int page = 1,
+        int pageSize = Paging.DefaultSize)
     {
         CatalogFilters.EnsureNavigationEntry(entry);
         var series = context.Series.AsNoTracking().WhereContains(q, s => s.Title);
         if (entry is not null)
             series = series.Where(s => s.NavigationEntry == entry);
         if (authorId is not null)
-            series = series.Where(s => context.Albums.Any(a => a.SeriesId == s.Id && a.Contributions.Any(c => c.AuthorId == authorId)));
+            series = series.Where(s =>
+                s.TemplateContributions.Any(c => c.AuthorId == authorId)
+                || context.Albums.Any(a => a.SeriesId == s.Id && a.Contributions.Any(c => c.AuthorId == authorId)));
         if (publisherId is not null)
-            series = series.Where(s => context.Albums.Any(a => a.SeriesId == s.Id && a.Editions.Any(e => e.PublisherId == publisherId)));
+            series = series.Where(s =>
+                s.TemplatePublisherId == publisherId
+                || context.Albums.Any(a => a.SeriesId == s.Id && a.Editions.Any(e => e.PublisherId == publisherId)));
+        if (publisherCollectionId is not null)
+            series = series.Where(s =>
+                s.TemplatePublisherCollectionId == publisherCollectionId
+                || context.Albums.Any(a => a.SeriesId == s.Id && a.Editions.Any(e => e.PublisherCollectionId == publisherCollectionId)));
         if (genreId is not null)
             series = series.Where(s => s.Genres.Any(g => g.Id == genreId));
         if (universeId is not null)

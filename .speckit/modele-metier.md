@@ -53,9 +53,11 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | --- | --- | --- |
 | Série → Genre | 0..n | |
 | Série → Univers | 0..n | |
-| Série → Contribution | 0..n | Contributions template : recopiées sur un album rattaché à la série si l'album n'en a encore aucune. |
-| Série → Éditeur | 0..1 | Template pour les nouvelles éditions. |
-| Série → Collection éditeur | 0..1 | Template pour les nouvelles éditions. Si renseignée, l'éditeur template doit l'être aussi, et la collection doit lui appartenir. |
+| Série → Contribution | 0..n | Auteurs de la série, et template : recopiées sur un album rattaché à la série si l'album n'en a encore aucune. |
+| Série → Éditeur | 0..1 | Éditeur de la série, et template pour les nouvelles éditions. |
+| Série → Collection éditeur | 0..1 | Collection de la série, et template pour les nouvelles éditions. Si renseignée, l'éditeur de la série doit l'être aussi, et la collection doit lui appartenir. |
+
+> Les contributions, l'éditeur et la collection éditeur d'une série sont **autant des données de la série que des templates** : ils décrivent la série (fiche, recherche, bibliographie) au même titre que ses autres attributs, et servent en outre de point de départ à la saisie de ses albums et de leurs éditions. Les autres valeurs template (reliure, orientation, sens de lecture, format, catégorie, état, couleur) ne sont que des templates.
 
 ### Univers — relations
 
@@ -105,7 +107,7 @@ erDiagram
 
 > La **Collection utilisateur** n'est pas une entité en base. Elle est définie par le filtre `Mode d'acquisition IS NOT NULL` sur les éditions.
 >
-> **Contrainte (Contribution) :** Une contribution appartient à exactement l'un des deux : un Album (contribution réelle) ou une Série (template). Les deux références ne peuvent pas être nulles simultanément, ni renseignées toutes les deux.
+> **Contrainte (Contribution) :** Une contribution appartient à exactement l'un des deux : un Album ou une Série. Les deux références ne peuvent pas être nulles simultanément, ni renseignées toutes les deux.
 
 ---
 

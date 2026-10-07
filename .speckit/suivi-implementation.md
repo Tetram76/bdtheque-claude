@@ -80,6 +80,19 @@ Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de dev
 | ~~#84~~ | Listes et recherche de la consultation |
 | ~~#85~~ | Fiches détaillées de la consultation |
 
+### Consolidation avant la Phase 3
+
+Corrections issues de la revue complète de la Phase 2 (ticket parent #121), à réaliser avant d'ouvrir la Phase 3.
+
+| Ticket | Titre |
+| --- | --- |
+| ~~#122~~ | Filtres des séries par auteur, éditeur et collection sur les données de la série |
+| #123 | Remplacement des contributions porté par le domaine |
+| #124 | Retrait des opérations du domaine supplantées par les opérations atomiques |
+| #125 | Borne de la mémoire des traitements simultanés de visuels |
+| #126 | Maîtrise des versions de collation ICU de la base |
+| #127 | Correction et validation de la documentation du code de la Phase 2 |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle.
