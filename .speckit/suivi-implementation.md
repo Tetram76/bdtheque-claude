@@ -93,6 +93,7 @@ Corrections issues de la revue complète de la Phase 2 (ticket parent #121), à 
 | ~~#126~~ | Maîtrise des versions de collation ICU de la base |
 | ~~#127~~ | Correction et validation de la documentation du code de la Phase 2 |
 | ~~#134~~ | Optimisation des images Docker pour la production |
+| ~~#136~~ | Journalisation de production et chargement des agrégats par EF Core |
 
 ## Phase 3 — Frontend Blazor
 

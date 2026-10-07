@@ -77,7 +77,6 @@ internal static class AlbumEndpoints
                 a.PurchaseIntents.Where(p => p.EditionId == null).Select(p => p.ToItem()).FirstOrDefault(),
                 a.CreatedAt,
                 a.ModifiedAt)))
-            .AsSplitQuery()
             .SingleOrDefaultAsync(cancellationToken)
         ?? throw new EntityNotFoundException(typeof(Album), id);
 
@@ -154,10 +153,9 @@ internal static class AlbumEndpoints
         return ToForm(context, album);
     }
 
-    // The editions, intents and contributions are always loaded with the album (AlbumConfiguration);
-    // split, so that the collections are not joined into a single cartesian result.
+    // The editions, intents and contributions are always loaded with the album (AlbumConfiguration).
     private static IQueryable<Album> WithAssociations(IQueryable<Album> query) =>
-        query.Include(a => a.Genres).Include(a => a.Universes).AsSplitQuery();
+        query.Include(a => a.Genres).Include(a => a.Universes);
 
     // With its template contributions and their authors: attaching an album with no contribution to
     // the series credits them on the album.

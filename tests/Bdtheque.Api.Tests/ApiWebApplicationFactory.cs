@@ -1,9 +1,13 @@
 using System.Globalization;
 using Bdtheque.Api.Security;
+using Bdtheque.Infrastructure;
 using Bdtheque.Testing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Api.Tests;
 
@@ -49,6 +53,9 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
                 ["Visuals:RootPath"] = VisualsRoot,
                 ["Visuals:MaxFileSizeBytes"] = MaxVisualFileSizeBytes.ToString(CultureInfo.InvariantCulture),
             }));
+
+        builder.ConfigureTestServices(services =>
+            services.ConfigureDbContext<BdthequeDbContext>(options => StrictQueryWarnings.Apply(options)));
     }
 
     async Task IAsyncLifetime.DisposeAsync()

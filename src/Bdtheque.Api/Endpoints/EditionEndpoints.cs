@@ -77,7 +77,6 @@ internal static class EditionEndpoints
                               IsInCollection = e.IsOwned(),
                               PurchaseIntent = e.PurchaseIntentOf(),
                           }))
-                          .AsSplitQuery()
                           .SingleOrDefaultAsync(cancellationToken)
                       ?? throw new EntityNotFoundException(typeof(Edition), id);
         var e = edition.Entity;
