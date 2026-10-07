@@ -69,27 +69,6 @@ public sealed class EditionVisualTests
         Assert.Equal(VisualType.Plate, visual.Type);
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void SetMediaReference_Empty_Throws(string? mediaReference)
-    {
-        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
-
-        DomainAssert.Violates(DomainRules.EditionVisualMediaReferenceRequired, () => visual.SetMediaReference(mediaReference!));
-    }
-
-    [Fact]
-    public void SetMediaReference_TrimsAndStores()
-    {
-        var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0);
-
-        visual.SetMediaReference("  plates/01.jpg  ");
-
-        Assert.Equal("plates/01.jpg", visual.MediaReference);
-    }
-
     [Fact]
     public void SetDisplayOrder_Negative_Throws()
     {

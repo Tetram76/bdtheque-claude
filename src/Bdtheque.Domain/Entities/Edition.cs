@@ -266,7 +266,9 @@ public sealed class Edition : EntityBase
         EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, IsAlbumDated);
     }
 
-    public EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder)
+    // Internal: a rank chosen by the caller could duplicate another; the application adds a visual
+    // after those of its type (AppendVisual) and reorders them by ArrangeVisuals.
+    internal EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder)
     {
         var visual = new EditionVisual(this, type, mediaReference, displayOrder);
         _visuals.Add(visual);

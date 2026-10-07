@@ -92,19 +92,6 @@ public sealed class Album : EntityBase, IAggregateRoot
                 DomainRules.AlbumTitleRequiredWithoutSeries, "An album must have a title when it is not attached to a series.");
     }
 
-    public void SetTitle(string? title)
-    {
-        var normalized = DomainText.NullIfBlank(title);
-        EnsureTitleOrSeries(normalized, Series);
-        ApplyTitle(normalized);
-    }
-
-    public void SetSeries(Series? series)
-    {
-        EnsureTitleOrSeries(Title, series);
-        AttachSeries(series);
-    }
-
     /// <summary>
     /// Sets the title, the series and the contributions together, as the form sends them: each
     /// depends on another — the title is required without a series, and attaching an album with no
@@ -342,16 +329,6 @@ public sealed class Album : EntityBase, IAggregateRoot
 
         RemovePurchaseIntent(intent);
         return AddIntent(null);
-    }
-
-    /// <summary>
-    /// Records the acquisition of one of this album's editions with <paramref name="mode"/> alone, as
-    /// the confirmation of a purchase does: the edition, not owned, has neither date nor amount yet.
-    /// </summary>
-    public void RecordAcquisition(Edition edition, AcquisitionMode mode)
-    {
-        ArgumentNullException.ThrowIfNull(edition);
-        RecordAcquisition(edition, new EditionAcquisition(mode, null, null, null, edition.IsFree, null, null));
     }
 
     /// <summary>

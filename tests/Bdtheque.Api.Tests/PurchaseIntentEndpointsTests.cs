@@ -429,8 +429,8 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
         var edition = await context.Editions.SingleAsync(e => e.Id == editionId);
-        for (var order = 0; order < count; order++)
-            context.Add(edition.AddVisual(DomainEnums.VisualType.Plate, $"{Guid.NewGuid():N}.jpg", order));
+        for (var i = 0; i < count; i++)
+            context.Add(edition.AppendVisual(DomainEnums.VisualType.Plate, $"{Guid.NewGuid():N}.jpg"));
         await context.SaveChangesAsync();
     }
 }

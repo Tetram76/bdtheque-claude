@@ -633,8 +633,8 @@ public sealed class ModelCreationTests : IAsyncLifetime
     [Fact]
     public async Task Album_LoadedFromDatabase_ComesWithItsContributions()
     {
-        // Attaching an album to a series copies the series' contributions only if the album has
-        // none: an album loaded without them would receive the copy on top of its own credits.
+        // The contributions of the form replace those of the album, which are kept when unchanged:
+        // an album loaded without them would credit its own contribution a second time.
         var album = new Album("Spirou", null);
         var author = new Author("Franquin", "André", null);
         album.SetTitleSeriesAndContributions(album.Title, null, [(author, ContributionRole.Illustrator)]);
@@ -648,7 +648,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var reloadedSeries = await _fixture.Context.Series
             .Include(s => s.TemplateContributions).ThenInclude(c => c.Author)
             .SingleAsync(s => s.Id == series.Id);
-        reloaded.SetSeries(reloadedSeries);
+        reloaded.SetTitleSeriesAndContributions(reloaded.Title, reloadedSeries, [(author, ContributionRole.Illustrator)]);
         await _fixture.Context.SaveChangesAsync();
 
         var saved = await _fixture.Context.Contributions.Where(c => c.AlbumId == album.Id).ToListAsync();
@@ -661,7 +661,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Astérix", null);
         var publisher = new Publisher("Dargaud");
         var edition = new Edition(album, publisher);
-        var visual = edition.AddVisual(VisualType.Cover, "covers/asterix-01.jpg", 1);
+        var visual = edition.AppendVisual(VisualType.Cover, "covers/asterix-01.jpg");
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);
@@ -676,7 +676,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
 
         Assert.Equal(VisualType.Cover, saved.Type);
         Assert.Equal("covers/asterix-01.jpg", saved.MediaReference);
-        Assert.Equal(1, saved.DisplayOrder);
+        Assert.Equal(0, saved.DisplayOrder);
         Assert.Equal(edition.Id, saved.EditionId);
     }
 
@@ -711,7 +711,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         _fixture.Context.ChangeTracker.Clear();
 
         var reloaded = await _fixture.Context.Editions.Include(e => e.Visuals).FirstAsync(e => e.Id == edition.Id);
-        reloaded.AddVisual(VisualType.BackCover, "back-covers/gaston-01.jpg", 0);
+        reloaded.AppendVisual(VisualType.BackCover, "back-covers/gaston-01.jpg");
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
@@ -730,7 +730,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Spirou", null);
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
-        var visual = edition.AddVisual(VisualType.Endpaper, "endpapers/spirou-01.jpg", 0);
+        var visual = edition.AppendVisual(VisualType.Endpaper, "endpapers/spirou-01.jpg");
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);
