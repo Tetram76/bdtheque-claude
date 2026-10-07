@@ -23,4 +23,23 @@ public sealed class StartupMigrationTests : IClassFixture<ApiWebApplicationFacto
         Assert.Empty(await database.GetPendingMigrationsAsync());
         Assert.Equal(database.GetMigrations(), await database.GetAppliedMigrationsAsync());
     }
+
+    [Fact]
+    public async Task Startup_AfterAChangeOfIcu_RebuildsTheIndexesOfTheCollations()
+    {
+        // An update of the database image may bring another version of ICU, which PostgreSQL only
+        // warns about: the api container's startup is the only step every deployment goes through.
+        _ = _factory.Server;
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.ExecuteSqlAsync(
+                $"UPDATE pg_collation SET collversion = '0.0' WHERE collname = {BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}");
+        }
+
+        await using var restarted = _factory.WithWebHostBuilder(_ => { });
+        _ = restarted.Server;
+
+        await using var check = restarted.Services.CreateAsyncScope();
+        Assert.Empty(await CollationVersions.RefreshAsync(check.ServiceProvider.GetRequiredService<BdthequeDbContext>(), CancellationToken.None));
+    }
 }

@@ -126,6 +126,14 @@ Les dépôts sont privés : leur téléchargement exige une authentification (cf
 
 **Mise à jour** : modifier `BDTHEQUE_TAG` si besoin, puis télécharger les nouvelles images et recréer les conteneurs, en SSH depuis le dossier du projet : `docker compose pull && docker compose up -d`. Le schéma de la base est mis à jour automatiquement au démarrage d'`api` ; les données (volume `db-data`) et les visuels sont conservés.
 
+**Mise à jour de l'image PostgreSQL** : une nouvelle image `postgres` peut embarquer une autre version d'ICU, qui définit le tri et la comparaison des textes. Au démarrage, `api` le détecte et reconstruit alors tous les index de la base, ce que son journal signale par un avertissement (`The version of the collations … changed`). Si un index unique ne peut pas être reconstruit — deux libellés de genre devenus égaux sous la nouvelle définition —, `api` refuse de démarrer et son journal nomme l'index en cause (`IX_Genres_Label`). Il faut alors renommer l'un des genres en double, puis redémarrer `api`. En SSH, depuis le dossier du projet :
+
+```bash
+docker compose exec db psql -U bdtheque -d bdtheque -c 'SELECT array_agg("Id"), array_agg("Label") FROM "Genres" GROUP BY "Label" HAVING count(*) > 1'
+```
+
+liste les genres devenus égaux, avec leurs identifiants (utilisateur et base selon `POSTGRES_USER` et `POSTGRES_DB`). Renommer l'un d'eux par son identifiant — la comparaison des libellés ignorant la casse et les accents, une condition sur le libellé les viserait tous —, par `UPDATE "Genres" SET "Label" = '…' WHERE "Id" = '…'`, puis `docker compose restart api`.
+
 ### Dossier des visuels
 
 Les visuels (couvertures, planches, etc.) sont stockés sur un dossier du NAS monté dans les conteneurs, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.

@@ -54,7 +54,16 @@ var app = builder.Build();
 // empty while the health check only verifies connectivity.
 using (var migrationScope = app.Services.CreateScope())
 {
-    migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.Migrate();
+    var context = migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
+    context.Database.Migrate();
+
+    // An update of the database image may bring another version of ICU, which PostgreSQL only warns
+    // about while the indexes of the text columns may be corrupt: rebuilt here, the one step every
+    // deployment goes through (choix-implementation.md § Collation des colonnes texte).
+    var refreshed = await CollationVersions.RefreshAsync(context, CancellationToken.None);
+    if (refreshed.Count > 0)
+        app.Logger.LogWarning(
+            "The version of the collations {Collations} changed with the database image: every index was rebuilt.", refreshed);
 }
 
 // The deployment can guarantee neither that the visuals volume is writable nor that it is mounted

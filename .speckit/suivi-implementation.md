@@ -90,7 +90,7 @@ Corrections issues de la revue complète de la Phase 2 (ticket parent #121), à 
 | ~~#123~~ | Remplacement des contributions porté par le domaine |
 | ~~#124~~ | Retrait des opérations du domaine supplantées par les opérations atomiques |
 | ~~#125~~ | Borne de la mémoire des traitements simultanés de visuels |
-| #126 | Maîtrise des versions de collation ICU de la base |
+| ~~#126~~ | Maîtrise des versions de collation ICU de la base |
 | #127 | Correction et validation de la documentation du code de la Phase 2 |
 
 ## Phase 3 — Frontend Blazor
