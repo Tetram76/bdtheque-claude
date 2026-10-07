@@ -32,13 +32,13 @@ public sealed record AlbumDetail(
 /// <summary>An author credited with a role; a contribution has no record of its own.</summary>
 public sealed record ContributionItem(Guid Id, AuthorListItem Author, ContributionRole Role, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
 
-/// <param name="IsInCollection">Whether the edition is owned (fonctionnel.md § Appartenance à la collection).</param>
 /// <summary>
 /// A purchase intent, which has no record of its own: its target is the album, or the edition, whose
 /// record carries it (fonctionnel.md § Structure de l'application).
 /// </summary>
 public sealed record PurchaseIntentItem(Guid Id, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
 
+/// <param name="IsInCollection">Whether the edition is owned (fonctionnel.md § Appartenance à la collection).</param>
 /// <param name="PurchaseIntent">The purchase intent targeting the edition, which is then not owned, if any.</param>
 public sealed record AlbumEditionItem(EditionSummary Edition, bool IsInCollection, PurchaseIntentItem? PurchaseIntent);
 
