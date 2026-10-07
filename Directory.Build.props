@@ -21,7 +21,10 @@
          (CS1573) is not required, the comments explaining the why rather than the what. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- The documentation files only serve the compiler and the development tools, never the running
+         application: kept out of the published output, hence out of the Docker images. -->
+    <PublishDocumentationFiles>false</PublishDocumentationFiles>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
