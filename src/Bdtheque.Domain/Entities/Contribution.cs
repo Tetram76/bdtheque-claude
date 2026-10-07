@@ -43,7 +43,8 @@ public sealed class Contribution : EntityBase
     }
 
     // Both factories are internal: a contribution belongs to its owner, which alone creates it
-    // (Album.AddContribution, Series.AddTemplateContribution) and so sees every credit it holds.
+    // (Album.SetTitleSeriesAndContributions, Series.SetTemplateContributions) and so sees every
+    // credit it holds.
 
     /// <summary>Creates a real contribution credited on a specific album.</summary>
     internal static Contribution ForAlbum(Album album, Author author, ContributionRole role)
@@ -62,9 +63,32 @@ public sealed class Contribution : EntityBase
         return new Contribution(null, series, author, role);
     }
 
-    public void SetRole(ContributionRole role)
+    /// <summary>
+    /// Replaces the contributions of an owner by <paramref name="credits"/>, as its form sends them
+    /// whole: a contribution already credited is kept as it is, so that saving unchanged credits writes
+    /// none of them. Nothing is changed if any credit is refused.
+    /// </summary>
+    /// <param name="create">Creates a contribution of the owner, for a credit it does not hold yet.</param>
+    internal static void Replace(
+        List<Contribution> contributions, IReadOnlyCollection<(Author Author, ContributionRole Role)> credits,
+        Func<Author, ContributionRole, Contribution> create)
     {
-        EnumGuard.EnsureDefined(role, nameof(role));
-        Role = role;
+        ArgumentNullException.ThrowIfNull(credits);
+        foreach (var (author, role) in credits)
+        {
+            ArgumentNullException.ThrowIfNull(author, nameof(credits));
+            EnumGuard.EnsureDefined(role, nameof(credits));
+        }
+
+        // Same comparison as the partial unique indexes of the contributions: reported here so that
+        // the mistake is caught before the database.
+        var wanted = credits.Select(c => (AuthorId: c.Author.Id, c.Role)).ToList();
+        if (wanted.Count != wanted.Distinct().Count())
+            throw new DomainRuleViolationException(
+                DomainRules.ContributionAlreadyCredited, "An author cannot be credited twice with the same role.");
+
+        contributions.RemoveAll(c => !wanted.Contains((c.AuthorId, c.Role)));
+        foreach (var (author, role) in credits.Where(w => !contributions.Exists(c => c.AuthorId == w.Author.Id && c.Role == w.Role)))
+            contributions.Add(create(author, role));
     }
 }

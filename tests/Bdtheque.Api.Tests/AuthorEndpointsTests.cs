@@ -202,20 +202,15 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
         var author = await context.Authors.SingleAsync(a => a.Id == authorId);
         ContributionRole[] roles = [ContributionRole.Scenarist, ContributionRole.Illustrator, ContributionRole.Colorist];
+        var credits = roles.Take(rolesPerRecord).Select(role => (author, role)).ToList();
         for (var i = 0; i < albums; i++)
-        {
-            var album = new Album(UniqueName(), null);
-            context.Albums.Add(album);
-            foreach (var role in roles.Take(rolesPerRecord))
-                album.AddContribution(author, role);
-        }
+            context.Albums.Add(new Album(UniqueName(), null, credits));
 
         for (var i = 0; i < series; i++)
         {
             var oneSeries = new Series(UniqueName());
+            oneSeries.SetTemplateContributions(credits);
             context.Series.Add(oneSeries);
-            foreach (var role in roles.Take(rolesPerRecord))
-                oneSeries.AddTemplateContribution(author, role);
         }
 
         await context.SaveChangesAsync();

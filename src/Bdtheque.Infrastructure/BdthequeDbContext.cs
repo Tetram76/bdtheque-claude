@@ -68,14 +68,34 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        StampAuditDates();
+        PrepareSave();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        StampAuditDates();
+        PrepareSave();
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void PrepareSave()
+    {
+        ChangeTracker.DetectChanges();
+        DeleteSeveredContributions();
+        StampAuditDates();
+    }
+
+    // A contribution removed by its owner (Album.SetTitleSeriesAndContributions,
+    // Series.SetTemplateContributions) is part of it, and goes with its removal. Its relationship to
+    // either owner being optional — it has two, exclusive —, EF Core nulls its foreign key instead of
+    // deleting the orphan, which CK_Contributions_ExactlyOneOfAlbumOrSeries refuses: deleted here, the
+    // single place every save goes through, rather than by each caller of the domain.
+    private void DeleteSeveredContributions()
+    {
+        foreach (var entry in ChangeTracker.Entries<Contribution>()
+                     .Where(e => e.State == EntityState.Modified && e.Entity.AlbumId is null && e.Entity.SeriesId is null)
+                     .ToList())
+            entry.State = EntityState.Deleted;
     }
 
     // Creation and last modification dates are set here, never entered (modele-metier.md §
@@ -84,7 +104,6 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     // date follows any change to its children or associations.
     private void StampAuditDates()
     {
-        ChangeTracker.DetectChanges();
         var now = DateTimeOffset.UtcNow;
         // Truncated to PostgreSQL's microsecond precision, so the tracked value is the stored one.
         now = now.AddTicks(-(now.Ticks % (TimeSpan.TicksPerMillisecond / 1000)));

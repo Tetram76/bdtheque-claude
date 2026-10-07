@@ -42,7 +42,7 @@ public sealed class Series : EntityBase, IAggregateRoot
     private readonly List<Universe> _universes = [];
     public IReadOnlyCollection<Universe> Universes => _universes;
 
-    // The template contributions belong to the series: only AddTemplateContribution creates one.
+    // The contributions belong to the series: only SetTemplateContributions creates or removes one.
     private readonly List<Contribution> _templateContributions = [];
     public IReadOnlyCollection<Contribution> TemplateContributions => _templateContributions;
 
@@ -114,26 +114,13 @@ public sealed class Series : EntityBase, IAggregateRoot
 
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
 
-    /// <summary>Credits an author with a role on the series template, once per author and role.</summary>
-    public Contribution AddTemplateContribution(Author author, ContributionRole role)
-    {
-        ArgumentNullException.ThrowIfNull(author);
-        // Same comparison as the partial unique index of the series: reported here too so that the
-        // mistake is caught before the database, whatever the order the changes are saved in.
-        if (_templateContributions.Any(c => c.AuthorId == author.Id && c.Role == role))
-            throw new DomainRuleViolationException(
-                DomainRules.ContributionAlreadyCredited, "This author is already credited with this role on the series template.");
-
-        var contribution = Contribution.ForSeriesTemplate(this, author, role);
-        _templateContributions.Add(contribution);
-        return contribution;
-    }
-
-    public void RemoveTemplateContribution(Contribution contribution)
-    {
-        ArgumentNullException.ThrowIfNull(contribution);
-        _templateContributions.RemoveAll(c => c.Id == contribution.Id);
-    }
+    /// <summary>
+    /// Replaces the contributions of the series — its authors, and the starting point of the credits
+    /// of an album attached to it (modele-metier.md § Série — relations) — as the form sends them
+    /// whole. A contribution already credited is kept as it is; nothing is changed if any is refused.
+    /// </summary>
+    public void SetTemplateContributions(IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions) =>
+        Contribution.Replace(_templateContributions, contributions, (author, role) => Contribution.ForSeriesTemplate(this, author, role));
 
     public void SetTemplateBinding(BindingType? binding)
     {

@@ -399,11 +399,12 @@ public sealed class ModelCreationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddContribution_ForAlbum_Persists()
+    public async Task ContributionOfAnAlbum_Persists()
     {
         var album = new Album("Le Lotus bleu", null);
         var author = new Author(null, null, "Hergé");
-        var contribution = album.AddContribution(author, ContributionRole.Scenarist);
+        album.SetTitleSeriesAndContributions(album.Title, null, [(author, ContributionRole.Scenarist)]);
+        var contribution = album.Contributions.Single();
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Authors.Add(author);
@@ -423,11 +424,12 @@ public sealed class ModelCreationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddContribution_ForSeriesTemplate_Persists()
+    public async Task ContributionOfASeries_Persists()
     {
         var series = new Series("Tintin");
         var author = new Author(null, null, "Hergé");
-        var contribution = series.AddTemplateContribution(author, ContributionRole.Illustrator);
+        series.SetTemplateContributions([(author, ContributionRole.Illustrator)]);
+        var contribution = series.TemplateContributions.Single();
 
         _fixture.Context.Series.Add(series);
         _fixture.Context.Authors.Add(author);
@@ -446,12 +448,50 @@ public sealed class ModelCreationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddContribution_WithRole_PersistsEnumAsExplicitInt()
+    public async Task ContributionRemovedByItsAlbum_IsDeleted()
+    {
+        var removed = new Author(null, null, "Hergé");
+        var kept = new Author(null, null, "Jacobs");
+        var album = new Album("Le Lotus bleu", null, [(removed, ContributionRole.Scenarist), (kept, ContributionRole.Illustrator)]);
+        _fixture.Context.AddRange(album, removed, kept);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Albums.SingleAsync(a => a.Id == album.Id);
+        reloaded.SetTitleSeriesAndContributions(reloaded.Title, null, [(kept, ContributionRole.Illustrator)]);
+        await _fixture.Context.SaveChangesAsync();
+
+        var saved = await _fixture.Context.Contributions.AsNoTracking().ToListAsync();
+        Assert.Equal([(album.Id, kept.Id, ContributionRole.Illustrator)], saved.Select(c => (c.AlbumId!.Value, c.AuthorId, c.Role)));
+    }
+
+    [Fact]
+    public async Task ContributionRemovedByItsSeries_IsDeleted()
+    {
+        var removed = new Author(null, null, "Hergé");
+        var kept = new Author(null, null, "Jacobs");
+        var series = new Series("Tintin");
+        series.SetTemplateContributions([(removed, ContributionRole.Scenarist), (kept, ContributionRole.Illustrator)]);
+        _fixture.Context.AddRange(series, removed, kept);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var reloaded = await _fixture.Context.Series.Include(s => s.TemplateContributions).SingleAsync(s => s.Id == series.Id);
+        reloaded.SetTemplateContributions([(kept, ContributionRole.Illustrator)]);
+        await _fixture.Context.SaveChangesAsync();
+
+        var saved = await _fixture.Context.Contributions.AsNoTracking().ToListAsync();
+        Assert.Equal([(series.Id, kept.Id, ContributionRole.Illustrator)], saved.Select(c => (c.SeriesId!.Value, c.AuthorId, c.Role)));
+    }
+
+    [Fact]
+    public async Task ContributionRole_PersistsEnumAsExplicitInt()
     {
         // Confirms the project-wide enum-as-int convention also applies to Contribution.Role.
         var album = new Album("Astérix", null);
         var author = new Author(null, null, "Goscinny");
-        var contribution = album.AddContribution(author, ContributionRole.Colorist);
+        album.SetTitleSeriesAndContributions(album.Title, null, [(author, ContributionRole.Colorist)]);
+        var contribution = album.Contributions.Single();
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Authors.Add(author);
@@ -597,9 +637,9 @@ public sealed class ModelCreationTests : IAsyncLifetime
         // none: an album loaded without them would receive the copy on top of its own credits.
         var album = new Album("Spirou", null);
         var author = new Author("Franquin", "André", null);
-        album.AddContribution(author, ContributionRole.Illustrator);
+        album.SetTitleSeriesAndContributions(album.Title, null, [(author, ContributionRole.Illustrator)]);
         var series = new Series("Spirou et Fantasio");
-        series.AddTemplateContribution(author, ContributionRole.Scenarist);
+        series.SetTemplateContributions([(author, ContributionRole.Scenarist)]);
         _fixture.Context.AddRange(album, author, series);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();

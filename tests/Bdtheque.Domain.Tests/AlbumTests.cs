@@ -450,49 +450,6 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void AddContribution_RegistersItWithTheAlbum()
-    {
-        var album = new Album("Tintin", null);
-
-        var contribution = album.AddContribution(new Author(null, null, "Hergé"), ContributionRole.Scenarist);
-
-        Assert.Same(contribution, Assert.Single(album.Contributions));
-    }
-
-    [Fact]
-    public void AddContribution_SameAuthorAndRoleTwice_Throws()
-    {
-        var album = new Album("Tintin", null);
-        var author = new Author(null, null, "Hergé");
-        album.AddContribution(author, ContributionRole.Scenarist);
-
-        DomainAssert.Violates(DomainRules.ContributionAlreadyCredited, () => album.AddContribution(author, ContributionRole.Scenarist));
-    }
-
-    [Fact]
-    public void AddContribution_SameAuthorWithAnotherRole_IsAccepted()
-    {
-        var album = new Album("Tintin", null);
-        var author = new Author(null, null, "Hergé");
-        album.AddContribution(author, ContributionRole.Scenarist);
-
-        album.AddContribution(author, ContributionRole.Illustrator);
-
-        Assert.Equal(2, album.Contributions.Count);
-    }
-
-    [Fact]
-    public void RemoveContribution_DropsItFromTheAlbum()
-    {
-        var album = new Album("Tintin", null);
-        var contribution = album.AddContribution(new Author(null, null, "Hergé"), ContributionRole.Scenarist);
-
-        album.RemoveContribution(contribution);
-
-        Assert.Empty(album.Contributions);
-    }
-
-    [Fact]
     public void Constructor_InASeriesWithTemplateContributions_CopiesThemOntoTheAlbum()
     {
         var (series, scenarist, illustrator) = SeriesWithTemplate();
@@ -533,9 +490,8 @@ public sealed class AlbumTests
     public void SetSeries_AttachingAnAlbumWithContributions_KeepsThemAsTheyAre()
     {
         var (series, _, _) = SeriesWithTemplate();
-        var album = new Album("Le Lotus bleu", null);
         var colorist = new Author(null, null, "Studio");
-        album.AddContribution(colorist, ContributionRole.Colorist);
+        var album = new Album("Le Lotus bleu", null, [(colorist, ContributionRole.Colorist)]);
 
         album.SetSeries(series);
 
@@ -549,8 +505,7 @@ public sealed class AlbumTests
         // come back at the next save of the album.
         var (series, _, _) = SeriesWithTemplate();
         var album = new Album(null, series);
-        foreach (var contribution in album.Contributions.ToList())
-            album.RemoveContribution(contribution);
+        album.SetTitleSeriesAndContributions(null, series, []);
 
         album.SetSeries(series);
 
@@ -610,14 +565,24 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetTitleSeriesAndContributions_ReplacesTheContributions_KeepingTheUnchangedOnes()
+    public void SetTitleSeriesAndContributions_SameAuthorWithAnotherRole_IsAccepted()
     {
         var album = new Album("Le Lotus bleu", null);
+        var author = new Author(null, null, "Hergé");
+
+        album.SetTitleSeriesAndContributions("Le Lotus bleu", null, [(author, ContributionRole.Scenarist), (author, ContributionRole.Illustrator)]);
+
+        Assert.Equal(2, album.Contributions.Count);
+    }
+
+    [Fact]
+    public void SetTitleSeriesAndContributions_ReplacesTheContributions_KeepingTheUnchangedOnes()
+    {
         var kept = new Author(null, null, "Hergé");
         var dropped = new Author(null, null, "Jacobs");
         var added = new Author(null, null, "Studio");
-        var keptContribution = album.AddContribution(kept, ContributionRole.Scenarist);
-        album.AddContribution(dropped, ContributionRole.Illustrator);
+        var album = new Album("Le Lotus bleu", null, [(kept, ContributionRole.Scenarist), (dropped, ContributionRole.Illustrator)]);
+        var keptContribution = album.Contributions.Single(c => c.AuthorId == kept.Id);
 
         album.SetTitleSeriesAndContributions("Le Lotus bleu", null, [(kept, ContributionRole.Scenarist), (added, ContributionRole.Colorist)]);
 
@@ -631,8 +596,7 @@ public sealed class AlbumTests
         // The album's contributions are those of the form: emptied by the form while the album is
         // attached to a series, they are taken from the series as a starting point.
         var (series, scenarist, illustrator) = SeriesWithTemplate();
-        var album = new Album("Le Lotus bleu", null);
-        album.AddContribution(new Author(null, null, "Studio"), ContributionRole.Colorist);
+        var album = new Album("Le Lotus bleu", null, [(new Author(null, null, "Studio"), ContributionRole.Colorist)]);
 
         album.SetTitleSeriesAndContributions("Le Lotus bleu", series, []);
 
@@ -680,8 +644,7 @@ public sealed class AlbumTests
         var series = new Series("Tintin");
         var scenarist = new Author(null, null, "Hergé");
         var illustrator = new Author(null, null, "Jacobs");
-        series.AddTemplateContribution(scenarist, ContributionRole.Scenarist);
-        series.AddTemplateContribution(illustrator, ContributionRole.Illustrator);
+        series.SetTemplateContributions([(scenarist, ContributionRole.Scenarist), (illustrator, ContributionRole.Illustrator)]);
         return (series, scenarist, illustrator);
     }
 

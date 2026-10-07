@@ -119,23 +119,10 @@ public sealed class Album : EntityBase, IAggregateRoot
     public void SetTitleSeriesAndContributions(
         string? title, Series? series, IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions)
     {
-        ArgumentNullException.ThrowIfNull(contributions);
         var normalizedTitle = DomainText.NullIfBlank(title);
         EnsureTitleOrSeries(normalizedTitle, series);
-        foreach (var (author, role) in contributions)
-        {
-            ArgumentNullException.ThrowIfNull(author, nameof(contributions));
-            EnumGuard.EnsureDefined(role, nameof(contributions));
-        }
 
-        var credits = contributions.Select(c => (AuthorId: c.Author.Id, c.Role)).ToList();
-        if (credits.Count != credits.Distinct().Count())
-            throw new DomainRuleViolationException(
-                DomainRules.ContributionAlreadyCredited, "An author cannot be credited twice with the same role on the album.");
-
-        _contributions.RemoveAll(c => !credits.Contains((c.AuthorId, c.Role)));
-        foreach (var (author, role) in contributions.Where(c => !IsCredited(c.Author, c.Role)))
-            _contributions.Add(Contribution.ForAlbum(this, author, role));
+        Contribution.Replace(_contributions, contributions, (author, role) => Contribution.ForAlbum(this, author, role));
         AttachSeries(series);
         ApplyTitle(normalizedTitle);
     }
@@ -270,30 +257,6 @@ public sealed class Album : EntityBase, IAggregateRoot
     public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
 
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
-
-    /// <summary>Credits an author with a role on the album, once per author and role.</summary>
-    public Contribution AddContribution(Author author, ContributionRole role)
-    {
-        ArgumentNullException.ThrowIfNull(author);
-        // Same comparison as the partial unique index of the album: reported here too so that the
-        // mistake is caught before the database, whatever the order the changes are saved in.
-        if (IsCredited(author, role))
-            throw new DomainRuleViolationException(
-                DomainRules.ContributionAlreadyCredited, "This author is already credited with this role on the album.");
-
-        var contribution = Contribution.ForAlbum(this, author, role);
-        _contributions.Add(contribution);
-        return contribution;
-    }
-
-    public void RemoveContribution(Contribution contribution)
-    {
-        ArgumentNullException.ThrowIfNull(contribution);
-        _contributions.RemoveAll(c => c.Id == contribution.Id);
-    }
-
-    private bool IsCredited(Author author, ContributionRole role) =>
-        _contributions.Exists(c => c.AuthorId == author.Id && c.Role == role);
 
     public void SetRating(AlbumRating? rating)
     {

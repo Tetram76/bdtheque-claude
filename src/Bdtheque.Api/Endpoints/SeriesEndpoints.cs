@@ -2,7 +2,6 @@ using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
-using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -197,28 +196,7 @@ internal static class SeriesEndpoints
         var universes = await FormReferences.LoadAsync(context.Universes, content.UniverseIds, cancellationToken);
         FormReferences.ReplaceAssociations(series.Universes, universes, series.AddUniverse, series.RemoveUniverse);
 
-        await ApplyContributionsAsync(series, content.Contributions, context, cancellationToken);
-    }
-
-    // The contributions already credited are kept as they are, so that saving a series whose
-    // contributions did not change writes none of them.
-    private static async Task ApplyContributionsAsync(
-        Series series, IReadOnlyList<ContributionContent> requested, BdthequeDbContext context, CancellationToken cancellationToken)
-    {
-        var wanted = requested.Select(c => (c.AuthorId, Role: EnumMapping.Map<DomainEnums.ContributionRole>(c.Role)!.Value)).ToList();
-        if (wanted.Count != wanted.Distinct().Count())
-            throw new DomainRuleViolationException(
-                DomainRules.ContributionAlreadyCredited, "An author cannot be credited twice with the same role on the series template.");
-
-        var credits = await FormReferences.LoadContributionsAsync(context, requested, cancellationToken);
-        foreach (var stale in series.TemplateContributions.Where(c => !wanted.Contains((c.AuthorId, c.Role))).ToList())
-        {
-            series.RemoveTemplateContribution(stale);
-            context.Contributions.Remove(stale);
-        }
-
-        foreach (var (author, role) in credits.Where(w => !series.TemplateContributions.Any(c => (c.AuthorId, c.Role) == (w.Author.Id, w.Role))))
-            series.AddTemplateContribution(author, role);
+        series.SetTemplateContributions(await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken));
     }
 
     private static SeriesForm ToForm(BdthequeDbContext context, Series series) =>
