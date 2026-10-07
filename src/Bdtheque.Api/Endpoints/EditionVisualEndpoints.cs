@@ -55,14 +55,15 @@ internal static class EditionVisualEndpoints
 
     /// <summary>
     /// Uploads a visual (form fields: <see cref="UploadVisualFields"/>), placed after the visuals of its
-    /// type. The file is read, validated and converted in memory before anything is written; its files
-    /// are written just before the row, and deleted right away if the row cannot be saved
-    /// (choix-implementation.md § Visuels : stockage et traitement).
+    /// type. The file is read, validated and converted in memory before anything is written, one upload
+    /// at a time (<see cref="VisualUploadGate"/>); its files are written just before the row, and deleted
+    /// right away if the row cannot be saved (choix-implementation.md § Visuels : stockage et traitement).
     /// </summary>
     private static async Task<Created<EditionVisualsForm>> UploadAsync(
-        Guid rootId, Guid editionId, HttpRequest request,
-        BdthequeDbContext context, VisualStorage storage, IOptions<VisualStorageOptions> options, CancellationToken cancellationToken)
+        Guid rootId, Guid editionId, HttpRequest request, BdthequeDbContext context, VisualStorage storage, VisualUploadGate gate,
+        IOptions<VisualStorageOptions> options, CancellationToken cancellationToken)
     {
+        using var turn = await gate.EnterAsync(cancellationToken);
         var upload = await VisualUploadReader.ReadAsync(request, options.Value.MaxFileSizeBytes, cancellationToken);
         var prepared = VisualImage.Prepare(upload.File);
 

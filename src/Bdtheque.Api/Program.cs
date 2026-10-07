@@ -42,6 +42,7 @@ builder.Services.AddOptions<VisualStorageOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 builder.Services.AddSingleton<VisualStorage>();
+builder.Services.AddSingleton<VisualUploadGate>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<VisualReconciliation>();
 builder.Services.AddHostedService(services => services.GetRequiredService<VisualReconciliation>());

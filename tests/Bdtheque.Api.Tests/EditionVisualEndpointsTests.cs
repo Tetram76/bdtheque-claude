@@ -68,6 +68,25 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     }
 
     [Fact]
+    public async Task Upload_WaitsForTheUploadUnderWay_ThenSucceeds()
+    {
+        // An upload holds a whole scan in memory, decoded: whatever the client sends at once, the
+        // uploads are processed one at a time, the others waiting without being refused.
+        var edition = await CreateEditionAsync();
+        var gate = _factory.Services.GetRequiredService<VisualUploadGate>();
+
+        Task<HttpResponseMessage> waiting;
+        using (await gate.EnterAsync(CancellationToken.None))
+        {
+            waiting = PostUploadAsync(edition, SmallJpeg(), VisualType.Cover, edition.AlbumVersion);
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            Assert.False(waiting.IsCompleted);
+        }
+
+        Assert.Equal(HttpStatusCode.Created, (await waiting).StatusCode);
+    }
+
+    [Fact]
     public async Task Upload_NotAnImage_IsABusinessErrorAndWritesNothing()
     {
         var edition = await CreateEditionAsync();
