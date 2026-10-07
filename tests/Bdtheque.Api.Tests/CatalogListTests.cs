@@ -153,19 +153,29 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         var universe = await CreateUniverseAsync($"Univers {_marker}", null);
         var subUniverse = await CreateUniverseAsync($"Sous-univers {_marker}", universe.Id);
 
-        // Credited and published through their albums, the source of truth of contributions and
-        // editions: the template of a series is only the starting point of the data entry.
+        var collection = await CreateCollectionAsync(publisher, $"Collection {_marker}");
+
+        // Credited and published through their albums, or on the series itself: its contributions,
+        // publisher and collection are data of the series as much as a template (modele-metier.md §
+        // Série — relations).
         var throughAlbums = await CreateSeriesAsync($"Alpha {_marker}");
         var album = await CreateAlbumAsync(null, throughAlbums.Id, 1, contributions: [new ContributionContent(author.Id, ContributionRole.Illustrator)]);
-        await CreateOwnedEditionAsync(album.Id, publisher.Id);
+        await CreateOwnedEditionAsync(album.Id, publisher.Id, collection.Id);
         var classified = await CreateSeriesAsync($"Bravo {_marker}", genreIds: [genre.Id], universeIds: [subUniverse.Id]);
-        await CreateSeriesAsync(
+        var ownCredits = await CreateSeriesAsync(
             $"Charlie {_marker}",
             template: NoTemplate with { PublisherId = publisher.Id },
             contributions: [new ContributionContent(author.Id, ContributionRole.Scenarist)]);
+        var ownCollection = await CreateSeriesAsync(
+            $"Delta {_marker}", template: NoTemplate with { PublisherId = publisher.Id, PublisherCollectionId = collection.Id });
 
-        Assert.Equal([throughAlbums.Id], Ids(await ListAsync<SeriesListItem>("series", $"q={_marker}&authorId={author.Id}")));
-        Assert.Equal([throughAlbums.Id], Ids(await ListAsync<SeriesListItem>("series", $"q={_marker}&publisherId={publisher.Id}")));
+        Assert.Equal([throughAlbums.Id, ownCredits.Id], Ids(await ListAsync<SeriesListItem>("series", $"q={_marker}&authorId={author.Id}")));
+        Assert.Equal(
+            [throughAlbums.Id, ownCredits.Id, ownCollection.Id],
+            Ids(await ListAsync<SeriesListItem>("series", $"q={_marker}&publisherId={publisher.Id}")));
+        Assert.Equal(
+            [throughAlbums.Id, ownCollection.Id],
+            Ids(await ListAsync<SeriesListItem>("series", $"q={_marker}&publisherCollectionId={collection.Id}")));
         Assert.Equal([classified.Id], Ids(await ListAsync<SeriesListItem>("series", $"q={_marker}&genreId={genre.Id}")));
         Assert.Equal([classified.Id], Ids(await ListAsync<SeriesListItem>("series", $"q={_marker}&universeId={universe.Id}")));
     }
