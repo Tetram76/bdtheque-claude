@@ -147,12 +147,7 @@ internal static class AlbumEndpoints
         var series = await LoadSeriesAsync(content.SeriesId, context, cancellationToken);
         var contributions = await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken);
 
-        var previousContributions = album.Contributions.ToList();
         album.SetTitleSeriesAndContributions(content.Title, series, contributions);
-        // Removed from the album, a contribution would otherwise only lose its owner: it is part of
-        // the album, and deleted with its removal.
-        context.Contributions.RemoveRange(previousContributions.Where(c => !album.Contributions.Contains(c)));
-
         await ApplyAsync(album, content, context, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

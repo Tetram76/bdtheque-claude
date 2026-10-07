@@ -348,50 +348,78 @@ public sealed class SeriesTests
     }
 
     [Fact]
-    public void AddTemplateContribution_CreditsTheAuthorOnTheSeriesTemplate()
+    public void SetTemplateContributions_CreditsTheAuthorsOnTheSeriesOnly()
     {
         var series = new Series("Tintin");
         var author = new Author("Hergé", null, null);
 
-        var contribution = series.AddTemplateContribution(author, ContributionRole.Illustrator);
+        series.SetTemplateContributions([(author, ContributionRole.Illustrator)]);
 
-        Assert.Same(contribution, Assert.Single(series.TemplateContributions));
+        var contribution = Assert.Single(series.TemplateContributions);
+        Assert.Same(series, contribution.Series);
+        Assert.Same(author, contribution.Author);
         Assert.Equal((series.Id, null, author.Id, ContributionRole.Illustrator),
             (contribution.SeriesId, contribution.AlbumId, contribution.AuthorId, contribution.Role));
     }
 
     [Fact]
-    public void AddTemplateContribution_SameAuthorWithAnotherRole_IsAccepted()
+    public void SetTemplateContributions_KeepsTheContributionsAlreadyCreditedAndDropsTheOthers()
+    {
+        // Saving unchanged contributions must write none of them.
+        var series = new Series("Tintin");
+        var kept = new Author("Hergé", null, null);
+        var dropped = new Author("Jacobs", null, null);
+        series.SetTemplateContributions([(kept, ContributionRole.Scenarist), (dropped, ContributionRole.Illustrator)]);
+        var keptContribution = series.TemplateContributions.Single(c => c.AuthorId == kept.Id);
+        var added = new Author(null, null, "Studio");
+
+        series.SetTemplateContributions([(kept, ContributionRole.Scenarist), (added, ContributionRole.Colorist)]);
+
+        Assert.Equal(
+            [(kept.Id, ContributionRole.Scenarist), (added.Id, ContributionRole.Colorist)],
+            series.TemplateContributions.Select(c => (c.AuthorId, c.Role)));
+        Assert.Same(keptContribution, series.TemplateContributions.First());
+    }
+
+    [Fact]
+    public void SetTemplateContributions_SameAuthorWithAnotherRole_IsAccepted()
     {
         var series = new Series("Tintin");
         var author = new Author("Hergé", null, null);
-        series.AddTemplateContribution(author, ContributionRole.Illustrator);
 
-        series.AddTemplateContribution(author, ContributionRole.Scenarist);
+        series.SetTemplateContributions([(author, ContributionRole.Illustrator), (author, ContributionRole.Scenarist)]);
 
         Assert.Equal(2, series.TemplateContributions.Count);
     }
 
     [Fact]
-    public void AddTemplateContribution_SameAuthorAndRoleTwice_Throws()
+    public void SetTemplateContributions_SameAuthorAndRoleTwice_IsRefusedAndChangesNothing()
     {
         var series = new Series("Tintin");
         var author = new Author("Hergé", null, null);
-        series.AddTemplateContribution(author, ContributionRole.Illustrator);
+        series.SetTemplateContributions([(author, ContributionRole.Scenarist)]);
+        var before = series.TemplateContributions.ToList();
 
         DomainAssert.Violates(
             DomainRules.ContributionAlreadyCredited,
-            () => series.AddTemplateContribution(author, ContributionRole.Illustrator));
+            () => series.SetTemplateContributions([(author, ContributionRole.Illustrator), (author, ContributionRole.Illustrator)]));
+        Assert.Equal(before, series.TemplateContributions);
     }
 
     [Fact]
-    public void RemoveTemplateContribution_DropsItFromTheTemplate()
+    public void SetTemplateContributions_NullAuthor_Throws()
     {
         var series = new Series("Tintin");
-        var contribution = series.AddTemplateContribution(new Author("Hergé", null, null), ContributionRole.Illustrator);
 
-        series.RemoveTemplateContribution(contribution);
+        Assert.Throws<ArgumentNullException>(() => series.SetTemplateContributions([(null!, ContributionRole.Scenarist)]));
+    }
 
-        Assert.Empty(series.TemplateContributions);
+    [Fact]
+    public void SetTemplateContributions_UndefinedRole_Throws()
+    {
+        var series = new Series("Tintin");
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => series.SetTemplateContributions([(new Author("Hergé", null, null), (ContributionRole)42)]));
     }
 }
