@@ -26,7 +26,9 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
-      ConnectionStrings__Bdtheque: Host=db;Port=5432;Database=${POSTGRES_DB:-bdtheque};Username=${POSTGRES_USER:-bdtheque};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      # GSS encryption (Kerberos) disabled: `db` is only reachable over the internal network, with a
+      # password, and its library is missing from the chiseled image (see choix-implementation.md).
+      ConnectionStrings__Bdtheque: Host=db;Port=5432;Database=${POSTGRES_DB:-bdtheque};Username=${POSTGRES_USER:-bdtheque};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required};GSS Encryption Mode=Disable
       InternalApiKey__Key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
     volumes:
       - ${VISUELS_HOST_PATH:-./data/visuels}:/app/visuels
