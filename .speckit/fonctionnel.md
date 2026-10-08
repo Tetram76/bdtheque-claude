@@ -319,27 +319,22 @@ Statistique **envisagée** : rien n'est statué, elle n'est pas à implémenter 
 
 ## Design et charte graphique
 
-L'interface doit offrir un rendu **visuellement premium**, clairement au-dessus du rendu par défaut des frameworks UI. Un template de base (Bootstrap, Material out-of-the-box, etc.) n'est pas acceptable.
+L'interface doit offrir un rendu **soigné et personnel**, clairement au-dessus du rendu par défaut des frameworks UI. Un template de base (Bootstrap, Material out-of-the-box, etc.) n'est pas acceptable.
 
-### Identité visuelle
-
-- **Thème** : dark first — fond sombre, accents lumineux.
-- **Couleur d'accent** : ambre chaud (évoque l'impression et la presse BD classique).
-- **Typographie** : serif élégant pour les titres (ex. *Playfair Display*), sans-serif moderne pour le corps (ex. *Inter*).
-- **Visuels** : les couvertures d'albums sont le principal élément visuel — elles doivent être mises en valeur (hero, cards avec effet au survol, profondeur).
-- **Esthétique générale** : médiathèque culturelle premium (référence : Letterboxd).
+La charte graphique, la présentation de chaque écran et leurs maquettes de référence sont décrites dans le dossier [`visuel/`](visuel/) : [`charte-graphique.md`](visuel/charte-graphique.md), puis un fichier par écran (ex. [`dashboard.md`](visuel/dashboard.md)).
 
 ## Page d'accueil
 
 La page d'accueil est un **dashboard public** présentant les statistiques principales de la collection. Elle n'est pas personnalisée (pas d'authentification sur la partie consultation). Certaines statistiques pourront être présentées sous forme de **graphiques** lorsque c'est pertinent.
 
-Le détail exact du dashboard reste à définir. Étant public, il n'affiche que des statistiques de niveau **public** (cf. § Règles d'accès) : il est considéré comme **purement public** dans un premier temps, sans variante pour une session authentifiée. Afficher aussi des données privées dans une session authentifiée est une ouverture **envisagée**, si une raison particulière le justifiait, mais **rien n'est statué** : elle n'est pas à implémenter tant qu'elle n'est pas décidée (YAGNI).
+Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md). Étant public, il n'affiche que des statistiques de niveau **public** (cf. § Règles d'accès) : il est considéré comme **purement public** dans un premier temps, sans variante pour une session authentifiée. Afficher aussi des données privées dans une session authentifiée est une ouverture **envisagée**, si une raison particulière le justifiait, mais **rien n'est statué** : elle n'est pas à implémenter tant qu'elle n'est pas décidée (YAGNI).
 
 Les statistiques du dashboard incluent notamment, sous réserve de ce niveau d'accès (liste non exhaustive) :
 
-- **Compteurs globaux** : nombre total d'albums, nombre total de séries.
-- **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur.
-- **Indicateurs de valeur** (exprimés en €) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée.
+- **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
+- **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
+- **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur. La répartition par type d'album distingue trois catégories exclusives, réguliers, intégrales et hors-séries, où le hors-série l'emporte sur le type : une intégrale hors-série compte parmi les hors-séries, comme dans l'ordre des albums d'une série (cf. § Ordre des albums dans une série).
+- **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée.
 
 ## Structure de l'application
 

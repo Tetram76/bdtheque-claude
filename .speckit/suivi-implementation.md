@@ -95,6 +95,14 @@ Corrections issues de la revue complète de la Phase 2 (ticket parent #121), à 
 | ~~#134~~ | Optimisation des images Docker pour la production |
 | ~~#136~~ | Journalisation de production et chargement des agrégats par EF Core |
 
+### Ajustement issu de la maquette du dashboard
+
+Répercussion dans le modèle de domaine et dans l'API de la date d'entrée dans la collection, ajoutée au `.speckit/` avec la maquette du dashboard. Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+
+| Ticket | Titre |
+| --- | --- |
+| #141 | Date d'entrée dans la collection dans le modèle de domaine et l'API |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle.
