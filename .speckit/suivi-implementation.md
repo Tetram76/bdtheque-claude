@@ -55,14 +55,6 @@ Répercussion dans le modèle de domaine des ajustements du `.speckit/` issus de
 | --- | --- |
 | ~~#102~~ | Ajustement du modèle de domaine issu de la reprise des données |
 
-### Ajustement issu de la maquette du dashboard
-
-Répercussion dans le modèle de domaine de la date d'entrée dans la collection, ajoutée au `.speckit/` avec la maquette du dashboard (ticket global #140).
-
-| Ticket | Titre |
-| --- | --- |
-| #141 | Date d'entrée dans la collection dans le modèle de domaine |
-
 ---
 
 ## Phase 2 — Contracts et API
@@ -105,11 +97,11 @@ Corrections issues de la revue complète de la Phase 2 (ticket parent #121), à 
 
 ### Ajustement issu de la maquette du dashboard
 
-Répercussion dans l'API de la date d'entrée dans la collection (ticket global #140), après #141.
+Répercussion dans le modèle de domaine et dans l'API de la date d'entrée dans la collection, ajoutée au `.speckit/` avec la maquette du dashboard. Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
 
 | Ticket | Titre |
 | --- | --- |
-| #142 | Date d'entrée dans la collection dans l'API de consultation |
+| #141 | Date d'entrée dans la collection dans le modèle de domaine et l'API |
 
 ## Phase 3 — Frontend Blazor
 
