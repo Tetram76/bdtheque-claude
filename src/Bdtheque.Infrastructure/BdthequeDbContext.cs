@@ -1,6 +1,7 @@
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Entities.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Bdtheque.Infrastructure;
 
@@ -17,6 +18,20 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<Edition> Editions => Set<Edition>();
     public DbSet<EditionVisual> EditionVisuals => Set<EditionVisual>();
     public DbSet<PurchaseIntent> PurchaseIntents => Set<PurchaseIntent>();
+
+    // Every query loads its collections by separate statements: an album always comes with its
+    // editions, intents and contributions (AutoInclude, AlbumConfiguration), which a single statement
+    // would join into a cartesian product — whoever queries the album, whatever else it includes.
+    //
+    // A failed statement, save or query is not logged here: it always reaches its caller as an
+    // exception, which the caller reports once, at the level its nature calls for — a value already
+    // used is a mistake the user corrects (ApiExceptionHandler), not an error of the application.
+    // Logged here too, at the error level, it would make every such mistake look like a failure.
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+        optionsBuilder
+            .UseNpgsql(npgsql => npgsql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+            .ConfigureWarnings(warnings => warnings.Ignore(
+                RelationalEventId.CommandError, CoreEventId.SaveChangesFailed, CoreEventId.QueryIterationFailed));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

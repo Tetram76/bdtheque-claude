@@ -17,11 +17,10 @@ public sealed class BdthequeDbContextFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         _connectionString = await PostgreSqlTestServer.CreateMigratedDatabaseAsync();
-        var options = new DbContextOptionsBuilder<BdthequeDbContext>()
-            .UseNpgsql(_connectionString)
-            .Options;
+        var options = new DbContextOptionsBuilder<BdthequeDbContext>().UseNpgsql(_connectionString);
+        StrictQueryWarnings.Apply(options);
 
-        Context = new BdthequeDbContext(options);
+        Context = new BdthequeDbContext(options.Options);
     }
 
     public async Task DisposeAsync()

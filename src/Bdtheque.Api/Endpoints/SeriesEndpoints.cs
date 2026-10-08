@@ -68,7 +68,6 @@ internal static class SeriesEndpoints
                              s.CreatedAt,
                              s.ModifiedAt,
                          }))
-                         .AsSplitQuery()
                          .SingleOrDefaultAsync(cancellationToken)
                      ?? throw new EntityNotFoundException(typeof(Series), id);
 
@@ -155,9 +154,8 @@ internal static class SeriesEndpoints
         return ToForm(context, series);
     }
 
-    // Split, so that the three collections are not joined into a single cartesian result.
     private static IQueryable<Series> WithChildren(IQueryable<Series> query) =>
-        query.Include(s => s.Genres).Include(s => s.Universes).Include(s => s.TemplateContributions).AsSplitQuery();
+        query.Include(s => s.Genres).Include(s => s.Universes).Include(s => s.TemplateContributions);
 
     /// <summary>
     /// Applies the whole form to the series: scalar fields, then the records it references, each of
