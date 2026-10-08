@@ -66,17 +66,17 @@ jobs:
       # (first nightly) leaves nothing to delete; a registry error fails the job, since a replaced
       # image could not be deleted without its digest. When both nightly images are already built
       # from the head of `main` (revision label set by metadata-action), nothing is published.
+      # On-demand runs record them too: they are the reference of the vulnerability check below.
       - name: Record the current nightly images
         id: previous
-        if: github.event_name == 'schedule'
         run: |
-          up_to_date=true
+          up_to_date=$([ "$GITHUB_EVENT_NAME" = schedule ] && echo true || echo false)
           for image in api frontend; do
             variable="${image^^}_REPOSITORY"
             repository=${!variable}
             digest=$(.github/scripts/registry-digest.sh "$repository" nightly)
             if [ -z "$digest" ]; then
-              echo "::notice::No $repository:nightly yet: nothing to replace."
+              echo "::notice::No $repository:nightly yet."
               up_to_date=false
               continue
             fi
@@ -118,8 +118,8 @@ jobs:
             echo "frontend<<EOF"; grep "^$FRONTEND_REPOSITORY:" <<< "$TAGS"; echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      # Build both images before pushing either: the push steps below rebuild from the builder's
-      # cache, so they only upload.
+      # Build and check both images before pushing either: the push steps below rebuild from the
+      # builder's cache, so they only upload. Loaded into the local image store for Docker Scout.
       - name: Build api image
         if: steps.previous.outputs.up-to-date != 'true'
         uses: docker/build-push-action@v7
@@ -127,6 +127,8 @@ jobs:
           context: .
           file: docker/api/Dockerfile
           platforms: linux/amd64
+          load: true
+          tags: bdtheque-api:scan
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
 
@@ -137,8 +139,37 @@ jobs:
           context: .
           file: docker/frontend/Dockerfile
           platforms: linux/amd64
+          load: true
+          tags: bdtheque-frontend:scan
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
+
+      # An image that adds a fixable vulnerability to the published one is never published, nor is
+      # the other image of the pair (same check as the CI, see ci.yml). Without a published image,
+      # no fixable vulnerability is accepted at all.
+      - name: Check vulnerabilities of the api image
+        if: steps.previous.outputs.up-to-date != 'true'
+        uses: docker/scout-action@v1
+        with:
+          command: ${{ steps.previous.outputs.api-digest && 'compare' || 'cves' }}
+          image: local://bdtheque-api:scan
+          to: registry://${{ env.API_REPOSITORY }}:nightly
+          only-fixed: true
+          exit-on: vulnerability
+          exit-code: ${{ !steps.previous.outputs.api-digest }}
+          write-comment: false
+
+      - name: Check vulnerabilities of the frontend image
+        if: steps.previous.outputs.up-to-date != 'true'
+        uses: docker/scout-action@v1
+        with:
+          command: ${{ steps.previous.outputs.frontend-digest && 'compare' || 'cves' }}
+          image: local://bdtheque-frontend:scan
+          to: registry://${{ env.FRONTEND_REPOSITORY }}:nightly
+          only-fixed: true
+          exit-on: vulnerability
+          exit-code: ${{ !steps.previous.outputs.frontend-digest }}
+          write-comment: false
 
       # Without attestations each image is a single manifest, deleted in one call: an image index
       # would leave its child manifests behind, untagged.
