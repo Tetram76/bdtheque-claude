@@ -333,7 +333,7 @@ Les statistiques du dashboard incluent notamment, sous réserve de ce niveau d'a
 
 - **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
 - **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
-- **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur.
+- **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur. La répartition par type d'album distingue trois catégories exclusives, réguliers, intégrales et hors-séries, où le hors-série l'emporte sur le type : une intégrale hors-série compte parmi les hors-séries, comme dans l'ordre des albums d'une série (cf. § Ordre des albums dans une série).
 - **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée.
 
 ## Structure de l'application
