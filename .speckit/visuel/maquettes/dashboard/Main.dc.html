@@ -15,7 +15,7 @@ body{margin:0}
 a{text-decoration:none}a:hover{color:#FFB547}
 .cover{transition:transform .3s cubic-bezier(.3,1.6,.5,1), box-shadow .3s ease}
 a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;box-shadow:0 24px 40px rgba(0,0,0,.5)}
-@media (max-width: 640px){.section-link{position:static !important;display:block;text-align:right;margin:0 0 18px}}
+@media (max-width: 640px){.section-link{position:static !important;display:block;text-align:right;margin:0 0 18px}.book-pile{zoom:.6}}
 </style>
 </helmet>
 <div style="min-height: 100vh; background: {{t.bg}}; color: #FBF3EA; font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
@@ -136,11 +136,13 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
         <sc-for list="{{piles}}" as="p" hint-placeholder-count="3">
           <div style="width: 30%; display: flex; flex-direction: column; align-items: center; gap: 1px">
             <span style="margin-bottom: 8px; font-family: Fraunces, Georgia, serif; font-size: 22px; font-weight: 800; line-height: 1; color: {{p.color}}">{{p.n}}</span>
+            <span class="book-pile" style="display: flex; flex-direction: column; align-items: center; gap: 1px">
             <sc-for list="{{p.books}}" as="b" hint-placeholder-count="5">
               <span style="position: relative; display: block; width: {{b.w}}; height: 7px; border-radius: 2px 3px 3px 2px; background: {{b.c}}; transform: translateX({{b.x}}) rotate({{b.r}}); box-shadow: inset 0 -2px 0 rgba(0,0,0,.28)">
                 <span style="position: absolute; top: 0; bottom: 2px; left: 14%; width: 5px; background: rgba(251,243,234,.45)"></span>
               </span>
             </sc-for>
+            </span>
           </div>
         </sc-for>
       </div>
