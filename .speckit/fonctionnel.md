@@ -332,7 +332,7 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
 Les statistiques du dashboard incluent notamment, sous réserve de ce niveau d'accès (liste non exhaustive) :
 
 - **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
-- **Dernières entrées** : les dernières éditions entrées dans la collection.
+- **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
 - **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur.
 - **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée.
 
