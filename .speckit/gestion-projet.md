@@ -14,7 +14,7 @@ Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage 
 
 ### Qui décide du contenu
 
-- **`contraintes-techniques.md` et `fonctionnel.md`** : l'utilisateur est le **seul décisionnaire** de leur contenu. L'agent n'y modifie, n'y ajoute et n'en retire rien de sa propre initiative : tout changement exige l'accord explicite préalable de l'utilisateur.
+- **`contraintes-techniques.md`, `fonctionnel.md` et le dossier `visuel/`** (charte graphique, présentation des écrans, maquettes) : l'utilisateur est le **seul décisionnaire** de leur contenu. L'agent n'y modifie, n'y ajoute et n'en retire rien de sa propre initiative : tout changement exige l'accord explicite préalable de l'utilisateur.
 - **`modele-metier.md`** : l'utilisateur en est le **décisionnaire principal**, puisqu'il choisit les données à utiliser et les règles qui les régissent (entités, attributs, relations, contraintes d'intégrité) : l'agent n'y modifie rien de cet ordre sans son accord explicite. L'agent peut en revanche le **compléter avec des informations plus techniques** (ex. type de stockage d'un attribut, précisions de représentation) sans accord préalable, à condition de ne modifier ni les données ni les règles choisies par l'utilisateur.
 - **`choix-implementation.md`** : l'agent peut **à tout moment remettre en cause** ce qui y est noté (changer, remplacer ou retirer un choix) sans accord préalable, dès lors que cela respecte `contraintes-techniques.md` et `fonctionnel.md`, qui prévalent. Il documente alors le nouveau choix (cf. § « Prise de décision » pour l'information de l'utilisateur lorsque l'impact est visible sur le livrable).
 
