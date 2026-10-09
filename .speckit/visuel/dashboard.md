@@ -36,9 +36,9 @@ Chaque genre, éditeur ou couverture mène à la liste ou à la fiche correspond
 
 ## Alternatives
 
-Deux autres présentations du dashboard restent en lice. Elles portent le même contenu, mais **s'écartent de la charte** de [`charte-graphique.md`](charte-graphique.md) : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
+Trois autres présentations du dashboard restent en lice. Elles portent le même contenu, mais **s'écartent de la charte** de [`charte-graphique.md`](charte-graphique.md) : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
 
-Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), et les deux maquettes partagent un même canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>.
+Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), et les trois maquettes partagent un même canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>.
 
 ### La gazette
 
@@ -95,3 +95,35 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
   - **Tomes, intégrales ou hors-séries ?** : une phrase de synthèse avec les trois nombres, puis une barre en trois couleurs dont la longueur de chaque part suit son pourcentage : jaune pour les réguliers, bleu pour les intégrales, rouge pour les hors-séries.
   - **Plutôt quel genre ?** : une accroche sur les genres en tête, puis les genres en majuscules. La taille de chaque mot suit le nombre d'albums, les couleurs alternent entre rouge, bleu et noir, et les mots alternent romain et italique.
   - **Chez quels éditeurs ?** : une accroche sur le classement, puis un podium des trois premiers éditeurs, avec le nom et le nombre d'éditions possédées de chacun. Les marches sont jaune pour le premier, bleu pour le deuxième, rouge pour le troisième.
+
+### Le plan de métro
+
+Le dashboard présenté comme un plan de métro. Source : `Metro.dc.html`.
+
+#### Apparence
+
+- **Couleurs** : fond blanc `#FFFFFF`, texte bleu nuit `#14213D`, texte atténué `#5A6478`, fond des encadrés `#F2F4F7`. Le bleu émaillé `#0A2C6E` est celui des panneaux, de l'en-tête et du pied de page.
+- **Lignes** : chacune a sa couleur et une couleur de texte qui reste lisible sur sa pastille.
+  - Texte bleu nuit : jaune `#FFCD00`, bleu ciel `#6EC4E8`, orange `#F28E42` et gris `#9B9B9B`.
+  - Texte blanc : rouge `#E3051C`, vert `#00A88F`, prune `#A0006E` et brun `#8D653D`.
+- **Typographie** : *Barlow*, une police de signalétique, en gras pour les titres ; *Barlow Condensed* pour les mentions en capitales et le tableau des départs.
+- **Mise en page** : aucune inclinaison ; tout est droit, comme sur un plan.
+
+#### Présentation
+
+Une ligne jaune, la « Ligne Collection », descend le long de la page. Chaque rubrique est une de ses stations : un rond blanc cerclé de bleu nuit, et une pastille jaune marquée « C » aux deux terminus.
+
+- **En-tête**, sur fond bleu émaillé : le nom de l'application avec une pastille « B », le menu, avec l'entrée active sur fond jaune, la recherche et le bouton d'aide, jaune.
+- **Terminus Accueil** :
+  - la **phrase d'accueil**, tirée au hasard dans la même liste, sur un panneau bleu émaillé à double filet blanc ;
+  - les **compteurs**, en pastilles de correspondance : une pastille de couleur avec une lettre (A, S, E), le nombre et son libellé.
+- **Tout juste arrivés !** : un **tableau des départs** à fond noir et texte ambre, avec la date d'entrée, le libellé de l'album en blanc et l'éditeur de chacune des dernières éditions entrées. Un lien mène à la liste des albums.
+- **Ça vaut combien, tout ça ?** :
+  - la valeur totale estimée et la valeur totale connue, sur deux **tickets à bande magnétique**, chacune en euros courants et en euros du jour ;
+  - les prix moyen, médian, minimum et maximum, dans des encadrés marqués d'un trait de couleur ;
+  - la mention des montants non convertibles exclus et des éditions gratuites non valorisées.
+- **Tomes, intégrales ou hors-séries ?** : une ligne par type, dont la longueur suit son pourcentage. Chaque ligne se termine par un terminus, suivi du nombre d'albums et du pourcentage.
+- **Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec une station tous les 50 albums.
+- **Chez quels éditeurs ?** : les éditeurs sont les **stations d'une ligne rouge horizontale**. La taille de chaque station suit le nombre d'éditions possédées, son nom est écrit en biais au-dessus, et le nombre d'éditions est indiqué en dessous.
+
+Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
