@@ -57,32 +57,32 @@ a{text-decoration:none;color:inherit}
     <section aria-labelledby="h-toc" style="flex: 1.3 1 520px; min-width: 0; display: flex; flex-direction: column">
       <h2 id="h-toc" style="margin: 0 0 12px; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: 72px; line-height: 1; text-transform: uppercase">Au sommaire</h2>
 
-      <a href="#" class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 4px solid {{t.ink}}">
+      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 4px solid {{t.ink}}">
         <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #E63946">04</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1">Tout juste arrivés !</h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Tout juste arrivés !</a></h2>
           <span style="color: {{t.soft}}">Six nouveautés, dont le tome 7 de Blacksad et le 40ᵉ Astérix.</span>
           <span style="display: flex; gap: 8px; margin-top: 6px">
             <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
-              <span style="width: 44px; aspect-ratio: 3 / 4; background: #2E2A33; border: 3px solid {{r.c}}"></span>
+              <a href="#" aria-label="{{r.label}}" title="{{r.label}}" style="display: block; width: 44px; aspect-ratio: 3 / 4; background: #2E2A33; border: 3px solid {{r.c}}"></a>
             </sc-for>
           </span>
         </span>
-      </a>
+      </div>
 
-      <a href="#" class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
+      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
         <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #1D4ED8">12</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1">Ça vaut combien, tout ça ?</h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Ça vaut combien, tout ça ?</a></h2>
           <span style="color: {{t.soft}}">Notre enquête : <strong style="color: {{t.ink}}">38 760 €</strong> au total, <strong style="padding: 0 4px; background: #FFD60A; color: #111111">55 230 € d'aujourd'hui</strong>. Un album coûte en moyenne 13,10 € (18,70 € du jour), le plus cher 189,00 € (214,50 € du jour).</span>
           <span style="font-size: 12px; color: {{t.muted}}">Valeur connue 31 482 € (44 910 € du jour) · médian 11,90 € (16,40 € du jour) · le moins cher 0,90 € (3,20 € du jour) · 12 montants non convertibles exclus · 25 éd. gratuites non valorisées.</span>
         </span>
-      </a>
+      </div>
 
-      <a href="#" class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
+      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
         <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: {{t.ink}}">18</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1">Tomes, intégrales ou hors-séries ?</h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Tomes, intégrales ou hors-séries ?</a></h2>
           <span style="color: {{t.soft}}">Neuf albums sur dix sont des tomes classiques : 2 571 réguliers, 184 intégrales, 92 hors-séries.</span>
           <span role="img" aria-label="90 % réguliers, 6 % intégrales, 3 % hors-séries" style="display: flex; gap: 3px; margin-top: 6px; font-family: Anton, Impact, sans-serif; font-size: 22px; line-height: 1">
             <span style="flex: 90 1 0; padding: 6px 8px; background: #FFD60A; color: #111111">90 %</span>
@@ -90,37 +90,37 @@ a{text-decoration:none;color:inherit}
             <span style="flex: 3 1 0; min-width: 40px; padding: 6px 4px; background: #E63946; color: #FFFFFF; font-size: 15px">3 %</span>
           </span>
         </span>
-      </a>
+      </div>
 
-      <a href="#" class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
+      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
         <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #E63946">22</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1">Plutôt quel genre ?</h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Plutôt quel genre ?</a></h2>
           <span style="color: {{t.soft}}">L'aventure en tête avec 612 albums, l'humour juste derrière.</span>
           <span style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; margin-top: 4px">
             <sc-for list="{{genres}}" as="g" hint-placeholder-count="7">
-              <span style="font-size: {{g.fs}}; font-weight: 800; font-style: {{g.fi}}; color: {{g.c}}; text-transform: uppercase">{{g.name}}</span>
+              <a href="#" style="font-size: {{g.fs}}; font-weight: 800; font-style: {{g.fi}}; color: {{g.c}}; text-transform: uppercase">{{g.name}}</a>
             </sc-for>
           </span>
         </span>
-      </a>
+      </div>
 
-      <a href="#" class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}; border-bottom: 4px solid {{t.ink}}">
+      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}; border-bottom: 4px solid {{t.ink}}">
         <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #1D4ED8">28</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1">Chez quels éditeurs ?</h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Chez quels éditeurs ?</a></h2>
           <span style="color: {{t.soft}}">Dargaud et Dupuis au coude à coude, Casterman sur le podium.</span>
           <span style="display: flex; align-items: flex-end; gap: 6px; margin-top: 6px">
             <sc-for list="{{podium}}" as="p" hint-placeholder-count="3">
-              <span style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 110px">
+              <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 110px">
                 <span style="font-weight: 800; font-size: 13px">{{p.name}} · {{p.n}}</span>
                 <span style="width: 100%; height: {{p.h}}; background: {{p.c}}; color: {{p.tc}}; display: flex; align-items: flex-start; justify-content: center; padding-top: 4px; box-sizing: border-box; font-family: Anton, Impact, sans-serif; font-size: 26px">{{p.rank}}</span>
-              </span>
+              </a>
             </sc-for>
           </span>
         </span>
-      </a>
-      <p style="margin: 14px 0 0; font-size: 13px; color: {{t.muted}}">Chaque rubrique mène à sa liste ou à sa page détaillée.</p>
+      </div>
+      <p style="margin: 14px 0 0; font-size: 13px; color: {{t.muted}}">Chaque titre de rubrique mène à sa liste ou à sa page détaillée ; chaque album, genre ou éditeur, à sa fiche ou à sa liste.</p>
     </section>
   </main>
 
@@ -155,7 +155,14 @@ class Component extends DCLogic {
       t,
       accent: this.props.accent ?? '#E63946',
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
-      recents: ['#E63946', '#1D4ED8', '#FFD60A', t.ink, '#E63946', '#1D4ED8'].map((c) => ({ c })),
+      recents: [
+        { label: 'Alors, tout tombe (Blacksad - T. 7)', c: '#E63946' },
+        { label: "L'Iris blanc (Astérix - T. 40)", c: '#1D4ED8' },
+        { label: 'Les Indes fourbes', c: '#FFD60A' },
+        { label: 'Le Château des étoiles - INT. [1 à 2]', c: t.ink },
+        { label: 'Mister Prairie (Undertaker - T. 7)', c: '#E63946' },
+        { label: 'Spirou et Fantasio - Hors-série 2', c: '#1D4ED8' }
+      ],
       genres: genres.map(([name, v], i) => ({ name, fs: (13 + Math.round(v / 612 * 17)) + 'px', fi: i % 2 ? 'italic' : 'normal', c: inks[i % 3] })),
       // Podium order: second, first, third, as on a real podium.
       podium: [

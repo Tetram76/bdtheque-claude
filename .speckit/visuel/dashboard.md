@@ -98,7 +98,7 @@ De haut en bas :
 
 ### Le sommaire de magazine
 
-Le dashboard présenté comme la couverture et le sommaire d'un magazine populaire. Chaque rubrique du sommaire annonce une statistique et mène à sa liste ou à sa page détaillée. Source : `Sommaire.dc.html`, en thème « papier ».
+Le dashboard présenté comme la couverture et le sommaire d'un magazine populaire. Chaque rubrique du sommaire annonce une statistique. Son titre mène à sa liste ou à sa page détaillée, et chaque album, genre ou éditeur qu'elle montre mène à sa fiche ou à sa liste. Source : `Sommaire.dc.html`, en thème « papier ».
 
 #### Apparence
 
