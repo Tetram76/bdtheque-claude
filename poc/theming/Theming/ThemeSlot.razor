@@ -1,0 +1,9 @@
+@typeparam TData
+@inject CurrentTheme Current
+
+<DynamicComponent Type="@Current.Theme.Resolve(Slot.Key)" Parameters="@(new Dictionary<string, object?> { ["Data"] = Data })" />
+
+@code {
+    [Parameter, EditorRequired] public Slot<TData> Slot { get; set; } = default!;
+    [Parameter, EditorRequired] public TData Data { get; set; } = default!;
+}

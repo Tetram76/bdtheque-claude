@@ -1,0 +1,32 @@
+@* Private to the magazine theme: the cover mixes the greeting, the counters and the latest arrival. *@
+<section class="cover-page" aria-labelledby="h-hero">
+    <a href="/" class="cover-name">BDthèque</a>
+    <div class="cover-band"><span>N° @Fmt.N(Hero.Albums)</span><span>@Month</span><span>Gratuit</span></div>
+    @if (Latest is not null)
+    {
+        <a href="@Latest.Href" class="cover-visual" aria-label="@Latest.AlbumLabel">[Couverture du dernier arrivé]</a>
+    }
+    <h1 id="h-hero" class="cover-greeting">@Hero.Greeting</h1>
+    <div class="cover-tags">
+        <a href="/series" class="cover-tag"><span>@Fmt.N(Hero.Series)</span> séries</a>
+        <a href="/albums" class="cover-tag"><span>@Fmt.N(Hero.Editions)</span> éditions</a>
+        @if (Latest is not null)
+        {
+            <span class="cover-special">Spécial : @Latest.AlbumLabel !</span>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public HeroData Hero { get; set; } = default!;
+    [Parameter] public NewArrival? Latest { get; set; }
+
+    private static string Month
+    {
+        get
+        {
+            var month = DateTime.Today.ToString("MMMM");
+            return char.ToUpper(month[0]) + month[1..];
+        }
+    }
+}

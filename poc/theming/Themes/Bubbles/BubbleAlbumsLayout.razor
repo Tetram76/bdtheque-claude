@@ -1,0 +1,12 @@
+@inherits Block<AlbumListData>
+<main class="albums-page">
+    <section class="block album-list" aria-labelledby="h-albums">
+        <h1 id="h-albums" class="bubble">Tous les albums</h1>
+        <ul>
+            @foreach (var album in Data.Albums)
+            {
+                <li><a href="@album.Href">@album.Name</a> <span class="muted">@album.Count éd.</span></li>
+            }
+        </ul>
+    </section>
+</main>

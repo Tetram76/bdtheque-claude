@@ -1,0 +1,23 @@
+@inherits Block<TypeDistributionData>
+<section class="block types spines" aria-labelledby="h-type">
+    <h2 id="h-type" class="bubble">Tomes, intégrales ou hors-séries ?</h2>
+    <p class="lede">@Ledes.Types(Data).</p>
+    @* One spine per rounded percent, from the same percentages as the legend: they never contradict each other. *@
+    <div class="shelf" role="img" aria-label="Une étagère d'un livre par pour cent d'albums : @string.Join(", ", Data.Shares.Select(s => $"{s.Percent} pour les {s.Label}"))">
+        @{ var index = 0; }
+        @foreach (var share in Data.Shares)
+        {
+            for (var k = 0; k < share.Percent; k++, index++)
+            {
+                <span class="spine kind-@share.Kind.ToString().ToLowerInvariant()" style="height:@(46 + index * 37 % 29)px"></span>
+            }
+        }
+    </div>
+    <div class="spine-legend">
+        @foreach (var share in Data.Shares)
+        {
+            <div class="kind-@share.Kind.ToString().ToLowerInvariant()"><strong>@Fmt.N(share.Count)</strong><span>@share.Label · @share.Percent %</span></div>
+        }
+    </div>
+    <p class="note">Un dos = 1 % des albums (pourcentages arrondis).</p>
+</section>

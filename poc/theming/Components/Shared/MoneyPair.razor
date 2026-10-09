@@ -1,0 +1,6 @@
+@* Shared primitive: every theme shows an amount in current and today's euros the same way. *@
+<span class="money"><span class="amount-current">@Fmt.Eur(Amount.Current)</span> <span class="amount-today">@Fmt.Eur(Amount.Today)</span></span>
+
+@code {
+    [Parameter, EditorRequired] public Money Amount { get; set; } = default!;
+}

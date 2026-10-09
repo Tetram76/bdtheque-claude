@@ -1,0 +1,137 @@
+/* Base theme: "Cases et bulles", violine. Every other theme loads this file first. */
+:root {
+  --bg: #2B1030; --panel: #3A1641; --panel2: #431B4B; --border: #6A3375;
+  --soft: #EBD3EF; --muted: #CFA9D6;
+  --cream: #FBF3EA; --accent: #FFB547;
+  --font-title: Fraunces, Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+}
+.pal-0 { --c: #FFB547; } .pal-1 { --c: #4FD1C5; } .pal-2 { --c: #FF7A6B; } .pal-3 { --c: #B69CFF; }
+.pal-4 { --c: #9BE07A; } .pal-5 { --c: #7FB8FF; } .pal-6 { --c: #F7A8D0; } .pal-7 { --c: #FFD166; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--cream); font: 15px/1.5 var(--font-body); }
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent); }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.muted, .note { color: var(--muted); }
+.note { margin: 14px 0 0; font-size: 13px; }
+
+/* Header */
+.site-header { max-width: 1280px; margin: 0 auto; padding: 20px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; }
+.logo { padding: 8px 18px; border-radius: 22px 26px 24px 8px; background: var(--cream); color: var(--bg); font: 800 24px var(--font-title); transform: rotate(-2deg); }
+.logo-dot { color: var(--accent); }
+.nav { flex: 1 1 420px; min-width: 0; overflow-x: auto; }
+.nav-pill { display: flex; gap: 6px; white-space: nowrap; padding: 4px; border-radius: 999px; background: var(--panel); width: max-content; }
+.nav-item { padding: 10px 16px; border-radius: 999px; color: var(--soft); }
+.nav-item[aria-current="page"] { background: var(--accent); color: var(--bg); font-weight: 700; }
+.tools { display: flex; align-items: center; gap: 8px; flex: 1 1 260px; max-width: 360px; }
+.search { flex: 1; display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 16px; border-radius: 999px; background: var(--panel); color: var(--muted); }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--cream); font: inherit; outline: none; }
+.help { width: 46px; height: 46px; flex: none; border: 0; border-radius: 50% 50% 50% 12%; background: #4FD1C5; color: var(--bg); font: 700 18px var(--font-body); cursor: pointer; }
+
+/* Cases */
+.dashboard, .albums-page { max-width: 1280px; margin: 0 auto; padding: 16px 24px 72px; display: flex; flex-wrap: wrap; gap: 40px 24px; align-items: flex-start; }
+.block { position: relative; min-width: 0; padding: 64px 28px 28px; border-radius: 26px 38px 30px 22px; background: var(--panel); border: 2px solid var(--border); }
+.block:nth-child(odd) { border-radius: 34px 22px 40px 26px; }
+/* Placement only applies to the base layouts: a theme placing these blocks elsewhere sizes them itself. */
+.dashboard > .block, .albums-page > .block { flex: 1 1 340px; }
+.dashboard > .hero, .dashboard > .arrivals, .albums-page > .album-list { flex-basis: 100%; }
+.dashboard > .value { flex: 3 1 560px; }
+.dashboard > .types { flex: 1 1 360px; }
+
+/* Bubbles: the title of a case */
+.bubble { position: absolute; top: -22px; left: 28px; margin: 0; padding: 10px 22px; border-radius: 999px; background: var(--cream); color: var(--bg); font: 800 22px/1.15 var(--font-title); transform: rotate(-2deg); }
+.bubble::after { content: ""; position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: var(--cream); border-radius: 0 0 18px 0; transform: skewX(-25deg); }
+.bubble--right { left: auto; right: 24px; max-width: calc(100% - 48px); text-align: center; transform: rotate(2deg); }
+.bubble--right::after { left: auto; right: 34px; border-radius: 0 0 0 18px; transform: skewX(25deg); }
+
+/* Hero */
+.hero { padding: 48px 40px; background: var(--panel2); display: flex; flex-wrap: wrap; gap: 36px 48px; align-items: center; border-radius: 28px 40px 24px 36px; }
+.hero-bubble { flex: 1 1 420px; position: relative; padding: 28px 34px; border-radius: 46% 54% 50% 50% / 58% 52% 48% 42%; background: var(--cream); color: var(--bg); }
+.hero-bubble::after { content: ""; position: absolute; bottom: -18px; left: 26%; width: 38px; height: 38px; background: var(--cream); border-radius: 0 0 36px 0; transform: skewX(-30deg) rotate(20deg); }
+.greeting { margin: 0; font: 800 clamp(30px, 4.2vw, 50px)/1.05 var(--font-title); letter-spacing: -0.01em; text-align: center; }
+.counters { flex: 1 1 400px; display: flex; flex-wrap: wrap; gap: 16px; }
+.counter { flex: 1 1 130px; padding: 22px; border-radius: 26px 18px 30px 14px; background: var(--c); color: var(--bg); font-weight: 700; transform: rotate(-2deg); }
+.counter:nth-child(2) { transform: rotate(1.5deg); border-radius: 16px 30px 18px 28px; }
+.counter:nth-child(3) { transform: rotate(-1deg); border-radius: 30px 16px 26px 20px; }
+.counter-n { display: block; font: 800 50px/1 var(--font-title); margin-bottom: 8px; }
+
+/* New arrivals */
+.arrivals { padding: 64px 32px 36px; }
+.section-link { position: absolute; top: 18px; right: 28px; font-weight: 700; color: var(--accent); }
+.covers { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 32px 26px; }
+.arrival { display: flex; flex-direction: column; gap: 14px; }
+.cover { display: block; padding: 8px; border-radius: 12px; background: var(--c); transform: rotate(-2.5deg); box-shadow: 0 12px 24px rgba(0,0,0,.4); transition: transform .3s cubic-bezier(.3,1.6,.5,1), box-shadow .3s ease; }
+.covers li:nth-child(even) .cover { transform: rotate(2.5deg); }
+.arrival:hover .cover { transform: rotate(0) translateY(-8px) scale(1.03); box-shadow: 0 24px 40px rgba(0,0,0,.5); }
+.cover-img { display: flex; aspect-ratio: 3 / 4; border-radius: 5px; background: #2E2A33; align-items: center; justify-content: center; text-align: center; padding: 12px; color: #A79FB0; font-size: 12px; }
+.arrival-label { font-weight: 700; line-height: 1.3; }
+.arrival-meta { font-size: 13px; color: var(--muted); }
+
+/* Value */
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; font-size: 13px; font-weight: 700; }
+.legend span { padding: 5px 12px; border-radius: 999px; background: var(--cream); color: var(--bg); }
+.legend .legend-today { background: var(--accent); }
+.totals { display: flex; flex-wrap: wrap; gap: 16px; }
+.total { flex: 1 1 260px; padding: 24px; border-radius: 22px 14px 26px 18px; background: var(--bg); }
+.total-label { display: block; color: var(--soft); font-weight: 500; margin-bottom: 10px; }
+.total .money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.total .amount-current { font: 800 44px/1 var(--font-title); }
+.total .amount-today { font: 600 28px/1 var(--font-title); color: var(--accent); }
+.total .note { margin-top: 12px; }
+.prices { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.price { padding: 16px 18px; border-radius: 18px; border: 2px dashed var(--border); display: flex; flex-direction: column; gap: 4px; }
+.price-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--soft); }
+.price-label::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.price .money { display: flex; flex-direction: column; }
+.price .amount-current { font-size: 22px; font-weight: 700; }
+.amount-today { color: var(--accent); font-weight: 700; }
+
+/* Type distribution: piles of books */
+.types { background: var(--panel2); display: flex; flex-direction: column; gap: 16px; }
+.shelf { display: flex; align-items: flex-end; justify-content: space-around; border-bottom: 8px solid #7A4E37; border-radius: 0 0 3px 3px; }
+.pile { width: 30%; display: flex; flex-direction: column; align-items: center; }
+.pile-n { margin-bottom: 8px; font: 800 22px/1 var(--font-title); }
+.kind-regular .pile-n { color: #FFB547; } .kind-omnibus .pile-n { color: #4FD1C5; } .kind-special .pile-n { color: #FF7A6B; }
+.pile-books { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.book { position: relative; display: block; height: 7px; border-radius: 2px 3px 3px 2px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.28); }
+.book::after { content: ""; position: absolute; top: 0; bottom: 2px; left: 14%; width: 5px; background: rgba(251,243,234,.45); }
+.pile-legend { display: flex; justify-content: space-around; font-size: 14px; text-align: center; }
+.pile-legend > span { width: 30%; }
+.types .note { margin: 0; font-size: 12px; text-align: center; }
+
+/* Genres: tags whose size follows --w */
+.tags { display: flex; flex-wrap: wrap; gap: 10px; }
+.tag { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; background: var(--c); color: var(--bg); font-weight: 700; font-size: calc(13px + 7px * var(--w)); }
+.tag:hover { color: var(--bg); filter: brightness(1.08); }
+.tag-n { padding: 2px 8px; border-radius: 999px; background: var(--bg); color: var(--cream); font-size: 12px; }
+
+/* Publishers: bars whose length follows --w */
+.ranking { display: flex; flex-direction: column; gap: 12px; }
+.rank-row { display: grid; grid-template-columns: 100px minmax(0, 1fr) 46px; align-items: center; gap: 12px; font-size: 14px; }
+.rank-bar { height: 14px; border-radius: 999px; background: var(--bg); }
+.rank-bar span { display: block; height: 14px; border-radius: 999px; width: calc(var(--w) * 100%); background: var(--c); }
+.publishers > .others { margin-top: 12px; }
+.rank-n { text-align: right; font-variant-numeric: tabular-nums; color: var(--soft); }
+
+/* Album list */
+
+.album-list li { padding: 10px 0; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; gap: 12px; }
+.album-list li a { font-weight: 700; }
+
+/* Footer */
+.site-footer { max-width: 1280px; margin: 0 auto; padding: 24px 24px 72px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px; color: var(--muted); }
+.site-footer a { color: var(--soft); }
+
+/* Prototype toolbar: not part of any theme */
+.proto-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 16px; background: #111; color: #eee; font: 13px system-ui, sans-serif; z-index: 10; }
+.proto-bar a { color: #8cf; text-decoration: underline; }
+
+@media (max-width: 640px) {
+  .section-link { position: static; display: block; text-align: right; margin: 0 0 18px; }
+  .pile-books { zoom: .6; }
+  .hero { padding: 36px 20px; }
+}

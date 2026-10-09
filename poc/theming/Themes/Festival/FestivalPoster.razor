@@ -1,0 +1,14 @@
+@inherits Block<HeroData>
+<section class="block hero" aria-labelledby="h-hero">
+    <div class="poster">
+        <span class="disc disc--sun" aria-hidden="true"></span>
+        <span class="disc disc--coral" aria-hidden="true"></span>
+        <span class="poster-badge">Festival permanent · entrée libre</span>
+        <h1 id="h-hero" class="poster-title">@Data.Greeting</h1>
+    </div>
+    <ul class="interchanges">
+        <li><a href="/albums" class="interchange"><span class="line-badge lc-1" aria-hidden="true">A</span><strong>@Fmt.N(Data.Albums)</strong> albums</a></li>
+        <li><a href="/series" class="interchange"><span class="line-badge lc-3" aria-hidden="true">S</span><strong>@Fmt.N(Data.Series)</strong> séries</a></li>
+        <li><a href="/albums" class="interchange"><span class="line-badge lc-4" aria-hidden="true">E</span><strong>@Fmt.N(Data.Editions)</strong> éditions</a></li>
+    </ul>
+</section>

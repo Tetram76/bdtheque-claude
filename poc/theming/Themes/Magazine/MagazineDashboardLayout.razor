@@ -1,0 +1,13 @@
+@inherits Block<DashboardData>
+@* A cover, then a table of contents where each entry is a block of the theme (or of its parent). *@
+<main class="dashboard magazine">
+    <MagazineCover Hero="Data.Hero" Latest="Data.NewArrivals.Items.FirstOrDefault()" />
+    <section class="toc" aria-labelledby="h-toc">
+        <h2 id="h-toc" class="toc-title">Au sommaire</h2>
+        <div class="entry"><span class="pageno" aria-hidden="true">04</span><ThemeSlot Slot="DashboardSlots.NewArrivals" Data="Data.NewArrivals" /></div>
+        <div class="entry"><span class="pageno" aria-hidden="true">12</span><ThemeSlot Slot="DashboardSlots.Value" Data="Data.Value" /></div>
+        <div class="entry"><span class="pageno" aria-hidden="true">18</span><ThemeSlot Slot="DashboardSlots.Types" Data="Data.Types" /></div>
+        <div class="entry"><span class="pageno" aria-hidden="true">22</span><ThemeSlot Slot="DashboardSlots.Genres" Data="Data.Genres" /></div>
+        <div class="entry"><span class="pageno" aria-hidden="true">28</span><ThemeSlot Slot="DashboardSlots.Publishers" Data="Data.Publishers" /></div>
+    </section>
+</main>
