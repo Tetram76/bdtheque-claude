@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dashboard — fanzine en risographie</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}
+a:hover{color:#FF48B0}
+.cut{transition:transform .2s ease}
+a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F4EFE4; color: #0078BF; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; line-height: 1.45">
+
+  <header style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px">
+    <nav aria-label="Navigation principale" style="flex: 1 1 420px; min-width: 0; overflow-x: auto">
+      <div style="display: flex; gap: 6px; white-space: nowrap; width: max-content; font-weight: 700">
+        <a href="#" aria-current="page" style="padding: 8px 14px; background: #FF48B0; color: #F4EFE4; mix-blend-mode: multiply">Accueil</a>
+        <a href="#" style="padding: 8px 14px">Albums</a>
+        <a href="#" style="padding: 8px 14px">Séries</a>
+        <a href="#" style="padding: 8px 14px">Auteurs</a>
+        <a href="#" style="padding: 8px 14px">Éditeurs</a>
+        <a href="#" style="padding: 8px 14px">Intentions d'achat</a>
+      </div>
+    </nav>
+    <div style="display: flex; gap: 6px; flex: 0 1 320px">
+      <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
+      <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 44px; padding: 0 14px; border: 2px dashed #0078BF; background: transparent; color: #0078BF; font: inherit; outline: none">
+      <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; background: #0078BF; color: #F4EFE4; font: 18px 'Rubik Mono One', sans-serif; cursor: pointer">?</button>
+    </div>
+  </header>
+
+  <main style="max-width: 1240px; margin: 0 auto; padding: 16px 24px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 64px">
+
+    <section aria-labelledby="h-hero" style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 32px 40px">
+      <div style="flex: 1 1 560px; min-width: 0">
+        <a href="#" style="display: block; font-family: 'Rubik Mono One', sans-serif; font-size: clamp(60px, 10vw, 140px); line-height: .9; color: #0078BF; text-shadow: 6px 4px 0 rgba(255,72,176,.85)">BDTHÈQUE</a>
+        <div style="margin-top: 8px; font-family: 'Rubik Mono One', sans-serif; font-size: 20px; color: #FF48B0">ZINE N° 2847 · PRIX LIBRE</div>
+        <h1 id="h-hero" class="cut" style="display: inline-block; margin: 26px 0 0; padding: 12px 18px; background: #FF48B0; color: #F4EFE4; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(24px, 3vw, 38px); line-height: 1.15; transform: rotate(-2deg); mix-blend-mode: multiply">{{heroLine}}</h1>
+      </div>
+      <div style="flex: 0 1 380px; position: relative; height: 340px; min-width: 300px">
+        <a href="#" style="position: absolute; left: 0; top: 30px; width: 210px; height: 210px; border-radius: 50%; background: #0078BF; color: #F4EFE4; mix-blend-mode: multiply; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-family: 'Rubik Mono One', sans-serif; font-size: 40px">2847</span><span style="font-weight: 700">albums</span></a>
+        <a href="#" style="position: absolute; left: 160px; top: 0; width: 150px; height: 150px; border-radius: 50%; background: #FF48B0; color: #F4EFE4; mix-blend-mode: multiply; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-family: 'Rubik Mono One', sans-serif; font-size: 30px">412</span><span style="font-weight: 700">séries</span></a>
+        <a href="#" style="position: absolute; left: 150px; top: 150px; width: 190px; height: 190px; border-radius: 50%; background: #FFE800; color: #0078BF; mix-blend-mode: multiply; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-family: 'Rubik Mono One', sans-serif; font-size: 36px">2913</span><span style="font-weight: 700">éditions</span></a>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-recent" style="display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+        <h2 id="h-recent" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 30px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Tout juste arrivés !</h2>
+        <a href="#" style="font-weight: 700; color: #FF48B0">Tous les albums →</a>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 30px 22px">
+        <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
+          <a href="#" style="display: flex; flex-direction: column; gap: 10px">
+            <span class="cut" style="position: relative; display: block; transform: rotate({{r.rot}})">
+              <span aria-hidden="true" style="position: absolute; inset: 0; transform: translate(6px, 5px); background: #FF48B0; mix-blend-mode: multiply"></span>
+              <span style="position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 4; background-color: #0078BF; background-image: radial-gradient(rgba(244,239,228,.5) 1.2px, transparent 1.6px); background-size: 6px 6px; color: #F4EFE4; font-size: 12px; mix-blend-mode: multiply">[Couverture]</span>
+              <span aria-hidden="true" style="position: absolute; top: -10px; left: 50%; width: 64px; height: 20px; margin-left: -32px; background: rgba(255,232,0,.75); transform: rotate(-4deg)"></span>
+            </span>
+            <span style="font-weight: 700; line-height: 1.25">{{r.label}}</span>
+            <span style="font-size: 14px; color: #FF48B0">{{r.meta}}</span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 48px">
+      <section aria-labelledby="h-value" style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+        <h2 id="h-value" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Ça vaut combien, tout ça ?</h2>
+        <div style="font-weight: 700">Valeur totale estimée</div>
+        <div style="font-family: 'Rubik Mono One', sans-serif; font-size: clamp(48px, 6vw, 76px); line-height: 1; color: #FF48B0; text-shadow: 5px 4px 0 rgba(0,120,191,.6)">38 760 €</div>
+        <div style="font-family: 'Rubik Mono One', sans-serif; font-size: 24px">55 230 € du jour</div>
+        <p style="margin: 0">Valeur connue : <strong>31 482 €</strong> · 44 910 € du jour.</p>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 22px">
+          <sc-for list="{{prices}}" as="p" hint-placeholder-count="4">
+            <div style="display: flex; justify-content: space-between; gap: 8px; border-bottom: 2px dotted #FF48B0"><span>{{p.label}}</span><span><strong>{{p.cur}}</strong> · {{p.today}}</span></div>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-size: 13px">€ courants · € du jour. 12 montants non convertibles exclus · 25 éditions gratuites non valorisées.</p>
+      </section>
+
+      <section aria-labelledby="h-type" style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-type" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 22px; line-height: 1.3; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Tomes, intégrales ou hors-séries ?</h2>
+        <div role="img" aria-label="2 571 réguliers (90 %), 184 intégrales (6 %), 92 hors-séries (3 %) ; surface des disques proportionnelle" style="position: relative; height: 260px">
+          <span style="position: absolute; left: 10px; top: 0; width: 250px; height: 250px; border-radius: 50%; background: #0078BF; mix-blend-mode: multiply"></span>
+          <span style="position: absolute; left: 226px; top: 120px; width: 66px; height: 66px; border-radius: 50%; background: #FF48B0; mix-blend-mode: multiply"></span>
+          <span style="position: absolute; left: 270px; top: 190px; width: 46px; height: 46px; border-radius: 50%; background: #FFE800; mix-blend-mode: multiply"></span>
+          <span style="position: absolute; left: 70px; top: 100px; font-family: 'Rubik Mono One', sans-serif; font-size: 36px; color: #F4EFE4">90 %</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span><strong>2 571</strong> réguliers · 90 %</span>
+          <span style="color: #FF48B0"><strong>184</strong> intégrales · 6 %</span>
+          <span><strong>92</strong> hors-séries · 3 % <span style="color: #9A8A00">(jaune)</span></span>
+        </div>
+      </section>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 48px">
+      <section aria-labelledby="h-genre" style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-genre" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Plutôt quel genre ?</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px">
+          <sc-for list="{{genres}}" as="g" hint-placeholder-count="8">
+            <a href="#" class="cut" style="padding: 6px 12px; background: {{g.bg}}; color: {{g.tc}}; font-weight: 700; font-size: {{g.fs}}; transform: rotate({{g.rot}}); mix-blend-mode: multiply">{{g.name}} <span style="font-family: 'Rubik Mono One', sans-serif; font-size: 13px">{{g.n}}</span></a>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-size: 13px">Un album peut cumuler plusieurs genres.</p>
+      </section>
+
+      <section aria-labelledby="h-pub" style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+        <h2 id="h-pub" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Chez quels éditeurs ?</h2>
+        <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
+          <a href="#" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 46px; align-items: center; gap: 10px; font-size: 14px">
+            <span style="font-weight: 700">{{e.name}}</span>
+            <span style="display: block; height: 16px; width: {{e.w}}; background-color: {{e.c}}; background-image: radial-gradient(rgba(244,239,228,.55) 1.2px, transparent 1.6px); background-size: 5px 5px; mix-blend-mode: multiply"></span>
+            <span style="text-align: right">{{e.n}}</span>
+          </a>
+        </sc-for>
+        <p style="margin: 0; font-size: 13px">Éditions possédées.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; border-top: 2px dashed #0078BF; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px">
+    <span>Imprimé en deux couleurs et demie · Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+    <a href="#" style="font-weight: 700">Administration</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+const HERO_LINES = [
+  'Entrez donc, il y a de quoi lire !',
+  'Installez-vous, la collection vous attend !',
+  'Alors, on bouquine ?',
+  'Encore de la place sur les étagères ? Pas sûr…',
+  'Attention, ça déborde des étagères !'
+];
+class Component extends DCLogic {
+  componentDidMount() {
+    this.setState({ heroIndex: Math.floor(Math.random() * HERO_LINES.length) });
+  }
+  renderVals() {
+    const fmt = (v) => v.toLocaleString('fr-FR');
+    // Riso inks: fluorescent pink, blue, yellow; colours mix where they overlap (multiply).
+    const inks = [['#0078BF', '#F4EFE4'], ['#FF48B0', '#F4EFE4'], ['#FFE800', '#0078BF']];
+    const rots = ['-3deg', '2deg', '-1deg', '3deg', '-2deg', '1.5deg', '-2.5deg', '2.5deg'];
+    const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
+    const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
+    return {
+      heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
+      recents: [
+        { label: 'Alors, tout tombe (Blacksad - T. 7)', meta: 'Dargaud · 3 oct.', rot: '-2deg' },
+        { label: "L'Iris blanc (Astérix - T. 40)", meta: 'Albert René · 28 sept.', rot: '1.5deg' },
+        { label: 'Les Indes fourbes', meta: 'Delcourt · 21 sept.', rot: '-1deg' },
+        { label: 'Le Château des étoiles - INT. [1 à 2]', meta: 'Rue de Sèvres · 14 sept.', rot: '2deg' },
+        { label: 'Mister Prairie (Undertaker - T. 7)', meta: 'Dargaud · 9 sept.', rot: '-2.5deg' },
+        { label: 'Spirou et Fantasio - Hors-série 2', meta: 'Dupuis · 2 sept.', rot: '1deg' }
+      ],
+      prices: [
+        { label: 'Prix moyen', cur: '13,10 €', today: '18,70 €' },
+        { label: 'Prix médian', cur: '11,90 €', today: '16,40 €' },
+        { label: 'Le moins cher', cur: '0,90 €', today: '3,20 €' },
+        { label: 'Le plus cher', cur: '189,00 €', today: '214,50 €' }
+      ],
+      genres: genres.map(([name, v], i) => ({ name, n: fmt(v), bg: inks[i % 3][0], tc: inks[i % 3][1], fs: (14 + Math.round(v / 612 * 14)) + 'px', rot: rots[i] })),
+      publishers: pubs.map(([name, v], i) => ({ name, n: fmt(v), w: Math.round(v / 548 * 100) + '%', c: i % 2 ? '#FF48B0' : '#0078BF' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

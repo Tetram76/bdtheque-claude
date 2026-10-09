@@ -36,9 +36,9 @@ Chaque genre, éditeur ou couverture mène à la liste ou à la fiche correspond
 
 ## Alternatives
 
-Trois autres présentations du dashboard restent en lice. Elles portent le même contenu, mais **s'écartent de la charte** de [`charte-graphique.md`](charte-graphique.md) : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
+Quatre autres présentations du dashboard restent en lice. Elles portent le même contenu, mais **s'écartent de la charte** de [`charte-graphique.md`](charte-graphique.md) : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
 
-Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), et les trois maquettes partagent un même canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>.
+Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), et les quatre maquettes partagent un même canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>.
 
 ### La gazette
 
@@ -125,5 +125,38 @@ Une ligne jaune, la « Ligne Collection », descend le long de la page. Chaque r
 - **Tomes, intégrales ou hors-séries ?** : une ligne par type, dont la longueur suit son pourcentage. Chaque ligne se termine par un terminus, suivi du nombre d'albums et du pourcentage.
 - **Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec une station tous les 50 albums.
 - **Chez quels éditeurs ?** : les éditeurs sont les **stations d'une ligne rouge horizontale**. La taille de chaque station suit le nombre d'éditions possédées, son nom est écrit en biais au-dessus, et le nombre d'éditions est indiqué en dessous.
+
+Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
+
+### Le fanzine en risographie
+
+Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres, qui se mélangent là où elles se chevauchent, avec un léger décalage d'impression. Source : `Riso.dc.html`.
+
+#### Apparence
+
+- **Couleurs** : papier écru `#F4EFE4` et trois encres.
+  - Le bleu `#0078BF` est la couleur du texte. Le rose fluo `#FF48B0` sert d'accent, et le jaune `#FFE800` sert de troisième couleur.
+  - Les aplats qui se chevauchent se mélangent, comme deux encres superposées.
+  - Les gros titres portent une ombre décalée de l'autre encre, qui imite le décalage d'impression.
+- **Typographie** : *Rubik Mono One*, une police large en capitales, pour le nom, les titres et les grands chiffres ; *Space Grotesk* pour le texte.
+- **Mise en page** : un collage. Bandes de papier et couvertures sont légèrement inclinées, les couvertures sont tenues par un morceau de scotch, et les traits de séparation sont en pointillés.
+
+#### Présentation
+
+- **En-tête** : le menu, avec l'entrée active sur fond rose ; la recherche dans un cadre en pointillés ; le bouton d'aide dans un disque bleu.
+- **Accueil** :
+  - le nom « BDTHÈQUE » en très grand, en bleu, avec son ombre rose décalée ;
+  - la mention « Zine n° », suivie du nombre d'albums, et « Prix libre » ;
+  - la **phrase d'accueil**, tirée au hasard dans la même liste, sur une bande rose légèrement inclinée ;
+  - les **compteurs**, en trois disques qui se chevauchent : bleu pour les albums, rose pour les séries, jaune pour les éditions.
+- **Tout juste arrivés !** : les couvertures des dernières éditions entrées, imprimées en trame bleue avec une ombre rose décalée, tenues par un morceau de scotch jaune et légèrement inclinées. Sous chacune, le libellé de l'album, l'éditeur et la date. Un lien mène à la liste des albums.
+- **Ça vaut combien, tout ça ?** :
+  - la valeur totale estimée en très grands chiffres roses, ombrés de bleu, puis son montant en euros du jour ;
+  - la valeur totale connue, avec son montant en euros du jour ;
+  - les prix moyen, médian, minimum et maximum, séparés par des pointillés roses, en euros courants et en euros du jour ;
+  - la mention des montants non convertibles exclus et des éditions gratuites non valorisées.
+- **Tomes, intégrales ou hors-séries ?** : trois disques qui se chevauchent, dont la surface suit le nombre d'albums : bleu pour les réguliers, rose pour les intégrales, jaune pour les hors-séries. Les nombres et les pourcentages sont écrits en dessous.
+- **Plutôt quel genre ?** : les genres sur des bandes de papier découpées et inclinées, alternativement bleues, roses et jaunes. La taille de chaque bande suit le nombre d'albums, qui est écrit à côté du nom.
+- **Chez quels éditeurs ?** : des barres tramées, alternativement bleues et roses, dont la longueur suit le nombre d'éditions possédées.
 
 Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
