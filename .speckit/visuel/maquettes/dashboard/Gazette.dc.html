@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dashboard — gazette</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,600&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}a:hover{text-decoration:underline;text-decoration-thickness:2px}
+@media (max-width: 900px){.cols > *{flex-basis:100% !important}}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: {{paper}}; color: {{ink}}; font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55">
+  <div style="max-width: 1240px; margin: 0 auto; padding: 24px 28px 64px; box-sizing: border-box">
+
+    <header style="display: flex; flex-direction: column; gap: 14px; padding-bottom: 14px; border-bottom: 4px double {{ink}}">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase">
+        <span>Édition du jour · n° 2 847</span>
+        <div style="display: flex; align-items: center; gap: 8px; flex: 0 1 340px">
+          <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
+          <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 44px; padding: 0 16px; border: 2px solid {{ink}}; border-radius: 999px; background: transparent; color: {{ink}}; font: 400 15px 'DM Sans', sans-serif; text-transform: none; letter-spacing: 0">
+          <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; background: {{ink}}; color: {{paper}}; font: 700 18px 'DM Sans', sans-serif; cursor: pointer">?</button>
+        </div>
+      </div>
+      <a href="#" style="align-self: center; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: clamp(48px, 9vw, 112px); line-height: .9; letter-spacing: -0.03em; text-decoration: none">La Gazette de la BDthèque<span style="color: {{accent}}">.</span></a>
+      <nav aria-label="Navigation principale" style="overflow-x: auto; border-top: 2px solid {{ink}}; padding-top: 10px">
+        <div style="display: flex; justify-content: center; gap: 4px 28px; white-space: nowrap; font-weight: 700; width: max-content; margin: 0 auto">
+          <a href="#" aria-current="page" style="padding: 6px 0; border-bottom: 3px solid {{accent}}">Accueil</a>
+          <a href="#" style="padding: 6px 0">Albums</a>
+          <a href="#" style="padding: 6px 0">Séries</a>
+          <a href="#" style="padding: 6px 0">Auteurs</a>
+          <a href="#" style="padding: 6px 0">Éditeurs</a>
+          <a href="#" style="padding: 6px 0">Intentions d'achat</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="cols" style="display: flex; flex-wrap: wrap; gap: 32px; padding-top: 28px">
+
+      <section aria-labelledby="h-hero" style="flex: 2 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+        <h1 id="h-hero" style="margin: 0; font-family: Fraunces, Georgia, serif; font-style: italic; font-weight: 600; font-size: clamp(34px, 4.6vw, 60px); line-height: 1.02">« {{heroLine}} »</h1>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 2px solid {{ink}}; border-bottom: 2px solid {{ink}}">
+          <a href="#" style="padding: 18px 14px; text-align: center; text-decoration: none">
+            <div style="font-family: Fraunces, Georgia, serif; font-size: clamp(40px, 6vw, 76px); font-weight: 800; line-height: 1">2 847</div>
+            <div style="font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 13px">albums</div>
+          </a>
+          <a href="#" style="padding: 18px 14px; text-align: center; border-left: 1px solid {{rule}}; border-right: 1px solid {{rule}}; text-decoration: none">
+            <div style="font-family: Fraunces, Georgia, serif; font-size: clamp(40px, 6vw, 76px); font-weight: 800; line-height: 1">412</div>
+            <div style="font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 13px">séries</div>
+          </a>
+          <a href="#" style="padding: 18px 14px; text-align: center; text-decoration: none">
+            <div style="font-family: Fraunces, Georgia, serif; font-size: clamp(40px, 6vw, 76px); font-weight: 800; line-height: 1">2 913</div>
+            <div style="font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 13px">éditions</div>
+          </a>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+          <a href="#" style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 10px; text-decoration: none">
+            <div style="padding: 8px; background: #FF7A6B; transform: rotate(-1.5deg)">
+              <div style="aspect-ratio: 3 / 4; background: #2E2A33; display: flex; align-items: center; justify-content: center; color: #A79FB0; font-size: 13px">[Visuel de couverture]</div>
+            </div>
+          </a>
+          <div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+            <span style="align-self: flex-start; padding: 3px 10px; background: {{accent}}; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em">Arrivé le 3 octobre</span>
+            <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 38px; font-weight: 800; line-height: 1.05"><a href="#">Alors, tout tombe</a></h2>
+            <p style="margin: 0; font-size: 17px; color: {{ink2}}">Blacksad - T. 7 · Dargaud</p>
+            <p style="margin: 0; color: {{ink2}}; border-top: 1px solid {{rule}}; padding-top: 10px">[Résumé de l'album, tiré de sa fiche — la une met en avant la dernière entrée de la collection.]</p>
+            <h3 style="margin: 14px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em">Également arrivés</h3>
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+              <sc-for list="{{recents}}" as="r" hint-placeholder-count="5">
+                <li style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid {{rule}}">
+                  <a href="#" style="font-weight: 700">{{r.label}}</a>
+                  <span style="flex: none; color: {{ink2}}; font-size: 13px">{{r.date}}</span>
+                </li>
+              </sc-for>
+            </ul>
+            <a href="#" style="font-weight: 700; color: {{link}}">Tous les albums →</a>
+          </div>
+        </div>
+      </section>
+
+      <aside aria-label="Cours et palmarès" style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 28px; padding-left: 28px; border-left: 2px solid {{ink}}">
+        <section aria-labelledby="h-value" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="h-value" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 26px; font-weight: 800">Le cours de la collection</h2>
+          <div style="padding: 16px; background: {{ink}}; color: {{paper}}">
+            <div style="font-size: 13px; text-transform: uppercase; letter-spacing: .08em">Valeur totale estimée</div>
+            <div style="font-family: Fraunces, Georgia, serif; font-size: 44px; font-weight: 800; line-height: 1.05">38 760 €</div>
+            <div style="font-weight: 700; color: {{accent}}">55 230 € en euros du jour</div>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px">
+            <thead><tr style="text-align: right; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: {{ink2}}"><th scope="col" style="text-align: left; padding: 6px 0; font-weight: 700"></th><th scope="col" style="padding: 6px 0; font-weight: 700">€ courants</th><th scope="col" style="padding: 6px 0; font-weight: 700">€ du jour</th></tr></thead>
+            <tbody>
+              <sc-for list="{{prices}}" as="p" hint-placeholder-count="5">
+                <tr style="border-top: 1px solid {{rule}}"><th scope="row" style="text-align: left; padding: 8px 0; font-weight: 500">{{p.label}}</th><td style="text-align: right; font-weight: 700">{{p.cur}}</td><td style="text-align: right; font-weight: 700; color: {{link}}">{{p.today}}</td></tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <p style="margin: 0; font-size: 12px; color: {{ink2}}">Estimation : prix connus + 497 éditions sans prix. 12 montants non convertibles exclus · 25 éditions gratuites non valorisées.</p>
+        </section>
+
+        <section aria-labelledby="h-pub" style="display: flex; flex-direction: column; gap: 6px">
+          <h2 id="h-pub" style="margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-size: 26px; font-weight: 800">Le palmarès des éditeurs</h2>
+          <ol style="margin: 0; padding: 0; list-style: none">
+            <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
+              <li style="display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid {{rule}}">
+                <span style="font-family: Fraunces, Georgia, serif; font-size: 22px; font-weight: 800; color: {{e.c}}">{{e.rank}}</span>
+                <a href="#" style="font-weight: 700">{{e.name}}</a>
+                <span style="font-variant-numeric: tabular-nums; color: {{ink2}}">{{e.n}} éd.</span>
+              </li>
+            </sc-for>
+          </ol>
+        </section>
+      </aside>
+    </div>
+
+    <div class="cols" style="display: flex; flex-wrap: wrap; gap: 32px; margin-top: 36px; padding-top: 24px; border-top: 4px double {{ink}}">
+      <section aria-labelledby="h-type" style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-type" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 26px; font-weight: 800">Tomes, intégrales ou hors-séries ?</h2>
+        <p style="margin: 0; font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 22px; line-height: 1.25; color: {{ink2}}">Neuf albums sur dix sont des tomes classiques.</p>
+        <div role="img" aria-label="Une étagère de 100 livres : 91 réguliers, 6 intégrales, 3 hors-séries" style="display: flex; align-items: flex-end; gap: 2px; height: 76px; padding: 0 2px; border-bottom: 4px solid {{ink}}">
+          <sc-for list="{{spines}}" as="s" hint-placeholder-count="100">
+            <span style="flex: 1 1 0; height: {{s.h}}; background: {{s.c}}; border-radius: 1px 1px 0 0"></span>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+          <div style="border-top: 4px solid {{ink}}; padding-top: 6px"><div style="font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 800; line-height: 1">2 571</div><div style="font-size: 13px; color: {{ink2}}">réguliers · 90 %</div></div>
+          <div style="border-top: 4px solid {{accent}}; padding-top: 6px"><div style="font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 800; line-height: 1">184</div><div style="font-size: 13px; color: {{ink2}}">intégrales · 6 %</div></div>
+          <div style="border-top: 4px solid {{link}}; padding-top: 6px"><div style="font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 800; line-height: 1">92</div><div style="font-size: 13px; color: {{ink2}}">hors-séries · 3 %</div></div>
+        </div>
+        <p style="margin: 0; font-size: 12px; color: {{ink2}}">Un dos = 1 % des albums.</p>
+      </section>
+
+      <section aria-labelledby="h-genre" style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-genre" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 26px; font-weight: 800">Plutôt quel genre ?</h2>
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 22px; padding: 6px 0 10px; border-top: 1px solid {{rule}}; border-bottom: 1px solid {{rule}}">
+          <sc-for list="{{genres}}" as="g" hint-placeholder-count="8">
+            <a href="#" style="display: inline-flex; align-items: flex-start; gap: 4px; font-family: Fraunces, Georgia, serif; font-size: {{g.fs}}; font-weight: {{g.fw}}; font-style: {{g.fi}}; line-height: 1.15; color: {{g.c}}">{{g.name}}<span style="font-family: 'DM Sans', sans-serif; font-style: normal; font-weight: 700; font-size: 12px; line-height: 1.6; color: {{ink2}}">{{g.n}}</span></a>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-size: 12px; color: {{ink2}}">Taille du mot proportionnelle au nombre d'albums ; un album peut cumuler plusieurs genres.</p>
+      </section>
+    </div>
+
+    <footer style="margin-top: 40px; padding-top: 12px; border-top: 2px solid {{ink}}; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px; color: {{ink2}}">
+      <span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+      <a href="#" style="font-weight: 700; color: {{ink}}">Administration</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"paper":{"editor":"color","default":"#FBF3EA","options":["#FBF3EA","#F4EBDD","#FFFFFF"]},"accent":{"editor":"color","default":"#FFB547","options":["#FFB547","#FFD166","#9BE07A","#4FD1C5"]},"$preview":{"width":1440,"height":1700}}'>
+const HERO_LINES = [
+  'Entrez donc, il y a de quoi lire !',
+  'Installez-vous, la collection vous attend !',
+  'Alors, on bouquine ?',
+  'Encore de la place sur les étagères ? Pas sûr…',
+  'Attention, ça déborde des étagères !'
+];
+class Component extends DCLogic {
+  componentDidMount() {
+    this.setState({ heroIndex: Math.floor(Math.random() * HERO_LINES.length) });
+  }
+  renderVals() {
+    const fmt = (v) => v.toLocaleString('fr-FR');
+    const accent = this.props.accent ?? '#FFB547';
+    // Genres set as a typographic line: word size follows the count, alternating roman and italic.
+    const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
+    // 100 spines, one per percent; heights vary deterministically so the shelf looks lived-in.
+    const spines = [];
+    for (let i = 0; i < 100; i++) {
+      spines.push({ h: (46 + ((i * 37) % 29)) + 'px', c: i < 91 ? '#2B1030' : i < 97 ? accent : '#9A3D12' });
+    }
+    const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
+    return {
+      paper: this.props.paper ?? '#FBF3EA',
+      ink: '#2B1030',
+      ink2: '#5E3F63',
+      rule: '#D9C6CF',
+      link: '#9A3D12',
+      accent,
+      spines,
+      heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
+      recents: [
+        { label: "L'Iris blanc (Astérix - T. 40)", date: '28 sept.' },
+        { label: 'Les Indes fourbes', date: '21 sept.' },
+        { label: 'Le Château des étoiles - INT. [1 à 2]', date: '14 sept.' },
+        { label: 'Mister Prairie (Undertaker - T. 7)', date: '9 sept.' },
+        { label: 'Spirou et Fantasio - Hors-série 2', date: '2 sept.' }
+      ],
+      prices: [
+        { label: 'Valeur connue', cur: '31 482 €', today: '44 910 €' },
+        { label: 'Prix moyen', cur: '13,10 €', today: '18,70 €' },
+        { label: 'Prix médian', cur: '11,90 €', today: '16,40 €' },
+        { label: 'Le moins cher', cur: '0,90 €', today: '3,20 €' },
+        { label: 'Le plus cher', cur: '189,00 €', today: '214,50 €' }
+      ],
+      publishers: pubs.map(([name, v], i) => ({ name, n: fmt(v), rank: name === 'Autres' ? '·' : String(i + 1), c: '#2B1030' })),
+      genres: genres.map(([name, v], i) => ({
+        name,
+        n: fmt(v),
+        fs: (18 + Math.round(v / 612 * 34)) + 'px',
+        fw: v > 300 ? '800' : '600',
+        fi: i % 2 ? 'italic' : 'normal',
+        c: name === 'Autres' ? '#5E3F63' : '#2B1030'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
