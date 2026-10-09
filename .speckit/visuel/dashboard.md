@@ -1,44 +1,74 @@
 # Dashboard
 
-Ce fichier décrit la présentation du dashboard, la page d'accueil de la partie Consultation (`fonctionnel.md` § Page d'accueil), selon la charte de [`charte-graphique.md`](charte-graphique.md). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+Ce fichier décrit la présentation du dashboard, la page d'accueil de la partie Consultation (`fonctionnel.md` § Page d'accueil). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+
+Plusieurs présentations du dashboard restent en lice. Ce sont des **alternatives** d'un même projet de maquettes, qui mettent en scène le même contenu (§ Contenu commun), chacune à sa façon.
+
+- Les deux alternatives « Cases et bulles », violine et mûre, suivent la charte de [`charte-graphique.md`](charte-graphique.md), dont elles sont issues.
+- Les autres **s'écartent de cette charte** : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
 
 ---
 
-## Maquette de référence
+## Maquettes
 
-Sources dans [`maquettes/dashboard/`](maquettes/dashboard/), canevas : <https://claude.ai/artifact/GVhoEBfShTiTCK9ZEPSUaf>.
+Toutes les alternatives forment un seul projet, dans un seul canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>. Ses sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), dont `canvas.json` est l'index : il donne la disposition et le titre des planches du canevas.
 
-| Fichier | Contenu |
+| Alternative | Fichiers |
 | --- | --- |
-| `Violine.dc.html` | Le dashboard en teinte violine. |
-| `Mure.dc.html` | Le dashboard en teinte mûre. |
-| `Main.dc.html` | Source commune aux deux variantes, qu'elles affichent chacune avec sa teinte ; son nom est imposé par le canevas, dont c'est le fichier d'entrée. |
+| Cases et bulles, violine | `Violine.dc.html` |
+| Cases et bulles, mûre | `Mure.dc.html` |
+| La gazette | `Gazette.dc.html` |
+| Le sommaire de magazine | `Sommaire.dc.html` |
+| Le festival en métro | `FestivalMetro.dc.html` |
+| Le fanzine en risographie | `Riso.dc.html` |
+| La vitrine de librairie | `Librairie.dc.html` |
+| L'album de vignettes | `Vignettes.dc.html` |
 
-## Présentation
+`Main.dc.html` n'est pas une alternative : c'est la source commune des deux alternatives « Cases et bulles », que chacune affiche avec sa teinte. Son nom est imposé par le canevas, dont c'est le fichier d'entrée.
 
-De haut en bas :
+## Contenu commun
 
-- **Accueil** : une grande bulle porte une **phrase d'accueil tirée au hasard** à chaque affichage, dans une liste prédéfinie :
-  - « Entrez donc, il y a de quoi lire ! »
-  - « Installez-vous, la collection vous attend ! »
-  - « Alors, on bouquine ? »
-  - « Encore de la place sur les étagères ? Pas sûr… »
-  - « Attention, ça déborde des étagères ! »
+Toutes les alternatives présentent les rubriques suivantes ; la présentation de chaque alternative précise ce qu'elle en montre et comment.
 
-  À côté, les **compteurs** : albums, séries, éditions.
-- **Tout juste arrivés !** : les dernières éditions entrées dans la collection (ordre : `fonctionnel.md` § Page d'accueil), par leur couverture, avec le libellé de l'album, l'éditeur et la date d'acquisition, omise lorsqu'elle n'est pas connue ; un lien mène à la liste des albums. Sur smartphone, ce lien passe sous la bulle de titre.
-- **Ça vaut combien, tout ça ?** : valeur totale estimée et valeur totale connue, puis prix moyen, médian, minimum et maximum, chaque montant en euros courants et en euros du jour (`fonctionnel.md` § Gestion des devises) ; une mention indique les montants non convertibles exclus et les éditions gratuites non valorisées.
-- **Tomes, intégrales ou hors-séries ?** : la répartition par type d'album est représentée par des **piles de livres** posées sur une étagère, une par catégorie — réguliers, intégrales, hors-séries, une intégrale hors-série comptant parmi les hors-séries (`fonctionnel.md` § Page d'accueil) — (un livre ≈ 100 albums), avec le nombre d'albums au-dessus et le pourcentage en dessous. Les piles ont l'air **empilées à la main** : en tendance, les livres s'élargissent vers la base pour que la pile tienne, mais leur largeur, leur décalage et leur inclinaison varient, et cette variation est **tirée au hasard à chaque affichage**, dans des limites qui gardent la pile plausible.
-- **Plutôt quel genre ?** : les genres en étiquettes colorées, dont la taille suit le nombre d'albums ; un album peut relever de plusieurs genres.
-- **Chez quels éditeurs ?** : les éditeurs en barres horizontales, sur les éditions possédées.
+- **Accueil** :
+  - une **phrase d'accueil tirée au hasard** à chaque affichage, dans une liste prédéfinie :
+    - « Entrez donc, il y a de quoi lire ! »
+    - « Installez-vous, la collection vous attend ! »
+    - « Alors, on bouquine ? »
+    - « Encore de la place sur les étagères ? Pas sûr… »
+    - « Attention, ça déborde des étagères ! »
+  - les **compteurs** : albums, séries, éditions.
+- **Tout juste arrivés !** : les dernières éditions entrées dans la collection (ordre : `fonctionnel.md` § Page d'accueil), et un lien vers la liste des albums.
+- **Ça vaut combien, tout ça ?** :
+  - la valeur totale estimée et la valeur totale connue, puis les prix moyen, médian, minimum et maximum ;
+  - chaque montant en euros courants et en euros du jour (`fonctionnel.md` § Gestion des devises) ;
+  - une mention qui indique les montants non convertibles exclus et les éditions gratuites non valorisées.
+- **Tomes, intégrales ou hors-séries ?** : la répartition par type d'album, en trois catégories exclusives (réguliers, intégrales et hors-séries), une intégrale hors-série comptant parmi les hors-séries (`fonctionnel.md` § Page d'accueil).
+- **Plutôt quel genre ?** : les genres et leur nombre d'albums ; un album peut relever de plusieurs genres.
+- **Chez quels éditeurs ?** : les éditeurs et leur nombre d'éditions possédées.
 
-Chaque genre, éditeur ou couverture mène à la liste ou à la fiche correspondante.
+Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
 
 ## Alternatives
 
-Six autres présentations du dashboard restent en lice. Elles portent le même contenu, mais **s'écartent de la charte** de [`charte-graphique.md`](charte-graphique.md) : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
+### Cases et bulles, violine et mûre
 
-Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), et les six maquettes partagent un même canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>.
+Deux alternatives, identiques à la teinte près, qui suivent la charte de [`charte-graphique.md`](charte-graphique.md) : l'une en teinte violine, l'autre en teinte mûre (`charte-graphique.md` § Couleurs). Sources : `Violine.dc.html` et `Mure.dc.html`, qui affichent toutes deux `Main.dc.html`.
+
+#### Présentation
+
+De haut en bas :
+
+- **Accueil** : une grande bulle porte la **phrase d'accueil**. À côté, les **compteurs**.
+- **Tout juste arrivés !** : les dernières éditions entrées, par leur couverture, avec le libellé de l'album, l'éditeur et la date d'acquisition, omise lorsqu'elle n'est pas connue. Le lien vers la liste des albums passe sous la bulle de titre sur smartphone.
+- **Ça vaut combien, tout ça ?** : les montants, puis la mention des montants exclus.
+- **Tomes, intégrales ou hors-séries ?** :
+  - la répartition est représentée par des **piles de livres** posées sur une étagère, une par catégorie, à raison d'un livre pour environ 100 albums ;
+  - le nombre d'albums est écrit au-dessus de chaque pile, et le pourcentage en dessous ;
+  - les piles ont l'air **empilées à la main** : en tendance, les livres s'élargissent vers la base pour que la pile tienne, mais leur largeur, leur décalage et leur inclinaison varient ;
+  - cette variation est **tirée au hasard à chaque affichage**, dans des limites qui gardent la pile plausible.
+- **Plutôt quel genre ?** : les genres en étiquettes colorées, dont la taille suit le nombre d'albums.
+- **Chez quels éditeurs ?** : les éditeurs en barres horizontales.
 
 ### La gazette
 
@@ -55,7 +85,7 @@ De haut en bas :
 
 - **En-tête de journal** : un bandeau « Édition du jour · n° » suivi du nombre d'albums, avec la recherche et l'aide ; puis le titre « La Gazette de la BDthèque » ; enfin le menu, sous un filet, avec l'entrée active soulignée de l'accent.
 - **La une**, sur deux tiers de la largeur :
-  - La **phrase d'accueil** est le gros titre, en italique et entre guillemets, tirée au hasard dans la même liste.
+  - La **phrase d'accueil** est le gros titre, en italique et entre guillemets, tirée au hasard dans la liste commune.
   - Les **compteurs** (albums, séries, éditions) forment un bandeau de trois colonnes.
   - La **dernière édition entrée** dans la collection est à la une : sa couverture, sa date d'entrée, le titre, la série et l'éditeur de son album, et le résumé de l'album.
   - Sous « Également arrivés », les entrées suivantes sont listées avec leur date. Un lien mène à la liste des albums.
@@ -65,8 +95,6 @@ De haut en bas :
 - **Bas de page**, sous un double filet :
   - **Tomes, intégrales ou hors-séries ?** : une phrase de synthèse en italique, puis une étagère de 100 dos de livres, chacun valant 1 % des albums : encre pour les réguliers, ambre pour les intégrales, rouille pour les hors-séries. Le nombre et le pourcentage de chaque catégorie sont soulignés de sa couleur.
   - **Plutôt quel genre ?** : les genres sur une ligne typographique. La taille de chaque mot suit le nombre d'albums, les mots alternent romain et italique, et le nombre d'albums suit chaque mot en petit.
-
-Comme dans la présentation principale, chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
 
 ### Le sommaire de magazine
 
@@ -87,7 +115,7 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
   - le nom de l'application en blanc ;
   - un bandeau entre deux filets : « N° », suivi du nombre d'albums, le mois et la mention « Gratuit » ;
   - la couverture du dernier album entré dans la collection, sur presque toute la hauteur ;
-  - la **phrase d'accueil** en gros titre blanc, tirée au hasard dans la même liste ;
+  - la **phrase d'accueil** en gros titre blanc, tirée au hasard dans la liste commune ;
   - des étiquettes noires, qui donnent le nombre de séries et d'éditions, et une étiquette jaune inclinée, qui annonce le dernier album entré.
 - **Au sommaire**, à droite : une rubrique par statistique, chacune avec un grand numéro de page coloré, son titre, une accroche et un petit visuel.
   - **Tout juste arrivés !** : une accroche qui cite les derniers albums entrés, et les vignettes de leurs couvertures.
@@ -114,7 +142,7 @@ Une ligne corail, la « Navette du festival », descend le long de la page. Chaq
 
 - **En-tête** : le nom de l'application avec une pastille « B », le menu, avec l'entrée active sur fond bleu, la recherche et le bouton d'aide, jaune.
 - **Terminus Entrée** :
-  - l'**affiche du festival**, sur fond bleu avec deux disques jaune et corail, la mention « Festival permanent · entrée libre » et la **phrase d'accueil**, tirée au hasard dans la même liste ;
+  - l'**affiche du festival**, sur fond bleu avec deux disques jaune et corail, la mention « Festival permanent · entrée libre » et la **phrase d'accueil**, tirée au hasard dans la liste commune ;
   - les **compteurs**, en pastilles de correspondance : une pastille de couleur avec une lettre (A, S, E), le nombre et son libellé.
 - **Station Scène des nouveautés, Tout juste arrivés !** : les dernières éditions entrées, en fiches de programme. Chaque fiche donne la date d'entrée en couleur, la couverture, le libellé de l'album et le stand de son éditeur. Un lien mène à la liste des albums.
 - **Station Billetterie, Ça vaut combien, tout ça ?** :
@@ -124,8 +152,6 @@ Une ligne corail, la « Navette du festival », descend le long de la page. Chaq
 - **Station Pavillons, Tomes, intégrales ou hors-séries ?** : trois **pavillons** à toit pointu, dont la largeur suit le nombre d'albums, avec le pourcentage et le nombre : bleu pour les réguliers, corail pour les intégrales, jaune pour les hors-séries.
 - **Correspondance Espaces thématiques, Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec un arrêt tous les 50 albums.
 - **Terminus Allée des exposants, Chez quels éditeurs ?** : les éditeurs sont les **stations d'une ligne bleue horizontale**. La taille de chaque station suit le nombre d'éditions possédées, son nom est écrit en biais au-dessus, et sous la station figurent son nombre d'éditions et son numéro de stand.
-
-Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
 
 ### Le fanzine en risographie
 
@@ -146,7 +172,7 @@ Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres,
 - **Accueil** :
   - le nom « BDTHÈQUE » en très grand, en bleu, avec son ombre rose décalée ;
   - la mention « Zine n° », suivie du nombre d'albums, et « Prix libre » ;
-  - la **phrase d'accueil**, tirée au hasard dans la même liste, sur une bande rose légèrement inclinée ;
+  - la **phrase d'accueil**, tirée au hasard dans la liste commune, sur une bande rose légèrement inclinée ;
   - les **compteurs**, en trois disques qui se chevauchent : bleu pour les albums, rose pour les séries, jaune pour les éditions.
 - **Tout juste arrivés !** : les couvertures des dernières éditions entrées, imprimées en trame bleue avec une ombre rose décalée, tenues par un morceau de scotch jaune et légèrement inclinées. Sous chacune, le libellé de l'album, l'éditeur et la date. Un lien mène à la liste des albums.
 - **Ça vaut combien, tout ça ?** :
@@ -157,8 +183,6 @@ Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres,
 - **Tomes, intégrales ou hors-séries ?** : trois disques qui se chevauchent, dont la surface suit le nombre d'albums : bleu pour les réguliers, rose pour les intégrales, jaune pour les hors-séries. Les nombres et les pourcentages sont écrits en dessous.
 - **Plutôt quel genre ?** : les genres sur des bandes de papier découpées et inclinées, alternativement bleues, roses et jaunes. La taille de chaque bande suit le nombre d'albums, qui est écrit à côté du nom.
 - **Chez quels éditeurs ?** : des barres tramées, alternativement bleues et roses, dont la longueur suit le nombre d'éditions possédées.
-
-Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
 
 ### La vitrine de librairie
 
@@ -182,7 +206,7 @@ Le dashboard présenté comme une librairie de bandes dessinées : la façade, p
 - **La façade** :
   - l'enseigne « BDthèque » en lettres dorées, entre deux filets, sous la mention « Librairie · Bandes dessinées » ;
   - un store rayé vert et crème, à bord festonné ;
-  - la vitrine, où la **phrase d'accueil**, tirée au hasard dans la même liste, est peinte en lettres dorées italiques ;
+  - la vitrine, où la **phrase d'accueil**, tirée au hasard dans la liste commune, est peinte en lettres dorées italiques ;
   - la porte, où pend une pancarte « Ouvert » qui donne les **compteurs** : albums, séries, éditions.
 - **Tout juste arrivés !** : les couvertures des dernières éditions entrées, posées sur une tablette en noyer. Sous chacune, un carton de libraire donne la date d'entrée, écrite à la main, le libellé de l'album et l'éditeur. Un lien mène à la liste des albums.
 - **Ça vaut combien, tout ça ?**, sur une **ardoise** encadrée de noyer, écrite à la craie :
@@ -192,8 +216,6 @@ Le dashboard présenté comme une librairie de bandes dessinées : la façade, p
 - **Tomes, intégrales ou hors-séries ?** : trois casiers d'une bibliothèque en noyer, remplis de livres, dont la largeur suit le nombre d'albums. Sous chaque casier, une étiquette donne le nombre et le pourcentage.
 - **Plutôt quel genre ?** : une plaque de rayon par genre, vert bouteille encadré de laiton, avec le nom du genre et une barre dont la longueur suit le nombre d'albums.
 - **Chez quels éditeurs ?** : une étagère par éditeur, garnie de livres, un dos pour environ 25 éditions possédées, avec un porte-étiquette qui donne le nom de l'éditeur et son nombre d'éditions.
-
-Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
 
 ### L'album de vignettes
 
@@ -215,7 +237,7 @@ Chaque rubrique est une page de l'album, encadrée de bleu canard, avec une past
 - **En-tête**, bleu canard : le nom de l'application, le menu, avec l'entrée active sur fond jaune, la recherche et le bouton d'aide, jaune.
 - **Page 1, Bienvenue** :
   - la mention « Album officiel de la collection » ;
-  - la **phrase d'accueil**, tirée au hasard dans la même liste, sur une grande vignette brillante aux reflets irisés ;
+  - la **phrase d'accueil**, tirée au hasard dans la liste commune, sur une grande vignette brillante aux reflets irisés ;
   - les **compteurs**, en trois vignettes rondes : rose pour les albums, jaune pour les séries, bleu pour les éditions.
 - **Page 2, Tout juste arrivés !** : les couvertures des dernières éditions entrées, collées un peu de travers sur leur emplacement. Le numéro de l'emplacement est imprimé dessous, et sous chacune figurent ce numéro, le libellé de l'album, l'éditeur et la date. Un lien mène à la liste des albums.
 - **Page 3, Ça vaut combien, tout ça ?** :
@@ -225,5 +247,3 @@ Chaque rubrique est une page de l'album, encadrée de bleu canard, avec une past
 - **Page 4, Tomes, intégrales ou hors-séries ?** : une planche de 100 petites vignettes, chacune valant 1 % des albums : bleu canard pour les réguliers, orange pour les intégrales, rose pour les hors-séries. Les nombres et les pourcentages sont donnés en dessous.
 - **Page 5, Plutôt quel genre ?** : un écusson rond par genre, chacun dans sa couleur, dont la taille suit le nombre d'albums.
 - **Page 6, Chez quels éditeurs ?** : une barre par éditeur, dans un emplacement en pointillés, dont la longueur suit le nombre d'éditions possédées.
-
-Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
