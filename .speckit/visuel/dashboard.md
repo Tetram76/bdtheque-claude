@@ -93,7 +93,7 @@ De haut en bas :
   - **Le cours de la collection** : la valeur totale estimée dans un encadré en couleurs inversées, avec son montant en euros du jour. Un tableau donne ensuite la valeur totale connue et les prix moyen, médian, minimum et maximum, en euros courants et en euros du jour. Une mention indique les montants non convertibles exclus et les éditions gratuites non valorisées.
   - **Le palmarès des éditeurs** : un classement numéroté des éditeurs, avec le nombre d'éditions possédées de chacun.
 - **Bas de page**, sous un double filet :
-  - **Tomes, intégrales ou hors-séries ?** : une phrase de synthèse en italique, puis une étagère de 100 dos de livres, chacun valant 1 % des albums : encre pour les réguliers, ambre pour les intégrales, rouille pour les hors-séries. Le nombre et le pourcentage de chaque catégorie sont soulignés de sa couleur.
+  - **Tomes, intégrales ou hors-séries ?** : une phrase de synthèse en italique, puis une étagère de dos de livres, un dos pour 1 % des albums : encre pour les réguliers, ambre pour les intégrales, rouille pour les hors-séries. Le nombre et le pourcentage de chaque catégorie sont soulignés de sa couleur. Chaque catégorie a autant de dos que son pourcentage arrondi, si bien que l'étagère peut compter un dos de plus ou de moins que 100, mais jamais un nombre de dos qui contredise le pourcentage affiché.
   - **Plutôt quel genre ?** : les genres sur une ligne typographique. La taille de chaque mot suit le nombre d'albums, les mots alternent romain et italique, et le nombre d'albums suit chaque mot en petit.
 
 ### Le sommaire de magazine
@@ -244,6 +244,6 @@ Chaque rubrique est une page de l'album, encadrée de bleu canard, avec une past
   - la valeur totale estimée, sur un encadré bleu canard, et la valeur totale connue, sur un encadré blanc, chacune avec son montant en euros du jour ;
   - les prix moyen, médian, minimum et maximum, séparés par des pointillés, en euros courants et en euros du jour ;
   - la mention des montants non convertibles exclus et des éditions gratuites non valorisées.
-- **Page 4, Tomes, intégrales ou hors-séries ?** : une planche de 100 petites vignettes, chacune valant 1 % des albums : bleu canard pour les réguliers, orange pour les intégrales, rose pour les hors-séries. Les nombres et les pourcentages sont donnés en dessous.
+- **Page 4, Tomes, intégrales ou hors-séries ?** : une planche de petites vignettes, une pour 1 % des albums : bleu canard pour les réguliers, orange pour les intégrales, rose pour les hors-séries. Les nombres et les pourcentages sont donnés en dessous. Chaque catégorie a autant de vignettes que son pourcentage arrondi, si bien que la planche peut compter une vignette de plus ou de moins que 100, mais jamais un nombre de vignettes qui contredise le pourcentage affiché.
 - **Page 5, Plutôt quel genre ?** : un écusson rond par genre, chacun dans sa couleur, dont la taille suit le nombre d'albums.
 - **Page 6, Chez quels éditeurs ?** : une barre par éditeur, dans un emplacement en pointillés, dont la longueur suit le nombre d'éditions possédées.

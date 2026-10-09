@@ -105,17 +105,17 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
       <section aria-labelledby="h-type" style="flex: 1 1 380px; min-width: 0; position: relative; padding: 36px; border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 14px">
         <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 4 · La planche</span>
         <h2 id="h-type" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 28px; line-height: 1.15">Tomes, intégrales ou hors-séries ?</h2>
-        <div role="img" aria-label="Planche de 100 vignettes : 91 réguliers, 6 intégrales, 3 hors-séries" style="padding: 10px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.12); display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 3px">
-          <sc-for list="{{sheet}}" as="s" hint-placeholder-count="100">
+        <div role="img" aria-label="{{typesAria}}" style="padding: 10px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.12); display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 3px">
+          <sc-for list="{{sheet}}" as="s" hint-placeholder-count="99">
             <span style="aspect-ratio: 3 / 4; border-radius: 2px; background: {{s}}"></span>
           </sc-for>
         </div>
         <div style="display: flex; flex-direction: column; gap: 2px">
-          <span><span style="color: #0F7C8C">■</span> <strong>2 571</strong> réguliers · 90 %</span>
-          <span><span style="color: #F2994A">■</span> <strong>184</strong> intégrales · 6 %</span>
-          <span><span style="color: #E0457B">■</span> <strong>92</strong> hors-séries · 3 %</span>
+          <sc-for list="{{types}}" as="y" hint-placeholder-count="3">
+            <span><span style="color: {{y.c}}">■</span> <strong>{{y.n}}</strong> {{y.label}} · {{y.pct}}</span>
+          </sc-for>
         </div>
-        <p style="margin: 0; font-size: 13px; color: #5B6B72">Une vignette = 1 % des albums.</p>
+        <p style="margin: 0; font-size: 13px; color: #5B6B72">Une vignette = 1 % des albums (pourcentages arrondis).</p>
       </section>
     </div>
 
@@ -178,8 +178,14 @@ class Component extends DCLogic {
     const rots = ['-4deg', '3deg', '-2deg', '5deg', '-3deg', '2deg', '-5deg', '4deg'];
     const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
     const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
-    const sheet = [];
-    for (let i = 0; i < 100; i++) sheet.push(i < 91 ? '#0F7C8C' : i < 97 ? '#F2994A' : '#E0457B');
+    // Chart, legend and accessible label all derive from the same counts and the same rounding:
+    // one sticker per rounded percent, so the sheet can hold 99 or 101 stickers but never contradicts its legend.
+    const typeCounts = [['réguliers', 2571, '#0F7C8C'], ['intégrales', 184, '#F2994A'], ['hors-séries', 92, '#E0457B']];
+    const total = typeCounts.reduce((sum, [, n]) => sum + n, 0);
+    const types = typeCounts.map(([label, n, c]) => ({ label, n: fmt(n), pctValue: Math.round(n / total * 100), c }))
+      .map((y) => ({ ...y, pct: y.pctValue + ' %' }));
+    const sheet = types.flatMap((y) => Array.from({ length: y.pctValue }, () => y.c));
+    const typesAria = 'Planche d\'une vignette par pour cent d\'albums : ' + types.map((y) => y.pctValue + ' pour les ' + y.label).join(', ');
     return {
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
       counters: [
@@ -202,6 +208,8 @@ class Component extends DCLogic {
         { label: 'Le plus cher', cur: '189,00 €', today: '214,50 €' }
       ],
       sheet,
+      types,
+      typesAria,
       genres: genres.map(([name, v], i) => {
         const k = Math.sqrt(v / 612);
         return { name, n: fmt(v), c: inks[i][0], tc: inks[i][1], rot: rots[i], d: Math.round(78 + k * 64) + 'px', fs: (12 + Math.round(k * 8)) + 'px' };

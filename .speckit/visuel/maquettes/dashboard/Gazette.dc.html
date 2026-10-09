@@ -123,17 +123,17 @@ a{text-decoration:none;color:inherit}a:hover{text-decoration:underline;text-deco
       <section aria-labelledby="h-type" style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
         <h2 id="h-type" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 26px; font-weight: 800">Tomes, intégrales ou hors-séries ?</h2>
         <p style="margin: 0; font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 22px; line-height: 1.25; color: {{ink2}}">Neuf albums sur dix sont des tomes classiques.</p>
-        <div role="img" aria-label="Une étagère de 100 livres : 91 réguliers, 6 intégrales, 3 hors-séries" style="display: flex; align-items: flex-end; gap: 2px; height: 76px; padding: 0 2px; border-bottom: 4px solid {{ink}}">
-          <sc-for list="{{spines}}" as="s" hint-placeholder-count="100">
+        <div role="img" aria-label="{{typesAria}}" style="display: flex; align-items: flex-end; gap: 2px; height: 76px; padding: 0 2px; border-bottom: 4px solid {{ink}}">
+          <sc-for list="{{spines}}" as="s" hint-placeholder-count="99">
             <span style="flex: 1 1 0; height: {{s.h}}; background: {{s.c}}; border-radius: 1px 1px 0 0"></span>
           </sc-for>
         </div>
         <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
-          <div style="border-top: 4px solid {{ink}}; padding-top: 6px"><div style="font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 800; line-height: 1">2 571</div><div style="font-size: 13px; color: {{ink2}}">réguliers · 90 %</div></div>
-          <div style="border-top: 4px solid {{accent}}; padding-top: 6px"><div style="font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 800; line-height: 1">184</div><div style="font-size: 13px; color: {{ink2}}">intégrales · 6 %</div></div>
-          <div style="border-top: 4px solid {{link}}; padding-top: 6px"><div style="font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 800; line-height: 1">92</div><div style="font-size: 13px; color: {{ink2}}">hors-séries · 3 %</div></div>
+          <sc-for list="{{types}}" as="y" hint-placeholder-count="3">
+            <div style="border-top: 4px solid {{y.c}}; padding-top: 6px"><div style="font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 800; line-height: 1">{{y.n}}</div><div style="font-size: 13px; color: {{ink2}}">{{y.label}} · {{y.pct}}</div></div>
+          </sc-for>
         </div>
-        <p style="margin: 0; font-size: 12px; color: {{ink2}}">Un dos = 1 % des albums.</p>
+        <p style="margin: 0; font-size: 12px; color: {{ink2}}">Un dos = 1 % des albums (pourcentages arrondis).</p>
       </section>
 
       <section aria-labelledby="h-genre" style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
@@ -171,11 +171,21 @@ class Component extends DCLogic {
     const accent = this.props.accent ?? '#FFB547';
     // Genres set as a typographic line: word size follows the count, alternating roman and italic.
     const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
-    // 100 spines, one per percent; heights vary deterministically so the shelf looks lived-in.
+    // Chart, legend and accessible label all derive from the same counts and the same rounding:
+    // one spine per rounded percent, so the shelf can hold 99 or 101 spines but never contradicts its legend.
+    const typeCounts = [['réguliers', 2571, '#2B1030'], ['intégrales', 184, accent], ['hors-séries', 92, '#9A3D12']];
+    const total = typeCounts.reduce((sum, [, n]) => sum + n, 0);
+    const types = typeCounts.map(([label, n, c]) => ({ label, n: fmt(n), pctValue: Math.round(n / total * 100), c }))
+      .map((y) => ({ ...y, pct: y.pctValue + ' %' }));
     const spines = [];
-    for (let i = 0; i < 100; i++) {
-      spines.push({ h: (46 + ((i * 37) % 29)) + 'px', c: i < 91 ? '#2B1030' : i < 97 ? accent : '#9A3D12' });
-    }
+    types.forEach((y) => {
+      for (let k = 0; k < y.pctValue; k++) {
+        const i = spines.length;
+        // Heights vary deterministically so the shelf looks lived-in.
+        spines.push({ h: (46 + ((i * 37) % 29)) + 'px', c: y.c });
+      }
+    });
+    const typesAria = 'Une étagère d\'un livre par pour cent d\'albums : ' + types.map((y) => y.pctValue + ' pour les ' + y.label).join(', ');
     const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
     return {
       paper: this.props.paper ?? '#FBF3EA',
@@ -185,6 +195,8 @@ class Component extends DCLogic {
       link: '#9A3D12',
       accent,
       spines,
+      types,
+      typesAria,
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
       recents: [
         { label: "L'Iris blanc (Astérix - T. 40)", date: '28 sept.' },
