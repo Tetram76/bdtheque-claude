@@ -36,9 +36,9 @@ Chaque genre, éditeur ou couverture mène à la liste ou à la fiche correspond
 
 ## Alternatives
 
-Cinq autres présentations du dashboard restent en lice. Elles portent le même contenu, mais **s'écartent de la charte** de [`charte-graphique.md`](charte-graphique.md) : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
+Six autres présentations du dashboard restent en lice. Elles portent le même contenu, mais **s'écartent de la charte** de [`charte-graphique.md`](charte-graphique.md) : thème clair, sans cases ni bulles, avec leur propre typographie. En retenir une imposerait de revoir la charte.
 
-Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), et les cinq maquettes partagent un même canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>.
+Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), et les six maquettes partagent un même canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>.
 
 ### La gazette
 
@@ -193,5 +193,38 @@ Le dashboard présenté comme une librairie de bandes dessinées : la façade, p
 - **Tomes, intégrales ou hors-séries ?** : trois casiers d'une bibliothèque en noyer, remplis de livres, dont la largeur suit le nombre d'albums. Sous chaque casier, une étiquette donne le nombre et le pourcentage.
 - **Plutôt quel genre ?** : une plaque de rayon par genre, vert bouteille encadré de laiton, avec le nom du genre et une barre dont la longueur suit le nombre d'albums.
 - **Chez quels éditeurs ?** : une étagère par éditeur, garnie de livres, un dos pour environ 25 éditions possédées, avec un porte-étiquette qui donne le nom de l'éditeur et son nombre d'éditions.
+
+Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
+
+### L'album de vignettes
+
+Le dashboard présenté comme un album de vignettes autocollantes à collectionner, page par page. Source : `Vignettes.dc.html`.
+
+#### Apparence
+
+- **Couleurs** :
+  - le fond de l'album est jaune pâle `#FFF4D6`, les pages crème `#FFFBEF`, encadrées et titrées de bleu canard `#0F7C8C` ;
+  - le texte est ardoise `#23323A`, atténué `#5B6B72`, et les emplacements vides sont tracés en pointillés `#9DB8BD` ;
+  - les vignettes reprennent des couleurs vives, chacune avec une couleur de texte lisible : jaune `#FFD23F`, rose `#E0457B`, vert `#6BBF59`, orange `#F2994A`, bleu `#5B6CD9`, bleu clair `#9DD6DD` et beige `#C9B9A0`.
+- **Typographie** : *Baloo 2*, une police ronde et grasse, pour le nom, les titres et les grands chiffres ; *Nunito* pour le texte.
+- **Vignettes** : chaque vignette a un liseré blanc, une ombre légère et une petite inclinaison. Au survol, elle se redresse et se soulève.
+
+#### Présentation
+
+Chaque rubrique est une page de l'album, encadrée de bleu canard, avec une pastille qui donne son numéro et son thème (« Page 1 · Bienvenue »…).
+
+- **En-tête**, bleu canard : le nom de l'application, le menu, avec l'entrée active sur fond jaune, la recherche et le bouton d'aide, jaune.
+- **Page 1, Bienvenue** :
+  - la mention « Album officiel de la collection » ;
+  - la **phrase d'accueil**, tirée au hasard dans la même liste, sur une grande vignette brillante aux reflets irisés ;
+  - les **compteurs**, en trois vignettes rondes : rose pour les albums, jaune pour les séries, bleu pour les éditions.
+- **Page 2, Tout juste arrivés !** : les couvertures des dernières éditions entrées, collées un peu de travers sur leur emplacement. Le numéro de l'emplacement est imprimé dessous, et sous chacune figurent ce numéro, le libellé de l'album, l'éditeur et la date. Un lien mène à la liste des albums.
+- **Page 3, Ça vaut combien, tout ça ?** :
+  - la valeur totale estimée, sur un encadré bleu canard, et la valeur totale connue, sur un encadré blanc, chacune avec son montant en euros du jour ;
+  - les prix moyen, médian, minimum et maximum, séparés par des pointillés, en euros courants et en euros du jour ;
+  - la mention des montants non convertibles exclus et des éditions gratuites non valorisées.
+- **Page 4, Tomes, intégrales ou hors-séries ?** : une planche de 100 petites vignettes, chacune valant 1 % des albums : bleu canard pour les réguliers, orange pour les intégrales, rose pour les hors-séries. Les nombres et les pourcentages sont donnés en dessous.
+- **Page 5, Plutôt quel genre ?** : un écusson rond par genre, chacun dans sa couleur, dont la taille suit le nombre d'albums.
+- **Page 6, Chez quels éditeurs ?** : une barre par éditeur, dans un emplacement en pointillés, dont la longueur suit le nombre d'éditions possédées.
 
 Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
