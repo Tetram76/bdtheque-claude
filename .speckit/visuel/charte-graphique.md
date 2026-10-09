@@ -1,6 +1,6 @@
 # Charte graphique
 
-Ce fichier décrit l'identité visuelle de l'application : ton, couleurs, typographie et éléments graphiques. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation). L'exigence de rendu est posée par `fonctionnel.md` § Design et charte graphique ; la présentation de chaque écran est décrite dans son propre fichier de ce dossier, avec ses maquettes de référence.
+Ce fichier décrit l'identité visuelle de l'application : ton, couleurs, typographie et éléments graphiques. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation). L'exigence de rendu est posée par `fonctionnel.md` § Design et charte graphique ; la présentation de chaque écran est décrite dans son propre fichier de ce dossier, avec ses maquettes.
 
 ---
 
