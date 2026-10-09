@@ -1,0 +1,16 @@
+@inherits Block<SiteHeaderData>
+<header class="site-header masthead">
+    <div class="masthead-top">
+        <span class="issue">Édition du jour · n° @Fmt.N(Data.AlbumCount)</span>
+        <SearchAndHelp />
+    </div>
+    <a href="/" class="masthead-title">La Gazette de la BDthèque<span class="logo-dot">.</span></a>
+    <nav aria-label="Navigation principale" class="nav">
+        <div class="nav-line">
+            @foreach (var item in Data.Nav)
+            {
+                <a href="@item.Href" class="nav-item" aria-current="@(item.Active ? "page" : null)">@item.Label</a>
+            }
+        </div>
+    </nav>
+</header>

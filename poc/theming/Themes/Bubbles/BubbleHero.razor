@@ -1,0 +1,9 @@
+@inherits Block<HeroData>
+<section class="block hero" aria-labelledby="h-hero">
+    <div class="hero-bubble"><h1 id="h-hero" class="greeting">@Data.Greeting</h1></div>
+    <ul class="counters">
+        <li class="counter pal-0"><span class="counter-n">@Fmt.N(Data.Albums)</span> <span class="counter-label">albums</span></li>
+        <li class="counter pal-1"><span class="counter-n">@Fmt.N(Data.Series)</span> <span class="counter-label">séries</span></li>
+        <li class="counter pal-3"><span class="counter-n">@Fmt.N(Data.Editions)</span> <span class="counter-label">éditions</span></li>
+    </ul>
+</section>

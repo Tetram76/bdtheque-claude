@@ -1,0 +1,14 @@
+@* Private to the festival theme: one station of the shuttle line, around any block. *@
+<div class="stop @(Terminus ? "stop--terminus" : "")">
+    <span class="track" aria-hidden="true"><span class="station-mark">@(Terminus ? "N" : "")</span></span>
+    <div class="stop-body">
+        <span class="station">@Station</span>
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Station { get; set; } = default!;
+    [Parameter] public bool Terminus { get; set; }
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+}

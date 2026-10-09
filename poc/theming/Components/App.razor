@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+@inject CurrentTheme Current
+<html lang="fr" data-theme="@Current.Theme.Id">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    @if (Current.Theme.FontsUrl is { } fonts)
+    {
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="stylesheet" href="@fonts" />
+    }
+    @foreach (var stylesheet in Current.Theme.Stylesheets)
+    {
+        <link rel="stylesheet" href="@stylesheet" />
+    }
+    <ImportMap />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

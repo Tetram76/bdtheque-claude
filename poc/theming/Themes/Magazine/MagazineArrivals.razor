@@ -1,0 +1,22 @@
+@inherits Block<NewArrivalsData>
+<section class="block arrivals" aria-labelledby="h-recent">
+    <h2 id="h-recent" class="bubble"><a href="@Data.AllAlbumsHref">Tout juste arrivés !</a></h2>
+    <p class="lede">@Lede</p>
+    <ul class="thumbs">
+        @foreach (var (item, i) in Data.Items.Select((item, i) => (item, i)))
+        {
+            <li class="ink-@(i % 4)"><a href="@item.Href" class="thumb" aria-label="@item.AlbumLabel" title="@item.AlbumLabel"></a></li>
+        }
+    </ul>
+</section>
+
+@code {
+    private static readonly string[] Numbers = ["Aucune", "Une", "Deux", "Trois", "Quatre", "Cinq", "Six", "Sept", "Huit", "Neuf", "Dix"];
+
+    private string Lede => Data.Items switch
+    {
+        [] => "Rien de neuf ce mois-ci.",
+        [var only] => $"Une nouveauté : {only.AlbumLabel}.",
+        [var first, var second, ..] => $"{(Data.Items.Count < Numbers.Length ? Numbers[Data.Items.Count] : Fmt.N(Data.Items.Count))} nouveautés, dont {first.AlbumLabel} et {second.AlbumLabel}.",
+    };
+}

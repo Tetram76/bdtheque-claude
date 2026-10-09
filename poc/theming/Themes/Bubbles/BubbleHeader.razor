@@ -1,0 +1,13 @@
+@inherits Block<SiteHeaderData>
+<header class="site-header">
+    <a href="/" class="logo">BDthèque<span class="logo-dot">.</span></a>
+    <nav aria-label="Navigation principale" class="nav">
+        <div class="nav-pill">
+            @foreach (var item in Data.Nav)
+            {
+                <a href="@item.Href" class="nav-item" aria-current="@(item.Active ? "page" : null)">@item.Label</a>
+            }
+        </div>
+    </nav>
+    <SearchAndHelp />
+</header>

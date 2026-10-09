@@ -1,0 +1,24 @@
+@inherits Block<ValueData>
+<section class="block value" aria-labelledby="h-value">
+    <h2 id="h-value" class="bubble">Ça vaut combien, tout ça ?</h2>
+    <p class="legend"><span class="legend-current">€ courants · ce que ça a coûté</span> <span class="legend-today">€ du jour · ce que ça représente aujourd'hui</span></p>
+    <div class="totals">
+        <div class="total total--estimated">
+            <span class="total-label">Valeur totale estimée</span>
+            <MoneyPair Amount="Data.Estimated" />
+            <p class="note">Prix connus + estimation de @Fmt.N(Data.EstimatedEditions) éditions sans prix.</p>
+        </div>
+        <div class="total total--known">
+            <span class="total-label">Valeur totale connue</span>
+            <MoneyPair Amount="Data.Known" />
+            <p class="note">Sur @Fmt.N(Data.KnownEditions) éditions au prix renseigné.</p>
+        </div>
+    </div>
+    <ul class="prices">
+        @foreach (var (price, i) in Data.Prices.Select((p, i) => (p, i)))
+        {
+            <li class="price pal-@(i + 1)"><span class="price-label">@price.Label</span><MoneyPair Amount="price.Amount" /></li>
+        }
+    </ul>
+    <p class="note">@Fmt.N(Data.NotConvertible) montants non convertibles exclus · @Fmt.N(Data.FreeEditions) éditions gratuites non valorisées.</p>
+</section>

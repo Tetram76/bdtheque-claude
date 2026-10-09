@@ -1,0 +1,5 @@
+/* "Cases et bulles", mûre: the base theme with another tint. Nothing else to declare. */
+:root {
+  --bg: #1F1033; --panel: #2A1844; --panel2: #321D4F; --border: #533A78;
+  --soft: #DCD1EE; --muted: #B9A8D8;
+}

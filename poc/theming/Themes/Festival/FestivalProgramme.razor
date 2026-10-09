@@ -1,0 +1,33 @@
+@inherits Block<NewArrivalsData>
+<section class="block arrivals" aria-labelledby="h-recent">
+    <div class="title-row">
+        <h2 id="h-recent" class="bubble">Tout juste arrivés !</h2>
+        <a href="@Data.AllAlbumsHref" class="section-link">Tous les albums →</a>
+    </div>
+    <ul class="programme">
+        @foreach (var (item, i) in Data.Items.Select((item, i) => (item, i)))
+        {
+            <li class="lc-@DateLines[i % DateLines.Length]">
+                <a href="@item.Href" class="programme-card">
+                    <span class="programme-date">
+                        @if (item.AcquiredOn is { } date)
+                        {
+                            @date.Day<br /><span>@date.ToString("MMM")</span>
+                        }
+                        else
+                        {
+                            <span>date inconnue</span>
+                        }
+                    </span>
+                    <span class="programme-cover" aria-hidden="true"></span>
+                    <span class="programme-text"><span class="programme-label">@item.AlbumLabel</span><span class="programme-stand">Stand @item.Publisher</span></span>
+                </a>
+            </li>
+        }
+    </ul>
+</section>
+
+@code {
+    // Coral, blue, green, violet: the order of the mockup's programme cards.
+    private static readonly int[] DateLines = [1, 0, 3, 4];
+}

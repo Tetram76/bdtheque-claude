@@ -1,0 +1,34 @@
+@inherits Block<GenresData>
+<section class="block genres" aria-labelledby="h-genre">
+    <h2 id="h-genre" class="bubble">Plutôt quel genre ?</h2>
+    <p class="lede">Une ligne par espace ; un arrêt tous les @StopEvery albums. Un album peut cumuler plusieurs genres.</p>
+    <ol class="lines">
+        @foreach (var (genre, line) in _lines)
+        {
+            <li class="lc-@line">
+                <a href="@genre.Href" class="line-row">
+                    <span class="line-badge" aria-hidden="true">@(line == OthersLine ? "·" : line + 1)</span>
+                    <span class="line-name">@genre.Name</span>
+                    @* The track is as long as the genre's share; its stops are spaced by StopEvery albums along it. *@
+                    <span class="line-track" aria-hidden="true" style="--w:@Fmt.Css((double)genre.Count / _max);--step:@Fmt.Css(StopEvery * 100.0 / genre.Count)%"></span>
+                    <span class="line-n">@Fmt.N(genre.Count)</span>
+                </a>
+            </li>
+        }
+    </ol>
+</section>
+
+@code {
+    private const int StopEvery = 50;
+    private const int OthersLine = 7;
+
+    private List<(CountedLink Genre, int Line)> _lines = [];
+    private int _max;
+
+    protected override void OnParametersSet()
+    {
+        _lines = Data.Genres.Select((g, i) => (g, i % OthersLine)).ToList();
+        if (Data.Others is { } others) _lines.Add((others, OthersLine));
+        _max = _lines.Max(l => l.Genre.Count);
+    }
+}

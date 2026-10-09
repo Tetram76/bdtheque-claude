@@ -1,0 +1,26 @@
+@inherits Block<GenresData>
+<section class="block genres" aria-labelledby="h-genre">
+    <h2 id="h-genre" class="bubble">Plutôt quel genre ?</h2>
+    <ul class="tags">
+        @foreach (var (genre, i) in Data.Genres.Select((g, i) => (g, i)))
+        {
+            @* --w (0..1) is the raw proportion: each theme decides what it scales with it. *@
+            <li class="pal-@(i % 8)" style="--w:@Fmt.Css((double)genre.Count / _max)">
+                <a href="@genre.Href" class="tag">@genre.Name <span class="tag-n">@Fmt.N(genre.Count)</span></a>
+            </li>
+        }
+        @if (Data.Others is { } others)
+        {
+            <li class="pal-7 others" style="--w:@Fmt.Css((double)others.Count / _max)">
+                <a href="@others.Href" class="tag">@others.Name <span class="tag-n">@Fmt.N(others.Count)</span></a>
+            </li>
+        }
+    </ul>
+    <p class="note">Un album peut cumuler plusieurs genres.</p>
+</section>
+
+@code {
+    private int _max;
+    protected override void OnParametersSet() =>
+        _max = Data.Genres.Append(Data.Others).Max(g => g?.Count ?? 0);
+}

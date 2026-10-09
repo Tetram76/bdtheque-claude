@@ -1,0 +1,17 @@
+@inherits Block<NewArrivalsData>
+<section class="block arrivals" aria-labelledby="h-recent">
+    <h2 id="h-recent" class="bubble">Tout juste arrivés !</h2>
+    <a href="@Data.AllAlbumsHref" class="section-link">Tous les albums →</a>
+    <ul class="covers">
+        @foreach (var (item, i) in Data.Items.Select((item, i) => (item, i)))
+        {
+            <li class="pal-@((i + 2) % 8)">
+                <a href="@item.Href" class="arrival">
+                    <span class="cover"><span class="cover-img">[Visuel de couverture]</span></span>
+                    <span class="arrival-label">@item.AlbumLabel</span>
+                    <span class="arrival-meta">@item.Publisher@(item.AcquiredOn is { } d ? " · " + Fmt.Day(d) : "")</span>
+                </a>
+            </li>
+        }
+    </ul>
+</section>

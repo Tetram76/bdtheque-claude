@@ -1,0 +1,11 @@
+@inherits Block<TypeDistributionData>
+<section class="block types" aria-labelledby="h-type">
+    <h2 id="h-type" class="bubble">Tomes, intégrales ou hors-séries ?</h2>
+    <p class="lede">@Ledes.Types(Data) : @string.Join(", ", Data.Shares.Select(s => $"{Fmt.N(s.Count)} {s.Label}")).</p>
+    <div class="type-bar" role="img" aria-label="@string.Join(", ", Data.Shares.Select(s => $"{s.Percent} % {s.Label}"))">
+        @foreach (var share in Data.Shares)
+        {
+            <span class="kind-@share.Kind.ToString().ToLowerInvariant()" style="flex:@share.Percent 1 0">@share.Percent %</span>
+        }
+    </div>
+</section>

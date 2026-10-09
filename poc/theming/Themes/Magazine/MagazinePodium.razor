@@ -1,0 +1,33 @@
+@inherits Block<PublishersData>
+<section class="block publishers" aria-labelledby="h-pub">
+    <h2 id="h-pub" class="bubble">Chez quels éditeurs ?</h2>
+    <p class="lede">@Lede</p>
+    @* Ranked order in the markup; CSS shows the second, first, third steps of a real podium. *@
+    <ol class="podium">
+        @foreach (var (publisher, i) in _top.Select((p, i) => (p, i)))
+        {
+            <li class="step step-@(i + 1)">
+                <a href="@publisher.Href">
+                    <span class="step-name">@publisher.Name · @Fmt.N(publisher.Count)</span>
+                    <span class="step-block">@(i + 1)</span>
+                </a>
+            </li>
+        }
+    </ol>
+</section>
+
+@code {
+    private List<CountedLink> _top = [];
+
+    protected override void OnParametersSet() =>
+        _top = Data.Publishers.OrderByDescending(p => p.Count).Take(3).ToList();
+
+    private string Lede => _top switch
+    {
+        [var first, var second, var third] when second.Count >= first.Count * 0.9 =>
+            $"{first.Name} et {second.Name} au coude à coude, {third.Name} sur le podium.",
+        [var first, var second, var third] => $"{first.Name} en tête, devant {second.Name} et {third.Name}.",
+        [var first, ..] => $"{first.Name} en tête.",
+        [] => "Pas encore d'éditeur.",
+    };
+}

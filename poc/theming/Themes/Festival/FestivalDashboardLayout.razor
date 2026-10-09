@@ -1,0 +1,22 @@
+@inherits Block<DashboardData>
+@* The shuttle line runs down the page; each rubric is a station. *@
+<main class="dashboard festival">
+    <FestivalStop Station="Navette du festival · Terminus Entrée" Terminus="true">
+        <ThemeSlot Slot="DashboardSlots.Hero" Data="Data.Hero" />
+    </FestivalStop>
+    <FestivalStop Station="Station Scène des nouveautés">
+        <ThemeSlot Slot="DashboardSlots.NewArrivals" Data="Data.NewArrivals" />
+    </FestivalStop>
+    <FestivalStop Station="Station Billetterie">
+        <ThemeSlot Slot="DashboardSlots.Value" Data="Data.Value" />
+    </FestivalStop>
+    <FestivalStop Station="Station Pavillons">
+        <ThemeSlot Slot="DashboardSlots.Types" Data="Data.Types" />
+    </FestivalStop>
+    <FestivalStop Station="Correspondance Espaces thématiques">
+        <ThemeSlot Slot="DashboardSlots.Genres" Data="Data.Genres" />
+    </FestivalStop>
+    <FestivalStop Station="Terminus Allée des exposants" Terminus="true">
+        <ThemeSlot Slot="DashboardSlots.Publishers" Data="Data.Publishers" />
+    </FestivalStop>
+</main>

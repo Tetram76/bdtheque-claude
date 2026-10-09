@@ -1,0 +1,64 @@
+@inherits Block<TypeDistributionData>
+<section class="block types" aria-labelledby="h-type">
+    <h2 id="h-type" class="bubble bubble--right">Tomes, intégrales ou hors-séries ?</h2>
+    <div class="shelf" role="img" aria-label="@string.Join(", ", Data.Shares.Select(s => $"{Fmt.N(s.Count)} {s.Label}"))">
+        @foreach (var (share, books) in _piles)
+        {
+            <div class="pile kind-@share.Kind.ToString().ToLowerInvariant()">
+                <span class="pile-n">@Fmt.N(share.Count)</span>
+                <span class="pile-books">
+                    @foreach (var book in books)
+                    {
+                        <span class="book" style="@book"></span>
+                    }
+                </span>
+            </div>
+        }
+    </div>
+    <div class="pile-legend">
+        @foreach (var share in Data.Shares)
+        {
+            <span><strong>@share.Label</strong><br /><span class="muted">@share.Percent %</span></span>
+        }
+    </div>
+    <p class="note">Un livre ≈ 100 albums.</p>
+</section>
+
+@code {
+    private static readonly Dictionary<AlbumKind, string[]> Shades = new()
+    {
+        [AlbumKind.Regular] = ["#FFB547", "#F5A33A", "#FFC56A", "#E8962E"],
+        [AlbumKind.Omnibus] = ["#4FD1C5", "#3FBFB3"],
+        [AlbumKind.Special] = ["#FF7A6B"],
+    };
+
+    private List<(TypeShare Share, List<string> Books)> _piles = [];
+
+    // Drawn again on every display, as the mockup requires: same algorithm as Main.dc.html.
+    protected override void OnParametersSet() =>
+        _piles = Data.Shares
+            .Select(s => (s, Pile(Math.Max(1, (int)Math.Round(s.Count / 100.0)), Shades[s.Kind], s.Kind == AlbumKind.Omnibus)))
+            .ToList();
+
+    private static List<string> Pile(int count, string[] shades, bool fixedWidth)
+    {
+        var rand = Random.Shared;
+        double dev = 0, x = 0;
+        double? prev = null;
+        var books = new List<string>();
+        for (var i = 0; i < count; i++)
+        {
+            var trend = 106 - 26 * (count > 1 ? (double)i / (count - 1) : 0);
+            dev = Math.Clamp(dev * 0.75 + rand.NextDouble() * 22 - 11, -16, 16);
+            var w = trend + dev;
+            if (prev is { } p) w = Math.Clamp(w, p - 15, p + 15);
+            prev = w;
+            x = Math.Clamp(x * 0.7 + rand.NextDouble() * 12 - 6, -12, 12);
+            var tilt = rand.NextDouble() < 0.3 ? rand.NextDouble() * 4 - 2 : 0;
+            var width = fixedWidth ? 110 : Math.Round(w);
+            books.Add($"width:{Fmt.Css(width)}px;transform:translateX({Fmt.Css(Math.Round(x))}px) rotate({Fmt.Css(Math.Round(tilt, 1))}deg);background:{shades[rand.Next(shades.Length)]}");
+        }
+        books.Reverse();
+        return books;
+    }
+}
