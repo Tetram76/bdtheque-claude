@@ -16,6 +16,7 @@ a{text-decoration:none;color:inherit}
 a:hover{color:#FF48B0}
 .cut{transition:transform .2s ease}
 a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
+@media (max-width: 420px){.disks{zoom:.8}}
 </style>
 </helmet>
 <div style="min-height: 100vh; background: #F4EFE4; color: #0078BF; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; line-height: 1.45">
@@ -42,11 +43,11 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
 
     <section aria-labelledby="h-hero" style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 32px 40px">
       <div style="flex: 1 1 560px; min-width: 0">
-        <a href="#" style="display: block; font-family: 'Rubik Mono One', sans-serif; font-size: clamp(60px, 10vw, 140px); line-height: .9; color: #0078BF; text-shadow: 6px 4px 0 rgba(255,72,176,.85)">BDTHÈQUE</a>
+        <a href="#" style="display: block; font-family: 'Rubik Mono One', sans-serif; font-size: clamp(30px, 10vw, 140px); line-height: .9; color: #0078BF; text-shadow: 6px 4px 0 rgba(255,72,176,.85)">BDTHÈQUE</a>
         <div style="margin-top: 8px; font-family: 'Rubik Mono One', sans-serif; font-size: 20px; color: #FF48B0">ZINE N° 2847 · PRIX LIBRE</div>
         <h1 id="h-hero" class="cut" style="display: inline-block; margin: 26px 0 0; padding: 12px 18px; background: #FF48B0; color: #F4EFE4; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(24px, 3vw, 38px); line-height: 1.15; transform: rotate(-2deg); mix-blend-mode: multiply">{{heroLine}}</h1>
       </div>
-      <div style="flex: 0 1 380px; position: relative; height: 340px; min-width: 300px">
+      <div class="disks" style="flex: 0 1 380px; position: relative; height: 340px; min-width: 300px">
         <a href="#" style="position: absolute; left: 0; top: 30px; width: 210px; height: 210px; border-radius: 50%; background: #0078BF; color: #F4EFE4; mix-blend-mode: multiply; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-family: 'Rubik Mono One', sans-serif; font-size: 40px">2847</span><span style="font-weight: 700">albums</span></a>
         <a href="#" style="position: absolute; left: 160px; top: 0; width: 150px; height: 150px; border-radius: 50%; background: #FF48B0; color: #F4EFE4; mix-blend-mode: multiply; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-family: 'Rubik Mono One', sans-serif; font-size: 30px">412</span><span style="font-weight: 700">séries</span></a>
         <a href="#" style="position: absolute; left: 150px; top: 150px; width: 190px; height: 190px; border-radius: 50%; background: #FFE800; color: #0078BF; mix-blend-mode: multiply; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-family: 'Rubik Mono One', sans-serif; font-size: 36px">2913</span><span style="font-weight: 700">éditions</span></a>
