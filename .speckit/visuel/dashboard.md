@@ -96,35 +96,34 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
   - **Plutôt quel genre ?** : une accroche sur les genres en tête, puis les genres en majuscules. La taille de chaque mot suit le nombre d'albums, les couleurs alternent entre rouge, bleu et noir, et les mots alternent romain et italique.
   - **Chez quels éditeurs ?** : une accroche sur le classement, puis un podium des trois premiers éditeurs, avec le nom et le nombre d'éditions possédées de chacun. Les marches sont jaune pour le premier, bleu pour le deuxième, rouge pour le troisième.
 
-### Le plan de métro
+### Le festival en métro
 
-Le dashboard présenté comme un plan de métro. Source : `Metro.dc.html`.
+Le dashboard présenté comme un festival de bande dessinée, desservi par une ligne de métro : la structure d'un plan de métro, les couleurs et les objets d'un festival. Source : `FestivalMetro.dc.html`.
 
 #### Apparence
 
-- **Couleurs** : fond blanc `#FFFFFF`, texte bleu nuit `#14213D`, texte atténué `#5A6478`, fond des encadrés `#F2F4F7`. Le bleu émaillé `#0A2C6E` est celui des panneaux, de l'en-tête et du pied de page.
-- **Lignes** : chacune a sa couleur et une couleur de texte qui reste lisible sur sa pastille.
-  - Texte bleu nuit : jaune `#FFCD00`, bleu ciel `#6EC4E8`, orange `#F28E42` et gris `#9B9B9B`.
-  - Texte blanc : rouge `#E3051C`, vert `#00A88F`, prune `#A0006E` et brun `#8D653D`.
-- **Typographie** : *Barlow*, une police de signalétique, en gras pour les titres ; *Barlow Condensed* pour les mentions en capitales et le tableau des départs.
-- **Mise en page** : aucune inclinaison ; tout est droit, comme sur un plan.
+- **Couleurs** : fond crème `#FFF8EC`, texte bleu nuit `#1B2350`, texte atténué `#5B6290`.
+  - Couleurs du festival : bleu `#1F3A93`, corail `#E8604C` et jaune `#F6C343`.
+  - Elles servent aussi de couleurs de ligne, avec vert `#2E9E6E`, violet `#8E5BB8`, bleu ciel `#3BA7D9`, orange `#F29E4C` et gris `#B8B2A3`. Chacune a une couleur de texte qui reste lisible sur sa pastille : bleu nuit sur le jaune, le bleu ciel, l'orange et le gris, blanc sur les autres.
+- **Typographie** : *Bricolage Grotesque*, en gras pour les titres et les grands chiffres.
+- **Mise en page** : aucune inclinaison. Des formes rondes : pastilles, coins arrondis, pilules.
 
 #### Présentation
 
-Une ligne jaune, la « Ligne Collection », descend le long de la page. Chaque rubrique est une de ses stations : un rond blanc cerclé de bleu nuit, et une pastille jaune marquée « C » aux deux terminus.
+Une ligne corail, la « Navette du festival », descend le long de la page. Chaque rubrique est une de ses stations : un rond blanc cerclé de bleu nuit, et une pastille corail marquée « N » aux deux terminus. Au-dessus de chaque rubrique, une mention en capitales donne le nom de sa station.
 
-- **En-tête**, sur fond bleu émaillé : le nom de l'application avec une pastille « B », le menu, avec l'entrée active sur fond jaune, la recherche et le bouton d'aide, jaune.
-- **Terminus Accueil** :
-  - la **phrase d'accueil**, tirée au hasard dans la même liste, sur un panneau bleu émaillé à double filet blanc ;
+- **En-tête** : le nom de l'application avec une pastille « B », le menu, avec l'entrée active sur fond bleu, la recherche et le bouton d'aide, jaune.
+- **Terminus Entrée** :
+  - l'**affiche du festival**, sur fond bleu avec deux disques jaune et corail, la mention « Festival permanent · entrée libre » et la **phrase d'accueil**, tirée au hasard dans la même liste ;
   - les **compteurs**, en pastilles de correspondance : une pastille de couleur avec une lettre (A, S, E), le nombre et son libellé.
-- **Tout juste arrivés !** : un **tableau des départs** à fond noir et texte ambre, avec la date d'entrée, le libellé de l'album en blanc et l'éditeur de chacune des dernières éditions entrées. Un lien mène à la liste des albums.
-- **Ça vaut combien, tout ça ?** :
-  - la valeur totale estimée et la valeur totale connue, sur deux **tickets à bande magnétique**, chacune en euros courants et en euros du jour ;
+- **Station Scène des nouveautés, Tout juste arrivés !** : les dernières éditions entrées, en fiches de programme. Chaque fiche donne la date d'entrée en couleur, la couverture, le libellé de l'album et le stand de son éditeur. Un lien mène à la liste des albums.
+- **Station Billetterie, Ça vaut combien, tout ça ?** :
+  - la valeur totale estimée et la valeur totale connue, sur deux **pass à bande magnétique**, jaune et blanc, chacune en euros courants et en euros du jour ;
   - les prix moyen, médian, minimum et maximum, dans des encadrés marqués d'un trait de couleur ;
   - la mention des montants non convertibles exclus et des éditions gratuites non valorisées.
-- **Tomes, intégrales ou hors-séries ?** : une ligne par type, dont la longueur suit son pourcentage. Chaque ligne se termine par un terminus, suivi du nombre d'albums et du pourcentage.
-- **Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec une station tous les 50 albums.
-- **Chez quels éditeurs ?** : les éditeurs sont les **stations d'une ligne rouge horizontale**. La taille de chaque station suit le nombre d'éditions possédées, son nom est écrit en biais au-dessus, et le nombre d'éditions est indiqué en dessous.
+- **Station Pavillons, Tomes, intégrales ou hors-séries ?** : trois **pavillons** à toit pointu, dont la largeur suit le nombre d'albums, avec le pourcentage et le nombre : bleu pour les réguliers, corail pour les intégrales, jaune pour les hors-séries.
+- **Correspondance Espaces thématiques, Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec un arrêt tous les 50 albums.
+- **Terminus Allée des exposants, Chez quels éditeurs ?** : les éditeurs sont les **stations d'une ligne bleue horizontale**. La taille de chaque station suit le nombre d'éditions possédées, son nom est écrit en biais au-dessus, et sous la station figurent son nombre d'éditions et son numéro de stand.
 
 Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
 
