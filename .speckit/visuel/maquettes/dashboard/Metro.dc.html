@@ -155,12 +155,12 @@ a:hover{text-decoration:underline;text-decoration-thickness:2px}
         <h2 id="h-pub" style="margin: 0; font-weight: 800; font-size: 30px">Chez quels éditeurs ?</h2>
         <p style="margin: 0; color: #5A6478">Une station par éditeur, à la taille de ses éditions possédées.</p>
         <div style="overflow-x: auto">
-          <div style="position: relative; display: flex; align-items: flex-end; min-width: 680px; padding-top: 90px">
-            <span aria-hidden="true" style="position: absolute; left: 20px; right: 20px; bottom: 50px; height: 12px; margin-bottom: -6px; background: #E3051C; border-radius: 6px"></span>
+          <div style="position: relative; display: flex; align-items: flex-start; min-width: 680px; padding-top: 90px">
+            <span aria-hidden="true" style="position: absolute; left: 20px; right: 20px; top: 114px; height: 12px; background: #E3051C; border-radius: 6px"></span>
             <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
-              <a href="#" style="position: relative; flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
-                <span style="position: absolute; bottom: 82px; left: 50%; transform-origin: left bottom; transform: rotate(-38deg); white-space: nowrap; font-weight: 600">{{e.name}}</span>
-                <span style="width: {{e.d}}; height: {{e.d}}; margin-bottom: {{e.mb}}; border-radius: 50%; background: #FFFFFF; border: 5px solid #14213D; box-sizing: border-box; position: relative"></span>
+              <a href="#" style="position: relative; flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 6px">
+                <span style="position: absolute; bottom: calc(100% + 4px); left: 50%; transform-origin: left bottom; transform: rotate(-38deg); white-space: nowrap; font-weight: 600">{{e.name}}</span>
+                <span style="height: 60px; display: flex; align-items: center"><span style="width: {{e.d}}; height: {{e.d}}; border-radius: 50%; background: #FFFFFF; border: 5px solid #14213D; box-sizing: border-box"></span></span>
                 <span style="font-weight: 800; font-variant-numeric: tabular-nums">{{e.n}}</span>
               </a>
             </sc-for>
@@ -222,10 +222,7 @@ class Component extends DCLogic {
         { label: 'Hors-séries', n: '92', pct: '3 %', w: '3%', c: '#F28E42', aria: '92 hors-séries, 3 %' }
       ],
       genres: genres.map(([name, v], i) => ({ name, n: fmt(v), num: i + 1, c: lines[i][0], tc: lines[i][1], w: Math.round(v / 612 * 100) + '%', step: Math.round(50 / v * 100 * 100) / 100 + '%' })),
-      publishers: pubs.map(([name, v]) => {
-        const d = 18 + Math.round(v / 548 * 30);
-        return { name, n: fmt(v), d: d + 'px', mb: Math.round(44 - d / 2) + 'px' };
-      })
+      publishers: pubs.map(([name, v]) => ({ name, n: fmt(v), d: (18 + Math.round(v / 548 * 30)) + 'px' }))
     };
   }
 }
