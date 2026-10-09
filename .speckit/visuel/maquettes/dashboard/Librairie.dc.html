@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dashboard — vitrine de librairie</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Caveat:wght@500;700&amp;family=Karla:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}
+a:hover{color:#B5523B}
+.book{transition:transform .25s ease}
+a:hover .book{transform:translateY(-6px)}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F5EEDF; color: #2A2420; font-family: Karla, system-ui, sans-serif; font-size: 16px; line-height: 1.55">
+
+  <header style="background: #16291F; color: #F5EEDF">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 8px 24px; box-sizing: border-box">
+      <div style="width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px">
+        <nav aria-label="Navigation principale" style="flex: 1 1 420px; min-width: 0; overflow-x: auto">
+          <div style="display: flex; gap: 24px; white-space: nowrap; width: max-content; font-weight: 500">
+            <a href="#" aria-current="page" style="padding: 8px 0; color: #D8B972; border-bottom: 2px solid #D8B972">Accueil</a>
+            <a href="#" style="padding: 8px 0">Albums</a>
+            <a href="#" style="padding: 8px 0">Séries</a>
+            <a href="#" style="padding: 8px 0">Auteurs</a>
+            <a href="#" style="padding: 8px 0">Éditeurs</a>
+            <a href="#" style="padding: 8px 0">Intentions d'achat</a>
+          </div>
+        </nav>
+        <div style="display: flex; gap: 6px; flex: 0 1 320px">
+          <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
+          <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 44px; padding: 0 16px; border: 1px solid #B8924A; border-radius: 22px; background: transparent; color: #F5EEDF; font: inherit; outline: none">
+          <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: 1px solid #B8924A; border-radius: 50%; background: transparent; color: #D8B972; font: 20px 'DM Serif Display', serif; cursor: pointer">?</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-hero" style="background: #EFE6D2; padding: 36px 24px 0">
+    <div style="max-width: 1100px; margin: 0 auto; background: #1E3B2F; padding: 0 22px; box-shadow: 0 30px 60px -30px rgba(42,36,32,.6)">
+      <div style="padding: 20px 0 16px; text-align: center; border-bottom: 3px solid #B8924A">
+        <a href="#" style="display: inline-flex; flex-direction: column; align-items: center; padding: 6px 40px; border-top: 1px solid #B8924A; border-bottom: 1px solid #B8924A">
+          <span style="font-size: 12px; letter-spacing: .45em; text-transform: uppercase; color: #B8924A">Librairie · Bandes dessinées</span>
+          <span style="font-family: 'DM Serif Display', serif; font-size: clamp(44px, 6vw, 72px); line-height: 1.05; color: #D8B972; text-shadow: 0 1px 0 #8A6A2E">BDthèque</span>
+        </a>
+      </div>
+      <div aria-hidden="true" style="height: 30px; margin: 0 -34px; background: repeating-linear-gradient(to right, #2C5442 0, #2C5442 44px, #EFE6D2 44px, #EFE6D2 88px)"></div>
+      <div aria-hidden="true" style="height: 14px; margin: 0 -34px; background-image: radial-gradient(circle at 22px 0, #2C5442 0 22px, transparent 22.5px), radial-gradient(circle at 22px 0, #EFE6D2 0 22px, transparent 22.5px); background-size: 88px 14px, 88px 14px; background-position: 0 0, 44px 0; background-repeat: repeat-x"></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 18px; padding: 22px 0 0">
+        <div style="flex: 3 1 520px; min-width: 0; min-height: 280px; padding: 40px 36px; box-sizing: border-box; border: 6px solid #12241B; outline: 1px solid #B8924A; outline-offset: -12px; background: #F6EBD3; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px">
+          <span style="font-size: 12px; letter-spacing: .4em; text-transform: uppercase; color: #8A7A66">En vitrine</span>
+          <h1 id="h-hero" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: clamp(32px, 4vw, 54px); line-height: 1.1; color: #A8803A; text-shadow: 0 1px 0 #6E5222">{{heroLine}}</h1>
+        </div>
+        <div style="flex: 1 1 220px; min-width: 0; min-height: 280px; border: 6px solid #12241B; background: #2A4B3C; display: flex; flex-direction: column; align-items: center; padding: 18px 16px 24px; box-sizing: border-box; gap: 4px">
+          <span aria-hidden="true" style="width: 70%; height: 70px; background: #F6EBD3; border: 4px solid #12241B; opacity: .9"></span>
+          <span aria-hidden="true" style="display: flex; justify-content: space-between; width: 46%; height: 18px"><span style="width: 1px; background: #B8924A"></span><span style="width: 1px; background: #B8924A"></span></span>
+          <div style="width: 100%; padding: 12px 14px; box-sizing: border-box; background: #FBF7EE; border: 1px solid #B8924A; display: flex; flex-direction: column; gap: 6px; text-align: center">
+            <span style="font-family: 'DM Serif Display', serif; font-size: 22px; color: #1E3B2F">Ouvert</span>
+            <a href="#" style="display: flex; justify-content: space-between; border-top: 1px solid #E2D6BC; padding-top: 4px"><span>albums</span><strong>2 847</strong></a>
+            <a href="#" style="display: flex; justify-content: space-between"><span>séries</span><strong>412</strong></a>
+            <a href="#" style="display: flex; justify-content: space-between"><span>éditions</span><strong>2 913</strong></a>
+          </div>
+          <span aria-hidden="true" style="margin-top: auto; align-self: flex-end; width: 10px; height: 34px; border-radius: 5px; background: #B8924A"></span>
+        </div>
+      </div>
+      <div aria-hidden="true" style="height: 22px; margin: 0 -22px; background: #12241B"></div>
+    </div>
+    <div aria-hidden="true" style="height: 16px; background: #CFC3A9"></div>
+  </section>
+
+  <main style="max-width: 1240px; margin: 0 auto; padding: 48px 24px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 64px">
+
+    <section aria-labelledby="h-recent" style="display: flex; flex-direction: column">
+      <div style="display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+          <h2 id="h-recent" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; color: #1E3B2F">Tout juste arrivés !</h2>
+          <a href="#" style="font-weight: 700; color: #B5523B">Tous les albums →</a>
+        </div>
+        <div role="group" aria-labelledby="h-recent" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 28px; align-items: end">
+          <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
+            <a href="#" style="display: flex; flex-direction: column">
+              <span class="book" style="display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 4; background: #2E2A33; color: #A79FB0; font-size: 12px; box-shadow: 6px 10px 18px rgba(42,36,32,.28)">[Couverture]</span>
+              <span style="margin-top: 14px; padding: 8px 10px 10px; background: #FFFFFF; border-top: 3px solid #B8924A; box-shadow: 0 1px 4px rgba(42,36,32,.15)">
+                <span style="display: block; font-family: Caveat, cursive; font-size: 19px; line-height: 1.1; color: #B5523B">{{r.note}}</span>
+                <span style="display: block; font-weight: 700; font-size: 14px; line-height: 1.3">{{r.label}}</span>
+                <span style="display: block; font-size: 13px; color: #8A7A66">{{r.pub}}</span>
+              </span>
+              <span aria-hidden="true" style="height: 18px"></span>
+            </a>
+          </sc-for>
+        </div>
+        <span aria-hidden="true" style="display: block; height: 14px; margin: -18px 0 0; background: #5B3A24; box-shadow: 0 6px 10px -4px rgba(0,0,0,.35)"></span>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 40px">
+      <section aria-labelledby="h-value" style="flex: 1 1 480px; min-width: 0; padding: 30px 32px; background: #263129; color: #EFEDE4; border: 10px solid #5B3A24; outline: 1px solid #B8924A; outline-offset: -10px; display: flex; flex-direction: column; gap: 10px">
+        <h2 id="h-value" style="margin: 0; font-family: Caveat, cursive; font-weight: 700; font-size: 40px; line-height: 1.1">Ça vaut combien, tout ça ?</h2>
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; font-family: Caveat, cursive">
+          <span style="font-size: 58px; line-height: 1; font-weight: 700">38 760 €</span>
+          <span style="font-size: 28px; color: #E8CF8F">soit 55 230 € d'aujourd'hui</span>
+        </div>
+        <div style="font-family: Caveat, cursive; font-size: 24px">dont 31 482 € connus <span style="color: #E8CF8F">(44 910 € d'aujourd'hui)</span></div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 24px; font-family: Caveat, cursive; font-size: 23px">
+          <sc-for list="{{prices}}" as="p" hint-placeholder-count="4">
+            <div style="display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed rgba(239,237,228,.35)"><span>{{p.label}}</span><span>{{p.cur}} <span style="color: #E8CF8F">· {{p.today}}</span></span></div>
+          </sc-for>
+        </div>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #BFC4BA">Estimation : prix connus + 497 éditions sans prix. 12 montants non convertibles exclus · 25 éditions gratuites non valorisées.</p>
+      </section>
+
+      <section aria-labelledby="h-type" style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-type" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; color: #1E3B2F">Tomes, intégrales ou hors-séries ?</h2>
+        <div role="img" aria-label="Trois casiers : 2 571 réguliers (90 %), 184 intégrales (6 %), 92 hors-séries (3 %)" style="display: flex; align-items: stretch; height: 170px; padding: 8px; gap: 8px; background: #5B3A24">
+          <sc-for list="{{bays}}" as="b" hint-placeholder-count="3">
+            <span style="flex: {{b.flex}} 1 0; min-width: 44px; display: flex; align-items: flex-end; gap: 2px; padding: 6px 4px 0; background: #3F2818; overflow: hidden">
+              <sc-for list="{{b.books}}" as="k" hint-placeholder-count="8">
+                <span style="flex: 1 1 0; min-width: 4px; max-width: 12px; height: {{k.h}}; background: {{k.c}}; border-radius: 1px 1px 0 0"></span>
+              </sc-for>
+            </span>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <span style="padding: 6px 8px; border: 1px solid #B8924A; background: #FBF7EE; font-size: 14px; text-align: center"><strong>2 571</strong><br>réguliers · 90 %</span>
+          <span style="padding: 6px 8px; border: 1px solid #B8924A; background: #FBF7EE; font-size: 14px; text-align: center"><strong>184</strong><br>intégrales · 6 %</span>
+          <span style="padding: 6px 8px; border: 1px solid #B8924A; background: #FBF7EE; font-size: 14px; text-align: center"><strong>92</strong><br>hors-séries · 3 %</span>
+        </div>
+        <p style="margin: 0; font-size: 13px; color: #8A7A66">La largeur de chaque casier suit le nombre d'albums.</p>
+      </section>
+    </div>
+
+    <section aria-labelledby="h-genre" style="display: flex; flex-direction: column; gap: 16px">
+      <h2 id="h-genre" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; color: #1E3B2F">Plutôt quel genre ?</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px">
+        <sc-for list="{{genres}}" as="g" hint-placeholder-count="8">
+          <a href="#" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: #1E3B2F; color: #F5EEDF; border: 1px solid #B8924A; outline: 3px solid #1E3B2F">
+            <span style="font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #B8924A">Rayon</span>
+            <span style="font-family: 'DM Serif Display', serif; font-size: 24px; line-height: 1.1; color: #D8B972">{{g.name}}</span>
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 13px"><span style="display: block; height: 4px; width: {{g.w}}; background: #B8924A"></span>{{g.n}}</span>
+          </a>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 13px; color: #8A7A66">Un album peut cumuler plusieurs genres.</p>
+    </section>
+
+    <section aria-labelledby="h-pub" style="display: flex; flex-direction: column; gap: 16px">
+      <h2 id="h-pub" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; color: #1E3B2F">Chez quels éditeurs ?</h2>
+      <div style="padding: 8px; background: #5B3A24; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px">
+        <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
+          <a href="#" style="display: flex; flex-direction: column; background: #3F2818; padding: 10px 12px 0">
+            <span style="display: flex; align-items: flex-end; gap: 2px; height: 72px">
+              <sc-for list="{{e.spines}}" as="s" hint-placeholder-count="8">
+                <span style="width: 10px; height: {{s.h}}; background: {{s.c}}; border-radius: 1px 1px 0 0"></span>
+              </sc-for>
+            </span>
+            <span style="margin: 0 -12px; padding: 6px 12px; background: #5B3A24; display: flex; justify-content: space-between; align-items: baseline">
+              <span style="padding: 1px 8px; background: #E9DDBF; border: 1px solid #B8924A; color: #2A2420; font-weight: 700; font-size: 13px">{{e.name}}</span>
+              <span style="color: #E9DDBF; font-size: 13px">{{e.n}} éd.</span>
+            </span>
+          </a>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 13px; color: #8A7A66">Éditions possédées ; un dos ≈ 25 éditions.</p>
+    </section>
+  </main>
+
+  <footer style="background: #1E3B2F; color: #D9D2C0; border-top: 4px solid #B8924A">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px">
+      <span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+      <a href="#" style="font-weight: 700">Administration</a>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2100}}'>
+const HERO_LINES = [
+  'Entrez donc, il y a de quoi lire !',
+  'Installez-vous, la collection vous attend !',
+  'Alors, on bouquine ?',
+  'Encore de la place sur les étagères ? Pas sûr…',
+  'Attention, ça déborde des étagères !'
+];
+class Component extends DCLogic {
+  componentDidMount() {
+    this.setState({
+      heroIndex: Math.floor(Math.random() * HERO_LINES.length),
+      shelfSeed: 1 + Math.floor(Math.random() * 2147483646)
+    });
+  }
+  renderVals() {
+    const fmt = (v) => v.toLocaleString('fr-FR');
+    // A restrained spine palette taken from the shop itself: bottle green, brass, terracotta, cream, walnut.
+    const spineColors = ['#1E3B2F', '#B8924A', '#B5523B', '#E9DDBF', '#7A5A3A', '#3E5C4C'];
+    // Seeded per display, so the shelves look different on every visit but stay stable between renders.
+    let seed = this.state?.shelfSeed ?? 17;
+    const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const spines = (count) => {
+      let prev = null;
+      return Array.from({ length: count }, () => {
+        let h = 58 + rand() * 40;
+        // Neighbouring books rarely share a height; a small nudge keeps the row irregular.
+        if (prev !== null && Math.abs(h - prev) < 4) h = Math.min(98, h + 6);
+        prev = h;
+        return { h: Math.round(h) + '%', c: spineColors[Math.floor(rand() * spineColors.length)] };
+      });
+    };
+    const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
+    const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
+    return {
+      heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
+      recents: [
+        { label: 'Alors, tout tombe (Blacksad - T. 7)', pub: 'Dargaud', note: 'Arrivé le 3 oct.' },
+        { label: "L'Iris blanc (Astérix - T. 40)", pub: 'Albert René', note: 'Arrivé le 28 sept.' },
+        { label: 'Les Indes fourbes', pub: 'Delcourt', note: 'Arrivé le 21 sept.' },
+        { label: 'Le Château des étoiles - INT. [1 à 2]', pub: 'Rue de Sèvres', note: 'Arrivé le 14 sept.' },
+        { label: 'Mister Prairie (Undertaker - T. 7)', pub: 'Dargaud', note: 'Arrivé le 9 sept.' },
+        { label: 'Spirou et Fantasio - Hors-série 2', pub: 'Dupuis', note: 'Arrivé le 2 sept.' }
+      ],
+      prices: [
+        { label: 'Prix moyen', cur: '13,10 €', today: '18,70 €' },
+        { label: 'Prix médian', cur: '11,90 €', today: '16,40 €' },
+        { label: 'Le moins cher', cur: '0,90 €', today: '3,20 €' },
+        { label: 'Le plus cher', cur: '189,00 €', today: '214,50 €' }
+      ],
+      bays: [
+        { flex: 90, books: spines(40) },
+        { flex: 6, books: spines(4) },
+        { flex: 3, books: spines(2) }
+      ],
+      genres: genres.map(([name, v]) => ({ name, n: fmt(v) + ' albums', w: Math.round(v / 612 * 60) + 'px' })),
+      publishers: pubs.map(([name, v], i) => ({ name, n: fmt(v), spines: spines(Math.max(1, Math.round(v / 25))).map((s) => ({ ...s, h: s.h.replace('%', '') * 0.72 + 'px' })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>
