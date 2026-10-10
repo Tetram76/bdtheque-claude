@@ -117,7 +117,7 @@ Découpage à établir à l'ouverture de la phase. La qualité de l'estimation d
 
 ## Phase 5 — Fonctionnalités de second plan
 
-Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel.md` § Fonctionnalités de second plan).
+Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel.md` § Fonctionnalités de second plan). Les statistiques du dashboard qui en dépendent (tomes manquants, prochaines sorties estimées, `fonctionnel.md` § Page d'accueil) n'entrent dans son tirage qu'une fois ces fonctionnalités réalisées : le dashboard de la Phase 4 les en exclut.
 
 Découpage à établir à l'ouverture de la phase.
 

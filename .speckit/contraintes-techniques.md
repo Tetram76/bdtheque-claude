@@ -91,6 +91,7 @@ Caractéristiques de la base Firebird de l'application existante, que la migrati
 - **Fonctions externes (UDF)** : la base déclare 20 UDF de la bibliothèque propre à l'application, `BDT_UDF.dll` (dépôt des sources : `bdtheque/delphi/trunk/src/BDT_UDF.DLL/`, sans binaire compilé ; la DLL est fournie avec la base). Certaines agissent sur le système de fichiers (`UDF_DELETEFILE`, `UDF_SAVEBLOBTOFILE`, `UDF_LOADBLOBFROMFILE`, `UDF_FINDFILEFIRST`…).
 - **Vues et procédures stockées** : 20 vues (`VW_*`) et des procédures stockées qui portent une partie de la logique de l'application (listes par initiale, albums manquants, prévisions de sorties…). Certaines procédures construisent leur requête en concaténant un paramètre `FILTRE` ; d'autres enveloppent les UDF de fichiers (`DELETEFILE`, `SAVEBLOBTOFILE`, `LOADBLOBFROMFILE`, `DIRECTORYCONTENT`, `SEARCHFILENAME`).
 - **Titres stockés sous forme de tri** (`ALBUMS.TITREALBUM`, `SERIES.TITRESERIE`) : l'article initial est reporté en suffixe entre crochets (`fils d'Asterix [Le]`, `étoile du désert [L']`), selon la même convention que la clé de tri de `fonctionnel.md` § Titres (séries et albums). La forme affichée est reconstituée par l'UDF `UDF_FORMATTITLE` (`Le fils d'Asterix`).
+- **Date d'achat absente** (`EDITIONS.DATEACHAT`) : une édition sans date d'achat a été acquise **avant 2004**.
 - **Initiale stockée** (`ALBUMS.INITIALETITREALBUM`, `CHAR(1)` en `UTF8`) : initiale **brute** du titre, non normalisée — casse et accents conservés (`É` et `é` sont deux valeurs distinctes), chaque chiffre est une valeur à part entière, `#` figure parmi les valeurs, et la colonne est vide (`NULL`) pour un album sans titre propre, que l'application range sous l'initiale de sa série (`coalesce(initialetitrealbum, initialetitreserie)`, procédure `INITIALES_ALBUMS`). Elle ne correspond donc pas aux entrées de navigation de `fonctionnel.md` § Entrées de la navigation par initiale.
 
 ### Données non reprises
@@ -116,6 +117,11 @@ Caractéristiques de la base Firebird de l'application existante, que la migrati
 | Données de la base existante | Reprise | Motif |
 | --- | --- | --- |
 | Éditions gratuites non offertes (`EDITIONS.GRATUIT = 1`, `EDITIONS.OFFERT = 0`) | Mode d'acquisition `Offerte`, gratuité conservée | Une édition achetée ne peut pas être gratuite (`modele-metier.md` § Édition) |
+| Prix d'acquisition antérieurs à l'euro (`EDITIONS.PRIX`, toujours exprimé en euros dans la base existante, les francs y étant convertis à la saisie) | Reprise dans la devise réellement payée, reconvertie en francs (6,55957 FF = 1 €) si nécessaire, ou en anciens francs (655,957 anciens francs = 1 €) pour un prix antérieur au nouveau franc de 1960 :<br>- **devise certaine** : le prix est repris tel quel s'il a été payé en euros, reconverti en francs sinon ;<br>- **devise incertaine** : le montant en euros et son équivalent en francs sont comparés, et le plus vraisemblable comme prix affiché est retenu ;<br>- **doute persistant** : la devise est arbitrée au cas par cas par l'utilisateur. | Restituer le montant dans la devise réellement payée (`fonctionnel.md` § Gestion des devises) |
+
+## Statistiques du dashboard
+
+Seules les données des statistiques **présentées** lors d'un affichage du dashboard (les trois blocs toujours présents et les statistiques tirées, `fonctionnel.md` § Page d'accueil) sont calculées et chargées : le tirage précède le chargement, et aucune donnée n'est chargée pour une statistique qui ne sera pas présentée.
 
 ## Hébergement
 

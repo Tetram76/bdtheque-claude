@@ -74,6 +74,10 @@ Les visuels d'une édition sont présentés dans l'ordre suivant :
 1. Par type, dans cet ordre fixe : Couverture → Dédicace → Page de garde → Planche → 4e de couverture.
 2. Pour les visuels du même type : par ordre d'affichage, ajustable manuellement par l'utilisateur.
 
+### Visuel par défaut
+
+Règle globale : **toute représentation visuelle** d'une édition **sans couverture** utilise un **visuel générique par défaut** à la place de sa couverture.
+
 ### Langue et culture d'affichage
 
 L'utilisateur choisit une **culture d'affichage** (ex. français de France), pas seulement une langue : ce choix pilote la langue des textes de l'interface, mais aussi le **formatage des dates, nombres et montants** et l'**ordre de tri** des listes et résultats de recherche (voir « Tri et navigation par initiale » ci-dessous).
@@ -305,6 +309,7 @@ Statistique **envisagée** : rien n'est statué, elle n'est pas à implémenter 
 - **Euros courants** : un montant exprimé en euros courants est **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), **sans correction de l'inflation**.
 - **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord exprimé en **euros courants**, puis **corrigé de l'inflation** entre sa date de référence et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
 - **Analyses et statistiques** : chaque montant est affiché **en parallèle** dans les deux versions, pour mettre en relation l'**investissement réalisé** (euros courants) et son **équivalent en pouvoir d'achat** à la date du jour (euros du jour). Un montant non convertible (cf. *Taux de change* ci-dessous) n'entre dans aucune des deux : elles portent toujours sur les mêmes données.
+- **Comparaison de montants** : toute comparaison entre montants (classement, minimum, maximum, record…) se fait **en euros du jour**, seule version qui compare les époques entre elles, sauf cas particulier où l'on souhaite explicitement comparer les montants **d'origine**. Le résultat reste affiché dans les deux versions.
 - **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euro, dans ces deux versions.
 - **Date de référence d'un montant** : première date connue, dans cet ordre :
   - **prix d'acquisition** : date d'acquisition, puis année d'édition, puis date de première publication de l'album ;
@@ -323,18 +328,78 @@ L'interface doit offrir un rendu **soigné et personnel**, clairement au-dessus 
 
 La charte graphique, la présentation de chaque écran et leurs maquettes de référence sont décrites dans le dossier [`visuel/`](visuel/) : [`charte-graphique.md`](visuel/charte-graphique.md), puis un fichier par écran (ex. [`dashboard.md`](visuel/dashboard.md)).
 
+Le dossier `visuel/` est une **référence visuelle et ergonomique** (apparence, mise en page, maquettes) : il ne définit **pas le contenu** des écrans, qui relève de ce fichier. Un écart entre le contenu d'une maquette et les règles fonctionnelles n'est pas une contradiction : les règles fonctionnelles s'appliquent, la maquette n'illustrant qu'un rendu possible.
+
 ## Page d'accueil
 
 La page d'accueil est un **dashboard public** présentant les statistiques principales de la collection. Elle n'est pas personnalisée (pas d'authentification sur la partie consultation). Certaines statistiques pourront être présentées sous forme de **graphiques** lorsque c'est pertinent.
 
 Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md). Étant public, il n'affiche que des statistiques de niveau **public** (cf. § Règles d'accès) : il est considéré comme **purement public** dans un premier temps, sans variante pour une session authentifiée. Afficher aussi des données privées dans une session authentifiée est une ouverture **envisagée**, si une raison particulière le justifiait, mais **rien n'est statué** : elle n'est pas à implémenter tant qu'elle n'est pas décidée (YAGNI).
 
-Les statistiques du dashboard incluent notamment, sous réserve de ce niveau d'accès (liste non exhaustive) :
+**Composition du dashboard** :
 
-- **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
-- **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
-- **Répartitions clés** : intégrales, hors-séries, par genre, par éditeur. La répartition par type d'album distingue trois catégories exclusives, réguliers, intégrales et hors-séries, où le hors-série l'emporte sur le type : une intégrale hors-série compte parmi les hors-séries, comme dans l'ordre des albums d'une série (cf. § Ordre des albums dans une série).
-- **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée.
+- Il présente **toujours** les trois blocs suivants, qui ne font pas partie du tirage :
+  - **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
+  - **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
+  - **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée. Les prix minimum et maximum sont ceux des éditions dont le prix d'acquisition est **connu** (jamais une valeur estimée).
+- Chacun de ses **autres blocs** présente une statistique **tirée au hasard** parmi les statistiques ci-dessous. Le tirage a lieu **à chaque affichage**. Le nombre de ces blocs dépend de la représentation retenue, et sera fixé avec elle. La représentation (le thème) ne fait que **fournir ce paramétrage** : le tirage est fait **en amont**, selon les règles ci-dessous, et le thème présente les statistiques tirées sans choisir lui-même lesquelles afficher. Il choisit en revanche **l'ordre** dans lequel il les présente.
+- **Catégories** : ce sont les rubriques de la liste ci-dessous. Les statistiques **utiles** (toutes celles qui ne sont pas ludiques) forment quatre catégories : répartitions clés (dont chaque répartition est une statistique distincte), suivi des séries, dépenses et valeur, composition de la collection. Les statistiques **ludiques** forment une seule catégorie pour le tirage, elle-même divisée en **catégories ludiques** (ses rubriques).
+- **Règles du tirage** :
+  - un bloc présente une statistique **ludique**, les autres une statistique **utile**, toutes de **catégories différentes** ;
+  - si la représentation demande **plus de blocs qu'il n'y a de catégories**, chaque catégorie, ludique comprise, est présente **au moins une fois**, et les blocs en surplus sont tirés parmi toutes les statistiques qui ne sont pas encore présentées, quelles que soient leur catégorie et leur nature (utile ou ludique) ;
+  - lorsque plusieurs statistiques ludiques sont présentées, elles appartiennent chacune à une **catégorie ludique différente**, selon la même règle : au moins une de chaque catégorie ludique si elles sont plus nombreuses que ces catégories.
+- Exemples, pour cinq catégories :
+
+  | Blocs tirés | Résultat |
+  | --- | --- |
+  | 3 | 1 ludique, 2 utiles de deux catégories différentes, toutes deux marquées *(graphique)* |
+  | 5 | 1 ludique, 1 utile de chacune des quatre catégories |
+  | 6 | les 5 ci-dessus, plus 1 statistique quelconque non encore présentée : utile de n'importe quelle catégorie, ou ludique d'une autre catégorie ludique que la première |
+- Le dashboard est **graphique** : au moins **75 %** des statistiques **tirées au hasard** **peuvent** être représentées graphiquement, c'est-à-dire sont marquées *(graphique)* dans la liste ci-dessous ; les trois blocs toujours présents et la statistique ludique **obligatoire** (aucune statistique ludique n'étant marquée *(graphique)*) ont leur propre présentation et n'entrent pas dans ce compte ; les statistiques ludiques tirées en surplus y entrent. L'objectif est de **privilégier le visuel** : le dashboard ne doit pas devenir un pavé de texte, sauf choix du thème. Le tirage écarte toute combinaison qui n'atteint pas ce seuil. Le seuil porte sur le tirage, non sur le rendu : la représentation retenue (le thème) reste libre de formuler en texte une statistique marquée *(graphique)*.
+
+Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous réserve de ce niveau d'accès (liste non exhaustive). Celles qui sont marquées *(graphique)* **peuvent** être présentées sous forme de graphique (la forme indiquée n'est qu'une suggestion) : le choix final revient à la représentation retenue (le thème), qui peut aussi bien les formuler en texte, comme le ferait une présentation de type magazine :
+
+- **Répartitions clés** : par type d'album, par genre, par éditeur *(graphique, chacune)*. La répartition par type d'album distingue trois catégories exclusives, réguliers, intégrales et hors-séries, où le hors-série l'emporte sur le type : une intégrale hors-série compte parmi les hors-séries, comme dans l'ordre des albums d'une série (cf. § Ordre des albums dans une série).
+- **Suivi des séries** :
+  - les séries **complètes** et **à compléter** : nombre et part des séries de la collection marquées complètes *(graphique)* ;
+  - les **tomes manquants** : leur nombre total, et les séries qui en comptent le plus (cf. § Identification des albums manquants dans une série) *(graphique : le classement des séries)* ;
+  - la répartition des séries de la collection par **statut** (en cours, terminée, abandonnée, non renseigné) *(graphique)* ;
+  - les **prochaines sorties estimées** : quelques séries, celles dont la sortie estimée du prochain tome est la plus proche (cf. § Estimation de sortie d'un nouvel album) ; leur nombre dépend de la représentation retenue, et sera fixé avec elle. La liste complète est réservée à un écran dédié *(graphique : une frise chronologique est envisagée)*.
+- **Dépenses et valeur** :
+  - les **dépenses par année** : total des prix d'acquisition des éditions achetées (mode `Achat`), par année d'acquisition ; les éditions achetées sans date d'acquisition forment une tranche à part. Sur le dashboard, les deux versions des montants (cf. § Gestion des devises) forment **deux statistiques distinctes**, les dépenses par année en euros courants et les dépenses par année en euros du jour, chacune avec son propre graphique *(graphique)* ;
+  - la part de la valeur totale estimée qui est **connue** (prix d'acquisition) et celle qui est **estimée** (valeurs estimées) *(graphique)* ;
+  - la répartition des éditions par **mode d'acquisition** *(graphique)* ;
+  - la répartition des éditions de la collection entre **neuves** et **d'occasion**, quel que soit leur mode d'acquisition *(graphique, par exemple en camembert)*.
+- **Composition de la collection** :
+  - les albums par **décennie** de première publication *(graphique)* ;
+  - l'**âge moyen d'un album au moment de son achat** : l'écart moyen entre la date de première publication de l'album et la date d'acquisition de l'édition, sur les éditions achetées qui ont les deux. L'écart se calcule **à l'année** (année d'acquisition moins année de première publication), quelle que soit la précision des dates, et la moyenne s'exprime en années ;
+  - les **auteurs les plus présents**, par rôle (scénariste, dessinateur, coloriste) *(graphique)* ;
+  - la répartition des **auteurs** de la collection **par rôle** : le nombre d'auteurs distincts crédités comme scénariste, comme dessinateur et comme coloriste ; un auteur qui tient plusieurs rôles compte dans chacun *(graphique)* ;
+  - la répartition des albums par **univers**, chaque univers comptant les albums de ses sous-univers (cf. § Hiérarchie des univers) *(graphique, par exemple hiérarchique, qui montre l'imbrication des univers)* ;
+  - la répartition des éditions par **catégorie** (originale, spéciale, tirage de tête) *(graphique)* ;
+  - la répartition des éditions par **état** *(graphique)* ;
+  - le nombre d'albums possédés en **plusieurs éditions**.
+- **Statistiques ludiques**, propres au dashboard (aucune autre page ne les présente) :
+  - **Records et curiosités** :
+    - le **doyen** et le **benjamin** : les albums dont la date de première publication est la plus ancienne et la plus récente ;
+    - le **plus cher** et le **moins cher** : les éditions qui portent les prix maximum et minimum des indicateurs de valeur, désignées nommément ;
+    - le **plus gros pavé** : l'édition qui compte le plus de pages ;
+    - l'**univers le plus vaste** : l'univers qui compte le plus d'albums, sous-univers compris (cf. § Hiérarchie des univers) ;
+    - la **plus longue série** : la série dont la séquence théorique de tomes (cf. § Séquence théorique de tomes d'une série) est la plus longue, et la **série la plus fournie** : celle dont la collection compte le plus d'albums ;
+    - les **auteurs les plus prolifiques** : l'auteur crédité sur le plus d'albums, tous rôles confondus et pour chaque rôle (scénariste, dessinateur, coloriste) ; le thème choisit la ou les versions qu'il présente, à partir des mêmes données ;
+    - le **duo** scénariste-dessinateur (deux auteurs distincts) crédité ensemble sur le plus d'albums ;
+    - les **hommes-orchestres** : le nombre d'albums dont un même auteur est à la fois scénariste et dessinateur ;
+    - les **éditions dédicacées** : leur nombre.
+  - **Machine à remonter le temps** :
+    - **payé en francs** : le nombre d'éditions achetées (mode `Achat`) dont le prix d'acquisition est en francs ou en anciens francs, et la plus ancienne d'entre elles selon la date de référence de ce prix (cf. § Gestion des devises), avec ce prix en euros du jour ;
+    - **il y a N ans ce mois-ci** : les albums parus le mois en cours d'une année passée ; seuls les albums dont la date de première publication comporte le mois y figurent ;
+    - le **mois le plus dépensier** : le mois dont les prix d'acquisition des éditions achetées (mode `Achat`) totalisent le montant le plus élevé ; le **record d'achats en une journée** : la date d'acquisition qui compte le plus d'éditions achetées.
+  - **La collection en volume** : le **nombre total de pages**, et le **temps de lecture** qu'il représente, à raison d'**une minute par page**. Seules les éditions dont le nombre de pages est renseigné y comptent.
+  - **Jeux sur les données** :
+    - le **titre le plus long** et le **titre le plus court**, parmi les albums qui ont un titre propre ;
+    - la **pioche au hasard** : une **édition possédée** tirée au hasard à chaque affichage, présentée avec son album et sa couverture. Le tirage **privilégie une édition avec couverture** : si l'édition tirée n'en a pas alors qu'une autre édition possédée du même album en a une, c'est l'une de celles-ci qui est présentée. Une édition présentée sans couverture reçoit le visuel générique (cf. § Visuel par défaut).
+
+  Ces statistiques portent, comme toutes les autres, sur la collection seule (cf. § Périmètre de la consultation) : albums de la collection, éditions possédées, séries et auteurs de ces albums.
 
 ## Structure de l'application
 
