@@ -391,7 +391,7 @@ Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous 
     - les **hommes-orchestres** : le nombre d'albums dont un même auteur est à la fois scénariste et dessinateur ;
     - les **éditions dédicacées** : leur nombre.
   - **Machine à remonter le temps** :
-    - **payé en francs** : le nombre d'éditions dont le prix d'acquisition est en francs ou en anciens francs, et la plus ancienne d'entre elles selon la date de référence de ce prix (cf. § Gestion des devises), avec ce prix en euros du jour ;
+    - **payé en francs** : le nombre d'éditions achetées (mode `Achat`) dont le prix d'acquisition est en francs ou en anciens francs, et la plus ancienne d'entre elles selon la date de référence de ce prix (cf. § Gestion des devises), avec ce prix en euros du jour ;
     - **il y a N ans ce mois-ci** : les albums parus le mois en cours d'une année passée ; seuls les albums dont la date de première publication comporte le mois y figurent ;
     - le **mois le plus dépensier** : le mois dont les prix d'acquisition des éditions achetées (mode `Achat`) totalisent le montant le plus élevé ; le **record d'achats en une journée** : la date d'acquisition qui compte le plus d'éditions achetées.
   - **La collection en volume** : le **nombre total de pages**, et le **temps de lecture** qu'il représente, à raison d'**une minute par page**. Seules les éditions dont le nombre de pages est renseigné y comptent.
