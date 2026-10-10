@@ -324,6 +324,8 @@ L'interface doit offrir un rendu **soigné et personnel**, clairement au-dessus 
 
 La charte graphique, la présentation de chaque écran et leurs maquettes de référence sont décrites dans le dossier [`visuel/`](visuel/) : [`charte-graphique.md`](visuel/charte-graphique.md), puis un fichier par écran (ex. [`dashboard.md`](visuel/dashboard.md)).
 
+Le dossier `visuel/` est une **référence visuelle et ergonomique** (apparence, mise en page, maquettes) : il ne définit **pas le contenu** des écrans, qui relève de ce fichier. Un écart entre le contenu d'une maquette et les règles fonctionnelles n'est pas une contradiction : les règles fonctionnelles s'appliquent, la maquette n'illustrant qu'un rendu possible.
+
 ## Page d'accueil
 
 La page d'accueil est un **dashboard public** présentant les statistiques principales de la collection. Elle n'est pas personnalisée (pas d'authentification sur la partie consultation). Certaines statistiques pourront être présentées sous forme de **graphiques** lorsque c'est pertinent.
