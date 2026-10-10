@@ -374,6 +374,7 @@ Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous 
   - les albums par **décennie** de première publication *(graphique)* ;
   - l'**âge moyen d'un album au moment de son achat** : l'écart moyen entre la date de première publication de l'album et la date d'acquisition de l'édition, sur les éditions achetées qui ont les deux. L'écart se calcule **à l'année** (année d'acquisition moins année de première publication), quelle que soit la précision des dates, et la moyenne s'exprime en années ;
   - les **auteurs les plus présents**, par rôle (scénariste, dessinateur, coloriste) *(graphique)* ;
+  - la répartition des **auteurs** de la collection **par rôle** : le nombre d'auteurs distincts crédités comme scénariste, comme dessinateur et comme coloriste ; un auteur qui tient plusieurs rôles compte dans chacun *(graphique)* ;
   - la répartition des albums par **univers**, chaque univers comptant les albums de ses sous-univers (cf. § Hiérarchie des univers) *(graphique, par exemple hiérarchique, qui montre l'imbrication des univers)* ;
   - la répartition des éditions par **catégorie** (originale, spéciale, tirage de tête) *(graphique)* ;
   - la répartition des éditions par **état** *(graphique)* ;
