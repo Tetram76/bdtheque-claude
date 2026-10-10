@@ -76,7 +76,7 @@ Les visuels d'une édition sont présentés dans l'ordre suivant :
 
 ### Visuel par défaut
 
-Règle globale : **toute représentation visuelle** d'une édition **sans couverture** utilise un **visuel générique par défaut** à la place de sa couverture, quel que soit l'écran ou le bloc qui la présente, à une seule exception : la pioche au hasard du dashboard (cf. § Page d'accueil).
+Règle globale : **toute représentation visuelle** d'une édition **sans couverture** utilise un **visuel générique par défaut** à la place de sa couverture, quel que soit l'écran ou le bloc qui la présente.
 
 ### Langue et culture d'affichage
 
@@ -397,7 +397,7 @@ Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous 
   - **La collection en volume** : le **nombre total de pages**, et le **temps de lecture** qu'il représente, à raison d'**une minute par page**. Seules les éditions dont le nombre de pages est renseigné y comptent.
   - **Jeux sur les données** :
     - le **titre le plus long** et le **titre le plus court**, parmi les albums qui ont un titre propre ;
-    - la **pioche au hasard** : une **édition possédée** tirée au hasard à chaque affichage, présentée avec son album et sa couverture. Si elle n'a pas de couverture, par exception à la règle du visuel par défaut, la couverture de n'importe laquelle des autres éditions possédées de l'album qui en ont une est présentée à la place ; à défaut, le visuel générique (cf. § Visuel par défaut).
+    - la **pioche au hasard** : une **édition possédée** tirée au hasard à chaque affichage, présentée avec son album et sa couverture. Le tirage **privilégie une édition avec couverture** : si l'édition tirée n'en a pas alors qu'une autre édition possédée du même album en a une, c'est l'une de celles-ci qui est présentée. Une édition présentée sans couverture reçoit le visuel générique (cf. § Visuel par défaut).
 
   Ces statistiques portent, comme toutes les autres, sur la collection seule (cf. § Périmètre de la consultation) : albums de la collection, éditions possédées, séries et auteurs de ces albums.
 
