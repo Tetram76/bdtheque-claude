@@ -332,7 +332,10 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
 
 **Composition du dashboard** :
 
-- Il présente **toujours** les **compteurs globaux**, les **dernières entrées** et les **indicateurs de valeur**.
+- Il présente **toujours** les trois blocs suivants, qui ne font pas partie du tirage :
+  - **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
+  - **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
+  - **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée. Les prix minimum et maximum sont ceux des éditions dont le prix d'acquisition est **connu** (jamais une valeur estimée).
 - Chacun de ses **autres blocs** présente une statistique **tirée au hasard** parmi les statistiques ci-dessous. Le tirage a lieu **à chaque affichage**. Le nombre de ces blocs dépend de la représentation retenue, et sera fixé avec elle. La représentation (le thème) ne fait que **fournir ce paramétrage** : le tirage est fait **en amont**, selon les règles ci-dessous, et le thème présente les statistiques tirées sans choisir lui-même lesquelles afficher. Il choisit en revanche **l'ordre** dans lequel il les présente.
 - **Catégories** : ce sont les rubriques de la liste ci-dessous. Les statistiques **utiles** (toutes celles qui ne sont pas ludiques) forment quatre catégories : répartitions clés (dont chaque répartition est une statistique distincte), suivi des séries, dépenses et valeur, composition de la collection. Les statistiques **ludiques** forment une seule catégorie pour le tirage, elle-même divisée en **catégories ludiques** (ses rubriques).
 - **Règles du tirage** :
@@ -348,12 +351,9 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
   | 6 | les 5 ci-dessus, plus 1 statistique quelconque non encore présentée : utile de n'importe quelle catégorie, ou ludique d'une autre catégorie ludique que la première |
 - Le dashboard est **graphique** : au moins **75 %** des statistiques **tirées au hasard** **peuvent** être représentées graphiquement, c'est-à-dire sont marquées *(graphique)* dans la liste ci-dessous ; les trois blocs toujours présents ont leur propre présentation et n'entrent pas dans ce compte. Le tirage écarte toute combinaison qui n'atteint pas ce seuil. Le seuil porte sur le tirage, non sur le rendu : la représentation retenue (le thème) reste libre de formuler en texte une statistique marquée *(graphique)*.
 
-Les statistiques du dashboard incluent notamment, sous réserve de ce niveau d'accès (liste non exhaustive). Celles qui sont marquées *(graphique)* **peuvent** être présentées sous forme de graphique (la forme indiquée n'est qu'une suggestion) : le choix final revient à la représentation retenue (le thème), qui peut aussi bien les formuler en texte, comme le ferait une présentation de type magazine :
+Les statistiques que le dashboard tire au hasard sont notamment, sous réserve de ce niveau d'accès (liste non exhaustive). Celles qui sont marquées *(graphique)* **peuvent** être présentées sous forme de graphique (la forme indiquée n'est qu'une suggestion) : le choix final revient à la représentation retenue (le thème), qui peut aussi bien les formuler en texte, comme le ferait une présentation de type magazine :
 
-- **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
-- **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
 - **Répartitions clés** : par type d'album, par genre, par éditeur *(graphique, chacune)*. La répartition par type d'album distingue trois catégories exclusives, réguliers, intégrales et hors-séries, où le hors-série l'emporte sur le type : une intégrale hors-série compte parmi les hors-séries, comme dans l'ordre des albums d'une série (cf. § Ordre des albums dans une série).
-- **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée. Les prix minimum et maximum sont ceux des éditions dont le prix d'acquisition est **connu** (jamais une valeur estimée).
 - **Suivi des séries** :
   - les séries **complètes** et **à compléter** : nombre et part des séries de la collection marquées complètes *(graphique)* ;
   - les **tomes manquants** : leur nombre total, et les séries qui en comptent le plus (cf. § Identification des albums manquants dans une série) *(graphique : le classement des séries)* ;
