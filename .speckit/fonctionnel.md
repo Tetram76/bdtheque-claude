@@ -386,7 +386,8 @@ Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous 
     - le **plus gros pavé** : l'édition qui compte le plus de pages ;
     - l'**univers le plus vaste** : l'univers qui compte le plus d'albums, sous-univers compris (cf. § Hiérarchie des univers) ;
     - la **plus longue série** : la série dont la séquence théorique de tomes (cf. § Séquence théorique de tomes d'une série) est la plus longue, et la **série la plus fournie** : celle dont la collection compte le plus d'albums ;
-    - l'**auteur fétiche** : l'auteur crédité sur le plus d'albums, et le **duo** scénariste-dessinateur (deux auteurs distincts) crédité ensemble sur le plus d'albums ;
+    - les **auteurs les plus prolifiques** : l'auteur crédité sur le plus d'albums, tous rôles confondus et pour chaque rôle (scénariste, dessinateur, coloriste) ; le thème choisit la ou les versions qu'il présente, à partir des mêmes données ;
+    - le **duo** scénariste-dessinateur (deux auteurs distincts) crédité ensemble sur le plus d'albums ;
     - les **hommes-orchestres** : le nombre d'albums dont un même auteur est à la fois scénariste et dessinateur ;
     - les **éditions dédicacées** : leur nombre.
   - **Machine à remonter le temps** :
