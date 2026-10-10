@@ -346,10 +346,10 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
 
   | Blocs tirés | Résultat |
   | --- | --- |
-  | 3 | 1 ludique, 2 utiles de deux catégories différentes |
+  | 3 | 1 ludique, 2 utiles de deux catégories différentes, toutes deux marquées *(graphique)* |
   | 5 | 1 ludique, 1 utile de chacune des quatre catégories |
   | 6 | les 5 ci-dessus, plus 1 statistique quelconque non encore présentée : utile de n'importe quelle catégorie, ou ludique d'une autre catégorie ludique que la première |
-- Le dashboard est **graphique** : au moins **75 %** des statistiques **tirées au hasard** **peuvent** être représentées graphiquement, c'est-à-dire sont marquées *(graphique)* dans la liste ci-dessous ; les trois blocs toujours présents ont leur propre présentation et n'entrent pas dans ce compte. Le tirage écarte toute combinaison qui n'atteint pas ce seuil. Le seuil porte sur le tirage, non sur le rendu : la représentation retenue (le thème) reste libre de formuler en texte une statistique marquée *(graphique)*.
+- Le dashboard est **graphique** : au moins **75 %** des statistiques **tirées au hasard** **peuvent** être représentées graphiquement, c'est-à-dire sont marquées *(graphique)* dans la liste ci-dessous ; les trois blocs toujours présents et la statistique ludique **obligatoire** (aucune statistique ludique n'étant marquée *(graphique)*) ont leur propre présentation et n'entrent pas dans ce compte ; les statistiques ludiques tirées en surplus y entrent. L'objectif est de **privilégier le visuel** : le dashboard ne doit pas devenir un pavé de texte, sauf choix du thème. Le tirage écarte toute combinaison qui n'atteint pas ce seuil. Le seuil porte sur le tirage, non sur le rendu : la représentation retenue (le thème) reste libre de formuler en texte une statistique marquée *(graphique)*.
 
 Les statistiques que le dashboard tire au hasard sont notamment, sous réserve de ce niveau d'accès (liste non exhaustive). Celles qui sont marquées *(graphique)* **peuvent** être présentées sous forme de graphique (la forme indiquée n'est qu'une suggestion) : le choix final revient à la représentation retenue (le thème), qui peut aussi bien les formuler en texte, comme le ferait une présentation de type magazine :
 
