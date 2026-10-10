@@ -268,6 +268,17 @@ Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque
   - **Plusieurs UDF `CSTRING(32767)` dans une même ligne** : `block size exceeds implementation restriction` → une UDF par requête.
   - **Classe de caractères dans `LIKE`** (`'%[[]%'`, syntaxe SQL Server) : aucune ligne → dans Firebird, `[` est littéral dans `LIKE` (`'%[%'`).
 
+## Reprise des prix antérieurs à l'euro : devise retenue
+
+Mise en œuvre déterministe de la règle de `contraintes-techniques.md` § Correspondances particulières (prix d'acquisition antérieurs à l'euro), pour qu'un même prix soit toujours repris dans la même devise :
+
+- **Devise certaine** : date d'achat connue (euro à partir du 1er janvier 2002, franc avant, ancien franc avant 1960) ; ou, sans date d'achat, année de référence du prix (année d'édition, à défaut de première publication) postérieure ou égale à 2002, l'achat ne pouvant précéder la parution (euro).
+- **Devise incertaine** : sans date d'achat, achat antérieur à 2004 (`contraintes-techniques.md` § Base existante) d'une édition dont l'année de référence est antérieure à 2002. Le franc candidat est le franc, ou l'ancien franc pour une année de référence antérieure à 1960. Un montant est **vraisemblable comme prix affiché** :
+  - en euros, si ses centimes sont un multiple de 5 ou se terminent par 9 ;
+  - en francs, s'il existe un prix multiple de 0,50 dans cette devise dont la conversion en euros, arrondie au centime, donne le montant stocké ; ce prix est alors le montant repris.
+- Une seule des deux devises vraisemblable : elle est retenue. Les deux, ou aucune : **doute persistant**, le prix est soumis à l'arbitrage de l'utilisateur, sans être repris d'office.
+  - Mesuré sur la base existante : 41 prix de devise incertaine, dont 16 classés en francs, 21 en euros et 4 laissés à l'arbitrage.
+
 ## Erreurs métier, fonctionnelles et techniques
 
 - Pour que l'utilisateur distingue une erreur métier d'une erreur technique (`fonctionnel.md` § Présentation des erreurs), le domaine signale **toute violation d'une règle métier** par un type dédié, `DomainRuleViolationException` (`Bdtheque.Domain.Common`), porteur d'un **code de règle stable** (`DomainRules`). Le texte présenté à l'utilisateur est produit à partir de ce code par la localisation du frontend ; le message de l'exception ne sert qu'aux journaux.
