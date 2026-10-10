@@ -121,7 +121,7 @@ Caractéristiques de la base Firebird de l'application existante, que la migrati
 
 ## Statistiques du dashboard
 
-Seules les données des statistiques **tirées** pour un affichage du dashboard (`fonctionnel.md` § Page d'accueil) sont calculées et chargées : le tirage précède le chargement, et aucune donnée n'est chargée pour une statistique qui ne sera pas présentée.
+Seules les données des statistiques **présentées** lors d'un affichage du dashboard (les trois blocs toujours présents et les statistiques tirées, `fonctionnel.md` § Page d'accueil) sont calculées et chargées : le tirage précède le chargement, et aucune donnée n'est chargée pour une statistique qui ne sera pas présentée.
 
 ## Hébergement
 
