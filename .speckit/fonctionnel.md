@@ -397,7 +397,7 @@ Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous 
   - **La collection en volume** : le **nombre total de pages**, et le **temps de lecture** qu'il représente, à raison d'**une minute par page**. Seules les éditions dont le nombre de pages est renseigné y comptent.
   - **Jeux sur les données** :
     - le **titre le plus long** et le **titre le plus court**, parmi les albums qui ont un titre propre ;
-    - la **pioche au hasard** : un album tiré au hasard à chaque affichage, avec sa couverture (à défaut, le visuel générique, cf. § Visuel par défaut).
+    - la **pioche au hasard** : une **édition possédée** tirée au hasard à chaque affichage, présentée avec son album et sa couverture. Si elle n'a pas de couverture, la couverture de n'importe laquelle des autres éditions possédées de l'album qui en ont une est présentée à la place ; à défaut, le visuel générique (cf. § Visuel par défaut).
 
   Ces statistiques portent, comme toutes les autres, sur la collection seule (cf. § Périmètre de la consultation) : albums de la collection, éditions possédées, séries et auteurs de ces albums.
 
