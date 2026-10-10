@@ -76,7 +76,7 @@ Les visuels d'une édition sont présentés dans l'ordre suivant :
 
 ### Visuel par défaut
 
-Lorsqu'une couverture doit être présentée (album, édition) et qu'aucune n'est disponible, un **visuel générique par défaut** est présenté à sa place.
+Règle globale : **toute représentation visuelle** d'une édition **sans couverture** utilise un **visuel générique par défaut** à la place de sa couverture, quel que soit l'écran ou le bloc qui la présente.
 
 ### Langue et culture d'affichage
 
