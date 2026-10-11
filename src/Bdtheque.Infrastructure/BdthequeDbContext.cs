@@ -17,6 +17,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<Contribution> Contributions => Set<Contribution>();
     public DbSet<Edition> Editions => Set<Edition>();
     public DbSet<EditionVisual> EditionVisuals => Set<EditionVisual>();
+    public DbSet<ChangeLogEntry> ChangeLog => Set<ChangeLogEntry>();
     public DbSet<PurchaseIntent> PurchaseIntents => Set<PurchaseIntent>();
 
     // Every query loads its collections by separate statements: an album always comes with its
@@ -81,23 +82,32 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public uint VersionOf<TRoot>(TRoot root) where TRoot : EntityBase, IAggregateRoot =>
         Entry(root).Property<uint>(VersionProperty).CurrentValue;
 
-    public override int SaveChanges(bool acceptAllChangesOnSuccess)
-    {
-        PrepareSave();
-        return base.SaveChanges(acceptAllChangesOnSuccess);
-    }
+    // Recording the change log reads from the database the labels of the records a save does not
+    // hold (ChangeLogLabels): every save is asynchronous, the single path where it is recorded.
+    public override int SaveChanges(bool acceptAllChangesOnSuccess) =>
+        throw new NotSupportedException("Save asynchronously: the change log is recorded by SaveChangesAsync.");
 
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
-    {
-        PrepareSave();
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-    }
-
-    private void PrepareSave()
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         ChangeTracker.DetectChanges();
         DeleteSeveredContributions();
+        // Every write on a record adds its entry to the change log, in the same save (modele-metier.md §
+        // Entrée du journal des modifications); dated below, like any other entity.
+        // Changes were just detected: the recorder enumerates the tracked entities many times over,
+        // each enumeration otherwise detecting them all again.
+        var autoDetectChanges = ChangeTracker.AutoDetectChangesEnabled;
+        ChangeTracker.AutoDetectChangesEnabled = false;
+        try
+        {
+            await new ChangeLogRecorder(this).RecordAsync(cancellationToken);
+        }
+        finally
+        {
+            ChangeTracker.AutoDetectChangesEnabled = autoDetectChanges;
+        }
+
         StampAuditDates();
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     // A contribution removed by its owner (Album.SetTitleSeriesAndContributions,

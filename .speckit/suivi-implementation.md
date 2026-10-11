@@ -109,7 +109,7 @@ Répercussion dans le modèle de domaine et dans l'API du journal des modificati
 
 | Ticket | Titre |
 | --- | --- |
-| #148 | Journal des modifications dans le modèle de domaine et l'API |
+| ~~#148~~ | Journal des modifications dans le modèle de domaine et l'API |
 
 ## Phase 3 — Frontend Blazor
 

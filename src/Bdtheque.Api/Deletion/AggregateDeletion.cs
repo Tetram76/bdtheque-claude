@@ -107,13 +107,17 @@ internal static class AggregateDeletion
     /// <exception cref="EntityNotFoundException">No aggregate has this identifier.</exception>
     /// <exception cref="DbUpdateConcurrencyException">The aggregate was modified since <paramref name="version"/>.</exception>
     /// <exception cref="DeletionRefusedException">Records reference the aggregate.</exception>
+    /// <param name="shape">
+    /// Loads with the aggregate the records it is composed of (e.g. the collections of a publisher): the
+    /// change log records their deletion, which the database would otherwise do by cascade, out of its sight.
+    /// </param>
     /// <exception cref="DeletionImpactChangedException">The impact is no longer the one confirmed.</exception>
     public static Task DeleteAsync<TRoot>(
         BdthequeDbContext context, VisualStorage storage, Guid id, uint version, string fingerprint, IReadOnlyList<DeletionLink> links,
-        CancellationToken cancellationToken)
+        Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape, CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot =>
         DeleteCoreAsync<TRoot, TRoot>(
-            context, storage, id, version, fingerprint, links, shape: null, root => root, delete: null, cancellationToken);
+            context, storage, id, version, fingerprint, links, shape, root => root, delete: null, cancellationToken);
 
     /// <summary>
     /// Deletes a child of an aggregate (e.g. a collection of a publisher) under the same guarantees

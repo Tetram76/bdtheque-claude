@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20261005170429_InitialCreate")]
+    [Migration("20261011145150_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -234,6 +234,44 @@ namespace Bdtheque.Infrastructure.Migrations
                             t.HasCheckConstraint("CK_Authors_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
 
                             t.HasCheckConstraint("CK_Authors_SortKeyNotBlank", "COALESCE(LENGTH(TRIM(\"SortKey\")), 0) > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.ChangeLogEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Changes")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Operation")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RecordType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt", "Id");
+
+                    b.ToTable("ChangeLogEntries", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ChangeLogEntries_ChangesOfModificationOnly", "(jsonb_array_length(\"Changes\") > 0) = (\"Operation\" = 2)");
                         });
                 });
 

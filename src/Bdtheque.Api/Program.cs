@@ -99,6 +99,7 @@ admin.MapAlbums();
 admin.MapEditions();
 admin.MapEditionVisuals();
 admin.MapPurchaseIntents();
+admin.MapChangeLog();
 
 var catalog = app.MapCatalog();
 catalog.MapSeriesCatalog();

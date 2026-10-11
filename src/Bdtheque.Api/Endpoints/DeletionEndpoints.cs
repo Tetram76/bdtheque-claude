@@ -12,7 +12,9 @@ internal static class DeletionEndpoints
     /// confirmation message announces, then <c>DELETE {id}?version=…&amp;fingerprint=…</c>, sending back
     /// the version of the record and the fingerprint of the impact the user confirmed.
     /// </summary>
-    public static void MapDeletion<TRoot>(this RouteGroupBuilder group, IReadOnlyList<DeletionLink> links)
+    /// <param name="shape">Loads with the aggregate the records it is composed of, whose deletion the change log records.</param>
+    public static void MapDeletion<TRoot>(
+        this RouteGroupBuilder group, IReadOnlyList<DeletionLink> links, Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape = null)
         where TRoot : EntityBase, IAggregateRoot
     {
         group.MapGet("/{id:guid}/deletion-impact", (Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
@@ -20,7 +22,7 @@ internal static class DeletionEndpoints
 
         group.MapDelete("/{id:guid}", async (Guid id, uint version, string fingerprint, BdthequeDbContext context, VisualStorage storage, CancellationToken cancellationToken) =>
         {
-            await AggregateDeletion.DeleteAsync<TRoot>(context, storage, id, version, fingerprint, links, cancellationToken);
+            await AggregateDeletion.DeleteAsync(context, storage, id, version, fingerprint, links, shape, cancellationToken);
             return TypedResults.NoContent();
         });
     }

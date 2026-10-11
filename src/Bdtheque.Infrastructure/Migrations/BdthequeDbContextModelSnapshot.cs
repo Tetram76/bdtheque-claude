@@ -234,6 +234,44 @@ namespace Bdtheque.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bdtheque.Domain.Entities.ChangeLogEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Changes")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Operation")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RecordType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt", "Id");
+
+                    b.ToTable("ChangeLogEntries", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ChangeLogEntries_ChangesOfModificationOnly", "(jsonb_array_length(\"Changes\") > 0) = (\"Operation\" = 2)");
+                        });
+                });
+
             modelBuilder.Entity("Bdtheque.Domain.Entities.Contribution", b =>
                 {
                     b.Property<Guid>("Id")

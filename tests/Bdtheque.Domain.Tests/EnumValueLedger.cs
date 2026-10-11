@@ -31,5 +31,28 @@ internal static class EnumValueLedger
             [typeof(AcquisitionMode)] = [("Purchase", 1), ("Gift", 2), ("Trade", 3), ("Won", 4), ("Inherited", 5)],
             [typeof(VisualType)] =
                 [("Cover", 1), ("Dedication", 2), ("Endpaper", 3), ("Plate", 4), ("BackCover", 5)],
+            [typeof(RecordType)] =
+            [
+                ("Album", 1), ("Edition", 2), ("Series", 3), ("PurchaseIntent", 4), ("Author", 5), ("Publisher", 6),
+                ("PublisherCollection", 7), ("Genre", 8), ("Universe", 9),
+            ],
+            [typeof(ChangeLogOperation)] = [("Creation", 1), ("Modification", 2), ("Deletion", 3)],
+            [typeof(ChangeLogAttribute)] =
+            [
+                ("Title", 1), ("SortKey", 2), ("ManualSortKey", 3), ("Summary", 4), ("PersonalNotes", 5), ("Genre", 6),
+                ("Universe", 7), ("Contribution", 8), ("Series", 9), ("AlbumType", 10), ("SpecialIssue", 11),
+                ("VolumeNumber", 12), ("StartVolumeNumber", 13), ("EndVolumeNumber", 14), ("FirstPublicationDate", 15),
+                ("Rating", 16), ("Status", 17), ("TheoreticalVolumeCount", 18), ("Complete", 19),
+                ("ExcludeFromMissingVolumes", 20), ("ExcludeFromReleaseEstimates", 21), ("TemplatePublisher", 22),
+                ("TemplatePublisherCollection", 23), ("TemplateBinding", 24), ("TemplateOrientation", 25),
+                ("TemplateReadingDirection", 26), ("TemplateFormat", 27), ("TemplateEditionCategory", 28),
+                ("TemplateCondition", 29), ("TemplateColor", 30), ("Publisher", 31), ("PublisherCollection", 32),
+                ("PublicationYear", 33), ("Isbn", 34), ("Binding", 35), ("Orientation", 36), ("ReadingDirection", 37),
+                ("Format", 38), ("PageCount", 39), ("EditionCategory", 40), ("Dedicated", 41), ("Color", 42),
+                ("Condition", 43), ("AcquisitionMode", 44), ("SecondHand", 45), ("AcquisitionDate", 46),
+                ("AcquisitionPrice", 47), ("Free", 48), ("InitialValue", 49), ("PersonalReference", 50), ("Visual", 51),
+                ("LastName", 52), ("FirstName", 53), ("Pseudonym", 54), ("Biography", 55), ("Nationality", 56),
+                ("Name", 57), ("Website", 58), ("Description", 59), ("ParentUniverse", 60), ("Label", 61),
+            ],
         };
 }
