@@ -25,6 +25,8 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | **Univers** | Cadre fictionnel auquel albums/séries peuvent être rattachés, avec hiérarchie possible. |
 | **Visuel d'édition** | Média rattaché à une édition avec un type de visuel. |
 | **Intention d'achat** | Souhait d'acquisition portant sur un album (toute édition) ou sur une édition spécifique. |
+| **Paramétrage de l'application** | Réglages de l'application, fixés par l'administrateur dans le bloc « Paramétrage » de l'administration. Fiche unique. |
+| **Journal des modifications** | Trace de chaque écriture sur une fiche : création, modification, suppression ou reprise d'une ancienne donnée. |
 
 ---
 
@@ -266,3 +268,27 @@ erDiagram
 | Cible édition | référence | conditionnel | Édition visée. Renseignée si l'intention porte sur une édition spécifique. Exclusive avec "Cible album". |
 
 > **Contraintes :** Exactement l'un des deux champs "Cible album" ou "Cible édition" doit être renseigné. Une même cible (album ou édition) ne peut être visée que par une seule intention d'achat. Un album et l'une de ses éditions ne peuvent pas être visés simultanément. Une édition possédée (`Mode d'acquisition` renseigné) ne peut pas être visée.
+
+### Paramétrage de l'application
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Format du libellé des albums | énuméré | oui | `Album (Série - Tome)` (défaut) / `Tome - Album (Série)` (voir `fonctionnel.md` § Libellé d'un album). |
+| Culture d'affichage | énuméré | oui | `Français (France)`, seule culture proposée (voir `fonctionnel.md` § Langue et culture d'affichage). |
+
+> **Contrainte :** le paramétrage est une fiche **unique**, toujours présente : il se modifie, mais ne se crée ni ne se supprime.
+
+### Entrée du journal des modifications
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Paramétrage`. |
+| Fiche | identifiant | oui | Identifiant de la fiche écrite. Conservé après la suppression de la fiche : aucune contrainte d'intégrité référentielle. |
+| Libellé | texte | oui | Libellé de la fiche au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. |
+| Opération | énuméré | oui | `Création` / `Modification` / `Suppression` / `Reprise` (reprise d'une ancienne donnée depuis l'application existante). |
+| Changements | liste | non | Pour une modification uniquement : chaque changement, avec l'attribut concerné, sa valeur **avant** et sa valeur **après**, sous leur forme affichée. |
+
+> - Une entrée est ajoutée **automatiquement** à chaque écriture sur une fiche, dans la même opération ; elle n'est jamais saisie, modifiée ni supprimée, et le journal n'est jamais purgé. Sa date de création (attribut commun) est la date de l'écriture.
+> - L'ajout ou le retrait d'un élément associé (genre, univers, contribution, visuel…) est un changement de la fiche qui le porte : un ajout n'a pas de valeur avant, un retrait pas de valeur après. Les éléments sans fiche propre (visuel, contribution) n'ont pas d'entrée à leur nom.
+> - La reprise des données ajoute au moins une entrée `Reprise` pour chaque fiche qu'elle crée ou met à jour.
+> - Le journal n'est consultable que dans l'administration.
