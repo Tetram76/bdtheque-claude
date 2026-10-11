@@ -72,9 +72,9 @@ Les données récupérées auprès de sources externes (taux de change Frankfurt
 - Des données existantes sont stockées dans la base Firebird 2.5 de l'application client lourd.
 - Une **migration de données** depuis Firebird vers la base cible devra être possible lorsque la nouvelle application sera suffisamment mature.
 - La conception du modèle de données cible doit tenir compte de cette migration future : préserver la sémantique des données existantes et ne pas rendre la migration inutilement complexe.
-- La migration pourra être **incrémentale** (imports successifs et partiels) : l'outil de migration devra **fusionner** les données importées avec les données déjà présentes dans la base cible lorsqu'il y a correspondance (pas de doublons, mise à jour des éléments existants).
+- La migration est une **opération unique** (*one-shot*) : aucun import successif ni partiel. Elle **fusionne** les données importées avec les données déjà présentes dans la base cible lorsqu'il y a correspondance (pas de doublons, mise à jour des éléments existants).
 - La migration est **unidirectionnelle** : aucun retour en arrière, aucune synchronisation vers l'application client lourd.
-- Un outil ou script de migration dédié devra être prévu le moment venu.
+- Elle ne donne lieu à aucun outil de migration maintenu : c'est une opération ponctuelle, préparée le moment venu.
 
 ### Base existante
 
