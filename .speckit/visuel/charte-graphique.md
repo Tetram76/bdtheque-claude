@@ -8,7 +8,7 @@ Ce fichier décrit l'identité visuelle de l'application, c'est-à-dire ce que p
 
 La charte ci-dessous est issue des maquettes du dashboard (cf. [`dashboard.md`](dashboard.md)), premier écran conçu, dont elle réunit ce que partagent toutes les alternatives : elle s'applique à la partie **Consultation** (`fonctionnel.md` § Structure de l'application).
 
-La charte de la partie **Administration** reste à définir. Elle s'écartera probablement un peu de celle-ci, dans un sens plus sobre (moins de fantaisie et de désordre), sans que ce soit statué.
+La partie **Administration** respecte l'identité visuelle du thème actif, dans un sens plus sobre : un espace technique, qui privilégie l'efficacité et le fonctionnel sans être impersonnel, sans fantaisie ni désordre (cf. [`administration.md`](administration.md) § Ton).
 
 ## Thème de base
 

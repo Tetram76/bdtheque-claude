@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Administration</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
+input::placeholder{color:inherit;opacity:.6}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
+
+  <header style="position: relative; z-index: 10; background: {{t.hBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+    <div style="position: relative; max-width: 1280px; margin: 0 auto; padding: 16px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
+        <sc-if value="{{t.lgMark}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
+        <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
+      </a>
+      <span style="padding: 4px 12px; border: {{t.tagB}}; border-radius: {{t.tagR}}; background: {{t.tagBg}}; color: {{t.tagText}}; font-weight: 700; font-size: 13px; text-transform: {{t.tagTT}}; letter-spacing: {{t.tagLS}}">Administration</span>
+      <div style="flex: 1 1 260px; min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 8px">
+        <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Retrouver une fiche</label>
+        <input id="find" type="search" placeholder="Retrouver une fiche à modifier…" style="flex: 0 1 340px; min-width: 0; height: 44px; padding: 0 16px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit; outline: none">
+        <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
+        <a href="#" style="display: inline-flex; align-items: center; gap: 6px; height: 44px; flex: none; padding: 0 6px; color: {{t.hText}}; font-weight: 700; font-size: 14px">Aller à la consultation<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a>
+      </div>
+      <button type="button" aria-expanded="{{menuExpanded}}" aria-controls="admin-menu" onClick="{{toggleMenu}}" style="display: inline-flex; align-items: center; gap: 8px; height: 44px; flex: none; padding: 0 14px; border: {{t.hInB}}; border-radius: {{t.btnR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>Menu</button>
+
+      <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+    <button type="button" tabindex="-1" aria-label="Fermer le menu" onClick="{{closeMenu}}" style="position: fixed; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default"></button>
+    <nav id="admin-menu" aria-label="Plan de l'administration" style="position: absolute; top: calc(100% + 8px); right: 24px; width: min(340px, calc(100% - 48px)); max-height: 80vh; overflow-y: auto; padding: 22px; border: {{panelB}}; border-radius: {{t.cR}}; background: {{panelBg}}; color: {{t.text}}; box-shadow: {{panelSh}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: {{t.rowB}}">
+        <span style="padding-left: 12px; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 18px; text-transform: {{t.fdTT}}">Menu</span>
+        <button type="button" aria-label="Fermer le menu" onClick="{{toggleMenu}}" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <sc-for list="{{menu}}" as="g" hint-placeholder-count="5">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="padding: 0 12px 4px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: {{t.muted}}">{{g.label}}</span>
+          <sc-for list="{{g.items}}" as="m" hint-placeholder-count="3">
+            <a href="#" aria-current="{{m.current}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: {{t.btnR}}; background: {{m.bg}}; color: {{m.fg}}; font-weight: {{m.fw}}">
+              <span>{{m.label}}</span>
+              <span style="font-size: 13px; font-variant-numeric: tabular-nums; opacity: .85">{{m.n}}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="padding-top: 12px; border-top: {{t.rowB}}">
+        <button type="button" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 42px; padding: 0 12px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 15px; text-align: left; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10"></path></svg>Se déconnecter</button>
+      </div>
+    </nav>
+      </sc-if>
+    </div>
+  </header>
+
+  <div style="max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; box-sizing: border-box">
+    <main style="display: flex; flex-direction: column; gap: 40px">
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Administration</h1>
+        <p style="margin: 0; color: {{t.muted}}">Saisir et corriger les fiches, tenir les référentiels, régler l'application.</p>
+      </div>
+
+      <section aria-labelledby="a-saisie" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.hiSh}}; display: flex; flex-direction: column; gap: 16px">
+        <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.saisie}}</span>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
+          <h2 id="a-saisie" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Saisir à partir d'un ISBN</h2>
+        </div>
+        <form style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px">
+          <label style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 14px">ISBN de l'édition
+            <input type="text" inputmode="numeric" placeholder="978-2-205-08889-2" style="height: 50px; padding: 0 18px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit; font-size: 17px; font-weight: 400; letter-spacing: .04em; outline: none">
+          </label>
+          <button type="submit" style="height: 50px; padding: 0 24px; border: 0; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-family: {{t.fb}}; font-weight: 700; font-size: 15px; cursor: pointer">Chercher dans les sources</button>
+        </form>
+        <p style="margin: 0; font-size: 14px; color: {{t.muted}}">Album, édition et visuels, série, auteurs, éditeur et collection : chaque fiche est créée ou complétée à partir du catalogue de la BnF et des autres sources, puis relue avant enregistrement.</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 16px; border-top: {{t.rowB}}">
+          <span style="font-weight: 700; font-size: 14px; color: {{t.muted}}; margin-right: 4px">Ou créer directement :</span>
+          <sc-for list="{{creates}}" as="c" hint-placeholder-count="4">
+            <a href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{c.label}}</a>
+          </sc-for>
+        </div>
+      </section>
+
+      <section aria-labelledby="a-fiches" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 18px">
+        <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.fiches}}</span>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
+          <h2 id="a-fiches" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Les fiches</h2>
+          <span style="font-size: 14px; color: {{t.muted}}">Les éditions, leurs visuels et les intentions d'achat se saisissent depuis leur album.</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); gap: 14px">
+          <sc-for list="{{entities}}" as="e" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
+              <div style="display: flex; align-items: center; gap: 12px">
+                <span aria-hidden="true" style="width: 42px; height: 42px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: {{t.chipR}}; background: {{e.bg}}; color: {{e.fg}}; box-shadow: {{t.chipSh}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{e.icon}}"></path></svg></span>
+                <a href="#" style="min-width: 0; font-weight: 700; font-size: 17px; line-height: 1.2; color: {{t.text}}">{{e.name}}</a>
+                <span style="margin-left: auto; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums">{{e.n}}</span>
+              </div>
+              <span style="font-size: 13px; color: {{t.muted}}">{{e.sub}}</span>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: auto; font-weight: 700; font-size: 14px">
+                <a href="#" style="color: {{t.link}}">Gérer la liste</a>
+                <sc-if value="{{e.hasNew}}" hint-placeholder-val="{{true}}"><a href="#" style="color: {{t.link}}">+ {{e.act}}</a></sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 40px 28px; align-items: flex-start">
+        <section aria-labelledby="a-controle" style="flex: 1 1 380px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+          <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.controle}}</span>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
+            <h2 id="a-controle" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>À vérifier</h2>
+          </div>
+          <ul style="margin: 0; padding: 0; list-style: none">
+            <sc-for list="{{checks}}" as="c" hint-placeholder-count="5">
+              <li style="border-bottom: {{t.rowB}}">
+                <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 50px; color: {{t.text}}">
+                  <span style="flex: 1 1 auto; min-width: 0">{{c.label}}</span>
+                  <span style="min-width: 42px; padding: 2px 10px; box-sizing: border-box; border-radius: {{t.btnR}}; background: {{c.bg}}; color: {{c.fg}}; font-weight: 700; font-size: 14px; text-align: center; font-variant-numeric: tabular-nums">{{c.n}}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; color: {{t.muted}}"><path d="M9 6l6 6-6 6"></path></svg>
+                </a>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+
+        <section aria-labelledby="a-journal" style="flex: 1.4 1 460px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+          <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.journal}}</span>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
+            <h2 id="a-journal" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Dernières modifications</h2>
+          </div>
+          <ul style="margin: 0; padding: 0; list-style: none">
+            <sc-for list="{{edits}}" as="d" hint-placeholder-count="6">
+              <li style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; padding: 11px 0; border-bottom: {{t.rowB}}">
+                <span style="display: flex; flex-direction: column; min-width: 0">
+                  <a href="#" style="font-weight: 700; color: {{t.text}}">{{d.label}}</a>
+                  <span style="font-size: 13px; color: {{t.muted}}">{{d.type}} {{d.what}} {{d.when}}</span>
+                </span>
+                <a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Modifier</a>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 40px 28px; align-items: flex-start">
+        <section aria-labelledby="a-reglages" style="flex: 1.4 1 460px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+          <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.reglages}}</span>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
+            <h2 id="a-reglages" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Paramétrage</h2>
+          </div>
+          <dl style="margin: 0">
+            <sc-for list="{{settings}}" as="s" hint-placeholder-count="4">
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 16px; min-height: 50px; padding: 6px 0; box-sizing: border-box; border-bottom: {{t.rowB}}">
+                <dt style="flex: 1 1 200px; font-weight: 700">{{s.label}}</dt>
+                <dd style="flex: 1 1 200px; margin: 0; color: {{t.muted}}">{{s.value}}</dd>
+                <dd style="margin: 0"><a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Modifier</a></dd>
+              </div>
+            </sc-for>
+          </dl>
+        </section>
+
+        <section aria-labelledby="a-stats" style="flex: 1 1 340px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+          <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.stats}}</span>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
+            <h2 id="a-stats" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Statistiques privées</h2>
+          </div>
+          <div style="padding: 24px 20px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; text-align: center; font-size: 14px">Aucune statistique privée n'est définie pour l'instant. Celles qui le seront apparaîtront ici, réservées au compte administrateur.</div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <footer style="max-width: 1280px; margin: 0 auto; padding: 20px 24px 32px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: {{t.muted}}">
+    <span>Espace réservé au compte administrateur.</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["violine","mure","gazette","sommaire","festival","riso","librairie","vignettes"],"default":"violine"},"menuOpen":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1900}}'>
+// Shared defaults: each theme only states what its identity changes.
+const BASE = {
+  kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
+  kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
+  mkDisp: 'none', chipSh: 'none', lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
+  tagTT: 'none', tagLS: '0', h2fs: 'normal', h2sh: 'none', h2tt: 'none', h2line: '0', h2grow: '0', h2pad: '0', h2r: '0', h2bg: 'transparent',
+  fdTT: 'none', h1size: 'clamp(32px, 4vw, 48px)', cSh: 'none', hiSh: 'none'
+};
+
+// « Cases et bulles » comes in two tints that only differ by their purple shades.
+const CASES_INKS = ['#FFB547', '#4FD1C5', '#FF7A6B', '#B69CFF', '#9BE07A', '#7FB8FF', '#F7A8D0', '#FFD166'];
+const cases = (c) => ({
+  ...BASE,
+  bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
+  acc: '#FFB547', onAcc: c.bg, link: '#FFB547', warn: '#FF7A6B', onWarn: c.bg, nBg: '#FBF3EA', nFg: c.bg,
+  fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: '28px',
+  tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
+  inBg: c.bg, inB: '2px solid ' + c.border, inR: '999px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', chipR: '14px 10px 16px 8px',
+  hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
+  helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '8px 18px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 24px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '6px 18px', h2r: '999px', h2size: '20px',
+  pal: CASES_INKS.map((x) => [x, c.bg])
+});
+
+const THEMES = {
+  violine: cases({ bg: '#2B1030', panel: '#3A1641', border: '#6A3375', soft: '#EBD3EF', muted: '#CFA9D6' }),
+  mure: cases({ bg: '#1F1033', panel: '#2A1844', border: '#533A78', soft: '#DCD1EE', muted: '#B9A8D8' }),
+  gazette: {
+    ...BASE,
+    bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
+    acc: '#2B1030', onAcc: '#FBF3EA', link: '#9A3D12', warn: '#9A3D12', onWarn: '#FBF3EA', nBg: '#F1E3D6', nFg: '#2B1030',
+    fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+    cBg: 'transparent', cB: '0', cBT: '2px solid #2B1030', cR: '0', cPad: '14px 0 0',
+    tBg: 'transparent', tB: '1px solid #D9C6CF', tR: '0', rowB: '1px solid #D9C6CF',
+    inBg: 'transparent', inB: '2px solid #2B1030', inR: '999px', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', chipR: '0',
+    hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
+    helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
+    lgText: '#2B1030', lgFont: '800 32px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    tagBg: '#FFB547', tagText: '#2B1030', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.08em',
+    h2c: '#2B1030', h2size: '26px',
+    kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase',
+    pal: [['#2B1030', '#FBF3EA'], ['#FFB547', '#2B1030'], ['#9A3D12', '#FBF3EA'], ['#5E3F63', '#FBF3EA']]
+  },
+  sommaire: {
+    ...BASE,
+    bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
+    acc: '#E63946', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#FFD60A', onWarn: '#111111', nBg: '#111111', nFg: '#FFFFFF',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(40px, 5vw, 64px)',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: '26px', hiSh: '10px 10px 0 #111111',
+    tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
+    inBg: '#FFFFFF', inB: '2px solid #111111', inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', chipR: '0',
+    hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
+    helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 30px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    tagBg: '#111111', tagText: '#FFFFFF', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.06em',
+    h2c: '#111111', h2size: '32px', h2tt: 'uppercase', h2line: '4px solid #111111', h2grow: '1', h2pad: '0 0 6px',
+    pal: [['#E63946', '#FFFFFF'], ['#1D4ED8', '#FFFFFF'], ['#FFD60A', '#111111'], ['#111111', '#FFFFFF']]
+  },
+  festival: {
+    ...BASE,
+    bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
+    acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#E8604C', onWarn: '#FFFFFF', nBg: '#F6C343', nFg: '#1B2350',
+    fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: '26px', cSh: '0 2px 0 rgba(27,35,80,.08)', hiSh: '0 2px 0 rgba(27,35,80,.08)',
+    tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
+    inBg: '#FFFFFF', inB: '2px solid #1B2350', inR: '999px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', chipR: '50%',
+    hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
+    helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 24px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: '#F6C343', tagText: '#1B2350', tagB: '0', tagR: '999px',
+    h2c: '#1B2350', h2size: '26px', mkDisp: 'inline-block',
+    kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (i, label) => 'Station ' + label,
+    pal: [['#1F3A93', '#FFFFFF'], ['#E8604C', '#FFFFFF'], ['#F6C343', '#1B2350'], ['#2E9E6E', '#FFFFFF'], ['#8E5BB8', '#FFFFFF'], ['#3BA7D9', '#1B2350'], ['#F29E4C', '#1B2350'], ['#B8B2A3', '#1B2350']]
+  },
+  riso: {
+    ...BASE,
+    bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
+    acc: '#0078BF', onAcc: '#F4EFE4', link: '#FF48B0', warn: '#FFE800', onWarn: '#0078BF', nBg: 'rgba(0,120,191,.12)', nFg: '#0078BF',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(24px, 3vw, 36px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: '24px', hiSh: '7px 6px 0 rgba(255,72,176,.85)',
+    tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
+    inBg: 'transparent', inB: '2px dashed #0078BF', inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', chipR: '50%',
+    hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
+    helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 26px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    tagBg: '#FF48B0', tagText: '#F4EFE4', tagB: '0', tagR: '0',
+    h2c: '#0078BF', h2size: '19px', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
+    pal: [['#0078BF', '#F4EFE4'], ['#FF48B0', '#F4EFE4'], ['#FFE800', '#0078BF']]
+  },
+  librairie: {
+    ...BASE,
+    bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
+    acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', warn: '#B5523B', onWarn: '#FBF7EE', nBg: '#EFE6D2', nFg: '#2A2420',
+    fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: '26px', cSh: '0 1px 4px rgba(42,36,32,.12)', hiSh: '0 1px 4px rgba(42,36,32,.12)',
+    tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
+    inBg: '#FFFFFF', inB: '1px solid #B8924A', inR: '22px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', chipR: '2px',
+    hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF',
+    helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
+    lgText: '#D8B972', lgFont: "400 30px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: 'transparent', tagText: '#B8924A', tagB: '1px solid #B8924A', tagR: '0', tagTT: 'uppercase', tagLS: '.3em',
+    h2c: '#1E3B2F', h2size: '28px', h2fs: 'italic',
+    pal: [['#1E3B2F', '#F5EEDF'], ['#B8924A', '#2A2420'], ['#B5523B', '#FBF7EE'], ['#5B3A24', '#F5EEDF']]
+  },
+  vignettes: {
+    ...BASE,
+    bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
+    acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#E0457B', onWarn: '#FFFFFF', nBg: '#9DD6DD', nFg: '#23323A',
+    fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '34px 28px 28px',
+    tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
+    inBg: '#FFFFFF', inB: '2px solid #0F7C8C', inR: '999px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', chipR: '50%', chipSh: '0 0 0 3px #FFFFFF, 0 2px 6px rgba(0,0,0,.18)',
+    hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A',
+    helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
+    lgText: '#FFFFFF', lgFont: "800 28px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    tagBg: '#FFD23F', tagText: '#23323A', tagB: '0', tagR: '999px',
+    h2c: '#23323A', h2size: '26px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-15px', kLeft: '24px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '2px 14px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '15px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
+    pal: [['#0F7C8C', '#FFFFFF'], ['#FFD23F', '#23323A'], ['#E0457B', '#FFFFFF'], ['#6BBF59', '#23323A'], ['#F2994A', '#23323A'], ['#5B6CD9', '#FFFFFF'], ['#9DD6DD', '#23323A'], ['#C9B9A0', '#23323A']]
+  }
+};
+
+// One stroke icon per kind of record.
+const ICONS = {
+  album: 'M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z M4 17a3 3 0 0 1 3-3h11',
+  edition: 'M12 3l9 5-9 5-9-5 9-5z M3 13l9 5 9-5',
+  series: 'M4 4h4v16H4z M10 4h4v16h-4z M16 5.5l3.8 1-3 14-3.8-1z',
+  intent: 'M6 3h12v18l-6-4-6 4V3z',
+  author: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 21a8 8 0 0 1 16 0',
+  publisher: 'M4 21V6l8-3 8 3v15 M9 21v-5h6v5 M8 9h2 M14 9h2 M8 13h2 M14 13h2',
+  genre: 'M3 12V3h9l9 9-9 9-9-9z M7.5 7.5h.01',
+  universe: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M3 12h18 M12 3c3 3 3 15 0 18 M12 3c-3 3-3 15 0 18'
+};
+
+const ENTITIES = [
+  { key: 'album', name: 'Albums', n: '2 847', sub: 'dont 214 hors de la collection', act: 'Nouvel album' },
+  { key: 'edition', name: 'Éditions', n: '2 913', sub: 'saisies depuis leur album, avec leurs visuels', act: null },
+  { key: 'series', name: 'Séries', n: '412', sub: 'dont 28 sans statut', act: 'Nouvelle série' },
+  { key: 'intent', name: "Intentions d'achat", n: '18', sub: 'posées depuis leur album', act: null },
+  { key: 'author', name: 'Auteurs', n: '1 106', sub: 'scénaristes, dessinateurs, coloristes', act: 'Nouvel auteur' },
+  { key: 'publisher', name: 'Éditeurs', n: '96', sub: 'et leurs 214 collections', act: 'Nouvel éditeur' },
+  { key: 'genre', name: 'Genres', n: '24', sub: 'référentiel', act: 'Nouveau genre' },
+  { key: 'universe', name: 'Univers', n: '37', sub: 'dont 9 sous-univers', act: 'Nouvel univers' }
+];
+
+const EDITS = [
+  { type: 'Édition', label: 'Alors, tout tombe (Blacksad - T. 7)', what: 'créée', when: "aujourd'hui à 10:42" },
+  { type: 'Album', label: "L'Iris blanc (Astérix - T. 40)", what: 'modifié', when: "aujourd'hui à 10:15" },
+  { type: 'Auteur', label: 'Juanjo Guarnido', what: 'modifié', when: 'hier à 21:08' },
+  { type: 'Série', label: 'Undertaker', what: 'modifiée', when: 'hier à 20:51' },
+  { type: "Intention d'achat", label: 'Les Vieux Fourneaux - T. 8', what: 'créée', when: 'le 8 oct. à 18:30' },
+  { type: 'Genre', label: 'Western', what: 'modifié', when: 'le 8 oct. à 18:02' }
+];
+
+const CHECKS = [
+  { label: 'ISBN au chiffre de contrôle incohérent', n: '7' },
+  { label: 'Éditions sans couverture', n: '143' },
+  { label: 'Éditions possédées sans prix', n: '497' },
+  { label: 'Montants non convertibles', n: '12' },
+  { label: 'Séries sans statut', n: '28' }
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    const t = THEMES[this.props.theme] ?? THEMES.violine;
+    // The menu is not permanent: it floats over the page on demand and never pushes the content aside.
+    const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
+    // Themes without an opaque or bordered card still need one for a panel laid over the content.
+    const panelBg = t.cBg === 'transparent' ? t.bg : t.cBg;
+    const panelB = t.cB !== '0' ? t.cB : (t.cBT !== '0' ? t.cBT : '2px solid ' + t.line);
+    const panelSh = t.hiSh !== 'none' && t.hiSh !== t.cSh ? t.hiSh : '0 18px 40px rgba(0,0,0,.28)';
+    const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
+    const entities = ENTITIES.map((e, i) => {
+      const [bg, fg] = t.pal[i % t.pal.length];
+      return { ...e, bg, fg, icon: ICONS[e.key], hasNew: Boolean(e.act) };
+    });
+    // Only the ISBN warning is an error to fix; the other counts are work left to do.
+    const checks = CHECKS.map((c, i) => ({ ...c, bg: i === 0 ? t.warn : t.nBg, fg: i === 0 ? t.onWarn : t.nFg }));
+    const menuItem = (label, n, current) => ({
+      label, n, current: current ? 'page' : 'false',
+      bg: current ? t.acc : 'transparent', fg: current ? t.onAcc : t.text, fw: current ? '700' : '500'
+    });
+    return {
+      t,
+      menuOpen,
+      menuExpanded: menuOpen ? 'true' : 'false',
+      panelBg,
+      panelB,
+      panelSh,
+      toggleMenu: () => this.setState({ menuOpen: !menuOpen }),
+      // A transparent layer under the open panel catches any click outside it.
+      closeMenu: () => this.setState({ menuOpen: false }),
+      k: { saisie: kick(1, 'Saisie'), fiches: kick(2, 'Fiches'), controle: kick(3, 'Contrôles'), journal: kick(4, 'Journal'), reglages: kick(5, 'Réglages'), stats: kick(6, 'Statistiques') },
+      creates: [{ label: 'Album' }, { label: 'Série' }, { label: 'Auteur' }, { label: 'Éditeur' }],
+      entities,
+      checks,
+      edits: EDITS,
+      settings: [
+        { label: 'Libellé des albums', value: 'Album (Série - Tome)' },
+        { label: "Culture d'affichage", value: 'Français (France)' },
+        { label: "Sources d'aide à la saisie", value: 'Catalogue général de la BnF' },
+        { label: 'Compte administrateur', value: 'Identifiant et mot de passe' }
+      ],
+      menu: [
+        { label: 'Accueil', items: [menuItem('Tableau de bord', '', true), menuItem('Nouvelle édition', '', false)] },
+        { label: 'Collection', items: [menuItem('Albums', '2 847', false), menuItem('Séries', '412', false), menuItem('Éditions', '2 913', false), menuItem("Intentions d'achat", '18', false)] },
+        { label: 'Auteurs et éditeurs', items: [menuItem('Auteurs', '1 106', false), menuItem('Éditeurs', '96', false)] },
+        { label: 'Référentiels', items: [menuItem('Genres', '24', false), menuItem('Univers', '37', false)] },
+        { label: 'Réglages', items: [menuItem('Paramétrage', '', false), menuItem('Statistiques privées', '', false)] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
