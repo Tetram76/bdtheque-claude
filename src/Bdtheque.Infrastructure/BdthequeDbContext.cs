@@ -139,6 +139,20 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
                     break;
             }
         }
+
+        // An edition enters the collection when it becomes owned — created owned, or bought after
+        // being targeted by an intent (Album.RecordAcquisition) — and keeps that date for good: the
+        // edition stays owned until deleted. Stamped from its state rather than from the operation, so
+        // that every way of saving an owned edition, the import of the existing data included, dates it.
+        foreach (var entry in ChangeTracker.Entries<Edition>()
+                     .Where(e => e.State is EntityState.Added or EntityState.Modified))
+        {
+            var entered = entry.Property(e => e.EnteredCollectionAt);
+            var stored = entry.State == EntityState.Modified ? entered.OriginalValue : null;
+            entered.CurrentValue = entry.Entity.AcquisitionMode is null ? null : stored ?? now;
+            if (entry.State == EntityState.Modified && entered.CurrentValue == stored)
+                entered.IsModified = false;
+        }
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

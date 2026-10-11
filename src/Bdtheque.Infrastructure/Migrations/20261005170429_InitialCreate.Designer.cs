@@ -313,6 +313,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("EnteredCollectionAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int?>("Format")
                         .HasColumnType("integer");
 
@@ -387,6 +390,8 @@ namespace Bdtheque.Infrastructure.Migrations
                             t.HasCheckConstraint("CK_Editions_AcquisitionAmountPositive", "\"AcquisitionAmount\" IS NULL OR \"AcquisitionAmount\" > 0");
 
                             t.HasCheckConstraint("CK_Editions_AcquisitionModeRequiredForDateOrAmounts", "\"AcquisitionMode\" IS NOT NULL OR (\"AcquisitionDate\" IS NULL AND \"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
+
+                            t.HasCheckConstraint("CK_Editions_EnteredCollectionIffOwned", "(\"AcquisitionMode\" IS NULL) = (\"EnteredCollectionAt\" IS NULL)");
 
                             t.HasCheckConstraint("CK_Editions_FreeRequiresNoAmount", "\"IsFree\" = false OR (\"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
 

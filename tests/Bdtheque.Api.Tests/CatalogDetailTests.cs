@@ -160,6 +160,8 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         // Stored as entered, the ISBN carries the warning of its inconsistent check digit (6 expected).
         Assert.Equal((AcquisitionMode.Purchase, true, false), (detail.AcquisitionMode, detail.IsInCollection, detail.IsbnChecksumValid));
         Assert.Null(detail.PurchaseIntent);
+        // Created owned, the edition entered the collection when it was created.
+        Assert.Equal(detail.CreatedAt, detail.EnteredCollectionAt);
         Assert.Equal([cover, plate, backCover], detail.Visuals.Select(v => v with { CreatedAt = default, ModifiedAt = default }));
         Assert.All(detail.Visuals, v => AssertCreatedAfter(detail.CreatedAt, (v.CreatedAt, v.ModifiedAt)));
     }
@@ -173,7 +175,9 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
 
         var detail = await GetAsync<EditionDetail>($"/catalog/editions/{intended}");
 
-        Assert.Equal((null, false, intent, null), ((AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection, detail.PurchaseIntent?.Id, detail.IsbnChecksumValid));
+        Assert.Equal(
+            (null, false, intent, null, null),
+            ((AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection, detail.PurchaseIntent?.Id, detail.IsbnChecksumValid, detail.EnteredCollectionAt));
         Assert.Empty(detail.Visuals);
     }
 

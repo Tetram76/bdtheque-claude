@@ -54,6 +54,12 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             $"(\"{nameof(Edition.AcquisitionDate)}\" IS NULL AND \"{nameof(Edition.AcquisitionAmount)}\" IS NULL " +
             $"AND \"{nameof(Edition.InitialValueAmount)}\" IS NULL)"));
 
+        // The date an edition entered the collection is known if and only if it is owned
+        // (modele-metier.md § Édition), stamped on save by BdthequeDbContext.
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Editions_EnteredCollectionIffOwned",
+            $"(\"{nameof(Edition.AcquisitionMode)}\" IS NULL) = (\"{nameof(Edition.EnteredCollectionAt)}\" IS NULL)"));
+
         // Mirrors the model constraints: a free edition has no value, and a purchase is never free.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Editions_FreeRequiresNoAmount",

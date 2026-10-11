@@ -41,6 +41,11 @@ public sealed class Edition : EntityBase
     public decimal? InitialValueAmount { get; private set; }
     public string? InitialValueCurrency { get; private set; }
 
+    // When the edition became owned, null until then (modele-metier.md § Édition): always known for an
+    // owned edition, unlike its optional acquisition date, and later than its creation for an edition
+    // first targeted by an intent. Set on save, never entered (BdthequeDbContext), like the creation date.
+    public DateTimeOffset? EnteredCollectionAt { get; private set; }
+
     public string? PersonalReference { get; private set; }
     public string? PersonalNotes { get; private set; }
 

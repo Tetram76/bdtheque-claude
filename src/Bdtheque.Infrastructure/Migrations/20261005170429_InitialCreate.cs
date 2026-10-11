@@ -378,6 +378,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     IsFree = table.Column<bool>(type: "boolean", nullable: false),
                     InitialValueAmount = table.Column<decimal>(type: "numeric(14,4)", precision: 14, scale: 4, nullable: true),
                     InitialValueCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true, collation: "fr-FR-x-icu"),
+                    EnteredCollectionAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     PersonalReference = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
                     PersonalNotes = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -389,6 +390,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     table.CheckConstraint("CK_Editions_AcquisitionAmountCurrencyTogether", "(\"AcquisitionAmount\" IS NULL) = (\"AcquisitionCurrency\" IS NULL)");
                     table.CheckConstraint("CK_Editions_AcquisitionAmountPositive", "\"AcquisitionAmount\" IS NULL OR \"AcquisitionAmount\" > 0");
                     table.CheckConstraint("CK_Editions_AcquisitionModeRequiredForDateOrAmounts", "\"AcquisitionMode\" IS NOT NULL OR (\"AcquisitionDate\" IS NULL AND \"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
+                    table.CheckConstraint("CK_Editions_EnteredCollectionIffOwned", "(\"AcquisitionMode\" IS NULL) = (\"EnteredCollectionAt\" IS NULL)");
                     table.CheckConstraint("CK_Editions_FreeRequiresNoAmount", "\"IsFree\" = false OR (\"AcquisitionAmount\" IS NULL AND \"InitialValueAmount\" IS NULL)");
                     table.CheckConstraint("CK_Editions_InitialValueAmountCurrencyTogether", "(\"InitialValueAmount\" IS NULL) = (\"InitialValueCurrency\" IS NULL)");
                     table.CheckConstraint("CK_Editions_InitialValueAmountPositive", "\"InitialValueAmount\" IS NULL OR \"InitialValueAmount\" > 0");
