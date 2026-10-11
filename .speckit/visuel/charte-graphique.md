@@ -19,6 +19,8 @@ Le rendu repose sur un **thème de base neutre**, qui définit les **contrats** 
 ## Ton général
 
 - **Joyeux et chaleureux**, ni sérieux ni sévère : l'application présente une collection de BD, avec un clin d'œil à l'univers de la BD.
+- **Ludique.**
+- **Non conventionnel, borderline mais pas excentrique.**
 - **Sans pastiche de comics.**
 
 ## Apparence propre à chaque alternative
