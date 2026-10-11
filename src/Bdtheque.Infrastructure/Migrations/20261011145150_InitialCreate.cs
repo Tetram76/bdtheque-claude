@@ -39,6 +39,25 @@ namespace Bdtheque.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChangeLogEntries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RecordType = table.Column<int>(type: "integer", nullable: false),
+                    RecordId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Label = table.Column<string>(type: "jsonb", nullable: false),
+                    Operation = table.Column<int>(type: "integer", nullable: false),
+                    Changes = table.Column<string>(type: "jsonb", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChangeLogEntries", x => x.Id);
+                    table.CheckConstraint("CK_ChangeLogEntries_ChangesOfModificationOnly", "(jsonb_array_length(\"Changes\") > 0) = (\"Operation\" = 2)");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Genres",
                 columns: table => new
                 {
@@ -505,6 +524,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 column: "SortKey");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChangeLogEntries_CreatedAt_Id",
+                table: "ChangeLogEntries",
+                columns: new[] { "CreatedAt", "Id" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Contributions_AlbumId_Role_AuthorId",
                 table: "Contributions",
                 columns: new[] { "AlbumId", "Role", "AuthorId" },
@@ -623,6 +647,9 @@ namespace Bdtheque.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AlbumUniverses");
+
+            migrationBuilder.DropTable(
+                name: "ChangeLogEntries");
 
             migrationBuilder.DropTable(
                 name: "Contributions");

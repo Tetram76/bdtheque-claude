@@ -43,7 +43,8 @@ internal static class PublisherEndpoints
         publishers.MapGet("/{id:guid}", GetAsync);
         publishers.MapPost("/", CreateAsync);
         publishers.MapPut("/{id:guid}", UpdateAsync);
-        publishers.MapDeletion<Publisher>(PublisherDeletionLinks);
+        // Its collections are records of their own, whose deletion the change log records.
+        publishers.MapDeletion<Publisher>(PublisherDeletionLinks, query => query.Include(p => p.Collections));
 
         // `rootId` is the name the common child deletion expects for the identifier of the root.
         var collections = publishers.MapGroup("/{rootId:guid}/collections");

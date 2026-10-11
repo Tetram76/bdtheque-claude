@@ -36,7 +36,7 @@ public sealed class AggregateDeletionTests : IClassFixture<ApiWebApplicationFact
         var storage = _factory.Services.GetRequiredService<VisualStorage>();
 
         await Assert.ThrowsAsync<DeletionRefusedException>(
-            () => AggregateDeletion.DeleteAsync<Universe>(context, storage, parent.Id, version, impact.Fingerprint, [], CancellationToken.None));
+            () => AggregateDeletion.DeleteAsync<Universe>(context, storage, parent.Id, version, impact.Fingerprint, [], shape: null, CancellationToken.None));
 
         context.ChangeTracker.Clear();
         Assert.True(await context.Universes.AnyAsync(u => u.Id == parent.Id));

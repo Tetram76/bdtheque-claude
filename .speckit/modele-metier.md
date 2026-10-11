@@ -284,11 +284,12 @@ erDiagram
 | --- | --- | --- | --- |
 | Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Paramétrage`. |
 | Fiche | identifiant | oui | Identifiant de la fiche écrite. Conservé après la suppression de la fiche : aucune contrainte d'intégrité référentielle. |
-| Libellé | texte | oui | Libellé de la fiche au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. |
+| Libellé | composantes du libellé | oui | Données qui composent le libellé de la fiche (ex. titre, série et tome d'un album, cf. `fonctionnel.md` § Libellé d'un album), relevées au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. Le libellé en est construit à la consultation. |
 | Opération | énuméré | oui | `Création` / `Modification` / `Suppression` / `Reprise` (reprise d'une ancienne donnée depuis l'application existante). |
-| Changements | liste | non | Pour une modification uniquement : chaque changement, avec l'attribut concerné, sa valeur **avant** et sa valeur **après**, sous leur forme affichée. |
+| Changements | liste | non | Pour une modification uniquement : chaque changement, avec l'attribut concerné, sa valeur **avant** et sa valeur **après**, telles qu'enregistrées dans la fiche ; une valeur qui désigne une autre fiche (ex. la série d'un album) l'est par les composantes de son libellé, comme ci-dessus. |
 
 > - Une entrée est ajoutée **automatiquement** à chaque écriture sur une fiche, dans la même opération ; elle n'est jamais saisie, modifiée ni supprimée, et le journal n'est jamais purgé. Sa date de création (attribut commun) est la date de l'écriture.
 > - L'ajout ou le retrait d'un élément associé (genre, univers, contribution, visuel…) est un changement de la fiche qui le porte : un ajout n'a pas de valeur avant, un retrait pas de valeur après. Les éléments sans fiche propre (visuel, contribution) n'ont pas d'entrée à leur nom.
+> - Aucun texte d'une entrée n'est figé à l'écriture : type de fiche, opération, attribut, valeurs et libellé sont présentés dans la culture d'affichage en vigueur lors de la consultation (`fonctionnel.md` § Langue et culture d'affichage), comme sur la fiche elle-même. Cette présentation est **idempotente** : pour une même culture d'affichage et un même paramétrage, une entrée produit toujours le même message, à chaque lecture.
 > - La reprise des données ajoute au moins une entrée `Reprise` pour chaque fiche qu'elle crée ou met à jour.
 > - Le journal n'est consultable que dans l'administration.

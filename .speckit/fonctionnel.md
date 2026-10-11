@@ -82,6 +82,8 @@ Règle globale : **toute représentation visuelle** d'une édition **sans couver
 
 La **culture d'affichage** (ex. français de France), et non une simple langue, est un paramètre de l'application : ce choix pilote la langue des textes de l'interface, mais aussi le **formatage des dates, nombres et montants** et l'**ordre de tri** des listes et résultats de recherche (voir « Tri et navigation par initiale » ci-dessous).
 
+La culture s'applique à tout texte **au moment où il est présenté** : un texte que l'application produit à partir de données enregistrées (ex. le journal des modifications, cf. `modele-metier.md` § Entrée du journal des modifications) n'est jamais figé dans la culture en vigueur lors de leur enregistrement.
+
 Seule la culture **française** est proposée actuellement ; l'application est conçue pour pouvoir en proposer d'autres ultérieurement sans refonte.
 
 ### Tri et navigation par initiale
