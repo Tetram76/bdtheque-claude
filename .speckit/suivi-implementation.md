@@ -105,13 +105,13 @@ Répercussion dans le modèle de domaine et dans l'API de la date d'entrée dans
 
 ## Phase 3 — Frontend Blazor
 
-Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle.
+Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
 
 Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, formulaires admin) plutôt que par entité.
 
 ## Phase 4 — Statistiques, devises et estimation de valeur
 
-Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euro (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel.md` § Calcul des estimations).
+Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euros courants (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) et en euros du jour (coefficients d'inflation de l'INSEE, mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel.md` § Calcul des estimations).
 
 Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 

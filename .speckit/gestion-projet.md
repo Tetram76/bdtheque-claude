@@ -178,11 +178,18 @@ Codex ne connaît **ni le contexte du projet** (`.speckit/`, architecture, conve
 
 #### Traiter un retour
 
-1. **Contre-vérifier**, toujours et sans exception : pertinence vis-à-vis de l'objectif de la PR, du contenu du `.speckit/` et des bonnes pratiques applicables, faisabilité du scénario dans le contexte réel de l'application, critère « à l'épreuve de l'utilisateur » (cf. règles générales ci-dessus). Un retour non vérifié n'est ni appliqué ni rejeté.
-2. **Corriger à la racine** un retour validé : établir la **cause racine** du problème, et la corriger, jamais un correctif de surface (« sparadrap ») qui ne traite que le symptôme relevé. Un **commit dédié** par retour appliqué.
-3. **Répondre à chaque retour**, toujours, qu'il soit appliqué (avec le commit correspondant) ou rejeté (avec la justification du rejet).
-4. **Apprécier chaque commentaire** de Codex, toujours, par une réaction : 👍 s'il était utile, 👎 sinon (Codex le demande dans chacun de ses commentaires).
-5. **Résoudre** chaque conversation de revue une fois tous ses retours traités.
+1. **Contre-vérifier la pertinence**, toujours et sans exception : au regard du contenu du `.speckit/` et des bonnes pratiques applicables, faisabilité du scénario dans le contexte réel de l'application, critère « à l'épreuve de l'utilisateur » (cf. règles générales ci-dessus). Un retour non vérifié n'est ni appliqué, ni différé, ni rejeté.
+2. **Établir la cause racine** d'un retour jugé pertinent : le problème est analysé dans sa globalité, au-delà du passage relevé. La cause peut se trouver hors du diff, et hors de l'objectif de la PR.
+3. **Confronter à l'objectif de la PR**, impérativement, le **point dans son ensemble** — ce qu'il relève, sa cause et sa correction —, et non le seul passage relevé : Codex ne connaissant pas cet objectif (§ « Statut des retours de Codex »), un retour pertinent n'est pas pour autant à corriger dans la PR.
+   - **Point qui relève, dans son ensemble, de l'objectif de la PR** : il est corrigé dans la PR (étape 4).
+   - **Point qui sort de l'objectif de la PR**, par ce qu'il relève, par sa cause ou par sa correction, y compris lorsque le symptôme se trouve dans le diff : sa correction peut être **différée**, sans qu'aucun correctif de surface ne compense dans la PR la cause laissée en place. Elle n'est jamais perdue pour autant, et sa trace dépend de la phase du plan d'implémentation dont relève le point :
+     - **phase déjà terminée** : la correction prend la forme d'un **ticket** (§ « Issues ») ;
+     - **phase déjà découpée** : elle est reportée dans le ticket ouvert du chantier dont elle relève, ou, à défaut, prend la forme d'un **nouveau ticket** ;
+     - **phase pas encore découpée** : aucun ticket ; une **note** est ajoutée sur cette phase dans [`suivi-implementation.md`](suivi-implementation.md), pour que le point soit intégré au plan lors de son découpage.
+4. **Corriger à la racine** un retour validé dont la correction n'est pas différée : corriger la cause établie, jamais un correctif de surface (« sparadrap ») qui ne traite que le symptôme relevé. Un **commit dédié** par retour appliqué.
+5. **Répondre à chaque retour**, toujours, qu'il soit appliqué (avec le commit correspondant), différé (avec le ticket ou la note du plan qui porte sa correction) ou rejeté (avec la justification du rejet).
+6. **Apprécier chaque commentaire** de Codex, toujours, par une réaction : 👍 s'il était utile, 👎 sinon (Codex le demande dans chacun de ses commentaires). Un retour pertinent est utile, même lorsque sa correction est différée.
+7. **Résoudre** chaque conversation de revue une fois tous ses retours traités.
 
 #### Cycle
 
@@ -196,7 +203,7 @@ Le traitement est répété **tant que Codex émet des retours**, jusqu'à sa va
   - **PR suspendue** : un délai dépassé (aucune revue n'a démarré) ou une impossibilité durable d'interroger GitHub **suspend** la PR, comme un budget de Codex épuisé (ci-dessous) : rien n'y avancera sans intervention, et un nouvel observateur ne ferait qu'attendre en vain. L'agent le signale à l'utilisateur et n'arme plus d'observateur ; une PR suspendue n'est pas une PR en attente.
   - **Pas de push pendant une revue** : le 👍 de Codex ne désigne aucun commit ; seul le déroulé de la revue (Codex retire son 👍 et pose 👀 au début, conclut par un 👍 ou une revue) le rattache au commit de tête. L'agent ne pousse donc jamais pendant une revue en cours (👀 présent) : un push fait pendant une revue n'en déclenche pas de nouvelle, et le 👍 qui conclut la revue en cours passerait à tort pour l'approbation du nouveau commit. Si cela arrive malgré tout, l'agent attend la fin de cette revue, puis demande celle du commit de tête (`@codex review`).
   - **Budget de Codex épuisé** : un commentaire de Codex signalant que sa limite d'usage est atteinte **suspend** la PR. L'agent le signale à l'utilisateur, n'arme plus d'observateur et ne relance pas Codex (`@codex review`) : une relance immédiate n'obtiendrait qu'un nouveau refus. La revue ne reprend que sur demande de l'utilisateur.
-- Si **tous les retours sont rejetés sans ajouter de commit**, Codex ne relance pas la revue : l'agent la **force** par un commentaire `@codex review` sur la PR.
+- Si **tous les retours sont rejetés ou différés sans ajouter de commit**, Codex ne relance pas la revue : l'agent la **force** par un commentaire `@codex review` sur la PR.
 - **Faux positif sur la signature des commits** : Codex peut signaler des commits non signés. Si la vérification (statut « Verified » côté GitHub) établit un faux positif, il se traite comme tout retour rejeté (réponse justifiée, appréciation 👎, résolution), et Codex est alors considéré comme n'ayant **plus rien d'autre à remonter**. L'agent relance la revue (`@codex review`) jusqu'à **3 fois** ; si Codex persiste sur ce seul faux positif, **sans autre commentaire**, la PR est considérée comme **validée par Codex**, en l'absence du 👍.
 
 La procédure opérationnelle détaillée (commandes `gh`, requêtes GraphQL de résolution de conversation, etc.) est décrite dans le skill `.claude/skills/codex-review-loop/`.
