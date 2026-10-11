@@ -210,6 +210,8 @@ const cases = (c) => ({
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
 
+// Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
+// another ink of the same theme carries the text or the fill.
 const THEMES = {
   violine: cases({ bg: '#2B1030', panel: '#3A1641', border: '#6A3375', soft: '#EBD3EF', muted: '#CFA9D6' }),
   mure: cases({ bg: '#1F1033', panel: '#2A1844', border: '#533A78', soft: '#DCD1EE', muted: '#B9A8D8' }),
@@ -232,7 +234,7 @@ const THEMES = {
   sommaire: {
     ...BASE,
     bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
-    acc: '#E63946', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#FFD60A', onWarn: '#111111', nBg: '#111111', nFg: '#FFFFFF',
+    acc: '#1D4ED8', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#FFD60A', onWarn: '#111111', nBg: '#111111', nFg: '#FFFFFF',
     fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(40px, 5vw, 64px)',
     cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: '26px', hiSh: '10px 10px 0 #111111',
     tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
@@ -247,7 +249,7 @@ const THEMES = {
   festival: {
     ...BASE,
     bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
-    acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#E8604C', onWarn: '#FFFFFF', nBg: '#F6C343', nFg: '#1B2350',
+    acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#E8604C', onWarn: '#1B2350', nBg: '#F6C343', nFg: '#1B2350',
     fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
     cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: '26px', cSh: '0 2px 0 rgba(27,35,80,.08)', hiSh: '0 2px 0 rgba(27,35,80,.08)',
     tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
@@ -263,7 +265,7 @@ const THEMES = {
   riso: {
     ...BASE,
     bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
-    acc: '#0078BF', onAcc: '#F4EFE4', link: '#0078BF', warn: '#FFE800', onWarn: '#0078BF', nBg: 'rgba(0,120,191,.12)', nFg: '#0078BF',
+    acc: '#0078BF', onAcc: '#F4EFE4', link: '#0078BF', warn: '#FFE800', onWarn: '#002284', nBg: 'rgba(0,120,191,.12)', nFg: '#0078BF',
     fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(24px, 3vw, 36px)',
     cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: '24px', hiSh: '7px 6px 0 rgba(255,72,176,.85)',
     tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
@@ -271,7 +273,7 @@ const THEMES = {
     hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
     helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
     lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 26px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
-    tagBg: '#FF48B0', tagText: '#F4EFE4', tagB: '0', tagR: '0',
+    tagBg: 'transparent', tagText: '#0078BF', tagB: '2px solid #FF48B0', tagR: '0',
     h2c: '#0078BF', h2size: '19px', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
     pal: [['#0078BF', '#F4EFE4'], ['#FF48B0', '#F4EFE4'], ['#FFE800', '#0078BF']]
   },
@@ -293,7 +295,7 @@ const THEMES = {
   vignettes: {
     ...BASE,
     bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
-    acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#E0457B', onWarn: '#FFFFFF', nBg: '#9DD6DD', nFg: '#23323A',
+    acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#F2994A', onWarn: '#23323A', nBg: '#9DD6DD', nFg: '#23323A',
     fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
     cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '34px 28px 28px',
     tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
