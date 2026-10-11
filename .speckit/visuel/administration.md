@@ -8,7 +8,7 @@ La page est déclinée selon chacun des thèmes en lice pour la partie Consultat
 
 ## Maquettes
 
-Toutes les déclinaisons forment un seul projet, dans un seul canevas : <https://claude.ai/artifact/57fW7eokzrDkJ1MwVPMZJA>. Ses sources sont dans [`maquettes/administration/`](maquettes/administration/), dont `canvas.json` est l'index : il donne la disposition et le titre des planches du canevas.
+Toutes les déclinaisons forment la page « Administration » du canevas des maquettes (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Leurs sources sont dans [`maquettes/administration/`](maquettes/administration/).
 
 | Thème | Fichiers |
 | --- | --- |

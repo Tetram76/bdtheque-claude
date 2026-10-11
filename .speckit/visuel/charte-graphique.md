@@ -29,4 +29,4 @@ Couleurs, typographie et éléments graphiques ne sont pas communs : chaque alte
 
 ## Maquettes
 
-Les maquettes sont réalisées dans un canevas *Design* de Claude, dont les sources sont conservées dans [`maquettes/`](maquettes/), un sous-dossier par écran ; elles ne s'ouvrent qu'à travers ce canevas. Leurs données sont fictives. Chaque maquette est **déclinée dans le visuel de chaque thème** en lice, une planche par thème. Le fichier de chaque écran indique ses sources et le lien de son canevas.
+Toutes les maquettes sont réalisées dans **un seul canevas** *Design* de Claude, <https://claude.ai/artifact/57fW7eokzrDkJ1MwVPMZJA>, avec **une page par écran** de l'application. Ses sources sont conservées dans [`maquettes/`](maquettes/), un sous-dossier par écran ; [`maquettes/canvas.json`](maquettes/canvas.json) en est l'index : il donne les pages, et la disposition et le titre des planches. Les maquettes ne s'ouvrent qu'à travers ce canevas. Leurs données sont fictives. Chaque maquette est **déclinée dans le visuel de chaque thème** en lice, une planche par thème. Le fichier de chaque écran indique ses sources.
