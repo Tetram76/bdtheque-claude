@@ -80,7 +80,7 @@ Règle globale : **toute représentation visuelle** d'une édition **sans couver
 
 ### Langue et culture d'affichage
 
-L'utilisateur choisit une **culture d'affichage** (ex. français de France), pas seulement une langue : ce choix pilote la langue des textes de l'interface, mais aussi le **formatage des dates, nombres et montants** et l'**ordre de tri** des listes et résultats de recherche (voir « Tri et navigation par initiale » ci-dessous).
+La **culture d'affichage** (ex. français de France), et non une simple langue, est un paramètre de l'application : ce choix pilote la langue des textes de l'interface, mais aussi le **formatage des dates, nombres et montants** et l'**ordre de tri** des listes et résultats de recherche (voir « Tri et navigation par initiale » ci-dessous).
 
 Seule la culture **française** est proposée actuellement ; l'application est conçue pour pouvoir en proposer d'autres ultérieurement sans refonte.
 
@@ -163,7 +163,7 @@ Il peut optionnellement inclure le **titre de la série**, utilisé quand le con
 
 Le numéro de tome n'apparaît que s'il est renseigné. Pour les intégrales, la séquence `[Début à Fin]` n'apparaît que si les deux bornes sont renseignées.
 
-#### Deux formats configurables (préférence utilisateur)
+#### Deux formats configurables (paramètre de l'application)
 
 **Format 0 — `Album (Série - Tome)`** *(défaut)*
 
