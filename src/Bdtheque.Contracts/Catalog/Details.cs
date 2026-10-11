@@ -70,6 +70,9 @@ public sealed record SeriesDetail(
 /// <param name="AcquisitionAmount">Together with <paramref name="AcquisitionCurrency"/> (ISO 4217 code, or <c>QZF</c> for the old franc).</param>
 /// <param name="InitialValueAmount">Together with <paramref name="InitialValueCurrency"/>.</param>
 /// <param name="IsInCollection">Whether the edition is owned (fonctionnel.md § Appartenance à la collection).</param>
+/// <param name="EnteredCollectionAt">
+/// When the edition became owned, set automatically, <c>null</c> for an edition not owned (modele-metier.md § Édition).
+/// </param>
 /// <param name="PurchaseIntent">The purchase intent targeting the edition, which is then not owned, if any.</param>
 /// <param name="Visuals">In their presentation order (fonctionnel.md § Ordre des visuels d'une édition).</param>
 public sealed record EditionDetail(
@@ -96,6 +99,7 @@ public sealed record EditionDetail(
     string? PersonalReference,
     string? PersonalNotes,
     bool IsInCollection,
+    DateTimeOffset? EnteredCollectionAt,
     PurchaseIntentItem? PurchaseIntent,
     IReadOnlyList<EditionVisualItem> Visuals,
     DateTimeOffset CreatedAt,

@@ -101,7 +101,7 @@ Répercussion dans le modèle de domaine et dans l'API de la date d'entrée dans
 
 | Ticket | Titre |
 | --- | --- |
-| #141 | Date d'entrée dans la collection dans le modèle de domaine et l'API |
+| ~~#141~~ | Date d'entrée dans la collection dans le modèle de domaine et l'API |
 
 ### Ajustement issu de la maquette de l'administration
 

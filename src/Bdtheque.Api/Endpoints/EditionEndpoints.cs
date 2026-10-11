@@ -110,6 +110,7 @@ internal static class EditionEndpoints
             e.PersonalReference,
             e.PersonalNotes,
             edition.IsInCollection,
+            e.EnteredCollectionAt,
             edition.PurchaseIntent,
             visuals,
             e.CreatedAt,

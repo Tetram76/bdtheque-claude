@@ -504,8 +504,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
 
     private const string InsertEditionSql =
         "INSERT INTO \"Editions\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", \"IsSecondHand\", \"IsFree\", " +
-        "\"PublicationYear\", \"PageCount\", \"AcquisitionMode\", \"AcquisitionDate\", \"AcquisitionAmount\", \"AcquisitionCurrency\") " +
-        "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, {3}, {4}, {5}, {6}, {7}, {8}, {9})";
+        "\"PublicationYear\", \"PageCount\", \"AcquisitionMode\", \"AcquisitionDate\", \"AcquisitionAmount\", \"AcquisitionCurrency\", \"EnteredCollectionAt\") " +
+        "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, {3}, {4}, {5}, {6}, {7}, {8}, {9}, CASE WHEN {6}::integer IS NULL THEN NULL ELSE now() END)";
 
     [Fact]
     public async Task EditionCheckConstraint_NonPositivePublicationYear_ThrowsAtDatabase()
@@ -594,8 +594,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     // Dated by its publication year, so that only the constraint under test can fail.
     private const string InsertEditionWithInitialValueSql =
         "INSERT INTO \"Editions\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", " +
-        "\"IsSecondHand\", \"IsFree\", \"PublicationYear\", \"AcquisitionMode\", \"InitialValueAmount\", \"InitialValueCurrency\") " +
-        "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, {3}, 2000, {4}, {5}, {6})";
+        "\"IsSecondHand\", \"IsFree\", \"PublicationYear\", \"AcquisitionMode\", \"InitialValueAmount\", \"InitialValueCurrency\", \"EnteredCollectionAt\") " +
+        "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, {3}, 2000, {4}, {5}, {6}, CASE WHEN {4}::integer IS NULL THEN NULL ELSE now() END)";
 
     [Theory]
     [InlineData(10, null, "CK_Editions_InitialValueAmountCurrencyTogether")]
@@ -672,6 +672,34 @@ public sealed class CheckConstraintTests : IAsyncLifetime
 
         var count = await _fixture.Context.Editions.CountAsync(e => e.Id == id);
         Assert.Equal(1, count);
+    }
+
+    // The date an edition entered the collection is known if and only if the edition is owned.
+    private const string InsertEditionWithEntryDateSql =
+        "INSERT INTO \"Editions\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"AlbumId\", \"PublisherId\", \"IsDedicated\", \"IsColor\", " +
+        "\"IsSecondHand\", \"IsFree\", \"AcquisitionMode\", \"EnteredCollectionAt\") " +
+        "VALUES ({0}, now(), now(), {1}, {2}, false, true, false, false, {3}, {4})";
+
+    [Fact]
+    public async Task EditionCheckConstraint_OwnedWithoutEntryDate_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        await AssertViolatesAsync("CK_Editions_EnteredCollectionIffOwned", () =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionWithEntryDateSql, Guid.CreateVersion7(), albumId, publisherId, (int)AcquisitionMode.Purchase, null!));
+    }
+
+    [Fact]
+    public async Task EditionCheckConstraint_EntryDateWithoutAcquisitionMode_ThrowsAtDatabase()
+    {
+        var albumId = await InsertAlbumAsync();
+        var publisherId = await InsertPublisherAsync();
+
+        await AssertViolatesAsync("CK_Editions_EnteredCollectionIffOwned", () =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionWithEntryDateSql, Guid.CreateVersion7(), albumId, publisherId, null!, DateTimeOffset.UtcNow));
     }
 
     private async Task<Guid> InsertEditionAsync() =>
