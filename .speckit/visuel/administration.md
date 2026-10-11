@@ -2,7 +2,7 @@
 
 Ce fichier décrit la présentation de la page d'accueil de la partie Administration (`fonctionnel.md` § Structure de l'application) : le point d'entrée de la saisie et de la modification des données, du paramétrage et des statistiques privées. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
 
-La page est déclinée selon chacun des thèmes en lice pour la partie Consultation (cf. [`dashboard.md`](dashboard.md) § Alternatives) : elle respecte l'identité visuelle du thème actif.
+La page est déclinée selon chacun des thèmes en lice pour la partie Consultation (cf. [`dashboard.md`](dashboard.md) § Alternatives) : comme toute page, elle suit l'identité visuelle du thème actif (cf. [`charte-graphique.md`](charte-graphique.md) § Portée).
 
 ---
 

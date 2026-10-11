@@ -6,9 +6,11 @@ Ce fichier décrit l'identité visuelle de l'application, c'est-à-dire ce que p
 
 ## Portée
 
-La charte ci-dessous est issue des maquettes du dashboard (cf. [`dashboard.md`](dashboard.md)), premier écran conçu, dont elle réunit ce que partagent toutes les alternatives : elle s'applique à la partie **Consultation** (`fonctionnel.md` § Structure de l'application).
+**Chaque page** de l'application, quelle que soit sa partie (Consultation, Administration, aide contextuelle, `fonctionnel.md` § Structure de l'application), **suit l'identité visuelle du thème actif** : ses couleurs, sa typographie et ses éléments graphiques.
 
-La partie **Administration** respecte l'identité visuelle du thème actif, dans un sens plus sobre : un espace technique, qui privilégie l'efficacité et le fonctionnel sans être impersonnel, sans fantaisie ni désordre (cf. [`administration.md`](administration.md) § Ton).
+La charte ci-dessous est issue des maquettes du dashboard (cf. [`dashboard.md`](dashboard.md)), premier écran conçu, dont elle réunit ce que partagent toutes les alternatives : elle s'applique à la partie **Consultation**.
+
+La partie **Administration** suit cette identité dans un sens plus sobre : un espace technique, qui privilégie l'efficacité et le fonctionnel sans être impersonnel, sans fantaisie ni désordre (cf. [`administration.md`](administration.md) § Ton).
 
 ## Thème de base
 
@@ -25,4 +27,4 @@ Couleurs, typographie et éléments graphiques ne sont pas communs : chaque alte
 
 ## Maquettes
 
-Les maquettes sont réalisées dans un canevas *Design* de Claude, dont les sources sont conservées dans [`maquettes/`](maquettes/), un sous-dossier par écran ; elles ne s'ouvrent qu'à travers ce canevas. Leurs données sont fictives. Le fichier de chaque écran indique ses sources et le lien de son canevas.
+Les maquettes sont réalisées dans un canevas *Design* de Claude, dont les sources sont conservées dans [`maquettes/`](maquettes/), un sous-dossier par écran ; elles ne s'ouvrent qu'à travers ce canevas. Leurs données sont fictives. Chaque maquette est **déclinée dans le visuel de chaque thème** en lice, une planche par thème. Le fichier de chaque écran indique ses sources et le lien de son canevas.
