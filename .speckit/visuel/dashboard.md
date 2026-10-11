@@ -11,7 +11,7 @@ Plusieurs présentations du dashboard restent en lice. Ce sont des **alternative
 
 ## Maquettes
 
-Toutes les alternatives forment un seul projet, dans un seul canevas : <https://claude.ai/artifact/DSFTnXe5VY4J1nmZrDDngs>. Ses sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/), dont `canvas.json` est l'index : il donne la disposition et le titre des planches du canevas.
+Toutes les alternatives forment la page « Dashboard » du canevas des maquettes (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/).
 
 | Alternative | Fichiers |
 | --- | --- |

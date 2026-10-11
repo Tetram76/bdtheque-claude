@@ -109,6 +109,9 @@ Pages de consultation (public) et d'administration (authentifié), composants pa
 
 Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, formulaires admin) plutôt que par entité.
 
+- **Note — contraste des thèmes** : le texte courant du thème « fanzine en risographie » (bleu `#0078BF` sur papier `#F4EFE4`, `visuel/dashboard.md`) n'atteint que 4,1:1, sous les 4,5:1 attendus pour du texte courant. La couleur relevant de l'identité du thème, sa correction est soumise à l'utilisateur lors du découpage de la phase, avec la vérification des contrastes de tous les thèmes retenus.
+- **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base.
+
 ## Phase 4 — Statistiques, devises et estimation de valeur
 
 Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euros courants (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) et en euros du jour (coefficients d'inflation de l'INSEE, mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel.md` § Calcul des estimations).
