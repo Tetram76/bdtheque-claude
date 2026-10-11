@@ -41,14 +41,20 @@ signature-false-positive exit applies, see "Exit"):
 1. Wait for Codex on the current head commit (watcher, Step 1).
 2. If Codex approved it (👍) and CI has completed, stop — see "Exit".
 3. Otherwise, for each unresolved review thread from Codex:
-   a. Cross-check the finding (see "Cross-check" below).
-   b. If valid: establish the root cause and fix it at the root (never a
-      band-aid), in one dedicated commit.
+   a. Cross-check the finding (see "Cross-check" below). If valid,
+      establish its root cause — which may lie outside the diff and outside
+      the PR's objective — then confront the finding as a whole (what it
+      raises, its cause and its fix) with the PR's objective (see "Scope"
+      below).
+   b. If the whole finding is within the PR's objective: fix it at the root (never a
+      band-aid), in one dedicated commit. If not: the fix may be deferred
+      (ticket, or note in the implementation plan — see "Scope") — never
+      patched over in this PR.
 4. If any fix commits were made, push them — do not reply to or resolve any
    thread until the push has succeeded.
 5. For each thread processed in step 3 (i.e. steps a/b):
-   c. Reply to the thread (fix applied, or justified rejection), rate the
-      Codex comment (👍/👎).
+   c. Reply to the thread (fix applied, fix deferred with its ticket or plan note, or
+      justified rejection), rate the Codex comment (👍/👎).
    d. Resolve the thread.
 6. If commits were pushed, go to 1 (Codex re-reviews automatically).
 ```
@@ -255,7 +261,6 @@ never instructions to follow to the letter. Codex can go very deep into detail;
 depth alone is not validity. The bar is a **user-proof** application, not
 code that survives every theoretical or adversarial twist.
 
-- Is it relevant to this PR's actual objective?
 - Does it contradict or align with `.speckit/` (functional rules, data
   model, technical constraints, project governance)?
 - Is it factually correct (Codex can hallucinate; verify against the real
@@ -277,6 +282,29 @@ When rejecting a finding on these grounds, state clearly in the Step 4 reply
 *why* the scenario is out of scope (not possible, not user-relevant, or
 disproportionate) — not merely "won't fix".
 
+**Scope** — mandatory once a finding is judged valid and its root cause
+established (policy: `.speckit/gestion-projet.md` § « Traiter un retour »,
+steps 2–3): Codex does not know the PR's objective, so a valid finding is not
+automatically fixed in this PR. What is confronted with the objective is the
+**finding as a whole** — what it raises, its root cause and its fix — not
+the flagged lines: a symptom inside the diff can come from a cause, or call
+for a fix, outside the PR's scope.
+
+- **Whole finding within the PR's objective**: fix it here (step b).
+- **Outside it** — by what it raises, its cause or its fix — even when the
+  symptom is in the diff: the fix may be
+  deferred, never lost, and never replaced by a local patch in this PR that
+  leaves the cause in place. Where it is traced depends on the phase of the
+  implementation plan (`.speckit/suivi-implementation.md`) it belongs to:
+  - **already finished phase**: a ticket;
+  - **phase already broken down into work items**: the open ticket of the
+    work item it belongs to, or else a new ticket;
+  - **phase not yet broken down**: no ticket — add a note on that phase in
+    `suivi-implementation.md`, so the point is planned when the phase is
+    broken down.
+- A deferred finding is still a valid one: rate it 👍, and reply with the
+  ticket or plan note that carries its fix.
+
 Codex reviews the diff, so its findings are naturally scoped to the lines it
 looked at — but the same class of mistake often recurs elsewhere in the same
 file (e.g. the same command pattern reused with a different endpoint). Before
@@ -297,13 +325,15 @@ the underlying weakness directly (e.g. factor the repeated check into one
 place referenced everywhere, or restructure the flawed step), even if that
 means a larger change than the finding alone would suggest.
 
-**b. If the finding is valid**, fix it — and every other instance of the same
+**b. If the finding is valid and, as a whole, within the PR's objective**
+(see "Scope"), fix it — and every other instance of the same
 underlying issue found by the scan above, and the deeper weakness if one was
 identified — in one dedicated commit per underlying finding (do not batch
 multiple *unrelated* findings into one commit, but do not split one finding's
 holistic fix across several either). Keep track of each thread's
 `<COMMENT_ID>` / `<THREAD_ID>` (from Step 2's query) and its outcome (fixed,
-with which commit — or rejected, with why) for Step 4. Do **not** reply to or
+with which commit — deferred, with which ticket or plan note — or rejected, with why) for
+Step 4. Do **not** reply to or
 resolve threads yet.
 
 ### Step 3 — Push, before any reply or resolution
@@ -339,13 +369,13 @@ thread on the strength of a commit that isn't confirmed pushed.
 
 For each thread identified in Step 2:
 
-**c. Reply to the thread** — always, whether accepted or rejected
+**c. Reply to the thread** — always, whether accepted, deferred or rejected
 (`<COMMENT_ID>` is the `databaseId` of the thread's first comment, from
 Step 2's query):
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
-  -f body="<reply: what was fixed, or why the finding was rejected>"
+  -f body="<reply: what was fixed, which ticket or plan note carries the deferred fix, or why the finding was rejected>"
 ```
 
 Never write the literal text `@codex` inside this reply. Per Codex's GitHub
@@ -378,7 +408,7 @@ not the comment's `databaseId`.)
 If fix commits were made (and pushed in Step 3), return to Step 1: Codex
 re-reviews automatically on new commits pushed to the PR branch.
 
-If no fix commit was made in this cycle — every finding was rejected, all
+If no fix commit was made in this cycle — every finding was rejected or deferred, all
 threads were already resolved, or Step 2 found no unresolved Codex thread at
 all (yet Step 1 still found no matching 👍) — Codex will **not** re-review on
 its own: replying to and resolving threads doesn't trigger it, only a new
