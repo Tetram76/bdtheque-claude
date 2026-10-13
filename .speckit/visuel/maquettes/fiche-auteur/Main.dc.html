@@ -95,7 +95,8 @@ summary{cursor:pointer}
           <sc-for list="{{entries}}" as="e" hint-placeholder-count="9">
             <li style="border-bottom: {{t.rowB}}">
               <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-height: 58px; padding: 8px 0; box-sizing: border-box">
-                <sc-if value="{{e.isSeries}}" hint-placeholder-val="{{true}}"><button type="button" aria-expanded="{{e.expanded}}" aria-label="{{e.toggleLabel}}" onClick="{{e.toggle}}" style="width: 40px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: {{t.text}}; cursor: pointer"><span aria-hidden="true" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: {{nest.bg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate({{e.chevron}})"><path d="M9 6l6 6-6 6"></path></svg></span></button></sc-if>
+                <sc-if value="{{e.noOpen}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 40px; flex: none"></span></sc-if>
+                <sc-if value="{{e.canOpen}}" hint-placeholder-val="{{true}}"><button type="button" aria-expanded="{{e.expanded}}" aria-label="{{e.toggleLabel}}" onClick="{{e.toggle}}" style="width: 40px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: {{t.text}}; cursor: pointer"><span aria-hidden="true" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: {{nest.bg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate({{e.chevron}})"><path d="M9 6l6 6-6 6"></path></svg></span></button></sc-if>
                 <sc-if value="{{e.isSeries}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="position: relative; width: 40px; height: 44px; flex: none">
                   <sc-for list="{{e.stack}}" as="c" hint-placeholder-count="3"><span style="position: absolute; left: {{c.left}}; top: {{c.top}}; width: 24px; height: 32px; border-radius: 3px; background: {{c.bg}}; box-shadow: 0 0 0 1.5px {{t.bg}}, 0 1px 3px rgba(0,0,0,.3); transform: rotate({{c.rot}})"></span></sc-for>
                 </span></sc-if>
@@ -294,7 +295,9 @@ const BIBLIOGRAPHY = [
   { title: 'Krashmonsters', seriesRoles: [], seriesSize: 2, albums: [['T. 1', 'Mosca Argnus Siestae', DC, 'own', 0]] },
   { title: "Les Naufragés d'Ythaq", seriesRoles: D, seriesSize: 18, albums: ythaq },
   { title: 'Sangre', seriesRoles: D, seriesSize: 6, albums: Array.from({ length: 6 }, (_, i) => ['T. ' + (i + 1), '', D, 'own', i === 0 ? 4 : 0]) },
-  { title: 'Slhoka', seriesRoles: DC, seriesSize: 5, albums: Array.from({ length: 5 }, (_, i) => ['T. ' + (i + 1), '', DC, i < 4 ? 'own' : 'no', 0]) }
+  { title: 'Slhoka', seriesRoles: DC, seriesSize: 5, albums: Array.from({ length: 5 }, (_, i) => ['T. ' + (i + 1), '', DC, i < 4 ? 'own' : 'no', 0]) },
+  // Credited on the series itself only: the series is listed, with no album to unfold.
+  { title: 'Les Terres de Troy', seriesRoles: D, seriesSize: 4, albums: [] }
 ];
 const ROLE_LABELS = { scenario: 'Scénario', dessin: 'Dessin', couleurs: 'Couleurs' };
 const ROLE_ORDER = ['scenario', 'dessin', 'couleurs'];
@@ -314,7 +317,7 @@ class Component extends DCLogic {
       fg: current && !t.navUnderline ? navOnAcc : t.hText,
       deco: current && t.navUnderline ? 'underline' : 'none'
     });
-    const defaults = Object.fromEntries(BIBLIOGRAPHY.map((e, i) => [i, !e.album && e.albums.length <= FOLD_ABOVE]));
+    const defaults = Object.fromEntries(BIBLIOGRAPHY.map((e, i) => [i, !e.album && e.albums.length > 0 && e.albums.length <= FOLD_ABOVE]));
     const open = this.state?.open ?? defaults;
     // Each role keeps its colour across the page, so that a role reads at a glance in a long list.
     const roleChips = (roles) => ROLE_ORDER.filter((r) => roles.includes(r)).map((r) => {
@@ -334,41 +337,45 @@ class Component extends DCLogic {
     const byRole = ROLE_ORDER.map((r) => [r, allAlbums.filter((roles) => roles.includes(r)).length]).filter(([, n]) => n > 0);
     const seriesCount = BIBLIOGRAPHY.filter((e) => !e.album).length;
     const loneCount = BIBLIOGRAPHY.length - seriesCount;
-    // Every album, in a series or not, is shown by its cover: only a series has an icon.
-    let coverIndex = 0;
-    const cover = () => 'hsl(' + ((coverIndex++ * 47 + 200) % 360) + ', 42%, 36%)';
+    // Every album, in a series or not, is shown by its cover: only a series has a pile of covers.
+    // A cover belongs to the album itself (entry, and volume within its series), never to its rank in this list.
+    const cover = (entry, volume) => 'hsl(' + ((entry * 67 + volume * 29 + 200) % 360) + ', 42%, 36%)';
+    const volumeOf = (tome) => Number(tome.replace(/^T\. /, '')) || 1;
     const entries = BIBLIOGRAPHY.map((e, i) => {
       const base = { title: e.title };
       if (e.album) {
         return {
-          ...base, isAlbum: true, isSeries: false, open: false, cover: cover(),
+          ...base, isAlbum: true, isSeries: false, canOpen: false, noOpen: false, open: false, cover: cover(i, 1),
           meta: 'Album sans série', roles: roleChips(e.roles), hasSeriesRoles: false, albums: [], ...rating(e.rating), ...badge(e.state)
         };
       }
-      const isOpen = Boolean(open[i]);
+      const hasAlbums = e.albums.length > 0;
+      const isOpen = hasAlbums && Boolean(open[i]);
       const owned = e.albums.filter((a) => a[3] === 'own').length;
       // An album without its own title is named by its volume alone (« Tome 3 »).
       const albums = e.albums.map(([tome, title, roles, state, n], k) => ({
-        title: title || tome.replace(/^T\. /, 'Tome '), meta: e.title + ' · ' + tome, cover: cover(),
+        title: title || tome.replace(/^T\. /, 'Tome '), meta: e.title + ' · ' + tome, cover: cover(i, volumeOf(tome)),
         rowB: k === 0 ? '0' : t.rowB,
         roles: roleChips(roles), ...rating(n), ...badge(state)
       }));
-      // A series is shown as a small pile of the covers listed under it: it reads as several albums.
-      const pile = (k) => albums[Math.min(k, albums.length - 1)].cover;
+      const credited = hasAlbums
+        ? 'crédité sur ' + e.albums.length + (e.albums.length > 1 ? ' albums' : ' album') + ' sur ' + e.seriesSize + ' · ' + owned + ' dans la collection'
+        : 'crédité sur la série seulement, sur aucun de ses ' + e.seriesSize + ' albums';
       return {
-        ...base, isAlbum: false, isSeries: true, open: isOpen, rated: false,
+        ...base, isAlbum: false, isSeries: true, canOpen: hasAlbums, noOpen: !hasAlbums, open: isOpen, rated: false,
         listLabel: 'Albums de la série ' + e.title,
+        // The pile shows the series itself, by the covers of its first volumes, whatever the author is credited on:
+        // a series credited on itself only, with no album listed, has its pile too.
         stack: [
-          { left: '14px', top: '0', rot: '8deg', bg: pile(2) },
-          { left: '8px', top: '5px', rot: '2deg', bg: pile(1) },
-          { left: '2px', top: '10px', rot: '-5deg', bg: pile(0) }
+          { left: '14px', top: '0', rot: '8deg', bg: cover(i, 3) },
+          { left: '8px', top: '5px', rot: '2deg', bg: cover(i, 2) },
+          { left: '2px', top: '10px', rot: '-5deg', bg: cover(i, 1) }
         ],
         expanded: isOpen ? 'true' : 'false',
         chevron: isOpen ? '90deg' : '0deg',
         toggleLabel: (isOpen ? 'Replier ' : 'Déplier ') + e.title,
         toggle: () => this.setState({ open: { ...open, [i]: !isOpen } }),
-        meta: 'Série · crédité sur ' + e.albums.length + (e.albums.length > 1 ? ' albums' : ' album') + ' sur ' + e.seriesSize
-          + ' · ' + owned + ' dans la collection',
+        meta: 'Série · ' + credited,
         roles: roleChips(e.seriesRoles),
         hasSeriesRoles: e.seriesRoles.length > 0,
         albums
@@ -396,7 +403,7 @@ class Component extends DCLogic {
       ],
       biblioSummary: seriesCount + ' séries et ' + loneCount + ' albums sans série, rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.',
       entries,
-      openAll: () => this.setState({ open: Object.fromEntries(BIBLIOGRAPHY.map((_, i) => [i, true])) }),
+      openAll: () => this.setState({ open: Object.fromEntries(BIBLIOGRAPHY.map((e, i) => [i, !e.album && e.albums.length > 0])) }),
       closeAll: () => this.setState({ open: {} })
     };
   }
