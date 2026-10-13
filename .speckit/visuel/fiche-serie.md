@@ -23,7 +23,7 @@ Toutes les déclinaisons forment la page « Fiche de série » du canevas des ma
 
 `Main.dc.html` n'est pas une déclinaison : c'est la source commune, que chaque planche affiche avec son thème. Son nom est imposé par le canevas, dont c'est le fichier d'entrée.
 
-Deux exemples, au choix du réglage « exemple » de la source commune : `longue` (par défaut), une série en cours de 32 albums (28 tomes, deux intégrales, deux hors-séries), dont cinq hors de la collection et un visé par une intention d'achat, dessinée par neuf auteurs, rattachée à un sous-univers ; `heads`, une série terminée et complète de quatre tomes sans titre propre. Les couvertures sont des illustrations de substitution.
+Trois exemples, au choix du réglage « exemple » de la source commune : `longue` (par défaut), une série en cours de 32 albums (28 tomes, deux intégrales, deux hors-séries), dont cinq hors de la collection et un visé par une intention d'achat, dessinée par neuf auteurs, rattachée à un sous-univers ; `heads`, une série terminée et complète de quatre tomes sans titre propre ; `courte`, une série d'un seul album, sans éditeur, collection, nombre de tomes prévu ni résumé. Les couvertures sont des illustrations de substitution.
 
 ## Contenu
 
@@ -31,7 +31,7 @@ De haut en bas :
 
 - **En-tête** de la partie Consultation, avec l'entrée « Séries » active, puis le **fil d'Ariane** : Séries, puis la série.
 - **En-tête de la fiche**, sur deux colonnes, qui s'empilent sur smartphone :
-  - une **pile des premières couvertures** de la série, décorative ;
+  - une **pile de trois couvertures**, décorative : celles des premiers tomes de la série ; la pile garde toujours trois cartes, pour qu'une série ne se confonde jamais avec un album, une place au-delà des tomes de la série étant une carte générique ;
   - le titre, puis des étiquettes : le **statut**, le **nombre de tomes prévus** (nombre de tomes théorique) et la mention **Complète** ou **À compléter** ;
   - l'**avancement de la collection** : « N albums sur M dans la collection », avec une barre de progression ;
   - l'**éditeur** et la **collection** de la série (éditeur et collection template), chacun menant à sa fiche ;

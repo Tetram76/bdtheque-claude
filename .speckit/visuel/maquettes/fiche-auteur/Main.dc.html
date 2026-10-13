@@ -303,6 +303,7 @@ const ROLE_LABELS = { scenario: 'Scénario', dessin: 'Dessin', couleurs: 'Couleu
 const ROLE_ORDER = ['scenario', 'dessin', 'couleurs'];
 // A long series starts folded, so that one prolific series does not hide the rest of the bibliography.
 const FOLD_ABOVE = 6;
+const GENERIC_CARD = 'rgba(127,127,127,.35)';
 
 class Component extends DCLogic {
   renderVals() {
@@ -365,11 +366,12 @@ class Component extends DCLogic {
         ...base, isAlbum: false, isSeries: true, canOpen: hasAlbums, noOpen: !hasAlbums, open: isOpen, rated: false,
         listLabel: 'Albums de la série ' + e.title,
         // The pile shows the series itself, by the covers of its first volumes, whatever the author is credited on:
-        // a series credited on itself only, with no album listed, has its pile too.
+        // a series credited on itself only, with no album listed, has its pile too. It always keeps three cards, so
+        // that a series never passes for a single album: a place beyond the volumes of the series is a generic card.
         stack: [
-          { left: '14px', top: '0', rot: '8deg', bg: cover(i, 3) },
-          { left: '8px', top: '5px', rot: '2deg', bg: cover(i, 2) },
-          { left: '2px', top: '10px', rot: '-5deg', bg: cover(i, 1) }
+          { left: '14px', top: '0', rot: '8deg', bg: e.seriesSize >= 3 ? cover(i, 3) : GENERIC_CARD },
+          { left: '8px', top: '5px', rot: '2deg', bg: e.seriesSize >= 2 ? cover(i, 2) : GENERIC_CARD },
+          { left: '2px', top: '10px', rot: '-5deg', bg: e.seriesSize >= 1 ? cover(i, 1) : GENERIC_CARD }
         ],
         expanded: isOpen ? 'true' : 'false',
         chevron: isOpen ? '90deg' : '0deg',

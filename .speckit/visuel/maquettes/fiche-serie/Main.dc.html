@@ -55,7 +55,7 @@ summary{cursor:pointer}
             <sc-for list="{{stack}}" as="c" hint-placeholder-count="3">
               <div style="position: absolute; left: {{c.left}}; top: {{c.top}}; width: 200px; box-sizing: border-box; padding: {{t.cvPad}}; border: {{t.cvB}}; border-radius: {{t.cvR}}; background: {{t.cvBg}}; box-shadow: {{t.cvSh}}; transform: rotate({{c.rot}})">
                 <div style="aspect-ratio: 3 / 4; border-radius: {{t.imgR}}; background: {{c.bg}}; color: #FFFFFF; display: flex; flex-direction: column; justify-content: space-between; padding: 14px; box-sizing: border-box; font-family: Georgia, serif">
-                  <span style="font-weight: 700; font-size: 17px; line-height: 1.1">{{s.title}}</span>
+                  <span style="font-weight: 700; font-size: 17px; line-height: 1.1">{{c.title}}</span>
                   <span style="align-self: flex-end; font-size: 34px; font-weight: 700">{{c.label}}</span>
                 </div>
               </div>
@@ -182,7 +182,7 @@ summary{cursor:pointer}
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["violine","mure","gazette","sommaire","festival","riso","librairie","vignettes"],"default":"violine"},"exemple":{"editor":"enum","options":["longue","heads"],"default":"longue"},"$preview":{"width":1440,"height":3000}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["violine","mure","gazette","sommaire","festival","riso","librairie","vignettes"],"default":"violine"},"exemple":{"editor":"enum","options":["longue","heads","courte"],"default":"longue"},"$preview":{"width":1440,"height":3000}}'>
 // Shared defaults: each theme only states what its identity changes.
 const BASE = {
   kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
@@ -368,8 +368,22 @@ const EXAMPLES = {
     notes: '',
     albums: [['Tome 1', '', 'tome', 'own', 0], ['Tome 2', '', 'tome', 'own', 0], ['Tome 3', '', 'tome', 'own', 0], ['Tome 4', '', 'tome', 'own', 0]],
     meta: 'Fiche créée le 2 février 2026, modifiée le 2 février 2026.'
+  },
+  // A sparse series: a single album, and no publisher, collection, planned count nor summary.
+  courte: {
+    title: 'Le Voyage de Mia',
+    status: 'En cours', planned: null, complete: false,
+    publisher: null, collection: null,
+    credits: { scenario: ['Léa Ferrand'], dessin: ['Léa Ferrand'], couleurs: [] },
+    genres: ['Jeunesse'],
+    universes: [],
+    summary: '',
+    notes: '',
+    albums: [['T. 1', 'Le Départ', 'tome', 'own', 3]],
+    meta: 'Fiche créée le 9 octobre 2026, modifiée le 9 octobre 2026.'
   }
 };
+const GENERIC_CARD = 'rgba(127,127,127,.35)';
 const ROLES = [['scenario', 'Scénario'], ['dessin', 'Dessin'], ['couleurs', 'Couleurs']];
 // Beyond this many names a role is folded, so that a series drawn by many hands does not push the rest of the page down.
 const SHOWN_PER_ROLE = 6;
@@ -419,6 +433,15 @@ class Component extends DCLogic {
       badgeFg: state === 'own' ? t.colFg : t.text,
       badgeB: state === 'own' ? '0' : '2px dashed ' + t.line
     });
+    // The pile shows the first regular volumes of the series, each with the cover it has in the grid below. It
+    // always keeps three cards, so that a series never passes for a single album: a missing volume is a generic card.
+    const firstVolumes = s.albums.map((a, i) => [a, i]).filter(([a]) => a[2] === 'tome' && !a[0].startsWith('INT')).slice(0, 3);
+    const pileCard = (k) => {
+      const entry = firstVolumes[k];
+      if (!entry) return { bg: GENERIC_CARD, title: '', label: '' };
+      const [a, i] = entry;
+      return { bg: cover(i), title: s.title, label: a[0].replace(/^Tome /, '').replace(/^T\. /, '') };
+    };
     const tomes = s.albums.filter((a) => a[2] === 'tome');
     const specials = s.albums.filter((a) => a[2] === 'hs');
     const groups = [{ title: 'Tomes et intégrales', count: '(' + tomes.length + ')', albums: tomes.map(album) }];
@@ -432,9 +455,9 @@ class Component extends DCLogic {
       k: { recit: kick(1, 'Le récit'), albums: kick(2, 'Les albums') },
       nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', true), navItem('Auteurs', false), navItem('Éditeurs', false), navItem("Intentions d'achat", false)],
       stack: [
-        { left: '40px', top: '0', rot: '6deg', bg: cover(2), label: '3' },
-        { left: '20px', top: '12px', rot: '2deg', bg: cover(1), label: '2' },
-        { left: '0', top: '24px', rot: t.cvRot, bg: cover(0), label: '1' }
+        { left: '40px', top: '0', rot: '6deg', ...pileCard(2) },
+        { left: '20px', top: '12px', rot: '2deg', ...pileCard(1) },
+        { left: '0', top: '24px', rot: t.cvRot, ...pileCard(0) }
       ],
       facts: [
         { label: s.status, ...chip(true) },
