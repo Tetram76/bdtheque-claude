@@ -111,6 +111,14 @@ Répercussion dans le modèle de domaine et dans l'API du journal des modificati
 | --- | --- |
 | ~~#148~~ | Journal des modifications dans le modèle de domaine et l'API |
 
+### Ajustement issu des maquettes des fiches de série et d'auteur
+
+Répercussion dans l'API des données que les cartes d'album des fiches de série et d'auteur affichent (couverture, appréciation, intention d'achat, nombre d'albums d'une série), après que l'utilisateur a statué quelle édition fournit la couverture d'un album. La phase 2 étant validée, un seul ticket la couvre.
+
+| Ticket | Titre |
+| --- | --- |
+| #156 | Données des cartes d'album dans les fiches de série et d'auteur |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
