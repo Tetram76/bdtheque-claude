@@ -38,6 +38,7 @@ De haut en bas :
   - une **série** se distingue par une **petite pile de trois couvertures**, celles de ses premiers tomes, que l'auteur y soit crédité ou non, comme la pile de l'en-tête de la fiche d'une série (`fiche-serie.md`), et comme elle toujours de trois cartes, une place au-delà des tomes de la série étant une carte générique ; une série sur laquelle l'auteur n'est crédité que sur la série elle-même a donc sa pile, sans chevron ni album à déplier, avec la mention « crédité sur la série seulement » ;
   - une série indique le nombre d'albums sur lesquels l'auteur est crédité, rapporté au nombre d'albums de la série, et combien sont dans la collection ; les rôles tenus sur la série elle-même suivent la mention « Sur la série : ». Elle se déplie sur ses albums crédités, dans l'ordre de la série ;
   - chaque rôle garde sa couleur sur toute la page ;
+  - un auteur sans aucun crédit le dit : « Crédité sur aucun album », et « Aucune série ni aucun album crédité pour l'instant. » à la place de la liste ;
   - une série se déplie par un **chevron** placé devant elle, sur une pastille ronde de la teinte de l'encadré de ses albums, sans cadre : visible sur smartphone sans dominer la ligne ; une série de plus de six albums crédités est repliée à l'arrivée ; « Tout déplier » et « Tout replier » agissent sur toute la liste.
 - **Pied de page** : les dates de création et de modification de la fiche.
 

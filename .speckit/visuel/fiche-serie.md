@@ -23,7 +23,7 @@ Toutes les déclinaisons forment la page « Fiche de série » du canevas des ma
 
 `Main.dc.html` n'est pas une déclinaison : c'est la source commune, que chaque planche affiche avec son thème. Son nom est imposé par le canevas, dont c'est le fichier d'entrée.
 
-Trois exemples, au choix du réglage « exemple » de la source commune : `longue` (par défaut), une série en cours de 32 albums (28 tomes, deux intégrales, deux hors-séries), dont cinq hors de la collection et un visé par une intention d'achat, dessinée par neuf auteurs, rattachée à un sous-univers ; `heads`, une série terminée et complète de quatre tomes sans titre propre ; `courte`, une série d'un seul album, sans éditeur, collection, nombre de tomes prévu ni résumé. Les couvertures sont des illustrations de substitution.
+Quatre exemples, au choix du réglage « exemple » de la source commune : `longue` (par défaut), une série en cours de 32 albums (28 tomes, deux intégrales, deux hors-séries), dont cinq hors de la collection et un visé par une intention d'achat, dessinée par neuf auteurs, rattachée à un sous-univers ; `heads`, une série terminée et complète de quatre tomes sans titre propre ; `courte`, une série d'un seul album, sans éditeur, collection, nombre de tomes prévu ni résumé ; `vide`, une série tout juste créée, sans album, auteur, genre ni statut. Les couvertures sont des illustrations de substitution.
 
 ## Contenu
 
@@ -37,7 +37,7 @@ De haut en bas :
   - l'**éditeur** et la **collection** de la série (éditeur et collection template), chacun menant à sa fiche ;
   - les **auteurs de la série** (contributions template), présentés comme les contributions d'un album (`fiche-album.md` § Contenu) : nombre d'auteurs distincts, une ligne par rôle, rôle replié au-delà de six noms ;
   - les **genres** et les **univers**, chaque univers avec la chaîne de ses ancêtres, comme sur la fiche d'un album.
-  - Une donnée non renseignée (statut, nombre de tomes prévus, éditeur, collection, résumé) reste affichée, avec la mention « Non renseigné » en texte atténué, jamais sous la forme d'un lien vide, comme sur la fiche d'un album.
+  - Une donnée non renseignée (statut, nombre de tomes prévus, éditeur, collection, résumé) reste affichée, avec la mention « Non renseigné » en texte atténué, jamais sous la forme d'un lien vide, comme sur la fiche d'un album. Une série sans album, sans auteur ou sans genre le dit de même (« Aucun album dans la série pour l'instant », sans barre de progression ; « Aucun auteur crédité sur la série » ; « Aucun genre »).
   - Les autres valeurs template et les indicateurs d'exclusion n'y figurent pas (`fonctionnel.md` § Structure de l'application).
 - **De quoi ça parle ?** : le résumé, puis les notes personnelles de la série (« Aucune note » sinon).
 - **Combien d'albums ?** : le décompte (tomes, intégrales, hors-séries), puis les albums **dans l'ordre de la série** (`fonctionnel.md` § Ordre des albums dans une série), en deux groupes : **Tomes et intégrales**, puis **Hors-séries**. Chaque album est une carte, en grille, qui mène à sa fiche :

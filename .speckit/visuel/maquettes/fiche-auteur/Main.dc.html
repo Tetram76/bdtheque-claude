@@ -338,6 +338,11 @@ class Component extends DCLogic {
     const byRole = ROLE_ORDER.map((r) => [r, allAlbums.filter((roles) => roles.includes(r)).length]).filter(([, n]) => n > 0);
     const seriesCount = BIBLIOGRAPHY.filter((e) => !e.album).length;
     const loneCount = BIBLIOGRAPHY.length - seriesCount;
+    // An author may be in the base without any credit yet: every count reads right at zero and at one.
+    const count = (n, one, many, none) => (n === 0 ? none : n + ' ' + (n > 1 ? many : one));
+    const credits = allAlbums.length === 0
+      ? 'Crédité sur aucun album'
+      : 'Crédité sur ' + allAlbums.length + (allAlbums.length > 1 ? ' albums' : ' album');
     // Every album, in a series or not, is shown by its cover: only a series has a pile of covers.
     // A cover belongs to the album itself (entry, and volume within its series), never to its rank in this list.
     const cover = (entry, volume) => 'hsl(' + ((entry * 67 + volume * 29 + 200) % 360) + ', 42%, 36%)';
@@ -400,10 +405,13 @@ class Component extends DCLogic {
       k: { bio: kick(1, 'Portrait'), biblio: kick(2, 'Bibliographie') },
       nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', false), navItem('Auteurs', true), navItem('Éditeurs', false), navItem("Intentions d'achat", false)],
       facts: [
-        { label: 'Crédité sur ' + allAlbums.length + ' albums', bg: t.acc, fg: t.onAcc, bd: '2px solid ' + t.acc },
+        { label: credits, bg: t.acc, fg: t.onAcc, bd: '2px solid ' + t.acc },
         ...byRole.map(([r, n]) => ({ label: ROLE_LABELS[r] + ' · ' + n, ...chip }))
       ],
-      biblioSummary: seriesCount + ' séries et ' + loneCount + ' albums sans série, rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.',
+      biblioSummary: BIBLIOGRAPHY.length === 0
+        ? 'Aucune série ni aucun album crédité pour l\'instant.'
+        : count(seriesCount, 'série', 'séries', 'Aucune série') + ' et ' + count(loneCount, 'album sans série', 'albums sans série', 'aucun album sans série')
+          + ', rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.',
       entries,
       openAll: () => this.setState({ open: Object.fromEntries(BIBLIOGRAPHY.map((e, i) => [i, !e.album && e.albums.length > 0])) }),
       closeAll: () => this.setState({ open: {} })

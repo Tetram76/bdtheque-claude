@@ -79,9 +79,9 @@ summary{cursor:pointer}
 
           <div style="display: flex; flex-direction: column; gap: 8px; max-width: 560px">
             <span style="font-weight: 700">{{owned.label}}</span>
-            <span role="img" aria-label="{{owned.label}}" style="display: block; height: 14px; border-radius: {{t.btnR}}; background: {{owned.track}}; overflow: hidden">
+            <sc-if value="{{owned.hasBar}}" hint-placeholder-val="{{true}}"><span role="img" aria-label="{{owned.label}}" style="display: block; height: 14px; border-radius: {{t.btnR}}; background: {{owned.track}}; overflow: hidden">
               <span style="display: block; height: 100%; width: {{owned.pct}}; background: {{t.colBg}}"></span>
-            </span>
+            </span></sc-if>
           </div>
 
           <dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px 40px">
@@ -115,6 +115,7 @@ summary{cursor:pointer}
             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px">
               <dt style="min-width: 80px; font-weight: 700">Genres</dt>
               <dd style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px">
+                <sc-if value="{{noGenre}}" hint-placeholder-val="{{false}}"><span style="min-height: 34px; display: flex; align-items: center; color: {{t.muted}}">Aucun genre</span></sc-if>
                 <sc-for list="{{genres}}" as="g" hint-placeholder-count="2"><a href="#" style="display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: {{t.chipR}}; background: {{g.bg}}; color: {{g.fg}}; font-weight: 700; font-size: 14px">{{g.label}}</a></sc-for>
               </dd>
             </div>
@@ -182,7 +183,7 @@ summary{cursor:pointer}
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["violine","mure","gazette","sommaire","festival","riso","librairie","vignettes"],"default":"violine"},"exemple":{"editor":"enum","options":["longue","heads","courte"],"default":"longue"},"$preview":{"width":1440,"height":3000}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["violine","mure","gazette","sommaire","festival","riso","librairie","vignettes"],"default":"violine"},"exemple":{"editor":"enum","options":["longue","heads","courte","vide"],"default":"longue"},"$preview":{"width":1440,"height":3000}}'>
 // Shared defaults: each theme only states what its identity changes.
 const BASE = {
   kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
@@ -381,6 +382,19 @@ const EXAMPLES = {
     notes: '',
     albums: [['T. 1', 'Le Départ', 'tome', 'own', 3]],
     meta: 'Fiche créée le 9 octobre 2026, modifiée le 9 octobre 2026.'
+  },
+  // A series just created: no album, author, genre nor status yet.
+  vide: {
+    title: 'Les Récits du phare',
+    status: null, planned: 6, complete: false,
+    publisher: null, collection: null,
+    credits: { scenario: [], dessin: [], couleurs: [] },
+    genres: [],
+    universes: [],
+    summary: '',
+    notes: '',
+    albums: [],
+    meta: 'Fiche créée le 13 octobre 2026, modifiée le 13 octobre 2026.'
   }
 };
 const GENERIC_CARD = 'rgba(127,127,127,.35)';
@@ -444,9 +458,11 @@ class Component extends DCLogic {
     };
     const tomes = s.albums.filter((a) => a[2] === 'tome');
     const specials = s.albums.filter((a) => a[2] === 'hs');
-    const groups = [{ title: 'Tomes et intégrales', count: '(' + tomes.length + ')', albums: tomes.map(album) }];
+    const groups = [];
+    if (tomes.length) groups.push({ title: 'Tomes et intégrales', count: '(' + tomes.length + ')', albums: tomes.map(album) });
     if (specials.length) groups.push({ title: 'Hors-séries', count: '(' + specials.length + ')', albums: specials.map((a, i) => album(a, i + tomes.length)) });
-    const parts = [regular + (regular > 1 ? ' tomes' : ' tome')];
+    const parts = [];
+    if (regular) parts.push(regular + (regular > 1 ? ' tomes' : ' tome'));
     if (omnibus) parts.push(omnibus + (omnibus > 1 ? ' intégrales' : ' intégrale'));
     if (hs) parts.push(hs + (hs > 1 ? ' hors-séries' : ' hors-série'));
     return {
@@ -473,12 +489,16 @@ class Component extends DCLogic {
           ? { label: 'Complète', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
           : { label: 'À compléter', ...chip(false) }
       ],
+      // A series without any album yet has nothing to measure: it says so, without a bar.
       owned: {
-        label: ownedCount + (ownedCount > 1 ? ' albums' : ' album') + ' sur ' + s.albums.length + ' dans la collection',
-        pct: Math.round((ownedCount * 100) / s.albums.length) + '%',
+        hasBar: s.albums.length > 0,
+        label: s.albums.length === 0
+          ? 'Aucun album dans la série pour l\'instant'
+          : ownedCount + (ownedCount > 1 ? ' albums' : ' album') + ' sur ' + s.albums.length + ' dans la collection',
+        pct: s.albums.length === 0 ? '0%' : Math.round((ownedCount * 100) / s.albums.length) + '%',
         track: t.tB === '0' ? t.line : t.tBg === 'transparent' ? t.line : t.tBg
       },
-      creditsTotal: distinct > 1 ? distinct + ' auteurs de la série' : 'Auteur de la série',
+      creditsTotal: distinct === 0 ? 'Aucun auteur crédité sur la série' : distinct > 1 ? distinct + ' auteurs de la série' : 'Auteur de la série',
       credits: ROLES.map(([role, label], r) => {
         const all = people[role];
         const open = Boolean(unfolded[role]);
@@ -495,13 +515,16 @@ class Component extends DCLogic {
           rowB: r < ROLES.length - 1 ? t.rowB : '0'
         };
       }),
+      noGenre: s.genres.length === 0,
       genres: s.genres.map((label) => ({ label, bg: t.pal[0][0], fg: t.pal[0][1] })),
       noUniverse: s.universes.length === 0,
       universes: s.universes.map((chain) => ({
         bg: t.pal[1][0], fg: t.pal[1][1],
         path: chain.map((name, i) => ({ name, sep: i > 0, leaf: i === chain.length - 1, parent: i < chain.length - 1 }))
       })),
-      albumsSummary: s.albums.length + (s.albums.length > 1 ? ' albums : ' : ' album : ') + parts.join(', '),
+      albumsSummary: s.albums.length === 0
+        ? 'Aucun album dans cette série pour l\'instant.'
+        : s.albums.length + (s.albums.length > 1 ? ' albums : ' : ' album : ') + parts.join(', '),
       groups
     };
   }
