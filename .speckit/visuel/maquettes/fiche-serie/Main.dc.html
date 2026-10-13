@@ -87,11 +87,11 @@ summary{cursor:pointer}
           <dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px 40px">
             <div style="display: flex; gap: 10px; align-items: baseline">
               <dt style="font-weight: 700">Éditeur</dt>
-              <dd style="margin: 0"><a href="#" style="font-weight: 700; color: {{t.link}}">{{s.publisher}}</a></dd>
+              <dd style="margin: 0"><sc-if value="{{s.hasPublisher}}" hint-placeholder-val="{{true}}"><a href="#" style="font-weight: 700; color: {{t.link}}">{{s.publisher}}</a></sc-if><sc-if value="{{s.noPublisher}}" hint-placeholder-val="{{false}}"><span style="color: {{t.muted}}">Non renseigné</span></sc-if></dd>
             </div>
             <div style="display: flex; gap: 10px; align-items: baseline">
               <dt style="font-weight: 700">Collection</dt>
-              <dd style="margin: 0"><a href="#" style="font-weight: 700; color: {{t.link}}">{{s.collection}}</a></dd>
+              <dd style="margin: 0"><sc-if value="{{s.hasCollection}}" hint-placeholder-val="{{true}}"><a href="#" style="font-weight: 700; color: {{t.link}}">{{s.collection}}</a></sc-if><sc-if value="{{s.noCollection}}" hint-placeholder-val="{{false}}"><span style="color: {{t.muted}}">Non renseignée</span></sc-if></dd>
             </div>
           </dl>
 
@@ -140,7 +140,7 @@ summary{cursor:pointer}
       <section aria-labelledby="s-recit" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 16px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.recit}}</span>
         <h2 id="s-recit" style="position: relative; align-self: flex-start; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>De quoi ça parle ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
-        <p style="margin: 0; max-width: 72ch; font-size: 16px">{{s.summary}}</p>
+        <p style="margin: 0; max-width: 72ch; font-size: 16px; color: {{s.summaryColor}}">{{s.summary}}</p>
         <div style="display: flex; flex-direction: column; gap: 4px; max-width: 72ch; padding-top: 14px; border-top: {{t.rowB}}">
           <span style="font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">Notes personnelles</span>
           <p style="margin: 0; color: {{s.notesColor}}">{{s.notes}}</p>
@@ -451,7 +451,14 @@ class Component extends DCLogic {
     if (hs) parts.push(hs + (hs > 1 ? ' hors-séries' : ' hors-série'));
     return {
       t,
-      s: { ...s, notes: s.notes || 'Aucune note', notesColor: s.notes ? t.text : t.muted },
+      // Every optional value of a series stays visible when absent, as on the record of an album, never as an empty link.
+      s: {
+        ...s,
+        hasPublisher: Boolean(s.publisher), noPublisher: !s.publisher,
+        hasCollection: Boolean(s.collection), noCollection: !s.collection,
+        summary: s.summary || 'Aucun résumé', summaryColor: s.summary ? t.text : t.muted,
+        notes: s.notes || 'Aucune note', notesColor: s.notes ? t.text : t.muted
+      },
       k: { recit: kick(1, 'Le récit'), albums: kick(2, 'Les albums') },
       nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', true), navItem('Auteurs', false), navItem('Éditeurs', false), navItem("Intentions d'achat", false)],
       stack: [
@@ -460,14 +467,14 @@ class Component extends DCLogic {
         { left: '0', top: '24px', rot: t.cvRot, ...pileCard(0) }
       ],
       facts: [
-        { label: s.status, ...chip(true) },
-        { label: s.planned + ' tomes prévus', ...chip(false) },
+        s.status ? { label: s.status, ...chip(true) } : { label: 'Statut non renseigné', ...chip(false) },
+        { label: s.planned ? s.planned + ' tomes prévus' : 'Nombre de tomes prévus non renseigné', ...chip(false) },
         s.complete
           ? { label: 'Complète', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
           : { label: 'À compléter', ...chip(false) }
       ],
       owned: {
-        label: ownedCount + ' albums sur ' + s.albums.length + ' dans la collection',
+        label: ownedCount + (ownedCount > 1 ? ' albums' : ' album') + ' sur ' + s.albums.length + ' dans la collection',
         pct: Math.round((ownedCount * 100) / s.albums.length) + '%',
         track: t.tB === '0' ? t.line : t.tBg === 'transparent' ? t.line : t.tBg
       },
@@ -494,7 +501,7 @@ class Component extends DCLogic {
         bg: t.pal[1][0], fg: t.pal[1][1],
         path: chain.map((name, i) => ({ name, sep: i > 0, leaf: i === chain.length - 1, parent: i < chain.length - 1 }))
       })),
-      albumsSummary: s.albums.length + ' albums : ' + parts.join(', '),
+      albumsSummary: s.albums.length + (s.albums.length > 1 ? ' albums : ' : ' album : ') + parts.join(', '),
       groups
     };
   }

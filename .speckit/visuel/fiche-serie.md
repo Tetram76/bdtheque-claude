@@ -37,6 +37,7 @@ De haut en bas :
   - l'**éditeur** et la **collection** de la série (éditeur et collection template), chacun menant à sa fiche ;
   - les **auteurs de la série** (contributions template), présentés comme les contributions d'un album (`fiche-album.md` § Contenu) : nombre d'auteurs distincts, une ligne par rôle, rôle replié au-delà de six noms ;
   - les **genres** et les **univers**, chaque univers avec la chaîne de ses ancêtres, comme sur la fiche d'un album.
+  - Une donnée non renseignée (statut, nombre de tomes prévus, éditeur, collection, résumé) reste affichée, avec la mention « Non renseigné » en texte atténué, jamais sous la forme d'un lien vide, comme sur la fiche d'un album.
   - Les autres valeurs template et les indicateurs d'exclusion n'y figurent pas (`fonctionnel.md` § Structure de l'application).
 - **De quoi ça parle ?** : le résumé, puis les notes personnelles de la série (« Aucune note » sinon).
 - **Combien d'albums ?** : le décompte (tomes, intégrales, hors-séries), puis les albums **dans l'ordre de la série** (`fonctionnel.md` § Ordre des albums dans une série), en deux groupes : **Tomes et intégrales**, puis **Hors-séries**. Chaque album est une carte, en grille, qui mène à sa fiche :
