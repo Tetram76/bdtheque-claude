@@ -50,9 +50,9 @@ internal static class AuthorEndpoints
     /// albums of each, and the albums without series, each with the roles held.
     /// </summary>
     /// <remarks>
-    /// The series and the albums without series come together, by sort key, as typed entries: the place
-    /// of the albums without series is not settled yet, and any placement can be drawn from this order (a
-    /// filter keeps their alphabetical order).
+    /// The series and the albums without series come together, by sort key, as typed entries: this is the
+    /// order of the first level of the bibliography, where the albums without series stand alongside the
+    /// series (fonctionnel.md § Structure de l'application).
     /// </remarks>
     private static async Task<AuthorDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
