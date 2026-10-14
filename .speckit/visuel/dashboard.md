@@ -47,7 +47,7 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
 - **Plutôt quel genre ?** : les genres et leur nombre d'albums ; un album peut relever de plusieurs genres.
 - **Chez quels éditeurs ?** : les éditeurs et leur nombre d'éditions possédées.
 
-Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
+Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu mène à ce site, et n'est sinon pas un lien (`fonctionnel.md` § Structure de l'application).
 
 ## Alternatives
 
@@ -124,7 +124,7 @@ De haut en bas :
 
 ### Le sommaire de magazine
 
-Le dashboard présenté comme la couverture et le sommaire d'un magazine populaire. Chaque rubrique du sommaire annonce une statistique. Son titre mène à sa liste ou à sa page détaillée, et chaque album, genre ou éditeur qu'elle montre mène à sa fiche ou à sa liste. Source : `sommaire.html`, en thème « papier ».
+Le dashboard présenté comme la couverture et le sommaire d'un magazine populaire. Chaque rubrique du sommaire annonce une statistique. Son titre mène à sa liste ou à sa page détaillée, et chaque album ou genre qu'elle montre mène à sa fiche ou à sa liste, chaque éditeur à son site web lorsqu'il est connu. Source : `sommaire.html`, en thème « papier ».
 
 #### Apparence
 
