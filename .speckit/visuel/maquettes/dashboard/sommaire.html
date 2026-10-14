@@ -111,10 +111,10 @@ a{text-decoration:none;color:inherit}
           <span style="color: {{t.soft}}">Dargaud et Dupuis au coude à coude, Casterman sur le podium.</span>
           <span style="display: flex; align-items: flex-end; gap: 6px; margin-top: 6px">
             <sc-for list="{{podium}}" as="p" hint-placeholder-count="3">
-              <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 110px">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 110px">
                 <span style="font-weight: 800; font-size: 13px">{{p.name}} · {{p.n}}</span>
                 <span style="width: 100%; height: {{p.h}}; background: {{p.c}}; color: {{p.tc}}; display: flex; align-items: flex-start; justify-content: center; padding-top: 4px; box-sizing: border-box; font-family: Anton, Impact, sans-serif; font-size: 26px">{{p.rank}}</span>
-              </a>
+              </div>
             </sc-for>
           </span>
         </span>

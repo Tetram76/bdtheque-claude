@@ -165,12 +165,12 @@ a:hover{color:#E8604C}
           <div style="position: relative; display: flex; align-items: flex-start; min-width: 700px; padding-top: 90px">
             <span aria-hidden="true" style="position: absolute; left: 20px; right: 20px; top: 114px; height: 12px; background: #1F3A93; border-radius: 6px"></span>
             <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
-              <a href="#" style="position: relative; flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 6px">
+              <div style="position: relative; flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 6px">
                 <span style="position: absolute; bottom: calc(100% + 4px); left: 50%; transform-origin: left bottom; transform: rotate(-38deg); white-space: nowrap; font-weight: 700">{{e.name}}</span>
                 <span style="height: 60px; display: flex; align-items: center"><span style="width: {{e.d}}; height: {{e.d}}; border-radius: 50%; background: #FFFFFF; border: 5px solid #1B2350; box-sizing: border-box"></span></span>
                 <span style="font-weight: 800; font-variant-numeric: tabular-nums">{{e.n}}</span>
                 <span style="padding: 1px 8px; border-radius: 6px; background: #F6C343; font-weight: 800; font-size: 13px">{{e.stand}}</span>
-              </a>
+              </div>
             </sc-for>
           </div>
         </div>
