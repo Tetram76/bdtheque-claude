@@ -403,7 +403,7 @@ class View extends Mockup {
         r: t.tR === '0' ? '0' : '12px'
       },
       k: { bio: kick(1, 'Portrait'), biblio: kick(2, 'Bibliographie') },
-      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', false), navItem('Auteurs', true), navItem('Éditeurs', false), navItem("Intentions d'achat", false)],
+      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', false), navItem('Auteurs', true), navItem("Intentions d'achat", false)],
       facts: [
         { label: credits, bg: t.acc, fg: t.onAcc, bd: '2px solid ' + t.acc },
         ...byRole.map(([r, n]) => ({ label: ROLE_LABELS[r] + ' · ' + n, ...chip }))
