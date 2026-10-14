@@ -106,22 +106,32 @@
     const cards = versions.map((version) => {
       const card = { version, values: {}, schema: null };
       card.frame = createFrame(version.title);
-      card.open = el('a', { href: '#', target: '_blank', rel: 'noopener', text: 'Ouvrir seule ↗' });
       card.settings = el('div', { class: 'settings' });
       card.url = () => urlOf(version.page, { ...version.params, ...shared, ...card.values });
-      card.reload = () => {
-        card.open.href = card.url();
-        card.frame.load(card.url());
-      };
+      card.reload = () => card.frame.load(card.url());
+      // Enlarged within the viewer rather than opened in a new tab: a viewer embedded in a sandboxed frame
+      // (as a published artifact is) may not open one.
+      card.open = el('button', { type: 'button', class: 'enlarge', 'aria-pressed': 'false', text: 'Agrandir',
+        onclick: () => {
+          const enlarged = !card.section.classList.contains('focus');
+          for (const c of cards) {
+            c.section.classList.toggle('focus', enlarged && c === card);
+            c.open.textContent = enlarged ? 'Toutes les versions' : 'Agrandir';
+            c.open.setAttribute('aria-pressed', String(enlarged && c === card));
+          }
+          grid.classList.toggle('focused', enlarged);
+          card.section.scrollIntoView({ block: 'start' });
+        } });
       card.frame.onSettings = (schema) => {
         if (card.schema) return;
         card.schema = schema;
         if (cards.every((c) => c.schema)) buildSettings();
       };
-      grid.append(el('section', { class: 'version' }, [
+      card.section = el('section', { class: 'version' }, [
         el('header', {}, [el('h2', { text: version.title }), card.open, card.settings]),
         card.frame.box
-      ]));
+      ]);
+      grid.append(card.section);
       return card;
     });
 
