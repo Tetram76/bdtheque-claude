@@ -121,7 +121,7 @@ Répercussion dans l'API des données que les cartes d'album des fiches de séri
 
 ### Ajustement issu des fiches de consultation
 
-Répercussion dans l'API de la règle qui réserve les fiches de consultation aux albums, aux séries et aux auteurs : éditions présentées par la fiche de leur album ; éditeurs et collections éditeur menant à la liste de leurs albums, genres et univers à la liste de leurs séries et albums présentée comme la bibliographie d'un auteur. La phase 2 étant validée, un seul ticket la couvre.
+Répercussion dans l'API de la règle qui réserve les fiches de consultation aux albums, aux séries et aux auteurs : éditions présentées par la fiche de leur album ; éditeurs et collections éditeur sans fiche ; genres et univers menant à la liste de leurs séries et albums présentée comme la bibliographie d'un auteur. La phase 2 étant validée, un seul ticket la couvre.
 
 | Ticket | Titre |
 | --- | --- |

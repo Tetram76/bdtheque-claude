@@ -32,7 +32,7 @@ De haut en bas :
   - une **pile de trois couvertures**, décorative : celles des premiers tomes de la série ; la pile garde toujours trois cartes, pour qu'une série ne se confonde jamais avec un album, une place au-delà des tomes de la série étant une carte générique ;
   - le titre, puis des étiquettes : le **statut**, le **nombre de tomes prévus** (nombre de tomes théorique) et la mention **Complète** ou **À compléter** ;
   - l'**avancement de la collection** : « N albums sur M dans la collection », avec une barre de progression ;
-  - l'**éditeur** et la **collection** de la série (éditeur et collection template), chacun menant à la liste de ses albums (`fonctionnel.md` § Structure de l'application) ;
+  - l'**éditeur** et la **collection** de la série (éditeur et collection template) ;
   - les **auteurs de la série** (contributions template), présentés comme les contributions d'un album (`fiche-album.md` § Contenu) : nombre d'auteurs distincts, une ligne par rôle, rôle replié au-delà de six noms ;
   - les **genres** et les **univers**, chaque univers avec la chaîne de ses ancêtres, comme sur la fiche d'un album.
   - Une donnée non renseignée (statut, nombre de tomes prévus, éditeur, collection, résumé) reste affichée, avec la mention « Non renseigné » en texte atténué, jamais sous la forme d'un lien vide, comme sur la fiche d'un album. Une série sans album, sans auteur ou sans genre le dit de même (« Aucun album dans la série pour l'instant », sans barre de progression ; « Aucun auteur crédité sur la série » ; « Aucun genre »).
