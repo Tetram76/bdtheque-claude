@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — maquettes</title>
+<link rel="stylesheet" href="../shared/viewer.css">
+<script src="../shared/viewer.js"></script>
+</head>
+<body>
+<script>
+Viewer.show({
+  title: 'Dashboard',
+  lead: 'La page d’accueil de la consultation : une alternative par thème en lice. Présentation : dashboard.md.',
+  versions: [
+    { title: 'Cases et bulles, violine', page: 'cases-et-bulles.html', params: { theme: 'violine' } },
+    { title: 'Cases et bulles, mûre', page: 'cases-et-bulles.html', params: { theme: 'mure' } },
+    { title: 'La gazette', page: 'gazette.html' },
+    { title: 'Le sommaire de magazine', page: 'sommaire.html' },
+    { title: 'Le festival en métro', page: 'festival.html' },
+    { title: 'Le fanzine en risographie', page: 'riso.html' },
+    { title: 'La vitrine de librairie', page: 'librairie.html' },
+    { title: 'L\'album de vignettes', page: 'vignettes.html' }
+  ]
+});
+</script>
+</body>
+</html>

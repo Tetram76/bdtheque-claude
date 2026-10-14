@@ -2,12 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dashboard — sommaire de magazine</title>
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;display=swap" rel="stylesheet">
 <style>
@@ -17,7 +13,11 @@ a{text-decoration:none;color:inherit}
 .entry:hover .pageno{transform:rotate(-4deg) scale(1.06)}
 .pageno{transition:transform .2s ease}
 </style>
-</helmet>
+<script src="../shared/mockup.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
 
   <header style="max-width: 1280px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 28px; border-bottom: 4px solid {{t.ink}}">
@@ -129,8 +129,8 @@ a{text-decoration:none;color:inherit}
     <a href="#" style="font-weight: 800">Administration</a>
   </footer>
 </div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["papier","noir"],"default":"papier"},"accent":{"editor":"color","default":"#E63946","options":["#E63946","#1D4ED8","#111111"]},"$preview":{"width":1440,"height":1500}}'>
+</template>
+<script>
 const HERO_LINES = [
   'Entrez donc, il y a de quoi lire !',
   'Installez-vous, la collection vous attend !',
@@ -138,7 +138,7 @@ const HERO_LINES = [
   'Encore de la place sur les étagères ? Pas sûr…',
   'Attention, ça déborde des étagères !'
 ];
-class Component extends DCLogic {
+class View extends Mockup {
   componentDidMount() {
     this.setState({ heroIndex: Math.floor(Math.random() * HERO_LINES.length) });
   }
@@ -173,6 +173,8 @@ class Component extends DCLogic {
     };
   }
 }
+
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["papier", "noir"], "default": "papier"}, "accent": {"label": "Accent", "editor": "color", "default": "#E63946", "options": ["#E63946", "#1D4ED8", "#111111"]}});
 </script>
 </body>
 </html>

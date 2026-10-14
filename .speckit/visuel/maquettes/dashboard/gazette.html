@@ -2,12 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dashboard — gazette</title>
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,600&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
 <style>
@@ -15,7 +11,11 @@ body{margin:0}
 a{text-decoration:none;color:inherit}a:hover{text-decoration:underline;text-decoration-thickness:2px}
 @media (max-width: 900px){.cols > *{flex-basis:100% !important}}
 </style>
-</helmet>
+<script src="../shared/mockup.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
 <div style="min-height: 100vh; background: {{paper}}; color: {{ink}}; font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55">
   <div style="max-width: 1240px; margin: 0 auto; padding: 24px 28px 64px; box-sizing: border-box">
 
@@ -153,8 +153,8 @@ a{text-decoration:none;color:inherit}a:hover{text-decoration:underline;text-deco
     </footer>
   </div>
 </div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"paper":{"editor":"color","default":"#FBF3EA","options":["#FBF3EA","#F4EBDD","#FFFFFF"]},"accent":{"editor":"color","default":"#FFB547","options":["#FFB547","#FFD166","#9BE07A","#4FD1C5"]},"$preview":{"width":1440,"height":1700}}'>
+</template>
+<script>
 const HERO_LINES = [
   'Entrez donc, il y a de quoi lire !',
   'Installez-vous, la collection vous attend !',
@@ -162,7 +162,7 @@ const HERO_LINES = [
   'Encore de la place sur les étagères ? Pas sûr…',
   'Attention, ça déborde des étagères !'
 ];
-class Component extends DCLogic {
+class View extends Mockup {
   componentDidMount() {
     this.setState({ heroIndex: Math.floor(Math.random() * HERO_LINES.length) });
   }
@@ -224,6 +224,8 @@ class Component extends DCLogic {
     };
   }
 }
+
+Mockup.mount(View, {"paper": {"label": "Papier", "editor": "color", "default": "#FBF3EA", "options": ["#FBF3EA", "#F4EBDD", "#FFFFFF"]}, "accent": {"label": "Accent", "editor": "color", "default": "#FFB547", "options": ["#FFB547", "#FFD166", "#9BE07A", "#4FD1C5"]}});
 </script>
 </body>
 </html>

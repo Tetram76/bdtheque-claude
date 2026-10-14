@@ -2,12 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fiche d'auteur</title>
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
 <style>
@@ -17,7 +13,11 @@ input::placeholder{color:inherit}
 :focus-visible{outline:3px solid currentColor;outline-offset:2px}
 summary{cursor:pointer}
 </style>
-</helmet>
+<script src="../shared/mockup.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
 
   <header style="background: {{t.hBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
@@ -142,8 +142,8 @@ summary{cursor:pointer}
     <span>Fiche créée le 2 février 2026, modifiée le 2 février 2026.</span>
   </footer>
 </div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["violine","mure","gazette","sommaire","festival","riso","librairie","vignettes"],"default":"violine"},"$preview":{"width":1440,"height":2500}}'>
+</template>
+<script>
 // Shared defaults: each theme only states what its identity changes.
 const BASE = {
   kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
@@ -305,7 +305,7 @@ const ROLE_ORDER = ['scenario', 'dessin', 'couleurs'];
 const FOLD_ABOVE = 6;
 const GENERIC_CARD = 'rgba(127,127,127,.35)';
 
-class Component extends DCLogic {
+class View extends Mockup {
   renderVals() {
     const key = this.props.theme ?? 'violine';
     const t = THEMES[key] ?? THEMES.violine;
@@ -418,6 +418,8 @@ class Component extends DCLogic {
     };
   }
 }
+
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["violine", "mure", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "violine"}});
 </script>
 </body>
 </html>

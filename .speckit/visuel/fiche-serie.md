@@ -8,20 +8,18 @@ La fiche est déclinée selon chacun des thèmes en lice pour la partie Consulta
 
 ## Maquettes
 
-Toutes les déclinaisons forment la page « Fiche de série » du canevas des maquettes (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Leurs sources sont dans [`maquettes/fiche-serie/`](maquettes/fiche-serie/).
+Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/fiche-serie/`](maquettes/fiche-serie/index.html) (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` :
 
-| Thème | Fichiers |
+| Thème | Paramètre `theme` |
 | --- | --- |
-| Cases et bulles, violine | `Serie-Violine.dc.html` |
-| Cases et bulles, mûre | `Serie-Mure.dc.html` |
-| La gazette | `Serie-Gazette.dc.html` |
-| Le sommaire de magazine | `Serie-Sommaire.dc.html` |
-| Le festival en métro | `Serie-Festival.dc.html` |
-| Le fanzine en risographie | `Serie-Riso.dc.html` |
-| La vitrine de librairie | `Serie-Librairie.dc.html` |
-| L'album de vignettes | `Serie-Vignettes.dc.html` |
-
-`Main.dc.html` n'est pas une déclinaison : c'est la source commune, que chaque planche affiche avec son thème. Son nom est imposé par le canevas, dont c'est le fichier d'entrée.
+| Cases et bulles, violine | `violine` |
+| Cases et bulles, mûre | `mure` |
+| La gazette | `gazette` |
+| Le sommaire de magazine | `sommaire` |
+| Le festival en métro | `festival` |
+| Le fanzine en risographie | `riso` |
+| La vitrine de librairie | `librairie` |
+| L'album de vignettes | `vignettes` |
 
 Quatre exemples, au choix du réglage « exemple » de la source commune : `longue` (par défaut), une série en cours de 32 albums (28 tomes, deux intégrales, deux hors-séries), dont cinq hors de la collection et un visé par une intention d'achat, dessinée par neuf auteurs, rattachée à un sous-univers ; `heads`, une série terminée et complète de quatre tomes sans titre propre ; `courte`, une série d'un seul album, sans éditeur, collection, nombre de tomes prévu ni résumé ; `vide`, une série tout juste créée, sans album, auteur, genre ni statut. Les couvertures sont des illustrations de substitution.
 

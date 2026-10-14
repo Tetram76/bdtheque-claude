@@ -2,12 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tableau de bord</title>
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
 <style>
@@ -17,7 +13,11 @@ a{text-decoration:none}a:hover{color:#FFB547}
 a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;box-shadow:0 24px 40px rgba(0,0,0,.5)}
 @media (max-width: 640px){.section-link{position:static !important;display:block;text-align:right;margin:0 0 18px}.book-pile{zoom:.6}}
 </style>
-</helmet>
+<script src="../shared/mockup.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: #FBF3EA; font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
 
   <header style="max-width: 1280px; margin: 0 auto; padding: 20px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px">
@@ -190,8 +190,8 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <a href="#" style="color: {{t.soft}}">Administration</a>
   </footer>
 </div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["violine","mure"],"default":"violine"},"accent":{"editor":"color","default":"#FFB547","options":["#FFB547","#FFD166","#FF9F43","#F4A261"]},"$preview":{"width":1440,"height":2000}}'>
+</template>
+<script>
 const HERO_LINES = [
   'Entrez donc, il y a de quoi lire !',
   'Installez-vous, la collection vous attend !',
@@ -199,7 +199,7 @@ const HERO_LINES = [
   'Encore de la place sur les étagères ? Pas sûr…',
   'Attention, ça déborde des étagères !'
 ];
-class Component extends DCLogic {
+class View extends Mockup {
   componentDidMount() {
     this.setState({
       heroIndex: Math.floor(Math.random() * HERO_LINES.length),
@@ -269,6 +269,8 @@ class Component extends DCLogic {
     };
   }
 }
+
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["violine", "mure"], "default": "violine"}, "accent": {"label": "Accent", "editor": "color", "default": "#FFB547", "options": ["#FFB547", "#FFD166", "#FF9F43", "#F4A261"]}});
 </script>
 </body>
 </html>

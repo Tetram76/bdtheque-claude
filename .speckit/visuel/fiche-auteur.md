@@ -8,20 +8,18 @@ La fiche est déclinée selon chacun des thèmes en lice pour la partie Consulta
 
 ## Maquettes
 
-Toutes les déclinaisons forment la page « Fiche d'auteur » du canevas des maquettes (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Leurs sources sont dans [`maquettes/fiche-auteur/`](maquettes/fiche-auteur/).
+Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/fiche-auteur/`](maquettes/fiche-auteur/index.html) (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` :
 
-| Thème | Fichiers |
+| Thème | Paramètre `theme` |
 | --- | --- |
-| Cases et bulles, violine | `Auteur-Violine.dc.html` |
-| Cases et bulles, mûre | `Auteur-Mure.dc.html` |
-| La gazette | `Auteur-Gazette.dc.html` |
-| Le sommaire de magazine | `Auteur-Sommaire.dc.html` |
-| Le festival en métro | `Auteur-Festival.dc.html` |
-| Le fanzine en risographie | `Auteur-Riso.dc.html` |
-| La vitrine de librairie | `Auteur-Librairie.dc.html` |
-| L'album de vignettes | `Auteur-Vignettes.dc.html` |
-
-`Main.dc.html` n'est pas une déclinaison : c'est la source commune, que chaque planche affiche avec son thème. Son nom est imposé par le canevas, dont c'est le fichier d'entrée.
+| Cases et bulles, violine | `violine` |
+| Cases et bulles, mûre | `mure` |
+| La gazette | `gazette` |
+| Le sommaire de magazine | `sommaire` |
+| Le festival en métro | `festival` |
+| Le fanzine en risographie | `riso` |
+| La vitrine de librairie | `librairie` |
+| L'album de vignettes | `vignettes` |
 
 L'exemple présenté est un auteur sans biographie ni nationalité, crédité sur huit séries et deux albums sans série, dont une série de seize albums, une série sur laquelle il n'est crédité que sur la série elle-même, plusieurs rôles sur un même album et des albums hors de la collection.
 
