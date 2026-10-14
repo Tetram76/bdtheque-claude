@@ -34,7 +34,7 @@
 
     private List<(TypeShare Share, List<string> Books)> _piles = [];
 
-    // Drawn again on every display, as the mockup requires: same algorithm as Main.dc.html.
+    // Drawn again on every display, as the mockup requires: same algorithm as the dashboard mockup (cases-et-bulles.html).
     protected override void OnParametersSet() =>
         _piles = Data.Shares
             .Select(s => (s, Pile(Math.Max(1, (int)Math.Round(s.Count / 100.0)), Shades[s.Kind], s.Kind == AlbumKind.Omnibus)))

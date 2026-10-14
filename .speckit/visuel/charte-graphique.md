@@ -29,4 +29,14 @@ Couleurs, typographie et éléments graphiques ne sont pas communs : chaque alte
 
 ## Maquettes
 
-Toutes les maquettes sont réalisées dans **un seul canevas** *Design* de Claude, <https://claude.ai/artifact/57fW7eokzrDkJ1MwVPMZJA>, avec **une page par écran** de l'application. Ses sources sont conservées dans [`maquettes/`](maquettes/), un sous-dossier par écran ; [`maquettes/canvas.json`](maquettes/canvas.json) en est l'index : il donne les pages, et la disposition et le titre des planches. Les maquettes ne s'ouvrent qu'à travers ce canevas. Leurs données sont fictives. Chaque maquette est **déclinée dans le visuel de chaque thème** en lice, une planche par thème. Le fichier de chaque écran indique ses sources.
+Les maquettes sont des **pages HTML autonomes**, conservées dans [`maquettes/`](maquettes/) : elles s'ouvrent dans un navigateur, depuis le dépôt, sans autre ressource externe que leurs polices (Google Fonts). Leurs données sont fictives.
+
+- [`maquettes/index.html`](maquettes/index.html) les liste, en deux sections : **Consultation** et **Administration**.
+- Chaque écran a **son dossier**, dont la page `index.html` est une **visionneuse** : elle présente ses versions **côte à côte**, une par thème en lice, à la largeur d'un écran de bureau ou d'un smartphone, avec leurs réglages (exemple présenté, menu ouvert…). Chaque version peut aussi être agrandie, seule en pleine largeur.
+- Chaque maquette est ainsi **déclinée dans le visuel de chaque thème** en lice. Le fichier de chaque écran indique ses sources.
+- Le moteur d'affichage des maquettes et la visionneuse sont communs à tous les écrans ([`maquettes/shared/`](maquettes/shared/)).
+
+### Gestion des maquettes
+
+- **Source de vérité : le dépôt.** Les maquettes sont conçues et modifiées dans [`maquettes/`](maquettes/), et nulle part ailleurs.
+- **Publication systématique sur claude.ai**, pour en faciliter la visualisation : le dossier `maquettes/` est publié tel quel comme artifact claude.ai, <https://claude.ai/artifact/ADvU1T6KZEjKQdPFCRfSAD>, toujours à cette même adresse. Chaque modification des maquettes y est republiée. Cette publication n'est qu'une copie de consultation : elle n'est jamais modifiée directement, et ne fait jamais foi face au dépôt.

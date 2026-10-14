@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiche d’album — maquettes</title>
+<link rel="stylesheet" href="../shared/viewer.css">
+<script src="../shared/viewer.js"></script>
+</head>
+<body>
+<script>
+Viewer.show({
+  title: 'Fiche d’album',
+  lead: 'La fiche d’un album en consultation, déclinée dans chaque thème. Présentation : fiche-album.md.',
+  versions: [
+    { title: 'Cases et bulles, violine', page: 'mockup.html', params: { theme: 'violine' } },
+    { title: 'Cases et bulles, mûre', page: 'mockup.html', params: { theme: 'mure' } },
+    { title: 'La gazette', page: 'mockup.html', params: { theme: 'gazette' } },
+    { title: 'Le sommaire de magazine', page: 'mockup.html', params: { theme: 'sommaire' } },
+    { title: 'Le festival en métro', page: 'mockup.html', params: { theme: 'festival' } },
+    { title: 'Le fanzine en risographie', page: 'mockup.html', params: { theme: 'riso' } },
+    { title: 'La vitrine de librairie', page: 'mockup.html', params: { theme: 'librairie' } },
+    { title: 'L\'album de vignettes', page: 'mockup.html', params: { theme: 'vignettes' } }
+  ]
+});
+</script>
+</body>
+</html>

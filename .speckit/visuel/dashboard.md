@@ -11,20 +11,20 @@ Plusieurs présentations du dashboard restent en lice. Ce sont des **alternative
 
 ## Maquettes
 
-Toutes les alternatives forment la page « Dashboard » du canevas des maquettes (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Leurs sources sont dans [`maquettes/dashboard/`](maquettes/dashboard/).
+Toutes les alternatives sont présentées côte à côte par la visionneuse [`maquettes/dashboard/`](maquettes/dashboard/index.html) (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes).
 
-| Alternative | Fichiers |
+| Alternative | Fichier |
 | --- | --- |
-| Cases et bulles, violine | `Violine.dc.html` |
-| Cases et bulles, mûre | `Mure.dc.html` |
-| La gazette | `Gazette.dc.html` |
-| Le sommaire de magazine | `Sommaire.dc.html` |
-| Le festival en métro | `FestivalMetro.dc.html` |
-| Le fanzine en risographie | `Riso.dc.html` |
-| La vitrine de librairie | `Librairie.dc.html` |
-| L'album de vignettes | `Vignettes.dc.html` |
+| Cases et bulles, violine | `cases-et-bulles.html`, paramètre `theme` : `violine` |
+| Cases et bulles, mûre | `cases-et-bulles.html`, paramètre `theme` : `mure` |
+| La gazette | `gazette.html` |
+| Le sommaire de magazine | `sommaire.html` |
+| Le festival en métro | `festival.html` |
+| Le fanzine en risographie | `riso.html` |
+| La vitrine de librairie | `librairie.html` |
+| L'album de vignettes | `vignettes.html` |
 
-`Main.dc.html` n'est pas une alternative : c'est la source commune des deux alternatives « Cases et bulles », que chacune affiche avec sa teinte. Son nom est imposé par le canevas, dont c'est le fichier d'entrée.
+`cases-et-bulles.html` est la source commune des deux alternatives « Cases et bulles », que chacune affiche avec sa teinte.
 
 ## Contenu commun
 
@@ -53,7 +53,7 @@ Chaque genre, éditeur ou album mène à la liste ou à la fiche correspondante.
 
 ### Cases et bulles, violine et mûre
 
-Deux alternatives, identiques à la teinte près : l'une en teinte violine, l'autre en teinte mûre. Sources : `Violine.dc.html` et `Mure.dc.html`, qui affichent toutes deux `Main.dc.html`.
+Deux alternatives, identiques à la teinte près : l'une en teinte violine, l'autre en teinte mûre. Source : `cases-et-bulles.html`, dont le paramètre `theme` choisit la teinte (`violine` ou `mure`).
 
 #### Apparence
 
@@ -98,7 +98,7 @@ De haut en bas :
 
 ### La gazette
 
-Le dashboard mis en page comme la une d'un journal. Source : `Gazette.dc.html`.
+Le dashboard mis en page comme la une d'un journal. Source : `gazette.html`.
 
 #### Apparence
 
@@ -124,7 +124,7 @@ De haut en bas :
 
 ### Le sommaire de magazine
 
-Le dashboard présenté comme la couverture et le sommaire d'un magazine populaire. Chaque rubrique du sommaire annonce une statistique. Son titre mène à sa liste ou à sa page détaillée, et chaque album, genre ou éditeur qu'elle montre mène à sa fiche ou à sa liste. Source : `Sommaire.dc.html`, en thème « papier ».
+Le dashboard présenté comme la couverture et le sommaire d'un magazine populaire. Chaque rubrique du sommaire annonce une statistique. Son titre mène à sa liste ou à sa page détaillée, et chaque album, genre ou éditeur qu'elle montre mène à sa fiche ou à sa liste. Source : `sommaire.html`, en thème « papier ».
 
 #### Apparence
 
@@ -152,7 +152,7 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
 
 ### Le festival en métro
 
-Le dashboard présenté comme un festival de bande dessinée, desservi par une ligne de métro : la structure d'un plan de métro, les couleurs et les objets d'un festival. Source : `FestivalMetro.dc.html`.
+Le dashboard présenté comme un festival de bande dessinée, desservi par une ligne de métro : la structure d'un plan de métro, les couleurs et les objets d'un festival. Source : `festival.html`.
 
 #### Apparence
 
@@ -181,7 +181,7 @@ Une ligne corail, la « Navette du festival », descend le long de la page. Chaq
 
 ### Le fanzine en risographie
 
-Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres, qui se mélangent là où elles se chevauchent, avec un léger décalage d'impression. Source : `Riso.dc.html`.
+Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres, qui se mélangent là où elles se chevauchent, avec un léger décalage d'impression. Source : `riso.html`.
 
 #### Apparence
 
@@ -212,7 +212,7 @@ Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres,
 
 ### La vitrine de librairie
 
-Le dashboard présenté comme une librairie de bandes dessinées : la façade, puis l'intérieur de la boutique. Source : `Librairie.dc.html`.
+Le dashboard présenté comme une librairie de bandes dessinées : la façade, puis l'intérieur de la boutique. Source : `librairie.html`.
 
 #### Apparence
 
@@ -245,7 +245,7 @@ Le dashboard présenté comme une librairie de bandes dessinées : la façade, p
 
 ### L'album de vignettes
 
-Le dashboard présenté comme un album de vignettes autocollantes à collectionner, page par page. Source : `Vignettes.dc.html`.
+Le dashboard présenté comme un album de vignettes autocollantes à collectionner, page par page. Source : `vignettes.html`.
 
 #### Apparence
 

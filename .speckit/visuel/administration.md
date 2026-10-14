@@ -8,20 +8,18 @@ La page est déclinée selon chacun des thèmes en lice pour la partie Consultat
 
 ## Maquettes
 
-Toutes les déclinaisons forment la page « Administration » du canevas des maquettes (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Leurs sources sont dans [`maquettes/administration/`](maquettes/administration/).
+Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/administration/`](maquettes/administration/index.html) (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` :
 
-| Thème | Fichiers |
+| Thème | Paramètre `theme` |
 | --- | --- |
-| Cases et bulles, violine | `EtabliMenu-Violine.dc.html` |
-| Cases et bulles, mûre | `EtabliMenu-Mure.dc.html` |
-| La gazette | `EtabliMenu-Gazette.dc.html` |
-| Le sommaire de magazine | `EtabliMenu-Sommaire.dc.html` |
-| Le festival en métro | `EtabliMenu-Festival.dc.html` |
-| Le fanzine en risographie | `EtabliMenu-Riso.dc.html` |
-| La vitrine de librairie | `EtabliMenu-Librairie.dc.html` |
-| L'album de vignettes | `EtabliMenu-Vignettes.dc.html` |
-
-`Main.dc.html` n'est pas une déclinaison : c'est la source commune, que chaque planche affiche avec son thème. Son nom est imposé par le canevas, dont c'est le fichier d'entrée.
+| Cases et bulles, violine | `violine` |
+| Cases et bulles, mûre | `mure` |
+| La gazette | `gazette` |
+| Le sommaire de magazine | `sommaire` |
+| Le festival en métro | `festival` |
+| Le fanzine en risographie | `riso` |
+| La vitrine de librairie | `librairie` |
+| L'album de vignettes | `vignettes` |
 
 ## Ton
 

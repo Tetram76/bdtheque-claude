@@ -2,12 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dashboard — vitrine de librairie</title>
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Caveat:wght@500;700&amp;family=Karla:wght@400;500;700&amp;display=swap" rel="stylesheet">
 <style>
@@ -17,7 +13,11 @@ a:hover{color:#B5523B}
 .book{transition:transform .25s ease}
 a:hover .book{transform:translateY(-6px)}
 </style>
-</helmet>
+<script src="../shared/mockup.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
 <div style="min-height: 100vh; background: #F5EEDF; color: #2A2420; font-family: Karla, system-ui, sans-serif; font-size: 16px; line-height: 1.55">
 
   <header style="background: #16291F; color: #F5EEDF">
@@ -177,8 +177,8 @@ a:hover .book{transform:translateY(-6px)}
     </div>
   </footer>
 </div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2100}}'>
+</template>
+<script>
 const HERO_LINES = [
   'Entrez donc, il y a de quoi lire !',
   'Installez-vous, la collection vous attend !',
@@ -186,7 +186,7 @@ const HERO_LINES = [
   'Encore de la place sur les étagères ? Pas sûr…',
   'Attention, ça déborde des étagères !'
 ];
-class Component extends DCLogic {
+class View extends Mockup {
   componentDidMount() {
     this.setState({
       heroIndex: Math.floor(Math.random() * HERO_LINES.length),
@@ -238,6 +238,8 @@ class Component extends DCLogic {
     };
   }
 }
+
+Mockup.mount(View, {});
 </script>
 </body>
 </html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BDthèque — maquettes</title>
+<link rel="stylesheet" href="shared/viewer.css">
+<script src="shared/viewer.js"></script>
+</head>
+<body>
+<script>
+Viewer.list({
+  title: 'BDthèque — maquettes',
+  lead: 'Une page par écran de l’application ; chacune présente ses versions côte à côte, une par thème en lice. Les données sont fictives.',
+  sections: [
+    {
+      title: 'Consultation',
+      screens: [
+        { title: 'Dashboard', description: 'La page d’accueil de la consultation : une alternative par thème.', href: 'dashboard/index.html', preview: 'dashboard/cases-et-bulles.html?theme=violine' },
+        { title: 'Fiche d’album', description: 'Visuels, éditions et contributions d’un album.', href: 'fiche-album/index.html', preview: 'fiche-album/mockup.html?theme=violine' },
+        { title: 'Fiche de série', description: 'Avancement de la collection et albums d’une série.', href: 'fiche-serie/index.html', preview: 'fiche-serie/mockup.html?theme=violine' },
+        { title: 'Fiche d’auteur', description: 'Bibliographie complète d’un auteur.', href: 'fiche-auteur/index.html', preview: 'fiche-auteur/mockup.html?theme=violine' }
+      ]
+    },
+    {
+      title: 'Administration',
+      screens: [
+        { title: 'Accueil de l’administration', description: 'Saisie à partir d’un ISBN, fiches, contrôles, journal et paramétrage.', href: 'administration/index.html', preview: 'administration/mockup.html?theme=violine' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>
