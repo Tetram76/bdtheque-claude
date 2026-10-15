@@ -8,7 +8,10 @@
   // Until a page reports its height, and whenever its width changes: a frame taller than its page
   // would stretch the pages that fill the viewport (min-height: 100vh), which would report it back.
   const INITIAL_HEIGHT = 600;
+  // Room kept in the window for the viewer's sticky toolbar and the version's own header.
+  const FIT_MARGIN = 150;
   const frames = [];
+  window.addEventListener('resize', () => frames.forEach((frame) => frame.fit && frame.layout()));
 
   function el(tag, attributes = {}, children = []) {
     const element = document.createElement(tag);
@@ -34,17 +37,21 @@
       iframe.setAttribute('aria-hidden', 'true');
     }
     const box = el('div', { class: 'frame-box' }, [iframe]);
-    const frame = { iframe, box, width: WIDTHS.desktop, height: INITIAL_HEIGHT, onSettings: null };
+    const frame = { iframe, box, width: WIDTHS.desktop, height: INITIAL_HEIGHT, fit: false, onSettings: null };
 
     frame.layout = () => {
       const available = box.clientWidth;
       if (!available) return;
       const scale = Math.min(1, available / frame.width);
+      // An enlarged version fits the window and scrolls inside, so that what stays in place while the page
+      // scrolls (the header) can be seen; side by side, each version shows its whole height.
+      const fitted = frame.fit ? Math.max(320, (window.innerHeight - FIT_MARGIN) / scale) : Infinity;
+      const height = Math.min(frame.height, fitted);
       iframe.style.width = `${frame.width}px`;
-      iframe.style.height = `${frame.height}px`;
+      iframe.style.height = `${height}px`;
       iframe.style.transform = `scale(${scale})`;
       iframe.style.marginLeft = `${(available - frame.width * scale) / 2}px`;
-      box.style.height = `${Math.ceil(Math.min(frame.height, maxHeight) * scale)}px`;
+      box.style.height = `${Math.ceil(Math.min(height, maxHeight) * scale)}px`;
     };
     frame.load = (url) => {
       frame.height = INITIAL_HEIGHT;
@@ -118,8 +125,10 @@
             c.section.classList.toggle('focus', enlarged && c === card);
             c.open.textContent = enlarged ? 'Toutes les versions' : 'Agrandir';
             c.open.setAttribute('aria-pressed', String(enlarged && c === card));
+            c.frame.fit = enlarged && c === card;
           }
           grid.classList.toggle('focused', enlarged);
+          cards.forEach((c) => c.frame.layout());
           card.section.scrollIntoView({ block: 'start' });
         } });
       card.frame.onSettings = (schema) => {
