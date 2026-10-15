@@ -21,8 +21,8 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
 <template id="view">
 <div style="min-height: 100vh; background: #F4EFE4; color: #0078BF; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; line-height: 1.45">
 
-  <header style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px">
-    <nav aria-label="Navigation principale" style="flex: 1 1 420px; min-width: 0; overflow-x: auto">
+  <header style="position: sticky; top: 0; z-index: 20; background: #F4EFE4; max-width: 1240px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px">
+    <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: #F4EFE4"><div data-scroll="">
       <div style="display: flex; gap: 6px; white-space: nowrap; width: max-content; font-weight: 700">
         <a href="#" aria-current="page" style="padding: 8px 14px; background: #FF48B0; color: #F4EFE4; mix-blend-mode: multiply">Accueil</a>
         <a href="#" style="padding: 8px 14px">Albums</a>
@@ -30,21 +30,21 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
         <a href="#" style="padding: 8px 14px">Auteurs</a>
         <a href="#" style="padding: 8px 14px">Intentions d'achat</a>
       </div>
-    </nav>
+    </div></nav>
     <div style="display: flex; gap: 6px; flex: 0 1 320px">
       <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
-      <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 44px; padding: 0 14px; border: 2px dashed #0078BF; background: transparent; color: #0078BF; font: inherit; outline: none">
-      <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; background: #0078BF; color: #F4EFE4; font: 18px 'Rubik Mono One', sans-serif; cursor: pointer">?</button>
+      <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 12px; border: 2px dashed #0078BF; background: transparent; color: #0078BF; font: inherit; outline: none">
+      <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: #0078BF; color: #F4EFE4; font: 18px 'Rubik Mono One', sans-serif; cursor: pointer">?</button>
     </div>
   </header>
 
-  <main style="max-width: 1240px; margin: 0 auto; padding: 16px 24px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 64px">
+  <main style="max-width: 1240px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 44px">
 
     <section aria-labelledby="h-hero" style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 32px 40px">
       <div style="flex: 1 1 560px; min-width: 0">
-        <a href="#" style="display: block; font-family: 'Rubik Mono One', sans-serif; font-size: clamp(30px, 10vw, 140px); line-height: .9; color: #0078BF; text-shadow: 6px 4px 0 rgba(255,72,176,.85)">BDTHÈQUE</a>
+        <a href="#" style="display: block; font-family: 'Rubik Mono One', sans-serif; font-size: clamp(30px, 8.5vw, 116px); line-height: .9; color: #0078BF; text-shadow: 6px 4px 0 rgba(255,72,176,.85)">BDTHÈQUE</a>
         <div style="margin-top: 8px; font-family: 'Rubik Mono One', sans-serif; font-size: 20px; color: #FF48B0">ZINE N° 2847 · PRIX LIBRE</div>
-        <h1 id="h-hero" class="cut" style="display: inline-block; margin: 26px 0 0; padding: 12px 18px; background: #FF48B0; color: #F4EFE4; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(24px, 3vw, 38px); line-height: 1.15; transform: rotate(-2deg); mix-blend-mode: multiply">{{heroLine}}</h1>
+        <h1 id="h-hero" class="cut" style="display: inline-block; margin: 18px 0 0; padding: 10px 16px; background: #FF48B0; color: #F4EFE4; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 32px); line-height: 1.15; transform: rotate(-2deg); mix-blend-mode: multiply">{{heroLine}}</h1>
       </div>
       <div class="disks" style="flex: 0 1 380px; position: relative; height: 340px; min-width: 300px">
         <a href="#" style="position: absolute; left: 0; top: 30px; width: 210px; height: 210px; border-radius: 50%; background: #0078BF; color: #F4EFE4; mix-blend-mode: multiply; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-family: 'Rubik Mono One', sans-serif; font-size: 40px">2847</span><span style="font-weight: 700">albums</span></a>
@@ -53,31 +53,31 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
       </div>
     </section>
 
-    <section aria-labelledby="h-recent" style="display: flex; flex-direction: column; gap: 22px">
+    <section aria-labelledby="h-recent" style="display: flex; flex-direction: column; gap: 16px">
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
         <h2 id="h-recent" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 30px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Tout juste arrivés !</h2>
         <a href="#" style="font-weight: 700; color: #FF48B0">Tous les albums →</a>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 30px 22px">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(clamp(96px, 24vw, 160px), calc((100% - 2 * 16px) / 3)), 1fr)); gap: 22px 16px; padding-right: 8px">
         <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
-          <a href="#" style="display: flex; flex-direction: column; gap: 10px">
+          <a href="#" style="display: flex; flex-direction: column; gap: 8px">
             <span class="cut" style="position: relative; display: block; transform: rotate({{r.rot}})">
               <span aria-hidden="true" style="position: absolute; inset: 0; transform: translate(6px, 5px); background: #FF48B0; mix-blend-mode: multiply"></span>
               <span style="position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 4; background-color: #0078BF; background-image: radial-gradient(rgba(244,239,228,.5) 1.2px, transparent 1.6px); background-size: 6px 6px; color: #F4EFE4; font-size: 12px; mix-blend-mode: multiply">[Couverture]</span>
               <span aria-hidden="true" style="position: absolute; top: -10px; left: 50%; width: 64px; height: 20px; margin-left: -32px; background: rgba(255,232,0,.75); transform: rotate(-4deg)"></span>
             </span>
-            <span style="font-weight: 700; line-height: 1.25">{{r.label}}</span>
-            <span style="font-size: 14px; color: #FF48B0">{{r.meta}}</span>
+            <span style="font-size: 14px; font-weight: 700; line-height: 1.25">{{r.label}}</span>
+            <span style="font-size: 13px; color: #FF48B0">{{r.meta}}</span>
           </a>
         </sc-for>
       </div>
     </section>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 48px">
+    <div style="display: flex; flex-wrap: wrap; gap: 36px">
       <section aria-labelledby="h-value" style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
         <h2 id="h-value" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Ça vaut combien, tout ça ?</h2>
         <div style="font-weight: 700">Valeur totale estimée</div>
-        <div style="font-family: 'Rubik Mono One', sans-serif; font-size: clamp(48px, 6vw, 76px); line-height: 1; color: #FF48B0; text-shadow: 5px 4px 0 rgba(0,120,191,.6)">38 760 €</div>
+        <div style="font-family: 'Rubik Mono One', sans-serif; font-size: clamp(36px, 5vw, 64px); line-height: 1; color: #FF48B0; text-shadow: 5px 4px 0 rgba(0,120,191,.6)">38 760 €</div>
         <div style="font-family: 'Rubik Mono One', sans-serif; font-size: 24px">55 230 € du jour</div>
         <p style="margin: 0">Valeur connue : <strong>31 482 €</strong> · 44 910 € du jour.</p>
         <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 22px">
@@ -90,7 +90,7 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
 
       <section aria-labelledby="h-type" style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
         <h2 id="h-type" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 22px; line-height: 1.3; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Tomes, intégrales ou hors-séries ?</h2>
-        <div role="img" aria-label="2 571 réguliers (90 %), 184 intégrales (6 %), 92 hors-séries (3 %) ; surface des disques proportionnelle" style="position: relative; height: 260px">
+        <div class="disks" role="img" aria-label="2 571 réguliers (90 %), 184 intégrales (6 %), 92 hors-séries (3 %) ; surface des disques proportionnelle" style="position: relative; height: 260px">
           <span style="position: absolute; left: 10px; top: 0; width: 250px; height: 250px; border-radius: 50%; background: #0078BF; mix-blend-mode: multiply"></span>
           <span style="position: absolute; left: 226px; top: 120px; width: 66px; height: 66px; border-radius: 50%; background: #FF48B0; mix-blend-mode: multiply"></span>
           <span style="position: absolute; left: 270px; top: 190px; width: 46px; height: 46px; border-radius: 50%; background: #FFE800; mix-blend-mode: multiply"></span>
@@ -104,7 +104,7 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
       </section>
     </div>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 48px">
+    <div style="display: flex; flex-wrap: wrap; gap: 36px">
       <section aria-labelledby="h-genre" style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
         <h2 id="h-genre" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Plutôt quel genre ?</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 10px">

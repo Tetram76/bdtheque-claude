@@ -20,41 +20,41 @@ summary{cursor:pointer}
 <template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
 
-  <header style="background: {{t.hBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
-    <div style="max-width: 1280px; margin: 0 auto; padding: 16px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px">
+  <header style="position: sticky; top: 0; z-index: 20; background: {{hintBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
       <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
         <sc-if value="{{t.lgMark}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
         <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
       </a>
-      <nav aria-label="Navigation principale" style="flex: 1 1 auto; min-width: 0">
-        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px">
+      <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: {{hintBg}}">
+        <ul data-scroll="" style="margin: 0; padding: 0; list-style: none; display: flex; gap: 4px; white-space: nowrap">
           <sc-for list="{{nav}}" as="n" hint-placeholder-count="6">
-            <li><a href="#" aria-current="{{n.current}}" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: {{t.btnR}}; background: {{n.bg}}; color: {{n.fg}}; font-weight: 700; font-size: 14px; text-transform: {{t.navTT}}; text-decoration: {{n.deco}}; text-decoration-color: {{t.navLine}}; text-decoration-thickness: 3px; text-underline-offset: 6px">{{n.label}}</a></li>
+            <li style="flex: none"><a href="#" aria-current="{{n.current}}" style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border-radius: {{t.btnR}}; background: {{n.bg}}; color: {{n.fg}}; font-weight: 700; font-size: 14px; text-transform: {{t.navTT}}; text-decoration: {{n.deco}}; text-decoration-color: {{t.navLine}}; text-decoration-thickness: 3px; text-underline-offset: 6px">{{n.label}}</a></li>
           </sc-for>
         </ul>
       </nav>
-      <div style="flex: 1 1 260px; min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 8px">
+      <div style="flex: 1 1 260px; max-width: 380px; min-width: 0; margin-left: auto; display: flex; justify-content: flex-end; align-items: center; gap: 8px">
         <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Rechercher</label>
-        <input id="find" type="search" placeholder="Un album, une série, un auteur…" style="flex: 1 1 220px; max-width: 320px; min-width: 0; height: 44px; padding: 0 16px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
-        <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
+        <input id="find" type="search" placeholder="Un album, une série, un auteur…" style="flex: 1 1 220px; max-width: 320px; min-width: 0; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
       </div>
     </div>
   </header>
 
-  <div style="max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; box-sizing: border-box">
-    <nav aria-label="Fil d'Ariane" style="margin-bottom: 20px; font-size: 14px; color: {{t.muted}}">
+  <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
+    <nav aria-label="Fil d'Ariane" style="margin-bottom: 12px; font-size: 13px; color: {{t.muted}}">
       <a href="#" style="color: {{t.link}}; font-weight: 700">Auteurs</a> <span aria-hidden="true">›</span> <span>{{a.name}}</span>
     </nav>
 
-    <main style="display: flex; flex-direction: column; gap: 44px">
+    <main style="display: flex; flex-direction: column; gap: 22px">
 
-      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px 40px">
-        <div aria-hidden="true" style="position: relative; flex: none; width: 150px; height: 150px">
-          <span style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: {{t.cvPad}}; border: {{t.cvB}}; border-radius: {{mono.r}}; background: {{mono.bg}}; color: {{mono.fg}}; box-shadow: {{t.cvSh}}; transform: rotate({{t.cvRot}}); font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 56px; text-transform: uppercase">{{a.initials}}</span>
-          <sc-if value="{{t.tape}}" hint-placeholder-val="{{false}}"><span style="position: absolute; top: -12px; left: 50%; width: 80px; height: 24px; margin-left: -40px; background: rgba(255,232,0,.75); transform: rotate(-4deg)"></span></sc-if>
-          <sc-if value="{{t.shelf}}" hint-placeholder-val="{{false}}"><span style="position: absolute; left: -14px; right: -14px; bottom: -14px; height: 14px; background: #5B3A24; box-shadow: 0 4px 0 #3F2818"></span></sc-if>
+      <div style="display: flex; align-items: flex-start; gap: 16px">
+        <div aria-hidden="true" style="position: relative; flex: none; width: 52px; height: 52px; margin-top: 4px">
+          <span style="width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0; border: {{t.cvB}}; border-radius: {{mono.r}}; background: {{mono.bg}}; color: {{mono.fg}}; box-shadow: {{t.cvSh}}; transform: rotate({{t.cvRot}}); font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 20px; text-transform: uppercase">{{a.initials}}</span>
+          <sc-if value="{{t.tape}}" hint-placeholder-val="{{false}}"><span style="position: absolute; top: -6px; left: 50%; width: 36px; height: 12px; margin-left: -18px; background: rgba(255,232,0,.75); transform: rotate(-4deg)"></span></sc-if>
+          <sc-if value="{{t.shelf}}" hint-placeholder-val="{{false}}"><span style="position: absolute; left: -6px; right: -6px; bottom: -8px; height: 8px; background: #5B3A24; box-shadow: 0 3px 0 #3F2818"></span></sc-if>
         </div>
-        <div style="flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+        <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 10px">
           <div style="display: flex; flex-direction: column; gap: 6px">
             <span style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">Auteur</span>
             <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">{{a.name}}</h1>
@@ -66,66 +66,66 @@ summary{cursor:pointer}
               <dd style="margin: 0; color: {{a.nationalityColor}}">{{a.nationality}}</dd>
             </div>
           </dl>
-          <ul aria-label="En bref" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px">
+          <ul aria-label="En bref" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
             <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
-              <li style="display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; box-sizing: border-box; border: {{f.bd}}; border-radius: {{t.btnR}}; background: {{f.bg}}; color: {{f.fg}}; font-weight: 700; font-size: 14px">{{f.label}}</li>
+              <li style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; box-sizing: border-box; border: {{f.bd}}; border-radius: {{t.btnR}}; background: {{f.bg}}; color: {{f.fg}}; font-weight: 700; font-size: 13px">{{f.label}}</li>
             </sc-for>
           </ul>
         </div>
       </div>
 
-      <section aria-labelledby="a-bio" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 16px">
+      <section aria-labelledby="a-bio" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.bio}}</span>
         <h2 id="a-bio" style="position: relative; align-self: flex-start; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Qui est-ce ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
-        <p style="margin: 0; max-width: 72ch; font-size: 16px; color: {{a.bioColor}}">{{a.bio}}</p>
+        <p style="margin: 0; max-width: 80ch; font-size: 15px; color: {{a.bioColor}}">{{a.bio}}</p>
       </section>
 
-      <section aria-labelledby="a-biblio" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 18px">
+      <section aria-labelledby="a-biblio" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 10px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.biblio}}</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 16px">
           <h2 id="a-biblio" style="position: relative; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Sur quels albums ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
           <div style="display: flex; flex-wrap: wrap; gap: 8px">
-            <button type="button" onClick="{{openAll}}" style="min-height: 40px; padding: 0 14px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer">Tout déplier</button>
-            <button type="button" onClick="{{closeAll}}" style="min-height: 40px; padding: 0 14px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer">Tout replier</button>
+            <button type="button" onClick="{{openAll}}" style="min-height: 32px; padding: 0 12px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Tout déplier</button>
+            <button type="button" onClick="{{closeAll}}" style="min-height: 32px; padding: 0 12px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Tout replier</button>
           </div>
         </div>
-        <p style="margin: 0; font-size: 14px; color: {{t.muted}}">{{biblioSummary}}</p>
+        <p style="margin: 0; font-size: 13px; color: {{t.muted}}">{{biblioSummary}}</p>
 
         <ul style="margin: 0; padding: 0; list-style: none; border-top: {{t.rowB}}">
           <sc-for list="{{entries}}" as="e" hint-placeholder-count="9">
             <li style="border-bottom: {{t.rowB}}">
-              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-height: 58px; padding: 8px 0; box-sizing: border-box">
-                <sc-if value="{{e.noOpen}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 40px; flex: none"></span></sc-if>
-                <sc-if value="{{e.canOpen}}" hint-placeholder-val="{{true}}"><button type="button" aria-expanded="{{e.expanded}}" aria-label="{{e.toggleLabel}}" onClick="{{e.toggle}}" style="width: 40px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: {{t.text}}; cursor: pointer"><span aria-hidden="true" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: {{nest.bg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate({{e.chevron}})"><path d="M9 6l6 6-6 6"></path></svg></span></button></sc-if>
-                <sc-if value="{{e.isSeries}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="position: relative; width: 40px; height: 44px; flex: none">
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-height: 44px; padding: 4px 0; box-sizing: border-box">
+                <sc-if value="{{e.noOpen}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 34px; flex: none"></span></sc-if>
+                <sc-if value="{{e.canOpen}}" hint-placeholder-val="{{true}}"><button type="button" aria-expanded="{{e.expanded}}" aria-label="{{e.toggleLabel}}" onClick="{{e.toggle}}" style="width: 34px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: {{t.text}}; cursor: pointer"><span aria-hidden="true" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: {{nest.bg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate({{e.chevron}})"><path d="M9 6l6 6-6 6"></path></svg></span></button></sc-if>
+                <sc-if value="{{e.isSeries}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="position: relative; width: 40px; height: 40px; flex: none">
                   <sc-for list="{{e.stack}}" as="c" hint-placeholder-count="3"><span style="position: absolute; left: {{c.left}}; top: {{c.top}}; width: 24px; height: 32px; border-radius: 3px; background: {{c.bg}}; box-shadow: 0 0 0 1.5px {{t.bg}}, 0 1px 3px rgba(0,0,0,.3); transform: rotate({{c.rot}})"></span></sc-for>
                 </span></sc-if>
-                <sc-if value="{{e.isAlbum}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 40px; flex: none"></span></sc-if>
+                <sc-if value="{{e.isAlbum}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 34px; flex: none"></span></sc-if>
                 <sc-if value="{{e.isAlbum}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 40px; height: 40px; flex: none; display: inline-flex; align-items: center; justify-content: center"><span style="width: 30px; height: 40px; border-radius: 3px; background: {{e.cover}}; box-shadow: 0 1px 3px rgba(0,0,0,.3)"></span></span></sc-if>
-                <span style="flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column">
-                  <a href="#" style="align-self: flex-start; font-weight: 700; font-size: 17px; color: {{t.text}}">{{e.title}}</a>
-                  <span style="font-size: 13px; color: {{t.muted}}">{{e.meta}}</span>
+                <span style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; line-height: 1.3">
+                  <a href="#" style="align-self: flex-start; font-weight: 700; font-size: 15px; color: {{t.text}}">{{e.title}}</a>
+                  <span style="font-size: 12px; color: {{t.muted}}">{{e.meta}}</span>
                 </span>
-                <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
-                  <sc-if value="{{e.hasSeriesRoles}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; color: {{t.muted}}">Sur la série :</span></sc-if>
-                  <sc-for list="{{e.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 13px">{{r.label}}</span></sc-for>
-                  <sc-if value="{{e.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{e.ratingLabel}}" style="font-size: 14px; letter-spacing: 1px">{{e.stars}}</span></sc-if>
-                  <sc-if value="{{e.isAlbum}}" hint-placeholder-val="{{false}}"><span style="display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; box-sizing: border-box; border: {{e.badgeB}}; border-radius: {{t.btnR}}; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-weight: 700; font-size: 12px">{{e.badge}}</span></sc-if>
+                <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
+                  <sc-if value="{{e.hasSeriesRoles}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; color: {{t.muted}}">Sur la série :</span></sc-if>
+                  <sc-for list="{{e.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 12px">{{r.label}}</span></sc-for>
+                  <sc-if value="{{e.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{e.ratingLabel}}" style="font-size: 13px; letter-spacing: 1px">{{e.stars}}</span></sc-if>
+                  <sc-if value="{{e.isAlbum}}" hint-placeholder-val="{{false}}"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; box-sizing: border-box; border: {{e.badgeB}}; border-radius: {{t.btnR}}; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-weight: 700; font-size: 11px">{{e.badge}}</span></sc-if>
                 </span>
               </div>
               <sc-if value="{{e.open}}" hint-placeholder-val="{{false}}">
-                <ol aria-label="{{e.listLabel}}" style="margin: 0 0 14px 54px; padding: 4px 16px; list-style: none; border-left: 4px solid {{t.acc}}; border-radius: 0 {{nest.r}} {{nest.r}} 0; background: {{nest.bg}}">
+                <ol aria-label="{{e.listLabel}}" style="margin: 0 0 8px clamp(18px, 5vw, 44px); padding: 2px 12px; list-style: none; border-left: 4px solid {{t.acc}}; border-radius: 0 {{nest.r}} {{nest.r}} 0; background: {{nest.bg}}">
                   <sc-for list="{{e.albums}}" as="b" hint-placeholder-count="4">
-                    <li style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 58px; padding: 8px 0; box-sizing: border-box; border-top: {{b.rowB}}">
+                    <li style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-height: 44px; padding: 4px 0; box-sizing: border-box; border-top: {{b.rowB}}">
                       <span aria-hidden="true" style="width: 40px; height: 40px; flex: none; display: inline-flex; align-items: center; justify-content: center"><span style="width: 30px; height: 40px; border-radius: 3px; background: {{b.cover}}; box-shadow: 0 1px 3px rgba(0,0,0,.3)"></span></span>
-                      <span style="flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column">
+                      <span style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; line-height: 1.3">
                         <a href="#" style="align-self: flex-start; font-weight: 700; color: {{t.text}}">{{b.title}}</a>
-                        <span style="font-size: 13px; color: {{t.muted}}">{{b.meta}}</span>
+                        <span style="font-size: 12px; color: {{t.muted}}">{{b.meta}}</span>
                       </span>
-                      <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
-                        <sc-for list="{{b.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 12px">{{r.label}}</span></sc-for>
-                        <sc-if value="{{b.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{b.ratingLabel}}" style="font-size: 14px; letter-spacing: 1px">{{b.stars}}</span></sc-if>
-                        <span style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; box-sizing: border-box; border: {{b.badgeB}}; border-radius: {{t.btnR}}; background: {{b.badgeBg}}; color: {{b.badgeFg}}; font-weight: 700; font-size: 12px">{{b.badge}}</span>
+                      <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
+                        <sc-for list="{{b.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 12px">{{r.label}}</span></sc-for>
+                        <sc-if value="{{b.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{b.ratingLabel}}" style="font-size: 13px; letter-spacing: 1px">{{b.stars}}</span></sc-if>
+                        <span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; box-sizing: border-box; border: {{b.badgeB}}; border-radius: {{t.btnR}}; background: {{b.badgeBg}}; color: {{b.badgeFg}}; font-weight: 700; font-size: 11px">{{b.badge}}</span>
                       </span>
                     </li>
                   </sc-for>
@@ -138,7 +138,7 @@ summary{cursor:pointer}
     </main>
   </div>
 
-  <footer style="max-width: 1280px; margin: 0 auto; padding: 20px 24px 32px; box-sizing: border-box; font-size: 13px; color: {{t.muted}}">
+  <footer style="max-width: 1280px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px) 24px; box-sizing: border-box; font-size: 12px; color: {{t.muted}}">
     <span>Fiche créée le 2 février 2026, modifiée le 2 février 2026.</span>
   </footer>
 </div>
@@ -150,7 +150,7 @@ const BASE = {
   kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
   mkDisp: 'none', lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
   h2fs: 'normal', h2sh: 'none', h2tt: 'none', h2line: '0', h2pad: '0', h2r: '0', h2bg: 'transparent', h2rot: '0deg', tail: false,
-  fdTT: 'none', navTT: 'none', navLine: 'transparent', navUnderline: false, h1size: 'clamp(34px, 4.4vw, 56px)', cSh: 'none',
+  fdTT: 'none', navTT: 'none', navLine: 'transparent', navUnderline: false, h1size: 'clamp(24px, 3.2vw, 38px)', cSh: 'none',
   cvPad: '0', cvB: '0', cvR: '0', cvBg: 'transparent', cvSh: 'none', cvRot: '0deg', imgR: '0', tape: false, shelf: false
 };
 
@@ -161,13 +161,13 @@ const cases = (c) => ({
   bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
   acc: '#FFB547', onAcc: c.bg, link: '#FFB547', colBg: '#9BE07A', colFg: c.bg,
   fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
-  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: '30px 28px 28px',
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
   tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
   inR: '999px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', chipR: '999px',
   hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
   helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
-  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '8px 18px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 24px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '8px 20px', h2r: '26px 30px 28px 22px', h2size: '22px', h2rot: '-1.5deg', tail: true,
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '5px 16px', h2r: '26px 30px 28px 22px', h2size: '18px', h2rot: '-1.5deg', tail: true,
   cvPad: '10px', cvB: '0', cvR: '16px 10px 18px 12px', cvBg: '#4FD1C5', cvRot: '-2.5deg', cvSh: '0 16px 30px rgba(0,0,0,.35)', imgR: '8px 4px 10px 6px',
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
@@ -187,9 +187,9 @@ const THEMES = {
     inR: '999px', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', chipR: '0',
     hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
     helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
-    lgText: '#2B1030', lgFont: '800 32px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    lgText: '#2B1030', lgFont: '800 26px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
     navUnderline: true, navLine: '#FFB547',
-    h2c: '#2B1030', h2size: '28px', h2fs: 'italic',
+    h2c: '#2B1030', h2size: '22px', h2fs: 'italic',
     kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase',
     cvPad: '8px', cvB: '1px solid #2B1030', cvBg: '#FFFFFF', cvRot: '-1.5deg', cvSh: '6px 6px 0 #D9C6CF',
     pal: [['#2B1030', '#FBF3EA'], ['#FFB547', '#2B1030'], ['#9A3D12', '#FBF3EA']]
@@ -198,14 +198,14 @@ const THEMES = {
     ...BASE,
     bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
     acc: '#E63946', onAcc: '#FFFFFF', link: '#1D4ED8', colBg: '#FFD60A', colFg: '#111111',
-    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(44px, 5.4vw, 76px)', navTT: 'uppercase',
-    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: '26px',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(30px, 4vw, 50px)', navTT: 'uppercase',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
     tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
     inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', chipR: '0',
     hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
     helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
-    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 30px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
-    h2c: '#111111', h2size: '32px', h2tt: 'uppercase', h2line: '4px solid #111111', h2pad: '0 0 6px',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 24px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    h2c: '#111111', h2size: '24px', h2tt: 'uppercase', h2line: '4px solid #111111', h2pad: '0 0 6px',
     cvPad: '12px', cvB: '3px solid #111111', cvBg: '#E63946', cvRot: '2deg', cvSh: '10px 10px 0 #111111',
     pal: [['#E63946', '#FFFFFF'], ['#1D4ED8', '#FFFFFF'], ['#FFD60A', '#111111']]
   },
@@ -214,13 +214,13 @@ const THEMES = {
     bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
     acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', colBg: '#F6C343', colFg: '#1B2350',
     fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
-    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: '26px', cSh: '0 2px 0 rgba(27,35,80,.08)',
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 2px 0 rgba(27,35,80,.08)',
     tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
     inR: '999px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', chipR: '999px',
     hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
     helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
-    lgMark: true, lgText: '#1B2350', lgFont: "800 24px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
-    h2c: '#1B2350', h2size: '26px', mkDisp: 'inline-block',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 20px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    h2c: '#1B2350', h2size: '21px', mkDisp: 'inline-block',
     kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (i, label) => 'Station ' + label,
     cvPad: '14px', cvR: '28px', cvBg: '#1F3A93', imgR: '16px',
     pal: [['#1F3A93', '#FFFFFF'], ['#E8604C', '#FFFFFF'], ['#F6C343', '#1B2350']]
@@ -229,14 +229,14 @@ const THEMES = {
     ...BASE,
     bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
     acc: '#FF48B0', onAcc: '#002284', link: '#0078BF', colBg: '#FFE800', colFg: '#002284',
-    fd: "'Rubik Mono One', sans-serif", fdw: '400', fdTT: 'uppercase', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(28px, 3.4vw, 44px)',
-    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: '24px',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fdTT: 'uppercase', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(20px, 2.6vw, 30px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
     tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
     inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', chipR: '0',
     hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
     helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
-    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 26px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
-    h2c: '#0078BF', h2size: '19px', h2tt: 'uppercase', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 20px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    h2c: '#0078BF', h2size: '16px', h2tt: 'uppercase', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
     cvPad: '0', cvRot: '-2deg', cvSh: '8px 7px 0 rgba(255,72,176,.85)', tape: true,
     pal: [['#0078BF', '#F4EFE4'], ['#FF48B0', '#002284'], ['#FFE800', '#002284']]
   },
@@ -245,14 +245,14 @@ const THEMES = {
     bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
     acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', colBg: '#1E3B2F', colFg: '#F5EEDF',
     fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
-    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: '26px', cSh: '0 1px 4px rgba(42,36,32,.12)',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 1px 4px rgba(42,36,32,.12)',
     tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
     inR: '22px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', chipR: '2px',
     hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF',
     helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
-    lgText: '#D8B972', lgFont: "400 30px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    lgText: '#D8B972', lgFont: "400 24px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
     navUnderline: true, navLine: '#B8924A',
-    h2c: '#1E3B2F', h2size: '30px', h2fs: 'italic',
+    h2c: '#1E3B2F', h2size: '23px', h2fs: 'italic',
     cvPad: '0', cvSh: '0 10px 18px rgba(42,36,32,.35)', shelf: true,
     pal: [['#1E3B2F', '#F5EEDF'], ['#B8924A', '#2A2420'], ['#B5523B', '#FBF7EE']]
   },
@@ -261,15 +261,15 @@ const THEMES = {
     bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
     acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', colBg: '#6BBF59', colFg: '#23323A',
     fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
-    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '38px 28px 28px',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '26px clamp(14px, 2.2vw, 22px) clamp(14px, 2.2vw, 22px)',
     tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
     inR: '999px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', chipR: '999px',
     hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A',
     helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
-    lgText: '#FFFFFF', lgFont: "800 28px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
-    h2c: '#23323A', h2size: '26px',
-    kDisp: 'block', kPos: 'absolute', kTop: '-15px', kLeft: '24px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '2px 14px', kR: '999px',
-    kFont: "'Baloo 2', sans-serif", kSize: '15px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
+    lgText: '#FFFFFF', lgFont: "800 22px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    h2c: '#23323A', h2size: '21px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-13px', kLeft: '20px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '1px 12px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '13px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
     cvPad: '10px', cvR: '14px', cvBg: '#FFFFFF', cvRot: '-2deg', cvSh: '0 6px 16px rgba(35,50,58,.25)', imgR: '6px',
     pal: [['#0F7C8C', '#FFFFFF'], ['#FFD23F', '#23323A'], ['#E0457B', '#FFFFFF']]
   }
@@ -391,6 +391,8 @@ class View extends Mockup {
     const chip = { bg: 'transparent', fg: t.text, bd: t.tB === '0' ? '2px solid ' + t.line : t.tB };
     return {
       t,
+      // The scroll hint of the menu fades into what lies behind it: the header, or the page under a transparent one.
+      hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
       a: {
         name: 'Adrien Floch', initials: 'AF', hasRealName: false, realName: '',
         nationality: 'Non renseignée', nationalityColor: t.muted,

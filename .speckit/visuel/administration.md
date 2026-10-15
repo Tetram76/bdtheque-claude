@@ -32,7 +32,7 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 La page met en avant les fonctions les plus utiles, de haut en bas :
 
 - **Titre** « Administration », avec une phrase qui résume le rôle de l'espace.
-- **Saisir à partir d'un ISBN** : un champ ISBN et un bouton « Chercher dans les sources », qui crée ou complète à partir des sources externes (`fonctionnel.md` § Structure de l'application) l'album, l'édition et ses visuels, la série, les auteurs, l'éditeur et la collection, relus avant enregistrement. Ce bloc est mis en relief. En dessous, « Ou créer directement : » propose la création d'un album, d'une série, d'un auteur ou d'un éditeur.
+- **Saisir à partir d'un ISBN** : un champ ISBN et un bouton « Chercher dans les sources », qui crée ou complète à partir des sources externes (`fonctionnel.md` § Structure de l'application) l'album, l'édition et ses visuels, la série, les auteurs, l'éditeur et la collection, relus avant enregistrement. Ce bloc est mis en relief. En dessous, « Ou créer directement : » propose la création d'un album, d'une série, d'un auteur ou d'un éditeur, par quatre boutons toujours alignés sur une seule ligne.
 - **Les fiches** : une carte par type de fiche (albums, éditions, séries, intentions d'achat, auteurs, éditeurs, genres, univers), avec son icône, son nombre, une précision, le lien « Gérer la liste » et, sauf pour les éditions et les intentions d'achat, qui se saisissent depuis leur album, la création d'une nouvelle fiche.
 - **À vérifier** : des listes de fiches à corriger ou à compléter, chacune avec son nombre. Seule une incohérence à corriger (ex. ISBN au chiffre de contrôle incohérent) a la couleur d'alerte du thème.
 - **Dernières modifications** : les dernières fiches créées ou modifiées, avec leur type, la nature et la date de la modification, et un lien « Modifier ».
@@ -41,10 +41,10 @@ La page met en avant les fonctions les plus utiles, de haut en bas :
 
 ## En-tête et menu
 
-- **En-tête**, de gauche à droite : le logo, une étiquette « Administration », la recherche d'une fiche à modifier, le bouton d'aide, le lien « Aller à la consultation », marqué d'une flèche de sortie, puis le bouton « Menu », à l'extrémité droite.
+- **En-tête**, de gauche à droite : le logo, une étiquette « Administration », la recherche d'une fiche à modifier, le bouton d'aide, le lien « Aller à la consultation », marqué d'une flèche de sortie, puis le bouton « Menu », à l'extrémité droite. Sur smartphone, l'en-tête tient sur deux lignes : le logo, l'étiquette, la flèche de la consultation et le bouton « Menu », réduits à leur icône, puis la recherche et le bouton d'aide sur toute la largeur.
 - Le **menu** n'est pas permanent :
   - il est **fermé par défaut** et s'ouvre par le bouton « Menu » ;
-  - il s'ouvre en **panneau flottant** sous le bouton, aligné à droite, **par-dessus** le contenu : il ne décale jamais le reste de la page ;
+  - il s'ouvre en **panneau flottant** sous le bouton, aligné à droite, **par-dessus** le contenu : il ne décale jamais le reste de la page ; il défile de façon indépendante, la page restant immobile tant qu'il est ouvert ;
   - il se referme par sa croix, par le bouton « Menu », ou par **un clic en dehors** du panneau ;
   - il présente le plan de l'administration, par groupes (Accueil, Collection, Auteurs et éditeurs, Référentiels, Réglages), chaque entrée avec son nombre de fiches le cas échéant, l'entrée courante dans la couleur d'accent du thème ;
   - l'entrée « **Nouvelle édition** » donne un accès direct à l'action principale de l'administration : une édition se saisissant depuis son album, elle commence par le choix de cet album (ou par un ISBN, comme le bloc de saisie de la page) ;

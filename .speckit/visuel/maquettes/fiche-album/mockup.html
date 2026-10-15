@@ -20,38 +20,38 @@ summary{cursor:pointer}
 <template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
 
-  <header style="background: {{t.hBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
-    <div style="max-width: 1280px; margin: 0 auto; padding: 16px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px">
+  <header style="position: sticky; top: 0; z-index: 20; background: {{hintBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
       <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
         <sc-if value="{{t.lgMark}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
         <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
       </a>
-      <nav aria-label="Navigation principale" style="flex: 1 1 auto; min-width: 0">
-        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px">
+      <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: {{hintBg}}">
+        <ul data-scroll="" style="margin: 0; padding: 0; list-style: none; display: flex; gap: 4px; white-space: nowrap">
           <sc-for list="{{nav}}" as="n" hint-placeholder-count="6">
-            <li><a href="#" aria-current="{{n.current}}" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: {{t.btnR}}; background: {{n.bg}}; color: {{n.fg}}; font-weight: 700; font-size: 14px; text-transform: {{t.navTT}}; text-decoration: {{n.deco}}; text-decoration-color: {{t.navLine}}; text-decoration-thickness: 3px; text-underline-offset: 6px">{{n.label}}</a></li>
+            <li style="flex: none"><a href="#" aria-current="{{n.current}}" style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border-radius: {{t.btnR}}; background: {{n.bg}}; color: {{n.fg}}; font-weight: 700; font-size: 14px; text-transform: {{t.navTT}}; text-decoration: {{n.deco}}; text-decoration-color: {{t.navLine}}; text-decoration-thickness: 3px; text-underline-offset: 6px">{{n.label}}</a></li>
           </sc-for>
         </ul>
       </nav>
-      <div style="flex: 1 1 260px; min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 8px">
+      <div style="flex: 1 1 260px; max-width: 380px; min-width: 0; margin-left: auto; display: flex; justify-content: flex-end; align-items: center; gap: 8px">
         <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Rechercher</label>
-        <input id="find" type="search" placeholder="Un album, une série, un auteur…" style="flex: 1 1 220px; max-width: 320px; min-width: 0; height: 44px; padding: 0 16px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
-        <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
+        <input id="find" type="search" placeholder="Un album, une série, un auteur…" style="flex: 1 1 220px; max-width: 320px; min-width: 0; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
       </div>
     </div>
   </header>
 
-  <div style="max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; box-sizing: border-box">
-    <nav aria-label="Fil d'Ariane" style="margin-bottom: 20px; font-size: 14px; color: {{t.muted}}">
+  <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
+    <nav aria-label="Fil d'Ariane" style="margin-bottom: 12px; font-size: 13px; color: {{t.muted}}">
       <a href="#" style="color: {{t.link}}; font-weight: 700">Albums</a> <span aria-hidden="true">›</span> <a href="#" style="color: {{t.link}}; font-weight: 700">Corto Maltese</a> <span aria-hidden="true">›</span> <span>Lointaines îles du vent</span>
     </nav>
 
-    <main style="display: flex; flex-direction: column; gap: 44px">
+    <main style="display: flex; flex-direction: column; gap: 22px">
 
-      <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 36px 48px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 32px">
 
-        <section aria-label="Visuels de l'édition" style="flex: 0 1 380px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 0 auto">
-          <div style="width: 100%; max-width: 340px; box-sizing: border-box; position: relative; padding: {{t.cvPad}}; border: {{t.cvB}}; border-radius: {{t.cvR}}; background: {{t.cvBg}}; box-shadow: {{t.cvSh}}; transform: rotate({{t.cvRot}})">
+        <section aria-label="Visuels de l'édition" style="flex: 0 1 280px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 auto">
+          <div style="width: clamp(160px, 42vw, 250px); margin-bottom: {{t.shelfGap}}; box-sizing: border-box; position: relative; padding: {{t.cvPad}}; border: {{t.cvB}}; border-radius: {{t.cvR}}; background: {{t.cvBg}}; box-shadow: {{t.cvSh}}; transform: rotate({{t.cvRot}})">
             <sc-if value="{{t.tape}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; top: -12px; left: 50%; width: 96px; height: 26px; margin-left: -48px; background: rgba(255,232,0,.75); transform: rotate(-4deg)"></span></sc-if>
             <div role="img" aria-label="{{vis.alt}}" style="display: block; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: {{t.imgR}}; background: #FFFFFF">
               <sc-if value="{{vis.isCover}}" hint-placeholder-val="{{true}}">
@@ -126,84 +126,84 @@ summary{cursor:pointer}
             </div>
             <sc-if value="{{t.shelf}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: -14px; right: -14px; bottom: -14px; height: 14px; background: #5B3A24; box-shadow: 0 4px 0 #3F2818"></span></sc-if>
           </div>
-          <div style="width: 100%; max-width: 340px; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px">
-            <button type="button" aria-label="Visuel précédent" onClick="{{prevVis}}" style="width: 44px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
-            <span aria-live="polite" style="display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 14px">
+          <div style="width: 100%; max-width: 280px; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px">
+            <button type="button" aria-label="Visuel précédent" onClick="{{prevVis}}" style="width: 34px; height: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+            <span aria-live="polite" style="display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 13px; line-height: 1.3">
               <strong>{{vis.type}}</strong>
               <span style="color: {{t.muted}}">{{vis.pos}}</span>
             </span>
-            <button type="button" aria-label="Visuel suivant" onClick="{{nextVis}}" style="width: 44px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+            <button type="button" aria-label="Visuel suivant" onClick="{{nextVis}}" style="width: 34px; height: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
           </div>
-          <div style="width: 100%; max-width: 340px; overflow-x: auto; scroll-snap-type: x proximity">
-            <ul aria-label="Tous les visuels de l'édition" style="margin: 0; padding: 4px 2px 10px; list-style: none; display: flex; gap: 6px; width: max-content">
+          <div style="width: 100%; max-width: 280px; overflow-x: auto; scroll-snap-type: x proximity">
+            <ul aria-label="Tous les visuels de l'édition" style="margin: 0; padding: 2px 2px 6px; list-style: none; display: flex; gap: 4px; width: max-content">
               <sc-for list="{{visuals}}" as="v" hint-placeholder-count="13">
-                <li style="scroll-snap-align: start"><button type="button" aria-label="{{v.type}}" aria-pressed="{{v.pressed}}" onClick="{{v.pick}}" style="width: 48px; padding: 3px 3px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: {{v.thumbB}}; border-radius: 6px; background: transparent; color: {{v.thumbFg}}; font-family: {{t.fb}}; cursor: pointer">
-                  <span aria-hidden="true" style="display: block; width: 38px; height: 50px; overflow: hidden; border-radius: 3px; box-shadow: 0 0 0 1px {{t.line}}">
-                    <sc-if value="{{v.isCover}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="38" height="50" style="display: block"><rect width="30" height="40" fill="{{art.sky}}"></rect><rect y="27" width="30" height="13" fill="{{art.sea}}"></rect><rect width="30" height="10" fill="{{art.band}}"></rect><circle cx="21" cy="18" r="4.5" fill="{{art.sun}}"></circle></svg></sc-if>
-                    <sc-if value="{{v.isGarde}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="38" height="50" style="display: block"><rect width="30" height="40" fill="{{art.sea}}"></rect><path d="M0 12 q4 -2 8 0 t8 0 t8 0 t8 0 M0 24 q4 -2 8 0 t8 0 t8 0 t8 0" fill="none" stroke="{{art.sky}}" stroke-width="1.5"></path></svg></sc-if>
-                    <sc-if value="{{v.isPlanche}}" hint-placeholder-val="{{true}}"><svg viewBox="0 0 30 40" width="38" height="50" style="display: block"><rect width="30" height="40" fill="#FFFDF8"></rect><g fill="{{art.sky}}" stroke="{{art.ink}}" stroke-width="1"><rect x="2" y="2" width="12" height="11"></rect><rect x="16" y="2" width="12" height="11"></rect><rect x="2" y="15" width="26" height="10"></rect><rect x="2" y="27" width="12" height="11"></rect><rect x="16" y="27" width="12" height="11"></rect></g></svg></sc-if>
-                    <sc-if value="{{v.isDed}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="38" height="50" style="display: block"><rect width="30" height="40" fill="#F7F1E3"></rect><path d="M6 22 c4 -8 8 4 12 -3 c2 -3 5 -1 6 2" fill="none" stroke="#1F2A30" stroke-width="1.5"></path></svg></sc-if>
-                    <sc-if value="{{v.isBack}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="38" height="50" style="display: block"><rect width="30" height="40" fill="{{art.band}}"></rect><path d="M4 8 h22 M4 12 h20 M4 16 h21 M4 20 h14" stroke="{{art.title}}" stroke-width="1.5" opacity=".6"></path><rect x="17" y="29" width="10" height="7" fill="#FFFFFF"></rect></svg></sc-if>
+                <li style="scroll-snap-align: start"><button type="button" aria-label="{{v.type}}" aria-pressed="{{v.pressed}}" onClick="{{v.pick}}" style="width: 38px; padding: 2px 2px 1px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: {{v.thumbB}}; border-radius: 6px; background: transparent; color: {{v.thumbFg}}; font-family: {{t.fb}}; cursor: pointer">
+                  <span aria-hidden="true" style="display: block; width: 30px; height: 40px; overflow: hidden; border-radius: 3px; box-shadow: 0 0 0 1px {{t.line}}">
+                    <sc-if value="{{v.isCover}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="30" height="40" style="display: block"><rect width="30" height="40" fill="{{art.sky}}"></rect><rect y="27" width="30" height="13" fill="{{art.sea}}"></rect><rect width="30" height="10" fill="{{art.band}}"></rect><circle cx="21" cy="18" r="4.5" fill="{{art.sun}}"></circle></svg></sc-if>
+                    <sc-if value="{{v.isGarde}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="30" height="40" style="display: block"><rect width="30" height="40" fill="{{art.sea}}"></rect><path d="M0 12 q4 -2 8 0 t8 0 t8 0 t8 0 M0 24 q4 -2 8 0 t8 0 t8 0 t8 0" fill="none" stroke="{{art.sky}}" stroke-width="1.5"></path></svg></sc-if>
+                    <sc-if value="{{v.isPlanche}}" hint-placeholder-val="{{true}}"><svg viewBox="0 0 30 40" width="30" height="40" style="display: block"><rect width="30" height="40" fill="#FFFDF8"></rect><g fill="{{art.sky}}" stroke="{{art.ink}}" stroke-width="1"><rect x="2" y="2" width="12" height="11"></rect><rect x="16" y="2" width="12" height="11"></rect><rect x="2" y="15" width="26" height="10"></rect><rect x="2" y="27" width="12" height="11"></rect><rect x="16" y="27" width="12" height="11"></rect></g></svg></sc-if>
+                    <sc-if value="{{v.isDed}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="30" height="40" style="display: block"><rect width="30" height="40" fill="#F7F1E3"></rect><path d="M6 22 c4 -8 8 4 12 -3 c2 -3 5 -1 6 2" fill="none" stroke="#1F2A30" stroke-width="1.5"></path></svg></sc-if>
+                    <sc-if value="{{v.isBack}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="30" height="40" style="display: block"><rect width="30" height="40" fill="{{art.band}}"></rect><path d="M4 8 h22 M4 12 h20 M4 16 h21 M4 20 h14" stroke="{{art.title}}" stroke-width="1.5" opacity=".6"></path><rect x="17" y="29" width="10" height="7" fill="#FFFFFF"></rect></svg></sc-if>
                   </span>
-                  <span style="font-size: 11px; font-weight: 700; line-height: 1.3">{{v.short}}</span>
+                  <span style="font-size: 10px; font-weight: 700; line-height: 1.2">{{v.short}}</span>
                 </button></li>
               </sc-for>
             </ul>
           </div>
-          <a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Voir l'image originale</a>
+          <a href="#" style="font-weight: 700; font-size: 13px; color: {{t.link}}">Voir l'image originale</a>
         </section>
 
-        <div style="flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+        <div style="flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <a href="#" style="align-self: flex-start; font-weight: 700; font-size: 17px; color: {{t.link}}">Corto Maltese</a>
+            <a href="#" style="align-self: flex-start; font-weight: 700; font-size: 15px; color: {{t.link}}">Corto Maltese</a>
             <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Lointaines îles du vent</h1>
           </div>
 
-          <ul aria-label="En bref" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px">
+          <ul aria-label="En bref" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
             <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
-              <li style="display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; box-sizing: border-box; border: {{f.bd}}; border-radius: {{t.btnR}}; background: {{f.bg}}; color: {{f.fg}}; font-weight: 700; font-size: 14px">{{f.label}}</li>
+              <li style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; box-sizing: border-box; border: {{f.bd}}; border-radius: {{t.btnR}}; background: {{f.bg}}; color: {{f.fg}}; font-weight: 700; font-size: 13px">{{f.label}}</li>
             </sc-for>
           </ul>
 
           <div style="display: flex; align-items: center; gap: 10px">
             <span style="display: inline-flex; gap: 2px; color: {{t.muted}}" role="img" aria-label="Appréciation : pas encore notée">
-              <sc-for list="{{stars}}" as="s" hint-placeholder-count="5"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5 6.5 20.4l1-6.3L3 9.7l6.2-.9z"></path></svg></sc-for>
+              <sc-for list="{{stars}}" as="s" hint-placeholder-count="5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5 6.5 20.4l1-6.3L3 9.7l6.2-.9z"></path></svg></sc-for>
             </span>
-            <span style="font-size: 14px; color: {{t.muted}}">Pas encore noté</span>
+            <span style="font-size: 13px; color: {{t.muted}}">Pas encore noté</span>
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 4px; padding: 6px 18px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
-            <span style="padding-top: 8px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">{{creditsTotal}}</span>
+          <div style="display: flex; flex-direction: column; gap: 2px; padding: 4px 14px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
+            <span style="padding-top: 6px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">{{creditsTotal}}</span>
             <dl style="margin: 0">
               <sc-for list="{{credits}}" as="c" hint-placeholder-count="3">
-                <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; padding: 10px 0; border-bottom: {{c.rowB}}">
-                  <dt style="flex: 0 0 110px; font-weight: 700">{{c.role}} <span style="font-weight: 400; color: {{t.muted}}">{{c.count}}</span></dt>
-                  <dd style="flex: 1 1 280px; min-width: 0; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
-                    <sc-for list="{{c.shown}}" as="p" hint-placeholder-count="6"><a href="#" style="display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; box-sizing: border-box; border: 1px solid {{t.line}}; border-radius: {{t.btnR}}; color: {{t.text}}; font-weight: 700; font-size: 14px">{{p.name}}</a></sc-for>
+                <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 6px 0; border-bottom: {{c.rowB}}">
+                  <dt style="flex: 0 0 96px; font-weight: 700">{{c.role}} <span style="font-weight: 400; color: {{t.muted}}">{{c.count}}</span></dt>
+                  <dd style="flex: 1 1 220px; min-width: 0; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
+                    <sc-for list="{{c.shown}}" as="p" hint-placeholder-count="6"><a href="#" style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; box-sizing: border-box; border: 1px solid {{t.line}}; border-radius: {{t.btnR}}; color: {{t.text}}; font-weight: 700; font-size: 13px">{{p.name}}</a></sc-for>
                     <sc-if value="{{c.none}}" hint-placeholder-val="{{false}}"><span style="color: {{t.muted}}">Non crédité</span></sc-if>
-                    <sc-if value="{{c.more}}" hint-placeholder-val="{{false}}"><button type="button" aria-expanded="{{c.expanded}}" onClick="{{c.toggle}}" style="min-height: 32px; padding: 0 12px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">{{c.moreLabel}}</button></sc-if>
+                    <sc-if value="{{c.more}}" hint-placeholder-val="{{false}}"><button type="button" aria-expanded="{{c.expanded}}" onClick="{{c.toggle}}" style="min-height: 26px; padding: 0 8px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">{{c.moreLabel}}</button></sc-if>
                   </dd>
                 </div>
               </sc-for>
             </dl>
           </div>
 
-          <dl style="margin: 0; display: flex; flex-direction: column; gap: 12px">
+          <dl style="margin: 0; display: flex; flex-direction: column; gap: 8px">
             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px">
               <dt style="min-width: 80px; font-weight: 700">Genres</dt>
               <dd style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px">
-                <sc-for list="{{genres}}" as="g" hint-placeholder-count="2"><a href="#" style="display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: {{t.chipR}}; background: {{g.bg}}; color: {{g.fg}}; font-weight: 700; font-size: 14px">{{g.label}}</a></sc-for>
+                <sc-for list="{{genres}}" as="g" hint-placeholder-count="2"><a href="#" style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; border-radius: {{t.chipR}}; background: {{g.bg}}; color: {{g.fg}}; font-weight: 700; font-size: 13px">{{g.label}}</a></sc-for>
               </dd>
             </div>
             <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 14px">
-              <dt style="min-width: 80px; min-height: 34px; display: flex; align-items: center; font-weight: 700">Univers</dt>
+              <dt style="min-width: 80px; min-height: 26px; display: flex; align-items: center; font-weight: 700">Univers</dt>
               <dd style="margin: 0; display: flex; flex-direction: column; gap: 8px">
                 <sc-for list="{{universes}}" as="u" hint-placeholder-count="2">
                   <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px">
                     <sc-for list="{{u.path}}" as="p" hint-placeholder-count="3">
                       <sc-if value="{{p.sep}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="color: {{t.muted}}">›</span></sc-if>
-                      <sc-if value="{{p.leaf}}" hint-placeholder-val="{{true}}"><a href="#" style="display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: {{t.chipR}}; background: {{u.bg}}; color: {{u.fg}}; font-weight: 700; font-size: 14px">{{p.name}}</a></sc-if>
-                      <sc-if value="{{p.parent}}" hint-placeholder-val="{{false}}"><a href="#" style="display: inline-flex; align-items: center; min-height: 34px; color: {{t.muted}}; font-weight: 700; font-size: 14px">{{p.name}}</a></sc-if>
+                      <sc-if value="{{p.leaf}}" hint-placeholder-val="{{true}}"><a href="#" style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; border-radius: {{t.chipR}}; background: {{u.bg}}; color: {{u.fg}}; font-weight: 700; font-size: 13px">{{p.name}}</a></sc-if>
+                      <sc-if value="{{p.parent}}" hint-placeholder-val="{{false}}"><a href="#" style="display: inline-flex; align-items: center; min-height: 26px; color: {{t.muted}}; font-weight: 700; font-size: 13px">{{p.name}}</a></sc-if>
                     </sc-for>
                   </span>
                 </sc-for>
@@ -213,43 +213,43 @@ summary{cursor:pointer}
         </div>
       </div>
 
-      <section aria-labelledby="f-recit" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 16px">
+      <section aria-labelledby="f-recit" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.recit}}</span>
         <h2 id="f-recit" style="position: relative; align-self: flex-start; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Ça raconte quoi ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
-        <p style="margin: 0; max-width: 72ch; font-size: 16px">Venezuela, vers 1913. Amnésique, Corto Maltese est recueilli par son vieil ami Steiner, qui l'aide à retrouver la mémoire. Bientôt pris entre deux bandes rivales qui se disputent une mystérieuse valise, le Maltais va risquer sa vie pour un trésor dont il ignore tout, jusqu'à échouer sur l'île de Port-Ducal.</p>
-        <div style="display: flex; flex-direction: column; gap: 4px; max-width: 72ch; padding-top: 14px; border-top: {{t.rowB}}">
-          <span style="font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">Notes personnelles</span>
+        <p style="margin: 0; max-width: 80ch; font-size: 15px">Venezuela, vers 1913. Amnésique, Corto Maltese est recueilli par son vieil ami Steiner, qui l'aide à retrouver la mémoire. Bientôt pris entre deux bandes rivales qui se disputent une mystérieuse valise, le Maltais va risquer sa vie pour un trésor dont il ignore tout, jusqu'à échouer sur l'île de Port-Ducal.</p>
+        <div style="display: flex; flex-direction: column; gap: 2px; max-width: 80ch; padding-top: 10px; border-top: {{t.rowB}}">
+          <span style="font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">Notes personnelles</span>
           <p style="margin: 0">Réunit en couleurs les trois premiers récits de « Toujours un peu plus loin ».</p>
         </div>
       </section>
 
-      <section aria-labelledby="f-editions" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 18px">
+      <section aria-labelledby="f-editions" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.editions}}</span>
         <h2 id="f-editions" style="position: relative; align-self: flex-start; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Dans quelles éditions ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
 
-        <ul aria-label="Éditions de l'album" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 12px">
+        <ul aria-label="Éditions de l'album" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 8px">
           <sc-for list="{{editions}}" as="e" hint-placeholder-count="4">
             <li style="display: flex">
-              <button type="button" aria-pressed="{{e.pressed}}" onClick="{{e.pick}}" style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px 16px; border: {{e.bd}}; border-radius: {{t.tR}}; background: {{e.bg}}; color: {{e.fg}}; font-family: {{t.fb}}; font-size: 15px; text-align: left; cursor: pointer">
+              <button type="button" aria-pressed="{{e.pressed}}" onClick="{{e.pick}}" style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 7px 12px; border: {{e.bd}}; border-radius: {{t.tR}}; background: {{e.bg}}; color: {{e.fg}}; font-family: {{t.fb}}; font-size: 14px; line-height: 1.3; text-align: left; cursor: pointer">
                 <span style="font-weight: 700">{{e.label}}</span>
-                <span style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; box-sizing: border-box; border: {{e.badgeB}}; border-radius: {{t.btnR}}; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-weight: 700; font-size: 12px">{{e.badge}}</span>
+                <span style="display: inline-flex; align-items: center; min-height: 20px; padding: 0 8px; box-sizing: border-box; border: {{e.badgeB}}; border-radius: {{t.btnR}}; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-weight: 700; font-size: 11px">{{e.badge}}</span>
               </button>
             </li>
           </sc-for>
         </ul>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr)); gap: 16px 32px">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr)); gap: 12px 32px">
           <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
-            <div style="display: flex; flex-direction: column; gap: 6px">
-              <h3 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 18px; text-transform: {{t.fdTT}}">{{g.title}}</h3>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <h3 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">{{g.title}}</h3>
               <dl style="margin: 0">
                 <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="8">
-                  <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; padding: 9px 0; border-bottom: {{t.rowB}}">
-                    <dt style="flex: 0 0 170px; font-weight: 700">{{r.k}}</dt>
-                    <dd style="flex: 1 1 180px; min-width: 0; margin: 0; display: flex; flex-direction: column">
+                  <div style="display: flex; align-items: baseline; gap: 12px; padding: 5px 0; font-size: 14px; border-bottom: {{t.rowB}}">
+                    <dt style="flex: 0 0 clamp(118px, 36%, 170px); font-weight: 700">{{r.k}}</dt>
+                    <dd style="flex: 1 1 0; min-width: 0; margin: 0; display: flex; flex-direction: column">
                       <sc-if value="{{r.isLink}}" hint-placeholder-val="{{false}}"><a href="{{r.href}}" target="_blank" rel="noopener" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: {{t.link}}">{{r.v}}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-label="site externe" role="img"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a></sc-if>
                       <sc-if value="{{r.isText}}" hint-placeholder-val="{{true}}"><span style="color: {{r.color}}">{{r.v}}</span></sc-if>
-                      <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; color: {{t.muted}}">{{r.sub}}</span></sc-if>
+                      <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; color: {{t.muted}}">{{r.sub}}</span></sc-if>
                     </dd>
                   </div>
                 </sc-for>
@@ -257,23 +257,23 @@ summary{cursor:pointer}
             </div>
           </sc-for>
         </div>
-        <p style="margin: 0; font-size: 13px; color: {{t.muted}}">{{cur.meta}}</p>
+        <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{cur.meta}}</p>
       </section>
 
-      <section aria-labelledby="f-serie" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 16px">
+      <section aria-labelledby="f-serie" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.serie}}</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 16px">
           <h2 id="f-serie" style="position: relative; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Et le reste de la série ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
           <a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Voir la fiche de la série</a>
         </div>
         <details open="{{true}}"style="border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
-          <summary style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 52px; padding: 0 18px; font-weight: 700">
-            <span style="font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 18px; text-transform: {{t.fdTT}}">Corto Maltese</span>
-            <span style="font-size: 14px; color: {{t.muted}}">15 albums, dont 13 dans la collection</span>
+          <summary style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 40px; padding: 0 14px; font-weight: 700">
+            <span style="font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">Corto Maltese</span>
+            <span style="font-size: 13px; color: {{t.muted}}">15 albums, dont 13 dans la collection</span>
           </summary>
-          <ol style="margin: 0; padding: 0 18px 14px; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 0 28px">
+          <ol style="margin: 0; padding: 0 14px 8px; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 0 28px">
             <sc-for list="{{seriesAlbums}}" as="s" hint-placeholder-count="15">
-              <li style="display: flex; align-items: center; gap: 10px; min-height: 42px; border-bottom: {{t.rowB}}">
+              <li style="display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; border-bottom: {{t.rowB}}">
                 <span style="flex: none; min-width: 44px; font-size: 13px; font-weight: 700; color: {{t.muted}}; font-variant-numeric: tabular-nums">{{s.tome}}</span>
                 <sc-if value="{{s.current}}" hint-placeholder-val="{{false}}"><span aria-current="page" style="flex: 1 1 auto; min-width: 0; padding: 2px 10px; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-weight: 700">{{s.title}}</span></sc-if>
                 <sc-if value="{{s.other}}" hint-placeholder-val="{{true}}"><a href="#" style="flex: 1 1 auto; min-width: 0; color: {{t.text}}">{{s.title}}</a></sc-if>
@@ -286,7 +286,7 @@ summary{cursor:pointer}
     </main>
   </div>
 
-  <footer style="max-width: 1280px; margin: 0 auto; padding: 20px 24px 32px; box-sizing: border-box; font-size: 13px; color: {{t.muted}}">
+  <footer style="max-width: 1280px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px) 24px; box-sizing: border-box; font-size: 12px; color: {{t.muted}}">
     <span>Fiche créée le 2 février 2026, modifiée le 9 octobre 2026.</span>
   </footer>
 </div>
@@ -298,8 +298,8 @@ const BASE = {
   kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
   mkDisp: 'none', lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
   h2fs: 'normal', h2sh: 'none', h2tt: 'none', h2line: '0', h2pad: '0', h2r: '0', h2bg: 'transparent', h2rot: '0deg', tail: false,
-  fdTT: 'none', navTT: 'none', navLine: 'transparent', navUnderline: false, h1size: 'clamp(34px, 4.4vw, 56px)', cSh: 'none',
-  cvPad: '0', cvB: '0', cvR: '0', cvBg: 'transparent', cvSh: 'none', cvRot: '0deg', imgR: '0', tape: false, shelf: false
+  fdTT: 'none', navTT: 'none', navLine: 'transparent', navUnderline: false, h1size: 'clamp(24px, 3.2vw, 38px)', cSh: 'none',
+  cvPad: '0', cvB: '0', cvR: '0', cvBg: 'transparent', cvSh: 'none', cvRot: '0deg', imgR: '0', tape: false, shelf: false, shelfGap: '0'
 };
 
 // « Cases et bulles » comes in two tints that only differ by their purple shades.
@@ -309,13 +309,13 @@ const cases = (c) => ({
   bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
   acc: '#FFB547', onAcc: c.bg, link: '#FFB547', colBg: '#9BE07A', colFg: c.bg,
   fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
-  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: '30px 28px 28px',
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
   tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
   inR: '999px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', chipR: '999px',
   hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
   helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
-  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '8px 18px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 24px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '8px 20px', h2r: '26px 30px 28px 22px', h2size: '22px', h2rot: '-1.5deg', tail: true,
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '5px 16px', h2r: '26px 30px 28px 22px', h2size: '18px', h2rot: '-1.5deg', tail: true,
   cvPad: '10px', cvB: '0', cvR: '16px 10px 18px 12px', cvBg: '#4FD1C5', cvRot: '-2.5deg', cvSh: '0 16px 30px rgba(0,0,0,.35)', imgR: '8px 4px 10px 6px',
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
@@ -335,9 +335,9 @@ const THEMES = {
     inR: '999px', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', chipR: '0',
     hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
     helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
-    lgText: '#2B1030', lgFont: '800 32px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    lgText: '#2B1030', lgFont: '800 26px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
     navUnderline: true, navLine: '#FFB547',
-    h2c: '#2B1030', h2size: '28px', h2fs: 'italic',
+    h2c: '#2B1030', h2size: '22px', h2fs: 'italic',
     kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase',
     cvPad: '8px', cvB: '1px solid #2B1030', cvBg: '#FFFFFF', cvRot: '-1.5deg', cvSh: '6px 6px 0 #D9C6CF',
     pal: [['#2B1030', '#FBF3EA'], ['#FFB547', '#2B1030'], ['#9A3D12', '#FBF3EA']]
@@ -346,14 +346,14 @@ const THEMES = {
     ...BASE,
     bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
     acc: '#E63946', onAcc: '#FFFFFF', link: '#1D4ED8', colBg: '#FFD60A', colFg: '#111111',
-    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(44px, 5.4vw, 76px)', navTT: 'uppercase',
-    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: '26px',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(30px, 4vw, 50px)', navTT: 'uppercase',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
     tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
     inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', chipR: '0',
     hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
     helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
-    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 30px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
-    h2c: '#111111', h2size: '32px', h2tt: 'uppercase', h2line: '4px solid #111111', h2pad: '0 0 6px',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 24px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    h2c: '#111111', h2size: '24px', h2tt: 'uppercase', h2line: '4px solid #111111', h2pad: '0 0 6px',
     cvPad: '12px', cvB: '3px solid #111111', cvBg: '#E63946', cvRot: '2deg', cvSh: '10px 10px 0 #111111',
     pal: [['#E63946', '#FFFFFF'], ['#1D4ED8', '#FFFFFF'], ['#FFD60A', '#111111']]
   },
@@ -362,13 +362,13 @@ const THEMES = {
     bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
     acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', colBg: '#F6C343', colFg: '#1B2350',
     fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
-    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: '26px', cSh: '0 2px 0 rgba(27,35,80,.08)',
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 2px 0 rgba(27,35,80,.08)',
     tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
     inR: '999px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', chipR: '999px',
     hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
     helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
-    lgMark: true, lgText: '#1B2350', lgFont: "800 24px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
-    h2c: '#1B2350', h2size: '26px', mkDisp: 'inline-block',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 20px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    h2c: '#1B2350', h2size: '21px', mkDisp: 'inline-block',
     kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (i, label) => 'Station ' + label,
     cvPad: '14px', cvR: '28px', cvBg: '#1F3A93', imgR: '16px',
     pal: [['#1F3A93', '#FFFFFF'], ['#E8604C', '#FFFFFF'], ['#F6C343', '#1B2350']]
@@ -377,14 +377,14 @@ const THEMES = {
     ...BASE,
     bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
     acc: '#FF48B0', onAcc: '#002284', link: '#0078BF', colBg: '#FFE800', colFg: '#002284',
-    fd: "'Rubik Mono One', sans-serif", fdw: '400', fdTT: 'uppercase', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(28px, 3.4vw, 44px)',
-    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: '24px',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fdTT: 'uppercase', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(20px, 2.6vw, 30px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
     tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
     inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', chipR: '0',
     hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
     helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
-    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 26px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
-    h2c: '#0078BF', h2size: '19px', h2tt: 'uppercase', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 20px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    h2c: '#0078BF', h2size: '16px', h2tt: 'uppercase', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
     cvPad: '0', cvRot: '-2deg', cvSh: '8px 7px 0 rgba(255,72,176,.85)', tape: true,
     pal: [['#0078BF', '#F4EFE4'], ['#FF48B0', '#002284'], ['#FFE800', '#002284']]
   },
@@ -393,15 +393,15 @@ const THEMES = {
     bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
     acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', colBg: '#1E3B2F', colFg: '#F5EEDF',
     fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
-    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: '26px', cSh: '0 1px 4px rgba(42,36,32,.12)',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 1px 4px rgba(42,36,32,.12)',
     tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
     inR: '22px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', chipR: '2px',
     hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF',
     helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
-    lgText: '#D8B972', lgFont: "400 30px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    lgText: '#D8B972', lgFont: "400 24px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
     navUnderline: true, navLine: '#B8924A',
-    h2c: '#1E3B2F', h2size: '30px', h2fs: 'italic',
-    cvPad: '0', cvSh: '0 10px 18px rgba(42,36,32,.35)', shelf: true,
+    h2c: '#1E3B2F', h2size: '23px', h2fs: 'italic',
+    cvPad: '0', cvSh: '0 10px 18px rgba(42,36,32,.35)', shelf: true, shelfGap: '18px',
     pal: [['#1E3B2F', '#F5EEDF'], ['#B8924A', '#2A2420'], ['#B5523B', '#FBF7EE']]
   },
   vignettes: {
@@ -409,15 +409,15 @@ const THEMES = {
     bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
     acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', colBg: '#6BBF59', colFg: '#23323A',
     fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
-    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '38px 28px 28px',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '26px clamp(14px, 2.2vw, 22px) clamp(14px, 2.2vw, 22px)',
     tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
     inR: '999px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', chipR: '999px',
     hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A',
     helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
-    lgText: '#FFFFFF', lgFont: "800 28px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
-    h2c: '#23323A', h2size: '26px',
-    kDisp: 'block', kPos: 'absolute', kTop: '-15px', kLeft: '24px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '2px 14px', kR: '999px',
-    kFont: "'Baloo 2', sans-serif", kSize: '15px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
+    lgText: '#FFFFFF', lgFont: "800 22px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    h2c: '#23323A', h2size: '21px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-13px', kLeft: '20px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '1px 12px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '13px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
     cvPad: '10px', cvR: '14px', cvBg: '#FFFFFF', cvRot: '-2deg', cvSh: '0 6px 16px rgba(35,50,58,.25)', imgR: '6px',
     pal: [['#0F7C8C', '#FFFFFF'], ['#FFD23F', '#23323A'], ['#E0457B', '#FFFFFF']]
   }
@@ -438,7 +438,7 @@ const EDITIONS = [
     visuals: [['Couverture', 'cover', 'Couv.'], ['Page de garde', 'garde', 'Garde'], ...PLANCHES, ['4e de couverture', 'back', '4e']],
     objet: [
       ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', '', ''], ["Année d'édition", '2001', ''],
-      ['ISBN', '2-203-34424-5', '', 'Chiffre de contrôle valide'], ['Catégorie', '', ''], ['Format', 'Normal (A4)', ''],
+      ['ISBN', '2-203-34424-5', ''], ['Catégorie', '', ''], ['Format', 'Normal (A4)', ''],
       ['Reliure', 'Cartonnée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', '', ''],
       ['Pages', '', ''], ['Couleur', 'En couleur', '']
     ],
@@ -457,7 +457,7 @@ const EDITIONS = [
     visuals: [['Couverture', 'cover', 'Couv.'], ['Dédicace', 'ded', 'Déd.'], ['4e de couverture', 'back', '4e']],
     objet: [
       ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', "Univers d'auteurs", ''], ["Année d'édition", '2010', ''],
-      ['ISBN', '978-2-203-02972-9', '', 'Chiffre de contrôle valide'], ['Catégorie', '', ''], ['Format', 'Normal (A4)', ''],
+      ['ISBN', '978-2-203-02972-9', ''], ['Catégorie', '', ''], ['Format', 'Normal (A4)', ''],
       ['Reliure', 'Cartonnée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', 'Gauche à droite', ''],
       ['Pages', '88', ''], ['Couleur', 'En couleur', '']
     ],
@@ -476,7 +476,7 @@ const EDITIONS = [
     visuals: [['Couverture', 'cover', 'Couv.']],
     objet: [
       ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', 'Les Classiques de la BD', ''], ["Année d'édition", '2015', ''],
-      ['ISBN', '978-2-203-09872-1', '', 'Chiffre de contrôle incohérent'], ['Catégorie', '', ''], ['Format', 'Moyen (A5)', ''],
+      ['ISBN', '978-2-203-09872-1', ''], ['Catégorie', '', ''], ['Format', 'Moyen (A5)', ''],
       ['Reliure', 'Brochée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', '', ''],
       ['Pages', '72', ''], ['Couleur', 'Noir et blanc', '']
     ],
@@ -495,13 +495,13 @@ const EDITIONS = [
     visuals: [['Couverture', 'cover', 'Couv.']],
     objet: [
       ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', '', ''], ["Année d'édition", '2023', ''],
-      ['ISBN', '978-2-203-26633-9', '', 'Chiffre de contrôle valide'], ['Catégorie', 'Édition spéciale', ''], ['Format', 'Grand (> A4)', ''],
+      ['ISBN', '978-2-203-26633-9', ''], ['Catégorie', 'Édition spéciale', ''], ['Format', 'Grand (> A4)', ''],
       ['Reliure', 'Cartonnée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', 'Gauche à droite', ''],
       ['Pages', '112', ''], ['Couleur', 'En couleur', '']
     ],
     // A wished-for edition has no copy yet: its acquisition and the copy's characteristics do not exist.
     exemplaire: [
-      ['Possession', "Visée par une intention d'achat", '', "Pas encore dans la collection"]
+      ['Possession', "Intention d'achat", '']
     ],
     meta: 'Édition créée le 9 octobre 2026, modifiée le 9 octobre 2026.'
   }
@@ -577,6 +577,8 @@ class View extends Mockup {
     });
     return {
       t,
+      // The scroll hint of the menu fades into what lies behind it: the header, or the page under a transparent one.
+      hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
       art: ed.art,
       k: { recit: kick(1, 'Le récit'), editions: kick(2, 'Les éditions'), serie: kick(3, 'La série') },
       nav: [navItem('Accueil', false), navItem('Albums', true), navItem('Séries', false), navItem('Auteurs', false), navItem("Intentions d'achat", false)],

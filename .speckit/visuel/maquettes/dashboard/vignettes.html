@@ -20,10 +20,10 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
 <template id="view">
 <div style="min-height: 100vh; background: #FFF4D6; color: #23323A; font-family: Nunito, system-ui, sans-serif; font-size: 16px; line-height: 1.5">
 
-  <header style="background: #0F7C8C; color: #FFFFFF">
-    <div style="max-width: 1240px; margin: 0 auto; padding: 14px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px">
-      <a href="#" style="font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 28px; line-height: 1">BDthèque</a>
-      <nav aria-label="Navigation principale" style="flex: 1 1 420px; min-width: 0; overflow-x: auto">
+  <header style="position: sticky; top: 0; z-index: 20; background: #0F7C8C; color: #FFFFFF">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px">
+      <a href="#" style="font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 24px; line-height: 1">BDthèque</a>
+      <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: #0F7C8C"><div data-scroll="">
         <div style="display: flex; gap: 4px; white-space: nowrap; width: max-content; font-weight: 700">
           <a href="#" aria-current="page" style="padding: 8px 16px; border-radius: 999px; background: #FFD23F; color: #23323A">Accueil</a>
           <a href="#" style="padding: 8px 14px">Albums</a>
@@ -31,32 +31,32 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
           <a href="#" style="padding: 8px 14px">Auteurs</a>
           <a href="#" style="padding: 8px 14px">Intentions d'achat</a>
         </div>
-      </nav>
+      </div></nav>
       <div style="display: flex; gap: 6px; flex: 0 1 320px">
         <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
-        <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: #FFFFFF; color: #23323A; font: inherit; outline: none">
-        <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; background: #FFD23F; color: #23323A; font: 800 20px 'Baloo 2', sans-serif; cursor: pointer">?</button>
+        <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: #FFFFFF; color: #23323A; font: inherit; outline: none">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: #FFD23F; color: #23323A; font: 800 20px 'Baloo 2', sans-serif; cursor: pointer">?</button>
       </div>
     </div>
   </header>
 
-  <main style="max-width: 1240px; margin: 0 auto; padding: 32px 24px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 36px">
+  <main style="max-width: 1240px; margin: 0 auto; padding: 24px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 30px">
 
-    <section aria-labelledby="h-hero" style="position: relative; padding: 36px; border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-wrap: wrap; align-items: center; gap: 28px 48px">
+    <section aria-labelledby="h-hero" style="position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-wrap: wrap; align-items: center; gap: 20px 40px">
       <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 1 · Bienvenue</span>
       <div style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
         <span style="font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 18px; color: #0F7C8C">Album officiel de la collection</span>
         <div class="sticker" style="padding: 8px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,.15); transform: rotate(-1.5deg)">
-          <div style="padding: 26px 30px; border-radius: 8px; background: linear-gradient(120deg, #E8D9FF 0%, #CFF3F0 30%, #FFF0C2 55%, #FFD6E7 80%, #D9E8FF 100%)">
-            <h1 id="h-hero" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(30px, 4vw, 50px); line-height: 1.05">{{heroLine}}</h1>
+          <div style="padding: clamp(14px, 2.6vw, 26px) clamp(16px, 3vw, 30px); border-radius: 8px; background: linear-gradient(120deg, #E8D9FF 0%, #CFF3F0 30%, #FFF0C2 55%, #FFD6E7 80%, #D9E8FF 100%)">
+            <h1 id="h-hero" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(22px, 3.4vw, 44px); line-height: 1.05">{{heroLine}}</h1>
           </div>
         </div>
       </div>
-      <div style="flex: 0 1 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px">
+      <div style="flex: 0 1 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px">
         <sc-for list="{{counters}}" as="k" hint-placeholder-count="3">
-          <a href="#" class="sticker" style="width: 128px; height: 128px; border-radius: 50%; background: #FFFFFF; padding: 6px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,.15); transform: rotate({{k.rot}})">
+          <a href="#" class="sticker" style="width: clamp(92px, 12vw, 120px); height: clamp(92px, 12vw, 120px); border-radius: 50%; background: #FFFFFF; padding: 5px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,.15); transform: rotate({{k.rot}})">
             <span style="width: 100%; height: 100%; border-radius: 50%; background: {{k.bg}}; color: {{k.tc}}; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05">
-              <span style="font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 30px">{{k.n}}</span>
+              <span style="font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(20px, 2.6vw, 28px)">{{k.n}}</span>
               <span style="font-weight: 700; font-size: 14px">{{k.label}}</span>
             </span>
           </a>
@@ -64,29 +64,29 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
       </div>
     </section>
 
-    <section aria-labelledby="h-recent" style="position: relative; padding: 36px; border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 22px">
+    <section aria-labelledby="h-recent" style="position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 16px">
       <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 2 · Les nouvelles vignettes</span>
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
         <h2 id="h-recent" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 32px">Tout juste arrivés !</h2>
         <a href="#" style="font-weight: 700; color: #0F7C8C">Tous les albums →</a>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 26px 22px">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(clamp(96px, 24vw, 155px), calc((100% - 2 * 12px) / 3)), 1fr)); gap: 18px 12px">
         <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
           <a href="#" style="display: flex; flex-direction: column; gap: 10px">
-            <span style="position: relative; display: block; padding: 6px; border: 2px dashed #9DB8BD; border-radius: 12px">
+            <span style="position: relative; display: block; padding: 4px; border: 2px dashed #9DB8BD; border-radius: 10px">
               <span aria-hidden="true" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 34px; color: #D5E4E6">{{r.no}}</span>
-              <span class="sticker" style="position: relative; display: block; padding: 6px; border-radius: 10px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.18); transform: rotate({{r.rot}}) translate({{r.dx}}, {{r.dy}})">
+              <span class="sticker" style="position: relative; display: block; padding: 4px; border-radius: 8px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.18); transform: rotate({{r.rot}}) translate({{r.dx}}, {{r.dy}})">
                 <span style="display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 4; border-radius: 6px; background: #2E2A33; color: #A79FB0; font-size: 12px">[Couverture]</span>
               </span>
             </span>
-            <span style="display: flex; flex-direction: column; line-height: 1.25"><span style="font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px; color: #0F7C8C">N° {{r.no}}</span><span style="font-weight: 700">{{r.label}}</span><span style="font-size: 14px; color: #5B6B72">{{r.meta}}</span></span>
+            <span style="display: flex; flex-direction: column; line-height: 1.25; font-size: 14px"><span style="font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 13px; color: #0F7C8C">N° {{r.no}}</span><span style="font-weight: 700">{{r.label}}</span><span style="font-size: 13px; color: #5B6B72">{{r.meta}}</span></span>
           </a>
         </sc-for>
       </div>
     </section>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 36px">
-      <section aria-labelledby="h-value" style="flex: 1 1 480px; min-width: 0; position: relative; padding: 36px; border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-wrap: wrap; gap: 30px">
+      <section aria-labelledby="h-value" style="flex: 1 1 480px; min-width: 0; position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 14px">
         <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 3 · La cote</span>
         <h2 id="h-value" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 30px">Ça vaut combien, tout ça ?</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 14px">
@@ -101,7 +101,7 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
         <p style="margin: 0; font-size: 13px; color: #5B6B72">Estimation : prix connus + 497 éditions sans prix. 12 montants non convertibles exclus · 25 éditions gratuites non valorisées.</p>
       </section>
 
-      <section aria-labelledby="h-type" style="flex: 1 1 380px; min-width: 0; position: relative; padding: 36px; border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 14px">
+      <section aria-labelledby="h-type" style="flex: 1 1 380px; min-width: 0; position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 14px">
         <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 4 · La planche</span>
         <h2 id="h-type" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 28px; line-height: 1.15">Tomes, intégrales ou hors-séries ?</h2>
         <div role="img" aria-label="{{typesAria}}" style="padding: 10px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.12); display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 3px">
@@ -118,11 +118,11 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
       </section>
     </div>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 36px">
-      <section aria-labelledby="h-genre" style="flex: 1 1 480px; min-width: 0; position: relative; padding: 36px; border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-wrap: wrap; gap: 30px">
+      <section aria-labelledby="h-genre" style="flex: 1 1 480px; min-width: 0; position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 16px">
         <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 5 · Les écussons</span>
         <h2 id="h-genre" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 30px">Plutôt quel genre ?</h2>
-        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
           <sc-for list="{{genres}}" as="g" hint-placeholder-count="8">
             <a href="#" class="sticker" style="width: {{g.d}}; height: {{g.d}}; border-radius: 50%; padding: 5px; box-sizing: border-box; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.15); transform: rotate({{g.rot}})">
               <span style="width: 100%; height: 100%; border-radius: 50%; background: {{g.c}}; color: {{g.tc}}; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.05; padding: 4px; box-sizing: border-box">
@@ -135,7 +135,7 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
         <p style="margin: 0; font-size: 13px; color: #5B6B72">La taille de l'écusson suit le nombre d'albums ; un album peut cumuler plusieurs genres.</p>
       </section>
 
-      <section aria-labelledby="h-pub" style="flex: 1 1 380px; min-width: 0; position: relative; padding: 36px; border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 10px">
+      <section aria-labelledby="h-pub" style="flex: 1 1 380px; min-width: 0; position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 10px">
         <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 6 · Le classement</span>
         <h2 id="h-pub" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 30px">Chez quels éditeurs ?</h2>
         <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
@@ -211,7 +211,7 @@ class View extends Mockup {
       typesAria,
       genres: genres.map(([name, v], i) => {
         const k = Math.sqrt(v / 612);
-        return { name, n: fmt(v), c: inks[i][0], tc: inks[i][1], rot: rots[i], d: Math.round(78 + k * 64) + 'px', fs: (12 + Math.round(k * 8)) + 'px' };
+        return { name, n: fmt(v), c: inks[i][0], tc: inks[i][1], rot: rots[i], d: Math.round(66 + k * 50) + 'px', fs: (11 + Math.round(k * 6)) + 'px' };
       }),
       publishers: pubs.map(([name, v], i) => ({ name, n: fmt(v), w: Math.round(v / 548 * 100) + '%', c: inks[i][0] }))
     };

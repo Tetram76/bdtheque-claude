@@ -20,8 +20,8 @@ a{text-decoration:none;color:inherit}
 <template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
 
-  <header style="max-width: 1280px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 28px; border-bottom: 4px solid {{t.ink}}">
-    <nav aria-label="Navigation principale" style="flex: 1 1 480px; min-width: 0; overflow-x: auto">
+  <header style="position: sticky; top: 0; z-index: 20; background: {{t.bg}}; max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 28px; border-bottom: 4px solid {{t.ink}}">
+    <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: {{t.bg}}"><div data-scroll="">
       <div style="display: flex; gap: 4px; white-space: nowrap; width: max-content; font-weight: 800; text-transform: uppercase; font-size: 13px; letter-spacing: .04em">
         <a href="#" aria-current="page" style="padding: 10px 14px; background: {{accent}}; color: #FFFFFF">Accueil</a>
         <a href="#" style="padding: 10px 14px">Albums</a>
@@ -29,23 +29,23 @@ a{text-decoration:none;color:inherit}
         <a href="#" style="padding: 10px 14px">Auteurs</a>
         <a href="#" style="padding: 10px 14px">Intentions d'achat</a>
       </div>
-    </nav>
+    </div></nav>
     <div style="display: flex; align-items: center; gap: 8px; flex: 0 1 340px">
       <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
-      <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 44px; padding: 0 14px; border: 2px solid {{t.ink}}; border-radius: 0; background: transparent; color: {{t.ink}}; font: inherit; outline: none">
-      <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: 0; background: #FFD60A; color: #111111; font: 800 18px 'Libre Franklin', sans-serif; cursor: pointer">?</button>
+      <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 12px; border: 2px solid {{t.ink}}; border-radius: 0; background: transparent; color: {{t.ink}}; font: inherit; outline: none">
+      <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; background: #FFD60A; color: #111111; font: 800 18px 'Libre Franklin', sans-serif; cursor: pointer">?</button>
     </div>
   </header>
 
-  <main style="max-width: 1280px; margin: 0 auto; padding: 40px 24px 72px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-start">
+  <main style="max-width: 1280px; margin: 0 auto; padding: 24px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start">
 
-    <section aria-labelledby="h-hero" style="flex: 1 1 420px; min-width: 0; max-width: 520px; aspect-ratio: 210 / 297; padding: 26px; box-sizing: border-box; background: #E63946; color: #111111; display: flex; flex-direction: column; box-shadow: 18px 18px 0 #111111; transform: rotate(-1.5deg)">
-      <a href="#" style="font-family: Anton, Impact, sans-serif; font-size: clamp(64px, 9vw, 118px); line-height: .85; letter-spacing: -0.01em; text-transform: uppercase; color: #FFFFFF">BDthèque</a>
+    <section aria-labelledby="h-hero" style="flex: 0 1 clamp(250px, 34vw, 460px); min-width: 0; margin: 0 auto; aspect-ratio: 210 / 297; padding: clamp(14px, 2vw, 24px); box-sizing: border-box; background: #E63946; color: #111111; display: flex; flex-direction: column; box-shadow: 18px 18px 0 #111111; transform: rotate(-1.5deg)">
+      <a href="#" style="font-family: Anton, Impact, sans-serif; font-size: clamp(48px, 7vw, 104px); line-height: .85; letter-spacing: -0.01em; text-transform: uppercase; color: #FFFFFF">BDthèque</a>
       <div style="display: flex; justify-content: space-between; margin-top: 8px; padding: 4px 0; border-top: 3px solid #111111; border-bottom: 3px solid #111111; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .06em">
         <span>N° 2 847</span><span>Octobre</span><span>Gratuit</span>
       </div>
       <a href="#" aria-label="Alors, tout tombe (Blacksad - T. 7)" style="flex: 1; margin: 18px 0; background: #2E2A33; display: flex; align-items: center; justify-content: center; color: #A79FB0; font-size: 13px; border: 4px solid #111111">[Couverture du dernier arrivé]</a>
-      <h1 id="h-hero" style="margin: 0; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: clamp(32px, 3.8vw, 50px); line-height: .95; text-transform: uppercase; color: #FFFFFF">{{heroLine}}</h1>
+      <h1 id="h-hero" style="margin: 0; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: clamp(24px, 3.2vw, 44px); line-height: .95; text-transform: uppercase; color: #FFFFFF">{{heroLine}}</h1>
       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px">
         <a href="#" style="padding: 6px 12px; background: #111111; color: #FFFFFF; font-weight: 800"><span style="color: #FFD60A">412</span> séries</a>
         <a href="#" style="padding: 6px 12px; background: #111111; color: #FFFFFF; font-weight: 800"><span style="color: #FFD60A">2 913</span> éditions</a>
@@ -54,12 +54,12 @@ a{text-decoration:none;color:inherit}
     </section>
 
     <section aria-labelledby="h-toc" style="flex: 1.3 1 520px; min-width: 0; display: flex; flex-direction: column">
-      <h2 id="h-toc" style="margin: 0 0 12px; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: 72px; line-height: 1; text-transform: uppercase">Au sommaire</h2>
+      <h2 id="h-toc" style="margin: 0 0 8px; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: clamp(40px, 5vw, 64px); line-height: 1; text-transform: uppercase">Au sommaire</h2>
 
-      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 4px solid {{t.ink}}">
-        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #E63946">04</span>
+      <div class="entry" style="display: grid; grid-template-columns: clamp(52px, 7vw, 84px) minmax(0, 1fr); gap: clamp(12px, 2vw, 20px); padding: 16px 0; border-top: 4px solid {{t.ink}}">
+        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: clamp(44px, 5.4vw, 64px); line-height: .9; color: #E63946">04</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Tout juste arrivés !</a></h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1"><a href="#">Tout juste arrivés !</a></h2>
           <span style="color: {{t.soft}}">Six nouveautés, dont le tome 7 de Blacksad et le 40ᵉ Astérix.</span>
           <span style="display: flex; gap: 8px; margin-top: 6px">
             <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
@@ -69,19 +69,19 @@ a{text-decoration:none;color:inherit}
         </span>
       </div>
 
-      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
-        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #1D4ED8">12</span>
+      <div class="entry" style="display: grid; grid-template-columns: clamp(52px, 7vw, 84px) minmax(0, 1fr); gap: clamp(12px, 2vw, 20px); padding: 16px 0; border-top: 2px solid {{t.ink}}">
+        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: clamp(44px, 5.4vw, 64px); line-height: .9; color: #1D4ED8">12</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Ça vaut combien, tout ça ?</a></h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1"><a href="#">Ça vaut combien, tout ça ?</a></h2>
           <span style="color: {{t.soft}}">Notre enquête : <strong style="color: {{t.ink}}">38 760 €</strong> au total, <strong style="padding: 0 4px; background: #FFD60A; color: #111111">55 230 € d'aujourd'hui</strong>. Un album coûte en moyenne 13,10 € (18,70 € du jour), le plus cher 189,00 € (214,50 € du jour).</span>
           <span style="font-size: 12px; color: {{t.muted}}">Valeur connue 31 482 € (44 910 € du jour) · médian 11,90 € (16,40 € du jour) · le moins cher 0,90 € (3,20 € du jour) · 12 montants non convertibles exclus · 25 éd. gratuites non valorisées.</span>
         </span>
       </div>
 
-      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
-        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: {{t.ink}}">18</span>
+      <div class="entry" style="display: grid; grid-template-columns: clamp(52px, 7vw, 84px) minmax(0, 1fr); gap: clamp(12px, 2vw, 20px); padding: 16px 0; border-top: 2px solid {{t.ink}}">
+        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: clamp(44px, 5.4vw, 64px); line-height: .9; color: {{t.ink}}">18</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Tomes, intégrales ou hors-séries ?</a></h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1"><a href="#">Tomes, intégrales ou hors-séries ?</a></h2>
           <span style="color: {{t.soft}}">Neuf albums sur dix sont des tomes classiques : 2 571 réguliers, 184 intégrales, 92 hors-séries.</span>
           <span role="img" aria-label="90 % réguliers, 6 % intégrales, 3 % hors-séries" style="display: flex; gap: 3px; margin-top: 6px; font-family: Anton, Impact, sans-serif; font-size: 22px; line-height: 1">
             <span style="flex: 90 1 0; padding: 6px 8px; background: #FFD60A; color: #111111">90 %</span>
@@ -91,10 +91,10 @@ a{text-decoration:none;color:inherit}
         </span>
       </div>
 
-      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}">
-        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #E63946">22</span>
+      <div class="entry" style="display: grid; grid-template-columns: clamp(52px, 7vw, 84px) minmax(0, 1fr); gap: clamp(12px, 2vw, 20px); padding: 16px 0; border-top: 2px solid {{t.ink}}">
+        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: clamp(44px, 5.4vw, 64px); line-height: .9; color: #E63946">22</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Plutôt quel genre ?</a></h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1"><a href="#">Plutôt quel genre ?</a></h2>
           <span style="color: {{t.soft}}">L'aventure en tête avec 612 albums, l'humour juste derrière.</span>
           <span style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; margin-top: 4px">
             <sc-for list="{{genres}}" as="g" hint-placeholder-count="7">
@@ -104,10 +104,10 @@ a{text-decoration:none;color:inherit}
         </span>
       </div>
 
-      <div class="entry" style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 2px solid {{t.ink}}; border-bottom: 4px solid {{t.ink}}">
-        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: 72px; line-height: .9; color: #1D4ED8">28</span>
+      <div class="entry" style="display: grid; grid-template-columns: clamp(52px, 7vw, 84px) minmax(0, 1fr); gap: clamp(12px, 2vw, 20px); padding: 16px 0; border-top: 2px solid {{t.ink}}; border-bottom: 4px solid {{t.ink}}">
+        <span class="pageno" style="font-family: Anton, Impact, sans-serif; font-size: clamp(44px, 5.4vw, 64px); line-height: .9; color: #1D4ED8">28</span>
         <span style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 1.1"><a href="#">Chez quels éditeurs ?</a></h2>
+          <h2 style="margin: 0; font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1"><a href="#">Chez quels éditeurs ?</a></h2>
           <span style="color: {{t.soft}}">Dargaud et Dupuis au coude à coude, Casterman sur le podium.</span>
           <span style="display: flex; align-items: flex-end; gap: 6px; margin-top: 6px">
             <sc-for list="{{podium}}" as="p" hint-placeholder-count="3">

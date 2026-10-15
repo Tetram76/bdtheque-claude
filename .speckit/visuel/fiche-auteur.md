@@ -28,7 +28,7 @@ L'exemple présenté est un auteur sans biographie ni nationalité, crédité su
 De haut en bas :
 
 - **En-tête** de la partie Consultation, avec l'entrée « Auteurs » active, puis le **fil d'Ariane** : Auteurs, puis l'auteur.
-- **En-tête de la fiche** : un **monogramme** (initiales), décoratif ; l'identifiant principal de l'auteur (`fonctionnel.md` § Artistes), suivi de son prénom et de son nom lorsqu'il est connu sous un pseudonyme ; sa nationalité (« Non renseignée » sinon) ; des étiquettes qui donnent le nombre d'albums crédités, puis ce nombre par rôle.
+- **En-tête de la fiche** : un petit **monogramme** (initiales), décoratif, à gauche du nom, y compris sur smartphone ; l'identifiant principal de l'auteur (`fonctionnel.md` § Artistes), suivi de son prénom et de son nom lorsqu'il est connu sous un pseudonyme ; sa nationalité (« Non renseignée » sinon) ; des étiquettes qui donnent le nombre d'albums crédités, puis ce nombre par rôle.
 - **Qui est-ce ?** : la biographie, ou « Aucune biographie pour l'instant. ».
 - **Sur quels albums ?** : la **bibliographie complète** (`fonctionnel.md` § Structure de l'application), en une seule liste :
   - séries et **albums sans série au premier niveau**, triés ensemble par ordre alphabétique (clé de tri), comme le veut `fonctionnel.md` § Structure de l'application ;
