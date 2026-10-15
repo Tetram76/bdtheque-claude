@@ -21,7 +21,7 @@ a{text-decoration:none;color:inherit}a:hover{text-decoration:underline;text-deco
 <div style="min-height: 100vh; background: {{paper}}; color: {{ink}}; font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55">
   <div style="max-width: 1240px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 28px) 48px; box-sizing: border-box">
 
-    <header style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; border-bottom: 4px double {{ink}}">
+    <header style="display: flex; flex-direction: column; gap: 10px">
       <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase">
         <span>Édition du jour · n° 2 847</span>
         <div style="display: flex; align-items: center; gap: 8px; flex: 0 1 340px">
@@ -31,7 +31,8 @@ a{text-decoration:none;color:inherit}a:hover{text-decoration:underline;text-deco
         </div>
       </div>
       <a href="#" style="align-self: center; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: clamp(34px, 7vw, 88px); line-height: .9; letter-spacing: -0.03em; text-decoration: none">La Gazette de la BDthèque<span style="color: {{accent}}">.</span></a>
-      <nav aria-label="Navigation principale" data-scroll-hint="" style="border-top: 2px solid {{ink}}; padding-top: 10px; --hint-bg: {{paper}}"><div data-scroll="">
+    </header>
+    <nav aria-label="Navigation principale" data-scroll-hint="" style="position: sticky; top: 0; z-index: 20; margin-top: 10px; padding: 10px 0; background: {{paper}}; border-top: 2px solid {{ink}}; border-bottom: 4px double {{ink}}; --hint-bg: {{paper}}"><div data-scroll="">
         <div style="display: flex; justify-content: center; gap: 4px 28px; white-space: nowrap; font-weight: 700; width: max-content; margin: 0 auto">
           <a href="#" aria-current="page" style="padding: 6px 0; border-bottom: 3px solid {{accent}}">Accueil</a>
           <a href="#" style="padding: 6px 0">Albums</a>
@@ -40,7 +41,6 @@ a{text-decoration:none;color:inherit}a:hover{text-decoration:underline;text-deco
           <a href="#" style="padding: 6px 0">Intentions d'achat</a>
         </div>
       </div></nav>
-    </header>
 
     <div class="cols" style="display: flex; flex-wrap: wrap; gap: 28px; padding-top: 20px">
 

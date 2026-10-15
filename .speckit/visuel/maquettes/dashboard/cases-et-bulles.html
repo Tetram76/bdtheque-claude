@@ -20,7 +20,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
 <template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: #FBF3EA; font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
 
-  <header style="max-width: 1280px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px">
+  <header style="position: sticky; top: 0; z-index: 20; background: {{t.bg}}; max-width: 1280px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px">
     <a href="#" style="padding: 5px 14px; border-radius: 22px 26px 24px 8px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-size: 20px; font-weight: 800; transform: rotate(-2deg)">BDthèque<span style="color: {{accent}}">.</span></a>
     <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: {{t.bg}}"><div data-scroll="">
       <div style="display: flex; gap: 6px; white-space: nowrap; padding: 4px; border-radius: 999px; background: {{t.panel}}; width: max-content">

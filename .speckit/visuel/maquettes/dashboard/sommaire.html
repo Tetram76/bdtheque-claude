@@ -20,7 +20,7 @@ a{text-decoration:none;color:inherit}
 <template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Libre Franklin', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
 
-  <header style="max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 28px; border-bottom: 4px solid {{t.ink}}">
+  <header style="position: sticky; top: 0; z-index: 20; background: {{t.bg}}; max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 28px; border-bottom: 4px solid {{t.ink}}">
     <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: {{t.bg}}"><div data-scroll="">
       <div style="display: flex; gap: 4px; white-space: nowrap; width: max-content; font-weight: 800; text-transform: uppercase; font-size: 13px; letter-spacing: .04em">
         <a href="#" aria-current="page" style="padding: 10px 14px; background: {{accent}}; color: #FFFFFF">Accueil</a>

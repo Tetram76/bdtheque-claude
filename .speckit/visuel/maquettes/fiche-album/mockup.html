@@ -20,7 +20,7 @@ summary{cursor:pointer}
 <template id="view">
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
 
-  <header style="background: {{t.hBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+  <header style="position: sticky; top: 0; z-index: 20; background: {{hintBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
     <div style="max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
       <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
         <sc-if value="{{t.lgMark}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
