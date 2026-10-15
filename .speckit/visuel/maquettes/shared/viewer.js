@@ -4,7 +4,7 @@
 (function () {
   'use strict';
 
-  const WIDTHS = { desktop: 1440, phone: 390 };
+  const WIDTHS = { desktop: 1440, phone: 414 };
   // Until a page reports its height, and whenever its width changes: a frame taller than its page
   // would stretch the pages that fill the viewport (min-height: 100vh), which would report it back.
   const INITIAL_HEIGHT = 600;
@@ -162,7 +162,7 @@
       el('h1', { text: title }),
       lead ? el('p', { class: 'lead', text: lead }) : '',
       el('div', { class: 'toolbar' }, [
-        segmented('Largeur', 'width', [['desktop', 'Bureau · 1440 px'], ['phone', 'Smartphone · 390 px']], 'desktop',
+        segmented('Largeur', 'width', [['desktop', 'Bureau · 1440 px'], ['phone', 'Smartphone · 414 px']], 'desktop',
           (value) => cards.forEach((card) => card.frame.resize(WIDTHS[value]))),
         el('div', { class: 'columns-control' }, [
           segmented('Colonnes', 'columns', [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']], '2',

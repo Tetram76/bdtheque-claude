@@ -87,11 +87,11 @@ summary{cursor:pointer}
           <dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px 40px">
             <div style="display: flex; gap: 10px; align-items: baseline">
               <dt style="font-weight: 700">Éditeur</dt>
-              <dd style="margin: 0"><sc-if value="{{s.hasPublisher}}" hint-placeholder-val="{{true}}"><a href="#" style="font-weight: 700; color: {{t.link}}">{{s.publisher}}</a></sc-if><sc-if value="{{s.noPublisher}}" hint-placeholder-val="{{false}}"><span style="color: {{t.muted}}">Non renseigné</span></sc-if></dd>
+              <dd style="margin: 0"><sc-if value="{{s.publisherLink}}" hint-placeholder-val="{{true}}"><a href="{{s.publisherUrl}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: {{t.link}}">{{s.publisher}}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-label="site externe" role="img"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a></sc-if><sc-if value="{{s.publisherText}}" hint-placeholder-val="{{false}}"><span style="font-weight: 700">{{s.publisher}}</span></sc-if><sc-if value="{{s.noPublisher}}" hint-placeholder-val="{{false}}"><span style="color: {{t.muted}}">Non renseigné</span></sc-if></dd>
             </div>
             <div style="display: flex; gap: 10px; align-items: baseline">
               <dt style="font-weight: 700">Collection</dt>
-              <dd style="margin: 0"><sc-if value="{{s.hasCollection}}" hint-placeholder-val="{{true}}"><a href="#" style="font-weight: 700; color: {{t.link}}">{{s.collection}}</a></sc-if><sc-if value="{{s.noCollection}}" hint-placeholder-val="{{false}}"><span style="color: {{t.muted}}">Non renseignée</span></sc-if></dd>
+              <dd style="margin: 0"><sc-if value="{{s.hasCollection}}" hint-placeholder-val="{{true}}"><span style="font-weight: 700">{{s.collection}}</span></sc-if><sc-if value="{{s.noCollection}}" hint-placeholder-val="{{false}}"><span style="color: {{t.muted}}">Non renseignée</span></sc-if></dd>
             </div>
           </dl>
 
@@ -361,7 +361,7 @@ const EXAMPLES = {
   heads: {
     title: 'Heads',
     status: 'Terminée', planned: 4, complete: true,
-    publisher: 'Delcourt', collection: 'Akata',
+    publisher: 'Delcourt', publisherUrl: 'https://www.editions-delcourt.fr', collection: 'Akata',
     credits: { scenario: ['Keigo Higashino'], dessin: ['Motorou Mase'], couleurs: [] },
     genres: ['Manga', 'Thriller'],
     universes: [],
@@ -470,13 +470,15 @@ class View extends Mockup {
       // Every optional value of a series stays visible when absent, as on the record of an album, never as an empty link.
       s: {
         ...s,
-        hasPublisher: Boolean(s.publisher), noPublisher: !s.publisher,
+        // Only a publisher with a known website is a link, to that site; a collection never is (fonctionnel.md § Structure de l'application).
+        publisherLink: Boolean(s.publisher && s.publisherUrl), publisherText: Boolean(s.publisher && !s.publisherUrl),
+        noPublisher: !s.publisher,
         hasCollection: Boolean(s.collection), noCollection: !s.collection,
         summary: s.summary || 'Aucun résumé', summaryColor: s.summary ? t.text : t.muted,
         notes: s.notes || 'Aucune note', notesColor: s.notes ? t.text : t.muted
       },
       k: { recit: kick(1, 'Le récit'), albums: kick(2, 'Les albums') },
-      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', true), navItem('Auteurs', false), navItem('Éditeurs', false), navItem("Intentions d'achat", false)],
+      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', true), navItem('Auteurs', false), navItem("Intentions d'achat", false)],
       stack: [
         { left: '40px', top: '0', rot: '6deg', ...pileCard(2) },
         { left: '20px', top: '12px', rot: '2deg', ...pileCard(1) },

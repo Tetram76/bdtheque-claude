@@ -29,7 +29,6 @@ a:hover .book{transform:translateY(-6px)}
             <a href="#" style="padding: 8px 0">Albums</a>
             <a href="#" style="padding: 8px 0">Séries</a>
             <a href="#" style="padding: 8px 0">Auteurs</a>
-            <a href="#" style="padding: 8px 0">Éditeurs</a>
             <a href="#" style="padding: 8px 0">Intentions d'achat</a>
           </div>
         </nav>
@@ -153,7 +152,7 @@ a:hover .book{transform:translateY(-6px)}
       <h2 id="h-pub" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; color: #1E3B2F">Chez quels éditeurs ?</h2>
       <div style="padding: 8px; background: #5B3A24; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px">
         <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
-          <a href="#" style="display: flex; flex-direction: column; background: #3F2818; padding: 10px 12px 0">
+          <div style="display: flex; flex-direction: column; background: #3F2818; padding: 10px 12px 0">
             <span style="display: flex; align-items: flex-end; gap: 2px; height: 72px">
               <sc-for list="{{e.spines}}" as="s" hint-placeholder-count="8">
                 <span style="width: 10px; height: {{s.h}}; background: {{s.c}}; border-radius: 1px 1px 0 0"></span>
@@ -163,7 +162,7 @@ a:hover .book{transform:translateY(-6px)}
               <span style="padding: 1px 8px; background: #E9DDBF; border: 1px solid #B8924A; color: #2A2420; font-weight: 700; font-size: 13px">{{e.name}}</span>
               <span style="color: #E9DDBF; font-size: 13px">{{e.n}} éd.</span>
             </span>
-          </a>
+          </div>
         </sc-for>
       </div>
       <p style="margin: 0; font-size: 13px; color: #8A7A66">Éditions possédées ; un dos ≈ 25 éditions.</p>

@@ -28,7 +28,6 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
         <a href="#" style="padding: 10px 16px; border-radius: 999px; color: {{t.soft}}">Albums</a>
         <a href="#" style="padding: 10px 16px; border-radius: 999px; color: {{t.soft}}">Séries</a>
         <a href="#" style="padding: 10px 16px; border-radius: 999px; color: {{t.soft}}">Auteurs</a>
-        <a href="#" style="padding: 10px 16px; border-radius: 999px; color: {{t.soft}}">Éditeurs</a>
         <a href="#" style="padding: 10px 16px; border-radius: 999px; color: {{t.soft}}">Intentions d'achat</a>
       </div>
     </nav>
@@ -174,11 +173,11 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
       </div>
       <div style="display: flex; flex-direction: column; gap: 12px">
         <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
-          <a href="#" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 46px; align-items: center; gap: 12px; font-size: 14px; color: #FBF3EA">
+          <div style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 46px; align-items: center; gap: 12px; font-size: 14px; color: #FBF3EA">
             <span style="font-weight: 500">{{e.name}}</span>
             <span style="height: 14px; border-radius: 999px; background: {{t.bg}}"><span style="display: block; height: 14px; border-radius: 999px; width: {{e.w}}; background: {{e.c}}"></span></span>
             <span style="text-align: right; font-variant-numeric: tabular-nums; color: {{t.soft}}">{{e.n}}</span>
-          </a>
+          </div>
         </sc-for>
       </div>
       <p style="margin: 16px 0 0; font-size: 13px; color: {{t.muted}}">Éditions possédées.</p>

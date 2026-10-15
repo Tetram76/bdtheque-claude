@@ -119,6 +119,14 @@ Répercussion dans l'API des données que les cartes d'album des fiches de séri
 | --- | --- |
 | #156 | Données des cartes d'album dans les fiches de série et d'auteur |
 
+### Ajustement issu des fiches de consultation
+
+Répercussion dans l'API de la règle qui réserve les fiches de consultation aux albums, aux séries et aux auteurs : éditions présentées par la fiche de leur album ; éditeurs et collections éditeur sans fiche ; genres et univers menant à la liste de leurs séries et albums présentée comme la bibliographie d'un auteur. La phase 2 étant validée, un seul ticket la couvre.
+
+| Ticket | Titre |
+| --- | --- |
+| #157 | Fiches de consultation réservées aux albums, séries et auteurs |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).

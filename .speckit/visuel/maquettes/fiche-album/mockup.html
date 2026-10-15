@@ -247,7 +247,7 @@ summary{cursor:pointer}
                   <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; padding: 9px 0; border-bottom: {{t.rowB}}">
                     <dt style="flex: 0 0 170px; font-weight: 700">{{r.k}}</dt>
                     <dd style="flex: 1 1 180px; min-width: 0; margin: 0; display: flex; flex-direction: column">
-                      <sc-if value="{{r.isLink}}" hint-placeholder-val="{{false}}"><a href="#" style="align-self: flex-start; font-weight: 700; color: {{t.link}}">{{r.v}}</a></sc-if>
+                      <sc-if value="{{r.isLink}}" hint-placeholder-val="{{false}}"><a href="{{r.href}}" target="_blank" rel="noopener" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: {{t.link}}">{{r.v}}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-label="site externe" role="img"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a></sc-if>
                       <sc-if value="{{r.isText}}" hint-placeholder-val="{{true}}"><span style="color: {{r.color}}">{{r.v}}</span></sc-if>
                       <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; color: {{t.muted}}">{{r.sub}}</span></sc-if>
                     </dd>
@@ -437,7 +437,7 @@ const EDITIONS = [
     art: { sky: '#E9D8B4', sea: '#2F6F8F', sun: '#D9532B', ink: '#1F2A30', band: '#F4EBDD', title: '#1F2A30' },
     visuals: [['Couverture', 'cover', 'Couv.'], ['Page de garde', 'garde', 'Garde'], ...PLANCHES, ['4e de couverture', 'back', '4e']],
     objet: [
-      ['Éditeur', 'Casterman', 'link'], ['Collection', '', ''], ["Année d'édition", '2001', ''],
+      ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', '', ''], ["Année d'édition", '2001', ''],
       ['ISBN', '2-203-34424-5', '', 'Chiffre de contrôle valide'], ['Catégorie', '', ''], ['Format', 'Normal (A4)', ''],
       ['Reliure', 'Cartonnée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', '', ''],
       ['Pages', '', ''], ['Couleur', 'En couleur', '']
@@ -456,7 +456,7 @@ const EDITIONS = [
     art: { sky: '#1F2A44', sea: '#3E8E9E', sun: '#F2C14E', ink: '#0E1420', band: '#0E1420', title: '#F4EBDD' },
     visuals: [['Couverture', 'cover', 'Couv.'], ['Dédicace', 'ded', 'Déd.'], ['4e de couverture', 'back', '4e']],
     objet: [
-      ['Éditeur', 'Casterman', 'link'], ['Collection', "Univers d'auteurs", 'link'], ["Année d'édition", '2010', ''],
+      ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', "Univers d'auteurs", ''], ["Année d'édition", '2010', ''],
       ['ISBN', '978-2-203-02972-9', '', 'Chiffre de contrôle valide'], ['Catégorie', '', ''], ['Format', 'Normal (A4)', ''],
       ['Reliure', 'Cartonnée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', 'Gauche à droite', ''],
       ['Pages', '88', ''], ['Couleur', 'En couleur', '']
@@ -475,7 +475,7 @@ const EDITIONS = [
     art: { sky: '#F1E6CF', sea: '#2A2A2A', sun: '#2A2A2A', ink: '#1E1E1E', band: '#FFFFFF', title: '#1E1E1E' },
     visuals: [['Couverture', 'cover', 'Couv.']],
     objet: [
-      ['Éditeur', 'Casterman', 'link'], ['Collection', 'Les Classiques de la BD', 'link'], ["Année d'édition", '2015', ''],
+      ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', 'Les Classiques de la BD', ''], ["Année d'édition", '2015', ''],
       ['ISBN', '978-2-203-09872-1', '', 'Chiffre de contrôle incohérent'], ['Catégorie', '', ''], ['Format', 'Moyen (A5)', ''],
       ['Reliure', 'Brochée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', '', ''],
       ['Pages', '72', ''], ['Couleur', 'Noir et blanc', '']
@@ -494,7 +494,7 @@ const EDITIONS = [
     art: { sky: '#BFE3E0', sea: '#1D6A7A', sun: '#E86A3A', ink: '#123038', band: '#E86A3A', title: '#FFFFFF' },
     visuals: [['Couverture', 'cover', 'Couv.']],
     objet: [
-      ['Éditeur', 'Casterman', 'link'], ['Collection', '', ''], ["Année d'édition", '2023', ''],
+      ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', '', ''], ["Année d'édition", '2023', ''],
       ['ISBN', '978-2-203-26633-9', '', 'Chiffre de contrôle valide'], ['Catégorie', 'Édition spéciale', ''], ['Format', 'Grand (> A4)', ''],
       ['Reliure', 'Cartonnée', ''], ['Orientation', 'Portrait', ''], ['Sens de lecture', 'Gauche à droite', ''],
       ['Pages', '112', ''], ['Couleur', 'En couleur', '']
@@ -562,8 +562,10 @@ class View extends Mockup {
     const row = ([k, v, kind, sub]) => ({
       k,
       v: v || 'Non renseigné',
-      isLink: Boolean(v) && kind === 'link',
-      isText: !v || kind !== 'link',
+      // Only a publisher with a known website is a link, to that site (fonctionnel.md § Structure de l'application).
+      isLink: Boolean(v) && kind.startsWith('http'),
+      href: kind,
+      isText: !v || !kind.startsWith('http'),
       color: v ? t.text : t.muted,
       sub: sub ?? '',
       hasSub: Boolean(sub)
@@ -577,7 +579,7 @@ class View extends Mockup {
       t,
       art: ed.art,
       k: { recit: kick(1, 'Le récit'), editions: kick(2, 'Les éditions'), serie: kick(3, 'La série') },
-      nav: [navItem('Accueil', false), navItem('Albums', true), navItem('Séries', false), navItem('Auteurs', false), navItem('Éditeurs', false), navItem("Intentions d'achat", false)],
+      nav: [navItem('Accueil', false), navItem('Albums', true), navItem('Séries', false), navItem('Auteurs', false), navItem("Intentions d'achat", false)],
       facts: [
         { label: 'T. 5', ...pick(true) },
         { label: 'Paru en novembre 1970', ...pick(false) },

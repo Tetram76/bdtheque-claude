@@ -28,7 +28,6 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
         <a href="#" style="padding: 8px 14px">Albums</a>
         <a href="#" style="padding: 8px 14px">Séries</a>
         <a href="#" style="padding: 8px 14px">Auteurs</a>
-        <a href="#" style="padding: 8px 14px">Éditeurs</a>
         <a href="#" style="padding: 8px 14px">Intentions d'achat</a>
       </div>
     </nav>
@@ -119,11 +118,11 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
       <section aria-labelledby="h-pub" style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
         <h2 id="h-pub" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">Chez quels éditeurs ?</h2>
         <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">
-          <a href="#" style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 46px; align-items: center; gap: 10px; font-size: 14px">
+          <div style="display: grid; grid-template-columns: 100px minmax(0, 1fr) 46px; align-items: center; gap: 10px; font-size: 14px">
             <span style="font-weight: 700">{{e.name}}</span>
             <span style="display: block; height: 16px; width: {{e.w}}; background-color: {{e.c}}; background-image: radial-gradient(rgba(244,239,228,.55) 1.2px, transparent 1.6px); background-size: 5px 5px; mix-blend-mode: multiply"></span>
             <span style="text-align: right">{{e.n}}</span>
-          </a>
+          </div>
         </sc-for>
         <p style="margin: 0; font-size: 13px">Éditions possédées.</p>
       </section>
