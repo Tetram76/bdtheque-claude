@@ -19,9 +19,9 @@ a:hover{color:#E8604C}
 <template id="view">
 <div style="min-height: 100vh; background: #FFF8EC; color: #1B2350; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 16px; line-height: 1.5">
 
-  <header style="max-width: 1240px; margin: 0 auto; padding: 16px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px">
+  <header style="max-width: 1240px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px">
     <a href="#" style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 24px"><span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 20px">B</span>BDthèque</a>
-    <nav aria-label="Navigation principale" style="flex: 1 1 420px; min-width: 0; overflow-x: auto">
+    <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: #FFF8EC"><div data-scroll="">
       <div style="display: flex; gap: 4px; white-space: nowrap; width: max-content; font-weight: 600">
         <a href="#" aria-current="page" style="padding: 9px 16px; border-radius: 999px; background: #1F3A93; color: #FFFFFF">Accueil</a>
         <a href="#" style="padding: 9px 14px">Albums</a>
@@ -29,28 +29,28 @@ a:hover{color:#E8604C}
         <a href="#" style="padding: 9px 14px">Auteurs</a>
         <a href="#" style="padding: 9px 14px">Intentions d'achat</a>
       </div>
-    </nav>
+    </div></nav>
     <div style="display: flex; gap: 6px; flex: 0 1 320px">
       <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
-      <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 44px; padding: 0 16px; border: 2px solid #1B2350; border-radius: 999px; background: #FFFFFF; color: #1B2350; font: inherit; outline: none">
-      <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; background: #F6C343; color: #1B2350; font: 800 19px 'Bricolage Grotesque', sans-serif; cursor: pointer">?</button>
+      <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 14px; border: 2px solid #1B2350; border-radius: 999px; background: #FFFFFF; color: #1B2350; font: inherit; outline: none">
+      <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: #F6C343; color: #1B2350; font: 800 19px 'Bricolage Grotesque', sans-serif; cursor: pointer">?</button>
     </div>
   </header>
 
-  <main style="max-width: 1240px; margin: 0 auto; padding: 20px 24px 64px; box-sizing: border-box">
+  <main style="max-width: 1240px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box">
 
     <section aria-labelledby="h-hero" class="stop" style="display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 0 24px">
       <div style="position: relative">
         <span aria-hidden="true" style="position: absolute; top: 24px; bottom: 0; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
         <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 36px; height: 36px; margin-left: -18px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800">N</span>
       </div>
-      <div style="padding-bottom: 56px; display: flex; flex-direction: column; gap: 16px">
+      <div style="padding-bottom: 36px; display: flex; flex-direction: column; gap: 16px">
         <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Navette du festival · Terminus Entrée</span>
-        <div style="position: relative; overflow: hidden; padding: 40px 36px; border-radius: 24px; background: #1F3A93; color: #FFFFFF">
+        <div style="position: relative; overflow: hidden; padding: clamp(20px, 3.5vw, 36px); border-radius: 24px; background: #1F3A93; color: #FFFFFF">
           <span aria-hidden="true" style="position: absolute; right: -70px; top: -70px; width: 260px; height: 260px; border-radius: 50%; background: #F6C343"></span>
           <span aria-hidden="true" style="position: absolute; right: 120px; top: 110px; width: 110px; height: 110px; border-radius: 50%; background: #E8604C"></span>
           <span style="position: relative; display: inline-block; padding: 4px 12px; border-radius: 999px; background: #FFFFFF; color: #1F3A93; font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase">Festival permanent · entrée libre</span>
-          <h1 id="h-hero" style="position: relative; margin: 16px 0 0; max-width: 760px; font-weight: 800; font-size: clamp(36px, 5vw, 66px); line-height: .98; letter-spacing: -0.02em">{{heroLine}}</h1>
+          <h1 id="h-hero" style="position: relative; margin: 16px 0 0; max-width: 760px; font-weight: 800; font-size: clamp(26px, 4.4vw, 56px); line-height: .98; letter-spacing: -0.02em">{{heroLine}}</h1>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 12px">
           <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px; border: 2px solid #1B2350; border-radius: 999px; background: #FFFFFF"><span style="width: 32px; height: 32px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800">A</span><strong style="font-size: 22px">2 847</strong> albums</a>
@@ -65,18 +65,18 @@ a:hover{color:#E8604C}
         <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
         <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: #FFFFFF; border: 6px solid #1B2350; box-sizing: border-box"></span>
       </div>
-      <div style="padding-bottom: 56px; display: flex; flex-direction: column; gap: 14px">
+      <div style="padding-bottom: 36px; display: flex; flex-direction: column; gap: 14px">
         <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Station Scène des nouveautés</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
-          <h2 id="h-recent" style="margin: 0; font-weight: 800; font-size: 32px; letter-spacing: -0.01em">Tout juste arrivés !</h2>
+          <h2 id="h-recent" style="margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); letter-spacing: -0.01em">Tout juste arrivés !</h2>
           <a href="#" style="font-weight: 700; color: #E8604C">Tous les albums →</a>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 12px">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 8px">
           <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
-            <a href="#" style="display: grid; grid-template-columns: 64px 50px minmax(0, 1fr); align-items: center; gap: 14px; padding: 10px 14px; border-radius: 16px; background: #FFFFFF; box-shadow: 0 2px 0 rgba(27,35,80,.08)">
-              <span style="font-weight: 800; font-size: 24px; line-height: 1; color: {{r.c}}">{{r.day}}<br><span style="font-size: 14px; font-weight: 600; color: #1B2350">{{r.month}}</span></span>
+            <a href="#" style="display: grid; grid-template-columns: 44px 36px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 12px; border-radius: 16px; background: #FFFFFF; box-shadow: 0 2px 0 rgba(27,35,80,.08)">
+              <span style="font-weight: 800; font-size: 20px; line-height: 1; color: {{r.c}}">{{r.day}}<br><span style="font-size: 13px; font-weight: 600; color: #1B2350">{{r.month}}</span></span>
               <span style="aspect-ratio: 3 / 4; border-radius: 4px; background: #2E2A33"></span>
-              <span style="display: flex; flex-direction: column; line-height: 1.3"><span style="font-weight: 700">{{r.label}}</span><span style="font-size: 14px; color: #5B6290">Stand {{r.pub}}</span></span>
+              <span style="display: flex; flex-direction: column; line-height: 1.25; font-size: 14px"><span style="font-weight: 700">{{r.label}}</span><span style="font-size: 13px; color: #5B6290">Stand {{r.pub}}</span></span>
             </a>
           </sc-for>
         </div>
@@ -88,22 +88,22 @@ a:hover{color:#E8604C}
         <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
         <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: #FFFFFF; border: 6px solid #1B2350; box-sizing: border-box"></span>
       </div>
-      <div style="padding-bottom: 56px; display: flex; flex-direction: column; gap: 14px">
+      <div style="padding-bottom: 36px; display: flex; flex-direction: column; gap: 14px">
         <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Station Billetterie</span>
-        <h2 id="h-value" style="margin: 0; font-weight: 800; font-size: 32px; letter-spacing: -0.01em">Ça vaut combien, tout ça ?</h2>
+        <h2 id="h-value" style="margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); letter-spacing: -0.01em">Ça vaut combien, tout ça ?</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 16px">
           <sc-for list="{{passes}}" as="k" hint-placeholder-count="2">
-            <div style="flex: 1 1 300px; position: relative; padding: 18px 22px 34px; border-radius: 18px; background: {{k.bg}}; color: #1B2350">
+            <div style="flex: 1 1 260px; position: relative; padding: 14px 18px 30px; border-radius: 18px; background: {{k.bg}}; color: #1B2350">
               <div style="font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase">{{k.label}}</div>
-              <div style="font-weight: 800; font-size: 42px; line-height: 1.1">{{k.cur}}</div>
-              <div style="font-weight: 700; font-size: 19px; color: #1F3A93">{{k.today}} en euros du jour</div>
+              <div style="font-weight: 800; font-size: clamp(28px, 3.6vw, 38px); line-height: 1.1">{{k.cur}}</div>
+              <div style="font-weight: 700; font-size: 16px; color: #1F3A93">{{k.today}} en euros du jour</div>
               <span aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 12px; height: 10px; background: #1B2350; opacity: .85"></span>
             </div>
           </sc-for>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px">
           <sc-for list="{{prices}}" as="p" hint-placeholder-count="4">
-            <div style="padding: 10px 14px; border-radius: 12px; background: #FFFFFF; border-left: 6px solid {{p.c}}"><div style="font-size: 14px; color: #5B6290">{{p.label}}</div><strong>{{p.cur}}</strong> · {{p.today}}</div>
+            <div style="padding: 8px 12px; border-radius: 12px; background: #FFFFFF; font-size: 15px; border-left: 6px solid {{p.c}}"><div style="font-size: 14px; color: #5B6290">{{p.label}}</div><strong>{{p.cur}}</strong> · {{p.today}}</div>
           </sc-for>
         </div>
         <p style="margin: 0; font-size: 13px; color: #5B6290">Montants en euros courants, puis en euros du jour. Estimation : prix connus + 497 éditions sans prix. 12 montants non convertibles exclus · 25 éditions gratuites non valorisées.</p>
@@ -115,9 +115,9 @@ a:hover{color:#E8604C}
         <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
         <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: #FFFFFF; border: 6px solid #1B2350; box-sizing: border-box"></span>
       </div>
-      <div style="padding-bottom: 56px; display: flex; flex-direction: column; gap: 14px">
+      <div style="padding-bottom: 36px; display: flex; flex-direction: column; gap: 14px">
         <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Station Pavillons</span>
-        <h2 id="h-type" style="margin: 0; font-weight: 800; font-size: 32px; letter-spacing: -0.01em">Tomes, intégrales ou hors-séries ?</h2>
+        <h2 id="h-type" style="margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); letter-spacing: -0.01em">Tomes, intégrales ou hors-séries ?</h2>
         <div role="img" aria-label="Trois pavillons dont la largeur suit le nombre d'albums : 2 571 réguliers (90 %), 184 intégrales (6 %), 92 hors-séries (3 %)" style="display: flex; align-items: flex-end; gap: 10px">
           <sc-for list="{{pavilions}}" as="p" hint-placeholder-count="3">
             <span style="flex: {{p.flex}} 1 0; min-width: 76px; display: flex; flex-direction: column">
@@ -137,10 +137,10 @@ a:hover{color:#E8604C}
         <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
         <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: #FFFFFF; border: 6px solid #1B2350; box-sizing: border-box"></span>
       </div>
-      <div style="padding-bottom: 56px; display: flex; flex-direction: column; gap: 12px">
+      <div style="padding-bottom: 36px; display: flex; flex-direction: column; gap: 12px">
         <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Correspondance Espaces thématiques</span>
-        <h2 id="h-genre" style="margin: 0; font-weight: 800; font-size: 32px; letter-spacing: -0.01em">Plutôt quel genre ?</h2>
-        <p style="margin: 0; color: #5B6290">Une ligne par espace ; un arrêt tous les 50 albums. Un album peut cumuler plusieurs genres.</p>
+        <h2 id="h-genre" style="margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); letter-spacing: -0.01em">Plutôt quel genre ?</h2>
+        <p style="margin: 0; color: #5B6290">Une ligne par espace ; un arrêt tous les 100 albums. Un album peut cumuler plusieurs genres.</p>
         <sc-for list="{{genres}}" as="g" hint-placeholder-count="8">
           <a href="#" style="display: grid; grid-template-columns: 36px minmax(84px, 140px) minmax(0, 1fr) 44px; align-items: center; gap: 10px">
             <span style="width: 36px; height: 36px; border-radius: 50%; background: {{g.c}}; color: {{g.tc}}; display: flex; align-items: center; justify-content: center; font-weight: 800">{{g.num}}</span>
@@ -159,7 +159,7 @@ a:hover{color:#E8604C}
       </div>
       <div style="display: flex; flex-direction: column; gap: 12px">
         <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Terminus Allée des exposants</span>
-        <h2 id="h-pub" style="margin: 0; font-weight: 800; font-size: 32px; letter-spacing: -0.01em">Chez quels éditeurs ?</h2>
+        <h2 id="h-pub" style="margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); letter-spacing: -0.01em">Chez quels éditeurs ?</h2>
         <p style="margin: 0; color: #5B6290">Un stand par éditeur, à la taille de ses éditions possédées.</p>
         <div style="overflow-x: auto">
           <div style="position: relative; display: flex; align-items: flex-start; min-width: 700px; padding-top: 90px">
@@ -228,7 +228,7 @@ class View extends Mockup {
         { label: 'intégrales', n: '184', pct: '6 %', flex: 6, c: '#E8604C', tc: '#FFFFFF' },
         { label: 'hors-séries', n: '92', pct: '3 %', flex: 3, c: '#F6C343', tc: '#1B2350' }
       ],
-      genres: genres.map(([name, v], i) => ({ name, n: fmt(v), num: i + 1, c: lines[i][0], tc: lines[i][1], w: Math.round(v / 612 * 100) + '%', step: Math.round(50 / v * 100 * 100) / 100 + '%' })),
+      genres: genres.map(([name, v], i) => ({ name, n: fmt(v), num: i + 1, c: lines[i][0], tc: lines[i][1], w: Math.round(v / 612 * 100) + '%', step: Math.round(100 / v * 100 * 100) / 100 + '%' })),
       publishers: pubs.map(([name, v], i) => {
         const d = 18 + Math.round(v / 548 * 30);
         return { name, n: fmt(v), stand: name === 'Autres' ? '—' : stands[i], d: d + 'px' };

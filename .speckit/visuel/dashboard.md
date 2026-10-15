@@ -176,7 +176,7 @@ Une ligne corail, la « Navette du festival », descend le long de la page. Chaq
   - les prix moyen, médian, minimum et maximum, dans des encadrés marqués d'un trait de couleur ;
   - la mention des montants non convertibles exclus et des éditions gratuites non valorisées.
 - **Station Pavillons, Tomes, intégrales ou hors-séries ?** : trois **pavillons** à toit pointu, dont la largeur suit le nombre d'albums, avec le pourcentage et le nombre : bleu pour les réguliers, corail pour les intégrales, jaune pour les hors-séries.
-- **Correspondance Espaces thématiques, Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec un arrêt tous les 50 albums.
+- **Correspondance Espaces thématiques, Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec un arrêt tous les 100 albums.
 - **Terminus Allée des exposants, Chez quels éditeurs ?** : les éditeurs sont les **stations d'une ligne bleue horizontale**. La taille de chaque station suit le nombre d'éditions possédées, son nom est écrit en biais au-dessus, et sous la station figurent son nombre d'éditions et son numéro de stand.
 
 ### Le fanzine en risographie

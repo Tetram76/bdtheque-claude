@@ -6,7 +6,9 @@
 //     an attribute made of a single {{path}} takes the value itself: a function becomes an event
 //     listener (onClick="{{toggle}}"), true sets an empty attribute, false/null/undefined removes it;
 //   - <sc-for list="{{path}}" as="name"> to repeat its content for each item of a list;
-//   - <sc-if value="{{path}}"> to keep its content only when the value is truthy.
+//   - <sc-if value="{{path}}"> to keep its content only when the value is truthy;
+//   - data-scroll-hint on a wrapper whose child [data-scroll] scrolls horizontally, with --hint-bg
+//     set to the colour behind it, to show which edges have entries out of view.
 // Settings (theme, example…) come from the query string, typed and defaulted by the settings
 // declared with Mockup.mount; a viewer page embeds mockups in frames with these parameters.
 (function () {
@@ -141,7 +143,45 @@
     }
     if (focused) nodeAt(focused)?.focus({ preventScroll: true });
     window.scrollTo(page.x, page.y);
+    for (const hint of root.querySelectorAll('[data-scroll-hint]')) {
+      hint.querySelector('[data-scroll]')?.addEventListener('scroll', () => updateScrollHint(hint), { passive: true });
+    }
+    updateScrollHints();
     reportToViewer();
+  }
+
+  // A horizontal menu scrolls rather than wraps: a fading edge with a chevron shows on each side
+  // where some entries are out of view, so that the reader knows there is more to reach.
+  const SCROLL_HINT_STYLE = `
+[data-scroll-hint]{position:relative;min-width:0}
+[data-scroll]{overflow-x:auto;scrollbar-width:none}
+[data-scroll]::-webkit-scrollbar{display:none}
+[data-scroll-hint]::before,[data-scroll-hint]::after{position:absolute;top:0;bottom:0;width:34px;display:flex;align-items:center;font:800 20px/1 system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s}
+[data-scroll-hint]::before{content:'‹';left:0;justify-content:flex-start;background:linear-gradient(to left,transparent,var(--hint-bg) 55%)}
+[data-scroll-hint]::after{content:'›';right:0;justify-content:flex-end;background:linear-gradient(to right,transparent,var(--hint-bg) 55%)}
+[data-scroll-hint].more-left::before,[data-scroll-hint].more-right::after{opacity:1}`;
+
+  function updateScrollHint(hint) {
+    const scroller = hint.querySelector('[data-scroll]');
+    if (!scroller) return;
+    const max = scroller.scrollWidth - scroller.clientWidth;
+    hint.classList.toggle('more-left', scroller.scrollLeft > 1);
+    hint.classList.toggle('more-right', scroller.scrollLeft < max - 1);
+  }
+
+  function updateScrollHints() {
+    root?.querySelectorAll('[data-scroll-hint]').forEach(updateScrollHint);
+  }
+
+  // On opening the page, a scrolling menu shows its current entry in the middle of the visible part.
+  function centerCurrentEntries() {
+    for (const scroller of root.querySelectorAll('[data-scroll-hint] [data-scroll]')) {
+      const current = scroller.querySelector('[aria-current="page"]');
+      if (!current) continue;
+      const offset = current.getBoundingClientRect().left - scroller.getBoundingClientRect().left + scroller.scrollLeft;
+      scroller.scrollLeft = offset - (scroller.clientWidth - current.offsetWidth) / 2;
+    }
+    updateScrollHints();
   }
 
   function readProps() {
@@ -169,13 +209,18 @@
 
   Mockup.mount = function (View, declaredSettings) {
     settings = declaredSettings ?? {};
+    const style = document.createElement('style');
+    style.textContent = SCROLL_HINT_STYLE;
+    document.head.append(style);
     template = document.getElementById('view');
     root = document.getElementById('mockup');
     view = new View(readProps());
     render();
     view.componentDidMount?.();
-    new ResizeObserver(reportToViewer).observe(document.documentElement);
-    document.fonts?.ready.then(reportToViewer);
+    centerCurrentEntries();
+    new ResizeObserver(() => { updateScrollHints(); reportToViewer(); }).observe(document.documentElement);
+    // Web fonts change the width of the entries: the current one is centred again once they are loaded.
+    document.fonts?.ready.then(() => { centerCurrentEntries(); reportToViewer(); });
     window.addEventListener('load', reportToViewer);
   };
 

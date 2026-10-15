@@ -11,6 +11,16 @@ body{margin:0}
 a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 input::placeholder{color:inherit;opacity:.6}
 :focus-visible{outline:3px solid currentColor;outline-offset:2px}
+/* Header: on a wide screen, search then actions on the logo's line; on a phone, the actions stay
+   on the logo's line and the search takes the whole line below. */
+.adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
+@media (max-width: 640px){
+  .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
+  .adm-actions{margin-left:auto}
+  .adm-consult-label,.adm-menu-label{display:none}
+  .adm-menu{width:38px;padding:0 !important;justify-content:center}
+  .adm-tag{padding:2px 8px !important;font-size:11px !important}
+}
 </style>
 <script src="../shared/mockup.js"></script>
 </head>
@@ -20,19 +30,21 @@ input::placeholder{color:inherit;opacity:.6}
 <div style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
 
   <header style="position: relative; z-index: 10; background: {{t.hBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
-    <div style="position: relative; max-width: 1280px; margin: 0 auto; padding: 16px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px">
+    <div style="position: relative; max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
       <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
         <sc-if value="{{t.lgMark}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
         <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
       </a>
-      <span style="padding: 4px 12px; border: {{t.tagB}}; border-radius: {{t.tagR}}; background: {{t.tagBg}}; color: {{t.tagText}}; font-weight: 700; font-size: 13px; text-transform: {{t.tagTT}}; letter-spacing: {{t.tagLS}}">Administration</span>
-      <div style="flex: 1 1 260px; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px">
+      <span class="adm-tag" style="padding: 4px 12px; border: {{t.tagB}}; border-radius: {{t.tagR}}; background: {{t.tagBg}}; color: {{t.tagText}}; font-weight: 700; font-size: 13px; text-transform: {{t.tagTT}}; letter-spacing: {{t.tagLS}}">Administration</span>
+      <div class="adm-search" style="min-width: 0; display: flex; align-items: center; gap: 8px">
         <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Retrouver une fiche</label>
-        <input id="find" type="search" placeholder="Retrouver une fiche à modifier…" style="flex: 1 1 220px; max-width: 340px; min-width: 0; height: 44px; padding: 0 16px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
-        <button type="button" aria-label="Aide sur cette page" style="width: 44px; height: 44px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
-        <a href="#" style="display: inline-flex; align-items: center; gap: 6px; height: 44px; flex: none; padding: 0 6px; color: {{t.hText}}; font-weight: 700; font-size: 14px">Aller à la consultation<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a>
+        <input id="find" type="search" placeholder="Retrouver une fiche à modifier…" style="flex: 1 1 auto; min-width: 0; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
       </div>
-      <button type="button" aria-expanded="{{menuExpanded}}" aria-controls="admin-menu" onClick="{{toggleMenu}}" style="display: inline-flex; align-items: center; gap: 8px; height: 44px; flex: none; margin-left: auto; padding: 0 14px; border: {{t.hInB}}; border-radius: {{t.btnR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>Menu</button>
+      <div class="adm-actions" style="display: flex; align-items: center; gap: 8px">
+      <a href="#" aria-label="Aller à la consultation" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; flex: none; padding: 0 6px; color: {{t.hText}}; font-weight: 700; font-size: 14px"><span class="adm-consult-label">Aller à la consultation</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a>
+      <button type="button" aria-label="Menu" aria-expanded="{{menuExpanded}}" aria-controls="admin-menu" onClick="{{toggleMenu}}" class="adm-menu" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; flex: none; padding: 0 12px; border: {{t.hInB}}; border-radius: {{t.btnR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg><span class="adm-menu-label">Menu</span></button>
+      </div>
 
       <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
     <button type="button" tabindex="-1" aria-label="Fermer le menu" onClick="{{closeMenu}}" style="position: fixed; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default"></button>
@@ -60,50 +72,52 @@ input::placeholder{color:inherit;opacity:.6}
     </div>
   </header>
 
-  <div style="max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; box-sizing: border-box">
-    <main style="display: flex; flex-direction: column; gap: 40px">
+  <div style="max-width: 1280px; margin: 0 auto; padding: 16px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
+    <main style="display: flex; flex-direction: column; gap: 22px">
 
       <div style="display: flex; flex-direction: column; gap: 6px">
         <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Administration</h1>
-        <p style="margin: 0; color: {{t.muted}}">Saisir et corriger les fiches, tenir les référentiels, régler l'application.</p>
+        <p style="margin: 0; font-size: 14px; color: {{t.muted}}">Saisir et corriger les fiches, tenir les référentiels, régler l'application.</p>
       </div>
 
-      <section aria-labelledby="a-saisie" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.hiSh}}; display: flex; flex-direction: column; gap: 16px">
+      <section aria-labelledby="a-saisie" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.hiSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.saisie}}</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
           <h2 id="a-saisie" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Saisir à partir d'un ISBN</h2>
         </div>
         <form style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px">
-          <label style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 14px">ISBN de l'édition
-            <input type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="978-2-205-08889-2" style="height: 50px; padding: 0 18px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit; font-size: 17px; font-weight: 400; letter-spacing: .04em">
+          <label style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 13px">ISBN de l'édition
+            <input type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="978-2-205-08889-2" style="height: 42px; padding: 0 16px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit; font-size: 16px; font-weight: 400; letter-spacing: .04em">
           </label>
-          <button type="submit" style="height: 50px; padding: 0 24px; border: 0; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-family: {{t.fb}}; font-weight: 700; font-size: 15px; cursor: pointer">Chercher dans les sources</button>
+          <button type="submit" style="height: 42px; padding: 0 20px; border: 0; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-family: {{t.fb}}; font-weight: 700; font-size: 15px; cursor: pointer">Chercher dans les sources</button>
         </form>
-        <p style="margin: 0; font-size: 14px; color: {{t.muted}}">Album, édition et visuels, série, auteurs, éditeur et collection : chaque fiche est créée ou complétée à partir du catalogue de la BnF et des autres sources, puis relue avant enregistrement.</p>
-        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 16px; border-top: {{t.rowB}}">
-          <span style="font-weight: 700; font-size: 14px; color: {{t.muted}}; margin-right: 4px">Ou créer directement :</span>
-          <sc-for list="{{creates}}" as="c" hint-placeholder-count="4">
-            <a href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{c.label}}</a>
-          </sc-for>
+        <p style="margin: 0; font-size: 13px; color: {{t.muted}}">Album, édition et visuels, série, auteurs, éditeur et collection : chaque fiche est créée ou complétée à partir du catalogue de la BnF et des autres sources, puis relue avant enregistrement.</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 12px; border-top: {{t.rowB}}">
+          <span style="font-weight: 700; font-size: 13px; color: {{t.muted}}; margin-right: 4px">Ou créer directement :</span>
+          <div style="flex: 1 1 320px; max-width: 520px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+            <sc-for list="{{creates}}" as="c" hint-placeholder-count="4">
+              <a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 34px; padding: 0 4px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 13px; white-space: nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{c.label}}</a>
+            </sc-for>
+          </div>
         </div>
       </section>
 
-      <section aria-labelledby="a-fiches" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 18px">
+      <section aria-labelledby="a-fiches" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.fiches}}</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
           <h2 id="a-fiches" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Les fiches</h2>
-          <span style="font-size: 14px; color: {{t.muted}}">Les éditions, leurs visuels et les intentions d'achat se saisissent depuis leur album.</span>
+          <span style="font-size: 13px; color: {{t.muted}}">Les éditions, leurs visuels et les intentions d'achat se saisissent depuis leur album.</span>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); gap: 14px">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); gap: 10px">
           <sc-for list="{{entities}}" as="e" hint-placeholder-count="8">
-            <div style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
-              <div style="display: flex; align-items: center; gap: 12px">
-                <span aria-hidden="true" style="width: 42px; height: 42px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: {{t.chipR}}; background: {{e.bg}}; color: {{e.fg}}; box-shadow: {{t.chipSh}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{e.icon}}"></path></svg></span>
-                <a href="#" style="min-width: 0; font-weight: 700; font-size: 17px; line-height: 1.2; color: {{t.text}}">{{e.name}}</a>
-                <span style="margin-left: auto; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums">{{e.n}}</span>
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span aria-hidden="true" style="width: 32px; height: 32px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: {{t.chipR}}; background: {{e.bg}}; color: {{e.fg}}; box-shadow: {{t.chipSh}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{e.icon}}"></path></svg></span>
+                <a href="#" style="min-width: 0; font-weight: 700; font-size: 15px; line-height: 1.2; color: {{t.text}}">{{e.name}}</a>
+                <span style="margin-left: auto; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 20px; line-height: 1; font-variant-numeric: tabular-nums">{{e.n}}</span>
               </div>
-              <span style="font-size: 13px; color: {{t.muted}}">{{e.sub}}</span>
-              <div style="display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: auto; font-weight: 700; font-size: 14px">
+              <span style="font-size: 12px; color: {{t.muted}}">{{e.sub}}</span>
+              <div style="display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: auto; font-weight: 700; font-size: 13px">
                 <a href="#" style="color: {{t.link}}">Gérer la liste</a>
                 <sc-if value="{{e.hasNew}}" hint-placeholder-val="{{true}}"><a href="#" style="color: {{t.link}}">+ {{e.act}}</a></sc-if>
               </div>
@@ -112,8 +126,8 @@ input::placeholder{color:inherit;opacity:.6}
         </div>
       </section>
 
-      <div style="display: flex; flex-wrap: wrap; gap: 40px 28px; align-items: flex-start">
-        <section aria-labelledby="a-controle" style="flex: 1 1 380px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+      <div style="display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start">
+        <section aria-labelledby="a-controle" style="flex: 1 1 380px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box">
           <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.controle}}</span>
           <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
             <h2 id="a-controle" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>À vérifier</h2>
@@ -121,9 +135,9 @@ input::placeholder{color:inherit;opacity:.6}
           <ul style="margin: 0; padding: 0; list-style: none">
             <sc-for list="{{checks}}" as="c" hint-placeholder-count="5">
               <li style="border-bottom: {{t.rowB}}">
-                <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 50px; color: {{t.text}}">
+                <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 38px; font-size: 14px; color: {{t.text}}">
                   <span style="flex: 1 1 auto; min-width: 0">{{c.label}}</span>
-                  <span style="min-width: 42px; padding: 2px 10px; box-sizing: border-box; border-radius: {{t.btnR}}; background: {{c.bg}}; color: {{c.fg}}; font-weight: 700; font-size: 14px; text-align: center; font-variant-numeric: tabular-nums">{{c.n}}</span>
+                  <span style="min-width: 42px; padding: 1px 8px; box-sizing: border-box; border-radius: {{t.btnR}}; background: {{c.bg}}; color: {{c.fg}}; font-weight: 700; font-size: 13px; text-align: center; font-variant-numeric: tabular-nums">{{c.n}}</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; color: {{t.muted}}"><path d="M9 6l6 6-6 6"></path></svg>
                 </a>
               </li>
@@ -131,17 +145,17 @@ input::placeholder{color:inherit;opacity:.6}
           </ul>
         </section>
 
-        <section aria-labelledby="a-journal" style="flex: 1.4 1 460px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+        <section aria-labelledby="a-journal" style="flex: 1.4 1 460px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box">
           <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.journal}}</span>
           <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
             <h2 id="a-journal" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Dernières modifications</h2>
           </div>
           <ul style="margin: 0; padding: 0; list-style: none">
             <sc-for list="{{edits}}" as="d" hint-placeholder-count="6">
-              <li style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; padding: 11px 0; border-bottom: {{t.rowB}}">
+              <li style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; padding: 6px 0; font-size: 14px; border-bottom: {{t.rowB}}">
                 <span style="display: flex; flex-direction: column; min-width: 0">
                   <a href="#" style="font-weight: 700; color: {{t.text}}">{{d.label}}</a>
-                  <span style="font-size: 13px; color: {{t.muted}}">{{d.type}} {{d.what}} {{d.when}}</span>
+                  <span style="font-size: 12px; color: {{t.muted}}">{{d.type}} {{d.what}} {{d.when}}</span>
                 </span>
                 <a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Modifier</a>
               </li>
@@ -150,15 +164,15 @@ input::placeholder{color:inherit;opacity:.6}
         </section>
       </div>
 
-      <div style="display: flex; flex-wrap: wrap; gap: 40px 28px; align-items: flex-start">
-        <section aria-labelledby="a-reglages" style="flex: 1.4 1 460px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+      <div style="display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start">
+        <section aria-labelledby="a-reglages" style="flex: 1.4 1 460px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box">
           <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.reglages}}</span>
           <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
             <h2 id="a-reglages" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Paramétrage</h2>
           </div>
           <dl style="margin: 0">
             <sc-for list="{{settings}}" as="s" hint-placeholder-count="4">
-              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 16px; min-height: 50px; padding: 6px 0; box-sizing: border-box; border-bottom: {{t.rowB}}">
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 16px; min-height: 38px; padding: 4px 0; font-size: 14px; box-sizing: border-box; border-bottom: {{t.rowB}}">
                 <dt style="flex: 1 1 200px; font-weight: 700">{{s.label}}</dt>
                 <dd style="flex: 1 1 200px; margin: 0; color: {{t.muted}}">{{s.value}}</dd>
                 <dd style="margin: 0"><a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Modifier</a></dd>
@@ -167,18 +181,18 @@ input::placeholder{color:inherit;opacity:.6}
           </dl>
         </section>
 
-        <section aria-labelledby="a-stats" style="flex: 1 1 340px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+        <section aria-labelledby="a-stats" style="flex: 1 1 340px; min-width: 0; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box">
           <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.stats}}</span>
           <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px">
             <h2 id="a-stats" style="flex: {{t.h2grow}} 1 auto; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Statistiques privées</h2>
           </div>
-          <div style="padding: 24px 20px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; text-align: center; font-size: 14px">Aucune statistique privée n'est définie pour l'instant. Celles qui le seront apparaîtront ici, réservées au compte administrateur.</div>
+          <div style="padding: 14px 16px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; text-align: center; font-size: 13px">Aucune statistique privée n'est définie pour l'instant. Celles qui le seront apparaîtront ici, réservées au compte administrateur.</div>
         </section>
       </div>
     </main>
   </div>
 
-  <footer style="max-width: 1280px; margin: 0 auto; padding: 20px 24px 32px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: {{t.muted}}">
+  <footer style="max-width: 1280px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px) 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: 12px; color: {{t.muted}}">
     <span>Espace réservé au compte administrateur.</span>
   </footer>
 </div>
@@ -190,7 +204,7 @@ const BASE = {
   kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
   mkDisp: 'none', chipSh: 'none', lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
   tagTT: 'none', tagLS: '0', h2fs: 'normal', h2sh: 'none', h2tt: 'none', h2line: '0', h2grow: '0', h2pad: '0', h2r: '0', h2bg: 'transparent',
-  fdTT: 'none', h1size: 'clamp(32px, 4vw, 48px)', cSh: 'none', hiSh: 'none'
+  fdTT: 'none', h1size: 'clamp(24px, 3vw, 36px)', cSh: 'none', hiSh: 'none'
 };
 
 // « Cases et bulles » comes in two tints that only differ by their purple shades.
@@ -200,14 +214,14 @@ const cases = (c) => ({
   bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
   acc: '#FFB547', onAcc: c.bg, link: '#FFB547', warn: '#FF7A6B', onWarn: c.bg, nBg: '#FBF3EA', nFg: c.bg,
   fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
-  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: '28px',
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
   tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
   inBg: c.bg, inB: '2px solid ' + c.border, inR: '999px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', chipR: '14px 10px 16px 8px',
   hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
   helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
-  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '8px 18px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 24px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
   tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '6px 18px', h2r: '999px', h2size: '20px',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '4px 14px', h2r: '999px', h2size: '17px',
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
 
@@ -226,9 +240,9 @@ const THEMES = {
     inBg: 'transparent', inB: '2px solid #2B1030', inR: '999px', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', chipR: '0',
     hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
     helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
-    lgText: '#2B1030', lgFont: '800 32px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    lgText: '#2B1030', lgFont: '800 26px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
     tagBg: '#FFB547', tagText: '#2B1030', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.08em',
-    h2c: '#2B1030', h2size: '26px',
+    h2c: '#2B1030', h2size: '21px',
     kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase',
     pal: [['#2B1030', '#FBF3EA'], ['#FFB547', '#2B1030'], ['#9A3D12', '#FBF3EA'], ['#5E3F63', '#FBF3EA']]
   },
@@ -236,15 +250,15 @@ const THEMES = {
     ...BASE,
     bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
     acc: '#1D4ED8', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#FFD60A', onWarn: '#111111', nBg: '#111111', nFg: '#FFFFFF',
-    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(40px, 5vw, 64px)',
-    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: '26px', hiSh: '10px 10px 0 #111111',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(30px, 4vw, 48px)',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)', hiSh: '10px 10px 0 #111111',
     tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
     inBg: '#FFFFFF', inB: '2px solid #111111', inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', chipR: '0',
     hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
     helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
-    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 30px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 24px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
     tagBg: '#111111', tagText: '#FFFFFF', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.06em',
-    h2c: '#111111', h2size: '32px', h2tt: 'uppercase', h2line: '4px solid #111111', h2grow: '1', h2pad: '0 0 6px',
+    h2c: '#111111', h2size: '24px', h2tt: 'uppercase', h2line: '4px solid #111111', h2grow: '1', h2pad: '0 0 6px',
     pal: [['#E63946', '#FFFFFF'], ['#1D4ED8', '#FFFFFF'], ['#FFD60A', '#111111'], ['#111111', '#FFFFFF']]
   },
   festival: {
@@ -252,14 +266,14 @@ const THEMES = {
     bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
     acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#F29E4C', onWarn: '#1B2350', nBg: '#F6C343', nFg: '#1B2350',
     fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
-    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: '26px', cSh: '0 2px 0 rgba(27,35,80,.08)', hiSh: '0 2px 0 rgba(27,35,80,.08)',
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 2px 0 rgba(27,35,80,.08)', hiSh: '0 2px 0 rgba(27,35,80,.08)',
     tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
     inBg: '#FFFFFF', inB: '2px solid #1B2350', inR: '999px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', chipR: '50%',
     hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
     helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
-    lgMark: true, lgText: '#1B2350', lgFont: "800 24px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 20px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
     tagBg: '#F6C343', tagText: '#1B2350', tagB: '0', tagR: '999px',
-    h2c: '#1B2350', h2size: '26px', mkDisp: 'inline-block',
+    h2c: '#1B2350', h2size: '21px', mkDisp: 'inline-block',
     kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (i, label) => 'Station ' + label,
     pal: [['#1F3A93', '#FFFFFF'], ['#E8604C', '#FFFFFF'], ['#F6C343', '#1B2350'], ['#2E9E6E', '#FFFFFF'], ['#8E5BB8', '#FFFFFF'], ['#3BA7D9', '#1B2350'], ['#F29E4C', '#1B2350'], ['#B8B2A3', '#1B2350']]
   },
@@ -267,15 +281,15 @@ const THEMES = {
     ...BASE,
     bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
     acc: '#0078BF', onAcc: '#F4EFE4', link: '#0078BF', warn: '#FFE800', onWarn: '#002284', nBg: 'rgba(0,120,191,.12)', nFg: '#0078BF',
-    fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(24px, 3vw, 36px)',
-    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: '24px', hiSh: '7px 6px 0 rgba(255,72,176,.85)',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(20px, 2.4vw, 28px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)', hiSh: '7px 6px 0 rgba(255,72,176,.85)',
     tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
     inBg: 'transparent', inB: '2px dashed #0078BF', inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', chipR: '50%',
     hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
     helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
-    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 26px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 20px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
     tagBg: 'transparent', tagText: '#0078BF', tagB: '2px solid #FF48B0', tagR: '0',
-    h2c: '#0078BF', h2size: '19px', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
+    h2c: '#0078BF', h2size: '16px', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
     pal: [['#0078BF', '#F4EFE4'], ['#FF48B0', '#F4EFE4'], ['#FFE800', '#0078BF']]
   },
   librairie: {
@@ -283,14 +297,14 @@ const THEMES = {
     bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
     acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', warn: '#B5523B', onWarn: '#FBF7EE', nBg: '#EFE6D2', nFg: '#2A2420',
     fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
-    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: '26px', cSh: '0 1px 4px rgba(42,36,32,.12)', hiSh: '0 1px 4px rgba(42,36,32,.12)',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 1px 4px rgba(42,36,32,.12)', hiSh: '0 1px 4px rgba(42,36,32,.12)',
     tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
     inBg: '#FFFFFF', inB: '1px solid #B8924A', inR: '22px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', chipR: '2px',
     hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF',
     helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
-    lgText: '#D8B972', lgFont: "400 30px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    lgText: '#D8B972', lgFont: "400 24px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
     tagBg: 'transparent', tagText: '#B8924A', tagB: '1px solid #B8924A', tagR: '0', tagTT: 'uppercase', tagLS: '.3em',
-    h2c: '#1E3B2F', h2size: '28px', h2fs: 'italic',
+    h2c: '#1E3B2F', h2size: '22px', h2fs: 'italic',
     pal: [['#1E3B2F', '#F5EEDF'], ['#B8924A', '#2A2420'], ['#B5523B', '#FBF7EE'], ['#5B3A24', '#F5EEDF']]
   },
   vignettes: {
@@ -298,16 +312,16 @@ const THEMES = {
     bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
     acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#F2994A', onWarn: '#23323A', nBg: '#9DD6DD', nFg: '#23323A',
     fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
-    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '34px 28px 28px',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '26px clamp(14px, 2.2vw, 22px) clamp(14px, 2.2vw, 22px)',
     tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
     inBg: '#FFFFFF', inB: '2px solid #0F7C8C', inR: '999px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', chipR: '50%', chipSh: '0 0 0 3px #FFFFFF, 0 2px 6px rgba(0,0,0,.18)',
     hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A',
     helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
-    lgText: '#FFFFFF', lgFont: "800 28px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    lgText: '#FFFFFF', lgFont: "800 22px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
     tagBg: '#FFD23F', tagText: '#23323A', tagB: '0', tagR: '999px',
-    h2c: '#23323A', h2size: '26px',
-    kDisp: 'block', kPos: 'absolute', kTop: '-15px', kLeft: '24px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '2px 14px', kR: '999px',
-    kFont: "'Baloo 2', sans-serif", kSize: '15px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
+    h2c: '#23323A', h2size: '21px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-13px', kLeft: '20px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '1px 12px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '13px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
     pal: [['#0F7C8C', '#FFFFFF'], ['#FFD23F', '#23323A'], ['#E0457B', '#FFFFFF'], ['#6BBF59', '#23323A'], ['#F2994A', '#23323A'], ['#5B6CD9', '#FFFFFF'], ['#9DD6DD', '#23323A'], ['#C9B9A0', '#23323A']]
   }
 };
