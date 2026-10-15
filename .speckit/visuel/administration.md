@@ -44,7 +44,7 @@ La page met en avant les fonctions les plus utiles, de haut en bas :
 - **En-tête**, de gauche à droite : le logo, une étiquette « Administration », la recherche d'une fiche à modifier, le bouton d'aide, le lien « Aller à la consultation », marqué d'une flèche de sortie, puis le bouton « Menu », à l'extrémité droite. Sur smartphone, l'en-tête tient sur deux lignes : le logo, l'étiquette, la flèche de la consultation et le bouton « Menu », réduits à leur icône, puis la recherche et le bouton d'aide sur toute la largeur.
 - Le **menu** n'est pas permanent :
   - il est **fermé par défaut** et s'ouvre par le bouton « Menu » ;
-  - il s'ouvre en **panneau flottant** sous le bouton, aligné à droite, **par-dessus** le contenu : il ne décale jamais le reste de la page ;
+  - il s'ouvre en **panneau flottant** sous le bouton, aligné à droite, **par-dessus** le contenu : il ne décale jamais le reste de la page ; il défile de façon indépendante, la page restant immobile tant qu'il est ouvert ;
   - il se referme par sa croix, par le bouton « Menu », ou par **un clic en dehors** du panneau ;
   - il présente le plan de l'administration, par groupes (Accueil, Collection, Auteurs et éditeurs, Référentiels, Réglages), chaque entrée avec son nombre de fiches le cas échéant, l'entrée courante dans la couleur d'accent du thème ;
   - l'entrée « **Nouvelle édition** » donne un accès direct à l'action principale de l'administration : une édition se saisissant depuis son album, elle commence par le choix de cet album (ou par un ISBN, comme le bloc de saisie de la page) ;
