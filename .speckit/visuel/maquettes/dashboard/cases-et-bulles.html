@@ -72,7 +72,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
         <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
       </div>
       <a href="#" class="section-link" style="position: absolute; top: 18px; right: 28px; font-weight: 700; color: {{accent}}">Tous les albums →</a>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(96px, 24vw, 150px), 1fr)); gap: 20px 14px">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(clamp(96px, 24vw, 150px), calc((100% - 2 * 14px) / 3)), 1fr)); gap: 20px 14px">
         <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
           <a href="#" style="display: flex; flex-direction: column; gap: 10px; color: #FBF3EA">
             <div class="cover" style="padding: 5px; border-radius: 10px; background: {{r.bg}}; transform: rotate({{r.rot}}); box-shadow: 0 12px 24px rgba(0,0,0,.4)">

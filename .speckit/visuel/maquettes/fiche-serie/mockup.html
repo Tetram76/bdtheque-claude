@@ -157,7 +157,7 @@ summary{cursor:pointer}
         <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
           <div style="display: flex; flex-direction: column; gap: 8px">
             <h3 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">{{g.title}} <span style="font-family: {{t.fb}}; font-weight: 400; font-size: 14px; color: {{t.muted}}; text-transform: none">{{g.count}}</span></h3>
-            <ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px 10px">
+            <ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100px, calc((100% - 2 * 10px) / 3)), 1fr)); gap: 14px 10px">
               <sc-for list="{{g.albums}}" as="a" hint-placeholder-count="8">
                 <li style="display: flex">
                   <a href="#" aria-current="{{a.current}}" style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px; color: {{t.text}}">
