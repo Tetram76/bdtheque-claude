@@ -459,7 +459,7 @@ Les résultats sont présentés comme les entités de leur type le sont dans la 
 
 ### Comparaisons
 
-Chaque critère compare une donnée à une valeur, avec les méthodes de comparaison adaptées au type de la donnée :
+Chaque critère compare une donnée à une valeur (la comparaison à une autre donnée reste envisagée, cf. ci-dessous), avec les méthodes de comparaison adaptées au type de la donnée :
 
 | Type de donnée | Comparaisons |
 | --- | --- |
