@@ -127,6 +127,14 @@ Répercussion dans l'API de la règle qui réserve les fiches de consultation au
 | --- | --- |
 | #157 | Fiches de consultation réservées aux albums, séries et auteurs |
 
+### Ajustement issu de la définition de la recherche avancée
+
+Répercussion dans le modèle de domaine et dans l'API de la recherche avancée (`fonctionnel.md` § Recherche avancée) : recherche de toute entité consultable sur toute combinaison de critères portant sur les données du modèle métier, et recherches enregistrées, avec leurs variables. Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+
+| Ticket | Titre |
+| --- | --- |
+| #162 | Recherche avancée et recherches enregistrées dans le modèle de domaine et l'API |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
@@ -136,6 +144,7 @@ Découpage précis à établir une fois la Phase 2 stabilisée ; probablement pa
 - **Note — contraste des thèmes** : le texte courant du thème « fanzine en risographie » (bleu `#0078BF` sur papier `#F4EFE4`, `visuel/dashboard.md`) n'atteint que 4,1:1, sous les 4,5:1 attendus pour du texte courant. La couleur relevant de l'identité du thème, sa correction est soumise à l'utilisateur lors du découpage de la phase, avec la vérification des contrastes de tous les thèmes retenus.
 - **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base.
 - **Note — paramétrage de l'application** : le paramétrage (`modele-metier.md` § Paramétrage de l'application) n'existe encore ni dans le modèle de domaine ni dans l'API. Il est intégré à cette phase avec le bloc « Paramétrage » de l'administration, qui l'expose et le modifie, et ses écritures sont alors journalisées (`modele-metier.md` § Entrée du journal des modifications, type de fiche `Paramétrage`).
+- **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, qui met en évidence le chemin suivi entre entités, rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
 
 ## Phase 4 — Statistiques, devises et estimation de valeur
 

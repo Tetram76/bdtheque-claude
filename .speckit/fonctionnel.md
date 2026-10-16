@@ -281,7 +281,8 @@ La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 | Album | Ses éditions (avec leurs visuels et intentions d'achat), ses contributions, son intention d'achat | Composition | Supprimés avec lui. |
 | Édition | Ses visuels, son intention d'achat | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
 | Intention d'achat portant sur une édition | L'édition visée (non possédée), avec ses visuels | Composition | Supprimée avec elle : une édition non possédée n'existe que par son intention (cf. § Intention d'achat). |
-| Visuel d'édition, Contribution, Intention d'achat portant sur l'album | — | — | Suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
+| Toute fiche | Désignée par un critère ou par la valeur par défaut d'une variable d'une recherche enregistrée (cf. § Recherche avancée) | Référence | Refusée tant qu'une recherche enregistrée la désigne, elle ou une fiche supprimée avec elle. |
+| Visuel d'édition, Contribution, Intention d'achat portant sur l'album, Recherche enregistrée | — | — | Hors la ligne « Toute fiche », suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
 
 ### Calcul des estimations
 
@@ -420,15 +421,65 @@ L'application se compose de trois parties distinctes :
    - **Navigation inter-entités** : depuis une fiche, il est possible de naviguer vers les fiches des entités associées, ou vers la liste d'un genre ou d'un univers (ex. album → série, album → auteur, auteur → bibliographie, album → liste d'un genre, etc.).
    - **Recherche facilement accessible** à tout moment depuis n'importe quelle page de la partie consultation.
    - **Recherche simple** : par type d'entité (ex. rechercher des albums, des auteurs, des séries, etc.).
-   - **Recherche avancée** : exploite les **liens entre entités** pour des requêtes cross-domaines (ex. albums d'un auteur donné, séries d'un éditeur, etc.).
+   - **Recherche avancée** : recherche de n'importe quelle entité sur n'importe quelle combinaison de critères, portant sur les données du modèle métier et sur les liens entre entités, et rejeu des recherches enregistrées par l'administrateur (cf. § Recherche avancée).
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
-   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, etc.
+   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. § Recherche avancée), etc.
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
    - Le contenu peut être **riche** : texte, captures d'écran, tableaux, exemples, etc. — pas seulement de courts textes explicatifs.
+
+## Recherche avancée
+
+La recherche avancée de la consultation recherche n'importe quelle entité sur **n'importe quelle combinaison de critères**, chacun portant sur **n'importe quelle donnée du modèle métier** : elle doit couvrir toutes les combinaisons de recherche (ex. « éditions dont l'album est paru tel mois ou telle année, dont le résumé ou les notes personnelles de l'album contiennent le mot ZZZ, et dont l'album a pour genre AAA, BBB ou CCC »).
+
+### Entités recherchées
+
+La recherche n'est pas limitée à certaines entités : elle porte sur toute entité dont la consultation présente les données (cf. § Périmètre de la consultation), c'est-à-dire les albums, éditions, séries, auteurs, éditeurs, collections éditeur, genres, univers, visuels d'édition et intentions d'achat. Le journal des modifications, consultable dans la seule administration (`modele-metier.md` § Entrée du journal des modifications), le paramétrage de l'application et les recherches enregistrées n'en font pas partie.
+
+Les résultats sont présentés comme les entités de leur type le sont dans la consultation, et chacun mène là où la consultation le prévoit (cf. § Structure de l'application) : fiche d'un album, d'une série ou d'un auteur ; fiche de l'album d'une édition, d'un visuel ou d'une intention d'achat ; site web d'un éditeur ; liste d'un genre ou d'un univers.
+
+### Données interrogées
+
+- Toute donnée du modèle métier peut servir de critère, qu'elle soit **publique** (ex. titre, année de parution, genre), **de gestion** (ex. intention d'achat, date de création, date de dernière modification) ou **déduite** (ex. nombre d'éditions, clé de tri, initiale, appartenance à la collection, genres et univers affichés d'un album).
+- Les données techniques d'optimisation, s'il en existe, en sont exclues.
+- La recherche ne propose pas, dans un premier temps, de **regroupement** défini par l'utilisateur (somme, moyenne, minimum, maximum) ; les données déduites que l'application calcule elle-même (ex. nombre d'éditions) restent interrogeables.
+- Les règles de rattachement s'appliquent aux critères comme au reste de la consultation : un critère sur un univers couvre ses sous-univers (cf. § Hiérarchie des univers).
+
+### Liens entre entités
+
+- Un critère peut porter sur une donnée d'une **entité liée**, sur un ou plusieurs niveaux, en suivant les relations du modèle métier (`modele-metier.md` § Relations et cardinalités) : deux entités sans lien direct ne sont reliées que par les entités intermédiaires du modèle.
+- Lorsque plusieurs chemins relient deux entités, l'utilisateur choisit celui que suit le critère, et l'interface **met en évidence** ce chemin, au moins lors du choix de la donnée interrogée. Ex. un visuel est relié à une collection éditeur par la collection de son édition, ou par l'une des collections de l'éditeur de son édition.
+- Un critère qui suit un lien vers **plusieurs** entités (ex. genres d'un album, éditions d'un album) précise s'il doit être satisfait par **au moins une**, par **aucune** ou par **toutes** les entités liées : sans ce choix, certaines combinaisons ne seraient pas exprimables.
+
+### Comparaisons
+
+Chaque critère compare une donnée à une valeur, avec les méthodes de comparaison adaptées au type de la donnée :
+
+| Type de donnée | Comparaisons |
+| --- | --- |
+| Texte | contient, ne contient pas, est égal à, est différent de, commence par |
+| Nombre, date, montant | égal, différent, inférieur, inférieur ou égal, supérieur, supérieur ou égal, compris entre |
+| Énuméré, booléen, fiche liée | est, n'est pas, est l'un de, n'est aucun de |
+| Toute donnée optionnelle | est renseignée, n'est pas renseignée |
+
+- Une **date** se compare à la précision choisie par l'utilisateur : jour, mois ou année (ex. « publiée tel mois », « publiée telle année »). Une date partielle ne satisfait un critère que si sa précision suffit à l'établir : une date connue à l'année seule ne satisfait ni « publiée en mars 2020 » ni « publiée en dehors de mars 2020 ».
+- Un **montant** se compare en euros du jour, ou dans sa devise d'origine si l'utilisateur le demande explicitement (cf. § Gestion des devises, Comparaison de montants).
+- La **comparaison entre deux données du même type** (ex. « édition dont l'année d'édition est postérieure à sa date d'acquisition, ou antérieure à la date de première publication de l'album ») est **envisagée** : elle sera retenue si sa complexité de mise en œuvre le permet.
+
+### Combinaison des critères
+
+Les critères se combinent librement par **ET**, **OU** et **NON**, en groupes imbriqués à tout niveau, pour exprimer toute combinaison (ex. « (paru tel mois OU telle année) ET (résumé OU notes personnelles contiennent ZZZ) ET genre est l'un de AAA, BBB, CCC »).
+
+### Recherches enregistrées
+
+- **Enregistrement** : l'administrateur peut enregistrer une recherche sous un **nom**, pour la rejouer ultérieurement.
+- **Rejeu en consultation** : les recherches enregistrées sont proposées dans la consultation, dans un menu ou une liste ; les rejouer ne demande que les valeurs de leurs variables.
+- **Variables** : à l'enregistrement, une ou plusieurs constantes des critères peuvent être remplacées par des **variables**. La valeur d'une variable est demandée lorsqu'on rejoue la recherche en consultation ; sa **valeur par défaut**, fixée par l'administrateur, est d'abord la constante qu'elle remplace.
+- **Point de départ d'une nouvelle recherche** : en consultation, les critères d'une recherche enregistrée peuvent pré-charger le formulaire de construction de la recherche, comme modèle d'une nouvelle recherche. Aucun lien n'est conservé entre la recherche d'origine et la recherche complétée.
+- **Gestion** : une page de l'administration gère les recherches enregistrées : suppression, renommage, modification des critères et des valeurs par défaut des variables.
 
 ## Règles d'accès
 

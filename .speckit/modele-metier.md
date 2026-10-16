@@ -25,6 +25,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | **Univers** | Cadre fictionnel auquel albums/séries peuvent être rattachés, avec hiérarchie possible. |
 | **Visuel d'édition** | Média rattaché à une édition avec un type de visuel. |
 | **Intention d'achat** | Souhait d'acquisition portant sur un album (toute édition) ou sur une édition spécifique. |
+| **Recherche enregistrée** | Recherche avancée nommée par l'administrateur, rejouable en consultation (voir `fonctionnel.md` § Recherche avancée). |
 | **Paramétrage de l'application** | Réglages de l'application, fixés par l'administrateur dans le bloc « Paramétrage » de l'administration. Fiche unique. |
 | **Journal des modifications** | Trace de chaque écriture sur une fiche : création, modification, suppression ou reprise d'une ancienne donnée. |
 
@@ -269,6 +270,17 @@ erDiagram
 
 > **Contraintes :** Exactement l'un des deux champs "Cible album" ou "Cible édition" doit être renseigné. Une même cible (album ou édition) ne peut être visée que par une seule intention d'achat. Un album et l'une de ses éditions ne peuvent pas être visés simultanément. Une édition possédée (`Mode d'acquisition` renseigné) ne peut pas être visée.
 
+### Recherche enregistrée
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Nom | texte | oui | Nom sous lequel la recherche est proposée en consultation. |
+| Entité recherchée | énuméré | oui | Type des entités que la recherche renvoie (voir `fonctionnel.md` § Entités recherchées). |
+| Critères | expression | oui | Combinaison des critères (ET, OU, NON, groupes imbriqués), chacun avec la donnée interrogée, le chemin suivi depuis l'entité recherchée, la comparaison et sa valeur — constante ou variable (voir `fonctionnel.md` § Recherche avancée). |
+| Variables | liste | non | Constantes des critères remplacées par une variable, chacune avec sa **valeur par défaut**, dont la valeur est demandée au rejeu de la recherche. |
+
+> **Contrainte :** le nom d'une recherche enregistrée est **unique sans tenir compte de la casse ni des accents**, comme le libellé d'un genre : les recherches ne se distinguent en consultation que par leur nom.
+
 ### Paramétrage de l'application
 
 | Attribut | Type | Obligatoire | Remarques |
@@ -282,7 +294,7 @@ erDiagram
 
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
-| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Paramétrage`. |
+| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage`. |
 | Fiche | identifiant | oui | Identifiant de la fiche écrite. Conservé après la suppression de la fiche : aucune contrainte d'intégrité référentielle. |
 | Libellé | composantes du libellé | oui | Données qui composent le libellé de la fiche (ex. titre, série et tome d'un album, cf. `fonctionnel.md` § Libellé d'un album), relevées au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. Le libellé en est construit à la consultation. |
 | Opération | énuméré | oui | `Création` / `Modification` / `Suppression` / `Reprise` (reprise d'une ancienne donnée depuis l'application existante). |
