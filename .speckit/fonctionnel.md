@@ -454,7 +454,7 @@ Les résultats sont présentés comme les entités de leur type le sont dans la 
 
 - Un critère peut porter sur une donnée d'une **entité liée**, sur un ou plusieurs niveaux, en suivant les relations du modèle métier (`modele-metier.md` § Relations et cardinalités) : deux entités sans lien direct ne sont reliées que par les entités intermédiaires du modèle.
 - Lorsque plusieurs chemins relient deux entités, l'utilisateur choisit celui que suit le critère, et l'interface **met en évidence** ce chemin, au moins lors du choix de la donnée interrogée. Ex. un visuel est relié à une collection éditeur par la collection de son édition, ou par l'une des collections de l'éditeur de son édition.
-- Un critère qui suit un lien vers **plusieurs** entités (ex. genres d'un album, éditions d'un album) précise s'il doit être satisfait par **au moins une**, par **aucune** ou par **toutes** les entités liées : sans ce choix, certaines combinaisons ne seraient pas exprimables.
+- Un critère qui suit un lien vers **plusieurs** entités (ex. genres d'un album, éditions d'un album) précise s'il doit être satisfait par **au moins une**, par **aucune** ou par **toutes** les entités liées : sans ce choix, certaines combinaisons ne seraient pas exprimables. Sans entité liée (ex. un album sans édition), « au moins une » et « toutes » ne sont pas satisfaits, « aucune » l'est : « toutes » exige au moins une entité liée.
 
 ### Comparaisons
 
