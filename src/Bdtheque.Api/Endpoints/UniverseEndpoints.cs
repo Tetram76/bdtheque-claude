@@ -1,3 +1,4 @@
+using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
@@ -37,7 +38,7 @@ internal static class UniverseEndpoints
     public static void MapUniverseCatalog(this RouteGroupBuilder catalog)
     {
         catalog.MapGet("/universes", ListAsync);
-        catalog.MapGet("/universes/{id:guid}", GetDetailAsync);
+        catalog.MapGet("/universes/{id:guid}/works", GetWorksAsync);
     }
 
     private static readonly Expression<Func<Universe, UniverseListItem>> ListItem = CatalogExpressions.Expand((Universe u) => u.ToListItem());
@@ -51,31 +52,24 @@ internal static class UniverseEndpoints
             .ToPageAsync(page, pageSize, ListItem, cancellationToken);
 
     /// <summary>
-    /// A universe with its place in the hierarchy: its ancestors, computed from the whole hierarchy — a
-    /// small reference table — rather than by a recursive query, and its direct sub-universes.
+    /// The series and albums of a universe, which has no record, with its ancestors (fonctionnel.md §
+    /// Structure de l'application): those of its sub-universes included (fonctionnel.md § Hiérarchie des
+    /// univers), a series attached with all its albums, the universes of an album in a series being those
+    /// of the album and of the series, and a series with those of its albums only that are attached.
     /// </summary>
-    private static async Task<UniverseDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    private static async Task<UniverseWorks> GetWorksAsync(
+        Guid id, BdthequeDbContext context, CancellationToken cancellationToken, int page = 1, int pageSize = Paging.DefaultSize)
     {
-        var universe = await context.Universes.AsNoTracking()
-                           .Where(u => u.Id == id)
-                           .Select(u => new
-                           {
-                               u.Name,
-                               u.Description,
-                               u.ParentId,
-                               Children = u.Children.OrderBy(c => c.Name).ThenBy(c => c.Id).Select(c => new UniverseListItem(c.Id, c.Name, u.Id, u.Name)).ToList(),
-                               u.CreatedAt,
-                               u.ModifiedAt,
-                           })
-                           .SingleOrDefaultAsync(cancellationToken)
-                       ?? throw new EntityNotFoundException(typeof(Universe), id);
+        // A single snapshot for the reads assembled into one another.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var tree = await UniverseTree.LoadAsync(context, cancellationToken);
+        var universe = tree.InHierarchy(id);
+        var universeIds = tree.WithDescendants(id);
 
-        var hierarchy = await context.Universes.AsNoTracking().Select(ListItem).ToDictionaryAsync(u => u.Id, cancellationToken);
-        var ancestors = new List<UniverseListItem>();
-        for (var parentId = universe.ParentId; parentId is { } ancestorId && hierarchy.TryGetValue(ancestorId, out var ancestor); parentId = ancestor.ParentId)
-            ancestors.Insert(0, ancestor);
-
-        return new UniverseDetail(id, universe.Name, universe.Description, ancestors, universe.Children, universe.CreatedAt, universe.ModifiedAt);
+        var albums = context.Albums.AsNoTracking().WhereUniverse(universeIds);
+        var series = context.Series.AsNoTracking()
+            .Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)) || albums.Any(a => a.SeriesId == s.Id));
+        return new UniverseWorks(universe, await CatalogWorks.ReadPageAsync(series, albums, page, pageSize, cancellationToken));
     }
 
     private static async Task<UniverseForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>

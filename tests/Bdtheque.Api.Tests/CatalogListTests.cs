@@ -230,13 +230,17 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
     [Fact]
     public async Task Publishers_AndTheirCollections_AreSortedByNameAndSearched()
     {
-        var lombard = await CreatePublisherAsync($"Le Lombard {_marker}");
+        var lombard = await CreatePublisherAsync($"Le Lombard {_marker}", "https://www.lelombard.com");
         var dargaud = await CreatePublisherAsync($"Éditions Dargaud {_marker}");
         var signe = await CreateCollectionAsync(lombard, $"Signé {_marker}");
         var luckyLuke = await CreateCollectionAsync(dargaud, $"Lucky Luke {_marker}");
 
+        // A publisher leads to its website, having no record of its own (fonctionnel.md § Structure de l'application).
         Assert.Equal(
-            [new PublisherListItem(dargaud.Id, $"Éditions Dargaud {_marker}"), new PublisherListItem(lombard.Id, $"Le Lombard {_marker}")],
+            [
+                new PublisherListItem(dargaud.Id, $"Éditions Dargaud {_marker}", null),
+                new PublisherListItem(lombard.Id, $"Le Lombard {_marker}", "https://www.lelombard.com"),
+            ],
             await ListAsync<PublisherListItem>("publishers", $"q={_marker}"));
         Assert.Equal([dargaud.Id], Ids(await ListAsync<PublisherListItem>("publishers", $"q={Uri.EscapeDataString($"editions dargaud {_marker}")}")));
         Assert.Equal(
@@ -323,8 +327,8 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
     private Task<AuthorForm> CreateAuthorAsync(string? lastName, string? firstName, string? pseudonym) =>
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(lastName, firstName, pseudonym, null, null));
 
-    private Task<PublisherForm> CreatePublisherAsync(string name) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, null));
+    private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
+        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));
 
     private Task<PublisherCollectionForm> CreateCollectionAsync(PublisherForm publisher, string name) =>
         PostAsync<PublisherCollectionForm>(

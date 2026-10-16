@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Bdtheque.Domain.Common;
+using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -54,28 +55,20 @@ internal static class CatalogFilters
 
     /// <summary>
     /// The universe and its descendants at every level, to whose records it is attached too
-    /// (fonctionnel.md § Hiérarchie des univers). Computed from the whole hierarchy, a small reference
-    /// table, rather than by a recursive query.
+    /// (fonctionnel.md § Hiérarchie des univers).
     /// </summary>
     public static async Task<IReadOnlyCollection<Guid>> UniverseAndDescendantsAsync(
-        BdthequeDbContext context, Guid universeId, CancellationToken cancellationToken)
-    {
-        var children = (await context.Universes.AsNoTracking()
-                .Where(u => u.ParentId != null)
-                .Select(u => new { u.Id, ParentId = u.ParentId!.Value })
-                .ToListAsync(cancellationToken))
-            .ToLookup(u => u.ParentId, u => u.Id);
+        BdthequeDbContext context, Guid universeId, CancellationToken cancellationToken) =>
+        (await UniverseTree.LoadAsync(context, cancellationToken)).WithDescendants(universeId);
 
-        var scope = new HashSet<Guid> { universeId };
-        var pending = new Queue<Guid>(scope);
-        while (pending.TryDequeue(out var parentId))
-        {
-            foreach (var childId in children[parentId])
-            {
-                if (scope.Add(childId))
-                    pending.Enqueue(childId);
-            }
-        }
-        return scope;
-    }
+    // The genres and universes of an album in a series are those of the album and of the series
+    // (fonctionnel.md § Genres et univers d'un album).
+
+    /// <summary>Keeps the albums of the genre, theirs or that of their series.</summary>
+    public static IQueryable<Album> WhereGenre(this IQueryable<Album> albums, Guid genreId) =>
+        albums.Where(a => a.Genres.Any(g => g.Id == genreId) || a.Series!.Genres.Any(g => g.Id == genreId));
+
+    /// <summary>Keeps the albums of one of the universes, theirs or one of their series.</summary>
+    public static IQueryable<Album> WhereUniverse(this IQueryable<Album> albums, IReadOnlyCollection<Guid> universeIds) =>
+        albums.Where(a => a.Universes.Any(u => universeIds.Contains(u.Id)) || a.Series!.Universes.Any(u => universeIds.Contains(u.Id)));
 }

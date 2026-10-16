@@ -9,7 +9,8 @@ using SkiaSharp;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// Records of the consultation (<c>/catalog/…/{id}</c>): everything known of an entity, the entries
+/// Records of the consultation (<c>/catalog/…/{id}</c>), which only the albums, the series and the
+/// authors have: everything known of the entity, the entities without a record it presents, the entries
 /// leading to the records it is linked with, and the dates of the record.
 /// </summary>
 public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
@@ -27,13 +28,14 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var humour = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Humour {Guid.NewGuid():N}"));
         var spirou = await CreateUniverseAsync("Spirou", null);
         var champignac = await CreateUniverseAsync("Champignac", spirou.Id);
+        var zorglub = await CreateUniverseAsync("Zorglub", champignac.Id);
         var franquin = await CreateAuthorAsync("Franquin", "André");
         var jije = await CreateAuthorAsync("Gillain", "Joseph");
         var dupuis = await CreatePublisherAsync("Dupuis");
         var series = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Spirou et Fantasio", [aventure.Id], [spirou.Id]));
         var album = await PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
             "Le Nid des Marsupilamis", null, series.Id, AlbumType.Regular, false, 12, null, null, 1960, 3, "Résumé", "Notes",
-            AlbumRating.VeryGood, [aventure.Id, humour.Id], [champignac.Id],
+            AlbumRating.VeryGood, [aventure.Id, humour.Id], [zorglub.Id],
             [new(jije.Id, ContributionRole.Scenarist), new(franquin.Id, ContributionRole.Illustrator), new(franquin.Id, ContributionRole.Scenarist)]));
         var owned = await CreateOwnedEditionAsync(album.Id, dupuis.Id, 1960);
         var (intended, intent) = await CreateIntendedEditionAsync(album.Id, dupuis.Id, 2010);
@@ -47,9 +49,14 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
             (detail.FirstPublicationYear, detail.FirstPublicationMonth, detail.Summary, detail.PersonalNotes, detail.Rating));
         // Union of those of the album and of its series, without duplicates.
         Assert.Equal([new GenreListItem(aventure.Id, aventure.Label), new GenreListItem(humour.Id, humour.Label)], detail.Genres);
+        // By name, each with its ancestors from the top of the hierarchy.
+        var spirouItem = new UniverseListItem(spirou.Id, "Spirou", null, null);
         Assert.Equal(
-            [new UniverseListItem(champignac.Id, "Champignac", spirou.Id, "Spirou"), new UniverseListItem(spirou.Id, "Spirou", null, null)],
-            detail.Universes);
+            [spirouItem, new UniverseListItem(zorglub.Id, "Zorglub", champignac.Id, "Champignac")],
+            detail.Universes.Select(u => u.Universe));
+        Assert.Equal(
+            [[], [spirouItem, new UniverseListItem(champignac.Id, "Champignac", spirou.Id, "Spirou")]],
+            detail.Universes.Select(u => u.Ancestors));
         // By role, then by author; created with the album, untouched since.
         Assert.Equal(
             [
@@ -59,14 +66,55 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
             ],
             detail.Contributions.Select(c => (c.Author, c.Role)));
         AssertCreatedWith(detail.CreatedAt, detail.Contributions);
+        // By year.
         Assert.Equal(
             [
                 (new EditionSummary(owned.Id, dupuis.Id, dupuis.Name, null, null, 1960, null), true, (Guid?)null),
                 (new EditionSummary(intended, dupuis.Id, dupuis.Name, null, null, 2010, null), false, intent),
             ],
             detail.Editions.Select(e => (e.Edition, e.IsInCollection, e.PurchaseIntent?.Id)));
+        Assert.All(detail.Editions, e => AssertCreatedAfter(detail.CreatedAt, (e.CreatedAt, e.ModifiedAt)));
         AssertCreatedAfter(detail.CreatedAt, detail.Editions[1].PurchaseIntent!);
         Assert.Null(detail.PurchaseIntent);
+    }
+
+    [Fact]
+    public async Task Album_PresentsEachEditionWhole_WithItsVisualsInOrder()
+    {
+        var publisher = await CreatePublisherAsync("Casterman", "https://www.casterman.com");
+        var album = await CreateAlbumAsync("Le Lotus bleu", null);
+        var edition = await CreateOwnedEditionAsync(album.Id, publisher.Id, 1946, "978-2-203-00104-9");
+        var plate = await UploadAsync(album.Id, edition.Id, VisualType.Plate);
+        var backCover = await UploadAsync(album.Id, edition.Id, VisualType.BackCover);
+        var cover = await UploadAsync(album.Id, edition.Id, VisualType.Cover);
+
+        var detail = Assert.Single((await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}")).Editions);
+
+        Assert.Equal(new EditionSummary(edition.Id, publisher.Id, publisher.Name, null, null, 1946, "978-2-203-00104-9"), detail.Edition);
+        Assert.Equal("https://www.casterman.com", detail.PublisherWebsite);
+        // Stored as entered, the ISBN carries the warning of its inconsistent check digit (6 expected).
+        Assert.Equal((AcquisitionMode.Purchase, true, false), (detail.AcquisitionMode, detail.IsInCollection, detail.IsbnChecksumValid));
+        Assert.Null(detail.PurchaseIntent);
+        // Created owned, the edition entered the collection when it was created.
+        Assert.Equal(detail.CreatedAt, detail.EnteredCollectionAt);
+        Assert.Equal([cover, plate, backCover], detail.Visuals.Select(v => v with { CreatedAt = default, ModifiedAt = default }));
+        Assert.All(detail.Visuals, v => AssertCreatedAfter(detail.CreatedAt, (v.CreatedAt, v.ModifiedAt)));
+    }
+
+    [Fact]
+    public async Task Album_PresentsAnEditionTargetedByAnIntent_AsNotInTheCollection()
+    {
+        var publisher = await CreatePublisherAsync("Glénat");
+        var album = await CreateAlbumAsync("Album visé", null);
+        var (intended, intent) = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2020);
+
+        var detail = Assert.Single((await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}")).Editions);
+
+        Assert.Equal(
+            (intended, null, null, false, intent, null, null),
+            (detail.Edition.Id, detail.PublisherWebsite, (AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection,
+                detail.PurchaseIntent?.Id, detail.IsbnChecksumValid, detail.EnteredCollectionAt));
+        Assert.Empty(detail.Visuals);
     }
 
     [Fact]
@@ -89,10 +137,11 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     public async Task Series_PresentsItsAlbumsInTheOrderOfTheSeriesAndItsAuthorsPublisherAndCollection()
     {
         var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Western {Guid.NewGuid():N}"));
-        var universe = await CreateUniverseAsync("Far West", null);
+        var america = await CreateUniverseAsync("Amérique", null);
+        var universe = await CreateUniverseAsync("Far West", america.Id);
         var morris = await CreateAuthorAsync("De Bevere", "Maurice");
         var goscinny = await CreateAuthorAsync("Goscinny", "René");
-        var dargaud = await CreatePublisherAsync("Dargaud");
+        var dargaud = await CreatePublisherAsync("Dargaud", "https://www.dargaud.com");
         var collection = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{dargaud.Id}/collections", new CreatePublisherCollectionRequest("Lucky Luke", dargaud.Version));
         var series = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf(
@@ -117,7 +166,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
             detail.Albums.Select(a => a.Id));
         Assert.Equal(new AlbumSummary(omnibus.Id, "Intégrale 3 à 5", series.Id, "Lucky Luke", AlbumType.Omnibus, false, null, 3, 5, false),
             detail.Albums[2]);
-        Assert.Equal(new PublisherListItem(dargaud.Id, dargaud.Name), detail.Publisher);
+        Assert.Equal(new PublisherListItem(dargaud.Id, dargaud.Name, "https://www.dargaud.com"), detail.Publisher);
         Assert.Equal(new PublisherCollectionListItem(collection.Id, "Lucky Luke", dargaud.Id, dargaud.Name), detail.PublisherCollection);
         Assert.Equal(
             [
@@ -127,7 +176,9 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
             detail.Contributions.Select(c => (c.Author, c.Role)));
         AssertCreatedWith(detail.CreatedAt, detail.Contributions);
         Assert.Equal([new GenreListItem(genre.Id, genre.Label)], detail.Genres);
-        Assert.Equal([new UniverseListItem(universe.Id, "Far West", null, null)], detail.Universes);
+        var farWest = Assert.Single(detail.Universes);
+        Assert.Equal(new UniverseListItem(universe.Id, "Far West", america.Id, "Amérique"), farWest.Universe);
+        Assert.Equal([new UniverseListItem(america.Id, "Amérique", null, null)], farWest.Ancestors);
         Assert.Equal(("Lucky Luke", (SeriesStatus?)null, (int?)null, false), (detail.Title, detail.Status, detail.TheoreticalVolumeCount, detail.IsComplete));
     }
 
@@ -141,44 +192,6 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Null(detail.Publisher);
         Assert.Null(detail.PublisherCollection);
         Assert.Empty(detail.Albums);
-    }
-
-    [Fact]
-    public async Task Edition_PresentsItsAlbumItsVisualsInOrderAndItsMembership()
-    {
-        var publisher = await CreatePublisherAsync("Casterman");
-        var album = await CreateAlbumAsync("Le Lotus bleu", null);
-        var edition = await CreateOwnedEditionAsync(album.Id, publisher.Id, 1946, "978-2-203-00104-9");
-        var plate = await UploadAsync(album.Id, edition.Id, VisualType.Plate);
-        var backCover = await UploadAsync(album.Id, edition.Id, VisualType.BackCover);
-        var cover = await UploadAsync(album.Id, edition.Id, VisualType.Cover);
-
-        var detail = await GetAsync<EditionDetail>($"/catalog/editions/{edition.Id}");
-
-        Assert.Equal(new AlbumSummary(album.Id, "Le Lotus bleu", null, null, AlbumType.Regular, false, null, null, null, true), detail.Album);
-        Assert.Equal(new EditionSummary(edition.Id, publisher.Id, publisher.Name, null, null, 1946, "978-2-203-00104-9"), detail.Edition);
-        // Stored as entered, the ISBN carries the warning of its inconsistent check digit (6 expected).
-        Assert.Equal((AcquisitionMode.Purchase, true, false), (detail.AcquisitionMode, detail.IsInCollection, detail.IsbnChecksumValid));
-        Assert.Null(detail.PurchaseIntent);
-        // Created owned, the edition entered the collection when it was created.
-        Assert.Equal(detail.CreatedAt, detail.EnteredCollectionAt);
-        Assert.Equal([cover, plate, backCover], detail.Visuals.Select(v => v with { CreatedAt = default, ModifiedAt = default }));
-        Assert.All(detail.Visuals, v => AssertCreatedAfter(detail.CreatedAt, (v.CreatedAt, v.ModifiedAt)));
-    }
-
-    [Fact]
-    public async Task Edition_TargetedByAnIntent_IsNotInTheCollection()
-    {
-        var publisher = await CreatePublisherAsync("Glénat");
-        var album = await CreateAlbumAsync("Album visé", null);
-        var (intended, intent) = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2020);
-
-        var detail = await GetAsync<EditionDetail>($"/catalog/editions/{intended}");
-
-        Assert.Equal(
-            (null, false, intent, null, null),
-            ((AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection, detail.PurchaseIntent?.Id, detail.IsbnChecksumValid, detail.EnteredCollectionAt));
-        Assert.Empty(detail.Visuals);
     }
 
     [Fact]
@@ -230,58 +243,14 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     }
 
     [Fact]
-    public async Task Publisher_PresentsItsCollectionsByName_EachWithItsOwnRecord()
-    {
-        var publisher = await CreatePublisherAsync("Le Lombard");
-        var signe = await PostAsync<PublisherCollectionForm>(
-            $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest("Signé", publisher.Version));
-        var aventure = await PostAsync<PublisherCollectionForm>(
-            $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest("Aventure", signe.PublisherVersion));
-
-        var detail = await GetAsync<PublisherDetail>($"/catalog/publishers/{publisher.Id}");
-        var collection = await GetAsync<PublisherCollectionDetail>($"/catalog/publisher-collections/{signe.Id}");
-
-        Assert.Equal(
-            [
-                new PublisherCollectionListItem(aventure.Id, "Aventure", publisher.Id, publisher.Name),
-                new PublisherCollectionListItem(signe.Id, "Signé", publisher.Id, publisher.Name),
-            ],
-            detail.Collections);
-        Assert.Equal((signe.Id, "Signé", publisher.Id, publisher.Name),
-            (collection.Id, collection.Name, collection.PublisherId, collection.PublisherName));
-    }
-
-    [Fact]
-    public async Task Universe_PresentsItsAncestorsFromTheTopAndItsChildrenByName()
-    {
-        var top = await CreateUniverseAsync("Marvel", null);
-        var middle = await CreateUniverseAsync("X-Men", top.Id);
-        var universe = await CreateUniverseAsync("Wolverine", middle.Id);
-        var weaponX = await CreateUniverseAsync("Weapon X", universe.Id);
-        var origins = await CreateUniverseAsync("Origins", universe.Id);
-
-        var detail = await GetAsync<UniverseDetail>($"/catalog/universes/{universe.Id}");
-
-        Assert.Equal(
-            [new UniverseListItem(top.Id, "Marvel", null, null), new UniverseListItem(middle.Id, "X-Men", top.Id, "Marvel")],
-            detail.Ancestors);
-        Assert.Equal(
-            [
-                new UniverseListItem(origins.Id, "Origins", universe.Id, "Wolverine"),
-                new UniverseListItem(weaponX.Id, "Weapon X", universe.Id, "Wolverine"),
-            ],
-            detail.Children);
-    }
-
-    [Fact]
     public async Task Record_CarriesTheDatesOfItsCreationAndOfItsLastModification()
     {
-        var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Polar {Guid.NewGuid():N}"));
-        var created = await GetAsync<GenreDetail>($"/catalog/genres/{genre.Id}");
-        (await _client.PutAsJsonAsync($"/admin/genres/{genre.Id}", new UpdateGenreRequest($"Policier {Guid.NewGuid():N}", genre.Version)))
+        var author = await CreateAuthorAsync("Tardi", "Jacques");
+        var created = await GetAsync<AuthorDetail>($"/catalog/authors/{author.Id}");
+        (await _client.PutAsJsonAsync($"/admin/authors/{author.Id}", new UpdateAuthorRequest("Tardi", "Jacques", null, "Biographie", null, author.Version)))
             .EnsureSuccessStatusCode();
 
-        var modified = await GetAsync<GenreDetail>($"/catalog/genres/{genre.Id}");
+        var modified = await GetAsync<AuthorDetail>($"/catalog/authors/{author.Id}");
 
         Assert.Equal(created.CreatedAt, created.ModifiedAt);
         Assert.Equal(created.CreatedAt, modified.CreatedAt);
@@ -291,17 +260,27 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     [Theory]
     [InlineData("albums")]
     [InlineData("series")]
-    [InlineData("editions")]
     [InlineData("authors")]
-    [InlineData("publishers")]
-    [InlineData("publisher-collections")]
-    [InlineData("genres")]
-    [InlineData("universes")]
     public async Task UnknownRecord_IsAFunctionalError(string resource)
     {
         var response = await _client.GetAsync($"/catalog/{resource}/{Guid.NewGuid()}");
 
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
+    }
+
+    // fonctionnel.md § Structure de l'application: the editions are presented by the record of their
+    // album; the publishers, their collections, the genres and the universes have no record.
+    [Theory]
+    [InlineData("editions")]
+    [InlineData("publishers")]
+    [InlineData("publisher-collections")]
+    [InlineData("genres")]
+    [InlineData("universes")]
+    public async Task EntityWithoutRecord_HasNoRoute(string resource)
+    {
+        var response = await _client.GetAsync($"/catalog/{resource}/{Guid.NewGuid()}");
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Technical);
     }
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
@@ -320,8 +299,8 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     private Task<AuthorForm> CreateAuthorAsync(string lastName, string? firstName) =>
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(lastName, firstName, null, null, null));
 
-    private Task<PublisherForm> CreatePublisherAsync(string name) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"{name} {Guid.NewGuid():N}", null));
+    private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
+        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"{name} {Guid.NewGuid():N}", website));
 
     private Task<UniverseForm> CreateUniverseAsync(string name, Guid? parentId) =>
         PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest(name, null, parentId));

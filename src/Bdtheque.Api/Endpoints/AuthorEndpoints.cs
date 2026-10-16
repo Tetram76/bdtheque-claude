@@ -52,7 +52,7 @@ internal static class AuthorEndpoints
     /// <remarks>
     /// The series and the albums without series come together, by sort key, as typed entries: this is the
     /// order of the first level of the bibliography, where the albums without series stand alongside the
-    /// series (fonctionnel.md § Structure de l'application).
+    /// series (fonctionnel.md § Structure de l'application). Bounded, the bibliography is whole.
     /// </remarks>
     private static async Task<AuthorDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
@@ -69,15 +69,7 @@ internal static class AuthorEndpoints
         var creditedSeries = context.Series.AsNoTracking()
             .Where(s => s.TemplateContributions.Any(c => c.AuthorId == id) || credited.Any(a => a.SeriesId == s.Id));
 
-        // Ordered by the database, along the French collation of the sort keys. An album without series
-        // has a title, hence a sort key.
-        var entries = await creditedSeries
-            .Select(s => new { SortKey = s.SortKey, SeriesId = (Guid?)s.Id, AlbumId = (Guid?)null })
-            .Concat(credited.Where(a => a.SeriesId == null).Select(a => new { SortKey = a.SortKey!, SeriesId = (Guid?)null, AlbumId = (Guid?)a.Id }))
-            .OrderBy(e => e.SortKey)
-            .ThenBy(e => e.SeriesId)
-            .ThenBy(e => e.AlbumId)
-            .ToListAsync(cancellationToken);
+        var entries = await CatalogWorks.FirstLevel(creditedSeries, credited).ToListAsync(cancellationToken);
 
         var series = await creditedSeries
             .Select(CatalogExpressions.Expand((Series s) => new

@@ -1,3 +1,4 @@
+using System.Data;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
@@ -41,11 +42,14 @@ internal static class SeriesEndpoints
     }
 
     /// <summary>
-    /// A series with its albums, in its order, and what describes it of its template: its publisher,
-    /// collection and authors (fonctionnel.md § Structure de l'application).
+    /// A series with its albums, in its order, its universes, each with its ancestors, and what describes
+    /// it of its template: its publisher, collection and authors (fonctionnel.md § Structure de
+    /// l'application).
     /// </summary>
     private static async Task<SeriesDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
+        // A single snapshot for the reads below, which are assembled into one another.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var series = await context.Series.AsNoTracking()
                          .Where(s => s.Id == id)
                          .Select(CatalogExpressions.Expand((Series s) => new
@@ -56,7 +60,9 @@ internal static class SeriesEndpoints
                              s.IsComplete,
                              s.Summary,
                              s.PersonalNotes,
-                             Publisher = s.TemplatePublisher == null ? null : new PublisherListItem(s.TemplatePublisher.Id, s.TemplatePublisher.Name),
+                             Publisher = s.TemplatePublisher == null
+                                 ? null
+                                 : new PublisherListItem(s.TemplatePublisher.Id, s.TemplatePublisher.Name, s.TemplatePublisher.Website),
                              PublisherCollection = s.TemplatePublisherCollection == null
                                  ? null
                                  : new PublisherCollectionListItem(
@@ -76,10 +82,11 @@ internal static class SeriesEndpoints
             .OrderInSeries()
             .Select(CatalogExpressions.Expand((Album a) => a.ToSummary()))
             .ToListAsync(cancellationToken);
+        var universes = await UniverseTree.InHierarchyAsync(context, series.Universes, cancellationToken);
 
         return new SeriesDetail(
             id, series.Title, EnumMapping.Map<ContractEnums.SeriesStatus>(series.Status), series.TheoreticalVolumeCount, series.IsComplete,
-            series.Summary, series.PersonalNotes, series.Publisher, series.PublisherCollection, series.Genres, series.Universes,
+            series.Summary, series.PersonalNotes, series.Publisher, series.PublisherCollection, series.Genres, universes,
             series.Contributions, albums, series.CreatedAt, series.ModifiedAt);
     }
 
