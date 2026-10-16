@@ -467,7 +467,7 @@ Chaque critère compare une donnée à une valeur, avec les méthodes de compara
 | Énuméré, booléen, fiche liée | est, n'est pas, est l'un de, n'est aucun de |
 | Toute donnée optionnelle | est renseignée, n'est pas renseignée |
 
-- Une **date** se compare à la précision choisie par l'utilisateur : jour, mois ou année (ex. « publiée tel mois », « publiée telle année »). Une date partielle ne satisfait un critère que si sa précision suffit à l'établir : une date connue à l'année seule ne satisfait ni « publiée en mars 2020 » ni « publiée en dehors de mars 2020 ».
+- Une **date** se compare à la précision choisie par l'utilisateur : jour, mois ou année (ex. « publiée tel mois », « publiée telle année »). Une date partielle ne satisfait un critère que si sa précision suffit à l'établir : une date connue à l'année seule ne satisfait ni « publiée en mars 2020 » ni « publiée en dehors de mars 2020 ». Le **NON** d'un critère (cf. § Combinaison des critères) retient au contraire tout ce que le critère n'établit pas : « NON (publiée en mars 2020) » retient la date connue à l'année seule. Les deux formulations ne sont donc pas équivalentes : l'une exige que la date soit établie hors de mars 2020, l'autre seulement qu'elle ne soit pas établie en mars 2020.
 - Un **montant** se compare en euros du jour, ou dans sa devise d'origine si l'utilisateur le demande explicitement (cf. § Gestion des devises, Comparaison de montants).
 - La **comparaison entre deux données du même type** (ex. « édition dont l'année d'édition est postérieure à sa date d'acquisition, ou antérieure à la date de première publication de l'album ») est **envisagée** : elle sera retenue si sa complexité de mise en œuvre le permet.
 
