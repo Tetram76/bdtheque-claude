@@ -129,7 +129,7 @@ Répercussion dans l'API de la règle qui réserve les fiches de consultation au
 
 ### Ajustement issu de la définition de la recherche avancée
 
-Répercussion dans le modèle de domaine et dans l'API de la recherche avancée (`fonctionnel.md` § Recherche avancée) : recherche de toute entité consultable sur toute combinaison de critères portant sur les données du modèle métier, et recherches enregistrées, avec leurs variables. Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+Répercussion dans le modèle de domaine et dans l'API de la recherche avancée (`fonctionnel.md` § Recherche avancée) : recherche de toute entité consultable sur toute combinaison de critères portant sur les données du modèle métier, et recherches enregistrées, avec leurs variables. Les phases 1 et 2 étant validées, un seul ticket couvre les deux. Les critères sur des données que calculent des phases ultérieures (montants en euros, valeur estimée : phase 4 ; tomes manquants, sortie estimée : phase 5) en sont exclus, et rejoignent la recherche avancée avec ces phases.
 
 | Ticket | Titre |
 | --- | --- |
@@ -152,11 +152,15 @@ Dashboard public et statistiques (sur la collection uniquement) ; conversion des
 
 Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
+- **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée (`fonctionnel.md` § Recherche avancée), avec leurs comparaisons (version choisie par critère, montant non convertible).
+
 ## Phase 5 — Fonctionnalités de second plan
 
 Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel.md` § Fonctionnalités de second plan). Les statistiques du dashboard qui en dépendent (tomes manquants, prochaines sorties estimées, `fonctionnel.md` § Page d'accueil) n'entrent dans son tirage qu'une fois ces fonctionnalités réalisées : le dashboard de la Phase 4 les en exclut.
 
 Découpage à établir à l'ouverture de la phase.
+
+- **Note — recherche avancée** : les données que calculent ces fonctionnalités (tomes manquants d'une série, sortie estimée du prochain tome) deviennent des critères de la recherche avancée (`fonctionnel.md` § Recherche avancée).
 
 ## Phase 6 — Outil pour agents IA
 
