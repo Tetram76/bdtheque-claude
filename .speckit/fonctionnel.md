@@ -281,7 +281,8 @@ La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 | Album | Ses éditions (avec leurs visuels et intentions d'achat), ses contributions, son intention d'achat | Composition | Supprimés avec lui. |
 | Édition | Ses visuels, son intention d'achat | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
 | Intention d'achat portant sur une édition | L'édition visée (non possédée), avec ses visuels | Composition | Supprimée avec elle : une édition non possédée n'existe que par son intention (cf. § Intention d'achat). |
-| Visuel d'édition, Contribution, Intention d'achat portant sur l'album | — | — | Suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
+| Toute fiche | Désignée par un critère ou par la valeur par défaut d'une variable d'une recherche enregistrée (cf. § Recherche avancée) | Référence | Refusée tant qu'une recherche enregistrée la désigne, elle ou une fiche supprimée avec elle. |
+| Visuel d'édition, Contribution, Intention d'achat portant sur l'album, Recherche enregistrée | — | — | Hors la ligne « Toute fiche », suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
 
 ### Calcul des estimations
 
@@ -311,7 +312,7 @@ Statistique **envisagée** : rien n'est statué, elle n'est pas à implémenter 
 - **Euros courants** : un montant exprimé en euros courants est **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), **sans correction de l'inflation**.
 - **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord exprimé en **euros courants**, puis **corrigé de l'inflation** entre sa date de référence et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
 - **Analyses et statistiques** : chaque montant est affiché **en parallèle** dans les deux versions, pour mettre en relation l'**investissement réalisé** (euros courants) et son **équivalent en pouvoir d'achat** à la date du jour (euros du jour). Un montant non convertible (cf. *Taux de change* ci-dessous) n'entre dans aucune des deux : elles portent toujours sur les mêmes données.
-- **Comparaison de montants** : toute comparaison entre montants (classement, minimum, maximum, record…) se fait **en euros du jour**, seule version qui compare les époques entre elles, sauf cas particulier où l'on souhaite explicitement comparer les montants **d'origine**. Le résultat reste affiché dans les deux versions.
+- **Comparaison de montants** : toute comparaison entre montants (classement, minimum, maximum, record…) se fait **en euros du jour**, seule version qui compare les époques entre elles, sauf cas particulier où l'on souhaite explicitement comparer les montants **d'origine** ou en **euros courants** (ex. un critère de la recherche avancée, cf. § Recherche avancée). Le résultat reste affiché dans les deux versions.
 - **Agrégation multi-devises** : toute agrégation de données exprimées dans des devises différentes est convertie et consolidée en euro, dans ces deux versions.
 - **Date de référence d'un montant** : première date connue, dans cet ordre :
   - **prix d'acquisition** : date d'acquisition, puis année d'édition, puis date de première publication de l'album ;
@@ -420,15 +421,70 @@ L'application se compose de trois parties distinctes :
    - **Navigation inter-entités** : depuis une fiche, il est possible de naviguer vers les fiches des entités associées, ou vers la liste d'un genre ou d'un univers (ex. album → série, album → auteur, auteur → bibliographie, album → liste d'un genre, etc.).
    - **Recherche facilement accessible** à tout moment depuis n'importe quelle page de la partie consultation.
    - **Recherche simple** : par type d'entité (ex. rechercher des albums, des auteurs, des séries, etc.).
-   - **Recherche avancée** : exploite les **liens entre entités** pour des requêtes cross-domaines (ex. albums d'un auteur donné, séries d'un éditeur, etc.).
+   - **Recherche avancée** : recherche de n'importe quelle entité sur n'importe quelle combinaison de critères, portant sur les données du modèle métier et sur les liens entre entités, et rejeu des recherches enregistrées par l'administrateur (cf. § Recherche avancée).
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
-   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, etc.
+   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. § Recherche avancée), etc.
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
    - Le contenu peut être **riche** : texte, captures d'écran, tableaux, exemples, etc. — pas seulement de courts textes explicatifs.
+
+## Recherche avancée
+
+La recherche avancée de la consultation recherche n'importe quelle entité sur **n'importe quelle combinaison de critères**, chacun portant sur **n'importe quelle donnée du modèle métier** : elle doit couvrir toutes les combinaisons de recherche (ex. « éditions dont l'album est paru tel mois ou telle année, dont le résumé ou les notes personnelles de l'album contiennent le mot ZZZ, et dont l'album a pour genre AAA, BBB ou CCC »).
+
+L'interface de construction de la recherche est **ergonomiquement utilisable par un utilisateur sans aucune connaissance de SQL** ni d'un autre langage de requête : entités, données, liens, comparaisons et combinaisons y sont présentés dans les termes du métier, jamais dans ceux de la base.
+
+### Entités recherchées
+
+La recherche n'est pas limitée à certaines entités : elle porte sur toute entité dont la consultation présente les données (cf. § Périmètre de la consultation), c'est-à-dire les albums, éditions, séries, auteurs, éditeurs, collections éditeur, genres, univers, visuels d'édition, intentions d'achat et contributions. Le journal des modifications, consultable dans la seule administration (`modele-metier.md` § Entrée du journal des modifications), le paramétrage de l'application et les recherches enregistrées n'en font pas partie.
+
+Les résultats sont présentés comme les entités de leur type le sont dans la consultation, et chacun se comporte comme la consultation le prévoit pour son entité (cf. § Structure de l'application) : il mène à la fiche d'un album, d'une série ou d'un auteur ; à la fiche de l'album d'une édition, d'un visuel ou d'une intention d'achat ; à la fiche de l'album ou de la série qui porte une contribution ; au site web d'un éditeur, s'il est renseigné ; à la liste d'un genre ou d'un univers. Un éditeur sans site web et une collection éditeur ne sont pas des liens.
+
+### Données interrogées
+
+- Toute donnée du modèle métier peut servir de critère, qu'elle soit **publique** (ex. titre, année de parution, genre), **de gestion** (ex. intention d'achat, date de création, date de dernière modification) ou **déduite** (ex. nombre d'éditions, clé de tri, initiale, appartenance à la collection, genres et univers affichés d'un album).
+- Les données techniques d'optimisation, s'il en existe, en sont exclues.
+- La recherche ne propose pas, dans un premier temps, de **regroupement** défini par l'utilisateur (somme, moyenne, minimum, maximum) ; les données déduites que l'application calcule elle-même (ex. nombre d'éditions) restent interrogeables, de même que le **nombre d'entités liées** qui remplissent des critères (cf. § Liens entre entités).
+- Les règles de rattachement s'appliquent aux critères comme au reste de la consultation : un critère sur un univers couvre ses sous-univers (cf. § Hiérarchie des univers).
+
+### Liens entre entités
+
+- Un critère peut porter sur une donnée d'une **entité liée**, sur un ou plusieurs niveaux, en suivant les relations du modèle métier (`modele-metier.md` § Relations et cardinalités) : deux entités sans lien direct ne sont reliées que par les entités intermédiaires du modèle.
+- Lorsque plusieurs chemins relient deux entités, l'utilisateur choisit celui que suit le critère, et l'interface **met en évidence** ce chemin, au moins lors du choix de la donnée interrogée. Ex. un visuel est relié à une collection éditeur par la collection de son édition, ou par l'une des collections de l'éditeur de son édition.
+- Un critère qui suit un lien vers **plusieurs** entités (ex. genres d'un album, éditions d'un album) précise s'il doit être satisfait par **au moins une**, par **aucune** ou par **toutes** les entités liées, ou par un **nombre** d'entités liées, comparé comme tout nombre (ex. « éditions dont l'album a **plus d'une** contribution de dessinateur », soit les éditions qui ont plusieurs dessinateurs) : sans ce choix, certaines combinaisons ne seraient pas exprimables. Sans entité liée (ex. un album sans édition), « au moins une » et « toutes » ne sont pas satisfaits, « aucune » l'est : « toutes » exige au moins une entité liée. Sur un chemin de plusieurs niveaux, **chaque** lien vers plusieurs entités porte son propre choix (ex. « séries dont **tous** les albums ont **au moins une** édition chez Dargaud »).
+- Ce choix peut porter sur un **groupe de critères** appliqué à chaque entité liée, combinés comme tout autre groupe (cf. § Combinaison des critères), pour que plusieurs conditions portent sur **la même** entité liée : « albums ayant au moins une édition (chez Dargaud ET parue en 2000) » exige qu'une même édition remplisse les deux conditions, là où « albums ayant au moins une édition chez Dargaud ET au moins une édition parue en 2000 » les admet remplies par deux éditions différentes.
+
+### Comparaisons
+
+Chaque critère compare une donnée à une valeur (la comparaison à une autre donnée reste envisagée, cf. ci-dessous), avec les méthodes de comparaison adaptées au type de la donnée :
+
+| Type de donnée | Comparaisons |
+| --- | --- |
+| Texte | contient, ne contient pas, est égal à, est différent de, commence par |
+| Nombre, date, montant | égal, différent, inférieur, inférieur ou égal, supérieur, supérieur ou égal, compris entre |
+| Énuméré, booléen, fiche liée | est, n'est pas, est l'un de, n'est aucun de |
+| Toute donnée optionnelle | est renseignée, n'est pas renseignée |
+
+- Une comparaison n'est satisfaite que si les **données connues l'établissent**. Une donnée absente ne satisfait donc aucune comparaison, positive ou négative, hormis « n'est pas renseignée » : « état n'est pas Excellent » ne retient pas une édition dont l'état est absent. Le **NON** d'un critère (cf. § Combinaison des critères) retient au contraire tout ce que le critère n'établit pas : « NON (état est Excellent) » retient cette édition. Une comparaison négative et le NON de la comparaison positive ne sont donc pas équivalents : l'une exige que la donnée soit établie différente, l'autre seulement qu'elle ne soit pas établie égale.
+- Un **texte** se compare par défaut sans tenir compte de la casse ni des accents : « contient epee » retient `L'Épée`. **Chaque critère** sur un texte peut, à l'image de la version de comparaison d'un montant, **respecter la casse et les accents**, pour toutes les comparaisons de texte : « contient Épée » ne retient alors ni `L'épée` ni `L'Epee`.
+- Une **date** se compare à la précision choisie par l'utilisateur : jour, mois ou année (ex. « publiée tel mois », « publiée telle année »). Selon la règle ci-dessus, une date partielle ne satisfait un critère que si sa précision suffit à l'établir : une date connue à l'année seule ne satisfait ni « publiée en mars 2020 » ni « publiée en dehors de mars 2020 », mais « NON (publiée en mars 2020) » la retient.
+- Un **montant** se compare dans la version que **chaque critère** choisit, si bien qu'une même recherche peut comparer un montant en euros du jour et un autre en euros courants ou dans sa devise d'origine (cf. § Gestion des devises) : **euros du jour** par défaut, **euros courants**, ou **devise d'origine**. En euros du jour comme en euros courants, un montant non convertible ne satisfait pas le critère. Dans la devise d'origine, la valeur du critère porte sa devise, et seuls les montants dans cette devise peuvent le satisfaire : « prix supérieur à 100 USD » ne retient aucun prix en francs, des montants de devises différentes ne se comparant qu'une fois convertis.
+- La **comparaison entre deux données du même type** (ex. « édition dont l'année d'édition est postérieure à sa date d'acquisition, ou antérieure à la date de première publication de l'album ») est **envisagée** : elle sera retenue si sa complexité de mise en œuvre le permet.
+
+### Combinaison des critères
+
+Les critères se combinent librement par **ET**, **OU** et **NON**, en groupes imbriqués à tout niveau, pour exprimer toute combinaison (ex. « (paru tel mois OU telle année) ET (résumé OU notes personnelles contiennent ZZZ) ET genre est l'un de AAA, BBB, CCC »).
+
+### Recherches enregistrées
+
+- **Enregistrement** : l'administrateur peut enregistrer une recherche sous un **nom**, pour la rejouer ultérieurement.
+- **Rejeu en consultation** : les recherches enregistrées sont proposées dans la consultation, dans un menu ou une liste ; les rejouer ne demande que les valeurs de leurs variables.
+- **Variables** : à l'enregistrement, une ou plusieurs constantes des critères peuvent être remplacées par des **variables**. La valeur d'une variable est demandée lorsqu'on rejoue la recherche en consultation ; sa **valeur par défaut**, fixée par l'administrateur, est d'abord la constante qu'elle remplace.
+- **Point de départ d'une nouvelle recherche** : en consultation, les critères d'une recherche enregistrée peuvent pré-charger le formulaire de construction de la recherche, comme modèle d'une nouvelle recherche. Aucun lien n'est conservé entre la recherche d'origine et la recherche complétée.
+- **Gestion** : une page de l'administration gère les recherches enregistrées : suppression, renommage, modification des critères et des valeurs par défaut des variables.
 
 ## Règles d'accès
 
