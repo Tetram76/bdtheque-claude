@@ -39,7 +39,8 @@ signature-false-positive exit applies, see "Exit"):
 
 ```text
 1. Wait for Codex on the current head commit (watcher, Step 1).
-2. If Codex approved it (👍) and CI has completed, stop — see "Exit".
+2. If Codex approved it (👍, or an approving receipt naming it) and CI has
+   completed, stop — see "Exit".
 3. Otherwise, for each unresolved review thread from Codex:
    a. Cross-check the finding (see "Cross-check" below). If valid,
       establish its root cause — which may lie outside the diff and outside
@@ -59,14 +60,23 @@ signature-false-positive exit applies, see "Exit"):
 6. If commits were pushed, go to 1 (Codex re-reviews automatically).
 ```
 
-**The approval signal is the 👍 reaction Codex leaves on the PR description
-when it has nothing to report** — often without posting any review. The
-watcher (Step 1) checks for it every cycle.
+**Codex approves the head commit in one of two ways** (policy:
+`.speckit/gestion-projet.md` § Revue Codex), often without posting any review:
+
+- the **👍 reaction** on the PR description — it names no commit, so the
+  watcher ties it to the head through the review's course (trigger time, head
+  unchanged, no older review still running);
+- an **approving receipt**: a top-level comment marked
+  `<!-- codex-review-receipt:v1 -->` that reads "Codex Review: Didn't find any
+  major issues" and whose `**Reviewed commit:**` (an abbreviated SHA) is a
+  prefix of the head SHA. A receipt naming an older commit approves nothing.
+
+The watcher (Step 1) checks for both every cycle.
 
 ### Watching (mandatory, applies to every step that waits)
 
-Nothing notifies the session when Codex approves (bare 👍, and the dedicated
-comment is not systematic), so waiting is done by a **live watcher**, never by
+Nothing notifies the session when Codex approves (bare 👍, and the approving
+receipt is not systematic), so waiting is done by a **live watcher**, never by
 intention. Rules (policy: `.speckit/gestion-projet.md` § Cycle, « Surveillance
 active obligatoire »):
 
@@ -74,18 +84,21 @@ active obligatoire »):
   shared by several PRs: a shared script exits on the first PR's signal and
   silently stops watching the others.
 - It exits only on a terminal state of **its** PR: new feedback from Codex
-  (review, inline or top-level comment), PR merged/closed, the 👍 from
-  `chatgpt-codex-connector[bot]` dated after `<LAST_TRIGGER_AT>` once every CI
-  check has completed — at least one check registered, an empty rollup being
+  (review, inline or top-level comment other than an approving receipt for the
+  head), PR merged/closed, approval of the head — the 👍 from
+  `chatgpt-codex-connector[bot]` dated after `<LAST_TRIGGER_AT>`, or an
+  approving receipt naming the head — once every CI check has completed — at least one check registered, an empty rollup being
   CI not started (the merge needs both) —, a change of the PR's head commit,
   the end of a Codex review started before `<LAST_TRIGGER_AT>` (it keeps
   watching while that review runs; its verdict is about an older head, so
   its 👍 never counts as approval), GitHub queries failing 5 times in a
   row, or timeout (about one hour). It prints why (`exit: …`) and the final
   CI conclusions.
-- A top-level Codex comment (e.g. "You have reached your Codex usage limits",
-  which no review follows) only hands control back so it gets read; it is
-  **never** an approval — only the 👍 is.
+- Any other top-level Codex comment (e.g. "You have reached your Codex usage
+  limits", which no review follows; the "Codex Review Summary" table; a
+  receipt naming an older commit) only hands control back so it gets read; it
+  is **never** an approval — only the 👍 and the approving receipt naming the
+  head are.
 - Never say "I'm watching" without a running watcher, and never end a turn
   with a pending PR that has none. A suspended PR — Codex usage limit,
   timeout, or GitHub queries that keep failing (see Step 1) — is not pending:
@@ -119,6 +132,12 @@ set -o pipefail
 # page, and reviews come oldest first): the --jq filter must be per-page safe.
 count() { local n; n=$(gh api --paginate "$1?per_page=100" --jq "$2" | wc -l) && echo "$n"; }
 bot='.user.login=="chatgpt-codex-connector[bot]"'
+# approving receipt naming the head: its "Reviewed commit" (abbreviated SHA)
+# must be a prefix of <HEAD_SHA>; a receipt about an older commit is ordinary
+# feedback to read, never an approval
+receipt='((.body|test("codex-review-receipt")) and (.body|test("find any major issues"))
+  and (([.body|match("Reviewed commit:[*]+ `([0-9a-f]{7,40})`").captures[0].string][0] // "")
+  as $s | $s != "" and ("<HEAD_SHA>"|startswith($s))))'
 reason=timeout fails=0 saw_old=0
 for i in $(seq 1 60); do
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
@@ -132,17 +151,24 @@ for i in $(seq 1 60); do
      cm=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments" \
           ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")") &&
      ic=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
-          ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")") &&
+          ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\" and ($receipt|not))") &&
+     rc=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
+          ".[]|select($bot and $receipt)") &&
      sp=$(gh pr view <PR_NUMBER> --json state,headRefOid,statusCheckRollup \
           -q '"\(.state) \(.headRefOid) \(.statusCheckRollup|length) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"')
   then
     fails=0; read -r st head checks pending <<< "$sp"
-    echo "thumbs=$up old_review=$old reviews=$rv inline=$cm issue=$ic state=$st head=${head:0:7} checks=$checks pending=$pending"
+    echo "thumbs=$up receipt=$rc old_review=$old reviews=$rv inline=$cm issue=$ic state=$st head=${head:0:7} checks=$checks pending=$pending"
     if [ "$rv" -ne 0 ] || [ "$cm" -ne 0 ] || [ "$ic" -ne 0 ]; then
       reason="new Codex feedback"; break
     fi
     if [ "$st" != OPEN ]; then reason="PR $st"; break; fi
     if [ "$head" != "<HEAD_SHA>" ]; then reason="head changed"; break; fi
+    # a receipt names the commit it approves: no need to tie it to the head
+    # through the review's course, unlike the 👍 below
+    if [ "$rc" -ne 0 ] && [ "$checks" -gt 0 ] && [ "$pending" -eq 0 ]; then
+      reason="approved, CI done"; break
+    fi
     # a review started before the trigger is still running: keep watching,
     # and remember it — the 👍 that ends it is about an older head
     if [ "$old" -ne 0 ]; then saw_old=1; sleep 60; continue; fi
@@ -165,8 +191,8 @@ gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.na
 ### Step 1 — Wait for Codex
 
 Codex reacts with 👀 within seconds; within a few minutes it either approves
-the head commit with a bare 👍 — often without posting any review — or posts
-a review with findings. So never wait for a review to appear: run the watcher
+the head commit — with a bare 👍, or with an approving receipt naming it,
+often without posting any review — or posts a review with findings. So never wait for a review to appear: run the watcher
 above, `<LAST_TRIGGER_AT>` being the push just made (Step 3) or, on a cycle
 entered from Step 5 without a new push, the `@codex review` comment's
 `created_at`. Then act on its exit reason:
@@ -179,7 +205,7 @@ entered from Step 5 without a new push, the `@codex review` comment's
   back, so tell the user and stop — no watcher, and no `@codex review`, which
   would only be refused again; resume only when the user asks. Feedback
   reporting nothing to fix: re-arm with `<HANDLED_UNTIL>` set to now and keep
-  waiting for the 👍 — never answer it with `@codex review`, which would pay
+  waiting for the approval — never answer it with `@codex review`, which would pay
   for a needless extra review.
 - `head changed` (someone pushed) → re-arm with that push as the new trigger
   and head.
@@ -192,7 +218,7 @@ entered from Step 5 without a new push, the `@codex review` comment's
 - `PR MERGED` / `PR CLOSED` → tell the user and stop.
 - `GitHub queries keep failing`, or `timeout` (no review was triggered —
   `@codex review` may need to be commented manually, or automatic review is
-  disabled for the repo — or, if the 👍 is there, CI never started) → the PR
+  disabled for the repo — or, if Codex approved, CI never started) → the PR
   is **suspended**: tell the user and stop, with no watcher (a new one would
   only wait in vain); resume only when the user asks.
 
@@ -410,7 +436,7 @@ re-reviews automatically on new commits pushed to the PR branch.
 
 If no fix commit was made in this cycle — every finding was rejected or deferred, all
 threads were already resolved, or Step 2 found no unresolved Codex thread at
-all (yet Step 1 still found no matching 👍) — Codex will **not** re-review on
+all (yet Step 1 still found no approval) — Codex will **not** re-review on
 its own: replying to and resolving threads doesn't trigger it, only a new
 commit or an explicit request does. In every one of these cases, post a PR
 comment containing exactly `@codex review` to request a fresh pass, record
@@ -429,10 +455,10 @@ no other comment, see "Exit".
 
 ### Exit
 
-The Codex gate is satisfied once Codex has reacted 👍 to the PR for the
-current head commit. Merging still requires the CI checks to also pass (see
+The Codex gate is satisfied once Codex has approved the current head commit
+(👍, or an approving receipt naming it). Merging still requires the CI checks to also pass (see
 `.speckit/gestion-projet.md`).
 
 Exception: after 3 requests where Codex repeated only a verified signature
 false positive (see Step 5) with no other comment, the PR is considered
-validated by Codex even without the 👍.
+validated by Codex even without an approval.
