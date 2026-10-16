@@ -435,6 +435,8 @@ L'application se compose de trois parties distinctes :
 
 La recherche avancée de la consultation recherche n'importe quelle entité sur **n'importe quelle combinaison de critères**, chacun portant sur **n'importe quelle donnée du modèle métier** : elle doit couvrir toutes les combinaisons de recherche (ex. « éditions dont l'album est paru tel mois ou telle année, dont le résumé ou les notes personnelles de l'album contiennent le mot ZZZ, et dont l'album a pour genre AAA, BBB ou CCC »).
 
+L'interface de construction de la recherche est **ergonomiquement utilisable par un utilisateur sans aucune connaissance de SQL** ni d'un autre langage de requête : entités, données, liens, comparaisons et combinaisons y sont présentés dans les termes du métier, jamais dans ceux de la base.
+
 ### Entités recherchées
 
 La recherche n'est pas limitée à certaines entités : elle porte sur toute entité dont la consultation présente les données (cf. § Périmètre de la consultation), c'est-à-dire les albums, éditions, séries, auteurs, éditeurs, collections éditeur, genres, univers, visuels d'édition et intentions d'achat. Le journal des modifications, consultable dans la seule administration (`modele-metier.md` § Entrée du journal des modifications), le paramétrage de l'application et les recherches enregistrées n'en font pas partie.
