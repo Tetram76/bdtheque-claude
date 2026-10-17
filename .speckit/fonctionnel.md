@@ -520,7 +520,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 ### Accès par jeton
 
 - Toute utilisation de l'outil exige un **jeton d'accès**, quelle que soit la fonctionnalité utilisée, consultation publique comprise : un agent sans jeton valide n'obtient rien de l'outil.
-- Les jetons sont **générés dans l'administration**, par le compte administrateur, qui les gère comme toute autre fiche (cf. § Structure de l'application, Administration). Chaque jeton a :
+- Les jetons sont **générés dans l'administration**, par le compte administrateur, qui les gère comme toute autre fiche (cf. § Structure de l'application, Administration). Ils ne se gèrent **jamais au travers de l'outil pour agents IA**, même avec un jeton qui donne accès à l'administration : l'outil ne permet ni de générer, modifier, archiver, réarmer ou supprimer un jeton d'accès, ni de gérer les jetons de session, hormis l'ouverture d'une session (cf. § Suivi de l'utilisation). Chaque jeton a :
   - un **nom**, obligatoire, qui identifie son usage (ex. l'agent ou le poste qui l'utilise) ;
   - une **expiration**, optionnelle : un jeton expiré est archivé (cf. ci-dessous) ; sans expiration, il reste valable jusqu'à son archivage ou sa suppression ;
   - un **accès à l'administration**, autorisé ou non.
