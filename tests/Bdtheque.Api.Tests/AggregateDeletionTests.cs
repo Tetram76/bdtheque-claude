@@ -31,7 +31,7 @@ public sealed class AggregateDeletionTests : IClassFixture<ApiWebApplicationFact
         await context.SaveChangesAsync();
         var version = context.VersionOf(parent);
         context.ChangeTracker.Clear();
-        var impact = await AggregateDeletion.ComputeImpactAsync(context, parent.Id, [], CancellationToken.None);
+        var impact = await AggregateDeletion.ComputeImpactAsync<Universe>(context, parent.Id, [], CancellationToken.None);
 
         var storage = _factory.Services.GetRequiredService<VisualStorage>();
 

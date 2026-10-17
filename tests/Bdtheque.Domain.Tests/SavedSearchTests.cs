@@ -15,7 +15,7 @@ public sealed class SavedSearchTests
     [Fact]
     public void Constructor_KeepsItsSearch()
     {
-        var search = new SavedSearch("  Albums de Tintin  ", EntityKind.Album, Criteria, [new SearchVariable(" Titre ", TitleLocation)]);
+        var search = new SavedSearch("  Albums de Tintin  ", EntityKind.Album, Criteria, [new SearchVariable(" Titre ", TitleLocation)], []);
 
         Assert.Equal("Albums de Tintin", search.Name);
         Assert.Equal(EntityKind.Album, search.Entity);
@@ -29,13 +29,13 @@ public sealed class SavedSearchTests
     [InlineData("   ")]
     public void Constructor_EmptyName_Throws(string? name)
     {
-        DomainAssert.Violates(DomainRules.SavedSearchNameRequired, () => new SavedSearch(name!, EntityKind.Album, Criteria, []));
+        DomainAssert.Violates(DomainRules.SavedSearchNameRequired, () => new SavedSearch(name!, EntityKind.Album, Criteria, [], []));
     }
 
     [Fact]
     public void SetName_TrimsValue()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, []);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
         search.SetName("  Séries  ");
 
@@ -45,9 +45,9 @@ public sealed class SavedSearchTests
     [Fact]
     public void SetSearch_UndefinedEntity_Throws()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, []);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => search.SetSearch((EntityKind)999, Criteria, []));
+        Assert.Throws<ArgumentOutOfRangeException>(() => search.SetSearch((EntityKind)999, Criteria, [], []));
     }
 
     [Theory]
@@ -57,9 +57,9 @@ public sealed class SavedSearchTests
     [InlineData("\"text\"")]
     public void SetSearch_CriteriaNotAJsonObject_Throws(string criteria)
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, []);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
-        Assert.ThrowsAny<ArgumentException>(() => search.SetSearch(EntityKind.Album, criteria, []));
+        Assert.ThrowsAny<ArgumentException>(() => search.SetSearch(EntityKind.Album, criteria, [], []));
     }
 
     [Theory]
@@ -68,31 +68,31 @@ public sealed class SavedSearchTests
     [InlineData("  ")]
     public void SetSearch_VariableWithoutName_Throws(string? name)
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, []);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
         DomainAssert.Violates(
             DomainRules.SavedSearchVariableNameRequired,
-            () => search.SetSearch(EntityKind.Album, Criteria, [new SearchVariable(name!, TitleLocation)]));
+            () => search.SetSearch(EntityKind.Album, Criteria, [new SearchVariable(name!, TitleLocation)], []));
     }
 
     [Fact]
     public void SetSearch_TwoVariablesOfTheSameNameIgnoringCaseAndAccents_Throws()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, []);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
         DomainAssert.Violates(
             DomainRules.SavedSearchVariableNameAlreadyUsed,
             () => search.SetSearch(
-                EntityKind.Album, Criteria, [new SearchVariable("Éditions", TitleLocation), new SearchVariable("editions", CountMinLocation)]));
+                EntityKind.Album, Criteria, [new SearchVariable("Éditions", TitleLocation), new SearchVariable("editions", CountMinLocation)], []));
     }
 
     [Fact]
     public void SetSearch_TwoVariablesOnTheSameConstant_Throws()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, []);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
         Assert.Throws<ArgumentException>(() => search.SetSearch(
-            EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation), new SearchVariable("Autre", TitleLocation)]));
+            EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation), new SearchVariable("Autre", TitleLocation)], []));
     }
 
     [Theory]
@@ -106,18 +106,18 @@ public sealed class SavedSearchTests
     [InlineData("/conditions/0/values")]
     public void SetSearch_VariableNotOnAConstantOfTheCriteria_Throws(string location)
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, []);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
-        Assert.Throws<ArgumentException>(() => search.SetSearch(EntityKind.Album, Criteria, [new SearchVariable("Titre", location)]));
+        Assert.Throws<ArgumentException>(() => search.SetSearch(EntityKind.Album, Criteria, [new SearchVariable("Titre", location)], []));
     }
 
     [Fact]
     public void SetSearch_ReplacesTheWholeSearch()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)]);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)], []);
         const string seriesCriteria = """{"kind":"criterion","field":"title","comparison":"StartsWith","values":["A"]}""";
 
-        search.SetSearch(EntityKind.Series, seriesCriteria, [new SearchVariable("Début", "/values/0")]);
+        search.SetSearch(EntityKind.Series, seriesCriteria, [new SearchVariable("Début", "/values/0")], []);
 
         Assert.Equal(EntityKind.Series, search.Entity);
         Assert.Equal(seriesCriteria, search.Criteria);
@@ -125,10 +125,61 @@ public sealed class SavedSearchTests
     }
 
     [Fact]
+    public void SetSearch_KeepsEachDesignatedRecordOnce()
+    {
+        var genre = Guid.CreateVersion7();
+        var album = Guid.CreateVersion7();
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
+
+        search.SetSearch(
+            EntityKind.Album, Criteria, [],
+            [new DesignatedRecord(EntityKind.Genre, genre), new DesignatedRecord(EntityKind.Album, album), new DesignatedRecord(EntityKind.Genre, genre)]);
+
+        Assert.Equal(
+            [new DesignatedRecord(EntityKind.Genre, genre), new DesignatedRecord(EntityKind.Album, album)],
+            search.Designations.Select(d => new DesignatedRecord(d.Kind, d.RecordId)));
+    }
+
+    [Fact]
+    public void SetSearch_KeepsTheDesignationsThatRemain()
+    {
+        // Only the difference is written: a designation kept is the same row.
+        var kept = new DesignatedRecord(EntityKind.Genre, Guid.CreateVersion7());
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], [kept, new DesignatedRecord(EntityKind.Album, Guid.CreateVersion7())]);
+        var keptDesignation = search.Designations.First();
+        var added = new DesignatedRecord(EntityKind.Author, Guid.CreateVersion7());
+
+        search.SetSearch(EntityKind.Album, Criteria, [], [added, kept]);
+
+        Assert.Equal([kept, added], search.Designations.Select(d => new DesignatedRecord(d.Kind, d.RecordId)));
+        Assert.Same(keptDesignation, search.Designations.First());
+    }
+
+    [Fact]
+    public void SetSearch_DesignatingAPurchaseIntent_Throws()
+    {
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
+
+        DomainAssert.Violates(
+            DomainRules.SavedSearchPurchaseIntentDesignated,
+            () => search.SetSearch(EntityKind.Album, Criteria, [], [new DesignatedRecord(EntityKind.PurchaseIntent, Guid.CreateVersion7())]));
+        Assert.Empty(search.Designations);
+    }
+
+    [Fact]
+    public void SetSearch_DesignatingARecordOfAnUndefinedKind_Throws()
+    {
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => search.SetSearch(EntityKind.Album, Criteria, [], [new DesignatedRecord((EntityKind)999, Guid.CreateVersion7())]));
+    }
+
+    [Fact]
     public void DefaultValue_IsTheConstantTheVariableReplaces()
     {
         var search = new SavedSearch(
-            "Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation), new SearchVariable("Minimum", CountMinLocation)]);
+            "Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation), new SearchVariable("Minimum", CountMinLocation)], []);
 
         Assert.Equal("Tintin", search.DefaultValueOf(search.Variables[0]));
         Assert.Equal("1", search.DefaultValueOf(search.Variables[1]));
@@ -138,11 +189,11 @@ public sealed class SavedSearchTests
     public void CriteriaWith_ReplacesTheValuesGiven_AndKeepsTheDefaultOfTheOthers()
     {
         var search = new SavedSearch(
-            "Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation), new SearchVariable("Minimum", CountMinLocation)]);
+            "Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation), new SearchVariable("Minimum", CountMinLocation)], []);
 
         var criteria = search.CriteriaWith(new Dictionary<string, string> { ["Minimum"] = "2" });
 
-        var replayed = new SavedSearch("Rejeu", EntityKind.Album, criteria, search.Variables);
+        var replayed = new SavedSearch("Rejeu", EntityKind.Album, criteria, search.Variables, []);
         Assert.Equal("Tintin", replayed.DefaultValueOf(replayed.Variables[0]));
         Assert.Equal("2", replayed.DefaultValueOf(replayed.Variables[1]));
         Assert.Equal(Criteria, search.Criteria);
@@ -151,7 +202,7 @@ public sealed class SavedSearchTests
     [Fact]
     public void CriteriaWith_NamesTheVariableAsItsDefinitionDoes_IgnoringCaseAndAccents()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Éditions", CountMinLocation)]);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Éditions", CountMinLocation)], []);
 
         var criteria = search.CriteriaWith(new Dictionary<string, string> { ["EDITIONS"] = "2" });
 
@@ -161,7 +212,7 @@ public sealed class SavedSearchTests
     [Fact]
     public void CriteriaWith_TwoValuesForTheSameVariable_Throws()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)]);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)], []);
 
         Assert.Throws<ArgumentException>(() => search.CriteriaWith(new Dictionary<string, string> { ["Titre"] = "A", ["titre"] = "B" }));
     }
@@ -169,7 +220,7 @@ public sealed class SavedSearchTests
     [Fact]
     public void CriteriaWith_UnknownVariable_Throws()
     {
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)]);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)], []);
 
         Assert.Throws<ArgumentException>(() => search.CriteriaWith(new Dictionary<string, string> { ["Auteur"] = "Hergé" }));
     }
@@ -178,8 +229,8 @@ public sealed class SavedSearchTests
     public void Variables_AreComparedByValue()
     {
         // The change log tells a modification by comparing the values before and after it.
-        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)]);
-        var same = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)]);
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)], []);
+        var same = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)], []);
 
         Assert.Equal(search.Variables, same.Variables);
         Assert.True(search.Variables.Equals((object)same.Variables));

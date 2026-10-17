@@ -187,6 +187,9 @@ internal sealed class RecordField(string key, LambdaExpression selector, bool is
 {
     public override SearchDataType Type => SearchDataType.Record;
 
+    /// <summary>The entity of the records the values of a criterion designate.</summary>
+    public EntityKind Record => record;
+
     public override SearchFieldDescription Describe() => base.Describe() with { Record = record };
 }
 

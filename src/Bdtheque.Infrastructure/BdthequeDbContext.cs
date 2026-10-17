@@ -193,4 +193,10 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     /// the migrations (see <see cref="OnModelCreating"/>).
     /// </summary>
     public const string CaseAndAccentInsensitiveFrenchCollation = "fr_case_accent_insensitive";
+
+    /// <summary>
+    /// Table of the records the saved searches designate, whose foreign keys refuse the removal of a designated
+    /// record, whatever the write (SavedSearchDesignationConfiguration).
+    /// </summary>
+    public const string SavedSearchDesignationsTable = "SavedSearchDesignations";
 }

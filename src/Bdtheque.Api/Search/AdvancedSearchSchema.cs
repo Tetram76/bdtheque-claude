@@ -181,5 +181,13 @@ internal static class AdvancedSearchSchema
     /// <summary>The description of the schema, for the clients to build the form of the search.</summary>
     public static readonly SearchSchema Description = new(Entities.Values.Select(e => e.Describe()).ToList());
 
-    public static SearchEntityDefinition Of(EntityKind kind) => Entities[kind];
+    /// <exception cref="ArgumentException">
+    /// An entity the search never returns (the saved searches): a technical error, the client building the
+    /// search from the schema.
+    /// </exception>
+    public static SearchEntityDefinition Of(EntityKind kind) =>
+        Entities.GetValueOrDefault(kind) ?? throw new ArgumentException($"The advanced search does not return {kind}.", nameof(kind));
+
+    /// <summary>The entity of the records of <paramref name="clrType"/>; <c>null</c> for an entity the search never returns.</summary>
+    public static EntityKind? KindOf(Type clrType) => Entities.Values.SingleOrDefault(e => e.ClrType == clrType)?.Kind;
 }

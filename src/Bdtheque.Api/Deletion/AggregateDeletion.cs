@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
+using Bdtheque.Api.Endpoints;
+using Bdtheque.Api.Search;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
@@ -7,6 +9,7 @@ using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using DomainEnums = Bdtheque.Domain.Enums;
 using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Deletion;
@@ -27,7 +30,7 @@ internal static class AggregateDeletion
         if (!await context.Set<TRoot>().AnyAsync(r => r.Id == id, cancellationToken))
             throw new EntityNotFoundException(typeof(TRoot), id);
 
-        return await ComputeImpactAsync(context, id, links, cancellationToken);
+        return await ComputeImpactAsync<TRoot>(context, id, links, cancellationToken);
     }
 
     /// <summary>
@@ -46,7 +49,7 @@ internal static class AggregateDeletion
         if (!children(root).Any(c => c.Id == childId))
             throw new EntityNotFoundException(typeof(TChild), childId);
 
-        return await ComputeImpactAsync(context, childId, links, cancellationToken);
+        return await ComputeImpactAsync<TChild>(context, childId, links, cancellationToken);
     }
 
     /// <summary>
@@ -54,13 +57,15 @@ internal static class AggregateDeletion
     /// their identities: counts alone would stay equal if one association disappeared while another
     /// appeared.
     /// </summary>
-    public static async Task<DeletionImpact> ComputeImpactAsync(
-        BdthequeDbContext context, Guid id, IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken) =>
-        ImpactOf(await CollectRecordsAsync(context, id, links, cancellationToken));
+    /// <typeparam name="TDeleted">The entity of the deleted record.</typeparam>
+    public static async Task<DeletionImpact> ComputeImpactAsync<TDeleted>(
+        BdthequeDbContext context, Guid id, IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken) where TDeleted : EntityBase =>
+        ImpactOf(await CollectRecordsAsync<TDeleted>(context, id, links, cancellationToken));
 
     // Sorted, so that both the counts and the fingerprint come out in a stable order.
-    private static async Task<SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>>> CollectRecordsAsync(
+    private static async Task<SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>>> CollectRecordsAsync<TDeleted>(
         BdthequeDbContext context, Guid id, IReadOnlyList<DeletionLink> links, CancellationToken cancellationToken)
+        where TDeleted : EntityBase
     {
         var records = new SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>>();
         foreach (var link in links)
@@ -74,7 +79,38 @@ internal static class AggregateDeletion
             linked.UnionWith(ids);
         }
 
+        var designating = await DesignatingSearchesAsync<TDeleted>(context, id, records, cancellationToken);
+        if (designating.Count > 0)
+            records[(LinkNature.Reference, EntityKind.SavedSearch)] = designating;
+
         return records;
+    }
+
+    /// <summary>
+    /// The saved searches designating the deleted record or one of the records deleted with it (fonctionnel.md §
+    /// Suppression des entités, line « Toute fiche »): references of every resource, which none declares.
+    /// </summary>
+    private static async Task<SortedSet<Guid>> DesignatingSearchesAsync<TDeleted>(
+        BdthequeDbContext context, Guid id, SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>> records,
+        CancellationToken cancellationToken)
+        where TDeleted : EntityBase
+    {
+        var deleted = records.Where(r => r.Key.Nature == LinkNature.Composition).Select(r => (r.Key.Kind, Ids: r.Value.ToList())).ToList();
+        if (AdvancedSearchSchema.KindOf(typeof(TDeleted)) is { } kind)
+            deleted.Add((kind, [id]));
+
+        var searches = new SortedSet<Guid>();
+        foreach (var (entity, ids) in deleted)
+        {
+            var designated = EnumMapping.Map<DomainEnums.EntityKind>(entity)!.Value;
+            searches.UnionWith(await context.SavedSearches
+                .IgnoreAutoIncludes()
+                .Where(s => s.Designations.Any(d => d.Kind == designated && ids.Contains(d.RecordId)))
+                .Select(s => s.Id)
+                .ToListAsync(cancellationToken));
+        }
+
+        return searches;
     }
 
     private static DeletionImpact ImpactOf(SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>> records)
@@ -155,7 +191,7 @@ internal static class AggregateDeletion
         var root = await context.LoadAggregateForWriteAsync(rootId, version, shape, cancellationToken);
         var deleted = target(root);
 
-        var records = await CollectRecordsAsync(context, deleted.Id, links, cancellationToken);
+        var records = await CollectRecordsAsync<TTarget>(context, deleted.Id, links, cancellationToken);
         var impact = ImpactOf(records);
         if (impact.BlockedBy.Count > 0)
             throw new DeletionRefusedException(impact);
@@ -186,7 +222,7 @@ internal static class AggregateDeletion
             // aborted the transaction, hence the impact recomputed outside of it.
             await transaction.RollbackAsync(cancellationToken);
             context.ChangeTracker.Clear();
-            throw new DeletionRefusedException(await ComputeImpactAsync(context, deleted.Id, links, cancellationToken));
+            throw new DeletionRefusedException(await ComputeImpactAsync<TTarget>(context, deleted.Id, links, cancellationToken));
         }
 
         await transaction.CommitAsync(cancellationToken);

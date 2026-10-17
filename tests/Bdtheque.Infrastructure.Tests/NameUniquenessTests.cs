@@ -46,10 +46,10 @@ public sealed class NameUniquenessTests : IAsyncLifetime
     public async Task SavedSearchName_DifferingOnlyByCaseAndAccents_IsRejected()
     {
         const string criteria = """{"kind":"group","operator":"And","conditions":[]}""";
-        _fixture.Context.SavedSearches.Add(new SavedSearch("Éditions dédicacées", EntityKind.Edition, criteria, []));
+        _fixture.Context.SavedSearches.Add(new SavedSearch("Éditions dédicacées", EntityKind.Edition, criteria, [], []));
         await _fixture.Context.SaveChangesAsync();
 
-        _fixture.Context.SavedSearches.Add(new SavedSearch("editions DEDICACEES", EntityKind.Edition, criteria, []));
+        _fixture.Context.SavedSearches.Add(new SavedSearch("editions DEDICACEES", EntityKind.Edition, criteria, [], []));
         var exception = await Assert.ThrowsAnyAsync<Exception>(() => _fixture.Context.SaveChangesAsync());
 
         var violation = Assert.IsType<PostgresException>(exception.InnerException);

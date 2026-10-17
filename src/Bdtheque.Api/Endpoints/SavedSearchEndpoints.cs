@@ -82,8 +82,8 @@ internal static class SavedSearchEndpoints
     private static async Task<Created<SavedSearchForm>> CreateAsync(
         SavedSearchContent content, BdthequeDbContext context, CancellationToken cancellationToken)
     {
-        var (entity, criteria, variables) = Checked(content, context);
-        var search = new SavedSearch(content.Name, entity, criteria, variables);
+        var (entity, criteria, variables, designated) = Checked(content, context);
+        var search = new SavedSearch(content.Name, entity, criteria, variables, designated);
         context.SavedSearches.Add(search);
         await context.SaveChangesAsync(cancellationToken);
         return TypedResults.Created($"/admin/saved-searches/{search.Id}", ToForm(context, search));
@@ -94,9 +94,9 @@ internal static class SavedSearchEndpoints
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var search = await context.LoadAggregateForWriteAsync<SavedSearch>(id, request.Version, cancellationToken: cancellationToken);
-        var (entity, criteria, variables) = Checked(request.Content, context);
+        var (entity, criteria, variables, designated) = Checked(request.Content, context);
         search.SetName(request.Content.Name);
-        search.SetSearch(entity, criteria, variables);
+        search.SetSearch(entity, criteria, variables, designated);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return ToForm(context, search);
@@ -106,17 +106,20 @@ internal static class SavedSearchEndpoints
     /// The search as the domain keeps it, once its criteria are known to be a search of its entity: translated
     /// as they would be replayed, so that a criterion left without its value is the same business error
     /// (<c>AdvancedSearch.ValueMissing</c>), and criteria the schema does not describe the same technical error.
+    /// The records the criteria designate, which only the schema tells, come with them.
     /// </summary>
-    private static (DomainEnums.EntityKind Entity, string Criteria, IEnumerable<SearchVariable> Variables) Checked(
-        SavedSearchContent content, BdthequeDbContext context)
+    private static (DomainEnums.EntityKind Entity, string Criteria, IEnumerable<SearchVariable> Variables, IEnumerable<DesignatedRecord> Designated)
+        Checked(SavedSearchContent content, BdthequeDbContext context)
     {
         var criteria = content.Criteria ?? throw new ArgumentException("A saved search has criteria.", nameof(content));
+        var entity = AdvancedSearchSchema.Of(content.Entity);
         // Only built, never run: the depth of the hierarchy of the universes does not change what is checked.
-        SearchTranslator.Check(AdvancedSearchSchema.Of(content.Entity), criteria, new SearchScope(context, 0));
+        SearchTranslator.Check(entity, criteria, new SearchScope(context, 0));
         return (
             EnumMapping.Map<DomainEnums.EntityKind>(content.Entity)!.Value,
             SearchCriteriaJson.Serialize(criteria),
-            (content.Variables ?? []).Select(v => new SearchVariable(v.Name, v.Location)));
+            (content.Variables ?? []).Select(v => new SearchVariable(v.Name, v.Location)),
+            SearchDesignations.Of(entity, criteria).Select(r => new DesignatedRecord(EnumMapping.Map<DomainEnums.EntityKind>(r.Kind)!.Value, r.Id)));
     }
 
     private static async Task<SavedSearch> FindAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken) =>

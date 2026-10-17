@@ -77,13 +77,13 @@ public sealed class ChangeLogTests : IAsyncLifetime
     {
         const string tintin = """{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}""";
         const string asterix = """{"kind":"criterion","field":"title","comparison":"Contains","values":["Astérix"]}""";
-        var search = new SavedSearch("Titre", EntityKind.Album, tintin, [new SearchVariable("Titre", "/values/0")]);
+        var search = new SavedSearch("Titre", EntityKind.Album, tintin, [new SearchVariable("Titre", "/values/0")], []);
         Context.SavedSearches.Add(search);
         await Context.SaveChangesAsync();
 
         // The default value of a variable is the constant it replaces.
         search.SetName("Albums par titre");
-        search.SetSearch(EntityKind.Series, asterix, search.Variables);
+        search.SetSearch(EntityKind.Series, asterix, search.Variables, []);
         await Context.SaveChangesAsync();
 
         var entry = (await EntriesAsync()).Last();
@@ -108,11 +108,11 @@ public sealed class ChangeLogTests : IAsyncLifetime
         // An attribute read from several properties changes only if its value does, not if one of its properties does.
         const string before = """{"kind":"group","operator":"And","conditions":[{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}]}""";
         const string after = """{"kind":"group","operator":"Or","conditions":[{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}]}""";
-        var search = new SavedSearch("Titre", EntityKind.Album, before, [new SearchVariable("Titre", "/conditions/0/values/0")]);
+        var search = new SavedSearch("Titre", EntityKind.Album, before, [new SearchVariable("Titre", "/conditions/0/values/0")], []);
         Context.SavedSearches.Add(search);
         await Context.SaveChangesAsync();
 
-        search.SetSearch(EntityKind.Album, after, search.Variables);
+        search.SetSearch(EntityKind.Album, after, search.Variables, []);
         await Context.SaveChangesAsync();
 
         var entry = (await EntriesAsync()).Last();
@@ -123,7 +123,7 @@ public sealed class ChangeLogTests : IAsyncLifetime
     public async Task RewriteOfSavedSearch_ThatChangesNothing_IsNotRecorded()
     {
         const string criteria = """{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}""";
-        var search = new SavedSearch("Titre", EntityKind.Album, criteria, [new SearchVariable("Titre", "/values/0")]);
+        var search = new SavedSearch("Titre", EntityKind.Album, criteria, [new SearchVariable("Titre", "/values/0")], []);
         Context.SavedSearches.Add(search);
         await Context.SaveChangesAsync();
         var version = Context.VersionOf(search);
@@ -133,7 +133,7 @@ public sealed class ChangeLogTests : IAsyncLifetime
         {
             var root = await Context.LoadAggregateForWriteAsync<SavedSearch>(search.Id, version);
             root.SetName("Titre");
-            root.SetSearch(EntityKind.Album, criteria, [new SearchVariable("Titre", "/values/0")]);
+            root.SetSearch(EntityKind.Album, criteria, [new SearchVariable("Titre", "/values/0")], []);
             await Context.SaveChangesAsync();
             await transaction.CommitAsync();
         }

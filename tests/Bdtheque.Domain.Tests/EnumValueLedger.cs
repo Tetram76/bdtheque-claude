@@ -39,7 +39,7 @@ internal static class EnumValueLedger
             [typeof(EntityKind)] =
             [
                 ("Album", 1), ("Series", 2), ("Universe", 3), ("Edition", 4), ("EditionVisual", 5), ("PublisherCollection", 6),
-                ("Contribution", 7), ("PurchaseIntent", 8), ("Author", 9), ("Publisher", 10), ("Genre", 11),
+                ("Contribution", 7), ("PurchaseIntent", 8), ("Author", 9), ("Publisher", 10), ("Genre", 11), ("SavedSearch", 12),
             ],
             [typeof(ChangeLogOperation)] = [("Creation", 1), ("Modification", 2), ("Deletion", 3)],
             [typeof(ChangeLogAttribute)] =
