@@ -58,6 +58,10 @@ internal static partial class SearchValues
     /// </summary>
     public static Expression Parameter<T>(T value) => Expression.Property(Expression.Constant(new Box<T>(value)), nameof(Box<T>.Value));
 
+    /// <summary>A value of a type known at run time only, sent as a parameter (see <see cref="Parameter{T}(T)"/>).</summary>
+    public static Expression Parameter(object value, Type type) =>
+        Expression.Property(Expression.Constant(Activator.CreateInstance(typeof(Box<>).MakeGenericType(type), value)), nameof(Box<object>.Value));
+
     [GeneratedRegex(@"^(?<year>\d{4})(-(?<month>\d{2})(-(?<day>\d{2}))?)?$", RegexOptions.CultureInvariant)]
     private static partial Regex DatePattern();
 

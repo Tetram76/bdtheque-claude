@@ -139,6 +139,19 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         AssertIds([good.Id, poor.Id], await AlbumIdsAsync(Text("rating", IsSet)));
     }
 
+    /// <summary>
+    /// The values of "is one of" form a single parameter, whatever their number: one parameter per value
+    /// would exceed the 65,535 parameters PostgreSQL accepts in a query.
+    /// </summary>
+    [Fact]
+    public async Task IsOneOf_SendsItsValuesAsASingleParameter()
+    {
+        var album = await CreateAlbumAsync($"Album {_marker}");
+        var values = Enumerable.Range(0, 70_000).Select(_ => Guid.NewGuid().ToString()).Append(album.Id.ToString()).ToArray();
+
+        AssertIds([album.Id], await AlbumIdsAsync(Text("record", IsOneOf, values)));
+    }
+
     [Fact]
     public async Task PartialDate_SatisfiesACriterionOnlyIfItsPrecisionEstablishesIt()
     {

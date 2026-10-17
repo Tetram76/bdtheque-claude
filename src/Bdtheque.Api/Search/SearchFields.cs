@@ -144,14 +144,16 @@ internal abstract class IdentityField(string key, LambdaExpression selector, boo
 {
     protected override IReadOnlyList<SearchComparison> TypeComparisons => [Is, IsNot, IsOneOf, IsNoneOf];
 
+    // The values form a single array parameter (= ANY), whatever their number: the same query, cached once.
     protected override Expression Compare(Expression record, Expression data, SearchCriterion criterion, IReadOnlyList<string> values)
     {
-        var any = values.Select(v => (Expression)Expression.Equal(data, Value(data.Type, parse(v)))).Aggregate(Expression.OrElse);
-        return criterion.Comparison is Is or IsOneOf ? any : Expression.Not(any);
+        var array = Array.CreateInstance(data.Type, values.Count);
+        for (var i = 0; i < values.Count; i++)
+            array.SetValue(parse(values[i]), i);
+        var isOneOf = Expression.Call(
+            typeof(Enumerable), nameof(Enumerable.Contains), [data.Type], SearchValues.Parameter(array, array.GetType()), data);
+        return criterion.Comparison is Is or IsOneOf ? isOneOf : Expression.Not(isOneOf);
     }
-
-    private static Expression Value(Type type, object value) =>
-        (Expression)typeof(SearchValues).GetMethod(nameof(SearchValues.Parameter))!.MakeGenericMethod(type).Invoke(null, [value])!;
 }
 
 internal sealed class BooleanField(string key, LambdaExpression selector, bool isOptional)
