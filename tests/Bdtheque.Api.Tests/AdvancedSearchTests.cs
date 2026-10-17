@@ -376,6 +376,10 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
             [new EditionVisualListItem(visual.Id, VisualType.Cover, visual.OriginalPath, visual.DisplayPath, albumSummary, editionSummary)],
             await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, ofMyEdition));
         Assert.Equal(
+            [visual.Id],
+            (await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, Text("mediaReference", EqualTo, Path.GetFileName(visual.OriginalPath))))
+                .Select(v => v.Id));
+        Assert.Equal(
             [new EditionListItem(albumSummary, editionSummary, true)],
             await SearchAsync<EditionListItem>(EntityKind.Edition, Text("record", Is, edition.Id.ToString())));
         Assert.Equal(
