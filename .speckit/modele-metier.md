@@ -92,6 +92,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | Relation | Cardinalité | Remarques |
 | --- | --- | --- |
 | Jeton d'accès → Session | 0..n | Sessions ouvertes par le jeton ; supprimées avec lui (voir `fonctionnel.md` § Suppression des entités). |
+| Session → Session précédente | 0..1 | Session que la session prolonge (voir `fonctionnel.md` § Suivi de l'utilisation) ; ouverte avec le même jeton d'accès. Les sessions successives d'une conversation se relient ainsi de proche en proche. |
 | Session → Objectif de session | 0..n | Objectifs successifs, dans l'ordre de leur date ; aucun si l'agent n'en a jamais donné. |
 | Jeton d'accès → Utilisation de l'outil | 0..n | Utilisations faites avec le jeton ; supprimées avec lui. Une requête refusée faute de jeton d'accès valable n'est rattachée à aucun jeton et n'est pas relevée. |
 | Utilisation de l'outil → Session | 0..1 | Session sous laquelle l'utilisation a été faite ; absente pour une utilisation refusée faute de jeton de session valable, rattachée à son seul jeton d'accès. |
