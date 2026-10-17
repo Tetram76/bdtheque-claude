@@ -32,6 +32,8 @@ internal static class ChangeLogJson
         (typeof(ReferenceValue), "reference"),
         (typeof(ContributionValue), "contribution"),
         (typeof(VisualValue), "visual"),
+        (typeof(SearchCriteriaValue), "searchCriteria"),
+        (typeof(SearchVariablesValue), "searchVariables"),
     ];
 
     private static readonly (Type Type, string Kind)[] LabelKinds =

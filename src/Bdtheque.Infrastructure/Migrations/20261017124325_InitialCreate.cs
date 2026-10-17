@@ -91,6 +91,25 @@ namespace Bdtheque.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SavedSearches",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr_case_accent_insensitive"),
+                    Entity = table.Column<int>(type: "integer", nullable: false),
+                    Criteria = table.Column<string>(type: "text", nullable: false, collation: "fr-FR-x-icu"),
+                    Variables = table.Column<string>(type: "text", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SavedSearches", x => x.Id);
+                    table.CheckConstraint("CK_SavedSearches_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Universes",
                 columns: table => new
                 {
@@ -604,6 +623,12 @@ namespace Bdtheque.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_SavedSearches_Name",
+                table: "SavedSearches",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Series_NavigationEntry_SortKey",
                 table: "Series",
                 columns: new[] { "NavigationEntry", "SortKey" });
@@ -659,6 +684,9 @@ namespace Bdtheque.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "PurchaseIntents");
+
+            migrationBuilder.DropTable(
+                name: "SavedSearches");
 
             migrationBuilder.DropTable(
                 name: "SeriesGenres");

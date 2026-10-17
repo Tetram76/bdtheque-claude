@@ -22,5 +22,6 @@ internal static class UniqueIndexRules
         ["IX_Contributions_SeriesId_Role_AuthorId"] = DomainRules.ContributionAlreadyCredited,
         ["IX_PurchaseIntents_AlbumId_WholeAlbum"] = DomainRules.PurchaseIntentAlbumAlreadyTargeted,
         ["IX_PurchaseIntents_EditionId"] = DomainRules.PurchaseIntentEditionAlreadyTargeted,
+        ["IX_SavedSearches_Name"] = DomainRules.SavedSearchNameAlreadyUsed,
     };
 }

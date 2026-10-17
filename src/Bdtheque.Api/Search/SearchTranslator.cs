@@ -20,6 +20,14 @@ internal static class SearchTranslator
         return Expression.Lambda<Func<T, bool>>(criteria is null ? Expression.Constant(true) : Build(entity, record, criteria, scope), record);
     }
 
+    /// <summary>
+    /// Checks that <paramref name="criteria"/> are a search of <paramref name="entity"/>, as their translation
+    /// would, without running anything (e.g. criteria saved to be replayed later).
+    /// </summary>
+    /// <exception cref="ArgumentException">Criteria the schema does not describe.</exception>
+    public static void Check(SearchEntityDefinition entity, SearchCondition criteria, SearchScope scope) =>
+        _ = Build(entity, Expression.Parameter(entity.ClrType, "record"), criteria, scope);
+
     /// <summary>Whether the criteria follow a link to or from the universes, which needs the depth of their hierarchy.</summary>
     public static bool FollowsUniverseHierarchy(SearchEntityDefinition entity, SearchCondition? criteria) => criteria switch
     {

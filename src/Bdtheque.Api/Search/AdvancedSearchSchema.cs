@@ -4,6 +4,7 @@ using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities;
 using C = Bdtheque.Contracts.Enums;
 using D = Bdtheque.Domain.Enums;
+using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Search;
 

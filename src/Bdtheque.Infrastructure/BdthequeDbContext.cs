@@ -19,6 +19,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<EditionVisual> EditionVisuals => Set<EditionVisual>();
     public DbSet<ChangeLogEntry> ChangeLog => Set<ChangeLogEntry>();
     public DbSet<PurchaseIntent> PurchaseIntents => Set<PurchaseIntent>();
+    public DbSet<SavedSearch> SavedSearches => Set<SavedSearch>();
 
     // Every query loads its collections by separate statements: an album always comes with its
     // editions, intents and contributions (AutoInclude, AlbumConfiguration), which a single statement

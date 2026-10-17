@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Search;
 
 namespace Bdtheque.Contracts.Admin;
 
@@ -39,6 +40,8 @@ public sealed record ChangeLogChange(ChangeLogAttribute Attribute, ChangeLogValu
 [JsonDerivedType(typeof(ReferenceValue), "reference")]
 [JsonDerivedType(typeof(ContributionValue), "contribution")]
 [JsonDerivedType(typeof(VisualValue), "visual")]
+[JsonDerivedType(typeof(SearchCriteriaValue), "searchCriteria")]
+[JsonDerivedType(typeof(SearchVariablesValue), "searchVariables")]
 public abstract record ChangeLogValue;
 
 public sealed record TextValue(string Value) : ChangeLogValue;
@@ -68,6 +71,12 @@ public sealed record ContributionValue(Guid AuthorId, AuthorLabel Author, Contri
 
 /// <summary>A visual of an edition, with its rank among the visuals of its type.</summary>
 public sealed record VisualValue(Guid Id, VisualType Type, int DisplayOrder, string MediaReference) : ChangeLogValue;
+
+/// <summary>The criteria of a saved search.</summary>
+public sealed record SearchCriteriaValue(SearchCondition Criteria) : ChangeLogValue;
+
+/// <summary>The variables of a saved search, each with its default value.</summary>
+public sealed record SearchVariablesValue(IReadOnlyList<SavedSearchVariable> Variables) : ChangeLogValue;
 
 /// <summary>What the label of a record was built from at the time of the write.</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]

@@ -1,4 +1,5 @@
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Enums;
 using Npgsql;
 
 namespace Bdtheque.Infrastructure.Tests;
@@ -39,6 +40,20 @@ public sealed class NameUniquenessTests : IAsyncLifetime
 
         var violation = Assert.IsType<PostgresException>(exception.InnerException);
         Assert.Equal("IX_Genres_Label", violation.ConstraintName);
+    }
+
+    [Fact]
+    public async Task SavedSearchName_DifferingOnlyByCaseAndAccents_IsRejected()
+    {
+        const string criteria = """{"kind":"group","operator":"And","conditions":[]}""";
+        _fixture.Context.SavedSearches.Add(new SavedSearch("Éditions dédicacées", EntityKind.Edition, criteria, []));
+        await _fixture.Context.SaveChangesAsync();
+
+        _fixture.Context.SavedSearches.Add(new SavedSearch("editions DEDICACEES", EntityKind.Edition, criteria, []));
+        var exception = await Assert.ThrowsAnyAsync<Exception>(() => _fixture.Context.SaveChangesAsync());
+
+        var violation = Assert.IsType<PostgresException>(exception.InnerException);
+        Assert.Equal("IX_SavedSearches_Name", violation.ConstraintName);
     }
 
     [Fact]

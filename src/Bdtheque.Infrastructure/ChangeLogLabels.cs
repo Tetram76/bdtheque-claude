@@ -35,6 +35,7 @@ internal sealed class ChangeLogLabels(BdthequeDbContext context)
                 collection.Name, (await FindAsync<Publisher>(collection.PublisherId, cancellationToken)).Name),
             Genre genre => new NameLabel(genre.Label),
             Universe universe => new NameLabel(universe.Name),
+            SavedSearch search => new NameLabel(search.Name),
             _ => throw new ArgumentOutOfRangeException(nameof(record), record.GetType().Name, "Not a record of the change log."),
         };
 

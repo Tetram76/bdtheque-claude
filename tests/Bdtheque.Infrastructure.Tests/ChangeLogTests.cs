@@ -73,6 +73,58 @@ public sealed class ChangeLogTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ModificationOfSavedSearch_RecordsItsCriteriaAndItsVariablesWithTheirDefaultValues()
+    {
+        const string tintin = """{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}""";
+        const string asterix = """{"kind":"criterion","field":"title","comparison":"Contains","values":["Astérix"]}""";
+        var search = new SavedSearch("Titre", EntityKind.Album, tintin, [new SearchVariable("Titre", "/values/0")]);
+        Context.SavedSearches.Add(search);
+        await Context.SaveChangesAsync();
+
+        // The default value of a variable is the constant it replaces.
+        search.SetName("Albums par titre");
+        search.SetSearch(EntityKind.Series, asterix, search.Variables);
+        await Context.SaveChangesAsync();
+
+        var entry = (await EntriesAsync()).Last();
+        Assert.Equal(RecordType.SavedSearch, entry.RecordType);
+        Assert.Equal(new NameLabel("Albums par titre"), entry.Label);
+        Assert.Equal(
+            [
+                new ChangeLogChange(ChangeLogAttribute.Name, new TextValue("Titre"), new TextValue("Albums par titre")),
+                new ChangeLogChange(ChangeLogAttribute.SearchedEntity, new EnumValue((int)EntityKind.Album), new EnumValue((int)EntityKind.Series)),
+                new ChangeLogChange(ChangeLogAttribute.SearchCriteria, new SearchCriteriaValue(tintin), new SearchCriteriaValue(asterix)),
+                new ChangeLogChange(
+                    ChangeLogAttribute.SearchVariables,
+                    new SearchVariablesValue([new SearchVariableValue("Titre", "/values/0", "Tintin")]),
+                    new SearchVariablesValue([new SearchVariableValue("Titre", "/values/0", "Astérix")])),
+            ],
+            entry.Changes);
+    }
+
+    [Fact]
+    public async Task RewriteOfSavedSearch_ThatChangesNothing_IsNotRecorded()
+    {
+        const string criteria = """{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}""";
+        var search = new SavedSearch("Titre", EntityKind.Album, criteria, [new SearchVariable("Titre", "/values/0")]);
+        Context.SavedSearches.Add(search);
+        await Context.SaveChangesAsync();
+        var version = Context.VersionOf(search);
+        Context.ChangeTracker.Clear();
+
+        await using (var transaction = await Context.Database.BeginTransactionAsync())
+        {
+            var root = await Context.LoadAggregateForWriteAsync<SavedSearch>(search.Id, version);
+            root.SetName("Titre");
+            root.SetSearch(EntityKind.Album, criteria, [new SearchVariable("Titre", "/values/0")]);
+            await Context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+
+        Assert.Single(await EntriesAsync());
+    }
+
+    [Fact]
     public async Task ModificationOfAlbum_RecordsTextsAndDatesAsData()
     {
         var album = new Album("Le Lotus bleu", null);

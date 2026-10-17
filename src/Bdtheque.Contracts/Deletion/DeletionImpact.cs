@@ -1,3 +1,5 @@
+using Bdtheque.Contracts.Enums;
+
 namespace Bdtheque.Contracts.Deletion;
 
 /// <summary>

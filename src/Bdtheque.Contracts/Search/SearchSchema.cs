@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Bdtheque.Contracts.Deletion;
+using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Search;
 

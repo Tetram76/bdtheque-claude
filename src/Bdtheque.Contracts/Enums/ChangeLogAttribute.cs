@@ -76,10 +76,15 @@ public enum ChangeLogAttribute
     Biography = 55,
     Nationality = 56,
 
-    // Publisher, publisher collection, universe, genre
+    // Publisher, publisher collection, universe, genre, saved search
     Name = 57,
     Website = 58,
     Description = 59,
     ParentUniverse = 60,
     Label = 61,
+
+    // Saved search
+    SearchedEntity = 62,
+    SearchCriteria = 63,
+    SearchVariables = 64,
 }

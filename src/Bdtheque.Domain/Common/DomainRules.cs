@@ -115,4 +115,20 @@ public static class DomainRules
     /// Recherche avancée), e.g. an empty text: the user fills it in.
     /// </summary>
     public const string AdvancedSearchValueMissing = "AdvancedSearch.ValueMissing";
+
+    public const string SavedSearchNameRequired = "SavedSearch.NameRequired";
+
+    /// <summary>
+    /// A name already given to another saved search, ignoring case and accents (modele-metier.md §
+    /// Recherche enregistrée): the database enforces it, as the label of a genre.
+    /// </summary>
+    public const string SavedSearchNameAlreadyUsed = "SavedSearch.NameAlreadyUsed";
+
+    public const string SavedSearchVariableNameRequired = "SavedSearch.VariableNameRequired";
+
+    /// <summary>
+    /// Two variables of a saved search named alike, ignoring case and accents: their values, asked by
+    /// their names at replay, could not be told apart.
+    /// </summary>
+    public const string SavedSearchVariableNameAlreadyUsed = "SavedSearch.VariableNameAlreadyUsed";
 }

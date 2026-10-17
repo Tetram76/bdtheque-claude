@@ -18,4 +18,5 @@ public enum RecordType
     PublisherCollection = 7,
     Genre = 8,
     Universe = 9,
+    SavedSearch = 10,
 }

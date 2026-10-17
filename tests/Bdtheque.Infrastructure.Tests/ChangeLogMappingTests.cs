@@ -35,8 +35,11 @@ public sealed class ChangeLogMappingTests : IAsyncLifetime
                 .Select(p => p.Name)
                 .Except(common)
                 .Order(StringComparer.Ordinal);
+            // A property may be read by several attributes (e.g. the criteria of a saved search, which
+            // give its variables their default values).
             var covered = mapping.Attributes.SelectMany(a => a.Properties)
                 .Concat(mapping.LeftOut)
+                .Distinct()
                 .Order(StringComparer.Ordinal);
 
             Assert.Equal(properties, covered);

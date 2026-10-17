@@ -33,6 +33,14 @@ public sealed class ChangeLogJsonTests
             new VisualValue(Guid.Parse("0199c0de-0000-7000-8000-000000000003"), VisualType.BackCover, 2, "a.jpg"),
             """{"kind":"visual","id":"0199c0de-0000-7000-8000-000000000003","type":5,"displayOrder":2,"mediaReference":"a.jpg"}"""
         },
+        {
+            new SearchCriteriaValue("""{"kind":"group","operator":"And","conditions":[]}"""),
+            """{"kind":"searchCriteria","criteria":"{\"kind\":\"group\",\"operator\":\"And\",\"conditions\":[]}"}"""
+        },
+        {
+            new SearchVariablesValue([new SearchVariableValue("Titre", "/values/0", "Tintin")]),
+            """{"kind":"searchVariables","variables":[{"name":"Titre","location":"/values/0","defaultValue":"Tintin"}]}"""
+        },
     };
 
     public static TheoryData<RecordLabel, string> Labels()
