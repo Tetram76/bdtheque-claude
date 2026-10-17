@@ -49,6 +49,7 @@ public sealed record UniverseInHierarchy(UniverseListItem Universe, IReadOnlyLis
 /// <param name="PublisherCollection">The collection of the series: its template collection.</param>
 /// <param name="Universes">By name.</param>
 /// <param name="Contributions">The authors of the series: its template contributions.</param>
+/// <param name="Overview">The number of its albums and the covers of its first volumes, for its pile of covers.</param>
 /// <param name="Albums">Every album of the series, as a card, in its order (fonctionnel.md § Ordre des albums dans une série).</param>
 public sealed record SeriesDetail(
     Guid Id,
@@ -63,6 +64,7 @@ public sealed record SeriesDetail(
     IReadOnlyList<GenreListItem> Genres,
     IReadOnlyList<UniverseInHierarchy> Universes,
     IReadOnlyList<ContributionItem> Contributions,
+    SeriesOverview Overview,
     IReadOnlyList<AlbumCard> Albums,
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);

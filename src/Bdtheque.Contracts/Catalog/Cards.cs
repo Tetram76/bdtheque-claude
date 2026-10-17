@@ -19,15 +19,17 @@ public sealed record AlbumCard(AlbumSummary Album, AlbumRating? Rating, AlbumCov
 public sealed record AlbumCover(string OriginalPath, string DisplayPath);
 
 /// <summary>
-/// What represents a series among albums: the number of its albums, and the covers of its first ones,
-/// whether the list presents them or not (e.g. a series an author is credited on itself only).
+/// What represents a series: the number of its albums, and the covers of its first volumes, whether the
+/// list presents them or not (e.g. a series an author is credited on itself only).
 /// </summary>
-/// <param name="FirstAlbumCovers">
-/// Those of its first <see cref="SeriesOverview.FirstAlbumCount"/> albums at most, in the order of the
-/// series (fonctionnel.md § Ordre des albums dans une série), <c>null</c> for an album without cover.
+/// <param name="AlbumCount">Every album of the series, omnibuses and special issues included.</param>
+/// <param name="FirstVolumeCovers">
+/// Those of its first <see cref="SeriesOverview.FirstVolumeCount"/> regular volumes at most — neither
+/// omnibus nor special issue —, in the order of the series (fonctionnel.md § Ordre des albums dans une
+/// série), <c>null</c> for a volume without cover. A place beyond them is a generic card (visuel/fiche-serie.md).
 /// </param>
-public sealed record SeriesOverview(int AlbumCount, IReadOnlyList<AlbumCover?> FirstAlbumCovers)
+public sealed record SeriesOverview(int AlbumCount, IReadOnlyList<AlbumCover?> FirstVolumeCovers)
 {
-    /// <summary>How many first albums represent a series: the pile of three covers of the mockups (visuel/fiche-serie.md).</summary>
-    public const int FirstAlbumCount = 3;
+    /// <summary>How many first volumes represent a series: the pile of three covers of the mockups (visuel/fiche-serie.md).</summary>
+    public const int FirstVolumeCount = 3;
 }

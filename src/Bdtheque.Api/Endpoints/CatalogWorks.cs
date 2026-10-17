@@ -1,5 +1,6 @@
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
+using Bdtheque.Domain.Enums;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -69,24 +70,36 @@ internal static class CatalogWorks
     }
 
     /// <summary>
-    /// Each of <paramref name="seriesIds"/> as a whole: the number of its albums and the covers of its first
-    /// ones, in its order, whichever of its albums the list presents.
+    /// Each of <paramref name="seriesIds"/> as a whole, whichever of its albums the list presents: the number
+    /// of its albums, and the covers of its first regular volumes, in its order — the pile of covers of the
+    /// mockups, where neither an omnibus nor a special issue stands in for a volume (visuel/fiche-serie.md).
     /// </summary>
     /// <remarks>
-    /// Every album of these series is read, rather than its first ones only: a series counts a few dozen
+    /// Every album of these series is read, rather than its first volumes only: a series counts a few dozen
     /// albums at most, and the count needs them all anyway.
     /// </remarks>
     public static async Task<Dictionary<Guid, SeriesOverview>> OverviewsAsync(
         BdthequeDbContext context, IReadOnlyCollection<Guid> seriesIds, CancellationToken cancellationToken)
     {
-        var covers = (await context.Albums.AsNoTracking()
+        var albums = (await context.Albums.AsNoTracking()
                 .Where(a => a.SeriesId != null && seriesIds.Contains(a.SeriesId.Value))
                 .OrderInSeries()
-                .Select(CatalogExpressions.Expand((Album a) => new { SeriesId = a.SeriesId!.Value, MediaReference = a.CoverMediaReference() }))
+                .Select(CatalogExpressions.Expand((Album a) => new
+                {
+                    SeriesId = a.SeriesId!.Value,
+                    IsRegularVolume = a.Type == AlbumType.Regular && !a.IsSpecialIssue,
+                    MediaReference = a.CoverMediaReference(),
+                }))
                 .ToListAsync(cancellationToken))
-            .ToLookup(a => a.SeriesId, a => CatalogExpressions.ToCover(a.MediaReference));
+            .ToLookup(a => a.SeriesId);
         return seriesIds.ToDictionary(
             id => id,
-            id => new SeriesOverview(covers[id].Count(), covers[id].Take(SeriesOverview.FirstAlbumCount).ToList()));
+            id => new SeriesOverview(
+                albums[id].Count(),
+                albums[id]
+                    .Where(a => a.IsRegularVolume)
+                    .Take(SeriesOverview.FirstVolumeCount)
+                    .Select(a => CatalogExpressions.ToCover(a.MediaReference))
+                    .ToList()));
     }
 }

@@ -121,7 +121,30 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
     }
 
     [Fact]
-    public async Task Bibliography_PresentsTheAlbumsAsCards_AndEachSeriesWithItsAlbumCountAndTheCoversOfItsFirstAlbums()
+    public async Task Series_IsRepresentedByTheCoversOfItsFirstRegularVolumes_ItsCountTakingEveryAlbum()
+    {
+        var publisher = await CreatePublisherAsync("Soleil");
+        var series = await CreateSeriesAsync("Lanfeust de Troy");
+        // In the order of the series: volume 1, the omnibus of volumes 1 to 4, volume 2, then a special issue.
+        var volume1 = await CreateAlbumAsync("L'Ivoire du Magohamoth", series.Id, volume: 1);
+        var omnibus = await CreateAlbumAsync("Intégrale", series.Id, type: AlbumType.Omnibus, start: 1, end: 4);
+        var volume2 = await CreateAlbumAsync("Thanos l'incongru", series.Id, volume: 2);
+        var special = await CreateAlbumAsync("Les Trolls", series.Id, volume: 1, specialIssue: true);
+        var cover1 = await UploadAsync(volume1.Id, await CreateOwnedEditionAsync(volume1.Id, publisher.Id, 1994), VisualType.Cover);
+        await UploadAsync(omnibus.Id, await CreateOwnedEditionAsync(omnibus.Id, publisher.Id, 2005), VisualType.Cover);
+        var cover2 = await UploadAsync(volume2.Id, await CreateOwnedEditionAsync(volume2.Id, publisher.Id, 1995), VisualType.Cover);
+        await UploadAsync(special.Id, await CreateOwnedEditionAsync(special.Id, publisher.Id, 2000), VisualType.Cover);
+
+        var overview = (await GetAsync<SeriesDetail>($"/catalog/series/{series.Id}")).Overview;
+
+        // The pile of the mockups shows the first regular volumes only, a missing one being a generic card
+        // (visuel/fiche-serie.md): neither the omnibus nor the special issue stands in for the third.
+        Assert.Equal(4, overview.AlbumCount);
+        Assert.Equal([cover1, cover2], overview.FirstVolumeCovers);
+    }
+
+    [Fact]
+    public async Task Bibliography_PresentsTheAlbumsAsCards_AndEachSeriesWithItsAlbumCountAndTheCoversOfItsFirstVolumes()
     {
         var publisher = await CreatePublisherAsync("Delcourt");
         var author = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest("Sfar", "Joann", null, null, null));
@@ -150,7 +173,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         // "Chat du rabbin [Le]" < "Donjon" < "Klezmer".
         var chatEntry = bibliography[0].Series!;
         Assert.Equal(2, chatEntry.Overview.AlbumCount);
-        Assert.Equal([chatCover, null], chatEntry.Overview.FirstAlbumCovers);
+        Assert.Equal([chatCover, null], chatEntry.Overview.FirstVolumeCovers);
         var chatCard = Assert.Single(chatEntry.Albums).Album;
         Assert.Equal((chat1.Id, (AlbumRating?)AlbumRating.Good, (AlbumCover?)chatCover, true, false),
             (chatCard.Album.Id, chatCard.Rating, chatCard.Cover, chatCard.Album.IsInCollection, chatCard.HasPurchaseIntent));
@@ -159,14 +182,14 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         Assert.Empty(donjonEntry.Albums);
         Assert.Equal(4, donjonEntry.Overview.AlbumCount);
         // The first three, in the order of the series.
-        Assert.Equal([cover1, null, cover3], donjonEntry.Overview.FirstAlbumCovers);
+        Assert.Equal([cover1, null, cover3], donjonEntry.Overview.FirstVolumeCovers);
 
         var oneShotCard = bibliography[2].Album!.Album;
         Assert.Equal((oneShot.Id, (AlbumCover?)null), (oneShotCard.Album.Id, oneShotCard.Cover));
     }
 
     [Fact]
-    public async Task Works_PresentTheAlbumsAsCards_AndEachSeriesWithItsAlbumCountAndTheCoversOfItsFirstAlbums()
+    public async Task Works_PresentTheAlbumsAsCards_AndEachSeriesWithItsAlbumCountAndTheCoversOfItsFirstVolumes()
     {
         var publisher = await CreatePublisherAsync("Futuropolis");
         var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Chronique {Guid.NewGuid():N}"));
@@ -183,7 +206,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         // "Combat ordinaire [Le]" < "métamorphose iranienne [Une]".
         var seriesEntry = works[0].Series!;
         Assert.Equal(2, seriesEntry.Overview.AlbumCount);
-        Assert.Equal([firstCover, secondCover], seriesEntry.Overview.FirstAlbumCovers);
+        Assert.Equal([firstCover, secondCover], seriesEntry.Overview.FirstVolumeCovers);
         Assert.Equal([(second.Id, (AlbumCover?)secondCover)], seriesEntry.Albums.Select(a => (a.Album.Id, a.Cover)));
         Assert.Equal((oneShot.Id, (AlbumRating?)AlbumRating.Average, (AlbumCover?)null), (works[1].Album!.Album.Id, works[1].Album!.Rating, works[1].Album!.Cover));
     }
@@ -201,9 +224,10 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
 
     private Task<AlbumForm> CreateAlbumAsync(
         string title, Guid? seriesId, int? volume = null, AlbumRating? rating = null, Guid[]? genreIds = null,
-        ContributionContent[]? contributions = null) =>
+        ContributionContent[]? contributions = null, AlbumType type = AlbumType.Regular, bool specialIssue = false, int? start = null,
+        int? end = null) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
-            title, null, seriesId, AlbumType.Regular, false, volume, null, null, null, null, null, null, rating, genreIds ?? [], [],
+            title, null, seriesId, type, specialIssue, volume, start, end, null, null, null, null, rating, genreIds ?? [], [],
             contributions ?? []));
 
     private async Task<Guid> CreateOwnedEditionAsync(Guid albumId, Guid publisherId, int? publicationYear) =>
