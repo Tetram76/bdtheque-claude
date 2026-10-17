@@ -136,7 +136,7 @@ Répercussion dans le modèle de domaine et dans l'API de la recherche avancée 
 | ~~#168~~ | Moteur de la recherche avancée en consultation |
 | ~~#169~~ | Recherches enregistrées : administration et rejeu en consultation |
 | ~~#170~~ | Blocage de la suppression des fiches désignées par une recherche enregistrée |
-| #171 | Comparaison entre deux données dans la recherche avancée |
+| ~~#171~~ | Comparaison entre deux données dans la recherche avancée |
 
 ## Phase 3 — Frontend Blazor
 
