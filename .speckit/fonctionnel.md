@@ -547,7 +547,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
   | Durée des utilisations | Performance |
 
   Sa pertinence sera jugée à l'usage, et sa définition ajustée en conséquence.
-- **Retour écrit de l'agent** : l'agent peut, s'il le juge utile, signaler par écrit une limite rencontrée (ex. un filtre ou une donnée qui lui a manqué, une réponse inadaptée). Ce retour est facultatif et n'est pas une note : il complète le suivi, rattaché à l'utilisation qu'il concerne, sans entrer dans l'indice d'efficacité.
+- **Retour écrit de l'agent** : l'agent peut, s'il le juge utile, signaler par écrit une limite rencontrée (ex. un filtre ou une donnée qui lui a manqué, une réponse inadaptée). Ce retour est facultatif et n'est pas une note : il complète le suivi, rattaché à l'utilisation précise qu'il concerne, ou à sa session s'il ne porte sur aucune utilisation (ex. une fonction absente), sans entrer dans l'indice d'efficacité.
 - Le suivi, retours écrits compris, est consultable dans l'administration. L'historique d'un jeton est conservé tant que le jeton existe, archivé compris, et supprimé avec lui (cf. § Accès par jeton, Archivage).
 
 Les règles d'accès sont celles de l'application (cf. § Règles d'accès) : l'outil n'a pas de règles d'accès aux données qui lui soient propres, son jeton ne faisant que déterminer le niveau d'accès de l'agent, et les fonctionnalités équivalentes de l'interface web ont les mêmes restrictions.
