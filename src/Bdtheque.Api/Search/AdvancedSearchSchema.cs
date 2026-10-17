@@ -46,7 +46,9 @@ internal static class AdvancedSearchSchema
             .Attached("displayedGenres", EntityKind.Genre, SearchAttachments.GenresOf<Album>(a => a.Genres, a => a.Series!.Genres))
             .Attached("universes", EntityKind.Universe, SearchAttachments.UniversesOf<Album>(a => a.Universes))
             .Attached("displayedUniverses", EntityKind.Universe, SearchAttachments.UniversesOf<Album>(a => a.Universes, a => a.Series!.Universes))
-            .Many("purchaseIntents", EntityKind.PurchaseIntent, a => a.PurchaseIntents)
+            // The intent on the album itself: those on its editions carry its identifier too, but target them
+            // (modele-metier.md § Intention d'achat — relations), and are reached through them.
+            .ZeroOrOne("purchaseIntent", EntityKind.PurchaseIntent, a => a.PurchaseIntents.Where(p => p.EditionId == null))
             .Build(),
 
         new SearchEntityBuilder<Series>(EntityKind.Series)
@@ -158,7 +160,8 @@ internal static class AdvancedSearchSchema
 
         new SearchEntityBuilder<PurchaseIntent>(EntityKind.PurchaseIntent)
             .Boolean("targetsEdition", p => p.EditionId != null)
-            .One("album", EntityKind.Album, p => p.Album)
+            // The album targeted, only by an intent on the album itself: that of an edition is reached through it.
+            .QueriedZeroOrOne<Album>("album", EntityKind.Album, scope => p => scope.Context.Albums.Where(a => a.Id == p.AlbumId && p.EditionId == null))
             .One("edition", EntityKind.Edition, p => p.Edition)
             .Build(),
 

@@ -76,6 +76,11 @@ internal sealed class SearchEntityBuilder<T>(EntityKind kind) where T : EntityBa
     public SearchEntityBuilder<T> ZeroOrOne<TTarget>(string key, EntityKind target, Expression<Func<T, IEnumerable<TTarget>>> related) =>
         With(new SearchLinkDefinition(key, target, IsMultiple: false, _ => related));
 
+    /// <summary>A link to at most one record, queried in the scope of the search (without navigation to it).</summary>
+    public SearchEntityBuilder<T> QueriedZeroOrOne<TTarget>(
+        string key, EntityKind target, Func<SearchScope, Expression<Func<T, IEnumerable<TTarget>>>> related) =>
+        With(new SearchLinkDefinition(key, target, IsMultiple: false, related));
+
     /// <summary>A link to several records, through a navigation.</summary>
     public SearchEntityBuilder<T> Many<TTarget>(string key, EntityKind target, Expression<Func<T, IEnumerable<TTarget>>> related) =>
         With(new SearchLinkDefinition(key, target, IsMultiple: true, _ => related));

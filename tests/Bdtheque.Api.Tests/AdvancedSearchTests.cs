@@ -282,6 +282,27 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
+    public async Task PurchaseIntent_LinksTheAlbumOnlyWhenItTargetsTheAlbumItself()
+    {
+        var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
+        var onAlbum = await CreateAlbumAsync($"Intention album {_marker}");
+        var albumIntent = await CreateIntentAsync(onAlbum.Id, null);
+        var onEdition = await CreateAlbumAsync($"Intention édition {_marker}");
+        var editionIntent = await CreateIntentAsync(onEdition.Id, publisher.Id);
+
+        // modele-metier.md § Intention d'achat — relations: an intent targets an album or an edition, exclusively.
+        AssertIds([onAlbum.Id], await AlbumIdsAsync(new SearchLink("purchaseIntent")));
+        AssertIds(
+            [onEdition.Id],
+            await AlbumIdsAsync(new SearchLink("editions", new SearchLink("purchaseIntent"), new SearchQuantifier(SearchQuantifierKind.Any))));
+
+        var mine = new SearchLink("album", Text("title", Contains, _marker));
+        var viaEdition = new SearchLink("edition", new SearchLink("album", Text("title", Contains, _marker)));
+        AssertIds([albumIntent], Ids(await SearchAsync<PurchaseIntentListItem>(EntityKind.PurchaseIntent, mine)));
+        AssertIds([editionIntent], Ids(await SearchAsync<PurchaseIntentListItem>(EntityKind.PurchaseIntent, viaEdition)));
+    }
+
+    [Fact]
     public async Task DeducedData_AreQueried()
     {
         var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
@@ -481,6 +502,18 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
                     publisherId, null, publicationYear, isbn, null, null, null, null, null, null, false, true, null,
                     AcquisitionMode.Gift, false, acquisitionDate, null, null, false, null, null, null, null),
                 (await _client.GetFromJsonAsync<AlbumForm>($"/admin/albums/{albumId}"))!.Version));
+
+    /// <returns>The identifier of the intent: on the whole album without <paramref name="publisherId"/>, on a new edition otherwise.</returns>
+    private async Task<Guid> CreateIntentAsync(Guid albumId, Guid? publisherId)
+    {
+        var edition = publisherId is null
+            ? null
+            : new PurchaseIntentEditionContent(publisherId, null, null, null, null, null, null, null, null, null, true);
+        var intents = await PostAsync<PurchaseIntentsForm>(
+            $"/admin/albums/{albumId}/purchase-intents",
+            new CreatePurchaseIntentRequest(edition, (await _client.GetFromJsonAsync<AlbumForm>($"/admin/albums/{albumId}"))!.Version));
+        return Assert.Single(intents.Intents).Id;
+    }
 
     private async Task<EditionVisualsForm> UploadCoverAsync(EditionForm edition)
     {
