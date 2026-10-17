@@ -8,6 +8,7 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Tests;
 

@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities.Common;
+using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Search;
 

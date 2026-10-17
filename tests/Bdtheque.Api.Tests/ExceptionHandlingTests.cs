@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Tests;
 

@@ -6,6 +6,7 @@ using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using static Bdtheque.Contracts.Search.SearchComparison;
+using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Search;
 

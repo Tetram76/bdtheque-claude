@@ -7,6 +7,7 @@ using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Deletion;
 

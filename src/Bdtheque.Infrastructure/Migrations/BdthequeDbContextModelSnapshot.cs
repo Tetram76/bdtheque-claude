@@ -615,6 +615,52 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.ToTable("PurchaseIntents");
                 });
 
+            modelBuilder.Entity("Bdtheque.Domain.Entities.SavedSearch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Criteria")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<int>("Entity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr_case_accent_insensitive");
+
+                    b.Property<string>("Variables")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("SavedSearches", t =>
+                        {
+                            t.HasCheckConstraint("CK_SavedSearches_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
+                        });
+                });
+
             modelBuilder.Entity("Bdtheque.Domain.Entities.Series", b =>
                 {
                     b.Property<Guid>("Id")

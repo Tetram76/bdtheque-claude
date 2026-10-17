@@ -135,6 +135,24 @@ internal static class ChangeLogMappings
                 Reference<Universe>(ChangeLogAttribute.ParentUniverse, nameof(Universe.ParentId)),
             ],
             []),
+
+        [typeof(SavedSearch)] = new(
+            RecordType.SavedSearch,
+            [
+                Text(ChangeLogAttribute.Name, nameof(SavedSearch.Name)),
+                Enum<SavedSearch>(ChangeLogAttribute.SearchedEntity, nameof(SavedSearch.Entity)),
+                Scalar(ChangeLogAttribute.SearchCriteria, nameof(SavedSearch.Criteria), value => value is string criteria ? new SearchCriteriaValue(criteria) : null),
+                // With the default value of each variable, the constant it replaces: read from the criteria too,
+                // so that a new default value shows as a change of the variables.
+                new(ChangeLogAttribute.SearchVariables, [nameof(SavedSearch.Criteria), nameof(SavedSearch.Variables)],
+                    (values, _, _) => ValueTask.FromResult<ChangeLogValue?>(
+                        values is [string criteria, SearchVariables variables]
+                            ? new SearchVariablesValue(variables
+                                .Select(v => new SearchVariableValue(v.Name, v.Location, SavedSearch.DefaultValueOf(criteria, v)))
+                                .ToList())
+                            : null)),
+            ],
+            []),
     };
 
     private static AttributeMapping Text(ChangeLogAttribute attribute, string property) =>

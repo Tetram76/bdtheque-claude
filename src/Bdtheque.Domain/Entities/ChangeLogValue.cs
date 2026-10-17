@@ -39,6 +39,20 @@ public sealed record ContributionValue(Guid AuthorId, AuthorLabel Author, Contri
 /// <summary>A visual of an edition, with its rank among the visuals of its type.</summary>
 public sealed record VisualValue(Guid Id, VisualType Type, int DisplayOrder, string MediaReference) : ChangeLogValue;
 
+/// <summary>The criteria of a saved search, in the JSON form the advanced search takes.</summary>
+public sealed record SearchCriteriaValue(string Criteria) : ChangeLogValue;
+
+/// <summary>The variables of a saved search, in their order, compared by value.</summary>
+public sealed record SearchVariablesValue(IReadOnlyList<SearchVariableValue> Variables) : ChangeLogValue
+{
+    public bool Equals(SearchVariablesValue? other) => other is not null && Variables.SequenceEqual(other.Variables);
+
+    public override int GetHashCode() => Variables.Aggregate(0, (hash, variable) => HashCode.Combine(hash, variable));
+}
+
+/// <summary>A variable of a saved search, with its default value: the constant of the criteria it replaces.</summary>
+public sealed record SearchVariableValue(string Name, string Location, string DefaultValue);
+
 /// <summary>
 /// One attribute changed by a modification, with its value before and after it: an element added
 /// (genre, contribution, visual…) has no value before, an element removed none after.

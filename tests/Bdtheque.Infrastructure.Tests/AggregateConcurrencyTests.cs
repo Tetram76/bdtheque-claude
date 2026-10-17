@@ -39,7 +39,7 @@ public sealed class AggregateConcurrencyTests : IAsyncLifetime
         }
 
         Assert.Equal(
-            [nameof(Album), nameof(Author), nameof(Genre), nameof(Publisher), nameof(Series), nameof(Universe)],
+            [nameof(Album), nameof(Author), nameof(Genre), nameof(Publisher), nameof(SavedSearch), nameof(Series), nameof(Universe)],
             versioned.Order());
     }
 

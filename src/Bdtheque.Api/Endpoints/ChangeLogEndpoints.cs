@@ -1,5 +1,7 @@
 using System.Globalization;
+using Bdtheque.Api.Search;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Contracts.Search;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Contract = Bdtheque.Contracts.Admin;
@@ -62,6 +64,9 @@ internal static class ChangeLogEndpoints
                 contribution.AuthorId, ToAuthor(contribution.Author), EnumMapping.Map<ContractEnums.ContributionRole>(contribution.Role)!.Value),
             Model.VisualValue visual => new Contract.VisualValue(
                 visual.Id, EnumMapping.Map<ContractEnums.VisualType>(visual.Type)!.Value, visual.DisplayOrder, visual.MediaReference),
+            Model.SearchCriteriaValue criteria => new Contract.SearchCriteriaValue(SearchCriteriaJson.Deserialize(criteria.Criteria)),
+            Model.SearchVariablesValue variables => new Contract.SearchVariablesValue(
+                variables.Variables.Select(v => new SavedSearchVariable(v.Name, v.Location, v.DefaultValue)).ToList()),
             _ => throw new ArgumentOutOfRangeException(nameof(value), value.GetType().Name, "Unknown kind of change log value."),
         };
 

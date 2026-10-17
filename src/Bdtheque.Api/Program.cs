@@ -99,6 +99,7 @@ admin.MapAlbums();
 admin.MapEditions();
 admin.MapEditionVisuals();
 admin.MapPurchaseIntents();
+admin.MapSavedSearches();
 admin.MapChangeLog();
 
 var catalog = app.MapCatalog();
@@ -111,6 +112,7 @@ catalog.MapGenreCatalog();
 catalog.MapUniverseCatalog();
 catalog.MapPurchaseIntentList();
 catalog.MapAdvancedSearch();
+catalog.MapSavedSearchCatalog();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {

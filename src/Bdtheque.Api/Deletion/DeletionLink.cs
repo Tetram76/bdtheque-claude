@@ -1,5 +1,6 @@
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Infrastructure;
+using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Deletion;
 

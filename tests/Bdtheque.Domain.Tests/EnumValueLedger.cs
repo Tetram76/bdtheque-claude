@@ -34,7 +34,12 @@ internal static class EnumValueLedger
             [typeof(RecordType)] =
             [
                 ("Album", 1), ("Edition", 2), ("Series", 3), ("PurchaseIntent", 4), ("Author", 5), ("Publisher", 6),
-                ("PublisherCollection", 7), ("Genre", 8), ("Universe", 9),
+                ("PublisherCollection", 7), ("Genre", 8), ("Universe", 9), ("SavedSearch", 10),
+            ],
+            [typeof(EntityKind)] =
+            [
+                ("Album", 1), ("Series", 2), ("Universe", 3), ("Edition", 4), ("EditionVisual", 5), ("PublisherCollection", 6),
+                ("Contribution", 7), ("PurchaseIntent", 8), ("Author", 9), ("Publisher", 10), ("Genre", 11),
             ],
             [typeof(ChangeLogOperation)] = [("Creation", 1), ("Modification", 2), ("Deletion", 3)],
             [typeof(ChangeLogAttribute)] =
@@ -53,6 +58,7 @@ internal static class EnumValueLedger
                 ("AcquisitionPrice", 47), ("Free", 48), ("InitialValue", 49), ("PersonalReference", 50), ("Visual", 51),
                 ("LastName", 52), ("FirstName", 53), ("Pseudonym", 54), ("Biography", 55), ("Nationality", 56),
                 ("Name", 57), ("Website", 58), ("Description", 59), ("ParentUniverse", 60), ("Label", 61),
+                ("SearchedEntity", 62), ("SearchCriteria", 63), ("SearchVariables", 64),
             ],
         };
 }
