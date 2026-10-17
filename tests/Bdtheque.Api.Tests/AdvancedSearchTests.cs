@@ -291,7 +291,17 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var universes = await SearchAsync<UniverseListItem>(
             EntityKind.Universe,
             And(Text("name", Contains, _marker), new SearchLink("albums", null, new SearchQuantifier(SearchQuantifierKind.Any))));
-        AssertIds([child.Id, grandChild.Id, parent.Id], Ids(universes));
+        // The albums attached to the universe or a descendant themselves: those of a series through the series.
+        AssertIds([child.Id, parent.Id], Ids(universes));
+        var throughSeries = await SearchAsync<UniverseListItem>(
+            EntityKind.Universe,
+            And(Text("name", Contains, _marker), new SearchLink("series", new SearchLink("albums", null, new SearchQuantifier(SearchQuantifierKind.Any)), new SearchQuantifier(SearchQuantifierKind.Any))));
+        AssertIds([grandChild.Id, child.Id, parent.Id], Ids(throughSeries));
+
+        var anyAlbum = new SearchQuantifier(SearchQuantifierKind.Any);
+        Assert.Empty(await SearchAsync<GenreListItem>(EntityKind.Genre, And(Text("record", Is, genre.Id.ToString()), new SearchLink("albums", null, anyAlbum))));
+        Assert.Single(await SearchAsync<GenreListItem>(
+            EntityKind.Genre, And(Text("record", Is, genre.Id.ToString()), new SearchLink("series", new SearchLink("albums", null, anyAlbum), anyAlbum))));
     }
 
     [Fact]

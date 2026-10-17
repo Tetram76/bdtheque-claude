@@ -137,8 +137,9 @@ internal static class AdvancedSearchSchema
 
         new SearchEntityBuilder<Genre>(EntityKind.Genre)
             .Text("label", g => g.Label, isOptional: false)
-            // Those showing the genre, as the consultation lists them (fonctionnel.md § Genres et univers d'un album).
-            .Attached("albums", EntityKind.Album, SearchAttachments.RecordsOfGenre<Album>(a => a.Genres, a => a.Series!.Genres))
+            // The reverse of the association of an album, as its link `genres`: an album showing the genre of its
+            // series is reached through the series (`series`, then `albums`), a path of its own.
+            .Attached("albums", EntityKind.Album, SearchAttachments.RecordsOfGenre<Album>(a => a.Genres))
             .Attached("series", EntityKind.Series, SearchAttachments.RecordsOfGenre<Series>(s => s.Genres))
             .Build(),
 
@@ -147,8 +148,9 @@ internal static class AdvancedSearchSchema
             .Text("description", u => u.Description)
             .One("parent", EntityKind.Universe, u => u.Parent)
             .Many("children", EntityKind.Universe, u => u.Children)
-            // Those showing the universe or one of its descendants (fonctionnel.md § Hiérarchie des univers).
-            .Attached("albums", EntityKind.Album, SearchAttachments.RecordsOfUniverse<Album>(a => a.Universes, a => a.Series!.Universes))
+            // Attached to the universe or one of its descendants (fonctionnel.md § Hiérarchie des univers): the reverse
+            // of the link `universes` of an album, those of its series being reached through the series.
+            .Attached("albums", EntityKind.Album, SearchAttachments.RecordsOfUniverse<Album>(a => a.Universes))
             .Attached("series", EntityKind.Series, SearchAttachments.RecordsOfUniverse<Series>(s => s.Universes))
             .Build(),
 
