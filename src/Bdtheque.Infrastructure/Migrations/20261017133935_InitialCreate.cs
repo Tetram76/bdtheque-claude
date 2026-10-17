@@ -507,6 +507,96 @@ namespace Bdtheque.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "SavedSearchDesignations",
+                columns: table => new
+                {
+                    Kind = table.Column<int>(type: "integer", nullable: false),
+                    RecordId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SavedSearchId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AlbumId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 1 THEN \"RecordId\" END", stored: true),
+                    AuthorId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 9 THEN \"RecordId\" END", stored: true),
+                    ContributionId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 7 THEN \"RecordId\" END", stored: true),
+                    EditionId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 4 THEN \"RecordId\" END", stored: true),
+                    EditionVisualId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 5 THEN \"RecordId\" END", stored: true),
+                    GenreId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 11 THEN \"RecordId\" END", stored: true),
+                    PublisherCollectionId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 6 THEN \"RecordId\" END", stored: true),
+                    PublisherId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 10 THEN \"RecordId\" END", stored: true),
+                    SeriesId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 2 THEN \"RecordId\" END", stored: true),
+                    UniverseId = table.Column<Guid>(type: "uuid", nullable: true, computedColumnSql: "CASE WHEN \"Kind\" = 3 THEN \"RecordId\" END", stored: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SavedSearchDesignations", x => new { x.SavedSearchId, x.Kind, x.RecordId });
+                    table.CheckConstraint("CK_SavedSearchDesignations_DesignatesAReferenceableRecord", "num_nonnulls(\"AlbumId\", \"SeriesId\", \"UniverseId\", \"EditionId\", \"EditionVisualId\", \"PublisherCollectionId\", \"ContributionId\", \"AuthorId\", \"PublisherId\", \"GenreId\") = 1");
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Albums_AlbumId",
+                        column: x => x.AlbumId,
+                        principalTable: "Albums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Authors_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Authors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Contributions_ContributionId",
+                        column: x => x.ContributionId,
+                        principalTable: "Contributions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_EditionVisuals_EditionVisualId",
+                        column: x => x.EditionVisualId,
+                        principalTable: "EditionVisuals",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Editions_EditionId",
+                        column: x => x.EditionId,
+                        principalTable: "Editions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Genres_GenreId",
+                        column: x => x.GenreId,
+                        principalTable: "Genres",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_PublisherCollections_PublisherColle~",
+                        column: x => x.PublisherCollectionId,
+                        principalTable: "PublisherCollections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Publishers_PublisherId",
+                        column: x => x.PublisherId,
+                        principalTable: "Publishers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_SavedSearches_SavedSearchId",
+                        column: x => x.SavedSearchId,
+                        principalTable: "SavedSearches",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Series_SeriesId",
+                        column: x => x.SeriesId,
+                        principalTable: "Series",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SavedSearchDesignations_Universes_UniverseId",
+                        column: x => x.UniverseId,
+                        principalTable: "Universes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumGenres_GenresId",
                 table: "AlbumGenres",
@@ -623,6 +713,61 @@ namespace Bdtheque.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_AlbumId",
+                table: "SavedSearchDesignations",
+                column: "AlbumId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_AuthorId",
+                table: "SavedSearchDesignations",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_ContributionId",
+                table: "SavedSearchDesignations",
+                column: "ContributionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_EditionId",
+                table: "SavedSearchDesignations",
+                column: "EditionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_EditionVisualId",
+                table: "SavedSearchDesignations",
+                column: "EditionVisualId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_GenreId",
+                table: "SavedSearchDesignations",
+                column: "GenreId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_Kind_RecordId",
+                table: "SavedSearchDesignations",
+                columns: new[] { "Kind", "RecordId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_PublisherCollectionId",
+                table: "SavedSearchDesignations",
+                column: "PublisherCollectionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_PublisherId",
+                table: "SavedSearchDesignations",
+                column: "PublisherId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_SeriesId",
+                table: "SavedSearchDesignations",
+                column: "SeriesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedSearchDesignations_UniverseId",
+                table: "SavedSearchDesignations",
+                column: "UniverseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SavedSearches_Name",
                 table: "SavedSearches",
                 column: "Name",
@@ -677,16 +822,10 @@ namespace Bdtheque.Infrastructure.Migrations
                 name: "ChangeLogEntries");
 
             migrationBuilder.DropTable(
-                name: "Contributions");
-
-            migrationBuilder.DropTable(
-                name: "EditionVisuals");
-
-            migrationBuilder.DropTable(
                 name: "PurchaseIntents");
 
             migrationBuilder.DropTable(
-                name: "SavedSearches");
+                name: "SavedSearchDesignations");
 
             migrationBuilder.DropTable(
                 name: "SeriesGenres");
@@ -695,16 +834,25 @@ namespace Bdtheque.Infrastructure.Migrations
                 name: "SeriesUniverses");
 
             migrationBuilder.DropTable(
-                name: "Authors");
+                name: "Contributions");
 
             migrationBuilder.DropTable(
-                name: "Editions");
+                name: "EditionVisuals");
+
+            migrationBuilder.DropTable(
+                name: "SavedSearches");
 
             migrationBuilder.DropTable(
                 name: "Genres");
 
             migrationBuilder.DropTable(
                 name: "Universes");
+
+            migrationBuilder.DropTable(
+                name: "Authors");
+
+            migrationBuilder.DropTable(
+                name: "Editions");
 
             migrationBuilder.DropTable(
                 name: "Albums");

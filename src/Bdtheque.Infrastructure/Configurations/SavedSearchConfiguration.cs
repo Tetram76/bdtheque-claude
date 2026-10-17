@@ -36,6 +36,10 @@ internal sealed class SavedSearchConfiguration : IEntityTypeConfiguration<SavedS
                     // Immutable: the snapshot can be the value itself.
                     variables => variables));
 
+        // Replaced with the criteria (SavedSearch.SetSearch), which writes only the difference with those loaded:
+        // never on a search loaded without them, which would add again those already stored.
+        builder.Navigation(s => s.Designations).AutoInclude();
+
         // Database-level defence in depth mirroring the domain invariant (see GenreConfiguration).
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_SavedSearches_NameNotBlank",

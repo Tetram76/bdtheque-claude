@@ -31,34 +31,58 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     // Stored as entered, read back by the API: the texts keep their own characters.
     private static readonly JsonSerializerOptions WriteOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
+    private readonly List<SavedSearchDesignation> _designations = [];
+
     public string Name { get; private set; } = string.Empty;
     public EntityKind Entity { get; private set; }
     public string Criteria { get; private set; } = string.Empty;
     public SearchVariables Variables { get; private set; } = SearchVariables.Empty;
 
+    /// <summary>
+    /// The records the criteria designate, default values of the variables included: each one's deletion is
+    /// refused while the search designates it (fonctionnel.md § Suppression des entités).
+    /// </summary>
+    public IReadOnlyCollection<SavedSearchDesignation> Designations => _designations.AsReadOnly();
+
     // EF Core parameterless constructor
     private SavedSearch() { }
 
-    public SavedSearch(string name, EntityKind entity, string criteria, IEnumerable<SearchVariable> variables)
+    public SavedSearch(
+        string name, EntityKind entity, string criteria, IEnumerable<SearchVariable> variables, IEnumerable<DesignatedRecord> designated)
     {
         SetName(name);
-        SetSearch(entity, criteria, variables);
+        SetSearch(entity, criteria, variables, designated);
     }
 
     public void SetName(string name) =>
         Name = DomainText.Required(name, DomainRules.SavedSearchNameRequired, "A saved search must have a name.");
 
     /// <summary>
-    /// Replaces what the search looks for: its variables designate constants of its criteria, so the
-    /// three are written together.
+    /// Replaces what the search looks for: its variables designate constants of its criteria, and some of
+    /// these constants designate records, so the four are written together.
     /// </summary>
+    /// <param name="designated">
+    /// The records the criteria designate, which only the schema of the advanced search can tell, its
+    /// reader: the API reads them in the criteria it checks.
+    /// </param>
     /// <exception cref="ArgumentException">
     /// Criteria that are not a JSON object, or a variable that does not designate a constant of them, or
     /// the constant of another variable: the client builds them from the criteria it sends.
     /// </exception>
-    public void SetSearch(EntityKind entity, string criteria, IEnumerable<SearchVariable> variables)
+    public void SetSearch(EntityKind entity, string criteria, IEnumerable<SearchVariable> variables, IEnumerable<DesignatedRecord> designated)
     {
         EnumGuard.EnsureDefined(entity, nameof(entity));
+        ArgumentNullException.ThrowIfNull(designated);
+        var records = designated.Distinct().ToList();
+        foreach (var record in records)
+        {
+            EnumGuard.EnsureDefined(record.Kind, nameof(designated));
+            // An intent is only the wish to acquire another record, which the search designates instead.
+            if (record.Kind == EntityKind.PurchaseIntent)
+                throw new DomainRuleViolationException(
+                    DomainRules.SavedSearchPurchaseIntentDesignated, $"A saved search cannot designate the purchase intent {record.Id}.");
+        }
+
         var tree = Parse(criteria);
         var checkedVariables = new List<SearchVariable>();
         foreach (var variable in variables)
@@ -76,6 +100,9 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
         Entity = entity;
         Criteria = criteria;
         Variables = new SearchVariables(checkedVariables);
+        // Only the difference is written: a designation kept stays the same row.
+        _designations.RemoveAll(d => !records.Contains(d.Record));
+        _designations.AddRange(records.Where(r => !_designations.Exists(d => d.Record == r)).Select(r => new SavedSearchDesignation(r)));
     }
 
     /// <summary>The default value of one of the variables: the constant it replaces.</summary>
@@ -178,6 +205,30 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
         return token.Length > 0 && token.All(char.IsAsciiDigit) && (token == "0" || token[0] != '0')
                && int.TryParse(token, NumberStyles.None, CultureInfo.InvariantCulture, out index);
     }
+}
+
+/// <summary>A record, of any entity, by its identifier.</summary>
+public sealed record DesignatedRecord(EntityKind Kind, Guid Id);
+
+/// <summary>
+/// A record a saved search designates, by a criterion or by the default value of a variable: a reference, whose
+/// deletion is refused while the search designates it (fonctionnel.md § Suppression des entités).
+/// </summary>
+public sealed class SavedSearchDesignation
+{
+    // EF Core parameterless constructor
+    private SavedSearchDesignation() { }
+
+    internal SavedSearchDesignation(DesignatedRecord record)
+    {
+        Kind = record.Kind;
+        RecordId = record.Id;
+    }
+
+    public EntityKind Kind { get; private set; }
+    public Guid RecordId { get; private set; }
+
+    internal DesignatedRecord Record => new(Kind, RecordId);
 }
 
 /// <summary>A constant of the criteria of a saved search replaced by a variable, whose value is asked at replay.</summary>

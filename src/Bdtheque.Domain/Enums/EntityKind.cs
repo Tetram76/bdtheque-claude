@@ -18,4 +18,7 @@ public enum EntityKind
     Author = 9,
     Publisher = 10,
     Genre = 11,
+
+    // Never searched: only counted by the impact of a deletion it blocks.
+    SavedSearch = 12,
 }

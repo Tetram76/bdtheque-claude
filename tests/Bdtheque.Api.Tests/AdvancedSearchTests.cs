@@ -34,7 +34,9 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     {
         var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
 
-        Assert.Equal(Enum.GetValues<EntityKind>().Order(), schema.Entities.Select(e => e.Entity).Order());
+        // Every entity but the saved searches themselves (fonctionnel.md § Entités recherchées).
+        Assert.Equal(
+            Enum.GetValues<EntityKind>().Where(k => k != EntityKind.SavedSearch).Order(), schema.Entities.Select(e => e.Entity).Order());
         foreach (var entity in schema.Entities)
         {
             Assert.Equal(entity.Fields.Count, entity.Fields.Select(f => f.Key).Distinct().Count());

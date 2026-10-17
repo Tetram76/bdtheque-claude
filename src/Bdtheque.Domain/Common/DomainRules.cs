@@ -131,4 +131,17 @@ public static class DomainRules
     /// their names at replay, could not be told apart.
     /// </summary>
     public const string SavedSearchVariableNameAlreadyUsed = "SavedSearch.VariableNameAlreadyUsed";
+
+    /// <summary>
+    /// A saved search designating a purchase intent (fonctionnel.md § Recherches enregistrées): an intent is
+    /// only the wish to acquire another record, which a saved search designates instead.
+    /// </summary>
+    public const string SavedSearchPurchaseIntentDesignated = "SavedSearch.PurchaseIntentDesignated";
+
+    /// <summary>
+    /// A write removing a record that a saved search designates, other than its deletion (e.g. a contribution
+    /// removed from the form of its album): refused as the deletion would be (fonctionnel.md § Suppression des
+    /// entités), the database enforcing it.
+    /// </summary>
+    public const string SavedSearchDesignatedRecordRemoved = "SavedSearch.DesignatedRecordRemoved";
 }

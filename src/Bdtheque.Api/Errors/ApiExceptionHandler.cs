@@ -80,6 +80,12 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation } } =>
             (StatusCodes.Status404NotFound, ProblemTypes.Functional, null),
 
+        // A write other than a deletion removing a record a saved search designates (a contribution removed
+        // from the form of its album or series): refused as its deletion would be, which the user resolves by
+        // modifying the search first. Any other reference left behind remains a missing check, technical.
+        DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.RestrictViolation, TableName: BdthequeDbContext.SavedSearchDesignationsTable } } =>
+            (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, DomainRules.SavedSearchDesignatedRecordRemoved),
+
         // A request the frontend built wrongly, whatever the user typed: thrown by the framework
         // outside Production (RouteHandlerOptions.ThrowOnBadRequest), and in every environment by the
         // handlers that read their request themselves (e.g. VisualUploadReader).

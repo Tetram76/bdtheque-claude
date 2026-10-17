@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20261017124325_InitialCreate")]
+    [Migration("20261017133935_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -664,6 +664,97 @@ namespace Bdtheque.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bdtheque.Domain.Entities.SavedSearchDesignation", b =>
+                {
+                    b.Property<Guid>("SavedSearchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AlbumId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 1 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("AuthorId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 9 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("ContributionId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 7 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("EditionId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 4 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("EditionVisualId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 5 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("GenreId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 11 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("PublisherCollectionId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 6 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("PublisherId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 10 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("SeriesId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 2 THEN \"RecordId\" END", true);
+
+                    b.Property<Guid?>("UniverseId")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uuid")
+                        .HasComputedColumnSql("CASE WHEN \"Kind\" = 3 THEN \"RecordId\" END", true);
+
+                    b.HasKey("SavedSearchId", "Kind", "RecordId");
+
+                    b.HasIndex("AlbumId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ContributionId");
+
+                    b.HasIndex("EditionId");
+
+                    b.HasIndex("EditionVisualId");
+
+                    b.HasIndex("GenreId");
+
+                    b.HasIndex("PublisherCollectionId");
+
+                    b.HasIndex("PublisherId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.HasIndex("UniverseId");
+
+                    b.HasIndex("Kind", "RecordId");
+
+                    b.ToTable("SavedSearchDesignations", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SavedSearchDesignations_DesignatesAReferenceableRecord", "num_nonnulls(\"AlbumId\", \"SeriesId\", \"UniverseId\", \"EditionId\", \"EditionVisualId\", \"PublisherCollectionId\", \"ContributionId\", \"AuthorId\", \"PublisherId\", \"GenreId\") = 1");
+                        });
+                });
+
             modelBuilder.Entity("Bdtheque.Domain.Entities.Series", b =>
                 {
                     b.Property<Guid>("Id")
@@ -979,6 +1070,65 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Navigation("Edition");
                 });
 
+            modelBuilder.Entity("Bdtheque.Domain.Entities.SavedSearchDesignation", b =>
+                {
+                    b.HasOne("Bdtheque.Domain.Entities.Album", null)
+                        .WithMany()
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.Author", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.Contribution", null)
+                        .WithMany()
+                        .HasForeignKey("ContributionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.Edition", null)
+                        .WithMany()
+                        .HasForeignKey("EditionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.EditionVisual", null)
+                        .WithMany()
+                        .HasForeignKey("EditionVisualId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.PublisherCollection", null)
+                        .WithMany()
+                        .HasForeignKey("PublisherCollectionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.Publisher", null)
+                        .WithMany()
+                        .HasForeignKey("PublisherId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.SavedSearch", null)
+                        .WithMany("Designations")
+                        .HasForeignKey("SavedSearchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Bdtheque.Domain.Entities.Series", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Bdtheque.Domain.Entities.Universe", null)
+                        .WithMany()
+                        .HasForeignKey("UniverseId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("Bdtheque.Domain.Entities.Series", b =>
                 {
                     b.HasOne("Bdtheque.Domain.Entities.PublisherCollection", "TemplatePublisherCollection")
@@ -1053,6 +1203,11 @@ namespace Bdtheque.Infrastructure.Migrations
             modelBuilder.Entity("Bdtheque.Domain.Entities.Publisher", b =>
                 {
                     b.Navigation("Collections");
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.SavedSearch", b =>
+                {
+                    b.Navigation("Designations");
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Series", b =>
