@@ -541,7 +541,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
   | Signal | Indique |
   | --- | --- |
   | Erreurs dues à des paramètres mal construits | Description ou exemples du point d'entrée à revoir |
-  | Nouvelle tentative après un résultat vide ou une erreur | Comportement de la recherche ou message d'erreur à revoir |
+  | Nouvelle tentative après une erreur, un résultat vide ou un résultat que l'agent abandonne aussitôt | Message d'erreur, comportement de la recherche ou pertinence des résultats à revoir |
   | Enchaînement de pages | Taille des pages ou filtres manquants |
   | Réponses volumineuses | Besoin d'une forme de réponse plus concise |
   | Mêmes enchaînements de points d'entrée dans de nombreuses sessions | **Nouveau point d'entrée** qui les regroupe |
