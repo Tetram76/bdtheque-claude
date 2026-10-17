@@ -53,33 +53,36 @@ internal static class EditionEndpoints
         admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn)));
     }
 
-    public static void MapEditionCatalog(this RouteGroupBuilder catalog)
-    {
-        catalog.MapGet("/editions", ListAsync);
-        catalog.MapGet("/editions/{id:guid}", GetDetailAsync);
-    }
+    public static void MapEditionCatalog(this RouteGroupBuilder catalog) => catalog.MapGet("/editions", ListAsync);
 
     /// <summary>
-    /// An edition with its album, its membership of the collection, its intent, and its visuals, which
-    /// have no record of their own, in their presentation order.
+    /// The editions of an album, by year, each whole, with its membership of the collection, its intent,
+    /// and its visuals, in their presentation order: an edition has no record of its own, the record of its
+    /// album presents it (fonctionnel.md § Structure de l'application).
     /// </summary>
-    private static async Task<EditionDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    internal static async Task<List<EditionDetail>> ReadDetailsAsync(Guid albumId, BdthequeDbContext context, CancellationToken cancellationToken)
     {
-        // The entity, with its visuals, for the order of the visuals, which the domain alone applies.
-        var edition = await context.Editions.AsNoTracking()
-                          .Include(e => e.Visuals)
-                          .Where(e => e.Id == id)
-                          .Select(CatalogExpressions.Expand((Edition e) => new
-                          {
-                              Album = e.Album.ToSummary(),
-                              Edition = e.ToSummary(),
-                              Entity = e,
-                              IsInCollection = e.IsOwned(),
-                              PurchaseIntent = e.PurchaseIntentOf(),
-                          }))
-                          .SingleOrDefaultAsync(cancellationToken)
-                      ?? throw new EntityNotFoundException(typeof(Edition), id);
-        var e = edition.Entity;
+        // The entities, with their visuals, for the order of the visuals, which the domain alone applies.
+        var editions = await context.Editions.AsNoTracking()
+            .Include(e => e.Visuals)
+            .Where(e => e.AlbumId == albumId)
+            .OrderBy(e => e.PublicationYear)
+            .ThenBy(e => e.Id)
+            .Select(CatalogExpressions.Expand((Edition e) => new
+            {
+                Edition = e.ToSummary(),
+                e.Publisher.Website,
+                Entity = e,
+                IsInCollection = e.IsOwned(),
+                PurchaseIntent = e.PurchaseIntentOf(),
+            }))
+            .ToListAsync(cancellationToken);
+        return editions.Select(e => ToDetail(e.Edition, e.Website, e.Entity, e.IsInCollection, e.PurchaseIntent)).ToList();
+    }
+
+    private static EditionDetail ToDetail(
+        EditionSummary summary, string? publisherWebsite, Edition e, bool isInCollection, PurchaseIntentItem? purchaseIntent)
+    {
         var visuals = e.GetOrderedVisuals()
             .Select(v => new EditionVisualItem(
                 v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder, VisualStorage.OriginalPath(v.MediaReference),
@@ -87,8 +90,8 @@ internal static class EditionEndpoints
             .ToList();
 
         return new EditionDetail(
-            edition.Album,
-            edition.Edition,
+            summary,
+            publisherWebsite,
             e.Isbn is null ? null : IsbnChecksumValidator.IsValid(e.Isbn),
             EnumMapping.Map<ContractEnums.BindingType>(e.Binding),
             EnumMapping.Map<ContractEnums.BookOrientation>(e.Orientation),
@@ -109,9 +112,9 @@ internal static class EditionEndpoints
             e.InitialValueCurrency,
             e.PersonalReference,
             e.PersonalNotes,
-            edition.IsInCollection,
+            isInCollection,
             e.EnteredCollectionAt,
-            edition.PurchaseIntent,
+            purchaseIntent,
             visuals,
             e.CreatedAt,
             e.ModifiedAt);

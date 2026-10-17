@@ -125,7 +125,7 @@ Répercussion dans l'API de la règle qui réserve les fiches de consultation au
 
 | Ticket | Titre |
 | --- | --- |
-| #157 | Fiches de consultation réservées aux albums, séries et auteurs |
+| ~~#157~~ | Fiches de consultation réservées aux albums, séries et auteurs |
 
 ### Ajustement issu de la définition de la recherche avancée
 

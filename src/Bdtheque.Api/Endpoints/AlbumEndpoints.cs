@@ -1,3 +1,4 @@
+using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Admin;
@@ -50,35 +51,48 @@ internal static class AlbumEndpoints
 
     /// <summary>
     /// An album with what it is linked with: the genres and universes displayed — those of the album and
-    /// of its series, without duplicates (fonctionnel.md § Genres et univers d'un album) —, its
-    /// contributions, and every edition, each with its membership of the collection and its intent.
+    /// of its series, without duplicates (fonctionnel.md § Genres et univers d'un album) —, each universe
+    /// with its ancestors, its contributions, and every edition, whole, which has no record of its own
+    /// (fonctionnel.md § Structure de l'application).
     /// </summary>
-    private static async Task<AlbumDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
-        await context.Albums.AsNoTracking()
-            .Where(a => a.Id == id)
-            .Select(CatalogExpressions.Expand((Album a) => new AlbumDetail(
-                a.ToSummary(),
-                a.FirstPublicationYear,
-                a.FirstPublicationMonth,
-                a.Summary,
-                a.PersonalNotes,
-                EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating),
-                context.Genres
-                    .Where(g => a.Genres.Any(o => o.Id == g.Id) || a.Series!.Genres.Any(o => o.Id == g.Id))
-                    .OrderBy(g => g.Label).ThenBy(g => g.Id)
-                    .Select(g => new GenreListItem(g.Id, g.Label)).ToList(),
-                context.Universes
-                    .Where(u => a.Universes.Any(o => o.Id == u.Id) || a.Series!.Universes.Any(o => o.Id == u.Id))
-                    .OrderBy(u => u.Name).ThenBy(u => u.Id)
-                    .Select(u => u.ToListItem()).ToList(),
-                a.Contributions.ToItems().ToList(),
-                a.Editions.OrderBy(e => e.PublicationYear).ThenBy(e => e.Id)
-                    .Select(e => new AlbumEditionItem(e.ToSummary(), e.IsOwned(), e.PurchaseIntentOf())).ToList(),
-                a.PurchaseIntents.Where(p => p.EditionId == null).Select(p => p.ToItem()).FirstOrDefault(),
-                a.CreatedAt,
-                a.ModifiedAt)))
-            .SingleOrDefaultAsync(cancellationToken)
-        ?? throw new EntityNotFoundException(typeof(Album), id);
+    private static async Task<AlbumDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot for the reads below, which are assembled into one another.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var album = await context.Albums.AsNoTracking()
+                        .Where(a => a.Id == id)
+                        .Select(CatalogExpressions.Expand((Album a) => new
+                        {
+                            Album = a.ToSummary(),
+                            a.FirstPublicationYear,
+                            a.FirstPublicationMonth,
+                            a.Summary,
+                            a.PersonalNotes,
+                            a.Rating,
+                            Genres = context.Genres
+                                .Where(g => a.Genres.Any(o => o.Id == g.Id) || a.Series!.Genres.Any(o => o.Id == g.Id))
+                                .OrderBy(g => g.Label).ThenBy(g => g.Id)
+                                .Select(g => new GenreListItem(g.Id, g.Label)).ToList(),
+                            Universes = context.Universes
+                                .Where(u => a.Universes.Any(o => o.Id == u.Id) || a.Series!.Universes.Any(o => o.Id == u.Id))
+                                .OrderBy(u => u.Name).ThenBy(u => u.Id)
+                                .Select(u => u.ToListItem()).ToList(),
+                            Contributions = a.Contributions.ToItems().ToList(),
+                            PurchaseIntent = a.PurchaseIntents.Where(p => p.EditionId == null).Select(p => p.ToItem()).FirstOrDefault(),
+                            a.CreatedAt,
+                            a.ModifiedAt,
+                        }))
+                        .SingleOrDefaultAsync(cancellationToken)
+                    ?? throw new EntityNotFoundException(typeof(Album), id);
+
+        var editions = await EditionEndpoints.ReadDetailsAsync(id, context, cancellationToken);
+        var universes = await UniverseTree.InHierarchyAsync(context, album.Universes, cancellationToken);
+
+        return new AlbumDetail(
+            album.Album, album.FirstPublicationYear, album.FirstPublicationMonth, album.Summary, album.PersonalNotes,
+            EnumMapping.Map<ContractEnums.AlbumRating>(album.Rating), album.Genres, universes, album.Contributions, editions,
+            album.PurchaseIntent, album.CreatedAt, album.ModifiedAt);
+    }
 
     /// <summary>
     /// The albums found by their title or that of their series, part of their label (fonctionnel.md §
@@ -102,16 +116,10 @@ internal static class AlbumEndpoints
             albums = albums.Where(a => a.Editions.Any(e => e.PublisherId == publisherId));
         if (publisherCollectionId is not null)
             albums = albums.Where(a => a.Editions.Any(e => e.PublisherCollectionId == publisherCollectionId));
-        // The genres and universes of an album in a series are those of the album and of the series
-        // (fonctionnel.md § Genres et univers d'un album).
         if (genreId is not null)
-            albums = albums.Where(a => a.Genres.Any(g => g.Id == genreId) || a.Series!.Genres.Any(g => g.Id == genreId));
+            albums = albums.WhereGenre(genreId.Value);
         if (universeId is not null)
-        {
-            var universeIds = await CatalogFilters.UniverseAndDescendantsAsync(context, universeId.Value, cancellationToken);
-            albums = albums.Where(a =>
-                a.Universes.Any(u => universeIds.Contains(u.Id)) || a.Series!.Universes.Any(u => universeIds.Contains(u.Id)));
-        }
+            albums = albums.WhereUniverse(await CatalogFilters.UniverseAndDescendantsAsync(context, universeId.Value, cancellationToken));
 
         return await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, ListItem, cancellationToken);
     }
