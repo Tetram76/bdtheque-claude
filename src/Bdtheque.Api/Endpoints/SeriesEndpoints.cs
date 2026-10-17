@@ -80,14 +80,15 @@ internal static class SeriesEndpoints
         var albums = await context.Albums.AsNoTracking()
             .Where(a => a.SeriesId == id)
             .OrderInSeries()
-            .Select(CatalogExpressions.Expand((Album a) => a.ToSummary()))
+            .Select(CatalogExpressions.Expand((Album a) => a.ToCard()))
             .ToListAsync(cancellationToken);
+        var overview = (await CatalogWorks.OverviewsAsync(context, [id], cancellationToken))[id];
         var universes = await UniverseTree.InHierarchyAsync(context, series.Universes, cancellationToken);
 
         return new SeriesDetail(
             id, series.Title, EnumMapping.Map<ContractEnums.SeriesStatus>(series.Status), series.TheoreticalVolumeCount, series.IsComplete,
             series.Summary, series.PersonalNotes, series.Publisher, series.PublisherCollection, series.Genres, universes,
-            series.Contributions, albums, series.CreatedAt, series.ModifiedAt);
+            series.Contributions, overview, albums, series.CreatedAt, series.ModifiedAt);
     }
 
     /// <summary>

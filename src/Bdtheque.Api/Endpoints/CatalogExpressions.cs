@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Query;
@@ -9,8 +10,9 @@ namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// Expressions shared by the lists and records of the consultation — what the labels of an album and of
-/// an edition are built from, the membership of the collection, the purchase intents, the order of the albums —, written once and
-/// inserted into each query (choix-implementation.md § Recherche).
+/// an edition are built from, the card and the cover of an album, the membership of the collection, the
+/// purchase intents, the order of the albums —, written once and inserted into each query
+/// (choix-implementation.md § Recherche).
 /// </summary>
 /// <remarks>
 /// EF Core translates an expression tree, never the call of a C# method: a query calls the shared
@@ -44,6 +46,16 @@ internal static class CatalogExpressions
     /// <summary>Marker of the summary of an edition, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static EditionSummary ToSummary(this Edition edition) => throw NotExpanded();
 
+    /// <summary>Marker of the card of an album, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static AlbumCard ToCard(this Album album) => throw NotExpanded();
+
+    /// <summary>Marker of the media reference of the cover of an album, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static string? CoverMediaReference(this Album album) => throw NotExpanded();
+
+    /// <summary>The cover of an album, from the media reference of its visual.</summary>
+    public static AlbumCover? ToCover(string? mediaReference) =>
+        mediaReference is null ? null : new AlbumCover(VisualStorage.OriginalPath(mediaReference), VisualStorage.DisplayPath(mediaReference));
+
     private static readonly Expression<Func<Album, AlbumSummary>> AlbumSummaryOf = a => new AlbumSummary(
         a.Id,
         a.Title,
@@ -64,6 +76,28 @@ internal static class CatalogExpressions
         e.PublisherCollection != null ? e.PublisherCollection.Name : null,
         e.PublicationYear,
         e.Isbn);
+
+    // The intents of an album carry its identifier, those on its editions included.
+    private static readonly Expression<Func<Album, AlbumCard>> AlbumCardOf = a => new AlbumCard(
+        a.ToSummary(),
+        EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating),
+        ToCover(a.CoverMediaReference()),
+        a.PurchaseIntents.Any());
+
+    // fonctionnel.md § Couverture d'un album, among all the editions: the oldest edition with a cover, by
+    // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
+    // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered:
+    // the first created.
+    private static readonly Expression<Func<Album, string?>> CoverMediaReferenceOf = a => a.Editions
+        .SelectMany(e => e.Visuals
+            .Where(v => v.Type == DomainEnums.VisualType.Cover)
+            .Select(v => new { e.PublicationYear, EditionId = e.Id, v.DisplayOrder, VisualId = v.Id, v.MediaReference }))
+        .OrderBy(c => c.PublicationYear)
+        .ThenBy(c => c.EditionId)
+        .ThenBy(c => c.DisplayOrder)
+        .ThenBy(c => c.VisualId)
+        .Select(c => c.MediaReference)
+        .FirstOrDefault();
 
     private static readonly Expression<Func<Universe, UniverseListItem>> UniverseListItemOf =
         u => new UniverseListItem(u.Id, u.Name, u.ParentId, u.Parent != null ? u.Parent.Name : null);
@@ -144,6 +178,8 @@ internal static class CatalogExpressions
                 nameof(RolesOf) => RolesOfAuthor,
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
+                nameof(ToCard) => AlbumCardOf,
+                nameof(CoverMediaReference) => CoverMediaReferenceOf,
                 _ => null,
             };
             if (expression is null)

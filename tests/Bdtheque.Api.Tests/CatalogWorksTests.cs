@@ -49,15 +49,15 @@ public sealed class CatalogWorksTests : IClassFixture<ApiWebApplicationFactory>
         // "Astérix" < "Blake et Mortimer" < "Corto Maltese" < "Dernier Pharaon [Le]".
         Assert.Equal(
             [(asterix.Id, (Guid?)null), (blake.Id, null), (corto.Id, null), (null, pharaon.Id)],
-            works.Works.Items.Select(e => (e.Series?.Series.Id, e.Album?.Id)));
+            works.Works.Items.Select(e => (e.Series?.Series.Id, e.Album?.Album.Id)));
         Assert.Equal((1, 50, 4), (works.Works.Number, works.Works.Size, works.Works.TotalCount));
 
         var asterixEntry = works.Works.Items[0].Series!;
         Assert.Equal(new SeriesListItem(asterix.Id, "Astérix"), asterixEntry.Series);
-        Assert.Equal([asterix1.Id, asterix2.Id], asterixEntry.Albums.Select(a => a.Id));
+        Assert.Equal([asterix1.Id, asterix2.Id], asterixEntry.Albums.Select(a => a.Album.Id));
         Assert.Equal(new AlbumSummary(asterix1.Id, "Astérix le Gaulois", asterix.Id, "Astérix", AlbumType.Regular, false, 1, null, null, false),
-            asterixEntry.Albums[0]);
-        Assert.Equal([blake1.Id], works.Works.Items[1].Series!.Albums.Select(a => a.Id));
+            asterixEntry.Albums[0].Album);
+        Assert.Equal([blake1.Id], works.Works.Items[1].Series!.Albums.Select(a => a.Album.Id));
         Assert.Empty(works.Works.Items[2].Series!.Albums);
     }
 
@@ -75,9 +75,9 @@ public sealed class CatalogWorksTests : IClassFixture<ApiWebApplicationFactory>
 
         // "Alack Sinner" < "Blacksad" < "Tir de la mort [Le]": a series counts once, with all its albums.
         Assert.Equal((2, 2, 3), (works.Works.Number, works.Works.Size, works.Works.TotalCount));
-        Assert.Equal([tirLa.Id], works.Works.Items.Select(e => e.Album!.Id));
+        Assert.Equal([tirLa.Id], works.Works.Items.Select(e => e.Album!.Album.Id));
         var firstPage = await GetAsync<GenreWorks>($"/catalog/genres/{genre.Id}/works?page=1&pageSize=2");
-        Assert.Equal([blacksad1.Id, blacksad2.Id], firstPage.Works.Items[1].Series!.Albums.Select(a => a.Id));
+        Assert.Equal([blacksad1.Id, blacksad2.Id], firstPage.Works.Items[1].Series!.Albums.Select(a => a.Album.Id));
     }
 
     [Fact]
@@ -103,14 +103,14 @@ public sealed class CatalogWorksTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal((new UniverseListItem(marvel.Id, "Marvel", null, null), 0), (top.Universe.Universe, top.Universe.Ancestors.Count));
         Assert.Equal(
             [(avengers.Id, (Guid?)null), (daredevil.Id, null), (null, hulk.Id), (wolverine.Id, null)],
-            top.Works.Items.Select(e => (e.Series?.Series.Id, e.Album?.Id)));
-        Assert.Equal([daredevil1.Id], top.Works.Items[1].Series!.Albums.Select(a => a.Id));
+            top.Works.Items.Select(e => (e.Series?.Series.Id, e.Album?.Album.Id)));
+        Assert.Equal([daredevil1.Id], top.Works.Items[1].Series!.Albums.Select(a => a.Album.Id));
 
         Assert.Equal([new UniverseListItem(marvel.Id, "Marvel", null, null)], sub.Universe.Ancestors);
         // The works of the parent are not those of its sub-universe.
         Assert.Equal(
             [(daredevil.Id, (Guid?)null), (null, hulk.Id), (wolverine.Id, null)],
-            sub.Works.Items.Select(e => (e.Series?.Series.Id, e.Album?.Id)));
+            sub.Works.Items.Select(e => (e.Series?.Series.Id, e.Album?.Album.Id)));
     }
 
     [Theory]

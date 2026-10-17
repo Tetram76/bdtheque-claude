@@ -69,7 +69,7 @@ internal static class UniverseEndpoints
         var albums = context.Albums.AsNoTracking().WhereUniverse(universeIds);
         var series = context.Series.AsNoTracking()
             .Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)) || albums.Any(a => a.SeriesId == s.Id));
-        return new UniverseWorks(universe, await CatalogWorks.ReadPageAsync(series, albums, page, pageSize, cancellationToken));
+        return new UniverseWorks(universe, await CatalogWorks.ReadPageAsync(context, series, albums, page, pageSize, cancellationToken));
     }
 
     private static async Task<UniverseForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>

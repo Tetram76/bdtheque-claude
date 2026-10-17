@@ -49,7 +49,8 @@ public sealed record UniverseInHierarchy(UniverseListItem Universe, IReadOnlyLis
 /// <param name="PublisherCollection">The collection of the series: its template collection.</param>
 /// <param name="Universes">By name.</param>
 /// <param name="Contributions">The authors of the series: its template contributions.</param>
-/// <param name="Albums">Every album of the series, in its order (fonctionnel.md § Ordre des albums dans une série).</param>
+/// <param name="Overview">The number of its albums and the covers of its first volumes, for its pile of covers.</param>
+/// <param name="Albums">Every album of the series, as a card, in its order (fonctionnel.md § Ordre des albums dans une série).</param>
 public sealed record SeriesDetail(
     Guid Id,
     string Title,
@@ -63,7 +64,8 @@ public sealed record SeriesDetail(
     IReadOnlyList<GenreListItem> Genres,
     IReadOnlyList<UniverseInHierarchy> Universes,
     IReadOnlyList<ContributionItem> Contributions,
-    IReadOnlyList<AlbumSummary> Albums,
+    SeriesOverview Overview,
+    IReadOnlyList<AlbumCard> Albums,
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);
 
@@ -144,10 +146,11 @@ public sealed record AuthorDetail(
 public sealed record BibliographyEntry(SeriesBibliographyItem? Series, AlbumBibliographyItem? Album);
 
 /// <summary>A series of a bibliography, credited on the series itself or on one of its albums.</summary>
+/// <param name="Overview">The series as a whole, its albums the author took no part in included.</param>
 /// <param name="Roles">The roles credited on the series itself; empty for an author credited on its albums only.</param>
 /// <param name="Albums">The albums of the series the author took part in, in the order of the series.</param>
 public sealed record SeriesBibliographyItem(
-    SeriesListItem Series, IReadOnlyList<ContributionRole> Roles, IReadOnlyList<AlbumBibliographyItem> Albums);
+    SeriesListItem Series, SeriesOverview Overview, IReadOnlyList<ContributionRole> Roles, IReadOnlyList<AlbumBibliographyItem> Albums);
 
 /// <summary>An album of a bibliography, with every role the author is credited with on it.</summary>
-public sealed record AlbumBibliographyItem(AlbumSummary Album, IReadOnlyList<ContributionRole> Roles);
+public sealed record AlbumBibliographyItem(AlbumCard Album, IReadOnlyList<ContributionRole> Roles);
