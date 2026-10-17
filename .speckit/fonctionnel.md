@@ -293,7 +293,7 @@ La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 | Édition | Ses visuels, son intention d'achat | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
 | Intention d'achat portant sur une édition | L'édition visée (non possédée), avec ses visuels | Composition | Supprimée avec elle : une édition non possédée n'existe que par son intention (cf. § Intention d'achat). |
 | Toute fiche | Désignée par un critère ou par la valeur par défaut d'une variable d'une recherche enregistrée (cf. § Recherche avancée) | Référence | Refusée tant qu'une recherche enregistrée la désigne, elle ou une fiche supprimée avec elle. |
-| Jeton d'accès | Son historique d'utilisation et ses retours écrits (cf. § Suivi de l'utilisation) | — | Conservés, rattachés au nom du jeton : le suivi évalue les points d'entrée de l'outil, non les jetons. Le jeton supprimé est refusé dès l'utilisation suivante. |
+| Jeton d'accès | Son historique d'utilisation et ses retours écrits (cf. § Suivi de l'utilisation) | Composition | Supprimés avec lui. Pour conserver cet historique, le jeton est archivé plutôt que supprimé (cf. § Accès par jeton). |
 | Visuel d'édition, Contribution, Intention d'achat portant sur l'album, Recherche enregistrée | — | — | Hors la ligne « Toute fiche », suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
 
 ### Calcul des estimations
@@ -522,10 +522,12 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 - Toute utilisation de l'outil exige un **jeton d'accès**, quelle que soit la fonctionnalité utilisée, consultation publique comprise : un agent sans jeton valide n'obtient rien de l'outil.
 - Les jetons sont **générés dans l'administration**, par le compte administrateur, qui les gère comme toute autre fiche (cf. § Structure de l'application, Administration). Chaque jeton a :
   - un **nom**, obligatoire, qui identifie son usage (ex. l'agent ou le poste qui l'utilise) ;
-  - une **expiration**, optionnelle : un jeton expiré est refusé comme un jeton inconnu ; sans expiration, il reste valable jusqu'à sa suppression ;
+  - une **expiration**, optionnelle : un jeton expiré est archivé (cf. ci-dessous) ; sans expiration, il reste valable jusqu'à son archivage ou sa suppression ;
   - un **accès à l'administration**, autorisé ou non.
 - Un jeton **sans accès à l'administration** donne le niveau **public** des règles d'accès (cf. § Règles d'accès) : recherche, consultation, analyses et statistiques publiques. Un jeton **avec accès à l'administration** donne le niveau du **compte administrateur** : écriture de données (toujours à la demande de l'utilisateur, cf. ci-dessus) et analyses et statistiques privées. Il agit au nom de ce compte unique, sans créer d'autre utilisateur.
-- La **valeur du jeton** n'est présentée qu'une seule fois, à sa génération : l'application ne la conserve pas sous une forme qui permettrait de la présenter de nouveau. Un jeton perdu est supprimé, et un autre est généré.
+- La **valeur du jeton** n'est présentée qu'une seule fois, à sa génération : l'application ne la conserve pas sous une forme qui permettrait de la présenter de nouveau. Un jeton perdu est archivé ou supprimé, et un autre est généré.
+- **Archivage** : un jeton peut être **archivé**, plutôt que supprimé, pour conserver son historique d'utilisation (cf. § Suivi de l'utilisation). Un jeton archivé est refusé comme un jeton inconnu, mais reste consultable dans l'administration avec son historique. Un jeton **expiré** est **archivé automatiquement**. Supprimer un jeton, archivé ou non, supprime son historique (cf. § Suppression des entités).
+- **Réarmement** : un jeton archivé peut être **réarmé**. Le réarmement génère une **nouvelle valeur**, présentée une seule fois comme à la génération (l'ancienne reste refusée), avec une **nouvelle expiration** choisie comme à la génération ; le jeton réarmé n'est plus archivé. C'est le même jeton : son nom, son accès à l'administration et son **historique** sont conservés, l'historique d'avant et d'après le réarmement étant commun.
 
 ### Suivi de l'utilisation
 
@@ -544,7 +546,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 
   Sa pertinence sera jugée à l'usage, et sa définition ajustée en conséquence.
 - **Retour écrit de l'agent** : l'agent peut, s'il le juge utile, signaler par écrit une limite rencontrée (ex. un filtre ou une donnée qui lui a manqué, une réponse inadaptée). Ce retour est facultatif et n'est pas une note : il complète le suivi, rattaché à l'utilisation qu'il concerne, sans entrer dans l'indice d'efficacité.
-- Le suivi, retours écrits compris, est consultable dans l'administration. La suppression d'un jeton ne l'efface pas : son historique reste rattaché à son nom (cf. § Suppression des entités).
+- Le suivi, retours écrits compris, est consultable dans l'administration. L'historique d'un jeton est conservé tant que le jeton existe, archivé compris, et supprimé avec lui (cf. § Accès par jeton, Archivage).
 
 Les règles d'accès sont celles de l'application (cf. § Règles d'accès) : l'outil n'a pas de règles d'accès aux données qui lui soient propres, son jeton ne faisant que déterminer le niveau d'accès de l'agent, et les fonctionnalités équivalentes de l'interface web ont les mêmes restrictions.
 
