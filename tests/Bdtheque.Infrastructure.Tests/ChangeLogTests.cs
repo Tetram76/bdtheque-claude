@@ -103,6 +103,23 @@ public sealed class ChangeLogTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ModificationOfSavedSearchCriteria_OutsideTheConstantsOfItsVariables_LeavesItsVariablesUnchanged()
+    {
+        // An attribute read from several properties changes only if its value does, not if one of its properties does.
+        const string before = """{"kind":"group","operator":"And","conditions":[{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}]}""";
+        const string after = """{"kind":"group","operator":"Or","conditions":[{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}]}""";
+        var search = new SavedSearch("Titre", EntityKind.Album, before, [new SearchVariable("Titre", "/conditions/0/values/0")]);
+        Context.SavedSearches.Add(search);
+        await Context.SaveChangesAsync();
+
+        search.SetSearch(EntityKind.Album, after, search.Variables);
+        await Context.SaveChangesAsync();
+
+        var entry = (await EntriesAsync()).Last();
+        Assert.Equal([new ChangeLogChange(ChangeLogAttribute.SearchCriteria, new SearchCriteriaValue(before), new SearchCriteriaValue(after))], entry.Changes);
+    }
+
+    [Fact]
     public async Task RewriteOfSavedSearch_ThatChangesNothing_IsNotRecorded()
     {
         const string criteria = """{"kind":"criterion","field":"title","comparison":"Contains","values":["Tintin"]}""";

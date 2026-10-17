@@ -74,10 +74,14 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
                 if (before.SequenceEqual(after))
                     continue;
 
-                changes.Add(new ChangeLogChange(
-                    attribute.Attribute,
-                    await attribute.Read(before, _labels, cancellationToken),
-                    await attribute.Read(after, _labels, cancellationToken)));
+                // An attribute read from several properties may keep its value while one of them changes (e.g.
+                // the variables of a saved search and their defaults, when the criteria change elsewhere).
+                var valueBefore = await attribute.Read(before, _labels, cancellationToken);
+                var valueAfter = await attribute.Read(after, _labels, cancellationToken);
+                if (Equals(valueBefore, valueAfter))
+                    continue;
+
+                changes.Add(new ChangeLogChange(attribute.Attribute, valueBefore, valueAfter));
             }
         }
 
