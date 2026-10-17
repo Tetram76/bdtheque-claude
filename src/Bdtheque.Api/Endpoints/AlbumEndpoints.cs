@@ -47,7 +47,7 @@ internal static class AlbumEndpoints
         catalog.MapGet("/albums/{id:guid}", GetDetailAsync);
     }
 
-    private static readonly Expression<Func<Album, AlbumSummary>> ListItem = CatalogExpressions.Expand((Album a) => a.ToSummary());
+    internal static readonly Expression<Func<Album, AlbumSummary>> ListItem = CatalogExpressions.Expand((Album a) => a.ToSummary());
 
     /// <summary>
     /// An album with what it is linked with: the genres and universes displayed — those of the album and

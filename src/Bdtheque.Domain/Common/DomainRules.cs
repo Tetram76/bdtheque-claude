@@ -109,4 +109,10 @@ public static class DomainRules
     /// Suppression des entités); the error carries the impact naming them.
     /// </summary>
     public const string DeletionBlockedByReferences = "Deletion.BlockedByReferences";
+
+    /// <summary>
+    /// A criterion of the advanced search left without the value its comparison needs (fonctionnel.md §
+    /// Recherche avancée), e.g. an empty text: the user fills it in.
+    /// </summary>
+    public const string AdvancedSearchValueMissing = "AdvancedSearch.ValueMissing";
 }

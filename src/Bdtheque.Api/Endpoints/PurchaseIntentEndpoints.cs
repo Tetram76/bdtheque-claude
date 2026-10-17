@@ -121,7 +121,7 @@ internal static class PurchaseIntentEndpoints
         return ToForm(album, context.VersionOf(album));
     }
 
-    private static readonly Expression<Func<PurchaseIntent, PurchaseIntentListItem>> ListItem = CatalogExpressions.Expand(
+    internal static readonly Expression<Func<PurchaseIntent, PurchaseIntentListItem>> ListItem = CatalogExpressions.Expand(
         (PurchaseIntent p) => new PurchaseIntentListItem(p.Id, p.Album.ToSummary(), p.Edition == null ? null : p.Edition.ToSummary()));
 
     /// <summary>The public list of the intents, in the order of their albums.</summary>

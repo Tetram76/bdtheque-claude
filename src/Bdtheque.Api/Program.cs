@@ -110,6 +110,7 @@ catalog.MapPublisherCatalog();
 catalog.MapGenreCatalog();
 catalog.MapUniverseCatalog();
 catalog.MapPurchaseIntentList();
+catalog.MapAdvancedSearch();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
