@@ -46,8 +46,37 @@ internal static class SearchTranslator
             SearchNot not => Expression.Not(Build(entity, record, Required(not.Condition), scope)),
             SearchCriterion criterion => entity.Field(criterion.Field).Build(record, criterion),
             SearchLink link => Follow(entity.Link(link.Link), record, link, scope),
+            SearchDataComparison comparison => CompareData(entity, record, comparison, scope),
             _ => throw new ArgumentException($"Unknown condition {condition.GetType().Name}.", nameof(condition)),
         };
+
+    private static Expression CompareData(SearchEntityDefinition entity, Expression record, SearchDataComparison comparison, SearchScope scope)
+    {
+        var field = entity.Field(comparison.Field);
+        var other = comparison.Other ?? throw new ArgumentException("A comparison of data without its other data.", nameof(comparison));
+        return Reach(entity, record, other.Links ?? [], scope, (target, targetRecord) => field.Build(record, comparison, target.Field(other.Field), targetRecord));
+    }
+
+    // The condition on the record that links, each to one record, lead to from record: it must exist.
+    private static Expression Reach(
+        SearchEntityDefinition entity, Expression record, IReadOnlyList<string> links, SearchScope scope,
+        Func<SearchEntityDefinition, Expression, Expression> condition)
+    {
+        if (links.Count == 0)
+            return condition(entity, record);
+
+        var definition = entity.Link(links[0]);
+        if (definition.IsMultiple)
+            throw new ArgumentException($"{definition.Key} leads to several records, among which no other data is chosen.", nameof(links));
+        var (target, related) = Related(definition, record, scope);
+        if (related.Type == target.ClrType)
+            return Expression.AndAlso(
+                Expression.NotEqual(related, Expression.Constant(null, related.Type)), Reach(target, related, links.Skip(1).ToList(), scope, condition));
+        var relatedRecord = Expression.Parameter(target.ClrType, "related");
+        return Call(
+            nameof(Enumerable.Any), related, target.ClrType,
+            Expression.Lambda(Reach(target, relatedRecord, links.Skip(1).ToList(), scope, condition), relatedRecord));
+    }
 
     // Empty, AND holds for every record, and OR for none: the neutral element of each.
     private static Expression Combine(SearchGroup group, IReadOnlyList<Expression> conditions)
@@ -63,9 +92,7 @@ internal static class SearchTranslator
 
     private static Expression Follow(SearchLinkDefinition definition, Expression record, SearchLink link, SearchScope scope)
     {
-        var target = AdvancedSearchSchema.Of(definition.Target);
-        var lambda = definition.Related(scope);
-        var related = Unwrapped(ReplacingExpressionVisitor.Replace(lambda.Parameters[0], record, lambda.Body));
+        var (target, related) = Related(definition, record, scope);
         var relatedRecord = Expression.Parameter(target.ClrType, "related");
         var condition = link.Condition is null ? null : Expression.Lambda(Build(target, relatedRecord, link.Condition, scope), relatedRecord);
 
@@ -114,6 +141,14 @@ internal static class SearchTranslator
             ? [related]
             : [related, isQuery ? Expression.Quote(condition) : condition];
         return Expression.Call(declaringType, method, [type], arguments);
+    }
+
+    // The entity a link leads to, and the related records of record: the record itself through a navigation,
+    // a sequence otherwise.
+    private static (SearchEntityDefinition Target, Expression Related) Related(SearchLinkDefinition definition, Expression record, SearchScope scope)
+    {
+        var lambda = definition.Related(scope);
+        return (AdvancedSearchSchema.Of(definition.Target), Unwrapped(ReplacingExpressionVisitor.Replace(lambda.Parameters[0], record, lambda.Body)));
     }
 
     // A query declared as a sequence carries a conversion its methods do not need.
