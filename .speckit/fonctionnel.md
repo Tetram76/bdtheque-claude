@@ -80,7 +80,7 @@ Règle globale : **toute représentation visuelle** d'une édition **sans couver
 
 ### Couverture d'un album
 
-Un album n'a pas de couverture propre : sa couverture est celle de l'une de ses éditions (un visuel appartient toujours à une édition, `modele-metier.md` § Visuel d'édition). Toute représentation d'un album par sa couverture (ex. cartes d'album, piles de couvertures d'une série) retient, parmi les éditions qui ont un visuel de type **Couverture**, la plus ancienne selon son **année d'édition**, les éditions sans année d'édition venant en dernier.
+Un album n'a pas de couverture propre : sa couverture est celle de l'une de ses éditions (un visuel appartient toujours à une édition, `modele-metier.md` § Visuel d'édition). Toute représentation d'un album par sa couverture (ex. cartes d'album, piles de couvertures d'une série) retient, parmi les éditions qui ont un visuel de type **Couverture**, la plus ancienne selon son **année d'édition**, les éditions sans année d'édition venant en dernier, et de cette édition sa **première couverture** dans l'ordre de ses visuels (cf. § Ordre des visuels d'une édition).
 
 Les éditions prises en compte dépendent du contexte d'affichage :
 
