@@ -27,6 +27,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | **Intention d'achat** | Souhait d'acquisition portant sur un album (toute édition) ou sur une édition spécifique. |
 | **Recherche enregistrée** | Recherche avancée nommée par l'administrateur, rejouable en consultation (voir `fonctionnel.md` § Recherche avancée). |
 | **Paramétrage de l'application** | Réglages de l'application, fixés par l'administrateur dans le bloc « Paramétrage » de l'administration. Fiche unique. |
+| **Jeton d'accès** | Jeton généré par l'administrateur, sans lequel l'outil pour agents IA n'est pas utilisable ; il détermine le niveau d'accès de l'agent (voir `fonctionnel.md` § Interface pour agents IA). |
 | **Journal des modifications** | Trace de chaque écriture sur une fiche : création, modification, suppression ou reprise d'une ancienne donnée. |
 
 ---
@@ -290,11 +291,20 @@ erDiagram
 
 > **Contrainte :** le paramétrage est une fiche **unique**, toujours présente : il se modifie, mais ne se crée ni ne se supprime.
 
+### Jeton d'accès
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Nom | texte | oui | Identifie l'usage du jeton (ex. l'agent ou le poste qui l'utilise). |
+| Accès à l'administration | booléen | oui | `false` : niveau d'accès public ; `true` : niveau du compte administrateur (voir `fonctionnel.md` § Accès par jeton). |
+| Expiration | date et heure | non | À partir de laquelle le jeton est refusé. Absente : le jeton reste valable jusqu'à sa suppression. |
+| Valeur | secret | oui | Générée par l'application, jamais saisie ; présentée une seule fois, à la génération, et conservée sous une forme qui ne permet pas de la présenter de nouveau. |
+
 ### Entrée du journal des modifications
 
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
-| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage`. |
+| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage` / `Jeton d'accès`. |
 | Fiche | identifiant | oui | Identifiant de la fiche écrite. Conservé après la suppression de la fiche : aucune contrainte d'intégrité référentielle. |
 | Libellé | composantes du libellé | oui | Données qui composent le libellé de la fiche (ex. titre, série et tome d'un album, cf. `fonctionnel.md` § Libellé d'un album), relevées au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. Le libellé en est construit à la consultation. |
 | Opération | énuméré | oui | `Création` / `Modification` / `Suppression` / `Reprise` (reprise d'une ancienne donnée depuis l'application existante). |
