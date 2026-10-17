@@ -2,7 +2,7 @@
 
 Ce fichier décrit le plan d'implémentation de l'application, découpé en phases puis en chantiers — pas l'historique des décisions qui ont conduit à ce découpage.
 
-Chaque ligne correspond à un chantier, c'est-à-dire à un ticket GitHub (et à une Pull Request) : elle en indique le **numéro** et le **titre**. Le contenu détaillé du chantier est porté par le ticket. L'**état** d'un chantier est celui de son ticket : le numéro est **barré** lorsque le ticket est fermé (cf. `gestion-projet.md` § « Suivi par tickets »).
+Chaque ligne correspond à un chantier, c'est-à-dire à un ticket GitHub (et à une Pull Request) : elle en indique le **numéro** et le **titre**. Le contenu détaillé du chantier est porté par le ticket. L'**état** d'un chantier est celui de son ticket, signalé par la mise en forme de son numéro, selon la règle unique de `gestion-projet.md` § « Suivi par tickets » (Statut).
 
 ---
 
