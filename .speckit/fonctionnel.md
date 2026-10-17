@@ -78,6 +78,17 @@ Les visuels d'une édition sont présentés dans l'ordre suivant :
 
 Règle globale : **toute représentation visuelle** d'une édition **sans couverture** utilise un **visuel générique par défaut** à la place de sa couverture.
 
+### Couverture d'un album
+
+Un album n'a pas de couverture propre : sa couverture est celle de l'une de ses éditions (un visuel appartient toujours à une édition, `modele-metier.md` § Visuel d'édition). Toute représentation d'un album par sa couverture (ex. cartes d'album, piles de couvertures d'une série) retient, parmi les éditions qui ont un visuel de type **Couverture**, la plus ancienne selon son **année d'édition**, les éditions sans année d'édition venant en dernier, et de cette édition sa **première couverture** dans l'ordre de ses visuels (cf. § Ordre des visuels d'une édition).
+
+Les éditions prises en compte dépendent du contexte d'affichage :
+
+- **donnée de la collection** (ex. statistiques, consultation limitée à la collection, cf. § Périmètre de la consultation) : seules les éditions **possédées** ;
+- **ailleurs** (ex. fiches de série et d'auteur) : toutes les éditions de l'album, possédées ou visées par une intention d'achat.
+
+Un album dont aucune des éditions prises en compte n'a de couverture (y compris un album sans édition) est représenté par le visuel générique (cf. § Visuel par défaut).
+
 ### Langue et culture d'affichage
 
 La **culture d'affichage** (ex. français de France), et non une simple langue, est un paramètre de l'application : ce choix pilote la langue des textes de l'interface, mais aussi le **formatage des dates, nombres et montants** et l'**ordre de tri** des listes et résultats de recherche (voir « Tri et navigation par initiale » ci-dessous).
