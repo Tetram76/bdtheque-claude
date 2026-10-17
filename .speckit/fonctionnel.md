@@ -532,8 +532,9 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 ### Suivi de l'utilisation
 
 - L'utilisation de l'outil est **suivie par jeton** : pour chaque fonctionnalité de l'outil (chaque point d'entrée qu'il propose aux agents), le **nombre** d'appels et leur **fréquence** dans le temps.
+- **Sessions** : l'agent ouvre une **session** avant d'utiliser l'outil, et chacune de ses utilisations la désigne ; une utilisation sans session est refusée. Une session regroupe les utilisations d'une même conversation de l'agent, et peut porter l'**objectif** de la demande de l'utilisateur, si l'agent le précise (facultatif) : le suivi présente ainsi le bilan de chaque session au regard de la demande qu'elle sert.
 - **Objectif** : repérer les points d'entrée à améliorer, et **comment** ou **en quoi** les améliorer, ainsi que les **nouveaux points d'entrée** nécessaires (ex. un besoin que l'agent ne satisfait qu'en enchaînant plusieurs appels). Le suivi ne se limite donc pas à compter les appels : il doit, idéalement, aboutir à un **indice d'efficacité** de chaque point d'entrée.
-- **Indice d'efficacité** d'un point d'entrée : la part de ses utilisations **productives**, c'est-à-dire réussies et dont l'agent n'abandonne pas aussitôt le résultat pour une nouvelle tentative sur le même point d'entrée (ex. une recherche sans résultat aussitôt reformulée). Consulter la page suivante d'un résultat n'est pas une nouvelle tentative. Il est accompagné de signaux qui disent **quoi** améliorer :
+- **Indice d'efficacité** d'un point d'entrée : la part de ses utilisations **productives**, c'est-à-dire réussies et dont l'agent n'abandonne pas aussitôt le résultat pour une nouvelle tentative sur le même point d'entrée, dans la même session (ex. une recherche sans résultat aussitôt reformulée). Consulter la page suivante d'un résultat n'est pas une nouvelle tentative. Il est accompagné de signaux qui disent **quoi** améliorer :
 
   | Signal | Indique |
   | --- | --- |
@@ -541,7 +542,7 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
   | Nouvelle tentative après un résultat vide ou une erreur | Comportement de la recherche ou message d'erreur à revoir |
   | Enchaînement de pages | Taille des pages ou filtres manquants |
   | Réponses volumineuses | Besoin d'une forme de réponse plus concise |
-  | Mêmes enchaînements de points d'entrée, récurrents | **Nouveau point d'entrée** qui les regroupe |
+  | Mêmes enchaînements de points d'entrée dans de nombreuses sessions | **Nouveau point d'entrée** qui les regroupe |
   | Durée des utilisations | Performance |
 
   Sa pertinence sera jugée à l'usage, et sa définition ajustée en conséquence.
