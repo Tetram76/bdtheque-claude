@@ -120,7 +120,7 @@ internal static class EditionEndpoints
             e.ModifiedAt);
     }
 
-    private static readonly Expression<Func<Edition, EditionListItem>> ListItem =
+    internal static readonly Expression<Func<Edition, EditionListItem>> ListItem =
         CatalogExpressions.Expand((Edition e) => new EditionListItem(e.Album.ToSummary(), e.ToSummary(), e.IsOwned()));
 
     /// <summary>
@@ -148,7 +148,7 @@ internal static class EditionEndpoints
             .ToPageAsync(page, pageSize, ListItem, cancellationToken);
     }
 
-    private static string WithoutIsbnSeparators(string isbn) =>
+    internal static string WithoutIsbnSeparators(string isbn) =>
         isbn.Replace("-", "", StringComparison.Ordinal).Replace(" ", "", StringComparison.Ordinal);
 
     internal static async Task<NewEditionForm> GetNewAsync(Guid rootId, BdthequeDbContext context, CancellationToken cancellationToken)

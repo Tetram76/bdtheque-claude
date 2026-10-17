@@ -38,7 +38,7 @@ internal static class CatalogFilters
         return source.Where(Expression.Lambda<Func<T, bool>>(condition, item));
     }
 
-    private static string EscapeLike(string text) =>
+    internal static string EscapeLike(string text) =>
         text.Replace(LikeEscapeCharacter, LikeEscapeCharacter + LikeEscapeCharacter, StringComparison.Ordinal)
             .Replace("%", LikeEscapeCharacter + "%", StringComparison.Ordinal)
             .Replace("_", LikeEscapeCharacter + "_", StringComparison.Ordinal);

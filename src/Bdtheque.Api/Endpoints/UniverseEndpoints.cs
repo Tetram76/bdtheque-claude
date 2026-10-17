@@ -41,7 +41,7 @@ internal static class UniverseEndpoints
         catalog.MapGet("/universes/{id:guid}/works", GetWorksAsync);
     }
 
-    private static readonly Expression<Func<Universe, UniverseListItem>> ListItem = CatalogExpressions.Expand((Universe u) => u.ToListItem());
+    internal static readonly Expression<Func<Universe, UniverseListItem>> ListItem = CatalogExpressions.Expand((Universe u) => u.ToListItem());
 
     private static Task<Page<UniverseListItem>> ListAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
