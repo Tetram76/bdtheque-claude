@@ -80,7 +80,7 @@ internal static class SeriesEndpoints
         var albums = await context.Albums.AsNoTracking()
             .Where(a => a.SeriesId == id)
             .OrderInSeries()
-            .Select(CatalogExpressions.Expand((Album a) => a.ToSummary()))
+            .Select(CatalogExpressions.Expand((Album a) => a.ToCard()))
             .ToListAsync(cancellationToken);
         var universes = await UniverseTree.InHierarchyAsync(context, series.Universes, cancellationToken);
 

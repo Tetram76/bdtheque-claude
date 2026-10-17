@@ -163,9 +163,9 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
 
         Assert.Equal(
             [volume1.Id, volume2.Id, omnibus.Id, undated1999.Id, undated2001.Id, special1.Id, specialUndated.Id],
-            detail.Albums.Select(a => a.Id));
+            detail.Albums.Select(a => a.Album.Id));
         Assert.Equal(new AlbumSummary(omnibus.Id, "Intégrale 3 à 5", series.Id, "Lucky Luke", AlbumType.Omnibus, false, null, 3, 5, false),
-            detail.Albums[2]);
+            detail.Albums[2].Album);
         Assert.Equal(new PublisherListItem(dargaud.Id, dargaud.Name, "https://www.dargaud.com"), detail.Publisher);
         Assert.Equal(new PublisherCollectionListItem(collection.Id, "Lucky Luke", dargaud.Id, dargaud.Name), detail.PublisherCollection);
         Assert.Equal(
@@ -223,19 +223,19 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         // Series and albums without series together, by sort key: "Babel" < "Contes du Cosmos [Les]" < "Nemesis" < "Oumpah-Pah".
         Assert.Equal(
             [(babel.Id, (Guid?)null), (null, oneShot.Id), (nemesis.Id, null), (oumpah.Id, null)],
-            detail.Bibliography.Select(e => (e.Series?.Series.Id, e.Album?.Album.Id)));
+            detail.Bibliography.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));
 
         var babelEntry = detail.Bibliography[0].Series!;
         Assert.Equal(new SeriesListItem(babel.Id, "Babel"), babelEntry.Series);
         Assert.Equal([ContributionRole.Scenarist], babelEntry.Roles);
-        Assert.Equal([(babel1.Id, ContributionRole.Illustrator)], babelEntry.Albums.Select(a => (a.Album.Id, Assert.Single(a.Roles))));
+        Assert.Equal([(babel1.Id, ContributionRole.Illustrator)], babelEntry.Albums.Select(a => (a.Album.Album.Id, Assert.Single(a.Roles))));
 
         var oneShotEntry = detail.Bibliography[1].Album!;
         Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], oneShotEntry.Roles);
 
         var nemesisEntry = detail.Bibliography[2].Series!;
         Assert.Empty(nemesisEntry.Roles);
-        Assert.Equal([nemesis1.Id, nemesis2.Id], nemesisEntry.Albums.Select(a => a.Album.Id));
+        Assert.Equal([nemesis1.Id, nemesis2.Id], nemesisEntry.Albums.Select(a => a.Album.Album.Id));
 
         var oumpahEntry = detail.Bibliography[3].Series!;
         Assert.Equal([ContributionRole.Illustrator], oumpahEntry.Roles);

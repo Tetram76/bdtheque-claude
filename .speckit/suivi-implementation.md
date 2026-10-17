@@ -117,7 +117,7 @@ Répercussion dans l'API des données que les cartes d'album des fiches de séri
 
 | Ticket | Titre |
 | --- | --- |
-| #156 | Données des cartes d'album dans les fiches de série et d'auteur |
+| ~~#156~~ | Données des cartes d'album dans les fiches de série et d'auteur |
 
 ### Ajustement issu des fiches de consultation
 
@@ -153,6 +153,7 @@ Dashboard public et statistiques (sur la collection uniquement) ; conversion des
 Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
 - **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée (`fonctionnel.md` § Recherche avancée), avec leurs comparaisons (version choisie par critère, montant non convertible).
+- **Note — couverture d'un album** : une statistique qui présente un album par sa couverture (ex. doyen et benjamin) est une donnée de la collection, qui ne retient que les éditions possédées (`fonctionnel.md` § Couverture d'un album) ; l'expression de la couverture (`choix-implementation.md` § Organisation de l'API, cartes d'album) ne couvre encore que la variante sans filtre.
 
 ## Phase 5 — Fonctionnalités de second plan
 

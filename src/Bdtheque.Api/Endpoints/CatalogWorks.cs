@@ -1,5 +1,6 @@
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
+using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Api.Endpoints;
@@ -40,7 +41,8 @@ internal static class CatalogWorks
     /// </summary>
     /// <param name="series">The series of the list, those of <paramref name="albums"/> included.</param>
     public static async Task<Page<WorksEntry>> ReadPageAsync(
-        IQueryable<Series> series, IQueryable<Album> albums, int page, int pageSize, CancellationToken cancellationToken)
+        BdthequeDbContext context, IQueryable<Series> series, IQueryable<Album> albums, int page, int pageSize,
+        CancellationToken cancellationToken)
     {
         var entries = await FirstLevel(series, albums).ToPageAsync(page, pageSize, e => e, cancellationToken);
         var seriesIds = entries.Items.Where(e => e.SeriesId is not null).Select(e => e.SeriesId!.Value).ToList();
@@ -50,18 +52,41 @@ internal static class CatalogWorks
             .Where(s => seriesIds.Contains(s.Id))
             .Select(s => new SeriesListItem(s.Id, s.Title))
             .ToDictionaryAsync(s => s.Id, cancellationToken);
-        var summaries = (await albums
+        var overviews = await OverviewsAsync(context, seriesIds, cancellationToken);
+        var cards = (await albums
                 .Where(a => (a.SeriesId != null && seriesIds.Contains(a.SeriesId.Value)) || albumIds.Contains(a.Id))
                 .OrderInSeries()
-                .Select(CatalogExpressions.Expand((Album a) => a.ToSummary()))
+                .Select(CatalogExpressions.Expand((Album a) => a.ToCard()))
                 .ToListAsync(cancellationToken))
-            .ToLookup(a => a.SeriesId);
+            .ToLookup(a => a.Album.SeriesId);
 
         var items = entries.Items
             .Select(e => e.SeriesId is { } seriesId
-                ? new WorksEntry(new SeriesWorksItem(seriesItems[seriesId], summaries[seriesId].ToList()), null)
-                : new WorksEntry(null, summaries[null].Single(a => a.Id == e.AlbumId)))
+                ? new WorksEntry(new SeriesWorksItem(seriesItems[seriesId], overviews[seriesId], cards[seriesId].ToList()), null)
+                : new WorksEntry(null, cards[null].Single(a => a.Album.Id == e.AlbumId)))
             .ToList();
         return new Page<WorksEntry>(items, entries.Number, entries.Size, entries.TotalCount);
+    }
+
+    /// <summary>
+    /// Each of <paramref name="seriesIds"/> as a whole: the number of its albums and the covers of its first
+    /// ones, in its order, whichever of its albums the list presents.
+    /// </summary>
+    /// <remarks>
+    /// Every album of these series is read, rather than its first ones only: a series counts a few dozen
+    /// albums at most, and the count needs them all anyway.
+    /// </remarks>
+    public static async Task<Dictionary<Guid, SeriesOverview>> OverviewsAsync(
+        BdthequeDbContext context, IReadOnlyCollection<Guid> seriesIds, CancellationToken cancellationToken)
+    {
+        var covers = (await context.Albums.AsNoTracking()
+                .Where(a => a.SeriesId != null && seriesIds.Contains(a.SeriesId.Value))
+                .OrderInSeries()
+                .Select(CatalogExpressions.Expand((Album a) => new { SeriesId = a.SeriesId!.Value, MediaReference = a.CoverMediaReference() }))
+                .ToListAsync(cancellationToken))
+            .ToLookup(a => a.SeriesId, a => CatalogExpressions.ToCover(a.MediaReference));
+        return seriesIds.ToDictionary(
+            id => id,
+            id => new SeriesOverview(covers[id].Count(), covers[id].Take(SeriesOverview.FirstAlbumCount).ToList()));
     }
 }

@@ -14,12 +14,13 @@ public sealed record GenreWorks(GenreListItem Genre, Page<WorksEntry> Works);
 public sealed record UniverseWorks(UniverseInHierarchy Universe, Page<WorksEntry> Works);
 
 /// <summary>An entry of the works: either a series, or an album without series, exactly one of the two.</summary>
-public sealed record WorksEntry(SeriesWorksItem? Series, AlbumSummary? Album);
+public sealed record WorksEntry(SeriesWorksItem? Series, AlbumCard? Album);
 
 /// <summary>
 /// A series of the works, attached itself or through one of its albums, the genres and universes of an
 /// album in a series being those of the album and of the series (fonctionnel.md § Genres et univers d'un
 /// album).
 /// </summary>
+/// <param name="Overview">The series as a whole, its albums not attached included.</param>
 /// <param name="Albums">The albums of the series attached, all of them for a series attached itself, in the order of the series.</param>
-public sealed record SeriesWorksItem(SeriesListItem Series, IReadOnlyList<AlbumSummary> Albums);
+public sealed record SeriesWorksItem(SeriesListItem Series, SeriesOverview Overview, IReadOnlyList<AlbumCard> Albums);

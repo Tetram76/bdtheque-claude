@@ -62,7 +62,7 @@ internal static class AuthorEndpoints
                          .SingleOrDefaultAsync(cancellationToken)
                      ?? throw new EntityNotFoundException(typeof(Author), id);
 
-        // A single snapshot for the three reads below, which are assembled into one another: an entry is
+        // A single snapshot for the reads below, which are assembled into one another: an entry is
         // never without its series or album, whatever is written meanwhile.
         await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var credited = context.Albums.AsNoTracking().Where(a => a.Contributions.Any(c => c.AuthorId == id));
@@ -79,17 +79,19 @@ internal static class AuthorEndpoints
                 Roles = s.TemplateContributions.RolesOf(id),
             }))
             .ToDictionaryAsync(s => s.Id, cancellationToken);
+        var overviews = await CatalogWorks.OverviewsAsync(context, series.Keys, cancellationToken);
         var albums = (await credited
                 .OrderInSeries()
-                .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToSummary(), a.Contributions.RolesOf(id))))
+                .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToCard(), a.Contributions.RolesOf(id))))
                 .ToListAsync(cancellationToken))
-            .ToLookup(a => a.Album.SeriesId);
+            .ToLookup(a => a.Album.Album.SeriesId);
 
         var bibliography = entries
             .Select(e => e.SeriesId is { } seriesId
                 ? new BibliographyEntry(
-                    new SeriesBibliographyItem(series[seriesId].Item, series[seriesId].Roles, albums[seriesId].ToList()), null)
-                : new BibliographyEntry(null, albums[null].Single(a => a.Album.Id == e.AlbumId)))
+                    new SeriesBibliographyItem(series[seriesId].Item, overviews[seriesId], series[seriesId].Roles, albums[seriesId].ToList()),
+                    null)
+                : new BibliographyEntry(null, albums[null].Single(a => a.Album.Album.Id == e.AlbumId)))
             .ToList();
 
         return new AuthorDetail(

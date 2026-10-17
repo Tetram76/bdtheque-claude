@@ -55,7 +55,7 @@ internal static class GenreEndpoints
 
         var albums = context.Albums.AsNoTracking().WhereGenre(id);
         var series = context.Series.AsNoTracking().Where(s => s.Genres.Any(g => g.Id == id) || albums.Any(a => a.SeriesId == s.Id));
-        return new GenreWorks(genre, await CatalogWorks.ReadPageAsync(series, albums, page, pageSize, cancellationToken));
+        return new GenreWorks(genre, await CatalogWorks.ReadPageAsync(context, series, albums, page, pageSize, cancellationToken));
     }
 
     private static Task<Page<GenreListItem>> ListAsync(
