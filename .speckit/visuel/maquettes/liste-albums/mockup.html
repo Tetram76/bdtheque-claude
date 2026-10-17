@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Albums — administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
+/* A placeholder keeps the contrast of muted text rather than fading it with an opacity. */
+input::placeholder{color:var(--placeholder);opacity:1}
+/* The focus ring is drawn outside the control, over a band of the page colour: it stands out from the
+   control, coloured or not, and from the surface around it. */
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px var(--focus-gap)}
+/* Header: on a wide screen, search then actions on the logo's line; on a phone, the actions stay
+   on the logo's line and the search takes the whole line below. */
+.adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
+/* A row of the list is a line of a table on a wide screen; on a phone, the album and its actions on
+   one line, then what situates it, below. */
+.al-row{display:grid;grid-template-columns:36px minmax(0,1fr) 108px 190px 170px 108px 150px;grid-template-areas:"cover main date eds col mod act";align-items:center;column-gap:14px}
+.al-meta{display:contents}
+.al-date{grid-area:date}.al-eds{grid-area:eds}.al-col{grid-area:col}.al-mod{grid-area:mod}
+.al-act-label{display:inline}
+@media (max-width: 1080px){
+  .al-row{grid-template-columns:36px minmax(0,1fr) 108px 190px 170px 150px;grid-template-areas:"cover main date eds col act"}
+  .al-mod{display:none}
+}
+@media (max-width: 760px){
+  .al-head{display:none !important}
+  .al-row{grid-template-columns:36px minmax(0,1fr) auto;grid-template-areas:"cover main act" "cover meta meta";row-gap:4px;align-items:start}
+  .al-meta{grid-area:meta;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+  .al-act-label{display:none}
+  .al-edit{width:34px;padding:0 !important;justify-content:center}
+  .al-filters{grid-template-columns:repeat(2, minmax(0, 1fr)) !important}
+}
+@media (max-width: 640px){
+  .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
+  .adm-actions{margin-left:auto}
+  .adm-consult-label,.adm-menu-label,.al-new-label{display:none}
+  .adm-menu{width:38px;padding:0 !important;justify-content:center}
+  .al-new{width:38px;padding:0 !important;justify-content:center}
+  .adm-tag{padding:2px 8px !important;font-size:11px !important}
+}
+</style>
+<script src="../shared/mockup.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
+<div style="--placeholder: {{t.muted}}; --focus: {{t.text}}; --focus-gap: {{t.bg}}; min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
+
+  <header style="--placeholder: {{hdrMuted}}; --focus: {{t.hText}}; --focus-gap: {{hdrBg}}; position: sticky; top: 0; z-index: 20; background: {{hdrBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+    <div style="position: relative; max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
+        <sc-if value="{{t.lgMark}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
+        <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
+      </a>
+      <span class="adm-tag" style="padding: 4px 12px; border: {{t.tagB}}; border-radius: {{t.tagR}}; background: {{t.tagBg}}; color: {{t.tagText}}; font-weight: 700; font-size: 13px; text-transform: {{t.tagTT}}; letter-spacing: {{t.tagLS}}">Administration</span>
+      <div class="adm-search" style="min-width: 0; display: flex; align-items: center; gap: 8px">
+        <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Retrouver une fiche</label>
+        <input id="find" type="search" placeholder="Retrouver une fiche à modifier…" style="flex: 1 1 auto; min-width: 0; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
+      </div>
+      <div class="adm-actions" style="display: flex; align-items: center; gap: 8px">
+      <a href="#" aria-label="Aller à la consultation" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; flex: none; padding: 0 6px; color: {{t.hText}}; font-weight: 700; font-size: 14px"><span class="adm-consult-label">Aller à la consultation</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a>
+      <button type="button" aria-label="Menu" aria-expanded="{{menuExpanded}}" aria-controls="admin-menu" onClick="{{toggleMenu}}" class="adm-menu" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; flex: none; padding: 0 12px; border: {{t.hInB}}; border-radius: {{t.btnR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg><span class="adm-menu-label">Menu</span></button>
+      </div>
+
+      <sc-if value="{{menuOpen}}">
+    <button type="button" tabindex="-1" aria-label="Fermer le menu" onClick="{{closeMenu}}" style="position: fixed; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default"></button>
+    <nav id="admin-menu" aria-label="Plan de l'administration" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 8px); right: 24px; width: min(340px, calc(100% - 48px)); max-height: 80vh; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 12px; border: {{panelB}}; border-radius: {{t.cR}}; background: {{panelBg}}; color: {{t.text}}; box-shadow: {{panelSh}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: {{t.rowB}}">
+        <span style="padding-left: 10px; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">Menu</span>
+        <button type="button" aria-label="Fermer le menu" onClick="{{toggleMenu}}" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <sc-for list="{{menu}}" as="g">
+        <div style="display: flex; flex-direction: column; gap: 1px">
+          <span style="padding: 0 10px 2px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: {{t.muted}}">{{g.label}}</span>
+          <sc-for list="{{g.items}}" as="m">
+            <a href="#" aria-current="{{m.current}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; padding: 0 10px; font-size: 14px; border-radius: {{t.btnR}}; background: {{m.bg}}; color: {{m.fg}}; font-weight: {{m.fw}}">
+              <span>{{m.label}}</span>
+              <span style="font-size: 13px; font-variant-numeric: tabular-nums; opacity: .85">{{m.n}}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="padding-top: 8px; border-top: {{t.rowB}}">
+        <button type="button" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10"></path></svg>Se déconnecter</button>
+      </div>
+    </nav>
+      </sc-if>
+    </div>
+  </header>
+
+  <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
+    <main style="display: flex; flex-direction: column; gap: 18px">
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <nav aria-label="Fil d'Ariane" style="font-size: 13px; color: {{t.muted}}">
+          <a href="#" style="color: {{t.link}}; font-weight: 700">Administration</a>
+          <span aria-hidden="true" style="margin: 0 6px">›</span>
+          <span aria-current="page">Albums</span>
+        </nav>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px">
+          <div style="display: flex; align-items: baseline; gap: 12px; min-width: 0">
+            <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Albums</h1>
+            <span style="font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 20px; font-variant-numeric: tabular-nums; color: {{t.muted}}">2 847</span>
+          </div>
+          <a href="#" class="al-new" aria-label="Nouvel album" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; box-sizing: border-box; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-weight: 700; font-size: 15px; --focus-gap: {{t.bg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span class="al-new-label">Nouvel album</span></a>
+        </div>
+      </div>
+
+      <section aria-labelledby="l-albums" style="--focus-gap: {{cardBg}}; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+        <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{kick}}</span>
+        <h2 id="l-albums" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Liste des albums</h2>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+          <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Rechercher un album</label>
+          <div style="flex: 1 1 280px; min-width: 0; position: relative">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="position: absolute; left: 14px; top: 12px; color: {{t.muted}}"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4"></path></svg>
+            <input id="q" type="search" value="{{query}}" placeholder="Titre de l'album ou de sa série…" style="width: 100%; height: 42px; padding: 0 14px 0 40px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit">
+          </div>
+          <button type="button" aria-expanded="{{filtersExpanded}}" aria-controls="al-filters" onClick="{{toggleFilters}}" style="display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: {{filtersBtnBg}}; color: {{filtersBtnFg}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"></path></svg>Filtres<sc-if value="{{activeCount}}"><span style="min-width: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: {{t.acc}}; color: {{t.onAcc}}; font-size: 12px; line-height: 20px; text-align: center">{{activeCount}}</span></sc-if></button>
+        </div>
+
+        <sc-if value="{{filtersOpen}}">
+          <div id="al-filters" style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
+            <div class="al-filters" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px 12px">
+              <sc-for list="{{filters}}" as="f">
+                <label style="display: flex; flex-direction: column; gap: 3px; min-width: 0; font-weight: 700; font-size: 12px; color: {{t.muted}}">{{f.label}}
+                  <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 36px; padding: 0 12px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{f.fg}}; font-weight: {{f.fw}}; font-size: 14px"><span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{f.value}}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; color: {{t.muted}}"><path d="{{f.icon}}"></path></svg></span>
+                </label>
+              </sc-for>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: {{t.muted}}">Série, auteur, éditeur, collection, genre et univers se choisissent en tapant leur nom. Un univers retient aussi les albums de ses sous-univers ; genres et univers sont ceux qu'affiche l'album, les siens et ceux de sa série.</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{activeCount}}">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
+            <sc-for list="{{active}}" as="a">
+              <span style="display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 6px 0 12px; box-sizing: border-box; border-radius: {{t.btnR}}; background: {{t.nBg}}; color: {{t.nFg}}; font-size: 13px"><span><span style="opacity: .8">{{a.label}} :</span> <strong>{{a.value}}</strong></span><button type="button" aria-label="Retirer le filtre {{a.label}}" style="width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
+            </sc-for>
+            <button type="button" style="padding: 0 6px; border: 0; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Tout effacer</button>
+          </div>
+        </sc-if>
+
+        <div data-scroll-hint style="--hint-bg: {{cardBg}}; color: {{t.text}}">
+          <nav data-scroll aria-label="Navigation par initiale" style="display: flex; gap: 2px; padding: 2px 0">
+            <sc-for list="{{entries}}" as="e">
+              <a href="#" aria-current="{{e.current}}" style="flex: none; min-width: {{e.w}}; height: 30px; padding: 0 6px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: {{t.btnR}}; background: {{e.bg}}; color: {{e.fg}}; font-weight: 700; font-size: 13px">{{e.label}}</a>
+            </sc-for>
+          </nav>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; font-size: 13px; color: {{t.muted}}">
+          <span><strong style="color: {{t.text}}">{{countLabel}}</strong> {{countDetail}}</span>
+          <span>Triés par titre, la série tenant lieu de titre aux albums qui n'en ont pas</span>
+        </div>
+
+        <sc-if value="{{hasRows}}">
+          <div role="table" aria-label="Albums" style="display: flex; flex-direction: column">
+            <div role="row" class="al-row al-head" style="padding: 0 4px 6px; border-bottom: {{headB}}; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">
+              <span role="columnheader" style="grid-area: cover"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Couverture</span></span>
+              <span role="columnheader" style="grid-area: main">Album</span>
+              <span role="columnheader" class="al-date">Parution</span>
+              <span role="columnheader" class="al-eds">Éditions</span>
+              <span role="columnheader" class="al-col">Collection</span>
+              <span role="columnheader" class="al-mod">Modifié</span>
+              <span role="columnheader" style="grid-area: act; text-align: right"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Actions</span></span>
+            </div>
+            <sc-for list="{{rows}}" as="r">
+              <div role="row" class="al-row" style="padding: 8px 4px; border-bottom: {{t.rowB}}; font-size: 14px">
+                <span role="cell" aria-hidden="true" style="grid-area: cover; width: 36px; height: 48px; box-sizing: border-box; border-radius: {{t.thR}}; background: {{r.coverBg}}; color: rgba(255,255,255,.88); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; font-weight: 800; font-size: 11px; overflow: hidden">{{r.mark}}</span>
+                <span role="cell" style="grid-area: main; min-width: 0; display: flex; flex-direction: column">
+                  <a href="#" style="font-weight: 700; color: {{t.text}}; overflow-wrap: anywhere">{{r.label}}</a>
+                  <span style="font-size: 12px; color: {{t.muted}}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.credits}}</span>
+                </span>
+                <span class="al-meta">
+                  <span role="cell" class="al-date" style="font-variant-numeric: tabular-nums; color: {{r.dateFg}}">{{r.date}}</span>
+                  <span role="cell" class="al-eds" style="color: {{r.edsFg}}">{{r.eds}}</span>
+                  <span role="cell" class="al-col"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{r.badgeB}}; border-radius: {{t.btnR}}; background: {{r.badgeBg}}; color: {{r.badgeFg}}; font-weight: 700; font-size: 12px; white-space: nowrap"><sc-if value="{{r.intent}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3z"></path></svg></sc-if>{{r.badge}}</span></span>
+                </span>
+                <span role="cell" class="al-mod" style="font-size: 13px; color: {{t.muted}}; font-variant-numeric: tabular-nums">{{r.modified}}</span>
+                <span role="cell" style="grid-area: act; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
+                  <a href="#" class="al-edit" aria-label="Modifier {{r.label}}" style="display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg><span class="al-act-label">Modifier</span></a>
+                  <button type="button" aria-label="Autres actions sur {{r.label}}" aria-haspopup="menu" aria-expanded="{{r.menuExpanded}}" onClick="{{r.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{r.moreBg}}; color: {{r.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
+                  <sc-if value="{{r.menuOpen}}">
+                    <div role="menu" aria-label="Actions sur {{r.label}}" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 10; width: 250px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                      <a href="#" role="menuitem" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border-radius: {{t.btnR}}; color: {{t.text}}; font-weight: 700; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg>Voir dans la consultation</a>
+                      <button type="button" role="menuitem" onClick="{{r.merge}}" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{mergeIcon}}"></path></svg>Fusionner avec un autre album…</button>
+                      <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
+                      <button type="button" role="menuitem" onClick="{{r.remove}}" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.del}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6"></path></svg>Supprimer…</button>
+                    </div>
+                  </sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+
+          <nav aria-label="Pages de la liste" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-top: 4px; font-size: 13px">
+            <span style="color: {{t.muted}}">{{pageLabel}}</span>
+            <span style="display: flex; align-items: center; gap: 4px">
+              <span aria-disabled="true" style="height: 32px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: {{t.btnR}}; color: {{t.muted}}; font-weight: 700">‹ Précédente</span>
+              <sc-for list="{{pages}}" as="p">
+                <a href="#" aria-current="{{p.current}}" style="min-width: 32px; height: 32px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: {{t.btnR}}; background: {{p.bg}}; color: {{p.fg}}; font-weight: 700; font-variant-numeric: tabular-nums">{{p.label}}</a>
+              </sc-for>
+              <a href="#" style="height: 32px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: {{t.btnR}}; color: {{t.link}}; font-weight: 700">Suivante ›</a>
+            </span>
+          </nav>
+        </sc-if>
+
+        <sc-if value="{{empty}}">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 16px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; text-align: center">
+            <strong style="font-size: 15px">Aucun album ne correspond à « {{query}} ».</strong>
+            <span style="font-size: 13px; color: {{t.muted}}">La recherche porte sur le titre de l'album et sur celui de sa série, sans tenir compte des majuscules ni des accents.</span>
+            <span style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px">
+              <button type="button" style="height: 36px; padding: 0 14px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Effacer la recherche</button>
+              <a href="#" style="display: inline-flex; align-items: center; height: 36px; padding: 0 14px; box-sizing: border-box; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-weight: 700; font-size: 13px">Créer l'album « {{query}} »</a>
+            </span>
+          </div>
+        </sc-if>
+      </section>
+    </main>
+  </div>
+
+  <footer style="max-width: 1280px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px) 24px; box-sizing: border-box; font-size: 12px; color: {{t.muted}}">
+    <span>Espace réservé au compte administrateur.</span>
+  </footer>
+
+  <sc-if value="{{dialog}}">
+    <div style="position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; background: rgba(0,0,0,.45)">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="d-title" aria-describedby="d-body" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; width: min(480px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; padding: 18px 20px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.cR}}; background: {{panelBg}}; color: {{t.text}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: flex-start; gap: 12px">
+          <span aria-hidden="true" style="width: 36px; height: 36px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: {{dialog.iconBg}}; color: {{dialog.iconFg}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{dialog.icon}}"></path></svg></span>
+          <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <h2 id="d-title" style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 19px; line-height: 1.2; text-transform: {{t.fdTT}}">{{dialog.title}}</h2>
+            <span style="font-weight: 700; font-size: 14px; overflow-wrap: anywhere">{{dialog.label}}</span>
+          </div>
+        </div>
+        <div id="d-body" style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+          <span>{{dialog.lead}}</span>
+          <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{dialog.lines}}" as="l">
+              <li style="display: flex; flex-wrap: wrap; gap: 2px 8px; padding: 8px 10px; border-radius: {{t.tR}}; background: {{t.nBg}}; color: {{t.nFg}}"><strong>{{l.kind}}</strong><span>{{l.what}}</span></li>
+            </sc-for>
+          </ul>
+          <sc-if value="{{dialog.pick}}">
+            <label for="d-pick" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Rechercher l'autre album</label>
+            <input id="d-pick" type="search" value="{{dialog.pick.query}}" style="height: 40px; padding: 0 14px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit">
+            <div role="radiogroup" aria-label="Autre album" style="display: flex; flex-direction: column; gap: 4px">
+              <sc-for list="{{dialog.pick.items}}" as="c">
+                <label style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: {{c.bd}}; border-radius: {{t.tR}}; cursor: pointer">
+                  <input type="radio" name="d-other" checked="{{c.checked}}" style="accent-color: {{t.acc}}; width: 16px; height: 16px; margin: 0">
+                  <span style="min-width: 0; display: flex; flex-direction: column"><strong style="font-size: 14px">{{c.label}}</strong><span style="font-size: 12px; color: {{t.muted}}">{{c.detail}}</span></span>
+                </label>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{dialog.note}}"><span style="font-size: 13px; color: {{t.muted}}">{{dialog.note}}</span></sc-if>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding-top: 4px">
+          <button type="button" onClick="{{closeDialog}}" style="height: 38px; padding: 0 16px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer">{{dialog.cancel}}</button>
+          <sc-if value="{{dialog.confirm}}"><button type="button" onClick="{{closeDialog}}" style="height: 38px; padding: 0 16px; border: 0; border-radius: {{t.btnR}}; background: {{dialog.confirmBg}}; color: {{dialog.confirmFg}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer">{{dialog.confirm}}</button></sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</template>
+<script>
+// Shared defaults: each theme only states what its identity changes.
+const BASE = {
+  kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
+  kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
+  lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
+  tagTT: 'none', tagLS: '0', fdTT: 'none', h1size: 'clamp(24px, 3vw, 36px)', cSh: 'none', hiSh: 'none', thR: '3px'
+};
+
+// « Cases et bulles » comes in two tints that only differ by their purple shades.
+const cases = (c) => ({
+  ...BASE,
+  bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
+  acc: '#FFB547', onAcc: c.bg, link: '#FFB547', warn: '#FF7A6B', onWarn: c.bg, del: '#FF7A6B', nBg: '#FBF3EA', nFg: c.bg,
+  fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
+  tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
+  inBg: c.bg, inB: '2px solid ' + c.border, inR: '999px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', thR: '6px 3px 7px 4px',
+  hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
+  helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px'
+});
+
+// Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
+// another ink of the same theme carries the text or the fill.
+const THEMES = {
+  violine: cases({ bg: '#2B1030', panel: '#3A1641', border: '#6A3375', soft: '#EBD3EF', muted: '#CFA9D6' }),
+  mure: cases({ bg: '#1F1033', panel: '#2A1844', border: '#533A78', soft: '#DCD1EE', muted: '#B9A8D8' }),
+  gazette: {
+    ...BASE,
+    bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
+    acc: '#2B1030', onAcc: '#FBF3EA', link: '#9A3D12', warn: '#9A3D12', onWarn: '#FBF3EA', del: '#9A3D12', nBg: '#F1E3D6', nFg: '#2B1030',
+    fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+    cBg: 'transparent', cB: '0', cBT: '2px solid #2B1030', cR: '0', cPad: '14px 0 0',
+    tBg: 'transparent', tB: '1px solid #D9C6CF', tR: '0', rowB: '1px solid #D9C6CF',
+    inBg: 'transparent', inB: '2px solid #2B1030', inR: '999px', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', thR: '0',
+    hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
+    helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
+    lgText: '#2B1030', lgFont: '800 26px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    tagBg: '#FFB547', tagText: '#2B1030', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.08em',
+    kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase'
+  },
+  sommaire: {
+    ...BASE,
+    bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
+    acc: '#1D4ED8', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#E63946', onWarn: '#FFFFFF', del: '#C62D3A', nBg: '#111111', nFg: '#FFFFFF',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(30px, 4vw, 48px)',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '10px 10px 0 #111111', hiSh: '10px 10px 0 #111111',
+    tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
+    inBg: '#FFFFFF', inB: '2px solid #111111', inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', thR: '0',
+    hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
+    helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 24px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    tagBg: '#111111', tagText: '#FFFFFF', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.06em'
+  },
+  festival: {
+    ...BASE,
+    bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
+    acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#C2412F', onWarn: '#FFFFFF', del: '#C2412F', nBg: '#F6C343', nFg: '#1B2350',
+    fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 2px 0 rgba(27,35,80,.08)', hiSh: '0 2px 0 rgba(27,35,80,.08)',
+    tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
+    inBg: '#FFFFFF', inB: '2px solid #1B2350', inR: '999px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', thR: '8px',
+    hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
+    helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 20px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: '#F6C343', tagText: '#1B2350', tagB: '0', tagR: '999px',
+    kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (label) => 'Station ' + label
+  },
+  riso: {
+    ...BASE,
+    bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
+    acc: '#0078BF', onAcc: '#F4EFE4', link: '#0078BF', warn: '#FF48B0', onWarn: '#002284', del: '#C4007A', nBg: 'rgba(0,120,191,.12)', nFg: '#00578C',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(20px, 2.4vw, 28px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)', hiSh: '7px 6px 0 rgba(255,72,176,.85)',
+    tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
+    inBg: 'transparent', inB: '2px dashed #0078BF', inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', thR: '0',
+    hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
+    helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 20px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    tagBg: 'transparent', tagText: '#0078BF', tagB: '2px solid #FF48B0', tagR: '0'
+  },
+  librairie: {
+    ...BASE,
+    bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
+    acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', warn: '#B5523B', onWarn: '#FBF7EE', del: '#A3472F', nBg: '#EFE6D2', nFg: '#2A2420',
+    fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 1px 4px rgba(42,36,32,.12)', hiSh: '0 1px 4px rgba(42,36,32,.12)',
+    tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
+    inBg: '#FFFFFF', inB: '1px solid #B8924A', inR: '22px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', thR: '1px',
+    hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF', hMuted: '#D8C9A8',
+    helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
+    lgText: '#D8B972', lgFont: "400 24px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: 'transparent', tagText: '#B8924A', tagB: '1px solid #B8924A', tagR: '0', tagTT: 'uppercase', tagLS: '.3em'
+  },
+  vignettes: {
+    ...BASE,
+    bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
+    acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#C8366B', onWarn: '#FFFFFF', del: '#B42E5E', nBg: '#9DD6DD', nFg: '#23323A',
+    fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '26px clamp(14px, 2.2vw, 22px) clamp(14px, 2.2vw, 22px)',
+    tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
+    inBg: '#FFFFFF', inB: '2px solid #0F7C8C', inR: '999px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', thR: '4px',
+    hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A', hMuted: '#5B6B72',
+    helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
+    lgText: '#FFFFFF', lgFont: "800 22px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    tagBg: '#FFD23F', tagText: '#23323A', tagB: '0', tagR: '999px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-13px', kLeft: '20px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '1px 12px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '13px', kPre: (label) => 'Page 1 · ' + label
+  }
+};
+
+// The rows of the list, in the order of the list: by sort key, the series' key standing for the
+// title of an album that has none (fonctionnel.md § Tri et navigation par initiale). Labels follow
+// the default format, « Album (Série - Tome) » (fonctionnel.md § Libellé d'un album).
+// state: own (at least one owned edition), out (none), intent (aimed at by a purchase intent).
+const ALBUMS = [
+  { label: 'La Ballade de la mer salée (Corto Maltese - T. 1)', mark: '1', credits: 'Hugo Pratt', date: '1975', eds: [2, 1], state: 'own', cover: true, modified: '12 oct. 2026', genre: true },
+  { label: 'Barracuda - Tome 1', mark: '1', credits: 'Jean Dufaux · Jérémy', date: 'nov. 2010', eds: [1, 1], state: 'own', cover: true, modified: '3 sept. 2026', genre: true },
+  { label: 'Bécassine (Bécassine - T. 1)', mark: '1', credits: 'Caumery · Joseph Porphyre Pinchon', date: '1913', eds: [1, 1], state: 'own', cover: true, modified: '21 juil. 2026' },
+  { label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', mark: '21', credits: 'Hergé', date: '1963', eds: [2, 2], state: 'own', cover: true, modified: 'hier', genre: true },
+  { label: 'Blacksad - Intégrale [1 à 5]', mark: 'INT', credits: 'Juan Díaz Canales · Juanjo Guarnido', date: 'oct. 2023', eds: [0, 0], state: 'intent', cover: false, modified: '8 oct. 2026' },
+  { label: 'Blake et Mortimer - Hors-série 2', mark: 'HS', credits: 'Edgar P. Jacobs', date: '', eds: [0, 0], state: 'out', cover: false, modified: '2 févr. 2026' },
+  { label: 'Le Bleu est une couleur chaude', mark: '', credits: 'Julie Maroh', date: 'mars 2010', eds: [1, 1], state: 'own', cover: true, modified: '14 mai 2026' },
+  { label: 'Le Bout du monde (Undertaker - T. 8)', mark: '8', credits: 'Xavier Dorison · Ralph Meyer · Caroline Delabie', date: 'sept. 2026', eds: [1, 1], state: 'own', cover: false, modified: "aujourd'hui", genre: true },
+  { label: 'Brüsel (Les Cités obscures - T. 4)', mark: '4', credits: 'Benoît Peeters · François Schuiten', date: '1992', eds: [1, 1], state: 'own', cover: true, modified: '30 juin 2026' },
+  { label: 'Buddy Longway - Tome 2', mark: '2', credits: 'Derib', date: '1974', eds: [1, 0], state: 'intent', cover: true, modified: '9 oct. 2026', genre: true }
+];
+
+const EXAMPLES = {
+  // The list as it opens on an entry of the navigation by initial.
+  liste: { entry: 'B', query: '', active: [], rows: ALBUMS, count: '143 albums', detail: 'sous la lettre B', page: 'Albums 1 à 50 sur 143', pages: ['1', '2', '3'] },
+  // A search narrowed by cross filters.
+  filtree: {
+    entry: '', query: '', rows: ALBUMS.filter((a) => a.state === 'own' && a.genre),
+    active: [{ label: 'Genre', value: 'Aventure' }, { label: 'Collection', value: 'Dans la collection' }],
+    count: '38 albums', detail: 'sur 2 847', page: 'Albums 1 à 38 sur 38', pages: ['1']
+  },
+  // A search that finds nothing.
+  vide: { entry: '', query: 'Zorglub', active: [], rows: [], count: 'Aucun album', detail: 'sur 2 847', page: '', pages: [] }
+};
+
+const FILTERS = [
+  ['Série', 'serie'], ['Auteur', 'auteur'], ['Éditeur', 'editeur'], ['Collection éditeur', 'collectionEditeur'],
+  ['Genre', 'genre'], ['Univers', 'univers'], ['Collection', 'collection']
+];
+const CHEVRON = 'M6 9l6 6 6-6';
+const SEARCH = 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4';
+
+const TRASH = 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13';
+const MERGE = 'M6 4v5a5 5 0 0 0 5 5h1a5 5 0 0 1 5 5v1 M18 4v5a5 5 0 0 1-5 5 M3 7l3-3 3 3 M15 7l3-3 3 3';
+const BLOCK ='M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M5.6 5.6l12.8 12.8';
+
+// What deleting an album announces (fonctionnel.md § Suppression des entités): the records deleted
+// with it, the associations it loses, or the references that block it, counted by kind of record.
+const DIALOGS = {
+  confirmation: (t) => ({
+    title: 'Supprimer cet album ?', label: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
+    lead: "La suppression est définitive et emporte avec l'album :",
+    lines: [
+      { kind: 'Supprimés avec lui', what: '2 éditions, 9 visuels, 1 contribution' },
+      { kind: 'Associations retirées', what: '2 genres, 1 univers' }
+    ],
+    note: "Les genres et l'univers restent : seul leur lien avec l'album disparaît.",
+    cancel: 'Annuler', confirm: 'Supprimer définitivement', confirmBg: t.warn, confirmFg: t.onWarn, icon: TRASH, iconBg: t.warn, iconFg: t.onWarn
+  }),
+  // Merging two albums starts from one of them: the other one is chosen here. What the merge keeps
+  // of each is still to be defined (fonctionnel.md § Structure de l'application, Administration).
+  fusion: (t) => ({
+    title: 'Fusionner deux albums', label: 'Barracuda - Tome 1',
+    lead: 'Avec quel album fusionner celui-ci ?',
+    lines: [],
+    pick: {
+      query: 'barracuda',
+      items: [
+        { label: 'Esclaves (Barracuda - T. 1)', detail: 'Jean Dufaux · Jérémy · nov. 2010 · 1 édition, possédée', checked: true },
+        { label: 'Barracuda - Intégrale [1 à 3]', detail: 'Jean Dufaux · Jérémy · 2016 · aucune édition', checked: false }
+      ].map((c) => ({ ...c, bd: c.checked ? '2px solid ' + t.acc : t.rowB }))
+    },
+    note: 'L’étape suivante présentera les deux albums côte à côte, avec ce que la fusion garde de chacun.',
+    cancel: 'Annuler', confirm: 'Continuer', confirmBg: t.acc, confirmFg: t.onAcc, icon: MERGE, iconBg: t.nBg, iconFg: t.nFg
+  }),
+  refus: (t) => ({
+    title: 'Suppression impossible', label: 'Blake et Mortimer - Hors-série 2',
+    lead: "L'album est encore désigné ailleurs : la suppression est refusée tant que ce lien existe.",
+    lines: [{ kind: 'Utilisé par', what: '1 recherche enregistrée, « Hors-séries à trouver »' }],
+    note: 'Retirez d’abord l’album des critères de cette recherche, puis recommencez.',
+    cancel: 'Fermer', confirm: null, icon: BLOCK, iconBg: t.nBg, iconFg: t.nFg
+  })
+};
+
+class View extends Mockup {
+  renderVals() {
+    const t = THEMES[this.props.theme] ?? THEMES.violine;
+    const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.liste;
+    const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
+    const filtersOpen = this.state?.filtersOpen ?? (this.props.filtres ?? false);
+    const dialogKey = this.state?.dialog !== undefined ? this.state.dialog : this.props.dialogue;
+    // The menu of a row's other actions: the « actions » setting opens it on the second row.
+    const rowMenu = this.state?.rowMenu !== undefined ? this.state.rowMenu : (this.props.actions ? 1 : null);
+    document.documentElement.style.overflow = menuOpen || DIALOGS[dialogKey] ? 'hidden' : '';
+    // Themes without an opaque or bordered card still need one for a panel laid over the content.
+    const panelBg = t.cBg === 'transparent' ? t.bg : t.cBg;
+    const panelB = t.cB !== '0' ? t.cB : (t.cBT !== '0' ? t.cBT : '2px solid ' + t.line);
+    const panelSh = t.hiSh !== 'none' && t.hiSh !== t.cSh ? t.hiSh : '0 18px 40px rgba(0,0,0,.28)';
+    const hdrBg = t.hBg === 'transparent' ? t.bg : t.hBg;
+    const cardBg = t.cBg === 'transparent' ? t.bg : t.cBg;
+    const menuItem = (label, n, current) => ({
+      label, n, current: current ? 'page' : 'false',
+      bg: current ? t.acc : 'transparent', fg: current ? t.onAcc : t.text, fw: current ? '700' : '500'
+    });
+    const entry = (label, w) => {
+      const current = label === (x.entry || 'Toutes');
+      return { label, w, current: current ? 'page' : 'false', bg: current ? t.acc : 'transparent', fg: current ? t.onAcc : t.text };
+    };
+    const activeOf = (label) => x.active.find((a) => a.label === label);
+    const filters = FILTERS.map(([label]) => {
+      const set = activeOf(label === 'Collection' ? 'Collection' : label);
+      return {
+        label,
+        value: set ? set.value : (label === 'Collection' ? 'Tous les albums' : 'Tous'),
+        fg: set ? t.text : t.muted, fw: set ? '700' : '400',
+        // A list of fixed values opens as a choice; the others are found by typing their name.
+        icon: label === 'Collection' ? CHEVRON : SEARCH
+      };
+    });
+    // Covers get a hue of their own, so that the list reads as a shelf; an album without a cover
+    // shows the generic visual (fonctionnel.md § Visuel par défaut).
+    const coverOf = (a, i) => (a.cover
+      ? 'hsl(' + ((i * 47 + 200) % 360) + ', 42%, 36%)'
+      : 'repeating-linear-gradient(135deg, rgba(127,127,127,.42) 0 6px, rgba(127,127,127,.24) 6px 12px)');
+    const rows = x.rows.map((a, i) => {
+      const [total, owned] = a.eds;
+      return {
+        ...a,
+        coverBg: coverOf(a, ALBUMS.indexOf(a)),
+        mark: a.cover ? a.mark : '',
+        date: a.date || 'Non renseignée',
+        dateFg: a.date ? t.text : t.muted,
+        eds: total === 0 ? 'Aucune édition' : total + (total > 1 ? ' éditions' : ' édition') + (owned ? ', ' + owned + (owned > 1 ? ' possédées' : ' possédée') : ', aucune possédée'),
+        edsFg: total === 0 ? t.muted : t.text,
+        intent: a.state === 'intent',
+        badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? "Intention d'achat" : 'Pas dans la collection'),
+        badgeBg: a.state === 'own' ? t.nBg : 'transparent',
+        badgeFg: a.state === 'own' ? t.nFg : t.text,
+        badgeB: a.state === 'own' ? '2px solid transparent' : '2px dashed ' + t.line,
+        modified: a.modified,
+        menuOpen: rowMenu === i,
+        menuExpanded: rowMenu === i ? 'true' : 'false',
+        moreBg: rowMenu === i ? t.nBg : 'transparent',
+        moreFg: rowMenu === i ? t.nFg : t.text,
+        toggle: () => this.setState({ rowMenu: rowMenu === i ? null : i }),
+        merge: () => this.setState({ rowMenu: null, dialog: 'fusion' }),
+        remove: () => this.setState({ rowMenu: null, dialog: a.state === 'out' ? 'refus' : 'confirmation' })
+      };
+    });
+    const dialog = DIALOGS[dialogKey] ? DIALOGS[dialogKey](t) : null;
+    return {
+      t,
+      hdrBg,
+      hdrMuted: t.hMuted ?? t.muted,
+      cardBg,
+      headB: t.rowB.replace(/^1px/, '2px'),
+      menuOpen,
+      menuExpanded: menuOpen ? 'true' : 'false',
+      panelBg, panelB, panelSh,
+      toggleMenu: () => this.setState({ menuOpen: !menuOpen }),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      kick: t.kPre ? t.kPre('Fiches') : 'Fiches',
+      query: x.query,
+      filtersOpen,
+      filtersExpanded: filtersOpen ? 'true' : 'false',
+      filtersBtnBg: filtersOpen ? t.nBg : 'transparent',
+      filtersBtnFg: filtersOpen ? t.nFg : t.secText,
+      toggleFilters: () => this.setState({ filtersOpen: !filtersOpen }),
+      filters,
+      active: x.active,
+      activeCount: x.active.length || null,
+      entries: [entry('Toutes', '58px'), ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#@'.split('').map((l) => entry(l, '30px'))],
+      countLabel: x.count,
+      countDetail: x.detail,
+      rows,
+      hasRows: rows.length > 0,
+      empty: rows.length === 0,
+      pageLabel: x.page,
+      pages: x.pages.map((p, i) => ({ label: p, current: i === 0 ? 'page' : 'false', bg: i === 0 ? t.acc : 'transparent', fg: i === 0 ? t.onAcc : t.text })),
+      dialog,
+      mergeIcon: MERGE,
+      closeDialog: () => this.setState({ dialog: null }),
+      menu: [
+        { label: 'Accueil', items: [menuItem('Tableau de bord', '', false), menuItem('Nouvelle édition', '', false)] },
+        { label: 'Collection', items: [menuItem('Albums', '2 847', true), menuItem('Séries', '412', false), menuItem('Éditions', '2 913', false), menuItem("Intentions d'achat", '18', false)] },
+        { label: 'Auteurs et éditeurs', items: [menuItem('Auteurs', '1 106', false), menuItem('Éditeurs', '96', false)] },
+        { label: 'Référentiels', items: [menuItem('Genres', '24', false), menuItem('Univers', '37', false)] },
+        { label: 'Réglages', items: [menuItem('Paramétrage', '', false), menuItem('Statistiques privées', '', false)] }
+      ]
+    };
+  }
+}
+
+Mockup.mount(View, {
+  theme: { label: 'Thème', editor: 'enum', options: ['violine', 'mure', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes'], default: 'violine' },
+  exemple: { label: 'Exemple', editor: 'enum', options: ['liste', 'filtree', 'vide'], default: 'liste' },
+  filtres: { label: 'Filtres ouverts', editor: 'boolean', default: false },
+  actions: { label: 'Actions d’une ligne', editor: 'boolean', default: false },
+  dialogue: { label: 'Dialogue', editor: 'enum', options: ['aucun', 'confirmation', 'refus', 'fusion'], default: 'aucun' },
+  menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
+});
+</script>
+</body>
+</html>
