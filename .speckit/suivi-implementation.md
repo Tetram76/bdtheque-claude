@@ -136,7 +136,7 @@ Répercussion dans le modèle de domaine et dans l'API de la recherche avancée 
 | ~~#168~~ | Moteur de la recherche avancée en consultation |
 | ~~#169~~ | Recherches enregistrées : administration et rejeu en consultation |
 | ~~#170~~ | Blocage de la suppression des fiches désignées par une recherche enregistrée |
-| #171 | Comparaison entre deux données dans la recherche avancée |
+| ~~#171~~ | Comparaison entre deux données dans la recherche avancée |
 
 ## Phase 3 — Frontend Blazor
 
@@ -148,7 +148,7 @@ Découpage précis à établir une fois la Phase 2 stabilisée ; probablement pa
 - **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base.
 - **Note — paramétrage de l'application** : le paramétrage (`modele-metier.md` § Paramétrage de l'application) n'existe encore ni dans le modèle de domaine ni dans l'API. Il est intégré à cette phase avec le bloc « Paramétrage » de l'administration, qui l'expose et le modifie, et ses écritures sont alors journalisées (`modele-metier.md` § Entrée du journal des modifications, type de fiche `Paramétrage`).
 - **Note — fuseau horaire** : les dates et heures (création, modification, entrée dans la collection) sont enregistrées en temps universel, et la recherche avancée les compare par leur jour en temps universel (`choix-implementation.md` § Recherche avancée : mise en œuvre). Le fuseau horaire dans lequel l'application les présente est établi avec le frontend, et la recherche alignée sur lui, pour qu'une date présentée et la même date recherchée désignent le même jour.
-- **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
+- **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données (`choix-implementation.md` § Recherche avancée : mise en œuvre), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
 
 ## Phase 4 — Statistiques, devises et estimation de valeur
 
@@ -156,7 +156,7 @@ Dashboard public et statistiques (sur la collection uniquement) ; conversion des
 
 Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
-- **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée (`fonctionnel.md` § Recherche avancée), avec leurs comparaisons (version choisie par critère, montant non convertible).
+- **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée (`fonctionnel.md` § Recherche avancée), avec leurs comparaisons (version choisie par critère, montant non convertible), à une valeur comme à un autre montant.
 - **Note — couverture d'un album** : une statistique qui présente un album par sa couverture (ex. doyen et benjamin) est une donnée de la collection, qui ne retient que les éditions possédées (`fonctionnel.md` § Couverture d'un album) ; l'expression de la couverture (`choix-implementation.md` § Organisation de l'API, cartes d'album) ne couvre encore que la variante sans filtre.
 
 ## Phase 5 — Fonctionnalités de second plan

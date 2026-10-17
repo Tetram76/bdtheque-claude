@@ -201,6 +201,22 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
     }
 
     [Fact]
+    public async Task Replay_ComparesTwoDataAsTheAdvancedSearch_NextToItsVariables()
+    {
+        var withoutArticle = await CreateAlbumAsync($"Tintin {_marker}");
+        await CreateAlbumAsync($"Le Lotus {_marker}");
+        var criteria = new SearchGroup(SearchOperator.And,
+        [
+            new SearchCriterion("title", Contains, [_marker]),
+            // The sort key moves the article of a title to its end (fonctionnel.md § Titres).
+            new SearchDataComparison("title", EqualTo, new SearchOperand("sortKey")),
+        ]);
+        var search = await CreateAsync(Name(), criteria, [new SearchVariableContent("Repère", "/conditions/0/values/0")]);
+
+        Assert.Equal([withoutArticle.Id], (await ReplayAsync<AlbumSummary>(search.Id, null)).Select(a => a.Id));
+    }
+
+    [Fact]
     public async Task Replay_ReturnsTheEntitiesOfTheSearch()
     {
         var search = await CreateAsync(Name(), new SearchCriterion("title", StartsWith, [$"Série {_marker}"]), entity: EntityKind.Series);

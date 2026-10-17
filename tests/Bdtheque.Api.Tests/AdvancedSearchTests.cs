@@ -56,7 +56,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var album = schema.Entities.Single(e => e.Entity == EntityKind.Album);
         var rating = album.Fields.Single(f => f.Key == "rating");
         Assert.Equal(
-            new SearchFieldDescription("rating", SearchDataType.Enumeration, true, [Is, IsNot, IsOneOf, IsNoneOf, IsSet, IsNotSet], null,
+            new SearchFieldDescription("rating", SearchDataType.Enumeration, true, [Is, IsNot, IsOneOf, IsNoneOf, IsSet, IsNotSet], [Is, IsNot], null,
                 nameof(AlbumRating), Enum.GetNames<AlbumRating>()),
             rating with { Comparisons = rating.Comparisons.ToList(), Members = rating.Members!.ToList() },
             new RecordComparer());
@@ -64,6 +64,29 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         Assert.Contains(new SearchLinkDescription("series", EntityKind.Series, false), album.Links);
         var acquisitionPrice = schema.Entities.Single(e => e.Entity == EntityKind.Edition).Fields.Single(f => f.Key == "acquisitionPrice");
         Assert.Equal([IsSet, IsNotSet], acquisitionPrice.Comparisons);
+        Assert.Empty(acquisitionPrice.DataComparisons);
+    }
+
+    /// <summary>
+    /// To another data, a data is compared by the comparisons of its type that need a single value: neither
+    /// "between", nor "is one of", nor "is set".
+    /// </summary>
+    [Fact]
+    public async Task Schema_DescribesTheComparisonsOfEachDataToAnother()
+    {
+        var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
+
+        foreach (var field in schema.Entities.SelectMany(e => e.Fields))
+        {
+            SearchComparison[] expected = field.Type switch
+            {
+                SearchDataType.Text => [Contains, DoesNotContain, StartsWith, EqualTo, NotEqualTo],
+                SearchDataType.Number or SearchDataType.Date => [EqualTo, NotEqualTo, LessThan, LessThanOrEqualTo, GreaterThan, GreaterThanOrEqualTo],
+                SearchDataType.Boolean or SearchDataType.Enumeration or SearchDataType.Record => [Is, IsNot],
+                _ => [],
+            };
+            Assert.Equal(expected, field.DataComparisons);
+        }
     }
 
     /// <summary>
@@ -84,6 +107,13 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
                     var criterion = new SearchCriterion(field.Key, comparison, SampleValues(field, comparison));
                     var response = await PostSearchAsync(entity.Entity, criterion);
                     Assert.True(response.IsSuccessStatusCode, $"{entity.Entity}.{field.Key} {comparison}: {response.StatusCode}");
+                }
+
+                foreach (var comparison in field.DataComparisons)
+                {
+                    var precision = field.Type == SearchDataType.Date ? SearchDatePrecision.Day : (SearchDatePrecision?)null;
+                    var response = await PostSearchAsync(entity.Entity, Data(field.Key, comparison, new SearchOperand(field.Key), precision));
+                    Assert.True(response.IsSuccessStatusCode, $"{entity.Entity}.{field.Key} {comparison} {field.Key}: {response.StatusCode}");
                 }
             }
 
@@ -191,6 +221,72 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         AssertIds([june.Id], await EditionIdsAsync(And(mine, Text("publicationYear", EqualTo, "1985"))));
         Assert.Empty(await EditionIdsAsync(And(mine, Text("publicationYear", EqualTo, "1985-01"))));
         AssertIds([june.Id, july.Id], await EditionIdsAsync(And(mine, Text("createdAt", EqualTo, DateTime.UtcNow.ToString("yyyy")))));
+    }
+
+    [Fact]
+    public async Task Dates_AreComparedToEachOtherAtThePrecisionChosen_EachCoveringTheWholePeriodItIsKnownTo()
+    {
+        var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
+        var album = await CreateAlbumAsync($"Album {_marker}", publication: (2000, 6));
+        var reprint = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 2010, acquisitionDate: new DateOnly(2009, 12, 24));
+        var sameYear = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 2010, acquisitionDate: new DateOnly(2010, 3, 1));
+        var original = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 2000, acquisitionDate: new DateOnly(2000, 6, 30));
+        var notAcquiredOn = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 2000);
+
+        var mine = new SearchLink("publisher", Text("name", Contains, _marker));
+        var acquisition = new SearchOperand("acquisitionDate");
+        var albumPublication = new SearchOperand("firstPublicationDate", ["album"]);
+
+        // fonctionnel.md § Comparaisons: editions published after their acquisition, or before the first publication of their album.
+        AssertIds([reprint.Id], await EditionIdsAsync(And(mine, Data("publicationYear", GreaterThan, acquisition, SearchDatePrecision.Year))));
+        AssertIds([sameYear.Id, original.Id], await EditionIdsAsync(And(mine, Data("publicationYear", EqualTo, acquisition, SearchDatePrecision.Year))));
+        AssertIds([original.Id, notAcquiredOn.Id], await EditionIdsAsync(And(mine, Data("publicationYear", LessThanOrEqualTo, albumPublication, SearchDatePrecision.Year))));
+        Assert.Empty(await EditionIdsAsync(And(mine, Data("publicationYear", LessThan, albumPublication, SearchDatePrecision.Year))));
+
+        // At the month, a year covers its twelve months: no month of 2010 is established equal to, before or after March 2010.
+        Assert.Empty(await EditionIdsAsync(And(mine, Data("publicationYear", EqualTo, acquisition, SearchDatePrecision.Month))));
+        AssertIds([reprint.Id], await EditionIdsAsync(And(mine, Data("publicationYear", GreaterThan, acquisition, SearchDatePrecision.Month))));
+        AssertIds([reprint.Id], await EditionIdsAsync(And(mine, Data("publicationYear", NotEqualTo, acquisition, SearchDatePrecision.Year))));
+        AssertIds(
+            [sameYear.Id, original.Id, notAcquiredOn.Id],
+            await EditionIdsAsync(And(mine, new SearchNot(Data("publicationYear", GreaterThan, acquisition, SearchDatePrecision.Month)))));
+        AssertIds(
+            [sameYear.Id, original.Id],
+            await EditionIdsAsync(And(mine, Data("acquisitionDate", GreaterThanOrEqualTo, new SearchOperand("publicationYear"), SearchDatePrecision.Year))));
+    }
+
+    [Fact]
+    public async Task Data_OfEachType_IsComparedToAnotherOfTheSameType_OfTheRecordOrOfARecordItLeadsTo()
+    {
+        var series = await CreateSeriesAsync($"Série {_marker} 1_0");
+        var same = await CreateAlbumAsync($"SERIE {_marker} 1_0", series.Id, volumeNumber: 1);
+        var sequel = await CreateAlbumAsync($"Série {_marker} 1_0 : la suite", series.Id, volumeNumber: 1);
+        var other = await CreateAlbumAsync($"Série {_marker} 1x0", series.Id, volumeNumber: 2);
+        var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
+        await CreateEditionAsync(sequel.Id, publisher.Id);
+        var seriesTitle = new SearchOperand("title", ["series"]);
+
+        AssertIds([same.Id], await AlbumIdsAsync(Data("title", EqualTo, seriesTitle)));
+        Assert.Empty(await AlbumIdsAsync(new SearchDataComparison("title", EqualTo, seriesTitle, MatchCaseAndAccents: true)));
+        AssertIds([same.Id, sequel.Id], await AlbumIdsAsync(Data("title", StartsWith, seriesTitle)));
+        // The wildcards of LIKE in the other data are looked for as they are: "1x0" neither starts with nor contains "1_0".
+        AssertIds([other.Id], await AlbumIdsAsync(Data("title", DoesNotContain, seriesTitle)));
+        AssertIds([same.Id, other.Id], await AlbumIdsAsync(Data("volumeNumber", GreaterThan, new SearchOperand("editionCount"))));
+        AssertIds([same.Id, sequel.Id, other.Id], await AlbumIdsAsync(Data("manualSortKey", Is, new SearchOperand("manualSortKey", ["series"]))));
+        Assert.Empty(await AlbumIdsAsync(Data("record", IsNot, new SearchOperand("record"))));
+    }
+
+    [Fact]
+    public async Task OtherData_IsReachedThroughALinkToAtMostOneRecordWithoutNavigation()
+    {
+        var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
+        await CreateIntentAsync((await CreateAlbumAsync($"Intention {_marker}")).Id, publisher.Id);
+        var album = await CreateAlbumAsync($"Sans intention {_marker}");
+        await CreateEditionAsync(album.Id, publisher.Id);
+        var mine = new SearchLink("publisher", Text("name", Contains, _marker));
+        var intended = Assert.Single(await EditionIdsAsync(And(mine, new SearchLink("purchaseIntent"))));
+
+        AssertIds([intended], await EditionIdsAsync(And(mine, Data("record", Is, new SearchOperand("record", ["purchaseIntent", "edition"])))));
     }
 
     [Fact]
@@ -420,6 +516,16 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     [InlineData("""{"kind":"criterion","field":"volumeNumber","comparison":"EqualTo","values":["1","2"]}""")]
     [InlineData("""{"kind":"link","link":"editions"}""")]
     [InlineData("""{"kind":"link","link":"series","quantifier":{"kind":"Any"}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"title","comparison":"EqualTo","other":{"field":"volumeNumber"}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"rating","comparison":"Is","other":{"field":"type"}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"record","comparison":"Is","other":{"field":"record","links":["series"]}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"title","comparison":"EqualTo","other":{"field":"title","links":["contributions"]}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"title","comparison":"EqualTo","other":{"field":"unknown"}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"volumeNumber","comparison":"Between","other":{"field":"editionCount"}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"firstPublicationDate","comparison":"EqualTo","other":{"field":"createdAt"}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"firstPublicationDate","comparison":"EqualTo","other":{"field":"createdAt"},"datePrecision":7}""")]
+    [InlineData("""{"kind":"dataComparison","field":"title","comparison":"EqualTo","other":{"field":"summary"},"datePrecision":"Year"}""")]
+    [InlineData("""{"kind":"dataComparison","field":"volumeNumber","comparison":"EqualTo","other":{"field":"editionCount"},"matchCaseAndAccents":true}""")]
     public async Task MalformedCriteria_AreATechnicalError(string criteria)
     {
         var response = await _client.PostAsync(
@@ -453,6 +559,9 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
 
     private static SearchCriterion Text(string field, SearchComparison comparison, params string[] values) =>
         new(field, comparison, values.Length == 0 ? null : values);
+
+    private static SearchDataComparison Data(string field, SearchComparison comparison, SearchOperand other, SearchDatePrecision? precision = null) =>
+        new(field, comparison, other, DatePrecision: precision);
 
     private static SearchGroup And(params SearchCondition[] conditions) => new(SearchOperator.And, conditions);
 
@@ -570,8 +679,9 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     {
         public bool Equals(SearchFieldDescription? x, SearchFieldDescription? y) =>
             x is not null && y is not null
-            && x with { Comparisons = [], Members = null } == y with { Comparisons = [], Members = null }
+            && x with { Comparisons = [], DataComparisons = [], Members = null } == y with { Comparisons = [], DataComparisons = [], Members = null }
             && x.Comparisons.SequenceEqual(y.Comparisons)
+            && x.DataComparisons.SequenceEqual(y.DataComparisons)
             && (x.Members ?? []).SequenceEqual(y.Members ?? []);
 
         public int GetHashCode(SearchFieldDescription obj) => obj.Key.GetHashCode(StringComparison.Ordinal);

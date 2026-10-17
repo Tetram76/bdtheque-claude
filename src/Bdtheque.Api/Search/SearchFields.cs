@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using Bdtheque.Api.Endpoints;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
@@ -30,7 +31,10 @@ internal abstract class SearchField(string key, LambdaExpression selector, bool 
 
     public IReadOnlyList<SearchComparison> Comparisons => isOptional ? [.. TypeComparisons, IsSet, IsNotSet] : TypeComparisons;
 
-    public virtual SearchFieldDescription Describe() => new(Key, Type, isOptional, Comparisons);
+    /// <summary>The comparisons of the type to another data, those taking a single value (fonctionnel.md § Comparaisons).</summary>
+    public virtual IReadOnlyList<SearchComparison> DataComparisons => [];
+
+    public virtual SearchFieldDescription Describe() => new(Key, Type, isOptional, Comparisons, DataComparisons);
 
     /// <summary>The condition <paramref name="criterion"/> sets on <paramref name="record"/>.</summary>
     /// <exception cref="ArgumentException">
@@ -45,21 +49,78 @@ internal abstract class SearchField(string key, LambdaExpression selector, bool 
             throw new ArgumentException($"{Key} is not a text, whose case and accents could be matched.", nameof(criterion));
 
         var values = SearchValues.Of(criterion.Comparison, criterion.Values);
-        var data = ReplacingExpressionVisitor.Replace(selector.Parameters[0], record, selector.Body);
-        // Lifted to its nullable type, the data compares the same way whether it is optional or not.
-        if (data.Type.IsValueType && Nullable.GetUnderlyingType(data.Type) is null)
-            data = Expression.Convert(data, typeof(Nullable<>).MakeGenericType(data.Type));
-        var isSet = Expression.NotEqual(data, Expression.Constant(null, data.Type));
+        var data = Data(record);
         return criterion.Comparison switch
         {
-            IsSet => isSet,
-            IsNotSet => Expression.Not(isSet),
-            _ => Expression.AndAlso(isSet, Compare(record, data, criterion, values)),
+            IsSet => IsSetCondition(data),
+            IsNotSet => Expression.Not(IsSetCondition(data)),
+            _ => Expression.AndAlso(IsSetCondition(data), Compare(record, data, criterion, values)),
         };
+    }
+
+    /// <summary>
+    /// The condition <paramref name="comparison"/> sets on <paramref name="record"/>, comparing its data to
+    /// <paramref name="other"/> of <paramref name="otherRecord"/>: both must be set.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// A comparison the type does not allow to another data, a data of another type, an option the type does not
+    /// take, or a date without its precision: a technical error, the client building the criterion from the
+    /// schema.
+    /// </exception>
+    public Expression Build(Expression record, SearchDataComparison comparison, SearchField other, Expression otherRecord)
+    {
+        if (!DataComparisons.Contains(comparison.Comparison))
+            throw new ArgumentException($"{Key} cannot be compared to another data by {comparison.Comparison}.", nameof(comparison));
+        if (!IsComparableTo(other))
+            throw new ArgumentException($"{Key} cannot be compared to {other.Key}, of another type.", nameof(other));
+        if (comparison.MatchCaseAndAccents && Type != SearchDataType.Text)
+            throw new ArgumentException($"{Key} is not a text, whose case and accents could be matched.", nameof(comparison));
+        if (comparison.DatePrecision is null == (Type == SearchDataType.Date))
+            throw new ArgumentException($"A date, and only a date, is compared to another at a precision ({Key}).", nameof(comparison));
+
+        var data = Data(record);
+        var otherData = other.Data(otherRecord);
+        return Expression.AndAlso(
+            Expression.AndAlso(IsSetCondition(data), IsSetCondition(otherData)),
+            CompareData(record, data, comparison, other, otherRecord, otherData));
     }
 
     /// <summary>The comparison of <paramref name="data"/> of <paramref name="record"/>, known to be set.</summary>
     protected abstract Expression Compare(Expression record, Expression data, SearchCriterion criterion, IReadOnlyList<string> values);
+
+    /// <summary>Whether <paramref name="other"/> is of the type of this data, to which it compares.</summary>
+    protected virtual bool IsComparableTo(SearchField other) => other.GetType() == GetType();
+
+    /// <summary>
+    /// The comparison of <paramref name="data"/> of <paramref name="record"/> to <paramref name="otherData"/> of
+    /// <paramref name="otherRecord"/>, of the same type, both known to be set.
+    /// </summary>
+    protected virtual Expression CompareData(
+        Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData) =>
+        throw new ArgumentOutOfRangeException(nameof(comparison));
+
+    /// <summary>The comparison of two values of an order (numbers, periods of dates) by one that takes a single value.</summary>
+    protected static Expression Ordered(SearchComparison comparison, Expression left, Expression right) => comparison switch
+    {
+        EqualTo => Expression.Equal(left, right),
+        NotEqualTo => Expression.NotEqual(left, right),
+        LessThan => Expression.LessThan(left, right),
+        LessThanOrEqualTo => Expression.LessThanOrEqual(left, right),
+        GreaterThan => Expression.GreaterThan(left, right),
+        GreaterThanOrEqualTo => Expression.GreaterThanOrEqual(left, right),
+        _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Not a comparison taking a single value."),
+    };
+
+    // Lifted to its nullable type, the data compares the same way whether it is optional or not.
+    private Expression Data(Expression record)
+    {
+        var data = ReplacingExpressionVisitor.Replace(selector.Parameters[0], record, selector.Body);
+        return data.Type.IsValueType && Nullable.GetUnderlyingType(data.Type) is null
+            ? Expression.Convert(data, typeof(Nullable<>).MakeGenericType(data.Type))
+            : data;
+    }
+
+    private static Expression IsSetCondition(Expression data) => Expression.NotEqual(data, Expression.Constant(null, data.Type));
 }
 
 /// <summary>A text, compared ignoring case and accents unless the criterion asks otherwise.</summary>
@@ -79,7 +140,35 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
 
     public override SearchDataType Type => SearchDataType.Text;
 
+    private static readonly MethodInfo Replace = typeof(string).GetMethod(nameof(string.Replace), [typeof(string), typeof(string)])!;
+    private static readonly MethodInfo Concat = typeof(string).GetMethod(nameof(string.Concat), [typeof(string), typeof(string)])!;
+
     protected override IReadOnlyList<SearchComparison> TypeComparisons => [Contains, DoesNotContain, StartsWith, EqualTo, NotEqualTo];
+
+    public override IReadOnlyList<SearchComparison> DataComparisons => TypeComparisons;
+
+    // The pattern is built from the other text as stored: PostgreSQL refuses replace() on a nondeterministic
+    // collation, and the collation set explicitly on the compared text prevails over that of the column.
+    protected override Expression CompareData(
+        Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData)
+    {
+        var text = comparison.MatchCaseAndAccents ? data : Inline(IgnoringCaseAndAccents, data);
+        var escaped = new[] { LikeEscapeCharacter, "%", "_" }.Aggregate(
+            otherData,
+            (escaping, character) => Expression.Call(
+                escaping, Replace, Expression.Constant(character), Expression.Constant(LikeEscapeCharacter + character)));
+        Expression Joined(Expression left, Expression right) => Expression.Call(Concat, left, right);
+        var anywhere = Joined(Joined(Expression.Constant("%"), escaped), Expression.Constant("%"));
+        return comparison.Comparison switch
+        {
+            Contains => Inline(Like, text, anywhere),
+            DoesNotContain => Expression.Not(Inline(Like, text, anywhere)),
+            StartsWith => Inline(Like, text, Joined(escaped, Expression.Constant("%"))),
+            EqualTo => Expression.Equal(text, otherData),
+            NotEqualTo => Expression.NotEqual(text, otherData),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison)),
+        };
+    }
 
     protected override Expression Compare(Expression record, Expression data, SearchCriterion criterion, IReadOnlyList<string> values)
     {
@@ -115,10 +204,20 @@ internal sealed class NumberField(string key, LambdaExpression selector, bool is
 
     public override SearchDataType Type => SearchDataType.Number;
 
+    /// <summary>The comparisons of a number or a date to another data: those of a number but "between", which takes two values.</summary>
+    public static readonly IReadOnlyList<SearchComparison> OrderComparisons =
+        [EqualTo, NotEqualTo, LessThan, LessThanOrEqualTo, GreaterThan, GreaterThanOrEqualTo];
+
     protected override IReadOnlyList<SearchComparison> TypeComparisons => NumberComparisons;
+
+    public override IReadOnlyList<SearchComparison> DataComparisons => OrderComparisons;
 
     protected override Expression Compare(Expression record, Expression data, SearchCriterion criterion, IReadOnlyList<string> values) =>
         CompareNumber(Expression.Convert(data, typeof(int)), criterion.Comparison, values);
+
+    protected override Expression CompareData(
+        Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData) =>
+        Ordered(comparison.Comparison, Expression.Convert(data, typeof(int)), Expression.Convert(otherData, typeof(int)));
 
     /// <summary>The comparison of a number, set, to the values written for it (also that of a number of related records).</summary>
     public static Expression CompareNumber(Expression number, SearchComparison comparison, IReadOnlyList<string> values)
@@ -144,6 +243,12 @@ internal abstract class IdentityField(string key, LambdaExpression selector, boo
     : SearchField(key, selector, isOptional)
 {
     protected override IReadOnlyList<SearchComparison> TypeComparisons => [Is, IsNot, IsOneOf, IsNoneOf];
+
+    public override IReadOnlyList<SearchComparison> DataComparisons => [Is, IsNot];
+
+    protected override Expression CompareData(
+        Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData) =>
+        comparison.Comparison == Is ? Expression.Equal(data, otherData) : Expression.NotEqual(data, otherData);
 
     // The values form a single array parameter (= ANY), whatever their number: the same query, cached once.
     protected override Expression Compare(Expression record, Expression data, SearchCriterion criterion, IReadOnlyList<string> values)
@@ -191,6 +296,8 @@ internal sealed class RecordField(string key, LambdaExpression selector, bool is
     public EntityKind Record => record;
 
     public override SearchFieldDescription Describe() => base.Describe() with { Record = record };
+
+    protected override bool IsComparableTo(SearchField other) => other is RecordField field && field.Record == record;
 }
 
 /// <summary>
@@ -241,8 +348,63 @@ internal abstract class DateField(string key, LambdaExpression selector, bool is
         };
     }
 
+    public override IReadOnlyList<SearchComparison> DataComparisons => NumberField.OrderComparisons;
+
+    protected override bool IsComparableTo(SearchField other) => other is DateField;
+
+    // Each date covers the periods of the precision chosen from that of its first day to that of its last:
+    // several of them for a date known less precisely. Equal: both one and the same period; before or after:
+    // every period of one before or after every period of the other.
+    protected override Expression CompareData(
+        Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData)
+    {
+        var precision = comparison.DatePrecision!.Value;
+        var (first, last) = Periods(Days(record, data), precision);
+        var (otherFirst, otherLast) = Periods(((DateField)other).Days(otherRecord, otherData), precision);
+        return comparison.Comparison switch
+        {
+            EqualTo => Expression.AndAlso(Expression.LessThanOrEqual(last, otherFirst), Expression.GreaterThanOrEqual(first, otherLast)),
+            NotEqualTo => Expression.OrElse(Expression.LessThan(last, otherFirst), Expression.GreaterThan(first, otherLast)),
+            LessThan => Expression.LessThan(last, otherFirst),
+            LessThanOrEqualTo => Expression.LessThanOrEqual(last, otherFirst),
+            GreaterThan => Expression.GreaterThan(first, otherLast),
+            GreaterThanOrEqualTo => Expression.GreaterThanOrEqual(first, otherLast),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison)),
+        };
+    }
+
     /// <summary>The first and the last moment of the period of the data, set.</summary>
     protected abstract (Expression First, Expression Last) Bounds(Expression record, Expression data);
+
+    /// <summary>
+    /// The first and the last day of the period of the data, set, as numbers <c>yyyyMMdd</c>, which compare
+    /// whatever the kind of date.
+    /// </summary>
+    protected abstract (Expression First, Expression Last) Days(Expression record, Expression data);
+
+    /// <summary>The day of a date that has a year, a month and a day, as a number <c>yyyyMMdd</c>.</summary>
+    protected static Expression DayNumber(Expression date) =>
+        Expression.Add(
+            Expression.Add(
+                Expression.Multiply(Expression.Property(date, nameof(DateOnly.Year)), Expression.Constant(10_000)),
+                Expression.Multiply(Expression.Property(date, nameof(DateOnly.Month)), Expression.Constant(100))),
+            Expression.Property(date, nameof(DateOnly.Day)));
+
+    // The number yyyyMMdd of the first day of the period each day falls in.
+    private static (Expression First, Expression Last) Periods((Expression First, Expression Last) days, SearchDatePrecision precision)
+    {
+        var length = precision switch
+        {
+            SearchDatePrecision.Year => 10_000,
+            SearchDatePrecision.Month => 100,
+            SearchDatePrecision.Day => 1,
+            // An integer outside the enumeration, which the JSON converter accepts: a technical error, as any value the schema does not describe.
+            _ => throw new ArgumentOutOfRangeException(nameof(precision), precision, "Not a precision of a date."),
+        };
+        Expression PeriodOf(Expression day) =>
+            length == 1 ? day : Expression.Multiply(Expression.Divide(day, Expression.Constant(length)), Expression.Constant(length));
+        return (PeriodOf(days.First), PeriodOf(days.Last));
+    }
 
     /// <summary>The first moment of the period of a value, comparable to the bounds of the data.</summary>
     protected abstract Expression Start(DateValue value);
@@ -258,6 +420,12 @@ internal sealed class DayField(string key, LambdaExpression selector, bool isOpt
     protected override (Expression First, Expression Last) Bounds(Expression record, Expression data)
     {
         var day = Expression.Convert(data, typeof(DateOnly));
+        return (day, day);
+    }
+
+    protected override (Expression First, Expression Last) Days(Expression record, Expression data)
+    {
+        var day = DayNumber(Expression.Convert(data, typeof(DateOnly)));
         return (day, day);
     }
 
@@ -277,6 +445,12 @@ internal sealed class InstantField(string key, LambdaExpression selector, bool i
     {
         var instant = Expression.Convert(data, typeof(DateTimeOffset));
         return (instant, instant);
+    }
+
+    protected override (Expression First, Expression Last) Days(Expression record, Expression data)
+    {
+        var day = DayNumber(Expression.Property(Expression.Convert(data, typeof(DateTimeOffset)), nameof(DateTimeOffset.UtcDateTime)));
+        return (day, day);
     }
 
     protected override Expression Start(DateValue value) => SearchValues.Parameter(StartOf(value.First));
@@ -309,6 +483,9 @@ internal sealed class PartialDateField(string key, LambdaExpression year, Lambda
             Expression.Add(Expression.Add(yearPart, Expression.Multiply(monthOfYear, Expression.Constant(100))), Expression.Constant(day));
         return (Key(MonthOr(1), 1), Key(MonthOr(12), LastDay));
     }
+
+    // A month ending on a 31st keeps the order of days of a date known to the day, none after the 31st.
+    protected override (Expression First, Expression Last) Days(Expression record, Expression data) => Bounds(record, data);
 
     protected override Expression Start(DateValue value) => SearchValues.Parameter(KeyOf(value.First, value.First.Day));
 

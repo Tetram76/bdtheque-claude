@@ -16,6 +16,8 @@ public sealed class SearchCriteriaJsonTests
         new SearchLink("editions", new SearchCriterion("isbn", SearchComparison.IsSet),
             new SearchQuantifier(SearchQuantifierKind.Count, SearchComparison.Between, ["1", "3"])),
         new SearchLink("series"),
+        new SearchDataComparison("firstPublicationDate", SearchComparison.LessThan, new SearchOperand("createdAt", ["series"]),
+            DatePrecision: SearchDatePrecision.Month),
     ]);
 
     private const string Json =
@@ -23,7 +25,9 @@ public sealed class SearchCriteriaJsonTests
         """{"kind":"not","condition":{"kind":"criterion","field":"title","comparison":"Contains","values":["Épée"],"matchCaseAndAccents":true}},""" +
         """{"kind":"link","link":"editions","condition":{"kind":"criterion","field":"isbn","comparison":"IsSet","matchCaseAndAccents":false},"quantifier":""" +
         """{"kind":"Count","comparison":"Between","values":["1","3"]}},""" +
-        """{"kind":"link","link":"series"}]}""";
+        """{"kind":"link","link":"series"},""" +
+        """{"kind":"dataComparison","field":"firstPublicationDate","comparison":"LessThan","other":{"field":"createdAt","links":["series"]}""" +
+        ""","matchCaseAndAccents":false,"datePrecision":"Month"}]}""";
 
     [Fact]
     public void Criteria_HaveTheirPinnedJsonForm()

@@ -16,6 +16,7 @@ namespace Bdtheque.Contracts.Search;
 [JsonDerivedType(typeof(SearchNot), "not")]
 [JsonDerivedType(typeof(SearchLink), "link")]
 [JsonDerivedType(typeof(SearchCriterion), "criterion")]
+[JsonDerivedType(typeof(SearchDataComparison), "dataComparison")]
 public abstract record SearchCondition;
 
 /// <summary>Conditions combined by AND or by OR; empty, AND holds for every record and OR for none.</summary>
@@ -65,6 +66,36 @@ public sealed record SearchQuantifier(
 public sealed record SearchCriterion(
     string Field, SearchComparison Comparison, IReadOnlyList<string>? Values = null, bool MatchCaseAndAccents = false)
     : SearchCondition;
+
+/// <summary>
+/// A comparison of one data of the entity to another data of the same type (fonctionnel.md § Comparaisons), of
+/// the same record or of a record it leads to: it holds only if both data are set and the comparison
+/// establishes it.
+/// </summary>
+/// <param name="Field">Key of the data of the entity, among those the schema describes (<see cref="SearchFieldDescription"/>).</param>
+/// <param name="Comparison">One of the <see cref="SearchFieldDescription.DataComparisons"/> of the data.</param>
+/// <param name="Other">
+/// The data compared to: of the same type, of the same enumeration for an enumeration, of the same entity for
+/// a record; any date for a date.
+/// </param>
+/// <param name="MatchCaseAndAccents">For texts only: compares them respecting case and accents.</param>
+/// <param name="DatePrecision">
+/// For dates only, and required: the precision both are compared at, each covering the whole period it is
+/// known to at that precision (e.g. a date known to the year covers its twelve months).
+/// </param>
+public sealed record SearchDataComparison(
+    string Field, SearchComparison Comparison, SearchOperand Other, bool MatchCaseAndAccents = false, SearchDatePrecision? DatePrecision = null)
+    : SearchCondition;
+
+/// <summary>The other data of a <see cref="SearchDataComparison"/>.</summary>
+/// <param name="Field">Key of the data, among those of the entity <paramref name="Links"/> lead to.</param>
+/// <param name="Links">
+/// Keys of the links leading from the record to the one carrying the data, each to one record
+/// (<see cref="SearchLinkDescription.IsMultiple"/> false); none for a data of the record itself. A
+/// comparison to the data of several related records is written under a <see cref="SearchLink"/>, whose
+/// quantifier counts them, and whose related record leads back to the record by a link to one record.
+/// </param>
+public sealed record SearchOperand(string Field, IReadOnlyList<string>? Links = null);
 
 [JsonConverter(typeof(JsonStringEnumConverter<SearchOperator>))]
 public enum SearchOperator

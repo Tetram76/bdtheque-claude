@@ -15,6 +15,10 @@ public sealed record SearchEntityDescription(
 
 /// <summary>A data of an entity, which a criterion compares.</summary>
 /// <param name="Comparisons">Those its type allows, "is set" and "is not set" for an optional data only.</param>
+/// <param name="DataComparisons">
+/// Those its type allows to another data of the same type (<see cref="SearchDataComparison"/>); none for a type
+/// that cannot be compared so.
+/// </param>
 /// <param name="DatePrecision">For a date: the finest precision it is known to (a partial date, a year).</param>
 /// <param name="Enumeration">For an enumeration: its name, whose members a client localizes.</param>
 /// <param name="Members">For an enumeration: the names of its members, in their business order.</param>
@@ -24,6 +28,7 @@ public sealed record SearchFieldDescription(
     SearchDataType Type,
     bool IsOptional,
     IReadOnlyList<SearchComparison> Comparisons,
+    IReadOnlyList<SearchComparison> DataComparisons,
     SearchDatePrecision? DatePrecision = null,
     string? Enumeration = null,
     IReadOnlyList<string>? Members = null,
