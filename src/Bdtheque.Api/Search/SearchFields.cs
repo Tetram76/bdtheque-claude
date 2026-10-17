@@ -397,7 +397,9 @@ internal abstract class DateField(string key, LambdaExpression selector, bool is
         {
             SearchDatePrecision.Year => 10_000,
             SearchDatePrecision.Month => 100,
-            _ => 1,
+            SearchDatePrecision.Day => 1,
+            // An integer outside the enumeration, which the JSON converter accepts: a technical error, as any value the schema does not describe.
+            _ => throw new ArgumentOutOfRangeException(nameof(precision), precision, "Not a precision of a date."),
         };
         Expression PeriodOf(Expression day) =>
             length == 1 ? day : Expression.Multiply(Expression.Divide(day, Expression.Constant(length)), Expression.Constant(length));

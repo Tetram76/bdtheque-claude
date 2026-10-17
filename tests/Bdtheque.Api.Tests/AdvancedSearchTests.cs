@@ -523,6 +523,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     [InlineData("""{"kind":"dataComparison","field":"title","comparison":"EqualTo","other":{"field":"unknown"}}""")]
     [InlineData("""{"kind":"dataComparison","field":"volumeNumber","comparison":"Between","other":{"field":"editionCount"}}""")]
     [InlineData("""{"kind":"dataComparison","field":"firstPublicationDate","comparison":"EqualTo","other":{"field":"createdAt"}}""")]
+    [InlineData("""{"kind":"dataComparison","field":"firstPublicationDate","comparison":"EqualTo","other":{"field":"createdAt"},"datePrecision":7}""")]
     [InlineData("""{"kind":"dataComparison","field":"title","comparison":"EqualTo","other":{"field":"summary"},"datePrecision":"Year"}""")]
     [InlineData("""{"kind":"dataComparison","field":"volumeNumber","comparison":"EqualTo","other":{"field":"editionCount"},"matchCaseAndAccents":true}""")]
     public async Task MalformedCriteria_AreATechnicalError(string criteria)
