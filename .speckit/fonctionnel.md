@@ -293,6 +293,7 @@ La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 | Édition | Ses visuels, son intention d'achat | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
 | Intention d'achat portant sur une édition | L'édition visée (non possédée), avec ses visuels | Composition | Supprimée avec elle : une édition non possédée n'existe que par son intention (cf. § Intention d'achat). |
 | Toute fiche | Désignée par un critère ou par la valeur par défaut d'une variable d'une recherche enregistrée (cf. § Recherche avancée) | Référence | Refusée tant qu'une recherche enregistrée la désigne, elle ou une fiche supprimée avec elle. |
+| Jeton d'accès | Son historique d'utilisation et ses retours écrits (cf. § Suivi de l'utilisation) | — | Conservés, rattachés au nom du jeton : le suivi évalue les points d'entrée de l'outil, non les jetons. Le jeton supprimé est refusé dès l'utilisation suivante. |
 | Visuel d'édition, Contribution, Intention d'achat portant sur l'album, Recherche enregistrée | — | — | Hors la ligne « Toute fiche », suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
 
 ### Calcul des estimations
@@ -435,7 +436,7 @@ L'application se compose de trois parties distinctes :
    - **Recherche avancée** : recherche de n'importe quelle entité sur n'importe quelle combinaison de critères, portant sur les données du modèle métier et sur les liens entre entités, et rejeu des recherches enregistrées par l'administrateur (cf. § Recherche avancée).
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
-   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. § Recherche avancée), etc.
+   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. § Recherche avancée), gestion des jetons d'accès de l'outil pour agents IA et suivi de son utilisation (cf. § Interface pour agents IA), etc.
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
@@ -500,7 +501,7 @@ Les critères se combinent librement par **ET**, **OU** et **NON**, en groupes i
 
 ## Règles d'accès
 
-Ces règles sont **globales** : elles s'appliquent à l'interface web comme à l'interface pour agents IA, une fonctionnalité ayant les mêmes restrictions d'accès quelle que soit l'interface qui la propose.
+Ces règles sont **globales** : elles s'appliquent à l'interface web comme à l'interface pour agents IA, une fonctionnalité ayant les mêmes restrictions d'accès quelle que soit l'interface qui la propose. Seul le moyen de s'authentifier diffère : l'interface pour agents IA ne connaît que ses jetons d'accès, dont chacun donne le niveau public ou celui du compte administrateur (cf. § Interface pour agents IA, Accès par jeton).
 
 - **Recherche et consultation** : publiques. L'authentification n'est pas requise, mais n'est pas interdite pour autant.
 - **Analyses et statistiques** : deux niveaux d'accès, **public** et **privé** (réservé au compte administrateur). Le niveau est choisi **au cas par cas**, en fonction des données accédées et exposées par chaque analyse ou statistique.
@@ -513,10 +514,39 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 - **Aide à la saisie** : assister l'utilisateur dans la saisie des données de l'application. L'agent peut aussi **écrire en base**, mais uniquement **à la demande de l'utilisateur**.
   - **Fonction principale attendue** : répondre à la demande « à partir de cet ISBN, compléter ou saisir la fiche de l'album et de l'édition (visuels inclus), de la série si l'album en fait partie, et des auteurs ». L'**éditeur** et la **collection éditeur** de l'édition font aussi partie des données à saisir ou compléter.
   - Les données proviennent de **plusieurs sources externes** (jamais d'une seule). La **source principale** reste le **site de l'éditeur** ; le **catalogue général de la BnF** (API SRU, cf. § Structure de l'application, Administration) est une **source d'information complémentaire**. Les autres sources seront arrêtées à l'ouverture de la phase d'implémentation.
-- **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation).
+- **Recherche et consultation** : rechercher et consulter les fiches, avec la même étendue que la partie Consultation (cf. § Périmètre de la consultation), **recherche avancée comprise** (cf. § Recherche avancée) : toute entité recherchée, sur toute combinaison de critères. Les recherches enregistrées n'y sont pas proposées, ni pour leur rejeu ni pour leur gestion (aucun enregistrement de recherche, même avec un jeton qui donne accès à l'administration) : l'agent construit lui-même les recherches dont il a besoin.
 - **Analyses et statistiques** : produire des analyses et statistiques sur la collection, avec les mêmes règles que les statistiques de l'application (portée sur la collection uniquement, montants en euro, cf. § Gestion des devises).
 
-Les règles d'accès sont celles de l'application (cf. § Règles d'accès) : l'outil n'a pas de règles propres, et les fonctionnalités équivalentes de l'interface web ont les mêmes restrictions.
+### Accès par jeton
+
+- Toute utilisation de l'outil exige un **jeton d'accès**, quelle que soit la fonctionnalité utilisée, consultation publique comprise : un agent sans jeton valide n'obtient rien de l'outil.
+- Les jetons sont **générés dans l'administration**, par le compte administrateur, qui les gère comme toute autre fiche (cf. § Structure de l'application, Administration). Chaque jeton a :
+  - un **nom**, obligatoire, qui identifie son usage (ex. l'agent ou le poste qui l'utilise) ;
+  - une **expiration**, optionnelle : un jeton expiré est refusé comme un jeton inconnu ; sans expiration, il reste valable jusqu'à sa suppression ;
+  - un **accès à l'administration**, autorisé ou non.
+- Un jeton **sans accès à l'administration** donne le niveau **public** des règles d'accès (cf. § Règles d'accès) : recherche, consultation, analyses et statistiques publiques. Un jeton **avec accès à l'administration** donne le niveau du **compte administrateur** : écriture de données (toujours à la demande de l'utilisateur, cf. ci-dessus) et analyses et statistiques privées. Il agit au nom de ce compte unique, sans créer d'autre utilisateur.
+- La **valeur du jeton** n'est présentée qu'une seule fois, à sa génération : l'application ne la conserve pas sous une forme qui permettrait de la présenter de nouveau. Un jeton perdu est supprimé, et un autre est généré.
+
+### Suivi de l'utilisation
+
+- L'utilisation de l'outil est **suivie par jeton** : pour chaque fonctionnalité de l'outil (chaque point d'entrée qu'il propose aux agents), le **nombre** d'appels et leur **fréquence** dans le temps.
+- **Objectif** : repérer les points d'entrée à améliorer, et **comment** ou **en quoi** les améliorer, ainsi que les **nouveaux points d'entrée** nécessaires (ex. un besoin que l'agent ne satisfait qu'en enchaînant plusieurs appels). Le suivi ne se limite donc pas à compter les appels : il doit, idéalement, aboutir à un **indice d'efficacité** de chaque point d'entrée.
+- **Indice d'efficacité** d'un point d'entrée : la part de ses utilisations **productives**, c'est-à-dire réussies et dont l'agent n'abandonne pas aussitôt le résultat pour une nouvelle tentative sur le même point d'entrée, dans la même conversation (ex. une recherche sans résultat aussitôt reformulée). Consulter la page suivante d'un résultat n'est pas une nouvelle tentative. Il est accompagné de signaux qui disent **quoi** améliorer :
+
+  | Signal | Indique |
+  | --- | --- |
+  | Erreurs dues à des paramètres mal construits | Description ou exemples du point d'entrée à revoir |
+  | Nouvelle tentative après un résultat vide ou une erreur | Comportement de la recherche ou message d'erreur à revoir |
+  | Enchaînement de pages | Taille des pages ou filtres manquants |
+  | Réponses volumineuses | Besoin d'une forme de réponse plus concise |
+  | Mêmes enchaînements de points d'entrée dans de nombreuses conversations | **Nouveau point d'entrée** qui les regroupe |
+  | Durée des utilisations | Performance |
+
+  Sa pertinence sera jugée à l'usage, et sa définition ajustée en conséquence.
+- **Retour écrit de l'agent** : l'agent peut, s'il le juge utile, signaler par écrit une limite rencontrée (ex. un filtre ou une donnée qui lui a manqué, une réponse inadaptée). Ce retour est facultatif et n'est pas une note : il complète le suivi, rattaché à l'utilisation qu'il concerne, sans entrer dans l'indice d'efficacité.
+- Le suivi, retours écrits compris, est consultable dans l'administration. La suppression d'un jeton ne l'efface pas : son historique reste rattaché à son nom (cf. § Suppression des entités).
+
+Les règles d'accès sont celles de l'application (cf. § Règles d'accès) : l'outil n'a pas de règles d'accès aux données qui lui soient propres, son jeton ne faisant que déterminer le niveau d'accès de l'agent, et les fonctionnalités équivalentes de l'interface web ont les mêmes restrictions.
 
 <!-- À préciser : périmètre exact de l'aide à la saisie, cas d'usage détaillés, analyses et statistiques attendues. -->
 

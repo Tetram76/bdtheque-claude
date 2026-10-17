@@ -169,6 +169,6 @@ Découpage à établir à l'ouverture de la phase.
 
 ## Phase 6 — Outil pour agents IA
 
-Serveur MCP exposant l'aide à la saisie, la recherche/consultation et les analyses et statistiques (`fonctionnel.md` § Interface pour agents IA ; `choix-implementation.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2) et des statistiques (Phase 4).
+Serveur MCP exposant l'aide à la saisie, la recherche/consultation (recherche avancée comprise) et les analyses et statistiques ; accès par jeton, avec la gestion des jetons dans l'administration ; suivi de l'utilisation par jeton et par outil ou ressource (`fonctionnel.md` § Interface pour agents IA ; `choix-implementation.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2), des statistiques (Phase 4) et de l'administration du frontend (Phase 3), qui accueille la gestion des jetons et le suivi de l'utilisation.
 
-Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie et le mécanisme d'authentification de l'agent précisés.
+Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie précisé.
