@@ -173,6 +173,8 @@ Une revue **Codex** se déclenche automatiquement à chaque commit poussé sur u
 
 Codex revoit ce qui est poussé, que le travail soit achevé ou non : une PR ouverte trop tôt lui fait revoir un contenu incomplet, et consomme sa revue en pure perte (cf. § Budget IA). Une PR n'est donc **créée hors brouillon** — ou **passée de brouillon à « prête pour la revue »** — qu'une fois le **contenu de sa branche complet**. Tant que ce contenu est en cours d'élaboration ou de discussion, il reste local, ou sur une PR en brouillon.
 
+**Un travail en cours, c'est une PR en brouillon.** Le contenu d'une branche est celui du **chantier entier**, tel que l'utilisateur l'a demandé, et non celui de l'étape qui vient d'aboutir. Dans un chantier mené en plusieurs étapes (ex. les maquettes de plusieurs écrans, revues une à une par l'utilisateur), la validation d'une étape n'achève pas le chantier : la PR reste en brouillon jusqu'à la fin de sa dernière étape. Une PR créée pendant le chantier, pour publier ou sauvegarder un état intermédiaire, est toujours créée en brouillon. En cas de doute sur l'achèvement du contenu, la PR est en brouillon.
+
 Le passage d'un brouillon en « prête pour la revue » ne déclenche pas nécessairement de revue Codex, aucun commit n'étant poussé à ce moment-là. L'agent vérifie donc, quelques minutes après ce passage, que Codex s'est saisi de la PR ; à défaut, il demande la revue par un commentaire `@codex review` (signaux à observer : skill `codex-review-loop`).
 
 #### Statut des retours de Codex
