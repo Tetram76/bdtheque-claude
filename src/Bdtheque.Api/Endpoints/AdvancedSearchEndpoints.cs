@@ -1,3 +1,4 @@
+using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Search;
 using Bdtheque.Api.Visuals;
@@ -91,10 +92,14 @@ internal static class AdvancedSearchEndpoints
         where T : class
     {
         var definition = AdvancedSearchSchema.Of(entity);
-        // Read only for the criteria that follow the hierarchy of the universes: a small reference table.
-        var universeLevels = SearchTranslator.FollowsUniverseHierarchy(definition, request.Criteria)
-            ? (await UniverseTree.LoadAsync(context, cancellationToken)).MaxAncestorCount
-            : 0;
+        // Read only for the criteria that follow the hierarchy of the universes: a small reference table. Its depth
+        // and the results are then read in a single snapshot, as any reads assembled into one another: a
+        // universe moved deeper in between would otherwise escape a predicate built for the former depth.
+        var followsUniverses = SearchTranslator.FollowsUniverseHierarchy(definition, request.Criteria);
+        await using var snapshot = followsUniverses
+            ? await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken)
+            : null;
+        var universeLevels = followsUniverses ? (await UniverseTree.LoadAsync(context, cancellationToken)).MaxAncestorCount : 0;
         var condition = SearchTranslator.Translate<T>(definition, request.Criteria, new SearchScope(context, universeLevels));
 
         return await order(context.Set<T>().AsNoTracking().Where(condition)).ToPageAsync(page, pageSize, item, cancellationToken);
