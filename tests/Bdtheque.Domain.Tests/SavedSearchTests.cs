@@ -149,6 +149,24 @@ public sealed class SavedSearchTests
     }
 
     [Fact]
+    public void CriteriaWith_NamesTheVariableAsItsDefinitionDoes_IgnoringCaseAndAccents()
+    {
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Éditions", CountMinLocation)]);
+
+        var criteria = search.CriteriaWith(new Dictionary<string, string> { ["EDITIONS"] = "2" });
+
+        Assert.Equal("2", SavedSearch.DefaultValueOf(criteria, search.Variables[0]));
+    }
+
+    [Fact]
+    public void CriteriaWith_TwoValuesForTheSameVariable_Throws()
+    {
+        var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)]);
+
+        Assert.Throws<ArgumentException>(() => search.CriteriaWith(new Dictionary<string, string> { ["Titre"] = "A", ["titre"] = "B" }));
+    }
+
+    [Fact]
     public void CriteriaWith_UnknownVariable_Throws()
     {
         var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)]);

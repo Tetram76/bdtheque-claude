@@ -20,7 +20,7 @@ public sealed record SavedSearchVariable(string Name, string Location, string De
 
 /// <summary>The replay of a saved search, whose results are paginated by the query of the request.</summary>
 /// <param name="Values">
-/// The value of each variable given one, by its name, written as the values of the criteria; the others
-/// keep their default value.
+/// The value of each variable given one, by its name (ignoring case and accents, as variables are told
+/// apart), written as the values of the criteria; the others keep their default value.
 /// </param>
 public sealed record ReplaySavedSearchRequest(IReadOnlyDictionary<string, string>? Values);

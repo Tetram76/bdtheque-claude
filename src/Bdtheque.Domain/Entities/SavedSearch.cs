@@ -65,7 +65,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
         {
             ArgumentNullException.ThrowIfNull(variable);
             var name = DomainText.Required(variable.Name, DomainRules.SavedSearchVariableNameRequired, "A variable must have a name.");
-            if (checkedVariables.Exists(v => FrenchOrder.Compare(v.Name, name, IgnoringCaseAndAccents) == 0))
+            if (checkedVariables.Exists(v => SameName(v.Name, name)))
                 throw new DomainRuleViolationException(DomainRules.SavedSearchVariableNameAlreadyUsed, $"Two variables are named {name}.");
             if (checkedVariables.Exists(v => v.Location == variable.Location))
                 throw new ArgumentException($"Two variables replace the constant at {variable.Location}.", nameof(variables));
@@ -100,21 +100,29 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     /// The criteria to replay: each variable given a value by its name replaced by it, the others keeping
     /// their default value.
     /// </summary>
-    /// <exception cref="ArgumentException">A value for a variable the search does not have.</exception>
+    /// <remarks>A variable is named as its definition names it, ignoring case and accents.</remarks>
+    /// <exception cref="ArgumentException">A value for a variable the search does not have, or two values for the same one.</exception>
     public string CriteriaWith(IReadOnlyDictionary<string, string> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var tree = Parse(Criteria);
+        var replaced = new List<SearchVariable>();
         foreach (var (name, value) in values)
         {
-            var variable = Variables.SingleOrDefault(v => v.Name == name)
+            var variable = Variables.SingleOrDefault(v => SameName(v.Name, name))
                            ?? throw new ArgumentException($"The search has no variable {name}.", nameof(values));
+            if (replaced.Contains(variable))
+                throw new ArgumentException($"Two values are given for the variable {variable.Name}.", nameof(values));
+            replaced.Add(variable);
             var (array, index) = ConstantAt(tree, variable.Location);
             array[index] = JsonValue.Create(value);
         }
 
         return tree.ToJsonString(WriteOptions);
     }
+
+    // The single identity of a variable, when it is defined as when it is given a value.
+    private static bool SameName(string left, string right) => FrenchOrder.Compare(left, right, IgnoringCaseAndAccents) == 0;
 
     private void EnsureOwn(SearchVariable variable)
     {
