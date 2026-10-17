@@ -326,7 +326,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Ouverture | date et heure | oui | Moment de l'ouverture de la session. |
-| Expiration | date et heure | oui | Fin de validité du jeton de session, annoncée à l'agent à l'ouverture (voir `fonctionnel.md` § Suivi de l'utilisation). Une session est aussi invalidée par un redémarrage de l'outil, sans que son expiration change. |
+| Expiration | date et heure | oui | Fin de validité du jeton de session, annoncée à l'agent à l'ouverture (voir `fonctionnel.md` § Suivi de l'utilisation). Un redémarrage de l'outil peut aussi invalider une session, sans que son expiration change. |
 
 ### Objectif de session
 
