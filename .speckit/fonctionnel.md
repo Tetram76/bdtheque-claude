@@ -470,7 +470,7 @@ Les résultats sont présentés comme les entités de leur type le sont dans la 
 
 ### Comparaisons
 
-Chaque critère compare une donnée à une valeur (la comparaison à une autre donnée reste envisagée, cf. ci-dessous), avec les méthodes de comparaison adaptées au type de la donnée :
+Chaque critère compare une donnée à une valeur, ou à une autre donnée du même type (cf. ci-dessous), avec les méthodes de comparaison adaptées au type de la donnée :
 
 | Type de donnée | Comparaisons |
 | --- | --- |
@@ -483,7 +483,7 @@ Chaque critère compare une donnée à une valeur (la comparaison à une autre d
 - Un **texte** se compare par défaut sans tenir compte de la casse ni des accents : « contient epee » retient `L'Épée`. **Chaque critère** sur un texte peut, à l'image de la version de comparaison d'un montant, **respecter la casse et les accents**, pour toutes les comparaisons de texte : « contient Épée » ne retient alors ni `L'épée` ni `L'Epee`.
 - Une **date** se compare à la précision choisie par l'utilisateur : jour, mois ou année (ex. « publiée tel mois », « publiée telle année »). Selon la règle ci-dessus, une date partielle ne satisfait un critère que si sa précision suffit à l'établir : une date connue à l'année seule ne satisfait ni « publiée en mars 2020 » ni « publiée en dehors de mars 2020 », mais « NON (publiée en mars 2020) » la retient.
 - Un **montant** se compare dans la version que **chaque critère** choisit, si bien qu'une même recherche peut comparer un montant en euros du jour et un autre en euros courants ou dans sa devise d'origine (cf. § Gestion des devises) : **euros du jour** par défaut, **euros courants**, ou **devise d'origine**. En euros du jour comme en euros courants, un montant non convertible ne satisfait pas le critère. Dans la devise d'origine, la valeur du critère porte sa devise, et seuls les montants dans cette devise peuvent le satisfaire : « prix supérieur à 100 USD » ne retient aucun prix en francs, des montants de devises différentes ne se comparant qu'une fois convertis.
-- La **comparaison entre deux données du même type** (ex. « édition dont l'année d'édition est postérieure à sa date d'acquisition, ou antérieure à la date de première publication de l'album ») est **envisagée** : elle sera retenue si sa complexité de mise en œuvre le permet.
+- Une donnée peut aussi être comparée à une **autre donnée du même type**, de la même fiche ou d'une fiche liée (ex. « édition dont l'année d'édition est postérieure à sa date d'acquisition, ou antérieure à la date de première publication de l'album »), par les comparaisons de son type qui portent sur une seule valeur. Comme pour une valeur, la comparaison n'est satisfaite que si les deux données sont renseignées et que les données connues l'établissent ; deux dates se comparent à la précision choisie par l'utilisateur, chacune couvrant toute la période où elle est connue (une date connue à l'année couvre, au mois, ses douze mois).
 
 ### Combinaison des critères
 
