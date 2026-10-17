@@ -297,8 +297,9 @@ erDiagram
 | --- | --- | --- | --- |
 | Nom | texte | oui | Identifie l'usage du jeton (ex. l'agent ou le poste qui l'utilise). |
 | Accès à l'administration | booléen | oui | `false` : niveau d'accès public ; `true` : niveau du compte administrateur (voir `fonctionnel.md` § Accès par jeton). |
-| Expiration | date et heure | non | À partir de laquelle le jeton est refusé. Absente : le jeton reste valable jusqu'à sa suppression. |
-| Valeur | secret | oui | Générée par l'application, jamais saisie ; présentée une seule fois, à la génération, et conservée sous une forme qui ne permet pas de la présenter de nouveau. |
+| Expiration | date et heure | non | À partir de laquelle le jeton est archivé, donc refusé. Absente : le jeton reste valable jusqu'à son archivage ou sa suppression. |
+| Archivé | booléen | oui | `false` par défaut. Un jeton archivé est refusé, mais conservé avec son historique d'utilisation (voir `fonctionnel.md` § Accès par jeton). Un jeton expiré est archivé. |
+| Valeur | secret | oui | Générée par l'application, jamais saisie ; présentée une seule fois, à la génération ou au réarmement du jeton, qui la remplace, et conservée sous une forme qui ne permet pas de la présenter de nouveau. |
 
 ### Entrée du journal des modifications
 
