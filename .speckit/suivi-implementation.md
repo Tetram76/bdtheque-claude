@@ -169,6 +169,9 @@ Découpage à établir à l'ouverture de la phase.
 
 ## Phase 6 — Outil pour agents IA
 
-Serveur MCP exposant l'aide à la saisie, la recherche/consultation et les analyses et statistiques (`fonctionnel.md` § Interface pour agents IA ; `choix-implementation.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2) et des statistiques (Phase 4).
+Serveur MCP exposant l'aide à la saisie, la recherche/consultation (recherche avancée comprise) et les analyses et statistiques ; accès par jeton, avec la gestion des jetons dans l'administration ; suivi de l'utilisation par jeton et par outil ou ressource (`fonctionnel.md` § Interface pour agents IA ; `choix-implementation.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2), des statistiques (Phase 4) et de l'administration du frontend (Phase 3), qui accueille la gestion des jetons et le suivi de l'utilisation.
 
-Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie et le mécanisme d'authentification de l'agent précisés.
+Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie précisé.
+
+- **Note — modèle de domaine et journal des modifications** : la phase ajoute au modèle de domaine et à l'API les entités du suivi de l'outil (`modele-metier.md` : jeton d'accès, session, objectif de session, utilisation de l'outil, retour écrit), sans modifier les entités existantes, et étend le journal des modifications au jeton d'accès (type de fiche, correspondance de ses attributs, valeur consignée sans contenu pour son réarmement, `choix-implementation.md` § Journal des modifications : mise en œuvre).
+- **Note — image du conteneur `mcp`** : le conteneur dédié `mcp` (`choix-implementation.md` § Outil pour agents IA) doit avoir son image, comme `api` et `frontend` : image de base (§ Images de base des conteneurs), image publiée `tetram76/bdtheque-mcp`, intégrée à la paire d'images construites toutes avant d'en publier aucune, à l'analyse des vulnérabilités et au job `docker-build` du CI (§ Publication des images Docker ; `gestion-projet.md` § Intégration continue (CI), Ruleset compris). Sans elle, le déploiement sans les sources ne peut pas démarrer `mcp`.
