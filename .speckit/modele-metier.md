@@ -27,6 +27,11 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | **Intention d'achat** | Souhait d'acquisition portant sur un album (toute édition) ou sur une édition spécifique. |
 | **Recherche enregistrée** | Recherche avancée nommée par l'administrateur, rejouable en consultation (voir `fonctionnel.md` § Recherche avancée). |
 | **Paramétrage de l'application** | Réglages de l'application, fixés par l'administrateur dans le bloc « Paramétrage » de l'administration. Fiche unique. |
+| **Jeton d'accès** | Jeton généré par l'administrateur, sans lequel l'outil pour agents IA n'est pas utilisable ; il détermine le niveau d'accès de l'agent (voir `fonctionnel.md` § Interface pour agents IA). |
+| **Session de l'outil pour agents IA** | Conversation d'un agent avec l'outil, ouverte par un jeton d'accès : elle regroupe ses utilisations, ses objectifs et ses retours écrits (voir `fonctionnel.md` § Suivi de l'utilisation). |
+| **Objectif de session** | Objectif de la demande de l'utilisateur, donné par l'agent à l'ouverture de la session ou mis à jour ensuite. |
+| **Utilisation de l'outil** | Trace d'un appel d'outil ou d'une lecture de ressource par un agent, au sein d'une session. |
+| **Retour écrit** | Limite signalée par l'agent, sur une utilisation précise ou sur sa session. |
 | **Journal des modifications** | Trace de chaque écriture sur une fiche : création, modification, suppression ou reprise d'une ancienne donnée. |
 
 ---
@@ -81,6 +86,23 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 > - Une cible ne fait l'objet que d'**une seule** intention d'achat : un album est visé par au plus une intention, une édition par au plus une intention.
 > - Pour un même album, l'intention porte **soit** sur l'album, **soit** sur ses éditions, jamais les deux : un album visé par une intention ne peut pas avoir en même temps une de ses éditions visée par une autre intention, et réciproquement.
 > - Une édition **possédée** (`Mode d'acquisition` renseigné) ne peut pas être visée par une intention d'achat.
+
+### Jeton d'accès et suivi de l'outil — relations
+
+| Relation | Cardinalité | Remarques |
+| --- | --- | --- |
+| Jeton d'accès → Session | 0..n | Sessions ouvertes par le jeton ; supprimées avec lui (voir `fonctionnel.md` § Suppression des entités). |
+| Session → Session précédente | 0..1 | Session que la session prolonge (voir `fonctionnel.md` § Suivi de l'utilisation) ; ouverte avec le même jeton d'accès. Les sessions successives d'une conversation se relient ainsi de proche en proche. |
+| Session → Objectif de session | 0..n | Objectifs successifs, dans l'ordre de leur date ; aucun si l'agent n'en a jamais donné. |
+| Jeton d'accès → Utilisation de l'outil | 0..n | Utilisations faites avec le jeton ; supprimées avec lui. Une requête refusée faute de jeton d'accès valable n'est rattachée à aucun jeton et n'est pas relevée. |
+| Utilisation de l'outil → Session | 0..1 | Session sous laquelle l'utilisation a été faite ; absente pour une utilisation refusée faute de jeton de session valable, rattachée à son seul jeton d'accès. |
+| Session → Retour écrit | 0..n | Retours écrits faits sous la session. |
+| Retour écrit → Utilisation de l'outil | 0..1 | Utilisation que le retour commente ; absente pour un retour qui ne porte sur aucune utilisation (ex. une fonction absente). |
+
+> **Contraintes :**
+>
+> - L'utilisation qu'un retour écrit commente appartient à la même session que lui, et une utilisation rattachée à une session l'est au même jeton d'accès que cette session.
+> - Sessions, objectifs, utilisations et retours écrits ne sont jamais modifiés après leur enregistrement ; ils ne disparaissent qu'avec le jeton d'accès qui porte la session. Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications.
 
 ---
 
@@ -290,15 +312,63 @@ erDiagram
 
 > **Contrainte :** le paramétrage est une fiche **unique**, toujours présente : il se modifie, mais ne se crée ni ne se supprime.
 
+### Jeton d'accès
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Nom | texte | oui | Identifie l'usage du jeton (ex. l'agent ou le poste qui l'utilise). |
+| Accès à l'administration | booléen | oui | `false` : niveau d'accès public ; `true` : niveau du compte administrateur (voir `fonctionnel.md` § Accès par jeton). |
+| Expiration | date et heure | non | À partir de laquelle le jeton est archivé, donc refusé. Absente : le jeton reste valable jusqu'à son archivage ou sa suppression. Fixée à la génération, elle ne change que par un réarmement, qui change aussi la valeur. Si elle est renseignée, elle est **postérieure** au moment de la génération ou du réarmement : une valeur ne naît jamais expirée. |
+| Archivé | booléen | oui | `false` par défaut. Un jeton archivé est refusé, mais conservé avec son historique d'utilisation (voir `fonctionnel.md` § Accès par jeton). Un jeton expiré est archivé. |
+| Valeur | secret | oui | Générée par l'application, jamais saisie ; présentée une seule fois, à la génération ou au réarmement du jeton, qui la remplace, et conservée sous une forme qui ne permet pas de la présenter de nouveau. |
+
+### Session de l'outil pour agents IA
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Ouverture | date et heure | oui | Moment de l'ouverture de la session. |
+| Expiration | date et heure | oui | Fin de validité du jeton de session, annoncée à l'agent à l'ouverture (voir `fonctionnel.md` § Suivi de l'utilisation). Un redémarrage de l'outil peut aussi invalider une session, sans que son expiration change. |
+
+### Objectif de session
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Texte | texte long | oui | Objectif tel que l'agent l'a formulé. |
+| Date | date et heure | oui | Moment où l'objectif a été donné ; une utilisation relève de l'objectif le plus récent avant elle. |
+
+### Utilisation de l'outil
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Point d'entrée | texte | oui | Outil appelé ou ressource lue. |
+| Paramètres | texte long | oui | Paramètres tels que l'agent les a transmis (arguments de l'outil, adresse de la ressource) ; jamais le jeton d'accès. |
+| Date | date et heure | oui | Moment de l'appel. |
+| Durée | durée | oui | |
+| Client | texte | non | Identité du logiciel client, s'il la transmet. |
+| Issue | énuméré | oui | `Succès` / `Erreur métier` / `Erreur fonctionnelle` / `Erreur technique` (voir `fonctionnel.md` § Présentation des erreurs) / `Session refusée` (jeton de session absent, inconnu ou expiré). |
+| Message d'erreur | texte long | non | Message renvoyé à l'agent, pour une utilisation en erreur. |
+| Nombre de résultats | entier | non | Pour une utilisation qui renvoie des résultats. |
+| Taille de la réponse | entier | oui | |
+
+> L'indice d'efficacité et ses signaux (voir `fonctionnel.md` § Suivi de l'utilisation) sont déduits de ces utilisations, jamais stockés.
+
+### Retour écrit
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Texte | texte long | oui | Limite signalée par l'agent. |
+| Point d'entrée | texte | non | Outil ou ressource concerné, si l'agent le désigne. |
+| Date | date et heure | oui | Moment du retour. |
+
 ### Entrée du journal des modifications
 
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
-| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage`. |
+| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage` / `Jeton d'accès`. |
 | Fiche | identifiant | oui | Identifiant de la fiche écrite. Conservé après la suppression de la fiche : aucune contrainte d'intégrité référentielle. |
 | Libellé | composantes du libellé | oui | Données qui composent le libellé de la fiche (ex. titre, série et tome d'un album, cf. `fonctionnel.md` § Libellé d'un album), relevées au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. Le libellé en est construit à la consultation. |
 | Opération | énuméré | oui | `Création` / `Modification` / `Suppression` / `Reprise` (reprise d'une ancienne donnée depuis l'application existante). |
-| Changements | liste | non | Pour une modification uniquement : chaque changement, avec l'attribut concerné, sa valeur **avant** et sa valeur **après**, telles qu'enregistrées dans la fiche ; une valeur qui désigne une autre fiche (ex. la série d'un album) l'est par les composantes de son libellé, comme ci-dessus. |
+| Changements | liste | non | Pour une modification uniquement : chaque changement, avec l'attribut concerné, sa valeur **avant** et sa valeur **après**, telles qu'enregistrées dans la fiche ; une valeur qui désigne une autre fiche (ex. la série d'un album) l'est par les composantes de son libellé, comme ci-dessus. Un secret (valeur d'un jeton d'accès, renouvelée par son réarmement) est consigné comme changé, sans valeur avant ni après. |
 
 > - Une entrée est ajoutée **automatiquement** à chaque écriture sur une fiche, dans la même opération ; elle n'est jamais saisie, modifiée ni supprimée, et le journal n'est jamais purgé. Sa date de création (attribut commun) est la date de l'écriture.
 > - L'ajout ou le retrait d'un élément associé (genre, univers, contribution, visuel…) est un changement de la fiche qui le porte : un ajout n'a pas de valeur avant, un retrait pas de valeur après. Les éléments sans fiche propre (visuel, contribution) n'ont pas d'entrée à leur nom.
