@@ -1,0 +1,57 @@
+# Saisie d'une édition
+
+Ce fichier décrit la présentation de la fiche de saisie d'une édition et de ses visuels dans la partie Administration (`fonctionnel.md` § Structure de l'application) : la page dédiée où une édition se crée ou se modifie, ouverte depuis la fiche de saisie de son album ([`saisie-album.md`](saisie-album.md)), une édition se saisissant toujours depuis son album. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+
+La fiche suit les principes de la fiche de saisie d'un album ([`saisie-album.md`](saisie-album.md)) : blocs de taille comparable, champs dimensionnés à leur contenu, cases à cocher pour les données oui/non, mention de bloc distincte de son titre, erreurs distinguées au premier coup d'œil, barre d'enregistrement figée. Elle est déclinée selon chacun des thèmes en lice (cf. [`dashboard.md`](dashboard.md) § Alternatives), dans le ton sobre de l'administration (cf. [`administration.md`](administration.md) § Ton).
+
+---
+
+## Maquettes
+
+Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/saisie-edition/`](maquettes/saisie-edition/index.html) (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` (mêmes valeurs que pour la page d'accueil de l'administration, [`administration.md`](administration.md) § Maquettes).
+
+Réglages de la source commune :
+
+| Réglage | Valeurs |
+| --- | --- |
+| `exemple` | `modification` (par défaut) : une édition possédée, avec onze visuels ; `creation` : une nouvelle édition, pré-remplie d'après la série de l'album ; `intention` : une édition visée par une intention d'achat, donc non possédée |
+| `mode` | `achat` (par défaut) ou `offerte` : le mode d'acquisition, dont suivent les libellés de la date et du montant |
+| `gratuite` | édition gratuite (avec le mode `offerte`) |
+| `isbn` | `valide` (par défaut) ou `incoherent` : chiffre de contrôle incohérent |
+| `televersement` | `aucun` (par défaut), `encours` (un envoi en cours, un autre en attente) ou `refus` (deux fichiers refusés) |
+| `visuelMenu` | menu des actions d'un visuel ouvert |
+| `erreur` | `aucune` (par défaut), `metier`, `fonctionnelle` ou `technique` |
+| `menuOpen` | menu de l'administration ouvert |
+
+Les données sont fictives ; les visuels sont des illustrations de substitution.
+
+## Contenu
+
+- **En-tête et menu** de l'administration, l'entrée « Albums » étant l'entrée courante du menu.
+- **Fil d'Ariane** : Administration, Albums, l'album, puis l'édition (« Nouvelle édition » en création).
+- **Titre** « Modifier l'édition » ou « Nouvelle édition », suivi du **libellé de l'édition** (`fonctionnel.md` § Libellé d'une édition), recalculé au fil de la saisie, et du lien vers la fiche de saisie de l'**album**. En modification, à droite : **Voir dans la consultation** (la fiche de l'album, qui présente l'édition) et un bouton « ⋯ » qui ouvre **Supprimer l'édition…**, dont le dialogue annonce l'impact, et la sortie de l'album de la collection s'il s'agit de sa dernière édition possédée (`fonctionnel.md` § Suppression des entités).
+- **Erreur d'enregistrement**, en tête de page, présentée comme sur la fiche de saisie d'un album ; l'erreur métier pointe en outre le champ en cause (ex. un prix sans date de référence).
+- **Pré-remplissage** : en création, un encadré indique que la fiche est pré-remplie d'après la série de l'album, et quels champs, ces valeurs n'étant que des propositions (`fonctionnel.md` § Initialisation d'une nouvelle édition depuis la série).
+- **Le formulaire**, en blocs :
+  - **L'édition** : l'**éditeur**, obligatoire, et la **collection**, parmi celles de l'éditeur, chacun choisi en tapant son nom ; puis l'**année d'édition**, l'**ISBN** et la **catégorie**. Le chiffre de contrôle de l'ISBN est vérifié pendant la saisie : correct, une coche ; incohérent, un cadre et un message d'avertissement, qui rappellent que l'ISBN peut être enregistré tel quel (`fonctionnel.md` § Validation de l'ISBN).
+  - **Fabrication** : format, reliure, orientation et sens de lecture, en listes courtes où « — » laisse la donnée vide, puis le nombre de **pages** et la case **En couleur**.
+  - **L'exemplaire**, pour une édition possédée : le **mode d'acquisition**, obligatoire ; la **date**, dont le libellé suit le mode (« Date d'achat », « Date d'acquisition », `fonctionnel.md` § Libellés contextuels sur l'édition) ; l'**état** ; les cases **D'occasion** et **Dédicacée** ; la **numérotation personnelle** ; les **notes personnelles**.
+  - **Valeur**, pour une édition possédée : le **montant d'acquisition**, dont le libellé suit le mode (« Prix d'achat », « Valeur d'acquisition »), et la **valeur initiale**, chacun en montant et devise côte à côte (devise d'origine, ancien franc compris), avec ce qui le date ; puis la case **Gratuite**, qui vide et désactive les deux montants, et que le mode « Achat » désactive (une édition achetée n'est jamais gratuite).
+  - **Intention d'achat**, à la place de l'exemplaire et de la valeur, pour une édition non possédée, cadre en tirets : elle explique que l'exemplaire se saisit en confirmant l'achat, avec **Confirmer l'achat…** et **Retirer l'intention…**, qui supprime aussi l'édition (`fonctionnel.md` § Intention d'achat, § Réalisation d'une intention).
+- **Les visuels**, en colonne latérale sur grand écran (après le formulaire sur smartphone), car ils ne s'enregistrent pas avec le formulaire : chaque visuel est enregistré dès son ajout, son ordre et son type dès qu'on les change, ce que le bloc rappelle.
+  - une **zone de dépôt**, avec le choix de fichiers et le type des visuels ajoutés (« Couverture » proposé), les formats acceptés et la taille maximale ;
+  - les **envois en cours**, traités un à la fois : progression de l'envoi, « En attente » pour les suivants ; un fichier refusé (format, taille) l'est avec sa raison, en couleur d'alerte, et se retire de la liste ;
+  - le **nombre de visuels**, puis tous les visuels en **une seule grille**, dans l'ordre des types (`fonctionnel.md` § Ordre des visuels d'une édition), chaque vignette marquée de son type (« Couv. », « Garde », « Pl. 3 », « 4e »), pour qu'un type d'un seul visuel n'occupe pas une ligne à lui seul ;
+  - sur chaque vignette, un bouton « ⋯ » qui ouvre son menu : **Changer le type**, **Ouvrir l'original** et **Supprimer le visuel…** ; une vignette se glisse pour la réordonner parmi celles de son type ;
+  - en création, le bloc indique que les visuels s'ajoutent une fois l'édition enregistrée ;
+  - sous le bloc, les dates de création, d'entrée dans la collection et de modification de l'édition.
+- **La barre d'enregistrement**, comme sur la fiche de saisie d'un album (« Créer l'édition » en création).
+- **Smartphone** : les blocs s'empilent ; les champs passent à la ligne en gardant leur taille, et les cases à cocher s'alignent sur le bas des champs voisins.
+
+## Contrôles
+
+Ceux de la liste des albums ([`liste-albums.md`](liste-albums.md) § Contrôles).
+
+## Déclinaison par thème
+
+Celle de la fiche de saisie d'un album ([`saisie-album.md`](saisie-album.md) § Déclinaison par thème). Mentions des blocs : Publication (L'édition), Objet (Fabrication), Possession (L'exemplaire, Intention d'achat), Montants (Valeur), Images (Les visuels).
