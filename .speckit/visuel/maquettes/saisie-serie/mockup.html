@@ -18,6 +18,11 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 /* The form on the left, the series' albums on the right; one column on a narrower screen. */
 .sa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;align-items:start}
 .sa-side{position:sticky;top:84px}
+/* The albums keep within the screen height, between the header and the save bar, and scroll on their own:
+   a long series is browsed without scrolling the whole form first. */
+.sa-side{max-height:calc(100vh - 84px - 84px)}
+.ss-albums{flex:0 1 auto;min-height:0}
+.ss-album-list{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px !important}
 .sa-role{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 14px;align-items:start}
 .sa-status-sm{display:none}
 /* Publisher and imprint side by side; the edition defaults on as many lines as needed. */
@@ -27,7 +32,8 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 .sa-duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch}
 @media (max-width: 1080px){
   .sa-layout{grid-template-columns:minmax(0,1fr)}
-  .sa-side{position:static}
+  .sa-side{position:static;max-height:none}
+  .ss-album-list{overflow-y:visible}
 }
 @media (max-width: 640px){
   .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
@@ -176,7 +182,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <div style="display: flex; flex-direction: column; gap: 4px">
               <label for="f-planned" style="{{lbl}}">Tomes numérotés prévus</label>
               <input id="f-planned" type="text" inputmode="numeric" maxlength="4" value="{{x.planned}}" aria-describedby="f-planned-help" style="{{num}} width: 64px">
-              <span id="f-planned-help" style="{{help}}">Sans les hors-série ; sert à repérer les albums manquants.</span>
+              <span id="f-planned-help" style="{{help}}">Sans les hors-série ; sert à identifier les albums manquants.</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 2px">
               <label style="display: inline-flex; align-items: center; gap: 8px; min-height: 32px; font-size: 14px; cursor: pointer">
@@ -298,13 +304,13 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         </form>
 
         <aside class="sa-side" style="min-width: 0; display: flex; flex-direction: column; gap: 22px">
-          <section aria-labelledby="s-albums" style="{{block}}">
+          <section class="ss-albums" aria-labelledby="s-albums" style="{{block}}">
             <span style="{{kickStyle}}">{{k.albums}}</span>
             <h2 id="s-albums" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Les albums</h2>
             <sc-if value="{{x.existing}}">
               <span style="{{help}}">Chaque album se saisit sur sa propre fiche ; ses changements s'enregistrent là-bas, pas ici.</span>
               <span style="font-size: 13px; font-weight: 700">{{x.albumCount}}</span>
-              <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+              <ul class="ss-album-list" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
                 <sc-for list="{{albums}}" as="a">
                   <li style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: {{a.bd}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
                     <span aria-hidden="true" style="width: 30px; height: 40px; flex: none; border-radius: {{t.thR}}; background: {{a.cover}}"></span>
@@ -678,6 +684,21 @@ Mockup.mount(View, {
   erreur: { label: 'Erreur', editor: 'enum', options: ['aucune', 'metier', 'fonctionnelle', 'technique'], default: 'aucune' },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
 });
+
+// The albums column ends above the save bar wherever it stands: lower at the top of the page, then held
+// under the header once it sticks. Its list scrolls within it.
+function fitSide() {
+  const side = document.querySelector('.sa-side');
+  const bar = document.querySelector('.sa-bar');
+  if (!side || !bar) return;
+  if (getComputedStyle(side).position !== 'sticky') { side.style.maxHeight = ''; return; }
+  const top = Math.max(84, side.getBoundingClientRect().top);
+  side.style.maxHeight = Math.max(240, bar.getBoundingClientRect().top - top - 16) + 'px';
+}
+addEventListener('scroll', fitSide, { passive: true });
+addEventListener('resize', fitSide);
+new MutationObserver(fitSide).observe(document.getElementById('mockup'), { childList: true, subtree: true });
+fitSide();
 </script>
 </body>
 </html>
