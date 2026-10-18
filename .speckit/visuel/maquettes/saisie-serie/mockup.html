@@ -303,6 +303,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           </section>
         </form>
 
+        <sc-if value="{{x.existing}}">
         <aside class="sa-side" style="min-width: 0; display: flex; flex-direction: column; gap: 22px">
           <section class="ss-albums" aria-labelledby="s-albums" style="{{block}}">
             <span style="{{kickStyle}}">{{k.albums}}</span>
@@ -325,14 +326,12 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                 </sc-for>
               </ul>
             </sc-if>
-            <sc-if value="{{x.creating}}">
-              <span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucun album pour l'instant : un album se rattache à la série depuis sa propre fiche.</span>
-            </sc-if>
           </section>
           <sc-if value="{{x.existing}}">
             <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p>
           </sc-if>
         </aside>
+        </sc-if>
       </div>
     </main>
   </div>
