@@ -18,8 +18,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 /* The form on the left, the album's editions on the right; one column on a narrower screen. */
 .sa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;align-items:start}
 .sa-side{position:sticky;top:84px}
-.sa-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
-.sa-tomes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
 .sa-role{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 14px;align-items:start}
 .sa-status-sm{display:none}
 @media (max-width: 1080px){
@@ -32,8 +30,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
   .adm-consult-label,.adm-menu-label,.sa-hide-sm{display:none}
   .adm-menu{width:38px;padding:0 !important;justify-content:center}
   .adm-tag{padding:2px 8px !important;font-size:11px !important}
-  .sa-pair{grid-template-columns:minmax(0,1fr)}
-  .sa-tomes{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
   .sa-role{grid-template-columns:minmax(0,1fr)}
   /* The save bar keeps to one line: the status shrinks to a word. */
   .sa-status{display:none}
@@ -175,52 +171,45 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <span style="{{kickStyle}}">{{k.volume}}</span>
             <h2 id="s-volume" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Tomes et parution</h2>
 
-            <div class="sa-pair">
-              <div style="display: flex; flex-direction: column; gap: 4px">
-                <span id="f-type" style="{{lbl}}">Type</span>
-                <div role="radiogroup" aria-labelledby="f-type" style="display: flex; height: 42px; padding: 3px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}">
-                  <sc-for list="{{types}}" as="o">
-                    <button type="button" role="radio" aria-checked="{{o.checked}}" onClick="{{o.pick}}" style="flex: 1 1 0; border: 0; border-radius: {{t.btnR}}; background: {{o.bg}}; color: {{o.fg}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer">{{o.label}}</button>
+            <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px 28px">
+              <fieldset style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                <legend style="{{lbl}} padding: 0 0 4px">Type</legend>
+                <div style="display: flex; align-items: center; gap: 18px; height: 38px">
+                  <sc-for list="{{flags}}" as="f">
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer">
+                      <input type="checkbox" checked="{{f.checked}}" onChange="{{f.toggle}}" style="width: 18px; height: 18px; margin: 0; accent-color: {{t.acc}}; cursor: pointer">{{f.label}}
+                    </label>
                   </sc-for>
                 </div>
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 4px">
-                <span style="{{lbl}}">Hors-série</span>
-                <label style="display: flex; align-items: center; gap: 10px; height: 42px; font-size: 14px; cursor: pointer">
-                  <span role="switch" aria-checked="{{hsChecked}}" tabindex="0" onClick="{{toggleHs}}" style="width: 44px; height: 26px; flex: none; box-sizing: border-box; padding: 3px; border-radius: 999px; background: {{hsTrack}}; border: 2px solid {{hsTrackB}}; display: flex; justify-content: {{hsJustify}}"><span style="width: 16px; height: 16px; border-radius: 50%; background: {{hsKnob}}"></span></span>
-                  {{hsLabel}}
-                </label>
-              </div>
-            </div>
-
-            <div class="sa-tomes">
+              </fieldset>
               <div style="display: flex; flex-direction: column; gap: 4px">
                 <label for="f-tome" style="{{lbl}}">{{tomeLabel}}</label>
-                <input id="f-tome" type="text" inputmode="numeric" value="{{x.tome}}" style="{{inp}}">
+                <input id="f-tome" type="text" inputmode="numeric" maxlength="4" value="{{x.tome}}" style="{{num}} width: 64px">
               </div>
               <sc-if value="{{omnibus}}">
-                <fieldset aria-describedby="f-range-help" style="grid-column: span 2; margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                <fieldset aria-describedby="f-range-help" style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
                   <legend style="{{lbl}} padding: 0 0 4px">Tomes couverts</legend>
                   <div style="display: flex; align-items: center; gap: 8px">
                     <label for="f-from" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Du tome</label>
-                    <input id="f-from" type="text" inputmode="numeric" value="{{x.from}}" style="{{inp}}">
-                    <span aria-hidden="true" style="flex: none; font-size: 14px; color: {{t.muted}}">à</span>
+                    <input id="f-from" type="text" inputmode="numeric" maxlength="4" value="{{x.from}}" style="{{num}} width: 64px">
+                    <span aria-hidden="true" style="font-size: 14px; color: {{t.muted}}">à</span>
                     <label for="f-to" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Au tome</label>
-                    <input id="f-to" type="text" inputmode="numeric" value="{{x.to}}" style="{{inp}}">
+                    <input id="f-to" type="text" inputmode="numeric" maxlength="4" value="{{x.to}}" style="{{num}} width: 64px">
                   </div>
                   <span id="f-range-help" style="{{help}}">Les deux, ou aucun.</span>
                 </fieldset>
               </sc-if>
+              <fieldset aria-describedby="f-date-help" style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                <legend style="{{lbl}} padding: 0 0 4px">Première publication</legend>
+                <div style="display: flex; align-items: center; gap: 8px">
+                  <label for="f-month" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Mois</label>
+                  <span style="position: relative; display: block"><select id="f-month" style="{{num}} width: 138px; text-align: left; padding: 0 30px 0 12px; appearance: none"><sc-for list="{{months}}" as="m"><option selected="{{m.selected}}">{{m.label}}</option></sc-for></select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 11px; top: 13px; pointer-events: none"><path d="M6 9l6 6 6-6"></path></svg></span>
+                  <label for="f-year" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Année</label>
+                  <input id="f-year" type="text" inputmode="numeric" maxlength="4" value="{{x.year}}" placeholder="aaaa" style="{{num}} width: 76px">
+                </div>
+                <span id="f-date-help" style="{{help}}">Mois facultatif ; jamais le jour.</span>
+              </fieldset>
             </div>
-
-            <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0">
-              <legend style="{{lbl}} padding: 0 0 4px">Première publication</legend>
-              <div class="sa-pair">
-                <label style="display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: {{t.muted}}">Mois <span style="position: relative; display: block"><select style="{{inp}} appearance: none; padding-right: 36px"><sc-for list="{{months}}" as="m"><option selected="{{m.selected}}">{{m.label}}</option></sc-for></select><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 14px; top: 14px; pointer-events: none"><path d="M6 9l6 6 6-6"></path></svg></span></label>
-                <label style="display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: {{t.muted}}">Année <input type="text" inputmode="numeric" value="{{x.year}}" placeholder="aaaa" style="{{inp}}"></label>
-              </div>
-              <span style="{{help}}">L'année seule, ou le mois et l'année : jamais le jour.</span>
-            </fieldset>
           </section>
 
           <section aria-labelledby="s-credits" style="{{block}}">
@@ -502,7 +491,7 @@ const ICONS = {
   technical: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z'
 };
 
-const MONTHS = ['Mois inconnu', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const MONTHS = ['—', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
 // Three albums: one in a series being modified, a brand new one, and an untitled omnibus whose credits
 // were just copied from its series. Labels follow the default format (fonctionnel.md § Libellé d'un album).
@@ -637,6 +626,8 @@ class View extends Mockup {
       lbl: 'font-weight: 700; font-size: 13px;',
       help: 'font-size: 12px; color: ' + t.muted + ';',
       inp: field + ' height: 42px; padding: 0 14px;',
+      // A field sized to what it holds: a few digits for a volume or a year, a month name.
+      num: field + ' height: 38px; padding: 0 8px; text-align: center; font-variant-numeric: tabular-nums;',
       area: field + ' padding: 10px 14px; resize: vertical; line-height: 1.5;',
       iconBtn: 'width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: ' + t.text + '; cursor: pointer;',
       chip: 'display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 4px 0 12px; box-sizing: border-box; border-radius: ' + t.btnR + '; background: ' + t.nBg + '; color: ' + t.nFg + '; font-weight: 700; font-size: 13px;',
@@ -656,17 +647,13 @@ class View extends Mockup {
       keyHelp: keyManual
         ? 'Saisie à la main : elle ne suit plus le titre. « Réinitialiser » la recalcule à partir du titre.'
         : (x.title || !x.series ? 'Calculée à partir du titre, article reporté à la fin ; la modifier la fige.' : 'Sans titre propre, l\'album est rangé à la clé de sa série.'),
-      types: [['regular', 'Régulier'], ['omnibus', 'Intégrale']].map(([key, text]) => ({
-        label: text, checked: type === key ? 'true' : 'false',
-        bg: type === key ? t.acc : 'transparent', fg: type === key ? t.onAcc : t.text,
-        pick: () => this.setState({ type: key })
-      })),
+      // Both are yes-or-no: an album is regular unless it is an omnibus, and either may be a special issue.
+      flags: [
+        { label: 'Intégrale', checked: omnibus, toggle: () => this.setState({ type: omnibus ? 'regular' : 'omnibus' }) },
+        { label: 'Hors-série', checked: hs, toggle: () => this.setState({ hs: !hs }) }
+      ],
       omnibus,
       tomeLabel: omnibus ? 'Numéro' : 'Tome',
-      hsChecked: hs ? 'true' : 'false',
-      hsTrack: hs ? t.acc : 'transparent', hsTrackB: hs ? t.acc : t.muted, hsKnob: hs ? t.onAcc : t.muted, hsJustify: hs ? 'flex-end' : 'flex-start',
-      hsLabel: hs ? 'Oui, hors de la séquence des tomes' : 'Non',
-      toggleHs: () => this.setState({ hs: !hs }),
       months: MONTHS.map((m, i) => ({ label: m, selected: i === x.month })),
       roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people, none: people.length === 0 })),
       tagGroups: [

@@ -35,10 +35,10 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
     - la **série**, choisie en tapant son titre, que l'on retire pour faire de l'album un album isolé ; l'aide rappelle ce que change la série pour le titre ;
     - le **titre**, dont la mention suit la série : « facultatif dans une série », « obligatoire sans série » ;
     - la **clé de tri**, toujours visible, marquée **Auto** ou **Manuelle** ; en mode manuel, **Réinitialiser** la recalcule à partir du titre (`fonctionnel.md` § Calcul et stockage de la clé de tri) ; sans titre propre, l'aide indique que l'album est rangé à la clé de sa série.
-  - **Tomes et parution**, bloc distinct, pour que l'identité de l'album ne forme pas un bloc démesuré face aux autres :
-    - le **type**, Régulier ou Intégrale, en sélecteur à deux positions, et l'interrupteur **Hors-série**, indépendant du type ;
+  - **Tomes et parution**, bloc distinct, pour que l'identité de l'album ne forme pas un bloc démesuré face aux autres. Ses champs tiennent sur une ligne, qui passe à la ligne au besoin : chaque champ est **dimensionné à ce qu'il contient** (quelques chiffres pour un tome ou une année, un nom de mois), jamais étiré sur toute la largeur.
+    - le **type** : deux cases à cocher, **Intégrale** et **Hors-série**, indépendantes l'une de l'autre ; sans case cochée, l'album est régulier. Une donnée à deux valeurs se saisit par une case à cocher, jamais par un sélecteur à boutons ;
     - le **tome** ; pour une intégrale, son **numéro** et, à côté, les **tomes couverts**, regroupés sous leur propre intitulé (« 1 à 5 »), la règle qui les lie (« Les deux, ou aucun ») placée juste sous eux ;
-    - la **première publication** : un mois facultatif et l'année, jamais le jour.
+    - la **première publication** : une liste de mois (« — » pour un mois inconnu) et l'année, côte à côte, jamais le jour.
   - **Les auteurs** : une ligne par rôle (scénario, dessin, couleurs), chaque auteur en étiquette retirable, « Personne » sans auteur, et **Ajouter**, qui trouve un auteur en tapant son nom ou le crée sur place. Quand ils viennent d'être repris de la série (`fonctionnel.md` § Initialisation des contributions depuis la série), un encadré le dit, et rappelle qu'ils appartiennent désormais à l'album.
   - **Genres et univers** : ceux de l'album, en étiquettes retirables, avec **Ajouter** ; en dessous, **par la série**, ceux qu'il affiche par sa série, en étiquettes en tirets, non modifiables ici (`fonctionnel.md` § Genres et univers d'un album). Un univers est présenté avec ses ancêtres.
   - **Résumé, notes et appréciation** : le résumé et les notes personnelles en zones de texte, puis l'appréciation en cinq étoiles, avec son libellé (« Bien », « Pas encore noté ») et **Retirer**.
@@ -49,7 +49,7 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
   - en création, le bloc indique que les éditions et les intentions d'achat s'ajoutent une fois l'album enregistré ;
   - sous le bloc, les dates de création et de modification de la fiche.
 - **La barre d'enregistrement**, figée en bas de l'écran : l'état de la fiche (« Modifications non enregistrées », signalé d'un point de couleur d'accent ; « Nouvelle fiche »), **Annuler** et **Enregistrer** (« Créer l'album » en création), mis en relief. Sur smartphone, elle tient sur une ligne, l'état réduit à quelques mots.
-- **Smartphone** : les blocs s'empilent sur une colonne, les champs appariés (type et hors-série, mois et année) aussi, et les rôles des auteurs passent au-dessus de leurs étiquettes ; les tomes d'une intégrale restent sur une ligne.
+- **Smartphone** : les blocs s'empilent sur une colonne ; les champs de « Tomes et parution » passent à la ligne en gardant leur taille, les tomes couverts et la date restant chacun sur une ligne ; les rôles des auteurs passent au-dessus de leurs étiquettes.
 
 ## Contrôles
 
