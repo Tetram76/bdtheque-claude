@@ -30,6 +30,7 @@ Les données sont fictives.
 - **Actions** : l'action principale de l'entité en bouton, puis un menu « ⋯ » : voir l'entrée dans la consultation (ou le site web d'un éditeur), **Fusionner avec…** une autre fiche du même type (`fonctionnel.md` § Structure de l'application), et, séparée par un filet, la suppression.
 - **Création** : un bouton « Nouvel… » en tête de page, sauf pour les intentions d'achat, qui se posent depuis la fiche de leur album (une mention le dit à sa place), et pour les genres, créés dans la liste même.
 - **Données absentes** : affichées « Non renseigné(e) » ou « — », en texte atténué, jamais laissées vides.
+- **Zone de texte** (ex. description d'un univers) : un arrondi modéré, même dans un thème dont les champs d'une ligne sont en pilule, dont l'arrondi rognerait ses coins et son texte.
 
 ## Saisie selon l'entité
 
