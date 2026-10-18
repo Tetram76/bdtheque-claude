@@ -18,7 +18,8 @@ Réglages de la source commune :
 | `filtres` | panneau des filtres ouvert (séries et éditions) |
 | `actions` | menu des autres actions d'une ligne ouvert |
 | `edition` | un genre en cours de modification dans sa ligne |
-| `doublon` | un nouveau genre refusé, son libellé étant déjà pris |
+| `ajout` | cadre d'ajout d'un genre ouvert |
+| `doublon` | un nouveau genre refusé, son libellé étant déjà pris (cadre d'ajout ouvert) |
 | `panneau` | panneau d'un univers : `aucun` (par défaut), `modification`, `creation` ou `cycle` (parent refusé) |
 | `menuOpen` | menu de l'administration ouvert |
 
@@ -28,7 +29,7 @@ Les données sont fictives.
 
 - **Ligne** : un visuel lorsque l'entité en a un, l'entrée (son nom ou son libellé, avec une précision en petit dessous), les colonnes propres à l'entité, puis les actions. Sur un écran moins large, les colonnes secondaires (date de modification, catégorie, nationalité, site web…) s'effacent ; sur smartphone, les autres colonnes passent juste sous l'entrée, alignées sur elle (sur le nom d'un sous-univers, au-delà de son retrait), un nombre y étant précédé du nom de sa colonne (« Albums 24 ») ; les actions, à droite, sont centrées sur ces deux lignes.
 - **Actions** : l'action principale de l'entité en bouton, puis un menu « ⋯ » : voir l'entrée dans la consultation (ou le site web d'un éditeur), **Fusionner avec…** une autre fiche du même type (`fonctionnel.md` § Structure de l'application), et, séparée par un filet, la suppression.
-- **Création** : un bouton « Nouvel… » en tête de page, sauf pour les intentions d'achat, qui se posent depuis la fiche de leur album (une mention le dit à sa place), et pour les genres, créés dans la liste même.
+- **Création** : un bouton « Nouvel… » en tête de page, sauf pour les intentions d'achat, qui se posent depuis la fiche de leur album (une mention le dit à sa place).
 - **Données absentes** : affichées « Non renseigné(e) » ou « — », en texte atténué, jamais laissées vides.
 - **Zone de texte** (ex. description d'un univers) : un arrondi modéré, même dans un thème dont les champs d'une ligne sont en pilule, dont l'arrondi rognerait ses coins et son texte.
 
@@ -39,7 +40,7 @@ La saisie d'une fiche s'ouvre selon le poids de l'entité :
 | Entité | Saisie |
 | --- | --- |
 | Série, édition, auteur, éditeur | **Page dédiée**, comme l'album ; l'éditeur, qui porte ses collections, en est une. |
-| Genre | **Dans sa ligne** : « Modifier » change la ligne en champ, avec **Enregistrer** et **Annuler** ; un nouveau genre se saisit dans un cadre en tirets au-dessus de la liste, avec **Ajouter**. Un libellé déjà pris est refusé sur place, en couleur d'alerte, en rappelant que la casse et les accents ne distinguent pas deux genres (`modele-metier.md` § Genre). |
+| Genre | **Dans sa ligne** : « Modifier » change la ligne en champ, avec **Enregistrer** et **Annuler** ; un nouveau genre se saisit dans un cadre en tirets au-dessus de la liste, avec **Ajouter** et **Annuler** ; ce cadre est masqué par défaut, et le bouton **Nouveau genre** de l'en-tête l'ouvre. Un libellé déjà pris est refusé sur place, en couleur d'alerte, en rappelant que la casse et les accents ne distinguent pas deux genres (`modele-metier.md` § Genre). |
 | Univers | **Panneau latéral**, qui glisse par-dessus la liste depuis la droite, la liste restant visible et grisée derrière : nom, univers parent (choisi en tapant son nom, présenté avec ses ancêtres, « Univers Hugo Pratt › Corto Maltese »), description, dates de la fiche, puis **Annuler** et **Enregistrer**. Un parent qui créerait un cycle est refusé sur place, avec sa raison (`modele-metier.md` § Univers — relations). |
 | Intention d'achat | Pas de fiche propre : l'action principale est **Confirmer l'achat**, et le menu mène à la fiche de l'album, à la conversion vers l'album ou une édition, et au retrait de l'intention (`fonctionnel.md` § Intention d'achat). |
 

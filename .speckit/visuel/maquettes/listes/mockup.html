@@ -161,12 +161,13 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           <span>{{e.order}}</span>
         </div>
 
-        <sc-if value="{{e.inlineNew}}">
+        <sc-if value="{{newOpen}}">
           <form onSubmit="{{noSubmit}}" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 2px dashed {{inlineNewB}}; border-radius: {{t.tR}}">
             <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
               <label for="lr-new" style="font-weight: 700; font-size: 13px">{{e.inlineNew}}</label>
               <input id="lr-new" type="text" value="{{newValue}}" placeholder="Libellé" aria-invalid="{{newInvalid}}" style="width: 240px; max-width: 100%; height: 36px; padding: 0 12px; box-sizing: border-box; border: {{newBorder}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit">
               <button type="submit" style="height: 36px; padding: 0 14px; border: 0; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Ajouter</button>
+              <button type="button" onClick="{{closeNew}}" style="height: 36px; padding: 0 10px; border: 0; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Annuler</button>
             </span>
             <sc-if value="{{newError}}"><span style="font-weight: 700; font-size: 13px; color: {{t.del}}">{{newError}}</span></sc-if>
           </form>
@@ -514,7 +515,7 @@ const ENTITIES = {
     ]
   },
   genres: {
-    menu: 'Genres', title: 'Genres', total: '24', create: null, kind: 'Référentiel',
+    menu: 'Genres', title: 'Genres', total: '24', create: 'Nouveau genre', kind: 'Référentiel',
     inlineNew: 'Nouveau genre',
     searchPh: 'Libellé…', initials: null, filters: [],
     count: '24 genres', countDetail: '', order: 'Triés par libellé',
@@ -646,6 +647,8 @@ class View extends Mockup {
     };
     // A label must be unique regardless of case and accents (modele-metier.md § Genre).
     const duplicate = e.inline && this.props.doublon;
+    // The block to add a genre stays hidden until « Nouveau genre » opens it.
+    const newOpen = e.inline && (this.state?.newOpen ?? (Boolean(this.props.ajout) || duplicate));
     const panel = panelData ? {
       ...panelData,
       invalid: panelData.invalid ? 'true' : 'false',
@@ -672,7 +675,9 @@ class View extends Mockup {
         metaCol: e.thumb ? '2 / 3' : '1 / 2',
         cols: e.cols.map((c) => ({ ...c, cls: c.hideMd ? 'lr-hide-md' : '' }))
       },
-      create: () => { if (e.panel) this.setState({ panel: 'creation' }); },
+      create: () => { if (e.panel) this.setState({ panel: 'creation' }); else if (e.inline) this.setState({ newOpen: true }); },
+      newOpen,
+      closeNew: () => this.setState({ newOpen: false }),
       hasFilters: e.filters.length > 0,
       filtersOpen: filtersOpen && e.filters.length > 0,
       filtersExpanded: filtersOpen ? 'true' : 'false',
@@ -707,6 +712,7 @@ Mockup.mount(View, {
   filtres: { label: 'Filtres ouverts', editor: 'boolean', default: false },
   actions: { label: 'Actions d’une ligne', editor: 'boolean', default: false },
   edition: { label: 'Genre en cours de modification', editor: 'boolean', default: false },
+  ajout: { label: 'Ajout d’un genre ouvert', editor: 'boolean', default: false },
   doublon: { label: 'Nouveau genre en double', editor: 'boolean', default: false },
   panneau: { label: 'Panneau d’un univers', editor: 'enum', options: ['aucun', 'modification', 'creation', 'cycle'], default: 'aucun' },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
