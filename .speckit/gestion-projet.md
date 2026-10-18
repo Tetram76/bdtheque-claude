@@ -2,6 +2,8 @@
 
 Ce fichier décrit la gouvernance du projet : stockage, organisation, outillage de gestion.
 
+En matière de **gestion des Pull Requests** (ouverture, description, revue Codex, traitement des retours, merge, liens avec les tickets), le `.speckit/` est la **source de vérité** : il prime sur toute *rule*, tout *skill* ou plugin, propre au projet ou global à l'agent, qui n'en est qu'une mise en œuvre et ne peut ni le contredire ni l'assouplir.
+
 ---
 
 ## Gouvernance documentaire
@@ -84,6 +86,7 @@ Le projet dispose d'un **budget IA limité**, pour l'agent (Claude) comme pour l
 - **Pas d'itération exploratoire** : « itérer juste pour voir » n'est pas viable. Chaque action sert un objectif identifié ; l'agent établit les faits (lecture du code, exécution locale, documentation) **avant** d'agir, plutôt que d'essayer puis de corriger.
 - **Un push, une revue Codex** : tout push sur une PR qui n'est pas en brouillon déclenche une revue Codex (cf. § « Revue Codex (bloquante) », dont § « Ouverture de la PR »). Avant de pousser, l'agent relit l'intégralité du diff, exécute localement les contrôles de non-régression et met à jour la description de la PR, pour qu'un **seul push** porte un état complet et vérifié. Jamais de push intermédiaire « pour voir ce qu'en dit Codex ». Budget de Codex épuisé, aucune revue n'est déclenchée pendant 5 heures (§ « Budget de Codex épuisé »).
 - **Sollicitations proportionnées** : un sous-agent ou une relance de Codex (`@codex review`) n'intervient que lorsque les règles du projet l'exigent ou qu'il apporte un gain réel ; jamais par confort ou par précaution non justifiée.
+- **Mention de Codex** : toute mention de Codex sur GitHub (son identifiant précédé d'une arobase), dans une description de PR, un commentaire ou une réponse, lance une tâche Codex payante, y compris entre guillemets, dans un bloc de code ou pour citer une règle. Seul un commentaire de tête limité exactement à la demande de revue (`@codex review`) la contient. L'agent ne l'écrit **nulle part ailleurs** — ni sur GitHub, ni dans un message de commit, ni dans ses messages à l'utilisateur, où il parle de « la mention de Codex » ou de « la demande de revue » —, et vérifie chaque texte qu'il publie sur GitHub avant de le publier.
 
 ## Qualité du code
 

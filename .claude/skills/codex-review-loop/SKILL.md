@@ -10,8 +10,10 @@ description: >-
 
 # Codex Review Loop
 
-Policy source of truth: `.speckit/gestion-projet.md` → "Revue de code" /
-"Revue Codex (bloquante)". This skill is the operational procedure for that
+The `.speckit/` is the source of truth for PR management on this repo: it
+prevails over this skill and over any other rule, skill or plugin, global
+ones included; on any divergence, the speckit applies. Policy:
+`.speckit/gestion-projet.md` → "Revue de code" / "Revue Codex (bloquante)". This skill is the operational procedure for that
 policy: a PR on this repo cannot be merged until the Codex bot
 (`chatgpt-codex-connector[bot]`) has approved the current head commit.
 
@@ -444,6 +446,11 @@ integration, any `@codex` mention followed by anything other than exactly
 `review` starts a cloud task using the PR as context (i.e. an unwanted fix
 attempt) — only the dedicated top-level PR comment in Step 5, containing
 exactly `@codex review` and nothing else, should ever contain that mention.
+The same holds for the PR description and every other comment, even when the
+mention is quoted, in backticks or used to describe a rule: grep each text
+for it right before `gh pr create` / `gh pr edit` / `gh pr comment` / `gh api`.
+In chat with the user, never type it either (policy: `.speckit/gestion-projet.md`
+§ Budget IA, « Mention de Codex »).
 
 **c'. Rate Codex's comment** — always, as Codex asks in every comment: 👍
 (`+1`) if the finding was useful, 👎 (`-1`) if not:
