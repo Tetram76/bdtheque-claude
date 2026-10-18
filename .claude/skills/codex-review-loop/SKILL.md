@@ -25,6 +25,38 @@ request a review with a `@codex review` comment.
 
 Requires `gh` authenticated (`gh auth status`) with access to the repo.
 
+## Codex budget cooldown — check before any trigger
+
+When Codex runs out of budget it posts "You have reached your Codex usage
+limits" on a PR. Any review triggered within **5 hours** of that notice is
+refused **and restarts the 5-hour delay**, whichever PR triggers it: the
+budget is shared (policy: `.speckit/gestion-projet.md` § « Budget de Codex
+épuisé »). So, before **every** act that could trigger a review — creating a
+non-draft PR, marking a draft ready, pushing to a non-draft PR, or posting
+any comment with an `@codex` mention (Step 5 included) — run:
+
+```bash
+set -o pipefail
+prs=$(gh pr list --state open --limit 200 --json number -q '.[].number') || { echo "query failed: retry"; exit 1; }
+last=""
+for n in $prs; do
+  t=$(gh api --paginate "repos/{owner}/{repo}/issues/$n/comments?per_page=100" \
+        --jq '.[]|select(.user.login=="chatgpt-codex-connector[bot]" and (.body|test("reached your Codex usage limits")))|.created_at' \
+      | sort | tail -1) || { echo "query failed: retry"; exit 1; }
+  [[ "$t" > "$last" ]] && last=$t
+done
+if [ -n "$last" ] && [ $(( $(date -u +%s) - $(date -u -d "$last" +%s) )) -lt 18000 ]; then
+  echo "blocked until $(date -u -d "@$(( $(date -u -d "$last" +%s) + 18000 ))" +%FT%TZ)"
+else
+  echo "clear (last notice: ${last:-none})"
+fi
+```
+
+`blocked` → do none of those acts: open the PR as a draft (drafts are out of
+Codex's scope, so pushing to one is fine), keep commits local or on a draft,
+and tell the user when the window ends. A failed query is not `clear`: retry.
+This check overrides every other step of this skill that triggers Codex.
+
 Placeholder convention below: `{owner}` / `{repo}` are literal — `gh api`
 auto-expands them from the current repo in REST endpoint paths only. Every
 `<ANGLE_BRACKET>` placeholder (`<PR_NUMBER>`, `<COMMENT_ID>`, `<THREAD_ID>`)
@@ -203,7 +235,8 @@ entered from Step 5 without a new push, the `@codex review` comment's
   (a top-level comment, or a review without threads): read it. A usage-limit
   message **suspends** the PR: no review is coming until Codex's budget is
   back, so tell the user and stop — no watcher, and no `@codex review`, which
-  would only be refused again; resume only when the user asks. Feedback
+  would be refused and restart the 5-hour cooldown (see "Codex budget
+  cooldown"); resume only when the user asks, once the cooldown is over. Feedback
   reporting nothing to fix: re-arm with `<HANDLED_UNTIL>` set to now and keep
   waiting for the approval — never answer it with `@codex review`, which would pay
   for a needless extra review.
@@ -380,6 +413,8 @@ retry the check.
 If this is `> 0`, wait for the verdict first (watcher): a push made during a
 review gets no review of its own, and the 👍 that ends the running review
 would wrongly look like an approval of the new head.
+
+Nor while the Codex budget cooldown is running (see "Codex budget cooldown").
 
 If any fix commits were made in Step 2, push them now, and confirm the push
 succeeded (e.g. check the command's exit status and that the remote ref
