@@ -35,22 +35,29 @@ refused **and restarts the 5-hour delay**, whichever PR triggers it: the
 budget is shared (policy: `.speckit/gestion-projet.md` § « Budget de Codex
 épuisé »). So, before **every** act that could trigger a review — creating a
 non-draft PR, marking a draft ready, pushing to a non-draft PR, or posting
-any comment with an `@codex` mention (Step 5 included) — run:
+any comment with an `@codex` mention (Step 5 included) — run the check below.
+It scans the PRs that are open, or were closed less than 5 hours ago — not
+every PR: closing or merging the PR that carries the notice does not end the
+cooldown. A notice posted within the window bumped its PR's `updated_at`, so
+reading the comments of the PRs updated since the cutoff is enough.
 
 ```bash
 set -o pipefail
-prs=$(gh pr list --state open --limit 200 --json number -q '.[].number') || { echo "query failed: retry"; exit 1; }
+window=18000
+cutoff=$(date -u -d "@$(( $(date -u +%s) - window ))" +%FT%TZ)
+prs=$(gh api --paginate "repos/{owner}/{repo}/pulls?state=all&sort=updated&direction=desc&per_page=100" \
+        --jq ".[]|select(.updated_at>=\"$cutoff\")|.number") || { echo "query failed: retry"; exit 1; }
 last=""
 for n in $prs; do
-  t=$(gh api --paginate "repos/{owner}/{repo}/issues/$n/comments?per_page=100" \
-        --jq '.[]|select(.user.login=="chatgpt-codex-connector[bot]" and (.body|test("reached your Codex usage limits")))|.created_at' \
+  t=$(gh api --paginate "repos/{owner}/{repo}/issues/$n/comments?since=$cutoff&per_page=100" \
+        --jq ".[]|select(.user.login==\"chatgpt-codex-connector[bot]\" and .created_at>=\"$cutoff\" and (.body|test(\"reached your Codex usage limits\")))|.created_at" \
       | sort | tail -1) || { echo "query failed: retry"; exit 1; }
   [[ "$t" > "$last" ]] && last=$t
 done
-if [ -n "$last" ] && [ $(( $(date -u +%s) - $(date -u -d "$last" +%s) )) -lt 18000 ]; then
-  echo "blocked until $(date -u -d "@$(( $(date -u -d "$last" +%s) + 18000 ))" +%FT%TZ)"
+if [ -n "$last" ]; then
+  echo "blocked until $(date -u -d "@$(( $(date -u -d "$last" +%s) + window ))" +%FT%TZ)"
 else
-  echo "clear (last notice: ${last:-none})"
+  echo "clear (no notice since $cutoff)"
 fi
 ```
 

@@ -186,13 +186,13 @@ Le passage d'un brouillon en « prête pour la revue » ne déclenche pas néces
 
 #### Budget de Codex épuisé
 
-Codex signale l'épuisement de son budget par un commentaire sur une PR (« limite d'usage atteinte »), qu'aucune revue ne suit. Toute revue déclenchée dans les **5 heures** qui suivent ce signalement est refusée et **réarme ce délai** de 5 heures, quelle que soit la PR qui la déclenche, le budget étant commun à toutes. Tant que le dernier signalement de Codex sur l'une des PR ouvertes date de moins de 5 heures, l'agent ne déclenche donc **jamais** de revue Codex, intentionnellement ou non :
+Codex signale l'épuisement de son budget par un commentaire sur une PR (« limite d'usage atteinte »), qu'aucune revue ne suit. Toute revue déclenchée dans les **5 heures** qui suivent ce signalement est refusée et **réarme ce délai** de 5 heures, quelle que soit la PR qui la déclenche, le budget étant commun à toutes. Tant que le dernier signalement de Codex sur une PR ouverte, ou fermée depuis moins de 5 heures, date de moins de 5 heures, l'agent ne déclenche donc **jamais** de revue Codex, intentionnellement ou non :
 
 - aucune PR créée hors brouillon, ni passée de brouillon à « prête pour la revue » : une PR à ouvrir l'est en brouillon ;
 - aucun commit poussé sur une PR qui n'est pas en brouillon ;
 - aucun commentaire qui sollicite Codex (`@codex review`, ou toute autre mention `@codex`).
 
-Avant chacun de ces actes, l'agent vérifie la date du dernier signalement de Codex sur les PR ouvertes. Cette règle prévaut sur toute autre qui prévoit de solliciter Codex (passage en « prête pour la revue », relance par `@codex review`). Une PR en brouillon étant hors du périmètre de Codex, le travail s'y poursuit normalement (création, push).
+Avant chacun de ces actes, l'agent vérifie la date du dernier signalement de Codex sur ces PR : fermer ou fusionner la PR qui porte le signalement ne lève pas le délai. Cette règle prévaut sur toute autre qui prévoit de solliciter Codex (passage en « prête pour la revue », relance par `@codex review`). Une PR en brouillon étant hors du périmètre de Codex, le travail s'y poursuit normalement (création, push).
 
 La PR sur laquelle Codex a signalé son budget épuisé est en outre **suspendue** : l'agent le signale à l'utilisateur, n'arme plus d'observateur et ne relance pas Codex. Sa revue ne reprend que sur demande de l'utilisateur, une fois le délai écoulé.
 
