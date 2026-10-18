@@ -1,0 +1,59 @@
+# Saisie d'un album
+
+Ce fichier décrit la présentation de la fiche de saisie d'un album dans la partie Administration (`fonctionnel.md` § Structure de l'application) : la page dédiée où un album se crée ou se modifie, ouverte depuis la liste des albums ([`liste-albums.md`](liste-albums.md)). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+
+La fiche est déclinée selon chacun des thèmes en lice pour la partie Consultation (cf. [`dashboard.md`](dashboard.md) § Alternatives) : comme toute page de l'administration, elle suit l'identité visuelle du thème actif, dans le ton sobre de l'administration (cf. [`administration.md`](administration.md) § Ton).
+
+---
+
+## Maquettes
+
+Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/saisie-album/`](maquettes/saisie-album/index.html) (cf. [`charte-graphique.md`](charte-graphique.md) § Maquettes). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` (mêmes valeurs que pour la page d'accueil de l'administration, [`administration.md`](administration.md) § Maquettes).
+
+Réglages de la source commune :
+
+| Réglage | Valeurs |
+| --- | --- |
+| `exemple` | `modification` (par défaut) : un album d'une série, avec trois éditions dont une visée par une intention d'achat ; `creation` : un nouvel album, vide ; `integrale` : une intégrale sans titre propre, dont les auteurs viennent d'être repris de sa série, visée par une intention d'achat sur l'album |
+| `cleManuelle` | clé de tri saisie à la main (exemple `modification`) |
+| `erreur` | `aucune` (par défaut), `metier`, `fonctionnelle` ou `technique` : l'erreur présentée après un enregistrement refusé |
+| `menuOpen` | menu de l'administration ouvert |
+
+Les données sont fictives ; les couvertures sont des illustrations de substitution.
+
+## Contenu
+
+- **En-tête et menu** de l'administration ([`administration.md`](administration.md) § En-tête et menu), l'entrée « Albums » étant l'entrée courante du menu.
+- **Fil d'Ariane** : Administration, Albums, puis l'album (« Nouvel album » en création).
+- **Titre** « Modifier l'album » ou « Nouvel album », suivi du **libellé de l'album** (`fonctionnel.md` § Libellé d'un album), recalculé au fil de la saisie (« <Sans titre> » tant que rien n'est saisi). En modification, à droite : **Voir dans la consultation**, et un bouton « ⋯ » qui ouvre **Fusionner avec un autre album…** et, séparée par un filet, **Supprimer l'album…** ; ces deux actions mènent aux dialogues de la liste des albums.
+- **Erreur d'enregistrement**, en tête de page, au-dessus du formulaire. Les trois catégories (`fonctionnel.md` § Présentation des erreurs) se distinguent au premier coup d'œil, chacune par sa mention, son icône, sa couleur et son cadre :
+  - **À corriger** (erreur métier) : cadre plein de la couleur d'alerte, point d'exclamation ; le message dit quoi corriger, et le champ en cause est en outre bordé de la couleur d'alerte, avec son message sous lui ;
+  - **Modifiée entre-temps** (erreur fonctionnelle) : cadre en tirets d'une couleur d'information, flèches de rechargement ; le message explique que rien n'a été écrasé, avec **Recharger la fiche** et **Voir mes changements** ;
+  - **Problème technique** : cadre pointillé neutre, clé à molette ; le message rassure sur les changements saisis, avec **Réessayer**.
+- **Le formulaire**, en blocs, sur la colonne principale :
+  - **L'album** :
+    - la **série**, choisie en tapant son titre, que l'on retire pour faire de l'album un album isolé ; l'aide rappelle ce que change la série pour le titre ;
+    - le **titre**, dont la mention suit la série : « facultatif dans une série », « obligatoire sans série » ;
+    - la **clé de tri**, toujours visible, marquée **Auto** ou **Manuelle** ; en mode manuel, **Réinitialiser** la recalcule à partir du titre (`fonctionnel.md` § Calcul et stockage de la clé de tri) ; sans titre propre, l'aide indique que l'album est rangé à la clé de sa série ;
+    - le **type**, Régulier ou Intégrale, en sélecteur à deux positions, et l'interrupteur **Hors-série**, indépendant du type ;
+    - le **tome** ; pour une intégrale, son **numéro** et les tomes couverts, **du tome… au tome…**, avec la règle qui les lie ;
+    - la **première publication** : un mois facultatif et l'année, jamais le jour.
+  - **Les auteurs** : une ligne par rôle (scénario, dessin, couleurs), chaque auteur en étiquette retirable, « Personne » sans auteur, et **Ajouter**, qui trouve un auteur en tapant son nom ou le crée sur place. Quand ils viennent d'être repris de la série (`fonctionnel.md` § Initialisation des contributions depuis la série), un encadré le dit, et rappelle qu'ils appartiennent désormais à l'album.
+  - **Genres et univers** : ceux de l'album, en étiquettes retirables, avec **Ajouter** ; en dessous, **par la série**, ceux qu'il affiche par sa série, en étiquettes en tirets, non modifiables ici (`fonctionnel.md` § Genres et univers d'un album). Un univers est présenté avec ses ancêtres.
+  - **Résumé, notes et appréciation** : le résumé et les notes personnelles en zones de texte, puis l'appréciation en cinq étoiles, avec son libellé (« Bien », « Pas encore noté ») et **Retirer**.
+- **Les éditions**, en colonne latérale sur grand écran (après le formulaire sur smartphone), car elles ne s'enregistrent pas avec le formulaire : chaque édition, avec ses visuels, se saisit sur sa propre fiche, ce que le bloc rappelle.
+  - l'**intention d'achat sur l'album**, lorsqu'elle existe, en cadre en tirets, avec **Viser plutôt une édition…** et **Retirer l'intention…** ;
+  - chaque **édition** : sa vignette de couverture, son libellé (`fonctionnel.md` § Libellé d'une édition), « Dans la collection » ou « Intention d'achat », un détail (mode d'acquisition, catégorie, visuels), **Modifier** et, pour une édition visée, **Confirmer l'achat…** (`fonctionnel.md` § Réalisation d'une intention) ;
+  - **Nouvelle édition** et, tant que ni l'album ni l'une de ses éditions n'est visé, **Intention d'achat** (`fonctionnel.md` § Intention d'achat) ;
+  - en création, le bloc indique que les éditions et les intentions d'achat s'ajoutent une fois l'album enregistré ;
+  - sous le bloc, les dates de création et de modification de la fiche.
+- **La barre d'enregistrement**, figée en bas de l'écran : l'état de la fiche (« Modifications non enregistrées », signalé d'un point de couleur d'accent ; « Nouvelle fiche »), **Annuler** et **Enregistrer** (« Créer l'album » en création), mis en relief. Sur smartphone, elle tient sur une ligne, l'état réduit à quelques mots.
+- **Smartphone** : les blocs s'empilent sur une colonne, les champs appariés (type et hors-série, mois et année) aussi, et les rôles des auteurs passent au-dessus de leurs étiquettes ; les tomes d'une intégrale restent sur une ligne.
+
+## Contrôles
+
+Ceux de la liste des albums ([`liste-albums.md`](liste-albums.md) § Contrôles) : texte indicatif de la couleur du texte atténué, sans opacité, et focus clavier détaché du contrôle par une bande de la couleur de la surface qui l'entoure.
+
+## Déclinaison par thème
+
+Couleurs, typographie et touche propre de chaque thème : celles de la page d'accueil de l'administration ([`administration.md`](administration.md) § Déclinaison par thème), chaque bloc du formulaire ayant son titre de bloc. La couleur d'information de l'erreur fonctionnelle est une couleur propre au thème, distincte de sa couleur d'alerte.
