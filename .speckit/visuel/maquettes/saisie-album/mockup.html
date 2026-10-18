@@ -165,11 +165,21 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               <input id="f-key" type="text" value="{{x.key}}" placeholder="{{x.keyPh}}" style="{{inp}}">
               <span style="{{help}}">{{keyHelp}}</span>
             </div>
+              <fieldset aria-describedby="f-date-help" style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                <legend style="{{lbl}} padding: 0 0 4px">Première publication</legend>
+                <div style="display: flex; align-items: center; gap: 8px">
+                  <label for="f-month" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Mois</label>
+                  <span style="position: relative; display: block"><select id="f-month" style="{{num}} width: 138px; text-align: left; padding: 0 30px 0 12px; appearance: none"><sc-for list="{{months}}" as="m"><option selected="{{m.selected}}">{{m.label}}</option></sc-for></select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 11px; top: 13px; pointer-events: none"><path d="M6 9l6 6 6-6"></path></svg></span>
+                  <label for="f-year" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Année</label>
+                  <input id="f-year" type="text" inputmode="numeric" maxlength="4" value="{{x.year}}" placeholder="aaaa" style="{{num}} width: 76px">
+                </div>
+                <span id="f-date-help" style="{{help}}">Mois facultatif ; jamais le jour.</span>
+              </fieldset>
           </section>
 
           <section aria-labelledby="s-volume" style="{{block}}">
             <span style="{{kickStyle}}">{{k.volume}}</span>
-            <h2 id="s-volume" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Tomes et parution</h2>
+            <h2 id="s-volume" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Tomaison</h2>
 
             <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px 28px">
               <fieldset style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
@@ -199,16 +209,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                   <span id="f-range-help" style="{{help}}">Les deux, ou aucun.</span>
                 </fieldset>
               </sc-if>
-              <fieldset aria-describedby="f-date-help" style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
-                <legend style="{{lbl}} padding: 0 0 4px">Première publication</legend>
-                <div style="display: flex; align-items: center; gap: 8px">
-                  <label for="f-month" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Mois</label>
-                  <span style="position: relative; display: block"><select id="f-month" style="{{num}} width: 138px; text-align: left; padding: 0 30px 0 12px; appearance: none"><sc-for list="{{months}}" as="m"><option selected="{{m.selected}}">{{m.label}}</option></sc-for></select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 11px; top: 13px; pointer-events: none"><path d="M6 9l6 6 6-6"></path></svg></span>
-                  <label for="f-year" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Année</label>
-                  <input id="f-year" type="text" inputmode="numeric" maxlength="4" value="{{x.year}}" placeholder="aaaa" style="{{num}} width: 76px">
-                </div>
-                <span id="f-date-help" style="{{help}}">Mois facultatif ; jamais le jour.</span>
-              </fieldset>
             </div>
           </section>
 
@@ -618,7 +618,7 @@ class View extends Mockup {
       moreBg: moreOpen ? t.nBg : 'transparent', moreFg: moreOpen ? t.nFg : t.secText,
       toggleMore: () => this.setState({ moreOpen: !moreOpen }),
       noSubmit: (e) => e.preventDefault(),
-      k: { ident: kick(1, 'Album'), volume: kick(2, 'Tomes'), credits: kick(3, 'Auteurs'), tags: kick(4, 'Classement'), texts: kick(5, 'Textes'), eds: kick(6, 'Éditions') },
+      k: { ident: kick(1, 'Album'), volume: kick(2, 'Tomaison'), credits: kick(3, 'Auteurs'), tags: kick(4, 'Classement'), texts: kick(5, 'Textes'), eds: kick(6, 'Éditions') },
       block: 'position: relative; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
       kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
       h2: 'align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: 0; display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
