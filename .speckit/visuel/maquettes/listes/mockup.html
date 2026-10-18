@@ -30,9 +30,9 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
   .lr-row{grid-template-columns:var(--phone);row-gap:4px;align-items:start}
   .lr-thumb{grid-row:1 / span 2}
   .lr-main{grid-row:1}
-  .lr-act{grid-row:1;grid-column:-2 / -1}
+  .lr-act{grid-row:1 / span 2;grid-column:-2 / -1;align-self:center}
   .lr-cap{display:inline !important}
-  .lr-meta{grid-row:2;grid-column:var(--meta-col);display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+  .lr-meta{grid-row:2;grid-column:var(--meta-col);padding-left:var(--indent,0);display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
   .lr-hide-sm{display:none !important}
   .lr-act-label{display:none}
   .lr-edit{width:34px;padding:0 !important;justify-content:center}
@@ -180,7 +180,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <span role="columnheader" style="text-align: right"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Actions</span></span>
           </div>
           <sc-for list="{{rows}}" as="r">
-            <div role="row" class="lr-row" style="--desk: {{e.desk}}; --mid: {{e.mid}}; --phone: {{e.phone}}; --meta-col: {{e.metaCol}}; padding: 8px 4px; border-bottom: {{t.rowB}}; font-size: 14px; background: {{r.rowBg}}">
+            <div role="row" class="lr-row" style="--desk: {{e.desk}}; --mid: {{e.mid}}; --phone: {{e.phone}}; --meta-col: {{e.metaCol}}; --indent: {{r.metaIndent}}; padding: 8px 4px; border-bottom: {{t.rowB}}; font-size: 14px; background: {{r.rowBg}}">
               <sc-if value="{{e.thumb}}">
                 <span role="cell" aria-hidden="true" class="lr-thumb" style="position: relative; width: 36px; height: {{r.thumbH}}; box-sizing: border-box; border-radius: {{r.thumbR}}; background: {{r.thumbBg}}; color: {{r.thumbFg}}; display: flex; align-items: {{r.thumbAlign}}; justify-content: center; padding-bottom: {{r.thumbPad}}; font-family: {{t.fd}}; font-weight: 800; font-size: {{r.thumbSize}}; overflow: visible; box-shadow: {{r.thumbSh}}">{{r.mark}}</span>
               </sc-if>
@@ -623,6 +623,8 @@ class View extends Mockup {
         ...thumb,
         id: i, title, sub,
         indent: opts.depth ? (opts.depth * 22) + 'px' : '0',
+        // The counters of a sub-universe line up with its name, past the branch mark before it.
+        metaIndent: opts.depth ? (opts.depth * 22 + 16) + 'px' : '0',
         branch: Boolean(opts.depth),
         rowBg: editing ? t.tBg : 'transparent',
         editing, reading: !editing,
@@ -666,7 +668,8 @@ class View extends Mockup {
       e: {
         ...e, desk, mid,
         phone: (e.thumb ? '36px ' : '') + 'minmax(0,1fr) auto',
-        metaCol: e.thumb ? '2 / -1' : '1 / -1',
+        // Below its entry, beside the actions, which are centred on both lines of the row.
+        metaCol: e.thumb ? '2 / 3' : '1 / 2',
         cols: e.cols.map((c) => ({ ...c, cls: c.hideMd ? 'lr-hide-md' : '' }))
       },
       create: () => { if (e.panel) this.setState({ panel: 'creation' }); },

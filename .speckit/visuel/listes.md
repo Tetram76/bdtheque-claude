@@ -26,7 +26,7 @@ Les données sont fictives.
 
 ## Principes communs
 
-- **Ligne** : un visuel lorsque l'entité en a un, l'entrée (son nom ou son libellé, avec une précision en petit dessous), les colonnes propres à l'entité, puis les actions. Sur un écran moins large, les colonnes secondaires (date de modification, catégorie, nationalité, site web…) s'effacent ; sur smartphone, l'entrée et ses actions tiennent sur une ligne, les autres colonnes passent en dessous, un nombre y étant précédé du nom de sa colonne (« Albums 24 »).
+- **Ligne** : un visuel lorsque l'entité en a un, l'entrée (son nom ou son libellé, avec une précision en petit dessous), les colonnes propres à l'entité, puis les actions. Sur un écran moins large, les colonnes secondaires (date de modification, catégorie, nationalité, site web…) s'effacent ; sur smartphone, les autres colonnes passent juste sous l'entrée, alignées sur elle (sur le nom d'un sous-univers, au-delà de son retrait), un nombre y étant précédé du nom de sa colonne (« Albums 24 ») ; les actions, à droite, sont centrées sur ces deux lignes.
 - **Actions** : l'action principale de l'entité en bouton, puis un menu « ⋯ » : voir l'entrée dans la consultation (ou le site web d'un éditeur), **Fusionner avec…** une autre fiche du même type (`fonctionnel.md` § Structure de l'application), et, séparée par un filet, la suppression.
 - **Création** : un bouton « Nouvel… » en tête de page, sauf pour les intentions d'achat, qui se posent depuis la fiche de leur album (une mention le dit à sa place), et pour les genres, créés dans la liste même.
 - **Données absentes** : affichées « Non renseigné(e) » ou « — », en texte atténué, jamais laissées vides.
