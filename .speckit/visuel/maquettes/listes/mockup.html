@@ -29,8 +29,8 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
   .lr-head{display:none !important}
   .lr-row{grid-template-columns:var(--phone);row-gap:4px;align-items:start}
   .lr-thumb{grid-row:1 / span 2}
-  .lr-main{grid-row:1}
-  .lr-act{grid-row:1 / span 2;grid-column:-2 / -1;align-self:center}
+  .lr-main{grid-row:1;align-self:center}
+  .lr-act{grid-row:1;grid-column:-2 / -1;align-self:center}
   .lr-cap{display:inline !important}
   .lr-meta{grid-row:2;grid-column:var(--meta-col);padding-left:var(--indent,0);display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
   .lr-hide-sm{display:none !important}
@@ -213,7 +213,8 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                   <sc-if value="{{r.primary}}"><button type="button" onClick="{{r.open}}" class="lr-edit" aria-label="{{r.primary}} : {{r.title}}" style="display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.primaryIcon}}"></path></svg><span class="lr-act-label">{{r.primary}}</span></button></sc-if>
                   <button type="button" aria-label="Autres actions : {{r.title}}" aria-haspopup="menu" aria-expanded="{{r.menuExpanded}}" onClick="{{r.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{r.moreBg}}; color: {{r.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
                   <sc-if value="{{r.menuOpen}}">
-                    <div role="menu" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 10; width: 270px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                    <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                    <div role="menu" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 270px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
                       <sc-for list="{{r.menu}}" as="m">
                         <sc-if value="{{m.sep}}"><span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span></sc-if>
                         <button type="button" role="menuitem" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{m.fg}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.icon}}"></path></svg>{{m.label}}</button>
@@ -427,13 +428,13 @@ const ENTITIES = {
     rowMenu: menuOf(VIEW('Voir dans la consultation'), MERGE('Fusionner avec une autre série…'), DELETE),
     rows: [
       ['Barracuda', '', ['Terminée', '6 albums · 6 dans la collection', { badge: 'Complète', full: true }, '3 sept. 2026']],
-      ['Bécassine', '', ['Terminée', '27 albums · 3 dans la collection', 'À compléter', '21 juil. 2026']],
-      ['Blacksad', '', ['En cours', '9 albums · 8 dans la collection', 'À compléter', '8 oct. 2026']],
-      ['Blake et Mortimer', '', ['En cours', '31 albums · 12 dans la collection', 'À compléter', '2 févr. 2026']],
-      ['Bone', '', [{ text: 'Non renseigné', muted: true }, '9 albums · aucun dans la collection', 'À compléter', '19 mai 2026']],
-      ['Bouncer', '', ['Abandonnée', '10 albums · 4 dans la collection', 'À compléter', '30 juin 2026']],
-      ['Buddy Longway', '', ['Terminée', '20 albums · 11 dans la collection', 'À compléter', '9 oct. 2026']],
-      ['Le Bureau des prolongations', '', [{ text: 'Non renseigné', muted: true }, { text: 'Aucun album', muted: true }, 'À compléter', "aujourd'hui"]]
+      ['Bécassine', '', ['Terminée', '27 albums · 3 dans la collection', { text: 'À compléter', hideSm: true }, '21 juil. 2026']],
+      ['Blacksad', '', ['En cours', '9 albums · 8 dans la collection', { text: 'À compléter', hideSm: true }, '8 oct. 2026']],
+      ['Blake et Mortimer', '', ['En cours', '31 albums · 12 dans la collection', { text: 'À compléter', hideSm: true }, '2 févr. 2026']],
+      ['Bone', '', [{ text: 'Non renseigné', muted: true }, '9 albums · aucun dans la collection', { text: 'À compléter', hideSm: true }, '19 mai 2026']],
+      ['Bouncer', '', ['Abandonnée', '10 albums · 4 dans la collection', { text: 'À compléter', hideSm: true }, '30 juin 2026']],
+      ['Buddy Longway', '', ['Terminée', '20 albums · 11 dans la collection', { text: 'À compléter', hideSm: true }, '9 oct. 2026']],
+      ['Le Bureau des prolongations', '', [{ text: 'Non renseigné', muted: true }, { text: 'Aucun album', muted: true }, { text: 'À compléter', hideSm: true }, "aujourd'hui"]]
     ]
   },
   editions: {
@@ -597,7 +598,7 @@ class View extends Mockup {
     const cellOf = (value, c) => {
       const v = typeof value === 'string' ? { text: value } : value;
       return {
-        cls: c.hideMd ? 'lr-hide-md lr-hide-sm' : '',
+        cls: c.hideMd ? 'lr-hide-md lr-hide-sm' : (v.hideSm ? 'lr-hide-sm' : ''),
         // On a phone a bare number loses its column header: it carries the column's name instead.
         cap: v.text && /^[0-9][0-9 ]*$/.test(v.text) ? c.label : null,
         text: v.text ?? null, link: v.link ?? null, badge: v.badge ?? null, intent: Boolean(v.intent),
@@ -666,13 +667,15 @@ class View extends Mockup {
       areaR: t.inR === "999px" ? "14px" : t.inR,
       toggleMenu: () => this.setState({ menuOpen: !menuOpen }),
       closeMenu: () => this.setState({ menuOpen: false }),
+      // A click anywhere outside an open row menu closes it.
+      closeRowMenu: () => this.setState({ rowMenu: null }),
       noSubmit: (ev) => ev.preventDefault(),
       kick: t.kPre ? t.kPre(e.kind) : e.kind,
       e: {
         ...e, desk, mid,
         phone: (e.thumb ? '36px ' : '') + 'minmax(0,1fr) auto',
-        // Below its entry, beside the actions, which are centred on both lines of the row.
-        metaCol: e.thumb ? '2 / 3' : '1 / 2',
+        // Below its entry, across the width; the entry is centred on the line of its actions, close to them.
+        metaCol: e.thumb ? '2 / -1' : '1 / -1',
         cols: e.cols.map((c) => ({ ...c, cls: c.hideMd ? 'lr-hide-md' : '' }))
       },
       create: () => { if (e.panel) this.setState({ panel: 'creation' }); else if (e.inline) this.setState({ newOpen: true }); },
