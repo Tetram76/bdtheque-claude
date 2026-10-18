@@ -59,4 +59,4 @@ Ceux de la liste des albums ([`liste-albums.md`](liste-albums.md) § Contrôles)
 
 ## Déclinaison par thème
 
-Couleurs, typographie et touche propre de chaque thème : celles de la page d'accueil de l'administration ([`administration.md`](administration.md) § Déclinaison par thème), chaque bloc du formulaire ayant son titre de bloc. La couleur d'information de l'erreur fonctionnelle est une couleur propre au thème, distincte de sa couleur d'alerte.
+Couleurs, typographie et touche propre de chaque thème : celles de la page d'accueil de l'administration ([`administration.md`](administration.md) § Déclinaison par thème), chaque bloc du formulaire ayant son titre de bloc. Dans les thèmes qui portent une mention au-dessus du titre (gazette, festival, album de vignettes), cette mention dit la nature des données du bloc, sans répéter son titre : Identification (L'album), Dans la série (Tomaison), Calendrier (Parution), Contributions (Les auteurs), Classement (Genres et univers), Lecture (Résumé, notes et appréciation), Exemplaires (Les éditions). La couleur d'information de l'erreur fonctionnelle est une couleur propre au thème, distincte de sa couleur d'alerte.
