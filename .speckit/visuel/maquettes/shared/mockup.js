@@ -7,7 +7,8 @@
 //     listener (onClick="{{toggle}}"), true sets an empty attribute, false/null/undefined removes it;
 //   - <sc-for list="{{path}}" as="name"> to repeat its content for each item of a list;
 //   - <sc-if value="{{path}}"> to keep its content only when the value is truthy;
-//   - data-scroll-hint on a wrapper whose child [data-scroll] scrolls horizontally, with --hint-bg
+//   - data-scroll-hint on a wrapper whose child [data-scroll] scrolls horizontally (by touch, by the mouse
+//     wheel, or by clicking an edge chevron), with --hint-bg
 //     set to the colour behind it, to show which edges have entries out of view.
 // Settings (theme, example…) come from the query string, typed and defaulted by the settings
 // declared with Mockup.mount; a viewer page embeds mockups in frames with these parameters.
@@ -143,9 +144,7 @@
     }
     if (focused) nodeAt(focused)?.focus({ preventScroll: true });
     window.scrollTo(page.x, page.y);
-    for (const hint of root.querySelectorAll('[data-scroll-hint]')) {
-      hint.querySelector('[data-scroll]')?.addEventListener('scroll', () => updateScrollHint(hint), { passive: true });
-    }
+    root.querySelectorAll('[data-scroll-hint]').forEach(wireScrollHint);
     updateScrollHints();
     reportToViewer();
   }
@@ -159,7 +158,30 @@
 [data-scroll-hint]::before,[data-scroll-hint]::after{position:absolute;top:0;bottom:0;width:34px;display:flex;align-items:center;font:800 20px/1 system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s}
 [data-scroll-hint]::before{content:'‹';left:0;justify-content:flex-start;background:linear-gradient(to left,transparent,var(--hint-bg) 55%)}
 [data-scroll-hint]::after{content:'›';right:0;justify-content:flex-end;background:linear-gradient(to right,transparent,var(--hint-bg) 55%)}
-[data-scroll-hint].more-left::before,[data-scroll-hint].more-right::after{opacity:1}`;
+[data-scroll-hint].more-left::before,[data-scroll-hint].more-right::after{opacity:1;pointer-events:auto;cursor:pointer}`;
+
+  // Without a touch screen nothing scrolls a bar whose scrollbar is hidden: a chevron scrolls it by most
+  // of its width when clicked (a click on a pseudo-element reaches its host), and the mouse wheel
+  // scrolls it sideways.
+  function wireScrollHint(hint) {
+    const scroller = hint.querySelector('[data-scroll]');
+    if (!scroller) return;
+    scroller.addEventListener('scroll', () => updateScrollHint(hint), { passive: true });
+    scroller.addEventListener('wheel', (event) => {
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      if (max <= 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      const next = Math.min(max, Math.max(0, scroller.scrollLeft + event.deltaY));
+      if (next === scroller.scrollLeft) return;
+      event.preventDefault();
+      scroller.scrollLeft = next;
+    }, { passive: false });
+    hint.addEventListener('click', (event) => {
+      if (event.target !== hint) return;
+      const box = hint.getBoundingClientRect();
+      const step = scroller.clientWidth * 0.8;
+      scroller.scrollLeft += event.clientX - box.left < box.width / 2 ? -step : step;
+    });
+  }
 
   function updateScrollHint(hint) {
     const scroller = hint.querySelector('[data-scroll]');
