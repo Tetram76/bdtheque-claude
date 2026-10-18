@@ -34,9 +34,10 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
   - **L'album** :
     - la **série**, choisie en tapant son titre, que l'on retire pour faire de l'album un album isolé ; l'aide rappelle ce que change la série pour le titre ;
     - le **titre**, dont la mention suit la série : « facultatif dans une série », « obligatoire sans série » ;
-    - la **clé de tri**, toujours visible, marquée **Auto** ou **Manuelle** ; en mode manuel, **Réinitialiser** la recalcule à partir du titre (`fonctionnel.md` § Calcul et stockage de la clé de tri) ; sans titre propre, l'aide indique que l'album est rangé à la clé de sa série ;
+    - la **clé de tri**, toujours visible, marquée **Auto** ou **Manuelle** ; en mode manuel, **Réinitialiser** la recalcule à partir du titre (`fonctionnel.md` § Calcul et stockage de la clé de tri) ; sans titre propre, l'aide indique que l'album est rangé à la clé de sa série.
+  - **Tomes et parution**, bloc distinct, pour que l'identité de l'album ne forme pas un bloc démesuré face aux autres :
     - le **type**, Régulier ou Intégrale, en sélecteur à deux positions, et l'interrupteur **Hors-série**, indépendant du type ;
-    - le **tome** ; pour une intégrale, son **numéro** et les tomes couverts, **du tome… au tome…**, avec la règle qui les lie ;
+    - le **tome** ; pour une intégrale, son **numéro** et, à côté, les **tomes couverts**, regroupés sous leur propre intitulé (« 1 à 5 »), la règle qui les lie (« Les deux, ou aucun ») placée juste sous eux ;
     - la **première publication** : un mois facultatif et l'année, jamais le jour.
   - **Les auteurs** : une ligne par rôle (scénario, dessin, couleurs), chaque auteur en étiquette retirable, « Personne » sans auteur, et **Ajouter**, qui trouve un auteur en tapant son nom ou le crée sur place. Quand ils viennent d'être repris de la série (`fonctionnel.md` § Initialisation des contributions depuis la série), un encadré le dit, et rappelle qu'ils appartiennent désormais à l'album.
   - **Genres et univers** : ceux de l'album, en étiquettes retirables, avec **Ajouter** ; en dessous, **par la série**, ceux qu'il affiche par sa série, en étiquettes en tirets, non modifiables ici (`fonctionnel.md` § Genres et univers d'un album). Un univers est présenté avec ses ancêtres.

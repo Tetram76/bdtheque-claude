@@ -169,6 +169,11 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               <input id="f-key" type="text" value="{{x.key}}" placeholder="{{x.keyPh}}" style="{{inp}}">
               <span style="{{help}}">{{keyHelp}}</span>
             </div>
+          </section>
+
+          <section aria-labelledby="s-volume" style="{{block}}">
+            <span style="{{kickStyle}}">{{k.volume}}</span>
+            <h2 id="s-volume" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Tomes et parution</h2>
 
             <div class="sa-pair">
               <div style="display: flex; flex-direction: column; gap: 4px">
@@ -194,17 +199,19 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                 <input id="f-tome" type="text" inputmode="numeric" value="{{x.tome}}" style="{{inp}}">
               </div>
               <sc-if value="{{omnibus}}">
-                <div style="display: flex; flex-direction: column; gap: 4px">
-                  <label for="f-from" style="{{lbl}}">Du tome</label>
-                  <input id="f-from" type="text" inputmode="numeric" value="{{x.from}}" style="{{inp}}">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 4px">
-                  <label for="f-to" style="{{lbl}}">Au tome</label>
-                  <input id="f-to" type="text" inputmode="numeric" value="{{x.to}}" style="{{inp}}">
-                </div>
+                <fieldset aria-describedby="f-range-help" style="grid-column: span 2; margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                  <legend style="{{lbl}} padding: 0 0 4px">Tomes couverts</legend>
+                  <div style="display: flex; align-items: center; gap: 8px">
+                    <label for="f-from" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Du tome</label>
+                    <input id="f-from" type="text" inputmode="numeric" value="{{x.from}}" style="{{inp}}">
+                    <span aria-hidden="true" style="flex: none; font-size: 14px; color: {{t.muted}}">à</span>
+                    <label for="f-to" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Au tome</label>
+                    <input id="f-to" type="text" inputmode="numeric" value="{{x.to}}" style="{{inp}}">
+                  </div>
+                  <span id="f-range-help" style="{{help}}">Les deux, ou aucun.</span>
+                </fieldset>
               </sc-if>
             </div>
-            <sc-if value="{{omnibus}}"><span style="{{help}}">Les tomes couverts vont ensemble : les deux, ou aucun.</span></sc-if>
 
             <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0">
               <legend style="{{lbl}} padding: 0 0 4px">Première publication</legend>
@@ -622,7 +629,7 @@ class View extends Mockup {
       moreBg: moreOpen ? t.nBg : 'transparent', moreFg: moreOpen ? t.nFg : t.secText,
       toggleMore: () => this.setState({ moreOpen: !moreOpen }),
       noSubmit: (e) => e.preventDefault(),
-      k: { ident: kick(1, 'Album'), credits: kick(2, 'Auteurs'), tags: kick(3, 'Classement'), texts: kick(4, 'Textes'), eds: kick(5, 'Éditions') },
+      k: { ident: kick(1, 'Album'), volume: kick(2, 'Tomes'), credits: kick(3, 'Auteurs'), tags: kick(4, 'Classement'), texts: kick(5, 'Textes'), eds: kick(6, 'Éditions') },
       block: 'position: relative; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
       kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
       h2: 'align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: 0; display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
