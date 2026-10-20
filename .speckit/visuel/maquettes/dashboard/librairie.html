@@ -32,9 +32,11 @@ a:hover .book{transform:translateY(-6px)}
             <a href="#" style="padding: 8px 0">Intentions d'achat</a>
           </div>
         </div></nav>
-        <div style="display: flex; gap: 6px; flex: 0 1 320px">
+        <div style="display: flex; gap: 6px; flex: {{toolsFlex}}">
+          <sc-if value="{{full}}">
           <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
           <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 14px; border: 1px solid #B8924A; border-radius: 22px; background: transparent; color: #F5EEDF; font: inherit; outline: none">
+          </sc-if>
           <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 1px solid #B8924A; border-radius: 50%; background: transparent; color: #D8B972; font: 20px 'DM Serif Display', serif; cursor: pointer">?</button>
         </div>
       </div>
@@ -60,10 +62,15 @@ a:hover .book{transform:translateY(-6px)}
           <span aria-hidden="true" style="width: 70%; height: clamp(10px, 1.6vw, 22px); background: #F6EBD3; border: 3px solid #12241B; opacity: .9"></span>
           <span aria-hidden="true" style="display: flex; justify-content: space-between; width: 46%; height: 8px"><span style="width: 1px; background: #B8924A"></span><span style="width: 1px; background: #B8924A"></span></span>
           <div style="width: 100%; padding: 6px 10px; box-sizing: border-box; background: #FBF7EE; border: 1px solid #B8924A; display: flex; flex-direction: column; gap: 2px; text-align: center; font-size: 13px; line-height: 1.35; white-space: nowrap">
+            <sc-if value="{{full}}">
             <span style="font-family: 'DM Serif Display', serif; font-size: 18px; color: #1E3B2F">Ouvert</span>
             <a href="#" style="display: flex; justify-content: space-between; border-top: 1px solid #E2D6BC; padding-top: 4px"><span>albums</span><strong>2 847</strong></a>
             <a href="#" style="display: flex; justify-content: space-between"><span>séries</span><strong>412</strong></a>
             <a href="#" style="display: flex; justify-content: space-between"><span>éditions</span><strong>2 913</strong></a>
+            </sc-if>
+            <sc-if value="{{vide}}">
+            <span style="font-family: 'DM Serif Display', serif; font-size: 18px; line-height: 1.15; color: #1E3B2F">Ouverture<br>prochaine</span>
+            </sc-if>
           </div>
           <span aria-hidden="true" style="margin-top: auto; align-self: flex-end; width: 8px; height: 18px; border-radius: 4px; background: #B8924A"></span>
         </div>
@@ -75,6 +82,58 @@ a:hover .book{transform:translateY(-6px)}
 
   <main style="max-width: 1240px; margin: 0 auto; padding: 28px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 44px">
 
+    <sc-if value="{{vide}}">
+    <!-- The window above carries the title of the welcome block; this block goes on with the shop's explanation. -->
+    <section aria-labelledby="h-empty" style="display: flex; flex-wrap: wrap; align-items: center; gap: clamp(18px, 3vw, 36px); padding: clamp(14px, 2.6vw, 28px); background: #FBF7EE; border: 1px solid #B8924A; outline: 6px solid #F5EEDF; outline-offset: -8px">
+      <div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+        <h2 id="h-empty" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.15; color: #1E3B2F">La collection ne compte encore aucune édition.</h2>
+        <p style="margin: 0; max-width: 56ch">Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</p>
+        <p style="margin: 0; max-width: 56ch; font-size: 14px; color: #8A7A66">Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection.</p>
+      </div>
+      <!-- An empty walnut bay: bookends, the bookseller's card and a dashed place kept for the first album. -->
+      <div aria-hidden="true" style="flex: 1 1 260px; min-width: 0; max-width: 440px; margin: 0 auto; padding: 8px 8px 6px; box-sizing: border-box; background: #5B3A24; box-shadow: 0 18px 30px -18px rgba(42,36,32,.6)">
+        <div style="height: 124px; padding: 0 12px; display: flex; align-items: flex-end; justify-content: space-between; background: #3F2818; box-shadow: inset 0 10px 14px -8px rgba(0,0,0,.5)">
+          <span style="width: 30px; height: 62px; background: #B8924A; clip-path: polygon(0 0, 28% 0, 28% 80%, 100% 80%, 100% 100%, 0 100%)"></span>
+          <span style="margin-bottom: 6px; padding: 6px 12px 8px; background: #FFFFFF; border-top: 3px solid #B5523B; box-shadow: 0 2px 6px rgba(0,0,0,.35); font-family: Caveat, cursive; font-size: 24px; line-height: 1.05; color: #B5523B; text-align: center; transform: rotate(-3deg)">Arrivage<br>prochainement</span>
+          <span style="width: 30px; height: 62px; background: #B8924A; clip-path: polygon(72% 0, 100% 0, 100% 100%, 0 100%, 0 80%, 72% 80%)"></span>
+        </div>
+        <div style="height: 96px; margin-top: 8px; padding: 0 12px; display: flex; align-items: flex-end; justify-content: center; background: #3F2818; box-shadow: inset 0 10px 14px -8px rgba(0,0,0,.5)">
+          <span style="width: 32px; height: 74px; box-sizing: border-box; border: 2px dashed rgba(184,146,74,.6); border-bottom: 0; border-radius: 2px 2px 0 0"></span>
+        </div>
+        <div style="display: flex; justify-content: center; padding-top: 6px"><span style="width: 84px; height: 12px; background: #E9DDBF; border: 1px solid #B8924A"></span></div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 32px">
+      <section aria-labelledby="h-browse" style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-browse" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; line-height: 1.15; color: #1E3B2F">On jette un œil quand même ?</h2>
+        <p style="margin: 0">La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</p>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+          <sc-for list="{{shelves}}" as="s" hint-placeholder-count="3">
+            <a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; background: #1E3B2F; color: #F5EEDF; border: 1px solid #B8924A; outline: 3px solid #1E3B2F">
+              <span style="font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #B8924A">Rayon</span>
+              <span style="font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1.1; color: #D8B972">{{s}}</span>
+            </a>
+          </sc-for>
+        </div>
+        <div style="display: flex">
+          <a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 10px 16px; background: #FBF7EE; border: 1px solid #B8924A; outline: 3px solid #F5EEDF">
+            <span style="font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #8A7A66">Au comptoir</span>
+            <span style="font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1.1; color: #1E3B2F">Recherche avancée</span>
+          </a>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-admin" style="flex: 1 1 380px; min-width: 0; padding: clamp(16px, 3vw, 28px); box-sizing: border-box; background: #263129; color: #EFEDE4; border: 10px solid #5B3A24; outline: 1px solid #B8924A; outline-offset: -10px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px">
+        <h2 id="h-admin" style="margin: 0; font-family: Caveat, cursive; font-weight: 700; font-size: 40px; line-height: 1.1">C'est votre collection ?</h2>
+        <p style="margin: 0; font-family: Caveat, cursive; font-size: 24px; line-height: 1.25">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</p>
+        <a href="#" style="padding: 8px 18px; border: 1px solid #E8CF8F; border-radius: 22px; color: #E8CF8F; font-weight: 700">Ouvrir l'administration →</a>
+        <span style="font-size: 13px; color: #BFC4BA">La connexion est demandée à l'ouverture.</span>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{full}}">
     <section aria-labelledby="h-featured" style="display: flex; flex-direction: column; gap: 20px">
       <h2 id="h-featured" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; color: #1E3B2F">Le coup de cœur du jour</h2>
       <a href="#" style="display: grid; grid-template-columns: clamp(110px, 24vw, 200px) minmax(0, 1fr); gap: clamp(16px, 3vw, 32px); align-items: start; padding: clamp(14px, 2.6vw, 24px); background: #FBF7EE; border: 1px solid #B8924A; outline: 6px solid #F5EEDF; outline-offset: -8px">
@@ -183,11 +242,12 @@ a:hover .book{transform:translateY(-6px)}
       </div>
       <p style="margin: 0; font-size: 13px; color: #8A7A66">Éditions possédées ; un dos ≈ 25 éditions.</p>
     </section>
+    </sc-if>
   </main>
 
   <footer style="background: #1E3B2F; color: #D9D2C0; border-top: 4px solid #B8924A">
-    <div style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px">
-      <span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+    <div style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: {{footerJustify}}; gap: 12px 24px; font-size: 13px">
+      <sc-if value="{{full}}"><span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span></sc-if>
       <a href="#" style="font-weight: 700">Administration</a>
     </div>
   </footer>
@@ -227,8 +287,15 @@ class View extends Mockup {
     };
     const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
     const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
+    const vide = this.props.vide;
     return {
-      heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
+      vide,
+      full: !vide,
+      // Without the search field, the help button alone keeps its own width at the end of the bar.
+      toolsFlex: vide ? 'none' : '0 1 320px',
+      footerJustify: vide ? 'flex-end' : 'space-between',
+      heroLine: vide ? 'Les étagères attendent leur premier album !' : HERO_LINES[this.state?.heroIndex ?? 0],
+      shelves: ['Albums', 'Séries', 'Auteurs'],
       recents: [
         { label: 'Alors, tout tombe (Blacksad - T. 7)', pub: 'Dargaud', ratio: '3 / 4', note: 'Arrivé le 3 oct.' },
         { label: "L'Iris blanc (Astérix - T. 40)", pub: 'Albert René', ratio: '2 / 3', note: 'Arrivé le 28 sept.' },
@@ -254,7 +321,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {});
+Mockup.mount(View, {"vide": {"label": "Collection vide", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>
