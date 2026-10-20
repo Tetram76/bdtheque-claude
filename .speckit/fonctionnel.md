@@ -353,7 +353,12 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
 
 **Composition du dashboard** :
 
-- Il présente **toujours** les trois blocs suivants, qui ne font pas partie du tirage :
+- Il présente **toujours** les quatre blocs suivants, qui ne font pas partie du tirage :
+  - **À la une** : une **édition possédée** mise en avant, à la manière d'une citation du jour. Elle est tirée au hasard **une fois par jour** et reste la même pour tous les affichages de la journée.
+    - **Présentation** : sa couverture, le libellé de son album (cf. § Libellé d'un album), le sien (cf. § Libellé d'une édition) et le résumé de l'album s'il en a un, que la représentation retenue (le thème) peut abréger. L'album mène à sa fiche.
+    - **Couverture** : le tirage **privilégie une édition avec couverture**. Si l'édition tirée n'en a pas alors qu'une autre édition possédée du même album en a une, c'est l'une de ces dernières qui est mise à la une. Une édition présentée sans couverture reçoit le visuel générique (cf. § Visuel par défaut).
+    - **Répétitions** : le tirage **évite les répétitions rapprochées sans les interdire**. Une édition mise à la une n'y revient pas pendant une courte période (historique court, dont la durée est fixée avec l'implémentation), sauf si toutes les éditions possédées y sont déjà passées pendant cette période.
+    - Si l'édition du jour est supprimée, une autre est tirée.
   - **Compteurs globaux** : nombre total d'albums, de séries et d'éditions.
   - **Dernières entrées** : les dernières éditions entrées dans la collection, de la plus récente à la plus ancienne selon leur date d'acquisition, ou à défaut leur date d'entrée dans la collection (`modele-metier.md` § Édition).
   - **Indicateurs de valeur** (exprimés en €, en euros courants et en euros du jour, cf. § Gestion des devises) : prix moyen, médian, min/max, valeur totale connue et valeur totale estimée. Les prix minimum et maximum sont ceux des éditions dont le prix d'acquisition est **connu** (jamais une valeur estimée).
@@ -370,7 +375,7 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
   | 3 | 1 ludique, 2 utiles de deux catégories différentes, toutes deux marquées *(graphique)* |
   | 5 | 1 ludique, 1 utile de chacune des quatre catégories |
   | 6 | les 5 ci-dessus, plus 1 statistique quelconque non encore présentée : utile de n'importe quelle catégorie, ou ludique d'une autre catégorie ludique que la première |
-- Le dashboard est **graphique** : au moins **75 %** des statistiques **tirées au hasard** **peuvent** être représentées graphiquement, c'est-à-dire sont marquées *(graphique)* dans la liste ci-dessous ; les trois blocs toujours présents et la statistique ludique **obligatoire** (aucune statistique ludique n'étant marquée *(graphique)*) ont leur propre présentation et n'entrent pas dans ce compte ; les statistiques ludiques tirées en surplus y entrent. L'objectif est de **privilégier le visuel** : le dashboard ne doit pas devenir un pavé de texte, sauf choix du thème. Le tirage écarte toute combinaison qui n'atteint pas ce seuil. Le seuil porte sur le tirage, non sur le rendu : la représentation retenue (le thème) reste libre de formuler en texte une statistique marquée *(graphique)*.
+- Le dashboard est **graphique** : au moins **75 %** des statistiques **tirées au hasard** **peuvent** être représentées graphiquement, c'est-à-dire sont marquées *(graphique)* dans la liste ci-dessous ; les quatre blocs toujours présents et la statistique ludique **obligatoire** (aucune statistique ludique n'étant marquée *(graphique)*) ont leur propre présentation et n'entrent pas dans ce compte ; les statistiques ludiques tirées en surplus y entrent. L'objectif est de **privilégier le visuel** : le dashboard ne doit pas devenir un pavé de texte, sauf choix du thème. Le tirage écarte toute combinaison qui n'atteint pas ce seuil. Le seuil porte sur le tirage, non sur le rendu : la représentation retenue (le thème) reste libre de formuler en texte une statistique marquée *(graphique)*.
 
 Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous réserve de ce niveau d'accès (liste non exhaustive). Celles qui sont marquées *(graphique)* **peuvent** être présentées sous forme de graphique (la forme indiquée n'est qu'une suggestion) : le choix final revient à la représentation retenue (le thème), qui peut aussi bien les formuler en texte, comme le ferait une présentation de type magazine :
 
@@ -410,9 +415,7 @@ Les statistiques que le dashboard tire au hasard sont listées ci-dessous, sous 
     - **il y a N ans ce mois-ci** : les albums parus le mois en cours d'une année passée ; seuls les albums dont la date de première publication comporte le mois y figurent ;
     - le **mois le plus dépensier** : le mois dont les prix d'acquisition des éditions achetées (mode `Achat`) totalisent le montant le plus élevé ; le **record d'achats en une journée** : la date d'acquisition qui compte le plus d'éditions achetées.
   - **La collection en volume** : le **nombre total de pages**, et le **temps de lecture** qu'il représente, à raison d'**une minute par page**. Seules les éditions dont le nombre de pages est renseigné y comptent.
-  - **Jeux sur les données** :
-    - le **titre le plus long** et le **titre le plus court**, parmi les albums qui ont un titre propre ;
-    - la **pioche au hasard** : une **édition possédée** tirée au hasard à chaque affichage, présentée avec son album et sa couverture. Le tirage **privilégie une édition avec couverture** : si l'édition tirée n'en a pas alors qu'une autre édition possédée du même album en a une, c'est l'une de celles-ci qui est présentée. Une édition présentée sans couverture reçoit le visuel générique (cf. § Visuel par défaut).
+  - **Jeux sur les données** : le **titre le plus long** et le **titre le plus court**, parmi les albums qui ont un titre propre.
 
   Ces statistiques portent, comme toutes les autres, sur la collection seule (cf. § Périmètre de la consultation) : albums de la collection, éditions possédées, séries et auteurs de ces albums.
 
