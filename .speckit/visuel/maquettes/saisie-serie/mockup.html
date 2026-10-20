@@ -15,14 +15,9 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
    control, coloured or not, and from the surface around it. */
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px var(--focus-gap)}
 .adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
-/* The form on the left, the series' albums on the right; one column on a narrower screen. */
-.sa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;align-items:start}
-.sa-side{position:sticky;top:84px}
-/* The albums keep within the screen height, between the header and the save bar, and scroll on their own:
-   a long series is browsed without scrolling the whole form first. */
-.sa-side{max-height:calc(100vh - 84px - 84px)}
-.ss-albums{flex:0 1 auto;min-height:0}
-.ss-album-list{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px !important}
+/* A single column, as wide as the form beside a side column on the other forms: the record has nothing
+   to show beside its form. */
+.sa-layout{display:grid;grid-template-columns:minmax(0,878px);gap:22px}
 .sa-role{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 14px;align-items:start}
 .sa-status-sm{display:none}
 /* Publisher and imprint side by side; the edition defaults on as many lines as needed. */
@@ -30,11 +25,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 .ss-tpl{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 20px}
 /* Collection progress and calculation settings: two unrelated settings, in two blocks side by side. */
 .sa-duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch}
-@media (max-width: 1080px){
-  .sa-layout{grid-template-columns:minmax(0,1fr)}
-  .sa-side{position:static;max-height:none}
-  .ss-album-list{overflow-y:visible}
-}
 @media (max-width: 640px){
   .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
   .adm-actions{margin-left:auto}
@@ -301,37 +291,9 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             </div>
             <span style="{{help}}">Valeurs proposées à la création d'une édition d'un album de la série, qui reste modifiable ; « — » : rien n'est proposé. Elles ne décrivent pas la série et n'apparaissent pas dans la consultation.</span>
           </section>
+          <sc-if value="{{x.existing}}"><p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p></sc-if>
         </form>
 
-        <sc-if value="{{x.existing}}">
-        <aside class="sa-side" style="min-width: 0; display: flex; flex-direction: column; gap: 22px">
-          <section class="ss-albums" aria-labelledby="s-albums" style="{{block}}">
-            <span style="{{kickStyle}}">{{k.albums}}</span>
-            <h2 id="s-albums" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Les albums</h2>
-            <sc-if value="{{x.existing}}">
-              <span style="{{help}}">Pour mémoire, en lecture seule : un album se modifie, et se rattache à une série, sur sa propre fiche.</span>
-              <span style="font-size: 13px; font-weight: 700">{{x.albumCount}}</span>
-              <ul class="ss-album-list" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
-                <sc-for list="{{albums}}" as="a">
-                  <li style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: {{a.bd}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
-                    <span aria-hidden="true" style="width: 30px; height: 40px; flex: none; border-radius: {{t.thR}}; background: {{a.cover}}"></span>
-                    <span style="min-width: 0; flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px">
-                      <span style="font-weight: 700; font-size: 14px; color: {{t.text}}; overflow-wrap: anywhere"><span style="color: {{t.muted}}">{{a.tome}}</span> {{a.title}}</span>
-                      <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 12px; color: {{t.muted}}">
-                        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border: {{a.badgeB}}; border-radius: {{t.btnR}}; background: {{a.badgeBg}}; color: {{a.badgeFg}}; font-weight: 700"><sc-if value="{{a.intent}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg></sc-if>{{a.badge}}</span>
-                        <span>{{a.year}}</span>
-                      </span>
-                    </span>
-                  </li>
-                </sc-for>
-              </ul>
-            </sc-if>
-          </section>
-          <sc-if value="{{x.existing}}">
-            <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p>
-          </sc-if>
-        </aside>
-        </sc-if>
       </div>
     </main>
   </div>
@@ -498,8 +460,7 @@ const TEMPLATES = [
   { id: 'f-colour', key: 'colour', label: 'Couleur', width: '156px', options: ['—', 'En couleur', 'Noir et blanc'], initial: 1 }
 ];
 
-// A series being modified, with its albums in the series order (fonctionnel.md § Ordre des albums dans
-// une série), and a brand new one.
+// A series being modified, and a brand new one.
 const EXAMPLES = {
   modification: {
     existing: true, heading: 'Modifier la série', crumb: 'Blacksad',
@@ -511,17 +472,6 @@ const EXAMPLES = {
     summary: 'John Blacksad, détective privé à tête de chat, dans l\'Amérique des années cinquante.',
     notes: 'Attendre l\'intégrale cartonnée avant de compléter.',
     tpl: { category: 0, condition: 1, binding: 2, format: 4, orientation: 1, reading: 1, colour: 1 },
-    albumCount: '8 albums, dont 6 dans la collection',
-    albums: [
-      { tome: 'T. 1', title: 'Quelque part entre les ombres', year: '2000', state: 'own' },
-      { tome: 'T. 2', title: 'Arctic-Nation', year: '2003', state: 'own' },
-      { tome: 'T. 3', title: 'Âme rouge', year: '2005', state: 'own' },
-      { tome: 'T. 4', title: 'L\'Enfer, le silence', year: '2010', state: 'own' },
-      { tome: 'T. 5', title: 'Amarillo', year: '2013', state: 'own' },
-      { tome: 'T. 6', title: 'Alors, tout tombe - Première partie', year: '2021', state: 'own' },
-      { tome: 'T. 7', title: 'Alors, tout tombe - Seconde partie', year: '2023', state: 'none' },
-      { tome: 'INT.', title: 'Intégrale [1 à 5]', year: 'octobre 2023', state: 'intent' }
-    ],
     meta: 'Fiche créée le 12 janvier 2026, modifiée le 8 octobre 2026.',
     dirty: true, statusText: 'Modifications non enregistrées', statusShort: 'Non enregistré', save: 'Enregistrer'
   },
@@ -532,7 +482,7 @@ const EXAMPLES = {
     credits: { 'Scénario': [], 'Dessin': [], 'Couleurs': [] },
     publisher: '', imprint: '',
     genres: [], universes: [], summary: '', notes: '',
-    tpl: null, albumCount: '', albums: [],
+    tpl: null,
     meta: '', dirty: false, statusText: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer la série'
   }
 };
@@ -582,16 +532,6 @@ class View extends Mockup {
     const label = title || '<Sans titre>';
     const field = 'width: 100%; box-sizing: border-box; border: ' + t.inB + '; border-radius: ' + t.inR + '; background: ' + t.inBg + '; color: ' + t.text + '; font: inherit; font-size: 15px;';
     const num = field + ' height: 38px; padding: 0 8px; text-align: center; font-variant-numeric: tabular-nums;';
-    const albums = x.albums.map((a, i) => ({
-      ...a,
-      intent: a.state === 'intent',
-      cover: a.state !== 'none' ? 'hsl(' + ((i * 47 + 200) % 360) + ', 38%, 34%)' : 'repeating-linear-gradient(135deg, rgba(127,127,127,.42) 0 6px, rgba(127,127,127,.24) 6px 12px)',
-      badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? "Intention d'achat" : 'Pas dans la collection'),
-      badgeBg: a.state === 'own' ? t.nBg : 'transparent',
-      badgeFg: a.state === 'own' ? t.nFg : t.text,
-      badgeB: a.state === 'own' ? '2px solid transparent' : '2px dashed ' + t.line,
-      bd: t.tB === '0' ? '2px solid ' + t.line : t.tB
-    }));
     return {
       t, x, label, title,
       key: titleError ? '' : x.key,
@@ -658,7 +598,6 @@ class View extends Mockup {
         const picked = x.tpl ? x.tpl[f.key] : f.initial;
         return { ...f, options: f.options.map((o, i) => ({ label: o, selected: i === picked })) };
       }),
-      albums,
       barBg: t.cBg === 'transparent' ? t.bg : t.cBg,
       barB: t.cBT !== '0' ? t.cBT : '2px solid ' + t.line,
       menu: [
@@ -679,21 +618,6 @@ Mockup.mount(View, {
   erreur: { label: 'Erreur', editor: 'enum', options: ['aucune', 'metier', 'fonctionnelle', 'technique'], default: 'aucune' },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
 });
-
-// The albums column ends above the save bar wherever it stands: lower at the top of the page, then held
-// under the header once it sticks. Its list scrolls within it.
-function fitSide() {
-  const side = document.querySelector('.sa-side');
-  const bar = document.querySelector('.sa-bar');
-  if (!side || !bar) return;
-  if (getComputedStyle(side).position !== 'sticky') { side.style.maxHeight = ''; return; }
-  const top = Math.max(84, side.getBoundingClientRect().top);
-  side.style.maxHeight = Math.max(240, bar.getBoundingClientRect().top - top - 16) + 'px';
-}
-addEventListener('scroll', fitSide, { passive: true });
-addEventListener('resize', fitSide);
-new MutationObserver(fitSide).observe(document.getElementById('mockup'), { childList: true, subtree: true });
-fitSide();
 </script>
 </body>
 </html>

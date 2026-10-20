@@ -15,23 +15,13 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
    control, coloured or not, and from the surface around it. */
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px var(--focus-gap)}
 .adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
-/* The form on the left, the author's credits on the right; one column on a narrower screen. */
-.sa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;align-items:start}
-.sa-side{position:sticky;top:84px}
-/* The credits keep within the screen height, between the header and the save bar, and scroll on their own:
-   a long bibliography is browsed without scrolling the whole form first. */
-.sa-side{max-height:calc(100vh - 84px - 84px)}
-.ss-albums{flex:0 1 auto;min-height:0}
-.ss-album-list{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px !important}
+/* A single column, as wide as the form beside a side column on the other forms: the record has nothing
+   to show beside its form. */
+.sa-layout{display:grid;grid-template-columns:minmax(0,878px);gap:22px}
 .sa-role{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 14px;align-items:start}
 .sa-status-sm{display:none}
 /* First name and last name side by side. */
 .ss-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
-@media (max-width: 1080px){
-  .sa-layout{grid-template-columns:minmax(0,1fr)}
-  .sa-side{position:static;max-height:none}
-  .ss-album-list{overflow-y:visible}
-}
 @media (max-width: 640px){
   .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
   .adm-actions{margin-left:auto}
@@ -186,34 +176,9 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               <textarea id="f-bio" rows="9" placeholder="Parcours de l'auteur, visible dans la consultation…" style="{{area}}">{{x.bio}}</textarea>
             </div>
           </section>
+          <sc-if value="{{x.existing}}"><p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p></sc-if>
         </form>
 
-        <sc-if value="{{x.existing}}">
-        <aside class="sa-side" style="min-width: 0; display: flex; flex-direction: column; gap: 22px">
-          <section class="ss-albums" aria-labelledby="s-works" style="{{block}}">
-            <span style="{{kickStyle}}">{{k.works}}</span>
-            <h2 id="s-works" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Bibliographie</h2>
-            <span style="{{help}}">Pour mémoire, en lecture seule : un auteur se crédite sur la fiche de l'album ou de la série. Tant qu'il est crédité, il ne peut pas être supprimé.</span>
-            <span style="font-size: 13px; font-weight: 700">{{x.worksCount}}</span>
-            <ul class="ss-album-list" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
-              <sc-for list="{{works}}" as="w">
-                <li style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: {{w.bd}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
-                  <span aria-hidden="true" style="width: 30px; height: 40px; flex: none; border-radius: {{t.thR}}; background: {{w.cover}}; box-shadow: {{w.stack}}"></span>
-                  <span style="min-width: 0; flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px">
-                    <span style="font-weight: 700; font-size: 14px; overflow-wrap: anywhere">{{w.title}}</span>
-                    <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 12px; color: {{t.muted}}">
-                      <span style="padding: 0 8px; border: 2px solid {{t.line}}; border-radius: {{t.btnR}}; color: {{t.text}}; font-weight: 700">{{w.kind}}</span>
-                      <span>{{w.roles}}</span>
-                      <span>{{w.detail}}</span>
-                    </span>
-                  </span>
-                </li>
-              </sc-for>
-            </ul>
-          </section>
-          <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p>
-        </aside>
-        </sc-if>
       </div>
     </main>
   </div>
@@ -433,27 +398,18 @@ const errorOf = (key, t, business) => ({
   })
 }[key]?.() ?? null);
 
-// An author known by a pen name, with the series and albums credited to him in alphabetical order
-// (fonctionnel.md § Structure de l'application), and a brand new one.
+// An author known by a pen name, and a brand new one.
 const EXAMPLES = {
   modification: {
     existing: true, heading: "Modifier l'auteur", crumb: 'Gotlib',
     first: 'Marcel', last: 'Gotlieb', pen: 'Gotlib', nationality: 'Française',
     bio: 'Né à Paris en 1934, il entre à Pilote en 1965, où naissent Gai-Luron et la Rubrique-à-brac, puis cofonde L\'Écho des savanes et Fluide glacial.',
-    worksCount: '4 séries et 1 album sans série, soit 22 albums',
-    works: [
-      { kind: 'Série', title: 'Les Dingodossiers', roles: 'Dessin', detail: '1 album sur 3', series: true },
-      { kind: 'Série', title: 'Gai-Luron', roles: 'Scénario · Dessin', detail: '9 albums', series: true },
-      { kind: 'Album', title: 'Pervers Pépère', roles: 'Scénario · Dessin', detail: '1981', series: false },
-      { kind: 'Série', title: 'Rubrique-à-brac', roles: 'Scénario · Dessin', detail: '5 albums', series: true },
-      { kind: 'Série', title: 'Superdupont', roles: 'Scénario', detail: '6 albums', series: true }
-    ],
     meta: 'Fiche créée le 2 février 2026, modifiée le 30 mars 2026.',
     dirty: true, statusText: 'Modifications non enregistrées', statusShort: 'Non enregistré', save: 'Enregistrer'
   },
   creation: {
     existing: false, creating: true, heading: 'Nouvel auteur', crumb: 'Nouvel auteur',
-    first: '', last: '', pen: '', nationality: '', bio: '', worksCount: '', works: [], meta: '',
+    first: '', last: '', pen: '', nationality: '', bio: '', meta: '',
     dirty: false, statusText: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'auteur'
   }
 };
@@ -473,13 +429,6 @@ class View extends Mockup {
     // The main identifier and its sort key (fonctionnel.md § Artistes), worked out as the form changes.
     const shown = pen || [first, last].filter(Boolean).join(' ');
     const sortKey = pen || [last, first].filter(Boolean).join(' ');
-    const works = x.works.map((w, i) => ({
-      ...w,
-      cover: 'hsl(' + ((i * 61 + 300) % 360) + ', 36%, 36%)',
-      // A series shows as a small pile of covers, an album as one.
-      stack: w.series ? '3px -3px 0 -1px ' + t.line + ', 6px -6px 0 -2px ' + t.muted : 'none',
-      bd: t.tB === '0' ? '2px solid ' + t.line : t.tB
-    }));
     return {
       ...commonVals(this, t, kick),
       t, x, first, last, pen,
@@ -489,8 +438,7 @@ class View extends Mockup {
       nameInvalid: nameError ? 'true' : 'false',
       nameBorder: nameError ? '2px solid ' + t.del : t.inB,
       // The mention above a block title says what kind of data the block holds, never the title again.
-      k: { ident: kick(1, 'Identification'), bio: kick(2, 'Présentation'), works: kick(3, 'Crédits') },
-      works,
+      k: { ident: kick(1, 'Identification'), bio: kick(2, 'Présentation') },
       menu: menuOf(t, 'Auteurs')
     };
   }
@@ -502,20 +450,6 @@ Mockup.mount(View, {
   erreur: { label: 'Erreur', editor: 'enum', options: ['aucune', 'metier', 'fonctionnelle', 'technique'], default: 'aucune' },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
 });
-// The credits column ends above the save bar wherever it stands: lower at the top of the page, then held
-// under the header once it sticks. Its list scrolls within it.
-function fitSide() {
-  const side = document.querySelector('.sa-side');
-  const bar = document.querySelector('.sa-bar');
-  if (!side || !bar) return;
-  if (getComputedStyle(side).position !== 'sticky') { side.style.maxHeight = ''; return; }
-  const top = Math.max(84, side.getBoundingClientRect().top);
-  side.style.maxHeight = Math.max(240, bar.getBoundingClientRect().top - top - 16) + 'px';
-}
-addEventListener('scroll', fitSide, { passive: true });
-addEventListener('resize', fitSide);
-new MutationObserver(fitSide).observe(document.getElementById('mockup'), { childList: true, subtree: true });
-fitSide();
 </script>
 </body>
 </html>
