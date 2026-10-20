@@ -14,7 +14,8 @@ Réglages de la source commune :
 
 | Réglage | Valeurs |
 | --- | --- |
-| `exemple` | `editions` (par défaut) : un album et ses trois éditions, dont une visée par une intention d'achat ; `integrale` : une intégrale sans édition, visée par une intention d'achat sur l'album |
+| `exemple` | `sansIntention` (par défaut) : un album et son édition, sans intention d'achat ; `editions` : un album et ses trois éditions, dont une visée par une intention d'achat ; `integrale` : une intégrale sans édition, visée par une intention d'achat sur l'album |
+| `choixIntention` | choix de l'intention d'achat ouvert |
 | `actions` | menu des autres actions d'une édition ouvert |
 | `menuOpen` | menu de l'administration ouvert |
 
@@ -27,7 +28,10 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
 - **Titre** « Éditions et intentions d'achat », suivi du libellé de l'album (`fonctionnel.md` § Libellé d'un album). À droite : **Modifier l'album**, qui ouvre sa fiche de saisie, et **Voir dans la consultation** (réduits à leur icône sur smartphone).
 - **L'album**, en bref, pour savoir de quel album il s'agit sans quitter la page : sa vignette de couverture (visuel générique sans couverture), son libellé, ses auteurs, sa date de première publication et son appartenance à la collection (« Dans la collection », « Pas dans la collection » ou « Intention d'achat », comme dans la liste des albums) ; l'aide rappelle que l'album lui-même se modifie sur sa fiche de saisie.
 - **Les éditions** :
-  - le décompte (« 3 éditions, dont 2 dans la collection », « Aucune édition »), et à droite **Nouvelle édition**, mise en relief, qui ouvre la fiche de saisie d'une nouvelle édition de l'album, et, tant que ni l'album ni l'une de ses éditions n'est visé, **Intention d'achat sur l'album…** (`fonctionnel.md` § Intention d'achat) ;
+  - le décompte (« 3 éditions, dont 2 dans la collection », « Aucune édition »), et à droite **Nouvelle édition**, mise en relief, qui ouvre la fiche de saisie d'une nouvelle édition de l'album, et **Intention d'achat**, qui propose de poser l'intention :
+    - **Sur l'album…**, toute édition de l'album faisant l'affaire, tant qu'aucune de ses éditions n'est visée ;
+    - **Sur une nouvelle édition…**, une édition précise, qui ouvre la fiche de saisie d'une édition visée par une intention d'achat, sans exemplaire ni valeur (`fonctionnel.md` § Intention d'achat) ; plusieurs éditions d'un même album peuvent être visées, une intention chacune ;
+    - le bouton n'apparaît pas pour un album lui-même visé (`fonctionnel.md` § Intention d'achat) ; un clic en dehors des choix ouverts les referme ;
   - l'**intention d'achat sur l'album**, lorsqu'elle existe, en cadre en tirets, avec sa date, **Viser plutôt une édition…** et **Retirer l'intention…** ;
   - chaque **édition**, une ligne, dense comme une table sur grand écran : sa vignette de couverture, son libellé (`fonctionnel.md` § Libellé d'une édition) avec, en petit dessous, sa catégorie, sa reliure et son nombre de pages, son appartenance à la collection (« Dans la collection », ou « Intention d'achat » en tirets), un détail (mode et année d'acquisition, nombre de visuels), puis ses actions ;
   - **actions d'une édition** : **Modifier**, qui ouvre sa fiche de saisie, et un menu « ⋯ ». Pour une édition possédée : **Voir dans la consultation** et, séparée par un filet, **Supprimer l'édition…**. Pour une édition visée par une intention d'achat : **Confirmer l'achat…** (`fonctionnel.md` § Réalisation d'une intention), **Viser plutôt l'album…** et, séparée par un filet, **Retirer l'intention…**, qui supprime l'édition avec elle (`fonctionnel.md` § Suppression des entités). Un clic en dehors d'un menu ouvert le referme ;

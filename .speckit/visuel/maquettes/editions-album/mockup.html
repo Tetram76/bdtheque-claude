@@ -126,7 +126,22 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
           <span style="font-size: 13px; font-weight: 700">{{x.count}}</span>
           <span style="display: flex; flex-wrap: wrap; gap: 8px">
-            <sc-if value="{{canIntend}}"><a href="#" style="{{secBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Intention d'achat sur l'album…</a></sc-if>
+            <sc-if value="{{canIntend}}">
+              <span style="position: relative; display: inline-flex">
+                <button type="button" aria-haspopup="menu" aria-expanded="{{intentExpanded}}" onClick="{{toggleIntent}}" style="{{secBtn}} background: {{intentBg}}; color: {{intentFg}}; font-family: {{t.fb}}; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Intention d'achat<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+                <sc-if value="{{intentOpen}}">
+                  <span aria-hidden="true" onClick="{{closeIntent}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                  <div role="menu" aria-label="Poser une intention d'achat" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 300px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                    <sc-for list="{{intentChoices}}" as="o">
+                      <a href="#" role="menuitem" style="display: flex; flex-direction: column; gap: 1px; padding: 6px 10px; border-radius: {{t.btnR}}; color: {{t.text}}; text-decoration: none">
+                        <span style="font-weight: 700; font-size: 14px">{{o.label}}</span>
+                        <span style="font-size: 12px; color: {{t.muted}}">{{o.help}}</span>
+                      </a>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </span>
+            </sc-if>
             <a href="#" style="{{priBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle édition</a>
           </span>
         </div>
@@ -397,6 +412,14 @@ const errorOf = (key, t, business) => ({
 // An album with three editions, one of them aimed at by a purchase intent, and an untitled omnibus
 // aimed at by an intent on the album itself, without any edition yet.
 const EXAMPLES = {
+  sansIntention: {
+    label: 'Barracuda - Tome 1', credits: 'Jean Dufaux · Jérémy', date: 'novembre 2010', inCollection: 'Dans la collection', cover: true,
+    count: '1 édition, dans la collection', albumIntent: '',
+    editions: [
+      { label: 'Dargaud [2010] - ISBN 978-2-505-00838-3', sub: 'Édition originale · Cartonnée · 56 pages', state: 'own', detail: 'Achat, 2010 · 1 visuel', cover: true }
+    ],
+    meta: 'Fiche de l\'album créée le 2 juin 2026, modifiée le 3 septembre 2026.'
+  },
   editions: {
     label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', credits: 'Hergé', date: '1963', inCollection: 'Dans la collection', cover: true,
     count: '3 éditions, dont 2 dans la collection', albumIntent: '',
@@ -418,11 +441,12 @@ const EXAMPLES = {
 class View extends Mockup {
   renderVals() {
     const t = THEMES[this.props.theme] ?? THEMES.violine;
-    const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.editions;
+    const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.sansIntention;
     const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
     const c = commonVals(this, t, kick);
     // The row whose menu is open: the settings open the first one, a click toggles any.
     const openRow = this.state?.openRow ?? (this.props.actions ? 0 : -1);
+    const intentOpen = this.state?.intentOpen ?? this.props.choixIntention;
     const badge = 'display: inline-flex; align-items: center; gap: 4px; padding: 0 9px; border-radius: ' + t.btnR + '; font-weight: 700; font-size: 12px; white-space: nowrap;';
     const owned = 'border: 2px solid transparent; background: ' + t.nBg + '; color: ' + t.nFg + ';';
     const dashed = 'border: 2px dashed ' + t.line + '; background: transparent; color: ' + t.text + ';';
@@ -448,8 +472,17 @@ class View extends Mockup {
       badge, albumBadge: x.inCollection === 'Dans la collection' ? owned : dashed,
       hasEditions: editions.length > 0,
       noEdition: editions.length === 0 && !x.albumIntent,
-      // An album aimed at by an intent on itself cannot have its editions aimed at too, and the reverse.
-      canIntend: !x.albumIntent && !x.editions.some((e) => e.state === 'intent'),
+      // An album aimed at by an intent on itself cannot have its editions aimed at too, and the reverse:
+      // the album can be aimed at while nothing is, a new edition while the album itself is not.
+      canIntend: !x.albumIntent,
+      intentOpen, intentExpanded: intentOpen ? 'true' : 'false',
+      intentBg: intentOpen ? t.nBg : 'transparent', intentFg: intentOpen ? t.nFg : t.secText,
+      toggleIntent: () => this.setState({ intentOpen: !intentOpen }),
+      closeIntent: () => this.setState({ intentOpen: false }),
+      intentChoices: [
+        ...(x.editions.some((e) => e.state === 'intent') ? [] : [{ label: 'Sur l\'album…', help: 'Toute édition de l\'album fera l\'affaire.' }]),
+        { label: 'Sur une nouvelle édition…', help: 'Une édition précise, saisie sans exemplaire ni valeur.' }
+      ],
       closeRowMenu: () => this.setState({ openRow: -1 }),
       secBtn: btn + 'height: 38px; padding: 0 14px; border: ' + t.secB + '; color: ' + t.secText + '; font-size: 14px;',
       priBtn: btn + 'height: 38px; padding: 0 16px; border: 0; background: ' + t.acc + '; color: ' + t.onAcc + '; font-size: 14px;',
@@ -461,7 +494,8 @@ class View extends Mockup {
 
 Mockup.mount(View, {
   theme: { label: 'Thème', editor: 'enum', options: ['violine', 'mure', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes'], default: 'violine' },
-  exemple: { label: 'Exemple', editor: 'enum', options: ['editions', 'integrale'], default: 'editions' },
+  exemple: { label: 'Exemple', editor: 'enum', options: ['sansIntention', 'editions', 'integrale'], default: 'sansIntention' },
+  choixIntention: { label: 'Choix de l\'intention ouvert', editor: 'boolean', default: false },
   actions: { label: 'Menu d\'une édition ouvert', editor: 'boolean', default: false },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
 });
