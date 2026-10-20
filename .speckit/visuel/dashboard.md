@@ -38,6 +38,7 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
     - « Encore de la place sur les étagères ? Pas sûr… »
     - « Attention, ça déborde des étagères ! »
   - les **compteurs** : albums, séries, éditions.
+- **À la une** : l'édition mise à la une du jour (`fonctionnel.md` § Page d'accueil), avec sa couverture, le libellé de son album, le sien et le résumé de l'album. L'album mène à sa fiche.
 - **Tout juste arrivés !** : les dernières éditions entrées dans la collection (ordre : `fonctionnel.md` § Page d'accueil), et un lien vers la liste des albums.
 - **Ça vaut combien, tout ça ?** :
   - la valeur totale estimée et la valeur totale connue, puis les prix moyen, médian, minimum et maximum ;
@@ -86,6 +87,7 @@ Deux alternatives, identiques à la teinte près : l'une en teinte violine, l'au
 De haut en bas :
 
 - **Accueil** : une grande bulle porte la **phrase d'accueil**. À côté, les **compteurs**.
+- **À la une aujourd'hui !** : la couverture de l'édition à la une, dans un cadre coloré incliné, à côté du libellé de son album en titre, du libellé de l'édition et du résumé de l'album.
 - **Tout juste arrivés !** : les dernières éditions entrées, par leur couverture, avec le libellé de l'album, l'éditeur et la date d'acquisition, omise lorsqu'elle n'est pas connue. Le lien vers la liste des albums passe sous la bulle de titre sur smartphone.
 - **Ça vaut combien, tout ça ?** : les montants, puis la mention des montants exclus.
 - **Tomes, intégrales ou hors-séries ?** :
@@ -113,8 +115,8 @@ De haut en bas :
 - **La une**, sur deux tiers de la largeur :
   - La **phrase d'accueil** est le gros titre, en italique et entre guillemets, tirée au hasard dans la liste commune.
   - Les **compteurs** (albums, séries, éditions) forment un bandeau de trois colonnes.
-  - La **dernière édition entrée** dans la collection est à la une : sa couverture, sa date d'entrée, le titre, la série et l'éditeur de son album, et le résumé de l'album.
-  - Sous « Également arrivés », les entrées suivantes sont listées avec leur date. Un lien mène à la liste des albums.
+  - L'édition **à la une** (`fonctionnel.md` § Page d'accueil) : sa couverture, le libellé de son album, le sien et le résumé de l'album.
+  - Sous « Tout juste arrivés ! », les dernières éditions entrées, la plus récente comprise, sont listées avec leur date. Un lien mène à la liste des albums.
 - **La colonne latérale** :
   - **Le cours de la collection** : la valeur totale estimée dans un encadré en couleurs inversées, avec son montant en euros du jour. Un tableau donne ensuite la valeur totale connue et les prix moyen, médian, minimum et maximum, en euros courants et en euros du jour. Une mention indique les montants non convertibles exclus et les éditions gratuites non valorisées.
   - **Le palmarès des éditeurs** : un classement numéroté des éditeurs, avec le nombre d'éditions possédées de chacun.
@@ -140,9 +142,11 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
 - **La couverture**, à gauche, au format d'une page de magazine, rouge, légèrement inclinée et portant une ombre noire décalée :
   - le nom de l'application en blanc ;
   - un bandeau entre deux filets : « N° », suivi du nombre d'albums, le mois et la mention « Gratuit » ;
-  - la couverture du dernier album entré dans la collection, sur presque toute la hauteur ;
+  - la couverture de l'édition **à la une** (`fonctionnel.md` § Page d'accueil), sur presque toute la hauteur ;
   - la **phrase d'accueil** en gros titre blanc, tirée au hasard dans la liste commune ;
-  - des étiquettes noires, qui donnent le nombre de séries et d'éditions, et une étiquette jaune inclinée, qui annonce le dernier album entré.
+  - des étiquettes noires, qui donnent le nombre de séries et d'éditions ;
+  - une étiquette jaune inclinée, posée sur la couverture, qui annonce l'édition à la une : le libellé de son album, une accroche tirée du résumé de l'album, abrégé, et, en petit, le libellé de l'édition.
+- Les dernières éditions entrées ne sont plus mises en avant sur la couverture : elles restent la rubrique « Tout juste arrivés ! » du sommaire.
 - **Au sommaire**, à droite : une rubrique par statistique, chacune avec un grand numéro de page coloré, son titre, une accroche et un petit visuel.
   - **Tout juste arrivés !** : une accroche qui cite les derniers albums entrés, et les vignettes de leurs couvertures.
   - **Ça vaut combien, tout ça ?** : la valeur totale estimée, avec son montant en euros du jour surligné en jaune, le prix moyen et le prix maximum. En petit suivent la valeur totale connue, les prix médian et minimum, et la mention des montants non convertibles exclus et des éditions gratuites non valorisées. Chaque montant est donné en euros courants, suivi de son montant en euros du jour.
@@ -170,6 +174,7 @@ Une ligne corail, la « Navette du festival », descend le long de la page. Chaq
 - **Terminus Entrée** :
   - l'**affiche du festival**, sur fond bleu avec deux disques jaune et corail, la mention « Festival permanent · entrée libre » et la **phrase d'accueil**, tirée au hasard dans la liste commune ;
   - les **compteurs**, en pastilles de correspondance : une pastille de couleur avec une lettre (A, S, E), le nombre et son libellé.
+- **Station Grande scène, À l'affiche aujourd'hui !** : l'édition à la une est la **tête d'affiche** du festival, sur une affiche jaune : sa couverture, cerclée de blanc, une pastille « Tête d'affiche », le libellé de son album, le stand de son éditeur (le libellé de l'édition) et le résumé de l'album.
 - **Station Scène des nouveautés, Tout juste arrivés !** : les dernières éditions entrées, en fiches de programme. Chaque fiche donne la date d'entrée en couleur, la couverture, le libellé de l'album et le stand de son éditeur. Un lien mène à la liste des albums.
 - **Station Billetterie, Ça vaut combien, tout ça ?** :
   - la valeur totale estimée et la valeur totale connue, sur deux **pass à bande magnétique**, jaune et blanc, chacune en euros courants et en euros du jour ;
@@ -200,6 +205,7 @@ Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres,
   - la mention « Zine n° », suivie du nombre d'albums, et « Prix libre » ;
   - la **phrase d'accueil**, tirée au hasard dans la liste commune, sur une bande rose légèrement inclinée ;
   - les **compteurs**, en trois disques qui se chevauchent : bleu pour les albums, rose pour les séries, jaune pour les éditions.
+- **À la une !** : la couverture de l'édition à la une, plus grande, imprimée en trame rose avec une ombre jaune décalée, tenue par un scotch bleu et légèrement inclinée ; à côté, le libellé de son album en capitales, le libellé de l'édition en rose, puis le résumé de l'album sous un trait en pointillés.
 - **Tout juste arrivés !** : les couvertures des dernières éditions entrées, imprimées en trame bleue avec une ombre rose décalée, tenues par un morceau de scotch jaune et légèrement inclinées. Sous chacune, le libellé de l'album, l'éditeur et la date. Un lien mène à la liste des albums.
 - **Ça vaut combien, tout ça ?** :
   - la valeur totale estimée en très grands chiffres roses, ombrés de bleu, puis son montant en euros du jour ;
@@ -234,7 +240,8 @@ Le dashboard présenté comme une librairie de bandes dessinées : la façade, p
   - un store rayé vert et crème, à bord festonné ;
   - la vitrine, où la **phrase d'accueil**, tirée au hasard dans la liste commune, est peinte en lettres dorées italiques ;
   - la porte, où pend une pancarte « Ouvert » qui donne les **compteurs** : albums, séries, éditions.
-- **Tout juste arrivés !** : les couvertures des dernières éditions entrées, posées sur une tablette en noyer. Sous chacune, un carton de libraire donne la date d'entrée, écrite à la main, le libellé de l'album et l'éditeur. Un lien mène à la liste des albums.
+- **Le coup de cœur du jour** : l'édition à la une est le coup de cœur du libraire, dans un encadré crème filet de laiton : sa couverture sur un présentoir en noyer, un carton manuscrit « Le libraire vous le recommande ! », le libellé de son album, le libellé de l'édition et le résumé de l'album.
+- **Tout juste arrivés !** : les couvertures des dernières éditions entrées, posées sur une tablette en noyer : quels que soient leur format et la longueur de leur carton, celles d'une même rangée sont alignées par le bas, sur la même tablette. Sous chacune, un carton de libraire donne la date d'entrée, écrite à la main, le libellé de l'album et l'éditeur. Un lien mène à la liste des albums.
 - **Ça vaut combien, tout ça ?**, sur une **ardoise** encadrée de noyer, écrite à la craie :
   - la valeur totale estimée et son montant en euros du jour, puis la valeur totale connue et le sien ;
   - les prix moyen, médian, minimum et maximum, en euros courants et en euros du jour ;
@@ -265,11 +272,12 @@ Chaque rubrique est une page de l'album, encadrée de bleu canard, avec une past
   - la mention « Album officiel de la collection » ;
   - la **phrase d'accueil**, tirée au hasard dans la liste commune, sur une grande vignette brillante aux reflets irisés ;
   - les **compteurs**, en trois vignettes rondes : rose pour les albums, jaune pour les séries, bleu pour les éditions.
-- **Page 2, Tout juste arrivés !** : les couvertures des dernières éditions entrées, collées un peu de travers sur leur emplacement. Le numéro de l'emplacement est imprimé dessous, et sous chacune figurent ce numéro, le libellé de l'album, l'éditeur et la date. Un lien mène à la liste des albums.
-- **Page 3, Ça vaut combien, tout ça ?** :
+- **Page 2, À la une aujourd'hui !** : l'édition à la une est la **vignette du jour**, une vignette brillante aux reflets irisés qui porte sa couverture, avec une pastille « Vignette brillante », le libellé de son album, le libellé de l'édition et le résumé de l'album.
+- **Page 3, Tout juste arrivés !** : les couvertures des dernières éditions entrées, collées un peu de travers sur leur emplacement. Le numéro de l'emplacement est imprimé dessous, et sous chacune figurent ce numéro, le libellé de l'album, l'éditeur et la date. Un lien mène à la liste des albums.
+- **Page 4, Ça vaut combien, tout ça ?** :
   - la valeur totale estimée, sur un encadré bleu canard, et la valeur totale connue, sur un encadré blanc, chacune avec son montant en euros du jour ;
   - les prix moyen, médian, minimum et maximum, séparés par des pointillés, en euros courants et en euros du jour ;
   - la mention des montants non convertibles exclus et des éditions gratuites non valorisées.
-- **Page 4, Tomes, intégrales ou hors-séries ?** : une planche de petites vignettes, une pour 1 % des albums : bleu canard pour les réguliers, orange pour les intégrales, rose pour les hors-séries. Les nombres et les pourcentages sont donnés en dessous. Chaque catégorie a autant de vignettes que son pourcentage arrondi, si bien que la planche peut compter une vignette de plus ou de moins que 100, mais jamais un nombre de vignettes qui contredise le pourcentage affiché.
-- **Page 5, Plutôt quel genre ?** : un écusson rond par genre, chacun dans sa couleur, dont la taille suit le nombre d'albums.
-- **Page 6, Chez quels éditeurs ?** : une barre par éditeur, dans un emplacement en pointillés, dont la longueur suit le nombre d'éditions possédées.
+- **Page 5, Tomes, intégrales ou hors-séries ?** : une planche de petites vignettes, une pour 1 % des albums : bleu canard pour les réguliers, orange pour les intégrales, rose pour les hors-séries. Les nombres et les pourcentages sont donnés en dessous. Chaque catégorie a autant de vignettes que son pourcentage arrondi, si bien que la planche peut compter une vignette de plus ou de moins que 100, mais jamais un nombre de vignettes qui contredise le pourcentage affiché.
+- **Page 6, Plutôt quel genre ?** : un écusson rond par genre, chacun dans sa couleur, dont la taille suit le nombre d'albums.
+- **Page 7, Chez quels éditeurs ?** : une barre par éditeur, dans un emplacement en pointillés, dont la longueur suit le nombre d'éditions possédées.

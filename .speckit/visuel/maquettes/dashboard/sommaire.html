@@ -12,6 +12,7 @@ a{text-decoration:none;color:inherit}
 .entry:hover h2{color:#E63946}
 .entry:hover .pageno{transform:rotate(-4deg) scale(1.06)}
 .pageno{transition:transform .2s ease}
+@media (max-width: 640px){.featured-tag{max-width:64% !important;bottom:-8px !important;padding:4px 7px !important}.featured-tag > :first-child{font-size:12px !important}.featured-tag > :nth-child(2){font-size:10px !important}.featured-tag > :nth-child(3){font-size:9px !important}}
 </style>
 <script src="../shared/mockup.js"></script>
 </head>
@@ -44,12 +45,18 @@ a{text-decoration:none;color:inherit}
       <div style="display: flex; justify-content: space-between; margin-top: 8px; padding: 4px 0; border-top: 3px solid #111111; border-bottom: 3px solid #111111; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .06em">
         <span>N° 2 847</span><span>Octobre</span><span>Gratuit</span>
       </div>
-      <a href="#" aria-label="Alors, tout tombe (Blacksad - T. 7)" style="flex: 1; margin: 18px 0; background: #2E2A33; display: flex; align-items: center; justify-content: center; color: #A79FB0; font-size: 13px; border: 4px solid #111111">[Couverture du dernier arrivé]</a>
+      <a href="#" style="position: relative; flex: 1; margin: 18px 0; background: #2E2A33; display: flex; align-items: center; justify-content: center; color: #A79FB0; font-size: 13px; border: 4px solid #111111">
+        <span>[Couverture de l'édition à la une]</span>
+        <span class="featured-tag" style="position: absolute; right: -10px; bottom: 14px; max-width: 78%; padding: 6px 10px; background: #FFD60A; color: #111111; transform: rotate(3deg); display: flex; flex-direction: column; gap: 1px; line-height: 1.2; box-shadow: 4px 4px 0 #111111">
+          <span style="font-family: Anton, Impact, sans-serif; font-size: 15px; text-transform: uppercase">À la une : Le Lotus bleu (Les Aventures de Tintin - T. 5)</span>
+          <span style="font-weight: 600; font-size: 12px">Tintin en Chine, face aux trafiquants d'opium…</span>
+          <span style="font-size: 10px">Casterman (Les Aventures de Tintin) [1946]</span>
+        </span>
+      </a>
       <h1 id="h-hero" style="margin: 0; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: clamp(24px, 3.2vw, 44px); line-height: .95; text-transform: uppercase; color: #FFFFFF">{{heroLine}}</h1>
       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px">
         <a href="#" style="padding: 6px 12px; background: #111111; color: #FFFFFF; font-weight: 800"><span style="color: #FFD60A">412</span> séries</a>
         <a href="#" style="padding: 6px 12px; background: #111111; color: #FFFFFF; font-weight: 800"><span style="color: #FFD60A">2 913</span> éditions</a>
-        <span style="padding: 6px 12px; background: #FFD60A; font-weight: 800; transform: rotate(3deg)">Spécial : Blacksad T. 7 !</span>
       </div>
     </section>
 
