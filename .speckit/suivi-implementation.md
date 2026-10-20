@@ -138,6 +138,14 @@ Répercussion dans le modèle de domaine et dans l'API de la recherche avancée 
 | ~~#170~~ | Blocage de la suppression des fiches désignées par une recherche enregistrée |
 | ~~#171~~ | Comparaison entre deux données dans la recherche avancée |
 
+### Ajustement issu des maquettes des listes et saisies de l'administration
+
+Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'achat sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'achat d'un album (`fonctionnel.md` § Intention d'achat). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+
+| Ticket | Titre |
+| --- | --- |
+| #185 | Intention d'achat sur un album réservée à un album sans édition |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).

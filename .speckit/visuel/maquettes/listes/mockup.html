@@ -471,7 +471,7 @@ const ENTITIES = {
     rowMenu: menuOf({ label: 'Éditions et intentions d\'achat', icon: ICON.album }, { label: 'Viser plutôt une édition…', icon: ICON.swap }, { label: 'Retirer l\'intention…', icon: ICON.trash, del: true, sep: true }),
     rows: [
       ['Blacksad - Intégrale [1 à 5]', '', ['L\'album, toute édition', { badge: 'Pas dans la collection', dashed: true }, '8 oct. 2026'], { cover: false }],
-      ['Les Bijoux de la Castafiore (Tintin - T. 21)', '', [{ text: 'Casterman (Fac-similé) [2013]' }, { badge: 'Dans la collection', full: true }, '8 oct. 2026'], { cover: true, other: 'Viser plutôt l\'album…' }],
+      ['Les Bijoux de la Castafiore (Tintin - T. 21)', '', [{ text: 'Casterman (Fac-similé) [2013]' }, { badge: 'Dans la collection', full: true }, '8 oct. 2026'], { cover: true, noSwap: true }],
       ['Buddy Longway - Tome 2', '', [{ text: 'Dupuis [1974]' }, { badge: 'Pas dans la collection', dashed: true }, '9 oct. 2026'], { cover: true, other: 'Viser plutôt l\'album…' }],
       ['Le Château des étoiles (Le Château des étoiles - T. 4)', '', ['L\'album, toute édition', { badge: 'Pas dans la collection', dashed: true }, '1 oct. 2026'], { cover: true }],
       ['Les Vieux Fourneaux - Tome 8', '', ['L\'album, toute édition', { badge: 'Pas dans la collection', dashed: true }, '8 oct. 2026'], { cover: false }]
@@ -620,7 +620,10 @@ class View extends Mockup {
         return {};
       })();
       const editing = editRow === i;
-      const menu = e.rowMenu.map((m) => ({ ...m, label: m.icon === ICON.swap && opts.other ? opts.other : m.label, fg: m.del ? t.del : t.text, sep: Boolean(m.sep) }));
+      // An intent on an edition turns into one on the album only when that edition is the album's
+      // only one (fonctionnel.md § Intention d'achat): otherwise the conversion is not offered.
+      const menu = e.rowMenu.filter((m) => !(m.icon === ICON.swap && opts.noSwap))
+        .map((m) => ({ ...m, label: m.icon === ICON.swap && opts.other ? opts.other : m.label, fg: m.del ? t.del : t.text, sep: Boolean(m.sep) }));
       return {
         ...thumb,
         id: i, title, sub,
