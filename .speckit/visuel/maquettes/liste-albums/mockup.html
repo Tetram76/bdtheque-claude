@@ -515,7 +515,7 @@ class View extends Mockup {
         eds: total === 0 ? 'Aucune édition' : total + (total > 1 ? ' éditions' : ' édition') + (owned ? ', ' + owned + (owned > 1 ? ' possédées' : ' possédée') : ', aucune possédée'),
         edsFg: total === 0 ? t.muted : t.text,
         intent: a.state === 'intent',
-        badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? "Intention d'achat" : 'Pas dans la collection'),
+        badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? "Intention d'achat" : 'Hors collection'),
         badgeBg: a.state === 'own' ? t.nBg : 'transparent',
         badgeFg: a.state === 'own' ? t.nFg : t.text,
         badgeB: a.state === 'own' ? '2px solid transparent' : '2px dashed ' + t.line,

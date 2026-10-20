@@ -442,7 +442,7 @@ class View extends Mockup {
       rated: rating > 0,
       stars: '★'.repeat(rating) + '☆'.repeat(5 - rating),
       ratingLabel: 'Appréciation : ' + rating + ' sur 5',
-      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? "Intention d'achat" : 'Pas dans la collection'),
+      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? "Intention d'achat" : 'Hors collection'),
       badgeBg: state === 'own' ? t.colBg : 'transparent',
       badgeFg: state === 'own' ? t.colFg : t.text,
       badgeB: state === 'own' ? '0' : '2px dashed ' + t.line

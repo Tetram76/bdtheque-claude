@@ -644,7 +644,7 @@ class View extends Mockup {
         const owned = !NOT_OWNED.includes(i);
         return {
           tome: 'T. ' + (i + 1), title, current: i === 4, other: i !== 4,
-          own: owned ? 'Possédé' : 'Pas dans la collection', ownColor: owned ? t.muted : t.link
+          own: owned ? 'Possédé' : 'Hors collection', ownColor: owned ? t.muted : t.link
         };
       })
     };
