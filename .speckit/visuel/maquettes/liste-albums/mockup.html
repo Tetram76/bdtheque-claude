@@ -180,7 +180,7 @@ input::placeholder{color:var(--placeholder);opacity:1}
                 </span>
                 <span class="al-meta">
                   <span role="cell" class="al-date" style="font-variant-numeric: tabular-nums; color: {{r.dateFg}}">{{r.date}}</span>
-                  <span role="cell" class="al-eds"><a href="#" title="Éditions de l'album" style="color: {{r.edsFg}}; text-decoration: underline; text-underline-offset: 3px">{{r.eds}}</a></span>
+                  <span role="cell" class="al-eds"><a href="#" title="Éditions et intentions d'achat" style="color: {{r.edsFg}}; text-decoration: underline; text-underline-offset: 3px">{{r.eds}}</a></span>
                   <span role="cell" class="al-col"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{r.badgeB}}; border-radius: {{t.btnR}}; background: {{r.badgeBg}}; color: {{r.badgeFg}}; font-weight: 700; font-size: 12px; white-space: nowrap"><sc-if value="{{r.intent}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3z"></path></svg></sc-if>{{r.badge}}</span></span>
                 </span>
                 <span role="cell" class="al-mod" style="font-size: 13px; color: {{t.muted}}; font-variant-numeric: tabular-nums">{{r.modified}}</span>

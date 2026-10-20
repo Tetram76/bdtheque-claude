@@ -1,6 +1,6 @@
 # Saisie d'une édition
 
-Ce fichier décrit la présentation de la fiche de saisie d'une édition et de ses visuels dans la partie Administration (`fonctionnel.md` § Structure de l'application) : la page dédiée où une édition se crée ou se modifie, ouverte depuis la page des éditions de son album ([`editions-album.md`](editions-album.md)) ou depuis la liste des éditions ([`listes.md`](listes.md)). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+Ce fichier décrit la présentation de la fiche de saisie d'une édition et de ses visuels dans la partie Administration (`fonctionnel.md` § Structure de l'application) : la page dédiée où une édition se crée ou se modifie, ouverte depuis la page des éditions et intentions d'achat de son album ([`editions-album.md`](editions-album.md)) ou depuis la liste des éditions ([`listes.md`](listes.md)). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
 
 La fiche suit les principes de la fiche de saisie d'un album ([`saisie-album.md`](saisie-album.md)) : blocs de taille comparable, champs dimensionnés à leur contenu, cases à cocher pour les données oui/non, mention de bloc distincte de son titre, erreurs distinguées au premier coup d'œil, barre d'enregistrement figée. Elle est déclinée selon chacun des thèmes en lice (cf. [`dashboard.md`](dashboard.md) § Alternatives), dans le ton sobre de l'administration (cf. [`administration.md`](administration.md) § Ton).
 
@@ -28,7 +28,7 @@ Les données sont fictives ; les visuels sont des illustrations de substitution.
 ## Contenu
 
 - **En-tête et menu** de l'administration, l'entrée « Albums » étant l'entrée courante du menu.
-- **Fil d'Ariane** : Administration, Albums, l'album, qui mène à la page de ses éditions, puis l'édition (« Nouvelle édition » en création).
+- **Fil d'Ariane** : Administration, Albums, l'album, qui mène à la page de ses éditions et intentions d'achat, puis l'édition (« Nouvelle édition » en création).
 - **Titre** « Modifier l'édition » ou « Nouvelle édition », suivi du **libellé de l'édition** (`fonctionnel.md` § Libellé d'une édition), recalculé au fil de la saisie, et du lien vers la fiche de saisie de l'**album**. En modification, à droite : **Voir dans la consultation** (la fiche de l'album, qui présente l'édition) et un bouton « ⋯ » qui ouvre **Supprimer l'édition…**, dont le dialogue annonce l'impact, et la sortie de l'album de la collection s'il s'agit de sa dernière édition possédée (`fonctionnel.md` § Suppression des entités).
 - **Erreur d'enregistrement**, en tête de page, présentée comme sur la fiche de saisie d'un album ; l'erreur métier pointe en outre le champ en cause (ex. un prix sans date de référence).
 - **Pré-remplissage** : en création, un encadré indique que la fiche est pré-remplie d'après la série de l'album, et quels champs, ces valeurs n'étant que des propositions (`fonctionnel.md` § Initialisation d'une nouvelle édition depuis la série).

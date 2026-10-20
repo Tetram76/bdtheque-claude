@@ -1,6 +1,6 @@
-# Éditions d'un album
+# Éditions et intentions d'achat d'un album
 
-Ce fichier décrit la présentation de la page des éditions d'un album dans la partie Administration (`fonctionnel.md` § Structure de l'application) : la page où se gèrent les éditions d'un album et ses intentions d'achat, ouverte depuis la liste des albums ([`liste-albums.md`](liste-albums.md)). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+Ce fichier décrit la présentation de la page des éditions et intentions d'achat d'un album dans la partie Administration (`fonctionnel.md` § Structure de l'application) : la page où se gèrent les éditions d'un album et ses intentions d'achat, ouverte depuis la liste des albums ([`liste-albums.md`](liste-albums.md)). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
 
 Ce n'est pas une fiche de saisie : rien ne s'y enregistre, elle n'a donc pas de barre d'enregistrement, et on la quitte sans rien perdre. Elle mène à la fiche de saisie de chaque édition ([`saisie-edition.md`](saisie-edition.md)), et à celle de l'album ([`saisie-album.md`](saisie-album.md)), qui ne présente pas ses éditions. Elle est déclinée selon chacun des thèmes en lice (cf. [`dashboard.md`](dashboard.md) § Alternatives), dans le ton sobre de l'administration (cf. [`administration.md`](administration.md) § Ton).
 
@@ -24,7 +24,7 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
 
 - **En-tête et menu** de l'administration, l'entrée « Albums » étant l'entrée courante du menu.
 - **Fil d'Ariane** : Administration, Albums, puis l'album.
-- **Titre** « Éditions de l'album », suivi du libellé de l'album (`fonctionnel.md` § Libellé d'un album). À droite : **Modifier l'album**, qui ouvre sa fiche de saisie, et **Voir dans la consultation** (réduits à leur icône sur smartphone).
+- **Titre** « Éditions et intentions d'achat », suivi du libellé de l'album (`fonctionnel.md` § Libellé d'un album). À droite : **Modifier l'album**, qui ouvre sa fiche de saisie, et **Voir dans la consultation** (réduits à leur icône sur smartphone).
 - **L'album**, en bref, pour savoir de quel album il s'agit sans quitter la page : sa vignette de couverture (visuel générique sans couverture), son libellé, ses auteurs, sa date de première publication et son appartenance à la collection (« Dans la collection », « Pas dans la collection » ou « Intention d'achat », comme dans la liste des albums) ; l'aide rappelle que l'album lui-même se modifie sur sa fiche de saisie.
 - **Les éditions** :
   - le décompte (« 3 éditions, dont 2 dans la collection », « Aucune édition »), et à droite **Nouvelle édition**, mise en relief, qui ouvre la fiche de saisie d'une nouvelle édition de l'album, et, tant que ni l'album ni l'une de ses éditions n'est visé, **Intention d'achat sur l'album…** (`fonctionnel.md` § Intention d'achat) ;
