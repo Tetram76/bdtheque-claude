@@ -14,7 +14,7 @@ Réglages de la source commune :
 
 | Réglage | Valeurs |
 | --- | --- |
-| `exemple` | `modification` (par défaut) : un album d'une série, avec trois éditions dont une visée par une intention d'achat ; `creation` : un nouvel album, vide ; `integrale` : une intégrale sans titre propre, dont les auteurs viennent d'être repris de sa série, visée par une intention d'achat sur l'album |
+| `exemple` | `modification` (par défaut) : un album d'une série ; `creation` : un nouvel album, vide ; `integrale` : une intégrale sans titre propre, dont les auteurs viennent d'être repris de sa série |
 | `cleManuelle` | clé de tri saisie à la main (exemple `modification`) |
 | `erreur` | `aucune` (par défaut), `metier`, `fonctionnelle` ou `technique` : l'erreur présentée après un enregistrement refusé |
 | `menuOpen` | menu de l'administration ouvert |
@@ -44,12 +44,7 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
   - **Les auteurs** : une ligne par rôle (scénario, dessin, couleurs), chaque auteur en étiquette retirable, « Personne » sans auteur, et **Ajouter**, qui trouve un auteur en tapant son nom ou le crée sur place. Quand ils viennent d'être repris de la série (`fonctionnel.md` § Initialisation des contributions depuis la série), un encadré le dit, et rappelle qu'ils appartiennent désormais à l'album.
   - **Genres et univers** : ceux de l'album, en étiquettes retirables, avec **Ajouter** ; en dessous, **par la série**, ceux qu'il affiche par sa série, en étiquettes en tirets, non modifiables ici (`fonctionnel.md` § Genres et univers d'un album). Un univers est présenté avec ses ancêtres.
   - **Résumé, notes et appréciation** : le résumé et les notes personnelles en zones de texte, puis l'appréciation en cinq étoiles, avec son libellé (« Bien », « Pas encore noté ») et **Retirer**.
-- **Les éditions**, en colonne latérale sur grand écran (après le formulaire sur smartphone), car elles ne s'enregistrent pas avec le formulaire : chaque édition, avec ses visuels, se saisit sur sa propre fiche, ce que le bloc rappelle.
-  - l'**intention d'achat sur l'album**, lorsqu'elle existe, en cadre en tirets, avec **Viser plutôt une édition…** et **Retirer l'intention…** ;
-  - chaque **édition** : sa vignette de couverture, son libellé (`fonctionnel.md` § Libellé d'une édition), « Dans la collection » ou « Intention d'achat », un détail (mode d'acquisition, catégorie, visuels), **Modifier** et, pour une édition visée, **Confirmer l'achat…** (`fonctionnel.md` § Réalisation d'une intention) ;
-  - **Nouvelle édition** et, tant que ni l'album ni l'une de ses éditions n'est visé, **Intention d'achat** (`fonctionnel.md` § Intention d'achat) ;
-  - en création, le bloc indique que les éditions et les intentions d'achat s'ajoutent une fois l'album enregistré ;
-  - sous le bloc, les dates de création et de modification de la fiche.
+- **Pas de colonne des éditions** : les éditions et les intentions d'achat de l'album ne se gèrent pas depuis sa fiche de saisie, qu'on ne quitte ainsi jamais pour une autre fiche avec des changements non enregistrés ; elles ont leur propre page, **Éditions de l'album** ([`editions-album.md`](editions-album.md)), ouverte depuis la liste des albums. Le formulaire garde la largeur qu'il a à côté d'une colonne latérale sur la fiche d'une édition ; sous lui, en modification, les dates de création et de modification de la fiche.
 - **La barre d'enregistrement**, figée en bas de l'écran : l'état de la fiche (« Modifications non enregistrées », signalé d'un point de couleur d'accent ; « Nouvelle fiche »), **Annuler** et **Enregistrer** (« Créer l'album » en création), mis en relief. Sur smartphone, elle tient sur une ligne, l'état réduit à quelques mots.
 - **Smartphone** : les blocs s'empilent sur une colonne ; « Tomaison » et « Parution » aussi ; les champs de la tomaison passent à la ligne en gardant leur taille, les tomes couverts et la date de première publication restant chacun sur une ligne ; les rôles des auteurs passent au-dessus de leurs étiquettes.
 
@@ -59,4 +54,4 @@ Ceux de la liste des albums ([`liste-albums.md`](liste-albums.md) § Contrôles)
 
 ## Déclinaison par thème
 
-Couleurs, typographie et touche propre de chaque thème : celles de la page d'accueil de l'administration ([`administration.md`](administration.md) § Déclinaison par thème), chaque bloc du formulaire ayant son titre de bloc. Dans les thèmes qui portent une mention au-dessus du titre (gazette, festival, album de vignettes), cette mention dit la nature des données du bloc, sans répéter son titre : Identification (L'album), Dans la série (Tomaison), Calendrier (Parution), Contributions (Les auteurs), Classement (Genres et univers), Lecture (Résumé, notes et appréciation), Exemplaires (Les éditions). La couleur d'information de l'erreur fonctionnelle est une couleur propre au thème, distincte de sa couleur d'alerte.
+Couleurs, typographie et touche propre de chaque thème : celles de la page d'accueil de l'administration ([`administration.md`](administration.md) § Déclinaison par thème), chaque bloc du formulaire ayant son titre de bloc. Dans les thèmes qui portent une mention au-dessus du titre (gazette, festival, album de vignettes), cette mention dit la nature des données du bloc, sans répéter son titre : Identification (L'album), Dans la série (Tomaison), Calendrier (Parution), Contributions (Les auteurs), Classement (Genres et univers), Lecture (Résumé, notes et appréciation). La couleur d'information de l'erreur fonctionnelle est une couleur propre au thème, distincte de sa couleur d'alerte.

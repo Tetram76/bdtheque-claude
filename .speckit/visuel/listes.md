@@ -29,7 +29,7 @@ Les données sont fictives.
 
 - **Ligne** : un visuel lorsque l'entité en a un, l'entrée (son nom ou son libellé, avec une précision en petit dessous), les colonnes propres à l'entité, puis les actions. Sur un écran moins large, les colonnes secondaires (date de modification, catégorie, nationalité, site web…) s'effacent ; sur smartphone, les autres colonnes passent juste sous l'entrée, alignées sur elle (sur le nom d'un sous-univers, au-delà de son retrait), un nombre y étant précédé du nom de sa colonne (« Albums 24 ») ; l'entrée est centrée sur la hauteur de ses actions, à droite, pour en rester proche, les boutons gardant la taille qu'ils ont sur les autres pages.
 - **Actions** : l'action principale de l'entité en bouton, puis un menu « ⋯ » : voir l'entrée dans la consultation (ou le site web d'un éditeur), **Fusionner avec…** une autre fiche du même type (`fonctionnel.md` § Structure de l'application), et, séparée par un filet, la suppression. Un clic en dehors d'un menu ouvert le referme.
-- **Création** : un bouton « Nouvel… » en tête de page, sauf pour les intentions d'achat, qui se posent depuis la fiche de leur album (une mention le dit à sa place).
+- **Création** : un bouton « Nouvel… » en tête de page, sauf pour les intentions d'achat, qui se posent depuis la page des éditions de leur album ([`editions-album.md`](editions-album.md) ; une mention le dit à sa place).
 - **Données absentes** : affichées « Non renseigné(e) » ou « — », en texte atténué, jamais laissées vides.
 - **Zone de texte** (ex. description d'un univers) : un arrondi modéré, même dans un thème dont les champs d'une ligne sont en pilule, dont l'arrondi rognerait ses coins et son texte.
 
@@ -42,7 +42,7 @@ La saisie d'une fiche s'ouvre selon le poids de l'entité :
 | Série, édition, auteur, éditeur | **Page dédiée**, comme l'album ; l'éditeur, qui porte ses collections, en est une. Série : [`saisie-serie.md`](saisie-serie.md) ; édition : [`saisie-edition.md`](saisie-edition.md) ; auteur : [`saisie-auteur.md`](saisie-auteur.md) ; éditeur : [`saisie-editeur.md`](saisie-editeur.md). |
 | Genre | **Dans sa ligne** : « Modifier » change la ligne en champ, avec **Enregistrer** et **Annuler** ; un nouveau genre se saisit dans un cadre en tirets au-dessus de la liste, avec **Ajouter** et **Annuler** ; ce cadre est masqué par défaut, et le bouton **Nouveau genre** de l'en-tête l'ouvre. Un libellé déjà pris est refusé sur place, en couleur d'alerte, en rappelant que la casse et les accents ne distinguent pas deux genres (`modele-metier.md` § Genre). |
 | Univers | **Panneau latéral**, qui glisse par-dessus la liste depuis la droite, la liste restant visible et grisée derrière : nom, univers parent (choisi en tapant son nom, présenté avec ses ancêtres, « Univers Hugo Pratt › Corto Maltese »), description, dates de la fiche, puis **Annuler** et **Enregistrer**. Un parent qui créerait un cycle est refusé sur place, avec sa raison (`modele-metier.md` § Univers — relations). |
-| Intention d'achat | Pas de fiche propre : l'action principale est **Confirmer l'achat**, et le menu mène à la fiche de l'album, à la conversion vers l'album ou une édition, et au retrait de l'intention (`fonctionnel.md` § Intention d'achat). |
+| Intention d'achat | Pas de fiche propre : l'action principale est **Confirmer l'achat**, et le menu mène à la page des éditions de l'album, à la conversion vers l'album ou une édition, et au retrait de l'intention (`fonctionnel.md` § Intention d'achat). |
 
 ## Liste par liste
 
