@@ -199,6 +199,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                 <sc-for list="{{r.cells}}" as="c">
                   <span role="cell" class="{{c.cls}}" style="min-width: 0; font-size: 13px; color: {{c.fg}}; font-variant-numeric: tabular-nums">
                     <sc-if value="{{c.badge}}"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{c.badgeB}}; border-radius: {{t.btnR}}; background: {{c.badgeBg}}; color: {{c.badgeFg}}; font-weight: 700; font-size: 12px; white-space: nowrap"><sc-if value="{{c.intent}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3z"></path></svg></sc-if>{{c.badge}}</span></sc-if>
+                    <sc-if value="{{c.target}}"><span style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{c.targetB}}; border-radius: {{t.btnR}}; background: {{c.targetBg}}; color: {{c.targetFg}}; font-weight: 800; font-size: 12px; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.targetIcon}}"></path></svg>{{c.target}}</span><span style="color: {{c.targetTextFg}}; font-weight: {{c.targetTextW}}; overflow-wrap: anywhere">{{c.targetText}}</span></span></sc-if>
                     <sc-if value="{{c.link}}"><a href="#" style="color: {{t.link}}; font-weight: 700; overflow-wrap: anywhere">{{c.link}}</a></sc-if>
                     <sc-if value="{{c.text}}"><span><sc-if value="{{c.cap}}"><span class="lr-cap" style="color: {{t.muted}}">{{c.cap}} </span></sc-if>{{c.text}}</span></sc-if>
                   </span>
@@ -466,15 +467,15 @@ const ENTITIES = {
     count: '18 intentions', countDetail: '', order: 'Dans l\'ordre des albums',
     page: 'Intentions 1 à 18 sur 18', pages: [],
     thumb: 'cover', mainHead: 'Album visé',
-    cols: [col('Porte sur', '230px'), col('Album', '170px', { hideMd: true }), col('Posée le', '104px')],
+    cols: [col('Porte sur', '330px'), col('Collection', '170px', { hideMd: true }), col('Posée le', '104px')],
     primary: ['Confirmer l\'achat', ICON.check],
     rowMenu: menuOf({ label: 'Éditions et intentions d\'achat', icon: ICON.album }, { label: 'Viser plutôt une édition…', icon: ICON.swap }, { label: 'Retirer l\'intention…', icon: ICON.trash, del: true, sep: true }),
     rows: [
-      ['Blacksad - Intégrale [1 à 5]', '', ['L\'album, toute édition', { badge: 'Pas dans la collection', dashed: true }, '8 oct. 2026'], { cover: false }],
-      ['Les Bijoux de la Castafiore (Tintin - T. 21)', '', [{ text: 'Casterman (Fac-similé) [2013]' }, { badge: 'Dans la collection', full: true }, '8 oct. 2026'], { cover: true, noSwap: true }],
-      ['Buddy Longway - Tome 2', '', [{ text: 'Dupuis [1974]' }, { badge: 'Pas dans la collection', dashed: true }, '9 oct. 2026'], { cover: true, other: 'Viser plutôt l\'album…' }],
-      ['Le Château des étoiles (Le Château des étoiles - T. 4)', '', ['L\'album, toute édition', { badge: 'Pas dans la collection', dashed: true }, '1 oct. 2026'], { cover: true }],
-      ['Les Vieux Fourneaux - Tome 8', '', ['L\'album, toute édition', { badge: 'Pas dans la collection', dashed: true }, '8 oct. 2026'], { cover: false }]
+      ['Blacksad - Intégrale [1 à 5]', '', [{ album: true }, { badge: 'Pas dans la collection', dashed: true }, '8 oct. 2026'], { cover: false }],
+      ['Les Bijoux de la Castafiore (Tintin - T. 21)', '', [{ edition: 'Casterman (Fac-similé) [2013]' }, { badge: 'Dans la collection', full: true }, '8 oct. 2026'], { cover: true, noSwap: true }],
+      ['Buddy Longway - Tome 2', '', [{ edition: 'Dupuis [1974]' }, { badge: 'Pas dans la collection', dashed: true }, '9 oct. 2026'], { cover: true, other: 'Viser plutôt l\'album…' }],
+      ['Le Château des étoiles (Le Château des étoiles - T. 4)', '', [{ album: true }, { badge: 'Pas dans la collection', dashed: true }, '1 oct. 2026'], { cover: true }],
+      ['Les Vieux Fourneaux - Tome 8', '', [{ album: true }, { badge: 'Pas dans la collection', dashed: true }, '8 oct. 2026'], { cover: false }]
     ]
   },
   auteurs: {
@@ -605,7 +606,17 @@ class View extends Mockup {
         fg: v.muted ? t.muted : t.text,
         badgeBg: v.full ? t.nBg : 'transparent',
         badgeFg: v.full ? t.nFg : t.text,
-        badgeB: v.full ? '2px solid transparent' : '2px dashed ' + t.line
+        badgeB: v.full ? '2px solid transparent' : '2px dashed ' + t.line,
+        // What an intent aims at, told apart at first glance: the whole album, filled, any edition
+        // will do; one edition, outlined, named beside it.
+        target: v.album ? 'Album entier' : (v.edition ? 'Édition précise' : null),
+        targetIcon: v.album ? ICON.album : 'M4 7h12v13H4z M8 4h12v13',
+        targetBg: v.album ? t.acc : 'transparent',
+        targetFg: v.album ? t.onAcc : t.text,
+        targetB: v.album ? '2px solid ' + t.acc : '2px solid ' + t.text,
+        targetText: v.album ? 'toute édition' : (v.edition ?? null),
+        targetTextFg: v.album ? t.muted : t.text,
+        targetTextW: v.album ? '400' : '700'
       };
     };
     const rows = e.rows.map(([title, sub, values, opts = {}], i) => {
