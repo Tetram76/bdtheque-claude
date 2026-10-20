@@ -66,6 +66,23 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
       </div>
     </section>
 
+    <section aria-labelledby="h-featured" style="flex: 1 1 100%; position: relative; padding: 44px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 24px 36px 28px 40px; background: {{t.panel2}}; border: 2px solid {{t.border}}; box-sizing: border-box">
+      <div style="position: absolute; top: -22px; left: 28px; transform: rotate(1.5deg)">
+        <h2 id="h-featured" style="margin: 0; padding: 10px 22px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 24px">À la une aujourd'hui !</h2>
+        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
+      </div>
+      <a href="#" style="display: grid; grid-template-columns: clamp(100px, 22vw, 170px) minmax(0, 1fr); gap: clamp(16px, 3vw, 32px); align-items: start; color: #FBF3EA">
+        <div class="cover" style="padding: 6px; border-radius: 12px; background: #4FD1C5; transform: rotate(-2.5deg); box-shadow: 0 14px 28px rgba(0,0,0,.45)">
+          <div style="aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; background: #2E2A33; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; box-sizing: border-box; color: #A79FB0; font-size: 12px">[Visuel de couverture]</div>
+        </div>
+        <div style="min-width: 0; display: flex; flex-direction: column; gap: 8px">
+          <span style="font-family: Fraunces, Georgia, serif; font-size: clamp(22px, 3.4vw, 36px); font-weight: 800; line-height: 1.05">{{featured.album}}</span>
+          <span style="font-size: 14px; color: {{t.soft}}">{{featured.edition}}</span>
+          <p style="margin: 6px 0 0; color: {{t.soft}}">{{featured.summary}}</p>
+        </div>
+      </a>
+    </section>
+
     <section aria-labelledby="h-recent" style="flex: 1 1 100%; position: relative; padding: 44px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 34px 22px 40px 26px; background: {{t.panel}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: absolute; top: -22px; left: 28px; transform: rotate(-2deg)">
         <h2 id="h-recent" style="margin: 0; padding: 10px 22px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 24px">Tout juste arrivés !</h2>
@@ -198,6 +215,11 @@ const HERO_LINES = [
   'Encore de la place sur les étagères ? Pas sûr…',
   'Attention, ça déborde des étagères !'
 ];
+const FEATURED = {
+  album: 'Le Lotus bleu (Les Aventures de Tintin - T. 5)',
+  edition: 'Casterman (Les Aventures de Tintin) [1946]',
+  summary: "Invité en Chine, Tintin s'attaque à un réseau de trafiquants d'opium, déjoue les manœuvres de l'occupant et se lie d'amitié avec le jeune Tchang."
+};
 class View extends Mockup {
   componentDidMount() {
     this.setState({
@@ -244,6 +266,7 @@ class View extends Mockup {
       t: themes[this.props.theme] ?? themes.violine,
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
       accent: this.props.accent ?? '#FFB547',
+      featured: FEATURED,
       recents: [
         { label: 'Alors, tout tombe (Blacksad - T. 7)', meta: 'Dargaud · 3 oct.', bg: '#FF7A6B', rot: '-3deg' },
         { label: "L'Iris blanc (Astérix - T. 40)", meta: 'Albert René · 28 sept.', bg: '#7FB8FF', rot: '2.5deg' },
