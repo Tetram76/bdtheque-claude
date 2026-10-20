@@ -23,7 +23,7 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
   <header style="position: sticky; top: 0; z-index: 20; background: #0F7C8C; color: #FFFFFF">
     <div style="max-width: 1240px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px">
       <a href="#" style="font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 24px; line-height: 1">BDthèque</a>
-      <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: #0F7C8C"><div data-scroll="">
+      <nav aria-label="Navigation principale" data-scroll-hint="" style="flex: {{navFlex}}; --hint-bg: #0F7C8C"><div data-scroll="">
         <div style="display: flex; gap: 4px; white-space: nowrap; width: max-content; font-weight: 700">
           <a href="#" aria-current="page" style="padding: 8px 16px; border-radius: 999px; background: #FFD23F; color: #23323A">Accueil</a>
           <a href="#" style="padding: 8px 14px">Albums</a>
@@ -32,9 +32,11 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
           <a href="#" style="padding: 8px 14px">Intentions d'achat</a>
         </div>
       </div></nav>
-      <div style="display: flex; gap: 6px; flex: 0 1 320px">
+      <div style="display: flex; gap: 6px; flex: {{toolsFlex}}">
+        <sc-if value="{{full}}">
         <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
         <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: #FFFFFF; color: #23323A; font: inherit; outline: none">
+        </sc-if>
         <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: #FFD23F; color: #23323A; font: 800 20px 'Baloo 2', sans-serif; cursor: pointer">?</button>
       </div>
     </div>
@@ -42,6 +44,61 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
 
   <main style="max-width: 1240px; margin: 0 auto; padding: 24px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 30px">
 
+    <sc-if value="{{vide}}">
+    <section aria-labelledby="h-welcome" style="position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-wrap: wrap; align-items: center; gap: 28px 40px">
+      <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 1 · Bienvenue</span>
+      <div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 18px; color: #0F7C8C">Album officiel de la collection</span>
+        <div style="padding: 8px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,.15); transform: rotate(-1.5deg)">
+          <div style="padding: clamp(14px, 2.6vw, 24px) clamp(16px, 3vw, 28px); border-radius: 8px; background: linear-gradient(120deg, #E8D9FF 0%, #CFF3F0 30%, #FFF0C2 55%, #FFD6E7 80%, #D9E8FF 100%)">
+            <h1 id="h-welcome" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(24px, 3.2vw, 40px); line-height: 1.05; text-wrap: balance">Les étagères attendent leur premier album !</h1>
+          </div>
+        </div>
+        <p style="margin: 6px 0 0; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: clamp(18px, 2vw, 22px); line-height: 1.25">La collection ne compte encore aucune édition.</p>
+        <p style="margin: 0; max-width: 60ch">Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</p>
+        <p style="margin: 0; max-width: 60ch; font-size: 13px; color: #5B6B72">Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection.</p>
+      </div>
+      <!-- The pack is pulled over the sheet's corner, but kept inside the page: its tilt must not widen a phone screen. -->
+      <div role="img" aria-label="Une planche d'emplacements vides, numérotés, à côté d'une pochette de vignettes encore fermée" style="flex: 1 1 340px; min-width: 0; max-width: 460px; margin: 0 auto; position: relative; padding: 18px 26px 0 0; box-sizing: border-box">
+        <div style="padding: 12px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.12); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+          <sc-for list="{{slots}}" as="s" hint-placeholder-count="8">
+            <span style="aspect-ratio: 3 / 4; border: 2px dashed {{s.border}}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(22px, 3vw, 32px); color: {{s.color}}">{{s.no}}</span>
+          </sc-for>
+        </div>
+        <span style="position: absolute; top: 0; right: 0; width: clamp(78px, 22%, 104px); aspect-ratio: 3 / 4; clip-path: {{packClip}}; background: linear-gradient(160deg, #E0457B 0%, #F2994A 100%); color: #FFFFFF; transform: rotate(9deg); filter: drop-shadow(0 4px 6px rgba(0,0,0,.25)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; line-height: 1">
+          <span style="font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.6vw, 17px)">Vignettes</span>
+          <span style="width: 70%; border-top: 2px dotted rgba(255,255,255,.7)"></span>
+          <span style="font-weight: 700; font-size: 11px">BDthèque</span>
+        </span>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 30px">
+      <section aria-labelledby="h-browse" style="flex: 1 1 380px; min-width: 0; position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; gap: 14px">
+        <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 2 · La base documentaire</span>
+        <h2 id="h-browse" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.15">On jette un œil quand même ?</h2>
+        <p style="margin: 0">La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</p>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px">
+            <sc-for list="{{browse}}" as="b" hint-placeholder-count="3">
+              <a href="#"><span class="sticker" style="display: inline-block; padding: 4px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.15); transform: rotate({{b.rot}})"><span style="display: block; padding: 5px 16px; border-radius: 8px; background: {{b.bg}}; color: {{b.tc}}; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 17px">{{b.label}}</span></span></a>
+            </sc-for>
+          </div>
+          <a href="#"><span class="sticker" style="display: inline-block; padding: 4px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.15); transform: rotate(1deg)"><span style="display: block; padding: 5px 16px; border-radius: 8px; background: #5B6CD9; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 17px">Recherche avancée</span></span></a>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-admin" style="flex: 1 1 380px; min-width: 0; position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-direction: column; align-items: flex-start; gap: 14px">
+        <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 3 · L'administration</span>
+        <h2 id="h-admin" style="margin: 0; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.15">C'est votre collection ?</h2>
+        <p style="margin: 0">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</p>
+        <a href="#" style="padding: 10px 20px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 17px">Ouvrir l'administration →</a>
+        <p style="margin: 0; font-size: 13px; color: #5B6B72">La connexion est demandée à l'ouverture.</p>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{full}}">
     <section aria-labelledby="h-hero" style="position: relative; padding: 28px clamp(14px, 3vw, 30px) clamp(16px, 3vw, 28px); border: 3px solid #0F7C8C; border-radius: 20px; background: #FFFBEF; display: flex; flex-wrap: wrap; align-items: center; gap: 20px 40px">
       <span style="position: absolute; top: -15px; left: 28px; padding: 2px 14px; border-radius: 999px; background: #0F7C8C; color: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 15px">Page 1 · Bienvenue</span>
       <div style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
@@ -164,11 +221,12 @@ a:hover .sticker{transform:rotate(0deg) translateY(-4px) !important;box-shadow:0
         <p style="margin: 0; font-size: 13px; color: #5B6B72">Éditions possédées.</p>
       </section>
     </div>
+    </sc-if>
   </main>
 
   <footer style="background: #0F7C8C; color: #FFFFFF">
-    <div style="max-width: 1240px; margin: 0 auto; padding: 16px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px">
-      <span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+    <div style="max-width: 1240px; margin: 0 auto; padding: 16px 24px; box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: {{footerJustify}}; gap: 12px 24px; font-size: 13px">
+      <sc-if value="{{full}}"><span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span></sc-if>
       <a href="#" style="font-weight: 700">Administration</a>
     </div>
   </footer>
@@ -201,7 +259,27 @@ class View extends Mockup {
       .map((y) => ({ ...y, pct: y.pctValue + ' %' }));
     const sheet = types.flatMap((y) => Array.from({ length: y.pctValue }, () => y.c));
     const typesAria = 'Planche d\'une vignette par pour cent d\'albums : ' + types.map((y) => y.pctValue + ' pour les ' + y.label).join(', ');
+    const vide = this.props.vide;
+    // Serrated top and bottom edges, as on a sealed sticker pack.
+    const teeth = 10;
+    const edge = (y, dy) => Array.from({ length: teeth * 2 + 1 }, (_, i) => (i * 100 / (teeth * 2)) + '% ' + (i % 2 ? y : y + dy) + '%');
+    const packClip = 'polygon(' + [...edge(0, 5), ...edge(100, -5).reverse()].join(', ') + ')';
     return {
+      vide,
+      full: !vide,
+      // Without the search field, the help button no longer needs room to grow beside the menu.
+      toolsFlex: vide ? 'none' : '0 1 320px',
+      // A smaller basis keeps the lone help button on the menu's line on a phone.
+      navFlex: vide ? '999 1 120px' : '999 1 220px',
+      footerJustify: vide ? 'flex-end' : 'space-between',
+      // The first slot, the one the first edition will fill, is outlined in the page colour.
+      slots: Array.from({ length: 8 }, (_, i) => ({ no: i + 1, border: i ? '#9DB8BD' : '#0F7C8C', color: i ? '#D5E4E6' : '#9DD6DD' })),
+      packClip,
+      browse: [
+        { label: 'Albums', bg: '#E0457B', tc: '#FFFFFF', rot: '-2deg' },
+        { label: 'Séries', bg: '#FFD23F', tc: '#23323A', rot: '1.5deg' },
+        { label: 'Auteurs', bg: '#6BBF59', tc: '#23323A', rot: '-1deg' }
+      ],
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
       counters: [
         { n: '2 847', label: 'albums', bg: '#E0457B', tc: '#FFFFFF', rot: '-6deg' },
@@ -234,7 +312,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {});
+Mockup.mount(View, {"vide": {"label": "Collection vide", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>
