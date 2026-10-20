@@ -241,7 +241,7 @@ Le dashboard présenté comme une librairie de bandes dessinées : la façade, p
   - la vitrine, où la **phrase d'accueil**, tirée au hasard dans la liste commune, est peinte en lettres dorées italiques ;
   - la porte, où pend une pancarte « Ouvert » qui donne les **compteurs** : albums, séries, éditions.
 - **Le coup de cœur du jour** : l'édition à la une est le coup de cœur du libraire, dans un encadré crème filet de laiton : sa couverture sur un présentoir en noyer, un carton manuscrit « Le libraire vous le recommande ! », le libellé de son album, le libellé de l'édition et le résumé de l'album.
-- **Tout juste arrivés !** : les couvertures des dernières éditions entrées, posées sur une tablette en noyer. Sous chacune, un carton de libraire donne la date d'entrée, écrite à la main, le libellé de l'album et l'éditeur. Un lien mène à la liste des albums.
+- **Tout juste arrivés !** : les couvertures des dernières éditions entrées, posées sur une tablette en noyer : quels que soient leur format et la longueur de leur carton, celles d'une même rangée sont alignées par le bas, sur la même tablette. Sous chacune, un carton de libraire donne la date d'entrée, écrite à la main, le libellé de l'album et l'éditeur. Un lien mène à la liste des albums.
 - **Ça vaut combien, tout ça ?**, sur une **ardoise** encadrée de noyer, écrite à la craie :
   - la valeur totale estimée et son montant en euros du jour, puis la valeur totale connue et le sien ;
   - les prix moyen, médian, minimum et maximum, en euros courants et en euros du jour ;

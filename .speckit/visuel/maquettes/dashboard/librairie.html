@@ -97,20 +97,20 @@ a:hover .book{transform:translateY(-6px)}
           <h2 id="h-recent" style="margin: 0; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 30px; color: #1E3B2F">Tout juste arrivés !</h2>
           <a href="#" style="font-weight: 700; color: #B5523B">Tous les albums →</a>
         </div>
-        <div role="group" aria-labelledby="h-recent" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(clamp(96px, 24vw, 150px), calc((100% - 2 * clamp(10px, 2vw, 24px)) / 3)), 1fr)); gap: 0 clamp(10px, 2vw, 24px); align-items: end">
+        <!-- Each entry spans three rows of a subgrid (cover, shelf, card): the covers of a line rest on the same shelf whatever the height of their cards. -->
+        <div role="group" aria-labelledby="h-recent" style="--shelf-gap: clamp(10px, 2vw, 24px); display: grid; grid-template-columns: repeat(auto-fill, minmax(min(clamp(96px, 24vw, 150px), calc((100% - 2 * var(--shelf-gap)) / 3)), 1fr)); gap: 0 var(--shelf-gap)">
           <sc-for list="{{recents}}" as="r" hint-placeholder-count="6">
-            <a href="#" style="display: flex; flex-direction: column">
-              <span class="book" style="display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 4; background: #2E2A33; color: #A79FB0; font-size: 12px; box-shadow: 6px 10px 18px rgba(42,36,32,.28)">[Couverture]</span>
-              <span style="margin-top: 10px; padding: 6px 8px 8px; background: #FFFFFF; border-top: 3px solid #B8924A; box-shadow: 0 1px 4px rgba(42,36,32,.15)">
+            <a href="#" style="display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 0">
+              <span class="book" style="align-self: end; display: flex; align-items: center; justify-content: center; aspect-ratio: {{r.ratio}}; background: #2E2A33; color: #A79FB0; font-size: 12px; box-shadow: 6px 10px 18px rgba(42,36,32,.28)">[Couverture]</span>
+              <span aria-hidden="true" style="height: 14px; margin: 0 calc(var(--shelf-gap) / -2); background: #5B3A24; box-shadow: 0 6px 10px -4px rgba(0,0,0,.35)"></span>
+              <span style="align-self: start; margin: 12px 0 22px; padding: 6px 8px 8px; background: #FFFFFF; border-top: 3px solid #B8924A; box-shadow: 0 1px 4px rgba(42,36,32,.15)">
                 <span style="display: block; font-family: Caveat, cursive; font-size: 19px; line-height: 1.1; color: #B5523B">{{r.note}}</span>
                 <span style="display: block; font-weight: 700; font-size: 14px; line-height: 1.3">{{r.label}}</span>
                 <span style="display: block; font-size: 13px; color: #8A7A66">{{r.pub}}</span>
               </span>
-              <span aria-hidden="true" style="height: 18px"></span>
             </a>
           </sc-for>
         </div>
-        <span aria-hidden="true" style="display: block; height: 14px; margin: -18px 0 0; background: #5B3A24; box-shadow: 0 6px 10px -4px rgba(0,0,0,.35)"></span>
       </div>
     </section>
 
@@ -230,12 +230,12 @@ class View extends Mockup {
     return {
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
       recents: [
-        { label: 'Alors, tout tombe (Blacksad - T. 7)', pub: 'Dargaud', note: 'Arrivé le 3 oct.' },
-        { label: "L'Iris blanc (Astérix - T. 40)", pub: 'Albert René', note: 'Arrivé le 28 sept.' },
-        { label: 'Les Indes fourbes', pub: 'Delcourt', note: 'Arrivé le 21 sept.' },
-        { label: 'Le Château des étoiles - INT. [1 à 2]', pub: 'Rue de Sèvres', note: 'Arrivé le 14 sept.' },
-        { label: 'Mister Prairie (Undertaker - T. 7)', pub: 'Dargaud', note: 'Arrivé le 9 sept.' },
-        { label: 'Spirou et Fantasio - Hors-série 2', pub: 'Dupuis', note: 'Arrivé le 2 sept.' }
+        { label: 'Alors, tout tombe (Blacksad - T. 7)', pub: 'Dargaud', ratio: '3 / 4', note: 'Arrivé le 3 oct.' },
+        { label: "L'Iris blanc (Astérix - T. 40)", pub: 'Albert René', ratio: '2 / 3', note: 'Arrivé le 28 sept.' },
+        { label: 'Les Indes fourbes', pub: 'Delcourt', ratio: '4 / 5', note: 'Arrivé le 21 sept.' },
+        { label: 'Le Château des étoiles - INT. [1 à 2]', pub: 'Rue de Sèvres', ratio: '4 / 3', note: 'Arrivé le 14 sept.' },
+        { label: 'Mister Prairie (Undertaker - T. 7)', pub: 'Dargaud', ratio: '3 / 4', note: 'Arrivé le 9 sept.' },
+        { label: 'Spirou et Fantasio - Hors-série 2', pub: 'Dupuis', ratio: '5 / 7', note: 'Arrivé le 2 sept.' }
       ],
       prices: [
         { label: 'Prix moyen', cur: '13,10 €', today: '18,70 €' },
