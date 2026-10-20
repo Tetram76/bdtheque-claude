@@ -11,6 +11,16 @@ body{margin:0}
 a{text-decoration:none;color:inherit}
 a:hover{color:#E8604C}
 @media (max-width: 720px){.stop{grid-template-columns:44px minmax(0,1fr) !important}}
+/* Welcome screen on a phone: the poster discs move to its top edge, clear of the text, and the link
+   pills shrink so that Albums, Séries and Auteurs keep to one line. */
+@media (max-width: 720px){
+.poster-text{padding-right:0 !important}
+.disc-y{width:100px !important;height:100px !important;right:-50px !important;top:-50px !important}
+.disc-c{width:44px !important;height:44px !important;right:62px !important;top:-24px !important}
+.gates{gap:6px !important}
+.gate{gap:5px !important;padding:3px 10px 3px 3px !important;font-size:14px !important}
+.gate>span{width:24px !important;height:24px !important;font-size:11px !important}
+}
 </style>
 <script src="../shared/mockup.js"></script>
 </head>
@@ -30,14 +40,93 @@ a:hover{color:#E8604C}
         <a href="#" style="padding: 9px 14px">Intentions d'achat</a>
       </div>
     </div></nav>
-    <div style="display: flex; gap: 6px; flex: 0 1 320px">
+    <div style="display: flex; gap: 6px; flex: {{tools.flex}}">
+      <sc-if value="{{full}}">
       <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
       <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 14px; border: 2px solid #1B2350; border-radius: 999px; background: #FFFFFF; color: #1B2350; font: inherit; outline: none">
+      </sc-if>
       <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: #F6C343; color: #1B2350; font: 800 19px 'Bricolage Grotesque', sans-serif; cursor: pointer">?</button>
     </div>
   </header>
 
   <main style="max-width: 1240px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box">
+
+    <sc-if value="{{vide}}">
+    <section aria-labelledby="h-welcome" class="stop" style="display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 0 24px">
+      <div style="position: relative">
+        <span aria-hidden="true" style="position: absolute; top: 24px; bottom: 0; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
+        <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 36px; height: 36px; margin-left: -18px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800">N</span>
+      </div>
+      <div style="padding-bottom: 36px; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Navette du festival · Terminus Entrée</span>
+        <div style="position: relative; overflow: hidden; padding: clamp(20px, 3.5vw, 36px); border-radius: 24px; background: #1F3A93; color: #FFFFFF">
+          <span aria-hidden="true" class="disc-y" style="position: absolute; right: -80px; top: -80px; width: 240px; height: 240px; border-radius: 50%; background: #F6C343"></span>
+          <span aria-hidden="true" class="disc-c" style="position: absolute; right: 48px; top: 104px; width: 84px; height: 84px; border-radius: 50%; background: #E8604C"></span>
+          <!-- The right padding keeps the text clear of the discs, which hold the poster's corner. -->
+          <div class="poster-text" style="position: relative; padding-right: 150px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px">
+            <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background: #FFFFFF; color: #1F3A93; font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase">Festival permanent · entrée libre</span>
+            <h1 id="h-welcome" style="margin: 4px 0 0; max-width: 760px; font-weight: 800; font-size: clamp(26px, 4vw, 48px); line-height: 1; letter-spacing: -0.02em; text-wrap: balance">Les étagères attendent leur premier album !</h1>
+            <p style="margin: 0; font-weight: 700; font-size: clamp(17px, 1.8vw, 20px); line-height: 1.3">La collection ne compte encore aucune édition.</p>
+            <p style="margin: 0; max-width: 62ch">Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</p>
+            <p style="margin: 0; max-width: 62ch; font-size: 14px; color: #C9D3F5">Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection.</p>
+          </div>
+        </div>
+        <!-- Where the dashboard has its counters, the plan of a line still under construction. -->
+        <div aria-hidden="true" style="padding: clamp(14px, 2.4vw, 22px); border: 2px solid #1B2350; border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px">
+            <span style="padding: 3px 12px; border-radius: 999px; background: #F6C343; font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase">Prochainement</span>
+            <span style="font-weight: 700; font-size: 14px; color: #5B6290">Ligne en construction</span>
+          </div>
+          <div style="display: flex; align-items: center; padding: 26px 0 24px">
+            <span style="position: relative; flex: none; width: 30px; height: 30px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px">N<span style="position: absolute; left: 0; top: calc(100% + 4px); white-space: nowrap; font-size: 13px; font-weight: 700; color: #1B2350">Entrée</span></span>
+            <span style="flex: 1 1 0; min-width: 12px; height: 8px; background: #E8604C"></span>
+            <span style="position: relative; flex: none; width: 26px; height: 26px; border-radius: 50%; border: 4px dashed #1B2350; background: #FFFFFF; box-sizing: border-box"><span style="position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); white-space: nowrap; font-size: 13px; font-weight: 700">Premier album</span></span>
+            <sc-for list="{{plan}}" as="p" hint-placeholder-count="4">
+              <span style="flex: 1 1 0; min-width: 12px; height: 8px; border-radius: 4px; background: repeating-linear-gradient(90deg, #E8604C 0 12px, transparent 12px 20px); opacity: {{p.fade}}"></span>
+              <sc-if value="{{p.barrier}}"><span style="flex: none; width: 44px; height: 18px; border: 2px solid #1B2350; border-radius: 4px; box-sizing: border-box; background: repeating-linear-gradient(-45deg, #F6C343 0 6px, #1B2350 6px 12px)"></span></sc-if>
+              <sc-if value="{{p.station}}"><span style="flex: none; width: 26px; height: 26px; border-radius: 50%; border: 4px dashed #1B2350; background: #FFFFFF; box-sizing: border-box; opacity: {{p.fade}}"></span></sc-if>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-browse" class="stop" style="display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 0 24px">
+      <div style="position: relative">
+        <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
+        <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: #FFFFFF; border: 6px solid #1B2350; box-sizing: border-box"></span>
+      </div>
+      <div style="padding-bottom: 36px; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Correspondance Centre de documentation</span>
+        <h2 id="h-browse" style="margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); letter-spacing: -0.01em">On jette un œil quand même ?</h2>
+        <p style="margin: 0; max-width: 62ch">La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</p>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px">
+          <div class="gates" style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{browse}}" as="b" hint-placeholder-count="3">
+              <a href="#" class="gate" style="display: flex; align-items: center; gap: 10px; padding: 6px 16px 6px 6px; border: 2px solid #1B2350; border-radius: 999px; background: #FFFFFF; font-weight: 700"><span style="width: 30px; height: 30px; border-radius: 50%; background: {{b.c}}; color: {{b.tc}}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px">{{b.letter}}</span>{{b.label}}</a>
+            </sc-for>
+          </div>
+          <a href="#" class="gate" style="display: flex; align-items: center; gap: 10px; padding: 6px 16px 6px 6px; border: 2px solid #1B2350; border-radius: 999px; background: #FFFFFF; font-weight: 700"><span style="width: 30px; height: 30px; border-radius: 50%; background: #3BA7D9; color: #1B2350; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px">R</span>Recherche avancée</a>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-admin" class="stop" style="display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 0 24px">
+      <div style="position: relative">
+        <span aria-hidden="true" style="position: absolute; top: 0; height: 24px; left: 50%; width: 14px; margin-left: -7px; background: #E8604C"></span>
+        <span aria-hidden="true" style="position: absolute; top: 6px; left: 50%; width: 36px; height: 36px; margin-left: -18px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800">N</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 14px">
+        <span style="font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5B6290">Terminus Espace exposants</span>
+        <h2 id="h-admin" style="margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); letter-spacing: -0.01em">C'est votre collection ?</h2>
+        <p style="margin: 0; max-width: 62ch">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</p>
+        <a href="#" style="padding: 9px 20px; border: 2px solid #1B2350; border-radius: 999px; background: #F6C343; color: #1B2350; font-weight: 800">Ouvrir l'administration →</a>
+        <p style="margin: 0; font-size: 13px; color: #5B6290">La connexion est demandée à l'ouverture.</p>
+      </div>
+    </section>
+    </sc-if>
+
+    <sc-if value="{{full}}">
 
     <section aria-labelledby="h-hero" class="stop" style="display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 0 24px">
       <div style="position: relative">
@@ -196,10 +285,11 @@ a:hover{color:#E8604C}
         </div>
       </div>
     </section>
+    </sc-if>
   </main>
 
-  <footer style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; border-top: 2px solid #1B2350; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px; color: #5B6290">
-    <span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+  <footer style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; border-top: 2px solid #1B2350; display: flex; flex-wrap: wrap; justify-content: {{footerJustify}}; gap: 12px 24px; font-size: 13px; color: #5B6290">
+    <sc-if value="{{full}}"><span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span></sc-if>
     <a href="#" style="font-weight: 700; color: #1B2350">Administration</a>
   </footer>
 </div>
@@ -223,7 +313,20 @@ class View extends Mockup {
     const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
     const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
     const stands = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2'];
+    const vide = this.props.vide;
     return {
+      vide,
+      full: !vide,
+      // Without the search field, the help button no longer needs room beside the menu.
+      tools: { flex: vide ? 'none' : '0 1 320px' },
+      footerJustify: vide ? 'flex-end' : 'space-between',
+      // The planned stretch of the line fades out past the works.
+      plan: [{ station: true, fade: 1 }, { barrier: true, fade: 1 }, { station: true, fade: .6 }, { station: true, fade: .35 }],
+      browse: [
+        { letter: 'A', label: 'Albums', c: '#E8604C', tc: '#FFFFFF' },
+        { letter: 'S', label: 'Séries', c: '#2E9E6E', tc: '#FFFFFF' },
+        { letter: 'Au', label: 'Auteurs', c: '#8E5BB8', tc: '#FFFFFF' }
+      ],
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
       recents: [
         { day: '3', month: 'oct.', label: 'Alors, tout tombe (Blacksad - T. 7)', pub: 'Dargaud', c: '#E8604C' },
@@ -257,7 +360,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {});
+Mockup.mount(View, {"vide": {"label": "Collection vide", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>
