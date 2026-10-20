@@ -609,7 +609,7 @@ class View extends Mockup {
         badgeB: v.full ? '2px solid transparent' : '2px dashed ' + t.line,
         // What an intent aims at, told apart at first glance: the whole album, filled, any edition
         // will do; one edition, outlined, named beside it.
-        target: v.album ? 'Album entier' : (v.edition ? 'Édition précise' : null),
+        target: v.album ? 'Album' : (v.edition ? 'Édition' : null),
         targetIcon: v.album ? ICON.album : 'M4 7h12v13H4z M8 4h12v13',
         targetBg: v.album ? t.acc : 'transparent',
         targetFg: v.album ? t.onAcc : t.text,
