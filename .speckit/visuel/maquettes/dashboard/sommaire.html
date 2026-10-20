@@ -31,14 +31,75 @@ a{text-decoration:none;color:inherit}
         <a href="#" style="padding: 10px 14px">Intentions d'achat</a>
       </div>
     </div></nav>
-    <div style="display: flex; align-items: center; gap: 8px; flex: 0 1 340px">
+    <div style="display: flex; align-items: center; gap: 8px; flex: {{toolsFlex}}">
+      <sc-if value="{{full}}">
       <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
       <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 12px; border: 2px solid {{t.ink}}; border-radius: 0; background: transparent; color: {{t.ink}}; font: inherit; outline: none">
+      </sc-if>
       <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; background: #FFD60A; color: #111111; font: 800 18px 'Libre Franklin', sans-serif; cursor: pointer">?</button>
     </div>
   </header>
 
   <main style="max-width: 1280px; margin: 0 auto; padding: 24px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start">
+
+    <sc-if value="{{vide}}">
+    <!-- Issue zero: the cover keeps its masthead, but its picture box is still the layout's empty
+         frame, crossed as on a page waiting for its photo. It carries no figure, no issue number. -->
+    <div aria-hidden="true" style="flex: 0 1 clamp(250px, 34vw, 460px); min-width: 0; margin: 0 auto; aspect-ratio: 210 / 297; padding: clamp(14px, 2vw, 24px); box-sizing: border-box; background: #E63946; color: #111111; display: flex; flex-direction: column; box-shadow: 18px 18px 0 #111111; transform: rotate(-1.5deg)">
+      <span style="font-family: Anton, Impact, sans-serif; font-size: clamp(48px, 7vw, 104px); line-height: .85; letter-spacing: -0.01em; text-transform: uppercase; color: #FFFFFF">BDthèque</span>
+      <!-- Spelled out, the issue number is longer than a figure: the strip shrinks on a phone rather than wrap. -->
+      <span style="display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; margin-top: 8px; padding: 4px 0; border-top: 3px solid #111111; border-bottom: 3px solid #111111; font-weight: 800; font-size: clamp(10px, 0.9vw, 13px); text-transform: uppercase; letter-spacing: .06em">
+        <span>Numéro zéro</span><span>Octobre</span><span>Gratuit</span>
+      </span>
+      <span style="position: relative; flex: 1; margin: 18px 0; background: #FAF7F0; border: 4px solid #111111; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%"><path d="M0 0L100 100M100 0L0 100" stroke="#C9C1B2" stroke-width="2" vector-effect="non-scaling-stroke" fill="none"></path></svg>
+        <span style="position: relative; padding: 5px 10px; background: #FAF7F0; border: 2px dashed #111111; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .06em">Couverture à venir</span>
+        <span class="featured-tag" style="position: absolute; right: -10px; bottom: 14px; max-width: 78%; padding: 6px 10px; background: #FFD60A; color: #111111; transform: rotate(3deg); display: flex; flex-direction: column; gap: 1px; line-height: 1.2; box-shadow: 4px 4px 0 #111111">
+          <span style="font-family: Anton, Impact, sans-serif; font-size: 15px; text-transform: uppercase">Bientôt en kiosque !</span>
+          <span style="font-weight: 600; font-size: 12px">Le premier album de la collection fera la une.</span>
+        </span>
+      </span>
+      <span style="font-family: Anton, Impact, sans-serif; font-size: clamp(24px, 3.2vw, 44px); line-height: .95; text-transform: uppercase; color: #FFFFFF">Numéro en préparation !</span>
+    </div>
+
+    <div style="flex: 1.3 1 520px; min-width: 0; display: flex; flex-direction: column">
+      <section aria-labelledby="h-welcome" style="padding-bottom: 20px">
+        <span style="display: inline-block; padding: 3px 10px; background: {{t.ink}}; color: {{t.bg}}; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .06em">L'édito</span>
+        <h1 id="h-welcome" style="margin: 10px 0 14px; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: clamp(34px, 4.6vw, 60px); line-height: 1; text-transform: uppercase">Les étagères attendent leur premier album !</h1>
+        <p style="margin: 0 0 10px; font-weight: 800; font-size: clamp(17px, 1.8vw, 20px); line-height: 1.3">La collection ne compte encore aucune édition.</p>
+        <p style="margin: 0 0 10px; max-width: 62ch; color: {{t.soft}}">Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</p>
+        <p style="margin: 0; max-width: 62ch; font-size: 13px; color: {{t.muted}}">Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection.</p>
+      </section>
+
+      <section aria-labelledby="h-browse" style="display: grid; grid-template-columns: clamp(52px, 7vw, 84px) minmax(0, 1fr); gap: clamp(12px, 2vw, 20px); padding: 16px 0; border-top: 4px solid {{t.ink}}">
+        <span aria-hidden="true" style="font-family: Anton, Impact, sans-serif; font-size: clamp(44px, 5.4vw, 64px); line-height: .9; color: #1D4ED8">02</span>
+        <span style="display: flex; flex-direction: column; gap: 6px">
+          <h2 id="h-browse" style="margin: 0; font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1">On jette un œil quand même ?</h2>
+          <span style="color: {{t.soft}}">La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</span>
+          <span style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px">
+            <sc-for list="{{browse}}" as="b" hint-placeholder-count="3">
+              <a href="#" style="padding: 6px 12px; background: {{t.ink}}; color: {{t.bg}}; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .04em">{{b}}</a>
+            </sc-for>
+          </span>
+          <span style="display: flex">
+            <a href="#" style="padding: 6px 12px; background: #1D4ED8; color: #FFFFFF; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .04em">Recherche avancée</a>
+          </span>
+        </span>
+      </section>
+
+      <section aria-labelledby="h-admin" style="display: grid; grid-template-columns: clamp(52px, 7vw, 84px) minmax(0, 1fr); gap: clamp(12px, 2vw, 20px); padding: 16px 0 20px; border-top: 2px solid {{t.ink}}; border-bottom: 4px solid {{t.ink}}">
+        <span aria-hidden="true" style="font-family: Anton, Impact, sans-serif; font-size: clamp(44px, 5.4vw, 64px); line-height: .9; color: #E63946">03</span>
+        <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px">
+          <h2 id="h-admin" style="margin: 0; font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1">C'est votre collection ?</h2>
+          <span style="color: {{t.soft}}">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</span>
+          <a href="#" style="margin-top: 6px; padding: 10px 16px; background: {{accent}}; color: #FFFFFF; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; box-shadow: 4px 4px 0 {{t.ink}}">Ouvrir l'administration →</a>
+          <span style="margin-top: 4px; font-size: 12px; color: {{t.muted}}">La connexion est demandée à l'ouverture.</span>
+        </span>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{full}}">
 
     <section aria-labelledby="h-hero" style="flex: 0 1 clamp(250px, 34vw, 460px); min-width: 0; margin: 0 auto; aspect-ratio: 210 / 297; padding: clamp(14px, 2vw, 24px); box-sizing: border-box; background: #E63946; color: #111111; display: flex; flex-direction: column; box-shadow: 18px 18px 0 #111111; transform: rotate(-1.5deg)">
       <a href="#" style="font-family: Anton, Impact, sans-serif; font-size: clamp(48px, 7vw, 104px); line-height: .85; letter-spacing: -0.01em; text-transform: uppercase; color: #FFFFFF">BDthèque</a>
@@ -128,10 +189,11 @@ a{text-decoration:none;color:inherit}
       </div>
       <p style="margin: 14px 0 0; font-size: 13px; color: {{t.muted}}">Chaque titre de rubrique mène à sa liste ou à sa page détaillée ; chaque album, à sa fiche ; chaque genre, à sa liste ; chaque éditeur, à son site web lorsqu’il est connu.</p>
     </section>
+    </sc-if>
   </main>
 
-  <footer style="max-width: 1280px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px; color: {{t.muted}}">
-    <span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+  <footer style="max-width: 1280px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap; justify-content: {{footerJustify}}; gap: 12px 24px; font-size: 13px; color: {{t.muted}}">
+    <sc-if value="{{full}}"><span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span></sc-if>
     <a href="#" style="font-weight: 800">Administration</a>
   </footer>
 </div>
@@ -157,7 +219,14 @@ class View extends Mockup {
     const t = themes[this.props.theme] ?? themes.papier;
     const inks = ['#E63946', '#1D4ED8', t.ink];
     const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118]];
+    const vide = this.props.vide;
     return {
+      vide,
+      full: !vide,
+      // Without the search field, the help button no longer needs room to grow beside the menu.
+      toolsFlex: vide ? 'none' : '0 1 340px',
+      footerJustify: vide ? 'flex-end' : 'space-between',
+      browse: ['Albums', 'Séries', 'Auteurs'],
       t,
       accent: this.props.accent ?? '#E63946',
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
@@ -180,7 +249,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["papier", "noir"], "default": "papier"}, "accent": {"label": "Accent", "editor": "color", "default": "#E63946", "options": ["#E63946", "#1D4ED8", "#111111"]}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["papier", "noir"], "default": "papier"}, "accent": {"label": "Accent", "editor": "color", "default": "#E63946", "options": ["#E63946", "#1D4ED8", "#111111"]}, "vide": {"label": "Collection vide", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>
