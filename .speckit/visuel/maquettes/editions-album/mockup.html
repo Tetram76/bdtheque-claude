@@ -126,7 +126,10 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
           <span style="font-size: 13px; font-weight: 700">{{x.count}}</span>
           <span style="display: flex; flex-wrap: wrap; gap: 8px">
-            <sc-if value="{{canIntend}}">
+            <sc-if value="{{intentDirect}}">
+              <a href="#" title="Une édition précise, saisie sans exemplaire ni valeur" style="{{secBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Intention d'achat sur une édition…</a>
+            </sc-if>
+            <sc-if value="{{intentMenu}}">
               <span style="position: relative; display: inline-flex">
                 <button type="button" aria-haspopup="menu" aria-expanded="{{intentExpanded}}" onClick="{{toggleIntent}}" style="{{secBtn}} background: {{intentBg}}; color: {{intentFg}}; font-family: {{t.fb}}; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Intention d'achat<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
                 <sc-if value="{{intentOpen}}">
@@ -474,7 +477,9 @@ class View extends Mockup {
       noEdition: editions.length === 0 && !x.albumIntent,
       // An album aimed at by an intent on itself cannot have its editions aimed at too, and the reverse:
       // the album can be aimed at while nothing is, a new edition while the album itself is not.
-      canIntend: !x.albumIntent,
+      // Two possible targets open a choice; a single one, a precise edition, is a plain button.
+      intentMenu: !x.albumIntent && x.editions.length === 0,
+      intentDirect: !x.albumIntent && x.editions.length > 0,
       intentOpen, intentExpanded: intentOpen ? 'true' : 'false',
       intentBg: intentOpen ? t.nBg : 'transparent', intentFg: intentOpen ? t.nFg : t.secText,
       toggleIntent: () => this.setState({ intentOpen: !intentOpen }),
@@ -482,7 +487,7 @@ class View extends Mockup {
       intentChoices: [
         // Only an album without any edition, owned or aimed at, may be aimed at as a whole
         // (fonctionnel.md § Intention d'achat): once one is known, the intent names a precise edition.
-        ...(x.editions.length ? [] : [{ label: 'Sur l\'album…', help: 'Toute édition de l\'album fera l\'affaire.' }]),
+        { label: 'Sur l\'album…', help: 'Toute édition de l\'album fera l\'affaire.' },
         { label: 'Sur une nouvelle édition…', help: 'Une édition précise, saisie sans exemplaire ni valeur.' }
       ],
       closeRowMenu: () => this.setState({ openRow: -1 }),
