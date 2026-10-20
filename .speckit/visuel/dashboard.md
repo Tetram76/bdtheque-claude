@@ -63,6 +63,9 @@ Sans édition possédée, un **écran d'accueil** remplace le dashboard (`foncti
 - **« On jette un œil quand même ? »** : « La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée. », puis les liens vers les albums, les séries et les auteurs, et, seul sur la ligne suivante, le lien vers la recherche avancée. Ce bloc reste présent même si la base documentaire est vide : il annonce ce que la consultation proposera.
 - **« C'est votre collection ? »** : « Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration. », un lien « Ouvrir l'administration », et en petit « La connexion est demandée à l'ouverture. »
 - **Aucun compteur** : l'écran n'affiche ni compteurs à zéro ni numéro tiré du nombre d'albums, qui ne diraient rien.
+- **Pied de page** : sans montant à présenter, il ne porte plus la mention des montants convertis en euro ; le lien vers l'administration reste.
+
+La présentation propre à chaque alternative est décrite avec elle (§ Alternatives, rubriques « Collection vide »).
 
 ## Alternatives
 
@@ -112,6 +115,15 @@ De haut en bas :
 - **Plutôt quel genre ?** : les genres en étiquettes colorées, dont la taille suit le nombre d'albums.
 - **Chez quels éditeurs ?** : les éditeurs en barres horizontales.
 
+#### Collection vide
+
+- **En-tête** : sans le champ de recherche ; le bouton d'aide passe à droite et, sur smartphone, le logo, le menu, qui défile, et le bouton d'aide tiennent sur une ligne.
+- **Les étagères attendent leur premier album !** : une case pleine largeur, en relief, dont la bulle de titre, plus grande que les autres, porte la phrase. À gauche, les textes ; à droite, l'illustration, qui passe sous le texte sur smartphone.
+- **Illustration** : une étagère vide, sur la planche des piles de livres. Un seul tome turquoise, marqué « TOME 1 », penche contre un serre-livre de la couleur d'accent, à côté d'emplacements de hauteurs variées tracés en pointillés.
+- **On jette un œil quand même ?** : une case, avec des pastilles colorées : Albums, Séries et Auteurs sur une ligne, puis Recherche avancée.
+- **C'est votre collection ?** : une case, avec un bouton « Ouvrir l'administration → » dans la couleur d'accent, aux coins irréguliers.
+- Les deux dernières cases sont côte à côte, de même hauteur, sur grand écran, et l'une sous l'autre sur smartphone.
+
 ### La gazette
 
 Le dashboard mis en page comme la une d'un journal. Source : `gazette.html`.
@@ -137,6 +149,19 @@ De haut en bas :
 - **Bas de page**, sous un double filet :
   - **Tomes, intégrales ou hors-séries ?** : une phrase de synthèse en italique, puis une étagère de dos de livres, un dos pour 1 % des albums : encre pour les réguliers, ambre pour les intégrales, rouille pour les hors-séries. Le nombre et le pourcentage de chaque catégorie sont soulignés de sa couleur. Chaque catégorie a autant de dos que son pourcentage arrondi, si bien que l'étagère peut compter un dos de plus ou de moins que 100, mais jamais un nombre de dos qui contredise le pourcentage affiché.
   - **Plutôt quel genre ?** : les genres sur une ligne typographique. La taille de chaque mot suit le nombre d'albums, les mots alternent romain et italique, et le nombre d'albums suit chaque mot en petit.
+
+#### Collection vide
+
+- **En-tête de journal** : le bandeau devient « Édition du jour · Numéro zéro », sans le champ de recherche ; le titre et le menu restent.
+- **La une**, sur deux tiers de la largeur :
+  - « Les étagères attendent leur premier album ! » est le gros titre, en italique et entre guillemets ;
+  - à gauche, un emplacement de photo réservé, barré en croix et marqué « Photo à venir », dans un cadre ambre incliné comme la couverture à la une ;
+  - à droite, « La collection ne compte encore aucune édition. » en chapô, puis le texte, ouvert par une lettrine, et sous un filet la mention de la base consultable ;
+  - une étagère vide clôt le texte : les dos des livres à venir y sont tracés en pointillés.
+- **La colonne latérale** :
+  - **On jette un œil quand même ?** : les liens « Albums → », « Séries → » et « Auteurs → » en rouille sur une ligne, puis « Recherche avancée → » ;
+  - **C'est votre collection ?** : un encadré en couleurs inversées, avec un bouton ambre « Ouvrir l'administration → ».
+- **Smartphone** : la colonne latérale passe sous la une, séparée par un double filet ; l'emplacement de photo, réduit, reste à gauche du texte.
 
 ### Le sommaire de magazine
 
@@ -168,6 +193,18 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
   - **Plutôt quel genre ?** : une accroche sur les genres en tête, puis les genres en majuscules. La taille de chaque mot suit le nombre d'albums, les couleurs alternent entre rouge, bleu et noir, et les mots alternent romain et italique.
   - **Chez quels éditeurs ?** : une accroche sur le classement, puis un podium des trois premiers éditeurs, avec le nom et le nombre d'éditions possédées de chacun. Les marches sont jaune pour le premier, bleu pour le deuxième, rouge pour le troisième.
 
+#### Collection vide
+
+- **La couverture du numéro zéro**, à gauche, rouge, inclinée, à ombre noire décalée :
+  - le bandeau porte « Numéro zéro », le mois et « Gratuit » ;
+  - à la place de la couverture de l'édition, un cadre vide, barré en croix comme l'emplacement d'une image de maquette, porte l'étiquette en pointillés « Couverture à venir » ;
+  - le gros titre blanc est « Numéro en préparation ! », et une étiquette jaune inclinée annonce « Bientôt en kiosque ! » : « Le premier album de la collection fera la une. » ; ni compteur ni étiquette noire.
+- **L'édito**, à droite : une étiquette « L'édito » en couleurs inversées, le titre en majuscules, puis les textes.
+- **On jette un œil quand même ?** et **C'est votre collection ?** : deux rubriques du sommaire, sous l'édito, chacune avec son grand numéro de page (02 en bleu, 03 en rouge).
+  - Albums, Séries et Auteurs sont des étiquettes en couleurs inversées, sur une ligne, puis Recherche avancée, une étiquette bleue ;
+  - « Ouvrir l'administration → » est un bouton de la couleur d'accent, en majuscules, à ombre décalée.
+- **Smartphone** : la couverture, réduite et centrée, puis l'édito et les deux rubriques, s'empilent.
+
 ### Le festival en métro
 
 Le dashboard présenté comme un festival de bande dessinée, desservi par une ligne de métro : la structure d'un plan de métro, les couleurs et les objets d'un festival. Source : `festival.html`.
@@ -197,6 +234,17 @@ Une ligne corail, la « Navette du festival », descend le long de la page. Chaq
 - **Station Pavillons, Tomes, intégrales ou hors-séries ?** : trois **pavillons** à toit pointu, dont la largeur suit le nombre d'albums, avec le pourcentage et le nombre : bleu pour les réguliers, corail pour les intégrales, jaune pour les hors-séries.
 - **Correspondance Espaces thématiques, Plutôt quel genre ?** : chaque genre est une **ligne numérotée**, avec sa pastille de couleur et son nom. Sa longueur suit le nombre d'albums, avec un arrêt tous les 100 albums.
 - **Terminus Allée des exposants, Chez quels éditeurs ?** : les éditeurs sont les **stations d'une ligne bleue horizontale**. La taille de chaque station suit le nombre d'éditions possédées, son nom est écrit en biais au-dessus, et sous la station figurent son nombre d'éditions et son numéro de stand.
+
+#### Collection vide
+
+La Navette du festival ne dessert plus que trois stations.
+
+- **Terminus Entrée** :
+  - l'**affiche du festival**, sur fond bleu avec ses disques jaune et corail, porte « Festival permanent · entrée libre », le titre, puis les textes ;
+  - à la place des compteurs, le **plan d'une ligne en construction** : une carte blanche cerclée de bleu nuit, avec une pilule jaune « Prochainement ». Après la pastille corail « Entrée », la ligne mène à la station « Premier album », cerclée de pointillés, puis se poursuit en pointillés, coupée par une barrière de travaux rayée, vers d'autres stations qui s'estompent.
+- **Correspondance Centre de documentation, On jette un œil quand même ?** : les liens sont des pastilles de correspondance, chacune avec sa lettre de couleur : A corail pour les albums, S vert pour les séries, Au violet pour les auteurs, puis R bleu ciel pour la recherche avancée, seule sur sa ligne.
+- **Terminus Espace exposants, C'est votre collection ?** : le lien vers l'administration est une pilule jaune cerclée de bleu nuit.
+- **Smartphone** : les disques de l'affiche se rangent sur son bord supérieur, et les pastilles se resserrent pour tenir sur une ligne.
 
 ### Le fanzine en risographie
 
@@ -229,6 +277,13 @@ Le dashboard présenté comme un fanzine imprimé en risographie : peu d'encres,
 - **Tomes, intégrales ou hors-séries ?** : trois disques qui se chevauchent, dont la surface suit le nombre d'albums : bleu pour les réguliers, rose pour les intégrales, jaune pour les hors-séries. Les nombres et les pourcentages sont écrits en dessous.
 - **Plutôt quel genre ?** : les genres sur des bandes de papier découpées et inclinées, alternativement bleues, roses et jaunes. La taille de chaque bande suit le nombre d'albums, qui est écrit à côté du nom.
 - **Chez quels éditeurs ?** : des barres tramées, alternativement bleues et roses, dont la longueur suit le nombre d'éditions possédées.
+
+#### Collection vide
+
+- **Accueil** : le nom « BDTHÈQUE » en très grand, avec son ombre rose décalée, et la mention « Numéro zéro · Prix libre ». Le titre suit sur une bande rose légèrement inclinée, puis les textes en bleu, le dernier en petit sous un trait en pointillés.
+- **Illustration**, à côté (dessous sur smartphone) : l'emplacement vide d'une couverture, en pointillés bleus légèrement inclinés, doublés de pointillés roses décalés comme une impression mal calée, tenu par deux morceaux de scotch, jaune et bleu. Il porte « Collez ici » en capitales et, en rose, « la couverture du premier album ».
+- **On jette un œil quand même ?** : les liens Albums, Séries et Auteurs sont des bandes de papier inclinées, bleue, rose et jaune, puis une bande bleue « Recherche avancée ».
+- **C'est votre collection ?**, à côté (dessous sur smartphone) : le lien « Ouvrir l'administration → » sur une bande rose inclinée.
 
 ### La vitrine de librairie
 
@@ -264,6 +319,14 @@ Le dashboard présenté comme une librairie de bandes dessinées : la façade, p
 - **Plutôt quel genre ?** : une plaque de rayon par genre, vert bouteille encadré de laiton, avec le nom du genre et une barre dont la longueur suit le nombre d'albums.
 - **Chez quels éditeurs ?** : une étagère par éditeur, garnie de livres, un dos pour environ 25 éditions possédées, avec un porte-étiquette qui donne le nom de l'éditeur et son nombre d'éditions.
 
+#### Collection vide
+
+- **La façade** : l'enseigne et le store restent. Le titre est peint en lettres dorées italiques sur la vitrine, à la place de la phrase d'accueil, et la pancarte de la porte dit « Ouverture prochaine », sans compteur.
+- **Bloc principal**, dans un encadré crème filet de laiton : à gauche, « La collection ne compte encore aucune édition. » en titre de rubrique, puis les textes ; à droite, une bibliothèque en noyer vide, à deux étagères. Sur la première, deux serre-livres en laiton encadrent un carton du libraire, écrit à la main, « Arrivage prochainement » ; sur la seconde, une place en pointillés attend le premier album, au-dessus d'un porte-étiquette vierge.
+- **On jette un œil quand même ?** : trois plaques de rayon vert bouteille encadrées de laiton, Albums, Séries et Auteurs, puis une plaque crème « Au comptoir » qui mène à la recherche avancée.
+- **C'est votre collection ?**, sur une ardoise encadrée de noyer, écrite à la craie : un bouton cerclé de craie jaune « Ouvrir l'administration → ».
+- **Disposition** : les deux derniers blocs sont côte à côte sur grand écran ; sur smartphone, tout s'empile et l'illustration passe sous le texte.
+
 ### L'album de vignettes
 
 Le dashboard présenté comme un album de vignettes autocollantes à collectionner, page par page. Source : `vignettes.html`.
@@ -295,3 +358,11 @@ Chaque rubrique est une page de l'album, encadrée de bleu canard, avec une past
 - **Page 5, Tomes, intégrales ou hors-séries ?** : une planche de petites vignettes, une pour 1 % des albums : bleu canard pour les réguliers, orange pour les intégrales, rose pour les hors-séries. Les nombres et les pourcentages sont donnés en dessous. Chaque catégorie a autant de vignettes que son pourcentage arrondi, si bien que la planche peut compter une vignette de plus ou de moins que 100, mais jamais un nombre de vignettes qui contredise le pourcentage affiché.
 - **Page 6, Plutôt quel genre ?** : un écusson rond par genre, chacun dans sa couleur, dont la taille suit le nombre d'albums.
 - **Page 7, Chez quels éditeurs ?** : une barre par éditeur, dans un emplacement en pointillés, dont la longueur suit le nombre d'éditions possédées.
+
+#### Collection vide
+
+- **En-tête** : sans le champ de recherche ; sur smartphone, le bouton d'aide reste sur la ligne du menu.
+- **Page 1, Bienvenue** : la mention « Album officiel de la collection », puis le titre sur une grande vignette brillante aux reflets irisés, suivi des textes. À côté, ou dessous sur smartphone, une planche de huit emplacements vides en pointillés, numérotés de 1 à 8, le premier tracé en bleu canard, sur laquelle est posée de travers une pochette de vignettes encore fermée, rose et orange, à bords dentelés.
+- **Page 2, On jette un œil quand même ?** : les liens Albums (rose), Séries (jaune) et Auteurs (vert) sont des vignettes à liseré blanc, légèrement inclinées, puis Recherche avancée, en vignette bleue.
+- **Page 3, C'est votre collection ?** : un bouton bleu canard en pilule « Ouvrir l'administration → ».
+- Les pages 2 et 3 sont côte à côte sur grand écran, et s'empilent sur smartphone.

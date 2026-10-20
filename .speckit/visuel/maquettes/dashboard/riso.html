@@ -31,15 +31,70 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
         <a href="#" style="padding: 8px 14px">Intentions d'achat</a>
       </div>
     </div></nav>
-    <div style="display: flex; gap: 6px; flex: 0 1 320px">
+    <div style="display: flex; gap: 6px; flex: {{toolsFlex}}">
+      <sc-if value="{{full}}">
       <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
       <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 12px; border: 2px dashed #0078BF; background: transparent; color: #0078BF; font: inherit; outline: none">
+      </sc-if>
       <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: #0078BF; color: #F4EFE4; font: 18px 'Rubik Mono One', sans-serif; cursor: pointer">?</button>
     </div>
   </header>
 
   <main style="max-width: 1240px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px) 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 44px">
 
+    <sc-if value="{{vide}}">
+    <section aria-labelledby="h-welcome" style="display: flex; flex-wrap: wrap; align-items: center; gap: 32px 40px">
+      <div style="flex: 1 1 560px; min-width: 0">
+        <div style="font-family: 'Rubik Mono One', sans-serif; font-size: clamp(30px, 8.5vw, 116px); line-height: .9; color: #0078BF; text-shadow: 6px 4px 0 rgba(255,72,176,.85)">BDTHÈQUE</div>
+        <!-- A pilot issue rather than an issue number: the number is the album count, which is zero here. -->
+        <div style="margin-top: 8px; font-family: 'Rubik Mono One', sans-serif; font-size: 20px; color: #FF48B0">NUMÉRO ZÉRO · PRIX LIBRE</div>
+        <h1 id="h-welcome" style="display: inline-block; margin: 18px 0 0; padding: 10px 16px; background: #FF48B0; color: #F4EFE4; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(20px, 2.6vw, 32px); line-height: 1.15; transform: rotate(-2deg); mix-blend-mode: multiply">Les étagères attendent leur premier album&nbsp;!</h1>
+        <p style="margin: 22px 0 0; font-weight: 700; font-size: clamp(18px, 2vw, 22px); line-height: 1.3">La collection ne compte encore aucune édition.</p>
+        <p style="margin: 10px 0 0; max-width: 58ch">Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</p>
+        <p style="margin: 12px 0 0; max-width: 58ch; padding-top: 10px; border-top: 2px dashed #0078BF; font-size: 13px">Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection.</p>
+      </div>
+      <!-- The cover the first album will fill: an empty dashed slot, taped like the covers of the zine,
+           its pink outline printed slightly off register. -->
+      <div aria-hidden="true" style="flex: 0 1 380px; position: relative; height: 290px; min-width: 0">
+        <span style="position: absolute; left: calc(50% - 150px); bottom: 0; width: 120px; height: 120px; border-radius: 50%; background: #FFE800; mix-blend-mode: multiply"></span>
+        <span style="position: absolute; left: calc(50% - 100px); top: 18px; width: 180px; height: 240px; transform: rotate(-3deg)">
+          <span style="position: absolute; inset: 0; transform: translate(7px, 6px); border: 3px dashed #FF48B0; mix-blend-mode: multiply"></span>
+          <span style="position: absolute; inset: 0; border: 3px dashed #0078BF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center">
+            <span style="font-family: 'Rubik Mono One', sans-serif; font-size: 22px; line-height: 1.1">COLLEZ<br>ICI</span>
+            <span style="padding: 0 16px; font-weight: 700; font-size: 13px; line-height: 1.3; color: #FF48B0">la couverture du premier album</span>
+          </span>
+          <span style="position: absolute; top: -12px; left: -18px; width: 76px; height: 22px; background: rgba(255,232,0,.75); transform: rotate(-32deg)"></span>
+          <span style="position: absolute; top: -12px; right: -18px; width: 76px; height: 22px; background: rgba(0,120,191,.55); transform: rotate(28deg)"></span>
+        </span>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 36px">
+      <section aria-labelledby="h-browse" style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-browse" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; line-height: 1.3; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">On jette un œil quand même&nbsp;?</h2>
+        <p style="margin: 0">La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px">
+          <sc-for list="{{browse}}" as="b" hint-placeholder-count="3">
+            <a href="#" class="cut" style="padding: 6px 14px; background: {{b.bg}}; color: {{b.tc}}; font-weight: 700; font-size: 18px; transform: rotate({{b.rot}}); mix-blend-mode: multiply">{{b.label}}</a>
+          </sc-for>
+        </div>
+        <div style="display: flex">
+          <a href="#" class="cut" style="padding: 6px 14px; background: #0078BF; color: #F4EFE4; font-weight: 700; font-size: 18px; transform: rotate(1.5deg); mix-blend-mode: multiply">Recherche avancée</a>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-admin" style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="h-admin" style="margin: 0; font-family: 'Rubik Mono One', sans-serif; font-weight: 400; font-size: 26px; line-height: 1.3; text-shadow: 3px 2px 0 rgba(255,72,176,.7)">C'est votre collection&nbsp;?</h2>
+        <p style="margin: 0">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</p>
+        <div style="display: flex">
+          <a href="#" class="cut" style="padding: 8px 16px; background: #FF48B0; color: #F4EFE4; font-weight: 700; font-size: 18px; transform: rotate(-1.5deg); mix-blend-mode: multiply">Ouvrir l'administration →</a>
+        </div>
+        <p style="margin: 0; font-size: 13px">La connexion est demandée à l'ouverture.</p>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{full}}">
     <section aria-labelledby="h-hero" style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 32px 40px">
       <div style="flex: 1 1 560px; min-width: 0">
         <a href="#" style="display: block; font-family: 'Rubik Mono One', sans-serif; font-size: clamp(30px, 8.5vw, 116px); line-height: .9; color: #0078BF; text-shadow: 6px 4px 0 rgba(255,72,176,.85)">BDTHÈQUE</a>
@@ -143,10 +198,11 @@ a:hover .cut{transform:rotate(0deg) scale(1.03) !important}
         <p style="margin: 0; font-size: 13px">Éditions possédées.</p>
       </section>
     </div>
+    </sc-if>
   </main>
 
   <footer style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; box-sizing: border-box; border-top: 2px dashed #0078BF; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 13px">
-    <span>Imprimé en deux couleurs et demie · Montants convertis en euro (taux Frankfurter, inflation INSEE)</span>
+    <span>{{footerNote}}</span>
     <a href="#" style="font-weight: 700">Administration</a>
   </footer>
 </div>
@@ -170,7 +226,15 @@ class View extends Mockup {
     const rots = ['-3deg', '2deg', '-1deg', '3deg', '-2deg', '1.5deg', '-2.5deg', '2.5deg'];
     const genres = [['Aventure', 612], ['Humour', 488], ['Science-fiction', 341], ['Policier', 297], ['Fantastique', 254], ['Historique', 231], ['Western', 118], ['Autres', 506]];
     const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
+    const vide = this.props.vide;
     return {
+      vide,
+      full: !vide,
+      // Without the search field, the help button alone keeps its own width.
+      toolsFlex: vide ? '0 0 auto' : '0 1 320px',
+      // A single text node: splitting the sentence would change its kerning.
+      footerNote: 'Imprimé en deux couleurs et demie' + (vide ? '' : ' · Montants convertis en euro (taux Frankfurter, inflation INSEE)'),
+      browse: [['Albums', 0, '-2deg'], ['Séries', 1, '1.5deg'], ['Auteurs', 2, '-1deg']].map(([label, ink, rot]) => ({ label, bg: inks[ink][0], tc: inks[ink][1], rot })),
       heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
       recents: [
         { label: 'Alors, tout tombe (Blacksad - T. 7)', meta: 'Dargaud · 3 oct.', rot: '-2deg' },
@@ -192,7 +256,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {});
+Mockup.mount(View, {"vide": {"label": "Collection vide", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>
