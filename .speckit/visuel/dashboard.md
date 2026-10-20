@@ -113,8 +113,8 @@ De haut en bas :
 - **La une**, sur deux tiers de la largeur :
   - La **phrase d'accueil** est le gros titre, en italique et entre guillemets, tirée au hasard dans la liste commune.
   - Les **compteurs** (albums, séries, éditions) forment un bandeau de trois colonnes.
-  - La **dernière édition entrée** dans la collection est à la une : sa couverture, sa date d'entrée, le titre, la série et l'éditeur de son album, et le résumé de l'album.
-  - Sous « Également arrivés », les entrées suivantes sont listées avec leur date. Un lien mène à la liste des albums.
+  - L'édition **à la une** (`fonctionnel.md` § Page d'accueil) : sa couverture, le libellé de son album, le sien et le résumé de l'album.
+  - Sous « Tout juste arrivés ! », les dernières éditions entrées, la plus récente comprise, sont listées avec leur date. Un lien mène à la liste des albums.
 - **La colonne latérale** :
   - **Le cours de la collection** : la valeur totale estimée dans un encadré en couleurs inversées, avec son montant en euros du jour. Un tableau donne ensuite la valeur totale connue et les prix moyen, médian, minimum et maximum, en euros courants et en euros du jour. Une mention indique les montants non convertibles exclus et les éditions gratuites non valorisées.
   - **Le palmarès des éditeurs** : un classement numéroté des éditeurs, avec le nombre d'éditions possédées de chacun.
@@ -140,9 +140,10 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
 - **La couverture**, à gauche, au format d'une page de magazine, rouge, légèrement inclinée et portant une ombre noire décalée :
   - le nom de l'application en blanc ;
   - un bandeau entre deux filets : « N° », suivi du nombre d'albums, le mois et la mention « Gratuit » ;
-  - la couverture du dernier album entré dans la collection, sur presque toute la hauteur ;
+  - la couverture de l'édition **à la une** (`fonctionnel.md` § Page d'accueil), sur presque toute la hauteur ;
   - la **phrase d'accueil** en gros titre blanc, tirée au hasard dans la liste commune ;
-  - des étiquettes noires, qui donnent le nombre de séries et d'éditions, et une étiquette jaune inclinée, qui annonce le dernier album entré.
+  - des étiquettes noires, qui donnent le nombre de séries et d'éditions, et une étiquette jaune inclinée, qui annonce l'édition à la une : le libellé de son album, une accroche tirée du résumé de l'album, abrégé, et, en petit, le libellé de l'édition.
+- Les dernières éditions entrées ne sont plus mises en avant sur la couverture : elles restent la rubrique « Tout juste arrivés ! » du sommaire.
 - **Au sommaire**, à droite : une rubrique par statistique, chacune avec un grand numéro de page coloré, son titre, une accroche et un petit visuel.
   - **Tout juste arrivés !** : une accroche qui cite les derniers albums entrés, et les vignettes de leurs couvertures.
   - **Ça vaut combien, tout ça ?** : la valeur totale estimée, avec son montant en euros du jour surligné en jaune, le prix moyen et le prix maximum. En petit suivent la valeur totale connue, les prix médian et minimum, et la mention des montants non convertibles exclus et des éditions gratuites non valorisées. Chaque montant est donné en euros courants, suivi de son montant en euros du jour.
