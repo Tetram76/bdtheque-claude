@@ -35,7 +35,7 @@ L'application n'est pas un jeu : elle reste une **application bureautique**. Que
 
 Couleurs, typographie et éléments graphiques ne sont pas communs : chaque alternative des maquettes a les siens, décrits avec elle dans [`dashboard.md`](dashboard.md) § Alternatives. Seules les règles suivantes valent pour toutes :
 
-- le **champ de recherche** et le **bouton d'aide** sont toujours visibles dans l'en-tête ;
+- le **champ de recherche** et le **bouton d'aide** sont toujours visibles dans l'en-tête, à une exception : l'écran d'accueil d'une collection vide n'a pas de champ de recherche, qui n'aurait presque rien à trouver (cf. [`dashboard.md`](dashboard.md) § Collection vide) ;
 - le **menu horizontal** reste figé en haut de l'écran quand la page défile, avec l'en-tête qui le porte lorsque celui-ci est compact ; il ne passe jamais à la ligne : il défile horizontalement, et un dégradé marqué d'un chevron signale, de chaque côté, les entrées hors de vue. À l'ouverture de la page, il est centré sur l'entrée active. Sur petit écran, la recherche passe sous le menu, sans défiler.
 
 ## Maquettes

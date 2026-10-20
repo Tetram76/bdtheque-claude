@@ -50,6 +50,20 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
 
 Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu mène à ce site, et n'est sinon pas un lien (`fonctionnel.md` § Structure de l'application).
 
+## Collection vide
+
+Sans édition possédée, un **écran d'accueil** remplace le dashboard (`fonctionnel.md` § Page d'accueil). Toutes les alternatives en présentent le même contenu, chacune dans son apparence ; les maquettes le montrent avec le réglage « Collection vide ».
+
+- **En-tête** : celui de l'alternative, **sans le champ de recherche** (`charte-graphique.md` § Apparence propre à chaque alternative) ; le menu et le bouton d'aide restent.
+- **Un bloc principal** :
+  - le titre « Les étagères attendent leur premier album ! » ;
+  - « La collection ne compte encore aucune édition. », puis « Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques. » ;
+  - en plus discret : « Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection. » ;
+  - une illustration, propre à chaque alternative, d'une collection qui attend son premier album.
+- **« On jette un œil quand même ? »** : « La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée. », puis les liens vers les albums, les séries et les auteurs, et, seul sur la ligne suivante, le lien vers la recherche avancée. Ce bloc reste présent même si la base documentaire est vide : il annonce ce que la consultation proposera.
+- **« C'est votre collection ? »** : « Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration. », un lien « Ouvrir l'administration », et en petit « La connexion est demandée à l'ouverture. »
+- **Aucun compteur** : l'écran n'affiche ni compteurs à zéro ni numéro tiré du nombre d'albums, qui ne diraient rien.
+
 ## Alternatives
 
 ### Cases et bulles, violine et mûre
