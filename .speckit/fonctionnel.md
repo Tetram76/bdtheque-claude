@@ -569,11 +569,13 @@ Comme celle de l'outil pour agents IA (cf. § Interface pour agents IA, Suivi de
 
 - **Périmètre** : toute l'interface web, consultation, administration et aide contextuelle (cf. § Structure de l'application).
 - **Fonctions suivies** : chaque **écran** affiché (ex. fiche d'un album, liste des séries, dashboard, formulaire d'une édition) et chaque **action** déclenchée (ex. recherche lancée, rejeu d'une recherche enregistrée, navigation par initiale, page suivante d'une liste, enregistrement, suppression, import depuis une source externe, ouverture de l'aide).
+- **Fiche présentée** : l'utilisation d'un écran qui présente une fiche précise (ex. la fiche d'un album) désigne cette fiche, pour distinguer un même écran affiché plusieurs fois sur la même fiche (ex. trois affichages successifs de la fiche d'un même album) du même écran affiché sur des fiches différentes (trois fiches d'album différentes), qui n'ont pas la même signification.
 - **Visites** : les utilisations d'un même utilisateur au cours d'une même visite sont regroupées, pour que le **parcours** suivi pendant une visite reste lisible et qu'une fonction utilisée de nombreuses fois au cours d'une seule visite ne pèse pas comme une fonction utilisée au cours de nombreuses visites.
 - **Anonymat** : le suivi est **le plus anonyme possible**. Une visite ne porte rien qui identifie l'utilisateur (ni adresse IP, ni identité, ni appareil), et rien ne permet de reconnaître un même visiteur d'une visite à l'autre.
 - **Administrateur et visiteurs** : chaque visite indique si elle est celle de l'**administrateur** (session authentifiée) ou d'un **visiteur** public, y compris lorsque l'administrateur consulte la partie publique : l'usage public se lit sans être faussé par celui de l'administrateur, qui se lit aussi à part.
 - **Indicateurs**, pour chaque fonction, distingués pour les visiteurs, pour l'administrateur et ensemble :
   - le **nombre d'utilisations** et le **nombre de visites** au cours desquelles elle a été utilisée ;
+  - pour un écran qui présente une fiche, le **nombre de fiches différentes** présentées, et la part des affichages qui **répètent** aussitôt, au cours de la même visite, l'affichage de la même fiche ;
   - leur **fréquence** dans le temps, et la date de sa **dernière utilisation** ;
   - une fonction **jamais utilisée** figure dans le suivi, avec des indicateurs nuls.
 - **Conservation** : l'historique des visites et de leurs utilisations est conservé **sans limite**, pour suivre l'évolution de l'usage dans le temps.
