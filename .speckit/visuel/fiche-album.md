@@ -42,7 +42,7 @@ De haut en bas :
   - en pied, les dates de création, d'entrée dans la collection et de modification de l'édition.
   - sous le détail, l'**intention d'achat** de l'album, s'il en a une, en cadre en tirets, distinguée comme dans la liste des intentions d'achat par une étiquette : **Album**, suivie de « toute édition », ou **Édition**, suivie du libellé de l'édition visée et, en petit dessous, de sa catégorie, son format, sa reliure et son nombre de pages ; puis la date où elle a été posée. Une intention ne se choisit pas comme une édition et n'a pas de visuels à présenter.
 - **Et le reste de la série ?** : la liste dépliable des albums de la série, dans l'ordre de la série (`fonctionnel.md` § Ordre des albums dans une série), chacun avec son tome et son appartenance à la collection, l'album affiché étant mis en avant ; et le lien vers la fiche de la série.
-- **Pied de page** : les dates de création et de modification de la fiche.
+- **Pied de page** : les dates de création et de modification de l'album, introduites par ce qu'elles concernent (« Album créé le …, modifié le … »), jamais par « Fiche ».
 
 ## Déclinaison par thème
 

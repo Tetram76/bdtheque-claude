@@ -41,7 +41,7 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
   - chaque **intention**, une ligne, distinguée comme dans la liste des intentions d'achat ([`listes.md`](listes.md)) par une étiquette : **Album**, pleine, suivie de « toute édition », ou **Édition**, en contour, suivie du libellé de l'édition visée en gras, avec sa catégorie et sa reliure en petit dessous ; la date où elle a été posée ; puis ses actions : **Confirmer l'achat** (`fonctionnel.md` § Réalisation d'une intention) et un menu « ⋯ » : **Modifier l'intention**, pour une intention sur une édition ; **Viser plutôt une édition…** pour une intention sur l'album, ou **Viser plutôt l'album…** pour la seule intention d'un album sans édition, la conversion supprimant l'édition visée ; et, séparée par un filet, **Retirer l'intention…**, qui supprime avec elle l'édition visée (`fonctionnel.md` § Suppression des entités). Un clic en dehors d'un menu ouvert le referme ;
   - sans intention, « Aucune intention d'achat » ;
   - l'aide rappelle qu'une intention ne vise l'album entier que tant qu'il n'a aucune édition, possédée ou visée.
-- Sous les blocs, les dates de création et de modification de la fiche de l'album.
+- Sous les blocs, les dates de création et de modification de l'album, introduites par ce qu'elles concernent (« Album créé le …, modifié le … »), jamais par « Fiche ».
 - **Smartphone** : chaque édition tient sur deux lignes, la vignette à gauche : le libellé et les actions (Modifier réduit à son icône), puis le détail ; chaque intention de même, Confirmer l'achat réduit à son icône, la date passant sous ce qu'elle vise.
 
 ## Contrôles

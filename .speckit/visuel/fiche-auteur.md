@@ -38,7 +38,7 @@ De haut en bas :
   - chaque rôle garde sa couleur sur toute la page ;
   - un auteur sans aucun crédit le dit : « Crédité sur aucun album », et « Aucune série ni aucun album crédité pour l'instant. » à la place de la liste ;
   - une série se déplie par un **chevron** placé devant elle, sur une pastille ronde de la teinte de l'encadré de ses albums, sans cadre : visible sur smartphone sans dominer la ligne ; une série de plus de six albums crédités est repliée à l'arrivée ; « Tout déplier » et « Tout replier » agissent sur toute la liste.
-- **Pied de page** : les dates de création et de modification de la fiche.
+- **Pied de page** : les dates de création et de modification de l'auteur, introduites par ce qu'elles concernent (« Auteur créé le …, modifié le … »), jamais par « Fiche ».
 
 ## Déclinaison par thème
 
