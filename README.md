@@ -153,7 +153,7 @@ Le projet est piloté en **développement piloté par les spécifications** (*Sp
 
 Les spécifications du projet sont dans le dossier [`.speckit/`](.speckit/) constituent la **source de vérité absolue** du projet : toute décision d'architecture, de fonctionnel ou de gestion doit s'y conformer, et son contenu prime sur toute autre source (historique de discussion, suppositions, etc.).
 
-Le développement est mené par un agent IA disposant d'une **autonomie gouvernée** : il décide librement, dans les limites des règles et contraintes imposées par le `.speckit/` — seul sur les choix techniques et sur les points fonctionnels que la spécification tranche déjà, l'utilisateur restant décisionnaire de tout changement d'exigence fonctionnelle ou métier. Les fichiers `.speckit/` sont son unique canal d'expression des besoins et exigences.
+Le développement est mené par un agent IA disposant d'une **autonomie gouvernée** : il décide librement, dans les limites des règles et contraintes imposées par le `.speckit/`. Il décide seul des choix techniques ; sur un point fonctionnel ou métier, il ne fait qu'appliquer ce que la spécification établit, l'utilisateur décidant de tout changement d'exigence et de toute ambiguïté. Les fichiers `.speckit/` sont son unique canal d'expression des besoins et exigences.
 
 | Fichier | Contenu |
 | --- | --- |
