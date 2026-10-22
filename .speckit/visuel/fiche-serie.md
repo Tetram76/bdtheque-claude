@@ -41,8 +41,8 @@ De haut en bas :
 - **Combien d'albums ?** : le décompte (tomes, intégrales, hors-séries), puis les albums **dans l'ordre de la série** (`fonctionnel.md` § Ordre des albums dans une série), en deux groupes : **Tomes et intégrales**, puis **Hors-séries**. Chaque album est une carte, en grille, qui mène à sa fiche :
   - sa couverture, son tome (`fonctionnel.md` § Représentation du tome selon le type d'album) et son titre ; un album sans titre propre est nommé par son tome seul (« Tome 3 ») ;
   - son appréciation, en étoiles, lorsqu'elle est renseignée ;
-  - son **appartenance à la collection** : étiquette pleine « Dans la collection », ou étiquette en tirets « Pas dans la collection » ou « Intention d'achat ».
-- **Pied de page** : les dates de création et de modification de la fiche.
+  - son **appartenance à la collection** : étiquette pleine « Dans la collection », ou étiquette en tirets « Hors collection » ou « Intention d'achat ».
+- **Pied de page** : les dates de création et de modification de la série, introduites par ce qu'elles concernent (« Série créée le …, modifiée le … »), jamais par « Fiche ».
 
 ## Déclinaison par thème
 

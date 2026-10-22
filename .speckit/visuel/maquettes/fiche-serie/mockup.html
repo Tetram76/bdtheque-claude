@@ -14,6 +14,7 @@ input::placeholder{color:inherit}
 summary{cursor:pointer}
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/bubble-tails.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
@@ -138,9 +139,9 @@ summary{cursor:pointer}
         </div>
       </div>
 
-      <section aria-labelledby="s-recit" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+      <section aria-labelledby="s-recit" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.recit}}</span>
-        <h2 id="s-recit" style="position: relative; align-self: flex-start; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>De quoi ça parle ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
+        <h2 id="s-recit" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>De quoi ça parle ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
         <p style="margin: 0; max-width: 80ch; font-size: 15px; color: {{s.summaryColor}}">{{s.summary}}</p>
         <div style="display: flex; flex-direction: column; gap: 2px; max-width: 80ch; padding-top: 10px; border-top: {{t.rowB}}">
           <span style="font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">Notes personnelles</span>
@@ -148,10 +149,10 @@ summary{cursor:pointer}
         </div>
       </section>
 
-      <section aria-labelledby="s-albums" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 14px">
+      <section aria-labelledby="s-albums" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 14px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.albums}}</span>
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 16px">
-          <h2 id="s-albums" style="position: relative; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Combien d'albums ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: {{t.rowAlign}}; gap: 12px 16px">
+          <h2 id="s-albums" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Combien d'albums ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
           <span style="font-size: 13px; color: {{t.muted}}">{{albumsSummary}}</span>
         </div>
         <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
@@ -186,6 +187,9 @@ summary{cursor:pointer}
 <script>
 // Shared defaults: each theme only states what its identity changes.
 const BASE = {
+  rowAlign: 'center',
+  cTop: '0',
+  h2lift: '0',
   kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
   kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
   mkDisp: 'none', lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
@@ -207,7 +211,7 @@ const cases = (c) => ({
   hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
   helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
   lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '5px 16px', h2r: '26px 30px 28px 22px', h2size: '18px', h2rot: '-1.5deg', tail: true,
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '5px 16px', h2r: '26px 30px 28px 22px', h2size: '18px', h2rot: '-1.5deg', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px', rowAlign: 'flex-start', tail: true,
   cvPad: '10px', cvB: '0', cvR: '16px 10px 18px 12px', cvBg: '#4FD1C5', cvRot: '-2.5deg', cvSh: '0 16px 30px rgba(0,0,0,.35)', imgR: '8px 4px 10px 6px',
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
@@ -356,7 +360,7 @@ const EXAMPLES = {
     summary: "Sur un archipel noyé de brumes, cartographes, contrebandiers et gardiens de phares se disputent les routes maritimes, au fil de cycles qui changent de héros sans jamais quitter les îles.",
     notes: 'Série reprise en cours de route : tomes 1 à 8 lus en intégrales.',
     albums: longAlbums(),
-    meta: 'Fiche créée le 2 février 2026, modifiée le 11 octobre 2026.'
+    meta: 'Série créée le 2 février 2026, modifiée le 11 octobre 2026.'
   },
   heads: {
     title: 'Heads',
@@ -368,7 +372,7 @@ const EXAMPLES = {
     summary: "Après une greffe de cerveau, un jeune homme sent une autre personnalité, inquiétante, gagner peu à peu du terrain en lui : un récit de perte d'identité, adapté d'un roman japonais.",
     notes: '',
     albums: [['Tome 1', '', 'tome', 'own', 0], ['Tome 2', '', 'tome', 'own', 0], ['Tome 3', '', 'tome', 'own', 0], ['Tome 4', '', 'tome', 'own', 0]],
-    meta: 'Fiche créée le 2 février 2026, modifiée le 2 février 2026.'
+    meta: 'Série créée le 2 février 2026, modifiée le 2 février 2026.'
   },
   // A sparse series: a single album, and no publisher, collection, planned count nor summary.
   courte: {
@@ -381,7 +385,7 @@ const EXAMPLES = {
     summary: '',
     notes: '',
     albums: [['T. 1', 'Le Départ', 'tome', 'own', 3]],
-    meta: 'Fiche créée le 9 octobre 2026, modifiée le 9 octobre 2026.'
+    meta: 'Série créée le 9 octobre 2026, modifiée le 9 octobre 2026.'
   },
   // A series just created: no album, author, genre nor status yet.
   vide: {
@@ -394,7 +398,7 @@ const EXAMPLES = {
     summary: '',
     notes: '',
     albums: [],
-    meta: 'Fiche créée le 13 octobre 2026, modifiée le 13 octobre 2026.'
+    meta: 'Série créée le 13 octobre 2026, modifiée le 13 octobre 2026.'
   }
 };
 const GENERIC_CARD = 'rgba(127,127,127,.35)';
@@ -442,7 +446,7 @@ class View extends Mockup {
       rated: rating > 0,
       stars: '★'.repeat(rating) + '☆'.repeat(5 - rating),
       ratingLabel: 'Appréciation : ' + rating + ' sur 5',
-      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? "Intention d'achat" : 'Pas dans la collection'),
+      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? "Intention d'achat" : 'Hors collection'),
       badgeBg: state === 'own' ? t.colBg : 'transparent',
       badgeFg: state === 'own' ? t.colFg : t.text,
       badgeB: state === 'own' ? '0' : '2px dashed ' + t.line

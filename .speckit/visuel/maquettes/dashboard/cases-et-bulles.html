@@ -14,6 +14,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
 @media (max-width: 640px){.section-link{position:static !important;display:block;text-align:right;margin:0 0 18px}.book-pile{zoom:.6}}
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/bubble-tails.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
@@ -51,7 +52,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-welcome" style="flex: 1 1 100%; margin-top: 18px; padding: 0 clamp(14px, 3vw, 36px) clamp(18px, 3.5vw, 36px); border-radius: 28px 40px 24px 36px; background: {{t.panel2}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: relative; width: fit-content; max-width: 100%; margin: -26px 0 24px; transform: rotate(-1.5deg)">
         <h1 id="h-welcome" style="margin: 0; padding: 12px 26px; border-radius: 26px 34px 24px 30px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: clamp(22px, 3.2vw, 34px); line-height: 1.1; text-wrap: balance">Les étagères attendent leur premier album !</h1>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 34px; width: 22px; height: 22px; background: #FBF3EA; border-radius: 0 0 20px 0; transform: skewX(-25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; left: 34px; width: 22px; height: 22px; background: #FBF3EA; border-radius: 0 0 20px 0; transform: skewX(-25deg)"></div>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 28px 40px; align-items: center">
         <div style="flex: 1 1 360px; min-width: 0">
@@ -79,7 +80,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-browse" style="flex: 1 1 340px; align-self: stretch; min-width: 0; padding: 0 clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 22px 36px 26px 30px; background: {{t.panel}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: relative; width: fit-content; max-width: 100%; margin: -22px 0 18px; transform: rotate(-1.5deg)">
         <h2 id="h-browse" style="margin: 0; padding: 10px 22px; border-radius: 26px 30px 24px 28px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 22px; line-height: 1.15; text-wrap: balance">On jette un œil quand même ?</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
       </div>
       <p style="margin: 0 0 16px; color: {{t.soft}}">La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</p>
       <div style="display: flex; flex-wrap: wrap; gap: 10px">
@@ -95,7 +96,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-admin" style="flex: 1 1 340px; align-self: stretch; min-width: 0; padding: 0 clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 34px 20px 32px 24px; background: {{t.panel}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: relative; width: fit-content; max-width: 100%; margin: -22px 0 18px; transform: rotate(2deg)">
         <h2 id="h-admin" style="margin: 0; padding: 10px 22px; border-radius: 26px 30px 24px 28px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 22px; line-height: 1.15; text-wrap: balance">C'est votre collection ?</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
       </div>
       <p style="margin: 0 0 16px; color: {{t.soft}}">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</p>
       <a href="#" style="display: inline-block; padding: 10px 20px; border-radius: 14px 20px 12px 18px; background: {{accent}}; color: {{t.bg}}; font-weight: 700">Ouvrir l'administration →</a>
@@ -130,7 +131,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-featured" style="flex: 1 1 100%; position: relative; padding: 44px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 24px 36px 28px 40px; background: {{t.panel2}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: absolute; top: -22px; left: 28px; transform: rotate(1.5deg)">
         <h2 id="h-featured" style="margin: 0; padding: 10px 22px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 24px">À la une aujourd'hui !</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
       </div>
       <a href="#" style="display: grid; grid-template-columns: clamp(100px, 22vw, 170px) minmax(0, 1fr); gap: clamp(16px, 3vw, 32px); align-items: start; color: #FBF3EA">
         <div class="cover" style="padding: 6px; border-radius: 12px; background: #4FD1C5; transform: rotate(-2.5deg); box-shadow: 0 14px 28px rgba(0,0,0,.45)">
@@ -147,7 +148,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-recent" style="flex: 1 1 100%; position: relative; padding: 44px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 34px 22px 40px 26px; background: {{t.panel}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: absolute; top: -22px; left: 28px; transform: rotate(-2deg)">
         <h2 id="h-recent" style="margin: 0; padding: 10px 22px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 24px">Tout juste arrivés !</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
       </div>
       <a href="#" class="section-link" style="position: absolute; top: 18px; right: 28px; font-weight: 700; color: {{accent}}">Tous les albums →</a>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(clamp(96px, 24vw, 150px), calc((100% - 2 * 14px) / 3)), 1fr)); gap: 20px 14px">
@@ -168,7 +169,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-value" style="flex: 3 1 560px; min-width: 0; position: relative; padding: 44px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 26px 38px 30px 22px; background: {{t.panel}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: absolute; top: -22px; left: 28px; transform: rotate(1.5deg)">
         <h2 id="h-value" style="margin: 0; padding: 10px 22px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 24px">Ça vaut combien, tout ça ?</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; font-size: 13px; font-weight: 700">
         <span style="padding: 5px 12px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}">€ courants · ce que ça a coûté</span>
@@ -207,7 +208,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-type" style="flex: 1 1 360px; position: relative; padding: 52px clamp(14px, 3vw, 26px) 20px; border-radius: 40px 24px 28px 34px; background: {{t.panel2}}; border: 2px solid {{t.border}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
       <div style="position: absolute; top: -22px; right: 24px; left: 24px; display: flex; justify-content: flex-end; transform: rotate(2deg)">
         <h2 id="h-type" style="margin: 0; padding: 10px 20px; border-radius: 26px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 22px; line-height: 1.15; text-align: center">Tomes, intégrales ou hors-séries ?</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; right: 34px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 0 18px; transform: skewX(25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; right: 34px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 0 18px; transform: skewX(25deg)"></div>
       </div>
       <div role="img" aria-label="2 571 réguliers, 184 intégrales, 92 hors-séries" style="display: flex; align-items: flex-end; justify-content: space-around; margin-top: auto; border-bottom: 8px solid #7A4E37; border-radius: 0 0 3px 3px">
         <sc-for list="{{piles}}" as="p" hint-placeholder-count="3">
@@ -234,7 +235,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-genre" style="flex: 1 1 340px; min-width: 0; position: relative; padding: 44px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 22px 36px 26px 30px; background: {{t.panel}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: absolute; top: -22px; left: 28px; transform: rotate(-1.5deg)">
         <h2 id="h-genre" style="margin: 0; padding: 10px 22px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 22px">Plutôt quel genre ?</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; left: 30px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 18px 0; transform: skewX(-25deg)"></div>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 10px">
         <sc-for list="{{genres}}" as="g" hint-placeholder-count="8">
@@ -247,7 +248,7 @@ a:hover .cover{transform:rotate(0deg) translateY(-8px) scale(1.03) !important;bo
     <section aria-labelledby="h-pub" style="flex: 1 1 340px; min-width: 0; position: relative; padding: 44px clamp(14px, 3vw, 28px) clamp(16px, 3vw, 28px); border-radius: 34px 20px 32px 24px; background: {{t.panel}}; border: 2px solid {{t.border}}; box-sizing: border-box">
       <div style="position: absolute; top: -22px; right: 28px; transform: rotate(2deg)">
         <h2 id="h-pub" style="margin: 0; padding: 10px 22px; border-radius: 999px; background: #FBF3EA; color: {{t.bg}}; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 22px">Chez quels éditeurs ?</h2>
-        <div aria-hidden="true" style="position: absolute; bottom: -10px; right: 34px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 0 18px; transform: skewX(25deg)"></div>
+        <div aria-hidden="true" data-tail="" style="position: absolute; bottom: -10px; right: 34px; width: 20px; height: 20px; background: #FBF3EA; border-radius: 0 0 0 18px; transform: skewX(25deg)"></div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px">
         <sc-for list="{{publishers}}" as="e" hint-placeholder-count="8">

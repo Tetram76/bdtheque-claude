@@ -138,6 +138,14 @@ Répercussion dans le modèle de domaine et dans l'API de la recherche avancée 
 | ~~#170~~ | Blocage de la suppression des fiches désignées par une recherche enregistrée |
 | ~~#171~~ | Comparaison entre deux données dans la recherche avancée |
 
+### Ajustement issu des maquettes des listes et saisies de l'administration
+
+Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'achat sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'achat d'un album (`fonctionnel.md` § Intention d'achat). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+
+| Ticket | Titre |
+| --- | --- |
+| #185 | Intention d'achat sur un album réservée à un album sans édition |
+
 ### Ajustement issu de la mesure d'audience de l'interface web
 
 Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience de l'interface web (`fonctionnel.md` § Mesure d'audience de l'interface web) : visites, utilisations des fonctions et compteurs d'audience mensuels, leur conservation et la lecture de leurs indicateurs. Les phases 1 et 2 étant validées, un seul ticket couvre les deux ; la part de la Phase 3, pas encore découpée, y est notée.

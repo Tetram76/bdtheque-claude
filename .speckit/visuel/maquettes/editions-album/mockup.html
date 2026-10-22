@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Éditions et intentions d'achat d'un album — administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
+/* A placeholder keeps the contrast of muted text rather than fading it with an opacity. */
+input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
+/* The focus ring is drawn outside the control, over a band of the page colour: it stands out from the
+   control, coloured or not, and from the surface around it. */
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px var(--focus-gap)}
+.adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
+.sa-status-sm{display:none}
+/* The album in brief, then its editions, each on a line as dense as a table row. */
+.ea-album{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:start}
+.ea-row{display:grid;grid-template-columns:36px minmax(0,1fr) 300px auto;grid-template-areas:"cover main meta act";align-items:center;column-gap:14px}
+.ea-irow{display:grid;grid-template-columns:minmax(0,1fr) 300px auto;grid-template-areas:"main meta act";align-items:center;column-gap:14px}
+@media (max-width: 640px){
+  .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
+  .adm-actions{margin-left:auto}
+  .adm-consult-label,.adm-menu-label,.sa-hide-sm{display:none}
+  .adm-menu{width:38px;padding:0 !important;justify-content:center}
+  .adm-tag{padding:2px 8px !important;font-size:11px !important}
+  /* An edition on two lines: its label and actions, then its possession and detail. */
+  .ea-row{grid-template-columns:36px minmax(0,1fr) auto;grid-template-areas:"cover main act" "cover meta meta";row-gap:4px;align-items:start}
+  .ea-irow{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main act" "meta meta";row-gap:4px;align-items:start}
+  .ea-act-label{display:none}
+}
+</style>
+<script src="../shared/mockup.js"></script>
+<script src="../shared/bubble-tails.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
+<div style="--placeholder: {{t.muted}}; --focus: {{t.text}}; --focus-gap: {{t.bg}}; min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
+
+  <header style="--placeholder: {{hdrMuted}}; --focus: {{t.hText}}; --focus-gap: {{hdrBg}}; position: sticky; top: 0; z-index: 20; background: {{hdrBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+    <div style="position: relative; max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
+        <sc-if value="{{t.lgMark}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
+        <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
+      </a>
+      <span class="adm-tag" style="padding: 4px 12px; border: {{t.tagB}}; border-radius: {{t.tagR}}; background: {{t.tagBg}}; color: {{t.tagText}}; font-weight: 700; font-size: 13px; text-transform: {{t.tagTT}}; letter-spacing: {{t.tagLS}}">Administration</span>
+      <div class="adm-search" style="min-width: 0; display: flex; align-items: center; gap: 8px">
+        <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Retrouver une fiche</label>
+        <input id="find" type="search" placeholder="Retrouver une fiche à modifier…" style="flex: 1 1 auto; min-width: 0; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
+      </div>
+      <div class="adm-actions" style="display: flex; align-items: center; gap: 8px">
+      <a href="#" aria-label="Aller à la consultation" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; flex: none; padding: 0 6px; color: {{t.hText}}; font-weight: 700; font-size: 14px"><span class="adm-consult-label">Aller à la consultation</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a>
+      <button type="button" aria-label="Menu" aria-expanded="{{menuExpanded}}" aria-controls="admin-menu" onClick="{{toggleMenu}}" class="adm-menu" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; flex: none; padding: 0 12px; border: {{t.hInB}}; border-radius: {{t.btnR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg><span class="adm-menu-label">Menu</span></button>
+      </div>
+
+      <sc-if value="{{menuOpen}}">
+    <button type="button" tabindex="-1" aria-label="Fermer le menu" onClick="{{closeMenu}}" style="position: fixed; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default"></button>
+    <nav id="admin-menu" aria-label="Plan de l'administration" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 8px); right: 24px; width: min(340px, calc(100% - 48px)); max-height: 80vh; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 12px; border: {{panelB}}; border-radius: {{t.cR}}; background: {{panelBg}}; color: {{t.text}}; box-shadow: {{panelSh}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: {{t.rowB}}">
+        <span style="padding-left: 10px; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">Menu</span>
+        <button type="button" aria-label="Fermer le menu" onClick="{{toggleMenu}}" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <sc-for list="{{menu}}" as="g">
+        <div style="display: flex; flex-direction: column; gap: 1px">
+          <span style="padding: 0 10px 2px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: {{t.muted}}">{{g.label}}</span>
+          <sc-for list="{{g.items}}" as="m">
+            <a href="#" aria-current="{{m.current}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; padding: 0 10px; font-size: 14px; border-radius: {{t.btnR}}; background: {{m.bg}}; color: {{m.fg}}; font-weight: {{m.fw}}">
+              <span>{{m.label}}</span>
+              <span style="font-size: 13px; font-variant-numeric: tabular-nums; opacity: .85">{{m.n}}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="padding-top: 8px; border-top: {{t.rowB}}">
+        <button type="button" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10"></path></svg>Se déconnecter</button>
+      </div>
+    </nav>
+      </sc-if>
+    </div>
+  </header>
+
+  <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 24px; box-sizing: border-box">
+    <main style="display: flex; flex-direction: column; gap: 18px">
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <nav aria-label="Fil d'Ariane" style="font-size: 13px; color: {{t.muted}}; overflow-wrap: anywhere">
+          <a href="#" style="color: {{t.link}}; font-weight: 700">Administration</a>
+          <span aria-hidden="true" style="margin: 0 6px">›</span>
+          <a href="#" style="color: {{t.link}}; font-weight: 700">Albums</a>
+          <span aria-hidden="true" style="margin: 0 6px">›</span>
+          <span aria-current="page">{{x.label}}</span>
+        </nav>
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 16px">
+          <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Éditions et intentions d'achat</h1>
+            <span style="font-size: 14px; font-weight: 700">{{x.label}}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px">
+            <a href="#" aria-label="Modifier l'album" style="{{secBtn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.edit}}"></path></svg><span class="sa-hide-sm">Modifier l'album</span></a>
+            <a href="#" aria-label="Voir dans la consultation" style="{{secBtn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg><span class="sa-hide-sm">Voir dans la consultation</span></a>
+          </div>
+        </div>
+      </div>
+
+      <section aria-labelledby="s-album" style="{{block}}">
+        <span style="{{kickStyle}}">{{k.album}}</span>
+        <h2 id="s-album" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>L'album</h2>
+        <div class="ea-album">
+          <span aria-hidden="true" style="width: 64px; height: 86px; border-radius: {{t.thR}}; background: {{albumCover}}"></span>
+          <div style="min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: 14px">
+            <span style="font-weight: 700; font-size: 16px; overflow-wrap: anywhere">{{x.label}}</span>
+            <span style="color: {{t.muted}}">{{x.credits}}</span>
+            <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px">
+              <span>Première publication : <strong>{{x.date}}</strong></span>
+              <span style="{{badge}} {{albumBadge}}">{{x.inCollection}}</span>
+            </span>
+          </div>
+        </div>
+        <span style="{{help}}">L'album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d'achat.</span>
+      </section>
+
+      <section aria-labelledby="s-eds" style="{{block}}">
+        <span style="{{kickStyle}}">{{k.eds}}</span>
+        <h2 id="s-eds" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les éditions</h2>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
+          <span style="font-size: 13px; font-weight: 700">{{x.count}}</span>
+          <sc-if value="{{canAddEdition}}"><a href="#" style="{{priBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle édition</a></sc-if>
+        </div>
+
+        <sc-if value="{{hasEditions}}">
+          <div role="table" aria-label="Éditions de l'album" style="display: flex; flex-direction: column">
+            <sc-for list="{{editions}}" as="e">
+              <div role="row" class="ea-row" style="padding: 8px 0; border-bottom: {{t.rowB}}; font-size: 14px">
+                <span role="cell" aria-hidden="true" style="grid-area: cover; width: 36px; height: 48px; border-radius: {{t.thR}}; background: {{e.cover}}"></span>
+                <span role="cell" style="grid-area: main; min-width: 0; display: flex; flex-direction: column">
+                  <a href="#" style="font-weight: 700; color: {{t.text}}; overflow-wrap: anywhere">{{e.label}}</a>
+                  <span style="font-size: 12px; color: {{t.muted}}">{{e.sub}}</span>
+                </span>
+                <span role="cell" style="grid-area: meta; font-size: 12px; color: {{t.muted}}">{{e.detail}}</span>
+                <span role="cell" style="grid-area: act; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
+                  <a href="#" aria-label="Modifier {{e.label}}" style="{{rowBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.edit}}"></path></svg><span class="ea-act-label">Modifier</span></a>
+                  <button type="button" aria-label="Autres actions sur {{e.label}}" aria-haspopup="menu" aria-expanded="{{e.menuExpanded}}" onClick="{{e.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{e.moreBg}}; color: {{e.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
+                  <sc-if value="{{e.menuOpen}}">
+                    <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                    <div role="menu" aria-label="Actions sur {{e.label}}" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 250px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                      <a href="#" role="menuitem" style="{{menuBtn}} text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg>Voir dans la consultation</a>
+                      <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
+                      <button type="button" role="menuitem" style="{{menuBtn}} color: {{t.del}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.trash}}"></path></svg>Supprimer l'édition…</button>
+                    </div>
+                  </sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{noEdition}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucune édition dans la collection.</span></sc-if>
+        <span style="{{help}}">{{editionHelp}}</span>
+      </section>
+
+      <section aria-labelledby="s-intents" style="{{block}}">
+        <span style="{{kickStyle}}">{{k.intents}}</span>
+        <h2 id="s-intents" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les intentions d'achat</h2>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
+          <span style="font-size: 13px; font-weight: 700">{{intentCount}}</span>
+          <sc-if value="{{intentDirect}}">
+            <a href="#" style="{{secBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle intention sur une édition…</a>
+          </sc-if>
+          <sc-if value="{{intentMenu}}">
+            <span style="position: relative; display: inline-flex">
+              <button type="button" aria-haspopup="menu" aria-expanded="{{intentExpanded}}" onClick="{{toggleIntent}}" style="{{secBtn}} background: {{intentBg}}; color: {{intentFg}}; font-family: {{t.fb}}; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle intention d'achat<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+              <sc-if value="{{intentOpen}}">
+                <span aria-hidden="true" onClick="{{closeIntent}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                <div role="menu" aria-label="Nouvelle intention d'achat" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 300px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                  <sc-for list="{{intentChoices}}" as="o">
+                    <a href="#" role="menuitem" style="display: flex; flex-direction: column; gap: 1px; padding: 6px 10px; border-radius: {{t.btnR}}; color: {{t.text}}; text-decoration: none">
+                      <span style="font-weight: 700; font-size: 14px">{{o.label}}</span>
+                      <span style="font-size: 12px; color: {{t.muted}}">{{o.help}}</span>
+                    </a>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </span>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{hasIntents}}">
+          <div role="table" aria-label="Intentions d'achat sur l'album" style="display: flex; flex-direction: column">
+            <sc-for list="{{intents}}" as="i">
+              <div role="row" class="ea-irow" style="padding: 8px 0; border-bottom: {{t.rowB}}; font-size: 14px">
+                <span role="cell" style="grid-area: main; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                  <span style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{i.tagB}}; border-radius: {{t.btnR}}; background: {{i.tagBg}}; color: {{i.tagFg}}; font-weight: 800; font-size: 12px; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.tagIcon}}"></path></svg>{{i.tag}}</span><span style="color: {{i.textFg}}; font-weight: {{i.textW}}; overflow-wrap: anywhere">{{i.text}}</span></span>
+                  <sc-if value="{{i.sub}}"><span style="font-size: 12px; color: {{t.muted}}">{{i.sub}}</span></sc-if>
+                </span>
+                <span role="cell" style="grid-area: meta; font-size: 12px; color: {{t.muted}}">Posée le {{i.date}}</span>
+                <span role="cell" style="grid-area: act; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
+                  <a href="#" aria-label="Confirmer l'achat : {{i.text}}" style="{{rowBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg><span class="ea-act-label">Confirmer l'achat</span></a>
+                  <button type="button" aria-label="Autres actions sur l'intention" aria-haspopup="menu" aria-expanded="{{i.menuExpanded}}" onClick="{{i.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{i.moreBg}}; color: {{i.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
+                  <sc-if value="{{i.menuOpen}}">
+                    <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                    <div role="menu" aria-label="Actions sur l'intention" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 250px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                      <sc-if value="{{i.edition}}"><a href="#" role="menuitem" style="{{menuBtn}} text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.edit}}"></path></svg>Modifier l'intention</a></sc-if>
+                      <sc-if value="{{i.swap}}"><button type="button" role="menuitem" style="{{menuBtn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>{{i.swap}}</button></sc-if>
+                      <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
+                      <button type="button" role="menuitem" style="{{menuBtn}} color: {{t.del}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.trash}}"></path></svg>Retirer l'intention…</button>
+                    </div>
+                  </sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{noIntent}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucune intention d'achat.</span></sc-if>
+        <span style="{{help}}">{{intentHelp}}</span>
+      </section>
+      <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p>
+    </main>
+  </div>
+</div>
+</template>
+<script>
+// Shared defaults: each theme only states what its identity changes.
+const BASE = {
+  kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
+  kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
+  mkDisp: 'none', lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
+  tagTT: 'none', tagLS: '0', h2fs: 'normal', h2sh: 'none', h2tt: 'none', h2line: '0', h2pad: '0', h2r: '0', h2bg: 'transparent',
+  fdTT: 'none', h1size: 'clamp(24px, 3vw, 36px)', cSh: 'none', hiSh: 'none', thR: '3px'
+};
+
+// « Cases et bulles » comes in two tints that only differ by their purple shades.
+const cases = (c) => ({
+  ...BASE,
+  bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
+  acc: '#FFB547', onAcc: c.bg, link: '#FFB547', warn: '#FF7A6B', onWarn: c.bg, del: '#FF7A6B', nBg: '#FBF3EA', nFg: c.bg,
+  fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
+  tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
+  inBg: c.bg, inB: '2px solid ' + c.border, inR: '14px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', thR: '6px 3px 7px 4px',
+  hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
+  helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '4px 14px', h2r: '999px', h2size: '17px', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px', tail: true,
+  infoBg: '#4FD1C5', infoFg: c.bg
+});
+
+// Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
+// another ink of the same theme carries the text or the fill.
+const THEMES = {
+  violine: cases({ bg: '#2B1030', panel: '#3A1641', border: '#6A3375', soft: '#EBD3EF', muted: '#CFA9D6' }),
+  mure: cases({ bg: '#1F1033', panel: '#2A1844', border: '#533A78', soft: '#DCD1EE', muted: '#B9A8D8' }),
+  gazette: {
+    ...BASE,
+    bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
+    acc: '#2B1030', onAcc: '#FBF3EA', link: '#9A3D12', warn: '#9A3D12', onWarn: '#FBF3EA', del: '#9A3D12', nBg: '#F1E3D6', nFg: '#2B1030',
+    fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+    cBg: 'transparent', cB: '0', cBT: '2px solid #2B1030', cR: '0', cPad: '14px 0 0',
+    tBg: 'transparent', tB: '1px solid #D9C6CF', tR: '0', rowB: '1px solid #D9C6CF',
+    inBg: '#FFFFFF', inB: '2px solid #2B1030', inR: '0', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', thR: '0',
+    hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
+    helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
+    lgText: '#2B1030', lgFont: '800 26px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    tagBg: '#FFB547', tagText: '#2B1030', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.08em',
+    h2c: '#2B1030', h2size: '21px',
+    kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase',
+    infoBg: '#2B1030', infoFg: '#FBF3EA'
+  },
+  sommaire: {
+    ...BASE,
+    bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
+    acc: '#1D4ED8', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#E63946', onWarn: '#FFFFFF', del: '#C62D3A', nBg: '#111111', nFg: '#FFFFFF',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(30px, 4vw, 48px)',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
+    tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
+    inBg: '#FFFFFF', inB: '2px solid #111111', inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', thR: '0',
+    hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
+    helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 24px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    tagBg: '#111111', tagText: '#FFFFFF', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.06em',
+    h2c: '#111111', h2size: '24px', h2tt: 'uppercase', h2line: '4px solid #111111', h2pad: '0 0 6px',
+    infoBg: '#1D4ED8', infoFg: '#FFFFFF'
+  },
+  festival: {
+    ...BASE,
+    bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
+    acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#C2412F', onWarn: '#FFFFFF', del: '#C2412F', nBg: '#F6C343', nFg: '#1B2350',
+    fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 2px 0 rgba(27,35,80,.08)',
+    tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
+    inBg: '#FFFFFF', inB: '2px solid #1B2350', inR: '14px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', thR: '8px',
+    hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
+    helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 20px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: '#F6C343', tagText: '#1B2350', tagB: '0', tagR: '999px',
+    h2c: '#1B2350', h2size: '21px', mkDisp: 'inline-block',
+    kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (i, label) => 'Station ' + label,
+    infoBg: '#1F3A93', infoFg: '#FFFFFF'
+  },
+  riso: {
+    ...BASE,
+    bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
+    acc: '#0078BF', onAcc: '#F4EFE4', link: '#0078BF', warn: '#FF48B0', onWarn: '#002284', del: '#C4007A', nBg: 'rgba(0,120,191,.12)', nFg: '#00578C',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(20px, 2.4vw, 28px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
+    tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
+    inBg: '#FFFFFF', inB: '2px dashed #0078BF', inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', thR: '0',
+    hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
+    helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 20px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    tagBg: 'transparent', tagText: '#0078BF', tagB: '2px solid #FF48B0', tagR: '0',
+    h2c: '#0078BF', h2size: '16px', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
+    infoBg: '#FFE800', infoFg: '#002284'
+  },
+  librairie: {
+    ...BASE,
+    bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
+    acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', warn: '#B5523B', onWarn: '#FBF7EE', del: '#A3472F', nBg: '#EFE6D2', nFg: '#2A2420',
+    fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 1px 4px rgba(42,36,32,.12)',
+    tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
+    inBg: '#FFFFFF', inB: '1px solid #B8924A', inR: '2px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', thR: '1px',
+    hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF', hMuted: '#D8C9A8',
+    helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
+    lgText: '#D8B972', lgFont: "400 24px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: 'transparent', tagText: '#B8924A', tagB: '1px solid #B8924A', tagR: '0', tagTT: 'uppercase', tagLS: '.3em',
+    h2c: '#1E3B2F', h2size: '22px', h2fs: 'italic',
+    infoBg: '#1E3B2F', infoFg: '#F5EEDF'
+  },
+  vignettes: {
+    ...BASE,
+    bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
+    acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#C8366B', onWarn: '#FFFFFF', del: '#B42E5E', nBg: '#9DD6DD', nFg: '#23323A',
+    fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '26px clamp(14px, 2.2vw, 22px) clamp(14px, 2.2vw, 22px)',
+    tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
+    inBg: '#FFFFFF', inB: '2px solid #0F7C8C', inR: '14px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', thR: '4px',
+    hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A', hMuted: '#5B6B72',
+    helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
+    lgText: '#FFFFFF', lgFont: "800 22px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    tagBg: '#FFD23F', tagText: '#23323A', tagB: '0', tagR: '999px',
+    h2c: '#23323A', h2size: '21px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-13px', kLeft: '20px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '1px 12px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '13px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
+    infoBg: '#0F7C8C', infoFg: '#FFFFFF'
+  }
+};
+
+const ICONS = {
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4',
+  intent: 'M6 3h12v18l-6-4-6 4V3z',
+  merge: 'M6 4v5a5 5 0 0 0 5 5h1a5 5 0 0 1 5 5v1 M18 4v5a5 5 0 0 1-5 5 M3 7l3-3 3 3 M15 7l3-3 3 3',
+  trash: 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
+  business: 'M12 7v6 M12 17h.01',
+  functional: 'M4 12a8 8 0 0 1 14-5.3 M20 4v4h-4 M20 12a8 8 0 0 1-14 5.3 M4 20v-4h4',
+  technical: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z'
+};
+
+// What every block, field and button of the page shares, whatever the record.
+function commonVals(view, t, kick) {
+  const menuOpen = view.state?.menuOpen ?? (view.props.menuOpen ?? false);
+  const moreOpen = view.state?.moreOpen ?? false;
+  document.documentElement.style.overflow = menuOpen ? 'hidden' : '';
+  const panelBg = t.cBg === 'transparent' ? t.bg : t.cBg;
+  const field = 'width: 100%; box-sizing: border-box; border: ' + t.inB + '; border-radius: ' + t.inR + '; background: ' + t.inBg + '; color: ' + t.text + '; font: inherit; font-size: 15px;';
+  return {
+    icons: ICONS,
+    hdrBg: t.hBg === 'transparent' ? t.bg : t.hBg, hdrMuted: t.hMuted ?? t.muted,
+    menuOpen, menuExpanded: menuOpen ? 'true' : 'false',
+    panelBg, panelB: t.cB !== '0' ? t.cB : (t.cBT !== '0' ? t.cBT : '2px solid ' + t.line), panelSh: '0 18px 40px rgba(0,0,0,.28)',
+    toggleMenu: () => view.setState({ menuOpen: !menuOpen }),
+    closeMenu: () => view.setState({ menuOpen: false }),
+    // A click anywhere outside an open menu closes it.
+    closeMore: () => view.setState({ moreOpen: false }),
+    moreOpen, moreExpanded: moreOpen ? 'true' : 'false',
+    moreBg: moreOpen ? t.nBg : 'transparent', moreFg: moreOpen ? t.nFg : t.secText,
+    toggleMore: () => view.setState({ moreOpen: !moreOpen }),
+    noSubmit: (e) => e.preventDefault(),
+    block: 'position: relative; margin-top: ' + (t.cTop ?? '0') + '; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
+    kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
+    h2: 'position: relative; align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: ' + (t.h2lift ?? '0') + ' 0 0; transform: rotate(' + (t.h2rot ?? '0deg') + '); display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
+    // As on the dashboard, a speech bubble straddles the top edge of its panel, its tail pointing into it.
+    tail: t.tail ? 'position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: ' + t.h2bg + ';' : 'display: none;',
+    mark: 'display: ' + t.mkDisp + '; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF;',
+    lbl: 'font-weight: 700; font-size: 13px;',
+    help: 'font-size: 12px; color: ' + t.muted + ';',
+    inp: field + ' height: 42px; padding: 0 14px;',
+    area: field + ' padding: 10px 14px; resize: vertical; line-height: 1.5;',
+    iconBtn: 'width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: ' + t.text + '; cursor: pointer;',
+    addBtn: 'display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 12px; box-sizing: border-box; border: 2px dashed ' + t.line + '; border-radius: ' + t.btnR + '; background: transparent; color: ' + t.text + '; font-family: ' + t.fb + '; font-weight: 700; font-size: 13px; cursor: pointer;',
+    menuBtn: 'display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border: 0; border-radius: ' + t.btnR + '; background: transparent; color: ' + t.text + '; font-family: ' + t.fb + '; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer;',
+    barBg: t.cBg === 'transparent' ? t.bg : t.cBg,
+    barB: t.cBT !== '0' ? t.cBT : '2px solid ' + t.line
+  };
+}
+
+const menuOf = (t, current) => {
+  const item = (label, n) => ({
+    label, n, current: label === current ? 'page' : 'false',
+    bg: label === current ? t.acc : 'transparent', fg: label === current ? t.onAcc : t.text, fw: label === current ? '700' : '500'
+  });
+  return [
+    { label: 'Accueil', items: [item('Tableau de bord', ''), item('Nouvelle édition', '')] },
+    { label: 'Collection', items: [item('Albums', '2 847'), item('Séries', '412'), item('Éditions', '2 913'), item("Intentions d'achat", '18')] },
+    { label: 'Auteurs et éditeurs', items: [item('Auteurs', '1 106'), item('Éditeurs', '96')] },
+    { label: 'Référentiels', items: [item('Genres', '24'), item('Univers', '37')] },
+    { label: 'Réglages', items: [item('Paramétrage', ''), item('Statistiques privées', '')] }
+  ];
+};
+
+// The three kinds of error must be told apart at first glance (fonctionnel.md § Présentation des
+// erreurs): each has its own label, icon, colour and border. The business one is the record's own.
+const errorOf = (key, t, business) => ({
+  metier: () => ({
+    kind: 'À corriger', ...business,
+    icon: ICONS.business, style: 'solid', border: t.del, bg: 'transparent', fg: t.text, iconBg: t.del, iconFg: t.bg === '#2B1030' || t.bg === '#1F1033' ? t.bg : '#FFFFFF', action: null
+  }),
+  fonctionnelle: () => ({
+    kind: 'Modifiée entre-temps', title: 'Cette fiche a été modifiée depuis que vous l\'avez ouverte.', text: 'Vos changements ne sont pas enregistrés, pour ne pas écraser l\'autre modification. Rechargez la fiche, puis reportez-les.',
+    icon: ICONS.functional, style: 'dashed', border: t.infoBg, bg: 'transparent', fg: t.text, iconBg: t.infoBg, iconFg: t.infoFg, action: 'Recharger la fiche', action2: 'Voir mes changements'
+  }),
+  technique: () => ({
+    kind: 'Problème technique', title: 'L\'enregistrement n\'a pas pu aboutir.', text: 'L\'application n\'a pas répondu. Vos changements sont toujours là : réessayez dans un instant.',
+    icon: ICONS.technical, style: 'dotted', border: t.muted, bg: 'transparent', fg: t.text, iconBg: t.nBg, iconFg: t.nFg, action: 'Réessayer'
+  })
+}[key]?.() ?? null);
+
+// An album without any edition nor intent, an album with two editions and an intent on a third one,
+// and an untitled omnibus aimed at by an intent on the album itself, without any edition.
+// An intent is never one of the editions: it is listed among the intents, with what it aims at
+// (fonctionnel.md § Intention d'achat).
+const EXAMPLES = {
+  sansEdition: {
+    label: 'Le Château des étoiles (Le Château des étoiles - T. 8)', credits: 'Alex Alice', date: '2026', inCollection: 'Hors collection', cover: false,
+    count: 'Aucune édition',
+    editions: [], intents: [],
+    meta: 'Album créé le 14 octobre 2026, modifié le 14 octobre 2026.'
+  },
+  editions: {
+    label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', credits: 'Hergé', date: '1963', inCollection: 'Dans la collection', cover: true,
+    count: '2 éditions',
+    editions: [
+      { label: 'Casterman [1963]', sub: 'Édition originale · Cartonnée · 62 pages', detail: 'Achat, 1987 · 2 visuels' },
+      { label: 'Casterman [2007] - ISBN 978-2-203-00120-8', sub: 'Cartonnée · 62 pages', detail: 'Offerte · 3 visuels' }
+    ],
+    intents: [{ edition: 'Casterman (Fac-similé) [2013]', sub: 'Édition spéciale · Cartonnée', date: '8 octobre 2026' }],
+    meta: 'Album créé le 4 mars 2026, modifié hier à 21:08.'
+  },
+  integrale: {
+    label: 'Blacksad - Intégrale [1 à 5]', credits: 'Juan Díaz Canales · Juanjo Guarnido', date: 'octobre 2023', inCollection: 'Intention d\'achat', cover: false,
+    count: 'Aucune édition',
+    editions: [], intents: [{ album: true, date: '8 octobre 2026' }],
+    meta: 'Album créé le 8 octobre 2026, modifié le 8 octobre 2026.'
+  }
+};
+
+class View extends Mockup {
+  renderVals() {
+    const t = THEMES[this.props.theme] ?? THEMES.violine;
+    const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.sansEdition;
+    const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
+    const c = commonVals(this, t, kick);
+    // The row whose menu is open: the settings open the first one, a click toggles any.
+    const openRow = this.state?.openRow ?? (this.props.actions ? 0 : -1);
+    const intentOpen = this.state?.intentOpen ?? this.props.choixIntention;
+    const badge = 'display: inline-flex; align-items: center; gap: 4px; padding: 0 9px; border-radius: ' + t.btnR + '; font-weight: 700; font-size: 12px; white-space: nowrap;';
+    const owned = 'border: 2px solid transparent; background: ' + t.nBg + '; color: ' + t.nFg + ';';
+    const dashed = 'border: 2px dashed ' + t.line + '; background: transparent; color: ' + t.text + ';';
+    const generic = 'repeating-linear-gradient(135deg, rgba(127,127,127,.42) 0 6px, rgba(127,127,127,.24) 6px 12px)';
+    const rowMenu = (i) => ({
+      menuOpen: openRow === i, menuExpanded: openRow === i ? 'true' : 'false',
+      moreBg: openRow === i ? t.nBg : 'transparent', moreFg: openRow === i ? t.nFg : t.secText,
+      toggle: () => this.setState({ openRow: openRow === i ? -1 : i })
+    });
+    const editions = x.editions.map((e, i) => ({ ...e, cover: 'hsl(' + ((i * 47 + 20) % 360) + ', 42%, 36%)', ...rowMenu(i) }));
+    const albumIntent = x.intents.some((i) => i.album);
+    const intents = x.intents.map((v, i) => ({
+      ...v,
+      // What an intent aims at, told apart as in the list of intents: the whole album, filled,
+      // any edition will do; one edition, outlined, named beside it.
+      tag: v.album ? 'Album' : 'Édition',
+      tagIcon: v.album ? 'M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z M4 17a3 3 0 0 1 3-3h11' : 'M4 7h12v13H4z M8 4h12v13',
+      tagBg: v.album ? t.acc : 'transparent', tagFg: v.album ? t.onAcc : t.text,
+      tagB: v.album ? '2px solid ' + t.acc : '2px solid ' + t.text,
+      text: v.album ? 'toute édition' : v.edition,
+      textFg: v.album ? t.muted : t.text, textW: v.album ? '400' : '700',
+      // Aiming at the album instead removes the edition: only for the album's only edition.
+      swap: v.album ? 'Viser plutôt une édition…' : (x.editions.length === 0 && x.intents.length === 1 ? 'Viser plutôt l\'album…' : null),
+      ...rowMenu(x.editions.length + i)
+    }));
+    const n = intents.length;
+    const btn = 'display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; border-radius: ' + t.btnR + '; font-weight: 700; ';
+    return {
+      ...c,
+      t, x, editions, intents,
+      icons: { ...ICONS, edit: 'M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4' },
+      // The mention above a block title says what kind of data the block holds, never the title again.
+      k: { album: kick(1, 'Identification'), eds: kick(2, 'Exemplaires'), intents: kick(3, 'Achats prévus') },
+      albumCover: x.cover ? 'hsl(20, 42%, 36%)' : generic,
+      badge, albumBadge: x.inCollection === 'Dans la collection' ? owned : dashed,
+      hasEditions: editions.length > 0,
+      noEdition: editions.length === 0,
+      // An album aimed at by an intent on itself has no edition: its first one comes with the purchase.
+      canAddEdition: !albumIntent,
+      editionHelp: albumIntent
+        ? 'L\'album est visé par une intention d\'achat : sa première édition s\'ajoute en confirmant l\'achat.'
+        : 'Chaque édition, avec ses visuels, se saisit sur sa propre fiche.',
+      hasIntents: n > 0,
+      noIntent: n === 0,
+      intentCount: n === 0 ? 'Aucune intention d\'achat' : n + (n > 1 ? ' intentions d\'achat' : ' intention d\'achat'),
+      intentHelp: 'Une intention ne vise l\'album entier que tant qu\'il n\'a aucune édition, possédée ou visée ; ensuite, elle vise une édition précise, saisie sans exemplaire ni valeur.',
+      // An album aimed at by an intent on itself cannot have its editions aimed at too, and the reverse:
+      // the album can be aimed at while nothing is, a new edition while the album itself is not.
+      // Two possible targets open a choice; a single one, a precise edition, is a plain button.
+      intentMenu: x.editions.length === 0 && n === 0,
+      intentDirect: !albumIntent && (x.editions.length > 0 || n > 0),
+      intentOpen, intentExpanded: intentOpen ? 'true' : 'false',
+      intentBg: intentOpen ? t.nBg : 'transparent', intentFg: intentOpen ? t.nFg : t.secText,
+      toggleIntent: () => this.setState({ intentOpen: !intentOpen }),
+      closeIntent: () => this.setState({ intentOpen: false }),
+      intentChoices: [
+        // Only an album without any edition, owned or aimed at, may be aimed at as a whole
+        // (fonctionnel.md § Intention d'achat): once one is known, the intent names a precise edition.
+        { label: 'Sur l\'album…', help: 'Toute édition de l\'album fera l\'affaire.' },
+        { label: 'Sur une nouvelle édition…', help: 'Une édition précise, saisie sans exemplaire ni valeur.' }
+      ],
+      closeRowMenu: () => this.setState({ openRow: -1 }),
+      secBtn: btn + 'height: 38px; padding: 0 14px; border: ' + t.secB + '; color: ' + t.secText + '; font-size: 14px;',
+      priBtn: btn + 'height: 38px; padding: 0 16px; border: 0; background: ' + t.acc + '; color: ' + t.onAcc + '; font-size: 14px;',
+      rowBtn: btn + 'height: 34px; padding: 0 12px; border: ' + t.secB + '; color: ' + t.secText + '; font-size: 13px;',
+      menu: menuOf(t, 'Albums')
+    };
+  }
+}
+
+Mockup.mount(View, {
+  theme: { label: 'Thème', editor: 'enum', options: ['violine', 'mure', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes'], default: 'violine' },
+  exemple: { label: 'Exemple', editor: 'enum', options: ['sansEdition', 'editions', 'integrale'], default: 'sansEdition' },
+  choixIntention: { label: 'Choix de l\'intention ouvert', editor: 'boolean', default: false },
+  actions: { label: 'Menu d\'une édition ouvert', editor: 'boolean', default: false },
+  menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
+});
+</script>
+</body>
+</html>

@@ -30,13 +30,14 @@ L'application n'est pas un jeu : elle reste une **application bureautique**. Que
 - **Densité** : une page donne d'un coup d'œil le plus d'information utile possible. Tailles de texte, d'étiquettes, de boutons et espacements restent ceux d'une application, non ceux d'une affiche ou d'une vitrine.
 - **Listes et grilles** : leurs éléments sont compacts. Dans une liste, une couverture est une vignette, jamais un visuel en pleine largeur ; sur smartphone, une grille de couvertures en aligne au moins trois par ligne, et aucune liste ne présente un seul élément par écran.
 - **Smartphone** : marges et espacements se resserrent sur petit écran, pour que le contenu, et non l'habillage, occupe l'écran.
+- **Boutons** : pour une même largeur d'écran, un bouton a la même taille sur toutes les pages. Sa taille peut différer entre le smartphone et le grand écran, mais jamais d'une page à l'autre : une page ne gagne pas de place en rapetissant ses seuls boutons.
 
 ## Apparence propre à chaque alternative
 
 Couleurs, typographie et éléments graphiques ne sont pas communs : chaque alternative des maquettes a les siens, décrits avec elle dans [`dashboard.md`](dashboard.md) § Alternatives. Seules les règles suivantes valent pour toutes :
 
 - le **champ de recherche** et le **bouton d'aide** sont toujours visibles dans l'en-tête, à une exception : l'écran d'accueil d'une collection vide n'a pas de champ de recherche, qui n'aurait presque rien à trouver (cf. [`dashboard.md`](dashboard.md) § Collection vide) ;
-- le **menu horizontal** reste figé en haut de l'écran quand la page défile, avec l'en-tête qui le porte lorsque celui-ci est compact ; il ne passe jamais à la ligne : il défile horizontalement, et un dégradé marqué d'un chevron signale, de chaque côté, les entrées hors de vue. À l'ouverture de la page, il est centré sur l'entrée active. Sur petit écran, la recherche passe sous le menu, sans défiler.
+- le **menu horizontal** reste figé en haut de l'écran quand la page défile, avec l'en-tête qui le porte lorsque celui-ci est compact ; il ne passe jamais à la ligne : il défile horizontalement, et un dégradé marqué d'un chevron signale, de chaque côté, les entrées hors de vue. Il défile au doigt, à la molette de la souris, ou d'un clic sur un chevron, qui l'avance d'une largeur : sans écran tactile, sa barre de défilement étant masquée, rien d'autre ne le ferait défiler. Il en va de même de toute ligne d'entrées qui défile ainsi (ex. la navigation par initiale). À l'ouverture de la page, il est centré sur l'entrée active. Sur petit écran, la recherche passe sous le menu, sans défiler.
 
 ## Maquettes
 

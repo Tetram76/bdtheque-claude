@@ -94,7 +94,7 @@ Deux alternatives, identiques à la teinte près : l'une en teinte violine, l'au
   - corps de texte : sans-serif lisible (*DM Sans*).
 - **Éléments graphiques** :
   - **Cases** : chaque bloc de contenu est une case aux **coins arrondis irréguliers** (rayons différents à chaque coin, comme tracés à la main), à fine bordure, posée droite. Les cases ne sont pas animées au survol.
-  - **Bulles** : le titre d'une case est une **bulle** crème avec sa queue, légèrement inclinée, à cheval sur le bord supérieur de la case. Il est formulé comme une **phrase parlée** (question ou exclamation : « Plutôt quel genre ? », « Tout juste arrivés ! »), jamais comme un simple intitulé.
+  - **Bulles** : le titre d'une case est une **bulle** crème avec sa queue, légèrement inclinée, à cheval sur le bord supérieur de la case. Comme dans une BD lettrée à la main, la position de la queue le long de la bulle et son orientation, vers la gauche ou vers la droite, varient d'une bulle à l'autre : elles sont **tirées au hasard à chaque affichage**, et ne changent plus tant que la page reste affichée. Le titre est formulé comme une **phrase parlée** (question ou exclamation : « Plutôt quel genre ? », « Tout juste arrivés ! »), jamais comme un simple intitulé.
   - **Couvertures** : les couvertures d'albums sont le principal élément visuel. Chacune est présentée dans un **cadre coloré** (bordure tirée de la palette secondaire), légèrement incliné ; au survol, la couverture se redresse et se soulève.
   - **Logo** : le nom de l'application sur une étiquette crème inclinée, ponctuée de l'accent.
   - **Navigation** : menu en forme de pilule, l'entrée active en accent ; champ de recherche et bouton d'aide arrondis.

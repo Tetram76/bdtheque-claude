@@ -445,6 +445,8 @@ L'application se compose de trois parties distinctes :
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
    - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. § Recherche avancée), gestion des jetons d'accès de l'outil pour agents IA et suivi de son utilisation (cf. § Interface pour agents IA), mesure d'audience de l'interface web (cf. § Mesure d'audience de l'interface web), etc.
+   - **Fusion** de deux fiches d'un même type, proposée depuis la liste de leur type, en plus des opérations CRUD (ex. deux albums saisis en double). Ses modalités restent à définir : rien n'est statué sur ce que la fusion conserve de chaque fiche.
+   - Les listes n'offrent pas, dans un premier temps, d'opération groupée (plusieurs fiches sélectionnées à la fois) ; l'idée n'est pas écartée, mais rien n'est statué (YAGNI).
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
@@ -663,7 +665,11 @@ Ces deux cas sont représentés par une entité **Intention d'achat** distincte,
 
 Pour un même album, les deux cas sont **mutuellement exclusifs** : l'album est visé soit par une intention portant sur l'album lui-même, soit par des intentions portant sur une ou plusieurs de ses éditions (une intention par édition), jamais les deux à la fois.
 
-Un cas d'usage permettra de **convertir** une intention portant sur l'album en intention portant sur une édition, et inversement, dans le respect de cette exclusivité.
+Une intention ne peut porter sur l'**album** que tant qu'il n'a **aucune édition**, possédée ou visée par une intention : tant que l'album n'est pas dans la collection, l'utilisateur peut ne pas connaître les éditions disponibles ; mais dès qu'il en possède une ou en vise une en particulier, souhaiter acquérir une édition quelconque n'a plus de sens, et c'est une édition précise qu'il vise (cas d'usage 2).
+
+Un cas d'usage permettra de **convertir** une intention portant sur l'album en intention portant sur une édition, et inversement, dans le respect de ces règles : une intention portant sur une édition ne se convertit en intention portant sur l'album que si cette édition est la **seule** de l'album, la conversion la supprimant (cf. ci-dessous).
+
+Une intention d'achat est toujours **présentée comme une intention d'achat**, jamais comme un album ou une édition : une édition visée ne figure jamais parmi les éditions (d'un album, d'une liste, d'un décompte), mais parmi les intentions d'achat, avec ce qu'elle vise. Un album visé reste en revanche un album, dont l'appartenance à la collection signale qu'il fait l'objet d'une intention d'achat.
 
 Une édition **non possédée** et l'intention qui la vise sont **indissociables** : l'une ne va pas sans l'autre. Supprimer l'une supprime l'autre, après confirmation (cf. § Suppression des entités) ; de même, convertir une intention portant sur une édition en intention portant sur l'album supprime l'édition visée, après confirmation. Une édition non possédée ne peut donc jamais exister sans intention d'achat.
 

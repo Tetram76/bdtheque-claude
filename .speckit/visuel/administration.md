@@ -47,7 +47,7 @@ La page met en avant les fonctions les plus utiles, de haut en bas :
   - il s'ouvre en **panneau flottant** sous le bouton, aligné à droite, **par-dessus** le contenu : il ne décale jamais le reste de la page ; il défile de façon indépendante, la page restant immobile tant qu'il est ouvert ;
   - il se referme par sa croix, par le bouton « Menu », ou par **un clic en dehors** du panneau ;
   - il présente le plan de l'administration, par groupes (Accueil, Collection, Auteurs et éditeurs, Référentiels, Réglages), chaque entrée avec son nombre de fiches le cas échéant, l'entrée courante dans la couleur d'accent du thème ;
-  - l'entrée « **Nouvelle édition** » donne un accès direct à l'action principale de l'administration : une édition se saisissant depuis son album, elle commence par le choix de cet album (ou par un ISBN, comme le bloc de saisie de la page) ;
+  - l'entrée « **Nouvelle édition** » donne un accès direct à l'action principale de l'administration : une édition appartenant à un album, elle commence par le choix de cet album (ou par un ISBN, comme le bloc de saisie de la page) ;
   - « **Se déconnecter** » en est la dernière entrée, séparée des autres par un filet.
 - Le panneau a toujours un fond opaque, une bordure et une ombre, y compris pour un thème dont les blocs n'en ont pas (gazette, festival).
 
@@ -57,7 +57,7 @@ Couleurs et typographie de chaque thème : cf. [`dashboard.md`](dashboard.md) §
 
 | Thème | Touche propre |
 | --- | --- |
-| Cases et bulles (violine, mûre) | Titres de bloc en bulle crème, sans queue ni inclinaison ; coins arrondis irréguliers des blocs. |
+| Cases et bulles (violine, mûre) | Titres de bloc en bulle crème avec sa queue, à cheval sur le bord supérieur du bloc comme sur le dashboard (`dashboard.md` § Cases et bulles, violine et mûre), mais sans inclinaison ; coins arrondis irréguliers des blocs. |
 | La gazette | Double filet sous l'en-tête ; blocs ouverts par un filet d'encre, sans cadre ; petite mention en capitales au-dessus de chaque titre de bloc. |
 | Le sommaire de magazine | Gros filets noirs, titres en *Anton* soulignés d'un filet épais ; ombre noire décalée sur le bloc de saisie, logo sur fond rouge. |
 | Le festival en métro | Station (rond blanc cerclé de bleu nuit) devant chaque titre de bloc, précédé de « Station … » ; formes rondes, pastille « B » du logo. |
