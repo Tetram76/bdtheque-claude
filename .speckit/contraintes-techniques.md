@@ -25,6 +25,10 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 | ORM | EF Core |
 | Base de données | PostgreSQL |
 
+## Exploitation des technologies retenues
+
+Toute technologie retenue (langage, framework, bibliothèque, outil, base de données…) est **utilisée au mieux de la version retenue** : ses fonctionnalités, syntaxes et API sont employées dès qu'elles améliorent le code (performances, lisibilité, sécurité, concision, maintenabilité…). Se limiter à ce que permettait une version antérieure, alors que la version retenue offre mieux, n'a pas de sens (ex. retenir la version N d'un langage, mais n'en écrire que les syntaxes de la version N-1).
+
 ## Architecture des tiers
 
 L'application repose sur un **socle de 3 conteneurs Docker**, fondation à laquelle d'autres conteneurs peuvent s'ajouter (ex. l'outil pour agents IA, cf. § Indépendance de l'outil pour agents IA) :
