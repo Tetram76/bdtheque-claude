@@ -146,6 +146,14 @@ Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience d
 | --- | --- |
 | #186 | Mesure d'audience de l'interface web dans le modèle de domaine et l'API |
 
+### Ajustement issu de l'exploitation des technologies retenues
+
+Revue de l'existant au regard de la contrainte d'exploitation au mieux des technologies retenues (`contraintes-techniques.md` § Exploitation des technologies retenues), pour en identifier les chantiers d'amélioration, chacun avec son ticket. Les phases 0 à 2 étant validées, un seul ticket les couvre.
+
+| Ticket | Titre |
+| --- | --- |
+| #189 | Revue de l'existant au regard de l'exploitation des technologies retenues |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
