@@ -24,7 +24,7 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
 
 - **En-tête et menu** de l'administration, l'entrée « Auteurs » étant l'entrée courante du menu.
 - **Fil d'Ariane** : Administration, Auteurs, puis l'auteur (« Nouvel auteur » en création).
-- **Titre** « Modifier l'auteur » ou « Nouvel auteur », suivi de son identifiant principal (`fonctionnel.md` § Artistes), recalculé au fil de la saisie (« <Sans nom> » tant que rien n'est saisi). En modification, à droite : **Voir dans la consultation**, et le menu « ⋯ » : **Fusionner avec un autre auteur…** et, séparée par un filet, **Supprimer l'auteur…**, qui mènent aux dialogues de la liste (un auteur crédité ne se supprime pas, `fonctionnel.md` § Suppression des entités).
+- **Titre** « Modifier l'auteur » ou « Nouvel auteur », suivi de son identifiant principal (`fonctionnel.md` § Artistes), recalculé au fil de la saisie (« <Sans nom> » tant que rien n'est saisi). En modification, à droite : **Voir dans la consultation**. La fiche ne propose ni suppression ni fusion : on y modifie l'auteur, et ces actions se font depuis la liste des auteurs.
 - **Erreur d'enregistrement** : celle de la saisie d'un album, en trois catégories ; l'erreur métier de l'exemple est un auteur sans nom ni pseudonyme, les deux champs étant bordés de la couleur d'alerte (`modele-metier.md` § Auteur / Artiste).
 - **Le formulaire**, en deux blocs :
   - **L'auteur** :

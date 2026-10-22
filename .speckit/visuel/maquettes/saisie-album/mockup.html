@@ -104,15 +104,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           <sc-if value="{{x.existing}}">
             <div style="position: relative; display: flex; align-items: center; gap: 6px">
               <a href="#" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg><span class="sa-hide-sm">Voir dans la consultation</span></a>
-              <button type="button" aria-label="Autres actions sur l'album" aria-haspopup="menu" aria-expanded="{{moreExpanded}}" onClick="{{toggleMore}}" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: {{t.secB}}; border-radius: {{t.btnR}}; background: {{moreBg}}; color: {{moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
-              <sc-if value="{{moreOpen}}">
-                <span aria-hidden="true" onClick="{{closeMore}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
-                <div role="menu" aria-label="Actions sur l'album" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 250px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
-                  <button type="button" role="menuitem" style="{{menuBtn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.merge}}"></path></svg>Fusionner avec un autre album…</button>
-                  <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
-                  <button type="button" role="menuitem" style="{{menuBtn}} color: {{t.del}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.trash}}"></path></svg>Supprimer l'album…</button>
-                </div>
-              </sc-if>
             </div>
           </sc-if>
         </div>
@@ -516,7 +507,6 @@ class View extends Mockup {
     const t = THEMES[this.props.theme] ?? THEMES.violine;
     const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.modification;
     const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
-    const moreOpen = this.state?.moreOpen ?? false;
     const type = this.state?.type ?? x.type;
     const hs = this.state?.hs ?? x.hs;
     const rating = this.state?.rating ?? x.rating;
@@ -557,10 +547,6 @@ class View extends Mockup {
       toggleMenu: () => this.setState({ menuOpen: !menuOpen }),
       closeMenu: () => this.setState({ menuOpen: false }),
       // A click anywhere outside an open menu closes it.
-      closeMore: () => this.setState({ moreOpen: false }),
-      moreOpen, moreExpanded: moreOpen ? 'true' : 'false',
-      moreBg: moreOpen ? t.nBg : 'transparent', moreFg: moreOpen ? t.nFg : t.secText,
-      toggleMore: () => this.setState({ moreOpen: !moreOpen }),
       noSubmit: (e) => e.preventDefault(),
       // The mention above a block title says what kind of data the block holds, never the title again.
       k: { ident: kick(1, 'Identification'), volume: kick(2, 'Dans la série'), date: kick(3, 'Calendrier'), credits: kick(4, 'Contributions'), tags: kick(5, 'Classement'), texts: kick(6, 'Lecture') },
