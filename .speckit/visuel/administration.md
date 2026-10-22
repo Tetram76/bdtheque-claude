@@ -57,7 +57,7 @@ Couleurs et typographie de chaque thème : cf. [`dashboard.md`](dashboard.md) §
 
 | Thème | Touche propre |
 | --- | --- |
-| Cases et bulles (violine, mûre) | Titres de bloc en bulle crème, à cheval sur le bord supérieur du bloc comme sur le dashboard (`dashboard.md` § Cases et bulles, violine et mûre), mais sans queue ni inclinaison ; coins arrondis irréguliers des blocs. |
+| Cases et bulles (violine, mûre) | Titres de bloc en bulle crème avec sa queue, à cheval sur le bord supérieur du bloc comme sur le dashboard (`dashboard.md` § Cases et bulles, violine et mûre), mais sans inclinaison ; coins arrondis irréguliers des blocs. |
 | La gazette | Double filet sous l'en-tête ; blocs ouverts par un filet d'encre, sans cadre ; petite mention en capitales au-dessus de chaque titre de bloc. |
 | Le sommaire de magazine | Gros filets noirs, titres en *Anton* soulignés d'un filet épais ; ombre noire décalée sur le bloc de saisie, logo sur fond rouge. |
 | Le festival en métro | Station (rond blanc cerclé de bleu nuit) devant chaque titre de bloc, précédé de « Station … » ; formes rondes, pastille « B » du logo. |
