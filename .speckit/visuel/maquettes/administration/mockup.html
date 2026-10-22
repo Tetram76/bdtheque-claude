@@ -393,7 +393,7 @@ class View extends Mockup {
     return {
       t,
       // As on the dashboard, a speech bubble straddles the top edge of its panel, its tail pointing into it.
-      tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 13px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
+      tail: t.tail ? 'position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: ' + t.h2bg + ';' : 'display: none;',
       menuOpen,
       // The header stays at the top of the screen: it needs an opaque background, the page's under a transparent one.
       hdrBg: t.hBg === 'transparent' ? t.bg : t.hBg,
