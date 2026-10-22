@@ -32,6 +32,9 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | **Objectif de session** | Objectif de la demande de l'utilisateur, donné par l'agent à l'ouverture de la session ou mis à jour ensuite. |
 | **Utilisation de l'outil** | Trace d'un appel d'outil ou d'une lecture de ressource par un agent, au sein d'une session. |
 | **Retour écrit** | Limite signalée par l'agent, sur une utilisation précise ou sur sa session. |
+| **Visite de l'interface web** | Suite des utilisations de l'interface web par un même utilisateur (visiteur ou administrateur), au cours d'une même visite, sans rien qui l'identifie (voir `fonctionnel.md` § Mesure d'audience de l'interface web). |
+| **Utilisation d'une fonction** | Trace de l'affichage d'un écran ou du déclenchement d'une action de l'interface web, au sein d'une visite. |
+| **Compteur d'audience mensuel** | Indicateurs d'une fonction pour un mois, sans visite ni parcours, conservés au-delà de la suppression du détail des visites. |
 | **Journal des modifications** | Trace de chaque écriture sur une fiche : création, modification, suppression ou reprise d'une ancienne donnée. |
 
 ---
@@ -103,6 +106,14 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 >
 > - L'utilisation qu'un retour écrit commente appartient à la même session que lui, et une utilisation rattachée à une session l'est au même jeton d'accès que cette session.
 > - Sessions, objectifs, utilisations et retours écrits ne sont jamais modifiés après leur enregistrement ; ils ne disparaissent qu'avec le jeton d'accès qui porte la session. Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications.
+
+### Visite de l'interface web — relations
+
+| Relation | Cardinalité | Remarques |
+| --- | --- | --- |
+| Visite → Utilisation d'une fonction | 1..n | Utilisations faites au cours de la visite, dans l'ordre de leur date : le parcours de la visite. |
+
+> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement. Une visite d'un visiteur public est supprimée avec ses utilisations 25 mois après son début, une visite de l'administrateur est conservée sans limite (voir `fonctionnel.md` § Mesure d'audience de l'interface web). Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou son appareil, ou permette de le reconnaître d'une visite à l'autre : de l'appareil, elle ne retient que sa catégorie et le moteur de rendu de son navigateur, avec sa version.
 
 ---
 
@@ -360,6 +371,47 @@ erDiagram
 | Texte | texte long | oui | Limite signalée par l'agent. |
 | Point d'entrée | texte | non | Outil ou ressource concerné, si l'agent le désigne. |
 | Date | date et heure | oui | Moment du retour. |
+
+### Visite de l'interface web
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Début | date et heure | oui | Moment de la première utilisation de la visite. |
+| Administrateur | booléen | oui | `true` pour une visite de l'administrateur (session authentifiée), y compris lorsqu'il consulte la partie publique ; `false` pour un visiteur public. |
+| Type d'appareil | énuméré | oui | `Ordinateur` / `Tablette` / `Smartphone`. Avec le moteur de rendu, seule caractéristique de l'appareil retenue : aucune donnée qui l'identifie. |
+| Moteur de rendu | énuméré | oui | `Blink` / `Gecko` / `WebKit` / `Autre`. Moteur du navigateur employé, et non le navigateur lui-même. |
+| Version du moteur | texte | non | Version du moteur de rendu, si le navigateur la transmet. |
+
+### Utilisation d'une fonction
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Fonction | texte | oui | Écran affiché ou action déclenchée. |
+| Fiche présentée | type de fiche + identifiant | conditionnel | Renseignée pour l'affichage d'un écran qui présente une fiche précise (ex. fiche d'un album), absente sinon. Conservée après la suppression de la fiche : aucune contrainte d'intégrité référentielle, comme pour le journal des modifications. |
+| Paramètres | texte long | conditionnel | Renseignés pour une action qui en a (ex. critères d'une recherche, numéro de page, fiche enregistrée), absents sinon ; jamais un secret (mot de passe, valeur d'un jeton d'accès). |
+| Date | date et heure | oui | Moment de l'utilisation. |
+
+> Les indicateurs de la mesure d'audience (nombre d'utilisations et de visites, fiches et paramètres différents, utilisations répétées, fréquence, dernière utilisation, voir `fonctionnel.md` § Mesure d'audience de l'interface web) sont déduits de ces utilisations tant qu'elles sont conservées, puis des compteurs d'audience mensuels.
+
+### Compteur d'audience mensuel
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Fonction | texte | oui | Écran ou action compté. |
+| Mois | date partielle (mois + année) | oui | Mois du début des visites comptées : toutes les utilisations d'une visite sont comptées au mois de son début. |
+| Administrateur | booléen | oui | Visites de l'administrateur ou des visiteurs publics. |
+| Type d'appareil | énuméré | oui | Comme pour la visite. |
+| Moteur de rendu | énuméré | oui | Comme pour la visite. |
+| Version du moteur | texte | non | Comme pour la visite. |
+| Nombre d'utilisations | entier | oui | |
+| Nombre de visites | entier | oui | Visites au cours desquelles la fonction a été utilisée. |
+| Nombre d'utilisations répétées | entier | oui | Utilisations qui répètent aussitôt, dans leur visite, la précédente sur la même fiche ou avec les mêmes paramètres. |
+| Dernière utilisation | date et heure | oui | |
+| Objets | liste | non | Pour une fonction qui présente une fiche ou porte des paramètres : chaque fiche présentée ou chaque jeu de paramètres employé, avec son nombre d'utilisations. |
+
+> **Contraintes :** un compteur est unique pour une fonction, un mois et une combinaison d'administrateur, de type d'appareil et de moteur de rendu avec sa version. Il est établi à partir des visites du mois au plus tard avant la suppression de leur détail, n'est jamais modifié ensuite, et est conservé sans limite. Ce n'est pas une fiche : son enregistrement n'est pas consigné au journal des modifications.
+>
+> Tout indicateur se recompose à partir des compteurs, quels que soient les compartiments et les mois réunis (ex. visiteurs et administrateur ensemble, tous moteurs, une année) : les nombres d'utilisations, de visites et d'utilisations répétées s'additionnent, une visite n'appartenant qu'à un compteur par fonction (un seul mois, un seul compartiment) ; la dernière utilisation est la plus récente ; le nombre de fiches ou de paramètres différents est celui des objets distincts des compteurs réunis, qui ne s'additionne pas — d'où la liste des objets plutôt qu'un nombre.
 
 ### Entrée du journal des modifications
 
