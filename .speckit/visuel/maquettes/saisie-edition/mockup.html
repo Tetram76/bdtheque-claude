@@ -136,7 +136,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-pub" style="{{block}}">
             <span style="{{kickStyle}}">{{k.pub}}</span>
-            <h2 id="s-pub" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>L'édition</h2>
+            <h2 id="s-pub" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>L'édition</h2>
             <div style="{{row}}">
               <div style="{{col}} flex: 1 1 240px">
                 <label for="f-pub" style="{{lbl}}">Éditeur <span aria-hidden="true" style="color: {{t.del}}">*</span></label>
@@ -176,7 +176,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-make" style="{{block}}">
             <span style="{{kickStyle}}">{{k.make}}</span>
-            <h2 id="s-make" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Fabrication</h2>
+            <h2 id="s-make" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Fabrication</h2>
             <div style="{{row}}">
               <sc-for list="{{makeSelects}}" as="s">
                 <div style="{{col}}">
@@ -198,7 +198,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           <sc-if value="{{x.owned}}">
             <section aria-labelledby="s-copy" style="{{block}}">
               <span style="{{kickStyle}}">{{k.copy}}</span>
-              <h2 id="s-copy" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>L'exemplaire</h2>
+              <h2 id="s-copy" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>L'exemplaire</h2>
               <div style="{{row}}">
                 <div style="{{col}}">
                   <label for="f-mode" style="{{lbl}}">Mode d'acquisition <span aria-hidden="true" style="color: {{t.del}}">*</span></label>
@@ -231,7 +231,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
             <section aria-labelledby="s-value" style="{{block}}">
               <span style="{{kickStyle}}">{{k.value}}</span>
-              <h2 id="s-value" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Valeur</h2>
+              <h2 id="s-value" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Valeur</h2>
               <div style="{{row}}">
                 <sc-for list="{{amounts}}" as="m">
                   <fieldset aria-describedby="{{m.helpId}}" style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
@@ -259,7 +259,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         <aside class="sa-side" style="min-width: 0; display: flex; flex-direction: column; gap: 22px">
           <section aria-labelledby="s-vis" style="{{block}}">
             <span style="{{kickStyle}}">{{k.vis}}</span>
-            <h2 id="s-vis" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Les visuels</h2>
+            <h2 id="s-vis" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Les visuels</h2>
             <sc-if value="{{x.existing}}">
               <span style="{{help}}">Chaque visuel s'enregistre dès son ajout, et son ordre ou son type dès qu'on les change : rien à valider avec la fiche.</span>
               <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; text-align: center">
@@ -355,7 +355,7 @@ const cases = (c) => ({
   helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
   lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
   tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '4px 14px', h2r: '999px', h2size: '17px',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '4px 14px', h2r: '999px', h2size: '17px', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px',
   infoBg: '#4FD1C5', infoFg: c.bg
 });
 
@@ -642,9 +642,11 @@ class View extends Mockup {
       noSubmit: (e) => e.preventDefault(),
       // The mention above a block title says what kind of data the block holds, never the title again.
       k: { pub: kick(1, 'Publication'), make: kick(2, 'Objet'), copy: kick(3, 'Possession'), value: kick(4, 'Montants'), vis: kick(5, 'Images') },
-      block: 'position: relative; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
+      block: 'position: relative; margin-top: ' + (t.cTop ?? '0') + '; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
       kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
-      h2: 'align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: 0; display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
+      h2: 'position: relative; align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: ' + (t.h2lift ?? '0') + ' 0 0; transform: rotate(' + (t.h2rot ?? '0deg') + '); display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
+      // As on the dashboard, a speech bubble straddles the top edge of its panel; administration keeps it without a tail.
+      tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
       mark: 'display: ' + t.mkDisp + '; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF;',
       // Fields on a line that wraps when needed, each sized to what it holds.
       row: 'display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px 24px;',

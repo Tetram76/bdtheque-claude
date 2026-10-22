@@ -122,7 +122,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-ident" style="{{block}}">
             <span style="{{kickStyle}}">{{k.ident}}</span>
-            <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>L'auteur</h2>
+            <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>L'auteur</h2>
 
             <div class="ss-pair">
               <div style="min-width: 0; display: flex; flex-direction: column; gap: 4px">
@@ -156,7 +156,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-bio" style="{{block}}">
             <span style="{{kickStyle}}">{{k.bio}}</span>
-            <h2 id="s-bio" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Biographie</h2>
+            <h2 id="s-bio" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Biographie</h2>
             <div style="display: flex; flex-direction: column; gap: 4px">
               <label for="f-bio" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Biographie</label>
               <textarea id="f-bio" rows="9" placeholder="Parcours de l'auteur, visible dans la consultation…" style="{{area}}">{{x.bio}}</textarea>
@@ -203,7 +203,7 @@ const cases = (c) => ({
   helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
   lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
   tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '4px 14px', h2r: '999px', h2size: '17px',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '4px 14px', h2r: '999px', h2size: '17px', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px',
   infoBg: '#4FD1C5', infoFg: c.bg
 });
 
@@ -332,9 +332,11 @@ function commonVals(view, t, kick) {
     closeMenu: () => view.setState({ menuOpen: false }),
     // A click anywhere outside an open menu closes it.
     noSubmit: (e) => e.preventDefault(),
-    block: 'position: relative; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
+    block: 'position: relative; margin-top: ' + (t.cTop ?? '0') + '; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
     kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
-    h2: 'align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: 0; display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
+    h2: 'position: relative; align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: ' + (t.h2lift ?? '0') + ' 0 0; transform: rotate(' + (t.h2rot ?? '0deg') + '); display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
+    // As on the dashboard, a speech bubble straddles the top edge of its panel; administration keeps it without a tail.
+    tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
     mark: 'display: ' + t.mkDisp + '; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF;',
     lbl: 'font-weight: 700; font-size: 13px;',
     help: 'font-size: 12px; color: ' + t.muted + ';',
