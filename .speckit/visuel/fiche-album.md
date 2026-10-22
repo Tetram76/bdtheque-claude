@@ -21,7 +21,7 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 | La vitrine de librairie | `librairie` |
 | L'album de vignettes | `vignettes` |
 
-L'exemple présenté est un album d'une série, sans appréciation, qui pousse la fiche dans ses cas chargés : quatre éditions (une par album en moyenne, deux au plus dans la base existante), dont une visée par une intention d'achat ; une vingtaine d'auteurs (réglage « contributions » de la source commune : `nombreuses` ou `courantes`) ; un rattachement à un sous-univers ; une édition à treize visuels (couverture, page de garde, dix planches, 4e de couverture). Les visuels sont des illustrations de substitution.
+L'exemple présenté est un album d'une série, sans appréciation, qui pousse la fiche dans ses cas chargés : trois éditions (une par album en moyenne, deux au plus dans la base existante) et une intention d'achat sur une quatrième ; une vingtaine d'auteurs (réglage « contributions » de la source commune : `nombreuses` ou `courantes`) ; un rattachement à un sous-univers ; une édition à treize visuels (couverture, page de garde, dix planches, 4e de couverture). Les visuels sont des illustrations de substitution.
 
 ## Contenu
 
@@ -36,11 +36,11 @@ De haut en bas :
   - **Genres et univers** affichés (`fonctionnel.md` § Genres et univers d'un album). Chaque univers est présenté avec la **chaîne de ses ancêtres**, de la racine à l'univers rattaché (« Univers Hugo Pratt › Corto Maltese › Les Antilles ») : les ancêtres sont de simples liens, l'univers rattaché une étiquette colorée ; chacun mène à la liste de ses séries et albums, sous-univers compris, présentée comme la bibliographie d'un auteur (`fonctionnel.md` § Structure de l'application, § Hiérarchie des univers).
 - **Ça raconte quoi ?** : le résumé, puis les notes personnelles de l'album.
 - **Dans quelles éditions ?** :
-  - les éditions de l'album, en grille (quatre par ligne sur grand écran, une par ligne sur smartphone), chacune par son libellé (`fonctionnel.md` § Libellé d'une édition) et une étiquette : « Dans la collection » pour une édition possédée, « Intention d'achat » (cadre en tirets) pour une édition visée. Choisir une édition affiche son détail et ses visuels ;
-  - pour une édition visée par une intention d'achat, le groupe « L'exemplaire » se limite à la mention « Intention d'achat » : elle n'a ni acquisition ni caractéristiques d'exemplaire (`fonctionnel.md` § Réalisation d'une intention) ;
+  - les éditions de l'album, en grille (quatre par ligne sur grand écran, une par ligne sur smartphone), chacune par son libellé (`fonctionnel.md` § Libellé d'une édition) ; seules les éditions de la collection y figurent, une intention d'achat n'étant jamais présentée comme une édition (`fonctionnel.md` § Intention d'achat). Choisir une édition affiche son détail et ses visuels ;
   - le détail de l'édition choisie, en deux groupes : **l'édition** (éditeur, menant à son site web lorsqu'il est connu, collection, année d'édition, ISBN, catégorie, format, reliure, orientation, sens de lecture, pages, couleur) et **l'exemplaire** (mode d'acquisition, date et montant d'acquisition avec leurs libellés contextuels, valeur initiale, neuve ou d'occasion, état, dédicace, numérotation personnelle, notes personnelles). Chaque montant est suivi de sa valeur en euros du jour ; un montant d'acquisition absent est remplacé par la valeur estimée, lorsqu'elle existe (`fonctionnel.md` § Estimation de la valeur des éditions) ;
   - une donnée non renseignée reste affichée, avec la mention « Non renseigné » ;
   - en pied, les dates de création, d'entrée dans la collection et de modification de l'édition.
+  - sous le détail, l'**intention d'achat** de l'album, s'il en a une, en cadre en tirets, distinguée comme dans la liste des intentions d'achat par une étiquette : **Album**, suivie de « toute édition », ou **Édition**, suivie du libellé de l'édition visée et, en petit dessous, de sa catégorie, son format, sa reliure et son nombre de pages ; puis la date où elle a été posée. Une intention ne se choisit pas comme une édition et n'a pas de visuels à présenter.
 - **Et le reste de la série ?** : la liste dépliable des albums de la série, dans l'ordre de la série (`fonctionnel.md` § Ordre des albums dans une série), chacun avec son tome et son appartenance à la collection, l'album affiché étant mis en avant ; et le lien vers la fiche de la série.
 - **Pied de page** : les dates de création et de modification de la fiche.
 

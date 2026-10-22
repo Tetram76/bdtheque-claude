@@ -19,6 +19,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 /* The album in brief, then its editions, each on a line as dense as a table row. */
 .ea-album{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:start}
 .ea-row{display:grid;grid-template-columns:36px minmax(0,1fr) 300px auto;grid-template-areas:"cover main meta act";align-items:center;column-gap:14px}
+.ea-irow{display:grid;grid-template-columns:minmax(0,1fr) 300px auto;grid-template-areas:"main meta act";align-items:center;column-gap:14px}
 @media (max-width: 640px){
   .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
   .adm-actions{margin-left:auto}
@@ -27,6 +28,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
   .adm-tag{padding:2px 8px !important;font-size:11px !important}
   /* An edition on two lines: its label and actions, then its possession and detail. */
   .ea-row{grid-template-columns:36px minmax(0,1fr) auto;grid-template-areas:"cover main act" "cover meta meta";row-gap:4px;align-items:start}
+  .ea-irow{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main act" "meta meta";row-gap:4px;align-items:start}
   .ea-act-label{display:none}
 }
 </style>
@@ -125,42 +127,8 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         <h2 id="s-eds" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Les éditions</h2>
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
           <span style="font-size: 13px; font-weight: 700">{{x.count}}</span>
-          <span style="display: flex; flex-wrap: wrap; gap: 8px">
-            <sc-if value="{{intentDirect}}">
-              <a href="#" title="Une édition précise, saisie sans exemplaire ni valeur" style="{{secBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Intention d'achat sur une édition…</a>
-            </sc-if>
-            <sc-if value="{{intentMenu}}">
-              <span style="position: relative; display: inline-flex">
-                <button type="button" aria-haspopup="menu" aria-expanded="{{intentExpanded}}" onClick="{{toggleIntent}}" style="{{secBtn}} background: {{intentBg}}; color: {{intentFg}}; font-family: {{t.fb}}; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Intention d'achat<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
-                <sc-if value="{{intentOpen}}">
-                  <span aria-hidden="true" onClick="{{closeIntent}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
-                  <div role="menu" aria-label="Poser une intention d'achat" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 300px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
-                    <sc-for list="{{intentChoices}}" as="o">
-                      <a href="#" role="menuitem" style="display: flex; flex-direction: column; gap: 1px; padding: 6px 10px; border-radius: {{t.btnR}}; color: {{t.text}}; text-decoration: none">
-                        <span style="font-weight: 700; font-size: 14px">{{o.label}}</span>
-                        <span style="font-size: 12px; color: {{t.muted}}">{{o.help}}</span>
-                      </a>
-                    </sc-for>
-                  </div>
-                </sc-if>
-              </span>
-            </sc-if>
-            <a href="#" style="{{priBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle édition</a>
-          </span>
+          <sc-if value="{{canAddEdition}}"><a href="#" style="{{priBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle édition</a></sc-if>
         </div>
-
-        <sc-if value="{{x.albumIntent}}">
-          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 10px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}">
-            <span style="display: flex; flex-direction: column; gap: 2px">
-              <span style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Intention d'achat sur l'album</span>
-              <span style="{{help}}">N'importe quelle édition la réalisera ; posée le {{x.albumIntent}}.</span>
-            </span>
-            <span style="display: flex; flex-wrap: wrap; gap: 4px 14px; font-weight: 700; font-size: 13px">
-              <a href="#" style="color: {{t.link}}">Viser plutôt une édition…</a>
-              <a href="#" style="color: {{t.del}}">Retirer l'intention…</a>
-            </span>
-          </div>
-        </sc-if>
 
         <sc-if value="{{hasEditions}}">
           <div role="table" aria-label="Éditions de l'album" style="display: flex; flex-direction: column">
@@ -171,27 +139,16 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                   <a href="#" style="font-weight: 700; color: {{t.text}}; overflow-wrap: anywhere">{{e.label}}</a>
                   <span style="font-size: 12px; color: {{t.muted}}">{{e.sub}}</span>
                 </span>
-                <span role="cell" style="grid-area: meta; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; color: {{t.muted}}">
-                  <span style="{{badge}} {{e.badgeStyle}}"><sc-if value="{{e.intent}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg></sc-if>{{e.badge}}</span>
-                  <span>{{e.detail}}</span>
-                </span>
+                <span role="cell" style="grid-area: meta; font-size: 12px; color: {{t.muted}}">{{e.detail}}</span>
                 <span role="cell" style="grid-area: act; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
                   <a href="#" aria-label="Modifier {{e.label}}" style="{{rowBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.edit}}"></path></svg><span class="ea-act-label">Modifier</span></a>
                   <button type="button" aria-label="Autres actions sur {{e.label}}" aria-haspopup="menu" aria-expanded="{{e.menuExpanded}}" onClick="{{e.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{e.moreBg}}; color: {{e.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
                   <sc-if value="{{e.menuOpen}}">
                     <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
                     <div role="menu" aria-label="Actions sur {{e.label}}" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 250px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
-                      <sc-if value="{{e.intent}}">
-                        <button type="button" role="menuitem" style="{{menuBtn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>Confirmer l'achat…</button>
-                        <sc-if value="{{e.toAlbum}}"><button type="button" role="menuitem" style="{{menuBtn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>Viser plutôt l'album…</button></sc-if>
-                        <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
-                        <button type="button" role="menuitem" style="{{menuBtn}} color: {{t.del}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.trash}}"></path></svg>Retirer l'intention…</button>
-                      </sc-if>
-                      <sc-if value="{{e.own}}">
-                        <a href="#" role="menuitem" style="{{menuBtn}} text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg>Voir dans la consultation</a>
-                        <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
-                        <button type="button" role="menuitem" style="{{menuBtn}} color: {{t.del}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.trash}}"></path></svg>Supprimer l'édition…</button>
-                      </sc-if>
+                      <a href="#" role="menuitem" style="{{menuBtn}} text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg>Voir dans la consultation</a>
+                      <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
+                      <button type="button" role="menuitem" style="{{menuBtn}} color: {{t.del}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.trash}}"></path></svg>Supprimer l'édition…</button>
                     </div>
                   </sc-if>
                 </span>
@@ -199,8 +156,64 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             </sc-for>
           </div>
         </sc-if>
-        <sc-if value="{{noEdition}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucune édition pour l'instant.</span></sc-if>
-        <span style="{{help}}">Chaque édition, avec ses visuels, se saisit sur sa propre fiche. Une intention ne vise l'album entier que tant qu'il n'a aucune édition ; ensuite, elle vise une édition précise.</span>
+        <sc-if value="{{noEdition}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucune édition dans la collection.</span></sc-if>
+        <span style="{{help}}">{{editionHelp}}</span>
+      </section>
+
+      <section aria-labelledby="s-intents" style="{{block}}">
+        <span style="{{kickStyle}}">{{k.intents}}</span>
+        <h2 id="s-intents" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Les intentions d'achat</h2>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
+          <span style="font-size: 13px; font-weight: 700">{{intentCount}}</span>
+          <sc-if value="{{intentDirect}}">
+            <a href="#" style="{{secBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle intention sur une édition…</a>
+          </sc-if>
+          <sc-if value="{{intentMenu}}">
+            <span style="position: relative; display: inline-flex">
+              <button type="button" aria-haspopup="menu" aria-expanded="{{intentExpanded}}" onClick="{{toggleIntent}}" style="{{secBtn}} background: {{intentBg}}; color: {{intentFg}}; font-family: {{t.fb}}; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle intention d'achat<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+              <sc-if value="{{intentOpen}}">
+                <span aria-hidden="true" onClick="{{closeIntent}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                <div role="menu" aria-label="Nouvelle intention d'achat" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 300px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                  <sc-for list="{{intentChoices}}" as="o">
+                    <a href="#" role="menuitem" style="display: flex; flex-direction: column; gap: 1px; padding: 6px 10px; border-radius: {{t.btnR}}; color: {{t.text}}; text-decoration: none">
+                      <span style="font-weight: 700; font-size: 14px">{{o.label}}</span>
+                      <span style="font-size: 12px; color: {{t.muted}}">{{o.help}}</span>
+                    </a>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </span>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{hasIntents}}">
+          <div role="table" aria-label="Intentions d'achat sur l'album" style="display: flex; flex-direction: column">
+            <sc-for list="{{intents}}" as="i">
+              <div role="row" class="ea-irow" style="padding: 8px 0; border-bottom: {{t.rowB}}; font-size: 14px">
+                <span role="cell" style="grid-area: main; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                  <span style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{i.tagB}}; border-radius: {{t.btnR}}; background: {{i.tagBg}}; color: {{i.tagFg}}; font-weight: 800; font-size: 12px; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.tagIcon}}"></path></svg>{{i.tag}}</span><span style="color: {{i.textFg}}; font-weight: {{i.textW}}; overflow-wrap: anywhere">{{i.text}}</span></span>
+                  <sc-if value="{{i.sub}}"><span style="font-size: 12px; color: {{t.muted}}">{{i.sub}}</span></sc-if>
+                </span>
+                <span role="cell" style="grid-area: meta; font-size: 12px; color: {{t.muted}}">Posée le {{i.date}}</span>
+                <span role="cell" style="grid-area: act; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
+                  <a href="#" aria-label="Confirmer l'achat : {{i.text}}" style="{{rowBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg><span class="ea-act-label">Confirmer l'achat</span></a>
+                  <button type="button" aria-label="Autres actions sur l'intention" aria-haspopup="menu" aria-expanded="{{i.menuExpanded}}" onClick="{{i.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{i.moreBg}}; color: {{i.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
+                  <sc-if value="{{i.menuOpen}}">
+                    <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                    <div role="menu" aria-label="Actions sur l'intention" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 250px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                      <sc-if value="{{i.edition}}"><a href="#" role="menuitem" style="{{menuBtn}} text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.edit}}"></path></svg>Modifier l'intention</a></sc-if>
+                      <sc-if value="{{i.swap}}"><button type="button" role="menuitem" style="{{menuBtn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.intent}}"></path></svg>{{i.swap}}</button></sc-if>
+                      <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
+                      <button type="button" role="menuitem" style="{{menuBtn}} color: {{t.del}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.trash}}"></path></svg>Retirer l'intention…</button>
+                    </div>
+                  </sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{noIntent}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucune intention d'achat.</span></sc-if>
+        <span style="{{help}}">{{intentHelp}}</span>
       </section>
       <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p>
     </main>
@@ -412,29 +425,31 @@ const errorOf = (key, t, business) => ({
   })
 }[key]?.() ?? null);
 
-// An album without any edition nor intent, an album with three editions, one of them aimed at by a
-// purchase intent, and an untitled omnibus aimed at by an intent on the album itself, without any edition.
+// An album without any edition nor intent, an album with two editions and an intent on a third one,
+// and an untitled omnibus aimed at by an intent on the album itself, without any edition.
+// An intent is never one of the editions: it is listed among the intents, with what it aims at
+// (fonctionnel.md § Intention d'achat).
 const EXAMPLES = {
   sansEdition: {
     label: 'Le Château des étoiles (Le Château des étoiles - T. 8)', credits: 'Alex Alice', date: '2026', inCollection: 'Hors collection', cover: false,
-    count: 'Aucune édition', albumIntent: '',
-    editions: [],
+    count: 'Aucune édition',
+    editions: [], intents: [],
     meta: 'Fiche de l\'album créée le 14 octobre 2026, modifiée le 14 octobre 2026.'
   },
   editions: {
     label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', credits: 'Hergé', date: '1963', inCollection: 'Dans la collection', cover: true,
-    count: '3 éditions, dont 2 dans la collection', albumIntent: '',
+    count: '2 éditions',
     editions: [
-      { label: 'Casterman [1963]', sub: 'Édition originale · Cartonnée · 62 pages', state: 'own', detail: 'Achat, 1987 · 2 visuels', cover: true },
-      { label: 'Casterman [2007] - ISBN 978-2-203-00120-8', sub: 'Cartonnée · 62 pages', state: 'own', detail: 'Offerte · 3 visuels', cover: true },
-      { label: 'Casterman (Fac-similé) [2013]', sub: 'Édition spéciale · Cartonnée', state: 'intent', detail: 'Visée par une intention d\'achat', cover: false }
+      { label: 'Casterman [1963]', sub: 'Édition originale · Cartonnée · 62 pages', detail: 'Achat, 1987 · 2 visuels' },
+      { label: 'Casterman [2007] - ISBN 978-2-203-00120-8', sub: 'Cartonnée · 62 pages', detail: 'Offerte · 3 visuels' }
     ],
+    intents: [{ edition: 'Casterman (Fac-similé) [2013]', sub: 'Édition spéciale · Cartonnée', date: '8 octobre 2026' }],
     meta: 'Fiche de l\'album créée le 4 mars 2026, modifiée hier à 21:08.'
   },
   integrale: {
     label: 'Blacksad - Intégrale [1 à 5]', credits: 'Juan Díaz Canales · Juanjo Guarnido', date: 'octobre 2023', inCollection: 'Intention d\'achat', cover: false,
-    count: 'Aucune édition', albumIntent: '8 octobre 2026',
-    editions: [],
+    count: 'Aucune édition',
+    editions: [], intents: [{ album: true, date: '8 octobre 2026' }],
     meta: 'Fiche de l\'album créée le 8 octobre 2026, modifiée le 8 octobre 2026.'
   }
 };
@@ -452,34 +467,53 @@ class View extends Mockup {
     const owned = 'border: 2px solid transparent; background: ' + t.nBg + '; color: ' + t.nFg + ';';
     const dashed = 'border: 2px dashed ' + t.line + '; background: transparent; color: ' + t.text + ';';
     const generic = 'repeating-linear-gradient(135deg, rgba(127,127,127,.42) 0 6px, rgba(127,127,127,.24) 6px 12px)';
-    const editions = x.editions.map((e, i) => ({
-      ...e,
-      intent: e.state === 'intent', own: e.state === 'own',
-      // Aiming at the album instead removes the edition: only possible when it is the album's only one.
-      toAlbum: e.state === 'intent' && x.editions.length === 1,
-      cover: e.cover ? 'hsl(' + ((i * 47 + 20) % 360) + ', 42%, 36%)' : generic,
-      badge: e.state === 'own' ? 'Dans la collection' : "Intention d'achat",
-      badgeStyle: e.state === 'own' ? owned : dashed,
+    const rowMenu = (i) => ({
       menuOpen: openRow === i, menuExpanded: openRow === i ? 'true' : 'false',
       moreBg: openRow === i ? t.nBg : 'transparent', moreFg: openRow === i ? t.nFg : t.secText,
       toggle: () => this.setState({ openRow: openRow === i ? -1 : i })
+    });
+    const editions = x.editions.map((e, i) => ({ ...e, cover: 'hsl(' + ((i * 47 + 20) % 360) + ', 42%, 36%)', ...rowMenu(i) }));
+    const albumIntent = x.intents.some((i) => i.album);
+    const intents = x.intents.map((v, i) => ({
+      ...v,
+      // What an intent aims at, told apart as in the list of intents: the whole album, filled,
+      // any edition will do; one edition, outlined, named beside it.
+      tag: v.album ? 'Album' : 'Édition',
+      tagIcon: v.album ? 'M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z M4 17a3 3 0 0 1 3-3h11' : 'M4 7h12v13H4z M8 4h12v13',
+      tagBg: v.album ? t.acc : 'transparent', tagFg: v.album ? t.onAcc : t.text,
+      tagB: v.album ? '2px solid ' + t.acc : '2px solid ' + t.text,
+      text: v.album ? 'toute édition' : v.edition,
+      textFg: v.album ? t.muted : t.text, textW: v.album ? '400' : '700',
+      // Aiming at the album instead removes the edition: only for the album's only edition.
+      swap: v.album ? 'Viser plutôt une édition…' : (x.editions.length === 0 && x.intents.length === 1 ? 'Viser plutôt l\'album…' : null),
+      ...rowMenu(x.editions.length + i)
     }));
+    const n = intents.length;
     const btn = 'display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; border-radius: ' + t.btnR + '; font-weight: 700; ';
     return {
       ...c,
-      t, x, editions,
+      t, x, editions, intents,
       icons: { ...ICONS, edit: 'M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4' },
       // The mention above a block title says what kind of data the block holds, never the title again.
-      k: { album: kick(1, 'Identification'), eds: kick(2, 'Exemplaires') },
+      k: { album: kick(1, 'Identification'), eds: kick(2, 'Exemplaires'), intents: kick(3, 'Achats prévus') },
       albumCover: x.cover ? 'hsl(20, 42%, 36%)' : generic,
       badge, albumBadge: x.inCollection === 'Dans la collection' ? owned : dashed,
       hasEditions: editions.length > 0,
-      noEdition: editions.length === 0 && !x.albumIntent,
+      noEdition: editions.length === 0,
+      // An album aimed at by an intent on itself has no edition: its first one comes with the purchase.
+      canAddEdition: !albumIntent,
+      editionHelp: albumIntent
+        ? 'L\'album est visé par une intention d\'achat : sa première édition s\'ajoute en confirmant l\'achat.'
+        : 'Chaque édition, avec ses visuels, se saisit sur sa propre fiche.',
+      hasIntents: n > 0,
+      noIntent: n === 0,
+      intentCount: n === 0 ? 'Aucune intention d\'achat' : n + (n > 1 ? ' intentions d\'achat' : ' intention d\'achat'),
+      intentHelp: 'Une intention ne vise l\'album entier que tant qu\'il n\'a aucune édition, possédée ou visée ; ensuite, elle vise une édition précise, saisie sans exemplaire ni valeur.',
       // An album aimed at by an intent on itself cannot have its editions aimed at too, and the reverse:
       // the album can be aimed at while nothing is, a new edition while the album itself is not.
       // Two possible targets open a choice; a single one, a precise edition, is a plain button.
-      intentMenu: !x.albumIntent && x.editions.length === 0,
-      intentDirect: !x.albumIntent && x.editions.length > 0,
+      intentMenu: x.editions.length === 0 && n === 0,
+      intentDirect: !albumIntent && (x.editions.length > 0 || n > 0),
       intentOpen, intentExpanded: intentOpen ? 'true' : 'false',
       intentBg: intentOpen ? t.nBg : 'transparent', intentFg: intentOpen ? t.nFg : t.secText,
       toggleIntent: () => this.setState({ intentOpen: !intentOpen }),

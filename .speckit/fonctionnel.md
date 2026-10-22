@@ -669,6 +669,8 @@ Une intention ne peut porter sur l'**album** que tant qu'il n'a **aucune éditio
 
 Un cas d'usage permettra de **convertir** une intention portant sur l'album en intention portant sur une édition, et inversement, dans le respect de ces règles : une intention portant sur une édition ne se convertit en intention portant sur l'album que si cette édition est la **seule** de l'album, la conversion la supprimant (cf. ci-dessous).
 
+Une intention d'achat est toujours **présentée comme une intention d'achat**, jamais comme un album ou une édition : une édition visée ne figure jamais parmi les éditions (d'un album, d'une liste, d'un décompte), mais parmi les intentions d'achat, avec ce qu'elle vise. Un album visé reste en revanche un album, dont l'appartenance à la collection signale qu'il fait l'objet d'une intention d'achat.
+
 Une édition **non possédée** et l'intention qui la vise sont **indissociables** : l'une ne va pas sans l'autre. Supprimer l'une supprime l'autre, après confirmation (cf. § Suppression des entités) ; de même, convertir une intention portant sur une édition en intention portant sur l'album supprime l'édition visée, après confirmation. Une édition non possédée ne peut donc jamais exister sans intention d'achat.
 
 #### Réalisation d'une intention

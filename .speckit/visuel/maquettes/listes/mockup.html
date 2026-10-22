@@ -442,22 +442,22 @@ const ENTITIES = {
     menu: 'Éditions', title: 'Éditions', total: '2 913', create: 'Nouvelle édition', kind: 'Fiches',
     searchPh: 'ISBN, avec ou sans tirets…', initials: null,
     filters: ['Album', 'Éditeur', 'Collection éditeur'],
-    filtersHelp: 'Une édition appartient à un album : « Nouvelle édition » commence par le choix de l\'album, ou par un ISBN.',
+    filtersHelp: 'Seules les éditions de la collection : une édition visée figure parmi les intentions d\'achat. Une édition appartient à un album : « Nouvelle édition » commence par le choix de l\'album, ou par un ISBN.',
     count: '2 913 éditions', countDetail: '', order: 'Dans l\'ordre des albums, puis par année d\'édition',
     page: 'Éditions 1 à 50 sur 2 913', pages: ['1', '2', '3', '…', '59'],
     thumb: 'cover', mainHead: 'Édition',
-    cols: [col('Année', '64px'), col('Catégorie', '140px', { hideMd: true }), col('Possession', '170px'), col('Modifiée', '104px', { hideMd: true })],
+    cols: [col('Année', '64px'), col('Catégorie', '140px', { hideMd: true }), col('Acquisition', '130px'), col('Modifiée', '104px', { hideMd: true })],
     primary: ['Modifier', ICON.edit],
     rowMenu: menuOf(VIEW('Voir l\'album dans la consultation'), MERGE('Fusionner avec une autre édition…'), DELETE),
     rows: [
-      ['Glénat [2004] - ISBN 978-2-7234-4567-1', '...Et après (Les Lunes de Saturne - T. 1)', ['2004', { text: '—', muted: true }, { badge: 'Dans la collection', full: true }, '12 janv. 2026'], { cover: true }],
-      ['Dupuis [1983]', '13 (XIII - T. 1)', ['1984', 'Édition originale', { badge: 'Dans la collection', full: true }, '3 mars 2026'], { cover: true }],
-      ['Dupuis (Repérages) [2011] - ISBN 978-2-8001-5123-0', 'Le Bal des vampires (Spirou - HS 2)', ['2011', { text: '—', muted: true }, { badge: 'Dans la collection', full: true }, '7 juin 2026'], { cover: false }],
-      ['Dargaud [2010] - ISBN 978-2-505-00865-2', 'Barracuda - Tome 1', ['2010', 'Édition originale', { badge: 'Dans la collection', full: true }, '3 sept. 2026'], { cover: true }],
-      ['Casterman [1963]', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['1963', 'Édition originale', { badge: 'Dans la collection', full: true }, 'hier'], { cover: true }],
-      ['Casterman [2007] - ISBN 978-2-203-00120-8', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['2007', { text: '—', muted: true }, { badge: 'Dans la collection', full: true }, 'hier'], { cover: true }],
-      ['Casterman (Fac-similé) [2013]', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['2013', 'Édition spéciale', { badge: 'Intention d\'achat', intent: true }, '8 oct. 2026'], { cover: true }],
-      ['Dupuis [1974]', 'Buddy Longway - Tome 2', ['1974', { text: '—', muted: true }, { badge: 'Intention d\'achat', intent: true }, '9 oct. 2026'], { cover: true }]
+      ['Glénat [2004] - ISBN 978-2-7234-4567-1', '...Et après (Les Lunes de Saturne - T. 1)', ['2004', { text: '—', muted: true }, 'Achat, 2004', '12 janv. 2026'], { cover: true }],
+      ['Dupuis [1983]', '13 (XIII - T. 1)', ['1984', 'Édition originale', 'Achat, 1991', '3 mars 2026'], { cover: true }],
+      ['Dupuis (Repérages) [2011] - ISBN 978-2-8001-5123-0', 'Le Bal des vampires (Spirou - HS 2)', ['2011', { text: '—', muted: true }, 'Offerte, 2011', '7 juin 2026'], { cover: false }],
+      ['Dargaud [2010] - ISBN 978-2-505-00865-2', 'Barracuda - Tome 1', ['2010', 'Édition originale', 'Achat, 2010', '3 sept. 2026'], { cover: true }],
+      ['Casterman [1963]', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['1963', 'Édition originale', 'Achat, 1987', 'hier'], { cover: true }],
+      ['Casterman [2007] - ISBN 978-2-203-00120-8', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['2007', { text: '—', muted: true }, 'Offerte, 2008', 'hier'], { cover: true }],
+      ['Casterman (Fac-similé) [2013] - ISBN 978-2-203-03312-4', 'Le Lotus bleu (Tintin - T. 5)', ['2013', 'Édition spéciale', 'Achat, 2014', '2 oct. 2026'], { cover: true }],
+      ['Dupuis [1974]', 'Buddy Longway - Tome 2', ['1974', { text: '—', muted: true }, 'Échange', '9 oct. 2026'], { cover: false }]
     ]
   },
   intentions: {

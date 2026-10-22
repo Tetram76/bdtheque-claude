@@ -390,16 +390,16 @@ const THEMES = {
 // the default format, « Album (Série - Tome) » (fonctionnel.md § Libellé d'un album).
 // state: own (at least one owned edition), out (none), intent (aimed at by a purchase intent).
 const ALBUMS = [
-  { label: 'La Ballade de la mer salée (Corto Maltese - T. 1)', mark: '1', credits: 'Hugo Pratt', date: '1975', eds: [2, 1], state: 'own', cover: true, modified: '12 oct. 2026', genre: true },
-  { label: 'Barracuda - Tome 1', mark: '1', credits: 'Jean Dufaux · Jérémy', date: 'nov. 2010', eds: [1, 1], state: 'own', cover: true, modified: '3 sept. 2026', genre: true },
-  { label: 'Bécassine (Bécassine - T. 1)', mark: '1', credits: 'Caumery · Joseph Porphyre Pinchon', date: '1913', eds: [1, 1], state: 'own', cover: true, modified: '21 juil. 2026' },
-  { label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', mark: '21', credits: 'Hergé', date: '1963', eds: [2, 2], state: 'own', cover: true, modified: 'hier', genre: true },
-  { label: 'Blacksad - Intégrale [1 à 5]', mark: 'INT', credits: 'Juan Díaz Canales · Juanjo Guarnido', date: 'oct. 2023', eds: [0, 0], state: 'intent', cover: false, modified: '8 oct. 2026' },
+  { label: 'La Ballade de la mer salée (Corto Maltese - T. 1)', mark: '1', credits: 'Hugo Pratt', date: '1975', eds: [1, 1], state: 'own', cover: true, modified: '12 oct. 2026', genre: true },
+  { label: 'Barracuda - Tome 1', mark: '1', credits: 'Jean Dufaux · Jérémy', date: 'nov. 2010', eds: [1, 0], state: 'own', cover: true, modified: '3 sept. 2026', genre: true },
+  { label: 'Bécassine (Bécassine - T. 1)', mark: '1', credits: 'Caumery · Joseph Porphyre Pinchon', date: '1913', eds: [1, 0], state: 'own', cover: true, modified: '21 juil. 2026' },
+  { label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', mark: '21', credits: 'Hergé', date: '1963', eds: [2, 1], state: 'own', cover: true, modified: 'hier', genre: true },
+  { label: 'Blacksad - Intégrale [1 à 5]', mark: 'INT', credits: 'Juan Díaz Canales · Juanjo Guarnido', date: 'oct. 2023', eds: [0, 1], state: 'intent', cover: false, modified: '8 oct. 2026' },
   { label: 'Blake et Mortimer - Hors-série 2', mark: 'HS', credits: 'Edgar P. Jacobs', date: '', eds: [0, 0], state: 'out', cover: false, modified: '2 févr. 2026' },
-  { label: 'Le Bleu est une couleur chaude', mark: '', credits: 'Julie Maroh', date: 'mars 2010', eds: [1, 1], state: 'own', cover: true, modified: '14 mai 2026' },
-  { label: 'Le Bout du monde (Undertaker - T. 8)', mark: '8', credits: 'Xavier Dorison · Ralph Meyer · Caroline Delabie', date: 'sept. 2026', eds: [1, 1], state: 'own', cover: false, modified: "aujourd'hui", genre: true },
-  { label: 'Brüsel (Les Cités obscures - T. 4)', mark: '4', credits: 'Benoît Peeters · François Schuiten', date: '1992', eds: [1, 1], state: 'own', cover: true, modified: '30 juin 2026' },
-  { label: 'Buddy Longway - Tome 2', mark: '2', credits: 'Derib', date: '1974', eds: [1, 0], state: 'intent', cover: true, modified: '9 oct. 2026', genre: true }
+  { label: 'Le Bleu est une couleur chaude', mark: '', credits: 'Julie Maroh', date: 'mars 2010', eds: [1, 0], state: 'own', cover: true, modified: '14 mai 2026' },
+  { label: 'Le Bout du monde (Undertaker - T. 8)', mark: '8', credits: 'Xavier Dorison · Ralph Meyer · Caroline Delabie', date: 'sept. 2026', eds: [1, 0], state: 'own', cover: false, modified: "aujourd'hui", genre: true },
+  { label: 'Brüsel (Les Cités obscures - T. 4)', mark: '4', credits: 'Benoît Peeters · François Schuiten', date: '1992', eds: [1, 0], state: 'own', cover: true, modified: '30 juin 2026' },
+  { label: 'Buddy Longway - Tome 2', mark: '2', credits: 'Derib', date: '1974', eds: [0, 1], state: 'intent', cover: true, modified: '9 oct. 2026', genre: true }
 ];
 
 const EXAMPLES = {
@@ -448,7 +448,7 @@ const DIALOGS = {
     pick: {
       query: 'barracuda',
       items: [
-        { label: 'Esclaves (Barracuda - T. 1)', detail: 'Jean Dufaux · Jérémy · nov. 2010 · 1 édition, possédée', checked: true },
+        { label: 'Esclaves (Barracuda - T. 1)', detail: 'Jean Dufaux · Jérémy · nov. 2010 · 1 édition', checked: true },
         { label: 'Barracuda - Intégrale [1 à 3]', detail: 'Jean Dufaux · Jérémy · 2016 · aucune édition', checked: false }
       ].map((c) => ({ ...c, bd: c.checked ? '2px solid ' + t.acc : t.rowB }))
     },
@@ -505,15 +505,16 @@ class View extends Mockup {
       ? 'hsl(' + ((i * 47 + 200) % 360) + ', 42%, 36%)'
       : 'repeating-linear-gradient(135deg, rgba(127,127,127,.42) 0 6px, rgba(127,127,127,.24) 6px 12px)');
     const rows = x.rows.map((a, i) => {
-      const [total, owned] = a.eds;
+      // Owned editions and purchase intents are counted apart: an intent is never one of the editions.
+      const [owned, intents] = a.eds;
       return {
         ...a,
         coverBg: coverOf(a, ALBUMS.indexOf(a)),
         mark: a.cover ? a.mark : '',
         date: a.date || 'Non renseignée',
         dateFg: a.date ? t.text : t.muted,
-        eds: total === 0 ? 'Aucune édition' : total + (total > 1 ? ' éditions' : ' édition') + (owned ? ', ' + owned + (owned > 1 ? ' possédées' : ' possédée') : ', aucune possédée'),
-        edsFg: total === 0 ? t.muted : t.text,
+        eds: (owned ? owned + (owned > 1 ? ' éditions' : ' édition') : 'Aucune édition') + (intents ? ' · ' + intents + (intents > 1 ? ' intentions' : ' intention') : ''),
+        edsFg: owned + intents === 0 ? t.muted : t.text,
         intent: a.state === 'intent',
         badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? "Intention d'achat" : 'Hors collection'),
         badgeBg: a.state === 'own' ? t.nBg : 'transparent',

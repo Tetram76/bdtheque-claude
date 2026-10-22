@@ -232,7 +232,6 @@ summary{cursor:pointer}
             <li style="display: flex">
               <button type="button" aria-pressed="{{e.pressed}}" onClick="{{e.pick}}" style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 7px 12px; border: {{e.bd}}; border-radius: {{t.tR}}; background: {{e.bg}}; color: {{e.fg}}; font-family: {{t.fb}}; font-size: 14px; line-height: 1.3; text-align: left; cursor: pointer">
                 <span style="font-weight: 700">{{e.label}}</span>
-                <span style="display: inline-flex; align-items: center; min-height: 20px; padding: 0 8px; box-sizing: border-box; border: {{e.badgeB}}; border-radius: {{t.btnR}}; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-weight: 700; font-size: 11px">{{e.badge}}</span>
               </button>
             </li>
           </sc-for>
@@ -258,6 +257,16 @@ summary{cursor:pointer}
           </sc-for>
         </div>
         <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{cur.meta}}</p>
+        <sc-if value="{{intent}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 10px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; font-size: 14px">
+            <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+              <span style="font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">Intention d'achat</span>
+              <span style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0"><span style="display: inline-flex; align-items: center; padding: 1px 9px; border: 2px solid {{t.text}}; border-radius: {{t.btnR}}; font-weight: 800; font-size: 12px; white-space: nowrap">Édition</span><span style="font-weight: 700; overflow-wrap: anywhere">{{intent.label}}</span></span>
+              <span style="font-size: 12px; color: {{t.muted}}">{{intent.sub}}</span>
+            </span>
+            <span style="font-size: 12px; color: {{t.muted}}">{{intent.date}}</span>
+          </div>
+        </sc-if>
       </section>
 
       <section aria-labelledby="f-serie" style="position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
@@ -506,6 +515,8 @@ const EDITIONS = [
     meta: 'Édition créée le 9 octobre 2026, modifiée le 9 octobre 2026.'
   }
 ];
+const OWNED = EDITIONS.filter((e) => e.owned);
+const INTENT = EDITIONS.find((e) => !e.owned);
 
 // The usual case, and a collective album credited to some twenty artists (two of them in two roles).
 const CREDITS = {
@@ -540,7 +551,8 @@ class View extends Mockup {
     const t = THEMES[key] ?? THEMES.violine;
     const edIndex = this.state?.edition ?? 0;
     const visIndex = this.state?.visual ?? 0;
-    const ed = EDITIONS[edIndex];
+    // An intent is never one of the editions: the grid only holds owned ones, the intent is shown apart.
+    const ed = OWNED[edIndex];
     const visCount = ed.visuals.length;
     const vi = Math.min(visIndex, visCount - 1);
     const [visType, visKind] = ed.visuals[vi];
@@ -626,12 +638,13 @@ class View extends Mockup {
       })),
       prevVis: () => this.setState({ visual: (vi + visCount - 1) % visCount }),
       nextVis: () => this.setState({ visual: (vi + 1) % visCount }),
-      editions: EDITIONS.map((e, i) => ({
+      intent: INTENT ? {
+        label: INTENT.label,
+        sub: ['Catégorie', 'Format', 'Reliure', 'Pages'].map((k) => INTENT.objet.find(([key]) => key === k)?.[1]).filter(Boolean).map((v) => (/^\d+$/.test(v) ? v + ' pages' : v)).join(' · '),
+        date: 'Posée le 9 octobre 2026'
+      } : null,
+      editions: OWNED.map((e, i) => ({
         label: e.label, pressed: i === edIndex ? 'true' : 'false', ...pick(i === edIndex),
-        badge: e.owned ? 'Dans la collection' : "Intention d'achat",
-        badgeBg: e.owned ? t.colBg : 'transparent',
-        badgeFg: e.owned ? t.colFg : (i === edIndex ? t.onAcc : t.text),
-        badgeB: e.owned ? '0' : '2px dashed currentColor',
         // Switching edition also shows its own visuals, from its cover.
         pick: () => this.setState({ edition: i, visual: 0 })
       })),
