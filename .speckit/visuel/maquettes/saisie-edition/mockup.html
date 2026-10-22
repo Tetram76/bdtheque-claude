@@ -270,12 +270,14 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <section aria-labelledby="s-intent" style="{{block}} border-style: dashed">
               <span style="{{kickStyle}}">{{k.copy}}</span>
               <h2 id="s-intent" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Intention d'achat</h2>
-              <p style="margin: 0; font-size: 14px">Cette édition n'est pas encore possédée : elle est visée par une intention d'achat. L'exemplaire (acquisition, état, valeur, notes) se saisit en confirmant l'achat.</p>
+              <p style="margin: 0; font-size: 14px">{{x.intentText}}</p>
+              <sc-if value="{{x.existing}}">
               <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
                 <a href="#" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 16px; box-sizing: border-box; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-weight: 700; font-size: 14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.check}}"></path></svg>Confirmer l'achat…</a>
                 <a href="#" style="color: {{t.del}}; font-weight: 700; font-size: 13px">Retirer l'intention…</a>
               </span>
               <span style="{{help}}">Retirer l'intention supprime aussi l'édition, qui n'existe que par elle.</span>
+              </sc-if>
             </section>
           </sc-if>
         </form>
@@ -540,8 +542,21 @@ const EXAMPLES = {
     visuals: {}, meta: '',
     dirty: false, status: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'édition'
   },
+  // A new edition aimed at by a purchase intent: no copy and no value, only what describes the
+  // edition (fonctionnel.md § Réalisation d'une intention, minimum of fields).
+  nouvelleIntention: {
+    existing: false, creating: true, intent: true, heading: "Nouvelle intention d'achat", crumb: "Nouvelle intention d'achat",
+    album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
+    prefill: 'Pré-remplie d\'après la série Tintin : éditeur, catégorie, format, reliure, orientation, sens de lecture et couleur. Ce ne sont que des propositions : chaque valeur reste modifiable.',
+    intentText: 'L\'édition visée est créée avec l\'intention d\'achat, sans exemplaire ni valeur : l\'acquisition, l\'état et la valeur se saisissent en confirmant l\'achat. Seul l\'éditeur est obligatoire ; décrivez l\'édition autant que nécessaire pour la reconnaître.',
+    publisher: 'Casterman', collection: '', year: '', isbn: '', category: '—',
+    format: 'Normal (A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '', color: true,
+    visuals: {}, meta: '',
+    dirty: false, status: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'intention d\'achat'
+  },
   intention: {
     existing: true, intent: true, heading: "Modifier l'édition", crumb: 'Casterman (Fac-similé) [2013]',
+    intentText: 'Cette édition n\'est pas encore possédée : elle est visée par une intention d\'achat. L\'exemplaire (acquisition, état, valeur, notes) se saisit en confirmant l\'achat.',
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
     publisher: 'Casterman', collection: 'Fac-similé', year: '2013', isbn: '978-2-203-03312-4', category: 'Édition spéciale',
     format: 'Grand (> A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '62', color: true,
@@ -718,7 +733,7 @@ class View extends Mockup {
 
 Mockup.mount(View, {
   theme: { label: 'Thème', editor: 'enum', options: ['violine', 'mure', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes'], default: 'violine' },
-  exemple: { label: 'Exemple', editor: 'enum', options: ['modification', 'creation', 'intention'], default: 'modification' },
+  exemple: { label: 'Exemple', editor: 'enum', options: ['modification', 'creation', 'nouvelleIntention', 'intention'], default: 'modification' },
   mode: { label: 'Mode d\'acquisition', editor: 'enum', options: ['achat', 'offerte'], default: 'achat' },
   gratuite: { label: 'Gratuite (mode offerte)', editor: 'boolean', default: false },
   isbn: { label: 'ISBN', editor: 'enum', options: ['valide', 'incoherent'], default: 'valide' },

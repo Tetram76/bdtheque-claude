@@ -14,7 +14,7 @@ Réglages de la source commune :
 
 | Réglage | Valeurs |
 | --- | --- |
-| `exemple` | `modification` (par défaut) : une édition possédée, avec onze visuels ; `creation` : une nouvelle édition, pré-remplie d'après la série de l'album ; `intention` : une édition visée par une intention d'achat, donc non possédée |
+| `exemple` | `modification` (par défaut) : une édition possédée, avec onze visuels ; `creation` : une nouvelle édition, pré-remplie d'après la série de l'album ; `nouvelleIntention` : une nouvelle édition visée par une intention d'achat, créée avec elle ; `intention` : une édition visée par une intention d'achat, donc non possédée |
 | `mode` | `achat` (par défaut) ou `offerte` : le mode d'acquisition, dont suivent les libellés de la date et du montant |
 | `gratuite` | édition gratuite (avec le mode `offerte`) |
 | `isbn` | `valide` (par défaut) ou `incoherent` : chiffre de contrôle incohérent |
@@ -28,8 +28,8 @@ Les données sont fictives ; les visuels sont des illustrations de substitution.
 ## Contenu
 
 - **En-tête et menu** de l'administration, l'entrée « Albums » étant l'entrée courante du menu.
-- **Fil d'Ariane** : Administration, Albums, l'album, qui mène à la page de ses éditions et intentions d'achat, puis l'édition (« Nouvelle édition » en création).
-- **Titre** « Modifier l'édition » ou « Nouvelle édition », suivi du **libellé de l'édition** (`fonctionnel.md` § Libellé d'une édition), recalculé au fil de la saisie, et du lien vers la fiche de saisie de l'**album**. En modification, à droite : **Voir dans la consultation** (la fiche de l'album, qui présente l'édition) et un bouton « ⋯ » qui ouvre **Supprimer l'édition…**, dont le dialogue annonce l'impact, et la sortie de l'album de la collection s'il s'agit de sa dernière édition possédée (`fonctionnel.md` § Suppression des entités).
+- **Fil d'Ariane** : Administration, Albums, l'album, qui mène à la page de ses éditions et intentions d'achat, puis l'édition (« Nouvelle édition » en création, « Nouvelle intention d'achat » pour une édition visée).
+- **Titre** « Modifier l'édition », « Nouvelle édition » ou « Nouvelle intention d'achat », suivi du **libellé de l'édition** (`fonctionnel.md` § Libellé d'une édition), recalculé au fil de la saisie, et du lien vers la fiche de saisie de l'**album**. En modification, à droite : **Voir dans la consultation** (la fiche de l'album, qui présente l'édition) et un bouton « ⋯ » qui ouvre **Supprimer l'édition…**, dont le dialogue annonce l'impact, et la sortie de l'album de la collection s'il s'agit de sa dernière édition possédée (`fonctionnel.md` § Suppression des entités).
 - **Erreur d'enregistrement**, en tête de page, présentée comme sur la fiche de saisie d'un album ; l'erreur métier pointe en outre le champ en cause (ex. un prix sans date de référence).
 - **Pré-remplissage** : en création, un encadré indique que la fiche est pré-remplie d'après la série de l'album, et quels champs, ces valeurs n'étant que des propositions (`fonctionnel.md` § Initialisation d'une nouvelle édition depuis la série).
 - **Le formulaire**, en blocs :
@@ -37,7 +37,7 @@ Les données sont fictives ; les visuels sont des illustrations de substitution.
   - **Fabrication** : format, reliure, orientation et sens de lecture, en listes courtes où « — » laisse la donnée vide, puis le nombre de **pages** et la case **En couleur**.
   - **L'exemplaire**, pour une édition possédée : le **mode d'acquisition**, obligatoire ; la **date**, dont le libellé suit le mode (« Date d'achat », « Date d'acquisition », `fonctionnel.md` § Libellés contextuels sur l'édition) ; l'**état** ; les cases **D'occasion** et **Dédicacée** ; la **numérotation personnelle** ; les **notes personnelles**.
   - **Valeur**, pour une édition possédée : le **montant d'acquisition**, dont le libellé suit le mode (« Prix d'achat », « Valeur d'acquisition »), et la **valeur initiale**, chacun en montant et devise côte à côte (devise d'origine, ancien franc compris), avec ce qui le date ; puis la case **Gratuite**, qui vide et désactive les deux montants, et que le mode « Achat » désactive (une édition achetée n'est jamais gratuite).
-  - **Intention d'achat**, à la place de l'exemplaire et de la valeur, pour une édition non possédée, cadre en tirets : elle explique que l'exemplaire se saisit en confirmant l'achat, avec **Confirmer l'achat…** et **Retirer l'intention…**, qui supprime aussi l'édition (`fonctionnel.md` § Intention d'achat, § Réalisation d'une intention).
+  - **Intention d'achat**, à la place de l'exemplaire et de la valeur, pour une édition non possédée, cadre en tirets : elle explique que l'exemplaire se saisit en confirmant l'achat, avec **Confirmer l'achat…** et **Retirer l'intention…**, qui supprime aussi l'édition (`fonctionnel.md` § Intention d'achat, § Réalisation d'une intention). Pour une **nouvelle édition visée**, ouverte par les boutons d'intention d'achat de la page des éditions et intentions d'achat ([`editions-album.md`](editions-album.md)), le cadre annonce que l'édition est créée avec l'intention, sans exemplaire ni valeur, que seul l'éditeur est obligatoire, et n'a pas encore de boutons ; la fiche présente ainsi le minimum de champs (`fonctionnel.md` § Réalisation d'une intention), pré-remplis d'après la série comme toute nouvelle édition, hors l'état, propre à l'exemplaire.
 - **Les visuels**, en colonne latérale sur grand écran (après le formulaire sur smartphone), car ils ne s'enregistrent pas avec le formulaire : chaque visuel est enregistré dès son ajout, son ordre et son type dès qu'on les change, ce que le bloc rappelle.
   - une **zone de dépôt**, avec le choix de fichiers et le type des visuels ajoutés (« Couverture » proposé), les formats acceptés et la taille maximale ;
   - les **envois en cours**, traités un à la fois : progression de l'envoi, « En attente » pour les suivants ; un fichier refusé (format, taille) l'est avec sa raison, en couleur d'alerte, et se retire de la liste ;
@@ -45,7 +45,7 @@ Les données sont fictives ; les visuels sont des illustrations de substitution.
   - sur chaque vignette, un bouton « ⋯ » qui ouvre son menu : **Changer le type**, **Ouvrir l'original** et **Supprimer le visuel…** ; une vignette se glisse pour la réordonner parmi celles de son type ;
   - en création, le bloc indique que les visuels s'ajoutent une fois l'édition enregistrée ;
   - sous le bloc, les dates de création, d'entrée dans la collection et de modification de l'édition.
-- **La barre d'enregistrement**, comme sur la fiche de saisie d'un album (« Créer l'édition » en création).
+- **La barre d'enregistrement**, comme sur la fiche de saisie d'un album (« Créer l'édition » en création, « Créer l'intention d'achat » pour une nouvelle édition visée).
 - **Smartphone** : les blocs s'empilent ; les champs passent à la ligne en gardant leur taille, et les cases à cocher s'alignent sur le bas des champs voisins.
 
 ## Contrôles
