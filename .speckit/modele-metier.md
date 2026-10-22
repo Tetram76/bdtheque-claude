@@ -112,7 +112,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | --- | --- | --- |
 | Visite → Utilisation d'une fonction | 1..n | Utilisations faites au cours de la visite, dans l'ordre de leur date : le parcours de la visite. |
 
-> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement, ni supprimées : leur historique est conservé sans limite. Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou son appareil, ou permette de le reconnaître d'une visite à l'autre : de l'appareil, elle ne retient que sa catégorie.
+> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement, ni supprimées : leur historique est conservé sans limite. Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou son appareil, ou permette de le reconnaître d'une visite à l'autre : de l'appareil, elle ne retient que sa catégorie et le moteur de rendu de son navigateur, avec sa version.
 
 ---
 
@@ -377,7 +377,9 @@ erDiagram
 | --- | --- | --- | --- |
 | Début | date et heure | oui | Moment de la première utilisation de la visite. |
 | Administrateur | booléen | oui | `true` pour une visite de l'administrateur (session authentifiée), y compris lorsqu'il consulte la partie publique ; `false` pour un visiteur public. |
-| Type d'appareil | énuméré | oui | `Ordinateur` / `Tablette` / `Smartphone`. Seule caractéristique de l'appareil retenue : aucune donnée qui l'identifie. |
+| Type d'appareil | énuméré | oui | `Ordinateur` / `Tablette` / `Smartphone`. Avec le moteur de rendu, seule caractéristique de l'appareil retenue : aucune donnée qui l'identifie. |
+| Moteur de rendu | énuméré | oui | `Blink` / `Gecko` / `WebKit` / `Autre`. Moteur du navigateur employé, et non le navigateur lui-même. |
+| Version du moteur | texte | non | Version du moteur de rendu, si le navigateur la transmet. |
 
 ### Utilisation d'une fonction
 
