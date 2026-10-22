@@ -83,8 +83,8 @@ summary{cursor:pointer}
 
       <section aria-labelledby="a-biblio" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 10px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.biblio}}</span>
-        <div style="margin-top: {{t.h2lift}}; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 16px">
-          <h2 id="a-biblio" style="position: relative; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Sur quels albums ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: {{t.rowAlign}}; gap: 12px 16px">
+          <h2 id="a-biblio" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Sur quels albums ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
           <div style="display: flex; flex-wrap: wrap; gap: 8px">
             <button type="button" onClick="{{openAll}}" style="min-height: 32px; padding: 0 12px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Tout déplier</button>
             <button type="button" onClick="{{closeAll}}" style="min-height: 32px; padding: 0 12px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Tout replier</button>
@@ -147,6 +147,7 @@ summary{cursor:pointer}
 <script>
 // Shared defaults: each theme only states what its identity changes.
 const BASE = {
+  rowAlign: 'center',
   cTop: '0',
   h2lift: '0',
   kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
@@ -170,7 +171,7 @@ const cases = (c) => ({
   hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
   helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
   lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '5px 16px', h2r: '26px 30px 28px 22px', h2size: '18px', h2rot: '-1.5deg', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px', tail: true,
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '5px 16px', h2r: '26px 30px 28px 22px', h2size: '18px', h2rot: '-1.5deg', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px', rowAlign: 'flex-start', tail: true,
   cvPad: '10px', cvB: '0', cvR: '16px 10px 18px 12px', cvBg: '#4FD1C5', cvRot: '-2.5deg', cvSh: '0 16px 30px rgba(0,0,0,.35)', imgR: '8px 4px 10px 6px',
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
