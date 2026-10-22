@@ -259,13 +259,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             </section>
           </sc-if>
 
-          <sc-if value="{{x.intent}}">
-            <section aria-labelledby="s-intent" style="{{block}} border-style: dashed">
-              <span style="{{kickStyle}}">{{k.copy}}</span>
-              <h2 id="s-intent" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span>Intention d'achat</h2>
-              <p style="margin: 0; font-size: 14px">{{x.intentText}}</p>
-            </section>
-          </sc-if>
         </form>
 
         <aside class="sa-side" style="min-width: 0; display: flex; flex-direction: column; gap: 22px">
@@ -534,15 +527,13 @@ const EXAMPLES = {
     existing: false, creating: true, intent: true, heading: "Nouvelle intention d'achat", crumb: "Nouvelle intention d'achat",
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
     prefill: 'Pré-remplie d\'après la série Tintin : éditeur, catégorie, format, reliure, orientation, sens de lecture et couleur. Ce ne sont que des propositions : chaque valeur reste modifiable.',
-    intentText: 'L\'édition visée est créée avec l\'intention d\'achat, sans exemplaire ni valeur : l\'acquisition, l\'état et la valeur se saisissent en confirmant l\'achat. Seul l\'éditeur est obligatoire ; décrivez l\'édition autant que nécessaire pour la reconnaître.',
     publisher: 'Casterman', collection: '', year: '', isbn: '', category: '—',
     format: 'Normal (A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '', color: true,
     visuals: {}, meta: '',
     dirty: false, status: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'intention d\'achat'
   },
   intention: {
-    existing: true, intent: true, heading: "Modifier l'édition", crumb: 'Casterman (Fac-similé) [2013]',
-    intentText: 'Cette édition n\'est pas encore possédée : elle est visée par une intention d\'achat. L\'exemplaire (acquisition, état, valeur, notes) se saisit en confirmant l\'achat, depuis la page des éditions et intentions d\'achat de l\'album ou depuis la liste des intentions d\'achat.',
+    existing: true, intent: true, heading: "Modifier l'intention d'achat", crumb: 'Casterman (Fac-similé) [2013]',
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
     publisher: 'Casterman', collection: 'Fac-similé', year: '2013', isbn: '978-2-203-03312-4', category: 'Édition spéciale',
     format: 'Grand (> A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '62', color: true,
