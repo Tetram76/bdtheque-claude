@@ -41,6 +41,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 }
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/bubble-tails.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
@@ -126,7 +127,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-ident" style="{{block}}">
             <span style="{{kickStyle}}">{{k.ident}}</span>
-            <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>La série</h2>
+            <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>La série</h2>
 
             <div style="display: flex; flex-direction: column; gap: 4px">
               <label for="f-title" style="{{lbl}}">Titre <span style="font-weight: 400; color: {{t.muted}}">(obligatoire)</span></label>
@@ -154,7 +155,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           <div class="sa-duo">
           <section aria-labelledby="s-progress" style="{{block}}">
             <span style="{{kickStyle}}">{{k.progress}}</span>
-            <h2 id="s-progress" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Avancement</h2>
+            <h2 id="s-progress" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Avancement</h2>
             <div style="display: flex; flex-direction: column; gap: 4px">
               <label for="f-planned" style="{{lbl}}">Tomes numérotés prévus</label>
               <input id="f-planned" type="text" inputmode="numeric" maxlength="4" value="{{x.planned}}" aria-describedby="f-planned-help" style="{{num}} width: 64px">
@@ -170,7 +171,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-calc" style="{{block}}">
             <span style="{{kickStyle}}">{{k.calc}}</span>
-            <h2 id="s-calc" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Calculs</h2>
+            <h2 id="s-calc" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Calculs</h2>
             <div style="display: flex; flex-direction: column; gap: 6px">
               <sc-for list="{{excludes}}" as="f">
                 <label style="display: inline-flex; align-items: center; gap: 8px; min-height: 32px; font-size: 14px; cursor: pointer">
@@ -184,7 +185,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-credits" style="{{block}}">
             <span style="{{kickStyle}}">{{k.credits}}</span>
-            <h2 id="s-credits" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Les auteurs</h2>
+            <h2 id="s-credits" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les auteurs</h2>
             <div style="display: flex; flex-direction: column">
               <sc-for list="{{roles}}" as="r">
                 <div class="sa-role" style="padding: 10px 0; border-bottom: {{t.rowB}}">
@@ -204,7 +205,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-pub" style="{{block}}">
             <span style="{{kickStyle}}">{{k.pub}}</span>
-            <h2 id="s-pub" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Éditeur et collection</h2>
+            <h2 id="s-pub" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Éditeur et collection</h2>
             <div class="ss-pair">
               <div style="min-width: 0; display: flex; flex-direction: column; gap: 4px">
                 <label for="f-publisher" style="{{lbl}}">Éditeur</label>
@@ -229,7 +230,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-tags" style="{{block}}">
             <span style="{{kickStyle}}">{{k.tags}}</span>
-            <h2 id="s-tags" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Genres et univers</h2>
+            <h2 id="s-tags" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Genres et univers</h2>
             <sc-for list="{{tagGroups}}" as="g">
               <div style="display: flex; flex-direction: column; gap: 6px">
                 <span style="{{lbl}}">{{g.label}}</span>
@@ -247,7 +248,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-texts" style="{{block}}">
             <span style="{{kickStyle}}">{{k.texts}}</span>
-            <h2 id="s-texts" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Résumé et notes</h2>
+            <h2 id="s-texts" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Résumé et notes</h2>
             <div style="display: flex; flex-direction: column; gap: 4px">
               <label for="f-summary" style="{{lbl}}">Résumé</label>
               <textarea id="f-summary" rows="4" placeholder="Ce que raconte la série…" style="{{area}}">{{x.summary}}</textarea>
@@ -260,7 +261,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-tpl" style="{{block}}">
             <span style="{{kickStyle}}">{{k.tpl}}</span>
-            <h2 id="s-tpl" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Nouvelles éditions</h2>
+            <h2 id="s-tpl" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Nouvelles éditions</h2>
             <sc-if value="{{x.creating}}">
               <div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: {{t.tR}}; background: {{t.nBg}}; color: {{t.nFg}}; font-size: 13px">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M8 8h11v11H8z M5 16V5h11"></path></svg>
@@ -534,7 +535,7 @@ class View extends Mockup {
       kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
       h2: 'position: relative; align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: ' + (t.h2lift ?? '0') + ' 0 0; transform: rotate(' + (t.h2rot ?? '0deg') + '); display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
       // As on the dashboard, a speech bubble straddles the top edge of its panel, its tail pointing into it.
-      tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
+      tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 13px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
       mark: 'display: ' + t.mkDisp + '; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF;',
       lbl: 'font-weight: 700; font-size: 13px;',
       help: 'font-size: 12px; color: ' + t.muted + ';',

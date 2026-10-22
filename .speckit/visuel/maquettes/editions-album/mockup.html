@@ -33,6 +33,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 }
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/bubble-tails.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
@@ -107,7 +108,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
       <section aria-labelledby="s-album" style="{{block}}">
         <span style="{{kickStyle}}">{{k.album}}</span>
-        <h2 id="s-album" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>L'album</h2>
+        <h2 id="s-album" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>L'album</h2>
         <div class="ea-album">
           <span aria-hidden="true" style="width: 64px; height: 86px; border-radius: {{t.thR}}; background: {{albumCover}}"></span>
           <div style="min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: 14px">
@@ -124,7 +125,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
       <section aria-labelledby="s-eds" style="{{block}}">
         <span style="{{kickStyle}}">{{k.eds}}</span>
-        <h2 id="s-eds" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Les éditions</h2>
+        <h2 id="s-eds" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les éditions</h2>
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
           <span style="font-size: 13px; font-weight: 700">{{x.count}}</span>
           <sc-if value="{{canAddEdition}}"><a href="#" style="{{priBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle édition</a></sc-if>
@@ -162,7 +163,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
       <section aria-labelledby="s-intents" style="{{block}}">
         <span style="{{kickStyle}}">{{k.intents}}</span>
-        <h2 id="s-intents" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Les intentions d'achat</h2>
+        <h2 id="s-intents" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les intentions d'achat</h2>
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
           <span style="font-size: 13px; font-weight: 700">{{intentCount}}</span>
           <sc-if value="{{intentDirect}}">
@@ -382,7 +383,7 @@ function commonVals(view, t, kick) {
     kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
     h2: 'position: relative; align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: ' + (t.h2lift ?? '0') + ' 0 0; transform: rotate(' + (t.h2rot ?? '0deg') + '); display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
     // As on the dashboard, a speech bubble straddles the top edge of its panel, its tail pointing into it.
-    tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
+    tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 13px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
     mark: 'display: ' + t.mkDisp + '; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF;',
     lbl: 'font-weight: 700; font-size: 13px;',
     help: 'font-size: 12px; color: ' + t.muted + ';',

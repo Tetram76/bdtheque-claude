@@ -37,6 +37,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 }
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/bubble-tails.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
@@ -122,7 +123,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-ident" style="{{block}}">
             <span style="{{kickStyle}}">{{k.ident}}</span>
-            <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>L'éditeur</h2>
+            <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>L'éditeur</h2>
 
             <div style="display: flex; flex-direction: column; gap: 4px">
               <label for="f-name" style="{{lbl}}">Nom <span style="font-weight: 400; color: {{t.muted}}">(obligatoire)</span></label>
@@ -142,7 +143,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
           <section aria-labelledby="s-imprints" style="{{block}}">
             <span style="{{kickStyle}}">{{k.imprints}}</span>
-            <h2 id="s-imprints" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" style="{{tail}}"></span>Les collections</h2>
+            <h2 id="s-imprints" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les collections</h2>
             <span style="{{help}}">Elles s'enregistrent avec l'éditeur. Une collection que désigne une édition ou une série ne peut pas être retirée.</span>
             <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
               <sc-for list="{{imprints}}" as="c">
@@ -345,7 +346,7 @@ function commonVals(view, t, kick) {
     kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
     h2: 'position: relative; align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: ' + (t.h2lift ?? '0') + ' 0 0; transform: rotate(' + (t.h2rot ?? '0deg') + '); display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
     // As on the dashboard, a speech bubble straddles the top edge of its panel, its tail pointing into it.
-    tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
+    tail: t.tail ? 'position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 13px solid transparent; border-top: 12px solid ' + t.h2bg + ';' : 'display: none;',
     mark: 'display: ' + t.mkDisp + '; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF;',
     lbl: 'font-weight: 700; font-size: 13px;',
     help: 'font-size: 12px; color: ' + t.muted + ';',
