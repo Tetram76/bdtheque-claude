@@ -444,7 +444,7 @@ L'application se compose de trois parties distinctes :
    - **Recherche avancée** : recherche de n'importe quelle entité sur n'importe quelle combinaison de critères, portant sur les données du modèle métier et sur les liens entre entités, et rejeu des recherches enregistrées par l'administrateur (cf. § Recherche avancée).
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. § Règles d'accès).
 2. **Administration** — protégée par **authentification** :
-   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. § Recherche avancée), gestion des jetons d'accès de l'outil pour agents IA et suivi de son utilisation (cf. § Interface pour agents IA), etc.
+   - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. § Recherche avancée), gestion des jetons d'accès de l'outil pour agents IA et suivi de son utilisation (cf. § Interface pour agents IA), suivi de l'utilisation de l'interface web (cf. § Suivi de l'utilisation de l'interface web), etc.
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
@@ -562,6 +562,22 @@ L'application met à disposition d'un **agent IA** un outil lui permettant d'int
 Les règles d'accès sont celles de l'application (cf. § Règles d'accès) : l'outil n'a pas de règles d'accès aux données qui lui soient propres, son jeton ne faisant que déterminer le niveau d'accès de l'agent, et les fonctionnalités équivalentes de l'interface web ont les mêmes restrictions.
 
 <!-- À préciser : périmètre exact de l'aide à la saisie, cas d'usage détaillés, analyses et statistiques attendues. -->
+
+## Suivi de l'utilisation de l'interface web
+
+Comme celle de l'outil pour agents IA (cf. § Interface pour agents IA, Suivi de l'utilisation), l'utilisation de l'interface web est suivie, pour savoir quelles fonctions sont utilisées, lesquelles le sont moins, et lesquelles ne le sont pas du tout.
+
+- **Périmètre** : toute l'interface web, consultation, administration et aide contextuelle (cf. § Structure de l'application).
+- **Fonctions suivies** : chaque **écran** affiché (ex. fiche d'un album, liste des séries, dashboard, formulaire d'une édition) et chaque **action** déclenchée (ex. recherche lancée, rejeu d'une recherche enregistrée, navigation par initiale, page suivante d'une liste, enregistrement, suppression, import depuis une source externe, ouverture de l'aide).
+- **Visites** : les utilisations d'un même utilisateur au cours d'une même visite sont regroupées, pour que le **parcours** suivi pendant une visite reste lisible et qu'une fonction utilisée de nombreuses fois au cours d'une seule visite ne pèse pas comme une fonction utilisée au cours de nombreuses visites.
+- **Anonymat** : le suivi est **le plus anonyme possible**. Une visite ne porte rien qui identifie l'utilisateur (ni adresse IP, ni identité, ni appareil), et rien ne permet de reconnaître un même visiteur d'une visite à l'autre.
+- **Administrateur et visiteurs** : chaque visite indique si elle est celle de l'**administrateur** (session authentifiée) ou d'un **visiteur** public, y compris lorsque l'administrateur consulte la partie publique : l'usage public se lit sans être faussé par celui de l'administrateur, qui se lit aussi à part.
+- **Indicateurs**, pour chaque fonction, distingués pour les visiteurs, pour l'administrateur et ensemble :
+  - le **nombre d'utilisations** et le **nombre de visites** au cours desquelles elle a été utilisée ;
+  - leur **fréquence** dans le temps, et la date de sa **dernière utilisation** ;
+  - une fonction **jamais utilisée** figure dans le suivi, avec des indicateurs nuls.
+- **Conservation** : l'historique des visites et de leurs utilisations est conservé **sans limite**, pour suivre l'évolution de l'usage dans le temps.
+- Le suivi est consultable dans l'**administration** seule. Les visites et leurs utilisations ne sont pas des fiches : elles ne sont jamais modifiées, ni consignées au journal des modifications (`modele-metier.md` § Entrée du journal des modifications).
 
 ## Présentation des erreurs
 

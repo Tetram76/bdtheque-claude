@@ -32,6 +32,8 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | **Objectif de session** | Objectif de la demande de l'utilisateur, donné par l'agent à l'ouverture de la session ou mis à jour ensuite. |
 | **Utilisation de l'outil** | Trace d'un appel d'outil ou d'une lecture de ressource par un agent, au sein d'une session. |
 | **Retour écrit** | Limite signalée par l'agent, sur une utilisation précise ou sur sa session. |
+| **Visite de l'interface web** | Suite anonyme des utilisations de l'interface web par un même utilisateur (visiteur ou administrateur), au cours d'une même visite (voir `fonctionnel.md` § Suivi de l'utilisation de l'interface web). |
+| **Utilisation d'une fonction** | Trace de l'affichage d'un écran ou du déclenchement d'une action de l'interface web, au sein d'une visite. |
 | **Journal des modifications** | Trace de chaque écriture sur une fiche : création, modification, suppression ou reprise d'une ancienne donnée. |
 
 ---
@@ -103,6 +105,14 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 >
 > - L'utilisation qu'un retour écrit commente appartient à la même session que lui, et une utilisation rattachée à une session l'est au même jeton d'accès que cette session.
 > - Sessions, objectifs, utilisations et retours écrits ne sont jamais modifiés après leur enregistrement ; ils ne disparaissent qu'avec le jeton d'accès qui porte la session. Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications.
+
+### Visite de l'interface web — relations
+
+| Relation | Cardinalité | Remarques |
+| --- | --- | --- |
+| Visite → Utilisation d'une fonction | 1..n | Utilisations faites au cours de la visite, dans l'ordre de leur date : le parcours de la visite. |
+
+> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement, ni supprimées : leur historique est conservé sans limite. Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou permette de le reconnaître d'une visite à l'autre.
 
 ---
 
@@ -360,6 +370,22 @@ erDiagram
 | Texte | texte long | oui | Limite signalée par l'agent. |
 | Point d'entrée | texte | non | Outil ou ressource concerné, si l'agent le désigne. |
 | Date | date et heure | oui | Moment du retour. |
+
+### Visite de l'interface web
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Début | date et heure | oui | Moment de la première utilisation de la visite. |
+| Administrateur | booléen | oui | `true` pour une visite de l'administrateur (session authentifiée), y compris lorsqu'il consulte la partie publique ; `false` pour un visiteur public. |
+
+### Utilisation d'une fonction
+
+| Attribut | Type | Obligatoire | Remarques |
+| --- | --- | --- | --- |
+| Fonction | texte | oui | Écran affiché ou action déclenchée. |
+| Date | date et heure | oui | Moment de l'utilisation. |
+
+> Les indicateurs du suivi (nombre d'utilisations et de visites, fréquence, dernière utilisation, voir `fonctionnel.md` § Suivi de l'utilisation de l'interface web) sont déduits de ces utilisations, jamais stockés.
 
 ### Entrée du journal des modifications
 
