@@ -25,7 +25,7 @@ Les données sont fictives ; les couvertures sont des illustrations de substitut
 
 - **En-tête et menu** de l'administration, l'entrée « Séries » étant l'entrée courante du menu.
 - **Fil d'Ariane** : Administration, Séries, puis la série (« Nouvelle série » en création).
-- **Titre** « Modifier la série » ou « Nouvelle série », suivi du titre de la série, recalculé au fil de la saisie (« <Sans titre> » tant que rien n'est saisi). En modification, à droite : **Voir dans la consultation**. La fiche ne propose ni suppression ni fusion : on y modifie la série, et ces actions se font depuis la liste des séries.
+- **Titre** « Modifier la série » ou « Nouvelle série », suivi du titre de la série, recalculé au fil de la saisie (« <Sans titre> » tant que rien n'est saisi). La fiche ne propose ni lien vers la consultation, qui ne présenterait pas les données en cours de modification, ni suppression, ni fusion : on y modifie la série, et ces actions se font depuis la liste des séries.
 - **Erreur d'enregistrement** : celle de la saisie d'un album, en trois catégories ; l'erreur métier de l'exemple est un titre vidé, le champ étant bordé de la couleur d'alerte.
 - **Le formulaire**, en blocs, sur la colonne principale :
   - **La série** : le **titre**, obligatoire ; la **clé de tri**, marquée **Auto** ou **Manuelle**, avec **Réinitialiser** en mode manuel (`fonctionnel.md` § Calcul et stockage de la clé de tri) ; le **statut**, une liste (« — Non renseigné », En cours, Terminée, Abandonnée), l'aide rappelant ce que veut dire « Terminée ».

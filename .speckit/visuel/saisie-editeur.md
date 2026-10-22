@@ -24,7 +24,7 @@ Les données sont fictives.
 
 - **En-tête et menu** de l'administration, l'entrée « Éditeurs » étant l'entrée courante du menu.
 - **Fil d'Ariane** : Administration, Éditeurs, puis l'éditeur (« Nouvel éditeur » en création).
-- **Titre** « Modifier l'éditeur » ou « Nouvel éditeur », suivi de son nom, recalculé au fil de la saisie (« <Sans nom> » tant que rien n'est saisi). En modification, à droite : **Voir dans la consultation**. La fiche ne propose ni suppression ni fusion : on y modifie l'éditeur, et ces actions se font depuis la liste des éditeurs.
+- **Titre** « Modifier l'éditeur » ou « Nouvel éditeur », suivi de son nom, recalculé au fil de la saisie (« <Sans nom> » tant que rien n'est saisi). La fiche ne propose ni lien vers la consultation, qui ne présenterait pas les données en cours de modification, ni suppression, ni fusion : on y modifie l'éditeur, et ces actions se font depuis la liste des éditeurs.
 - **Erreur d'enregistrement** : celle de la saisie d'un album, en trois catégories ; l'erreur métier de l'exemple est un nom déjà porté par un autre éditeur, le champ étant bordé de la couleur d'alerte, le message rappelant qu'une différence de casse suffit à distinguer deux éditeurs (`modele-metier.md` § Éditeur).
 - **Le formulaire**, en deux blocs :
   - **L'éditeur** : le **nom**, obligatoire, et le **site web**, avec, une fois renseigné, un bouton qui l'ouvre ; l'aide rappelle que dans la consultation le nom de l'éditeur mène à son site, et n'est pas un lien sans lui (`fonctionnel.md` § Structure de l'application).
