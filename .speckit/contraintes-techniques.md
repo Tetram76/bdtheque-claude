@@ -29,6 +29,8 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 
 Toute technologie retenue (langage, framework, bibliothèque, outil, base de données, Docker, CI…) est **utilisée au mieux de la version retenue** : ses fonctionnalités, syntaxes et API sont employées dès qu'elles améliorent l'élément concerné (performances, lisibilité, sécurité, concision, maintenabilité…). La règle vaut pour **tous les éléments de l'application**, et non pour le seul code : schéma et requêtes de la base, Dockerfiles et fichier Compose, workflows CI, configuration, scripts… Se limiter à ce que permettait une version antérieure, alors que la version retenue offre mieux, n'a pas de sens (ex. retenir la version N d'un langage, mais n'en écrire que les syntaxes de la version N-1).
 
+Cette règle implique de **prendre connaissance des possibilités** de chaque technologie à la version retenue (documentation officielle, notes de version) : reproduire des modèles trouvés ailleurs (exemples, extraits, réponses en ligne, habitudes) ne suffit pas, surtout lorsqu'ils sont **datés**, écrits pour une version antérieure.
+
 Lors d'une **montée de version** d'une technologie retenue, une **revue de l'existant** est menée pour identifier les chantiers d'amélioration que permet la nouvelle version.
 
 ## Architecture des tiers
