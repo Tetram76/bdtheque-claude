@@ -146,6 +146,22 @@ Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve
 | --- | --- |
 | #185 | Intention d'achat sur un album réservée à un album sans édition |
 
+### Ajustement issu de la mesure d'audience de l'interface web
+
+Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience de l'interface web (`fonctionnel.md` § Mesure d'audience de l'interface web) : visites, utilisations des fonctions et compteurs d'audience mensuels, leur conservation et la lecture de leurs indicateurs. Les phases 1 et 2 étant validées, un seul ticket couvre les deux ; la part de la Phase 3, pas encore découpée, y est notée.
+
+| Ticket | Titre |
+| --- | --- |
+| #186 | Mesure d'audience de l'interface web dans le modèle de domaine et l'API |
+
+### Ajustement issu de l'exploitation des technologies retenues
+
+Revue de l'existant au regard de la contrainte d'exploitation au mieux des technologies retenues (`contraintes-techniques.md` § Exploitation des technologies retenues), pour en identifier les chantiers d'amélioration, chacun avec son ticket. Les phases 0 à 2 étant validées, un seul ticket les couvre.
+
+| Ticket | Titre |
+| --- | --- |
+| #189 | Revue de l'existant au regard de l'exploitation des technologies retenues |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
@@ -156,6 +172,7 @@ Découpage précis à établir une fois la Phase 2 stabilisée ; probablement pa
 - **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base.
 - **Note — paramétrage de l'application** : le paramétrage (`modele-metier.md` § Paramétrage de l'application) n'existe encore ni dans le modèle de domaine ni dans l'API. Il est intégré à cette phase avec le bloc « Paramétrage » de l'administration, qui l'expose et le modifie, et ses écritures sont alors journalisées (`modele-metier.md` § Entrée du journal des modifications, type de fiche `Paramétrage`).
 - **Note — fuseau horaire** : les dates et heures (création, modification, entrée dans la collection) sont enregistrées en temps universel, et la recherche avancée les compare par leur jour en temps universel (`choix-implementation.md` § Recherche avancée : mise en œuvre). Le fuseau horaire dans lequel l'application les présente est établi avec le frontend, et la recherche alignée sur lui, pour qu'une date présentée et la même date recherchée désignent le même jour. Le changement de jour de l'édition « À la une » du dashboard (`fonctionnel.md` § Page d'accueil, Phase 4) suit ce même fuseau.
+- **Note — mesure d'audience de l'interface web** : le modèle de domaine et l'API de la mesure d'audience (`fonctionnel.md` § Mesure d'audience de l'interface web) précèdent cette phase (#186). Elle y ajoute le relevé des écrans et actions qu'elle réalise, avec le type d'appareil et le moteur de rendu de chaque visite, la délimitation d'une visite et le traceur qui la porte ; la liste des fonctions suivies, nécessaire pour qu'une fonction jamais utilisée figure dans les indicateurs, qui suit celle des écrans et actions réalisés ; à l'administration, l'écran qui présente les indicateurs ; à l'interface publique, l'information des visiteurs et leur opposition.
 - **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données (`choix-implementation.md` § Recherche avancée : mise en œuvre), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
 
 ## Phase 4 — Statistiques, devises et estimation de valeur

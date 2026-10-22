@@ -1,5 +1,7 @@
 # .speckit — Source de Vérité Absolue
 
+Le projet est piloté en **développement piloté par les spécifications** (*Spec-Driven Development*, SDD) : la spécification, le dossier `.speckit/`, précède et gouverne le code (cf. [`.speckit/gestion-projet.md`](.speckit/gestion-projet.md) § « Gouvernance documentaire »).
+
 Le dossier `.speckit/` est la **source de vérité absolue et contraignante** du projet : il prime sur toute autre information, y compris ce fichier, qui n'en est que le point d'entrée. Les règles de gouvernance (primauté du speckit, qui décide du contenu, mise à jour, rôle et autonomie de l'agent) sont dans [`.speckit/gestion-projet.md`](.speckit/gestion-projet.md) § « Gouvernance documentaire » et § « Prise de décision ».
 
 ## Primauté sur les rules et les skills (critique)
