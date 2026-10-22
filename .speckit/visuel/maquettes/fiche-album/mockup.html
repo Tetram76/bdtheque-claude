@@ -51,6 +51,7 @@ summary{cursor:pointer}
       <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 32px">
 
         <section aria-label="Visuels de l'édition" style="flex: 0 1 280px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 auto">
+          <sc-if value="{{hasEdition}}" hint-placeholder-val="{{true}}">
           <div style="width: clamp(160px, 42vw, 250px); margin-bottom: {{t.shelfGap}}; box-sizing: border-box; position: relative; padding: {{t.cvPad}}; border: {{t.cvB}}; border-radius: {{t.cvR}}; background: {{t.cvBg}}; box-shadow: {{t.cvSh}}; transform: rotate({{t.cvRot}})">
             <sc-if value="{{t.tape}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; top: -12px; left: 50%; width: 96px; height: 26px; margin-left: -48px; background: rgba(255,232,0,.75); transform: rotate(-4deg)"></span></sc-if>
             <div role="img" aria-label="{{vis.alt}}" style="display: block; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: {{t.imgR}}; background: #FFFFFF">
@@ -151,6 +152,10 @@ summary{cursor:pointer}
             </ul>
           </div>
           <a href="#" style="font-weight: 700; font-size: 13px; color: {{t.link}}">Voir l'image originale</a>
+          </sc-if>
+          <sc-if value="{{noEdition}}" hint-placeholder-val="{{false}}">
+            <div role="img" aria-label="Visuel générique : aucune édition" style="width: clamp(160px, 42vw, 250px); aspect-ratio: 3 / 4; display: flex; align-items: flex-end; justify-content: center; padding: 12px; box-sizing: border-box; border-radius: {{t.imgR}}; background: repeating-linear-gradient(135deg, rgba(127,127,127,.42) 0 6px, rgba(127,127,127,.24) 6px 12px); color: {{t.muted}}; font-size: 13px; font-weight: 700">Aucun visuel</div>
+          </sc-if>
         </section>
 
         <div style="flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
@@ -227,6 +232,7 @@ summary{cursor:pointer}
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.editions}}</span>
         <h2 id="f-editions" style="position: relative; align-self: flex-start; margin: 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Dans quelles éditions ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 26px; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 10px solid transparent; border-top: 12px solid {{t.h2bg}}"></span></sc-if></h2>
 
+        <sc-if value="{{hasEdition}}" hint-placeholder-val="{{true}}">
         <ul aria-label="Éditions de l'album" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 8px">
           <sc-for list="{{editions}}" as="e" hint-placeholder-count="4">
             <li style="display: flex">
@@ -257,14 +263,22 @@ summary{cursor:pointer}
           </sc-for>
         </div>
         <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{cur.meta}}</p>
-        <sc-if value="{{intent}}" hint-placeholder-val="{{false}}">
-          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 10px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; font-size: 14px">
-            <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
-              <span style="font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">Intention d'achat</span>
-              <span style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0"><span style="display: inline-flex; align-items: center; padding: 1px 9px; border: 2px solid {{t.text}}; border-radius: {{t.btnR}}; font-weight: 800; font-size: 12px; white-space: nowrap">Édition</span><span style="font-weight: 700; overflow-wrap: anywhere">{{intent.label}}</span></span>
-              <span style="font-size: 12px; color: {{t.muted}}">{{intent.sub}}</span>
-            </span>
-            <span style="font-size: 12px; color: {{t.muted}}">{{intent.date}}</span>
+        </sc-if>
+        <sc-if value="{{noEdition}}" hint-placeholder-val="{{false}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 14px; text-align: center">Aucune édition dans la collection.</span></sc-if>
+        <sc-if value="{{hasIntents}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; font-size: 14px">
+            <span style="font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">{{intentsTitle}}</span>
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+              <sc-for list="{{intents}}" as="i" hint-placeholder-count="1">
+                <li style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 16px; padding: 4px 0; border-top: {{i.sep}}">
+                  <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+                    <span style="font-weight: 700; overflow-wrap: anywhere">{{i.label}}</span>
+                    <span style="font-size: 12px; color: {{t.muted}}">{{i.sub}}</span>
+                  </span>
+                  <span style="font-size: 12px; color: {{t.muted}}">{{i.date}}</span>
+                </li>
+              </sc-for>
+            </ul>
           </div>
         </sc-if>
       </section>
@@ -517,6 +531,19 @@ const EDITIONS = [
 ];
 const OWNED = EDITIONS.filter((e) => e.owned);
 const INTENT = EDITIONS.find((e) => !e.owned);
+const summary = (e) => ['Catégorie', 'Format', 'Reliure', 'Pages'].map((k) => e.objet.find(([key]) => key === k)?.[1]).filter(Boolean).map((v) => (/^\d+$/.test(v) ? v + ' pages' : v)).join(' · ');
+// What the album's intents aim at. Each is told by what it names, without a tag: an edition by its
+// label, the album itself by "any edition", the only intent an album without any edition may have.
+const INTENT_SCENARIOS = {
+  une: { intents: [{ label: INTENT.label, sub: summary(INTENT), date: 'Posée le 9 octobre 2026' }] },
+  plusieurs: {
+    intents: [
+      { label: INTENT.label, sub: summary(INTENT), date: 'Posée le 9 octobre 2026' },
+      { label: 'Casterman (Corto Maltese en couleur) [2016] - ISBN 978-2-203-10012-2', sub: 'Grand (> A4) · Cartonnée · 64 pages', date: 'Posée le 12 octobre 2026' }
+    ]
+  },
+  album: { albumOnly: true, intents: [{ label: 'Toute édition de l\'album', sub: 'N\'importe quelle édition la réalisera.', date: 'Posée le 9 octobre 2026' }] }
+};
 
 // The usual case, and a collective album credited to some twenty artists (two of them in two roles).
 const CREDITS = {
@@ -553,6 +580,10 @@ class View extends Mockup {
     const visIndex = this.state?.visual ?? 0;
     // An intent is never one of the editions: the grid only holds owned ones, the intent is shown apart.
     const ed = OWNED[edIndex];
+    const scenario = INTENT_SCENARIOS[this.props.intentions] ?? INTENT_SCENARIOS.une;
+    // An album aimed at by an intent on itself has no edition: no visual, no grid, only the intent.
+    const hasEdition = !scenario.albumOnly;
+    const intents = scenario.intents;
     const visCount = ed.visuals.length;
     const vi = Math.min(visIndex, visCount - 1);
     const [visType, visKind] = ed.visuals[vi];
@@ -597,7 +628,9 @@ class View extends Mockup {
       facts: [
         { label: 'T. 5', ...pick(true) },
         { label: 'Paru en novembre 1970', ...pick(false) },
-        { label: 'Dans la collection, en 3 éditions', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
+        hasEdition
+          ? { label: 'Dans la collection, en 3 éditions', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
+          : { label: 'Intention d\'achat', bg: 'transparent', fg: t.text, bd: '2px dashed ' + t.line }
       ],
       stars: [1, 2, 3, 4, 5],
       creditsTotal: distinct > 1 ? distinct + ' auteurs crédités' : 'Auteur',
@@ -638,11 +671,10 @@ class View extends Mockup {
       })),
       prevVis: () => this.setState({ visual: (vi + visCount - 1) % visCount }),
       nextVis: () => this.setState({ visual: (vi + 1) % visCount }),
-      intent: INTENT ? {
-        label: INTENT.label,
-        sub: ['Catégorie', 'Format', 'Reliure', 'Pages'].map((k) => INTENT.objet.find(([key]) => key === k)?.[1]).filter(Boolean).map((v) => (/^\d+$/.test(v) ? v + ' pages' : v)).join(' · '),
-        date: 'Posée le 9 octobre 2026'
-      } : null,
+      hasEdition, noEdition: !hasEdition,
+      hasIntents: intents.length > 0,
+      intentsTitle: intents.length > 1 ? 'Intentions d\'achat' : 'Intention d\'achat',
+      intents: intents.map((v, i) => ({ ...v, sep: i > 0 ? t.rowB : '0' })),
       editions: OWNED.map((e, i) => ({
         label: e.label, pressed: i === edIndex ? 'true' : 'false', ...pick(i === edIndex),
         // Switching edition also shows its own visuals, from its cover.
@@ -664,7 +696,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["violine", "mure", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "violine"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["violine", "mure", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "violine"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'achat", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
 </script>
 </body>
 </html>
