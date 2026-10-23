@@ -32,13 +32,13 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.1.0
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v4.4.1
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v4
+        uses: docker/login-action@v4.7.0
         with:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -95,7 +95,7 @@ jobs:
       - name: Compute tags and labels
         id: meta
         if: steps.previous.outputs.up-to-date != 'true'
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v6.2.0
         with:
           images: |
             ${{ env.API_REPOSITORY }}
@@ -122,7 +122,7 @@ jobs:
       # builder's cache, so they only upload. Loaded into the local image store for Docker Scout.
       - name: Build api image
         if: steps.previous.outputs.up-to-date != 'true'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           file: docker/api/Dockerfile
@@ -134,7 +134,7 @@ jobs:
 
       - name: Build frontend image
         if: steps.previous.outputs.up-to-date != 'true'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           file: docker/frontend/Dockerfile
@@ -149,7 +149,7 @@ jobs:
       # no fixable vulnerability is accepted at all.
       - name: Check vulnerabilities of the api image
         if: steps.previous.outputs.up-to-date != 'true'
-        uses: docker/scout-action@v1
+        uses: docker/scout-action@v1.27.0
         with:
           command: ${{ steps.previous.outputs.api-digest && 'compare' || 'cves' }}
           image: local://bdtheque-api:scan
@@ -161,7 +161,7 @@ jobs:
 
       - name: Check vulnerabilities of the frontend image
         if: steps.previous.outputs.up-to-date != 'true'
-        uses: docker/scout-action@v1
+        uses: docker/scout-action@v1.27.0
         with:
           command: ${{ steps.previous.outputs.frontend-digest && 'compare' || 'cves' }}
           image: local://bdtheque-frontend:scan
@@ -176,7 +176,7 @@ jobs:
       - name: Push api image
         id: push-api
         if: steps.previous.outputs.up-to-date != 'true'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           file: docker/api/Dockerfile
@@ -190,7 +190,7 @@ jobs:
       - name: Push frontend image
         id: push-frontend
         if: steps.previous.outputs.up-to-date != 'true'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           file: docker/frontend/Dockerfile

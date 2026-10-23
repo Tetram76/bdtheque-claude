@@ -2,7 +2,7 @@
 
 # The SDK runs on the platform of the build machine, and targets the platform of the image
 # (TARGETARCH, set by BuildKit): only the native libraries of that platform are published.
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.402 AS build
 ARG TARGETARCH
 WORKDIR /src
 
@@ -25,7 +25,7 @@ RUN dotnet publish src/Bdtheque.Frontend/Bdtheque.Frontend.csproj -c Release -a 
 
 # Chiseled: neither shell nor package manager, non-root user; "extra" for ICU, which the French
 # linguistic sorting and formatting require (choix-implementation/socle.md § Internationalisation).
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled-extra AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.13-noble-chiseled-extra AS final
 WORKDIR /app
 
 COPY --from=build /app .
