@@ -160,7 +160,15 @@ Revue de l'existant au regard de la contrainte d'exploitation au mieux des techn
 
 | Ticket | Titre |
 | --- | --- |
-| #189 | Revue de l'existant au regard de l'exploitation des technologies retenues |
+| ~~#189~~ | Revue de l'existant au regard de l'exploitation des technologies retenues |
+
+Chantiers d'amélioration identifiés par cette revue, chacun réalisé par sa propre Pull Request.
+
+| Ticket | Titre |
+| --- | --- |
+| #219 | Horloge de l'application pour les dates renseignées automatiquement |
+| #220 | Pipeline CI et outillage .NET : SDK, restauration verrouillée, cache NuGet, couverture et projets de test |
+| #221 | Paramétrage des valeurs de la recherche avancée par EF Core |
 
 ## Phase 3 — Frontend Blazor
 
