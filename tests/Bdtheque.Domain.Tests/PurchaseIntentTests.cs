@@ -83,9 +83,23 @@ public sealed class PurchaseIntentTests
     public void AddPurchaseIntent_WholeAlbum_WhenAnEditionIsTargeted_Throws()
     {
         var album = new Album("Le Lotus bleu", null);
-        album.AddPurchaseIntent(new Edition(album, Casterman));
+        var intent = album.AddPurchaseIntent(new Edition(album, Casterman));
 
-        DomainAssert.Violates(DomainRules.PurchaseIntentEditionsAlreadyTargeted, () => album.AddPurchaseIntent());
+        DomainAssert.Violates(DomainRules.PurchaseIntentAlbumHasEditions, () => album.AddPurchaseIntent());
+        Assert.Equal([intent], album.PurchaseIntents);
+    }
+
+    [Fact]
+    public void AddPurchaseIntent_WholeAlbum_WhenAnEditionIsOwned_Throws()
+    {
+        // fonctionnel.md § Intention d'achat: once the album has an edition, wishing for any edition no
+        // longer makes sense — a specific edition is targeted instead.
+        var album = new Album("Le Lotus bleu", null);
+        var owned = new Edition(album, Casterman);
+        album.RecordAcquisition(owned, AcquisitionMode.Purchase);
+
+        DomainAssert.Violates(DomainRules.PurchaseIntentAlbumHasEditions, () => album.AddPurchaseIntent());
+        Assert.Empty(album.PurchaseIntents);
     }
 
     [Fact]
@@ -202,14 +216,11 @@ public sealed class PurchaseIntentRemovalTests
     public void RemovePurchaseIntent_OnTheWholeAlbum_RemovesOnlyTheIntent()
     {
         var album = new Album("Le Lotus bleu", null);
-        var owned = new Edition(album, Casterman);
-        album.RecordAcquisition(owned, AcquisitionMode.Purchase);
         var intent = album.AddPurchaseIntent();
 
         album.RemovePurchaseIntent(intent);
 
         Assert.Empty(album.PurchaseIntents);
-        Assert.Equal([owned], album.Editions);
     }
 
     [Fact]
@@ -251,19 +262,6 @@ public sealed class PurchaseIntentRemovalTests
     }
 
     [Fact]
-    public void ConvertPurchaseIntentToEdition_AnOwnedEdition_ThrowsAndKeepsTheIntent()
-    {
-        var album = new Album("Le Lotus bleu", null);
-        var owned = new Edition(album, Casterman);
-        album.RecordAcquisition(owned, AcquisitionMode.Purchase);
-        var intent = album.AddPurchaseIntent();
-
-        DomainAssert.Violates(
-            DomainRules.PurchaseIntentEditionAlreadyOwned, () => album.ConvertPurchaseIntentToEdition(intent, owned));
-        Assert.Equal([intent], album.PurchaseIntents);
-    }
-
-    [Fact]
     public void ConvertPurchaseIntentToEdition_AnIntentOnAnEdition_Throws()
     {
         var album = new Album("Le Lotus bleu", null);
@@ -273,33 +271,47 @@ public sealed class PurchaseIntentRemovalTests
     }
 
     [Fact]
-    public void ConvertPurchaseIntentToAlbum_ReplacesTheIntentOnTheEditionAndRemovesTheEdition()
+    public void ConvertPurchaseIntentToAlbum_ReplacesTheIntentOnTheOnlyEditionAndRemovesTheEdition()
     {
         var album = new Album("Le Lotus bleu", null);
-        var owned = new Edition(album, Casterman);
-        album.RecordAcquisition(owned, AcquisitionMode.Purchase);
         var intent = album.AddPurchaseIntent(new Edition(album, Casterman));
 
         var converted = album.ConvertPurchaseIntentToAlbum(intent);
 
         Assert.Null(converted.EditionId);
         Assert.Equal([converted], album.PurchaseIntents);
-        Assert.Equal([owned], album.Editions);
+        Assert.Empty(album.Editions);
     }
 
     [Fact]
     public void ConvertPurchaseIntentToAlbum_WhileOtherEditionsAreTargeted_ThrowsAndKeepsEverything()
     {
         // The conversion respects the exclusivity of the two kinds of intent (fonctionnel.md §
-        // Intention d'achat): the other intents on editions forbid an intent on the whole album.
+        // Intention d'achat): the other editions targeted forbid an intent on the whole album.
         var album = new Album("Le Lotus bleu", null);
         var wished = new Edition(album, Casterman);
         var intent = album.AddPurchaseIntent(wished);
         var otherIntent = album.AddPurchaseIntent(new Edition(album, Casterman));
 
-        DomainAssert.Violates(DomainRules.PurchaseIntentEditionsAlreadyTargeted, () => album.ConvertPurchaseIntentToAlbum(intent));
+        DomainAssert.Violates(DomainRules.PurchaseIntentAlbumHasEditions, () => album.ConvertPurchaseIntentToAlbum(intent));
         Assert.Equal([intent, otherIntent], album.PurchaseIntents);
         Assert.Contains(wished, album.Editions);
+    }
+
+    [Fact]
+    public void ConvertPurchaseIntentToAlbum_WhileTheAlbumHasAnOwnedEdition_ThrowsAndKeepsEverything()
+    {
+        // Only the conversion of the intent on the only edition of the album leaves it without edition
+        // (fonctionnel.md § Intention d'achat).
+        var album = new Album("Le Lotus bleu", null);
+        var owned = new Edition(album, Casterman);
+        album.RecordAcquisition(owned, AcquisitionMode.Purchase);
+        var wished = new Edition(album, Casterman);
+        var intent = album.AddPurchaseIntent(wished);
+
+        DomainAssert.Violates(DomainRules.PurchaseIntentAlbumHasEditions, () => album.ConvertPurchaseIntentToAlbum(intent));
+        Assert.Equal([intent], album.PurchaseIntents);
+        Assert.Equal([owned, wished], album.Editions);
     }
 
     [Fact]

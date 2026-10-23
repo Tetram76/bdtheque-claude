@@ -144,7 +144,7 @@ Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve
 
 | Ticket | Titre |
 | --- | --- |
-| #185 | Intention d'achat sur un album réservée à un album sans édition |
+| ~~#185~~ | Intention d'achat sur un album réservée à un album sans édition |
 
 ### Ajustement issu de la mesure d'audience de l'interface web
 

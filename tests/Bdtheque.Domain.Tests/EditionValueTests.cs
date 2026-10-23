@@ -446,9 +446,10 @@ public sealed class EditionValueTests
     public void RecordAcquisition_WithoutMode_IsABusinessErrorWithoutRealizingTheIntent()
     {
         // Entering an edition requires its acquisition mode: only an intent creates an edition not owned.
-        var edition = CreateEdition();
-        var album = edition.Album;
+        // The album targeted as a whole has no edition: the edition entered is a new one.
+        var album = new Album("Le Lotus bleu", null);
         album.AddPurchaseIntent();
+        var edition = new Edition(album, CreatePublisher());
 
         DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => album.RecordAcquisition(edition, Acquisition(null)));
         Assert.Null(edition.AcquisitionMode);

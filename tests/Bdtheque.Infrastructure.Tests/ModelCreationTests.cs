@@ -746,16 +746,16 @@ public sealed class ModelCreationTests : IAsyncLifetime
         Assert.Equal((int)VisualType.Endpaper, rawValue);
     }
 
-    // Album.AddPurchaseIntent checks its rules against the loaded PurchaseIntents: these tests
-    // pin that the aggregate is complete however the album is loaded, with no explicit Include.
+    // Album.AddPurchaseIntent checks its rules against the loaded PurchaseIntents and Editions: these
+    // tests pin that the aggregate is complete however the album is loaded, with no explicit Include.
     [Fact]
-    public async Task AddPurchaseIntent_WholeAlbum_OnAlbumQueriedWithoutInclude_WhenEditionTargeted_Throws()
+    public async Task AddPurchaseIntent_WholeAlbum_OnAlbumQueriedWithoutInclude_WhenTargetedAsWhole_Throws()
     {
-        var album = await PersistAlbumWithEditionIntentAsync("Yakari");
+        var album = await PersistAlbumTargetedAsWholeAsync("Yakari");
 
         var reloaded = await _fixture.Context.Albums.FirstAsync(a => a.Id == album.Id);
 
-        Assert.Equal(DomainRules.PurchaseIntentEditionsAlreadyTargeted,
+        Assert.Equal(DomainRules.PurchaseIntentAlbumAlreadyTargeted,
             Assert.Throws<DomainRuleViolationException>(() => reloaded.AddPurchaseIntent()).Rule);
     }
 
@@ -766,27 +766,31 @@ public sealed class ModelCreationTests : IAsyncLifetime
 
         var reloaded = await _fixture.Context.Albums.FindAsync(album.Id);
 
-        Assert.Equal(DomainRules.PurchaseIntentEditionsAlreadyTargeted,
+        Assert.Equal(DomainRules.PurchaseIntentAlbumHasEditions,
             Assert.Throws<DomainRuleViolationException>(() => reloaded!.AddPurchaseIntent()).Rule);
     }
 
     [Fact]
-    public async Task AddPurchaseIntent_Edition_OnAlbumReachedThroughEdition_WhenWholeAlbumTargeted_Throws()
+    public async Task AddPurchaseIntent_Edition_OnAlbumReachedThroughEdition_WhenEditionTargeted_Throws()
     {
-        var album = new Album("Yakari", null);
-        var publisher = new Publisher("Le Lombard");
-        var edition = new Edition(album, publisher);
-        album.AddPurchaseIntent();
-        _fixture.Context.AddRange(album, publisher, edition);
-        await _fixture.Context.SaveChangesAsync();
-        _fixture.Context.ChangeTracker.Clear();
+        var album = await PersistAlbumWithEditionIntentAsync("Yakari");
 
         var reloadedEdition = await _fixture.Context.Editions
             .Include(e => e.Album)
-            .FirstAsync(e => e.Id == edition.Id);
+            .FirstAsync(e => e.AlbumId == album.Id);
 
-        Assert.Equal(DomainRules.PurchaseIntentAlbumAlreadyTargeted,
+        Assert.Equal(DomainRules.PurchaseIntentEditionAlreadyTargeted,
             Assert.Throws<DomainRuleViolationException>(() => reloadedEdition.Album.AddPurchaseIntent(reloadedEdition)).Rule);
+    }
+
+    private async Task<Album> PersistAlbumTargetedAsWholeAsync(string title)
+    {
+        var album = new Album(title, null);
+        album.AddPurchaseIntent();
+        _fixture.Context.Albums.Add(album);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+        return album;
     }
 
     [Fact]

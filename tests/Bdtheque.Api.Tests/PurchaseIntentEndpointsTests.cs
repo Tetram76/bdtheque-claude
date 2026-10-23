@@ -112,6 +112,32 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
     }
 
     [Fact]
+    public async Task Create_OnTheWholeAlbumWithAnOwnedEdition_IsABusinessError()
+    {
+        // fonctionnel.md § Intention d'achat: an album with an edition is no longer wished for in any edition.
+        var album = await CreateAlbumAsync();
+        var owned = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions",
+            new CreateEditionRequest(OwnedContent((await CreatePublisherAsync()).Id), album.Version));
+
+        var response = await _client.PostAsJsonAsync(IntentsUri(album.Id), new CreatePurchaseIntentRequest(null, owned.AlbumVersion));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PurchaseIntentAlbumHasEditions);
+        Assert.Empty((await GetIntentsAsync(album.Id)).Intents);
+    }
+
+    [Fact]
+    public async Task Create_OnTheWholeAlbumWithAnEditionTargeted_IsABusinessError()
+    {
+        var album = await CreateAlbumAsync();
+        var intents = await CreateAsync(album, Edition((await CreatePublisherAsync()).Id));
+
+        var response = await _client.PostAsJsonAsync(IntentsUri(album.Id), new CreatePurchaseIntentRequest(null, intents.AlbumVersion));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PurchaseIntentAlbumHasEditions);
+        AssertSameIntents(intents, await GetIntentsAsync(album.Id));
+    }
+
+    [Fact]
     public async Task Create_OnANewEditionWhileTheWholeAlbumIsTargeted_IsABusinessErrorAndCreatesNoEdition()
     {
         var album = await CreateAlbumAsync();
@@ -215,12 +241,10 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
     }
 
     [Fact]
-    public async Task Delete_AnIntentOnTheWholeAlbum_KeepsTheEditions()
+    public async Task Delete_AnIntentOnTheWholeAlbum_RemovesOnlyTheIntent()
     {
         var album = await CreateAlbumAsync();
-        var owned = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions",
-            new CreateEditionRequest(OwnedContent((await CreatePublisherAsync()).Id), album.Version));
-        var intents = await CreateAsync(album with { Version = owned.AlbumVersion }, null);
+        var intents = await CreateAsync(album, null);
         var intent = Assert.Single(intents.Intents);
         var impact = await GetImpactAsync(album.Id, intent.Id);
 
@@ -228,7 +252,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         Assert.Empty((await GetIntentsAsync(album.Id)).Intents);
-        await AssertEditionCountAsync(album.Id, 1);
+        Assert.Equal(album.Id, (await GetAlbumAsync(album.Id)).Id);
     }
 
     [Fact]
@@ -291,7 +315,27 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
         var response = await _client.PostAsJsonAsync(
             $"{IntentsUri(album.Id)}/{intent.Id}/to-album", new ConvertPurchaseIntentToAlbumRequest(intents.AlbumVersion, impact.Fingerprint));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PurchaseIntentEditionsAlreadyTargeted);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PurchaseIntentAlbumHasEditions);
+        AssertSameIntents(intents, await GetIntentsAsync(album.Id));
+        await AssertEditionCountAsync(album.Id, 2);
+    }
+
+    [Fact]
+    public async Task ConvertToAlbum_WhileTheAlbumHasAnOwnedEdition_IsABusinessErrorAndKeepsEverything()
+    {
+        // Only the conversion of the intent on the only edition of the album leaves it without edition.
+        var album = await CreateAlbumAsync();
+        var publisherId = (await CreatePublisherAsync()).Id;
+        var owned = await PostAsync<EditionForm>(
+            $"/admin/albums/{album.Id}/editions", new CreateEditionRequest(OwnedContent(publisherId), album.Version));
+        var intents = await CreateAsync(album with { Version = owned.AlbumVersion }, Edition(publisherId));
+        var intent = Assert.Single(intents.Intents);
+        var impact = await GetImpactAsync(album.Id, intent.Id);
+
+        var response = await _client.PostAsJsonAsync(
+            $"{IntentsUri(album.Id)}/{intent.Id}/to-album", new ConvertPurchaseIntentToAlbumRequest(intents.AlbumVersion, impact.Fingerprint));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PurchaseIntentAlbumHasEditions);
         AssertSameIntents(intents, await GetIntentsAsync(album.Id));
         await AssertEditionCountAsync(album.Id, 2);
     }
