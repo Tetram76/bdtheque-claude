@@ -4,9 +4,13 @@ Ce fichier décrit le plan d'implémentation de l'application, découpé en phas
 
 Chaque ligne correspond à un chantier, c'est-à-dire à un ticket GitHub (et à une Pull Request) : elle en indique le **numéro** et le **titre**. Le contenu détaillé du chantier est porté par le ticket. L'**état** d'un chantier est celui de son ticket, signalé par la mise en forme de son numéro, selon la règle unique de `gestion-projet/revue-tickets.md` § « Suivi par tickets » (Statut).
 
+Chaque phase, ou partie de phase, est livrée par une version (`gestion-projet/depot.md` § Versions et releases), indiquée sous son titre. Un ajustement réalisé après la consolidation de sa phase est livré par la version en cours lors de sa réalisation : celle du jalon de son ticket.
+
 ---
 
 ## Phase 0 — Architecture
+
+**Version** : `v0.0.1`, avec la mise en place du dépôt et du `.speckit/`.
 
 Mise en place de la structure porteuse de l'application, indépendamment du modèle métier :
 
@@ -21,6 +25,8 @@ Mise en place de la structure porteuse de l'application, indépendamment du mod�
 ---
 
 ## Phase 1 — Modèle de domaine
+
+**Version** : `v0.0.2`.
 
 Implémentation des entités du modèle métier (`modele-metier.md`) dans `Bdtheque.Domain` et `Bdtheque.Infrastructure` (configurations EF Core + migrations), séquencée selon les dépendances entre entités. Le `DbContext` reçoit progressivement ses `DbSet`.
 
@@ -58,6 +64,8 @@ Répercussion dans le modèle de domaine des ajustements du `.speckit/` issus de
 ---
 
 ## Phase 2 — Contracts et API
+
+**Version** : `v0.0.3`, avec l'ajustement issu de la reprise des données (#102), réalisé pendant la phase.
 
 Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` — administration (`/admin` : saisie, suppression selon `fonctionnel/regles-metier.md` § Suppression des entités) et consultation (`/catalog` : listes, navigation par initiale, recherche, fiches). Choix techniques : `choix-implementation/api.md` § Organisation de l'API et sections suivantes.
 
@@ -182,6 +190,8 @@ La phase est réalisée en plusieurs parties, découpées l'une après l'autre ;
 
 ### Partie 1 — Éléments de base
 
+**Version** : `v0.1.0`, avec les ajustements des phases 1 et 2 qui suivent la consolidation de la Phase 2.
+
 Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent.
 
 | Ticket | Titre |
@@ -213,7 +223,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 
 ### Parties suivantes
 
-Contenu et nombre à établir au découpage de chacune.
+Contenu, nombre et version à établir au découpage de chacune.
 
 - **Note — contraste des thèmes** : le texte courant du thème « fanzine en risographie » (bleu `#0078BF` sur papier `#F4EFE4`, `visuel/dashboard.md`) n'atteint que 4,1:1, sous les 4,5:1 attendus pour du texte courant. La couleur relevant de l'identité du thème, sa correction est soumise à l'utilisateur lors du découpage de la partie qui le réalise, avec la vérification des contrastes des thèmes qu'elle ajoute.
 - **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base (#194), que tout thème ajouté respecte.
@@ -225,7 +235,7 @@ Contenu et nombre à établir au découpage de chacune.
 
 Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euros courants (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) et en euros du jour (coefficients d'inflation de l'INSEE, mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel/valorisation.md` § Calcul des estimations).
 
-Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
+Découpage et version à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
 - **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée (`fonctionnel/recherche-avancee.md` § Recherche avancée), avec leurs comparaisons (version choisie par critère, montant non convertible), à une valeur comme à un autre montant.
 - **Note — couverture d'un album** : une statistique qui présente un album par sa couverture (ex. doyen et benjamin) est une donnée de la collection, qui ne retient que les éditions possédées (`fonctionnel/regles-metier.md` § Couverture d'un album) ; l'expression de la couverture (`choix-implementation/api.md` § Organisation de l'API, cartes d'album) ne couvre encore que la variante sans filtre.
@@ -234,7 +244,7 @@ Découpage à établir à l'ouverture de la phase. La qualité de l'estimation d
 
 Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel/second-plan.md` § Fonctionnalités de second plan). Les statistiques du dashboard qui en dépendent (tomes manquants, prochaines sorties estimées, `fonctionnel/page-accueil.md` § Page d'accueil) n'entrent dans son tirage qu'une fois ces fonctionnalités réalisées : le dashboard de la Phase 4 les en exclut.
 
-Découpage à établir à l'ouverture de la phase.
+Découpage et version à établir à l'ouverture de la phase.
 
 - **Note — recherche avancée** : les données que calculent ces fonctionnalités (tomes manquants d'une série, sortie estimée du prochain tome) deviennent des critères de la recherche avancée (`fonctionnel/recherche-avancee.md` § Recherche avancée).
 
@@ -242,7 +252,7 @@ Découpage à établir à l'ouverture de la phase.
 
 Serveur MCP exposant l'aide à la saisie, la recherche/consultation (recherche avancée comprise) et les analyses et statistiques ; accès par jeton, avec la gestion des jetons dans l'administration ; suivi de l'utilisation par jeton et par outil ou ressource (`fonctionnel/agents-ia.md` § Interface pour agents IA ; `choix-implementation/agents-ia.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2), des statistiques (Phase 4) et de l'administration du frontend (Phase 3), qui accueille la gestion des jetons et le suivi de l'utilisation.
 
-Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie précisé.
+Découpage et version à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie précisé.
 
 - **Note — modèle de domaine et journal des modifications** : la phase ajoute au modèle de domaine et à l'API les entités du suivi de l'outil (`modele-metier.md` : jeton d'accès, session, objectif de session, utilisation de l'outil, retour écrit), sans modifier les entités existantes, et étend le journal des modifications au jeton d'accès (type de fiche, correspondance de ses attributs, valeur consignée sans contenu pour son réarmement, `choix-implementation/domaine.md` § Journal des modifications : mise en œuvre).
 - **Note — image du conteneur `mcp`** : le conteneur dédié `mcp` (`choix-implementation/agents-ia.md` § Outil pour agents IA) doit avoir son image, comme `api` et `frontend` : image de base (`choix-implementation/deploiement.md` § Images de base des conteneurs), image publiée `tetram76/bdtheque-mcp`, intégrée à la paire d'images construites toutes avant d'en publier aucune, à l'analyse des vulnérabilités et au job `docker-build` du CI (`choix-implementation/deploiement.md` § Publication des images Docker ; `gestion-projet/depot.md` § Intégration continue (CI), Ruleset compris). Sans elle, le déploiement sans les sources ne peut pas démarrer `mcp`.
