@@ -20,7 +20,12 @@ public static class DomainRules
     public const string AlbumPublicationYearPositive = "Album.PublicationYearPositive";
 
     public const string PurchaseIntentAlbumAlreadyTargeted = "PurchaseIntent.AlbumAlreadyTargeted";
-    public const string PurchaseIntentEditionsAlreadyTargeted = "PurchaseIntent.EditionsAlreadyTargeted";
+
+    /// <summary>
+    /// An intent on the whole album while it has an edition, owned or targeted (fonctionnel.md § Intention
+    /// d'achat): the user then targets a specific edition.
+    /// </summary>
+    public const string PurchaseIntentAlbumHasEditions = "PurchaseIntent.AlbumHasEditions";
     public const string PurchaseIntentEditionAlreadyTargeted = "PurchaseIntent.EditionAlreadyTargeted";
     public const string PurchaseIntentEditionAlreadyOwned = "PurchaseIntent.EditionAlreadyOwned";
 

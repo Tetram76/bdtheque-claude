@@ -253,17 +253,14 @@ public sealed class Album : EntityBase, IAggregateRoot
     }
 
     /// <summary>
-    /// Records an intent to acquire this album in any edition. Refused if the album already has
-    /// an intent of any kind: a whole-album intent excludes intents on its editions
-    /// (modele-metier.md § Intention d'achat).
+    /// Records an intent to acquire this album in any edition. Refused if the album is already
+    /// targeted as a whole, or has any edition, owned or targeted: an album targeted as a whole has
+    /// no edition (modele-metier.md § Intention d'achat).
     /// </summary>
     public PurchaseIntent AddPurchaseIntent()
     {
         EnsureNotTargetedAsWhole();
-        if (_purchaseIntents.Count > 0)
-            throw new DomainRuleViolationException(
-                DomainRules.PurchaseIntentEditionsAlreadyTargeted,
-                "An intent on the whole album excludes the intents already recorded on its editions.");
+        EnsureWithoutEditionBut(null);
 
         return AddIntent(null);
     }
@@ -312,20 +309,17 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Converts an intent on an edition into an intent on the whole album, which removes the edition
-    /// targeted, not owned (fonctionnel.md § Intention d'achat). Refused while other editions of the
-    /// album are targeted: an intent on the whole album excludes them.
+    /// targeted, not owned (fonctionnel.md § Intention d'achat). Refused unless this edition is the
+    /// only one of the album: an album targeted as a whole has no edition.
     /// </summary>
     /// <exception cref="ArgumentException">The intent already targets the whole album.</exception>
     public PurchaseIntent ConvertPurchaseIntentToAlbum(PurchaseIntent intent)
     {
         EnsureOwnIntent(intent);
         // The client only offers this conversion for an intent on an edition.
-        if (intent.EditionId is null)
+        if (intent.EditionId is not { } editionId)
             throw new ArgumentException("Only an intent on an edition converts into an intent on the whole album.", nameof(intent));
-        if (_purchaseIntents.Count > 1)
-            throw new DomainRuleViolationException(
-                DomainRules.PurchaseIntentEditionsAlreadyTargeted,
-                "An intent on the whole album excludes the intents recorded on the other editions.");
+        EnsureWithoutEditionBut(editionId);
 
         RemovePurchaseIntent(intent);
         return AddIntent(null);
@@ -402,6 +396,16 @@ public sealed class Album : EntityBase, IAggregateRoot
         if (_purchaseIntents.Any(p => p.EditionId is null))
             throw new DomainRuleViolationException(
                 DomainRules.PurchaseIntentAlbumAlreadyTargeted, "This album is already targeted as a whole by a purchase intent.");
+    }
+
+    // An album targeted as a whole has no edition (modele-metier.md § Intention d'achat): once it has
+    // one, owned or targeted, a specific edition is wished for, not any. The edition excepted is the one
+    // a conversion to the whole album removes.
+    private void EnsureWithoutEditionBut(Guid? removedEditionId)
+    {
+        if (_editions.Any(e => e.Id != removedEditionId))
+            throw new DomainRuleViolationException(
+                DomainRules.PurchaseIntentAlbumHasEditions, "An album with editions cannot be targeted as a whole by a purchase intent.");
     }
 
     private PurchaseIntent AddIntent(Edition? edition)
