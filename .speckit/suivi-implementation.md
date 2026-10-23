@@ -169,16 +169,18 @@ Pages de consultation (public) et d'administration (authentifié), composants pa
 La phase est réalisée en plusieurs parties, découpées l'une après l'autre ; seule la partie 1 l'est à ce stade.
 
 - **Pages non implémentées** : tant qu'une page n'est pas implémentée, tout lien qui y mène affiche une page « Pas encore implémenté » (#191). Le chantier qui réalise une page remplace par le vrai lien tous les liens qui y mènent.
+- **Validation fonctionnelle** : les chantiers qui réalisent ce que l'utilisateur voit et utilise sont validés par lui avant fusion (`gestion-projet.md` § Validation fonctionnelle), avec l'environnement de validation (#214), réalisé avant le premier d'entre eux ; chaque ticket précise s'il y est soumis.
 - **Thèmes** : la partie 1 réalise le thème de base et deux thèmes, « Cases et bulles » (violine) et « La gazette », retenus pour s'opposer sur presque tout (sombre et clair, blocs encadrés et ouverts, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. Un thème ajouté par une partie ultérieure est décliné sur tous les écrans déjà réalisés.
 
 ### Partie 1 — Éléments de base
 
-Socle du frontend, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent.
+Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent.
 
 | Ticket | Titre |
 | --- | --- |
 | #161 | Accès du frontend au volume des visuels |
 | #191 | Socle du frontend : appels à l'API, erreurs, localisation, fuseau horaire et pages non implémentées |
+| #214 | Environnement de validation fonctionnelle |
 | #192 | Données du dashboard dans l'API avant la Phase 4 |
 | #193 | Paramétrage de l'application dans le modèle de domaine et l'API |
 | #194 | Thème de base neutre, contrats des thèmes et thème de la visite |
