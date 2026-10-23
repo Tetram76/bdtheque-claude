@@ -17,13 +17,16 @@ ones included; on any divergence, the speckit applies. Policy:
 policy: a PR on this repo cannot be merged until the Codex bot
 (`chatgpt-codex-connector[bot]`) has approved the current head commit.
 
-Codex reviews every push to a non-draft PR: open a non-draft PR (or mark a
-draft ready for review) only once the branch content is complete; until then,
-the work stays local or on a draft PR (policy: § « Ouverture de la PR »).
-Marking a draft ready may not trigger a review (nothing is pushed): a few minutes after marking it ready, check for any Codex activity
-since then — 👀 on the PR description (review running), or a 👍, review or
-comment (review already finished; the 👀 is transient). Only if there is none,
-request a review with a `@codex review` comment.
+Codex reviews a PR when it is opened as non-draft, when a draft is marked
+ready for review, and on every push to a non-draft PR: open a non-draft PR (or
+mark a draft ready for review) only once the branch content is complete; until
+then, the work stays local or on a draft PR (policy: § « Ouverture de la PR »).
+Marking a draft ready triggers a review by itself, so never pair it with a
+`@codex review` comment. As a safety net only, a few minutes after marking it
+ready, check for any Codex activity since then — 👀 on the PR description
+(review running), or a 👍, review or comment (review already finished; the 👀
+is transient). Only if there is none, request a review with a `@codex review`
+comment.
 
 Requires `gh` authenticated (`gh auth status`) with access to the repo.
 
@@ -149,8 +152,9 @@ active obligatoire »):
 
 ```bash
 # Two timestamps, because a 👍 is a *state* and a review/comment is an *event*:
-# <LAST_TRIGGER_AT> the push of the head commit, or the last `@codex review`
-#                   comment (Step 5). A 👍 dated after it approves the current
+# <LAST_TRIGGER_AT> the push of the head commit, the PR's opening as non-draft
+#                   or its marking as ready for review, or the last
+#                   `@codex review` comment (Step 5). A 👍 dated after it approves the current
 #                   head, and stays true.
 # <HANDLED_UNTIL>   Codex events (reviews, comments) older than this were
 #                   already handled. Starts equal to <LAST_TRIGGER_AT>; when
@@ -234,7 +238,8 @@ gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.na
 Codex reacts with 👀 within seconds; within a few minutes it either approves
 the head commit — with a bare 👍, or with an approving receipt naming it,
 often without posting any review — or posts a review with findings. So never wait for a review to appear: run the watcher
-above, `<LAST_TRIGGER_AT>` being the push just made (Step 3) or, on a cycle
+above, `<LAST_TRIGGER_AT>` being the push just made (Step 3), the PR's
+opening as non-draft or its marking as ready for review, or, on a cycle
 entered from Step 5 without a new push, the `@codex review` comment's
 `created_at`. Then act on its exit reason:
 
