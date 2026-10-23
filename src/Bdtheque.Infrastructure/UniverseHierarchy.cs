@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Serializes the changes to the hierarchy of the universes (choix-implementation.md § Cohérence
+/// Serializes the changes to the hierarchy of the universes (choix-implementation/persistance.md § Cohérence
 /// entre tables).
 /// </summary>
 /// <remarks>

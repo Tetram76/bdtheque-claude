@@ -13,7 +13,7 @@ using static Bdtheque.Contracts.Search.SearchComparison;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// The saved searches (fonctionnel.md § Recherches enregistrées): their administration
+/// The saved searches (fonctionnel/recherche-avancee.md § Recherches enregistrées): their administration
 /// (<c>/admin/saved-searches</c>), and their list, criteria and replay in the consultation
 /// (<c>/catalog/saved-searches</c>).
 /// </summary>
@@ -208,7 +208,7 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
         var criteria = new SearchGroup(SearchOperator.And,
         [
             new SearchCriterion("title", Contains, [_marker]),
-            // The sort key moves the article of a title to its end (fonctionnel.md § Titres).
+            // The sort key moves the article of a title to its end (fonctionnel/presentation.md § Titres).
             new SearchDataComparison("title", EqualTo, new SearchOperand("sortKey")),
         ]);
         var search = await CreateAsync(Name(), criteria, [new SearchVariableContent("Repère", "/conditions/0/values/0")]);

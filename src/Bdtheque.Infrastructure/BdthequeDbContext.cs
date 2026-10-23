@@ -57,7 +57,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
                 .ValueGeneratedNever();
         }
 
-        // Optimistic concurrency on whole aggregates (choix-implementation.md § Concurrence
+        // Optimistic concurrency on whole aggregates (choix-implementation/persistance.md § Concurrence
         // d'accès): the root's xmin, a native PostgreSQL row version needing no column of its own,
         // stands for the aggregate. A shadow property keeps this persistence concern out of the
         // domain.
@@ -174,14 +174,14 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
         // already-persisted rows — the same guarantee a string conversion would give, without
         // coupling persisted data (and the occasional CHECK constraint referencing a member by
         // name, e.g. AlbumConfiguration) to a C# identifier that renaming would silently break
-        // (see choix-implementation.md).
+        // (see choix-implementation/persistance.md § Conventions de persistance (EF Core)).
         configurationBuilder.Properties<Enum>().HaveConversion<int>();
 
-        // Every text column sorts in French linguistic order (fonctionnel.md § Langue et culture
+        // Every text column sorts in French linguistic order (fonctionnel/presentation.md § Langue et culture
         // d'affichage): the database default collation of the postgres image compares bytes,
         // which puts lowercase and accented initials after "Z". Declared on the columns rather
         // than relied upon from the database default, so the order travels with the schema
-        // whatever locale the database was initialized with (see choix-implementation.md).
+        // whatever locale the database was initialized with (see choix-implementation/persistance.md § Collation des colonnes texte).
         configurationBuilder.Properties<string>().UseCollation(FrenchCollation);
     }
 

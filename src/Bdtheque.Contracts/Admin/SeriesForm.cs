@@ -16,7 +16,7 @@ public sealed record SeriesForm(Guid Id, string SortKey, SeriesContent Content, 
 /// </summary>
 /// <param name="ManualSortKey">
 /// The sort key entered by hand, which is then kept whatever the title becomes; <c>null</c> for the
-/// automatic mode, where the sort key follows the title (fonctionnel.md § Calcul et stockage de la
+/// automatic mode, where the sort key follows the title (fonctionnel/presentation.md § Calcul et stockage de la
 /// clé de tri).
 /// </param>
 /// <param name="GenreIds">Genres of the series.</param>
@@ -38,7 +38,7 @@ public sealed record SeriesContent(
     IReadOnlyList<ContributionContent> Contributions);
 
 /// <summary>
-/// Default values of a new edition of an album of the series (fonctionnel.md § Initialisation d'une
+/// Default values of a new edition of an album of the series (fonctionnel/regles-metier.md § Initialisation d'une
 /// nouvelle édition depuis la série).
 /// </summary>
 /// <param name="PublisherCollectionId">Requires <paramref name="PublisherId"/>, and must belong to that publisher.</param>

@@ -2,7 +2,7 @@ namespace Bdtheque.Domain.Common;
 
 /// <summary>
 /// Computes the sort key of a French title by moving its leading article to a bracketed
-/// suffix, per the predefined list agreed for this project (see fonctionnel.md § Tri et
+/// suffix, per the predefined list agreed for this project (see fonctionnel/presentation.md § Tri et
 /// navigation par initiale). Shared by <see cref="Entities.Series"/> and <see cref="Entities.Album"/>.
 /// </summary>
 /// <remarks>

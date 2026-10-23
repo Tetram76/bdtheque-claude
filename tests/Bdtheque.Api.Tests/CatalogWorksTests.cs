@@ -10,7 +10,7 @@ namespace Bdtheque.Api.Tests;
 /// <summary>
 /// Works of a genre and of a universe (<c>/catalog/genres/{id}/works</c>,
 /// <c>/catalog/universes/{id}/works</c>), which have no record: their series and albums, presented as
-/// the bibliography of an author (fonctionnel.md § Structure de l'application).
+/// the bibliography of an author (fonctionnel/index.md § Structure de l'application).
 /// </summary>
 /// <remarks>Each test attaches its records to a genre or universe of its own, which narrows the works to them.</remarks>
 public sealed class CatalogWorksTests : IClassFixture<ApiWebApplicationFactory>
@@ -26,7 +26,7 @@ public sealed class CatalogWorksTests : IClassFixture<ApiWebApplicationFactory>
     {
         var genre = await CreateGenreAsync("Aventure");
         var other = await CreateGenreAsync("Humour");
-        // A series of the genre: all its albums are of the genre (fonctionnel.md § Genres et univers d'un album), in its order.
+        // A series of the genre: all its albums are of the genre (fonctionnel/regles-metier.md § Genres et univers d'un album), in its order.
         var asterix = await CreateSeriesAsync("Astérix", genreIds: [genre.Id]);
         var asterix2 = await CreateAlbumAsync("La Serpe d'or", asterix.Id, volume: 2);
         var asterix1 = await CreateAlbumAsync("Astérix le Gaulois", asterix.Id, volume: 1);

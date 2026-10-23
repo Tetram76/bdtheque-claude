@@ -24,7 +24,7 @@ RUN dotnet publish src/Bdtheque.Frontend/Bdtheque.Frontend.csproj -c Release -a 
         -p:DebugType=none -o /healthprobe
 
 # Chiseled: neither shell nor package manager, non-root user; "extra" for ICU, which the French
-# linguistic sorting and formatting require (choix-implementation.md § Internationalisation).
+# linguistic sorting and formatting require (choix-implementation/socle.md § Internationalisation).
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled-extra AS final
 WORKDIR /app
 

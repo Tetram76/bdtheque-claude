@@ -2,14 +2,14 @@ namespace Bdtheque.Contracts.Catalog;
 
 // Works of a genre or of a universe (/catalog/genres/{id}/works, /catalog/universes/{id}/works), which
 // have no record: the list of their series and albums, presented as the bibliography of an author
-// (fonctionnel.md § Structure de l'application). Unbounded, the list is paginated on its first level.
+// (fonctionnel/index.md § Structure de l'application). Unbounded, the list is paginated on its first level.
 
 /// <param name="Works">The series and the albums without series together, by sort key.</param>
 public sealed record GenreWorks(GenreListItem Genre, Page<WorksEntry> Works);
 
 /// <param name="Works">
 /// The series and the albums without series together, by sort key, those of its sub-universes included
-/// (fonctionnel.md § Hiérarchie des univers).
+/// (fonctionnel/regles-metier.md § Hiérarchie des univers).
 /// </param>
 public sealed record UniverseWorks(UniverseInHierarchy Universe, Page<WorksEntry> Works);
 
@@ -18,7 +18,7 @@ public sealed record WorksEntry(SeriesWorksItem? Series, AlbumCard? Album);
 
 /// <summary>
 /// A series of the works, attached itself or through one of its albums, the genres and universes of an
-/// album in a series being those of the album and of the series (fonctionnel.md § Genres et univers d'un
+/// album in a series being those of the album and of the series (fonctionnel/regles-metier.md § Genres et univers d'un
 /// album).
 /// </summary>
 /// <param name="Overview">The series as a whole, its albums not attached included.</param>

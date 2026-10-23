@@ -1,6 +1,6 @@
 # Saisie d'un éditeur
 
-Ce fichier décrit la présentation de la fiche de saisie d'un éditeur dans la partie Administration (`fonctionnel.md` § Structure de l'application) : la page dédiée où un éditeur se crée ou se modifie, avec ses collections, ouverte depuis la liste des éditeurs ([`listes.md`](listes.md)). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+Ce fichier décrit la présentation de la fiche de saisie d'un éditeur dans la partie Administration (`fonctionnel/index.md` § Structure de l'application) : la page dédiée où un éditeur se crée ou se modifie, avec ses collections, ouverte depuis la liste des éditeurs ([`listes.md`](listes.md)). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
 
 La fiche suit le modèle de la saisie d'une série ([`saisie-serie.md`](saisie-serie.md)), dont elle reprend l'en-tête, le titre et ses actions, la présentation des erreurs, les blocs, l'absence de colonne latérale, les contrôles et la barre d'enregistrement ; ce fichier ne décrit que ce qui lui est propre. Elle est déclinée selon chacun des thèmes en lice (cf. [`dashboard.md`](dashboard.md) § Alternatives), dans le ton sobre de l'administration (cf. [`administration.md`](administration.md) § Ton).
 
@@ -27,11 +27,11 @@ Les données sont fictives.
 - **Titre** « Modifier l'éditeur » ou « Nouvel éditeur », suivi de son nom, recalculé au fil de la saisie (« <Sans nom> » tant que rien n'est saisi). La fiche ne propose ni lien vers la consultation, qui ne présenterait pas les données en cours de modification, ni suppression, ni fusion : on y modifie l'éditeur, et ces actions se font depuis la liste des éditeurs.
 - **Erreur d'enregistrement** : celle de la saisie d'un album, en trois catégories ; l'erreur métier de l'exemple est un nom déjà porté par un autre éditeur, le champ étant bordé de la couleur d'alerte, le message rappelant qu'une différence de casse suffit à distinguer deux éditeurs (`modele-metier.md` § Éditeur).
 - **Le formulaire**, en deux blocs :
-  - **L'éditeur** : le **nom**, obligatoire, et le **site web**, avec, une fois renseigné, un bouton qui l'ouvre ; l'aide rappelle que dans la consultation le nom de l'éditeur mène à son site, et n'est pas un lien sans lui (`fonctionnel.md` § Structure de l'application).
-  - **Les collections** : les collections éditeur n'ont ni liste ni page à elles ; elles se saisissent ici et s'enregistrent avec l'éditeur, dont elles font partie (`fonctionnel.md` § Suppression des entités), ce que le bloc rappelle. Une ligne par collection, par ordre alphabétique :
+  - **L'éditeur** : le **nom**, obligatoire, et le **site web**, avec, une fois renseigné, un bouton qui l'ouvre ; l'aide rappelle que dans la consultation le nom de l'éditeur mène à son site, et n'est pas un lien sans lui (`fonctionnel/index.md` § Structure de l'application).
+  - **Les collections** : les collections éditeur n'ont ni liste ni page à elles ; elles se saisissent ici et s'enregistrent avec l'éditeur, dont elles font partie (`fonctionnel/regles-metier.md` § Suppression des entités), ce que le bloc rappelle. Une ligne par collection, par ordre alphabétique :
     - son **nom**, dans un champ, qui suffit à la renommer ;
     - ce qui la désigne : le nombre d'éditions et de séries (« 58 éditions · 3 séries », « Aucune édition ni série ») ;
-    - **Retirer**, une corbeille de la couleur de suppression, lorsque rien ne la désigne ; sinon, à sa place, un cadenas atténué dit qu'elle est utilisée et ne peut pas être retirée (`fonctionnel.md` § Suppression des entités) ;
+    - **Retirer**, une corbeille de la couleur de suppression, lorsque rien ne la désigne ; sinon, à sa place, un cadenas atténué dit qu'elle est utilisée et ne peut pas être retirée (`fonctionnel/regles-metier.md` § Suppression des entités) ;
     - une collection **retirée** reste dans la liste jusqu'à l'enregistrement, barrée, « Retirée à l'enregistrement », avec **Rétablir** ; une collection **ajoutée** porte l'étiquette « Nouvelle » ;
     - **Ajouter une collection**, en tirets, sous la liste ; « Aucune collection » à défaut.
   - Sur smartphone, ce qui désigne une collection passe sous son nom, la corbeille ou le cadenas restant à droite.

@@ -3,13 +3,13 @@ using System.Text.Json.Serialization;
 namespace Bdtheque.Contracts.Search;
 
 /// <summary>
-/// A condition of the advanced search (fonctionnel.md § Recherche avancée), on the records of an entity: a
+/// A condition of the advanced search (fonctionnel/recherche-avancee.md § Recherche avancée), on the records of an entity: a
 /// criterion on one of its data, a link to related records, or a combination of conditions.
 /// </summary>
 /// <remarks>
 /// A condition holds only if the known data establish it: absent data satisfy no comparison but "is not
 /// set", whereas <see cref="SearchNot"/> keeps whatever its condition does not establish
-/// (fonctionnel.md § Comparaisons).
+/// (fonctionnel/recherche-avancee.md § Comparaisons).
 /// </remarks>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(SearchGroup), "group")]
@@ -26,7 +26,7 @@ public sealed record SearchGroup(SearchOperator Operator, IReadOnlyList<SearchCo
 public sealed record SearchNot(SearchCondition Condition) : SearchCondition;
 
 /// <summary>
-/// A condition on the records related by a link of the model (fonctionnel.md § Liens entre entités), which
+/// A condition on the records related by a link of the model (fonctionnel/recherche-avancee.md § Liens entre entités), which
 /// may itself follow further links: the path of the criteria it holds.
 /// </summary>
 /// <param name="Link">Key of the link, among those the schema describes for the entity (<see cref="SearchLinkDescription"/>).</param>
@@ -60,7 +60,7 @@ public sealed record SearchQuantifier(
 /// <c>false</c>; a member of an enumeration by its name; a record by its identifier.
 /// </param>
 /// <param name="MatchCaseAndAccents">
-/// For a text only: compares it respecting case and accents, ignored otherwise (fonctionnel.md §
+/// For a text only: compares it respecting case and accents, ignored otherwise (fonctionnel/recherche-avancee.md §
 /// Comparaisons).
 /// </param>
 public sealed record SearchCriterion(
@@ -68,7 +68,7 @@ public sealed record SearchCriterion(
     : SearchCondition;
 
 /// <summary>
-/// A comparison of one data of the entity to another data of the same type (fonctionnel.md § Comparaisons), of
+/// A comparison of one data of the entity to another data of the same type (fonctionnel/recherche-avancee.md § Comparaisons), of
 /// the same record or of a record it leads to: it holds only if both data are set and the comparison
 /// establishes it.
 /// </summary>
@@ -104,7 +104,7 @@ public enum SearchOperator
     Or,
 }
 
-/// <summary>How many related records must satisfy the condition of a link (fonctionnel.md § Liens entre entités).</summary>
+/// <summary>How many related records must satisfy the condition of a link (fonctionnel/recherche-avancee.md § Liens entre entités).</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<SearchQuantifierKind>))]
 public enum SearchQuantifierKind
 {
@@ -121,7 +121,7 @@ public enum SearchQuantifierKind
     Count,
 }
 
-/// <summary>The comparisons of a criterion, each available according to the type of its data (fonctionnel.md § Comparaisons).</summary>
+/// <summary>The comparisons of a criterion, each available according to the type of its data (fonctionnel/recherche-avancee.md § Comparaisons).</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<SearchComparison>))]
 public enum SearchComparison
 {

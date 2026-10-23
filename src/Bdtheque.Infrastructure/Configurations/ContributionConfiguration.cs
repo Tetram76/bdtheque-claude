@@ -18,7 +18,7 @@ internal sealed class ContributionConfiguration : IEntityTypeConfiguration<Contr
 
         // Cascade from the owner, Restrict from the author: a contribution is part of its album
         // (or series template), whereas it merely references its author, whose deletion is
-        // refused while still credited (fonctionnel.md § Suppression des entités).
+        // refused while still credited (fonctionnel/regles-metier.md § Suppression des entités).
         builder.HasOne(c => c.Album)
             .WithMany(a => a.Contributions)
             .HasForeignKey(c => c.AlbumId)

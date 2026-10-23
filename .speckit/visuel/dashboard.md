@@ -1,6 +1,6 @@
 # Dashboard
 
-Ce fichier décrit la présentation du dashboard, la page d'accueil de la partie Consultation (`fonctionnel.md` § Page d'accueil). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+Ce fichier décrit la présentation du dashboard, la page d'accueil de la partie Consultation (`fonctionnel/page-accueil.md` § Page d'accueil). Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
 
 Plusieurs présentations du dashboard restent en lice. Ce sont des **alternatives** d'un même projet de maquettes, qui mettent en scène le même contenu (§ Contenu commun), chacune à sa façon.
 
@@ -38,21 +38,21 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
     - « Encore de la place sur les étagères ? Pas sûr… »
     - « Attention, ça déborde des étagères ! »
   - les **compteurs** : albums, séries, éditions.
-- **À la une** : l'édition mise à la une du jour (`fonctionnel.md` § Page d'accueil), avec sa couverture, le libellé de son album, le sien et le résumé de l'album. L'album mène à sa fiche.
-- **Tout juste arrivés !** : les dernières éditions entrées dans la collection (ordre : `fonctionnel.md` § Page d'accueil), et un lien vers la liste des albums.
+- **À la une** : l'édition mise à la une du jour (`fonctionnel/page-accueil.md` § Page d'accueil), avec sa couverture, le libellé de son album, le sien et le résumé de l'album. L'album mène à sa fiche.
+- **Tout juste arrivés !** : les dernières éditions entrées dans la collection (ordre : `fonctionnel/page-accueil.md` § Page d'accueil), et un lien vers la liste des albums.
 - **Ça vaut combien, tout ça ?** :
   - la valeur totale estimée et la valeur totale connue, puis les prix moyen, médian, minimum et maximum ;
-  - chaque montant en euros courants et en euros du jour (`fonctionnel.md` § Gestion des devises) ;
+  - chaque montant en euros courants et en euros du jour (`fonctionnel/valorisation.md` § Gestion des devises) ;
   - une mention qui indique les montants non convertibles exclus et les éditions gratuites non valorisées.
-- **Tomes, intégrales ou hors-séries ?** : la répartition par type d'album, en trois catégories exclusives (réguliers, intégrales et hors-séries), une intégrale hors-série comptant parmi les hors-séries (`fonctionnel.md` § Page d'accueil).
+- **Tomes, intégrales ou hors-séries ?** : la répartition par type d'album, en trois catégories exclusives (réguliers, intégrales et hors-séries), une intégrale hors-série comptant parmi les hors-séries (`fonctionnel/page-accueil.md` § Page d'accueil).
 - **Plutôt quel genre ?** : les genres et leur nombre d'albums ; un album peut relever de plusieurs genres.
 - **Chez quels éditeurs ?** : les éditeurs et leur nombre d'éditions possédées.
 
-Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu mène à ce site, et n'est sinon pas un lien (`fonctionnel.md` § Structure de l'application).
+Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu mène à ce site, et n'est sinon pas un lien (`fonctionnel/index.md` § Structure de l'application).
 
 ## Collection vide
 
-Sans édition possédée, un **écran d'accueil** remplace le dashboard (`fonctionnel.md` § Page d'accueil). Toutes les alternatives en présentent le même contenu, chacune dans son apparence ; les maquettes le montrent avec le réglage « Collection vide ».
+Sans édition possédée, un **écran d'accueil** remplace le dashboard (`fonctionnel/page-accueil.md` § Page d'accueil). Toutes les alternatives en présentent le même contenu, chacune dans son apparence ; les maquettes le montrent avec le réglage « Collection vide ».
 
 - **En-tête** : celui de l'alternative, **sans le champ de recherche** (`charte-graphique.md` § Apparence propre à chaque alternative) ; le menu et le bouton d'aide restent.
 - **Un bloc principal** :
@@ -141,7 +141,7 @@ De haut en bas :
 - **La une**, sur deux tiers de la largeur :
   - La **phrase d'accueil** est le gros titre, en italique et entre guillemets, tirée au hasard dans la liste commune.
   - Les **compteurs** (albums, séries, éditions) forment un bandeau de trois colonnes.
-  - L'édition **à la une** (`fonctionnel.md` § Page d'accueil) : sa couverture, le libellé de son album, le sien et le résumé de l'album.
+  - L'édition **à la une** (`fonctionnel/page-accueil.md` § Page d'accueil) : sa couverture, le libellé de son album, le sien et le résumé de l'album.
   - Sous « Tout juste arrivés ! », les dernières éditions entrées, la plus récente comprise, sont listées avec leur date. Un lien mène à la liste des albums.
 - **La colonne latérale** :
   - **Le cours de la collection** : la valeur totale estimée dans un encadré en couleurs inversées, avec son montant en euros du jour. Un tableau donne ensuite la valeur totale connue et les prix moyen, médian, minimum et maximum, en euros courants et en euros du jour. Une mention indique les montants non convertibles exclus et les éditions gratuites non valorisées.
@@ -181,7 +181,7 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
 - **La couverture**, à gauche, au format d'une page de magazine, rouge, légèrement inclinée et portant une ombre noire décalée :
   - le nom de l'application en blanc ;
   - un bandeau entre deux filets : « N° », suivi du nombre d'albums, le mois et la mention « Gratuit » ;
-  - la couverture de l'édition **à la une** (`fonctionnel.md` § Page d'accueil), sur presque toute la hauteur ;
+  - la couverture de l'édition **à la une** (`fonctionnel/page-accueil.md` § Page d'accueil), sur presque toute la hauteur ;
   - la **phrase d'accueil** en gros titre blanc, tirée au hasard dans la liste commune ;
   - des étiquettes noires, qui donnent le nombre de séries et d'éditions ;
   - une étiquette jaune inclinée, posée sur la couverture, qui annonce l'édition à la une : le libellé de son album, une accroche tirée du résumé de l'album, abrégé, et, en petit, le libellé de l'édition.

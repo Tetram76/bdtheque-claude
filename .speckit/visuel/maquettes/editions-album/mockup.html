@@ -411,7 +411,7 @@ const menuOf = (t, current) => {
   ];
 };
 
-// The three kinds of error must be told apart at first glance (fonctionnel.md § Présentation des
+// The three kinds of error must be told apart at first glance (fonctionnel/index.md § Présentation des
 // erreurs): each has its own label, icon, colour and border. The business one is the record's own.
 const errorOf = (key, t, business) => ({
   metier: () => ({
@@ -431,7 +431,7 @@ const errorOf = (key, t, business) => ({
 // An album without any edition nor intent, an album with two editions and an intent on a third one,
 // and an untitled omnibus aimed at by an intent on the album itself, without any edition.
 // An intent is never one of the editions: it is listed among the intents, with what it aims at
-// (fonctionnel.md § Intention d'achat).
+// (fonctionnel/regles-metier.md § Intention d'achat).
 const EXAMPLES = {
   sansEdition: {
     label: 'Le Château des étoiles (Le Château des étoiles - T. 8)', credits: 'Alex Alice', date: '2026', inCollection: 'Hors collection', cover: false,
@@ -523,7 +523,7 @@ class View extends Mockup {
       closeIntent: () => this.setState({ intentOpen: false }),
       intentChoices: [
         // Only an album without any edition, owned or aimed at, may be aimed at as a whole
-        // (fonctionnel.md § Intention d'achat): once one is known, the intent names a precise edition.
+        // (fonctionnel/regles-metier.md § Intention d'achat): once one is known, the intent names a precise edition.
         { label: 'Sur l\'album…', help: 'Toute édition de l\'album fera l\'affaire.' },
         { label: 'Sur une nouvelle édition…', help: 'Une édition précise, saisie sans exemplaire ni valeur.' }
       ],

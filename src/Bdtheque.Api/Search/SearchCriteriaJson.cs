@@ -7,7 +7,7 @@ namespace Bdtheque.Api.Search;
 
 /// <summary>
 /// The JSON form in which a saved search keeps its criteria: that of the advanced search contract
-/// (choix-implementation.md § Recherche avancée : mise en œuvre), into which its variables point.
+/// (choix-implementation/recherche-avancee.md § Recherche avancée : mise en œuvre), into which its variables point.
 /// </summary>
 /// <remarks>
 /// Stored by the saved searches and by the change log, never purged: the form must read back forever, so

@@ -11,7 +11,7 @@ namespace Bdtheque.Domain.Entities;
 /// <remarks>
 /// Nothing in an entry is a text fixed at the time of the write: the type of record, the operation,
 /// the attributes, the values and the label are presented in the display culture in force when the
-/// change log is read (fonctionnel.md § Langue et culture d'affichage).
+/// change log is read (fonctionnel/presentation.md § Langue et culture d'affichage).
 /// </remarks>
 public sealed class ChangeLogEntry : EntityBase
 {

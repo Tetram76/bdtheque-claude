@@ -7,7 +7,7 @@ namespace Bdtheque.Domain.Enums;
 /// </summary>
 /// <remarks>
 /// Persisted in the change log, never purged: a value keeps its meaning forever, whatever the
-/// properties of the entities become (choix-implementation.md § Conventions de persistance).
+/// properties of the entities become (choix-implementation/persistance.md § Conventions de persistance).
 /// </remarks>
 public enum ChangeLogAttribute
 {

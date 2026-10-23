@@ -16,7 +16,7 @@ public sealed class Author : EntityBase, IAggregateRoot
     public string? Nationality { get; private set; }
 
     // Stored rather than computed at read time, so that the database can sort and paginate
-    // authors (fonctionnel.md § Artistes). Derived from the identity only: never set manually.
+    // authors (fonctionnel/presentation.md § Artistes). Derived from the identity only: never set manually.
     public string SortKey { get; private set; } = string.Empty;
     public string NavigationEntry { get; private set; } = string.Empty;
 
@@ -44,7 +44,7 @@ public sealed class Author : EntityBase, IAggregateRoot
 
     /// <summary>
     /// The main identifier (pseudonym, otherwise "First Last"), except that a "First Last"
-    /// identifier sorts as "Last First", to file authors by family name (fonctionnel.md § Artistes).
+    /// identifier sorts as "Last First", to file authors by family name (fonctionnel/presentation.md § Artistes).
     /// </summary>
     private string ComputeSortKey()
     {

@@ -1,7 +1,7 @@
 namespace Bdtheque.Contracts.Catalog;
 
 /// <summary>
-/// One page of a list of the consultation, paginated by offset (choix-implementation.md §
+/// One page of a list of the consultation, paginated by offset (choix-implementation/api.md §
 /// Organisation de l'API).
 /// </summary>
 /// <param name="Number">Number of the page, from 1.</param>

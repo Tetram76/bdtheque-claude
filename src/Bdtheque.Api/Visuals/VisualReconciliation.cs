@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Api.Visuals;
 
 /// <summary>
-/// Removes the files of the visuals volume that no visual references any more (choix-implementation.md
+/// Removes the files of the visuals volume that no visual references any more (choix-implementation/domaine.md
 /// § Visuels : stockage et traitement): those an immediate compensation could not cover — process
 /// stopped between the file and the row, file that could not be deleted. Run at startup, then daily:
 /// an orphan only costs disk space.

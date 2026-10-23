@@ -12,11 +12,11 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Search;
 
 /// <summary>
-/// A data of an entity a criterion compares (fonctionnel.md § Données interrogées), translated into the
+/// A data of an entity a criterion compares (fonctionnel/recherche-avancee.md § Données interrogées), translated into the
 /// condition of a query.
 /// </summary>
 /// <remarks>
-/// A comparison holds only if the known data establish it (fonctionnel.md § Comparaisons): every condition
+/// A comparison holds only if the known data establish it (fonctionnel/recherche-avancee.md § Comparaisons): every condition
 /// requires the data to be set — "is not set" aside —, so that a NOT of the criterion keeps what it does not
 /// establish. EF Core gives the C# meaning to <c>null</c>, which a NOT then negates as such.
 /// </remarks>
@@ -31,7 +31,7 @@ internal abstract class SearchField(string key, LambdaExpression selector, bool 
 
     public IReadOnlyList<SearchComparison> Comparisons => isOptional ? [.. TypeComparisons, IsSet, IsNotSet] : TypeComparisons;
 
-    /// <summary>The comparisons of the type to another data, those taking a single value (fonctionnel.md § Comparaisons).</summary>
+    /// <summary>The comparisons of the type to another data, those taking a single value (fonctionnel/recherche-avancee.md § Comparaisons).</summary>
     public virtual IReadOnlyList<SearchComparison> DataComparisons => [];
 
     public virtual SearchFieldDescription Describe() => new(Key, Type, isOptional, Comparisons, DataComparisons);
@@ -315,7 +315,7 @@ internal sealed class AmountField(string key, LambdaExpression selector) : Searc
 }
 
 /// <summary>
-/// A date, known to a precision of its own and compared at that of the value (fonctionnel.md § Comparaisons):
+/// A date, known to a precision of its own and compared at that of the value (fonctionnel/recherche-avancee.md § Comparaisons):
 /// both are periods — a year, a month, a day —, and a comparison holds only if it holds for every day of the
 /// period of the data. Equal: within the period of the value; different: outside it; before or after: before
 /// or after the whole of it.

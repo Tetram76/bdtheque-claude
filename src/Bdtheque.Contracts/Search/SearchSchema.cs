@@ -5,7 +5,7 @@ namespace Bdtheque.Contracts.Search;
 
 /// <summary>
 /// What the advanced search can query, for the clients to build its form in the terms of the business
-/// (fonctionnel.md § Recherche avancée): its keys are localized by the client, never shown as they are.
+/// (fonctionnel/recherche-avancee.md § Recherche avancée): its keys are localized by the client, never shown as they are.
 /// </summary>
 public sealed record SearchSchema(IReadOnlyList<SearchEntityDescription> Entities);
 
@@ -34,7 +34,7 @@ public sealed record SearchFieldDescription(
     IReadOnlyList<string>? Members = null,
     EntityKind? Record = null);
 
-/// <summary>A link of the model from an entity to related records (fonctionnel.md § Liens entre entités).</summary>
+/// <summary>A link of the model from an entity to related records (fonctionnel/recherche-avancee.md § Liens entre entités).</summary>
 /// <param name="IsMultiple">Whether it leads to several records, its condition then being quantified.</param>
 public sealed record SearchLinkDescription(string Key, EntityKind Target, bool IsMultiple);
 

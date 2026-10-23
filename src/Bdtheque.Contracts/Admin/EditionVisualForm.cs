@@ -3,7 +3,7 @@ using Bdtheque.Contracts.Enums;
 namespace Bdtheque.Contracts.Admin;
 
 /// <summary>
-/// The visuals of an edition, in their presentation order (fonctionnel.md § Ordre des visuels d'une
+/// The visuals of an edition, in their presentation order (fonctionnel/regles-metier.md § Ordre des visuels d'une
 /// édition). The edition belongs to the aggregate of its album: the version sent back with any
 /// upload, rearrangement or deletion is the album's.
 /// </summary>

@@ -632,7 +632,7 @@ class View extends Mockup {
       })();
       const editing = editRow === i;
       // An intent on an edition turns into one on the album only when that edition is the album's
-      // only one (fonctionnel.md § Intention d'achat): otherwise the conversion is not offered.
+      // only one (fonctionnel/regles-metier.md § Intention d'achat): otherwise the conversion is not offered.
       const menu = e.rowMenu.filter((m) => !(m.icon === ICON.swap && opts.noSwap))
         .map((m) => ({ ...m, label: m.icon === ICON.swap && opts.other ? opts.other : m.label, fg: m.del ? t.del : t.text, sep: Boolean(m.sep) }));
       return {

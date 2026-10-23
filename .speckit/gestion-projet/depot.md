@@ -1,0 +1,95 @@
+# Dépôt
+
+Dépôt GitHub : configuration, signature des commits, intégration continue, branches, conventions de commit et releases.
+
+---
+
+## Repository
+
+- **Hébergement** : GitHub
+- **Nom du dépôt** : `Tetram76/bdtheque-claude`
+- **URL** : <https://github.com/Tetram76/bdtheque-claude>
+- La **gestion du repository GitHub** (configuration, branches, protections, CI/CD, etc.) relève du périmètre de l'agent et doit être maintenue conformément aux contraintes du projet.
+
+## Signature des commits
+
+- **Tous les commits doivent être signés et vérifiés** (GPG/SSH).
+- La signature est configurée globalement sur le poste (`commit.gpgsign=true`, clé GPG `CC10F185AA085B2DD98025986A5E6B8341983E31`).
+- La règle `required_signatures` est intégrée au Ruleset GitHub pour l'imposer côté serveur.
+
+## Configuration du repository GitHub
+
+- **Branche principale** : `main`
+- **Stratégie de merge** : squash merge uniquement (historique linéaire et lisible sur `main`)
+- **Suppression automatique** des branches de feature après merge
+- **Fonctionnalités actives** : Issues, Releases
+- **Visibilité** : dépôt **public**.
+- **Fonctionnalités désactivées** : Wiki, Projects, Discussions (aucune interaction communautaire souhaitée)
+- **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`, **actif** — le dépôt étant public) avec les règles suivantes :
+  - PR obligatoire avant tout merge
+  - Force-push interdit
+  - Suppression de `main` interdite
+  - Squash merge uniquement
+  - **Commits signés obligatoires** (`required_signatures`)
+  - **Checks de la CI requis** (`required_status_checks`) : chaque job du workflow CI est un check requis (cf. § « Intégration continue (CI) »). La branche n'a pas à être à jour avec `main` avant le merge : les PR sont fusionnées en squash une à une, et exiger cette mise à jour imposerait une resynchronisation systématique sans gain proportionné.
+- **Sécurité du dépôt** (`security_and_analysis`, disponible gratuitement car dépôt public) :
+  - **Secret scanning** : activé
+  - **Push protection** (blocage des push contenant un secret détecté) : activée
+  - **Dependabot security updates** : activé
+  - *Vérification de validité des secrets détectés* (`secret_scanning_validity_checks`) : désactivée, cause non identifiée — à vérifier manuellement dans les paramètres GitHub du dépôt si besoin.
+- **Merge réservé à l'utilisateur, y compris pour de futurs collaborateurs** : le dépôt est la propriété d'un compte **personnel** (`Tetram76`), pas d'une organisation — la restriction de push/merge par utilisateur ou équipe (fonctionnalité GitHub de branch protection) n'est **pas disponible** sur ce type de dépôt, elle ne peut donc pas être imposée techniquement via un Ruleset ou une protection de branche. La garantie repose donc sur la gestion des droits d'accès : **aucun collaborateur ne doit recevoir un accès `Write` (ou supérieur)** au dépôt. Toute contribution externe future passe par un **fork** + Pull Request ; le merge de cette PR reste effectué par l'utilisateur (ou par l'agent agissant en son nom), jamais par le contributeur externe lui-même.
+
+## Intégration continue (CI)
+
+- **GitHub Actions** héberge le pipeline de non-régression (`.github/workflows/ci.yml`), déclenché sur chaque Pull Request et sur push vers `main`.
+- Le contenu du pipeline (étapes, outillage de build et de test) est un choix d'implémentation : cf. `choix-implementation/socle.md` § Outillage de développement .NET.
+- Le workflow CI (`ci.yml`) constitue le **check de statut requis** de la règle de merge ci-dessous : ses jobs sont imposés par le Ruleset GitHub (cf. § « Configuration du repository GitHub »). Le Ruleset les désigne par leur nom : toute modification de la liste des jobs du workflow est reportée dans le Ruleset dans le même mouvement. Sans cela, un job ajouté n'est pas requis — son échec n'empêche pas la fusion —, et un job renommé ou retiré reste attendu sous son ancien nom sans jamais se présenter, ce qui bloque toute fusion.
+- **Publication des images Docker** sur Docker Hub (`contraintes-techniques/architecture-deploiement.md` § Déploiement) : workflow distinct, `.github/workflows/docker-publish.yml` (cf. `choix-implementation/deploiement.md` § Publication des images Docker). Il s'authentifie auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès (*Personal Access Token* Docker Hub, droits *Read, Write & Delete*, la suppression de l'image `nightly` remplacée l'exigeant) stocké dans le secret de dépôt GitHub `DOCKERHUB_TOKEN`.
+- **Analyse des vulnérabilités dans le CI** (`gestion-projet/revue-tickets.md` § « Analyse des vulnérabilités des images Docker ») : le CI lit les images publiées sur Docker Hub avec le même jeton (`DOCKERHUB_TOKEN`). Le code de la branche et de ses dépendances ne s'exécute que dans les conteneurs de construction des images, qui ne reçoivent pas les identifiants du registre, et seuls l'utilisateur, l'agent agissant en son nom et Dependabot ouvrent des Pull Requests qui accèdent aux secrets. Une PR venant d'un **fork** n'y a pas accès : elle échoue à ce contrôle et ne peut pas être fusionnée en l'état. C'est assumé : il revient à son auteur de s'en accommoder, et aucun chemin de contrôle sans secret n'est prévu pour elle. Les PR de Dependabot n'ayant accès qu'aux secrets Dependabot, le jeton y est aussi déclaré comme secret Dependabot, sous le même nom.
+- **Quotas consommés par le CI** :
+  - **API GitHub** : le jeton du workflow (`GITHUB_TOKEN`) est limité à **1 000 requêtes par heure et par dépôt** (documentation GitHub, *Rate limits for the REST API*), partagées par toutes les exécutions des workflows du dépôt ; l'analyse des vulnérabilités l'utilise notamment pour télécharger son outil. Au-delà, GitHub répond `403` ou `429`.
+  - **Docker Hub** : Docker Hub limite les téléchargements d'images (*pulls*) à **200 par période de 6 heures** pour un compte *Personal* authentifié comme `tetram76`, et à **100 par période de 6 heures et par adresse IP** sans authentification ; une image multi-architecture compte un téléchargement par architecture (documentation Docker Hub, *Usage and limits*). Au-delà, Docker Hub répond `429 Too Many Requests`, quel que soit le contenu de la PR. Chaque exécution du CI lit des images sur Docker Hub : l'image publiée, que l'analyse des vulnérabilités lit avec le compte `tetram76`, et l'image PostgreSQL des tests, téléchargée sans authentification.
+
+  Face à un échec dû à l'un de ces quotas, l'agent ne pousse pas de nouveau commit, qui le consommerait à son tour : il relance les seuls jobs en échec (`gh run rerun --failed`) une fois la période du quota écoulée, et signale à l'utilisateur un échec qui persiste.
+
+## Règle absolue : interdiction de pousser directement sur `main`
+
+> **Il est INTERDIT de commiter ou pousser directement sur la branche `main`.**
+> Toute modification, sans exception, doit passer par une Pull Request.
+
+Cette règle s'applique à l'agent comme à tout contributeur. Elle est **imposée techniquement** par le Ruleset GitHub (cf. « Configuration du repository GitHub » ci-dessus) et constitue par ailleurs une contrainte de processus stricte et non négociable.
+
+## Stratégie de branches
+
+- `main` : branche stable, reflète l'état livrable du projet
+- `feat/<sujet>` : développement de fonctionnalités
+- `fix/<sujet>` : corrections de bugs
+- `chore/<sujet>` : maintenance (config, refacto, outillage, CI)
+
+## Conventions de commit
+
+Le projet suit le standard **[Conventional Commits](https://www.conventionalcommits.org/)**.
+
+Format : `<type>(<scope>): <description courte>`
+
+Types : `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `ci`
+
+Le **titre de la Pull Request** doit également respecter ce format — c'est lui qui devient le titre du commit squashé sur `main`.
+
+La quasi-totalité des PR étant fusionnées en **squash merge**, la **description de la PR devient le corps du commit** (réglage repository `squash_merge_commit_message = PR_BODY`). La description doit donc être rédigée comme un **message de commit à part entière** : contenu clair, pertinent et durable, exploitable dans l'historique Git sans avoir à consulter la PR d'origine.
+
+**Ce réglage ne doit pas être modifié** : il porte à la fois la qualité de l'historique et la traçabilité jusqu'au ticket (cf. `gestion-projet/revue-tickets.md` § « Suivi par tickets »). Avec une autre valeur, le corps du commit squashé n'est plus la description de la PR (`COMMIT_MESSAGES` : concaténation des messages des commits intermédiaires ; `BLANK` : corps vide). Le mot-clé de fermeture (`Closes #<numéro>`) n'apparaît alors plus dans le commit final : celui-ci ne mène plus directement au ticket, seul le suffixe `(#<PR>)` du titre mène à la PR, et il faut passer par elle pour retrouver le ticket. La description, rédigée comme un message de commit, ne figure plus non plus dans l'historique de `main`. Toute modification de ce réglage exige donc de revoir ces règles.
+
+La description de toute Pull Request **suit toujours le template** du projet `.github` : le dépôt [`Tetram76/.github`](https://github.com/Tetram76/.github) du compte, qui porte les fichiers de santé communautaire par défaut de tous ses dépôts, dont `.github/pull_request_template.md`. Sections et consignes du template sont à suivre. Il n'est pas copié dans ce dépôt : il est relu à chaque PR.
+
+Exemples :
+
+- `feat(albums): ajout de la gestion des éditions`
+- `fix(devises): correction du taux de conversion franc français`
+- `chore(docker): mise à jour du Dockerfile backend`
+
+> **Note** : l'enforcement automatique du format (via ruleset GitHub) est réservé à GitHub Enterprise et n'est donc pas actif. Le respect de la convention est une contrainte de processus appliquée par l'agent.
+
+## Releases
+
+Des **releases GitHub** sont publiées pour marquer les jalons significatifs du projet. Chaque release correspond à un état stable et identifiable de l'application.

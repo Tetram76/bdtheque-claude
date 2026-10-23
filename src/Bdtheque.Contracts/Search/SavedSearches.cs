@@ -2,7 +2,7 @@ using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Search;
 
-/// <summary>A saved search, as the consultation offers it to be replayed (fonctionnel.md § Recherches enregistrées).</summary>
+/// <summary>A saved search, as the consultation offers it to be replayed (fonctionnel/recherche-avancee.md § Recherches enregistrées).</summary>
 /// <param name="Entity">The entity the search returns.</param>
 public sealed record SavedSearchListItem(Guid Id, string Name, EntityKind Entity);
 

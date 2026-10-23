@@ -7,8 +7,8 @@ namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// The hierarchy of the universes, read whole — a small reference table — rather than walked by
-/// recursive queries (choix-implementation.md § Organisation de l'API): the ancestors of a universe, and
-/// its descendants, to whose records it is attached too (fonctionnel.md § Hiérarchie des univers).
+/// recursive queries (choix-implementation/api.md § Organisation de l'API): the ancestors of a universe, and
+/// its descendants, to whose records it is attached too (fonctionnel/regles-metier.md § Hiérarchie des univers).
 /// </summary>
 internal sealed class UniverseTree
 {

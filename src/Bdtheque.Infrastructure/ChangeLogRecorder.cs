@@ -10,7 +10,7 @@ namespace Bdtheque.Infrastructure;
 /// <summary>
 /// Adds to the save under way the change log entry of every write on a record (modele-metier.md §
 /// Entrée du journal des modifications), from what the change tracker is about to write
-/// (choix-implementation.md § Journal des modifications : mise en œuvre).
+/// (choix-implementation/domaine.md § Journal des modifications : mise en œuvre).
 /// </summary>
 internal sealed class ChangeLogRecorder(BdthequeDbContext context)
 {

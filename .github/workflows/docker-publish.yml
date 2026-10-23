@@ -1,7 +1,7 @@
 name: Docker publish
 
-# Publishes the application images to Docker Hub (account `tetram76`, see contraintes-techniques.md).
-# Images are only published nightly and on demand (contraintes-techniques.md), never on each merge.
+# Publishes the application images to Docker Hub (account `tetram76`, see contraintes-techniques/architecture-deploiement.md § Déploiement).
+# Images are only published nightly and on demand (contraintes-techniques/architecture-deploiement.md § Déploiement), never on each merge.
 on:
   # Nightly images. Scheduled runs use the head of `main`.
   schedule:
@@ -61,7 +61,7 @@ jobs:
             exit 1
           fi
 
-      # Only one `nightly` image may exist per repository (contraintes-techniques.md): the images
+      # Only one `nightly` image may exist per repository (contraintes-techniques/architecture-deploiement.md § Déploiement): the images
       # the new ones replace are recorded here, then deleted once the tag has moved. A missing image
       # (first nightly) leaves nothing to delete; a registry error fails the job, since a replaced
       # image could not be deleted without its digest. When both nightly images are already built

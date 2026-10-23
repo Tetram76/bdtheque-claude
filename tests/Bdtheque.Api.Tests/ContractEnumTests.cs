@@ -7,7 +7,7 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// The contracts duplicate the domain enums so that the frontend never references the domain
-/// (choix-implementation.md § Organisation de l'API): the copies must stay identical, member by
+/// (choix-implementation/api.md § Organisation de l'API): the copies must stay identical, member by
 /// member, or a value would silently change meaning between the API and the frontend.
 /// </summary>
 public sealed class ContractEnumTests

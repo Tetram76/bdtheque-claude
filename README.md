@@ -157,9 +157,9 @@ Le développement est mené par un agent IA disposant d'une **autonomie gouvern�
 
 | Fichier | Contenu |
 | --- | --- |
-| [`fonctionnel.md`](.speckit/fonctionnel.md) | Fonctionnalités, règles métier, flux |
+| [`fonctionnel/`](.speckit/fonctionnel/index.md) | Fonctionnalités, règles métier, flux |
 | [`modele-metier.md`](.speckit/modele-metier.md) | Entités, attributs, relations |
-| [`contraintes-techniques.md`](.speckit/contraintes-techniques.md) | Stack, architecture, déploiement |
-| [`choix-implementation.md`](.speckit/choix-implementation.md) | Choix techniques retenus par l'agent de sa propre initiative |
-| [`gestion-projet.md`](.speckit/gestion-projet.md) | Branches, commits, CI/CD |
+| [`contraintes-techniques/`](.speckit/contraintes-techniques/index.md) | Stack, architecture, déploiement |
+| [`choix-implementation/`](.speckit/choix-implementation/index.md) | Choix techniques retenus par l'agent de sa propre initiative |
+| [`gestion-projet/`](.speckit/gestion-projet/index.md) | Branches, commits, CI/CD |
 | [`suivi-implementation.md`](.speckit/suivi-implementation.md) | Avancement du plan d'implémentation (phases, PR, statut) |

@@ -34,7 +34,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     {
         var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
 
-        // Every entity but the saved searches themselves (fonctionnel.md § Entités recherchées).
+        // Every entity but the saved searches themselves (fonctionnel/recherche-avancee.md § Entités recherchées).
         Assert.Equal(
             Enum.GetValues<EntityKind>().Where(k => k != EntityKind.SavedSearch).Order(), schema.Entities.Select(e => e.Entity).Order());
         foreach (var entity in schema.Entities)
@@ -237,7 +237,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var acquisition = new SearchOperand("acquisitionDate");
         var albumPublication = new SearchOperand("firstPublicationDate", ["album"]);
 
-        // fonctionnel.md § Comparaisons: editions published after their acquisition, or before the first publication of their album.
+        // fonctionnel/recherche-avancee.md § Comparaisons: editions published after their acquisition, or before the first publication of their album.
         AssertIds([reprint.Id], await EditionIdsAsync(And(mine, Data("publicationYear", GreaterThan, acquisition, SearchDatePrecision.Year))));
         AssertIds([sameYear.Id, original.Id], await EditionIdsAsync(And(mine, Data("publicationYear", EqualTo, acquisition, SearchDatePrecision.Year))));
         AssertIds([original.Id, notAcquiredOn.Id], await EditionIdsAsync(And(mine, Data("publicationYear", LessThanOrEqualTo, albumPublication, SearchDatePrecision.Year))));
@@ -304,7 +304,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var atDargaud = new SearchLink("publisher", Text("name", StartsWith, "Dargaud"));
         var in2000 = Text("publicationYear", EqualTo, "2000");
 
-        // fonctionnel.md § Liens entre entités: one edition satisfying both, or each by a different edition.
+        // fonctionnel/recherche-avancee.md § Liens entre entités: one edition satisfying both, or each by a different edition.
         AssertIds([sameEdition.Id], await AlbumIdsAsync(Editions(SearchQuantifierKind.Any, And(atDargaud, in2000))));
         AssertIds(
             [twoEditions.Id, sameEdition.Id],
@@ -332,7 +332,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         await CreateEditionAsync((await CreateAlbumAsync(null, partly.Id, volumeNumber: 1)).Id, dargaud.Id);
         await CreateAlbumAsync(null, partly.Id, volumeNumber: 2);
 
-        // fonctionnel.md § Liens entre entités: series all of whose albums have at least one edition at Dargaud.
+        // fonctionnel/recherche-avancee.md § Liens entre entités: series all of whose albums have at least one edition at Dargaud.
         var criteria = And(
             Text("title", Contains, _marker),
             new SearchLink("albums", Editions(SearchQuantifierKind.Any, new SearchLink("publisher", Text("name", StartsWith, "Dargaud"))),
@@ -356,7 +356,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var edition = await CreateEditionAsync(twoIllustrators.Id, publisher.Id);
         await CreateEditionAsync(oneIllustrator.Id, publisher.Id);
 
-        // fonctionnel.md § Liens entre entités: editions whose album has more than one illustrator.
+        // fonctionnel/recherche-avancee.md § Liens entre entités: editions whose album has more than one illustrator.
         var criteria = And(
             new SearchLink("publisher", Text("name", Contains, _marker)),
             new SearchLink("album", new SearchLink(

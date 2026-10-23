@@ -19,7 +19,7 @@ builder.Services.AddHealthChecks()
 builder.Services.AddOpenApi();
 
 // Every error response is a ProblemDetails whose type is one of the three error categories, and
-// no other (choix-implementation.md § Erreurs métier, fonctionnelles et techniques).
+// no other (choix-implementation/ecritures.md § Erreurs métier, fonctionnelles et techniques).
 // ApiExceptionHandler categorizes the exceptions; whatever the framework or a middleware emits
 // without one (unbindable request, unknown route, missing internal key…) gets the technical
 // category here, no user input being able to produce it.
@@ -35,7 +35,7 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-// The visuals volume (choix-implementation.md § Visuels : stockage et traitement), and the daily
+// The visuals volume (choix-implementation/domaine.md § Visuels : stockage et traitement), and the daily
 // removal of the files no visual references any more — resolvable on its own to be run on demand.
 builder.Services.AddOptions<VisualStorageOptions>()
     .Bind(builder.Configuration.GetSection(VisualStorageOptions.SectionName))
@@ -59,7 +59,7 @@ using (var migrationScope = app.Services.CreateScope())
 
     // An update of the database image may bring another version of ICU, which PostgreSQL only warns
     // about while the indexes of the text columns may be corrupt: rebuilt here, the one step every
-    // deployment goes through (choix-implementation.md § Collation des colonnes texte).
+    // deployment goes through (choix-implementation/persistance.md § Collation des colonnes texte).
     var refreshed = await CollationVersions.RefreshAsync(context, CancellationToken.None);
     if (refreshed.Count > 0)
         app.Logger.LogWarning(
@@ -86,7 +86,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Defense in depth: `api` is only reachable by `frontend` over the internal Docker
-// network, but still requires this shared secret (see choix-implementation.md).
+// network, but still requires this shared secret (see choix-implementation/socle.md § Authentification : mise en œuvre).
 app.UseMiddleware<InternalApiKeyMiddleware>();
 
 var admin = app.MapAdmin();

@@ -18,7 +18,7 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// Pins how every exception reaching the API's single exception handler is categorized
-/// (choix-implementation.md § Erreurs métier, fonctionnelles et techniques). The handler is taken
+/// (choix-implementation/ecritures.md § Erreurs métier, fonctionnelles et techniques). The handler is taken
 /// from the API's own services, with the API's own ProblemDetails configuration.
 /// </summary>
 public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFactory>

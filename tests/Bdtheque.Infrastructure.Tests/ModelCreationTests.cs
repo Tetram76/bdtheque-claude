@@ -310,7 +310,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         // Confirms the project-wide enum-as-int convention (ConfigureConventions): the raw
         // column value is the member's explicit numeric value, not the CLR default ordinal —
         // every domain enum assigns its values explicitly precisely so this holds regardless
-        // of declaration order (see choix-implementation.md).
+        // of declaration order (see choix-implementation/persistance.md § Conventions de persistance (EF Core)).
         var series = new Series("Tintin");
         series.SetStatus(SeriesStatus.InProgress);
 
@@ -590,7 +590,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
     public async Task AcquisitionAmount_ThreeDecimalCurrency_RoundTripsWithoutRounding()
     {
         // Some ISO 4217 currencies (KWD, BHD, OMR, JOD, TND) have 3 minor-unit digits;
-        // fonctionnel.md § Gestion des devises requires supporting any currency, so a column
+        // fonctionnel/valorisation.md § Gestion des devises requires supporting any currency, so a column
         // scale below 3 would let PostgreSQL silently round those amounts on save.
         var album = new Album("Tintin", null);
         var publisher = new Publisher("Casterman");

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Api.Endpoints;
 
-/// <summary>Offset pagination of the lists of the consultation (choix-implementation.md § Organisation de l'API).</summary>
+/// <summary>Offset pagination of the lists of the consultation (choix-implementation/api.md § Organisation de l'API).</summary>
 internal static class Paging
 {
     public const int DefaultSize = 50;

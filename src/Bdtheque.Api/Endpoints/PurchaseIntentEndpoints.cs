@@ -13,15 +13,15 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// Purchase intents (fonctionnel.md § Intention d'achat): their administration
+/// Purchase intents (fonctionnel/regles-metier.md § Intention d'achat): their administration
 /// (<c>/admin/albums/{albumId}/purchase-intents</c>) and their public list (<c>/catalog/purchase-intents</c>).
 /// The intents belong to the aggregate of their album, which alone sees them all: every write on them
-/// locks the album and checks its version (choix-implementation.md § Concurrence d'accès). Their
+/// locks the album and checks its version (choix-implementation/persistance.md § Concurrence d'accès). Their
 /// realization is the acquisition of an edition (<see cref="EditionEndpoints"/>).
 /// </summary>
 internal static class PurchaseIntentEndpoints
 {
-    // fonctionnel.md § Suppression des entités: an intent on an edition takes along the edition
+    // fonctionnel/regles-metier.md § Suppression des entités: an intent on an edition takes along the edition
     // targeted, not owned, with its visuals; an intent on the whole album, nothing else.
     private static readonly DeletionLink[] DeletionLinks =
     [
@@ -110,7 +110,7 @@ internal static class PurchaseIntentEndpoints
     /// <summary>
     /// Converts an intent on an edition into an intent on the whole album: the edition targeted is
     /// deleted with its visuals, as by the deletion of the intent, whose impact the user confirmed
-    /// (fonctionnel.md § Intention d'achat).
+    /// (fonctionnel/regles-metier.md § Intention d'achat).
     /// </summary>
     private static async Task<PurchaseIntentsForm> ConvertToAlbumAsync(
         Guid rootId, Guid id, ConvertPurchaseIntentToAlbumRequest request, BdthequeDbContext context, VisualStorage storage,
@@ -134,7 +134,7 @@ internal static class PurchaseIntentEndpoints
             .ToPageAsync(page, pageSize, ListItem, cancellationToken);
 
     // Entered with the minimum of fields: the traits of the copy keep the values of an edition not
-    // owned (fonctionnel.md § Réalisation d'une intention).
+    // owned (fonctionnel/regles-metier.md § Réalisation d'une intention).
     private static Task<Edition> AddEditionAsync(
         BdthequeDbContext context, Album album, PurchaseIntentEditionContent edition, CancellationToken cancellationToken) =>
         EditionEndpoints.AddEditionAsync(

@@ -167,7 +167,7 @@ internal static class ChangeLogMappings
     private static AttributeMapping Date(ChangeLogAttribute attribute, string property) =>
         Scalar(attribute, property, value => value is DateOnly date ? new DateValue(date) : null);
 
-    // Its persisted value, which keeps its meaning forever (choix-implementation.md § Conventions de persistance).
+    // Its persisted value, which keeps its meaning forever (choix-implementation/persistance.md § Conventions de persistance).
     private static AttributeMapping Enum<TRecord>(ChangeLogAttribute attribute, string property)
     {
         var type = typeof(TRecord).GetProperty(property)!.PropertyType;

@@ -6,7 +6,7 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// Validation and conversion of an uploaded visual, in memory, before anything is written
-/// (choix-implementation.md § Visuels : stockage et traitement).
+/// (choix-implementation/domaine.md § Visuels : stockage et traitement).
 /// </summary>
 public sealed class VisualImageTests
 {

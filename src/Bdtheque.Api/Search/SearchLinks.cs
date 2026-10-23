@@ -16,7 +16,7 @@ namespace Bdtheque.Api.Search;
 /// <param name="UniverseAncestorLevels">The most ancestors a universe has.</param>
 internal sealed record SearchScope(BdthequeDbContext Context, int UniverseAncestorLevels);
 
-/// <summary>A link of the model from an entity to related records (fonctionnel.md § Liens entre entités).</summary>
+/// <summary>A link of the model from an entity to related records (fonctionnel/recherche-avancee.md § Liens entre entités).</summary>
 /// <param name="Related">
 /// The related records of a record, built in the scope of the search: the record itself for a link to one
 /// record through a navigation, or a sequence otherwise (of at most one record for a link to one record).
@@ -31,8 +31,8 @@ internal sealed record SearchLinkDefinition(
 /// <summary>
 /// Links through the associations of a record with genres or universes (modele-metier.md § Relations et
 /// cardinalités), in both directions: a record is attached to a genre or a universe directly, or through
-/// another record (an album through its series, fonctionnel.md § Genres et univers d'un album), and to a
-/// universe, to its ancestors too (fonctionnel.md § Hiérarchie des univers).
+/// another record (an album through its series, fonctionnel/regles-metier.md § Genres et univers d'un album), and to a
+/// universe, to its ancestors too (fonctionnel/regles-metier.md § Hiérarchie des univers).
 /// </summary>
 internal static class SearchAttachments
 {
@@ -102,7 +102,7 @@ internal static class SearchAttachments
     // The universe associated with the record is the target or one of its descendants, down to the depth of
     // the hierarchy: associated.Id == target.Id || associated.ParentId == target.Id
     // || associated.Parent.ParentId == target.Id || …, without a recursive query (the hierarchy of the
-    // universes is read whole elsewhere too, choix-implementation.md § Recherche).
+    // universes is read whole elsewhere too, choix-implementation/api.md § Recherche).
     private static Expression<Func<Universe, Universe, bool>> AncestorOrSelf(int ancestorLevels)
     {
         var target = Expression.Parameter(typeof(Universe), "target");

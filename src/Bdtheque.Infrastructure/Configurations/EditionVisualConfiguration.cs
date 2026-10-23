@@ -15,7 +15,7 @@ internal sealed class EditionVisualConfiguration : IEntityTypeConfiguration<Edit
         // Optimizes the (EditionId, Type, DisplayOrder) ordering that Edition.GetOrderedVisuals
         // applies in memory. The index alone does not sort a loaded collection: EF Core never
         // adds an implicit ORDER BY to a collection navigation, so it does not by itself
-        // guarantee the fixed presentation order from fonctionnel.md § Ordre des visuels d'une
+        // guarantee the fixed presentation order from fonctionnel/regles-metier.md § Ordre des visuels d'une
         // édition — see GetOrderedVisuals, the single place that actually applies it.
         builder.HasIndex(v => new { v.EditionId, v.Type, v.DisplayOrder });
 

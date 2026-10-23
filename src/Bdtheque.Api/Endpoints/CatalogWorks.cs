@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// Lists presented as the bibliography of an author (fonctionnel.md § Structure de l'application): the
+/// Lists presented as the bibliography of an author (fonctionnel/index.md § Structure de l'application): the
 /// series and the albums without series together at the first level, by sort key, each series grouping
 /// its albums, in the order of the series. Shared by the bibliography of an author and by the works of a
 /// genre or of a universe.

@@ -33,7 +33,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         // Without year: after those with one.
         var undated = await CreateOwnedEditionAsync(album.Id, publisher.Id, null);
         await UploadAsync(album.Id, undated, VisualType.Cover);
-        // The oldest with a cover, though not owned (fonctionnel.md § Couverture d'un album: no filter here).
+        // The oldest with a cover, though not owned (fonctionnel/regles-metier.md § Couverture d'un album: no filter here).
         var intended = await CreateIntendedEditionAsync(album.Id, publisher.Id, 1985);
         var expected = await UploadAsync(album.Id, intended, VisualType.Cover);
 
@@ -67,7 +67,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         var edition = await CreateOwnedEditionAsync(album.Id, publisher.Id, 1980);
         var jacket = await UploadAsync(album.Id, edition, VisualType.Cover);
         var underneath = await UploadAsync(album.Id, edition, VisualType.Cover);
-        // The user puts the second cover first (fonctionnel.md § Ordre des visuels d'une édition).
+        // The user puts the second cover first (fonctionnel/regles-metier.md § Ordre des visuels d'une édition).
         var visuals = await GetAsync<EditionVisualsForm>(VisualsUri(album.Id, edition));
         var arrangement = visuals.Visuals.OrderBy(v => v.OriginalPath == underneath.OriginalPath ? 0 : 1).Select(v => new VisualArrangement(v.Id, v.Type));
         (await _client.PutAsJsonAsync(VisualsUri(album.Id, edition), new ArrangeVisualsRequest(arrangement.ToList(), visuals.AlbumVersion)))

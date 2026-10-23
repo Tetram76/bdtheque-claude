@@ -2,7 +2,7 @@ namespace Bdtheque.Domain.Common;
 
 /// <summary>
 /// Validates the check digit of an ISBN-10 or ISBN-13 to flag likely typos on input.
-/// This check is advisory only (fonctionnel.md § Validation de l'ISBN): some publishers have
+/// This check is advisory only (fonctionnel/regles-metier.md § Validation de l'ISBN): some publishers have
 /// shipped albums with a genuinely incorrect ISBN, so a caller must warn on <c>false</c>
 /// rather than reject the value.
 /// </summary>

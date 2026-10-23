@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// The logs of production (choix-implementation.md § Journalisation): what serves the operation of
+/// The logs of production (choix-implementation/socle.md § Journalisation): what serves the operation of
 /// the application, without the database statements, and without a user's input mistake looking
 /// like an error.
 /// </summary>

@@ -1,12 +1,12 @@
 # Charte graphique
 
-Ce fichier décrit l'identité visuelle de l'application, c'est-à-dire ce que partagent tous ses thèmes : thème de base et ton général. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation). L'exigence de rendu est posée par `fonctionnel.md` § Design et charte graphique ; la présentation de chaque écran est décrite dans son propre fichier de ce dossier, avec ses maquettes.
+Ce fichier décrit l'identité visuelle de l'application, c'est-à-dire ce que partagent tous ses thèmes : thème de base et ton général. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation). L'exigence de rendu est posée par `fonctionnel/index.md` § Design et charte graphique ; la présentation de chaque écran est décrite dans son propre fichier de ce dossier, avec ses maquettes.
 
 ---
 
 ## Portée
 
-**Chaque page** de l'application, quelle que soit sa partie (Consultation, Administration, aide contextuelle, `fonctionnel.md` § Structure de l'application), **suit l'identité visuelle du thème actif** : ses couleurs, sa typographie et ses éléments graphiques.
+**Chaque page** de l'application, quelle que soit sa partie (Consultation, Administration, aide contextuelle, `fonctionnel/index.md` § Structure de l'application), **suit l'identité visuelle du thème actif** : ses couleurs, sa typographie et ses éléments graphiques.
 
 La charte ci-dessous est issue des maquettes du dashboard (cf. [`dashboard.md`](dashboard.md)), premier écran conçu, dont elle réunit ce que partagent toutes les alternatives : elle s'applique à la partie **Consultation**.
 

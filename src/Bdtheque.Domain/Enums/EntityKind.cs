@@ -1,8 +1,8 @@
 namespace Bdtheque.Domain.Enums;
 
 /// <summary>
-/// An entity type of the model, as the advanced search returns or follows it (fonctionnel.md § Entités
-/// recherchées), and as the impact of a deletion counts its records (fonctionnel.md § Suppression des
+/// An entity type of the model, as the advanced search returns or follows it (fonctionnel/recherche-avancee.md § Entités
+/// recherchées), and as the impact of a deletion counts its records (fonctionnel/regles-metier.md § Suppression des
 /// entités).
 /// </summary>
 public enum EntityKind

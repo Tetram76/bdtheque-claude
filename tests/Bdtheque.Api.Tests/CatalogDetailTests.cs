@@ -149,7 +149,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
             new SeriesEditionTemplate(dargaud.Id, collection.Id, null, null, BindingType.Hardcover, null, null, null, true),
             [new(goscinny.Id, ContributionRole.Scenarist), new(morris.Id, ContributionRole.Illustrator)]));
 
-        // fonctionnel.md § Ordre des albums dans une série: the albums not special issues, then the special
+        // fonctionnel/regles-metier.md § Ordre des albums dans une série: the albums not special issues, then the special
         // issues, each by volume (its first one for an omnibus), failing which by first publication.
         var specialUndated = await CreateAlbumAsync("HS sans tome", series.Id, specialIssue: true);
         var special1 = await CreateAlbumAsync("HS 1", series.Id, volume: 1, specialIssue: true);
@@ -268,7 +268,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
     }
 
-    // fonctionnel.md § Structure de l'application: the editions are presented by the record of their
+    // fonctionnel/index.md § Structure de l'application: the editions are presented by the record of their
     // album; the publishers, their collections, the genres and the universes have no record.
     [Theory]
     [InlineData("editions")]

@@ -13,11 +13,11 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>
 /// Administration of the publishers and of their collections (<c>/admin/publishers</c>). A
 /// collection belongs to the aggregate of its publisher: every write on it locks the publisher and
-/// checks the version of the publisher (choix-implementation.md § Concurrence d'accès).
+/// checks the version of the publisher (choix-implementation/persistance.md § Concurrence d'accès).
 /// </summary>
 internal static class PublisherEndpoints
 {
-    // fonctionnel.md § Suppression des entités: a publisher is refused deletion while editions or
+    // fonctionnel/regles-metier.md § Suppression des entités: a publisher is refused deletion while editions or
     // series templates reference it, and its collections are deleted with it.
     private static readonly DeletionLink[] PublisherDeletionLinks =
     [
@@ -57,7 +57,7 @@ internal static class PublisherEndpoints
             query => query.Include(p => p.Collections), publisher => publisher.Collections, CollectionDeletionLinks);
     }
 
-    // A publisher and its collections have no record (fonctionnel.md § Structure de l'application): a
+    // A publisher and its collections have no record (fonctionnel/index.md § Structure de l'application): a
     // publisher leads to its website, its editions are listed by the cross filters of the lists.
     public static void MapPublisherCatalog(this RouteGroupBuilder catalog)
     {
@@ -73,7 +73,7 @@ internal static class PublisherEndpoints
             .ThenBy(p => p.Id)
             .ToPageAsync(page, pageSize, p => new PublisherListItem(p.Id, p.Name, p.Website), cancellationToken);
 
-    /// <summary>The collections of all publishers, or of one of them (choix-implementation.md § Recherche).</summary>
+    /// <summary>The collections of all publishers, or of one of them (choix-implementation/api.md § Recherche).</summary>
     private static Task<Page<PublisherCollectionListItem>> ListAllCollectionsAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, Guid? publisherId = null, int page = 1,
         int pageSize = Paging.DefaultSize)

@@ -16,7 +16,7 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>Administration of the series (<c>/admin/series</c>).</summary>
 internal static class SeriesEndpoints
 {
-    // fonctionnel.md § Suppression des entités: a series is refused deletion while it contains
+    // fonctionnel/regles-metier.md § Suppression des entités: a series is refused deletion while it contains
     // albums, and its template contributions are deleted with it. Its genres and universes are
     // associations that merely disappear, without any record being concerned.
     private static readonly DeletionLink[] DeletionLinks =
@@ -44,7 +44,7 @@ internal static class SeriesEndpoints
 
     /// <summary>
     /// A series with its albums, in its order, its universes, each with its ancestors, and what describes
-    /// it of its template: its publisher, collection and authors (fonctionnel.md § Structure de
+    /// it of its template: its publisher, collection and authors (fonctionnel/index.md § Structure de
     /// l'application).
     /// </summary>
     private static async Task<SeriesDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
@@ -93,7 +93,7 @@ internal static class SeriesEndpoints
     }
 
     /// <summary>
-    /// The series found by their title, narrowed by the cross filters (choix-implementation.md §
+    /// The series found by their title, narrowed by the cross filters (choix-implementation/api.md §
     /// Recherche): credited, published or collected on the series itself — its contributions, publisher
     /// and collection are data of the series as much as a template (modele-metier.md § Série —
     /// relations) — or through its albums.

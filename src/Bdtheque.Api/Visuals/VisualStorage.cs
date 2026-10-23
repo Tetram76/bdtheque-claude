@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 namespace Bdtheque.Api.Visuals;
 
 /// <summary>
-/// The files of the visuals on their volume (choix-implementation.md § Visuels : stockage et
+/// The files of the visuals on their volume (choix-implementation/domaine.md § Visuels : stockage et
 /// traitement): the original under <c>originals/</c>, the display version under <c>display/</c>, both
 /// named after the media reference of the visual. Files and rows cannot be written atomically: each
 /// write is compensated by its caller, and <see cref="VisualReconciliation"/> removes what remains.

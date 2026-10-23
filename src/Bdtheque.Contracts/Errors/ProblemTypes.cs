@@ -2,7 +2,7 @@ namespace Bdtheque.Contracts.Errors;
 
 /// <summary>
 /// Values of the <c>type</c> member of every error response of the API (ProblemDetails, RFC 9457):
-/// one per error category of fonctionnel.md § Présentation des erreurs, and no other. The category
+/// one per error category of fonctionnel/index.md § Présentation des erreurs, and no other. The category
 /// is all the frontend needs to present an error distinctively; the HTTP status only refines the
 /// nature of the error within its category.
 /// </summary>

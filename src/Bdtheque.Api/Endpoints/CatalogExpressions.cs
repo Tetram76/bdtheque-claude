@@ -12,7 +12,7 @@ namespace Bdtheque.Api.Endpoints;
 /// Expressions shared by the lists and records of the consultation — what the labels of an album and of
 /// an edition are built from, the card and the cover of an album, the membership of the collection, the
 /// purchase intents, the order of the albums —, written once and inserted into each query
-/// (choix-implementation.md § Recherche).
+/// (choix-implementation/api.md § Recherche).
 /// </summary>
 /// <remarks>
 /// EF Core translates an expression tree, never the call of a C# method: a query calls the shared
@@ -84,7 +84,7 @@ internal static class CatalogExpressions
         ToCover(a.CoverMediaReference()),
         a.PurchaseIntents.Any());
 
-    // fonctionnel.md § Couverture d'un album, among all the editions: the oldest edition with a cover, by
+    // fonctionnel/regles-metier.md § Couverture d'un album, among all the editions: the oldest edition with a cover, by
     // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
     // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered:
     // the first created.
@@ -143,7 +143,7 @@ internal static class CatalogExpressions
             .ThenBy(Of(album, a => a.Id));
 
     /// <summary>
-    /// Sorts albums by series, each series in its order (fonctionnel.md § Ordre des albums dans une
+    /// Sorts albums by series, each series in its order (fonctionnel/regles-metier.md § Ordre des albums dans une
     /// série): the albums not special issues first, then the special issues; in each, by volume — its
     /// first one for an omnibus —, failing which by first publication, the albums without volume coming
     /// after those with one (PostgreSQL sorts nulls last); then by sort key and album, for a total order.

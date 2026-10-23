@@ -5,7 +5,7 @@ namespace Bdtheque.Domain.Common;
 
 /// <summary>
 /// Computes the initial-based navigation entry (<c>A</c>–<c>Z</c>, <c>#</c> or <c>@</c>) of a sort
-/// key, per fonctionnel.md § Entrées de la navigation par initiale. Shared by
+/// key, per fonctionnel/presentation.md § Entrées de la navigation par initiale. Shared by
 /// <see cref="Entities.Series"/>, <see cref="Entities.Album"/> and <see cref="Entities.Author"/>.
 /// </summary>
 /// <remarks>
@@ -14,7 +14,7 @@ namespace Bdtheque.Domain.Common;
 /// ignoring case and diacritics — the same collation family as the text columns. A letter is
 /// thus filed exactly where the sorted list places it, including those that Unicode
 /// decomposition leaves untouched (<c>Œ</c>, <c>Ø</c>, <c>Ł</c>…), without a hand-written
-/// transliteration table that could contradict that order (choix-implementation.md
+/// transliteration table that could contradict that order (choix-implementation/api.md
 /// § Navigation par initiale : mise en œuvre).
 /// </remarks>
 public static class NavigationEntryCalculator

@@ -12,7 +12,7 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The saved searches (fonctionnel.md § Recherches enregistrées): their administration
+/// The saved searches (fonctionnel/recherche-avancee.md § Recherches enregistrées): their administration
 /// (<c>/admin/saved-searches</c>), and their list, criteria and replay in the consultation
 /// (<c>/catalog/saved-searches</c>).
 /// </summary>
@@ -29,7 +29,7 @@ internal static class SavedSearchEndpoints
         searches.MapGet("/{id:guid}", GetAsync);
         searches.MapPost("/", CreateAsync);
         searches.MapPut("/{id:guid}", UpdateAsync);
-        // fonctionnel.md § Suppression des entités: deleted with no other effect.
+        // fonctionnel/regles-metier.md § Suppression des entités: deleted with no other effect.
         searches.MapDeletion<SavedSearch>([]);
     }
 
