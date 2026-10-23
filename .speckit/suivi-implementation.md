@@ -160,7 +160,7 @@ Revue de l'existant au regard de la contrainte d'exploitation au mieux des techn
 
 | Ticket | Titre |
 | --- | --- |
-| #189 | Revue de l'existant au regard de l'exploitation des technologies retenues |
+| ~~#189~~ | Revue de l'existant au regard de l'exploitation des technologies retenues |
 
 ## Phase 3 — Frontend Blazor
 
