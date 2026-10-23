@@ -162,6 +162,14 @@ Revue de l'existant au regard de la contrainte d'exploitation au mieux des techn
 | --- | --- |
 | ~~#189~~ | Revue de l'existant au regard de l'exploitation des technologies retenues |
 
+Chantiers d'amélioration identifiés par cette revue, chacun réalisé par sa propre Pull Request.
+
+| Ticket | Titre |
+| --- | --- |
+| #219 | Horloge de l'application pour les dates renseignées automatiquement |
+| #220 | Pipeline CI et outillage .NET : SDK, restauration verrouillée, cache NuGet, couverture et projets de test |
+| #221 | Paramétrage des valeurs de la recherche avancée par EF Core |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
