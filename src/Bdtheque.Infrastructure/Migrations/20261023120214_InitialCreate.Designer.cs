@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20261017133935_InitialCreate")]
+    [Migration("20261023120214_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -166,6 +166,145 @@ namespace Bdtheque.Infrastructure.Migrations
 
                             t.HasCheckConstraint("CK_Albums_VolumeRangeStartPositive", "\"StartVolumeNumber\" IS NULL OR \"StartVolumeNumber\" > 0");
                         });
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.AudienceCounter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DeviceType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EngineVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<string>("Function")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<bool>("IsAdministrator")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastUsage")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly>("Month")
+                        .HasColumnType("date");
+
+                    b.Property<int>("RenderingEngine")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RepeatedUsageCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VisitCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Month", "Function", "IsAdministrator", "DeviceType", "RenderingEngine", "EngineVersion")
+                        .IsUnique()
+                        .HasDatabaseName("IX_AudienceCounters_FunctionMonthCompartment");
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("Month", "Function", "IsAdministrator", "DeviceType", "RenderingEngine", "EngineVersion"), false);
+
+                    b.ToTable("AudienceCounters", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AudienceCounters_Counts", "\"VisitCount\" >= 1 AND \"VisitCount\" <= \"UsageCount\" AND \"RepeatedUsageCount\" BETWEEN 0 AND \"UsageCount\" - \"VisitCount\"");
+
+                            t.HasCheckConstraint("CK_AudienceCounters_MonthFirstDay", "EXTRACT(DAY FROM \"Month\") = 1");
+                        });
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.AudienceUsage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Function")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<bool>("IsRepeat")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Parameters")
+                        .HasColumnType("text")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<Guid?>("PresentedRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("PresentedRecordType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("VisitId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VisitId", "CreatedAt", "Id");
+
+                    b.ToTable("AudienceUsages", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AudienceUsages_FunctionNotBlank", "COALESCE(LENGTH(TRIM(\"Function\")), 0) > 0");
+
+                            t.HasCheckConstraint("CK_AudienceUsages_RecordOrParameters", "(\"PresentedRecordType\" IS NULL) = (\"PresentedRecordId\" IS NULL) AND (\"PresentedRecordType\" IS NULL OR \"Parameters\" IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.AudienceVisit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DeviceType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EngineVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<bool>("IsAdministrator")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RenderingEngine")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt", "Id");
+
+                    b.ToTable("AudienceVisits", (string)null);
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Author", b =>
@@ -977,6 +1116,58 @@ namespace Bdtheque.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.AudienceCounter", b =>
+                {
+                    b.OwnsMany("Bdtheque.Domain.Entities.AudienceCounterObject", "Objects", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("CounterId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Parameters")
+                                .HasColumnType("text")
+                                .UseCollation("fr-FR-x-icu");
+
+                            b1.Property<Guid?>("RecordId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int?>("RecordType")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("UsageCount")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("CounterId");
+
+                            b1.ToTable("AudienceCounterObjects", null, t =>
+                                {
+                                    t.HasCheckConstraint("CK_AudienceCounterObjects_RecordOrParameters", "(\"RecordType\" IS NULL) = (\"RecordId\" IS NULL) AND (\"RecordType\" IS NULL) <> (\"Parameters\" IS NULL)");
+
+                                    t.HasCheckConstraint("CK_AudienceCounterObjects_UsageCountPositive", "\"UsageCount\" >= 1");
+                                });
+
+                            b1.WithOwner()
+                                .HasForeignKey("CounterId");
+                        });
+
+                    b.Navigation("Objects");
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.AudienceUsage", b =>
+                {
+                    b.HasOne("Bdtheque.Domain.Entities.AudienceVisit", "Visit")
+                        .WithMany()
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Visit");
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Contribution", b =>

@@ -34,6 +34,8 @@ public sealed class DeleteRuleTests : IAsyncLifetime
         ["FK_PurchaseIntents_Editions_EditionId"] = Cascade,
         ["FK_PublisherCollections_Publishers_PublisherId"] = Cascade,
         ["FK_SavedSearchDesignations_SavedSearches_SavedSearchId"] = Cascade,
+        ["FK_AudienceUsages_AudienceVisits_VisitId"] = Cascade,
+        ["FK_AudienceCounterObjects_AudienceCounters_CounterId"] = Cascade,
 
         // Associations: the join row disappears with either side.
         ["FK_AlbumGenres_Albums_AlbumId"] = Cascade,

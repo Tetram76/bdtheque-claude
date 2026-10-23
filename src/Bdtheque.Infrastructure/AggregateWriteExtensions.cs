@@ -53,22 +53,11 @@ public static class AggregateWriteExtensions
             throw new InvalidOperationException(
                 "An aggregate must be locked before anything is tracked: entities read earlier would not be refreshed.");
 
-        var entityType = context.Model.FindEntityType(typeof(TRoot))
-                         ?? throw new InvalidOperationException($"{typeof(TRoot).Name} is not mapped.");
-        // EF Core has no locking clause: the statement is written by hand, with the identifiers taken
-        // from the model and quoted by the provider, the id being passed as a parameter.
-        var sql = context.GetService<ISqlGenerationHelper>();
-        var table = sql.DelimitIdentifier(entityType.GetTableName()!, entityType.GetSchema());
-        var idColumn = sql.DelimitIdentifier(entityType.FindProperty(nameof(EntityBase.Id))!.GetColumnName());
-        var versionColumn = sql.DelimitIdentifier(entityType.FindProperty(BdthequeDbContext.VersionProperty)!.GetColumnName());
         // A raw query reads a uint as bigint, which Npgsql cannot read from an xid: hence the cast
         // (xid has no direct cast to bigint, only through its text form).
-        var lockStatement =
-            "SELECT " + versionColumn + "::text::bigint AS \"Value\" FROM " + table + " WHERE " + idColumn + " = {0} FOR UPDATE";
-
         // The version is read from the locked row itself, the only one the lock guarantees current.
         var lockedVersions = await context.Database
-            .SqlQueryRaw<long>(lockStatement, id)
+            .SqlQueryRaw<long>(LockStatement<TRoot>(context, column => column + "::text::bigint", BdthequeDbContext.VersionProperty), id)
             .ToListAsync(cancellationToken);
         if (lockedVersions.Count == 0)
             throw new EntityNotFoundException(typeof(TRoot), id);
@@ -85,5 +74,37 @@ public static class AggregateWriteExtensions
 
         context.Entry(root).State = EntityState.Modified;
         return root;
+    }
+
+    /// <summary>
+    /// Locks the row of an entity (<c>SELECT … FOR UPDATE</c>) until the end of the transaction, to serialize the
+    /// writes that depend on it without being writes of it (e.g. the next usage of an audience visit, which reads
+    /// the latest one).
+    /// </summary>
+    /// <exception cref="EntityNotFoundException">No entity has this identifier.</exception>
+    public static async Task LockAsync<TEntity>(this BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
+        where TEntity : EntityBase
+    {
+        if (context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("A row can only be locked within a transaction.");
+
+        var locked = await context.Database
+            .SqlQueryRaw<Guid>(LockStatement<TEntity>(context, column => column, nameof(EntityBase.Id)), id)
+            .ToListAsync(cancellationToken);
+        if (locked.Count == 0)
+            throw new EntityNotFoundException(typeof(TEntity), id);
+    }
+
+    // EF Core has no locking clause: the statement is written by hand, with the identifiers taken from the
+    // model and quoted by the provider, the id being passed as a parameter. It selects one column, as "Value".
+    private static string LockStatement<TEntity>(BdthequeDbContext context, Func<string, string> selected, string property)
+    {
+        var entityType = context.Model.FindEntityType(typeof(TEntity))
+                         ?? throw new InvalidOperationException($"{typeof(TEntity).Name} is not mapped.");
+        var sql = context.GetService<ISqlGenerationHelper>();
+        var table = sql.DelimitIdentifier(entityType.GetTableName()!, entityType.GetSchema());
+        var idColumn = sql.DelimitIdentifier(entityType.FindProperty(nameof(EntityBase.Id))!.GetColumnName());
+        var column = sql.DelimitIdentifier(entityType.FindProperty(property)!.GetColumnName());
+        return "SELECT " + selected(column) + " AS \"Value\" FROM " + table + " WHERE " + idColumn + " = {0} FOR UPDATE";
     }
 }
