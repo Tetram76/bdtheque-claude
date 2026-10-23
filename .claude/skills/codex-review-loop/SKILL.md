@@ -13,17 +13,20 @@ description: >-
 The `.speckit/` is the source of truth for PR management on this repo: it
 prevails over this skill and over any other rule, skill or plugin, global
 ones included; on any divergence, the speckit applies. Policy:
-`.speckit/gestion-projet.md` → "Revue de code" / "Revue Codex (bloquante)". This skill is the operational procedure for that
+`.speckit/gestion-projet/revue-tickets.md` → "Revue de code" / "Revue Codex (bloquante)". This skill is the operational procedure for that
 policy: a PR on this repo cannot be merged until the Codex bot
 (`chatgpt-codex-connector[bot]`) has approved the current head commit.
 
-Codex reviews every push to a non-draft PR: open a non-draft PR (or mark a
-draft ready for review) only once the branch content is complete; until then,
-the work stays local or on a draft PR (policy: § « Ouverture de la PR »).
-Marking a draft ready may not trigger a review (nothing is pushed): a few minutes after marking it ready, check for any Codex activity
-since then — 👀 on the PR description (review running), or a 👍, review or
-comment (review already finished; the 👀 is transient). Only if there is none,
-request a review with a `@codex review` comment.
+Codex reviews a PR when it is opened as non-draft, when a draft is marked
+ready for review, and on every push to a non-draft PR: open a non-draft PR (or
+mark a draft ready for review) only once the branch content is complete; until
+then, the work stays local or on a draft PR (policy: § « Ouverture de la PR »).
+Marking a draft ready triggers a review by itself, so never pair it with a
+`@codex review` comment. As a safety net only, a few minutes after marking it
+ready, check for any Codex activity since then — 👀 on the PR description
+(review running), or a 👍, review or comment (review already finished; the 👀
+is transient). Only if there is none, request a review with a `@codex review`
+comment.
 
 Requires `gh` authenticated (`gh auth status`) with access to the repo.
 
@@ -32,7 +35,7 @@ Requires `gh` authenticated (`gh auth status`) with access to the repo.
 When Codex runs out of budget it posts "You have reached your Codex usage
 limits" on a PR. Any review triggered within **5 hours** of that notice is
 refused **and restarts the 5-hour delay**, whichever PR triggers it: the
-budget is shared (policy: `.speckit/gestion-projet.md` § « Budget de Codex
+budget is shared (policy: `.speckit/gestion-projet/revue-tickets.md` § « Budget de Codex
 épuisé »). So, before **every** act that could trigger a review — creating a
 non-draft PR, marking a draft ready, pushing to a non-draft PR, or posting
 any comment with an `@codex` mention (Step 5 included) — run the check below.
@@ -102,7 +105,7 @@ signature-false-positive exit applies, see "Exit"):
 ```
 
 **Codex approves the head commit in one of two ways** (policy:
-`.speckit/gestion-projet.md` § Revue Codex), often without posting any review:
+`.speckit/gestion-projet/revue-tickets.md` § Revue Codex), often without posting any review:
 
 - the **👍 reaction** on the PR description — it names no commit, so the
   watcher ties it to the head through the review's course (trigger time, head
@@ -118,7 +121,7 @@ The watcher (Step 1) checks for both every cycle.
 
 Nothing notifies the session when Codex approves (bare 👍, and the approving
 receipt is not systematic), so waiting is done by a **live watcher**, never by
-intention. Rules (policy: `.speckit/gestion-projet.md` § Cycle, « Surveillance
+intention. Rules (policy: `.speckit/gestion-projet/revue-tickets.md` § Cycle, « Surveillance
 active obligatoire »):
 
 - **One background watcher per PR** (`run_in_background`), never one script
@@ -149,8 +152,9 @@ active obligatoire »):
 
 ```bash
 # Two timestamps, because a 👍 is a *state* and a review/comment is an *event*:
-# <LAST_TRIGGER_AT> the push of the head commit, or the last `@codex review`
-#                   comment (Step 5). A 👍 dated after it approves the current
+# <LAST_TRIGGER_AT> the push of the head commit, the PR's opening as non-draft
+#                   or its marking as ready for review, or the last
+#                   `@codex review` comment (Step 5). A 👍 dated after it approves the current
 #                   head, and stays true.
 # <HANDLED_UNTIL>   Codex events (reviews, comments) older than this were
 #                   already handled. Starts equal to <LAST_TRIGGER_AT>; when
@@ -234,7 +238,8 @@ gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.na
 Codex reacts with 👀 within seconds; within a few minutes it either approves
 the head commit — with a bare 👍, or with an approving receipt naming it,
 often without posting any review — or posts a review with findings. So never wait for a review to appear: run the watcher
-above, `<LAST_TRIGGER_AT>` being the push just made (Step 3) or, on a cycle
+above, `<LAST_TRIGGER_AT>` being the push just made (Step 3), the PR's
+opening as non-draft or its marking as ready for review, or, on a cycle
 entered from Step 5 without a new push, the `@codex review` comment's
 `created_at`. Then act on its exit reason:
 
@@ -274,7 +279,7 @@ matches the **exact** bot login rather than a substring, so none of them can
 be satisfied by an unrelated account. The exact string differs by API: REST
 endpoints (reviews, reactions, comments — used by the watcher) report bot
 accounts as `chatgpt-codex-connector[bot]`, the login named in
-`.speckit/gestion-projet.md`; GraphQL's `author.login` on review thread
+`.speckit/gestion-projet/`; GraphQL's `author.login` on review thread
 comments (Step 2) reports the same bot without the `[bot]` suffix, as
 `chatgpt-codex-connector` — a documented inconsistency between GitHub's REST
 and GraphQL representations of App bots, confirmed against this PR's live
@@ -351,7 +356,7 @@ When rejecting a finding on these grounds, state clearly in the Step 4 reply
 disproportionate) — not merely "won't fix".
 
 **Scope** — mandatory once a finding is judged valid and its root cause
-established (policy: `.speckit/gestion-projet.md` § « Traiter un retour »,
+established (policy: `.speckit/gestion-projet/revue-tickets.md` § « Traiter un retour »,
 steps 2–3): Codex does not know the PR's objective, so a valid finding is not
 automatically fixed in this PR. What is confronted with the objective is the
 **finding as a whole** — what it raises, its root cause and its fix — not
@@ -456,7 +461,7 @@ exactly `@codex review` and nothing else, should ever contain that mention.
 The same holds for the PR description and every other comment, even when the
 mention is quoted, in backticks or used to describe a rule: grep each text
 for it right before `gh pr create` / `gh pr edit` / `gh pr comment` / `gh api`.
-In chat with the user, never type it either (policy: `.speckit/gestion-projet.md`
+In chat with the user, never type it either (policy: `.speckit/gestion-projet/gouvernance.md`
 § Budget IA, « Mention de Codex »).
 
 **c'. Rate Codex's comment** — always, as Codex asks in every comment: 👍
@@ -506,7 +511,7 @@ no other comment, see "Exit".
 
 The Codex gate is satisfied once Codex has approved the current head commit
 (👍, or an approving receipt naming it). Merging still requires the CI checks to also pass (see
-`.speckit/gestion-projet.md`).
+`.speckit/gestion-projet/revue-tickets.md` § Règle de merge : non-régression et revue Codex obligatoires).
 
 Exception: after 3 requests where Codex repeated only a verified signature
 false positive (see Step 5) with no other comment, the PR is considered

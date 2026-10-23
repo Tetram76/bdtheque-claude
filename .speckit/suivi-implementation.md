@@ -2,7 +2,7 @@
 
 Ce fichier décrit le plan d'implémentation de l'application, découpé en phases puis en chantiers — pas l'historique des décisions qui ont conduit à ce découpage.
 
-Chaque ligne correspond à un chantier, c'est-à-dire à un ticket GitHub (et à une Pull Request) : elle en indique le **numéro** et le **titre**. Le contenu détaillé du chantier est porté par le ticket. L'**état** d'un chantier est celui de son ticket, signalé par la mise en forme de son numéro, selon la règle unique de `gestion-projet.md` § « Suivi par tickets » (Statut).
+Chaque ligne correspond à un chantier, c'est-à-dire à un ticket GitHub (et à une Pull Request) : elle en indique le **numéro** et le **titre**. Le contenu détaillé du chantier est porté par le ticket. L'**état** d'un chantier est celui de son ticket, signalé par la mise en forme de son numéro, selon la règle unique de `gestion-projet/revue-tickets.md` § « Suivi par tickets » (Statut).
 
 ---
 
@@ -59,7 +59,7 @@ Répercussion dans le modèle de domaine des ajustements du `.speckit/` issus de
 
 ## Phase 2 — Contracts et API
 
-Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` — administration (`/admin` : saisie, suppression selon `fonctionnel.md` § Suppression des entités) et consultation (`/catalog` : listes, navigation par initiale, recherche, fiches). Choix techniques : `choix-implementation.md` § Organisation de l'API et sections suivantes.
+Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` — administration (`/admin` : saisie, suppression selon `fonctionnel/regles-metier.md` § Suppression des entités) et consultation (`/catalog` : listes, navigation par initiale, recherche, fiches). Choix techniques : `choix-implementation/api.md` § Organisation de l'API et sections suivantes.
 
 Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de devises, estimations.
 
@@ -129,7 +129,7 @@ Répercussion dans l'API de la règle qui réserve les fiches de consultation au
 
 ### Ajustement issu de la définition de la recherche avancée
 
-Répercussion dans le modèle de domaine et dans l'API de la recherche avancée (`fonctionnel.md` § Recherche avancée) : recherche de toute entité consultable sur toute combinaison de critères portant sur les données du modèle métier, et recherches enregistrées, avec leurs variables. Les phases 1 et 2 étant validées, un seul ticket couvre les deux (ticket parent #162), découpé en sous-tickets, le chantier étant trop vaste pour une seule Pull Request. Les critères sur des données que calculent des phases ultérieures (montants en euros, valeur estimée : phase 4 ; tomes manquants, sortie estimée : phase 5) en sont exclus, et rejoignent la recherche avancée avec ces phases.
+Répercussion dans le modèle de domaine et dans l'API de la recherche avancée (`fonctionnel/recherche-avancee.md` § Recherche avancée) : recherche de toute entité consultable sur toute combinaison de critères portant sur les données du modèle métier, et recherches enregistrées, avec leurs variables. Les phases 1 et 2 étant validées, un seul ticket couvre les deux (ticket parent #162), découpé en sous-tickets, le chantier étant trop vaste pour une seule Pull Request. Les critères sur des données que calculent des phases ultérieures (montants en euros, valeur estimée : phase 4 ; tomes manquants, sortie estimée : phase 5) en sont exclus, et rejoignent la recherche avancée avec ces phases.
 
 | Ticket | Titre |
 | --- | --- |
@@ -140,7 +140,7 @@ Répercussion dans le modèle de domaine et dans l'API de la recherche avancée 
 
 ### Ajustement issu des maquettes des listes et saisies de l'administration
 
-Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'achat sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'achat d'un album (`fonctionnel.md` § Intention d'achat). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'achat sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'achat d'un album (`fonctionnel/regles-metier.md` § Intention d'achat). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
 
 | Ticket | Titre |
 | --- | --- |
@@ -148,7 +148,7 @@ Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve
 
 ### Ajustement issu de la mesure d'audience de l'interface web
 
-Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience de l'interface web (`fonctionnel.md` § Mesure d'audience de l'interface web) : visites, utilisations des fonctions et compteurs d'audience mensuels, leur conservation et la lecture de leurs indicateurs. Les phases 1 et 2 étant validées, un seul ticket couvre les deux ; la part de la Phase 3, pas encore découpée, y est notée.
+Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience de l'interface web (`fonctionnel/mesure-audience.md` § Mesure d'audience de l'interface web) : visites, utilisations des fonctions et compteurs d'audience mensuels, leur conservation et la lecture de leurs indicateurs. Les phases 1 et 2 étant validées, un seul ticket couvre les deux ; la part de la Phase 3, pas encore découpée, y est notée.
 
 | Ticket | Titre |
 | --- | --- |
@@ -156,7 +156,7 @@ Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience d
 
 ### Ajustement issu de l'exploitation des technologies retenues
 
-Revue de l'existant au regard de la contrainte d'exploitation au mieux des technologies retenues (`contraintes-techniques.md` § Exploitation des technologies retenues), pour en identifier les chantiers d'amélioration, chacun avec son ticket. Les phases 0 à 2 étant validées, un seul ticket les couvre.
+Revue de l'existant au regard de la contrainte d'exploitation au mieux des technologies retenues (`contraintes-techniques/index.md` § Exploitation des technologies retenues), pour en identifier les chantiers d'amélioration, chacun avec son ticket. Les phases 0 à 2 étant validées, un seul ticket les couvre.
 
 | Ticket | Titre |
 | --- | --- |
@@ -169,7 +169,7 @@ Pages de consultation (public) et d'administration (authentifié), composants pa
 La phase est réalisée en plusieurs parties, découpées l'une après l'autre ; seule la partie 1 l'est à ce stade.
 
 - **Pages non implémentées** : tant qu'une page n'est pas implémentée, tout lien qui y mène affiche une page « Pas encore implémenté » (#191). Le chantier qui réalise une page remplace par le vrai lien tous les liens qui y mènent.
-- **Validation fonctionnelle** : les chantiers qui réalisent ce que l'utilisateur voit et utilise sont validés par lui avant fusion (`gestion-projet.md` § Validation fonctionnelle), avec l'environnement de validation (#214), réalisé avant le premier d'entre eux ; chaque ticket précise s'il y est soumis.
+- **Validation fonctionnelle** : les chantiers qui réalisent ce que l'utilisateur voit et utilise sont validés par lui avant fusion (`gestion-projet/revue-tickets.md` § Validation fonctionnelle), avec l'environnement de validation (#214), réalisé avant le premier d'entre eux ; chaque ticket précise s'il y est soumis.
 - **Thèmes** : la partie 1 réalise le thème de base et deux thèmes, « Cases et bulles » (violine) et « La gazette », retenus pour s'opposer sur presque tout (sombre et clair, blocs encadrés et ouverts, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. Un thème ajouté par une partie ultérieure est décliné sur tous les écrans déjà réalisés.
 
 ### Partie 1 — Éléments de base
@@ -211,30 +211,30 @@ Contenu et nombre à établir au découpage de chacune.
 - **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base (#194), que tout thème ajouté respecte.
 - **Note — paramétrage de l'application** : le modèle de domaine et l'API du paramétrage sont réalisés par la partie 1 (#193), dont la page d'accueil de l'administration présente les valeurs ; l'écran qui le modifie reste à réaliser.
 - **Note — mesure d'audience de l'interface web** : la partie 1 réalise le relevé, les visites, l'information des visiteurs et leur opposition (#197), et chaque écran ajoute ses fonctions à la liste des fonctions suivies ; l'écran de l'administration qui présente les indicateurs reste à réaliser.
-- **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données (`choix-implementation.md` § Recherche avancée : mise en œuvre), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
+- **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel/recherche-avancee.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données (`choix-implementation/recherche-avancee.md` § Recherche avancée : mise en œuvre), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
 
 ## Phase 4 — Statistiques, devises et estimation de valeur
 
-Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euros courants (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) et en euros du jour (coefficients d'inflation de l'INSEE, mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel.md` § Calcul des estimations).
+Dashboard public et statistiques (sur la collection uniquement) ; conversion des montants en euros courants (taux fixes, taux variables récupérés auprès de Frankfurter et mis en cache) et en euros du jour (coefficients d'inflation de l'INSEE, mis en cache) ; valeur estimée des éditions (Random Forest, ML.NET), recalculée à partir de l'état courant de la base (`fonctionnel/valorisation.md` § Calcul des estimations).
 
 Découpage à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
-- **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée (`fonctionnel.md` § Recherche avancée), avec leurs comparaisons (version choisie par critère, montant non convertible), à une valeur comme à un autre montant.
-- **Note — couverture d'un album** : une statistique qui présente un album par sa couverture (ex. doyen et benjamin) est une donnée de la collection, qui ne retient que les éditions possédées (`fonctionnel.md` § Couverture d'un album) ; l'expression de la couverture (`choix-implementation.md` § Organisation de l'API, cartes d'album) ne couvre encore que la variante sans filtre.
+- **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée (`fonctionnel/recherche-avancee.md` § Recherche avancée), avec leurs comparaisons (version choisie par critère, montant non convertible), à une valeur comme à un autre montant.
+- **Note — couverture d'un album** : une statistique qui présente un album par sa couverture (ex. doyen et benjamin) est une donnée de la collection, qui ne retient que les éditions possédées (`fonctionnel/regles-metier.md` § Couverture d'un album) ; l'expression de la couverture (`choix-implementation/api.md` § Organisation de l'API, cartes d'album) ne couvre encore que la variante sans filtre.
 
 ## Phase 5 — Fonctionnalités de second plan
 
-Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel.md` § Fonctionnalités de second plan). Les statistiques du dashboard qui en dépendent (tomes manquants, prochaines sorties estimées, `fonctionnel.md` § Page d'accueil) n'entrent dans son tirage qu'une fois ces fonctionnalités réalisées : le dashboard de la Phase 4 les en exclut.
+Identification des albums manquants d'une série ; estimation de sortie d'un nouvel album (`fonctionnel/second-plan.md` § Fonctionnalités de second plan). Les statistiques du dashboard qui en dépendent (tomes manquants, prochaines sorties estimées, `fonctionnel/page-accueil.md` § Page d'accueil) n'entrent dans son tirage qu'une fois ces fonctionnalités réalisées : le dashboard de la Phase 4 les en exclut.
 
 Découpage à établir à l'ouverture de la phase.
 
-- **Note — recherche avancée** : les données que calculent ces fonctionnalités (tomes manquants d'une série, sortie estimée du prochain tome) deviennent des critères de la recherche avancée (`fonctionnel.md` § Recherche avancée).
+- **Note — recherche avancée** : les données que calculent ces fonctionnalités (tomes manquants d'une série, sortie estimée du prochain tome) deviennent des critères de la recherche avancée (`fonctionnel/recherche-avancee.md` § Recherche avancée).
 
 ## Phase 6 — Outil pour agents IA
 
-Serveur MCP exposant l'aide à la saisie, la recherche/consultation (recherche avancée comprise) et les analyses et statistiques ; accès par jeton, avec la gestion des jetons dans l'administration ; suivi de l'utilisation par jeton et par outil ou ressource (`fonctionnel.md` § Interface pour agents IA ; `choix-implementation.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2), des statistiques (Phase 4) et de l'administration du frontend (Phase 3), qui accueille la gestion des jetons et le suivi de l'utilisation.
+Serveur MCP exposant l'aide à la saisie, la recherche/consultation (recherche avancée comprise) et les analyses et statistiques ; accès par jeton, avec la gestion des jetons dans l'administration ; suivi de l'utilisation par jeton et par outil ou ressource (`fonctionnel/agents-ia.md` § Interface pour agents IA ; `choix-implementation/agents-ia.md` § Outil pour agents IA). Dépend des API de consultation (Phase 2), des statistiques (Phase 4) et de l'administration du frontend (Phase 3), qui accueille la gestion des jetons et le suivi de l'utilisation.
 
 Découpage à établir à l'ouverture de la phase, une fois le périmètre de l'aide à la saisie précisé.
 
-- **Note — modèle de domaine et journal des modifications** : la phase ajoute au modèle de domaine et à l'API les entités du suivi de l'outil (`modele-metier.md` : jeton d'accès, session, objectif de session, utilisation de l'outil, retour écrit), sans modifier les entités existantes, et étend le journal des modifications au jeton d'accès (type de fiche, correspondance de ses attributs, valeur consignée sans contenu pour son réarmement, `choix-implementation.md` § Journal des modifications : mise en œuvre).
-- **Note — image du conteneur `mcp`** : le conteneur dédié `mcp` (`choix-implementation.md` § Outil pour agents IA) doit avoir son image, comme `api` et `frontend` : image de base (§ Images de base des conteneurs), image publiée `tetram76/bdtheque-mcp`, intégrée à la paire d'images construites toutes avant d'en publier aucune, à l'analyse des vulnérabilités et au job `docker-build` du CI (§ Publication des images Docker ; `gestion-projet.md` § Intégration continue (CI), Ruleset compris). Sans elle, le déploiement sans les sources ne peut pas démarrer `mcp`.
+- **Note — modèle de domaine et journal des modifications** : la phase ajoute au modèle de domaine et à l'API les entités du suivi de l'outil (`modele-metier.md` : jeton d'accès, session, objectif de session, utilisation de l'outil, retour écrit), sans modifier les entités existantes, et étend le journal des modifications au jeton d'accès (type de fiche, correspondance de ses attributs, valeur consignée sans contenu pour son réarmement, `choix-implementation/domaine.md` § Journal des modifications : mise en œuvre).
+- **Note — image du conteneur `mcp`** : le conteneur dédié `mcp` (`choix-implementation/agents-ia.md` § Outil pour agents IA) doit avoir son image, comme `api` et `frontend` : image de base (`choix-implementation/deploiement.md` § Images de base des conteneurs), image publiée `tetram76/bdtheque-mcp`, intégrée à la paire d'images construites toutes avant d'en publier aucune, à l'analyse des vulnérabilités et au job `docker-build` du CI (`choix-implementation/deploiement.md` § Publication des images Docker ; `gestion-projet/depot.md` § Intégration continue (CI), Ruleset compris). Sans elle, le déploiement sans les sources ne peut pas démarrer `mcp`.

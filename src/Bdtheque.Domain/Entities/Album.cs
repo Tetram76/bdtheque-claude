@@ -16,7 +16,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     // Follows the album's own sort key only: for an album with no title, the series' entry is
     // substituted at read time, never copied here, where it would go stale whenever the series
-    // changes (choix-implementation.md § Navigation par initiale : mise en œuvre).
+    // changes (choix-implementation/api.md § Navigation par initiale : mise en œuvre).
     public string? NavigationEntry { get; private set; }
 
     public Guid? SeriesId { get; private set; }
@@ -67,7 +67,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Creates an album, attached to <paramref name="series"/> if any: having no contribution yet,
-    /// it receives those of the series template (fonctionnel.md § Initialisation des contributions
+    /// it receives those of the series template (fonctionnel/regles-metier.md § Initialisation des contributions
     /// depuis la série).
     /// </summary>
     public Album(string? title, Series? series) : this(title, series, []) { }
@@ -280,7 +280,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Removes an intent of this album. An intent on an edition takes the edition along: an edition
-    /// not owned and its intent are inseparable (fonctionnel.md § Intention d'achat).
+    /// not owned and its intent are inseparable (fonctionnel/regles-metier.md § Intention d'achat).
     /// </summary>
     public void RemovePurchaseIntent(PurchaseIntent intent)
     {
@@ -292,7 +292,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Converts the intent on the whole album into an intent on <paramref name="edition"/>, an edition
-    /// of the album neither owned nor targeted yet (fonctionnel.md § Intention d'achat).
+    /// of the album neither owned nor targeted yet (fonctionnel/regles-metier.md § Intention d'achat).
     /// </summary>
     /// <exception cref="ArgumentException">The intent does not target the whole album.</exception>
     public PurchaseIntent ConvertPurchaseIntentToEdition(PurchaseIntent intent, Edition edition)
@@ -309,7 +309,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Converts an intent on an edition into an intent on the whole album, which removes the edition
-    /// targeted, not owned (fonctionnel.md § Intention d'achat). Refused unless this edition is the
+    /// targeted, not owned (fonctionnel/regles-metier.md § Intention d'achat). Refused unless this edition is the
     /// only one of the album: an album targeted as a whole has no edition.
     /// </summary>
     /// <exception cref="ArgumentException">The intent already targets the whole album.</exception>
@@ -327,13 +327,13 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Records the acquisition of one of this album's editions — the only way for an edition to
-    /// become owned, since only this aggregate sees every intent it may realize (fonctionnel.md §
+    /// become owned, since only this aggregate sees every intent it may realize (fonctionnel/regles-metier.md §
     /// Intention d'achat › Réalisation d'une intention): the intent on this edition, or else the
     /// one on the whole album, is removed; other editions' intents are kept.
     /// </summary>
     /// <param name="acquisition">
     /// The acquisition and value of the edition, whose mode is required: entering an edition
-    /// requires it, only an intent creating an edition not owned (fonctionnel.md § Appartenance à la
+    /// requires it, only an intent creating an edition not owned (fonctionnel/regles-metier.md § Appartenance à la
     /// collection).
     /// </param>
     public void RecordAcquisition(Edition edition, EditionAcquisition acquisition)
@@ -378,7 +378,7 @@ public sealed class Album : EntityBase, IAggregateRoot
     {
         EnsureOwnEdition(edition);
         // An edition already bought cannot become an intent again: a second copy is recorded as
-        // a new edition of the album, which then carries the intent (fonctionnel.md § Intention
+        // a new edition of the album, which then carries the intent (fonctionnel/regles-metier.md § Intention
         // d'achat).
         if (edition.AcquisitionMode is not null)
             throw new DomainRuleViolationException(

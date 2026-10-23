@@ -17,7 +17,7 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>Administration of the albums (<c>/admin/albums</c>).</summary>
 internal static class AlbumEndpoints
 {
-    // fonctionnel.md § Suppression des entités: an album takes along its editions (with their
+    // fonctionnel/regles-metier.md § Suppression des entités: an album takes along its editions (with their
     // visuals and purchase intents), its contributions and its own purchase intent. Its genres and
     // universes are associations that merely disappear, without any record being concerned.
     private static readonly DeletionLink[] DeletionLinks =
@@ -52,9 +52,9 @@ internal static class AlbumEndpoints
 
     /// <summary>
     /// An album with what it is linked with: the genres and universes displayed — those of the album and
-    /// of its series, without duplicates (fonctionnel.md § Genres et univers d'un album) —, each universe
+    /// of its series, without duplicates (fonctionnel/regles-metier.md § Genres et univers d'un album) —, each universe
     /// with its ancestors, its contributions, and every edition, whole, which has no record of its own
-    /// (fonctionnel.md § Structure de l'application).
+    /// (fonctionnel/index.md § Structure de l'application).
     /// </summary>
     private static async Task<AlbumDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
@@ -96,8 +96,8 @@ internal static class AlbumEndpoints
     }
 
     /// <summary>
-    /// The albums found by their title or that of their series, part of their label (fonctionnel.md §
-    /// Libellé d'un album), narrowed by the cross filters (choix-implementation.md § Recherche). An album
+    /// The albums found by their title or that of their series, part of their label (fonctionnel/presentation.md §
+    /// Libellé d'un album), narrowed by the cross filters (choix-implementation/api.md § Recherche). An album
     /// without a title of its own is filed under the current sort key and entry of its series.
     /// </summary>
     private static async Task<Page<AlbumSummary>> ListAsync(

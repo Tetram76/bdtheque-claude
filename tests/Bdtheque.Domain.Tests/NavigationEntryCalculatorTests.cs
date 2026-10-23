@@ -4,7 +4,7 @@ namespace Bdtheque.Domain.Tests;
 
 public sealed class NavigationEntryCalculatorTests
 {
-    // Examples of fonctionnel.md § Titres (séries et albums) and § Artistes, applied to their sort key.
+    // Examples of fonctionnel/presentation.md § Titres (séries et albums) and § Artistes, applied to their sort key.
     [Theory]
     [InlineData("Lotus bleu [Le]", "L")]
     [InlineData("Schtroumpfs [Les]", "S")]
@@ -21,7 +21,7 @@ public sealed class NavigationEntryCalculatorTests
     }
 
     // Letters ranked under their base letter by the French alphabetical order itself
-    // (choix-implementation.md § Navigation par initiale : mise en œuvre).
+    // (choix-implementation/api.md § Navigation par initiale : mise en œuvre).
     [Theory]
     [InlineData("é", "E")]
     [InlineData("È", "E")]

@@ -14,9 +14,9 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The advanced search of the consultation (fonctionnel.md § Recherche avancée): the description of what it
+/// The advanced search of the consultation (fonctionnel/recherche-avancee.md § Recherche avancée): the description of what it
 /// queries, and the search of each entity, whose results are presented as the lists of the consultation
-/// present it, in their order (choix-implementation.md § Recherche).
+/// present it, in their order (choix-implementation/api.md § Recherche).
 /// </summary>
 /// <remarks>
 /// A search is a <c>POST</c>: its criteria, a tree of conditions, are the body of the request. It reads
@@ -76,7 +76,7 @@ internal static class AdvancedSearchEndpoints
             "genres", EntityKind.Genre, genres => genres.OrderBy(g => g.Label).ThenBy(g => g.Id), g => new GenreListItem(g.Id, g.Label)),
         new EntitySearch<Universe, UniverseListItem>(
             "universes", EntityKind.Universe, universes => universes.OrderBy(u => u.Name).ThenBy(u => u.Id), UniverseEndpoints.ListItem),
-        // The visuals of each edition in their order (fonctionnel.md § Ordre des visuels d'une édition).
+        // The visuals of each edition in their order (fonctionnel/regles-metier.md § Ordre des visuels d'une édition).
         new EntitySearch<EditionVisual, EditionVisualListItem>("edition-visuals", EntityKind.EditionVisual,
             visuals => visuals.OrderByAlbum(v => v.Edition.Album).ThenBy(v => v.Edition.PublicationYear).ThenBy(v => v.EditionId)
                 .ThenBy(v => v.Type).ThenBy(v => v.DisplayOrder).ThenBy(v => v.Id),

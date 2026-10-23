@@ -9,7 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // The authentication cookie is owned exclusively by this container (BFF):
-// `api` has no knowledge of the user (see choix-implementation.md).
+// `api` has no knowledge of the user (see choix-implementation/socle.md § Authentification : mise en œuvre).
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

@@ -6,7 +6,7 @@ namespace Bdtheque.Domain.Tests;
 
 /// <summary>
 /// Rules on the acquisition and the value of an edition (modele-metier.md § Édition, contraintes
-/// d'intégrité): who may carry an amount, and the reference date every amount needs (fonctionnel.md §
+/// d'intégrité): who may carry an amount, and the reference date every amount needs (fonctionnel/valorisation.md §
 /// Gestion des devises). The acquisition is written as a whole, the way the form sends it.
 /// </summary>
 public sealed class EditionValueTests
@@ -107,7 +107,7 @@ public sealed class EditionValueTests
     public void SetPublicationYearAndAcquisition_ClearingTheModeOfAnOwnedEdition_ThrowsAndKeepsIt()
     {
         // An owned edition stays owned until deleted: a bought edition never becomes an intent again
-        // (fonctionnel.md § Intention d'achat), and a form can leave the mode empty.
+        // (fonctionnel/regles-metier.md § Intention d'achat), and a form can leave the mode empty.
         var edition = CreateOwnedEdition(AcquisitionMode.Gift);
 
         DomainAssert.Violates(
@@ -214,7 +214,7 @@ public sealed class EditionValueTests
     public void SetPublicationYearAndAcquisition_OldFrenchFranc_Succeeds()
     {
         // The old franc has no ISO 4217 code: it is stored under the reserved code QZF
-        // (choix-implementation.md § Représentation de la devise).
+        // (choix-implementation/domaine.md § Représentation de la devise).
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1955);
 
         edition.SetPublicationYearAndAcquisition(
@@ -477,7 +477,7 @@ public sealed class EditionValueTests
     public void RecordAcquisition_PurchaseOfFreeEdition_ThrowsWithoutRealizingTheIntent()
     {
         // Freeness is a trait of the copy, left free of rules while the edition is not owned
-        // (fonctionnel.md § Intention d'achat): it only conflicts with the purchase that acquires it.
+        // (fonctionnel/regles-metier.md § Intention d'achat): it only conflicts with the purchase that acquires it.
         var edition = CreateEdition();
         var album = edition.Album;
         album.AddPurchaseIntent(edition);

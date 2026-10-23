@@ -4,7 +4,7 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Search;
 
 /// <summary>
-/// The records criteria designate (fonctionnel.md § Suppression des entités, line « Toute fiche »): the values of
+/// The records criteria designate (fonctionnel/regles-metier.md § Suppression des entités, line « Toute fiche »): the values of
 /// the criteria comparing a record, at every level of the links they follow, whose entity only the schema tells.
 /// </summary>
 internal static class SearchDesignations

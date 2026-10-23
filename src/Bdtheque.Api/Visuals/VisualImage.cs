@@ -9,7 +9,7 @@ namespace Bdtheque.Api.Visuals;
 internal sealed record PreparedVisual(byte[] Original, string OriginalExtension, byte[] Display);
 
 /// <summary>
-/// Validation and conversion of an uploaded visual (choix-implementation.md § Visuels : stockage et
+/// Validation and conversion of an uploaded visual (choix-implementation/domaine.md § Visuels : stockage et
 /// traitement), entirely in memory, so that nothing is written for a file that is refused.
 /// </summary>
 internal static class VisualImage

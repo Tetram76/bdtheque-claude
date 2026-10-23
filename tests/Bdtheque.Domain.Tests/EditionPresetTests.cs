@@ -4,7 +4,7 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Tests;
 
 /// <summary>
-/// Values a new edition's form starts from (fonctionnel.md § Initialisation d'une nouvelle édition
+/// Values a new edition's form starts from (fonctionnel/regles-metier.md § Initialisation d'une nouvelle édition
 /// depuis la série).
 /// </summary>
 public sealed class EditionPresetTests

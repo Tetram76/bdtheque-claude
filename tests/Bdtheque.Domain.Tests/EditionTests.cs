@@ -110,7 +110,7 @@ public sealed class EditionTests
     [Fact]
     public void SetIsbn_TrimsAndStoresWithoutValidation()
     {
-        // ISBN checksum validation is advisory only (fonctionnel.md § Validation de l'ISBN):
+        // ISBN checksum validation is advisory only (fonctionnel/regles-metier.md § Validation de l'ISBN):
         // the domain must accept and store an incorrect ISBN as-is.
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
@@ -260,7 +260,7 @@ public sealed class EditionTests
     [Fact]
     public void GetOrderedVisuals_MultipleTypesAndOrders_ReturnsInFixedOrder()
     {
-        // fonctionnel.md § Ordre des visuels d'une édition: by type in a fixed order
+        // fonctionnel/regles-metier.md § Ordre des visuels d'une édition: by type in a fixed order
         // (Couverture → Dédicace → Page de garde → Planche → 4e de couverture), then by
         // display order within the same type. Added out of order and across types on
         // purpose so a naive Visuals enumeration (unordered) would fail this assertion.

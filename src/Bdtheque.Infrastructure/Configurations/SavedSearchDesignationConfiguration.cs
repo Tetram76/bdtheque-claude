@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Bdtheque.Infrastructure.Configurations;
 
 /// <summary>
-/// The records a saved search designates, each a reference whose deletion the database refuses (fonctionnel.md §
+/// The records a saved search designates, each a reference whose deletion the database refuses (fonctionnel/regles-metier.md §
 /// Suppression des entités): a foreign key <c>ON DELETE RESTRICT</c> towards the table of its entity, on a column
 /// generated from the designation, that only the designations of this entity fill.
 /// </summary>
@@ -54,7 +54,7 @@ internal sealed class SavedSearchDesignationConfiguration : IEntityTypeConfigura
             $"num_nonnulls({string.Join(", ", DesignatedEntities.Keys.Select(k => $"\"{ColumnOf(k)}\""))}) = 1"));
     }
 
-    // Every entity a saved search can designate (fonctionnel.md § Recherches enregistrées: never an intent).
+    // Every entity a saved search can designate (fonctionnel/recherche-avancee.md § Recherches enregistrées: never an intent).
     private static readonly Dictionary<EntityKind, Type> DesignatedEntities = new()
     {
         [EntityKind.Album] = typeof(Album),

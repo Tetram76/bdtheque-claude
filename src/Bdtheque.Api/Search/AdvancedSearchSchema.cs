@@ -9,7 +9,7 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Search;
 
 /// <summary>
-/// What the advanced search queries (fonctionnel.md § Recherche avancée): every entity of the consultation,
+/// What the advanced search queries (fonctionnel/recherche-avancee.md § Recherche avancée): every entity of the consultation,
 /// every data of the business model — public, of management or deduced —, and every link of the model, in
 /// both directions (modele-metier.md § Relations et cardinalités).
 /// </summary>
@@ -149,7 +149,7 @@ internal static class AdvancedSearchSchema
             .Text("description", u => u.Description)
             .One("parent", EntityKind.Universe, u => u.Parent)
             .Many("children", EntityKind.Universe, u => u.Children)
-            // Attached to the universe or one of its descendants (fonctionnel.md § Hiérarchie des univers): the reverse
+            // Attached to the universe or one of its descendants (fonctionnel/regles-metier.md § Hiérarchie des univers): the reverse
             // of the link `universes` of an album, those of its series being reached through the series.
             .Attached("albums", EntityKind.Album, SearchAttachments.RecordsOfUniverse<Album>(a => a.Universes))
             .Attached("series", EntityKind.Series, SearchAttachments.RecordsOfUniverse<Series>(s => s.Universes))

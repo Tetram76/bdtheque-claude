@@ -15,7 +15,7 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>Administration of the universes and of their hierarchy (<c>/admin/universes</c>).</summary>
 internal static class UniverseEndpoints
 {
-    // fonctionnel.md § Suppression des entités: a universe is refused deletion while it has
+    // fonctionnel/regles-metier.md § Suppression des entités: a universe is refused deletion while it has
     // sub-universes, and is only associated with albums and series.
     private static readonly DeletionLink[] DeletionLinks =
     [
@@ -53,8 +53,8 @@ internal static class UniverseEndpoints
             .ToPageAsync(page, pageSize, ListItem, cancellationToken);
 
     /// <summary>
-    /// The series and albums of a universe, which has no record, with its ancestors (fonctionnel.md §
-    /// Structure de l'application): those of its sub-universes included (fonctionnel.md § Hiérarchie des
+    /// The series and albums of a universe, which has no record, with its ancestors (fonctionnel/index.md §
+    /// Structure de l'application): those of its sub-universes included (fonctionnel/regles-metier.md § Hiérarchie des
     /// univers), a series attached with all its albums, the universes of an album in a series being those
     /// of the album and of the series, and a series with those of its albums only that are attached.
     /// </summary>
@@ -125,7 +125,7 @@ internal static class UniverseEndpoints
     /// <summary>
     /// Loads a universe with its whole ancestor chain, which <see cref="Universe.SetParent"/> needs to
     /// rule out a cycle: the universes form a small referential, loaded whole rather than walked
-    /// recursively (choix-implementation.md § Organisation de l'API). The caller holds the hierarchy
+    /// recursively (choix-implementation/api.md § Organisation de l'API). The caller holds the hierarchy
     /// lock, so that the check sees every change of parent committed before it.
     /// </summary>
     private static async Task<Universe> LoadWithAncestorsAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)

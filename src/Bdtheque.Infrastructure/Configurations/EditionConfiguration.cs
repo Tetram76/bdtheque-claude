@@ -16,7 +16,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
         builder.Property(e => e.PersonalNotes);
         builder.Property(e => e.AcquisitionCurrency).HasMaxLength(3);
         // Scale 4 (not 2) so that ISO 4217 currencies with three minor-unit digits (e.g. KWD,
-        // BHD, OMR, JOD, TND) aren't silently rounded on persistence — fonctionnel.md §
+        // BHD, OMR, JOD, TND) aren't silently rounded on persistence — fonctionnel/valorisation.md §
         // Gestion des devises requires supporting any currency, not just 2-decimal ones.
         builder.Property(e => e.AcquisitionAmount).HasPrecision(14, 4);
         builder.Property(e => e.InitialValueCurrency).HasMaxLength(3);
@@ -70,7 +70,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             $"\"{nameof(Edition.IsFree)}\" = false OR \"{nameof(Edition.AcquisitionMode)}\" IS DISTINCT FROM {(int)AcquisitionMode.Purchase}"));
 
         // The reference date every amount needs (Edition.EnsureAmountsDated) may be the album's first
-        // publication: a cross-table rule, left to the domain only (choix-implementation.md §
+        // publication: a cross-table rule, left to the domain only (choix-implementation/persistance.md §
         // Cohérence entre tables).
 
         // An edition is part of its album and goes with it; publisher and collection are mere
@@ -89,7 +89,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
 
         // Cross-table half of the constraint (the collection must belong to this publisher) is
         // intentionally left to the domain layer only, as with Series' own template collection
-        // (see choix-implementation.md § Cohérence entre tables).
+        // (see choix-implementation/persistance.md § Cohérence entre tables).
         builder.HasOne(e => e.PublisherCollection)
             .WithMany()
             .HasForeignKey(e => e.PublisherCollectionId)

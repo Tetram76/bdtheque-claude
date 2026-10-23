@@ -18,7 +18,7 @@ internal sealed class ChangeLogEntryConfiguration : IEntityTypeConfiguration<Cha
         builder.Property(e => e.RecordId);
 
         // Data rather than texts, so that they are presented in the display culture in force when they
-        // are read (fonctionnel.md § Langue et culture d'affichage): JSON, in the form ChangeLogJson pins.
+        // are read (fonctionnel/presentation.md § Langue et culture d'affichage): JSON, in the form ChangeLogJson pins.
         builder.Property(e => e.Label)
             .HasColumnType("jsonb")
             .HasConversion(label => ChangeLogJson.SerializeLabel(label), json => ChangeLogJson.DeserializeLabel(json));

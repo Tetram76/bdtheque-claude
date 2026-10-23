@@ -10,7 +10,7 @@ namespace Bdtheque.Domain.Entities;
 
 /// <summary>
 /// An advanced search the administrator saved under a name, replayed in the consultation with the values
-/// of its variables (modele-metier.md § Recherche enregistrée; fonctionnel.md § Recherches enregistrées).
+/// of its variables (modele-metier.md § Recherche enregistrée; fonctionnel/recherche-avancee.md § Recherches enregistrées).
 /// </summary>
 /// <remarks>
 /// The criteria are the JSON the advanced search takes (its contract), which the API reads and checks
@@ -40,7 +40,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
 
     /// <summary>
     /// The records the criteria designate, default values of the variables included: each one's deletion is
-    /// refused while the search designates it (fonctionnel.md § Suppression des entités).
+    /// refused while the search designates it (fonctionnel/regles-metier.md § Suppression des entités).
     /// </summary>
     public IReadOnlyCollection<SavedSearchDesignation> Designations => _designations.AsReadOnly();
 
@@ -212,7 +212,7 @@ public sealed record DesignatedRecord(EntityKind Kind, Guid Id);
 
 /// <summary>
 /// A record a saved search designates, by a criterion or by the default value of a variable: a reference, whose
-/// deletion is refused while the search designates it (fonctionnel.md § Suppression des entités).
+/// deletion is refused while the search designates it (fonctionnel/regles-metier.md § Suppression des entités).
 /// </summary>
 public sealed class SavedSearchDesignation
 {

@@ -8,14 +8,14 @@ namespace Bdtheque.Contracts.Admin;
 /// </summary>
 /// <param name="IsbnChecksumValid">
 /// Whether the check digit of the ISBN is consistent, <c>null</c> without ISBN: a warning only, an
-/// inconsistent ISBN being stored as entered (fonctionnel.md § Validation de l'ISBN).
+/// inconsistent ISBN being stored as entered (fonctionnel/regles-metier.md § Validation de l'ISBN).
 /// </param>
 /// <param name="AlbumVersion">Version of the album, sent back with any modification or deletion of the edition.</param>
 public sealed record EditionForm(Guid Id, Guid AlbumId, EditionContent Content, bool? IsbnChecksumValid, uint AlbumVersion);
 
 /// <summary>
 /// The form of a new edition of an album, pre-filled from the template of the album's series, or
-/// with the default values for an album without series (fonctionnel.md § Initialisation d'une
+/// with the default values for an album without series (fonctionnel/regles-metier.md § Initialisation d'une
 /// nouvelle édition depuis la série).
 /// </summary>
 /// <param name="AlbumVersion">Version of the album, sent back with the creation of the edition.</param>
@@ -72,13 +72,13 @@ public sealed record CreateEditionRequest(EditionContent Content, uint AlbumVers
 public sealed record UpdateEditionRequest(EditionContent Content, uint AlbumVersion);
 
 /// <summary>
-/// Confirms the purchase of an edition targeted by an intent (fonctionnel.md § Réalisation d'une
+/// Confirms the purchase of an edition targeted by an intent (fonctionnel/regles-metier.md § Réalisation d'une
 /// intention): the edition, with its acquisition, which realizes the intent.
 /// </summary>
 /// <param name="Content">The whole edition, whose acquisition mode is required.</param>
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>
 public sealed record AcquireEditionRequest(EditionContent Content, uint AlbumVersion);
 
-/// <summary>Result of the check of an ISBN during entry (fonctionnel.md § Validation de l'ISBN).</summary>
+/// <summary>Result of the check of an ISBN during entry (fonctionnel/regles-metier.md § Validation de l'ISBN).</summary>
 /// <param name="IsChecksumValid">Whether the check digit is consistent: a warning only, never a refusal.</param>
 public sealed record IsbnCheck(bool IsChecksumValid);

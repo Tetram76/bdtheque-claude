@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Bdtheque.Api.Visuals;
 
-/// <summary>The visuals volume (contraintes-techniques.md § Stockage des visuels) and the upload limit.</summary>
+/// <summary>The visuals volume (contraintes-techniques/architecture-deploiement.md § Stockage des visuels) and the upload limit.</summary>
 internal sealed class VisualStorageOptions
 {
     public const string SectionName = "Visuals";

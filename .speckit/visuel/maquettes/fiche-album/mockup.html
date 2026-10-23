@@ -609,7 +609,7 @@ class View extends Mockup {
     const row = ([k, v, kind, sub]) => ({
       k,
       v: v || 'Non renseigné',
-      // Only a publisher with a known website is a link, to that site (fonctionnel.md § Structure de l'application).
+      // Only a publisher with a known website is a link, to that site (fonctionnel/index.md § Structure de l'application).
       isLink: Boolean(v) && kind.startsWith('http'),
       href: kind,
       isText: !v || !kind.startsWith('http'),

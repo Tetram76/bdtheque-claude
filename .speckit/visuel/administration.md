@@ -1,6 +1,6 @@
 # Administration
 
-Ce fichier décrit la présentation de la page d'accueil de la partie Administration (`fonctionnel.md` § Structure de l'application) : le point d'entrée de la saisie et de la modification des données, du paramétrage et des statistiques privées. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
+Ce fichier décrit la présentation de la page d'accueil de la partie Administration (`fonctionnel/index.md` § Structure de l'application) : le point d'entrée de la saisie et de la modification des données, du paramétrage et des statistiques privées. Comme tout le dossier `visuel/`, il n'est lu que lorsque le chantier entrepris le nécessite (cf. `AGENTS.md` § Règles de consultation).
 
 La page est déclinée selon chacun des thèmes en lice pour la partie Consultation (cf. [`dashboard.md`](dashboard.md) § Alternatives) : comme toute page, elle suit l'identité visuelle du thème actif (cf. [`charte-graphique.md`](charte-graphique.md) § Portée).
 
@@ -32,7 +32,7 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 La page met en avant les fonctions les plus utiles, de haut en bas :
 
 - **Titre** « Administration », avec une phrase qui résume le rôle de l'espace.
-- **Saisir à partir d'un ISBN** : un champ ISBN et un bouton « Chercher dans les sources », qui crée ou complète à partir des sources externes (`fonctionnel.md` § Structure de l'application) l'album, l'édition et ses visuels, la série, les auteurs, l'éditeur et la collection, relus avant enregistrement. Ce bloc est mis en relief. En dessous, « Ou créer directement : » propose la création d'un album, d'une série, d'un auteur ou d'un éditeur, par quatre boutons toujours alignés sur une seule ligne.
+- **Saisir à partir d'un ISBN** : un champ ISBN et un bouton « Chercher dans les sources », qui crée ou complète à partir des sources externes (`fonctionnel/index.md` § Structure de l'application) l'album, l'édition et ses visuels, la série, les auteurs, l'éditeur et la collection, relus avant enregistrement. Ce bloc est mis en relief. En dessous, « Ou créer directement : » propose la création d'un album, d'une série, d'un auteur ou d'un éditeur, par quatre boutons toujours alignés sur une seule ligne.
 - **Les fiches** : une carte par type de fiche (albums, éditions, séries, intentions d'achat, auteurs, éditeurs, genres, univers), avec son icône, son nombre, une précision, le lien « Gérer la liste » et, sauf pour les éditions et les intentions d'achat, qui se saisissent depuis leur album, la création d'une nouvelle fiche.
 - **À vérifier** : des listes de fiches à corriger ou à compléter, chacune avec son nombre. Seule une incohérence à corriger (ex. ISBN au chiffre de contrôle incohérent) a la couleur d'alerte du thème.
 - **Dernières modifications** : les dernières fiches créées ou modifiées, avec leur type, la nature et la date de la modification, et un lien « Modifier ».

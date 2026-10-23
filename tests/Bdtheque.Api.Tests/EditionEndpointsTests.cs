@@ -143,7 +143,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
     [Fact]
     public async Task Create_WithoutAcquisitionMode_IsABusinessError()
     {
-        // Only a purchase intent creates an edition not owned (fonctionnel.md § Appartenance à la collection).
+        // Only a purchase intent creates an edition not owned (fonctionnel/regles-metier.md § Appartenance à la collection).
         var album = await CreateAlbumAsync();
 
         var response = await PostCreateAsync(album, Content((await CreatePublisherAsync()).Id) with { AcquisitionMode = null });
@@ -307,7 +307,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
     [Fact]
     public async Task Update_ClearingTheAcquisitionMode_IsABusinessErrorAndKeepsTheEditionUntouched()
     {
-        // An owned edition stays owned until deleted (choix-implementation.md § Intention d'achat :
+        // An owned edition stays owned until deleted (choix-implementation/domaine.md § Intention d'achat :
         // agrégat porté par l'album).
         var created = await CreateAsync(await CreateAlbumAsync(), Content((await CreatePublisherAsync()).Id));
 

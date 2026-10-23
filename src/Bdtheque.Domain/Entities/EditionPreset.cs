@@ -3,7 +3,7 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// The values the form of a new edition starts from (fonctionnel.md § Initialisation d'une nouvelle
+/// The values the form of a new edition starts from (fonctionnel/regles-metier.md § Initialisation d'une nouvelle
 /// édition depuis la série): only a starting point, never applied to an edition by the domain.
 /// </summary>
 public sealed record EditionPreset(

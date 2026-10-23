@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// The common deletion mechanism (choix-implementation.md § Suppression des entités : mise en
+/// The common deletion mechanism (choix-implementation/ecritures.md § Suppression des entités : mise en
 /// œuvre), beyond what the endpoints of each resource exercise.
 /// </summary>
 public sealed class AggregateDeletionTests : IClassFixture<ApiWebApplicationFactory>

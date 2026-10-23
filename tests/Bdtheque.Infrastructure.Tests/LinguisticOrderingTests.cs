@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Pins that text sorted by the database follows French linguistic order (fonctionnel.md §
+/// Pins that text sorted by the database follows French linguistic order (fonctionnel/presentation.md §
 /// Langue et culture d'affichage, § Tri et navigation par initiale): case-insensitive at the
 /// first level, accented letters next to their base letter — not byte order, which puts every
 /// lowercase and accented initial after "Z".

@@ -14,11 +14,11 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>
 /// Administration of the visuals of an edition (<c>/admin/albums/{albumId}/editions/{editionId}/visuals</c>):
 /// upload, arrangement and deletion. The edition belongs to the aggregate of its album, whose version
-/// guards every write on its visuals (choix-implementation.md § Concurrence d'accès).
+/// guards every write on its visuals (choix-implementation/persistance.md § Concurrence d'accès).
 /// </summary>
 internal static class EditionVisualEndpoints
 {
-    // fonctionnel.md § Suppression des entités: a visual is deleted without any other record
+    // fonctionnel/regles-metier.md § Suppression des entités: a visual is deleted without any other record
     // concerned; its files follow it (AggregateDeletion).
     private static readonly DeletionLink[] DeletionLinks = [];
 
@@ -57,7 +57,7 @@ internal static class EditionVisualEndpoints
     /// Uploads a visual (form fields: <see cref="UploadVisualFields"/>), placed after the visuals of its
     /// type. The file is read, validated and converted in memory before anything is written, one upload
     /// at a time (<see cref="VisualUploadGate"/>); its files are written just before the row, and deleted
-    /// right away if the row cannot be saved (choix-implementation.md § Visuels : stockage et traitement).
+    /// right away if the row cannot be saved (choix-implementation/domaine.md § Visuels : stockage et traitement).
     /// </summary>
     private static async Task<Created<EditionVisualsForm>> UploadAsync(
         Guid rootId, Guid editionId, HttpRequest request, BdthequeDbContext context, VisualStorage storage, VisualUploadGate gate,

@@ -9,7 +9,7 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// A unique index the database enforces is a business rule the domain cannot check alone
-/// (choix-implementation.md § Erreurs métier, fonctionnelles et techniques): each one must be
+/// (choix-implementation/ecritures.md § Erreurs métier, fonctionnelles et techniques): each one must be
 /// translated into a business error with its rule code, never left as a technical error.
 /// </summary>
 public sealed class UniqueIndexRulesTests : IClassFixture<ApiWebApplicationFactory>

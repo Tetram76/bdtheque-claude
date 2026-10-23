@@ -9,7 +9,7 @@ namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// Search, navigation by initial and cross filters of the lists of the consultation
-/// (choix-implementation.md § Recherche).
+/// (choix-implementation/api.md § Recherche).
 /// </summary>
 internal static class CatalogFilters
 {
@@ -55,14 +55,14 @@ internal static class CatalogFilters
 
     /// <summary>
     /// The universe and its descendants at every level, to whose records it is attached too
-    /// (fonctionnel.md § Hiérarchie des univers).
+    /// (fonctionnel/regles-metier.md § Hiérarchie des univers).
     /// </summary>
     public static async Task<IReadOnlyCollection<Guid>> UniverseAndDescendantsAsync(
         BdthequeDbContext context, Guid universeId, CancellationToken cancellationToken) =>
         (await UniverseTree.LoadAsync(context, cancellationToken)).WithDescendants(universeId);
 
     // The genres and universes of an album in a series are those of the album and of the series
-    // (fonctionnel.md § Genres et univers d'un album).
+    // (fonctionnel/regles-metier.md § Genres et univers d'un album).
 
     /// <summary>Keeps the albums of the genre, theirs or that of their series.</summary>
     public static IQueryable<Album> WhereGenre(this IQueryable<Album> albums, Guid genreId) =>

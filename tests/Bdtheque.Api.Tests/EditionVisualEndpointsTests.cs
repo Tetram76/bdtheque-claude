@@ -15,7 +15,7 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// Administration of the visuals of an edition (<c>/admin/albums/{albumId}/editions/{editionId}/visuals</c>),
-/// and the consistency between their rows and their files on the volume (choix-implementation.md §
+/// and the consistency between their rows and their files on the volume (choix-implementation/domaine.md §
 /// Visuels : stockage et traitement), deletions of editions and albums included.
 /// </summary>
 public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicationFactory>

@@ -6,7 +6,7 @@ using Npgsql;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Pins the optimistic concurrency of aggregates (choix-implementation.md § Concurrence d'accès):
+/// Pins the optimistic concurrency of aggregates (choix-implementation/persistance.md § Concurrence d'accès):
 /// the version of an aggregate is its root's <c>xmin</c>, and any write on the aggregate locks
 /// the root first, then marks it modified so that its version changes even when only a child
 /// row is written.

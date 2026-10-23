@@ -3,7 +3,7 @@ using Bdtheque.Contracts.Enums;
 namespace Bdtheque.Contracts.Deletion;
 
 /// <summary>
-/// What deleting a record would do (fonctionnel.md § Suppression des entités): the number of
+/// What deleting a record would do (fonctionnel/regles-metier.md § Suppression des entités): the number of
 /// records concerned, by entity type and by nature of link — everything the confirmation message,
 /// or the error of a refused deletion, has to announce.
 /// </summary>

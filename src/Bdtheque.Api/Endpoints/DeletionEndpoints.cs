@@ -31,7 +31,7 @@ internal static class DeletionEndpoints
     /// Maps the deletion of a child of the group's aggregate (e.g. <c>/publishers/{rootId}/collections/{id}</c>),
     /// on the same two routes as <see cref="MapDeletion{TRoot}"/>; the group declares the root
     /// identifier as <c>{rootId}</c>. The version is the root's, which guards every write on the
-    /// aggregate (choix-implementation.md § Concurrence d'accès).
+    /// aggregate (choix-implementation/persistance.md § Concurrence d'accès).
     /// </summary>
     /// <param name="delete">The operation of the aggregate deleting the child, if more than its removal.</param>
     public static void MapChildDeletion<TRoot, TChild>(

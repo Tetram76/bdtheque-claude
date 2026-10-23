@@ -6,7 +6,7 @@ namespace Bdtheque.Api.Search;
 
 /// <summary>
 /// Translates the criteria of an advanced search into the condition of a query on its entity
-/// (fonctionnel.md § Recherche avancée): EF Core runs it in the database, links included.
+/// (fonctionnel/recherche-avancee.md § Recherche avancée): EF Core runs it in the database, links included.
 /// </summary>
 internal static class SearchTranslator
 {
@@ -114,7 +114,7 @@ internal static class SearchTranslator
         {
             SearchQuantifierKind.Any => Call(nameof(Enumerable.Any), related, target.ClrType, condition),
             SearchQuantifierKind.None => Expression.Not(Call(nameof(Enumerable.Any), related, target.ClrType, condition)),
-            // All of them, and at least one: never without any related record (fonctionnel.md § Liens entre entités).
+            // All of them, and at least one: never without any related record (fonctionnel/recherche-avancee.md § Liens entre entités).
             SearchQuantifierKind.All => Expression.AndAlso(
                 Call(nameof(Enumerable.Any), related, target.ClrType, null),
                 condition is null ? Expression.Constant(true) : Call(nameof(Enumerable.All), related, target.ClrType, condition)),

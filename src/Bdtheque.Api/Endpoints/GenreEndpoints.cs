@@ -14,7 +14,7 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>Administration of the genres (<c>/admin/genres</c>).</summary>
 internal static class GenreEndpoints
 {
-    // fonctionnel.md § Suppression des entités: a genre is only associated with albums and series.
+    // fonctionnel/regles-metier.md § Suppression des entités: a genre is only associated with albums and series.
     private static readonly DeletionLink[] DeletionLinks =
     [
         new(LinkNature.Association, EntityKind.Album,
@@ -39,7 +39,7 @@ internal static class GenreEndpoints
     }
 
     /// <summary>
-    /// The series and albums of a genre, which has no record (fonctionnel.md § Structure de l'application):
+    /// The series and albums of a genre, which has no record (fonctionnel/index.md § Structure de l'application):
     /// a series of the genre with all its albums, the genres of an album in a series being those of the
     /// album and of the series, and a series with those of its albums only that are of the genre.
     /// </summary>

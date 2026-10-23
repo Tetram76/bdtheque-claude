@@ -7,7 +7,7 @@ namespace Bdtheque.Domain.Entities;
 /// <summary>
 /// A published manifestation of an album (Édition): format, publisher, and — when the
 /// acquisition mode is set — the data that makes it part of the user's collection (see
-/// fonctionnel.md § Appartenance à la collection).
+/// fonctionnel/regles-metier.md § Appartenance à la collection).
 /// </summary>
 public sealed class Edition : EntityBase
 {
@@ -109,7 +109,7 @@ public sealed class Edition : EntityBase
     /// <remarks>
     /// An edition is acquired through <see cref="Album.RecordAcquisition(Edition, EditionAcquisition)"/>
     /// only, and an owned edition stays owned until deleted: a bought edition never becomes an
-    /// intent again (fonctionnel.md § Intention d'achat).
+    /// intent again (fonctionnel/regles-metier.md § Intention d'achat).
     /// </remarks>
     public void SetPublicationYearAndAcquisition(int? publicationYear, EditionAcquisition acquisition)
     {
@@ -131,7 +131,7 @@ public sealed class Edition : EntityBase
 
     /// <summary>
     /// Stores the ISBN as entered, without rejecting an incorrect check digit: validation is
-    /// advisory only (fonctionnel.md § Validation de l'ISBN) — see <see cref="IsbnChecksumValidator"/>
+    /// advisory only (fonctionnel/regles-metier.md § Validation de l'ISBN) — see <see cref="IsbnChecksumValidator"/>
     /// for the non-blocking check a caller should run to warn the user.
     /// </summary>
     public void SetIsbn(string? isbn) => Isbn = DomainText.NullIfBlank(isbn);
@@ -197,7 +197,7 @@ public sealed class Edition : EntityBase
 
     /// <summary>
     /// Returns <see cref="Visuals"/> in the fixed presentation order required by
-    /// fonctionnel.md § Ordre des visuels d'une édition: by <see cref="EditionVisual.Type"/> —
+    /// fonctionnel/regles-metier.md § Ordre des visuels d'une édition: by <see cref="EditionVisual.Type"/> —
     /// whose explicit int values are assigned in that same fixed order, see
     /// <see cref="Enums.VisualType"/> — then by <see cref="EditionVisual.DisplayOrder"/> within
     /// the same type. This is the single place that applies the rule: EF Core does not order a
@@ -240,7 +240,7 @@ public sealed class Edition : EntityBase
                 DomainRules.EditionInitialValueAmountCurrencyTogether, "An initial value amount and its currency must be provided together, or not at all.");
 
         // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
-        // until the edition is acquired (fonctionnel.md § Intention d'achat).
+        // until the edition is acquired (fonctionnel/regles-metier.md § Intention d'achat).
         if (acquisition.Mode is null
             && (acquisition.Date is not null || acquisition.PriceAmount is not null || acquisition.InitialValueAmount is not null))
             throw new DomainRuleViolationException(
@@ -285,7 +285,7 @@ public sealed class Edition : EntityBase
         AddVisual(type, mediaReference, _visuals.Where(v => v.Type == type).Select(v => v.DisplayOrder + 1).DefaultIfEmpty(0).Max());
 
     /// <summary>
-    /// Rearranges the visuals as the user ordered them (fonctionnel.md § Ordre des visuels d'une
+    /// Rearranges the visuals as the user ordered them (fonctionnel/regles-metier.md § Ordre des visuels d'une
     /// édition): each visual takes the given type, and its rank among the visuals of that type is
     /// its position in <paramref name="arrangement"/>. Nothing is changed if the arrangement is refused.
     /// </summary>
@@ -317,9 +317,9 @@ public sealed class Edition : EntityBase
     }
 
     // ISO 4217 gives every currency a 3-letter uppercase alphabetic code; validating the shape
-    // (rather than a hand-maintained list of codes) matches "any currency" from fonctionnel.md
+    // (rather than a hand-maintained list of codes) matches "any currency" from fonctionnel/valorisation.md
     // § Gestion des devises without artificially restricting which ones are accepted — including
-    // the old franc's reserved code QZF, which has the same shape (choix-implementation.md §
+    // the old franc's reserved code QZF, which has the same shape (choix-implementation/domaine.md §
     // Représentation de la devise).
     private static void EnsureValidCurrencyCode(string currencyCode)
     {
@@ -340,7 +340,7 @@ public sealed class Edition : EntityBase
         EnsureAmountsDated(AcquisitionAmount, InitialValueAmount, AcquisitionDate, PublicationYear, albumDated: () => false);
 
     /// <summary>
-    /// Checks that every amount keeps a reference date (fonctionnel.md § Gestion des devises), with
+    /// Checks that every amount keeps a reference date (fonctionnel/valorisation.md § Gestion des devises), with
     /// the values the edition would have after the write under way — the price: acquisition date,
     /// edition year, or album's first publication; the initial value: edition year, or album's
     /// first publication. The album is only consulted when the edition's own dates do not suffice.

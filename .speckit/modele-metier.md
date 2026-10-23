@@ -25,14 +25,14 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | **Univers** | Cadre fictionnel auquel albums/séries peuvent être rattachés, avec hiérarchie possible. |
 | **Visuel d'édition** | Média rattaché à une édition avec un type de visuel. |
 | **Intention d'achat** | Souhait d'acquisition portant sur un album (toute édition) ou sur une édition spécifique. |
-| **Recherche enregistrée** | Recherche avancée nommée par l'administrateur, rejouable en consultation (voir `fonctionnel.md` § Recherche avancée). |
+| **Recherche enregistrée** | Recherche avancée nommée par l'administrateur, rejouable en consultation (voir `fonctionnel/recherche-avancee.md` § Recherche avancée). |
 | **Paramétrage de l'application** | Réglages de l'application, fixés par l'administrateur dans le bloc « Paramétrage » de l'administration. Fiche unique. |
-| **Jeton d'accès** | Jeton généré par l'administrateur, sans lequel l'outil pour agents IA n'est pas utilisable ; il détermine le niveau d'accès de l'agent (voir `fonctionnel.md` § Interface pour agents IA). |
-| **Session de l'outil pour agents IA** | Conversation d'un agent avec l'outil, ouverte par un jeton d'accès : elle regroupe ses utilisations, ses objectifs et ses retours écrits (voir `fonctionnel.md` § Suivi de l'utilisation). |
+| **Jeton d'accès** | Jeton généré par l'administrateur, sans lequel l'outil pour agents IA n'est pas utilisable ; il détermine le niveau d'accès de l'agent (voir `fonctionnel/agents-ia.md` § Interface pour agents IA). |
+| **Session de l'outil pour agents IA** | Conversation d'un agent avec l'outil, ouverte par un jeton d'accès : elle regroupe ses utilisations, ses objectifs et ses retours écrits (voir `fonctionnel/agents-ia.md` § Suivi de l'utilisation). |
 | **Objectif de session** | Objectif de la demande de l'utilisateur, donné par l'agent à l'ouverture de la session ou mis à jour ensuite. |
 | **Utilisation de l'outil** | Trace d'un appel d'outil ou d'une lecture de ressource par un agent, au sein d'une session. |
 | **Retour écrit** | Limite signalée par l'agent, sur une utilisation précise ou sur sa session. |
-| **Visite de l'interface web** | Suite des utilisations de l'interface web par un même utilisateur (visiteur ou administrateur), au cours d'une même visite, sans rien qui l'identifie (voir `fonctionnel.md` § Mesure d'audience de l'interface web). |
+| **Visite de l'interface web** | Suite des utilisations de l'interface web par un même utilisateur (visiteur ou administrateur), au cours d'une même visite, sans rien qui l'identifie (voir `fonctionnel/mesure-audience.md` § Mesure d'audience de l'interface web). |
 | **Utilisation d'une fonction** | Trace de l'affichage d'un écran ou du déclenchement d'une action de l'interface web, au sein d'une visite. |
 | **Compteur d'audience mensuel** | Indicateurs d'une fonction pour un mois, sans visite ni parcours, conservés au-delà de la suppression du détail des visites. |
 | **Journal des modifications** | Trace de chaque écriture sur une fiche : création, modification, suppression ou reprise d'une ancienne donnée. |
@@ -88,15 +88,15 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 > - Une intention d'achat doit cibler exactement l'un des deux : un Album ou une Édition, jamais les deux, jamais aucun.
 > - Une cible ne fait l'objet que d'**une seule** intention d'achat : un album est visé par au plus une intention, une édition par au plus une intention.
 > - Pour un même album, l'intention porte **soit** sur l'album, **soit** sur ses éditions, jamais les deux : un album visé par une intention ne peut pas avoir en même temps une de ses éditions visée par une autre intention, et réciproquement.
-> - Un album visé par une intention portant sur lui-même n'a **aucune édition**, possédée ou non (voir `fonctionnel.md` § Intention d'achat).
+> - Un album visé par une intention portant sur lui-même n'a **aucune édition**, possédée ou non (voir `fonctionnel/regles-metier.md` § Intention d'achat).
 > - Une édition **possédée** (`Mode d'acquisition` renseigné) ne peut pas être visée par une intention d'achat.
 
 ### Jeton d'accès et suivi de l'outil — relations
 
 | Relation | Cardinalité | Remarques |
 | --- | --- | --- |
-| Jeton d'accès → Session | 0..n | Sessions ouvertes par le jeton ; supprimées avec lui (voir `fonctionnel.md` § Suppression des entités). |
-| Session → Session précédente | 0..1 | Session que la session prolonge (voir `fonctionnel.md` § Suivi de l'utilisation) ; ouverte avec le même jeton d'accès. Les sessions successives d'une conversation se relient ainsi de proche en proche. |
+| Jeton d'accès → Session | 0..n | Sessions ouvertes par le jeton ; supprimées avec lui (voir `fonctionnel/regles-metier.md` § Suppression des entités). |
+| Session → Session précédente | 0..1 | Session que la session prolonge (voir `fonctionnel/agents-ia.md` § Suivi de l'utilisation) ; ouverte avec le même jeton d'accès. Les sessions successives d'une conversation se relient ainsi de proche en proche. |
 | Session → Objectif de session | 0..n | Objectifs successifs, dans l'ordre de leur date ; aucun si l'agent n'en a jamais donné. |
 | Jeton d'accès → Utilisation de l'outil | 0..n | Utilisations faites avec le jeton ; supprimées avec lui. Une requête refusée faute de jeton d'accès valable n'est rattachée à aucun jeton et n'est pas relevée. |
 | Utilisation de l'outil → Session | 0..1 | Session sous laquelle l'utilisation a été faite ; absente pour une utilisation refusée faute de jeton de session valable, rattachée à son seul jeton d'accès. |
@@ -114,7 +114,7 @@ L'application gère une **collection de bandes dessinées (BD)**. Le domaine tou
 | --- | --- | --- |
 | Visite → Utilisation d'une fonction | 1..n | Utilisations faites au cours de la visite, dans l'ordre de leur date : le parcours de la visite. |
 
-> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement. Une visite d'un visiteur public est supprimée avec ses utilisations 25 mois après son début, une visite de l'administrateur est conservée sans limite (voir `fonctionnel.md` § Mesure d'audience de l'interface web). Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou son appareil, ou permette de le reconnaître d'une visite à l'autre : de l'appareil, elle ne retient que sa catégorie et le moteur de rendu de son navigateur, avec sa version.
+> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement. Une visite d'un visiteur public est supprimée avec ses utilisations 25 mois après son début, une visite de l'administrateur est conservée sans limite (voir `fonctionnel/mesure-audience.md` § Mesure d'audience de l'interface web). Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou son appareil, ou permette de le reconnaître d'une visite à l'autre : de l'appareil, elle ne retient que sa catégorie et le moteur de rendu de son navigateur, avec sa version.
 
 ---
 
@@ -162,7 +162,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Titre | texte | conditionnel | Obligatoire si l'album n'appartient à aucune série. Optionnel si une série est rattachée (la série + le tome peuvent suffire à identifier l'album). |
-| Clé de tri | texte | non | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir `fonctionnel.md` § Tri et navigation par initiale). Absente si le titre est absent ; dans ce cas, la clé de tri de la série rattachée est utilisée comme valeur de substitution pour le tri et la navigation par initiale. |
+| Clé de tri | texte | non | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir `fonctionnel/presentation.md` § Tri et navigation par initiale). Absente si le titre est absent ; dans ce cas, la clé de tri de la série rattachée est utilisée comme valeur de substitution pour le tri et la navigation par initiale. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Type | énuméré | oui | `Régulier` (défaut) / `Intégrale`. |
 | Hors-série | booléen | oui | `false` par défaut. Indépendant du type : une intégrale peut être hors-série. |
@@ -181,7 +181,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Titre | texte | oui | |
-| Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir `fonctionnel.md` § Tri et navigation par initiale). Toujours présente car le titre est obligatoire. |
+| Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir `fonctionnel/presentation.md` § Tri et navigation par initiale). Toujours présente car le titre est obligatoire. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Statut | énuméré | non | `En cours` / `Terminée` / `Abandonnée`. `Terminée` signifie que tous les albums prévus par les auteurs ont été publiés. |
 | Nombre de tomes numérotés (théorique) | entier | non | Nombre de tomes numérotés attendus dans la séquence principale de la série, selon l'utilisateur. Ne compte pas les hors-série ni les albums sans numéro de tome. Non calculé depuis la base — sert de borne supérieure pour la détection des albums manquants (queue théorique) et à évaluer la complétude de la collection. |
@@ -215,16 +215,16 @@ erDiagram
 | Dédicacée | booléen | oui | `false` par défaut. |
 | En couleur | booléen | oui | `true` par défaut. |
 | État | énuméré | non | `Excellent (état neuf)` / `Très bon` / `Bon` / `Moyen` / `Mauvais` / `Très mauvais`. « Excellent » plutôt que « Neuf » : une édition qui n'a pas été achetée neuve peut être dans cet état. Proposé à la saisie : `Excellent (état neuf)`. |
-| Mode d'acquisition | énuméré | conditionnel | `Achat` / `Offerte` / `Échange` / `Gagnée` / `Héritée`. Obligatoire si l'édition est possédée. Conditionne le libellé de la date et du montant en interface (voir `fonctionnel.md`). |
+| Mode d'acquisition | énuméré | conditionnel | `Achat` / `Offerte` / `Échange` / `Gagnée` / `Héritée`. Obligatoire si l'édition est possédée. Conditionne le libellé de la date et du montant en interface (voir `fonctionnel/presentation.md` § Libellés contextuels sur l'édition). |
 | D'occasion | booléen | oui | `false` = neuve, `true` = occasion. |
 | Date d'acquisition | date | non | Date à laquelle l'utilisateur a obtenu l'édition. |
 | Date d'entrée dans la collection | date et heure | conditionnel | Renseignée automatiquement, jamais saisie, au moment où l'édition devient possédée (création d'une édition possédée, ou confirmation de l'achat d'une édition visée par une intention d'achat) ; absente tant que l'édition n'est pas possédée. Contrairement à la date d'acquisition, facultative, elle est toujours connue pour une édition possédée : elle sert à repérer les dernières entrées dans la collection. Pour une édition reprise de l'application existante, c'est la date de la reprise. |
-| Nombre de mises à la une | calculé | — | Nombre de jours où l'édition a été mise à la une du dashboard, dont le tirage privilégie les éditions les moins souvent présentées (voir `fonctionnel.md` § Page d'accueil). Déduit de l'historique des mises à la une (`choix-implementation.md` § Édition « À la une » : mise en œuvre), non stocké sur l'édition : un tirage n'est jamais une écriture sur la fiche. |
-| Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**, cf. `choix-implementation.md` § Représentation de la devise, ou **ancien franc**, cf. `fonctionnel.md` § Gestion des devises) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour une édition achetée, c'est le prix payé au moment de l'acquisition. Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. `fonctionnel.md` § Gestion des devises). |
+| Nombre de mises à la une | calculé | — | Nombre de jours où l'édition a été mise à la une du dashboard, dont le tirage privilégie les éditions les moins souvent présentées (voir `fonctionnel/page-accueil.md` § Page d'accueil). Déduit de l'historique des mises à la une (`choix-implementation/domaine.md` § Édition « À la une » : mise en œuvre), non stocké sur l'édition : un tirage n'est jamais une écriture sur la fiche. |
+| Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**, cf. `choix-implementation/domaine.md` § Représentation de la devise, ou **ancien franc**, cf. `fonctionnel/valorisation.md` § Gestion des devises) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour une édition achetée, c'est le prix payé au moment de l'acquisition. Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. `fonctionnel/valorisation.md` § Gestion des devises). |
 | Gratuite | booléen | oui | `false` par défaut. Indique que l'édition **n'a pas de valeur** : aucun montant n'est enregistré (ni prix payé, ni valeur marchande, ni valeur initiale) et aucune valeur n'est estimée. Interdit pour une édition achetée. Si `true`, le prix d'acquisition et la valeur initiale doivent être `null` (contrainte d'intégrité) ; ces champs sont désactivés et vidés en interface. |
-| Valeur initiale | montant + devise (même représentation que le prix d'acquisition, ancien franc compris) | non | Prix de vente de l'édition à sa parution. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. `fonctionnel.md` § Gestion des devises). |
+| Valeur initiale | montant + devise (même représentation que le prix d'acquisition, ancien franc compris) | non | Prix de vente de l'édition à sa parution. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. `fonctionnel/valorisation.md` § Gestion des devises). |
 | Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. cote, numéro de rangement). |
-| Valeur estimée | calculée | — | Estimation du prix d'acquisition d'une édition possédée, non gratuite, dont le prix d'acquisition n'est pas renseigné (voir `fonctionnel.md` § Estimation de la valeur des éditions). Calculée dynamiquement, non stockée. |
+| Valeur estimée | calculée | — | Estimation du prix d'acquisition d'une édition possédée, non gratuite, dont le prix d'acquisition n'est pas renseigné (voir `fonctionnel/valorisation.md` § Estimation de la valeur des éditions). Calculée dynamiquement, non stockée. |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
 
 > **Valeurs par défaut des attributs énumérés** (État, Reliure, Orientation, Sens de lecture, Format) : ce sont uniquement des valeurs **proposées à la saisie**, qui pré-remplissent le formulaire de création. Elles ne sont **pas portées par la base** (aucune clause `DEFAULT` sur les colonnes correspondantes) ni appliquées à l'enregistrement : un attribut laissé vide est enregistré vide.
@@ -310,8 +310,8 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Nom | texte | oui | Nom sous lequel la recherche est proposée en consultation. |
-| Entité recherchée | énuméré | oui | Type des entités que la recherche renvoie (voir `fonctionnel.md` § Entités recherchées). |
-| Critères | expression | oui | Combinaison des critères (ET, OU, NON, groupes imbriqués), chacun avec la donnée interrogée, le chemin suivi depuis l'entité recherchée, la comparaison et sa valeur — constante ou variable (voir `fonctionnel.md` § Recherche avancée). |
+| Entité recherchée | énuméré | oui | Type des entités que la recherche renvoie (voir `fonctionnel/recherche-avancee.md` § Entités recherchées). |
+| Critères | expression | oui | Combinaison des critères (ET, OU, NON, groupes imbriqués), chacun avec la donnée interrogée, le chemin suivi depuis l'entité recherchée, la comparaison et sa valeur — constante ou variable (voir `fonctionnel/recherche-avancee.md` § Recherche avancée). |
 | Variables | liste | non | Constantes des critères remplacées par une variable, chacune avec sa **valeur par défaut**, dont la valeur est demandée au rejeu de la recherche. |
 
 > **Contrainte :** le nom d'une recherche enregistrée est **unique sans tenir compte de la casse ni des accents**, comme le libellé d'un genre : les recherches ne se distinguent en consultation que par leur nom.
@@ -320,8 +320,8 @@ erDiagram
 
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
-| Format du libellé des albums | énuméré | oui | `Album (Série - Tome)` (défaut) / `Tome - Album (Série)` (voir `fonctionnel.md` § Libellé d'un album). |
-| Culture d'affichage | énuméré | oui | `Français (France)`, seule culture proposée (voir `fonctionnel.md` § Langue et culture d'affichage). |
+| Format du libellé des albums | énuméré | oui | `Album (Série - Tome)` (défaut) / `Tome - Album (Série)` (voir `fonctionnel/presentation.md` § Libellé d'un album). |
+| Culture d'affichage | énuméré | oui | `Français (France)`, seule culture proposée (voir `fonctionnel/presentation.md` § Langue et culture d'affichage). |
 
 > **Contrainte :** le paramétrage est une fiche **unique**, toujours présente : il se modifie, mais ne se crée ni ne se supprime.
 
@@ -330,9 +330,9 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Nom | texte | oui | Identifie l'usage du jeton (ex. l'agent ou le poste qui l'utilise). |
-| Accès à l'administration | booléen | oui | `false` : niveau d'accès public ; `true` : niveau du compte administrateur (voir `fonctionnel.md` § Accès par jeton). |
+| Accès à l'administration | booléen | oui | `false` : niveau d'accès public ; `true` : niveau du compte administrateur (voir `fonctionnel/agents-ia.md` § Accès par jeton). |
 | Expiration | date et heure | non | À partir de laquelle le jeton est archivé, donc refusé. Absente : le jeton reste valable jusqu'à son archivage ou sa suppression. Fixée à la génération, elle ne change que par un réarmement, qui change aussi la valeur. Si elle est renseignée, elle est **postérieure** au moment de la génération ou du réarmement : une valeur ne naît jamais expirée. |
-| Archivé | booléen | oui | `false` par défaut. Un jeton archivé est refusé, mais conservé avec son historique d'utilisation (voir `fonctionnel.md` § Accès par jeton). Un jeton expiré est archivé. |
+| Archivé | booléen | oui | `false` par défaut. Un jeton archivé est refusé, mais conservé avec son historique d'utilisation (voir `fonctionnel/agents-ia.md` § Accès par jeton). Un jeton expiré est archivé. |
 | Valeur | secret | oui | Générée par l'application, jamais saisie ; présentée une seule fois, à la génération ou au réarmement du jeton, qui la remplace, et conservée sous une forme qui ne permet pas de la présenter de nouveau. |
 
 ### Session de l'outil pour agents IA
@@ -340,7 +340,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Ouverture | date et heure | oui | Moment de l'ouverture de la session. |
-| Expiration | date et heure | oui | Fin de validité du jeton de session, annoncée à l'agent à l'ouverture (voir `fonctionnel.md` § Suivi de l'utilisation). Un redémarrage de l'outil peut aussi invalider une session, sans que son expiration change. |
+| Expiration | date et heure | oui | Fin de validité du jeton de session, annoncée à l'agent à l'ouverture (voir `fonctionnel/agents-ia.md` § Suivi de l'utilisation). Un redémarrage de l'outil peut aussi invalider une session, sans que son expiration change. |
 
 ### Objectif de session
 
@@ -358,12 +358,12 @@ erDiagram
 | Date | date et heure | oui | Moment de l'appel. |
 | Durée | durée | oui | |
 | Client | texte | non | Identité du logiciel client, s'il la transmet. |
-| Issue | énuméré | oui | `Succès` / `Erreur métier` / `Erreur fonctionnelle` / `Erreur technique` (voir `fonctionnel.md` § Présentation des erreurs) / `Session refusée` (jeton de session absent, inconnu ou expiré). |
+| Issue | énuméré | oui | `Succès` / `Erreur métier` / `Erreur fonctionnelle` / `Erreur technique` (voir `fonctionnel/index.md` § Présentation des erreurs) / `Session refusée` (jeton de session absent, inconnu ou expiré). |
 | Message d'erreur | texte long | non | Message renvoyé à l'agent, pour une utilisation en erreur. |
 | Nombre de résultats | entier | non | Pour une utilisation qui renvoie des résultats. |
 | Taille de la réponse | entier | oui | |
 
-> L'indice d'efficacité et ses signaux (voir `fonctionnel.md` § Suivi de l'utilisation) sont déduits de ces utilisations, jamais stockés.
+> L'indice d'efficacité et ses signaux (voir `fonctionnel/agents-ia.md` § Suivi de l'utilisation) sont déduits de ces utilisations, jamais stockés.
 
 ### Retour écrit
 
@@ -392,7 +392,7 @@ erDiagram
 | Paramètres | texte long | conditionnel | Renseignés pour une action qui en a (ex. critères d'une recherche, numéro de page, fiche enregistrée), absents sinon ; jamais un secret (mot de passe, valeur d'un jeton d'accès). |
 | Date | date et heure | oui | Moment de l'utilisation. |
 
-> Les indicateurs de la mesure d'audience (nombre d'utilisations et de visites, fiches et paramètres différents, utilisations répétées, fréquence, dernière utilisation, voir `fonctionnel.md` § Mesure d'audience de l'interface web) sont déduits de ces utilisations tant qu'elles sont conservées, puis des compteurs d'audience mensuels.
+> Les indicateurs de la mesure d'audience (nombre d'utilisations et de visites, fiches et paramètres différents, utilisations répétées, fréquence, dernière utilisation, voir `fonctionnel/mesure-audience.md` § Mesure d'audience de l'interface web) sont déduits de ces utilisations tant qu'elles sont conservées, puis des compteurs d'audience mensuels.
 
 ### Compteur d'audience mensuel
 
@@ -420,12 +420,12 @@ erDiagram
 | --- | --- | --- | --- |
 | Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage` / `Jeton d'accès`. |
 | Fiche | identifiant | oui | Identifiant de la fiche écrite. Conservé après la suppression de la fiche : aucune contrainte d'intégrité référentielle. |
-| Libellé | composantes du libellé | oui | Données qui composent le libellé de la fiche (ex. titre, série et tome d'un album, cf. `fonctionnel.md` § Libellé d'un album), relevées au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. Le libellé en est construit à la consultation. |
+| Libellé | composantes du libellé | oui | Données qui composent le libellé de la fiche (ex. titre, série et tome d'un album, cf. `fonctionnel/presentation.md` § Libellé d'un album), relevées au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. Le libellé en est construit à la consultation. |
 | Opération | énuméré | oui | `Création` / `Modification` / `Suppression` / `Reprise` (reprise d'une ancienne donnée depuis l'application existante). |
 | Changements | liste | non | Pour une modification uniquement : chaque changement, avec l'attribut concerné, sa valeur **avant** et sa valeur **après**, telles qu'enregistrées dans la fiche ; une valeur qui désigne une autre fiche (ex. la série d'un album) l'est par les composantes de son libellé, comme ci-dessus. Un secret (valeur d'un jeton d'accès, renouvelée par son réarmement) est consigné comme changé, sans valeur avant ni après. |
 
 > - Une entrée est ajoutée **automatiquement** à chaque écriture sur une fiche, dans la même opération ; elle n'est jamais saisie, modifiée ni supprimée, et le journal n'est jamais purgé. Sa date de création (attribut commun) est la date de l'écriture.
 > - L'ajout ou le retrait d'un élément associé (genre, univers, contribution, visuel…) est un changement de la fiche qui le porte : un ajout n'a pas de valeur avant, un retrait pas de valeur après. Les éléments sans fiche propre (visuel, contribution) n'ont pas d'entrée à leur nom.
-> - Aucun texte d'une entrée n'est figé à l'écriture : type de fiche, opération, attribut, valeurs et libellé sont présentés dans la culture d'affichage en vigueur lors de la consultation (`fonctionnel.md` § Langue et culture d'affichage), comme sur la fiche elle-même. Cette présentation est **idempotente** : pour une même culture d'affichage et un même paramétrage, une entrée produit toujours le même message, à chaque lecture.
+> - Aucun texte d'une entrée n'est figé à l'écriture : type de fiche, opération, attribut, valeurs et libellé sont présentés dans la culture d'affichage en vigueur lors de la consultation (`fonctionnel/presentation.md` § Langue et culture d'affichage), comme sur la fiche elle-même. Cette présentation est **idempotente** : pour une même culture d'affichage et un même paramétrage, une entrée produit toujours le même message, à chaque lecture.
 > - La reprise des données ajoute au moins une entrée `Reprise` pour chaque fiche qu'elle crée ou met à jour.
 > - Le journal n'est consultable que dans l'administration.

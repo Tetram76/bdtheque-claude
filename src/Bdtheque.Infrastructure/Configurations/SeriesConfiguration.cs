@@ -46,7 +46,7 @@ internal sealed class SeriesConfiguration : IEntityTypeConfiguration<Series>
 
         // Mirrors the single-table half of the domain guard in Series.SetTemplate. The
         // cross-table half (the collection must belong to this publisher) is intentionally
-        // left to the domain layer only (see choix-implementation.md § Cohérence entre tables).
+        // left to the domain layer only (see choix-implementation/persistance.md § Cohérence entre tables).
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Series_TemplateCollectionRequiresPublisher",
             $"\"{nameof(Series.TemplatePublisherCollectionId)}\" IS NULL OR \"{nameof(Series.TemplatePublisherId)}\" IS NOT NULL"));

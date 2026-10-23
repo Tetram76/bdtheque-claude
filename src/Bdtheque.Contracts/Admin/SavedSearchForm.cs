@@ -3,7 +3,7 @@ using Bdtheque.Contracts.Search;
 
 namespace Bdtheque.Contracts.Admin;
 
-/// <summary>A saved search as its administration form edits it (fonctionnel.md § Recherches enregistrées).</summary>
+/// <summary>A saved search as its administration form edits it (fonctionnel/recherche-avancee.md § Recherches enregistrées).</summary>
 /// <param name="Version">Version of the search, sent back with any modification or deletion.</param>
 public sealed record SavedSearchForm(Guid Id, SavedSearchContent Content, uint Version);
 

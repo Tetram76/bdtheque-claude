@@ -12,7 +12,7 @@ namespace Bdtheque.Api.Visuals;
 internal sealed record VisualUpload(byte[] File, ContractEnums.VisualType Type, uint AlbumVersion);
 
 /// <summary>
-/// Reads an upload form as a stream (choix-implementation.md § Visuels : stockage et traitement): the
+/// Reads an upload form as a stream (choix-implementation/domaine.md § Visuels : stockage et traitement): the
 /// file is read into memory up to the maximum weight, and refused as soon as it exceeds it. Nothing is
 /// buffered beforehand, as the framework's form binding would (temporary file of the whole request).
 /// </summary>

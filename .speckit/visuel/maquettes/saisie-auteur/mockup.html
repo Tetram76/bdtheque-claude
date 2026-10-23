@@ -365,7 +365,7 @@ const menuOf = (t, current) => {
   ];
 };
 
-// The three kinds of error must be told apart at first glance (fonctionnel.md § Présentation des
+// The three kinds of error must be told apart at first glance (fonctionnel/index.md § Présentation des
 // erreurs): each has its own label, icon, colour and border. The business one is the record's own.
 const errorOf = (key, t, business) => ({
   metier: () => ({
@@ -410,7 +410,7 @@ class View extends Mockup {
     const first = x.first;
     const last = nameError ? '' : x.last;
     const pen = nameError ? '' : x.pen;
-    // The main identifier and its sort key (fonctionnel.md § Artistes), worked out as the form changes.
+    // The main identifier and its sort key (fonctionnel/presentation.md § Artistes), worked out as the form changes.
     const shown = pen || [first, last].filter(Boolean).join(' ');
     const sortKey = pen || [last, first].filter(Boolean).join(' ');
     return {

@@ -136,7 +136,7 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal([published.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&publisherId={publisher.Id}")));
         Assert.Equal([published.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&publisherCollectionId={collection.Id}")));
         Assert.Equal([inSeries.Id, ofGenre.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&genreId={genre.Id}")));
-        // A record attached to a universe is attached to its parents (fonctionnel.md § Hiérarchie des univers).
+        // A record attached to a universe is attached to its parents (fonctionnel/regles-metier.md § Hiérarchie des univers).
         Assert.Equal([inSeries.Id, ofSubSubUniverse.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&universeId={universe.Id}")));
         Assert.Equal([ofSubSubUniverse.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&universeId={subSubUniverse.Id}")));
         Assert.Equal([inSeries.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&genreId={genre.Id}&universeId={universe.Id}&entry=A")));
@@ -235,7 +235,7 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         var signe = await CreateCollectionAsync(lombard, $"Signé {_marker}");
         var luckyLuke = await CreateCollectionAsync(dargaud, $"Lucky Luke {_marker}");
 
-        // A publisher leads to its website, having no record of its own (fonctionnel.md § Structure de l'application).
+        // A publisher leads to its website, having no record of its own (fonctionnel/index.md § Structure de l'application).
         Assert.Equal(
             [
                 new PublisherListItem(dargaud.Id, $"Éditions Dargaud {_marker}", null),

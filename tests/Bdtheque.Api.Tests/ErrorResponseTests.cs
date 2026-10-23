@@ -8,7 +8,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// Errors the framework or a middleware emits without an exception (choix-implementation.md §
+/// Errors the framework or a middleware emits without an exception (choix-implementation/ecritures.md §
 /// Erreurs métier, fonctionnelles et techniques): no user input can produce them, the frontend
 /// building every request, so they are technical — whatever their HTTP status.
 /// </summary>

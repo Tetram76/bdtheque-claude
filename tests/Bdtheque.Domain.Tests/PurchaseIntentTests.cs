@@ -50,7 +50,7 @@ public sealed class PurchaseIntentTests
     [Fact]
     public void AddPurchaseIntent_EditionAlreadyOwned_Throws()
     {
-        // fonctionnel.md § Intention d'achat: an edition already bought cannot become an intent
+        // fonctionnel/regles-metier.md § Intention d'achat: an edition already bought cannot become an intent
         // again — a second copy is a new edition of the album, on which the intent is placed.
         var album = new Album("Le Lotus bleu", null);
         var edition = new Edition(album, Casterman);
@@ -92,7 +92,7 @@ public sealed class PurchaseIntentTests
     [Fact]
     public void AddPurchaseIntent_WholeAlbum_WhenAnEditionIsOwned_Throws()
     {
-        // fonctionnel.md § Intention d'achat: once the album has an edition, wishing for any edition no
+        // fonctionnel/regles-metier.md § Intention d'achat: once the album has an edition, wishing for any edition no
         // longer makes sense — a specific edition is targeted instead.
         var album = new Album("Le Lotus bleu", null);
         var owned = new Edition(album, Casterman);
@@ -151,7 +151,7 @@ public sealed class AcquisitionRecordingTests
     [Fact]
     public void RecordAcquisition_AlbumTargetedAsWhole_RemovesTheAlbumIntent()
     {
-        // Any edition satisfies an intent on the album (fonctionnel.md § Intention d'achat).
+        // Any edition satisfies an intent on the album (fonctionnel/regles-metier.md § Intention d'achat).
         var album = new Album("Le Lotus bleu", null);
         album.AddPurchaseIntent();
         var edition = new Edition(album, Casterman);
@@ -226,7 +226,7 @@ public sealed class PurchaseIntentRemovalTests
     [Fact]
     public void RemovePurchaseIntent_OnAnEdition_RemovesTheEditionAlongAndKeepsTheOthers()
     {
-        // fonctionnel.md § Intention d'achat: an edition not owned and its intent are inseparable.
+        // fonctionnel/regles-metier.md § Intention d'achat: an edition not owned and its intent are inseparable.
         var album = new Album("Le Lotus bleu", null);
         var wished = new Edition(album, Casterman);
         var otherWished = new Edition(album, Casterman);
@@ -286,7 +286,7 @@ public sealed class PurchaseIntentRemovalTests
     [Fact]
     public void ConvertPurchaseIntentToAlbum_WhileOtherEditionsAreTargeted_ThrowsAndKeepsEverything()
     {
-        // The conversion respects the exclusivity of the two kinds of intent (fonctionnel.md §
+        // The conversion respects the exclusivity of the two kinds of intent (fonctionnel/regles-metier.md §
         // Intention d'achat): the other editions targeted forbid an intent on the whole album.
         var album = new Album("Le Lotus bleu", null);
         var wished = new Edition(album, Casterman);
@@ -302,7 +302,7 @@ public sealed class PurchaseIntentRemovalTests
     public void ConvertPurchaseIntentToAlbum_WhileTheAlbumHasAnOwnedEdition_ThrowsAndKeepsEverything()
     {
         // Only the conversion of the intent on the only edition of the album leaves it without edition
-        // (fonctionnel.md § Intention d'achat).
+        // (fonctionnel/regles-metier.md § Intention d'achat).
         var album = new Album("Le Lotus bleu", null);
         var owned = new Edition(album, Casterman);
         album.RecordAcquisition(owned, AcquisitionMode.Purchase);

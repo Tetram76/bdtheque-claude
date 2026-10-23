@@ -386,8 +386,8 @@ const THEMES = {
 };
 
 // The rows of the list, in the order of the list: by sort key, the series' key standing for the
-// title of an album that has none (fonctionnel.md § Tri et navigation par initiale). Labels follow
-// the default format, « Album (Série - Tome) » (fonctionnel.md § Libellé d'un album).
+// title of an album that has none (fonctionnel/presentation.md § Tri et navigation par initiale). Labels follow
+// the default format, « Album (Série - Tome) » (fonctionnel/presentation.md § Libellé d'un album).
 // state: own (at least one owned edition), out (none), intent (aimed at by a purchase intent).
 const ALBUMS = [
   { label: 'La Ballade de la mer salée (Corto Maltese - T. 1)', mark: '1', credits: 'Hugo Pratt', date: '1975', eds: [1, 1], state: 'own', cover: true, modified: '12 oct. 2026', genre: true },
@@ -426,7 +426,7 @@ const TRASH = 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13';
 const MERGE = 'M6 4v5a5 5 0 0 0 5 5h1a5 5 0 0 1 5 5v1 M18 4v5a5 5 0 0 1-5 5 M3 7l3-3 3 3 M15 7l3-3 3 3';
 const BLOCK ='M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M5.6 5.6l12.8 12.8';
 
-// What deleting an album announces (fonctionnel.md § Suppression des entités): the records deleted
+// What deleting an album announces (fonctionnel/regles-metier.md § Suppression des entités): the records deleted
 // with it, the associations it loses, or the references that block it, counted by kind of record.
 const DIALOGS = {
   confirmation: (t) => ({
@@ -440,7 +440,7 @@ const DIALOGS = {
     cancel: 'Annuler', confirm: 'Supprimer définitivement', confirmBg: t.warn, confirmFg: t.onWarn, icon: TRASH, iconBg: t.warn, iconFg: t.onWarn
   }),
   // Merging two albums starts from one of them: the other one is chosen here. What the merge keeps
-  // of each is still to be defined (fonctionnel.md § Structure de l'application, Administration).
+  // of each is still to be defined (fonctionnel/index.md § Structure de l'application, Administration).
   fusion: (t) => ({
     title: 'Fusionner deux albums', label: 'Barracuda - Tome 1',
     lead: 'Avec quel album fusionner celui-ci ?',
@@ -500,7 +500,7 @@ class View extends Mockup {
       };
     });
     // Covers get a hue of their own, so that the list reads as a shelf; an album without a cover
-    // shows the generic visual (fonctionnel.md § Visuel par défaut).
+    // shows the generic visual (fonctionnel/regles-metier.md § Visuel par défaut).
     const coverOf = (a, i) => (a.cover
       ? 'hsl(' + ((i * 47 + 200) % 360) + ', 42%, 36%)'
       : 'repeating-linear-gradient(135deg, rgba(127,127,127,.42) 0 6px, rgba(127,127,127,.24) 6px 12px)');

@@ -327,7 +327,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     public async Task NavigationEntryCheckConstraint_ValueOutsideEntries_ThrowsAtDatabase(string table, string constraint)
     {
         // Lowercase or accented letters are filed under their uppercase base letter: only
-        // A–Z, # and @ are entries (fonctionnel.md § Entrées de la navigation par initiale).
+        // A–Z, # and @ are entries (fonctionnel/presentation.md § Entrées de la navigation par initiale).
         var sql = table switch
         {
             "Series" => "INSERT INTO \"Series\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"IsManualSortKey\", \"IsComplete\", \"ExcludeFromMissingVolumes\", \"ExcludeFromReleaseEstimates\", \"NavigationEntry\") " +

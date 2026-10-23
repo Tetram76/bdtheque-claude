@@ -5,7 +5,7 @@ namespace Bdtheque.Domain.Entities;
 /// <summary>
 /// A value of an attribute changed by a modification, as recorded in the record (modele-metier.md §
 /// Entrée du journal des modifications): never a text formatted for display, so that it is presented
-/// in the display culture in force when the change log is read (fonctionnel.md § Langue et culture
+/// in the display culture in force when the change log is read (fonctionnel/presentation.md § Langue et culture
 /// d'affichage).
 /// </summary>
 public abstract record ChangeLogValue;

@@ -4,9 +4,9 @@ using Bdtheque.Domain.Entities;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// Membership of the collection (fonctionnel.md § Appartenance à la collection), computed by a
+/// Membership of the collection (fonctionnel/regles-metier.md § Appartenance à la collection), computed by a
 /// single expression reused by every query, never recoded query by query
-/// (choix-implementation.md § Organisation de l'API).
+/// (choix-implementation/api.md § Organisation de l'API).
 /// </summary>
 internal static class CollectionMembership
 {

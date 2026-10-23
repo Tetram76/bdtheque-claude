@@ -18,12 +18,12 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>
 /// Administration of the editions (<c>/admin/albums/{albumId}/editions</c>). An edition belongs to
 /// the aggregate of its album, which alone sees the purchase intents an acquisition realizes: every
-/// write on it locks the album and checks the version of the album (choix-implementation.md §
+/// write on it locks the album and checks the version of the album (choix-implementation/persistance.md §
 /// Concurrence d'accès).
 /// </summary>
 internal static class EditionEndpoints
 {
-    // fonctionnel.md § Suppression des entités: an edition takes along its visuals and its purchase
+    // fonctionnel/regles-metier.md § Suppression des entités: an edition takes along its visuals and its purchase
     // intent; deleting the last owned edition of an album takes the album out of the collection.
     private static readonly DeletionLink[] DeletionLinks =
     [
@@ -59,7 +59,7 @@ internal static class EditionEndpoints
     /// <summary>
     /// The editions of an album, by year, each whole, with its membership of the collection, its intent,
     /// and its visuals, in their presentation order: an edition has no record of its own, the record of its
-    /// album presents it (fonctionnel.md § Structure de l'application).
+    /// album presents it (fonctionnel/index.md § Structure de l'application).
     /// </summary>
     internal static async Task<List<EditionDetail>> ReadDetailsAsync(Guid albumId, BdthequeDbContext context, CancellationToken cancellationToken)
     {
@@ -126,7 +126,7 @@ internal static class EditionEndpoints
 
     /// <summary>
     /// The editions found by their ISBN, separators ignored on both sides — an ISBN is entered as
-    /// printed, with or without them —, narrowed by the cross filters (choix-implementation.md §
+    /// printed, with or without them —, narrowed by the cross filters (choix-implementation/api.md §
     /// Recherche), in the order of their albums, then by year.
     /// </summary>
     private static Task<Page<EditionListItem>> ListAsync(
@@ -188,7 +188,7 @@ internal static class EditionEndpoints
     }
 
     /// <summary>
-    /// Confirms the purchase of an edition targeted by an intent (fonctionnel.md § Réalisation d'une
+    /// Confirms the purchase of an edition targeted by an intent (fonctionnel/regles-metier.md § Réalisation d'une
     /// intention): the whole form is applied, with the acquisition, which realizes the intent.
     /// </summary>
     private static async Task<EditionForm> AcquireAsync(

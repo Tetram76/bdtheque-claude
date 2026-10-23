@@ -15,7 +15,7 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>Administration of the authors (<c>/admin/authors</c>).</summary>
 internal static class AuthorEndpoints
 {
-    // fonctionnel.md § Suppression des entités: an author is refused deletion while credited on an
+    // fonctionnel/regles-metier.md § Suppression des entités: an author is refused deletion while credited on an
     // album or a series. An author credited with several roles on one record blocks it once: the
     // impact counts records, not contributions.
     private static readonly DeletionLink[] DeletionLinks =
@@ -46,14 +46,14 @@ internal static class AuthorEndpoints
     }
 
     /// <summary>
-    /// An author with the whole bibliography (fonctionnel.md § Structure de l'application): a single list
+    /// An author with the whole bibliography (fonctionnel/index.md § Structure de l'application): a single list
     /// reconciling the series credited on — on the series itself, or on one of its albums — with the
     /// albums of each, and the albums without series, each with the roles held.
     /// </summary>
     /// <remarks>
     /// The series and the albums without series come together, by sort key, as typed entries: this is the
     /// order of the first level of the bibliography, where the albums without series stand alongside the
-    /// series (fonctionnel.md § Structure de l'application). Bounded, the bibliography is whole.
+    /// series (fonctionnel/index.md § Structure de l'application). Bounded, the bibliography is whole.
     /// </remarks>
     private static async Task<AuthorDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
@@ -102,7 +102,7 @@ internal static class AuthorEndpoints
 
     /// <summary>
     /// The authors found by any part of their name: last name, first name, pseudonym, or full name, as
-    /// displayed ("First Last") or as sorted ("Last First", fonctionnel.md § Artistes).
+    /// displayed ("First Last") or as sorted ("Last First", fonctionnel/presentation.md § Artistes).
     /// </summary>
     private static Task<Page<AuthorListItem>> ListAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,

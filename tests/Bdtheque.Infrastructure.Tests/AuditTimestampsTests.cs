@@ -76,7 +76,7 @@ public sealed class AuditTimestampsTests : IAsyncLifetime
     [Fact]
     public async Task WriteOnAChildThroughItsAggregate_UpdatesTheRootModificationDate()
     {
-        // A child written through its aggregate modifies the root's record (choix-implementation.md
+        // A child written through its aggregate modifies the root's record (choix-implementation/persistance.md
         // § Concurrence d'accès), whose modification date follows.
         var publisher = new Publisher("Dupuis");
         _fixture.Context.Publishers.Add(publisher);

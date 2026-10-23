@@ -476,7 +476,7 @@ class View extends Mockup {
       // Every optional value of a series stays visible when absent, as on the record of an album, never as an empty link.
       s: {
         ...s,
-        // Only a publisher with a known website is a link, to that site; a collection never is (fonctionnel.md § Structure de l'application).
+        // Only a publisher with a known website is a link, to that site; a collection never is (fonctionnel/index.md § Structure de l'application).
         publisherLink: Boolean(s.publisher && s.publisherUrl), publisherText: Boolean(s.publisher && !s.publisherUrl),
         noPublisher: !s.publisher,
         hasCollection: Boolean(s.collection), noCollection: !s.collection,

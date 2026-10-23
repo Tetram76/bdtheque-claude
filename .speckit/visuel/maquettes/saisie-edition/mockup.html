@@ -491,7 +491,7 @@ const LISTS = {
 };
 const pick = (list, value) => LISTS[list].map((label) => ({ label, selected: label === value }));
 
-// The visuals of an edition, in their fixed order of types (fonctionnel.md § Ordre des visuels d'une édition).
+// The visuals of an edition, in their fixed order of types (fonctionnel/regles-metier.md § Ordre des visuels d'une édition).
 const VISUAL_TYPES = [['Couverture', 'Couv.'], ['Dédicace', 'Déd.'], ['Page de garde', 'Garde'], ['Planche', ''], ['4e de couverture', '4e']];
 
 const EXAMPLES = {
@@ -518,7 +518,7 @@ const EXAMPLES = {
     dirty: false, status: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'édition'
   },
   // A new edition aimed at by a purchase intent: no copy and no value, only what describes the
-  // edition (fonctionnel.md § Réalisation d'une intention, minimum of fields).
+  // edition (fonctionnel/regles-metier.md § Réalisation d'une intention, minimum of fields).
   nouvelleIntention: {
     existing: false, creating: true, intent: true, heading: "Nouvelle intention d'achat", crumb: "Nouvelle intention d'achat",
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
@@ -573,7 +573,7 @@ class View extends Mockup {
     const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
     const visualMenu = this.state?.visualMenu !== undefined ? this.state.visualMenu : (this.props.visuelMenu ? 'Planche-1' : null);
     const errorKey = this.props.erreur;
-    // The amount labels follow the mode of acquisition (fonctionnel.md § Libellés contextuels sur l'édition).
+    // The amount labels follow the mode of acquisition (fonctionnel/presentation.md § Libellés contextuels sur l'édition).
     const mode = this.props.mode === 'offerte' && x.owned && !x.creating ? 'Offerte' : x.mode;
     const isPurchase = mode === 'Achat';
     // A free edition has no value: its amounts are emptied and locked. A purchase is never free.
@@ -591,10 +591,10 @@ class View extends Mockup {
     const err = ERRORS[errorKey] && !(errorKey === 'metier' && free) ? ERRORS[errorKey](t) : null;
     // A free edition has no amount, so no amount to date: its business error is the missing date of a priced one.
     const priceError = errorKey === 'metier' && !free;
-    // The ISBN check warns without blocking: some publishers printed wrong ISBNs (fonctionnel.md § Validation de l'ISBN).
+    // The ISBN check warns without blocking: some publishers printed wrong ISBNs (fonctionnel/regles-metier.md § Validation de l'ISBN).
     const isbnWrong = this.props.isbn === 'incoherent' && Boolean(x.isbn);
     const isbn = isbnWrong && x.isbn ? x.isbn.slice(0, -1) + '7' : x.isbn;
-    // The edition label is rebuilt as the form changes (fonctionnel.md § Libellé d'une édition).
+    // The edition label is rebuilt as the form changes (fonctionnel/presentation.md § Libellé d'une édition).
     const label = x.publisher + (x.collection ? ' (' + x.collection + ')' : '') + (x.year ? ' [' + x.year + ']' : '') + (isbn ? ' - ISBN ' + isbn : '');
     const field = 'box-sizing: border-box; border: ' + t.inB + '; border-radius: ' + t.inR + '; background: ' + t.inBg + '; color: ' + t.text + '; font: inherit; font-size: 15px;';
     // One grid in the fixed order of types, each thumbnail marked with its type: a type with a
