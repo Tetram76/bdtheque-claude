@@ -95,7 +95,7 @@ La **culture d'affichage** (ex. français de France), et non une simple langue, 
 
 La culture s'applique à tout texte **au moment où il est présenté** : un texte que l'application produit à partir de données enregistrées (ex. le journal des modifications, cf. `modele-metier.md` § Entrée du journal des modifications) n'est jamais figé dans la culture en vigueur lors de leur enregistrement.
 
-Les dates et heures sont présentées dans le **fuseau horaire de l'application**, défini au **déploiement**, le même pour tous les visiteurs ; il fixe aussi le jour d'une date et heure dans la recherche avancée (cf. § Comparaisons) et le changement de jour de l'édition « À la une » (cf. § Page d'accueil).
+Les dates et heures (ex. dates de création et de modification d'une fiche) sont présentées dans le **fuseau horaire du navigateur** du visiteur. La recherche avancée compare une date et heure par son jour dans ce même fuseau (cf. § Comparaisons), pour qu'une date présentée et la même date recherchée désignent le même jour. Seul le changement de jour de l'édition « À la une » (cf. § Page d'accueil), commune à tous les visiteurs, suit le **fuseau horaire de l'application**, défini au **déploiement**.
 
 Seule la culture **française** est proposée actuellement ; l'application est conçue pour pouvoir en proposer d'autres ultérieurement sans refonte.
 
