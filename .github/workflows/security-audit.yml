@@ -128,7 +128,10 @@ jobs:
           gh label create security-audit --color B60205 --description "Daily security audit" --force
           issue=$(gh issue list --label security-audit --state all --limit 1 --json number -q '.[0].number')
           if [ -n "$issue" ]; then
-            gh issue view "$issue" --json body -q .body | tr -d '\r' | sed -n '/^<!-- list -->$/,/^<!-- end -->$/p' | grep -v '^<!--' | grep -v '^```' | sort -u > known.txt
+            # A single sed, which succeeds whether or not the list is empty (a filtering grep would fail
+            # on an empty one under pipefail).
+            gh issue view "$issue" --json body -q .body | tr -d '\r' \
+              | sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' | sort -u > known.txt
           else
             : > known.txt
           fi
