@@ -7,7 +7,7 @@ En matière de **gestion des Pull Requests** (ouverture, description, revue Code
 | Fichier | Contenu |
 | --- | --- |
 | `gouvernance.md` | Gouvernance documentaire, objectifs et périmètre, maintenance du `.speckit/`, prise de décision, règles de travail de l'agent, budget IA, qualité du code. |
-| `depot.md` | Dépôt GitHub : configuration, signature des commits, intégration continue, mises à jour des dépendances, branches, conventions de commit, releases. |
+| `depot.md` | Dépôt GitHub : configuration, signature des commits, intégration continue, mises à jour des dépendances, branches, conventions de commit, versions et releases. |
 | `revue-tickets.md` | Règle de merge, validation fonctionnelle, verrouillage, revue de code et revue Codex, tickets, liens entre Pull Requests et tickets. |
 
 ---

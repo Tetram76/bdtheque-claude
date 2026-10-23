@@ -1,6 +1,6 @@
 # Dépôt
 
-Dépôt GitHub : configuration, signature des commits, intégration continue, mises à jour des dépendances, branches, conventions de commit et releases.
+Dépôt GitHub : configuration, signature des commits, intégration continue, mises à jour des dépendances, branches, conventions de commit, versions et releases.
 
 ---
 
@@ -124,6 +124,22 @@ Exemples :
 
 > **Note** : l'enforcement automatique du format (via ruleset GitHub) est réservé à GitHub Enterprise et n'est donc pas actif. Le respect de la convention est une contrainte de processus appliquée par l'agent.
 
-## Releases
+## Versions et releases
 
-Des **releases GitHub** sont publiées pour marquer les jalons significatifs du projet. Chaque release correspond à un état stable et identifiable de l'application.
+Les versions de l'application sont connues du dépôt avant leur publication : chaque version à venir est un **jalon** GitHub (*milestone*), auquel sont rattachés les tickets et les Pull Requests qu'elle livre ; chaque version publiée est un **tag** et une **release** GitHub. Une version correspond à un état stable et identifiable de l'application, sur `main`.
+
+- **Numérotation** : [Semantic Versioning](https://semver.org/) (`MAJEUR.MINEUR.CORRECTIF`), tag `v<version>` (ex. `v0.1.0`) :
+  - `0.0.x` : les phases qui ne livrent pas encore d'application utilisable, une version par phase (phases 0 à 2) ;
+  - `0.1.0` : la première application utilisable (Phase 3, partie 1), puis une version **mineure** par phase ou partie de phase ;
+  - `1.0.0` : la version de la première mise en production (déploiement consigné dans `journal-evenements.md`) ; les versions suivantes gardent une version mineure par phase ou partie de phase ;
+  - une version **corrective** (ex. `v0.1.1`) livre une correction publiée entre deux de ces versions.
+
+  La version que livre chaque phase, ou partie de phase, est indiquée dans `suivi-implementation.md`.
+- **Jalon** : chaque version à venir est un jalon de même nom (`v0.1.0`), dont la description désigne la phase ou la partie qu'elle livre. Il est créé au découpage de cette phase ou de cette partie, avec ses tickets, ou avec le ticket d'une version corrective. Il ne porte pas d'échéance : le projet ne planifie pas de dates.
+- **Rattachement** : chaque ticket est rattaché au jalon de la version qui le livre (`gestion-projet/revue-tickets.md` § Suivi par tickets) ; un ticket hors plan l'est dès que sa réalisation est prévue dans une version, et reste sans jalon tant qu'elle ne l'est pas (ex. une montée de version majeure encore lointaine, le ticket des vulnérabilités connues, que ne réalise aucune PR). Chaque Pull Request fusionnée sur `main` est rattachée au jalon de son ticket de référence ; sans ticket, à celui de la version en cours, la première version non publiée. Un ticket fermé sans être réalisé (*not planned*) quitte son jalon.
+- **Publication** : une version est publiée quand tous les tickets de son jalon sont fermés :
+  - **tag** annoté et signé (clé GPG de § Signature des commits), posé sur le commit de `main` qui la complète ;
+  - **release** GitHub sur ce tag, dont les notes sont générées par GitHub à partir des Pull Requests fusionnées depuis le tag de la version précédente, et vérifiées avant publication comme tout texte publié (`gestion-projet/gouvernance.md` § Budget IA, mention de Codex). Une version `0.0.x`, qui ne livre pas d'application utilisable, est marquée **pré-release** ;
+  - **images Docker** de la version, publiées à la demande depuis son tag (`choix-implementation/deploiement.md` § Publication des images Docker) ; les versions `0.0.x` n'en ont pas, faute d'interface ;
+  - **fermeture du jalon**.
+- La publication d'une version est un acte de gestion du projet (`gestion-projet/gouvernance.md` § Prise de décision) : l'agent l'accomplit dès que la règle ci-dessus la prescrit, puis en informe l'utilisateur. Le déploiement de la version, lui, appartient à l'utilisateur.
