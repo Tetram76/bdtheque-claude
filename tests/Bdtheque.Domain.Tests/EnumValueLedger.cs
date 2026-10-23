@@ -60,5 +60,7 @@ internal static class EnumValueLedger
                 ("Name", 57), ("Website", 58), ("Description", 59), ("ParentUniverse", 60), ("Label", 61),
                 ("SearchedEntity", 62), ("SearchCriteria", 63), ("SearchVariables", 64),
             ],
+            [typeof(DeviceType)] = [("Computer", 1), ("Tablet", 2), ("Smartphone", 3)],
+            [typeof(RenderingEngine)] = [("Blink", 1), ("Gecko", 2), ("WebKit", 3), ("Other", 4)],
         };
 }
