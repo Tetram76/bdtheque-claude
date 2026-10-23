@@ -1,3 +1,4 @@
+using Bdtheque.Api.Audience;
 using Bdtheque.Api.Endpoints;
 using Bdtheque.Api.Errors;
 using Bdtheque.Api.Security;
@@ -46,6 +47,11 @@ builder.Services.AddSingleton<VisualUploadGate>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<VisualReconciliation>();
 builder.Services.AddHostedService(services => services.GetRequiredService<VisualReconciliation>());
+
+// The daily closing of the audience months into counters and removal of the public visits at the end of their
+// retention (choix-implementation/mesure-audience.md § Mesure d'audience : mise en œuvre).
+builder.Services.AddSingleton<AudienceRetention>();
+builder.Services.AddHostedService(services => services.GetRequiredService<AudienceRetention>());
 
 var app = builder.Build();
 
@@ -101,6 +107,7 @@ admin.MapEditionVisuals();
 admin.MapPurchaseIntents();
 admin.MapSavedSearches();
 admin.MapChangeLog();
+admin.MapAudienceReading();
 
 var catalog = app.MapCatalog();
 catalog.MapSeriesCatalog();
@@ -113,6 +120,8 @@ catalog.MapUniverseCatalog();
 catalog.MapPurchaseIntentList();
 catalog.MapAdvancedSearch();
 catalog.MapSavedSearchCatalog();
+
+app.MapAudience().MapAudienceRecording();
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
