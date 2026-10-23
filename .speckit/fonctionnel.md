@@ -95,7 +95,7 @@ La **culture d'affichage** (ex. français de France), et non une simple langue, 
 
 La culture s'applique à tout texte **au moment où il est présenté** : un texte que l'application produit à partir de données enregistrées (ex. le journal des modifications, cf. `modele-metier.md` § Entrée du journal des modifications) n'est jamais figé dans la culture en vigueur lors de leur enregistrement.
 
-**Fuseau horaire** : toute présentation à l'utilisateur et toute interaction avec lui suivent le **fuseau horaire de son navigateur** : dates et heures présentées (ex. dates de création et de modification d'une fiche), comme dates et heures saisies ou recherchées (une date et heure est comparée par son jour dans ce fuseau, cf. § Comparaisons). Côté serveur, les dates et heures sont enregistrées et traitées en **temps universel**. Le **fuseau horaire du serveur**, défini par le déploiement, ne sert qu'à un traitement propre au serveur qui a besoin d'une notion de fuseau horaire. L'édition « À la une » n'en est pas un : son jour est celui du visiteur (cf. § Page d'accueil).
+**Fuseau horaire** : toute présentation à l'utilisateur et toute interaction avec lui suivent le **fuseau horaire de son navigateur** : dates et heures présentées (ex. dates de création et de modification d'une fiche), comme dates et heures saisies ou recherchées (une date et heure est comparée par son jour dans ce fuseau, cf. § Comparaisons). Côté serveur, les dates et heures sont enregistrées et traitées en **temps universel**.
 
 Seule la culture **française** est proposée actuellement ; l'application est conçue pour pouvoir en proposer d'autres ultérieurement sans refonte.
 
