@@ -1,8 +1,8 @@
 #Requires -Version 7
 <#
 .SYNOPSIS
-    Lists the newer versions available for every technology pinned in the repository, and the open
-    Dependabot alerts.
+    Lists the newer versions available for every technology pinned in the repository, the known
+    vulnerabilities of its NuGet packages and the open Dependabot alerts.
 
 .DESCRIPTION
     Version watch of gestion-projet/depot.md § Mises à jour des dépendances, run by the agent at each
@@ -119,6 +119,28 @@ Get-ChildItem (Join-Path $root '.github/workflows') -Filter *.yml |
 
 $updates | Sort-Object Kind, Component | Format-Table -AutoSize | Out-String -Width 200 | Write-Output
 
+# Known vulnerabilities of NuGet packages, transitive ones included. GitHub's dependency graph cannot
+# serve here: it does not read the versions of Directory.Packages.props (central package management).
+$vulnerable = dotnet list (Join-Path $root 'Bdtheque.slnx') package --vulnerable --include-transitive --format json | ConvertFrom-Json
+$nugetVulnerabilities = $vulnerable.projects.frameworks |
+    ForEach-Object { @($_.topLevelPackages) + @($_.transitivePackages) } |
+    Where-Object { $_ } |
+    ForEach-Object {
+        $package = $_
+        $package.vulnerabilities | ForEach-Object {
+            [pscustomobject]@{ Package = $package.id; Version = $package.resolvedVersion; Severity = $_.severity; Advisory = $_.advisoryurl }
+        }
+    } |
+    Sort-Object Package, Advisory -Unique
+if (-not $nugetVulnerabilities) {
+    Write-Output 'Vulnerable NuGet packages: none'
+}
+else {
+    Write-Output "Vulnerable NuGet packages: $(@($nugetVulnerabilities).Count)"
+    $nugetVulnerabilities | Format-Table -AutoSize | Out-String -Width 200 | Write-Output
+}
+
+# Dependabot alerts: in practice, the GitHub Actions of the workflows, whose versions the dependency graph reads.
 $alerts = gh api 'repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100' | ConvertFrom-Json
 if ($alerts.Count -eq 0) {
     Write-Output 'Open Dependabot alerts: none'
