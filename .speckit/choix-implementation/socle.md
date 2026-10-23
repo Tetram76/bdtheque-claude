@@ -17,7 +17,7 @@ Frontend, internationalisation, authentification, documentation de l'API, journa
 
 - Le code (classes, fonctions, variables, commentaires, etc.) est écrit en **anglais** (cf. `gestion-projet/`), indépendamment de la langue de l'utilisateur final.
 - La **culture d'affichage** choisie par l'utilisateur (voir `fonctionnel/`) est implémentée via les ressources de localisation ASP.NET Core (`IStringLocalizer`) pour la traduction des textes, combinées à la **culture .NET courante** (`CultureInfo`, positionnée par requête) pour le formatage des données et le tri linguistique. Aucun texte utilisateur n'est codé en dur dans le code applicatif.
-- Le mode **globalization-invariant** de .NET est incompatible avec le tri linguistique et le formatage culturel requis par le fonctionnel : il ne doit pas être activé (`InvariantGlobalization=false`, `Directory.Build.props`). L'image Docker de `frontend` et d'`api` (`aspnet:10.0-noble-chiseled-extra`, `choix-implementation/deploiement.md` § Images de base des conteneurs) embarque ICU dans sa variante *extra*, retenue pour cette raison.
+- Le mode **globalization-invariant** de .NET est incompatible avec le tri linguistique et le formatage culturel requis par le fonctionnel : il ne doit pas être activé (`InvariantGlobalization=false`, `Directory.Build.props`). L'image Docker de `frontend` et d'`api` (`aspnet`, variante `noble-chiseled-extra`, `choix-implementation/deploiement.md` § Images de base des conteneurs) embarque ICU dans sa variante *extra*, retenue pour cette raison.
 
 ## Authentification : mise en œuvre
 
