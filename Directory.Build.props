@@ -22,6 +22,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- A package vulnerability reported by the NuGet audit stays a warning: one that no version fixes
+         yet must not block the development. The daily security audit (security-audit.yml) is the one
+         that fails on it (contraintes-techniques/index.md § Suivi des versions et des vulnérabilités). -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
     <!-- The published output — the content of the Docker images — holds only what the running
          application uses (contraintes-techniques/architecture-deploiement.md § Déploiement): no documentation files, which
          only serve the compiler and the development tools; no web.config, which only IIS reads; no

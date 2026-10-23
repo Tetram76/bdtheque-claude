@@ -5,7 +5,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 
 | Fichier | Contenu |
 | --- | --- |
-| `index.md` | Stack cible, exploitation des technologies retenues, licences. |
+| `index.md` | Stack cible, exploitation des technologies retenues, suivi des versions et des vulnérabilités, licences. |
 | `architecture-deploiement.md` | Architecture des tiers, indépendance de l'outil pour agents IA, déploiement, hébergement, stockage des visuels, compatibilité multi-supports, authentification, sources de données externes, statistiques du dashboard. |
 | `reprise-donnees.md` | Application existante (client lourd) et reprise de ses données. Lu seulement pour la reprise des données (`AGENTS.md`). |
 
@@ -28,6 +28,17 @@ Toute technologie retenue (langage, framework, bibliothèque, outil, base de don
 Cette règle implique de **prendre connaissance des possibilités** de chaque technologie à la version retenue (documentation officielle, notes de version) : reproduire des modèles trouvés ailleurs (exemples, extraits, réponses en ligne, habitudes) ne suffit pas, surtout lorsqu'ils sont **datés**, écrits pour une version antérieure.
 
 Lors d'une **montée de version** d'une technologie retenue, une **revue de l'existant** est menée pour identifier les chantiers d'amélioration que permet la nouvelle version.
+
+## Suivi des versions et des vulnérabilités
+
+Ces règles valent pour **toutes les technologies utilisées** : bibliothèques, SDK, images Docker, base de données, outils, actions du CI…
+
+- **Suivi des versions** : les nouvelles versions de chaque technologie sont suivies.
+- **Surveillance active des vulnérabilités** : les alertes de sécurité de chaque technologie sont surveillées activement, que le dépôt fasse ou non l'objet de travaux.
+- **Correction au plus tôt** : une vulnérabilité signalée est corrigée dès que possible, c'est-à-dire dès qu'une correction est disponible.
+- **Pas de blocage** : une vulnérabilité qu'aucune correction disponible ne permet encore de corriger ne bloque pas le projet ni la poursuite du développement.
+- **Pas de mise à jour pour elle-même** : appliquer une mise à jour impose la revue de l'existant (§ Exploitation des technologies retenues), pour que le dépôt profite de la nouvelle version.
+- **Souhait** : aucune Pull Request de mise à jour n'est ouverte automatiquement hors brouillon.
 
 ## Licences
 

@@ -2,7 +2,8 @@
 <#
 .SYNOPSIS
     Lists the newer versions available for every technology pinned in the repository, the known
-    vulnerabilities of its NuGet packages and the open Dependabot alerts.
+    vulnerabilities of its NuGet packages, the result of the daily security audit and the open
+    Dependabot alerts.
 
 .DESCRIPTION
     Version watch of gestion-projet/depot.md § Mises à jour des dépendances, run by the agent at each
@@ -138,6 +139,22 @@ if (-not $nugetVulnerabilities) {
 else {
     Write-Output "Vulnerable NuGet packages: $(@($nugetVulnerabilities).Count)"
     $nugetVulnerabilities | Format-Table -AutoSize | Out-String -Width 200 | Write-Output
+}
+
+# Daily security audit (security-audit.yml): every known vulnerability of the NuGet packages and of the
+# images, kept in its "Vulnérabilités connues" issue whether or not the repository is being worked on.
+$audit = gh run list --workflow security-audit.yml --branch main --limit 1 --json conclusion,createdAt,url 2>$null | ConvertFrom-Json
+if (-not $audit) {
+    Write-Output 'Daily security audit: no run yet'
+}
+else {
+    Write-Output "Daily security audit: $($audit[0].conclusion) ($($audit[0].createdAt.ToString('yyyy-MM-dd'))) $($audit[0].url)"
+    $issue = gh issue list --label security-audit --state all --limit 1 --json number,state,body,url | ConvertFrom-Json
+    if ($issue) {
+        $known = [regex]::Match($issue[0].body, '(?s)```text\r?\n(.*?)```').Groups[1].Value.Trim()
+        Write-Output "Known vulnerabilities ($($issue[0].state), $($issue[0].url)):"
+        Write-Output $(if ($known) { $known } else { 'none' })
+    }
 }
 
 # Dependabot alerts: in practice, the GitHub Actions of the workflows, whose versions the dependency graph reads.

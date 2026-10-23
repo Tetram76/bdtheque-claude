@@ -1,0 +1,158 @@
+name: Security audit
+
+# Daily check of the known vulnerabilities of every technology in use, whether or not the repository is
+# being worked on (contraintes-techniques/index.md § Suivi des versions et des vulnérabilités). The
+# current list is kept in the "Vulnérabilités connues" issue; the run only fails, hence only notifies
+# the user who created the workflow, when a vulnerability absent from that list shows up: a known one
+# does not repeat the notification every day. It is no required check: a vulnerability that no
+# correction fixes yet never blocks a pull request. The agent reads the issue at each resumption of
+# work (gestion-projet/depot.md § Mises à jour des dépendances). GitHub Actions are covered by the
+# repository's Dependabot alerts.
+on:
+  schedule:
+    - cron: "11 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-audit
+  cancel-in-progress: false
+
+jobs:
+  nuget:
+    name: NuGet packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.1.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5.4.0
+        with:
+          dotnet-version: "10.0.402"
+
+      # Every package, transitive ones included. The builds only warn about a vulnerable package
+      # (Directory.Build.props), so that one no version fixes yet does not block the development.
+      - name: Audit NuGet packages
+        run: |
+          dotnet restore Bdtheque.slnx
+          dotnet list Bdtheque.slnx package --vulnerable --include-transitive --format json > vulnerable.json
+          jq -r '.projects[].frameworks[]? | ((.topLevelPackages // []) + (.transitivePackages // []))[]
+            | . as $package | .vulnerabilities[]
+            | "nuget \($package.id): \(.advisoryurl)"' vulnerable.json \
+            | sort -u > vulnerabilities-nuget.txt
+          cat vulnerabilities-nuget.txt
+
+      - name: Upload the findings
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: vulnerabilities-nuget
+          path: vulnerabilities-nuget.txt
+
+  images:
+    name: Docker image (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [api, frontend, db]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.1.0
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4.7.0
+        with:
+          username: tetram76
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # The application images as published by the last nightly run; the database image as deployed by
+      # docker-compose.yml.
+      - name: Resolve the image
+        id: image
+        run: |
+          if [ "${{ matrix.image }}" = db ]; then
+            image=$(grep -A1 '^  db:' docker-compose.yml | grep -oP 'image:\s*\K\S+')
+          else
+            image="tetram76/bdtheque-${{ matrix.image }}:nightly"
+          fi
+          echo "name=$image" >> "$GITHUB_OUTPUT"
+
+      # Every known vulnerability, whether a fix is available or not: the agent checks, for each one,
+      # whether a correction can be applied.
+      - name: Check vulnerabilities
+        uses: docker/scout-action@v1.27.0
+        with:
+          command: cves
+          image: registry://${{ steps.image.outputs.name }}
+          sarif-file: scout.sarif
+          write-comment: false
+
+      - name: List the findings
+        run: |
+          jq -r --arg image "${{ matrix.image }}" \
+            '.runs[].results[] | "image \($image): \(.ruleId)"' scout.sarif | sort -u > "vulnerabilities-${{ matrix.image }}.txt"
+          cat "vulnerabilities-${{ matrix.image }}.txt"
+
+      - name: Upload the findings
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: vulnerabilities-${{ matrix.image }}
+          path: vulnerabilities-${{ matrix.image }}.txt
+
+  report:
+    name: Report
+    needs: [nuget, images]
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download the findings
+        uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: vulnerabilities-*
+          merge-multiple: true
+
+      # The issue body holds the list between two markers; a vulnerability missing from it is new. An entry
+      # names the component (package, or image of the matrix) and the advisory, not the version: an
+      # upgrade that leaves a known vulnerability in place does not report it again.
+      - name: Update the known vulnerabilities
+        run: |
+          export LC_ALL=C
+          cat vulnerabilities-*.txt | sort -u > current.txt
+          gh label create security-audit --color B60205 --description "Daily security audit" --force
+          issue=$(gh issue list --label security-audit --state all --limit 1 --json number -q '.[0].number')
+          if [ -n "$issue" ]; then
+            gh issue view "$issue" --json body -q .body | tr -d '\r' | sed -n '/^<!-- list -->$/,/^<!-- end -->$/p' | grep -v '^<!--' | grep -v '^```' | sort -u > known.txt
+          else
+            : > known.txt
+          fi
+          comm -23 current.txt known.txt > new.txt
+          {
+            echo "Vulnérabilités connues des technologies du dépôt, tenues à jour chaque jour par le contrôle de sécurité (\`.github/workflows/security-audit.yml\`, \`gestion-projet/depot.md\` § Mises à jour des dépendances). Chacune est corrigée dès qu'une correction est disponible."
+            echo
+            echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) vulnérabilité(s)."
+            echo
+            echo "<!-- list -->"
+            echo '```text'
+            cat current.txt
+            echo '```'
+            echo "<!-- end -->"
+          } > body.md
+          if [ -z "$issue" ]; then
+            issue=$(basename "$(gh issue create --title "Vulnérabilités connues" --label security-audit --body-file body.md)")
+          else
+            gh issue edit "$issue" --body-file body.md
+          fi
+          # Open while a vulnerability is known; reopening an open issue or closing a closed one fails harmlessly.
+          if [ -s current.txt ]; then gh issue reopen "$issue" || true; else gh issue close "$issue" || true; fi
+          if [ -s new.txt ]; then
+            echo "New vulnerabilities:"
+            cat new.txt
+            exit 1
+          fi
