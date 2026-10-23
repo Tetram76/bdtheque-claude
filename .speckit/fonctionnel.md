@@ -95,6 +95,8 @@ La **culture d'affichage** (ex. français de France), et non une simple langue, 
 
 La culture s'applique à tout texte **au moment où il est présenté** : un texte que l'application produit à partir de données enregistrées (ex. le journal des modifications, cf. `modele-metier.md` § Entrée du journal des modifications) n'est jamais figé dans la culture en vigueur lors de leur enregistrement.
 
+Les dates et heures sont présentées dans le **fuseau horaire de l'application**, défini au **déploiement**, le même pour tous les visiteurs ; il fixe aussi le jour d'une date et heure dans la recherche avancée (cf. § Comparaisons) et le changement de jour de l'édition « À la une » (cf. § Page d'accueil).
+
 Seule la culture **française** est proposée actuellement ; l'application est conçue pour pouvoir en proposer d'autres ultérieurement sans refonte.
 
 ### Tri et navigation par initiale
@@ -343,6 +345,8 @@ L'interface doit offrir un rendu **soigné et personnel**, clairement au-dessus 
 
 La charte graphique, la présentation de chaque écran et leurs maquettes de référence sont décrites dans le dossier [`visuel/`](visuel/) : [`charte-graphique.md`](visuel/charte-graphique.md), puis un fichier par écran (ex. [`dashboard.md`](visuel/dashboard.md)).
 
+**Thème actif** : l'application propose plusieurs thèmes (`visuel/charte-graphique.md` § Thème de base). Le thème est **tiré au hasard** à l'ouverture d'une **session de navigation**, parmi les thèmes proposés, et conservé toute la durée de cette session, dans la consultation comme dans l'administration. Une session est celle du navigateur : ouvrir un nouvel onglet ou une nouvelle fenêtre du même navigateur n'en ouvre pas une nouvelle, ouvrir un autre navigateur, si.
+
 Le dossier `visuel/` est une **référence visuelle et ergonomique** (apparence, mise en page, maquettes) : il ne définit **pas le contenu** des écrans, qui relève de ce fichier. Un écart entre le contenu d'une maquette et les règles fonctionnelles n'est pas une contradiction : les règles fonctionnelles s'appliquent, la maquette n'illustrant qu'un rendu possible.
 
 ## Page d'accueil
@@ -356,7 +360,7 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
 **Composition du dashboard** :
 
 - Il présente **toujours** les quatre blocs suivants, qui ne font pas partie du tirage :
-  - **À la une** : une **édition possédée** mise en avant, à la manière d'une citation du jour. Elle est tirée au hasard **une fois par jour** et reste la même pour tous les affichages de la journée.
+  - **À la une** : une **édition possédée** mise en avant, à la manière d'une citation du jour. Elle est tirée au hasard **une fois par jour** et reste la même pour tous les affichages de la journée. Le jour est celui du fuseau horaire de l'application (cf. § Langue et culture d'affichage).
     - **Présentation** : sa couverture, le libellé de son album (cf. § Libellé d'un album), le sien (cf. § Libellé d'une édition) et le résumé de l'album s'il en a un, que la représentation retenue (le thème) peut abréger. L'album mène à sa fiche.
     - **Répétitions** : le tirage **évite les répétitions rapprochées sans les interdire**. Une édition mise à la une n'y revient pas avant **10 jours** : la période se compte en jours de calendrier, et non en tirages, qu'il y ait eu ou non un tirage chaque jour (une journée sans affichage n'en a pas). Seule exception : toutes les éditions possédées sont déjà passées à la une pendant cette période.
     - **Couverture** : le tirage **privilégie les éditions avec couverture**. Parmi les éditions que la règle des 10 jours n'écarte pas, il ne retient que celles qui ont une couverture, et ne retient les éditions sans couverture que si aucune n'en a. Une édition présentée sans couverture reçoit le visuel générique (cf. § Visuel par défaut).
