@@ -166,13 +166,51 @@ Revue de l'existant au regard de la contrainte d'exploitation au mieux des techn
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
 
-Découpage précis à établir une fois la Phase 2 stabilisée ; probablement par écran (fiche album, fiche série, recherche, formulaires admin) plutôt que par entité.
+La phase est réalisée en plusieurs parties, découpées l'une après l'autre ; seule la partie 1 l'est à ce stade.
 
-- **Note — contraste des thèmes** : le texte courant du thème « fanzine en risographie » (bleu `#0078BF` sur papier `#F4EFE4`, `visuel/dashboard.md`) n'atteint que 4,1:1, sous les 4,5:1 attendus pour du texte courant. La couleur relevant de l'identité du thème, sa correction est soumise à l'utilisateur lors du découpage de la phase, avec la vérification des contrastes de tous les thèmes retenus.
-- **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base.
-- **Note — paramétrage de l'application** : le paramétrage (`modele-metier.md` § Paramétrage de l'application) n'existe encore ni dans le modèle de domaine ni dans l'API. Il est intégré à cette phase avec le bloc « Paramétrage » de l'administration, qui l'expose et le modifie, et ses écritures sont alors journalisées (`modele-metier.md` § Entrée du journal des modifications, type de fiche `Paramétrage`).
-- **Note — fuseau horaire** : les dates et heures (création, modification, entrée dans la collection) sont enregistrées en temps universel, et la recherche avancée les compare par leur jour en temps universel (`choix-implementation.md` § Recherche avancée : mise en œuvre). Le fuseau horaire dans lequel l'application les présente est établi avec le frontend, et la recherche alignée sur lui, pour qu'une date présentée et la même date recherchée désignent le même jour. Le changement de jour de l'édition « À la une » du dashboard (`fonctionnel.md` § Page d'accueil, Phase 4) suit ce même fuseau.
-- **Note — mesure d'audience de l'interface web** : le modèle de domaine et l'API de la mesure d'audience (`fonctionnel.md` § Mesure d'audience de l'interface web) précèdent cette phase (#186). Elle y ajoute le relevé des écrans et actions qu'elle réalise, avec le type d'appareil et le moteur de rendu de chaque visite, la délimitation d'une visite et le traceur qui la porte ; la liste des fonctions suivies, nécessaire pour qu'une fonction jamais utilisée figure dans les indicateurs, qui suit celle des écrans et actions réalisés ; à l'administration, l'écran qui présente les indicateurs ; à l'interface publique, l'information des visiteurs et leur opposition.
+- **Pages non implémentées** : tant qu'une page n'est pas implémentée, tout lien qui y mène affiche une page « Pas encore implémenté » (#191). Le chantier qui réalise une page remplace par le vrai lien tous les liens qui y mènent.
+- **Validation fonctionnelle** : les chantiers qui réalisent ce que l'utilisateur voit et utilise sont validés par lui avant fusion (`gestion-projet.md` § Validation fonctionnelle), avec l'environnement de validation (#214), réalisé avant le premier d'entre eux ; chaque ticket précise s'il y est soumis.
+- **Thèmes** : la partie 1 réalise le thème de base et deux thèmes, « Cases et bulles » (violine) et « La gazette », retenus pour s'opposer sur presque tout (sombre et clair, blocs encadrés et ouverts, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. Un thème ajouté par une partie ultérieure est décliné sur tous les écrans déjà réalisés.
+
+### Partie 1 — Éléments de base
+
+Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent.
+
+| Ticket | Titre |
+| --- | --- |
+| #161 | Accès du frontend au volume des visuels |
+| #191 | Socle du frontend : appels à l'API, erreurs, localisation, fuseau horaire et pages non implémentées |
+| #214 | Environnement de validation fonctionnelle |
+| #192 | Données du dashboard dans l'API avant la Phase 4 |
+| #193 | Paramétrage de l'application dans le modèle de domaine et l'API |
+| #194 | Thème de base neutre, contrats des thèmes et thème de la visite |
+| #195 | Thème « Cases et bulles » (violine) |
+| #196 | Thème « La gazette » |
+| #197 | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
+| #198 | Dashboard et écran d'accueil d'une collection vide |
+| #199 | Connexion et page d'accueil de l'administration |
+| #200 | Liste des albums de l'administration |
+| #201 | Listes des séries, des auteurs et des éditeurs de l'administration |
+| #202 | Listes des éditions et des intentions d'achat de l'administration |
+| #203 | Genres et univers : listes et saisie de l'administration |
+| #204 | Page des éditions et intentions d'achat d'un album |
+| #205 | Saisie d'un album |
+| #206 | Saisie d'une série |
+| #207 | Saisie d'un auteur |
+| #208 | Saisie d'un éditeur et de ses collections |
+| #209 | Saisie d'une édition, de ses visuels et d'une intention d'achat |
+| #210 | Fiche d'un album dans la consultation |
+| #211 | Fiche d'une série dans la consultation |
+| #212 | Fiche d'un auteur dans la consultation |
+
+### Parties suivantes
+
+Contenu et nombre à établir au découpage de chacune.
+
+- **Note — contraste des thèmes** : le texte courant du thème « fanzine en risographie » (bleu `#0078BF` sur papier `#F4EFE4`, `visuel/dashboard.md`) n'atteint que 4,1:1, sous les 4,5:1 attendus pour du texte courant. La couleur relevant de l'identité du thème, sa correction est soumise à l'utilisateur lors du découpage de la partie qui le réalise, avec la vérification des contrastes des thèmes qu'elle ajoute.
+- **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base (#194), que tout thème ajouté respecte.
+- **Note — paramétrage de l'application** : le modèle de domaine et l'API du paramétrage sont réalisés par la partie 1 (#193), dont la page d'accueil de l'administration présente les valeurs ; l'écran qui le modifie reste à réaliser.
+- **Note — mesure d'audience de l'interface web** : la partie 1 réalise le relevé, les visites, l'information des visiteurs et leur opposition (#197), et chaque écran ajoute ses fonctions à la liste des fonctions suivies ; l'écran de l'administration qui présente les indicateurs reste à réaliser.
 - **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données (`choix-implementation.md` § Recherche avancée : mise en œuvre), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
 
 ## Phase 4 — Statistiques, devises et estimation de valeur

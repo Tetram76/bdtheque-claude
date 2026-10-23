@@ -143,13 +143,22 @@ Le projet dispose d'un **budget IA limité**, pour l'agent (Claude) comme pour l
 
 ## Règle de merge : non-régression et revue Codex obligatoires
 
-> **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée ET que Codex l'a approuvée.**
+> **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée ET que Codex l'a approuvée**, et, pour une Pull Request soumise à validation fonctionnelle, **que l'utilisateur l'a validée**.
 
-- Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI) **et** à l'**approbation de la revue Codex** (voir « Revue de code » ci-dessous).
+- Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI) **et** à l'**approbation de la revue Codex** (voir « Revue de code » ci-dessous), ainsi qu'à la **validation fonctionnelle de l'utilisateur** lorsque la Pull Request y est soumise (§ « Validation fonctionnelle »).
 - Les contrôles de non-régression **doivent être exécutés localement avant tout push** sur la branche de PR qui modifie un élément qu'ils vérifient (code, projets et configuration de la solution, workflow CI, fichiers Docker) — pour détecter les régressions au plus tôt et ne pas attendre le CI distant. Un push qui ne modifie que de la documentation (`.speckit/`, fichiers Markdown, skills) en est dispensé : aucun de ces contrôles ne la vérifie, et le CI reste le filet de sécurité.
 - Le CI (GitHub Actions) constitue le filet de sécurité final et le verrou technique sur le merge.
 - La réussite de la CI est **imposée techniquement** par le Ruleset GitHub (required status checks) : une PR dont un check requis n'a pas réussi ne peut pas être fusionnée.
 - L'approbation de Codex n'est imposée par aucun mécanisme GitHub : elle reste une contrainte de processus, que l'agent vérifie avant tout merge.
+
+## Validation fonctionnelle
+
+Un chantier dont l'utilisateur est le décisionnaire, c'est-à-dire qui réalise ce qu'il voit et utilise de l'application (écrans, comportements, contenu présenté : `fonctionnel.md`, `visuel/`, cf. § « Qui décide du contenu »), est **validé fonctionnellement par l'utilisateur** avant sa fusion. Son ticket le précise (« Validation fonctionnelle : requise »). Un chantier purement technique n'y est pas soumis : sa validation reste la non-régression et la revue Codex.
+
+- **Environnement de validation** : l'agent fournit à l'utilisateur de quoi lancer la version de la Pull Request sur son poste, avec un service Docker (Docker Desktop, Rancher Desktop), en **une commande** et sans autre manipulation que celles que la plateforme impose, avec des données de validation qui couvrent les cas de l'écran.
+- **Moment** : la validation a lieu sur la Pull Request **en brouillon**, une fois son contenu complet, **avant** son passage en « prête pour la revue » : les corrections qu'elle entraîne ne coûtent ainsi aucune revue Codex (§ « Budget IA »). L'agent l'annonce à l'utilisateur avec la commande qui lance la version à valider et ce qu'il y a à valider.
+- **Retours** : chaque retour de l'utilisateur est traité dans la Pull Request, puis soumis de nouveau à sa validation. Un retour qui change une exigence suit § « Prise de décision ».
+- **Validation** : seule une validation **explicite** de l'utilisateur vaut validation ; elle porte sur le commit de tête qu'il a validé. Une modification ultérieure de ce qu'il a validé (ex. correction d'un retour de Codex qui change un comportement visible) lui est soumise de nouveau.
 
 ## Verrouillage des Pull Requests fusionnées
 
