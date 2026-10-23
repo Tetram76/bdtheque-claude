@@ -181,7 +181,7 @@ Socle du frontend, thème de base et deux thèmes, et les écrans qui ont une ma
 | #191 | Socle du frontend : appels à l'API, erreurs, localisation, fuseau horaire et pages non implémentées |
 | #192 | Données du dashboard dans l'API avant la Phase 4 |
 | #193 | Paramétrage de l'application dans le modèle de domaine et l'API |
-| #194 | Thème de base neutre, contrats des thèmes et thème de session |
+| #194 | Thème de base neutre, contrats des thèmes et thème de la visite |
 | #195 | Thème « Cases et bulles » (violine) |
 | #196 | Thème « La gazette » |
 | #197 | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
