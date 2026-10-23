@@ -46,24 +46,38 @@ function Get-NuGetPublished([string] $id, [string] $version) {
 
 $updates = [System.Collections.Generic.List[object]]::new()
 
-# NuGet packages: central package management resolves one version per package for the whole solution.
-$outdated = dotnet list (Join-Path $root 'Bdtheque.slnx') package --outdated --format json | ConvertFrom-Json
-$outdated.projects.frameworks.topLevelPackages |
-    Where-Object { $_ } |
-    Sort-Object id -Unique |
-    ForEach-Object {
-        $updates.Add((New-Update "NuGet $($_.id)" $_.resolvedVersion $_.latestVersion $_.resolvedVersion $_.latestVersion (Get-NuGetPublished $_.id $_.latestVersion)))
+# Reports the newest release of the major version in use, then, apart, the newest major version: a
+# newer major kept aside (e.g. a .NET release that is not LTS) must not hide the fixes of the current one.
+# $releases: objects with Version ([version]), Name (as written in the repository) and Published, or a
+# scriptblock returning the publication date of a release, so that only the reported ones are looked up.
+function Add-Update([string] $component, [string] $current, [version] $currentVersion, $releases) {
+    $newer = @($releases | Where-Object { $_.Version -gt $currentVersion } | Sort-Object Version)
+    $sameMajor = $newer | Where-Object { $_.Version.Major -eq $currentVersion.Major } | Select-Object -Last 1
+    $newestMajor = $newer | Where-Object { $_.Version.Major -gt $currentVersion.Major } | Select-Object -Last 1
+    foreach ($release in @($sameMajor, $newestMajor) | Where-Object { $_ }) {
+        $published = if ($release.Published -is [scriptblock]) { & $release.Published } else { $release.Published }
+        $updates.Add((New-Update $component $current $release.Name $currentVersion $release.Version $published))
     }
+}
 
-# Local .NET tools (dotnet-tools.json), absent from `dotnet list package`.
+function Get-NuGetReleases([string] $id) {
+    (Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$($id.ToLowerInvariant())/index.json").versions |
+        Where-Object { $_ -notmatch '-' } |
+        ForEach-Object {
+            $name = $_
+            [pscustomobject]@{ Version = [version] $name; Name = $name; Published = { Get-NuGetPublished $id $name }.GetNewClosure() }
+        }
+}
+
+# NuGet packages: central package management gives one version per package (Directory.Packages.props).
+([xml] (Get-Content (Join-Path $root 'Directory.Packages.props') -Raw)).Project.ItemGroup.PackageVersion |
+    Where-Object { $_ } |
+    ForEach-Object { Add-Update "NuGet $($_.Include)" $_.Version $_.Version (Get-NuGetReleases $_.Include) }
+
+# Local .NET tools (dotnet-tools.json).
 $tools = (Get-Content (Join-Path $root 'dotnet-tools.json') -Raw | ConvertFrom-Json).tools
 foreach ($tool in $tools.PSObject.Properties) {
-    $versions = (Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$($tool.Name.ToLowerInvariant())/index.json").versions |
-        Where-Object { $_ -notmatch '-' }
-    $latest = $versions[-1]
-    if ([version] $latest -gt [version] $tool.Value.version) {
-        $updates.Add((New-Update "dotnet tool $($tool.Name)" $tool.Value.version $latest $tool.Value.version $latest (Get-NuGetPublished $tool.Name $latest)))
-    }
+    Add-Update "dotnet tool $($tool.Name)" $tool.Value.version $tool.Value.version (Get-NuGetReleases $tool.Name)
 }
 
 # .NET images: the official release metadata gives the latest runtime and SDK of the channel, with
@@ -111,11 +125,10 @@ Get-ChildItem (Join-Path $root '.github/workflows') -Filter *.yml |
     ForEach-Object { [pscustomobject]@{ Repo = $_.Matches[0].Groups[1].Value; Version = $_.Matches[0].Groups[2].Value } } |
     Sort-Object Repo, Version -Unique |
     ForEach-Object {
-        $latest = gh api "repos/$($_.Repo)/releases/latest" | ConvertFrom-Json
-        $latestVersion = $latest.tag_name.TrimStart('v')
-        if ([version] $latestVersion -gt [version] $_.Version) {
-            $updates.Add((New-Update "Action $($_.Repo)" "v$($_.Version)" $latest.tag_name $_.Version $latestVersion $latest.published_at))
-        }
+        $releases = gh api "repos/$($_.Repo)/releases?per_page=100" | ConvertFrom-Json |
+            Where-Object { -not $_.draft -and -not $_.prerelease -and $_.tag_name -match '^v(\d+\.\d+\.\d+)$' } |
+            ForEach-Object { [pscustomobject]@{ Version = [version] $Matches[1]; Name = $_.tag_name; Published = $_.published_at } }
+        Add-Update "Action $($_.Repo)" "v$($_.Version)" $_.Version $releases
     }
 
 $updates | Sort-Object Kind, Component | Format-Table -AutoSize | Out-String -Width 200 | Write-Output
