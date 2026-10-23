@@ -95,7 +95,7 @@ La **culture d'affichage** (ex. français de France), et non une simple langue, 
 
 La culture s'applique à tout texte **au moment où il est présenté** : un texte que l'application produit à partir de données enregistrées (ex. le journal des modifications, cf. `modele-metier.md` § Entrée du journal des modifications) n'est jamais figé dans la culture en vigueur lors de leur enregistrement.
 
-Les dates et heures (ex. dates de création et de modification d'une fiche) sont présentées dans le **fuseau horaire du navigateur** du visiteur. La recherche avancée compare une date et heure par son jour dans ce même fuseau (cf. § Comparaisons), pour qu'une date présentée et la même date recherchée désignent le même jour. Seul le changement de jour de l'édition « À la une » (cf. § Page d'accueil), commune à tous les visiteurs, suit le **fuseau horaire de l'application**, défini au **déploiement**.
+**Fuseau horaire** : toute présentation à l'utilisateur et toute interaction avec lui suivent le **fuseau horaire de son navigateur** : dates et heures présentées (ex. dates de création et de modification d'une fiche), comme dates et heures saisies ou recherchées (une date et heure est comparée par son jour dans ce fuseau, cf. § Comparaisons). Le **fuseau horaire du serveur**, défini par le déploiement, ne sert qu'aux traitements propres au serveur, comme le changement de jour de l'édition « À la une », choisie par le serveur pour tous les visiteurs (cf. § Page d'accueil).
 
 Seule la culture **française** est proposée actuellement ; l'application est conçue pour pouvoir en proposer d'autres ultérieurement sans refonte.
 
@@ -360,7 +360,7 @@ Sa présentation est décrite dans [`visuel/dashboard.md`](visuel/dashboard.md).
 **Composition du dashboard** :
 
 - Il présente **toujours** les quatre blocs suivants, qui ne font pas partie du tirage :
-  - **À la une** : une **édition possédée** mise en avant, à la manière d'une citation du jour. Elle est tirée au hasard **une fois par jour** et reste la même pour tous les affichages de la journée. Le jour est celui du fuseau horaire de l'application (cf. § Langue et culture d'affichage).
+  - **À la une** : une **édition possédée** mise en avant, à la manière d'une citation du jour. Elle est tirée au hasard **une fois par jour** et reste la même pour tous les affichages de la journée. Le jour est celui du fuseau horaire du serveur (cf. § Langue et culture d'affichage).
     - **Présentation** : sa couverture, le libellé de son album (cf. § Libellé d'un album), le sien (cf. § Libellé d'une édition) et le résumé de l'album s'il en a un, que la représentation retenue (le thème) peut abréger. L'album mène à sa fiche.
     - **Répétitions** : le tirage **évite les répétitions rapprochées sans les interdire**. Une édition mise à la une n'y revient pas avant **10 jours** : la période se compte en jours de calendrier, et non en tirages, qu'il y ait eu ou non un tirage chaque jour (une journée sans affichage n'en a pas). Seule exception : toutes les éditions possédées sont déjà passées à la une pendant cette période.
     - **Couverture** : le tirage **privilégie les éditions avec couverture**. Parmi les éditions que la règle des 10 jours n'écarte pas, il ne retient que celles qui ont une couverture, et ne retient les éditions sans couverture que si aucune n'en a. Une édition présentée sans couverture reçoit le visuel générique (cf. § Visuel par défaut).
