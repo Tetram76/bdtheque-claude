@@ -29,7 +29,19 @@ public sealed partial class PostgreSqlTestServerTests
 
         PostgreSqlTestServer.ReleaseConnections(connectionString);
 
-        Assert.Equal(0, await CountOtherSessionsAsync(connectionString));
+        Assert.Equal(0, await WaitForNoOtherSessionAsync(connectionString));
+    }
+
+    // ClearPool returns once the client has closed its connections; each server session only leaves
+    // pg_stat_activity when its backend has processed the disconnection and exited, a moment later.
+    private static async Task<long> WaitForNoOtherSessionAsync(string connectionString)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+        long count;
+        while ((count = await CountOtherSessionsAsync(connectionString)) != 0 && DateTime.UtcNow < deadline)
+            await Task.Delay(50);
+
+        return count;
     }
 
     // Counted from an unpooled session, which is excluded from the count.
