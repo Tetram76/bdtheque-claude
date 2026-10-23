@@ -15,6 +15,48 @@ namespace Bdtheque.Infrastructure.Migrations
                 .Annotation("Npgsql:CollationDefinition:fr_case_accent_insensitive", "fr-FR-u-ks-level1,fr-FR-u-ks-level1,icu,False");
 
             migrationBuilder.CreateTable(
+                name: "AudienceCounters",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Function = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr-FR-x-icu"),
+                    Month = table.Column<DateOnly>(type: "date", nullable: false),
+                    IsAdministrator = table.Column<bool>(type: "boolean", nullable: false),
+                    DeviceType = table.Column<int>(type: "integer", nullable: false),
+                    RenderingEngine = table.Column<int>(type: "integer", nullable: false),
+                    EngineVersion = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true, collation: "fr-FR-x-icu"),
+                    UsageCount = table.Column<int>(type: "integer", nullable: false),
+                    VisitCount = table.Column<int>(type: "integer", nullable: false),
+                    RepeatedUsageCount = table.Column<int>(type: "integer", nullable: false),
+                    LastUsage = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AudienceCounters", x => x.Id);
+                    table.CheckConstraint("CK_AudienceCounters_Counts", "\"VisitCount\" >= 1 AND \"VisitCount\" <= \"UsageCount\" AND \"RepeatedUsageCount\" BETWEEN 0 AND \"UsageCount\" - \"VisitCount\"");
+                    table.CheckConstraint("CK_AudienceCounters_MonthFirstDay", "EXTRACT(DAY FROM \"Month\") = 1");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AudienceVisits",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsAdministrator = table.Column<bool>(type: "boolean", nullable: false),
+                    DeviceType = table.Column<int>(type: "integer", nullable: false),
+                    RenderingEngine = table.Column<int>(type: "integer", nullable: false),
+                    EngineVersion = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true, collation: "fr-FR-x-icu"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AudienceVisits", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Authors",
                 columns: table => new
                 {
@@ -132,6 +174,57 @@ namespace Bdtheque.Infrastructure.Migrations
                         principalTable: "Universes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AudienceCounterObjects",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RecordType = table.Column<int>(type: "integer", nullable: true),
+                    RecordId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Parameters = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
+                    UsageCount = table.Column<int>(type: "integer", nullable: false),
+                    CounterId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AudienceCounterObjects", x => x.Id);
+                    table.CheckConstraint("CK_AudienceCounterObjects_RecordOrParameters", "(\"RecordType\" IS NULL) = (\"RecordId\" IS NULL) AND (\"RecordType\" IS NULL) <> (\"Parameters\" IS NULL)");
+                    table.CheckConstraint("CK_AudienceCounterObjects_UsageCountPositive", "\"UsageCount\" >= 1");
+                    table.ForeignKey(
+                        name: "FK_AudienceCounterObjects_AudienceCounters_CounterId",
+                        column: x => x.CounterId,
+                        principalTable: "AudienceCounters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AudienceUsages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    VisitId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Function = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr-FR-x-icu"),
+                    PresentedRecordType = table.Column<int>(type: "integer", nullable: true),
+                    PresentedRecordId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Parameters = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
+                    IsRepeat = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AudienceUsages", x => x.Id);
+                    table.CheckConstraint("CK_AudienceUsages_FunctionNotBlank", "COALESCE(LENGTH(TRIM(\"Function\")), 0) > 0");
+                    table.CheckConstraint("CK_AudienceUsages_RecordOrParameters", "(\"PresentedRecordType\" IS NULL) = (\"PresentedRecordId\" IS NULL) AND (\"PresentedRecordType\" IS NULL OR \"Parameters\" IS NULL)");
+                    table.ForeignKey(
+                        name: "FK_AudienceUsages_AudienceVisits_VisitId",
+                        column: x => x.VisitId,
+                        principalTable: "AudienceVisits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -623,6 +716,28 @@ namespace Bdtheque.Infrastructure.Migrations
                 column: "UniversesId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AudienceCounterObjects_CounterId",
+                table: "AudienceCounterObjects",
+                column: "CounterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AudienceCounters_FunctionMonthCompartment",
+                table: "AudienceCounters",
+                columns: new[] { "Month", "Function", "IsAdministrator", "DeviceType", "RenderingEngine", "EngineVersion" },
+                unique: true)
+                .Annotation("Npgsql:NullsDistinct", false);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AudienceUsages_VisitId_CreatedAt_Id",
+                table: "AudienceUsages",
+                columns: new[] { "VisitId", "CreatedAt", "Id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AudienceVisits_CreatedAt_Id",
+                table: "AudienceVisits",
+                columns: new[] { "CreatedAt", "Id" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Authors_NavigationEntry_SortKey",
                 table: "Authors",
                 columns: new[] { "NavigationEntry", "SortKey" });
@@ -819,6 +934,12 @@ namespace Bdtheque.Infrastructure.Migrations
                 name: "AlbumUniverses");
 
             migrationBuilder.DropTable(
+                name: "AudienceCounterObjects");
+
+            migrationBuilder.DropTable(
+                name: "AudienceUsages");
+
+            migrationBuilder.DropTable(
                 name: "ChangeLogEntries");
 
             migrationBuilder.DropTable(
@@ -832,6 +953,12 @@ namespace Bdtheque.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "SeriesUniverses");
+
+            migrationBuilder.DropTable(
+                name: "AudienceCounters");
+
+            migrationBuilder.DropTable(
+                name: "AudienceVisits");
 
             migrationBuilder.DropTable(
                 name: "Contributions");

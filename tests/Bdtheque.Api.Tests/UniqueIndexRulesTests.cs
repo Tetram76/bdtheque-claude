@@ -27,9 +27,25 @@ public sealed class UniqueIndexRulesTests : IClassFixture<ApiWebApplicationFacto
             .SelectMany(t => t.GetIndexes())
             .Where(i => i.IsUnique)
             .Select(i => i.GetDatabaseName()!)
+            .Except(UniqueIndexRules.OutsideUserInput)
             .Order(StringComparer.Ordinal);
 
         Assert.Equal(uniqueIndexes, UniqueIndexRules.ByIndexName.Keys.Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void TheIndexesOutsideUserInput_AreIndexesOfTheModel_NotMappedToARule()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var uniqueIndexes = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Model
+            .GetEntityTypes()
+            .SelectMany(t => t.GetIndexes())
+            .Where(i => i.IsUnique)
+            .Select(i => i.GetDatabaseName()!)
+            .ToHashSet();
+
+        Assert.Subset(uniqueIndexes, UniqueIndexRules.OutsideUserInput.ToHashSet());
+        Assert.Empty(UniqueIndexRules.OutsideUserInput.Intersect(UniqueIndexRules.ByIndexName.Keys));
     }
 
     [Fact]

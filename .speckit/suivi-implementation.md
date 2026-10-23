@@ -152,7 +152,7 @@ Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience d
 
 | Ticket | Titre |
 | --- | --- |
-| #186 | Mesure d'audience de l'interface web dans le modèle de domaine et l'API |
+| ~~#186~~ | Mesure d'audience de l'interface web dans le modèle de domaine et l'API |
 
 ### Ajustement issu de l'exploitation des technologies retenues
 
