@@ -1,6 +1,6 @@
 # Dépôt
 
-Dépôt GitHub : configuration, signature des commits, intégration continue, branches, conventions de commit et releases.
+Dépôt GitHub : configuration, signature des commits, intégration continue, mises à jour des dépendances, branches, conventions de commit et releases.
 
 ---
 
@@ -51,6 +51,21 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, br
   - **Docker Hub** : Docker Hub limite les téléchargements d'images (*pulls*) à **200 par période de 6 heures** pour un compte *Personal* authentifié comme `tetram76`, et à **100 par période de 6 heures et par adresse IP** sans authentification ; une image multi-architecture compte un téléchargement par architecture (documentation Docker Hub, *Usage and limits*). Au-delà, Docker Hub répond `429 Too Many Requests`, quel que soit le contenu de la PR. Chaque exécution du CI lit des images sur Docker Hub : l'image publiée, que l'analyse des vulnérabilités lit avec le compte `tetram76`, et l'image PostgreSQL des tests, téléchargée sans authentification.
 
   Face à un échec dû à l'un de ces quotas, l'agent ne pousse pas de nouveau commit, qui le consommerait à son tour : il relance les seuls jobs en échec (`gh run rerun --failed`) une fois la période du quota écoulée, et signale à l'utilisateur un échec qui persiste.
+
+## Mises à jour des dépendances
+
+Les montées de version relèvent de l'agent (point technique, `gestion-projet/gouvernance.md` § Prise de décision) : il les détecte et les traite sans attendre de demande de l'utilisateur.
+
+- **Détection par Dependabot** : une version disponible arrive sous la forme d'une Pull Request, que l'agent n'a pas à chercher lui-même.
+  - **Correctifs de sécurité** (*Dependabot security updates*, § Configuration du repository GitHub) : proposés dès la publication de l'alerte.
+  - **Autres versions** (*version updates*, `.github/dependabot.yml`) : proposées **une fois par mois**, pour chaque écosystème du dépôt — packages NuGet (outil `dotnet-ef` compris), SDK .NET (`global.json`), images de base des Dockerfiles, image de `db` (`docker-compose.yml`), actions GitHub. Les images de l'application, publiées par le dépôt lui-même, n'en sont pas.
+  - **Coût maîtrisé** : chaque Pull Request consomme une revue Codex et les quotas du CI (`gestion-projet/gouvernance.md` § Budget IA). Les versions mineures et correctives d'un écosystème sont donc réunies en une seule PR, et Dependabot ne met jamais une PR à jour de lui-même (*rebase*), chaque mise à jour étant un push : l'agent la demande au besoin, pour une PR qu'il va fusionner (commentaire `@dependabot rebase`).
+  - **Délai de 7 jours** avant de proposer une version tout juste publiée (*cooldown*), pour qu'une version retirée ou corrigée aussitôt ne soit pas proposée ; il ne s'applique pas aux correctifs de sécurité.
+  - **Plateforme .NET** : ses versions majeures (SDK, images de base, packages alignés sur la version de .NET, fournisseur Npgsql) ne sont pas proposées, la plateforme ne suivant que les versions LTS (`choix-implementation/index.md` § Versions et bibliothèques) : la montée vers la LTS suivante est tracée par son propre ticket, ouvert d'avance.
+- **Traitement en priorité** : à chaque reprise du travail, avant le chantier suivant du plan, l'agent traite les Pull Requests de Dependabot ouvertes, comme toute PR (§ Règle de merge de `gestion-projet/revue-tickets.md`, revue Codex comprise) :
+  - **version mineure ou corrective** : contre-vérification des notes de version (changement de comportement, dépréciation, nouveauté utile à l'existant, `contraintes-techniques/index.md` § Exploitation des technologies retenues), adaptation éventuelle du code poussée sur la branche de la PR, puis fusion. La description, qui devient le corps du commit (§ Conventions de commit), est réécrite selon le template avant la fusion ;
+  - **version majeure d'une technologie de la stack** (`contraintes-techniques/index.md` § Stack cible, et les composants qu'elle retient : runtime et SDK .NET, ASP.NET Core, EF Core, Npgsql, PostgreSQL, images de base) : c'est un chantier, avec son ticket, qui porte la montée elle-même, puis la revue de l'existant qu'exige `contraintes-techniques/index.md` § Exploitation des technologies retenues ; la PR de Dependabot est fermée au profit de ce ticket. Une montée qui a un impact visible sur le déploiement (ex. version majeure de PostgreSQL après le premier déploiement, qui impose une sauvegarde et une restauration des données) est annoncée à l'utilisateur (`gestion-projet/gouvernance.md` § Prise de décision) ;
+  - **version majeure d'une autre dépendance** (actions GitHub, outils et bibliothèques de test…) : traitée dans sa PR, comme une version mineure, la revue de l'usage qu'en fait le dépôt comprise.
 
 ## Règle absolue : interdiction de pousser directement sur `main`
 

@@ -1,0 +1,96 @@
+# Version updates of every dependency of the repository (gestion-projet/depot.md § Mises à jour des
+# dépendances). Security updates are enabled in the repository settings and come regardless of the
+# schedule. Every pull request costs a Codex review and a CI run (quotas): updates are monthly, the minor
+# and patch versions of an ecosystem come together, and pull requests are never rebased automatically.
+version: 2
+
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    rebase-strategy: disabled
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      nuget:
+        update-types: [minor, patch]
+    # The .NET platform follows its LTS releases only (choix-implementation/index.md § Versions et
+    # bibliothèques): a major version of the packages aligned with it is a version upgrade, tracked by its
+    # own ticket.
+    ignore:
+      - dependency-name: "Microsoft.AspNetCore.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.EntityFrameworkCore*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.OpenApi"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Npgsql.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "dotnet-ef"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    rebase-strategy: disabled
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: docker
+    directories: [/docker/api, /docker/frontend]
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    rebase-strategy: disabled
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      docker:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*dotnet/*"
+        update-types: ["version-update:semver-major"]
+
+  # The images of the application itself are published by this repository, under a tag chosen at
+  # deployment (BDTHEQUE_TAG): only the image of `db` is a dependency.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    rebase-strategy: disabled
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      - dependency-name: "tetram76/*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    rebase-strategy: disabled
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      github-actions:
+        update-types: [minor, patch]
