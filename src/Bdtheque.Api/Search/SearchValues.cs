@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Common;
+using Microsoft.EntityFrameworkCore;
 using static Bdtheque.Contracts.Search.SearchComparison;
 
 namespace Bdtheque.Api.Search;
@@ -10,6 +12,8 @@ namespace Bdtheque.Api.Search;
 /// <summary>The values of a criterion, as written by the client (<see cref="SearchCriterion.Values"/>).</summary>
 internal static partial class SearchValues
 {
+    private static readonly MethodInfo EfParameter = typeof(EF).GetMethod(nameof(EF.Parameter))!;
+
     /// <summary>
     /// The values <paramref name="comparison"/> needs, checked: left empty, a business error — the user
     /// fills in what the criterion compares —; too many, a technical one, the client building the criterion.
@@ -56,16 +60,17 @@ internal static partial class SearchValues
     /// A value sent to the database as a parameter, never written into the SQL: a criterion keeps the same
     /// query, cached once, whatever its value.
     /// </summary>
-    public static Expression Parameter<T>(T value) => Expression.Property(Expression.Constant(new Box<T>(value)), nameof(Box<T>.Value));
+    public static Expression Parameter<T>(T value) => Parameter(value, typeof(T));
 
-    /// <summary>A value of a type known at run time only, sent as a parameter (see <see cref="Parameter{T}(T)"/>).</summary>
-    public static Expression Parameter(object value, Type type) =>
-        Expression.Property(Expression.Constant(Activator.CreateInstance(typeof(Box<>).MakeGenericType(type), value)), nameof(Box<object>.Value));
+    /// <summary>
+    /// A value of a type known at run time only, sent as a parameter (see <see cref="Parameter{T}(T)"/>); an
+    /// array remains a single parameter (<c>= ANY</c>), whatever the number of its values.
+    /// </summary>
+    public static Expression Parameter(object? value, Type type) =>
+        Expression.Call(EfParameter.MakeGenericMethod(type), Expression.Constant(value, type));
 
     [GeneratedRegex(@"^(?<year>\d{4})(-(?<month>\d{2})(-(?<day>\d{2}))?)?$", RegexOptions.CultureInvariant)]
     private static partial Regex DatePattern();
-
-    private sealed record Box<T>(T Value);
 }
 
 /// <summary>
