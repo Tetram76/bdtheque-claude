@@ -184,7 +184,7 @@ Pages de consultation (public) et d'administration (authentifié), composants pa
 
 La phase est réalisée en plusieurs parties, découpées l'une après l'autre ; seule la partie 1 l'est à ce stade.
 
-- **Pages non implémentées** : tant qu'une page n'est pas implémentée, tout lien qui y mène affiche une page « Pas encore implémenté » (#191). Le chantier qui réalise une page remplace par le vrai lien tous les liens qui y mènent.
+- **Pages non implémentées** : tant qu'une page n'est pas implémentée, tout lien qui y mène affiche une page « Pas encore implémenté » (#238). Le chantier qui réalise une page remplace par le vrai lien tous les liens qui y mènent.
 - **Validation fonctionnelle** : les chantiers qui réalisent ce que l'utilisateur voit et utilise sont validés par lui avant fusion (`gestion-projet/revue-tickets.md` § Validation fonctionnelle), avec l'environnement de validation (#214), réalisé avant le premier d'entre eux ; chaque ticket précise s'il y est soumis.
 - **Thèmes** : la partie 1 réalise le thème de base et deux thèmes, « Cases et bulles » (violine) et « La gazette », retenus pour s'opposer sur presque tout (sombre et clair, blocs encadrés et ouverts, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. Un thème ajouté par une partie ultérieure est décliné sur tous les écrans déjà réalisés.
 
@@ -192,12 +192,14 @@ La phase est réalisée en plusieurs parties, découpées l'une après l'autre ;
 
 **Version** : `v0.1.0`, avec les ajustements des phases 1 et 2 qui suivent la consolidation de la Phase 2.
 
-Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent.
+Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240.
 
 | Ticket | Titre |
 | --- | --- |
 | ~~#161~~ | Accès du frontend au volume des visuels |
-| #191 | Socle du frontend : appels à l'API, erreurs, localisation, fuseau horaire et pages non implémentées |
+| ~~#238~~ | Structure du frontend, page « Pas encore implémenté » et outillage de non-régression du frontend |
+| #239 | Appels à l'API, présentation des erreurs et localisation du frontend |
+| #240 | Fuseau horaire du navigateur et alignement de la recherche avancée |
 | #214 | Environnement de validation fonctionnelle |
 | #192 | Données du dashboard dans l'API avant la Phase 4 |
 | #193 | Paramétrage de l'application dans le modèle de domaine et l'API |
