@@ -59,6 +59,7 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, an
 - **Retours** : ceux de SonarQube Cloud sont ceux d'un outil d'analyse statique, traités dans le cycle de chaque Pull Request selon `gestion-projet/revue-tickets.md` § Analyse SonarQube Cloud ; sa porte de qualité n'est pas, en elle-même, une condition de fusion.
 - **Jeton** : l'analyse s'authentifie auprès de SonarQube Cloud avec le secret de dépôt GitHub `SONAR_TOKEN`. Une Pull Request venant d'un **fork** n'y a pas accès et son analyse échoue, sans bloquer sa fusion. L'analyse automatique de SonarQube Cloud est désactivée sur le projet : elle exclut l'analyse par le CI, et ne mesure pas la couverture.
 - **Périmètre** : le code de la solution ; les maquettes de `.speckit/`, les prototypes de `poc/` et les migrations générées par EF Core en sont exclus.
+- **Nouveau code** : celui qui a changé depuis la dernière version publiée (§ Versions et releases) : le projet est réglé sur la version précédente (*Previous version*), et chaque analyse porte le tag de la dernière version publiée. Sur une Pull Request, le nouveau code est celui de la PR.
 
 ## Mises à jour des dépendances
 
