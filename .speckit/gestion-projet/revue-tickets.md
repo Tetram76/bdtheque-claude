@@ -4,16 +4,16 @@ Règle de merge, validation fonctionnelle, verrouillage, revue de code et revue 
 
 ---
 
-## Règle de merge : non-régression et revue Codex obligatoires
+## Règle de merge : non-régression, porte de qualité et revue Codex obligatoires
 
-> **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée ET que Codex l'a approuvée**, et, pour une Pull Request soumise à validation fonctionnelle, **que l'utilisateur l'a validée**.
+> **Une Pull Request ne peut être fusionnée que si la non-régression est confirmée, que la porte de qualité de SonarQube Cloud est réussie ET que Codex l'a approuvée**, et, pour une Pull Request soumise à validation fonctionnelle, **que l'utilisateur l'a validée**.
 
-- Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI) **et** à l'**approbation de la revue Codex** (voir « Revue de code » ci-dessous), ainsi qu'à la **validation fonctionnelle de l'utilisateur** lorsque la Pull Request y est soumise (§ « Validation fonctionnelle »).
+- Tout merge sur `main` est conditionné à la **réussite des checks de non-régression** (pipeline CI), à la **réussite de la porte de qualité** de SonarQube Cloud sur le commit de tête (§ « Analyse SonarQube Cloud ») **et** à l'**approbation de la revue Codex** (voir « Revue de code » ci-dessous), ainsi qu'à la **validation fonctionnelle de l'utilisateur** lorsque la Pull Request y est soumise (§ « Validation fonctionnelle »).
 - Les contrôles de non-régression **doivent être exécutés localement avant tout push** sur la branche de PR qui modifie un élément qu'ils vérifient (code, projets et configuration de la solution, workflow CI, fichiers Docker) — pour détecter les régressions au plus tôt et ne pas attendre le CI distant. Un push qui ne modifie que de la documentation (`.speckit/`, fichiers Markdown, skills) en est dispensé : aucun de ces contrôles ne la vérifie, et le CI reste le filet de sécurité.
 - Le CI (GitHub Actions) constitue le filet de sécurité final et le verrou technique sur le merge.
-- La réussite de la CI est **imposée techniquement** par le Ruleset GitHub (required status checks) : une PR dont un check requis n'a pas réussi ne peut pas être fusionnée.
+- La réussite de la CI et celle de la porte de qualité sont **imposées techniquement** par le Ruleset GitHub (required status checks, `gestion-projet/depot.md` § Configuration du repository GitHub) : une PR dont un check requis n'a pas réussi ne peut pas être fusionnée.
 - L'approbation de Codex n'est imposée par aucun mécanisme GitHub : elle reste une contrainte de processus, que l'agent vérifie avant tout merge.
-- L'**analyse SonarQube Cloud** du commit de tête est **traitée** avant le merge (§ « Analyse SonarQube Cloud ») : chacun de ses nouveaux problèmes est corrigé, différé ou rejeté. Sa porte de qualité n'est pas, en elle-même, une condition de merge.
+- L'**analyse SonarQube Cloud** du commit de tête est **traitée** avant le merge (§ « Analyse SonarQube Cloud ») : chacun de ses nouveaux problèmes est corrigé, différé ou rejeté, et sa porte de qualité est réussie.
 
 ## Validation fonctionnelle
 
@@ -45,9 +45,10 @@ L'analyse SonarQube Cloud (`gestion-projet/depot.md` § Analyse de la qualité d
 
 - **Moment** : avant le passage de la PR en « prête pour la revue » (§ Ouverture de la PR), l'agent attend l'analyse du commit de tête et la traite. Après ce passage, chaque push (correction d'un retour de Codex) produit une nouvelle analyse, traitée de même avant le merge ; une correction qu'elle appelle rejoint, autant que possible, le push suivant d'une correction de Codex, pour ne pas déclencher une revue de plus.
 - **Contenu** : les **nouveaux problèmes** de la PR (bugs, vulnérabilités, *code smells*), ses **points sensibles de sécurité** (*security hotspots*) à revoir, et sa porte de qualité. Chaque problème est traité comme un retour de revue (§ « Traiter un retour » : contre-vérification, cause racine, confrontation à l'objectif de la PR, correction à la racine dans un commit dédié, report ou rejet justifié) ; une règle d'analyse inadaptée au projet est un rejet, justifié de même.
-- **Trace** : l'agent ne peut pas statuer sur un problème dans SonarQube Cloud. Les problèmes différés ou rejetés sont donc listés, avec leur justification, dans un **commentaire de la PR**, mis à jour à chaque analyse traitée ; l'utilisateur peut les marquer en conséquence dans SonarQube Cloud.
-- **Dispense** : une PR dont aucun push ne modifie de fichier analysé (documentation seule : `.speckit/`, fichiers Markdown, skills ; prototypes de `poc/`) n'a rien à traiter.
-- **Analyse indisponible** (service en panne, PR venant d'un fork, analyse en échec) : elle ne bloque pas la PR. L'agent le signale à l'utilisateur, et la PR suit le reste de son cycle.
+- **Porte de qualité** : condition du merge (§ Règle de merge), elle est réussie avant le passage en « prête pour la revue » comme avant le merge. Ses conditions portent sur le nouveau code : un problème corrigé, reporté ou rejeté (et marqué comme ci-dessous) n'y compte plus ; une couverture insuffisante se corrige par les tests qui manquent (`gestion-projet/gouvernance.md` § Qualité du code), ou, pour un fichier que les tests .NET ne peuvent pas couvrir, par son exclusion de la couverture, justifiée dans `gestion-projet/depot.md` § Analyse de la qualité du code.
+- **Trace** : les problèmes différés ou rejetés sont listés, avec leur justification, dans un **commentaire de la PR**, mis à jour à chaque analyse traitée. L'agent les marque lui-même dans SonarQube Cloud, acte de gestion du dépôt (`gestion-projet/gouvernance.md` § Prise de décision), chacun avec un commentaire qui renvoie à sa justification : *faux positif* pour un problème dont la prémisse est fausse ; *accepté* pour une règle inadaptée au cas, comme pour un problème pertinent dont la correction est différée (état que SonarQube Cloud réserve à un problème reconnu mais non corrigé dans l'immédiat), le commentaire nommant alors le ticket ou la note du plan qui porte sa correction. L'agent passe par l'API de SonarQube Cloud, avec le jeton du poste (`gestion-projet/depot.md` § Repository).
+- **Dispense** : une PR dont aucun push ne modifie de fichier analysé (documentation seule : `.speckit/`, fichiers Markdown, skills ; prototypes de `poc/`) n'a aucun problème à traiter ; sa porte de qualité, sans nouveau code, est réussie d'office.
+- **Analyse indisponible** (service en panne, PR venant d'un fork, analyse en échec) : sans porte de qualité, la PR ne peut pas être fusionnée. L'agent cherche la cause d'une analyse en échec et la corrige ; une panne du service suspend la fusion jusqu'à son retour, ce que l'agent signale à l'utilisateur. Une PR venant d'un fork, sans accès au jeton de l'analyse, ne peut pas être fusionnée en l'état, comme pour l'analyse des vulnérabilités des images (`gestion-projet/depot.md` § Intégration continue (CI)).
 
 ### Analyse des vulnérabilités des images Docker
 

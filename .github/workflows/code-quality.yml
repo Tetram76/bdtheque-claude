@@ -2,9 +2,9 @@ name: Code quality
 
 # SonarQube Cloud analysis of the code, with the test coverage, for the quality indicators of the
 # README and the pull request decoration (gestion-projet/depot.md § Analyse de la qualité du code).
-# It is kept out of ci.yml, whose jobs are all required checks: the scanner switches off
-# TreatWarningsAsErrors in the build it wraps, so it cannot stand in for the strict build of the CI,
-# and an outage of the external service must not block the merges.
+# It is kept out of ci.yml: the scanner switches off TreatWarningsAsErrors in the build it wraps, so
+# it cannot stand in for the strict build of the CI. The merge requires the quality gate through the
+# check that the SonarQube Cloud app publishes after this analysis, not through this job.
 on:
   pull_request:
     branches: [main]

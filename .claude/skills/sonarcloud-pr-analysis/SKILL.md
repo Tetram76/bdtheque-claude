@@ -34,9 +34,11 @@ $analysis = (Invoke-RestMethod "$base/project_pull_requests/list?project=$p").pu
 The analysis is the head's only when `IsHead` is true. Otherwise check the run
 (`gh run list --workflow code-quality.yml --branch <branch> -L 1`): still
 running → wait for it in the background (never a foreground sleep); failed or
-absent (fork, outage, missing `SONAR_TOKEN`) → the analysis is unavailable:
-tell the user and go on with the rest of the PR cycle, it does not block. A
-failed query is never read as « no analysis »: retry it.
+absent → no quality gate, so the PR cannot be merged (the Ruleset requires the
+`SonarCloud Code Analysis` check): find the cause of a failed run and fix it;
+an outage of the service or a fork PR (no `SONAR_TOKEN`) is reported to the
+user, the merge waiting. A failed query is never read as « no analysis »:
+retry it.
 
 ## 2. Read the findings
 
@@ -59,10 +61,53 @@ commit per finding), defer (ticket or plan note) or reject with its reason.
 Push fixes while the PR is a draft; on a ready PR, fold them into the next push
 of a Codex fix when one is coming.
 
+The quality gate must pass before marking the PR ready and before merging:
+deferred and rejected findings stop counting once marked (step 5); a coverage
+shortfall is fixed by the missing tests, or, for a file the .NET tests cannot
+cover, by a coverage exclusion justified in `depot.md`. Once findings are
+marked, check that the `SonarCloud Code Analysis` check of the head commit
+shows the gate passed (`gh pr checks <PR>`); if it still shows the earlier
+verdict, re-run the analysis job (`gh run rerun <run-id>`), which publishes a
+fresh one without a new commit.
+
 ## 4. Trace deferred and rejected findings
 
 Keep one PR comment, headed `## Analyse SonarQube Cloud`, listing each deferred
 or rejected finding (key, rule, file:line, decision, justification), and edit
 it (`gh api -X PATCH repos/Tetram76/bdtheque-claude/issues/comments/<id> -F body=@<file>`)
 at each handled analysis instead of posting a new one. Never write the Codex
-mention in it. The user marks these findings in SonarQube Cloud.
+mention in it.
+
+## 5. Mark the deferred and rejected findings in SonarQube Cloud
+
+Marking them is the agent's job, never handed to the user. Do it through the
+web API, authenticated by the user's personal token that the `SONAR_TOKEN`
+environment variable of the workstation holds (`depot.md` → « Repository »).
+Never print, log or echo the token, and never act through a browser session.
+If the variable is missing, say so and ask the user to create the token in
+SonarQube Cloud (My Account → Security) and set it as a user environment
+variable, without ever sending its value in the conversation.
+
+```powershell
+$base = 'https://sonarcloud.io/api'
+$auth = @{ Authorization = "Bearer $env:SONAR_TOKEN" }
+# per finding: a comment pointing to the justification, then the transition
+Invoke-RestMethod -Method Post "$base/issues/add_comment" -Headers $auth -Body @{
+    issue = $key; text = 'Contre-analysé : justification dans le commentaire « Analyse SonarQube Cloud » de <PR URL>' }
+Invoke-RestMethod -Method Post "$base/issues/do_transition" -Headers $auth -Body @{
+    issue = $key; transition = 'falsepositive' }   # or 'accept'
+# per security hotspot reviewed and judged safe
+Invoke-RestMethod -Method Post "$base/hotspots/change_status" -Headers $auth -Body @{
+    hotspot = $key; status = 'REVIEWED'; resolution = 'SAFE'; comment = '<justification>' }
+```
+
+The same token serves the project settings that the analysis configuration
+does not carry (e.g. the new code definition, the quality gate of the project),
+through the matching endpoints of the web API.
+
+`falsepositive` for a finding whose premise is wrong; `accept` for a rule that
+does not fit the case, and for a valid finding whose fix is deferred (the
+comment then names the ticket or plan note that carries the fix): accepted
+means acknowledged but not fixed now, and an open finding would fail the gate.
+Check the outcome with `/api/issues/search?issues=<keys>&additionalFields=comments`
+(`issueStatus` `FALSE_POSITIVE` or `ACCEPTED`, one comment each).
