@@ -66,6 +66,9 @@ public sealed class ApplicationHost : IAsyncLifetime
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Production");
+            // Outside Development, the static assets are read from the published output; the tests run on the build
+            // output, whose assets (styles, blazor.web.js) are only reached through the static web assets manifest.
+            builder.UseStaticWebAssets();
 
             builder.ConfigureAppConfiguration((_, configBuilder) =>
                 configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
