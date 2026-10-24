@@ -18,9 +18,11 @@ policy: a PR on this repo cannot be merged until the Codex bot
 (`chatgpt-codex-connector[bot]`) has approved the current head commit.
 
 Codex reviews a PR when it is opened as non-draft, when a draft is marked
-ready for review, and on every push to a non-draft PR: open a non-draft PR (or
-mark a draft ready for review) only once the branch content is complete; until
-then, the work stays local or on a draft PR (policy: § « Ouverture de la PR »).
+ready for review, and on every push to a non-draft PR: always open the PR as a
+draft, and mark it ready for review only once the branch content is complete,
+the CI checks have passed and the SonarQube Cloud analysis of the head commit
+has been handled (skill `sonarcloud-pr-analysis`); until then, the work stays
+local or on the draft PR (policy: § « Ouverture de la PR »).
 Marking a draft ready triggers a review by itself, so never pair it with a
 `@codex review` comment. As a safety net only, a few minutes after marking it
 ready, check for any Codex activity since then — 👀 on the PR description

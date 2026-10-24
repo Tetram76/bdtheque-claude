@@ -54,21 +54,16 @@ jobs:
           dotnet tool restore
           dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
 
-      # Coverage of the application code only: the library shared by the tests is left out.
+      # The coverage is measured by the SonarQube Cloud analysis (code-quality.yml), which reports it.
       - name: Run tests
-        run: >-
-          dotnet test Bdtheque.slnx --configuration Release --no-build
-          --logger "trx;LogFileName=test-results.trx" --collect "XPlat Code Coverage"
-          -- "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
+        run: dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
 
-      - name: Publish test results and coverage
+      - name: Publish test results
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
           name: test-results
-          path: |
-            **/TestResults/test-results.trx
-            **/TestResults/*/coverage.cobertura.xml
+          path: "**/TestResults/test-results.trx"
           if-no-files-found: warn
 
   docker-build:

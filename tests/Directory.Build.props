@@ -6,6 +6,9 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <!-- Test code for the SonarQube Cloud analysis, the library shared by the tests included: it
+         references no test framework, so the scanner would take it for application code. -->
+    <SonarQubeTestProject>true</SonarQubeTestProject>
   </PropertyGroup>
 
   <!-- The test projects, not the library they share (Bdtheque.Testing). -->

@@ -1,6 +1,6 @@
 # Dépôt
 
-Dépôt GitHub : configuration, signature des commits, intégration continue, mises à jour des dépendances, branches, conventions de commit, versions et releases.
+Dépôt GitHub : configuration, signature des commits, intégration continue, analyse de la qualité du code, mises à jour des dépendances, branches, conventions de commit, versions et releases.
 
 ---
 
@@ -51,6 +51,15 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, mi
   - **Docker Hub** : Docker Hub limite les téléchargements d'images (*pulls*) à **200 par période de 6 heures** pour un compte *Personal* authentifié comme `tetram76`, et à **100 par période de 6 heures et par adresse IP** sans authentification ; une image multi-architecture compte un téléchargement par architecture (documentation Docker Hub, *Usage and limits*). Au-delà, Docker Hub répond `429 Too Many Requests`, quel que soit le contenu de la PR. Chaque exécution du CI lit des images sur Docker Hub : l'image publiée, que l'analyse des vulnérabilités lit avec le compte `tetram76`, et l'image PostgreSQL des tests, téléchargée sans authentification.
 
   Face à un échec dû à l'un de ces quotas, l'agent ne pousse pas de nouveau commit, qui le consommerait à son tour : il relance les seuls jobs en échec (`gh run rerun --failed`) une fois la période du quota écoulée, et signale à l'utilisateur un échec qui persiste.
+
+## Analyse de la qualité du code
+
+- **SonarQube Cloud** (organisation `tetram76`, projet `Tetram76_bdtheque-claude`, gratuit pour un dépôt public) analyse le code et sa couverture par les tests, sur chaque Pull Request et sur `main`. Ses indicateurs (porte de qualité, couverture, fiabilité, sécurité, maintenabilité…) sont affichés en tête du `README.md`, et il commente chaque Pull Request de son analyse.
+- **Workflow distinct** (`.github/workflows/code-quality.yml`), hors du workflow CI : son analyse n'est **pas un check requis** du Ruleset. Le scanner (`dotnet-sonarscanner`, outil local épinglé de `dotnet-tools.json`) désactive `TreatWarningsAsErrors` dans la compilation qu'il instrumente : il ne peut donc pas remplacer celle du CI, qui reste le contrôle de non-régression. Une indisponibilité du service externe ne bloque pas non plus la fusion.
+- **Retours** : ceux de SonarQube Cloud sont ceux d'un outil d'analyse statique, traités dans le cycle de chaque Pull Request selon `gestion-projet/revue-tickets.md` § Analyse SonarQube Cloud ; sa porte de qualité n'est pas, en elle-même, une condition de fusion.
+- **Jeton** : l'analyse s'authentifie auprès de SonarQube Cloud avec le secret de dépôt GitHub `SONAR_TOKEN`. Une Pull Request venant d'un **fork** n'y a pas accès et son analyse échoue, sans bloquer sa fusion. L'analyse automatique de SonarQube Cloud est désactivée sur le projet : elle exclut l'analyse par le CI, et ne mesure pas la couverture.
+- **Périmètre** : le code de la solution, celui de `tests/` comme code de test ; les maquettes de `.speckit/`, les prototypes de `poc/` et les migrations générées par EF Core en sont exclus. La couverture, que seule cette analyse mesure, suit `choix-implementation/socle.md` § Outillage de développement .NET.
+- **Nouveau code** : celui qui a changé depuis la dernière version publiée (§ Versions et releases) : le projet est réglé sur la version précédente (*Previous version*), et chaque analyse porte le tag de la dernière version publiée ; la publication d'une version relance l'analyse de `main` pour que la période commence au commit publié (§ Versions et releases). Sur une Pull Request, le nouveau code est celui de la PR.
 
 ## Mises à jour des dépendances
 
@@ -140,6 +149,7 @@ Les versions de l'application sont connues du dépôt avant leur publication : c
 - **Publication** : une version est publiée quand tous les tickets de son jalon sont fermés :
   - **tag** annoté et signé (clé GPG de § Signature des commits), posé sur le commit de `main` qui la complète ;
   - **release** GitHub sur ce tag, dont les notes sont générées par GitHub à partir des Pull Requests fusionnées depuis le tag de la version précédente, et vérifiées avant publication comme tout texte publié (`gestion-projet/gouvernance.md` § Budget IA, mention de Codex). Une version `0.0.x`, qui ne livre pas d'application utilisable, est marquée **pré-release** ;
+  - **analyse SonarQube Cloud** de `main`, relancée dès le tag posé (`gh workflow run code-quality.yml --ref main`) : la période du nouveau code commence à la première analyse qui porte la version (§ Analyse de la qualité du code), qui doit être celle du commit publié, et non celle de la fusion suivante, dont les changements en seraient exclus ;
   - **images Docker** de la version, publiées à la demande depuis son tag (`choix-implementation/deploiement.md` § Publication des images Docker) ; les versions `0.0.x` n'en ont pas, faute d'interface ;
   - **fermeture du jalon**.
 - La publication d'une version est un acte de gestion du projet (`gestion-projet/gouvernance.md` § Prise de décision) : l'agent l'accomplit dès que la règle ci-dessus la prescrit, puis en informe l'utilisateur. Le déploiement de la version, lui, appartient à l'utilisateur.
