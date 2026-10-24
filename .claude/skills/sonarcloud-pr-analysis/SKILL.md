@@ -65,4 +65,28 @@ Keep one PR comment, headed `## Analyse SonarQube Cloud`, listing each deferred
 or rejected finding (key, rule, file:line, decision, justification), and edit
 it (`gh api -X PATCH repos/Tetram76/bdtheque-claude/issues/comments/<id> -F body=@<file>`)
 at each handled analysis instead of posting a new one. Never write the Codex
-mention in it. The user marks these findings in SonarQube Cloud.
+mention in it.
+
+## 5. Mark the rejected findings in SonarQube Cloud
+
+Marking them is the agent's job, never handed to the user. Do it through the
+user's SonarQube Cloud session in the built-in browser (no token is ever
+handled): open `https://sonarcloud.io/project/issues?id=Tetram76_bdtheque-claude`;
+on the sign-in page, ask the user to sign in there with GitHub, which is the
+only step left to them. Then, from that page, call the web API with the session
+cookie and its XSRF token, one small batch per call (the tool times out after
+about 45 s; never re-run a batch before checking what the previous one did):
+
+```javascript
+const xsrf = decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)[1]);
+const post = (url, body) => fetch(url, { method: 'POST', body: new URLSearchParams(body),
+  headers: { 'X-XSRF-TOKEN': xsrf, 'Content-Type': 'application/x-www-form-urlencoded' } });
+// per rejected finding: a comment pointing to the justification, then the transition
+await post('/api/issues/add_comment', { issue: key, text: 'Contre-analysé et rejeté : justification dans le commentaire « Analyse SonarQube Cloud » de <PR URL>' });
+await post('/api/issues/do_transition', { issue: key, transition: 'falsepositive' }); // or 'accept'
+```
+
+`falsepositive` for a finding whose premise is wrong, `accept` for a rule that
+does not fit the case. Deferred findings stay open. Check the outcome with
+`/api/issues/search?issues=<keys>&additionalFields=comments` (`issueStatus`
+`FALSE_POSITIVE` or `ACCEPTED`, one comment each).
