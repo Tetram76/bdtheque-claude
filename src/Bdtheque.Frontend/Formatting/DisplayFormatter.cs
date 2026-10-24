@@ -7,7 +7,7 @@ namespace Bdtheque.Frontend.Formatting;
 /// Formats the data shown to the user in the display culture of the request (fonctionnel/presentation.md
 /// § Langue et culture d'affichage), positioned by the request localization middleware.
 /// </summary>
-public sealed class DisplayFormatter(IStringLocalizer<CurrencySymbols> symbols)
+public sealed class DisplayFormatter(IStringLocalizer<CurrencySymbols> symbols, BrowserTimeZone timeZone)
 {
     public string Number(long value) => value.ToString("N0", CultureInfo.CurrentCulture);
 
@@ -27,6 +27,9 @@ public sealed class DisplayFormatter(IStringLocalizer<CurrencySymbols> symbols)
     }
 
     public string Date(DateOnly date) => date.ToString("d", CultureInfo.CurrentCulture);
+
+    /// <summary>A date and time, in the time zone of the browser (<see cref="BrowserTimeZone"/>).</summary>
+    public string DateTime(DateTimeOffset instant) => timeZone.ToLocal(instant).ToString("g", CultureInfo.CurrentCulture);
 
     /// <summary>A date known to the year, or to the month and year (modele-metier.md § Album, date de première publication).</summary>
     public string PartialDate(int year, int? month) =>

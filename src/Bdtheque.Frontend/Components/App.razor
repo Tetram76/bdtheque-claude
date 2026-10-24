@@ -1,5 +1,8 @@
+@inject BrowserTimeZone TimeZone
+
 <!DOCTYPE html>
-<html lang="fr">
+@* The time zone the page is rendered in, which the script compares to that of the browser. *@
+<html lang="fr" data-time-zone="@TimeZone.Zone.Id">
 
 <head>
     <meta charset="utf-8" />
@@ -15,6 +18,7 @@
 <body>
     <Routes />
     <ReconnectModal />
+    <script src="@Assets["browser-time-zone.js"]"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
