@@ -7,6 +7,9 @@ using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Common;
+using Bdtheque.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
 using static Bdtheque.Contracts.Search.SearchComparison;
 
@@ -497,11 +500,11 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var ofMyEdition = new SearchLink("edition", Text("record", Is, edition.Id.ToString()));
 
         Assert.Equal(
-            [new EditionVisualListItem(visual.Id, VisualType.Cover, visual.OriginalPath, visual.DisplayPath, albumSummary, editionSummary)],
+            [new EditionVisualListItem(visual.Id, VisualType.Cover, albumSummary, editionSummary)],
             await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, ofMyEdition));
         Assert.Equal(
             [visual.Id],
-            (await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, Text("mediaReference", EqualTo, Path.GetFileName(visual.OriginalPath))))
+            (await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, Text("mediaReference", EqualTo, await MediaReferenceOfAsync(visual.Id))))
                 .Select(v => v.Id));
         Assert.Equal(
             [new EditionListItem(albumSummary, editionSummary, true)],
@@ -681,6 +684,16 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var response = await _client.PostAsync($"/admin/albums/{edition.AlbumId}/editions/{edition.Id}/visuals", form);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!;
+    }
+
+    // A datum of the business model the advanced search queries, which the contracts do not carry.
+    private async Task<string> MediaReferenceOfAsync(Guid visualId)
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        return await scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().EditionVisuals
+            .Where(v => v.Id == visualId)
+            .Select(v => v.MediaReference)
+            .SingleAsync();
     }
 
     private async Task<TForm> PostAsync<TForm>(string uri, object request)

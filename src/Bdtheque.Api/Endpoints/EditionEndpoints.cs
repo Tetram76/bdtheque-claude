@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
-using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -86,8 +85,7 @@ internal static class EditionEndpoints
     {
         var visuals = e.GetOrderedVisuals()
             .Select(v => new EditionVisualItem(
-                v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder, VisualStorage.OriginalPath(v.MediaReference),
-                VisualStorage.DisplayPath(v.MediaReference), v.CreatedAt, v.ModifiedAt))
+                v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder, v.CreatedAt, v.ModifiedAt))
             .ToList();
 
         return new EditionDetail(

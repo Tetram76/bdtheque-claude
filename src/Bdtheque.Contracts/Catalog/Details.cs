@@ -116,12 +116,9 @@ public sealed record EditionDetail(
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);
 
-/// <summary>A visual of an edition, which has no record of its own.</summary>
+/// <summary>A visual of an edition, which has no record of its own; <c>api</c> serves its media (<see cref="VisualMediaRoutes"/>).</summary>
 /// <param name="DisplayOrder">Rank among the visuals of the same type.</param>
-/// <param name="OriginalPath">Path of the original file, relative to the visuals volume.</param>
-/// <param name="DisplayPath">Path of the reduced WebP version shown by default, relative to the visuals volume.</param>
-public sealed record EditionVisualItem(
-    Guid Id, VisualType Type, int DisplayOrder, string OriginalPath, string DisplayPath, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
+public sealed record EditionVisualItem(Guid Id, VisualType Type, int DisplayOrder, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
 
 /// <param name="Bibliography">
 /// The whole bibliography, a single list reconciling the series and the albums the author took part in

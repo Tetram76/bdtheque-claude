@@ -69,7 +69,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         var underneath = await UploadAsync(album.Id, edition, VisualType.Cover);
         // The user puts the second cover first (fonctionnel/regles-metier.md § Ordre des visuels d'une édition).
         var visuals = await GetAsync<EditionVisualsForm>(VisualsUri(album.Id, edition));
-        var arrangement = visuals.Visuals.OrderBy(v => v.OriginalPath == underneath.OriginalPath ? 0 : 1).Select(v => new VisualArrangement(v.Id, v.Type));
+        var arrangement = visuals.Visuals.OrderBy(v => v.Id == underneath.VisualId ? 0 : 1).Select(v => new VisualArrangement(v.Id, v.Type));
         (await _client.PutAsJsonAsync(VisualsUri(album.Id, edition), new ArrangeVisualsRequest(arrangement.ToList(), visuals.AlbumVersion)))
             .EnsureSuccessStatusCode();
 
@@ -263,7 +263,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         var response = await _client.PostAsync(VisualsUri(albumId, editionId), form);
         response.EnsureSuccessStatusCode();
         var visual = (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals.Single(v => !before.Contains(v.Id));
-        return new AlbumCover(visual.OriginalPath, visual.DisplayPath);
+        return new AlbumCover(visual.Id);
     }
 
     private async Task<uint> GetAlbumVersionAsync(Guid albumId) =>

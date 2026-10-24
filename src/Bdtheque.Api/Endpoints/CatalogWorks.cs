@@ -88,7 +88,7 @@ internal static class CatalogWorks
                 {
                     SeriesId = a.SeriesId!.Value,
                     IsRegularVolume = a.Type == AlbumType.Regular && !a.IsSpecialIssue,
-                    MediaReference = a.CoverMediaReference(),
+                    CoverVisualId = a.CoverVisualId(),
                 }))
                 .ToListAsync(cancellationToken))
             .ToLookup(a => a.SeriesId);
@@ -99,7 +99,7 @@ internal static class CatalogWorks
                 albums[id]
                     .Where(a => a.IsRegularVolume)
                     .Take(SeriesOverview.FirstVolumeCount)
-                    .Select(a => CatalogExpressions.ToCover(a.MediaReference))
+                    .Select(a => CatalogExpressions.ToCover(a.CoverVisualId))
                     .ToList()));
     }
 }

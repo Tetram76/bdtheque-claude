@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 
 namespace Bdtheque.Api.Visuals;
@@ -15,11 +16,25 @@ internal sealed class VisualStorage(IOptions<VisualStorageOptions> options, ILog
 
     private readonly string _root = options.Value.RootPath;
 
+    private const string DisplayContentType = "image/webp";
+
+    private static readonly FileExtensionContentTypeProvider ContentTypes = new();
+
     /// <summary>
     /// A media reference never used before (time-ordered GUID, with the extension of the original):
-    /// a file name is never reused, so that <c>frontend</c> can serve it with a long-lived cache.
+    /// a file name is never reused, so that its media can be served with a long-lived cache.
     /// </summary>
     public static string NewMediaReference(PreparedVisual visual) => $"{Guid.CreateVersion7():N}.{visual.OriginalExtension}";
+
+    /// <summary>The original of a visual on the volume, with its media type, which its extension gives.</summary>
+    public VisualFile OriginalFile(string mediaReference) =>
+        new(FullPath(OriginalPath(mediaReference)),
+            ContentTypes.TryGetContentType(mediaReference, out var contentType)
+                ? contentType
+                : throw new InvalidOperationException($"The media reference '{mediaReference}' has no known image extension."));
+
+    /// <summary>The display version of a visual on the volume.</summary>
+    public VisualFile DisplayFile(string mediaReference) => new(FullPath(DisplayPath(mediaReference)), DisplayContentType);
 
     /// <summary>Path of the original, relative to the volume.</summary>
     public static string OriginalPath(string mediaReference) => $"{OriginalsFolder}/{mediaReference}";
@@ -137,3 +152,7 @@ internal sealed class VisualStorage(IOptions<VisualStorageOptions> options, ILog
 
     private string FullPath(string relativePath) => Path.Combine(_root, relativePath);
 }
+
+/// <summary>A file of a visual on the volume, as <c>api</c> serves it.</summary>
+/// <param name="Path">Absolute path of the file.</param>
+internal sealed record VisualFile(string Path, string ContentType);

@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Query;
@@ -49,12 +48,11 @@ internal static class CatalogExpressions
     /// <summary>Marker of the card of an album, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumCard ToCard(this Album album) => throw NotExpanded();
 
-    /// <summary>Marker of the media reference of the cover of an album, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
-    public static string? CoverMediaReference(this Album album) => throw NotExpanded();
+    /// <summary>Marker of the visual of the cover of an album, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static Guid? CoverVisualId(this Album album) => throw NotExpanded();
 
-    /// <summary>The cover of an album, from the media reference of its visual.</summary>
-    public static AlbumCover? ToCover(string? mediaReference) =>
-        mediaReference is null ? null : new AlbumCover(VisualStorage.OriginalPath(mediaReference), VisualStorage.DisplayPath(mediaReference));
+    /// <summary>The cover of an album, from its visual.</summary>
+    public static AlbumCover? ToCover(Guid? visualId) => visualId is { } id ? new AlbumCover(id) : null;
 
     private static readonly Expression<Func<Album, AlbumSummary>> AlbumSummaryOf = a => new AlbumSummary(
         a.Id,
@@ -81,22 +79,22 @@ internal static class CatalogExpressions
     private static readonly Expression<Func<Album, AlbumCard>> AlbumCardOf = a => new AlbumCard(
         a.ToSummary(),
         EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating),
-        ToCover(a.CoverMediaReference()),
+        ToCover(a.CoverVisualId()),
         a.PurchaseIntents.Any());
 
     // fonctionnel/regles-metier.md § Couverture d'un album, among all the editions: the oldest edition with a cover, by
     // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
     // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered:
     // the first created.
-    private static readonly Expression<Func<Album, string?>> CoverMediaReferenceOf = a => a.Editions
+    private static readonly Expression<Func<Album, Guid?>> CoverVisualIdOf = a => a.Editions
         .SelectMany(e => e.Visuals
             .Where(v => v.Type == DomainEnums.VisualType.Cover)
-            .Select(v => new { e.PublicationYear, EditionId = e.Id, v.DisplayOrder, VisualId = v.Id, v.MediaReference }))
+            .Select(v => new { e.PublicationYear, EditionId = e.Id, v.DisplayOrder, VisualId = v.Id }))
         .OrderBy(c => c.PublicationYear)
         .ThenBy(c => c.EditionId)
         .ThenBy(c => c.DisplayOrder)
         .ThenBy(c => c.VisualId)
-        .Select(c => c.MediaReference)
+        .Select(c => (Guid?)c.VisualId)
         .FirstOrDefault();
 
     private static readonly Expression<Func<Universe, UniverseListItem>> UniverseListItemOf =
@@ -179,7 +177,7 @@ internal static class CatalogExpressions
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
                 nameof(ToCard) => AlbumCardOf,
-                nameof(CoverMediaReference) => CoverMediaReferenceOf,
+                nameof(CoverVisualId) => CoverVisualIdOf,
                 _ => null,
             };
             if (expression is null)

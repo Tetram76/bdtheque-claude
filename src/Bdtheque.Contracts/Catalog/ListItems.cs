@@ -23,11 +23,11 @@ public sealed record GenreListItem(Guid Id, string Label);
 /// <param name="ParentName">The name of the parent universe; <c>null</c> for a universe at the top of the hierarchy.</param>
 public sealed record UniverseListItem(Guid Id, string Name, Guid? ParentId, string? ParentName);
 
-/// <summary>A visual of an edition, which leads to the record of the album of its edition.</summary>
-/// <param name="OriginalPath">Path of the original file, relative to the visuals volume.</param>
-/// <param name="DisplayPath">Path of the reduced WebP version shown by default, relative to the visuals volume.</param>
-public sealed record EditionVisualListItem(
-    Guid Id, VisualType Type, string OriginalPath, string DisplayPath, AlbumSummary Album, EditionSummary Edition);
+/// <summary>
+/// A visual of an edition, which leads to the record of the album of its edition; <c>api</c> serves its
+/// media (<see cref="VisualMediaRoutes"/>).
+/// </summary>
+public sealed record EditionVisualListItem(Guid Id, VisualType Type, AlbumSummary Album, EditionSummary Edition);
 
 /// <summary>
 /// An author credited with a role, which leads to the record of the album or of the series carrying the

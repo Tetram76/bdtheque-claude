@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
@@ -15,8 +16,9 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// Administration of the visuals of an edition (<c>/admin/albums/{albumId}/editions/{editionId}/visuals</c>),
-/// and the consistency between their rows and their files on the volume (choix-implementation/domaine.md §
-/// Visuels : stockage et traitement), deletions of editions and albums included.
+/// the consistency between their rows and their files on the volume (choix-implementation/domaine.md §
+/// Visuels : stockage et traitement), deletions of editions and albums included, and their media, which
+/// <c>api</c> alone serves (<c>/catalog/visuals/{id}/…</c>).
 /// </summary>
 public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicationFactory>
 {
@@ -42,10 +44,10 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         Assert.Equal(edition.Id, form.EditionId);
         var visual = Assert.Single(form.Visuals);
         Assert.Equal((VisualType.Cover, 0), (visual.Type, visual.DisplayOrder));
-        Assert.Matches("^originals/[0-9a-f]{32}\\.jpg$", visual.OriginalPath);
-        Assert.Equal($"display/{Path.GetFileNameWithoutExtension(visual.OriginalPath)}.webp", visual.DisplayPath);
-        Assert.Equal(jpeg, await File.ReadAllBytesAsync(VolumePath(visual.OriginalPath)));
-        Assert.Equal(new SKSizeI(800, 1200), TestImages.SizeOf(await File.ReadAllBytesAsync(VolumePath(visual.DisplayPath))));
+        var files = await FilesOfAsync(visual.Id);
+        Assert.Matches("^[0-9a-f]{32}\\.jpg$", files.MediaReference);
+        Assert.Equal(jpeg, await File.ReadAllBytesAsync(files.Original));
+        Assert.Equal(new SKSizeI(800, 1200), TestImages.SizeOf(await File.ReadAllBytesAsync(files.Display)));
         Assert.NotEqual(edition.AlbumVersion, form.AlbumVersion);
         Assert.Equal(form.AlbumVersion, (await GetAlbumAsync(edition.AlbumId)).Version);
         Assert.Equal(form, await GetVisualsAsync(edition), VisualsFormComparer.Instance);
@@ -283,6 +285,7 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         var edition = await CreateEditionAsync();
         var uploaded = await UploadAsync(edition, VisualType.Cover);
         var visual = uploaded.Visuals.Single();
+        var files = await FilesOfAsync(visual.Id);
         var visualUri = $"{VisualsUri(edition)}/{visual.Id}";
         var impact = (await _client.GetFromJsonAsync<DeletionImpact>($"{visualUri}/deletion-impact"))!;
 
@@ -291,7 +294,7 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         Assert.Empty(impact.DeletedWith);
         Assert.Empty((await GetVisualsAsync(edition)).Visuals);
-        AssertFilesDeleted(visual);
+        AssertFilesDeleted(files);
     }
 
     [Fact]
@@ -311,13 +314,14 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     {
         var edition = await CreateEditionAsync();
         var uploaded = await UploadAsync(edition, VisualType.Cover);
+        var files = await FilesOfAsync(uploaded.Visuals.Single().Id);
         var editionUri = $"/admin/albums/{edition.AlbumId}/editions/{edition.Id}";
         var impact = (await _client.GetFromJsonAsync<DeletionImpact>($"{editionUri}/deletion-impact"))!;
 
         var response = await _client.DeleteAsync($"{editionUri}?version={uploaded.AlbumVersion}&fingerprint={impact.Fingerprint}");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        AssertFilesDeleted(uploaded.Visuals.Single());
+        AssertFilesDeleted(files);
     }
 
     [Fact]
@@ -328,14 +332,17 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         var otherEdition = await CreateEditionAsync(edition.AlbumId);
         var uploaded = await UploadAsync(otherEdition, VisualType.Plate);
         var visuals = (await GetVisualsAsync(edition)).Visuals.Concat(uploaded.Visuals).ToList();
+        var files = new List<VisualFiles>();
+        foreach (var visual in visuals)
+            files.Add(await FilesOfAsync(visual.Id));
         var albumUri = $"/admin/albums/{edition.AlbumId}";
         var impact = (await _client.GetFromJsonAsync<DeletionImpact>($"{albumUri}/deletion-impact"))!;
 
         var response = await _client.DeleteAsync($"{albumUri}?version={uploaded.AlbumVersion}&fingerprint={impact.Fingerprint}");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        Assert.Equal(2, visuals.Count);
-        visuals.ForEach(AssertFilesDeleted);
+        Assert.Equal(2, files.Count);
+        files.ForEach(AssertFilesDeleted);
     }
 
     [Fact]
@@ -349,26 +356,90 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         var response = await _client.DeleteAsync($"{albumUri}?version={edition.AlbumVersion}&fingerprint={impact.Fingerprint}");
 
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.Conflict, ProblemTypes.Functional);
-        var visual = uploaded.Visuals.Single();
-        Assert.True(File.Exists(VolumePath(visual.OriginalPath)));
-        Assert.True(File.Exists(VolumePath(visual.DisplayPath)));
+        var files = await FilesOfAsync(uploaded.Visuals.Single().Id);
+        Assert.True(File.Exists(files.Original));
+        Assert.True(File.Exists(files.Display));
     }
 
     [Fact]
     public async Task Reconciliation_DeletesTheOldOrphansOnly()
     {
         var edition = await CreateEditionAsync();
-        var referenced = (await UploadAsync(edition, VisualType.Cover)).Visuals.Single();
+        var referenced = await FilesOfAsync((await UploadAsync(edition, VisualType.Cover)).Visuals.Single().Id);
         var oldOrphan = await WriteVolumeFileAsync($"originals/{Guid.CreateVersion7():N}.jpg", TimeSpan.FromHours(2));
         var recentOrphan = await WriteVolumeFileAsync($"display/{Guid.CreateVersion7():N}.webp", TimeSpan.FromMinutes(10));
-        File.SetLastWriteTimeUtc(VolumePath(referenced.OriginalPath), _factory.Clock.GetUtcNow().UtcDateTime.AddDays(-3));
+        File.SetLastWriteTimeUtc(referenced.Original, _factory.Clock.GetUtcNow().UtcDateTime.AddDays(-3));
 
         await _factory.Services.GetRequiredService<VisualReconciliation>().ReconcileAsync(CancellationToken.None);
 
         Assert.False(File.Exists(oldOrphan));
         Assert.True(File.Exists(recentOrphan));
-        Assert.True(File.Exists(VolumePath(referenced.OriginalPath)));
-        Assert.True(File.Exists(VolumePath(referenced.DisplayPath)));
+        Assert.True(File.Exists(referenced.Original));
+        Assert.True(File.Exists(referenced.Display));
+    }
+
+    [Fact]
+    public async Task DisplayMedia_IsTheWebPVersion_CachedForLong()
+    {
+        var edition = await CreateEditionAsync();
+        var visual = (await UploadAsync(edition, VisualType.Cover)).Visuals.Single();
+
+        var response = await _client.GetAsync(VisualMediaRoutes.Display(visual.Id));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("image/webp", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(await File.ReadAllBytesAsync((await FilesOfAsync(visual.Id)).Display), await response.Content.ReadAsByteArrayAsync());
+        AssertCachedForLong(response);
+    }
+
+    [Fact]
+    public async Task OriginalMedia_IsTheUploadedFile_WithItsType_CachedForLong()
+    {
+        var edition = await CreateEditionAsync();
+        var png = TestImages.Encode(40, 60, SKEncodedImageFormat.Png);
+        var upload = await PostUploadAsync(edition, png, VisualType.Plate, edition.AlbumVersion);
+        var visual = (await upload.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals.Single();
+
+        var response = await _client.GetAsync(VisualMediaRoutes.Original(visual.Id));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("image/png", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(png, await response.Content.ReadAsByteArrayAsync());
+        AssertCachedForLong(response);
+    }
+
+    [Fact]
+    public async Task Media_OfAnUnknownVisual_IsAFunctionalError()
+    {
+        var id = Guid.CreateVersion7();
+
+        await ProblemAssert.IsProblemAsync(await _client.GetAsync(VisualMediaRoutes.Display(id)), HttpStatusCode.NotFound, ProblemTypes.Functional);
+        await ProblemAssert.IsProblemAsync(await _client.GetAsync(VisualMediaRoutes.Original(id)), HttpStatusCode.NotFound, ProblemTypes.Functional);
+    }
+
+    [Fact]
+    public async Task Media_OfADeletedVisual_IsAFunctionalError()
+    {
+        var edition = await CreateEditionAsync();
+        var uploaded = await UploadAsync(edition, VisualType.Cover);
+        var visual = uploaded.Visuals.Single();
+        var visualUri = $"{VisualsUri(edition)}/{visual.Id}";
+        var impact = (await _client.GetFromJsonAsync<DeletionImpact>($"{visualUri}/deletion-impact"))!;
+        (await _client.DeleteAsync($"{visualUri}?version={uploaded.AlbumVersion}&fingerprint={impact.Fingerprint}")).EnsureSuccessStatusCode();
+
+        var response = await _client.GetAsync(VisualMediaRoutes.Display(visual.Id));
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
+    }
+
+    // A media is never rewritten under the same address (choix-implementation/domaine.md § Visuels : stockage et
+    // traitement): a browser keeps it without ever asking again.
+    private static void AssertCachedForLong(HttpResponseMessage response)
+    {
+        var cacheControl = response.Headers.CacheControl!;
+        Assert.True(cacheControl.Public);
+        Assert.Equal(TimeSpan.FromDays(365), cacheControl.MaxAge);
+        Assert.Contains(cacheControl.Extensions, e => e.Name == "immutable");
     }
 
     private static byte[] SmallJpeg() => TestImages.Encode(40, 60, SKEncodedImageFormat.Jpeg);
@@ -382,11 +453,26 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
             ? Directory.EnumerateFiles(_factory.VisualsRoot, "*", SearchOption.AllDirectories).Order().ToList()
             : [];
 
-    private void AssertFilesDeleted(EditionVisualForm visual)
+    private static void AssertFilesDeleted(VisualFiles files)
     {
-        Assert.False(File.Exists(VolumePath(visual.OriginalPath)));
-        Assert.False(File.Exists(VolumePath(visual.DisplayPath)));
+        Assert.False(File.Exists(files.Original));
+        Assert.False(File.Exists(files.Display));
     }
+
+    // The files of a visual on the volume, which the contracts no longer reveal: read before any
+    // deletion, which takes the row along.
+    private async Task<VisualFiles> FilesOfAsync(Guid visualId)
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var mediaReference = await scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().EditionVisuals
+            .Where(v => v.Id == visualId)
+            .Select(v => v.MediaReference)
+            .SingleAsync();
+        return new VisualFiles(
+            mediaReference, VolumePath(VisualStorage.OriginalPath(mediaReference)), VolumePath(VisualStorage.DisplayPath(mediaReference)));
+    }
+
+    private sealed record VisualFiles(string MediaReference, string Original, string Display);
 
     private async Task<string> WriteVolumeFileAsync(string relativePath, TimeSpan age)
     {
