@@ -196,7 +196,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 
 | Ticket | Titre |
 | --- | --- |
-| #161 | Accès du frontend au volume des visuels |
+| ~~#161~~ | Accès du frontend au volume des visuels |
 | #191 | Socle du frontend : appels à l'API, erreurs, localisation, fuseau horaire et pages non implémentées |
 | #214 | Environnement de validation fonctionnelle |
 | #192 | Données du dashboard dans l'API avant la Phase 4 |
