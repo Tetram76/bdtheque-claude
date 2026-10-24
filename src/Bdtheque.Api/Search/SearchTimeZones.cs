@@ -7,10 +7,12 @@ internal static class SearchTimeZones
     /// Not the IANA name of a time zone, which PostgreSQL knows too, unlike a Windows name: a technical error, the
     /// frontend sending that of the browser.
     /// </exception>
-    public static TimeZoneInfo Resolve(string? name) =>
-        name is null
-            ? TimeZoneInfo.Utc
-            : TimeZoneInfo.TryFindSystemTimeZoneById(name, out var zone) && zone.HasIanaId
-                ? zone
-                : throw new BadHttpRequestException($"'{name}' is not the IANA name of a time zone.");
+    public static TimeZoneInfo Resolve(string? name)
+    {
+        if (name is null)
+            return TimeZoneInfo.Utc;
+        if (TimeZoneInfo.TryFindSystemTimeZoneById(name, out var zone) && zone.HasIanaId)
+            return zone;
+        throw new BadHttpRequestException($"'{name}' is not the IANA name of a time zone.");
+    }
 }
