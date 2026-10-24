@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using frontend::Bdtheque.Frontend.Api;
 using FrontendProgram = frontend::Program;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -26,6 +27,9 @@ public sealed class ApplicationHost : IAsyncLifetime
 
     /// <summary>Address of <c>frontend</c>, the only container a browser talks to.</summary>
     public Uri BaseAddress { get; private set; } = null!;
+
+    /// <summary>Services of <c>frontend</c>, as the application configures them.</summary>
+    public IServiceProvider FrontendServices => _frontend!.Services;
 
     public async Task InitializeAsync()
     {
@@ -66,6 +70,9 @@ public sealed class ApplicationHost : IAsyncLifetime
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Production");
+            // Outside Development, the static assets are read from the published output; the tests run on the build
+            // output, whose assets (styles, blazor.web.js) are only reached through the static web assets manifest.
+            builder.UseStaticWebAssets();
 
             builder.ConfigureAppConfiguration((_, configBuilder) =>
                 configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
@@ -75,7 +82,7 @@ public sealed class ApplicationHost : IAsyncLifetime
                 }));
 
             builder.ConfigureTestServices(services =>
-                services.AddHttpClient("Api").ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler()));
+                services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler()));
         }
     }
 }

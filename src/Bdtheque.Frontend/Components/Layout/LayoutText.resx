@@ -42,4 +42,28 @@
   <data name="Dismiss" xml:space="preserve">
     <value>Fermer</value>
   </data>
+  <data name="Reconnect.FirstAttempt" xml:space="preserve">
+    <value>Reconnexion au serveur…</value>
+  </data>
+  <data name="Reconnect.RepeatedAttempt" xml:space="preserve">
+    <value>Reconnexion impossible pour l&apos;instant : nouvel essai dans</value>
+  </data>
+  <data name="Reconnect.Seconds" xml:space="preserve">
+    <value>secondes.</value>
+  </data>
+  <data name="Reconnect.Failed" xml:space="preserve">
+    <value>La reconnexion a échoué. Réessayez, ou rechargez la page.</value>
+  </data>
+  <data name="Reconnect.Retry" xml:space="preserve">
+    <value>Réessayer</value>
+  </data>
+  <data name="Reconnect.Paused" xml:space="preserve">
+    <value>La session a été suspendue par le serveur.</value>
+  </data>
+  <data name="Reconnect.ResumeFailed" xml:space="preserve">
+    <value>La session n&apos;a pas pu reprendre. Réessayez, ou rechargez la page.</value>
+  </data>
+  <data name="Reconnect.Resume" xml:space="preserve">
+    <value>Reprendre</value>
+  </data>
 </root>

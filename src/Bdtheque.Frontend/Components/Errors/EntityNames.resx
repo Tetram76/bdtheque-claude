@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Album.One" xml:space="preserve">
+    <value>{0} album</value>
+  </data>
+  <data name="Album.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Series.One" xml:space="preserve">
+    <value>{0} série</value>
+  </data>
+  <data name="Series.Other" xml:space="preserve">
+    <value>{0} séries</value>
+  </data>
+  <data name="Universe.One" xml:space="preserve">
+    <value>{0} univers</value>
+  </data>
+  <data name="Universe.Other" xml:space="preserve">
+    <value>{0} univers</value>
+  </data>
+  <data name="Edition.One" xml:space="preserve">
+    <value>{0} édition</value>
+  </data>
+  <data name="Edition.Other" xml:space="preserve">
+    <value>{0} éditions</value>
+  </data>
+  <data name="EditionVisual.One" xml:space="preserve">
+    <value>{0} visuel</value>
+  </data>
+  <data name="EditionVisual.Other" xml:space="preserve">
+    <value>{0} visuels</value>
+  </data>
+  <data name="PublisherCollection.One" xml:space="preserve">
+    <value>{0} collection éditeur</value>
+  </data>
+  <data name="PublisherCollection.Other" xml:space="preserve">
+    <value>{0} collections éditeur</value>
+  </data>
+  <data name="Contribution.One" xml:space="preserve">
+    <value>{0} contribution</value>
+  </data>
+  <data name="Contribution.Other" xml:space="preserve">
+    <value>{0} contributions</value>
+  </data>
+  <data name="PurchaseIntent.One" xml:space="preserve">
+    <value>{0} intention d&apos;achat</value>
+  </data>
+  <data name="PurchaseIntent.Other" xml:space="preserve">
+    <value>{0} intentions d&apos;achat</value>
+  </data>
+  <data name="Author.One" xml:space="preserve">
+    <value>{0} auteur</value>
+  </data>
+  <data name="Author.Other" xml:space="preserve">
+    <value>{0} auteurs</value>
+  </data>
+  <data name="Publisher.One" xml:space="preserve">
+    <value>{0} éditeur</value>
+  </data>
+  <data name="Publisher.Other" xml:space="preserve">
+    <value>{0} éditeurs</value>
+  </data>
+  <data name="Genre.One" xml:space="preserve">
+    <value>{0} genre</value>
+  </data>
+  <data name="Genre.Other" xml:space="preserve">
+    <value>{0} genres</value>
+  </data>
+  <data name="SavedSearch.One" xml:space="preserve">
+    <value>{0} recherche enregistrée</value>
+  </data>
+  <data name="SavedSearch.Other" xml:space="preserve">
+    <value>{0} recherches enregistrées</value>
+  </data>
+</root>

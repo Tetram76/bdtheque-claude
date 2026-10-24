@@ -1,4 +1,6 @@
+using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components;
+using Bdtheque.Frontend.Formatting;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -10,8 +12,15 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // No text shown to the user is written in the code: each component reads its own (choix-implementation/socle.md
-// § Internationalisation).
+// § Internationalisation). The display culture is a setting of the application, French of France the only one
+// offered (fonctionnel/presentation.md § Langue et culture d'affichage): never the one the browser asks for.
 builder.Services.AddLocalization();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture(DisplayCulture.Name).AddSupportedCultures(DisplayCulture.Name).AddSupportedUICultures(DisplayCulture.Name);
+    options.RequestCultureProviders.Clear();
+});
+builder.Services.AddSingleton<DisplayFormatter>();
 
 // The authentication cookie is owned exclusively by this container (BFF):
 // `api` has no knowledge of the user (see choix-implementation/socle.md § Authentification : mise en œuvre).
@@ -31,7 +40,7 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
     .ValidateOnStart();
 
 // HTTP client for `api`, only reachable over the internal Docker network.
-builder.Services.AddHttpClient("Api", (services, client) =>
+builder.Services.AddHttpClient<ApiClient>(ApiClient.HttpClientName, (services, client) =>
 {
     var apiOptions = services.GetRequiredService<IConfiguration>().GetSection("Api");
     client.BaseAddress = new Uri(apiOptions["BaseUrl"] ?? throw new InvalidOperationException("Api:BaseUrl is not configured."));
@@ -49,6 +58,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+app.UseRequestLocalization();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
