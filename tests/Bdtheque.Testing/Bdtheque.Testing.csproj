@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <RootNamespace>Bdtheque.Testing</RootNamespace>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
