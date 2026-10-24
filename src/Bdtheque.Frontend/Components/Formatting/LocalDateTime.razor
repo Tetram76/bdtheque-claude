@@ -1,0 +1,10 @@
+@inject DisplayFormatter Formatter
+
+@* The way any date and time is presented: in the time zone of the browser, and marked (data-local) for the script that
+   renders the page again once it knows that time zone (wwwroot/browser-time-zone.js). *@
+<time datetime="@Value.ToString("O", CultureInfo.InvariantCulture)" data-local>@Formatter.DateTime(Value)</time>
+
+@code {
+    [Parameter, EditorRequired]
+    public DateTimeOffset Value { get; set; }
+}

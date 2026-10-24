@@ -199,7 +199,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#161~~ | Accès du frontend au volume des visuels |
 | ~~#238~~ | Structure du frontend, page « Pas encore implémenté » et outillage de non-régression du frontend |
 | ~~#239~~ | Appels à l'API, présentation des erreurs et localisation du frontend |
-| #240 | Fuseau horaire du navigateur et alignement de la recherche avancée |
+| ~~#240~~ | Fuseau horaire du navigateur et alignement de la recherche avancée |
 | #214 | Environnement de validation fonctionnelle |
 | #192 | Données du dashboard dans l'API avant la Phase 4 |
 | #193 | Paramétrage de l'application dans le modèle de domaine et l'API |

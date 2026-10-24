@@ -9,7 +9,8 @@ public sealed class DisplayFormatterTests : IDisposable
 {
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly DisplayFormatter _formatter =
-        new ServiceCollection().AddLogging().AddLocalization().AddSingleton<DisplayFormatter>().BuildServiceProvider().GetRequiredService<DisplayFormatter>();
+        new ServiceCollection().AddLogging().AddLocalization().AddScoped<BrowserTimeZone>().AddScoped<DisplayFormatter>()
+            .BuildServiceProvider().CreateScope().ServiceProvider.GetRequiredService<DisplayFormatter>();
 
     public DisplayFormatterTests() => CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
 

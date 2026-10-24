@@ -19,10 +19,15 @@ namespace Bdtheque.Api.Tests;
 /// </summary>
 public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationFactory>
 {
+    private readonly ApiWebApplicationFactory _factory;
     private readonly HttpClient _client;
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    public SavedSearchEndpointsTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    public SavedSearchEndpointsTests(ApiWebApplicationFactory factory)
+    {
+        _factory = factory;
+        _client = factory.CreateApiClient();
+    }
 
     // The albums whose title contains the marker of the test, and a given text: the variable "Titre"
     // replaces that text.
@@ -229,6 +234,27 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
         Assert.Equal([new SeriesListItem(series.Id, $"Série {_marker}")], results);
     }
 
+[Fact]
+    public async Task Replay_ComparesADateAndTimeByItsDayInTheTimeZoneOfTheBrowser()
+    {
+        // The criteria hold no time zone: the same search is replayed by visitors of any of them.
+        _factory.Clock.UtcNow = new DateTimeOffset(2025, 12, 31, 23, 30, 0, TimeSpan.Zero);
+        AlbumForm album;
+        try
+        {
+            album = await CreateAlbumAsync($"Album {_marker}");
+        }
+        finally
+        {
+            _factory.Clock.UtcNow = null;
+        }
+        var search = await CreateAsync(Name(), new SearchGroup(SearchOperator.And,
+            [new SearchCriterion("title", Contains, [_marker]), new SearchCriterion("createdAt", EqualTo, ["2026-01-01"])]));
+
+        Assert.Equal([album.Id], (await ReplayAsync<AlbumSummary>(search.Id, null, "Europe/Paris")).Select(a => a.Id));
+        Assert.Empty(await ReplayAsync<AlbumSummary>(search.Id, null));
+    }
+
     [Fact]
     public async Task Replay_WithAValueLeftEmpty_IsABusinessError()
     {
@@ -284,9 +310,10 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
             title, null, null, AlbumType.Regular, false, null, null, null, null, null, null, null, null, [], [], []));
 
-    private async Task<IReadOnlyList<T>> ReplayAsync<T>(Guid id, IReadOnlyDictionary<string, string>? values)
+    private async Task<IReadOnlyList<T>> ReplayAsync<T>(Guid id, IReadOnlyDictionary<string, string>? values, string? timeZone = null)
     {
-        var response = await _client.PostAsJsonAsync($"/catalog/saved-searches/{id}/results?pageSize=100", new ReplaySavedSearchRequest(values));
+        var zone = timeZone is null ? "" : $"&{AdvancedSearchQuery.TimeZoneParameter}={Uri.EscapeDataString(timeZone)}";
+        var response = await _client.PostAsJsonAsync($"/catalog/saved-searches/{id}/results?pageSize=100{zone}", new ReplaySavedSearchRequest(values));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<Page<T>>())!.Items;
     }

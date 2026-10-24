@@ -10,11 +10,12 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Search;
 
 /// <summary>
-/// What a search is translated in: the context, which the links without navigation query, and the depth of
-/// the hierarchy of the universes, which the links to universes follow.
+/// What a search is translated in: the context, which the links without navigation query, the depth of the
+/// hierarchy of the universes, which the links to universes follow, and the time zone of the dates and times.
 /// </summary>
 /// <param name="UniverseAncestorLevels">The most ancestors a universe has.</param>
-internal sealed record SearchScope(BdthequeDbContext Context, int UniverseAncestorLevels);
+/// <param name="TimeZone">The time zone in which a date and time is compared by its day (<see cref="InstantField"/>).</param>
+internal sealed record SearchScope(BdthequeDbContext Context, int UniverseAncestorLevels, TimeZoneInfo TimeZone);
 
 /// <summary>A link of the model from an entity to related records (fonctionnel/recherche-avancee.md § Liens entre entités).</summary>
 /// <param name="Related">

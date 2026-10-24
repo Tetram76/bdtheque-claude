@@ -5,6 +5,7 @@ using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DomainEnums = Bdtheque.Domain.Enums;
 using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
@@ -63,12 +64,12 @@ internal static class SavedSearchEndpoints
     /// </summary>
     private static async Task<Ok<object>> ReplayAsync(
         Guid id, ReplaySavedSearchRequest request, BdthequeDbContext context, CancellationToken cancellationToken, int page = 1,
-        int pageSize = Paging.DefaultSize)
+        int pageSize = Paging.DefaultSize, [FromQuery(Name = AdvancedSearchQuery.TimeZoneParameter)] string? timeZone = null)
     {
         var search = await FindAsync(context, id, cancellationToken);
         var criteria = SearchCriteriaJson.Deserialize(search.CriteriaWith(request.Values ?? new Dictionary<string, string>()));
         return TypedResults.Ok(await AdvancedSearchEndpoints.SearchAsync(
-            EnumMapping.Map<EntityKind>(search.Entity)!.Value, criteria, context, page, pageSize, cancellationToken));
+            EnumMapping.Map<EntityKind>(search.Entity)!.Value, criteria, context, page, pageSize, SearchTimeZones.Resolve(timeZone), cancellationToken));
     }
 
     /// <summary>The variables of a saved search, each with its default value: the constant of <paramref name="criteria"/> it replaces.</summary>
@@ -114,7 +115,7 @@ internal static class SavedSearchEndpoints
         var criteria = content.Criteria ?? throw new ArgumentException("A saved search has criteria.", nameof(content));
         var entity = AdvancedSearchSchema.Of(content.Entity);
         // Only built, never run: the depth of the hierarchy of the universes does not change what is checked.
-        SearchTranslator.Check(entity, criteria, new SearchScope(context, 0));
+        SearchTranslator.Check(entity, criteria, new SearchScope(context, 0, TimeZoneInfo.Utc));
         return (
             EnumMapping.Map<DomainEnums.EntityKind>(content.Entity)!.Value,
             SearchCriteriaJson.Serialize(criteria),

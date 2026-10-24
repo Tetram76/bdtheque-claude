@@ -1,5 +1,9 @@
+@inject BrowserTimeZone TimeZone
+
 <!DOCTYPE html>
-<html lang="fr">
+@* The time zone of the browser the request brought, which the script compares to the current one: the page is current
+   whenever its request brought it, even when the server, not knowing it, presents in universal time. *@
+<html lang="fr" data-time-zone="@TimeZone.Name">
 
 <head>
     <meta charset="utf-8" />
@@ -15,6 +19,7 @@
 <body>
     <Routes />
     <ReconnectModal />
+    <script src="@Assets["browser-time-zone.js"]"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
