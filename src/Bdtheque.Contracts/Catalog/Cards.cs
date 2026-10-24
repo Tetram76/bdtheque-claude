@@ -14,9 +14,8 @@ namespace Bdtheque.Contracts.Catalog;
 public sealed record AlbumCard(AlbumSummary Album, AlbumRating? Rating, AlbumCover? Cover, bool HasPurchaseIntent);
 
 /// <summary>The cover of an album: a visual of one of its editions.</summary>
-/// <param name="OriginalPath">Path of the original file, relative to the visuals volume.</param>
-/// <param name="DisplayPath">Path of the reduced WebP version shown by default, relative to the visuals volume.</param>
-public sealed record AlbumCover(string OriginalPath, string DisplayPath);
+/// <param name="VisualId">The visual, whose media <c>api</c> serves (<see cref="VisualMediaRoutes"/>).</param>
+public sealed record AlbumCover(Guid VisualId);
 
 /// <summary>
 /// What represents a series: the number of its albums, and the covers of its first volumes, whether the

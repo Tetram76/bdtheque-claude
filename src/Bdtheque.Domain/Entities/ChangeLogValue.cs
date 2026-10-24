@@ -36,8 +36,11 @@ public sealed record ReferenceValue(Guid Id, RecordLabel Label) : ChangeLogValue
 /// <summary>A role credited to an author on an album or a series.</summary>
 public sealed record ContributionValue(Guid AuthorId, AuthorLabel Author, ContributionRole Role) : ChangeLogValue;
 
-/// <summary>A visual of an edition, with its rank among the visuals of its type.</summary>
-public sealed record VisualValue(Guid Id, VisualType Type, int DisplayOrder, string MediaReference) : ChangeLogValue;
+/// <summary>
+/// A visual of an edition, with its rank among the visuals of its type; without the reference of its
+/// media, a technical datum the change log does not record (modele-metier.md § Visuel d'édition).
+/// </summary>
+public sealed record VisualValue(Guid Id, VisualType Type, int DisplayOrder) : ChangeLogValue;
 
 /// <summary>The criteria of a saved search, in the JSON form the advanced search takes.</summary>
 public sealed record SearchCriteriaValue(string Criteria) : ChangeLogValue;

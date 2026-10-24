@@ -10,14 +10,9 @@ namespace Bdtheque.Contracts.Admin;
 /// <param name="AlbumVersion">Version of the album, sent back with any write on the visuals.</param>
 public sealed record EditionVisualsForm(Guid EditionId, IReadOnlyList<EditionVisualForm> Visuals, uint AlbumVersion);
 
-/// <summary>A visual of an edition.</summary>
+/// <summary>A visual of an edition; <c>api</c> serves its media (<see cref="Catalog.VisualMediaRoutes"/>).</summary>
 /// <param name="DisplayOrder">Rank among the visuals of the same type.</param>
-/// <param name="OriginalPath">Path of the original file, relative to the visuals volume.</param>
-/// <param name="DisplayPath">
-/// Path of the reduced WebP version shown by default, relative to the visuals volume. Neither file
-/// name is ever reused, so that both can be served with a long-lived HTTP cache.
-/// </param>
-public sealed record EditionVisualForm(Guid Id, VisualType Type, int DisplayOrder, string OriginalPath, string DisplayPath);
+public sealed record EditionVisualForm(Guid Id, VisualType Type, int DisplayOrder);
 
 /// <summary>
 /// Names of the fields of the multipart form uploading a visual (<c>POST …/editions/{editionId}/visuals</c>).

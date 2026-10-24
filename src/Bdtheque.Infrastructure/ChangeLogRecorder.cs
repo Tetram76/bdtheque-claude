@@ -156,8 +156,7 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
         new(
             ((EditionVisual)entry.Entity).Id,
             values.GetValue<VisualType>(nameof(EditionVisual.Type)),
-            values.GetValue<int>(nameof(EditionVisual.DisplayOrder)),
-            values.GetValue<string>(nameof(EditionVisual.MediaReference)));
+            values.GetValue<int>(nameof(EditionVisual.DisplayOrder)));
 
     // A row of a join table (genres and universes of albums and series): the record carrying the
     // association is the side the change log records modifications of, the other side the element.

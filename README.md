@@ -151,7 +151,7 @@ liste les genres devenus égaux, avec leurs identifiants (utilisateur et base se
 
 ### Dossier des visuels
 
-Les visuels (couvertures, planches, etc.) sont stockés sur un dossier du NAS monté dans les conteneurs, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`.
+Les visuels (couvertures, planches, etc.) sont stockés sur un dossier du NAS, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`. Il n'est monté que dans le conteneur `api`, qui sert les visuels au `frontend`.
 
 Ce dossier doit exister et être **accessible en écriture pour l'utilisateur du conteneur `api`** (UID `1654`, qui n'est pas root) ; sans quoi `api` refuse de démarrer, en indiquant le dossier en cause dans son journal. Docker crée un dossier absent au nom de root : il faut donc le créer et lui donner ce droit avant le premier démarrage, par exemple :
 

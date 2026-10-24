@@ -30,6 +30,20 @@ public sealed class VisualVolumeTests
     }
 
     [Fact]
+    public void FilesOfARelativeRoot_AreAbsolute()
+    {
+        // The development configuration sets a relative root (appsettings.Development.json), while
+        // a file is served only by its absolute path (TypedResults.PhysicalFile rejects any other).
+        var storage = StorageAt(Path.Combine("..", "visuels"));
+
+        var original = storage.OriginalFile("0199c0de00007000800000000000000a.jpg");
+        var display = storage.DisplayFile("0199c0de00007000800000000000000a.jpg");
+
+        Assert.Equal(Path.GetFullPath(Path.Combine("..", "visuels", "originals", "0199c0de00007000800000000000000a.jpg")), original.Path);
+        Assert.Equal(Path.GetFullPath(Path.Combine("..", "visuels", "display", "0199c0de00007000800000000000000a.webp")), display.Path);
+    }
+
+    [Fact]
     public void EnsureWritable_VolumeThatCannotBeWritten_RefusesToStart()
     {
         // A file where the volume should be: its folders cannot be created, as on a volume the user

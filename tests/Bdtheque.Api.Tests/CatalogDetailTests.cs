@@ -355,7 +355,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var response = await _client.PostAsync($"/admin/albums/{albumId}/editions/{editionId}/visuals", form);
         response.EnsureSuccessStatusCode();
         var visual = (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals.Single(v => v.Type == type);
-        return new EditionVisualItem(visual.Id, visual.Type, visual.DisplayOrder, visual.OriginalPath, visual.DisplayPath, default, default);
+        return new EditionVisualItem(visual.Id, visual.Type, visual.DisplayOrder, default, default);
     }
 
     private async Task<uint> GetAlbumVersionAsync(Guid albumId) =>

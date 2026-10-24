@@ -120,6 +120,7 @@ catalog.MapUniverseCatalog();
 catalog.MapPurchaseIntentList();
 catalog.MapAdvancedSearch();
 catalog.MapSavedSearchCatalog();
+catalog.MapVisualMedia();
 
 app.MapAudience().MapAudienceRecording();
 

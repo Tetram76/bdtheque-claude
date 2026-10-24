@@ -51,8 +51,8 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       Api__BaseUrl: http://api:8080
       InternalApiKey__Key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
-    volumes:
-      - ${VISUELS_HOST_PATH:-./data/visuels}:/app/visuels:ro
+    # No visuals volume: like `db`, it is private to `api`, which serves the media
+    # (see choix-implementation/domaine.md § Visuels : stockage et traitement).
     ports:
       - "${FRONTEND_PORT:-8080}:8080"
     depends_on:

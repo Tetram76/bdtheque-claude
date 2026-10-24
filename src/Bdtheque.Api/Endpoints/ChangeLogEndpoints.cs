@@ -63,7 +63,7 @@ internal static class ChangeLogEndpoints
             Model.ContributionValue contribution => new Contract.ContributionValue(
                 contribution.AuthorId, ToAuthor(contribution.Author), EnumMapping.Map<ContractEnums.ContributionRole>(contribution.Role)!.Value),
             Model.VisualValue visual => new Contract.VisualValue(
-                visual.Id, EnumMapping.Map<ContractEnums.VisualType>(visual.Type)!.Value, visual.DisplayOrder, visual.MediaReference),
+                visual.Id, EnumMapping.Map<ContractEnums.VisualType>(visual.Type)!.Value, visual.DisplayOrder),
             Model.SearchCriteriaValue criteria => new Contract.SearchCriteriaValue(SearchCriteriaJson.Deserialize(criteria.Criteria)),
             Model.SearchVariablesValue variables => new Contract.SearchVariablesValue(
                 variables.Variables.Select(v => new SavedSearchVariable(v.Name, v.Location, v.DefaultValue)).ToList()),

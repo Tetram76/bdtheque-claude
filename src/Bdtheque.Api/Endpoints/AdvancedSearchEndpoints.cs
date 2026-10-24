@@ -1,7 +1,6 @@
 using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Search;
-using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
@@ -45,8 +44,6 @@ internal static class AdvancedSearchEndpoints
         (EditionVisual v) => new EditionVisualListItem(
             v.Id,
             EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value,
-            VisualStorage.OriginalPath(v.MediaReference),
-            VisualStorage.DisplayPath(v.MediaReference),
             v.Edition.Album.ToSummary(),
             v.Edition.ToSummary()));
 

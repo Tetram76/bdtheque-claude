@@ -35,6 +35,16 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
+    public async Task Schema_LeavesOutTheMediaReferenceOfAVisual()
+    {
+        // A technical datum, meaningless to the user (fonctionnel/recherche-avancee.md § Données interrogées).
+        var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
+
+        var visual = schema.Entities.Single(e => e.Entity == EntityKind.EditionVisual);
+        Assert.Equal(["createdAt", "displayOrder", "modifiedAt", "record", "type"], visual.Fields.Select(f => f.Key).Order());
+    }
+
+    [Fact]
     public async Task Schema_DescribesEveryEntityWithItsDataAndLinks()
     {
         var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
@@ -497,12 +507,8 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var ofMyEdition = new SearchLink("edition", Text("record", Is, edition.Id.ToString()));
 
         Assert.Equal(
-            [new EditionVisualListItem(visual.Id, VisualType.Cover, visual.OriginalPath, visual.DisplayPath, albumSummary, editionSummary)],
+            [new EditionVisualListItem(visual.Id, VisualType.Cover, albumSummary, editionSummary)],
             await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, ofMyEdition));
-        Assert.Equal(
-            [visual.Id],
-            (await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, Text("mediaReference", EqualTo, Path.GetFileName(visual.OriginalPath))))
-                .Select(v => v.Id));
         Assert.Equal(
             [new EditionListItem(albumSummary, editionSummary, true)],
             await SearchAsync<EditionListItem>(EntityKind.Edition, Text("record", Is, edition.Id.ToString())));
