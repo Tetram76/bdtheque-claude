@@ -81,23 +81,29 @@ mention in it.
 ## 5. Mark the deferred and rejected findings in SonarQube Cloud
 
 Marking them is the agent's job, never handed to the user. Do it through the
-user's SonarQube Cloud session in the built-in browser (no token is ever
-handled): open `https://sonarcloud.io/project/issues?id=Tetram76_bdtheque-claude`;
-on the sign-in page, ask the user to sign in there with GitHub, which is the
-only step left to them. Then, from that page, call the web API with the session
-cookie and its XSRF token, one small batch per call (the tool times out after
-about 45 s; never re-run a batch before checking what the previous one did):
+web API, authenticated by the user's personal token that the `SONAR_TOKEN`
+environment variable of the workstation holds (`depot.md` → « Repository »).
+Never print, log or echo the token, and never act through a browser session.
+If the variable is missing, say so and ask the user to create the token in
+SonarQube Cloud (My Account → Security) and set it as a user environment
+variable, without ever sending its value in the conversation.
 
-```javascript
-const xsrf = decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)[1]);
-const post = (url, body) => fetch(url, { method: 'POST', body: new URLSearchParams(body),
-  headers: { 'X-XSRF-TOKEN': xsrf, 'Content-Type': 'application/x-www-form-urlencoded' } });
-// per finding: a comment pointing to the justification, then the transition
-await post('/api/issues/add_comment', { issue: key, text: 'Contre-analysé : justification dans le commentaire « Analyse SonarQube Cloud » de <PR URL>' });
-await post('/api/issues/do_transition', { issue: key, transition: 'falsepositive' }); // or 'accept'
-// per security hotspot reviewed and judged safe
-await post('/api/hotspots/change_status', { hotspot: key, status: 'REVIEWED', resolution: 'SAFE', comment: '<justification>' });
+```powershell
+$base = 'https://sonarcloud.io/api'
+$auth = @{ Authorization = "Bearer $env:SONAR_TOKEN" }
+# per finding: a comment pointing to the justification, then the transition
+Invoke-RestMethod -Method Post "$base/issues/add_comment" -Headers $auth -Body @{
+    issue = $key; text = 'Contre-analysé : justification dans le commentaire « Analyse SonarQube Cloud » de <PR URL>' }
+Invoke-RestMethod -Method Post "$base/issues/do_transition" -Headers $auth -Body @{
+    issue = $key; transition = 'falsepositive' }   # or 'accept'
+# per security hotspot reviewed and judged safe
+Invoke-RestMethod -Method Post "$base/hotspots/change_status" -Headers $auth -Body @{
+    hotspot = $key; status = 'REVIEWED'; resolution = 'SAFE'; comment = '<justification>' }
 ```
+
+The same token serves the project settings that the analysis configuration
+does not carry (e.g. the new code definition, the quality gate of the project),
+through the matching endpoints of the web API.
 
 `falsepositive` for a finding whose premise is wrong; `accept` for a rule that
 does not fit the case, and for a valid finding whose fix is deferred (the
