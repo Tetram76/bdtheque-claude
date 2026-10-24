@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Category.Business" xml:space="preserve">
+    <value>Saisie à corriger</value>
+  </data>
+  <data name="Category.Functional" xml:space="preserve">
+    <value>Données modifiées entre-temps</value>
+  </data>
+  <data name="Category.Technical" xml:space="preserve">
+    <value>Erreur technique</value>
+  </data>
+  <data name="Business.Generic" xml:space="preserve">
+    <value>La demande enfreint une règle de l&apos;application : corrigez votre saisie.</value>
+  </data>
+  <data name="Functional.Conflict" xml:space="preserve">
+    <value>Cette fiche a été modifiée entre-temps, depuis un autre onglet ou un autre appareil : rechargez-la avant de recommencer.</value>
+  </data>
+  <data name="Functional.NotFound" xml:space="preserve">
+    <value>Cette fiche n&apos;existe plus : elle a été supprimée entre-temps.</value>
+  </data>
+  <data name="Functional.ImpactChanged" xml:space="preserve">
+    <value>Ce que la suppression emporte a changé depuis sa confirmation : vérifiez-le avant de confirmer de nouveau.</value>
+  </data>
+  <data name="Technical" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas pu traiter la demande. Réessayez dans quelques instants.</value>
+  </data>
+</root>

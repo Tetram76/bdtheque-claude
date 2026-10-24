@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bdtheque.Frontend\Bdtheque.Frontend.csproj" />
+    <!-- The rule codes the frontend's texts must cover (RuleMessagesTests); the frontend itself never references it. -->
+    <ProjectReference Include="..\..\src\Bdtheque.Domain\Bdtheque.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

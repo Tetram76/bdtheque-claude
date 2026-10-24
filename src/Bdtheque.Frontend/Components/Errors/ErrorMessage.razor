@@ -1,0 +1,42 @@
+@using Bdtheque.Contracts.Deletion
+@using Bdtheque.Frontend.Api
+@inject IStringLocalizer<ErrorMessage> L
+@inject IStringLocalizer<RuleMessages> Rules
+@inject IStringLocalizer<EntityNames> Entities
+
+@* The category, both named and carried by an attribute the themes style (#194), tells the three kinds of
+   errors apart at first glance (fonctionnel/index.md § Présentation des erreurs). *@
+<div role="alert" class="error-message" data-error-category="@CategoryName">
+    <p data-error-label>@L[$"Category.{Problem.Category}"]</p>
+    <p data-error-text>@Text</p>
+    @if (Problem.Category != ProblemCategory.Technical && Problem.Impact is { BlockedBy.Count: > 0 } impact)
+    {
+        <ul data-error-impact>
+            @foreach (var count in impact.BlockedBy)
+            {
+                <li>@CountText(count)</li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ApiProblem Problem { get; set; } = null!;
+
+    private string CategoryName => Problem.Category.ToString().ToLowerInvariant();
+
+    // A technical error discloses nothing of its cause, which only the logs of the API hold.
+    private string Text => Problem.Category switch
+    {
+        ProblemCategory.Business when Problem.RuleCode is { } code && Rules[code] is { ResourceNotFound: false } rule => rule.Value,
+        ProblemCategory.Business => L["Business.Generic"],
+        ProblemCategory.Functional when Problem.Impact is not null => L["Functional.ImpactChanged"],
+        ProblemCategory.Functional when Problem.Status == StatusCodes.Status404NotFound => L["Functional.NotFound"],
+        ProblemCategory.Functional => L["Functional.Conflict"],
+        _ => L["Technical"],
+    };
+
+    private string CountText(ImpactCount count) =>
+        Entities[$"{count.Kind}.{(count.Count == 1 ? "One" : "Other")}", count.Count];
+}
