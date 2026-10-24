@@ -9,7 +9,10 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, an
 - **Hébergement** : GitHub
 - **Nom du dépôt** : `Tetram76/bdtheque-claude`
 - **URL** : <https://github.com/Tetram76/bdtheque-claude>
-- La **gestion du repository GitHub** (configuration, branches, protections, CI/CD, etc.) relève du périmètre de l'agent et doit être maintenue conformément aux contraintes du projet.
+- La **gestion du repository GitHub** (configuration, branches, protections, sécurité, CI/CD, etc.) relève du périmètre de l'agent et doit être maintenue conformément aux contraintes du projet. Il en va de même des **services externes rattachés au dépôt** : paramétrage du projet SonarQube Cloud et marquage de ses problèmes (§ Analyse de la qualité du code), dépôts Docker Hub de l'application.
+  - L'agent accomplit lui-même ces actes (`gestion-projet/gouvernance.md` § Prise de décision, acte de gestion du projet), par l'API de GitHub ou, pour un service externe, par la session de l'utilisateur dans le navigateur intégré. Il ne les laisse jamais à l'utilisateur comme une tâche à faire de son côté.
+  - Seul ce qui exige l'utilisateur en personne lui revient : se connecter à un service (mot de passe, autorisation OAuth), créer un secret et en saisir la valeur, qu'aucun agent ne manipule.
+  - Un acte que l'outillage de l'agent lui refuse (ex. une commande bloquée par le mode automatique de Claude Code) n'est pas contourné : l'agent nomme l'acte refusé, la commande et la raison du refus, et demande à l'utilisateur de l'autoriser.
 
 ## Signature des commits
 
