@@ -1,0 +1,16 @@
+@inherits LayoutComponentBase
+@inject IStringLocalizer<LayoutText> L
+
+<header>
+    <a href="@AppPaths.AdminHome">@L["AdminTitle"]</a>
+    <nav aria-label="@L["AdminMenu"]">
+        <a href="@AppPaths.Home">@L["Consultation"]</a>
+    </nav>
+    <a href="@AppPaths.Help">@L["Help"]</a>
+</header>
+
+<main>
+    @Body
+</main>
+
+<UnhandledErrorBanner />

@@ -34,7 +34,7 @@ La solution .NET est découpée en projets par responsabilité, sous `src/` :
 | `Bdtheque.Mcp` | Conteneur `mcp` (Phase 6) : outils MCP pour agents IA, appels HTTP vers `Bdtheque.Api` via `Bdtheque.Contracts` (`choix-implementation/agents-ia.md` § Outil pour agents IA). Ne référence ni `Bdtheque.Api` ni `Bdtheque.Domain`. |
 | `Bdtheque.HealthProbe` | Sonde du bilan de santé des images publiées (`HEALTHCHECK`), qui n'ont ni shell ni `curl` (`choix-implementation/deploiement.md` § Images de base des conteneurs) : interroge une URL et sort en `0` sur un succès, en `1` sinon. |
 
-Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet/`.
+Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet/`. S'y ajoutent les tests de bout en bout de l'application complète (`Bdtheque.EndToEnd.Tests`) et la bibliothèque que partagent les tests (`Bdtheque.Testing`), cf. `choix-implementation/socle.md` § Outillage de développement .NET.
 
 ## Versions et bibliothèques
 

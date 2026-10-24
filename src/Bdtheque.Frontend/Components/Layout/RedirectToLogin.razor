@@ -6,7 +6,7 @@
         // `forceLoad` triggers a full page reload so the login page runs through the
         // regular ASP.NET Core authentication pipeline instead of an interactive render.
         NavigationManager.NavigateTo(
-            $"/admin/login?returnUrl={Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}",
+            $"{AppPaths.AdminLogin}?returnUrl={Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}",
             forceLoad: true);
     }
 }

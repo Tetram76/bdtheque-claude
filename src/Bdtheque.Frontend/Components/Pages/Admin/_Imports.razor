@@ -1,0 +1,5 @@
+@* Every page of the administration is reserved to the authenticated administrator
+   (contraintes-techniques/architecture-deploiement.md § Authentification). *@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@layout AdminLayout

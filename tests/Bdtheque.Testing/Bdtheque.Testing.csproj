@@ -5,10 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The API host is shared by the API tests and the end-to-end tests of the whole application. -->
+    <ProjectReference Include="..\..\src\Bdtheque.Api\Bdtheque.Api.csproj" />
     <ProjectReference Include="..\..\src\Bdtheque.Infrastructure\Bdtheque.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
 

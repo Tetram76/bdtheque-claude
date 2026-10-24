@@ -54,6 +54,11 @@ jobs:
           dotnet tool restore
           dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
 
+      # The end-to-end tests drive the application in Chromium, with the system libraries it needs on
+      # the runner (choix-implementation/socle.md § Outillage de développement .NET).
+      - name: Install the browser of the end-to-end tests
+        run: pwsh tests/Bdtheque.EndToEnd.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
       # The coverage is measured by the SonarQube Cloud analysis (code-quality.yml), which reports it.
       - name: Run tests
         run: dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
