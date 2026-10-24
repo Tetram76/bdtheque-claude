@@ -10,13 +10,19 @@ on:
     branches: [main]
   push:
     branches: [main]
+  # Run on main once a version is tagged: the new code period of the project starts at the first
+  # analysis carrying that version, which must be the one of the published commit
+  # (gestion-projet/depot.md § Versions et releases).
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# A new push to a pull request cancels the analysis of its previous commit. A run on main is never
+# cancelled, the one that follows the tagging of a version above all.
 concurrency:
-  group: code-quality-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   sonarcloud:

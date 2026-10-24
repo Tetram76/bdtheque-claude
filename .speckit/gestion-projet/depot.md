@@ -59,7 +59,7 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, an
 - **Retours** : ceux de SonarQube Cloud sont ceux d'un outil d'analyse statique, traités dans le cycle de chaque Pull Request selon `gestion-projet/revue-tickets.md` § Analyse SonarQube Cloud ; sa porte de qualité n'est pas, en elle-même, une condition de fusion.
 - **Jeton** : l'analyse s'authentifie auprès de SonarQube Cloud avec le secret de dépôt GitHub `SONAR_TOKEN`. Une Pull Request venant d'un **fork** n'y a pas accès et son analyse échoue, sans bloquer sa fusion. L'analyse automatique de SonarQube Cloud est désactivée sur le projet : elle exclut l'analyse par le CI, et ne mesure pas la couverture.
 - **Périmètre** : le code de la solution, celui de `tests/` comme code de test ; les maquettes de `.speckit/`, les prototypes de `poc/` et les migrations générées par EF Core en sont exclus. La couverture, que seule cette analyse mesure, suit `choix-implementation/socle.md` § Outillage de développement .NET.
-- **Nouveau code** : celui qui a changé depuis la dernière version publiée (§ Versions et releases) : le projet est réglé sur la version précédente (*Previous version*), et chaque analyse porte le tag de la dernière version publiée. Sur une Pull Request, le nouveau code est celui de la PR.
+- **Nouveau code** : celui qui a changé depuis la dernière version publiée (§ Versions et releases) : le projet est réglé sur la version précédente (*Previous version*), et chaque analyse porte le tag de la dernière version publiée ; la publication d'une version relance l'analyse de `main` pour que la période commence au commit publié (§ Versions et releases). Sur une Pull Request, le nouveau code est celui de la PR.
 
 ## Mises à jour des dépendances
 
@@ -149,6 +149,7 @@ Les versions de l'application sont connues du dépôt avant leur publication : c
 - **Publication** : une version est publiée quand tous les tickets de son jalon sont fermés :
   - **tag** annoté et signé (clé GPG de § Signature des commits), posé sur le commit de `main` qui la complète ;
   - **release** GitHub sur ce tag, dont les notes sont générées par GitHub à partir des Pull Requests fusionnées depuis le tag de la version précédente, et vérifiées avant publication comme tout texte publié (`gestion-projet/gouvernance.md` § Budget IA, mention de Codex). Une version `0.0.x`, qui ne livre pas d'application utilisable, est marquée **pré-release** ;
+  - **analyse SonarQube Cloud** de `main`, relancée dès le tag posé (`gh workflow run code-quality.yml --ref main`) : la période du nouveau code commence à la première analyse qui porte la version (§ Analyse de la qualité du code), qui doit être celle du commit publié, et non celle de la fusion suivante, dont les changements en seraient exclus ;
   - **images Docker** de la version, publiées à la demande depuis son tag (`choix-implementation/deploiement.md` § Publication des images Docker) ; les versions `0.0.x` n'en ont pas, faute d'interface ;
   - **fermeture du jalon**.
 - La publication d'une version est un acte de gestion du projet (`gestion-projet/gouvernance.md` § Prise de décision) : l'agent l'accomplit dès que la règle ci-dessus la prescrit, puis en informe l'utilisateur. Le déploiement de la version, lui, appartient à l'utilisateur.
