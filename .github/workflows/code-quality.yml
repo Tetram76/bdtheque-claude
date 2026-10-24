@@ -25,12 +25,12 @@ jobs:
     steps:
       # The full history lets the analysis tell the new code apart and blame each issue.
       - name: Checkout
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5.4.0
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: "10.0.402"
 
@@ -64,8 +64,12 @@ jobs:
       - name: Build
         run: dotnet build Bdtheque.slnx --configuration Release --no-restore
 
+      # Coverage of the application code only: the library shared by the tests is left out.
       - name: Run tests with coverage
-        run: dotnet test Bdtheque.slnx --configuration Release --no-build --collect "XPlat Code Coverage;Format=opencover"
+        run: >-
+          dotnet test Bdtheque.slnx --configuration Release --no-build --collect "XPlat Code Coverage"
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
 
       - name: End analysis
         env:
