@@ -1,8 +1,9 @@
 @inject BrowserTimeZone TimeZone
 
 <!DOCTYPE html>
-@* The time zone the page is rendered in, which the script compares to that of the browser. *@
-<html lang="fr" data-time-zone="@TimeZone.Zone.Id">
+@* The time zone of the browser the request brought, which the script compares to the current one: the page is current
+   whenever its request brought it, even when the server, not knowing it, presents in universal time. *@
+<html lang="fr" data-time-zone="@TimeZone.Name">
 
 <head>
     <meta charset="utf-8" />

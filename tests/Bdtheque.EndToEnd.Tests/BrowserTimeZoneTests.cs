@@ -69,8 +69,49 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         await page.GotoAsync(AppPaths.Home);
         await WaitForRendersAsync(renders, 1);
 
-        Assert.Equal("UTC", await page.Locator("html").GetAttributeAsync("data-time-zone"));
+        Assert.Null(await page.Locator("html").GetAttributeAsync("data-time-zone"));
         Assert.Single(renders);
+    }
+
+    [Fact]
+    public async Task TabLeftInTheFormerTimeZone_IsRenderedAgain_WhenTheCookieIsAlreadyCurrent()
+    {
+        // Two tabs open when the browser changes time zone: the first one the user comes back to updates the cookie,
+        // shared with the other one, which must still be rendered again in the new time zone.
+        var page = await PageInAsync("Asia/Tokyo");
+        await page.AddInitScriptAsync(ZoneOfTheBrowser("Asia/Tokyo"));
+        var renders = await PresentingADateAndTimeAsync(page);
+        await page.GotoAsync(AppPaths.Home);
+        await WaitForRendersAsync(renders, 2);
+        Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
+
+        await page.Context.AddCookiesAsync([TimeZoneCookie("Europe/Paris")]);
+        await page.EvaluateAsync("""
+            () => {
+                sessionStorage.setItem("zoneOfTheBrowser", "Europe/Paris");
+                document.dispatchEvent(new Event("visibilitychange"));
+            }
+            """);
+        await WaitForRendersAsync(renders, 3);
+
+        Assert.Equal(3, renders.Count);
+        Assert.Equal("Europe/Paris", await page.Locator("html").GetAttributeAsync("data-time-zone"));
+    }
+
+    [Fact]
+    public async Task TimeZoneTheServerDoesNotKnow_IsNotRenderedAgainAndAgain()
+    {
+        // The server presents in universal time a time zone it does not know: the page is current all the same, the
+        // request having brought the time zone of the browser.
+        var page = await PageInAsync("Asia/Tokyo");
+        await page.AddInitScriptAsync(ZoneOfTheBrowser("Nowhere/Atlantis"));
+        var renders = await PresentingADateAndTimeAsync(page);
+
+        await page.GotoAsync(AppPaths.Home);
+        await WaitForRendersAsync(renders, 3);
+
+        Assert.Equal(2, renders.Count);
+        Assert.Equal("Nowhere/Atlantis", await page.Locator("html").GetAttributeAsync("data-time-zone"));
     }
 
     [Fact]
@@ -94,6 +135,21 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         });
         return await context.NewPageAsync();
     }
+
+    // The time zone the browser reports, which the test changes where the context's is fixed. Kept for the tab, as the
+    // real one is, across the reloads that the init script runs again on.
+    private static string ZoneOfTheBrowser(string zone) => $$"""
+        if (sessionStorage.getItem("zoneOfTheBrowser") === null) {
+            sessionStorage.setItem("zoneOfTheBrowser", "{{zone}}");
+        }
+        const resolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
+        Intl.DateTimeFormat.prototype.resolvedOptions = function () {
+            return { ...resolvedOptions.call(this), timeZone: sessionStorage.getItem("zoneOfTheBrowser") };
+        };
+        """;
+
+    private Cookie TimeZoneCookie(string zone) =>
+        new() { Name = BrowserTimeZone.CookieName, Value = zone, Url = application.BaseAddress.ToString() };
 
     // No page presents a date and time yet: the home page served gets one, as a page that does would render it.
     private static async Task<List<string>> PresentingADateAndTimeAsync(IPage page)
