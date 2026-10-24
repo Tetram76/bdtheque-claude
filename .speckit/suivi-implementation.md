@@ -176,7 +176,7 @@ Chantiers d'amélioration identifiés par cette revue, chacun réalisé par sa p
 | --- | --- |
 | ~~#219~~ | Horloge de l'application pour les dates renseignées automatiquement |
 | ~~#220~~ | Pipeline CI et outillage .NET : SDK, restauration verrouillée, cache NuGet, couverture et projets de test |
-| #221 | Paramétrage des valeurs de la recherche avancée par EF Core |
+| ~~#221~~ | Paramétrage des valeurs de la recherche avancée par EF Core |
 
 ## Phase 3 — Frontend Blazor
 
