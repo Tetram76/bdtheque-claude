@@ -1,0 +1,8 @@
+@inject IStringLocalizer<LayoutText> L
+
+@* Shown by blazor.web.js when an interactive component fails: the id is the one it looks for. *@
+<div id="blazor-error-ui" data-nosnippet>
+    @L["UnhandledError"]
+    <a href="." class="reload">@L["Reload"]</a>
+    <button type="button" class="dismiss" aria-label="@L["Dismiss"]">🗙</button>
+</div>

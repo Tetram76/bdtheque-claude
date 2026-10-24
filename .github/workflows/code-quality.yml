@@ -72,6 +72,10 @@ jobs:
       - name: Build
         run: dotnet build Bdtheque.slnx --configuration Release --no-restore
 
+      # The end-to-end tests run in Chromium, as in the CI (ci.yml).
+      - name: Install the browser of the end-to-end tests
+        run: pwsh tests/Bdtheque.EndToEnd.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
       # Coverage of the application code only: the library shared by the tests is left out.
       - name: Run tests with coverage
         run: >-

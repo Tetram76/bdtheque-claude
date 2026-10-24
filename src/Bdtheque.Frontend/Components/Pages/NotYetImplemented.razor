@@ -1,0 +1,19 @@
+@attribute [Route(AppPaths.NotYetImplemented)]
+@inject IStringLocalizer<NotYetImplemented> L
+@inject NavigationManager Navigation
+
+<PageTitle>@L["Title"]</PageTitle>
+
+<h1>@L["Title"]</h1>
+<p>@L["Message"]</p>
+<a href="@_returnPath">@L["Return"]</a>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string _returnPath = AppPaths.Home;
+
+    protected override void OnInitialized() =>
+        _returnPath = ReturnPath.FromReferer(HttpContext?.Request.Headers.Referer, new Uri(Navigation.Uri));
+}

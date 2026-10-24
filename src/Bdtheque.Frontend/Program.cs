@@ -1,4 +1,5 @@
 using Bdtheque.Frontend.Components;
+using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
@@ -8,14 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// No text shown to the user is written in the code: each component reads its own (choix-implementation/socle.md
+// § Internationalisation).
+builder.Services.AddLocalization();
+
 // The authentication cookie is owned exclusively by this container (BFF):
 // `api` has no knowledge of the user (see choix-implementation/socle.md § Authentification : mise en œuvre).
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.Cookie.Name = "Bdtheque.Auth";
-        options.LoginPath = "/admin/login";
-        options.AccessDeniedPath = "/admin/login";
+        options.LoginPath = AppPaths.AdminLogin;
+        options.AccessDeniedPath = AppPaths.AdminLogin;
     });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
