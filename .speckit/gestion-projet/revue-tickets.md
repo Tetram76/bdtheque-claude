@@ -13,6 +13,7 @@ Règle de merge, validation fonctionnelle, verrouillage, revue de code et revue 
 - Le CI (GitHub Actions) constitue le filet de sécurité final et le verrou technique sur le merge.
 - La réussite de la CI est **imposée techniquement** par le Ruleset GitHub (required status checks) : une PR dont un check requis n'a pas réussi ne peut pas être fusionnée.
 - L'approbation de Codex n'est imposée par aucun mécanisme GitHub : elle reste une contrainte de processus, que l'agent vérifie avant tout merge.
+- L'**analyse SonarQube Cloud** du commit de tête est **traitée** avant le merge (§ « Analyse SonarQube Cloud ») : chacun de ses nouveaux problèmes est corrigé, différé ou rejeté. Sa porte de qualité n'est pas, en elle-même, une condition de merge.
 
 ## Validation fonctionnelle
 
@@ -38,6 +39,16 @@ Des agents de revue de code (ex. Bugbot, outils d'analyse statique comme SonarQu
 - L'objectif de robustesse est une application **à l'épreuve de l'utilisateur** (parcours réels, usages légitimes, erreurs utilisateur plausibles), pas un code **blindé** contre tout scénario théorique ou détourné. Le code est écrit pour le contexte de cette application — il n'a pas vocation à devenir une librairie publique ni à être réutilisé hors projet.
 - Les scénarios invoqués par une revue (cas limites, abus, chemins d'exécution) doivent être **pertinents, valides et possibles** dans ce contexte applicatif ; un scénario hypothétique, irréaliste ou hors périmètre ne justifie pas une complexification du code.
 
+### Analyse SonarQube Cloud
+
+L'analyse SonarQube Cloud (`gestion-projet/depot.md` § Analyse de la qualité du code) fait partie du cycle de réalisation d'une Pull Request. Elle a lieu sur chaque commit poussé, brouillon compris, en parallèle du CI, et ne coûte donc ni revue Codex ni attente propre tant que la PR est en brouillon : c'est là qu'elle est traitée.
+
+- **Moment** : avant le passage de la PR en « prête pour la revue » (§ Ouverture de la PR), l'agent attend l'analyse du commit de tête et la traite. Après ce passage, chaque push (correction d'un retour de Codex) produit une nouvelle analyse, traitée de même avant le merge ; une correction qu'elle appelle rejoint, autant que possible, le push suivant d'une correction de Codex, pour ne pas déclencher une revue de plus.
+- **Contenu** : les **nouveaux problèmes** de la PR (bugs, vulnérabilités, *code smells*), ses **points sensibles de sécurité** (*security hotspots*) à revoir, et sa porte de qualité. Chaque problème est traité comme un retour de revue (§ « Traiter un retour » : contre-vérification, cause racine, confrontation à l'objectif de la PR, correction à la racine dans un commit dédié, report ou rejet justifié) ; une règle d'analyse inadaptée au projet est un rejet, justifié de même.
+- **Trace** : l'agent ne peut pas statuer sur un problème dans SonarQube Cloud. Les problèmes différés ou rejetés sont donc listés, avec leur justification, dans un **commentaire de la PR**, mis à jour à chaque analyse traitée ; l'utilisateur peut les marquer en conséquence dans SonarQube Cloud.
+- **Dispense** : une PR dont aucun push ne modifie de fichier analysé (documentation seule : `.speckit/`, fichiers Markdown, skills ; prototypes de `poc/`) n'a rien à traiter.
+- **Analyse indisponible** (service en panne, PR venant d'un fork, analyse en échec) : elle ne bloque pas la PR. L'agent le signale à l'utilisateur, et la PR suit le reste de son cycle.
+
 ### Analyse des vulnérabilités des images Docker
 
 Les images Docker de l'application sont analysées par **Docker Scout** lors de la revue de chaque Pull Request, par le CI (check requis, cf. `gestion-projet/depot.md` § « Intégration continue (CI) »), et de nouveau avant toute publication. L'analyse échoue dès qu'une image ajoute une vulnérabilité **corrigeable** par rapport à l'image publiée, qu'elle ne doit ni introduire ni voir publiée (`contraintes-techniques/architecture-deploiement.md` § Déploiement).
@@ -53,7 +64,7 @@ Une revue **Codex** se déclenche automatiquement à la création d'une Pull Req
 
 #### Ouverture de la PR
 
-Codex revoit ce qui est poussé, que le travail soit achevé ou non : une PR ouverte trop tôt lui fait revoir un contenu incomplet, et consomme sa revue en pure perte (cf. `gestion-projet/gouvernance.md` § Budget IA). Une PR n'est donc **créée hors brouillon** — ou **passée de brouillon à « prête pour la revue »** — qu'une fois le **contenu de sa branche complet**. Tant que ce contenu est en cours d'élaboration ou de discussion, il reste local, ou sur une PR en brouillon.
+Codex revoit ce qui est poussé, que le travail soit achevé ou non : une PR ouverte trop tôt lui fait revoir un contenu incomplet, et consomme sa revue en pure perte (cf. `gestion-projet/gouvernance.md` § Budget IA). Une PR est donc toujours **créée en brouillon**, et n'est **passée de brouillon à « prête pour la revue »** qu'une fois le **contenu de sa branche complet**, les checks du CI réussis, et l'analyse SonarQube Cloud de son commit de tête traitée (§ Analyse SonarQube Cloud) : ce qu'ils relèvent est ainsi corrigé avant la revue de Codex, sans lui en coûter une de plus. Tant que ce contenu est en cours d'élaboration ou de discussion, il reste local, ou sur la PR en brouillon. Seule une PR limitée à `poc/`, hors de la revue Codex (aucun fichier analysé non plus), peut être créée directement « prête pour la revue ».
 
 **Un travail en cours, c'est une PR en brouillon.** Le contenu d'une branche est celui du **chantier entier**, tel que l'utilisateur l'a demandé, et non celui de l'étape qui vient d'aboutir. Dans un chantier mené en plusieurs étapes (ex. les maquettes de plusieurs écrans, revues une à une par l'utilisateur), la validation d'une étape n'achève pas le chantier : la PR reste en brouillon jusqu'à la fin de sa dernière étape. Une PR créée pendant le chantier, pour publier ou sauvegarder un état intermédiaire, est toujours créée en brouillon. En cas de doute sur l'achèvement du contenu, la PR est en brouillon.
 
