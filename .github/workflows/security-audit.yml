@@ -28,6 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
 
+      # The SDK of the Dockerfiles (SdkVersionTests).
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0
         with:
