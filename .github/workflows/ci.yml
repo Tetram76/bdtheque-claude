@@ -23,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # The SDK of the Dockerfiles (SdkVersionTests).
       - name: Setup .NET
         id: dotnet
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: "10.0.402"
 
@@ -36,7 +36,7 @@ jobs:
       # implicit ones. No fallback key: a partial cache, saved again under the new key, would keep
       # the packages of every former version.
       - name: Cache NuGet packages
-        uses: actions/cache@v6.1.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('Directory.Packages.props', '**/Directory.Build.props', '**/*.csproj', 'dotnet-tools.json') }}
@@ -60,7 +60,7 @@ jobs:
 
       - name: Publish test results
         if: always()
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-results
           path: "**/TestResults/test-results.trx"
@@ -74,16 +74,16 @@ jobs:
         image: [api, frontend]
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v4.4.1
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       # The publishing token: the code of the branch and of its dependencies only runs inside the
       # build containers, which never get the registry credentials (gestion-projet/depot.md § Intégration
       # continue (CI)).
       - name: Log in to Docker Hub
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -91,7 +91,7 @@ jobs:
       # Same platform as the published images (docker-publish.yml), so that a pull request
       # cannot break their publication. Loaded into the local image store for Docker Scout.
       - name: Build ${{ matrix.image }} image
-        uses: docker/build-push-action@v7.4.0
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: docker/${{ matrix.image }}/Dockerfile
@@ -114,7 +114,7 @@ jobs:
       # already holds is not introduced by this change (choix-implementation/deploiement.md § Publication des
       # images Docker). Without a published image, no fixable vulnerability is accepted at all.
       - name: Check vulnerabilities of the ${{ matrix.image }} image
-        uses: docker/scout-action@v1.27.0
+        uses: docker/scout-action@a4119c5a8c5076236a54e4ce99531f7e4dd2ef84 # v1.27.0
         with:
           command: ${{ steps.reference.outputs.published == 'true' && 'compare' || 'cves' }}
           image: local://bdtheque-${{ matrix.image }}:scan

@@ -2,8 +2,7 @@
 <#
 .SYNOPSIS
     Lists the newer versions available for every technology pinned in the repository, the known
-    vulnerabilities of its NuGet packages, the result of the daily security audit and the open
-    Dependabot alerts.
+    vulnerabilities of its NuGet packages and the result of the daily security audit.
 
 .DESCRIPTION
     Version watch of gestion-projet/depot.md § Mises à jour des dépendances, run by the agent at each
@@ -122,12 +121,24 @@ if ($newerAlpine) {
     $updates.Add((New-Update 'Image postgres (Alpine)' $pgTag $newerAlpine.Name $pgAlpine $newerAlpine.Alpine $newerAlpine.Updated))
 }
 
-# GitHub Actions: each action is pinned to an exact release of its repository.
+# The commit a tag designates, through the tag object of an annotated tag.
+function Get-TagCommit([string] $repo, [string] $tag) {
+    $target = (gh api "repos/$repo/git/ref/tags/$tag" | ConvertFrom-Json).object
+    if ($target.type -eq 'tag') { $target = (gh api "repos/$repo/git/tags/$($target.sha)" | ConvertFrom-Json).object }
+    $target.sha
+}
+
+# GitHub Actions: each action is pinned to the commit of an exact release of its repository, named in a
+# comment. A commit that is no longer the one of its release stops the watch: the comment would lie.
 Get-ChildItem (Join-Path $root '.github/workflows') -Filter *.yml |
-    Select-String -Pattern 'uses:\s*([\w.-]+/[\w.-]+)@v(\d+\.\d+\.\d+)' |
-    ForEach-Object { [pscustomobject]@{ Repo = $_.Matches[0].Groups[1].Value; Version = $_.Matches[0].Groups[2].Value } } |
-    Sort-Object Repo, Version -Unique |
+    Select-String -Pattern 'uses:\s*([\w.-]+/[\w.-]+)@([0-9a-f]{40}) # v(\d+\.\d+\.\d+)' |
+    ForEach-Object { [pscustomobject]@{ Repo = $_.Matches[0].Groups[1].Value; Commit = $_.Matches[0].Groups[2].Value; Version = $_.Matches[0].Groups[3].Value } } |
+    Sort-Object Repo, Commit, Version -Unique |
     ForEach-Object {
+        $released = Get-TagCommit $_.Repo "v$($_.Version)"
+        if ($released -ne $_.Commit) {
+            throw "Action $($_.Repo): commit $($_.Commit) is not the one of v$($_.Version) ($released)."
+        }
         $releases = gh api "repos/$($_.Repo)/releases?per_page=100" | ConvertFrom-Json |
             Where-Object { -not $_.draft -and -not $_.prerelease -and $_.tag_name -match '^v(\d+\.\d+\.\d+)$' } |
             ForEach-Object { [pscustomobject]@{ Version = [version] $Matches[1]; Name = $_.tag_name; Published = $_.published_at } }
@@ -157,8 +168,9 @@ else {
     $nugetVulnerabilities | Format-Table -AutoSize | Out-String -Width 200 | Write-Output
 }
 
-# Daily security audit (security-audit.yml): every known vulnerability of the NuGet packages and of the
-# images, kept in its "Vulnérabilités connues" issue whether or not the repository is being worked on.
+# Daily security audit (security-audit.yml): every known vulnerability of the NuGet packages, of the
+# images and of the actions, kept in its "Vulnérabilités connues" issue whether or not the repository is
+# being worked on.
 $audit = gh run list --workflow security-audit.yml --branch main --limit 1 --json conclusion,createdAt,url 2>$null | ConvertFrom-Json
 if (-not $audit) {
     Write-Output 'Daily security audit: no run yet'
@@ -171,21 +183,4 @@ else {
         Write-Output "Known vulnerabilities ($($issue[0].state), $($issue[0].url)):"
         Write-Output $(if ($known) { $known } else { 'none' })
     }
-}
-
-# Dependabot alerts: in practice, the GitHub Actions of the workflows, whose versions the dependency graph reads.
-$alerts = gh api 'repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100' | ConvertFrom-Json
-if ($alerts.Count -eq 0) {
-    Write-Output 'Open Dependabot alerts: none'
-}
-else {
-    Write-Output "Open Dependabot alerts: $($alerts.Count)"
-    $alerts | ForEach-Object {
-        [pscustomobject]@{
-            Package  = $_.dependency.package.name
-            Severity = $_.security_advisory.severity
-            Fixed    = $_.security_vulnerability.first_patched_version.identifier
-            Advisory = $_.security_advisory.ghsa_id
-        }
-    } | Format-Table -AutoSize | Out-String -Width 200 | Write-Output
 }
