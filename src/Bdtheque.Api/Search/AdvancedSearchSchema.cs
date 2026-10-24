@@ -158,8 +158,7 @@ internal static class AdvancedSearchSchema
         new SearchEntityBuilder<EditionVisual>(EntityKind.EditionVisual)
             .Enumeration<D.VisualType, C.VisualType>("type", v => v.Type, isOptional: false)
             .Number("displayOrder", v => v.DisplayOrder, isOptional: false)
-            // The reference of the stored media, its "file" in the model (modele-metier.md § Visuel d'édition).
-            .Text("mediaReference", v => v.MediaReference, isOptional: false)
+            // Not the reference of its media, a technical datum (fonctionnel/recherche-avancee.md § Données interrogées).
             .One("edition", EntityKind.Edition, v => v.Edition)
             .Build(),
 

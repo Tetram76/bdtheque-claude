@@ -30,8 +30,8 @@ public sealed class ChangeLogJsonTests
             """{"kind":"contribution","authorId":"0199c0de-0000-7000-8000-000000000002","author":{"lastName":"Remi","firstName":"Georges","pseudonym":"Hergé"},"role":1}"""
         },
         {
-            new VisualValue(Guid.Parse("0199c0de-0000-7000-8000-000000000003"), VisualType.BackCover, 2, "a.jpg"),
-            """{"kind":"visual","id":"0199c0de-0000-7000-8000-000000000003","type":5,"displayOrder":2,"mediaReference":"a.jpg"}"""
+            new VisualValue(Guid.Parse("0199c0de-0000-7000-8000-000000000003"), VisualType.BackCover, 2),
+            """{"kind":"visual","id":"0199c0de-0000-7000-8000-000000000003","type":5,"displayOrder":2}"""
         },
         {
             new SearchCriteriaValue("""{"kind":"group","operator":"And","conditions":[]}"""),

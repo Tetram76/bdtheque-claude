@@ -251,7 +251,7 @@ public sealed class ChangeLogTests : IAsyncLifetime
         await Context.SaveChangesAsync();
 
         Assert.Equal(
-            [new ChangeLogChange(ChangeLogAttribute.Visual, null, new VisualValue(cover.Id, VisualType.Cover, 0, "cover.jpg"))],
+            [new ChangeLogChange(ChangeLogAttribute.Visual, null, new VisualValue(cover.Id, VisualType.Cover, 0))],
             (await EntriesAsync()).Last().Changes);
 
         edition.ArrangeVisuals([(cover.Id, VisualType.BackCover)]);
@@ -264,8 +264,8 @@ public sealed class ChangeLogTests : IAsyncLifetime
             [
                 new ChangeLogChange(
                     ChangeLogAttribute.Visual,
-                    new VisualValue(cover.Id, VisualType.Cover, 0, "cover.jpg"),
-                    new VisualValue(cover.Id, VisualType.BackCover, 0, "cover.jpg")),
+                    new VisualValue(cover.Id, VisualType.Cover, 0),
+                    new VisualValue(cover.Id, VisualType.BackCover, 0)),
             ],
             entry.Changes);
         Assert.DoesNotContain(await EntriesAsync(), e => e.RecordId == album.Id && e.Operation == ChangeLogOperation.Modification);

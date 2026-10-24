@@ -70,7 +70,7 @@ public sealed record ReferenceValue(Guid Id, RecordLabel Label) : ChangeLogValue
 public sealed record ContributionValue(Guid AuthorId, AuthorLabel Author, ContributionRole Role) : ChangeLogValue;
 
 /// <summary>A visual of an edition, with its rank among the visuals of its type.</summary>
-public sealed record VisualValue(Guid Id, VisualType Type, int DisplayOrder, string MediaReference) : ChangeLogValue;
+public sealed record VisualValue(Guid Id, VisualType Type, int DisplayOrder) : ChangeLogValue;
 
 /// <summary>The criteria of a saved search.</summary>
 public sealed record SearchCriteriaValue(SearchCondition Criteria) : ChangeLogValue;

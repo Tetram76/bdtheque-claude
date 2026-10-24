@@ -7,9 +7,6 @@ using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Common;
-using Bdtheque.Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
 using static Bdtheque.Contracts.Search.SearchComparison;
 
@@ -35,6 +32,16 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     {
         _factory = factory;
         _client = factory.CreateApiClient();
+    }
+
+    [Fact]
+    public async Task Schema_LeavesOutTheMediaReferenceOfAVisual()
+    {
+        // A technical datum, meaningless to the user (fonctionnel/recherche-avancee.md § Données interrogées).
+        var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
+
+        var visual = schema.Entities.Single(e => e.Entity == EntityKind.EditionVisual);
+        Assert.Equal(["createdAt", "displayOrder", "modifiedAt", "record", "type"], visual.Fields.Select(f => f.Key).Order());
     }
 
     [Fact]
@@ -503,10 +510,6 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
             [new EditionVisualListItem(visual.Id, VisualType.Cover, albumSummary, editionSummary)],
             await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, ofMyEdition));
         Assert.Equal(
-            [visual.Id],
-            (await SearchAsync<EditionVisualListItem>(EntityKind.EditionVisual, Text("mediaReference", EqualTo, await MediaReferenceOfAsync(visual.Id))))
-                .Select(v => v.Id));
-        Assert.Equal(
             [new EditionListItem(albumSummary, editionSummary, true)],
             await SearchAsync<EditionListItem>(EntityKind.Edition, Text("record", Is, edition.Id.ToString())));
         Assert.Equal(
@@ -684,16 +687,6 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var response = await _client.PostAsync($"/admin/albums/{edition.AlbumId}/editions/{edition.Id}/visuals", form);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!;
-    }
-
-    // A datum of the business model the advanced search queries, which the contracts do not carry.
-    private async Task<string> MediaReferenceOfAsync(Guid visualId)
-    {
-        await using var scope = _factory.Services.CreateAsyncScope();
-        return await scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().EditionVisuals
-            .Where(v => v.Id == visualId)
-            .Select(v => v.MediaReference)
-            .SingleAsync();
     }
 
     private async Task<TForm> PostAsync<TForm>(string uri, object request)
