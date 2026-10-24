@@ -24,10 +24,15 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
+    private readonly ApiWebApplicationFactory _factory;
     private readonly HttpClient _client;
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    public AdvancedSearchTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    public AdvancedSearchTests(ApiWebApplicationFactory factory)
+    {
+        _factory = factory;
+        _client = factory.CreateApiClient();
+    }
 
     [Fact]
     public async Task Schema_DescribesEveryEntityWithItsDataAndLinks()
@@ -211,8 +216,18 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     {
         var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
         var album = await CreateAlbumAsync($"Album {_marker}");
-        var june = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 1985, acquisitionDate: new DateOnly(2021, 6, 15));
-        var july = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 2001, acquisitionDate: new DateOnly(2021, 7, 1));
+        // The last minute of a year: the editions are created in it, and not in the next one.
+        _factory.Clock.UtcNow = new DateTimeOffset(2025, 12, 31, 23, 59, 0, TimeSpan.Zero);
+        EditionForm june, july;
+        try
+        {
+            june = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 1985, acquisitionDate: new DateOnly(2021, 6, 15));
+            july = await CreateEditionAsync(album.Id, publisher.Id, publicationYear: 2001, acquisitionDate: new DateOnly(2021, 7, 1));
+        }
+        finally
+        {
+            _factory.Clock.UtcNow = null;
+        }
 
         var mine = new SearchLink("publisher", Text("name", Contains, _marker));
         AssertIds([june.Id], await EditionIdsAsync(And(mine, Text("acquisitionDate", EqualTo, "2021-06"))));
@@ -220,7 +235,8 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         AssertIds([july.Id], await EditionIdsAsync(And(mine, Text("acquisitionDate", GreaterThan, "2021-06-15"))));
         AssertIds([june.Id], await EditionIdsAsync(And(mine, Text("publicationYear", EqualTo, "1985"))));
         Assert.Empty(await EditionIdsAsync(And(mine, Text("publicationYear", EqualTo, "1985-01"))));
-        AssertIds([june.Id, july.Id], await EditionIdsAsync(And(mine, Text("createdAt", EqualTo, DateTime.UtcNow.ToString("yyyy")))));
+        AssertIds([june.Id, july.Id], await EditionIdsAsync(And(mine, Text("createdAt", EqualTo, "2025"))));
+        Assert.Empty(await EditionIdsAsync(And(mine, Text("createdAt", EqualTo, "2026"))));
     }
 
     [Fact]

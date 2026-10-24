@@ -361,7 +361,7 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         var referenced = (await UploadAsync(edition, VisualType.Cover)).Visuals.Single();
         var oldOrphan = await WriteVolumeFileAsync($"originals/{Guid.CreateVersion7():N}.jpg", TimeSpan.FromHours(2));
         var recentOrphan = await WriteVolumeFileAsync($"display/{Guid.CreateVersion7():N}.webp", TimeSpan.FromMinutes(10));
-        File.SetLastWriteTimeUtc(VolumePath(referenced.OriginalPath), DateTime.UtcNow.AddDays(-3));
+        File.SetLastWriteTimeUtc(VolumePath(referenced.OriginalPath), _factory.Clock.GetUtcNow().UtcDateTime.AddDays(-3));
 
         await _factory.Services.GetRequiredService<VisualReconciliation>().ReconcileAsync(CancellationToken.None);
 
@@ -393,7 +393,7 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         var path = VolumePath(relativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         await File.WriteAllBytesAsync(path, [1, 2, 3]);
-        File.SetLastWriteTimeUtc(path, DateTime.UtcNow - age);
+        File.SetLastWriteTimeUtc(path, _factory.Clock.GetUtcNow().UtcDateTime - age);
         return path;
     }
 

@@ -16,6 +16,8 @@ public sealed class CollectionEntryDateTests : IAsyncLifetime
 
     public Task DisposeAsync() => _fixture.DisposeAsync();
 
+    private static readonly DateTimeOffset Created = new(2026, 3, 14, 9, 26, 53, TimeSpan.Zero);
+
     [Fact]
     public async Task OwnedEditionCreated_EntersTheCollectionAtTheSave()
     {
@@ -44,8 +46,11 @@ public sealed class CollectionEntryDateTests : IAsyncLifetime
     {
         // Created long before it is bought, an edition targeted by an intent enters the collection
         // when its purchase is confirmed, not when it was created.
+        _fixture.Clock.UtcNow = Created;
         var (album, edition, version) = await CreateIntendedEditionAsync();
 
+        var bought = Created.AddDays(30);
+        _fixture.Clock.UtcNow = bought;
         await using (var transaction = await _fixture.Context.Database.BeginTransactionAsync())
         {
             var root = await _fixture.Context.LoadAggregateForWriteAsync<Album>(album.Id, version);
@@ -56,8 +61,8 @@ public sealed class CollectionEntryDateTests : IAsyncLifetime
         _fixture.Context.ChangeTracker.Clear();
 
         var saved = await _fixture.Context.Editions.SingleAsync(e => e.Id == edition.Id);
-        Assert.True(saved.EnteredCollectionAt > saved.CreatedAt);
-        Assert.Equal(saved.ModifiedAt, saved.EnteredCollectionAt);
+        Assert.Equal(Created, saved.CreatedAt);
+        Assert.Equal(bought, saved.EnteredCollectionAt);
     }
 
     [Fact]
@@ -67,10 +72,13 @@ public sealed class CollectionEntryDateTests : IAsyncLifetime
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
         album.RecordAcquisition(edition, AcquisitionMode.Gift);
+        _fixture.Clock.UtcNow = Created;
         _fixture.Context.AddRange(album, publisher, edition);
         await _fixture.Context.SaveChangesAsync();
-        var entered = edition.EnteredCollectionAt;
         _fixture.Context.ChangeTracker.Clear();
+
+        var modified = Created.AddDays(30);
+        _fixture.Clock.UtcNow = modified;
 
         var reloaded = await _fixture.Context.Editions.Include(e => e.Album).SingleAsync();
         reloaded.SetPublicationYearAndAcquisition(
@@ -79,9 +87,8 @@ public sealed class CollectionEntryDateTests : IAsyncLifetime
         _fixture.Context.ChangeTracker.Clear();
 
         var saved = await _fixture.Context.Editions.SingleAsync();
-        Assert.NotNull(entered);
-        Assert.Equal(entered, saved.EnteredCollectionAt);
-        Assert.True(saved.ModifiedAt > entered);
+        Assert.Equal(Created, saved.EnteredCollectionAt);
+        Assert.Equal(modified, saved.ModifiedAt);
     }
 
     [Fact]

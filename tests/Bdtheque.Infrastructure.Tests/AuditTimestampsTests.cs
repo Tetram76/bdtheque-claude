@@ -16,15 +16,16 @@ public sealed class AuditTimestampsTests : IAsyncLifetime
 
     public Task DisposeAsync() => _fixture.DisposeAsync();
 
+    private static readonly DateTimeOffset Created = new(2026, 3, 14, 9, 26, 53, TimeSpan.Zero);
+
     [Fact]
-    public async Task Add_SetsBothDatesToTheTimeOfTheSave()
+    public async Task Add_SetsBothDatesToTheTimeOfTheApplicationClock()
     {
-        var before = DateTimeOffset.UtcNow;
+        _fixture.Clock.UtcNow = Created;
         var publisher = new Publisher("Dargaud");
         var collection = publisher.AddCollection("Lucky Luke");
         _fixture.Context.AddRange(publisher, collection);
         await _fixture.Context.SaveChangesAsync();
-        var after = DateTimeOffset.UtcNow;
         _fixture.Context.ChangeTracker.Clear();
 
         // Children too: every entity carries the dates, not only the aggregate roots.
@@ -34,28 +35,45 @@ public sealed class AuditTimestampsTests : IAsyncLifetime
                      await _fixture.Context.PublisherCollections.SingleAsync(),
                  })
         {
-            Assert.InRange(saved.CreatedAt, before.AddMilliseconds(-1), after.AddMilliseconds(1));
-            Assert.Equal(saved.CreatedAt, saved.ModifiedAt);
+            Assert.Equal(Created, saved.CreatedAt);
+            Assert.Equal(Created, saved.ModifiedAt);
         }
+    }
+
+    [Fact]
+    public async Task Save_TruncatesTheTimeToTheMicrosecond_SoThatTheTrackedValueIsTheStoredOne()
+    {
+        // PostgreSQL keeps microseconds: a tenth of a microsecond (one tick) would be lost on the way.
+        _fixture.Clock.UtcNow = Created.AddTicks(1_234_567);
+        var genre = new Genre("Aventure");
+        _fixture.Context.Genres.Add(genre);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+
+        var expected = Created.AddTicks(1_234_560);
+        Assert.Equal(expected, genre.CreatedAt);
+        Assert.Equal(expected, (await _fixture.Context.Genres.SingleAsync()).CreatedAt);
     }
 
     [Fact]
     public async Task Modify_UpdatesTheModificationDateOnly()
     {
+        _fixture.Clock.UtcNow = Created;
         var genre = new Genre("Aventure");
         _fixture.Context.Genres.Add(genre);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
-        var created = (await _fixture.Context.Genres.AsNoTracking().SingleAsync()).CreatedAt;
 
+        var modified = Created.AddDays(2);
+        _fixture.Clock.UtcNow = modified;
         var reloaded = await _fixture.Context.Genres.SingleAsync();
         reloaded.SetLabel("Aventures");
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
         var saved = await _fixture.Context.Genres.SingleAsync();
-        Assert.Equal(created, saved.CreatedAt);
-        Assert.True(saved.ModifiedAt > saved.CreatedAt);
+        Assert.Equal(Created, saved.CreatedAt);
+        Assert.Equal(modified, saved.ModifiedAt);
     }
 
     [Fact]
@@ -78,12 +96,15 @@ public sealed class AuditTimestampsTests : IAsyncLifetime
     {
         // A child written through its aggregate modifies the root's record (choix-implementation/persistance.md
         // § Concurrence d'accès), whose modification date follows.
+        _fixture.Clock.UtcNow = Created;
         var publisher = new Publisher("Dupuis");
         _fixture.Context.Publishers.Add(publisher);
         await _fixture.Context.SaveChangesAsync();
         var version = _fixture.Context.VersionOf(publisher);
-        var modified = publisher.ModifiedAt;
         _fixture.Context.ChangeTracker.Clear();
+
+        var modified = Created.AddHours(1);
+        _fixture.Clock.UtcNow = modified;
 
         await using (var transaction = await _fixture.Context.Database.BeginTransactionAsync())
         {
@@ -95,6 +116,6 @@ public sealed class AuditTimestampsTests : IAsyncLifetime
         }
         _fixture.Context.ChangeTracker.Clear();
 
-        Assert.True((await _fixture.Context.Publishers.SingleAsync()).ModifiedAt > modified);
+        Assert.Equal(modified, (await _fixture.Context.Publishers.SingleAsync()).ModifiedAt);
     }
 }

@@ -87,7 +87,7 @@ public static class PostgreSqlTestServer
         }.ConnectionString;
 
         var options = new DbContextOptionsBuilder<BdthequeDbContext>().UseNpgsql(templateConnectionString).Options;
-        await using (var context = new BdthequeDbContext(options))
+        await using (var context = new BdthequeDbContext(options, TimeProvider.System))
         {
             await context.Database.MigrateAsync();
         }

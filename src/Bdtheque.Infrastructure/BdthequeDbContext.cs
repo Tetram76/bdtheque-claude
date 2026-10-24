@@ -5,7 +5,12 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Bdtheque.Infrastructure;
 
-public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> options) : DbContext(options)
+/// <param name="options">Options of the context.</param>
+/// <param name="clock">
+/// Application clock, which dates the writes: the one of the background tasks, so that a test sets the time of
+/// both. Required, so that no construction of the context can forget it.
+/// </param>
+public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> options, TimeProvider clock) : DbContext(options)
 {
     public DbSet<Author> Authors => Set<Author>();
     public DbSet<Publisher> Publishers => Set<Publisher>();
@@ -133,7 +138,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     // date follows any change to its children or associations.
     private void StampAuditDates()
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = clock.GetUtcNow();
         // Truncated to PostgreSQL's microsecond precision, so the tracked value is the stored one.
         now = now.AddTicks(-(now.Ticks % (TimeSpan.TicksPerMillisecond / 1000)));
 

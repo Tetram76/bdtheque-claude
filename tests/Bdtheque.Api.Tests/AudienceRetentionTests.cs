@@ -91,24 +91,18 @@ public sealed class AudienceRetentionTests : IClassFixture<ApiWebApplicationFact
         await scope.ServiceProvider.GetRequiredService<AudienceRetention>().RunAsync(Now, CancellationToken.None);
     }
 
-    /// <summary>Records a visit presenting <paramref name="records"/> in turn, then moves it back to <paramref name="begin"/>.</summary>
+    /// <summary>Records, from <paramref name="begin"/> on, a visit presenting <paramref name="records"/> one minute apart.</summary>
     private async Task<Guid> VisitAsync(DateTimeOffset begin, bool isAdministrator, string? engineVersion, params PresentedRecord[] records)
     {
+        _factory.Clock.UtcNow = begin;
         var response = await _client.PostAsJsonAsync(
             "/audience/visits",
             new OpenVisitRequest(isAdministrator, DeviceType.Computer, RenderingEngine.Blink, engineVersion, new FunctionUse(Function, records[0], null)));
         var visitId = (await response.Content.ReadFromJsonAsync<OpenedVisit>())!.VisitId;
         foreach (var record in records.Skip(1))
-            (await _client.PostAsJsonAsync($"/audience/visits/{visitId}/usages", new FunctionUse(Function, record, null))).EnsureSuccessStatusCode();
-
-        await using var scope = _factory.Services.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
-        await context.AudienceVisits.Where(v => v.Id == visitId).ExecuteUpdateAsync(s => s.SetProperty(v => v.CreatedAt, begin));
-        var usages = await context.AudienceUsages.Where(u => u.VisitId == visitId).OrderBy(u => u.CreatedAt).ThenBy(u => u.Id).Select(u => u.Id).ToListAsync();
-        for (var i = 0; i < usages.Count; i++)
         {
-            var date = begin.AddMinutes(i);
-            await context.AudienceUsages.Where(u => u.Id == usages[i]).ExecuteUpdateAsync(s => s.SetProperty(u => u.CreatedAt, date));
+            _factory.Clock.UtcNow = _factory.Clock.GetUtcNow().AddMinutes(1);
+            (await _client.PostAsJsonAsync($"/audience/visits/{visitId}/usages", new FunctionUse(Function, record, null))).EnsureSuccessStatusCode();
         }
 
         return visitId;

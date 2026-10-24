@@ -15,6 +15,6 @@ public sealed class BdthequeDbContextFactory : IDesignTimeDbContextFactory<Bdthe
         var optionsBuilder = new DbContextOptionsBuilder<BdthequeDbContext>()
             .UseNpgsql("Host=localhost;Database=bdtheque;Username=bdtheque;Password=bdtheque");
 
-        return new BdthequeDbContext(optionsBuilder.Options);
+        return new BdthequeDbContext(optionsBuilder.Options, TimeProvider.System);
     }
 }

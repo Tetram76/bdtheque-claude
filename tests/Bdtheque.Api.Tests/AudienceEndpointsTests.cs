@@ -14,9 +14,14 @@ namespace Bdtheque.Api.Tests;
 /// </summary>
 public sealed class AudienceEndpointsTests : IClassFixture<ApiWebApplicationFactory>
 {
+    private readonly ApiWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
-    public AudienceEndpointsTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    public AudienceEndpointsTests(ApiWebApplicationFactory factory)
+    {
+        _factory = factory;
+        _client = factory.CreateApiClient();
+    }
 
     [Fact]
     public async Task AVisit_IsOpenedWithItsFirstUsage_ThenFollowed_AndReadAsItsPath()
@@ -107,14 +112,20 @@ public sealed class AudienceEndpointsTests : IClassFixture<ApiWebApplicationFact
     [Fact]
     public async Task Indicators_AreRestrictedToThePeriodRead()
     {
+        // The first minute of a month: the visit belongs to it, and not to the month before.
         var function = Function("dashboard");
-        await OpenAsync(false, DeviceType.Computer, RenderingEngine.Blink, null, new FunctionUse(function, null, null));
-        var thisMonth = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        _factory.Clock.UtcNow = new DateTimeOffset(2026, 5, 1, 0, 0, 0, TimeSpan.Zero);
+        try
+        {
+            await OpenAsync(false, DeviceType.Computer, RenderingEngine.Blink, null, new FunctionUse(function, null, null));
+        }
+        finally
+        {
+            _factory.Clock.UtcNow = null;
+        }
 
-        var during = await _client.GetFromJsonAsync<List<FunctionIndicators>>(
-            $"/admin/audience/indicators?from={thisMonth:yyyy-MM-dd}&to={thisMonth:yyyy-MM-dd}");
-        var before = await _client.GetFromJsonAsync<List<FunctionIndicators>>(
-            $"/admin/audience/indicators?to={thisMonth.AddMonths(-1):yyyy-MM-dd}");
+        var during = await _client.GetFromJsonAsync<List<FunctionIndicators>>("/admin/audience/indicators?from=2026-05-01&to=2026-05-01");
+        var before = await _client.GetFromJsonAsync<List<FunctionIndicators>>("/admin/audience/indicators?to=2026-04-01");
 
         Assert.Contains(during!, i => i.Function == function);
         Assert.DoesNotContain(before!, i => i.Function == function);
