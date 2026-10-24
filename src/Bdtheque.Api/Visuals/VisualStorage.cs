@@ -14,7 +14,10 @@ internal sealed class VisualStorage(IOptions<VisualStorageOptions> options, ILog
     private const string OriginalsFolder = "originals";
     private const string DisplayFolder = "display";
 
-    private readonly string _root = options.Value.RootPath;
+    // Resolved once, as the file APIs resolve a relative path (against the current directory): the
+    // development configuration sets a relative root, while a file is served only by its absolute
+    // path (TypedResults.PhysicalFile) and mount points are absolute (MountInfo).
+    private readonly string _root = Path.GetFullPath(options.Value.RootPath);
 
     private const string DisplayContentType = "image/webp";
 
@@ -150,7 +153,8 @@ internal sealed class VisualStorage(IOptions<VisualStorageOptions> options, ILog
         }
     }
 
-    private string FullPath(string relativePath) => Path.Combine(_root, relativePath);
+    // Normalized, the relative paths of the volume using '/' whatever the system.
+    private string FullPath(string relativePath) => Path.GetFullPath(Path.Combine(_root, relativePath));
 }
 
 /// <summary>A file of a visual on the volume, as <c>api</c> serves it.</summary>
