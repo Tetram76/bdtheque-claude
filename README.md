@@ -44,7 +44,7 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 ├── Bdtheque.slnx                  # Solution .NET
 ├── Directory.Build.props          # Propriétés MSBuild communes (TFM, nullable, analyzers…)
 ├── Directory.Packages.props       # Gestion centralisée des versions NuGet (CPM)
-├── global.json                    # Version du SDK .NET
+├── global.json                    # Version minimale du SDK .NET
 ├── docker-compose.yml           # Déploiement (images Docker Hub) et build local
 ├── docker/
 │   ├── api/Dockerfile
@@ -68,7 +68,7 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 
 ### Prérequis
 
-- [.NET SDK 10](https://dotnet.microsoft.com/download) (version pilotée par [`global.json`](global.json))
+- [.NET SDK 10](https://dotnet.microsoft.com/download) (version minimale fixée par [`global.json`](global.json))
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (pour `docker compose`)
 
 ### Build et tests

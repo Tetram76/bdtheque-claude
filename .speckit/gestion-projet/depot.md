@@ -57,7 +57,7 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, mi
 Les montées de version relèvent de l'agent (point technique, `gestion-projet/gouvernance.md` § Prise de décision) : il les détecte et les traite sans attendre de demande de l'utilisateur.
 
 - **Toutes les technologies surveillées** : chaque version que le dépôt utilise est **épinglée** à sa valeur exacte, pour qu'aucune ne change sans une modification du dépôt, donc sans montée de version visible :
-  - packages NuGet (`Directory.Packages.props`), outil `dotnet-ef` (`dotnet-tools.json`) et SDK .NET (image `sdk` des Dockerfiles et CI, à la même version ; `global.json` n'en fixe que le minimum, pour les postes de développement) ;
+  - packages NuGet (`Directory.Packages.props`), outil `dotnet-ef` (`dotnet-tools.json`) et SDK .NET (image `sdk` des Dockerfiles et workflows, à la même version, alignement vérifié par un test ; `global.json` n'en fixe que le minimum, pour les postes de développement) ;
   - images de base des Dockerfiles et image de `db` (`docker-compose.yml`, et l'image identique des tests, `PostgreSqlTestServer`) : version exacte du composant (ex. version corrective de .NET, de PostgreSQL et version d'Alpine), sans empreinte (*digest*) : l'éditeur reconstruit l'image sous le même tag pour les correctifs de son système, qui arrivent ainsi sans attendre (choix-implementation/deploiement.md § Images de base des conteneurs) ;
   - actions GitHub des workflows.
 

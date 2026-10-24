@@ -9,6 +9,14 @@ on:
 permissions:
   contents: read
 
+# A push to a pull request makes the run of its previous commit useless: that run is cancelled rather
+# than left to consume the quotas of Docker Hub and of the GitHub API (gestion-projet/depot.md
+# § Intégration continue (CI)). Each push to main has a group of its own: a shared one would hold a
+# second run pending, and cancel it when a third one arrives.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-and-test:
     name: Build & tests (.NET)
@@ -17,10 +25,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
 
+      # The SDK of the Dockerfiles (SdkVersionTests).
       - name: Setup .NET
+        id: dotnet
         uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: "10.0.402"
+
+      # Keyed on everything that decides the restored packages, the SDK included, which brings
+      # implicit ones. No fallback key: a partial cache, saved again under the new key, would keep
+      # the packages of every former version.
+      - name: Cache NuGet packages
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('Directory.Packages.props', '**/Directory.Build.props', '**/*.csproj', 'dotnet-tools.json') }}
 
       - name: Restore dependencies
         run: dotnet restore Bdtheque.slnx
@@ -35,15 +54,21 @@ jobs:
           dotnet tool restore
           dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
 
+      # Coverage of the application code only: the library shared by the tests is left out.
       - name: Run tests
-        run: dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+        run: >-
+          dotnet test Bdtheque.slnx --configuration Release --no-build
+          --logger "trx;LogFileName=test-results.trx" --collect "XPlat Code Coverage"
+          -- "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
 
-      - name: Publish test results
+      - name: Publish test results and coverage
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
           name: test-results
-          path: "**/TestResults/test-results.trx"
+          path: |
+            **/TestResults/test-results.trx
+            **/TestResults/*/coverage.cobertura.xml
           if-no-files-found: warn
 
   docker-build:

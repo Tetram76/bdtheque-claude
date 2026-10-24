@@ -11,7 +11,7 @@ public sealed partial class PostgreSqlTestServerTests
     {
         // The persistence tests only vouch for the engine they run on: an image bump in
         // docker-compose.yml that the tests don't follow would leave production untested.
-        var compose = File.ReadAllText(Path.Combine(FindRepositoryRoot(), "docker-compose.yml"));
+        var compose = RepositoryFiles.Read("docker-compose.yml");
 
         var composeImage = DbServiceImage().Match(compose);
 
@@ -53,15 +53,6 @@ public sealed partial class PostgreSqlTestServerTests
         await using var command = new NpgsqlCommand(
             "SELECT count(*) FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid()", connection);
         return (long)(await command.ExecuteScalarAsync())!;
-    }
-
-    private static string FindRepositoryRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Bdtheque.slnx")))
-            directory = directory.Parent;
-
-        return directory?.FullName ?? throw new InvalidOperationException("Repository root (Bdtheque.slnx) not found.");
     }
 
     [GeneratedRegex(@"^  db:\s*\n    image:\s*(?<image>\S+)", RegexOptions.Multiline)]
