@@ -14,13 +14,16 @@ public sealed class BdthequeDbContextFixture : IAsyncLifetime
 
     public BdthequeDbContext Context { get; private set; } = null!;
 
+    /// <summary>Clock of <see cref="Context"/>, which dates its writes.</summary>
+    public TestClock Clock { get; } = new();
+
     public async Task InitializeAsync()
     {
         _connectionString = await PostgreSqlTestServer.CreateMigratedDatabaseAsync();
         var options = new DbContextOptionsBuilder<BdthequeDbContext>().UseNpgsql(_connectionString);
         StrictQueryWarnings.Apply(options);
 
-        Context = new BdthequeDbContext(options.Options);
+        Context = new BdthequeDbContext(options.Options, Clock);
     }
 
     public async Task DisposeAsync()

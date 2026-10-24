@@ -28,6 +28,9 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
     /// <summary>The visuals volume of this API instance, an empty temporary directory of its own.</summary>
     public string VisualsRoot { get; } = Path.Combine(Path.GetTempPath(), $"bdtheque-visuals-{Guid.NewGuid():N}");
 
+    /// <summary>The application clock of this API instance: it dates the writes and drives the background tasks.</summary>
+    public TestClock Clock { get; } = new();
+
     public async Task InitializeAsync() =>
         _connectionString = await PostgreSqlTestServer.CreateEmptyDatabaseAsync();
 
@@ -55,7 +58,10 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>, I
             }));
 
         builder.ConfigureTestServices(services =>
-            services.ConfigureDbContext<BdthequeDbContext>(options => StrictQueryWarnings.Apply(options)));
+        {
+            services.ConfigureDbContext<BdthequeDbContext>(options => StrictQueryWarnings.Apply(options));
+            services.AddSingleton<TimeProvider>(Clock);
+        });
     }
 
     async Task IAsyncLifetime.DisposeAsync()
