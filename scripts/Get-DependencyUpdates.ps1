@@ -61,11 +61,14 @@ function Add-Update([string] $component, [string] $current, [version] $currentVe
 }
 
 function Get-NuGetReleases([string] $id) {
+    # GetNewClosure() runs the scriptblock in a dynamic module that does not see the script's functions:
+    # the lookup is captured as a variable instead.
+    $getPublished = ${function:Get-NuGetPublished}
     (Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$($id.ToLowerInvariant())/index.json").versions |
         Where-Object { $_ -notmatch '-' } |
         ForEach-Object {
             $name = $_
-            [pscustomobject]@{ Version = [version] $name; Name = $name; Published = { Get-NuGetPublished $id $name }.GetNewClosure() }
+            [pscustomobject]@{ Version = [version] $name; Name = $name; Published = { & $getPublished $id $name }.GetNewClosure() }
         }
 }
 
