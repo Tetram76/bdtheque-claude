@@ -38,7 +38,7 @@ internal static class AdvancedSearchEndpoints
     /// </summary>
     public static Task<object> SearchAsync(
         EntityKind entity, SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, CancellationToken cancellationToken) =>
-        Searches[entity].SearchAsync(criteria, context, page, pageSize, cancellationToken);
+        Searches[entity].RunAsync(criteria, context, page, pageSize, cancellationToken);
 
     // Declared before the searches, whose initialization reads them.
     private static readonly Expression<Func<EditionVisual, EditionVisualListItem>> VisualListItem = CatalogExpressions.Expand(
@@ -99,7 +99,7 @@ internal static class AdvancedSearchEndpoints
     {
         public abstract void Map(RouteGroupBuilder search);
 
-        public abstract Task<object> SearchAsync(
+        public abstract Task<object> RunAsync(
             SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, CancellationToken cancellationToken);
     }
 
@@ -115,7 +115,7 @@ internal static class AdvancedSearchEndpoints
                 (AdvancedSearchRequest request, BdthequeDbContext context, CancellationToken cancellationToken, int page = 1,
                     int pageSize = Paging.DefaultSize) => PageAsync(request.Criteria, context, page, pageSize, cancellationToken));
 
-        public override async Task<object> SearchAsync(
+        public override async Task<object> RunAsync(
             SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, CancellationToken cancellationToken) =>
             await PageAsync(criteria, context, page, pageSize, cancellationToken);
 
