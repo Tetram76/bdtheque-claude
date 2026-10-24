@@ -1,5 +1,19 @@
 # BDthèque
 
+[![CI](https://github.com/Tetram76/bdtheque-claude/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Tetram76/bdtheque-claude/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Tetram76_bdtheque-claude)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=coverage)](https://sonarcloud.io/component_measures?id=Tetram76_bdtheque-claude&metric=coverage)
+
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=reliability_rating)](https://sonarcloud.io/component_measures?id=Tetram76_bdtheque-claude&metric=reliability_rating)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=security_rating)](https://sonarcloud.io/component_measures?id=Tetram76_bdtheque-claude&metric=security_rating)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=sqale_rating)](https://sonarcloud.io/component_measures?id=Tetram76_bdtheque-claude&metric=sqale_rating)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=bugs)](https://sonarcloud.io/project/issues?id=Tetram76_bdtheque-claude&types=BUG&resolved=false)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=vulnerabilities)](https://sonarcloud.io/project/issues?id=Tetram76_bdtheque-claude&types=VULNERABILITY&resolved=false)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=code_smells)](https://sonarcloud.io/project/issues?id=Tetram76_bdtheque-claude&types=CODE_SMELL&resolved=false)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=duplicated_lines_density)](https://sonarcloud.io/component_measures?id=Tetram76_bdtheque-claude&metric=duplicated_lines_density)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=sqale_index)](https://sonarcloud.io/component_measures?id=Tetram76_bdtheque-claude&metric=sqale_index)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Tetram76_bdtheque-claude&metric=ncloc)](https://sonarcloud.io/component_measures?id=Tetram76_bdtheque-claude&metric=ncloc)
+
 Application web de gestion de collection de bandes dessinées — réécriture d'une application client lourd (Delphi / Firebird) en architecture n-tiers.
 
 ## Fonctionnalités principales

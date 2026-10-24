@@ -29,7 +29,7 @@ Une fois une Pull Request fusionnée, ses commentaires sont **verrouillés** ave
 
 ## Revue de code
 
-Des agents de revue de code (ex. Bugbot, outils d'analyse statique) peuvent intervenir sur les Pull Requests. Règles générales d'application de leurs retours :
+Des agents de revue de code (ex. Bugbot, outils d'analyse statique comme SonarQube Cloud, `gestion-projet/depot.md` § Analyse de la qualité du code) peuvent intervenir sur les Pull Requests. Règles générales d'application de leurs retours :
 
 - Les retours ne sont **pas une source de vérité** : ils sont systématiquement soumis à contre-vérification.
 - Un retour est **appliqué** s'il est pertinent et que le gain justifie le coût de la modification.

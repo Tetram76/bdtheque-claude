@@ -1,6 +1,6 @@
 # Dépôt
 
-Dépôt GitHub : configuration, signature des commits, intégration continue, mises à jour des dépendances, branches, conventions de commit, versions et releases.
+Dépôt GitHub : configuration, signature des commits, intégration continue, analyse de la qualité du code, mises à jour des dépendances, branches, conventions de commit, versions et releases.
 
 ---
 
@@ -51,6 +51,14 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, mi
   - **Docker Hub** : Docker Hub limite les téléchargements d'images (*pulls*) à **200 par période de 6 heures** pour un compte *Personal* authentifié comme `tetram76`, et à **100 par période de 6 heures et par adresse IP** sans authentification ; une image multi-architecture compte un téléchargement par architecture (documentation Docker Hub, *Usage and limits*). Au-delà, Docker Hub répond `429 Too Many Requests`, quel que soit le contenu de la PR. Chaque exécution du CI lit des images sur Docker Hub : l'image publiée, que l'analyse des vulnérabilités lit avec le compte `tetram76`, et l'image PostgreSQL des tests, téléchargée sans authentification.
 
   Face à un échec dû à l'un de ces quotas, l'agent ne pousse pas de nouveau commit, qui le consommerait à son tour : il relance les seuls jobs en échec (`gh run rerun --failed`) une fois la période du quota écoulée, et signale à l'utilisateur un échec qui persiste.
+
+## Analyse de la qualité du code
+
+- **SonarQube Cloud** (organisation `tetram76`, projet `Tetram76_bdtheque-claude`, gratuit pour un dépôt public) analyse le code et sa couverture par les tests, sur chaque Pull Request et sur `main`. Ses indicateurs (porte de qualité, couverture, fiabilité, sécurité, maintenabilité…) sont affichés en tête du `README.md`, et il commente chaque Pull Request de son analyse.
+- **Workflow distinct** (`.github/workflows/code-quality.yml`), hors du workflow CI : son analyse n'est **pas un check requis** du Ruleset. Le scanner (`dotnet-sonarscanner`, outil local épinglé de `dotnet-tools.json`) désactive `TreatWarningsAsErrors` dans la compilation qu'il instrumente : il ne peut donc pas remplacer celle du CI, qui reste le contrôle de non-régression. Une indisponibilité du service externe ne bloque pas non plus la fusion.
+- **Retours** : ceux de SonarQube Cloud sont ceux d'un outil d'analyse statique, soumis aux règles générales de `gestion-projet/revue-tickets.md` § Revue de code (contre-vérification, application ou rejet justifié) ; sa porte de qualité n'est pas une condition de fusion.
+- **Jeton** : l'analyse s'authentifie auprès de SonarQube Cloud avec le secret de dépôt GitHub `SONAR_TOKEN`. Une Pull Request venant d'un **fork** n'y a pas accès et son analyse échoue, sans bloquer sa fusion. L'analyse automatique de SonarQube Cloud est désactivée sur le projet : elle exclut l'analyse par le CI, et ne mesure pas la couverture.
+- **Périmètre** : le code de la solution ; les maquettes de `.speckit/`, les prototypes de `poc/` et les migrations générées par EF Core en sont exclus.
 
 ## Mises à jour des dépendances
 
