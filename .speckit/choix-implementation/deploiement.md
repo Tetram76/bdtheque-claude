@@ -41,4 +41,4 @@ Images de base des conteneurs, publication des images Docker, version de Postgre
 
 ## Application du schéma au démarrage
 
-- Les migrations EF Core sont appliquées **automatiquement au démarrage** du conteneur `api` (`Database.Migrate()`). Pas de conteneur ou d'étape d'initialisation dédiée : un déploiement neuf sur une base vide crée le schéma dès le premier démarrage.
+- Les migrations EF Core sont appliquées **automatiquement au démarrage** du conteneur `api` (`Database.MigrateAsync()`). Pas de conteneur ou d'étape d'initialisation dédiée : un déploiement neuf sur une base vide crée le schéma dès le premier démarrage.

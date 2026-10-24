@@ -58,10 +58,10 @@ var app = builder.Build();
 // Nothing else applies the schema before the container starts serving traffic (no init
 // container, no migration bundle), so a fresh deployment would otherwise leave PostgreSQL
 // empty while the health check only verifies connectivity.
-using (var migrationScope = app.Services.CreateScope())
+await using (var migrationScope = app.Services.CreateAsyncScope())
 {
     var context = migrationScope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
-    context.Database.Migrate();
+    await context.Database.MigrateAsync();
 
     // An update of the database image may bring another version of ICU, which PostgreSQL only warns
     // about while the indexes of the text columns may be corrupt: rebuilt here, the one step every
@@ -135,4 +135,4 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     },
 });
 
-app.Run();
+await app.RunAsync();
