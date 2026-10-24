@@ -293,7 +293,7 @@ erDiagram
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Type de visuel | énuméré | oui | Couverture / Dédicace / Page de garde / Planche / 4e de couverture. `Couverture` proposé par défaut à la saisie (formulaire pré-rempli), non porté par la base (aucune clause `DEFAULT`). |
-| Fichier / URL | texte | oui | Référence au média stocké. |
+| Fichier / URL | texte | oui | Référence au média stocké. Donnée technique, interne à l'application : elle n'est ni présentée, ni interrogeable par la recherche avancée (`fonctionnel/recherche-avancee.md` § Données interrogées), ni consignée au journal des modifications. |
 | Ordre d'affichage | entier | oui | Rang au sein des visuels du même type, ajustable manuellement par l'utilisateur. |
 
 ### Intention d'achat
