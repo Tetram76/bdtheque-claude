@@ -6,6 +6,7 @@ using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ContractEnums = Bdtheque.Contracts.Enums;
 using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
@@ -36,8 +37,9 @@ internal static class AdvancedSearchEndpoints
     /// advanced search returns them: a <see cref="Page{T}"/> of the entries of its list.
     /// </summary>
     public static Task<object> SearchAsync(
-        EntityKind entity, SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, CancellationToken cancellationToken) =>
-        Searches[entity].RunAsync(criteria, context, page, pageSize, cancellationToken);
+        EntityKind entity, SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, TimeZoneInfo timeZone,
+        CancellationToken cancellationToken) =>
+        Searches[entity].RunAsync(criteria, context, page, pageSize, timeZone, cancellationToken);
 
     // Declared before the searches, whose initialization reads them.
     private static readonly Expression<Func<EditionVisual, EditionVisualListItem>> VisualListItem = CatalogExpressions.Expand(
@@ -97,7 +99,7 @@ internal static class AdvancedSearchEndpoints
         public abstract void Map(RouteGroupBuilder search);
 
         public abstract Task<object> RunAsync(
-            SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, CancellationToken cancellationToken);
+            SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, TimeZoneInfo timeZone, CancellationToken cancellationToken);
     }
 
     /// <summary>The search of one entity: its route, the order of its results, and the entry of its list each one is presented as.</summary>
@@ -110,14 +112,16 @@ internal static class AdvancedSearchEndpoints
             search.MapPost(
                 $"/{Route}",
                 (AdvancedSearchRequest request, BdthequeDbContext context, CancellationToken cancellationToken, int page = 1,
-                    int pageSize = Paging.DefaultSize) => PageAsync(request.Criteria, context, page, pageSize, cancellationToken));
+                    int pageSize = Paging.DefaultSize, [FromQuery(Name = AdvancedSearchQuery.TimeZoneParameter)] string? timeZone = null) =>
+                    PageAsync(request.Criteria, context, page, pageSize, SearchTimeZones.Resolve(timeZone), cancellationToken));
 
         public override async Task<object> RunAsync(
-            SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, CancellationToken cancellationToken) =>
-            await PageAsync(criteria, context, page, pageSize, cancellationToken);
+            SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, TimeZoneInfo timeZone,
+            CancellationToken cancellationToken) =>
+            await PageAsync(criteria, context, page, pageSize, timeZone, cancellationToken);
 
         private async Task<Page<TItem>> PageAsync(
-            SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, CancellationToken cancellationToken)
+            SearchCondition? criteria, BdthequeDbContext context, int page, int pageSize, TimeZoneInfo timeZone, CancellationToken cancellationToken)
         {
             var definition = AdvancedSearchSchema.Of(Entity);
             // Read only for the criteria that follow the hierarchy of the universes: a small reference table. Its depth
@@ -128,7 +132,7 @@ internal static class AdvancedSearchEndpoints
                 ? await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken)
                 : null;
             var universeLevels = followsUniverses ? (await UniverseTree.LoadAsync(context, cancellationToken)).MaxAncestorCount : 0;
-            var condition = SearchTranslator.Translate<T>(definition, criteria, new SearchScope(context, universeLevels));
+            var condition = SearchTranslator.Translate<T>(definition, criteria, new SearchScope(context, universeLevels, timeZone));
 
             return await Order(context.Set<T>().AsNoTracking().Where(condition)).ToPageAsync(page, pageSize, Item, cancellationToken);
         }

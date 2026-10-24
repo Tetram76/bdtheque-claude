@@ -44,7 +44,7 @@ internal static class SearchTranslator
         {
             SearchGroup group => Combine(group, group.Conditions.Select(c => Build(entity, record, Required(c), scope)).ToList()),
             SearchNot not => Expression.Not(Build(entity, record, Required(not.Condition), scope)),
-            SearchCriterion criterion => entity.Field(criterion.Field).Build(record, criterion),
+            SearchCriterion criterion => entity.Field(criterion.Field).Build(record, criterion, scope),
             SearchLink link => Follow(entity.Link(link.Link), record, link, scope),
             SearchDataComparison comparison => CompareData(entity, record, comparison, scope),
             _ => throw new ArgumentException($"Unknown condition {condition.GetType().Name}.", nameof(condition)),
@@ -54,7 +54,7 @@ internal static class SearchTranslator
     {
         var field = entity.Field(comparison.Field);
         var other = comparison.Other ?? throw new ArgumentException("A comparison of data without its other data.", nameof(comparison));
-        return Reach(entity, record, other.Links ?? [], scope, (target, targetRecord) => field.Build(record, comparison, target.Field(other.Field), targetRecord));
+        return Reach(entity, record, other.Links ?? [], scope, (target, targetRecord) => field.Build(record, comparison, target.Field(other.Field), targetRecord, scope));
     }
 
     // The condition on the record that links, each to one record, lead to from record: it must exist.

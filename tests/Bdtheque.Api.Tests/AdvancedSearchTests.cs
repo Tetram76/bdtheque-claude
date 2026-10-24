@@ -250,6 +250,49 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
+    public async Task DateAndTime_IsComparedByItsDayInTheTimeZoneOfTheBrowser()
+    {
+        // fonctionnel/presentation.md § Langue et culture d'affichage: a date presented and the same date searched
+        // designate the same day. 23:30 universal time on New Year's Eve is already New Year's Day in Paris.
+        var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
+        var album = await CreateAlbumAsync($"Album {_marker}");
+        _factory.Clock.UtcNow = new DateTimeOffset(2025, 12, 31, 23, 30, 0, TimeSpan.Zero);
+        EditionForm edition;
+        try
+        {
+            edition = await CreateEditionAsync(album.Id, publisher.Id, acquisitionDate: new DateOnly(2026, 1, 1));
+        }
+        finally
+        {
+            _factory.Clock.UtcNow = null;
+        }
+
+        var mine = new SearchLink("publisher", Text("name", Contains, _marker));
+        const string paris = "Europe/Paris";
+        AssertIds([edition.Id], await EditionIdsAsync(And(mine, Text("createdAt", EqualTo, "2026-01-01")), paris));
+        Assert.Empty(await EditionIdsAsync(And(mine, Text("createdAt", EqualTo, "2025")), paris));
+        AssertIds([edition.Id], await EditionIdsAsync(And(mine, Text("createdAt", LessThan, "2026-01-02")), paris));
+        Assert.Empty(await EditionIdsAsync(And(mine, Text("createdAt", LessThan, "2026-01-01")), paris));
+        // Without a time zone, as for a client that gives none, universal time.
+        AssertIds([edition.Id], await EditionIdsAsync(And(mine, Text("createdAt", EqualTo, "2025-12-31"))));
+
+        // Compared to another data, the date and time is taken at its day in the same time zone.
+        var sameDay = And(mine, Data("createdAt", EqualTo, new SearchOperand("acquisitionDate"), SearchDatePrecision.Day));
+        AssertIds([edition.Id], await EditionIdsAsync(sameDay, paris));
+        Assert.Empty(await EditionIdsAsync(sameDay));
+    }
+
+    [Fact]
+    public async Task UnknownTimeZone_IsATechnicalError()
+    {
+        var response = await _client.PostAsJsonAsync(
+            $"/catalog/search/albums?{AdvancedSearchQuery.TimeZoneParameter}=Nowhere/Atlantis",
+            new AdvancedSearchRequest(new SearchCriterion("createdAt", EqualTo, ["2026"])));
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.BadRequest, ProblemTypes.Technical);
+    }
+
+    [Fact]
     public async Task Dates_AreComparedToEachOtherAtThePrecisionChosen_EachCoveringTheWholePeriodItIsKnownTo()
     {
         var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
@@ -599,18 +642,20 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         return Ids(await SearchAsync<AlbumSummary>(EntityKind.Album, And(mine, criteria)));
     }
 
-    private async Task<IEnumerable<Guid>> EditionIdsAsync(SearchCondition criteria) =>
-        (await SearchAsync<EditionListItem>(EntityKind.Edition, criteria)).Select(e => e.Edition.Id);
+    private async Task<IEnumerable<Guid>> EditionIdsAsync(SearchCondition criteria, string? timeZone = null) =>
+        (await SearchAsync<EditionListItem>(EntityKind.Edition, criteria, timeZone)).Select(e => e.Edition.Id);
 
-    private async Task<IReadOnlyList<T>> SearchAsync<T>(EntityKind entity, SearchCondition criteria)
+    private async Task<IReadOnlyList<T>> SearchAsync<T>(EntityKind entity, SearchCondition criteria, string? timeZone = null)
     {
-        var response = await PostSearchAsync(entity, criteria);
+        var response = await PostSearchAsync(entity, criteria, timeZone);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<Page<T>>())!.Items;
     }
 
-    private Task<HttpResponseMessage> PostSearchAsync(EntityKind entity, SearchCondition criteria) =>
-        _client.PostAsJsonAsync($"/catalog/search/{Route(entity)}?pageSize=100", new AdvancedSearchRequest(criteria));
+    private Task<HttpResponseMessage> PostSearchAsync(EntityKind entity, SearchCondition criteria, string? timeZone = null) =>
+        _client.PostAsJsonAsync(
+            $"/catalog/search/{Route(entity)}?pageSize=100{(timeZone is null ? "" : $"&{AdvancedSearchQuery.TimeZoneParameter}={Uri.EscapeDataString(timeZone)}")}",
+            new AdvancedSearchRequest(criteria));
 
     private static string Route(EntityKind entity) => entity switch
     {

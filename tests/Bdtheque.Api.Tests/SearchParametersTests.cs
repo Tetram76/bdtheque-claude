@@ -86,7 +86,7 @@ public sealed class SearchParametersTests : IClassFixture<ApiWebApplicationFacto
     private static (string Query, int ParameterCount) Sql<T>(BdthequeDbContext context, EntityKind entity, SearchCondition criteria)
         where T : class
     {
-        var condition = SearchTranslator.Translate<T>(AdvancedSearchSchema.Of(entity), criteria, new SearchScope(context, 0));
+        var condition = SearchTranslator.Translate<T>(AdvancedSearchSchema.Of(entity), criteria, new SearchScope(context, 0, TimeZoneInfo.Utc));
         var lines = context.Set<T>().AsNoTracking().Where(condition).ToQueryString().Split('\n');
         var declarations = lines.TakeWhile(line => line.StartsWith("-- ", StringComparison.Ordinal)).Count();
         return (string.Join('\n', lines.Skip(declarations)), declarations);
