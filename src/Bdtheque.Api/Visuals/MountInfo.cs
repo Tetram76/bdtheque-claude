@@ -9,6 +9,8 @@ internal static class MountInfo
 {
     private const string MountInfoPath = "/proc/self/mountinfo";
 
+    private static readonly System.Buffers.SearchValues<char> OctalDigits = System.Buffers.SearchValues.Create("01234567");
+
     /// <summary>
     /// Whether <paramref name="path"/> lies on a mount of the container, <c>null</c> when the system
     /// does not tell (not Linux, e.g. a development machine).
@@ -45,7 +47,7 @@ internal static class MountInfo
         var result = new System.Text.StringBuilder(field.Length);
         for (var i = 0; i < field.Length; i++)
         {
-            if (field[i] == '\\' && i + 3 < field.Length && !field.AsSpan(i + 1, 3).ContainsAnyExcept("01234567"))
+            if (field[i] == '\\' && i + 3 < field.Length && !field.AsSpan(i + 1, 3).ContainsAnyExcept(OctalDigits))
             {
                 result.Append((char)Convert.ToInt32(field.Substring(i + 1, 3), 8));
                 i += 3;
