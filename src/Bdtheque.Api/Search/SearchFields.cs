@@ -358,9 +358,9 @@ internal abstract class DateField(string key, LambdaExpression selector, bool is
     protected override Expression CompareData(
         Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData)
     {
-        var precision = comparison.DatePrecision!.Value;
-        var (first, last) = Periods(Days(record, data), precision);
-        var (otherFirst, otherLast) = Periods(((DateField)other).Days(otherRecord, otherData), precision);
+        var comparisonPrecision = comparison.DatePrecision!.Value;
+        var (first, last) = Periods(Days(record, data), comparisonPrecision);
+        var (otherFirst, otherLast) = Periods(((DateField)other).Days(otherRecord, otherData), comparisonPrecision);
         return comparison.Comparison switch
         {
             EqualTo => Expression.AndAlso(Expression.LessThanOrEqual(last, otherFirst), Expression.GreaterThanOrEqual(first, otherLast)),
