@@ -188,45 +188,56 @@ public sealed class ValidationDataLoader(HttpClient client)
         for (var volume = 1; volume <= LongSeriesVolumeTitles.Length; volume++)
         {
             // Missing from the catalogue: the gaps of the series.
-            if (volume is 13 or 20)
-                continue;
-
-            // The last volume is announced, to be published.
-            var year = volume == LongSeriesVolumeTitles.Length ? DateTime.UtcNow.Year + 1 : 1998 + volume;
-            var album = await data.AlbumAsync(Album(LongSeriesVolumeTitles[volume - 1] is { Length: > 0 } title ? title : null, series, volume, year,
-                month: volume % 3 == 0 ? 1 + volume % 12 : null, rating: volume % 4 == 0 ? null : (AlbumRating)(1 + volume % 5)));
-
-            switch (volume)
-            {
-                // Catalogued, neither owned nor wished for.
-                case 22:
-                    continue;
-                // Announced: wished for as a whole.
-                case 24:
-                    await data.IntentOnAlbumAsync(album);
-                    continue;
-            }
-
-            var acquiredOn = new DateOnly(year, 1 + volume % 12, 1 + volume % 27);
-            var edition = await data.EditionAsync(album, Owned(lagoon.Id, lagoon.Collections[0], year, LongSeriesAcquisition(volume), acquiredOn) with
-            {
-                Isbn = Isbn($"9791091234{volume:D2}"), PageCount = 48 + volume % 3 * 8, IsSecondHand = volume % 6 == 0,
-                Category = volume == 1 ? EditionCategory.FirstEdition : null,
-                AcquisitionAmount = year < 2002 ? 59m + volume : 9.50m + volume / 2m, AcquisitionCurrency = year < 2002 ? "FRF" : "EUR",
-            });
-
-            // Owned without cover.
-            if (volume is not (10 or 11 or 12))
-                await data.VisualAsync(album, edition, VisualType.Cover, Images.Portrait(volume / 24d));
-
-            // Owned, and wished for again in its limited edition.
-            if (volume == 23)
-            {
-                await data.IntentOnEditionAsync(album, new PurchaseIntentEditionContent(lagoon.Id, lagoon.Collections[0], 2022, Isbn("979109123450"),
-                    BindingType.Hardcover, BookOrientation.Portrait, ReadingDirection.LeftToRight, EditionFormat.Large, 96, EditionCategory.LimitedEdition, IsColor: true));
-            }
+            if (volume is not (13 or 20))
+                await LoadLongSeriesVolumeAsync(data, lagoon, series, volume);
         }
 
+        await LoadLongSeriesSpecialsAsync(data, lagoon, bubbles, series, specialIssueUniverse);
+    }
+
+    private static async Task LoadLongSeriesVolumeAsync(Loading data, Publisher lagoon, Guid series, int volume)
+    {
+        // The last volume is announced, to be published.
+        var year = volume == LongSeriesVolumeTitles.Length ? DateTime.UtcNow.Year + 1 : 1998 + volume;
+        var title = LongSeriesVolumeTitles[volume - 1];
+        var album = await data.AlbumAsync(Album(title.Length > 0 ? title : null, series, volume, year,
+            month: volume % 3 == 0 ? 1 + volume % 12 : null, rating: volume % 4 == 0 ? null : (AlbumRating)(1 + volume % 5)));
+
+        switch (volume)
+        {
+            // Catalogued, neither owned nor wished for.
+            case 22:
+                return;
+            // Announced: wished for as a whole.
+            case 24:
+                await data.IntentOnAlbumAsync(album);
+                return;
+        }
+
+        var francs = year < 2002;
+        var edition = await data.EditionAsync(album, Owned(lagoon.Id, lagoon.Collections[0], year, LongSeriesAcquisition(volume),
+            new DateOnly(year, 1 + volume % 12, 1 + volume % 27)) with
+        {
+            Isbn = Isbn($"9791091234{volume:D2}"), PageCount = 48 + volume % 3 * 8, IsSecondHand = volume % 6 == 0,
+            Category = volume == 1 ? EditionCategory.FirstEdition : null,
+            AcquisitionAmount = francs ? 59m + volume : 9.50m + volume / 2m, AcquisitionCurrency = francs ? "FRF" : "EUR",
+        });
+
+        // Owned without cover.
+        if (volume is not (10 or 11 or 12))
+            await data.VisualAsync(album, edition, VisualType.Cover, Images.Portrait(volume / 24d));
+
+        // Owned, and wished for again in its limited edition.
+        if (volume == 23)
+        {
+            await data.IntentOnEditionAsync(album, new PurchaseIntentEditionContent(lagoon.Id, lagoon.Collections[0], 2022, Isbn("979109123450"),
+                BindingType.Hardcover, BookOrientation.Portrait, ReadingDirection.LeftToRight, EditionFormat.Large, 96, EditionCategory.LimitedEdition, IsColor: true));
+        }
+    }
+
+    // The omnibuses and the special issues of the long series.
+    private static async Task LoadLongSeriesSpecialsAsync(Loading data, Publisher lagoon, Publisher bubbles, Guid series, Guid specialIssueUniverse)
+    {
         var firstOmnibus = await data.AlbumAsync(Album(null, series, 1, 2010) with { Type = AlbumType.Omnibus, StartVolumeNumber = 1, EndVolumeNumber = 4 });
         var firstOmnibusEdition = await data.EditionAsync(firstOmnibus, Owned(lagoon.Id, lagoon.Collections[1], 2010, AcquisitionMode.Purchase, new DateOnly(2010, 11, 20)) with
         {
