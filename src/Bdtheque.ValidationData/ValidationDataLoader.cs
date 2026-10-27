@@ -208,7 +208,7 @@ public sealed class ValidationDataLoader(HttpClient client)
             }
 
             var acquiredOn = new DateOnly(year, 1 + volume % 12, 1 + volume % 27);
-            var edition = await data.EditionAsync(album, Owned(lagoon.Id, lagoon.Collections[0], year, volume == 5 ? AcquisitionMode.Gift : volume == 9 ? AcquisitionMode.Trade : AcquisitionMode.Purchase, acquiredOn) with
+            var edition = await data.EditionAsync(album, Owned(lagoon.Id, lagoon.Collections[0], year, LongSeriesAcquisition(volume), acquiredOn) with
             {
                 Isbn = Isbn($"9791091234{volume:D2}"), PageCount = 48 + volume % 3 * 8, IsSecondHand = volume % 6 == 0,
                 Category = volume == 1 ? EditionCategory.FirstEdition : null,
@@ -253,6 +253,13 @@ public sealed class ValidationDataLoader(HttpClient client)
             AcquisitionAmount = 35m, AcquisitionCurrency = "EUR",
         });
     }
+
+    private static AcquisitionMode LongSeriesAcquisition(int volume) => volume switch
+    {
+        5 => AcquisitionMode.Gift,
+        9 => AcquisitionMode.Trade,
+        _ => AcquisitionMode.Purchase,
+    };
 
     private static ContributionContent Credit(Guid author, ContributionRole role) => new(author, role);
 
