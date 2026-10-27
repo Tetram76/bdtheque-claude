@@ -24,8 +24,10 @@ internal static class Images
             // Each scanline starts with its filter type, 0 for none.
             var ratio = (double)y / (height - 1);
             for (var x = 0; x < width; x++)
-            for (var channel = 0; channel < 3; channel++)
-                pixels[y * stride + 1 + x * 3 + channel] = (byte)(top[channel] + (bottom[channel] - top[channel]) * ratio);
+            {
+                for (var channel = 0; channel < 3; channel++)
+                    pixels[y * stride + 1 + x * 3 + channel] = (byte)(top[channel] + (bottom[channel] - top[channel]) * ratio);
+            }
         }
 
         var header = new byte[13];
