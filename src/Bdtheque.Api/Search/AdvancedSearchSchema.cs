@@ -99,6 +99,7 @@ internal static class AdvancedSearchSchema
             .Boolean("free", e => e.IsFree)
             .Amount("initialValue", e => e.InitialValueAmount)
             .Instant("enteredCollectionAt", e => e.EnteredCollectionAt)
+            .Number("spotlightCount", e => e.Spotlights.Count(), isOptional: false)
             .Text("personalReference", e => e.PersonalReference)
             .Text("personalNotes", e => e.PersonalNotes)
             .Boolean("inCollection", CatalogExpressions.Expand((Edition e) => (bool?)e.IsOwned()))
