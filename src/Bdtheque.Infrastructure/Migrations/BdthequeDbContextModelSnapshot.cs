@@ -18,7 +18,7 @@ namespace Bdtheque.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:CollationDefinition:fr_case_accent_insensitive", "fr-FR-u-ks-level1,fr-FR-u-ks-level1,icu,False")
-                .HasAnnotation("ProductVersion", "10.0.9")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -579,6 +579,21 @@ namespace Bdtheque.Infrastructure.Migrations
 
                             t.HasCheckConstraint("CK_Editions_PurchaseNotFree", "\"IsFree\" = false OR \"AcquisitionMode\" IS DISTINCT FROM 1");
                         });
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.EditionSpotlight", b =>
+                {
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("EditionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Day");
+
+                    b.HasIndex("EditionId");
+
+                    b.ToTable("EditionSpotlights", (string)null);
                 });
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.EditionVisual", b =>
@@ -1218,6 +1233,17 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Navigation("PublisherCollection");
                 });
 
+            modelBuilder.Entity("Bdtheque.Domain.Entities.EditionSpotlight", b =>
+                {
+                    b.HasOne("Bdtheque.Domain.Entities.Edition", "Edition")
+                        .WithMany("Spotlights")
+                        .HasForeignKey("EditionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Edition");
+                });
+
             modelBuilder.Entity("Bdtheque.Domain.Entities.EditionVisual", b =>
                 {
                     b.HasOne("Bdtheque.Domain.Entities.Edition", "Edition")
@@ -1385,6 +1411,8 @@ namespace Bdtheque.Infrastructure.Migrations
 
             modelBuilder.Entity("Bdtheque.Domain.Entities.Edition", b =>
                 {
+                    b.Navigation("Spotlights");
+
                     b.Navigation("Visuals");
                 });
 

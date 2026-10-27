@@ -124,6 +124,7 @@ catalog.MapPurchaseIntentList();
 catalog.MapAdvancedSearch();
 catalog.MapSavedSearchCatalog();
 catalog.MapVisualMedia();
+catalog.MapDashboard();
 
 app.MapAudience().MapAudienceRecording();
 

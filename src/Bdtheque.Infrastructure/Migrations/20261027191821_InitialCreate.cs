@@ -549,6 +549,24 @@ namespace Bdtheque.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EditionSpotlights",
+                columns: table => new
+                {
+                    Day = table.Column<DateOnly>(type: "date", nullable: false),
+                    EditionId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EditionSpotlights", x => x.Day);
+                    table.ForeignKey(
+                        name: "FK_EditionSpotlights_Editions_EditionId",
+                        column: x => x.EditionId,
+                        principalTable: "Editions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EditionVisuals",
                 columns: table => new
                 {
@@ -787,6 +805,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 column: "PublisherId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_EditionSpotlights_EditionId",
+                table: "EditionSpotlights",
+                column: "EditionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EditionVisuals_EditionId_Type_DisplayOrder",
                 table: "EditionVisuals",
                 columns: new[] { "EditionId", "Type", "DisplayOrder" });
@@ -941,6 +964,9 @@ namespace Bdtheque.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "ChangeLogEntries");
+
+            migrationBuilder.DropTable(
+                name: "EditionSpotlights");
 
             migrationBuilder.DropTable(
                 name: "PurchaseIntents");

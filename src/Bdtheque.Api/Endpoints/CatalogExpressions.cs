@@ -9,8 +9,8 @@ namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// Expressions shared by the lists and records of the consultation — what the labels of an album and of
-/// an edition are built from, the card and the cover of an album, the membership of the collection, the
-/// purchase intents, the order of the albums —, written once and inserted into each query
+/// an edition are built from, the card of an album, the cover of an album or of an edition, the membership
+/// of the collection, the purchase intents, the order of the albums —, written once and inserted into each query
 /// (choix-implementation/api.md § Recherche).
 /// </summary>
 /// <remarks>
@@ -50,6 +50,9 @@ internal static class CatalogExpressions
 
     /// <summary>Marker of the visual of the cover of an album, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static Guid? CoverVisualId(this Album album) => throw NotExpanded();
+
+    /// <summary>Marker of the visual of the first cover of an edition, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static Guid? CoverVisualId(this Edition edition) => throw NotExpanded();
 
     /// <summary>The cover of an album, from its visual.</summary>
     public static AlbumCover? ToCover(Guid? visualId) => visualId is { } id ? new AlbumCover(id) : null;
@@ -95,6 +98,15 @@ internal static class CatalogExpressions
         .ThenBy(c => c.DisplayOrder)
         .ThenBy(c => c.VisualId)
         .Select(c => (Guid?)c.VisualId)
+        .FirstOrDefault();
+
+    // The first cover of an edition in the order of its visuals (that of Edition.GetOrderedVisuals): an edition
+    // represented by its own cover, e.g. in the spotlight of the dashboard.
+    private static readonly Expression<Func<Edition, Guid?>> EditionCoverVisualIdOf = e => e.Visuals
+        .Where(v => v.Type == DomainEnums.VisualType.Cover)
+        .OrderBy(v => v.DisplayOrder)
+        .ThenBy(v => v.Id)
+        .Select(v => (Guid?)v.Id)
         .FirstOrDefault();
 
     private static readonly Expression<Func<Universe, UniverseListItem>> UniverseListItemOf =
@@ -177,7 +189,8 @@ internal static class CatalogExpressions
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
                 nameof(ToCard) => AlbumCardOf,
-                nameof(CoverVisualId) => CoverVisualIdOf,
+                nameof(CoverVisualId) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => CoverVisualIdOf,
+                nameof(CoverVisualId) => EditionCoverVisualIdOf,
                 _ => null,
             };
             if (expression is null)

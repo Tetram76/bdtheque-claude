@@ -22,6 +22,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<Contribution> Contributions => Set<Contribution>();
     public DbSet<Edition> Editions => Set<Edition>();
     public DbSet<EditionVisual> EditionVisuals => Set<EditionVisual>();
+    public DbSet<EditionSpotlight> EditionSpotlights => Set<EditionSpotlight>();
     public DbSet<ChangeLogEntry> ChangeLog => Set<ChangeLogEntry>();
     public DbSet<PurchaseIntent> PurchaseIntents => Set<PurchaseIntent>();
     public DbSet<SavedSearch> SavedSearches => Set<SavedSearch>();
