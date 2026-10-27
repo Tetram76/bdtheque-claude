@@ -39,7 +39,7 @@ Frontend, internationalisation, authentification, documentation de l'API, journa
 ## Documentation de l'API
 
 - L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
-- Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement uniquement.
+- Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement et dans l'environnement de validation fonctionnelle (`choix-implementation/deploiement.md` § Environnement de validation fonctionnelle) uniquement, jamais en production.
 
 ## Journalisation
 

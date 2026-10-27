@@ -62,20 +62,25 @@ Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend
 ├── docker-compose.yml           # Déploiement (images Docker Hub) et build local
 ├── docker/
 │   ├── api/Dockerfile
-│   └── frontend/Dockerfile
+│   ├── frontend/Dockerfile
+│   ├── validation/                # Environnement de validation fonctionnelle (surcharge Compose, valeurs)
+│   └── validation-data/Dockerfile # Chargement des données de validation
+├── scripts/                       # Relevé des dépendances, lancement et arrêt de la validation
 ├── src/
 │   ├── Bdtheque.Domain/           # Entités, enums, value objects — aucune dépendance externe
 │   ├── Bdtheque.Contracts/        # DTOs échangés entre api et frontend
 │   ├── Bdtheque.Infrastructure/   # DbContext EF Core, configurations, migrations
 │   ├── Bdtheque.Api/              # Conteneur api : endpoints, sécurité, règles applicatives
 │   ├── Bdtheque.Frontend/         # Conteneur frontend : composants Blazor, auth cookie
-│   └── Bdtheque.HealthProbe/      # Sonde du bilan de santé des images (sans shell ni curl)
+│   ├── Bdtheque.HealthProbe/      # Sonde du bilan de santé des images (sans shell ni curl)
+│   └── Bdtheque.ValidationData/   # Données fictives de l'environnement de validation, chargées par l'API
 ├── tests/
 │   ├── Bdtheque.Domain.Tests/         # Tests unitaires du domaine
 │   ├── Bdtheque.Infrastructure.Tests/ # Tests de persistance (migrations, contraintes) sur PostgreSQL
 │   ├── Bdtheque.Api.Tests/            # Tests d'intégration de l'API (WebApplicationFactory + PostgreSQL)
 │   ├── Bdtheque.Frontend.Tests/       # Tests des composants Blazor (bUnit)
 │   ├── Bdtheque.EndToEnd.Tests/       # Tests de bout en bout dans Chromium (Playwright), application complète
+│   ├── Bdtheque.ValidationData.Tests/ # Chargement des données de validation par l'API
 │   └── Bdtheque.Testing/              # Support partagé : conteneur PostgreSQL de test, hôte de l'API
 └── .speckit/                      # Source de vérité du projet (voir ci-dessous)
 ```
@@ -108,6 +113,51 @@ docker compose up -d --build
 `--build` construit les images depuis les sources (sous les mêmes noms que les images publiées, cf. ci-dessous) au lieu de les télécharger.
 
 L'application est ensuite accessible sur `http://localhost:8080` (port configurable via `FRONTEND_PORT` dans `.env`). L'état de chaque conteneur peut être vérifié via son endpoint `/health` (exposé uniquement en interne pour `api`, et sur le port publié pour `frontend`).
+
+## Validation fonctionnelle
+
+Les écrans d'une Pull Request sont validés sur le poste de l'utilisateur, avant sa revue, dans un environnement de validation : l'application complète, construite depuis les sources de la Pull Request, avec des données fictives qui couvrent les cas des écrans.
+
+### Prérequis
+
+- [PowerShell 7.3](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) ou plus récent (`pwsh`) ;
+- git, avec ce dépôt cloné (le dépôt étant public, aucune authentification) ;
+- un service Docker démarré : [Docker Desktop](https://www.docker.com/products/docker-desktop/) ou [Rancher Desktop](https://rancherdesktop.io/) (moteur `dockerd`).
+
+Ni SDK .NET, ni fichier à éditer, ni secret, ni dossier à préparer : les images sont construites par Docker, et l'environnement a ses propres valeurs ([`docker/validation/validation.env`](docker/validation/validation.env)). Les scripts sont ceux de `main` : mettre à jour le dépôt (`git pull`) avant une validation.
+
+### Lancer la version d'une Pull Request
+
+Depuis la racine du dépôt, avec le numéro de la Pull Request :
+
+```bash
+pwsh ./scripts/Start-Validation.ps1 -PullRequest 245
+```
+
+Le premier lancement construit les images, en quelques minutes ; les suivants ne reconstruisent que ce que la Pull Request a changé. Une fois les conteneurs démarrés et les données chargées, le script affiche :
+
+- l'application : `http://localhost:8180` ;
+- la documentation de l'API (Scalar), pour information : `http://localhost:8181/scalar/v1`. Pour y essayer un appel, lui ajouter l'en-tête `X-Internal-Api-Key` avec la valeur de `INTERNAL_API_KEY` de `validation.env`.
+
+Ces ports ne sont ouverts qu'au poste lui-même.
+
+### Options
+
+| Option | Effet |
+| --- | --- |
+| `-Empty` | Sans les données de validation : écran d'accueil d'une collection vide. |
+| `-KeepData` | Conserve les données du lancement précédent (arrêté lui aussi avec `-KeepData`), au lieu de repartir d'une base vide. |
+| `-Ref <commit>` | Au lieu d'une Pull Request, n'importe quel commit du dépôt : branche, tag, empreinte. Sans `-PullRequest` ni `-Ref`, le commit courant (`HEAD`), sans les modifications non commitées. |
+
+### Remise à zéro et arrêt
+
+Chaque lancement repart d'une base vide (sauf `-KeepData`) : relancer la commande remet l'environnement à zéro. Pour l'arrêter et en supprimer les données :
+
+```bash
+pwsh ./scripts/Stop-Validation.ps1
+```
+
+Les images construites restent sur le poste, pour accélérer la validation suivante ; `docker image rm bdtheque-validation-api bdtheque-validation-frontend bdtheque-validation-data` les supprime.
 
 ## Déploiement
 

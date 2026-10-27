@@ -8,7 +8,7 @@ Ces choix ne sont pas imposés : ils peuvent être remis en cause si une meilleu
 | --- | --- |
 | `index.md` | Organisation du code, versions et bibliothèques. |
 | `socle.md` | Frontend, internationalisation, authentification, documentation de l'API, journalisation, outillage de développement .NET. |
-| `deploiement.md` | Images de base des conteneurs, publication des images Docker, version de PostgreSQL, application du schéma au démarrage. |
+| `deploiement.md` | Images de base des conteneurs, publication des images Docker, version de PostgreSQL, application du schéma au démarrage, environnement de validation fonctionnelle. |
 | `persistance.md` | Conventions EF Core, identifiants, cohérence entre tables, collation, migrations, concurrence d'accès, dates renseignées automatiquement, collections de navigation du domaine. |
 | `api.md` | Organisation de l'API, navigation par initiale, recherche simple. |
 | `ecritures.md` | Erreurs métier, fonctionnelles et techniques ; suppression des entités. |
@@ -33,6 +33,7 @@ La solution .NET est découpée en projets par responsabilité, sous `src/` :
 | `Bdtheque.Frontend` | Conteneur `frontend` : composants Blazor (rendu côté serveur), authentification cookie, appels HTTP vers `Bdtheque.Api`. |
 | `Bdtheque.Mcp` | Conteneur `mcp` (Phase 6) : outils MCP pour agents IA, appels HTTP vers `Bdtheque.Api` via `Bdtheque.Contracts` (`choix-implementation/agents-ia.md` § Outil pour agents IA). Ne référence ni `Bdtheque.Api` ni `Bdtheque.Domain`. |
 | `Bdtheque.HealthProbe` | Sonde du bilan de santé des images publiées (`HEALTHCHECK`), qui n'ont ni shell ni `curl` (`choix-implementation/deploiement.md` § Images de base des conteneurs) : interroge une URL et sort en `0` sur un succès, en `1` sinon. |
+| `Bdtheque.ValidationData` | Chargement des données de l'environnement de validation fonctionnelle, au travers de l'API d'administration (`choix-implementation/deploiement.md` § Environnement de validation fonctionnelle). Ne référence que `Bdtheque.Contracts` ; jamais déployé. |
 
 Chaque projet source a vocation à avoir son miroir sous `tests/` (ex. `Bdtheque.Api.Tests`), créé dès que son contenu justifie des tests — proportionnalité définie dans la règle de non-régression de `gestion-projet/`. S'y ajoutent les tests de bout en bout de l'application complète (`Bdtheque.EndToEnd.Tests`) et la bibliothèque que partagent les tests (`Bdtheque.Testing`), cf. `choix-implementation/socle.md` § Outillage de développement .NET.
 
