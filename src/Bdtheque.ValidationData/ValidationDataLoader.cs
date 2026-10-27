@@ -75,9 +75,12 @@ public sealed class ValidationDataLoader(HttpClient client)
             [Credit(arnaud, ContributionRole.Scenarist), Credit(vanSluys, ContributionRole.Illustrator), Credit(ostrova, ContributionRole.Colorist)]);
 
         // A completed series, under the `#` navigation entry.
-        var moons = await data.SeriesAsync(Series("13 Lunes", SeriesStatus.Completed, 3, isComplete: true,
+        var moons = await data.SeriesAsync(Series("13 Lunes", SeriesStatus.Completed,
             Template(blackPlate.Id, null, EditionFormat.Standard), [scienceFiction], [],
-            [Credit(brume, ContributionRole.Scenarist), Credit(pinceau, ContributionRole.Illustrator)]));
+            [Credit(brume, ContributionRole.Scenarist), Credit(pinceau, ContributionRole.Illustrator)]) with
+        {
+            TheoreticalVolumeCount = 3, IsComplete = true,
+        });
         var redMoon = await data.AlbumAsync(Album("Lune rousse", moons, 1, 1985, rating: AlbumRating.Good));
         var redMoonEdition = await data.EditionAsync(redMoon, Owned(blackPlate.Id, null, 1985, AcquisitionMode.Purchase, new DateOnly(2005, 6, 18)) with
         {
@@ -96,7 +99,7 @@ public sealed class ValidationDataLoader(HttpClient client)
 
         // An abandoned series, sorted under its article; its colourist is credited on the series alone, the
         // albums carrying contributions of their own. Two volumes only: the pile of covers is incomplete.
-        var sparrowhawk = await data.SeriesAsync(Series("L'Épervier des sables", SeriesStatus.Abandoned, null, isComplete: false,
+        var sparrowhawk = await data.SeriesAsync(Series("L'Épervier des sables", SeriesStatus.Abandoned,
             Template(bubbles.Id, bubbles.Collections[0], EditionFormat.Pocket, BindingType.Paperback), [adventure, history], [],
             [Credit(kador, ContributionRole.Scenarist), Credit(etienne, ContributionRole.Illustrator), Credit(ostrova, ContributionRole.Colorist)]));
         ContributionContent[] sparrowhawkCredits = [Credit(kador, ContributionRole.Scenarist), Credit(etienne, ContributionRole.Illustrator)];
@@ -116,7 +119,7 @@ public sealed class ValidationDataLoader(HttpClient client)
         await data.VisualAsync(oasis, oasisEdition, VisualType.Cover, Images.Portrait(0.13));
 
         // A series whose title begins with a letter of another alphabet, under `@`, catalogued only.
-        var omega = await data.SeriesAsync(Series("Ωmega", null, null, isComplete: false, Template(null, null, null), [scienceFiction], [],
+        var omega = await data.SeriesAsync(Series("Ωmega", null, Template(null, null, null), [scienceFiction], [],
             [Credit(lund, ContributionRole.Scenarist), Credit(tanabe, ContributionRole.Illustrator)]));
         await data.AlbumAsync(Album("Point zéro", omega, 1, 2024));
 
@@ -178,9 +181,10 @@ public sealed class ValidationDataLoader(HttpClient client)
     private static async Task LoadLongSeriesAsync(
         Loading data, Publisher lagoon, Publisher bubbles, Guid[] genres, Guid universe, Guid specialIssueUniverse, ContributionContent[] credits)
     {
-        var series = await data.SeriesAsync(Series(LongSeriesTitle, SeriesStatus.InProgress, 30, isComplete: false,
+        var series = await data.SeriesAsync(Series(LongSeriesTitle, SeriesStatus.InProgress,
             Template(lagoon.Id, lagoon.Collections[0], EditionFormat.Standard, BindingType.Hardcover), genres, [universe], credits) with
         {
+            TheoreticalVolumeCount = 30,
             Summary = "Dans la cité d'Ombrelune, les veilleurs gardent les lanternes qui retiennent la marée des songes.",
             PersonalNotes = "Collection commencée en 1999.",
         });
@@ -278,9 +282,8 @@ public sealed class ValidationDataLoader(HttpClient client)
         new(publisher, collection, null, EditionCondition.Excellent, binding, BookOrientation.Portrait, ReadingDirection.LeftToRight, format, true);
 
     private static SeriesContent Series(
-        string title, SeriesStatus? status, int? volumeCount, bool isComplete, SeriesEditionTemplate template, Guid[] genres, Guid[] universes,
-        ContributionContent[] credits) =>
-        new(title, null, status, volumeCount, isComplete, false, false, null, null, template, genres, universes, credits);
+        string title, SeriesStatus? status, SeriesEditionTemplate template, Guid[] genres, Guid[] universes, ContributionContent[] credits) =>
+        new(title, null, status, null, false, false, false, null, null, template, genres, universes, credits);
 
     // Without contributions of its own, an album attached to a series gets those of the series.
     private static AlbumContent Album(string? title, Guid series, int? volume, int year, int? month = null, AlbumRating? rating = null) =>
