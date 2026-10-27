@@ -1,6 +1,7 @@
 using Bdtheque.Api.Audience;
 using Bdtheque.Api.Endpoints;
 using Bdtheque.Api.Errors;
+using Bdtheque.Api.Hosting;
 using Bdtheque.Api.Security;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Errors;
@@ -85,7 +86,9 @@ app.UseExceptionHandler();
 // has a body (ApiExceptionHandler's, or /health's own report) is left untouched.
 app.UseStatusCodePages();
 
-if (app.Environment.IsDevelopment())
+// Never in production, where `api` is not reachable anyway: in the validation environment, the user may consult
+// it for information (choix-implementation/socle.md § Documentation de l'API).
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(ApiEnvironments.Validation))
 {
     app.MapOpenApi();
     app.MapScalarApiReference();

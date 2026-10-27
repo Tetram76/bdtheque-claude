@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Bdtheque.ValidationData.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bdtheque.ValidationData\Bdtheque.ValidationData.csproj" />
+    <ProjectReference Include="..\Bdtheque.Testing\Bdtheque.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Bdtheque.Testing" />
+  </ItemGroup>
+
+</Project>

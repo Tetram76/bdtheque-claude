@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Bdtheque.ValidationData</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Writes through the API, as its clients do: never through the domain nor the database. -->
+    <ProjectReference Include="..\Bdtheque.Contracts\Bdtheque.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

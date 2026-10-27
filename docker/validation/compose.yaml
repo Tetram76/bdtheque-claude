@@ -1,0 +1,45 @@
+# Validation environment (choix-implementation/deploiement.md § Environnement de validation fonctionnelle):
+# overrides docker-compose.yml, with the values of validation.env, under a project name of its own.
+# Run by scripts/Start-Validation.ps1, stopped by scripts/Stop-Validation.ps1.
+services:
+  api:
+    # Built on this machine, under names of their own: never the published images, which they would
+    # replace on this machine.
+    image: bdtheque-validation-api
+    environment:
+      # Production, plus the documentation of the API.
+      ASPNETCORE_ENVIRONMENT: Validation
+    # The visuals in a volume of the project, removed with it: no folder to create nor rights to set on
+    # the machine. Docker creates the volume as root, whom `api` runs as here, where the deployment
+    # grants its folder to the user of the image instead.
+    user: "0"
+    volumes:
+      - visuels:/app/visuels
+    # The documentation of the API, from this machine only: `api` is never exposed in production.
+    ports:
+      - "127.0.0.1:${API_PORT}:8080"
+
+  frontend:
+    image: bdtheque-validation-frontend
+    # From this machine only.
+    ports: !override
+      - "127.0.0.1:${FRONTEND_PORT}:8080"
+
+  # Loads the validation data through the API, once, into an empty database: started only on demand.
+  validation-data:
+    image: bdtheque-validation-data
+    build:
+      context: .
+      dockerfile: docker/validation-data/Dockerfile
+    profiles: [data]
+    environment:
+      Api__BaseUrl: http://api:8080
+      InternalApiKey__Key: ${INTERNAL_API_KEY}
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - frontend-net
+
+volumes:
+  visuels:

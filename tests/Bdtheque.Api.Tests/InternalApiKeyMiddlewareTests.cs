@@ -39,7 +39,7 @@ public sealed class InternalApiKeyMiddlewareTests : IClassFixture<ApiWebApplicat
 
         var response = await client.GetAsync(path);
 
-        // These routes are only mapped in Development (see Program.cs), so the 404 here
+        // These routes are not mapped in Production (see Program.cs), so the 404 here
         // still proves the middleware let the request through without the shared key,
         // unlike the 401 returned for a regular path.
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
