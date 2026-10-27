@@ -4,8 +4,9 @@
     Stops the validation environment started by Start-Validation.ps1, and removes its data.
 
 .DESCRIPTION
-    Validation environment of choix-implementation/deploiement.md § Environnement de validation fonctionnelle.
-    The images built for it are kept: the next validation rebuilds only what its pull request changes.
+    Validation environment of choix-implementation/deploiement.md § Environnement de validation fonctionnelle:
+    removes its containers, networks and data, and the sources extracted for it. The images built for it are
+    kept: the next validation rebuilds only what its pull request changes.
 #>
 [CmdletBinding()]
 param(
@@ -22,3 +23,9 @@ if (-not $KeepData) {
     $arguments += '--volumes'
 }
 docker @arguments
+
+# Extracted again at each start.
+$sources = Join-Path ([IO.Path]::GetTempPath()) 'bdtheque-validation'
+if (Test-Path $sources) {
+    Remove-Item $sources -Recurse -Force
+}

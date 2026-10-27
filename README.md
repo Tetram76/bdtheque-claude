@@ -151,7 +151,7 @@ Ces ports ne sont ouverts qu'au poste lui-même.
 
 ### Remise à zéro et arrêt
 
-Chaque lancement repart d'une base vide (sauf `-KeepData`) : relancer la commande remet l'environnement à zéro. Pour l'arrêter et en supprimer les données :
+Chaque lancement repart d'une base vide (sauf `-KeepData`) : relancer la commande remet l'environnement à zéro. Pour l'arrêter et supprimer ses conteneurs, ses réseaux, ses données (base et visuels) et les sources extraites pour lui :
 
 ```bash
 pwsh ./scripts/Stop-Validation.ps1
