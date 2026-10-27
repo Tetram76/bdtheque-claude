@@ -11,7 +11,7 @@ public sealed class InternalApiKeyMiddleware(RequestDelegate next, IOptions<Inte
 {
     /// <summary>
     /// Paths exempted from the shared secret: `/health` is polled by orchestrators, while
-    /// `/openapi` and `/scalar` are only ever mapped in Development (see Program.cs) and
+    /// `/openapi` and `/scalar` are only ever mapped in Development and Validation (see Program.cs) and
     /// must stay reachable from a plain browser to be usable as interactive documentation.
     /// </summary>
     private static readonly string[] ExemptPathPrefixes = ["/health", "/openapi", "/scalar"];

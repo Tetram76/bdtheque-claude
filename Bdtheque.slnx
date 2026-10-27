@@ -6,6 +6,7 @@
     <Project Path="src/Bdtheque.Frontend/Bdtheque.Frontend.csproj" />
     <Project Path="src/Bdtheque.HealthProbe/Bdtheque.HealthProbe.csproj" />
     <Project Path="src/Bdtheque.Infrastructure/Bdtheque.Infrastructure.csproj" />
+    <Project Path="src/Bdtheque.ValidationData/Bdtheque.ValidationData.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Bdtheque.Api.Tests/Bdtheque.Api.Tests.csproj" />
@@ -14,5 +15,6 @@
     <Project Path="tests/Bdtheque.Frontend.Tests/Bdtheque.Frontend.Tests.csproj" />
     <Project Path="tests/Bdtheque.Infrastructure.Tests/Bdtheque.Infrastructure.Tests.csproj" />
     <Project Path="tests/Bdtheque.Testing/Bdtheque.Testing.csproj" />
+    <Project Path="tests/Bdtheque.ValidationData.Tests/Bdtheque.ValidationData.Tests.csproj" />
   </Folder>
 </Solution>
