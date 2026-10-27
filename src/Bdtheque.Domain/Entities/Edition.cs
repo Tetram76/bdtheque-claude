@@ -54,6 +54,10 @@ public sealed class Edition : EntityBase
     private readonly List<EditionVisual> _visuals = [];
     public IReadOnlyCollection<EditionVisual> Visuals => _visuals;
 
+    // The days the edition was in the spotlight of the dashboard, which the draw alone inserts: read only.
+    private readonly List<EditionSpotlight> _spotlights = [];
+    public IReadOnlyCollection<EditionSpotlight> Spotlights => _spotlights;
+
     // EF Core parameterless constructor
     private Edition() { }
 

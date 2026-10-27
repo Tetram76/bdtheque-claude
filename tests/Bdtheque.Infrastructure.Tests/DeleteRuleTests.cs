@@ -36,6 +36,7 @@ public sealed class DeleteRuleTests : IAsyncLifetime
         ["FK_SavedSearchDesignations_SavedSearches_SavedSearchId"] = Cascade,
         ["FK_AudienceUsages_AudienceVisits_VisitId"] = Cascade,
         ["FK_AudienceCounterObjects_AudienceCounters_CounterId"] = Cascade,
+        ["FK_EditionSpotlights_Editions_EditionId"] = Cascade,
 
         // Associations: the join row disappears with either side.
         ["FK_AlbumGenres_Albums_AlbumId"] = Cascade,
@@ -150,6 +151,27 @@ public sealed class DeleteRuleTests : IAsyncLifetime
         Assert.False(await _fixture.Context.PurchaseIntents.AnyAsync());
         Assert.True(await _fixture.Context.Albums.AnyAsync(a => a.Id == album.Id));
         Assert.True(await _fixture.Context.Editions.AnyAsync(e => e.Id == otherEdition.Id));
+    }
+
+    [Fact]
+    public async Task DeleteEdition_RemovesItsSpotlights_KeepsThoseOfTheOtherEditions()
+    {
+        var album = new Album("Le Lotus bleu", null);
+        var publisher = new Publisher("Casterman");
+        var deleted = new Edition(album, publisher);
+        album.RecordAcquisition(deleted, AcquisitionMode.Purchase);
+        var kept = new Edition(album, publisher);
+        album.RecordAcquisition(kept, AcquisitionMode.Purchase);
+        _fixture.Context.AddRange(album, publisher, deleted, kept);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+        await _fixture.Context.InsertSpotlightAsync(new DateOnly(2026, 10, 1), deleted.Id);
+        await _fixture.Context.InsertSpotlightAsync(new DateOnly(2026, 10, 15), deleted.Id);
+        await _fixture.Context.InsertSpotlightAsync(new DateOnly(2026, 10, 27), kept.Id);
+
+        await _fixture.Context.Editions.Where(e => e.Id == deleted.Id).ExecuteDeleteAsync();
+
+        Assert.Equal([kept.Id], await _fixture.Context.EditionSpotlights.Select(s => s.EditionId).ToListAsync());
     }
 
     [Fact]
