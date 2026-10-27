@@ -40,7 +40,9 @@ function New-Update([string] $component, [string] $current, [string] $latest, [v
 }
 
 function Get-NuGetPublished([string] $id, [string] $version) {
-    (Invoke-RestMethod "https://api.nuget.org/v3/registration5-semver1/$($id.ToLowerInvariant())/$($version.ToLowerInvariant()).json").published
+    # The SemVer 2.0.0 hive: the SemVer 1.0.0 one omits any version that depends on a SemVer 2.0.0
+    # package (e.g. bunit 2.13.3), and answers 404 for it.
+    (Invoke-RestMethod "https://api.nuget.org/v3/registration5-gz-semver2/$($id.ToLowerInvariant())/$($version.ToLowerInvariant()).json").published
 }
 
 $updates = [System.Collections.Generic.List[object]]::new()
