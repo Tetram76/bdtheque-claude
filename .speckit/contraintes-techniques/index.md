@@ -6,7 +6,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 | Fichier | Contenu |
 | --- | --- |
 | `index.md` | Stack cible, exploitation des technologies retenues, suivi des versions et des vulnérabilités, licences. |
-| `architecture-deploiement.md` | Architecture des tiers, indépendance de l'outil pour agents IA, déploiement, hébergement, stockage des visuels, compatibilité multi-supports, authentification, sources de données externes, statistiques du dashboard. |
+| `architecture-deploiement.md` | Architecture des tiers, indépendance de l'outil pour agents IA, déploiement, hébergement et sécurisation SSL/TLS, stockage des visuels, compatibilité multi-supports, authentification, sources de données externes, statistiques du dashboard. |
 | `reprise-donnees.md` | Application existante (client lourd) et reprise de ses données. Lu seulement pour la reprise des données (`AGENTS.md`). |
 
 ---

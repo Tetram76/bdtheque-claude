@@ -19,6 +19,7 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, an
 - **Tous les commits doivent être signés et vérifiés** (GPG/SSH).
 - La signature est configurée globalement sur le poste (`commit.gpgsign=true`, clé GPG `CC10F185AA085B2DD98025986A5E6B8341983E31`).
 - La règle `required_signatures` est intégrée au Ruleset GitHub pour l'imposer côté serveur.
+- **Vérification sur GitHub uniquement** : seul compte l'état que GitHub constate, celui que contrôle `required_signatures` : la mention « Verified » d'un commit, ou le champ `verification` de l'API des commits (`verified`, `reason`). La signature d'un commit poussé se vérifie donc toujours là, jamais en local : `git log --show-signature` ou `%G?` ne connaissent que les clés déclarées sur le poste (ex. `gpg.ssh.allowedSignersFile` pour une signature SSH), et peuvent ne pas reconnaître une signature que GitHub vérifie.
 
 ## Configuration du repository GitHub
 
@@ -148,6 +149,9 @@ Les versions de l'application sont connues du dépôt avant leur publication : c
   - `0.1.0` : la première application utilisable (Phase 3, partie 1), puis une version **mineure** par phase ou partie de phase ;
   - `1.0.0` : la version de la première mise en production (déploiement consigné dans `journal-evenements.md`) ; les versions suivantes gardent une version mineure par phase ou partie de phase ;
   - une version **corrective** (ex. `v0.1.1`) livre une correction publiée entre deux de ces versions.
+
+  Une **version candidate** (RC), testée sur le déploiement interne avant la publication de la version (`contraintes-techniques/architecture-deploiement.md` § Hébergement), n'a pas de numéro propre : elle est désignée par les images d'une publication à la demande, sous leur tag immuable `sha-<commit>` (`choix-implementation/deploiement.md` § Publication des images Docker).
+  - **Alternative écartée (numéro de pré-version, ex. `v0.1.0-rc.1`, avec son tag et sa release)** : un nom plus lisible que `sha-<commit>`, pour un coût réel : chaque version publiée fait repartir la période du nouveau code de SonarQube Cloud (§ Analyse de la qualité du code), qu'une version candidate amputerait du code ajouté depuis la version précédente, et jalons, tags et releases devraient distinguer les versions candidates des versions publiées.
 
   La version que livre chaque phase, ou partie de phase, est indiquée dans `suivi-implementation.md`.
 - **Jalon** : chaque version à venir est un jalon de même nom (`v0.1.0`), dont la description désigne la phase ou la partie qu'elle livre. Il est créé au découpage de cette phase ou de cette partie, avec ses tickets, ou avec le ticket d'une version corrective. Il ne porte pas d'échéance : le projet ne planifie pas de dates.
