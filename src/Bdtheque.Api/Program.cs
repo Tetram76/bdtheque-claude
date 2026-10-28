@@ -71,6 +71,10 @@ await using (var migrationScope = app.Services.CreateAsyncScope())
     if (refreshed.Count > 0)
         app.Logger.LogWarning(
             "The version of the collations {Collations} changed with the database image: every index was rebuilt.", refreshed);
+
+    // The setting of the application is always present, from the first startup on (choix-implementation/domaine.md §
+    // Paramétrage de l'application : mise en œuvre).
+    await context.ProvisionApplicationSettingsAsync();
 }
 
 // The deployment can guarantee neither that the visuals volume is writable nor that it is mounted
@@ -109,6 +113,7 @@ admin.MapEditions();
 admin.MapEditionVisuals();
 admin.MapPurchaseIntents();
 admin.MapSavedSearches();
+admin.MapApplicationSettings();
 admin.MapChangeLog();
 admin.MapAudienceReading();
 
@@ -125,6 +130,7 @@ catalog.MapAdvancedSearch();
 catalog.MapSavedSearchCatalog();
 catalog.MapVisualMedia();
 catalog.MapDashboard();
+catalog.MapApplicationSettingsCatalog();
 
 app.MapAudience().MapAudienceRecording();
 

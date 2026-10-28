@@ -19,4 +19,5 @@ public enum RecordType
     Genre = 8,
     Universe = 9,
     SavedSearch = 10,
+    ApplicationSettings = 11,
 }

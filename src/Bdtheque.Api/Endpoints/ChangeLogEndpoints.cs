@@ -90,6 +90,7 @@ internal static class ChangeLogEndpoints
             Model.AuthorLabel author => ToAuthor(author),
             Model.PublisherCollectionLabel collection => new Contract.PublisherCollectionLabel(collection.Name, collection.PublisherName),
             Model.NameLabel name => new Contract.NameLabel(name.Name),
+            Model.ApplicationSettingsLabel => new Contract.ApplicationSettingsLabel(),
             _ => throw new ArgumentOutOfRangeException(nameof(label), label.GetType().Name, "Unknown kind of record label."),
         };
 

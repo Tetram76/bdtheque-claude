@@ -7,6 +7,11 @@ public abstract class EntityBase
     // BdthequeDbContext.OnModelCreating).
     public Guid Id { get; private set; } = Guid.CreateVersion7();
 
+    protected EntityBase() { }
+
+    // For a record whose identity is known beforehand: the single setting of the application.
+    protected EntityBase(Guid id) => Id = id;
+
     // Set automatically when the record is saved, never entered (modele-metier.md § Attributs
     // communs à toutes les entités): no domain operation writes them, the persistence layer does.
     public DateTimeOffset CreatedAt { get; private set; }

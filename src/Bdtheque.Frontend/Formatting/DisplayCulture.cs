@@ -1,8 +1,8 @@
 namespace Bdtheque.Frontend.Formatting;
 
 /// <summary>
-/// The display culture of the application, the only one offered until the setting of the application chooses it (#193;
-/// fonctionnel/presentation.md § Langue et culture d'affichage).
+/// The display culture of the application (fonctionnel/presentation.md § Langue et culture d'affichage): the only one
+/// the setting of the application offers, which the frontend therefore does not read.
 /// </summary>
 public static class DisplayCulture
 {

@@ -42,3 +42,6 @@ public sealed record PublisherCollectionLabel(string Name, string PublisherName)
 
 /// <summary>A record labelled by its name alone: series, publisher, genre, universe.</summary>
 public sealed record NameLabel(string Name) : RecordLabel;
+
+/// <summary>The single setting of the application, which its type of record suffices to label.</summary>
+public sealed record ApplicationSettingsLabel : RecordLabel;

@@ -165,6 +165,37 @@ namespace Bdtheque.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bdtheque.Domain.Entities.ApplicationSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AlbumLabelFormat")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayCulture")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationSettings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ApplicationSettings_Single", "\"Id\" = '0199c0de-5e77-7000-8000-000000000001'");
+                        });
+                });
+
             modelBuilder.Entity("Bdtheque.Domain.Entities.AudienceCounter", b =>
                 {
                     b.Property<Guid>("Id")

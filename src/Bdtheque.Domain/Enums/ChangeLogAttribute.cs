@@ -88,4 +88,8 @@ public enum ChangeLogAttribute
     SearchedEntity = 62,
     SearchCriteria = 63,
     SearchVariables = 64,
+
+    // Setting of the application
+    AlbumLabelFormat = 65,
+    DisplayCulture = 66,
 }

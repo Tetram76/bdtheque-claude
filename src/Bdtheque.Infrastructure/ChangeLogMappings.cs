@@ -153,6 +153,14 @@ internal static class ChangeLogMappings
                             : null)),
             ],
             []),
+
+        [typeof(ApplicationSettings)] = new(
+            RecordType.ApplicationSettings,
+            [
+                Enum<ApplicationSettings>(ChangeLogAttribute.AlbumLabelFormat, nameof(ApplicationSettings.AlbumLabelFormat)),
+                Enum<ApplicationSettings>(ChangeLogAttribute.DisplayCulture, nameof(ApplicationSettings.DisplayCulture)),
+            ],
+            []),
     };
 
     private static AttributeMapping Text(ChangeLogAttribute attribute, string property) =>

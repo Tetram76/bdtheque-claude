@@ -12,7 +12,7 @@ Ces choix ne sont pas imposés : ils peuvent être remis en cause si une meilleu
 | `persistance.md` | Conventions EF Core, identifiants, cohérence entre tables, collation, migrations, concurrence d'accès, dates renseignées automatiquement, collections de navigation du domaine. |
 | `api.md` | Organisation de l'API, navigation par initiale, recherche simple. |
 | `ecritures.md` | Erreurs métier, fonctionnelles et techniques ; suppression des entités. |
-| `domaine.md` | Intention d'achat, valeur d'une édition, devises, journal des modifications, édition « À la une », validation de l'ISBN, visuels. |
+| `domaine.md` | Intention d'achat, valeur d'une édition, devises, journal des modifications, paramétrage de l'application, édition « À la une », validation de l'ISBN, visuels. |
 | `recherche-avancee.md` | Recherche avancée et recherches enregistrées. |
 | `agents-ia.md` | Outil pour agents IA. |
 | `mesure-audience.md` | Mesure d'audience de l'interface web : enregistrement, compteurs, conservation, indicateurs. |
