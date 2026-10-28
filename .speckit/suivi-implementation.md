@@ -210,7 +210,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#240~~ | Fuseau horaire du navigateur et alignement de la recherche avancée |
 | ~~#214~~ | Environnement de validation fonctionnelle |
 | ~~#192~~ | Données du dashboard dans l'API avant la Phase 4 |
-| #193 | Paramétrage de l'application dans le modèle de domaine et l'API |
+| ~~#193~~ | Paramétrage de l'application dans le modèle de domaine et l'API |
 | #194 | Thème de base neutre, contrats des thèmes et thème de la visite |
 | #195 | Thème « Cases et bulles » (violine) |
 | #196 | Thème « La gazette » |
