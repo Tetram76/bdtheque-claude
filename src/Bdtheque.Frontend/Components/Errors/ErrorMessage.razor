@@ -4,7 +4,7 @@
 @inject IStringLocalizer<RuleMessages> Rules
 @inject IStringLocalizer<EntityNames> Entities
 
-@* The category, both named and carried by an attribute the themes style (#194), tells the three kinds of
+@* The category, both named and carried by an attribute that gives it its color (ErrorMessage.razor.css), tells the three kinds of
    errors apart at first glance (fonctionnel/index.md § Présentation des erreurs). *@
 <div role="alert" class="error-message" data-error-category="@CategoryName">
     <p data-error-label>@L[$"Category.{Problem.Category}"]</p>

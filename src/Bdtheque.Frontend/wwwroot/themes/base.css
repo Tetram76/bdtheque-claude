@@ -1,0 +1,261 @@
+/* Base theme: the contracts every theme follows, with their neutral values (visuel/charte-graphique.md § Thème de base;
+   choix-implementation/socle.md § Thèmes : mise en œuvre). A theme only redefines these custom properties under its own
+   [data-theme] selector, and hooks its own touches on the anchors below: it never styles a component directly.
+   Every pair of colors meant to be read together is checked by ThemeContrastTests, for every theme. */
+
+/* Served by the application: no font service is called at run time (fonctionnel/mesure-audience.md). Inter, SIL Open
+   Font License 1.1 (fonts/inter/OFL.txt), Latin and Latin Extended subsets, which cover the names of the catalog. */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/inter/inter-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: italic;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/inter/inter-latin-wght-italic.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/inter/inter-latin-ext-wght-normal.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: italic;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/inter/inter-latin-ext-wght-italic.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+    /* Colors */
+    --color-background: #F6F5F2;
+    --color-surface: #FFFFFF;
+    --color-surface-raised: #FFFFFF;
+    --color-surface-inverse: #26262B;
+    --color-text-on-inverse: #F6F5F2;
+    --color-text: #1D1D21;
+    --color-text-secondary: #45454D;
+    --color-text-muted: #63636B;
+    /* Decorative rules and separators, which need no contrast; the border of a control does (3:1). */
+    --color-rule: #DEDCD6;
+    --color-control-border: #85858C;
+    /* The accent fills the active entry and the highlights; read as text, it takes its own color. */
+    --color-accent: #2D5DA1;
+    --color-text-on-accent: #FFFFFF;
+    --color-accent-text: #2D5DA1;
+    --color-alert: #A35200;
+    --color-text-on-alert: #FFFFFF;
+    --color-info: #1F6E8C;
+    --color-text-on-info: #FFFFFF;
+    --color-delete: #B42318;
+    --color-text-on-delete: #FFFFFF;
+    --color-failure: #4A4A57;
+    --color-text-on-failure: #FFFFFF;
+    /* Secondary palette, to vary colors without hierarchy (genres, publishers, tags); one text color on all of them. */
+    --color-palette-1: #BFD7F2;
+    --color-palette-2: #F4C7B8;
+    --color-palette-3: #CBE6C1;
+    --color-palette-4: #F1DE9C;
+    --color-palette-5: #D9CCF0;
+    --color-palette-6: #BFE4DF;
+    --color-palette-7: #F0C6DA;
+    --color-text-on-palette: #1D1D21;
+
+    /* Typography */
+    --font-heading: "Inter", sans-serif;
+    --font-text: "Inter", sans-serif;
+    --font-figures: "Inter", sans-serif;
+    --font-weight-heading: 700;
+    --font-weight-strong: 600;
+    --font-size-small: 0.8125rem;
+    --font-size-text: 0.9375rem;
+    --font-size-large: 1.125rem;
+    --font-size-title: 1.375rem;
+    --font-size-page-title: 1.625rem;
+    --line-height-text: 1.5;
+    --line-height-heading: 1.2;
+
+    /* Shapes */
+    --radius-block: 0.5rem;
+    --radius-control: 0.375rem;
+    --radius-pill: 999px;
+    --border-block: 1px solid var(--color-rule);
+    --shadow-block: none;
+    --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
+
+    /* Spacing and sizes: those of an application, tighter on a smartphone (visuel/charte-graphique.md § Convivialité et
+       efficacité). A control has the same height on every page for a given screen width. */
+    --space-unit: 0.25rem;
+    --space-xs: var(--space-unit);
+    --space-s: calc(2 * var(--space-unit));
+    --space-m: calc(3 * var(--space-unit));
+    --space-l: calc(4 * var(--space-unit));
+    --space-xl: calc(6 * var(--space-unit));
+    --page-gutter: var(--space-m);
+    --page-max-width: 75rem;
+    --control-height: 2.5rem;
+    --control-padding-inline: var(--space-m);
+
+    /* Anchors of the touches proper to a theme: the logo, the block title and the mention above it, the covers, and
+       the occasional tilt, which the base theme leaves straight. */
+    --tilt-logo: 0deg;
+    --tilt-block-title: 0deg;
+    --tilt-cover: 0deg;
+    --block-kicker-display: none;
+}
+
+@media (min-width: 48rem) {
+    :root {
+        --space-unit: 0.3125rem;
+        --page-gutter: var(--space-xl);
+        --control-height: 2.25rem;
+    }
+}
+
+/* Base rendering, built on the contracts only. */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-text);
+    font-size: var(--font-size-text);
+    line-height: var(--line-height-text);
+    font-variant-numeric: tabular-nums;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0 0 var(--space-m);
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    line-height: var(--line-height-heading);
+}
+
+h1 {
+    font-size: var(--font-size-page-title);
+}
+
+h2 {
+    font-size: var(--font-size-title);
+}
+
+h3 {
+    font-size: var(--font-size-large);
+}
+
+p {
+    margin: 0 0 var(--space-m);
+}
+
+a {
+    color: var(--color-accent-text);
+    text-underline-offset: 0.15em;
+}
+
+a:hover {
+    text-decoration-thickness: 2px;
+}
+
+/* The keyboard focus: an outline of the color of the text, set apart from the element by a band of the surface around
+   it, so that it stands out against the element, colored or not, and against the surface (liste-albums.md § Contrôles). */
+:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+/* Frame shared by the layouts of the consultation and of the administration, until their headers and menus (#257). */
+
+.app-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-l);
+    padding: var(--space-s) var(--page-gutter);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-rule);
+}
+
+.app-header nav {
+    flex: 1;
+}
+
+.app-main {
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+    padding: var(--space-l) var(--page-gutter) var(--space-xl);
+}
+
+/* Anchors: classes that a theme styles to add its own touches. */
+
+.app-logo {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    font-size: var(--font-size-large);
+    color: var(--color-text);
+    text-decoration: none;
+    rotate: var(--tilt-logo);
+}
+
+.block {
+    background: var(--color-surface);
+    border: var(--border-block);
+    border-radius: var(--radius-block);
+    box-shadow: var(--shadow-block);
+    padding: var(--space-l);
+}
+
+.block-kicker {
+    display: var(--block-kicker-display);
+    margin: 0 0 var(--space-xs);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+}
+
+.block-title {
+    display: block;
+    rotate: var(--tilt-block-title);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

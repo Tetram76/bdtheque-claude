@@ -1,0 +1,29 @@
+/* Hidden by app.css until blazor.web.js shows it: a technical error, in the color of that category. */
+#blazor-error-ui {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 1000;
+    padding: var(--space-m) calc(var(--page-gutter) + var(--control-height)) var(--space-m) var(--page-gutter);
+    background: var(--color-failure);
+    color: var(--color-text-on-failure);
+    box-shadow: var(--shadow-raised);
+}
+
+#blazor-error-ui .reload {
+    margin-inline-start: var(--space-s);
+    color: inherit;
+    font-weight: var(--font-weight-strong);
+}
+
+#blazor-error-ui .dismiss {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: var(--space-s);
+    width: var(--control-height);
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: var(--font-size-title);
+    cursor: pointer;
+}

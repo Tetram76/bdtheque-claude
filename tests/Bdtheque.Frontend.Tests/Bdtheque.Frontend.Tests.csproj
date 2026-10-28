@@ -15,6 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The stylesheets of the themes, whose colors ThemeContrastTests checks. -->
+    <None Include="..\..\src\Bdtheque.Frontend\wwwroot\themes\*.css" LinkBase="themes" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Bunit" />
   </ItemGroup>
 

@@ -71,6 +71,16 @@ jobs:
           path: "**/TestResults/test-results.trx"
           if-no-files-found: warn
 
+      # The captures that differ from their reference, each with its difference image (CaptureStore), for the
+      # reviewer of a failed comparison.
+      - name: Publish the captures that differ
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: captures
+          path: tests/Bdtheque.EndToEnd.Tests/TestResults/captures
+          if-no-files-found: ignore
+
   docker-build:
     name: Build Docker image (${{ matrix.image }})
     runs-on: ubuntu-latest
