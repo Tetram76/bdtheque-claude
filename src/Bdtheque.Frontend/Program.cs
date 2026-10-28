@@ -1,6 +1,7 @@
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components;
 using Bdtheque.Frontend.Formatting;
+using Bdtheque.Frontend.Hosting;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -44,6 +45,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
+// Secure on an HTTPS request only, like the authentication cookie: never Secure by default, and always Secure would
+// not be sent back by the browser on the internal deployment in HTTP (choix-implementation/deploiement.md § Frontend
+// derrière le reverse proxy du NAS).
+builder.Services.AddAntiforgery(options => options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest);
+
+builder.Services.AddOptions<PublicAddressOptions>()
+    .Bind(builder.Configuration.GetSection(PublicAddressOptions.SectionName))
+    .Validate(options => options.IsValid(), "PublicAddress:Url must be an absolute http or https address, without path, query, fragment nor user information.")
+    .ValidateOnStart();
 
 builder.Services.AddOptions<InternalApiKeyOptions>()
     .Bind(builder.Configuration.GetSection(InternalApiKeyOptions.SectionName))
@@ -64,16 +74,26 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+// TLS is terminated by the reverse proxy of the NAS, and the internal deployment is reached in HTTP: neither
+// UseHttpsRedirection nor UseHsts (choix-implementation/deploiement.md § Frontend derrière le reverse proxy du NAS).
+// Before any other middleware, so that everything follows the public address rather than the connection of the proxy.
+if (app.Services.GetRequiredService<IOptions<PublicAddressOptions>>().Value.ParsedUrl is { } publicAddress)
 {
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
+    var host = HostString.FromUriComponent(publicAddress);
+    app.Use((context, next) =>
+    {
+        context.Request.Scheme = publicAddress.Scheme;
+        context.Request.Host = host;
+        return next(context);
+    });
 }
+
+if (!app.Environment.IsDevelopment())
+    app.UseExceptionHandler("/Error");
 
 app.UseRequestLocalization();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
