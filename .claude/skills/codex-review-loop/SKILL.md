@@ -25,10 +25,9 @@ has been handled (skill `sonarcloud-pr-analysis`); until then, the work stays
 local or on the draft PR (policy: § « Ouverture de la PR »).
 Marking a draft ready triggers a review by itself, so never pair it with a
 `@codex review` comment. As a safety net only, the watcher (Step 1) checks
-that the review started: no Codex activity 2 minutes after marking it ready —
-no 👀 on the PR description (review running), nor a 👍, review or comment
-(review already finished; the 👀 is transient) — and only then, request a
-review with a `@codex review` comment.
+that the review started: only if Codex has put no 👀 on the PR description
+2 minutes after marking it ready, request a review with a `@codex review`
+comment.
 
 Requires `gh` authenticated (`gh auth status`) with access to the repo.
 
@@ -138,7 +137,7 @@ active obligatoire »):
   the end of a Codex review started before `<LAST_TRIGGER_AT>` (it keeps
   watching while that review runs; its verdict is about an older head, so
   its 👍 never counts as approval), GitHub queries failing 5 times in a
-  row, a review not started — no 👀 nor verdict 2 minutes after
+  row, a review not started — no 👀 2 minutes after
   `<LAST_TRIGGER_AT>` —, a stuck Codex — no verdict 10 minutes after the 👀
   that started the review (policy: § Cycle, « Revue non démarrée », « Codex
   bloqué ») —, or timeout (about one hour, e.g. CI never completing after an
@@ -189,10 +188,9 @@ bot='.user.login=="chatgpt-codex-connector[bot]"'
 receipt='((.body|test("codex-review-receipt")) and (.body|test("find any major issues"))
   and (([.body|match("Reviewed commit:[*]+ `([0-9a-f]{7,40})`").captures[0].string][0] // "")
   as $s | $s != "" and ("<HEAD_SHA>"|startswith($s))))'
-# A review starts when Codex puts its 👀: none (nor any verdict) 2 minutes
-# after the trigger is a review that did not start; no verdict 10 minutes after
-# the 👀 is a stuck Codex. The 👀 goes away when the review ends, a verdict
-# then being there, so the first 👀 seen is remembered.
+# A review starts when Codex puts its 👀: none 2 minutes after the trigger is a
+# review that did not start; no verdict 10 minutes after the 👀 is a stuck
+# Codex. The first 👀 seen is remembered, Codex removing it when it concludes.
 epoch() { date -u -d "$1" +%s; }
 trigger=$(epoch "<LAST_TRIGGER_AT>") started=""
 reason=timeout fails=0 saw_old=0
@@ -284,7 +282,7 @@ entered from Step 5 without a new push, the `@codex review` comment's
   push made during one. If that older review left feedback instead, the
   watcher exits on `new Codex feedback`: handle it (Step 2) first.
 - `PR MERGED` / `PR CLOSED` → tell the user and stop.
-- `review not started` (no 👀 nor verdict 2 minutes after the trigger) or
+- `review not started` (no 👀 2 minutes after the trigger) or
   `Codex stuck` (no verdict 10 minutes after the 👀) → if the trigger was not
   already a request made for one of these reasons, run the budget check,
   request a review of the head with a top-level `@codex review` comment and
