@@ -86,6 +86,7 @@ public sealed record SearchVariablesValue(IReadOnlyList<SavedSearchVariable> Var
 [JsonDerivedType(typeof(AuthorLabel), "author")]
 [JsonDerivedType(typeof(PublisherCollectionLabel), "publisherCollection")]
 [JsonDerivedType(typeof(NameLabel), "name")]
+[JsonDerivedType(typeof(ApplicationSettingsLabel), "applicationSettings")]
 public abstract record RecordLabel;
 
 /// <summary>What the label of an album is built from (fonctionnel/presentation.md § Libellé d'un album).</summary>
@@ -117,3 +118,6 @@ public sealed record PublisherCollectionLabel(string Name, string PublisherName)
 
 /// <summary>A record labelled by its name alone: series, publisher, genre, universe.</summary>
 public sealed record NameLabel(string Name) : RecordLabel;
+
+/// <summary>The single setting of the application, which its type of record suffices to label.</summary>
+public sealed record ApplicationSettingsLabel : RecordLabel;

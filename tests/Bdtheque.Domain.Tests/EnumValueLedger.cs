@@ -34,7 +34,7 @@ internal static class EnumValueLedger
             [typeof(RecordType)] =
             [
                 ("Album", 1), ("Edition", 2), ("Series", 3), ("PurchaseIntent", 4), ("Author", 5), ("Publisher", 6),
-                ("PublisherCollection", 7), ("Genre", 8), ("Universe", 9), ("SavedSearch", 10),
+                ("PublisherCollection", 7), ("Genre", 8), ("Universe", 9), ("SavedSearch", 10), ("ApplicationSettings", 11),
             ],
             [typeof(EntityKind)] =
             [
@@ -58,9 +58,12 @@ internal static class EnumValueLedger
                 ("AcquisitionPrice", 47), ("Free", 48), ("InitialValue", 49), ("PersonalReference", 50), ("Visual", 51),
                 ("LastName", 52), ("FirstName", 53), ("Pseudonym", 54), ("Biography", 55), ("Nationality", 56),
                 ("Name", 57), ("Website", 58), ("Description", 59), ("ParentUniverse", 60), ("Label", 61),
-                ("SearchedEntity", 62), ("SearchCriteria", 63), ("SearchVariables", 64),
+                ("SearchedEntity", 62), ("SearchCriteria", 63), ("SearchVariables", 64), ("AlbumLabelFormat", 65),
+                ("DisplayCulture", 66),
             ],
             [typeof(DeviceType)] = [("Computer", 1), ("Tablet", 2), ("Smartphone", 3)],
             [typeof(RenderingEngine)] = [("Blink", 1), ("Gecko", 2), ("WebKit", 3), ("Other", 4)],
+            [typeof(AlbumLabelFormat)] = [("TitleSeriesVolume", 1), ("VolumeTitleSeries", 2)],
+            [typeof(DisplayCulture)] = [("FrenchFrance", 1)],
         };
 }

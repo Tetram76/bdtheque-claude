@@ -15,6 +15,23 @@ namespace Bdtheque.Infrastructure.Migrations
                 .Annotation("Npgsql:CollationDefinition:fr_case_accent_insensitive", "fr-FR-u-ks-level1,fr-FR-u-ks-level1,icu,False");
 
             migrationBuilder.CreateTable(
+                name: "ApplicationSettings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AlbumLabelFormat = table.Column<int>(type: "integer", nullable: false),
+                    DisplayCulture = table.Column<int>(type: "integer", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApplicationSettings", x => x.Id);
+                    table.CheckConstraint("CK_ApplicationSettings_Single", "\"Id\" = '0199c0de-5e77-7000-8000-000000000001'");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AudienceCounters",
                 columns: table => new
                 {
@@ -955,6 +972,9 @@ namespace Bdtheque.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AlbumUniverses");
+
+            migrationBuilder.DropTable(
+                name: "ApplicationSettings");
 
             migrationBuilder.DropTable(
                 name: "AudienceCounterObjects");

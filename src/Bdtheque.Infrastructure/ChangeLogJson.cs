@@ -44,6 +44,7 @@ internal static class ChangeLogJson
         (typeof(AuthorLabel), "author"),
         (typeof(PublisherCollectionLabel), "publisherCollection"),
         (typeof(NameLabel), "name"),
+        (typeof(ApplicationSettingsLabel), "applicationSettings"),
     ];
 
     private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)

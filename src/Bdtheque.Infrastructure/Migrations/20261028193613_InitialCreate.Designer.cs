@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bdtheque.Infrastructure.Migrations
 {
     [DbContext(typeof(BdthequeDbContext))]
-    [Migration("20261027191821_InitialCreate")]
+    [Migration("20261028193613_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -165,6 +165,37 @@ namespace Bdtheque.Infrastructure.Migrations
                             t.HasCheckConstraint("CK_Albums_VolumeRangeOrder", "\"StartVolumeNumber\" IS NULL OR \"StartVolumeNumber\" <= \"EndVolumeNumber\"");
 
                             t.HasCheckConstraint("CK_Albums_VolumeRangeStartPositive", "\"StartVolumeNumber\" IS NULL OR \"StartVolumeNumber\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Bdtheque.Domain.Entities.ApplicationSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AlbumLabelFormat")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayCulture")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationSettings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ApplicationSettings_Single", "\"Id\" = '0199c0de-5e77-7000-8000-000000000001'");
                         });
                 });
 

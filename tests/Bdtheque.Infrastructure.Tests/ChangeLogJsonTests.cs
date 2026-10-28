@@ -66,6 +66,7 @@ public sealed class ChangeLogJsonTests
             { new AuthorLabel(null, null, "Moebius"), """{"kind":"author","pseudonym":"Moebius"}""" },
             { new PublisherCollectionLabel("Lucky Luke", "Dargaud"), """{"kind":"publisherCollection","name":"Lucky Luke","publisherName":"Dargaud"}""" },
             { new NameLabel("Aventure"), """{"kind":"name","name":"Aventure"}""" },
+            { new ApplicationSettingsLabel(), """{"kind":"applicationSettings"}""" },
         };
     }
 

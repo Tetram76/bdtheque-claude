@@ -29,6 +29,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     public DbSet<AudienceVisit> AudienceVisits => Set<AudienceVisit>();
     public DbSet<AudienceUsage> AudienceUsages => Set<AudienceUsage>();
     public DbSet<AudienceCounter> AudienceCounters => Set<AudienceCounter>();
+    public DbSet<ApplicationSettings> ApplicationSettings => Set<ApplicationSettings>();
 
     // Every query loads its collections by separate statements: an album always comes with its
     // editions, intents and contributions (AutoInclude, AlbumConfiguration), which a single statement
@@ -139,9 +140,7 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     // date follows any change to its children or associations.
     private void StampAuditDates()
     {
-        var now = clock.GetUtcNow();
-        // Truncated to PostgreSQL's microsecond precision, so the tracked value is the stored one.
-        now = now.AddTicks(-(now.Ticks % (TimeSpan.TicksPerMillisecond / 1000)));
+        var now = Now();
 
         foreach (var entry in ChangeTracker.Entries<EntityBase>())
         {
@@ -173,6 +172,14 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
             if (entry.State == EntityState.Modified && entered.CurrentValue == stored)
                 entered.IsModified = false;
         }
+    }
+
+    /// <summary>The time of the application clock, as PostgreSQL stores it.</summary>
+    internal DateTimeOffset Now()
+    {
+        var now = clock.GetUtcNow();
+        // Truncated to PostgreSQL's microsecond precision, so the tracked value is the stored one.
+        return now.AddTicks(-(now.Ticks % (TimeSpan.TicksPerMillisecond / 1000)));
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
