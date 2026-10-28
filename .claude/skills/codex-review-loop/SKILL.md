@@ -138,7 +138,8 @@ active obligatoire »):
   the end of a Codex review started before `<LAST_TRIGGER_AT>` (it keeps
   watching while that review runs; its verdict is about an older head, so
   its 👍 never counts as approval), GitHub queries failing 5 times in a
-  row, or timeout (about one hour). It prints why (`exit: …`) and the final
+  row, or timeout: 10 minutes after `<LAST_TRIGGER_AT>` without a verdict,
+  Codex is stuck (policy: § Cycle, « Codex bloqué »). It prints why (`exit: …`) and the final
   CI conclusions.
 - Any other top-level Codex comment (e.g. "You have reached your Codex usage
   limits", which no review follows; the "Codex Review Summary" table; a
@@ -147,7 +148,8 @@ active obligatoire »):
   head are.
 - Never say "I'm watching" without a running watcher, and never end a turn
   with a pending PR that has none. A suspended PR — Codex usage limit,
-  timeout, or GitHub queries that keep failing (see Step 1) — is not pending:
+  Codex still stuck after a new review request, or GitHub queries that keep
+  failing (see Step 1) — is not pending:
   it gets no watcher. When a watcher ends: handle the state, then **re-arm**
   one for every PR still pending before handing back, with `<HANDLED_UNTIL>`
   set to the time the event was handled.
@@ -185,8 +187,10 @@ bot='.user.login=="chatgpt-codex-connector[bot]"'
 receipt='((.body|test("codex-review-receipt")) and (.body|test("find any major issues"))
   and (([.body|match("Reviewed commit:[*]+ `([0-9a-f]{7,40})`").captures[0].string][0] // "")
   as $s | $s != "" and ("<HEAD_SHA>"|startswith($s))))'
+# 10 polls a minute apart: a review without verdict 10 minutes after its
+# trigger is that of a stuck Codex
 reason=timeout fails=0 saw_old=0
-for i in $(seq 1 60); do
+for i in $(seq 1 10); do
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
   # an issue for the API), not a ticket's
   if up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
@@ -265,11 +269,15 @@ entered from Step 5 without a new push, the `@codex review` comment's
   push made during one. If that older review left feedback instead, the
   watcher exits on `new Codex feedback`: handle it (Step 2) first.
 - `PR MERGED` / `PR CLOSED` → tell the user and stop.
-- `GitHub queries keep failing`, or `timeout` (no review was triggered —
-  `@codex review` may need to be commented manually, or automatic review is
-  disabled for the repo — or, if Codex approved, CI never started) → the PR
-  is **suspended**: tell the user and stop, with no watcher (a new one would
-  only wait in vain); resume only when the user asks.
+- `timeout` → no verdict 10 minutes after the trigger, whether or not Codex
+  put its 👀: Codex is stuck. If the trigger was not already a request made
+  for that reason, run the budget check, request a review of the head with a
+  top-level `@codex review` comment and re-arm with that comment as trigger.
+  If it was (Codex still stuck), or if Codex approved but CI never started,
+  the PR is **suspended** (below).
+- `GitHub queries keep failing`, or a suspended PR → tell the user and stop,
+  with no watcher (a new one would only wait in vain); resume only when the
+  user asks.
 
 A PR can carry a stale 👍 from an earlier head, or a 👍/comment/review from a
 human or an unrelated bot whose login happens to contain "codex" (a
