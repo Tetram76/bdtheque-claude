@@ -184,7 +184,7 @@ Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le rever
 
 | Ticket | Titre |
 | --- | --- |
-| #249 | Frontend derrière le reverse proxy du NAS Synology, qui assure la sécurisation SSL/TLS |
+| ~~#249~~ | Frontend derrière le reverse proxy du NAS Synology, qui assure la sécurisation SSL/TLS |
 
 ## Phase 3 — Frontend Blazor
 

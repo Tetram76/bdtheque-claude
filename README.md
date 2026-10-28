@@ -185,7 +185,7 @@ Les dépôts sont privés : leur téléchargement exige une authentification (cf
 ### Procédure (Synology Container Manager)
 
 1. Créer sur le NAS un dossier pour le projet (ex. `/volume1/docker/bdtheque`) et y copier [`docker-compose.yml`](docker-compose.yml) et [`.env.example`](.env.example), renommé en `.env`.
-2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), `BDTHEQUE_TAG`, `FRONTEND_PORT` et `VISUELS_HOST_PATH`.
+2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), `BDTHEQUE_TAG`, `FRONTEND_PORT`, `VISUELS_HOST_PATH` et, derrière le reverse proxy, `PUBLIC_URL` (ci-dessous).
 3. Préparer le dossier des visuels (ci-dessous).
 4. Les dépôts Docker Hub étant **privés**, authentifier le NAS auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès en **lecture seule** (*Personal Access Token*, droits *Read-only*), sans quoi le téléchargement des images est refusé. En SSH : `sudo docker login -u tetram76` (le jeton tient lieu de mot de passe).
 5. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.
@@ -200,6 +200,15 @@ docker compose exec db psql -U bdtheque -d bdtheque -c 'SELECT array_agg("Id"), 
 ```
 
 liste les genres devenus égaux, avec leurs identifiants (utilisateur et base selon `POSTGRES_USER` et `POSTGRES_DB`). Renommer l'un d'eux par son identifiant — la comparaison des libellés ignorant la casse et les accents, une condition sur le libellé les viserait tous —, par `UPDATE "Genres" SET "Label" = '…' WHERE "Id" = '…'`, puis `docker compose restart api`.
+
+### HTTPS : reverse proxy du NAS
+
+Le `frontend` ne sert que du HTTP : le chiffrement (HTTPS, certificats) est assuré par le **reverse proxy du NAS** (DSM), qui reçoit les requêtes en HTTPS et les relaie en HTTP au port `FRONTEND_PORT` du NAS. La même image sert deux déploiements :
+
+- **derrière le reverse proxy** : `PUBLIC_URL` donne, dans `.env`, l'adresse sous laquelle le navigateur atteint l'application (ex. `https://bdtheque.example.com`, port compris s'il n'est pas celui du schéma, sans chemin : l'application est servie à la racine). Le `frontend` construit ses redirections sur cette adresse et marque ses cookies `Secure`. Une adresse mal formée, avec un chemin ou un autre schéma que `http` ou `https`, empêche le démarrage du `frontend`, qui le signale dans son journal ;
+- **en interne**, sans reverse proxy (versions à valider ou à tester) : `PUBLIC_URL` reste vide, et l'application est accessible directement sur `http://<NAS>:<FRONTEND_PORT>`, sans rien d'autre à configurer.
+
+Le `frontend` ne redirige jamais vers HTTPS et n'envoie pas d'en-tête HSTS : une éventuelle politique HSTS se règle sur le reverse proxy.
 
 ### Dossier des visuels
 
