@@ -178,6 +178,14 @@ Chantiers d'amélioration identifiés par cette revue, chacun réalisé par sa p
 | ~~#220~~ | Pipeline CI et outillage .NET : SDK, restauration verrouillée, cache NuGet, couverture et projets de test |
 | ~~#221~~ | Paramétrage des valeurs de la recherche avancée par EF Core |
 
+### Ajustement issu de la sécurisation SSL/TLS par le reverse proxy du NAS
+
+Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le reverse proxy du NAS Synology (`contraintes-techniques/architecture-deploiement.md` § Hébergement) : politique HTTPS laissée au reverse proxy, schéma d'origine transmis par lui. La configuration du frontend relevant de la Phase 0, validée, un seul ticket la couvre ; il précède la connexion de l'administration (#199), qui en dépend.
+
+| Ticket | Titre |
+| --- | --- |
+| #249 | Frontend derrière le reverse proxy du NAS Synology, qui assure la sécurisation SSL/TLS |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).
@@ -190,7 +198,7 @@ La phase est réalisée en plusieurs parties, découpées l'une après l'autre ;
 
 ### Partie 1 — Éléments de base
 
-**Version** : `v0.1.0`, avec les ajustements des phases 1 et 2 qui suivent la consolidation de la Phase 2.
+**Version** : `v0.1.0`, avec les ajustements des phases 0 à 2 qui suivent la consolidation de la Phase 2.
 
 Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240.
 
