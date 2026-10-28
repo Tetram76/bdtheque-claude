@@ -24,11 +24,11 @@ the CI checks have passed and the SonarQube Cloud analysis of the head commit
 has been handled (skill `sonarcloud-pr-analysis`); until then, the work stays
 local or on the draft PR (policy: § « Ouverture de la PR »).
 Marking a draft ready triggers a review by itself, so never pair it with a
-`@codex review` comment. As a safety net only, a few minutes after marking it
-ready, check for any Codex activity since then — 👀 on the PR description
-(review running), or a 👍, review or comment (review already finished; the 👀
-is transient). Only if there is none, request a review with a `@codex review`
-comment.
+`@codex review` comment. As a safety net only, the watcher (Step 1) checks
+that the review started: no Codex activity 2 minutes after marking it ready —
+no 👀 on the PR description (review running), nor a 👍, review or comment
+(review already finished; the 👀 is transient) — and only then, request a
+review with a `@codex review` comment.
 
 Requires `gh` authenticated (`gh auth status`) with access to the repo.
 
@@ -138,18 +138,20 @@ active obligatoire »):
   the end of a Codex review started before `<LAST_TRIGGER_AT>` (it keeps
   watching while that review runs; its verdict is about an older head, so
   its 👍 never counts as approval), GitHub queries failing 5 times in a
-  row, or timeout: 10 minutes after `<LAST_TRIGGER_AT>` without a verdict,
-  Codex is stuck (policy: § Cycle, « Codex bloqué »). It prints why (`exit: …`) and the final
-  CI conclusions.
+  row, a review not started — no 👀 nor verdict 2 minutes after
+  `<LAST_TRIGGER_AT>` —, a stuck Codex — no verdict 10 minutes after the 👀
+  that started the review (policy: § Cycle, « Revue non démarrée », « Codex
+  bloqué ») —, or timeout (about one hour, e.g. CI never completing after an
+  approval). It prints why (`exit: …`) and the final CI conclusions.
 - Any other top-level Codex comment (e.g. "You have reached your Codex usage
   limits", which no review follows; the "Codex Review Summary" table; a
   receipt naming an older commit) only hands control back so it gets read; it
   is **never** an approval — only the 👍 and the approving receipt naming the
   head are.
 - Never say "I'm watching" without a running watcher, and never end a turn
-  with a pending PR that has none. A suspended PR — Codex usage limit,
-  Codex still stuck after a new review request, or GitHub queries that keep
-  failing (see Step 1) — is not pending:
+  with a pending PR that has none. A suspended PR — Codex usage limit, a
+  review still not started or stuck after a new review request, timeout, or
+  GitHub queries that keep failing (see Step 1) — is not pending:
   it gets no watcher. When a watcher ends: handle the state, then **re-arm**
   one for every PR still pending before handing back, with `<HANDLED_UNTIL>`
   set to the time the event was handled.
@@ -187,10 +189,14 @@ bot='.user.login=="chatgpt-codex-connector[bot]"'
 receipt='((.body|test("codex-review-receipt")) and (.body|test("find any major issues"))
   and (([.body|match("Reviewed commit:[*]+ `([0-9a-f]{7,40})`").captures[0].string][0] // "")
   as $s | $s != "" and ("<HEAD_SHA>"|startswith($s))))'
-# 10 polls a minute apart: a review without verdict 10 minutes after its
-# trigger is that of a stuck Codex
+# A review starts when Codex puts its 👀: none (nor any verdict) 2 minutes
+# after the trigger is a review that did not start; no verdict 10 minutes after
+# the 👀 is a stuck Codex. The 👀 goes away when the review ends, a verdict
+# then being there, so the first 👀 seen is remembered.
+epoch() { date -u -d "$1" +%s; }
+trigger=$(epoch "<LAST_TRIGGER_AT>") started=""
 reason=timeout fails=0 saw_old=0
-for i in $(seq 1 10); do
+for i in $(seq 1 60); do
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
   # an issue for the API), not a ticket's
   if up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
@@ -205,6 +211,8 @@ for i in $(seq 1 10); do
           ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\" and ($receipt|not))") &&
      rc=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
           ".[]|select($bot and $receipt)") &&
+     eyes=$(gh api --paginate "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
+          --jq ".[]|select(.content==\"eyes\" and $bot and .created_at>=\"<LAST_TRIGGER_AT>\")|.created_at" | sort | head -1) &&
      sp=$(gh pr view <PR_NUMBER> --json state,headRefOid,statusCheckRollup \
           -q '"\(.state) \(.headRefOid) \(.statusCheckRollup|length) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"')
   then
@@ -228,6 +236,13 @@ for i in $(seq 1 10); do
     # rollup means CI has not started, not that it is done) and all completed
     if [ "$up" -ne 0 ] && [ "$checks" -gt 0 ] && [ "$pending" -eq 0 ]; then
       reason="approved, CI done"; break
+    fi
+    # an approval waiting for CI is a verdict: neither timer applies
+    if [ "$up" -eq 0 ] && [ "$rc" -eq 0 ]; then
+      now=$(date -u +%s)
+      [ -z "$started" ] && [ -n "$eyes" ] && started=$(epoch "$eyes")
+      if [ -z "$started" ] && [ $((now - trigger)) -ge 120 ]; then reason="review not started"; break; fi
+      if [ -n "$started" ] && [ $((now - started)) -ge 600 ]; then reason="Codex stuck"; break; fi
     fi
   else
     fails=$((fails + 1)); echo "GitHub query failed ($fails in a row)"
@@ -269,13 +284,14 @@ entered from Step 5 without a new push, the `@codex review` comment's
   push made during one. If that older review left feedback instead, the
   watcher exits on `new Codex feedback`: handle it (Step 2) first.
 - `PR MERGED` / `PR CLOSED` → tell the user and stop.
-- `timeout` → no verdict 10 minutes after the trigger, whether or not Codex
-  put its 👀: Codex is stuck. If the trigger was not already a request made
-  for that reason, run the budget check, request a review of the head with a
-  top-level `@codex review` comment and re-arm with that comment as trigger.
-  If it was (Codex still stuck), or if Codex approved but CI never started,
-  the PR is **suspended** (below).
-- `GitHub queries keep failing`, or a suspended PR → tell the user and stop,
+- `review not started` (no 👀 nor verdict 2 minutes after the trigger) or
+  `Codex stuck` (no verdict 10 minutes after the 👀) → if the trigger was not
+  already a request made for one of these reasons, run the budget check,
+  request a review of the head with a top-level `@codex review` comment and
+  re-arm with that comment as trigger. If it was, the PR is **suspended**
+  (below).
+- `timeout` (e.g. Codex approved but CI never completed),
+  `GitHub queries keep failing`, or a suspended PR → tell the user and stop,
   with no watcher (a new one would only wait in vain); resume only when the
   user asks.
 
