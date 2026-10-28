@@ -1,6 +1,6 @@
 # Architecture, déploiement et exploitation
 
-Architecture des tiers, indépendance de l'outil pour agents IA, déploiement, hébergement, stockage des visuels, compatibilité multi-supports, authentification, sources de données externes et statistiques du dashboard.
+Architecture des tiers, indépendance de l'outil pour agents IA, déploiement, hébergement et sécurisation SSL/TLS, stockage des visuels, compatibilité multi-supports, authentification, sources de données externes et statistiques du dashboard.
 
 ---
 
@@ -40,6 +40,7 @@ L'implémentation de l'outil pour agents IA (`fonctionnel/agents-ia.md` § Inter
 
 - L'application est hébergée sur un **NAS Synology RS1221+** (processeur AMD Ryzen V1500B, architecture x86_64).
 - Le déploiement Docker doit être compatible avec l'environnement Docker fourni par Synology (Container Manager).
+- **Sécurisation SSL/TLS** : le chiffrement des échanges avec le navigateur (HTTPS, certificats) est assuré par le **reverse proxy du NAS Synology**, placé devant le conteneur `frontend`. Celui-ci ne gère pas lui-même la sécurisation SSL/TLS : il ne sert que du HTTP, que le reverse proxy lui relaie.
 
 ## Stockage des visuels
 

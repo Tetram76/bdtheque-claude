@@ -1,6 +1,6 @@
 # Déploiement
 
-Images de base des conteneurs, publication des images Docker, version de PostgreSQL, application du schéma au démarrage et environnement de validation fonctionnelle.
+Images de base des conteneurs, frontend derrière le reverse proxy du NAS, publication des images Docker, version de PostgreSQL, application du schéma au démarrage et environnement de validation fonctionnelle.
 
 ---
 
@@ -16,6 +16,13 @@ Images de base des conteneurs, publication des images Docker, version de Postgre
   - **Contenu publié** : seules les bibliothèques natives de la plateforme visée (publication propre à l'architecture de l'image, `TARGETARCH`), sans symboles de débogage (compilation sans eux dans les Dockerfiles ; les traces des exceptions gardent les noms des méthodes, sans numéros de ligne), sans fichiers de documentation, `web.config`, lanceur natif ni `appsettings.Development.json` (réglages d'un lancement local depuis les sources).
   - **Connexion à `db`** : le chiffrement GSS (Kerberos), que Npgsql tente par défaut et dont la bibliothèque est absente de l'image *chiseled*, est désactivé dans la chaîne de connexion (`GSS Encryption Mode=Disable`, `docker-compose.yml`) : `db` n'est joignable que par le réseau Docker interne, avec une authentification par mot de passe.
 - **`db`** : image officielle `postgres`, version et variante : cf. § Version de PostgreSQL.
+
+## Frontend derrière le reverse proxy du NAS
+
+- **Politique HTTPS portée par le reverse proxy** (`contraintes-techniques/architecture-deploiement.md` § Hébergement) : redirection de HTTP vers HTTPS, en-tête HSTS et certificats relèvent du reverse proxy du NAS Synology, seul à voir les requêtes en HTTPS. `frontend` n'a ni point d'écoute HTTPS, ni redirection vers HTTPS (`UseHttpsRedirection`), ni HSTS (`UseHsts`) : derrière un proxy qui termine TLS, la documentation d'ASP.NET Core (*Configure ASP.NET Core to work with proxy servers and load balancers*) signale que ces deux intergiciels, sans connaissance du schéma d'origine, provoquent des redirections en boucle.
+- **Schéma d'origine transmis par le reverse proxy** : `frontend` lit le schéma de la requête du navigateur dans l'en-tête `X-Forwarded-Proto` (intergiciel des en-têtes transmis, `UseForwardedHeaders`, placé avant tout autre). Tout ce qui dépend du schéma suit alors la requête réelle, et non la connexion HTTP du reverse proxy : redirections absolues (renvoi vers la connexion de l'administration), et attribut `Secure` des cookies (authentification, antifalsification), que leur politique par défaut (`SameAsRequest`) pose sur une requête HTTPS. Un lancement sans reverse proxy (environnement de validation fonctionnelle, poste de développement) reste en HTTP, sans rien à configurer.
+  - Par défaut, l'intergiciel n'accepte ces en-têtes que d'une adresse de bouclage, alors que le reverse proxy du NAS joint le conteneur par le réseau Docker : les sources acceptées, la conservation de l'hôte d'origine (`Host`) et la règle du reverse proxy à configurer dans DSM (en-têtes personnalisés) restent à établir lors de la mise en œuvre de cette section, et à documenter ici et dans le `README.md`.
+- **Alternative écartée (HTTPS servi par `frontend`, certificat monté dans le conteneur)** : contraire à la contrainte, et deux certificats à renouveler pour un même site.
 
 ## Publication des images Docker
 
