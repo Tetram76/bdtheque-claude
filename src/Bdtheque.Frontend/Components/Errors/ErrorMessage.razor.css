@@ -1,0 +1,44 @@
+/* Each category has its own color, carried both by the named pill and by the side stripe, so that the three kinds of
+   errors are told apart at first glance (fonctionnel/index.md § Présentation des erreurs): a business error asks the
+   user to correct, a functional one to take the new state of the data into account, a technical one is the application's. */
+.error-message {
+    --error-color: var(--color-failure);
+    --error-text-color: var(--color-text-on-failure);
+    margin: 0 0 var(--space-m);
+    padding: var(--space-m) var(--space-l);
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-rule);
+    border-inline-start: 4px solid var(--error-color);
+    border-radius: var(--radius-control);
+}
+
+.error-message[data-error-category="business"] {
+    --error-color: var(--color-alert);
+    --error-text-color: var(--color-text-on-alert);
+}
+
+.error-message[data-error-category="functional"] {
+    --error-color: var(--color-info);
+    --error-text-color: var(--color-text-on-info);
+}
+
+[data-error-label] {
+    display: inline-block;
+    margin: 0 0 var(--space-s);
+    padding: 0 var(--space-s);
+    border-radius: var(--radius-pill);
+    background: var(--error-color);
+    color: var(--error-text-color);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+[data-error-text] {
+    margin: 0;
+}
+
+[data-error-impact] {
+    margin: var(--space-s) 0 0;
+    padding-inline-start: var(--space-xl);
+}

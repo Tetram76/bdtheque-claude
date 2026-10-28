@@ -3,11 +3,14 @@ extern alias frontend;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Bdtheque.EndToEnd.Tests.Captures;
 using frontend::Bdtheque.Frontend.Api;
+using frontend::Bdtheque.Frontend.Theming;
 using FrontendProgram = frontend::Program;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -45,13 +48,31 @@ public sealed class ApplicationHost : IAsyncLifetime
         if (Microsoft.Playwright.Program.Main(["install", "chromium"]) != 0)
             throw new InvalidOperationException("The Chromium browser of Playwright could not be installed.");
         _playwright = await Playwright.CreateAsync();
-        Browser = await _playwright.Chromium.LaunchAsync();
+        // Glyphs drawn without hinting and colors in sRGB: the captures do not depend on settings of the machine.
+        Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Args = ["--font-render-hinting=none", "--force-color-profile=srgb"],
+        });
     }
 
     /// <summary>A page of a browser context of its own: no cookie nor history shared between tests.</summary>
-    public async Task<IPage> NewPageAsync()
+    public Task<IPage> NewPageAsync() => NewPageAsync(new BrowserNewContextOptions());
+
+    /// <summary>A page of its own presented in the given theme, at the size of the given screen, for its capture.</summary>
+    public Task<IPage> NewCapturePageAsync(string themeKey, ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions
     {
-        var context = await Browser.NewContextAsync(new BrowserNewContextOptions { BaseURL = BaseAddress.ToString() });
+        ViewportSize = viewport,
+        DeviceScaleFactor = 1,
+        Locale = "fr-FR",
+        TimezoneId = "Europe/Paris",
+        ReducedMotion = ReducedMotion.Reduce,
+        ExtraHTTPHeaders = new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = themeKey },
+    });
+
+    private async Task<IPage> NewPageAsync(BrowserNewContextOptions options)
+    {
+        options.BaseURL = BaseAddress.ToString();
+        var context = await Browser.NewContextAsync(options);
         return await context.NewPageAsync();
     }
 
@@ -82,7 +103,24 @@ public sealed class ApplicationHost : IAsyncLifetime
                 }));
 
             builder.ConfigureTestServices(services =>
-                services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler()));
+            {
+                services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler());
+                FixTheThemeByRequest(services);
+            });
+        }
+
+        // The selector of the application stays the one used by a request that fixes no theme.
+        private static void FixTheThemeByRequest(IServiceCollection services)
+        {
+            var application = services.Single(service => service.ServiceType == typeof(IThemeSelector));
+            var implementation = application.ImplementationType
+                ?? throw new InvalidOperationException("The theme selector of the application is expected to be registered by its type.");
+
+            services.Remove(application);
+            services.Add(ServiceDescriptor.Describe(implementation, implementation, application.Lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(IThemeSelector),
+                provider => new RequestThemeSelector(provider.GetRequiredService<IHttpContextAccessor>(), (IThemeSelector)provider.GetRequiredService(implementation)),
+                application.Lifetime));
         }
     }
 }

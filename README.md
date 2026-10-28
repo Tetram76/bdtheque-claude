@@ -102,6 +102,20 @@ dotnet build Bdtheque.slnx --configuration Release
 dotnet test Bdtheque.slnx --configuration Release
 ```
 
+### Captures de référence des écrans
+
+Chaque écran est capturé dans chacun des thèmes et comparé, pixel par pixel, à sa capture de référence (`tests/Bdtheque.EndToEnd.Tests/Captures/References`). Le rendu des polices n'étant identique que dans un même environnement, la comparaison n'a lieu que sous Linux (CI) : ailleurs, ces tests sont ignorés, et le script suivant les exécute dans un conteneur Linux, sur la copie de travail. Une capture en écart est déposée, avec son image des différences, dans `tests/Bdtheque.EndToEnd.Tests/TestResults/captures`.
+
+```bash
+./scripts/Test-Captures.ps1
+```
+
+Un changement de rendu voulu met à jour les références, à relire avant de les committer :
+
+```bash
+./scripts/Test-Captures.ps1 -Update
+```
+
 ### Lancer la stack complète depuis les sources (Docker Compose)
 
 ```bash

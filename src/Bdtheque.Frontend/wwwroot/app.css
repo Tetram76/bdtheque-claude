@@ -4,6 +4,7 @@
 /* Focused by FocusOnNavigate after each navigation, for screen readers: not a visible focus. */
 h1:focus {
     outline: none;
+    box-shadow: none;
 }
 
 /* Shown by blazor.web.js only when an interactive component fails. */

@@ -1,3 +1,6 @@
+/* Taken from the Blazor project template, on the contracts of the theme: the colors of the template did not reach the
+   contrast of a text (white on #6b9ed2), and its animations ignored the preference for reduced motion. */
+
 .components-reconnect-first-attempt-visible,
 .components-reconnect-repeated-attempt-visible,
 .components-reconnect-failed-visible,
@@ -19,29 +22,27 @@
     display: block;
 }
 
-
 #components-reconnect-modal {
-    background-color: white;
-    width: 20rem;
+    width: min(20rem, calc(100vw - 2 * var(--page-gutter)));
     margin: 20vh auto;
-    padding: 2rem;
-    border: 0;
-    border-radius: 0.5rem;
-    box-shadow: 0 3px 6px 2px rgba(0, 0, 0, 0.3);
+    padding: var(--space-xl);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    border: var(--border-block);
+    border-radius: var(--radius-block);
+    box-shadow: var(--shadow-raised);
     opacity: 0;
     transition: display 0.5s allow-discrete, overlay 0.5s allow-discrete;
     animation: components-reconnect-modal-fadeOutOpacity 0.5s both;
-    &[open]
+}
 
-{
+#components-reconnect-modal[open] {
     animation: components-reconnect-modal-slideUp 1.5s cubic-bezier(.05, .89, .25, 1.02) 0.3s, components-reconnect-modal-fadeInOpacity 0.5s ease-in-out 0.3s;
     animation-fill-mode: both;
 }
 
-}
-
 #components-reconnect-modal::backdrop {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgb(0 0 0 / 0.4);
     animation: components-reconnect-modal-fadeInOpacity 0.5s ease-in-out;
     opacity: 1;
 }
@@ -80,7 +81,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: var(--space-l);
 }
 
 #components-reconnect-modal p {
@@ -89,20 +90,20 @@
 }
 
 #components-reconnect-modal button {
+    min-height: var(--control-height);
+    padding: 0 var(--control-padding-inline);
     border: 0;
-    background-color: #6b9ed2;
-    color: white;
-    padding: 4px 24px;
-    border-radius: 4px;
+    border-radius: var(--radius-control);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    cursor: pointer;
 }
 
-    #components-reconnect-modal button:hover {
-        background-color: #3b6ea2;
-    }
-
-    #components-reconnect-modal button:active {
-        background-color: #6b9ed2;
-    }
+#components-reconnect-modal button:hover {
+    text-decoration: underline;
+}
 
 .components-rejoining-animation {
     position: relative;
@@ -110,17 +111,17 @@
     height: 80px;
 }
 
-    .components-rejoining-animation div {
-        position: absolute;
-        border: 3px solid #0087ff;
-        opacity: 1;
-        border-radius: 50%;
-        animation: components-rejoining-animation 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-    }
+.components-rejoining-animation div {
+    position: absolute;
+    border: 3px solid var(--color-accent);
+    opacity: 1;
+    border-radius: 50%;
+    animation: components-rejoining-animation 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
 
-        .components-rejoining-animation div:nth-child(2) {
-            animation-delay: -0.5s;
-        }
+.components-rejoining-animation div:nth-child(2) {
+    animation-delay: -0.5s;
+}
 
 @keyframes components-rejoining-animation {
     0% {
@@ -148,10 +149,37 @@
     }
 
     100% {
-        top: 0px;
-        left: 0px;
+        top: 0;
+        left: 0;
         width: 80px;
         height: 80px;
         opacity: 0;
+    }
+}
+
+/* Without motion, the dialog simply appears, and the waiting rings stand still as a static mark. */
+@media (prefers-reduced-motion: reduce) {
+    #components-reconnect-modal,
+    #components-reconnect-modal[open],
+    #components-reconnect-modal::backdrop {
+        animation: none;
+        transition: none;
+        opacity: 1;
+    }
+
+    .components-rejoining-animation div {
+        animation: none;
+        top: 0;
+        left: 0;
+        width: 80px;
+        height: 80px;
+        opacity: 0.6;
+    }
+
+    .components-rejoining-animation div:nth-child(2) {
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
     }
 }

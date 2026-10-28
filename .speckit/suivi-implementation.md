@@ -200,7 +200,7 @@ La phase est réalisée en plusieurs parties, découpées l'une après l'autre ;
 
 **Version** : `v0.1.0`, avec les ajustements des phases 0 à 2 qui suivent la consolidation de la Phase 2.
 
-Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240.
+Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240 ; le thème de base neutre, les contrats des thèmes et le thème de la visite (ticket parent #194), par cinq sous-tickets, #254 à #258.
 
 | Ticket | Titre |
 | --- | --- |
@@ -211,7 +211,11 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#214~~ | Environnement de validation fonctionnelle |
 | ~~#192~~ | Données du dashboard dans l'API avant la Phase 4 |
 | ~~#193~~ | Paramétrage de l'application dans le modèle de domaine et l'API |
-| #194 | Thème de base neutre, contrats des thèmes et thème de la visite |
+| ~~#254~~ | Contrats des thèmes, thème de base neutre et captures de référence des écrans |
+| #255 | Composants de présentation : blocs, boutons, étiquettes, couvertures et mention « Non renseigné » |
+| #256 | Contrôles de saisie et composants interactifs : champs, choix d'une fiche, menu « ⋯ », dialogue, barre d'enregistrement |
+| #257 | En-têtes, menus et navigation : consultation, administration, fil d'Ariane, navigation par initiale, pagination |
+| #258 | Tirage du thème de la visite |
 | #195 | Thème « Cases et bulles » (violine) |
 | #196 | Thème « La gazette » |
 | #197 | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
@@ -236,7 +240,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 Contenu, nombre et version à établir au découpage de chacune.
 
 - **Note — contraste des thèmes** : le texte courant du thème « fanzine en risographie » (bleu `#0078BF` sur papier `#F4EFE4`, `visuel/dashboard.md`) n'atteint que 4,1:1, sous les 4,5:1 attendus pour du texte courant. La couleur relevant de l'identité du thème, sa correction est soumise à l'utilisateur lors du découpage de la partie qui le réalise, avec la vérification des contrastes des thèmes qu'elle ajoute.
-- **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base (#194), que tout thème ajouté respecte.
+- **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base (#194, réalisé par #256), que tout thème ajouté respecte.
 - **Note — paramétrage de l'application** : le modèle de domaine et l'API du paramétrage sont réalisés par la partie 1 (#193), dont la page d'accueil de l'administration présente les valeurs ; l'écran qui le modifie reste à réaliser.
 - **Note — mesure d'audience de l'interface web** : la partie 1 réalise le relevé, les visites, l'information des visiteurs et leur opposition (#197), et chaque écran ajoute ses fonctions à la liste des fonctions suivies ; l'écran de l'administration qui présente les indicateurs reste à réaliser.
 - **Note — recherche avancée** : les écrans de la recherche avancée (`fonctionnel/recherche-avancee.md` § Recherche avancée) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données (`choix-implementation/recherche-avancee.md` § Recherche avancée : mise en œuvre), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.

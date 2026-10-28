@@ -7,7 +7,7 @@ Ces choix ne sont pas imposés : ils peuvent être remis en cause si une meilleu
 | Fichier | Contenu |
 | --- | --- |
 | `index.md` | Organisation du code, versions et bibliothèques. |
-| `socle.md` | Frontend, internationalisation, authentification, documentation de l'API, journalisation, outillage de développement .NET. |
+| `socle.md` | Frontend, thèmes, internationalisation, authentification, documentation de l'API, journalisation, outillage de développement .NET. |
 | `deploiement.md` | Images de base des conteneurs, frontend derrière le reverse proxy du NAS, publication des images Docker, version de PostgreSQL, application du schéma au démarrage, environnement de validation fonctionnelle. |
 | `persistance.md` | Conventions EF Core, identifiants, cohérence entre tables, collation, migrations, concurrence d'accès, dates renseignées automatiquement, collections de navigation du domaine. |
 | `api.md` | Organisation de l'API, navigation par initiale, recherche simple. |

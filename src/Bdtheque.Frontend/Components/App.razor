@@ -1,16 +1,24 @@
 @inject BrowserTimeZone TimeZone
+@inject IThemeSelector ThemeSelector
 
 <!DOCTYPE html>
 @* The time zone of the browser the request brought, which the script compares to the current one: the page is current
-   whenever its request brought it, even when the server, not knowing it, presents in universal time. *@
-<html lang="fr" data-time-zone="@TimeZone.Name">
+   whenever its request brought it, even when the server, not knowing it, presents in universal time.
+   The theme is carried by the root element, so that a theme redefines the contracts of the base theme for the whole page. *@
+<html lang="fr" data-time-zone="@TimeZone.Name" data-theme="@Theme.Key">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <ResourcePreloader />
+    <link rel="preload" href="@Assets["fonts/inter/inter-latin-wght-normal.woff2"]" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["themes/base.css"]" />
+    @if (Theme.Stylesheet is { } stylesheet)
+    {
+        <link rel="stylesheet" href="@Assets[stylesheet]" />
+    }
     <link rel="stylesheet" href="@Assets["Bdtheque.Frontend.styles.css"]" />
     <ImportMap />
     <HeadOutlet />
@@ -24,3 +32,7 @@
 </body>
 
 </html>
+
+@code {
+    private Theme Theme => ThemeSelector.Current;
+}
