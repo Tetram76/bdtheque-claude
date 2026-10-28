@@ -91,5 +91,5 @@ public sealed class ApplicationSettingsEndpointsTests : IClassFixture<ApiWebAppl
         return (await response.Content.ReadFromJsonAsync<ApplicationSettingsForm>())!;
     }
 
-    private Task RestoreAsync(ApplicationSettingsForm original, uint version) => UpdateAsync(original.AlbumLabelFormat, version);
+    private Task<ApplicationSettingsForm> RestoreAsync(ApplicationSettingsForm original, uint version) => UpdateAsync(original.AlbumLabelFormat, version);
 }
