@@ -180,7 +180,7 @@ Chantiers d'amélioration identifiés par cette revue, chacun réalisé par sa p
 
 ### Ajustement issu de la sécurisation SSL/TLS par le reverse proxy du NAS
 
-Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le reverse proxy du NAS Synology (`contraintes-techniques/architecture-deploiement.md` § Hébergement) : politique HTTPS laissée au reverse proxy, schéma d'origine transmis par lui. La configuration du frontend relevant de la Phase 0, validée, un seul ticket la couvre ; il précède la connexion de l'administration (#199), qui en dépend.
+Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le reverse proxy du NAS Synology (`contraintes-techniques/architecture-deploiement.md` § Hébergement) : accès en HTTPS par le reverse proxy et accès direct en HTTP servis à l'identique, schéma d'origine transmis par le reverse proxy. La configuration du frontend relevant de la Phase 0, validée, un seul ticket la couvre ; il précède la connexion de l'administration (#199), qui en dépend.
 
 | Ticket | Titre |
 | --- | --- |

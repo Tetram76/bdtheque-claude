@@ -40,7 +40,8 @@ L'implémentation de l'outil pour agents IA (`fonctionnel/agents-ia.md` § Inter
 
 - L'application est hébergée sur un **NAS Synology RS1221+** (processeur AMD Ryzen V1500B, architecture x86_64).
 - Le déploiement Docker doit être compatible avec l'environnement Docker fourni par Synology (Container Manager).
-- **Sécurisation SSL/TLS** : le chiffrement des échanges avec le navigateur (HTTPS, certificats) est assuré par le **reverse proxy du NAS Synology**, placé devant le conteneur `frontend`. Celui-ci ne gère pas lui-même la sécurisation SSL/TLS : il ne sert que du HTTP, que le reverse proxy lui relaie.
+- **Sécurisation SSL/TLS** : le chiffrement des échanges avec le navigateur (HTTPS, certificats) est assuré par le **reverse proxy du NAS Synology**, placé devant le conteneur `frontend` : il reçoit les requêtes en HTTPS et les relaie en HTTP au `frontend`, sans rediriger le HTTP vers le HTTPS. Le `frontend` ne gère pas lui-même la sécurisation SSL/TLS : il ne sert que du HTTP.
+- **Accès direct en HTTP** : pendant le développement, le `frontend` reste accessible directement en HTTP, sans passer par le reverse proxy, au moins pour la validation fonctionnelle et le test des versions candidates (RC).
 
 ## Stockage des visuels
 
