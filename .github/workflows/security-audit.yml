@@ -6,8 +6,8 @@ name: Security audit
 # the user who created the workflow, when a vulnerability absent from that list shows up: a known one
 # does not repeat the notification every day. It is no required check: a vulnerability that no
 # correction fixes yet never blocks a pull request. The agent reads the issue in its version watch, once
-# per run of this audit, and records each watch as a comment on it (gestion-projet/depot.md § Mises à jour
-# des dépendances).
+# per run of this audit, and records the watch in the issue body: rewriting the whole body here removes
+# that record, which makes the next watch due (gestion-projet/depot.md § Mises à jour des dépendances).
 on:
   schedule:
     - cron: "11 6 * * *"
