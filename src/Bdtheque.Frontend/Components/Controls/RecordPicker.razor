@@ -114,7 +114,7 @@
     private async Task SearchAsync()
     {
         _active = -1;
-        await EndSearchAsync();
+        await CancelSearchAsync();
         if (string.IsNullOrWhiteSpace(_text))
         {
             Close();
@@ -122,9 +122,11 @@
         }
 
         // Only the latest text typed is answered: an earlier search, slower, would overwrite its suggestions. A search
-        // replaced or abandoned is cancelled, which is all it needs to know.
-        _search = new CancellationTokenSource();
-        var cancellation = _search.Token;
+        // replaced or abandoned is cancelled, which is all it needs to know. The search owns its source, which it frees
+        // once done; the field only lets a later one, or the disposal of the component, cancel it.
+        using var search = new CancellationTokenSource();
+        _search = search;
+        var cancellation = search.Token;
         _open = true;
         _status = SearchStatus.Searching;
         try
@@ -143,6 +145,11 @@
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
             // Replaced by a later search.
+        }
+        finally
+        {
+            if (_search == search)
+                _search = null;
         }
     }
 
@@ -198,20 +205,19 @@
         _active = -1;
     }
 
-    // Cancels the search under way, replaced or abandoned, and frees it: its token is no longer read once cancelled.
-    private async Task EndSearchAsync()
+    // Cancels the search under way, replaced or abandoned; the search itself frees its source.
+    private async Task CancelSearchAsync()
     {
         if (_search is not { } search)
             return;
 
         _search = null;
         await search.CancelAsync();
-        search.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
-        await EndSearchAsync();
+        await CancelSearchAsync();
         if (_module is not null)
         {
             try
