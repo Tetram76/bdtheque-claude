@@ -1,0 +1,5 @@
+.menu-separator {
+    margin: var(--space-xs) 0;
+    border: 0;
+    border-block-start: 1px solid var(--color-rule);
+}

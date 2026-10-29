@@ -1,0 +1,44 @@
+@* An item of an ActionsMenu: a link to another page, or a button, which closes the menu as it acts. *@
+@if (Href is not null)
+{
+    <a class="menu-item" href="@Href" data-variant="@VariantName">@Content</a>
+}
+else
+{
+    <button type="button" class="menu-item" data-variant="@VariantName" popovertarget="@Menu?.Id" popovertargetaction="hide"
+            @onclick="OnClick">
+        @Content
+    </button>
+}
+
+@code {
+    [CascadingParameter]
+    public ActionsMenu? Menu { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter]
+    public IconName? Icon { get; set; }
+
+    /// <summary><see cref="ButtonVariant.Delete"/> for a deletion, in the color of deletion of the theme.</summary>
+    [Parameter]
+    public ButtonVariant Variant { get; set; }
+
+    /// <summary>The page it leads to: a link rather than a button.</summary>
+    [Parameter]
+    public string? Href { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    private string VariantName => Variant.ToString().ToLowerInvariant();
+
+    private RenderFragment Content => @<text>
+        @if (Icon is { } icon)
+        {
+            <Icon Name="icon" />
+        }
+        <span>@Label</span>
+    </text>;
+}

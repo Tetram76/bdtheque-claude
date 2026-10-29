@@ -1,0 +1,20 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.deletion-impact ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.deletion-impact li {
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-control);
+    background: var(--color-tag);
+    color: var(--color-text-on-tag);
+}
+
+.deletion-impact p {
+    margin: 0;
+}

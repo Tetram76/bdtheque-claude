@@ -1,0 +1,34 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    min-block-size: var(--control-height);
+    padding: 0 var(--space-s);
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* A deletion stands out by its color, which the color of the text would not give. */
+.menu-item[data-variant="delete"] {
+    color: var(--color-delete);
+}
+
+.menu-item:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+}
+
+.menu-item ::deep .icon {
+    flex: none;
+    inline-size: 1.125em;
+    block-size: 1.125em;
+}

@@ -1,0 +1,9 @@
+/* A hit area of the height of the controls, which a finger reaches (contraintes-techniques/architecture-deploiement.md
+   § Compatibilité multi-supports). */
+.choice {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-s);
+    min-block-size: var(--control-height);
+    cursor: pointer;
+}

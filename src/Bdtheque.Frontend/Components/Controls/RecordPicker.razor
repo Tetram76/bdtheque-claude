@@ -1,0 +1,254 @@
+@implements IAsyncDisposable
+@inject RecordSearch Search
+@inject IStringLocalizer<RecordPicker> L
+@inject IJSRuntime JS
+
+@* The choice of a record by typing its name (e.g. a series, an author, a publisher: visuel/liste-albums.md § Contenu,
+   visuel/saisie-album.md § Contenu): a combobox whose list suggests the records that contain the text typed, chosen with
+   the mouse, the finger or the keyboard. It needs interactivity (choix-implementation/socle.md § Frontend): in a static
+   page, the caller renders it in the InteractiveServer mode; in a static form, it sends the record chosen by its
+   identifier (Name). The text typed is never a value: leaving the field without choosing gives back the record chosen. *@
+<div class="record-picker">
+    <input @ref="_input" id="@Id" type="text" role="combobox" autocomplete="off" aria-autocomplete="list"
+           aria-expanded="@(IsOpen ? "true" : "false")" aria-controls="@ListId" aria-activedescendant="@ActiveOptionId"
+           placeholder="@Placeholder" @bind="_text" @bind:event="oninput" @bind:after="SearchAsync" @onkeydown="OnKeyDownAsync" @onblur="LeaveAsync"
+           @attributes="AdditionalAttributes" />
+    @if (Value is { } value)
+    {
+        <button type="button" class="record-picker-clear" aria-label="@L["Clear", value.Label]" @onclick="ClearAsync"><Icon Name="IconName.Close" /></button>
+    }
+    else
+    {
+        <span class="record-picker-search"><Icon Name="IconName.Search" /></span>
+    }
+    @if (Name is not null)
+    {
+        <input type="hidden" name="@Name" value="@(Value?.Id.ToString() ?? "")" />
+    }
+    <ul id="@ListId" class="record-picker-list" role="listbox" aria-label="@L["Suggestions"]" hidden="@(!IsOpen)">
+        @if (_status is not SearchStatus.Done)
+        {
+            <li class="record-picker-status" role="presentation">@L[_status.ToString()]</li>
+        }
+        @for (var index = 0; index < _options.Count; index++)
+        {
+            var option = _options[index];
+            <li id="@OptionId(index)" class="record-picker-option" role="option" aria-selected="@(index == _active ? "true" : "false")"
+                @onmousedown:preventDefault @onclick="() => ChooseAsync(option)">
+                <span>@option.Label</span>
+                @if (option.Detail is not null)
+                {
+                    <span class="record-picker-detail">@option.Detail</span>
+                }
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    private ElementReference _input;
+    private IJSObjectReference? _module;
+    private CancellationTokenSource? _search;
+    private string _text = "";
+    private bool _open;
+    private SearchStatus _status = SearchStatus.Done;
+    private IReadOnlyList<RecordOption> _options = [];
+    private int _active = -1;
+    private string? _revealedOptionId;
+
+    /// <summary>The identifier of the text field, unique in the page, which a <see cref="Field"/> labels.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public RecordKind Kind { get; set; }
+
+    /// <summary>The record chosen; <c>null</c> for none.</summary>
+    [Parameter]
+    public RecordOption? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<RecordOption?> ValueChanged { get; set; }
+
+    /// <summary>The name under which a static form sends the identifier of the record chosen.</summary>
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    /// <summary>Set on the text field (e.g. the <c>aria-describedby</c> and <c>aria-invalid</c> of its <see cref="Field"/>).</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private enum SearchStatus
+    {
+        Done,
+        Searching,
+        NoResult,
+        Failed,
+    }
+
+    private bool IsOpen => _open && !string.IsNullOrWhiteSpace(_text);
+
+    private string ListId => $"{Id}-suggestions";
+
+    private string? ActiveOptionId => IsOpen && _active >= 0 ? OptionId(_active) : null;
+
+    private string OptionId(int index) => $"{Id}-suggestion-{index}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!_open && _text != (Value?.Label ?? ""))
+            await ShowTextAsync(Value?.Label ?? "");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["record-picker.js"]}");
+            await _module.InvokeVoidAsync("keepKeysForTheList", _input);
+        }
+
+        // The focus stays on the text field: the list does not scroll by itself to the active suggestion. The suggestion
+        // revealed is the one this rendering shows, noted before the call: the renderings of the keys pressed meanwhile
+        // each reveal their own.
+        if (ActiveOptionId is not { } active)
+            _revealedOptionId = null;
+        else if (_module is not null && active != _revealedOptionId)
+        {
+            _revealedOptionId = active;
+            await _module.InvokeVoidAsync("reveal", active);
+        }
+    }
+
+    private async Task SearchAsync()
+    {
+        await CancelSearchAsync();
+        // The suggestions of the earlier text are no longer valid: none is shown, nor chosen, until those of this one.
+        Suggest([], SearchStatus.Searching);
+        if (string.IsNullOrWhiteSpace(_text))
+        {
+            Close();
+            return;
+        }
+
+        // Only the latest text typed is answered: an earlier search, slower, would overwrite its suggestions. A search
+        // replaced or abandoned is cancelled, which is all it needs to know. The search owns its source, which it frees
+        // once done; the field only lets a later one, or the disposal of the component, cancel it.
+        using var search = new CancellationTokenSource();
+        _search = search;
+        var cancellation = search.Token;
+        _open = true;
+        try
+        {
+            var options = await Search.FindAsync(Kind, _text, cancellation);
+            if (cancellation.IsCancellationRequested)
+                return;
+            Suggest(options, options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done);
+        }
+        catch (ApiProblemException) when (!cancellation.IsCancellationRequested)
+        {
+            Suggest([], SearchStatus.Failed);
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            // Replaced by a later search.
+        }
+        finally
+        {
+            if (_search == search)
+                _search = null;
+        }
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        switch (args.Key)
+        {
+            case "ArrowDown" when !IsOpen && _options.Count > 0 && !string.IsNullOrWhiteSpace(_text):
+                _open = true;
+                break;
+            case "ArrowDown" when IsOpen && _options.Count > 0:
+                _active = Math.Min(_active + 1, _options.Count - 1);
+                break;
+            case "ArrowUp" when IsOpen && _options.Count > 0:
+                _active = Math.Max(_active - 1, 0);
+                break;
+            case "Enter" when IsOpen && _active >= 0:
+                await ChooseAsync(_options[_active]);
+                break;
+            case "Escape" when IsOpen:
+                Close();
+                break;
+        }
+    }
+
+    private async Task ChooseAsync(RecordOption option)
+    {
+        Value = option;
+        await ShowTextAsync(option.Label);
+        await ValueChanged.InvokeAsync(option);
+    }
+
+    private async Task ClearAsync()
+    {
+        Value = null;
+        await ShowTextAsync("");
+        await ValueChanged.InvokeAsync(null);
+        await _input.FocusAsync();
+    }
+
+    private Task LeaveAsync() => ShowTextAsync(Value?.Label ?? "");
+
+    // The only change of the text other than typing (choice, clearing, leaving the field, a new value): the suggestions
+    // are always those of the text shown, so those of the text replaced, and its search under way, end with it.
+    private async Task ShowTextAsync(string text)
+    {
+        _text = text;
+        Close();
+        await CancelSearchAsync();
+        Suggest([], SearchStatus.Done);
+    }
+
+    // The only writing of the suggestions: the active one, an index in them, never outlives them.
+    private void Suggest(IReadOnlyList<RecordOption> options, SearchStatus status)
+    {
+        _options = options;
+        _status = status;
+        _active = -1;
+    }
+
+    private void Close()
+    {
+        _open = false;
+        _active = -1;
+    }
+
+    // Cancels the search under way, replaced or abandoned; the search itself frees its source.
+    private async Task CancelSearchAsync()
+    {
+        if (_search is not { } search)
+            return;
+
+        _search = null;
+        await search.CancelAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await CancelSearchAsync();
+        if (_module is not null)
+        {
+            try
+            {
+                await _module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                // The circuit is gone, and the module with it.
+            }
+        }
+    }
+}

@@ -1,0 +1,31 @@
+@inject IStringLocalizer<SaveBar> L
+
+@* The bar of a record being entered, fixed at the bottom of the screen while its form is in view: the state of the record,
+   cancel and save (visuel/saisie-album.md § Contenu). Placed at the end of the form it submits. On a smartphone, it holds on
+   one line, the state reduced to a few words. *@
+<div class="save-bar">
+    <div class="save-bar-content">
+        <p class="save-bar-state" role="status" data-state="@StateName">
+            <span class="save-bar-state-long">@L[$"{State}.Long"]</span><span class="save-bar-state-short">@L[$"{State}.Short"]</span>
+        </p>
+        <div class="save-bar-actions">
+            <Button Label="@L["Cancel"]" Href="@CancelHref" />
+            <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SaveBarState State { get; set; }
+
+    /// <summary>The label of the save (« Enregistrer », or « Créer l'album » for a new one).</summary>
+    [Parameter, EditorRequired]
+    public string SaveLabel { get; set; } = null!;
+
+    /// <summary>The page cancelling leads back to, leaving the changes.</summary>
+    [Parameter, EditorRequired]
+    public string CancelHref { get; set; } = null!;
+
+    private string StateName => State.ToString().ToLowerInvariant();
+}

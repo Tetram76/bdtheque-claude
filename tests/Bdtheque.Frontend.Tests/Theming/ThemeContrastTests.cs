@@ -24,6 +24,7 @@ public sealed partial class ThemeContrastTests
         ("text-secondary", "surface", Text),
         ("text-muted", "background", Text),
         ("text-muted", "surface", Text),
+        ("text-muted", "surface-raised", Text),
         ("text-on-inverse", "surface-inverse", Text),
         ("accent-text", "background", Text),
         ("accent-text", "surface", Text),
@@ -35,6 +36,16 @@ public sealed partial class ThemeContrastTests
         ("text-on-tag", "tag", Text),
         ("control-border", "background", NonText),
         ("control-border", "surface", NonText),
+        ("control-border", "surface-raised", NonText),
+        // A control: its text, its placeholder (liste-albums.md § Contrôles) and the border of a control in error.
+        ("text", "control-background", Text),
+        ("text-muted", "control-background", Text),
+        ("control-border", "control-background", NonText),
+        ("alert", "surface", NonText),
+        ("alert", "surface-raised", NonText),
+        ("alert", "control-background", NonText),
+        // An item of a menu that deletes, in the color of deletion on the menu (liste-albums.md § Contenu).
+        ("delete", "surface-raised", Text),
         .. Enumerable.Range(1, 7).Select(index => ("text-on-palette", $"palette-{index}", Text)),
     ];
 

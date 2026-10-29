@@ -1,0 +1,62 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). Sticky rather than
+   fixed: it holds at the bottom of the screen while its form is in view, and never covers what follows the form. */
+.save-bar {
+    --focus-gap: var(--color-surface-raised);
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 10;
+    margin-block-start: var(--space-xl);
+    background: var(--color-surface-raised);
+    border-block-start: 1px solid var(--color-rule);
+    box-shadow: var(--shadow-raised);
+}
+
+.save-bar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-l);
+    max-inline-size: var(--page-max-width);
+    margin: 0 auto;
+    padding: var(--space-s) var(--page-gutter);
+}
+
+.save-bar-state {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    min-inline-size: 0;
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+/* Unsaved changes are marked by a dot of the accent color. */
+.save-bar-state[data-state="unsaved"]::before {
+    content: "";
+    flex: none;
+    inline-size: 0.5625rem;
+    block-size: 0.5625rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+}
+
+.save-bar-state-short {
+    display: none;
+}
+
+.save-bar-actions {
+    display: flex;
+    flex: none;
+    gap: var(--space-s);
+}
+
+@media (max-width: 47.99rem) {
+    .save-bar-state-long {
+        display: none;
+    }
+
+    .save-bar-state-short {
+        display: inline;
+    }
+}

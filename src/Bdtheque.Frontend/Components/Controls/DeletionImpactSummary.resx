@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Blocked" xml:space="preserve">
+    <value>Suppression bloquée par</value>
+  </data>
+  <data name="Deleted" xml:space="preserve">
+    <value>Suppression aussi de</value>
+  </data>
+  <data name="Dissociated" xml:space="preserve">
+    <value>Retrait de l&apos;association avec</value>
+  </data>
+  <data name="Leaving" xml:space="preserve">
+    <value>Sortie de la collection de</value>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>{0} et {1}</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Aucune autre fiche n&apos;est concernée.</value>
+  </data>
+</root>

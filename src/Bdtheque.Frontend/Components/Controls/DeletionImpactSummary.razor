@@ -1,0 +1,54 @@
+@using Bdtheque.Contracts.Deletion
+@inject IStringLocalizer<DeletionImpactSummary> L
+@inject IStringLocalizer<EntityNames> Entities
+
+@* The impact of a deletion, which its confirmation, or its refusal, announces: the number of records concerned, by
+   entity type and by nature of link (fonctionnel/regles-metier.md § Suppression des entités). A refused deletion
+   announces only what blocks it, nothing else being done. *@
+<div class="deletion-impact">
+    @if (_lines.Count == 0)
+    {
+        <p>@L["None"]</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var (nature, counts) in _lines)
+            {
+                <li data-nature="@nature.ToString().ToLowerInvariant()"><strong>@L[nature.ToString()]</strong> @Enumeration(counts)</li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public DeletionImpact Impact { get; set; } = null!;
+
+    private enum Nature
+    {
+        Blocked,
+        Deleted,
+        Dissociated,
+        Leaving,
+    }
+
+    private List<(Nature Nature, IReadOnlyList<ImpactCount> Counts)> _lines = [];
+
+    protected override void OnParametersSet() => _lines =
+        Impact.BlockedBy.Count > 0
+            ? [(Nature.Blocked, Impact.BlockedBy)]
+            : new (Nature Nature, IReadOnlyList<ImpactCount> Counts)[]
+            {
+                (Nature.Deleted, Impact.DeletedWith),
+                (Nature.Dissociated, Impact.AssociationsRemoved),
+                (Nature.Leaving, Impact.LeavingCollection),
+            }.Where(line => line.Counts.Count > 0).ToList();
+
+    // « 2 éditions, 5 visuels et 1 intention d'achat ».
+    private string Enumeration(IReadOnlyList<ImpactCount> counts)
+    {
+        var texts = counts.Select(count => Entities[$"{count.Kind}.{(count.Count == 1 ? "One" : "Other")}", count.Count].Value).ToList();
+        return texts.Count == 1 ? texts[0] : L["List", string.Join(", ", texts[..^1]), texts[^1]];
+    }
+}

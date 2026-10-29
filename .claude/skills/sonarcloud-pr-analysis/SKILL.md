@@ -105,7 +105,9 @@ The same token serves the project settings that the analysis configuration
 does not carry (e.g. the new code definition, the quality gate of the project),
 through the matching endpoints of the web API.
 
-`falsepositive` for a finding whose premise is wrong; `accept` for a rule that
+`falsepositive` for a finding whose premise is wrong and that no simpler design would satisfy — a finding raised because
+the rule cannot follow the code (an indirection) first points to a possible design defect, looked for and fixed before
+any rejection (`revue-tickets.md` → « Analyse SonarQube Cloud »); `accept` for a rule that
 does not fit the case, and for a valid finding whose fix is deferred (the
 comment then names the ticket or plan note that carries the fix): accepted
 means acknowledged but not fixed now, and an open finding would fail the gate.

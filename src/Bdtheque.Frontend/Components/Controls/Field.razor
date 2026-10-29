@@ -1,0 +1,65 @@
+@* A labelled field: its label, the control it gives its identifier to, then the error and the help that describe it. The
+   control is the caller's (a native input, an InputText bound to a form, a RecordPicker…), styled by the base theme
+   (themes/base.css). A field sized to its content (a volume, a year) is as wide as its characters, never stretched over
+   the whole width (visuel/saisie-album.md § Contenu). *@
+<div class="field" style="@WidthStyle">
+    <label class="field-label" for="@Id">
+        @Label
+        @if (Note is not null)
+        {
+            <span class="field-note">@Note</span>
+        }
+    </label>
+    @ChildContent?.Invoke(Context)
+    @if (Error is not null)
+    {
+        <p class="field-error" id="@ErrorId"><Icon Name="IconName.Alert" />@Error</p>
+    }
+    @if (Help is not null)
+    {
+        <p class="field-help" id="@HelpId">@Help</p>
+    }
+</div>
+
+@code {
+    /// <summary>The identifier of the control, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>A short mention after the label (e.g. « facultatif dans une série »).</summary>
+    [Parameter]
+    public string? Note { get; set; }
+
+    [Parameter]
+    public string? Help { get; set; }
+
+    /// <summary>What to correct: the field is then in error.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    /// <summary>The width of the control in characters, for a field sized to its content; the whole width otherwise.</summary>
+    [Parameter]
+    public int? Characters { get; set; }
+
+    [Parameter]
+    public RenderFragment<FieldContext>? ChildContent { get; set; }
+
+    private string ErrorId => $"{Id}-error";
+
+    private string HelpId => $"{Id}-help";
+
+    private string? WidthStyle => Characters is { } characters ? $"--field-characters: {characters}" : null;
+
+    private FieldContext Context
+    {
+        get
+        {
+            string?[] descriptions = [Error is null ? null : ErrorId, Help is null ? null : HelpId];
+            var describedBy = string.Join(' ', descriptions.OfType<string>());
+            return new FieldContext(Id, describedBy.Length == 0 ? null : describedBy, Error is null ? null : "true");
+        }
+    }
+}

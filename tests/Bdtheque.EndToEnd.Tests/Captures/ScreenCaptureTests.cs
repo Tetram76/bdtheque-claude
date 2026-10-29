@@ -26,6 +26,8 @@ public sealed class ScreenCaptureTests(ApplicationHost application)
         ["not-yet-implemented"] = AppPaths.NotYetImplemented,
         ["not-found"] = "/no-such-page",
         ["error"] = "/Error",
+        // Not a screen: the page of the tests that presents the controls shared by the screens, until they use them.
+        ["controls"] = Controls.ControlsPage.Path,
     };
 
     public static TheoryData<string, string, string> Captures

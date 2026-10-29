@@ -8,8 +8,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Bdtheque.EndToEnd.Tests.Captures;
+using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Api;
+using frontend::Bdtheque.Frontend.Navigation;
 using frontend::Bdtheque.Frontend.Theming;
 using FrontendProgram = frontend::Program;
 
@@ -109,6 +112,7 @@ public sealed class ApplicationHost : IAsyncLifetime
             {
                 services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler());
                 FixTheThemeByRequest(services);
+                services.Replace(ServiceDescriptor.Singleton(new PageAssemblies([typeof(ControlsPage).Assembly])));
             });
         }
 

@@ -1,0 +1,49 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.actions-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.actions-menu-toggle:hover,
+.actions-menu:has(.actions-menu-panel:popover-open) .actions-menu-toggle {
+    background: var(--color-tag);
+    color: var(--color-text-on-tag);
+}
+
+.actions-menu-toggle ::deep .icon {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+}
+
+/* In the top layer, under its button, right-aligned with it; above it, or the other way, when the screen lacks room. */
+.actions-menu-panel {
+    --focus-gap: var(--color-surface-raised);
+    position-area: block-end span-inline-start;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    inset: auto;
+    margin: var(--space-xs) 0;
+    inline-size: max-content;
+    min-inline-size: 12rem;
+    max-inline-size: min(20rem, calc(100vw - 2 * var(--page-gutter)));
+    padding: var(--space-xs);
+    border: var(--border-block);
+    border-radius: var(--radius-block);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    box-shadow: var(--shadow-raised);
+}
+
+.actions-menu-panel:popover-open {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}

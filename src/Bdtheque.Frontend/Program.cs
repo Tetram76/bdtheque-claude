@@ -1,5 +1,6 @@
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components;
+using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Formatting;
 using Bdtheque.Frontend.Hosting;
 using Bdtheque.Frontend.Navigation;
@@ -33,6 +34,8 @@ builder.Services.AddScoped(services => new BrowserTimeZone
     Name = services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request.Cookies[BrowserTimeZone.CookieName],
 });
 builder.Services.AddScoped<DisplayFormatter>();
+builder.Services.AddScoped<RecordSearch>();
+builder.Services.AddSingleton(new PageAssemblies([]));
 builder.Services.AddSingleton<IThemeSelector, FirstOfferedThemeSelector>();
 builder.Services.AddSingleton(TimeProvider.System);
 
@@ -110,6 +113,7 @@ app.MapHealthChecks("/health");
 app.MapStaticAssets();
 app.MapVisualMediaRelay();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies([.. app.Services.GetRequiredService<PageAssemblies>().Additional]);
 
 app.Run();
