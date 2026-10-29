@@ -113,8 +113,9 @@
 
     private async Task SearchAsync()
     {
-        _active = -1;
         await CancelSearchAsync();
+        // The suggestions of the earlier text are no longer valid: none is shown, nor chosen, until those of this one.
+        Suggest([], SearchStatus.Searching);
         if (string.IsNullOrWhiteSpace(_text))
         {
             Close();
@@ -128,19 +129,16 @@
         _search = search;
         var cancellation = search.Token;
         _open = true;
-        _status = SearchStatus.Searching;
         try
         {
             var options = await Search.FindAsync(Kind, _text, cancellation);
             if (cancellation.IsCancellationRequested)
                 return;
-            _options = options;
-            _status = options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done;
+            Suggest(options, options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done);
         }
         catch (ApiProblemException) when (!cancellation.IsCancellationRequested)
         {
-            _options = [];
-            _status = SearchStatus.Failed;
+            Suggest([], SearchStatus.Failed);
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
@@ -188,7 +186,7 @@
         Close();
         Value = null;
         _text = "";
-        _options = [];
+        Suggest([], SearchStatus.Done);
         await ValueChanged.InvokeAsync(null);
         await _input.FocusAsync();
     }
@@ -197,6 +195,14 @@
     {
         Close();
         _text = Value?.Label ?? "";
+    }
+
+    // The only writing of the suggestions: the active one, an index in them, never outlives them.
+    private void Suggest(IReadOnlyList<RecordOption> options, SearchStatus status)
+    {
+        _options = options;
+        _status = status;
+        _active = -1;
     }
 
     private void Close()

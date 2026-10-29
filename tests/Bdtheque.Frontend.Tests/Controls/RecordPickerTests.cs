@@ -16,6 +16,8 @@ public sealed class RecordPickerTests : BunitContext
     private static readonly Guid Titeuf = Guid.Parse("0199b6a4-0000-7000-8000-000000000002");
 
     private readonly List<string> _requests = [];
+    // A response still awaited, until the test gives it; none, the answer is immediate.
+    private Task<HttpResponseMessage>? _pending;
     private Func<HttpRequestMessage, HttpResponseMessage> _answer = _ => Json(
         $$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"},{"id":"{{Titeuf}}","title":"Titeuf"}],"number":1,"size":10,"totalCount":2}""");
 
@@ -25,7 +27,7 @@ public sealed class RecordPickerTests : BunitContext
         Services.AddSingleton(new ApiClient(new HttpClient(new StubHandler(request =>
         {
             _requests.Add(request.RequestUri!.PathAndQuery);
-            return _answer(request);
+            return _pending ?? Task.FromResult(_answer(request));
         }))
         {
             BaseAddress = new Uri("http://api"),
@@ -114,6 +116,39 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
+    public void SuggestionsOfAnEarlierText_AreNeitherShownNorChosen_WhileTheNewOnesAreAwaited()
+    {
+        RecordOption? chosen = null;
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-series")
+            .Add(p => p.Kind, RecordKind.Series)
+            .Add(p => p.ValueChanged, value => chosen = value));
+        picker.Find("input").Input("ti");
+        picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+        picker.Find("input").KeyDown("ArrowDown");
+        picker.Find("input").KeyDown("ArrowDown");
+
+        var answer = new TaskCompletionSource<HttpResponseMessage>();
+        _pending = answer.Task;
+        picker.Find("input").Input("tin");
+
+        Assert.Empty(picker.FindAll("[role=option]"));
+        Assert.Null(picker.Find("input").GetAttribute("aria-activedescendant"));
+        picker.Find("input").KeyDown("ArrowDown");
+
+        answer.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
+        picker.WaitForAssertion(() => Assert.Single(picker.FindAll("[role=option]")));
+        Assert.Null(picker.Find("input").GetAttribute("aria-activedescendant"));
+        picker.Find("input").KeyDown("Enter");
+
+        Assert.Null(chosen);
+        picker.Find("input").KeyDown("ArrowDown");
+        picker.WaitForAssertion(() => Assert.Equal("f-series-suggestion-0", picker.Find("input").GetAttribute("aria-activedescendant")));
+        picker.Find("input").KeyDown("Enter");
+        Assert.Equal(Tintin, chosen?.Id);
+    }
+
+    [Fact]
     public void Escape_ClosesTheSuggestions_AndBlurRestoresTheRecordChosen()
     {
         var picker = Render<RecordPicker>(parameters => parameters
@@ -187,9 +222,9 @@ public sealed class RecordPickerTests : BunitContext
     private static HttpResponseMessage Json(string body) =>
         new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
 
-    private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> answer) : HttpMessageHandler
+    private sealed class StubHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> answer) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(answer(request));
+            answer(request);
     }
 }
