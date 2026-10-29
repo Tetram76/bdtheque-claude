@@ -149,6 +149,54 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
+    public void LeavingTheField_EndsTheSuggestionsOfTheTextLeft_NoneReopeningForTheRecordRestored()
+    {
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-series")
+            .Add(p => p.Kind, RecordKind.Series)
+            .Add(p => p.Value, new RecordOption(Tintin, "Tintin", null)));
+        picker.Find("input").Input("tit");
+        picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+
+        picker.Find("input").Blur();
+        picker.Find("input").KeyDown("ArrowDown");
+
+        Assert.Equal("Tintin", picker.Find("input").GetAttribute("value"));
+        Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
+        Assert.Empty(picker.FindAll("[role=option]"));
+    }
+
+    [Fact]
+    public void SearchAnsweredAfterLeavingTheField_SuggestsNothing()
+    {
+        var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
+        var answer = new TaskCompletionSource<HttpResponseMessage>();
+        _pending = answer.Task;
+        picker.Find("input").Input("ti");
+
+        picker.Find("input").Blur();
+        answer.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
+        picker.Find("input").KeyDown("ArrowDown");
+
+        picker.WaitForAssertion(() => Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded")));
+        Assert.Empty(picker.FindAll("[role=option]"));
+    }
+
+    [Fact]
+    public void ChoosingASuggestion_EndsTheSuggestionsOfTheTextTyped()
+    {
+        var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
+        picker.Find("input").Input("ti");
+        picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+
+        picker.FindAll("[role=option]")[1].Click();
+        picker.Find("input").KeyDown("ArrowDown");
+
+        Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
+        Assert.Empty(picker.FindAll("[role=option]"));
+    }
+
+    [Fact]
     public void Escape_ClosesTheSuggestions_AndBlurRestoresTheRecordChosen()
     {
         var picker = Render<RecordPicker>(parameters => parameters

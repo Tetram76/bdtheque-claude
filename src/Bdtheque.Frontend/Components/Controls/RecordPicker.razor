@@ -11,7 +11,7 @@
 <div class="record-picker">
     <input @ref="_input" id="@Id" type="text" role="combobox" autocomplete="off" aria-autocomplete="list"
            aria-expanded="@(IsOpen ? "true" : "false")" aria-controls="@ListId" aria-activedescendant="@ActiveOptionId"
-           placeholder="@Placeholder" @bind="_text" @bind:event="oninput" @bind:after="SearchAsync" @onkeydown="OnKeyDownAsync" @onblur="Leave"
+           placeholder="@Placeholder" @bind="_text" @bind:event="oninput" @bind:after="SearchAsync" @onkeydown="OnKeyDownAsync" @onblur="LeaveAsync"
            @attributes="AdditionalAttributes" />
     @if (Value is { } value)
     {
@@ -97,10 +97,10 @@
 
     private string OptionId(int index) => $"{Id}-suggestion-{index}";
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        if (!_open)
-            _text = Value?.Label ?? "";
+        if (!_open && _text != (Value?.Label ?? ""))
+            await ShowTextAsync(Value?.Label ?? "");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -181,26 +181,29 @@
 
     private async Task ChooseAsync(RecordOption option)
     {
-        Close();
         Value = option;
-        _text = option.Label;
+        await ShowTextAsync(option.Label);
         await ValueChanged.InvokeAsync(option);
     }
 
     private async Task ClearAsync()
     {
-        Close();
         Value = null;
-        _text = "";
-        Suggest([], SearchStatus.Done);
+        await ShowTextAsync("");
         await ValueChanged.InvokeAsync(null);
         await _input.FocusAsync();
     }
 
-    private void Leave()
+    private Task LeaveAsync() => ShowTextAsync(Value?.Label ?? "");
+
+    // The only change of the text other than typing (choice, clearing, leaving the field, a new value): the suggestions
+    // are always those of the text shown, so those of the text replaced, and its search under way, end with it.
+    private async Task ShowTextAsync(string text)
     {
+        _text = text;
         Close();
-        _text = Value?.Label ?? "";
+        await CancelSearchAsync();
+        Suggest([], SearchStatus.Done);
     }
 
     // The only writing of the suggestions: the active one, an index in them, never outlives them.
