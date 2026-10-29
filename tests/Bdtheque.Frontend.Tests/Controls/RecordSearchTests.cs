@@ -14,28 +14,28 @@ public sealed class RecordSearchTests
     private static readonly Guid Id = Guid.Parse("0199b6a4-0000-7000-8000-000000000001");
     private static readonly Guid ParentId = Guid.Parse("0199b6a4-0000-7000-8000-000000000002");
 
-    public static TheoryData<RecordKind, string, string, RecordOption> Kinds => new()
+    public static TheoryData<RecordKind, string, string, string, string?> Kinds => new()
     {
-        { RecordKind.Series, "/catalog/series", $$"""{"id":"{{Id}}","title":"Tintin"}""", new(Id, "Tintin", null) },
-        { RecordKind.Publisher, "/catalog/publishers", $$"""{"id":"{{Id}}","name":"Dargaud","website":null}""", new(Id, "Dargaud", null) },
+        { RecordKind.Series, "/catalog/series", $$"""{"id":"{{Id}}","title":"Tintin"}""", "Tintin", null },
+        { RecordKind.Publisher, "/catalog/publishers", $$"""{"id":"{{Id}}","name":"Dargaud","website":null}""", "Dargaud", null },
         {
             RecordKind.PublisherCollection, "/catalog/publisher-collections",
-            $$"""{"id":"{{Id}}","name":"Lucky Luke","publisherId":"{{ParentId}}","publisherName":"Dargaud"}""", new(Id, "Lucky Luke", "Dargaud")
+            $$"""{"id":"{{Id}}","name":"Lucky Luke","publisherId":"{{ParentId}}","publisherName":"Dargaud"}""", "Lucky Luke", "Dargaud"
         },
-        { RecordKind.Genre, "/catalog/genres", $$"""{"id":"{{Id}}","label":"Aventure"}""", new(Id, "Aventure", null) },
+        { RecordKind.Genre, "/catalog/genres", $$"""{"id":"{{Id}}","label":"Aventure"}""", "Aventure", null },
         {
             RecordKind.Universe, "/catalog/universes",
-            $$"""{"id":"{{Id}}","name":"Spirou","parentId":"{{ParentId}}","parentName":"Dupuis"}""", new(Id, "Spirou", "Dupuis")
+            $$"""{"id":"{{Id}}","name":"Spirou","parentId":"{{ParentId}}","parentName":"Dupuis"}""", "Spirou", "Dupuis"
         },
         {
             RecordKind.Author, "/catalog/authors",
-            $$"""{"id":"{{Id}}","lastName":"Van Hamme","firstName":"Jean","pseudonym":null}""", new(Id, "Jean Van Hamme", null)
+            $$"""{"id":"{{Id}}","lastName":"Van Hamme","firstName":"Jean","pseudonym":null}""", "Jean Van Hamme", null
         },
     };
 
     [Theory]
     [MemberData(nameof(Kinds))]
-    public async Task Find_ReadsTheListOfItsKind_NamingEachRecordAsTheListsDo(RecordKind kind, string path, string item, RecordOption expected)
+    public async Task Find_ReadsTheListOfItsKind_NamingEachRecordAsTheListsDo(RecordKind kind, string path, string item, string label, string? detail)
     {
         string? requested = null;
         var search = new RecordSearch(new ApiClient(new HttpClient(new StubHandler(request =>
@@ -52,7 +52,7 @@ public sealed class RecordSearchTests
 
         var options = await search.FindAsync(kind, "  Dar & co ", CancellationToken.None);
 
-        Assert.Equal(expected, Assert.Single(options));
+        Assert.Equal(new RecordOption(Id, label, detail), Assert.Single(options));
         Assert.Equal($"{path}?q=Dar%20%26%20co&pageSize={RecordSearch.SuggestionCount}", requested);
     }
 
