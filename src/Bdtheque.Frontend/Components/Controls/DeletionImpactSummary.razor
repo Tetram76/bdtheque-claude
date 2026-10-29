@@ -6,14 +6,14 @@
    entity type and by nature of link (fonctionnel/regles-metier.md § Suppression des entités). A refused deletion
    announces only what blocks it, nothing else being done. *@
 <div class="deletion-impact">
-    @if (Lines.Count == 0)
+    @if (_lines.Count == 0)
     {
         <p>@L["None"]</p>
     }
     else
     {
         <ul>
-            @foreach (var (nature, counts) in Lines)
+            @foreach (var (nature, counts) in _lines)
             {
                 <li data-nature="@nature.ToString().ToLowerInvariant()"><strong>@L[nature.ToString()]</strong> @Enumeration(counts)</li>
             }
@@ -33,7 +33,9 @@
         Leaving,
     }
 
-    private List<(Nature Nature, IReadOnlyList<ImpactCount> Counts)> Lines =>
+    private List<(Nature Nature, IReadOnlyList<ImpactCount> Counts)> _lines = [];
+
+    protected override void OnParametersSet() => _lines =
         Impact.BlockedBy.Count > 0
             ? [(Nature.Blocked, Impact.BlockedBy)]
             : new (Nature Nature, IReadOnlyList<ImpactCount> Counts)[]
