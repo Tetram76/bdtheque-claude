@@ -1,0 +1,9 @@
+@inject IStringLocalizer<NotSet> L
+
+@* A missing data is shown, never left blank (visuel/listes.md § Principes communs). *@
+<span class="not-set">@L[Gender.ToString()]</span>
+
+@code {
+    [Parameter]
+    public GrammaticalGender Gender { get; set; }
+}

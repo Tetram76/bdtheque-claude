@@ -1,0 +1,66 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-s);
+    block-size: var(--control-height);
+    padding: 0 var(--control-padding-inline);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.button[data-variant="primary"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.button[data-variant="delete"] {
+    border-color: var(--color-delete);
+    background: var(--color-delete);
+    color: var(--color-text-on-delete);
+}
+
+/* Underlined rather than recolored: hovering never weakens the contrast of the label. */
+.button:hover:not(:disabled) {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.button ::deep .icon {
+    flex: none;
+    inline-size: 1.125em;
+    block-size: 1.125em;
+}
+
+/* On a smartphone, a square of the height of the controls, its label kept for assistive technologies only. */
+@media (max-width: 47.99rem) {
+    .button[data-icon-only-on-smartphone] {
+        inline-size: var(--control-height);
+        padding: 0;
+    }
+
+    .button[data-icon-only-on-smartphone] .button-label {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+}

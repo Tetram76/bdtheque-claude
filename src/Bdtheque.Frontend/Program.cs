@@ -62,15 +62,18 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-// HTTP client for `api`, only reachable over the internal Docker network.
-builder.Services.AddHttpClient<ApiClient>(ApiClient.HttpClientName, (services, client) =>
-{
-    var apiOptions = services.GetRequiredService<IConfiguration>().GetSection("Api");
-    client.BaseAddress = new Uri(apiOptions["BaseUrl"] ?? throw new InvalidOperationException("Api:BaseUrl is not configured."));
+builder.Services.AddOptions<ApiOptions>()
+    .Bind(builder.Configuration.GetSection(ApiOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
-    var internalApiKey = services.GetRequiredService<IOptions<InternalApiKeyOptions>>().Value.Key;
-    client.DefaultRequestHeaders.Add(InternalApiKeyOptions.HeaderName, internalApiKey);
-});
+// HTTP client for `api`, only reachable over the internal Docker network, whose connection the relay of the media shares.
+builder.Services.AddTransient<InternalApiKeyHandler>();
+builder.Services.AddHttpClient<ApiClient>(ApiClient.HttpClientName, (services, client) =>
+        client.BaseAddress = new Uri(services.GetRequiredService<IOptions<ApiOptions>>().Value.BaseUrl))
+    .ConfigurePrimaryHttpMessageHandler(VisualMediaRelay.CreateHandler)
+    .AddHttpMessageHandler<InternalApiKeyHandler>();
+builder.Services.AddHttpForwarder();
 
 builder.Services.AddHealthChecks();
 
@@ -105,6 +108,7 @@ app.UseAntiforgery();
 app.MapHealthChecks("/health");
 
 app.MapStaticAssets();
+app.MapVisualMediaRelay();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

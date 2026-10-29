@@ -1,0 +1,30 @@
+@inject IStringLocalizer<Tag> L
+
+@* A short mark: the membership of the collection, an active filter… A removable tag leads to the page without it (e.g. the
+   list without this filter): a link, which needs no interactivity (choix-implementation/socle.md § Frontend). *@
+<span class="tag" data-variant="@Variant.ToString().ToLowerInvariant()">
+    @if (Icon is { } icon)
+    {
+        <Icon Name="icon" />
+    }
+    <span>@Text</span>
+    @if (RemoveHref is not null)
+    {
+        <a class="tag-remove" href="@RemoveHref" aria-label="@L["Remove", Text]"><Icon Name="IconName.Close" /></a>
+    }
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = null!;
+
+    [Parameter]
+    public TagVariant Variant { get; set; }
+
+    [Parameter]
+    public IconName? Icon { get; set; }
+
+    /// <summary>The page without this tag: set, the tag can be removed.</summary>
+    [Parameter]
+    public string? RemoveHref { get; set; }
+}

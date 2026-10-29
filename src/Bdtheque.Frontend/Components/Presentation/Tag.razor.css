@@ -1,0 +1,42 @@
+/* Compact, as everything in a list (visuel/charte-graphique.md § Convivialité et efficacité). The dashed border is a
+   control border: it alone tells a dashed tag from text, so it keeps its contrast. */
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    max-inline-size: 100%;
+    padding: 0.0625rem var(--space-s);
+    border: 1px solid var(--color-tag);
+    border-radius: var(--radius-control);
+    background: var(--color-tag);
+    color: var(--color-text-on-tag);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    line-height: var(--line-height-text);
+    vertical-align: middle;
+}
+
+.tag[data-variant="dashed"] {
+    border: 1px dashed var(--color-control-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+}
+
+.tag ::deep .icon {
+    flex: none;
+    inline-size: 1em;
+    block-size: 1em;
+}
+
+/* A hit area larger than its cross, without making the tag taller. */
+.tag-remove {
+    display: inline-flex;
+    margin: -0.25rem calc(-1 * var(--space-xs)) -0.25rem 0;
+    padding: 0.25rem;
+    border-radius: var(--radius-pill);
+    color: inherit;
+}
+
+.tag-remove:hover {
+    background: color-mix(in srgb, currentColor 15%, transparent);
+}

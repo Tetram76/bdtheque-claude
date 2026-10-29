@@ -32,6 +32,7 @@ public sealed partial class ThemeContrastTests
         ("text-on-info", "info", Text),
         ("text-on-delete", "delete", Text),
         ("text-on-failure", "failure", Text),
+        ("text-on-tag", "tag", Text),
         ("control-border", "background", NonText),
         ("control-border", "surface", NonText),
         .. Enumerable.Range(1, 7).Select(index => ("text-on-palette", $"palette-{index}", Text)),
