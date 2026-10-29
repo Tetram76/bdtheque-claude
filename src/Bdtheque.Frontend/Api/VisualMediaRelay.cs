@@ -44,7 +44,7 @@ public static class VisualMediaRelay
     {
         // The handler of the API client, with the internal key: created by the factory, which owns and recycles it.
         using var invoker = new HttpMessageInvoker(handlers.CreateHandler(ApiClient.HttpClientName), disposeHandler: false);
-        var error = await forwarder.SendAsync(context, api.Value.BaseUrl, invoker, RequestConfig, Transformer);
+        var error = await forwarder.SendAsync(context, api.Value.BaseUrl, invoker, RequestConfig, Transformer, context.RequestAborted);
         if (error != ForwarderError.None)
         {
             loggers.CreateLogger(typeof(VisualMediaRelay)).LogError(context.GetForwarderErrorFeature()?.Exception,
