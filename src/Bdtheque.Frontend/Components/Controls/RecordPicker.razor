@@ -114,7 +114,7 @@
     private async Task SearchAsync()
     {
         _active = -1;
-        _search?.Cancel();
+        await EndSearchAsync();
         if (string.IsNullOrWhiteSpace(_text))
         {
             Close();
@@ -196,9 +196,20 @@
         _active = -1;
     }
 
+    // Cancels the search under way, replaced or abandoned, and frees it: its token is no longer read once cancelled.
+    private async Task EndSearchAsync()
+    {
+        if (_search is not { } search)
+            return;
+
+        _search = null;
+        await search.CancelAsync();
+        search.Dispose();
+    }
+
     public async ValueTask DisposeAsync()
     {
-        _search?.Cancel();
+        await EndSearchAsync();
         if (_module is not null)
         {
             try
