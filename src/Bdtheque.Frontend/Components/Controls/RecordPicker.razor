@@ -121,24 +121,26 @@
             return;
         }
 
-        // Only the latest text typed is answered: an earlier search, slower, would overwrite its suggestions.
-        var search = _search = new CancellationTokenSource();
+        // Only the latest text typed is answered: an earlier search, slower, would overwrite its suggestions. A search
+        // replaced or abandoned is cancelled, which is all it needs to know.
+        _search = new CancellationTokenSource();
+        var cancellation = _search.Token;
         _open = true;
         _status = SearchStatus.Searching;
         try
         {
-            var options = await Search.FindAsync(Kind, _text, search.Token);
-            if (search != _search)
+            var options = await Search.FindAsync(Kind, _text, cancellation);
+            if (cancellation.IsCancellationRequested)
                 return;
             _options = options;
             _status = options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done;
         }
-        catch (ApiProblemException) when (search == _search)
+        catch (ApiProblemException) when (!cancellation.IsCancellationRequested)
         {
             _options = [];
             _status = SearchStatus.Failed;
         }
-        catch (OperationCanceledException) when (search.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
             // Replaced by a later search.
         }
