@@ -44,7 +44,7 @@ public sealed partial class ControlsTests(ApplicationHost application)
 
         await toggle.ClickAsync();
         await menu.GetByRole(AriaRole.Link, new() { Name = "Modifier" }).ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(new Regex(@"\?edited=true$"));
+        await Assertions.Expect(page).ToHaveURLAsync(EditedUrl());
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public sealed partial class ControlsTests(ApplicationHost application)
 
         await page.Keyboard.PressAsync("Escape");
 
-        await Assertions.Expect(page).ToHaveURLAsync(new Regex($"{Regex.Escape(ControlsPage.Path)}$"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageWithoutDialogUrl());
         await Assertions.Expect(page.Locator("dialog.dialog")).ToHaveCountAsync(0);
     }
 
@@ -166,6 +166,12 @@ public sealed partial class ControlsTests(ApplicationHost application)
 
         Assert.Equal(colors[1], colors[0]);
     }
+
+    [GeneratedRegex(@"\?edited=true$")]
+    private static partial Regex EditedUrl();
+
+    [GeneratedRegex(@"/test/controls$")]
+    private static partial Regex PageWithoutDialogUrl();
 
     // The computed color of a custom property of the theme, as the browser writes the colors it computes (rgb()).
     private const string ResolveColor = "(name => { const probe = document.createElement('span'); probe.style.color = `var(${name})`; " +
