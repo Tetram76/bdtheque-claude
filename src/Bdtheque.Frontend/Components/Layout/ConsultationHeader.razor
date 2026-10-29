@@ -1,0 +1,46 @@
+@inject IStringLocalizer<LayoutText> L
+@inject NavigationManager Navigation
+
+@* The header of the consultation (visuel/charte-graphique.md § Apparence propre à chaque alternative): the logo, the menu,
+   whose entry of the current page is marked, then the search and the help, always visible. The menu never wraps: it
+   scrolls sideways. The header stays at the top of the screen when the page scrolls; on a small screen, the search goes
+   under the menu. The search is a section, which a page may leave out (NoHeaderSearch): the welcome screen of an empty
+   collection, whose search would have almost nothing to find (visuel/dashboard.md § Collection vide). *@
+<header class="app-header consultation-header">
+    <a class="app-logo" href="@AppPaths.Home">@L["AppName"]</a>
+    <ScrollRow class="consultation-menu">
+        <nav aria-label="@L["ConsultationMenu"]">
+            <ul>
+                @foreach (var entry in Entries)
+                {
+                    <li><a href="@entry.Path" aria-current="@(entry.IsCurrent(CurrentPath) ? "page" : null)">@L[entry.Name]</a></li>
+                }
+            </ul>
+        </nav>
+    </ScrollRow>
+    <div class="header-tools">
+        <SectionOutlet SectionId="SearchSection" />
+        <HelpLink />
+    </div>
+</header>
+
+@* The search by default: a page that leaves it out renders an empty section after this one, which wins. *@
+<SectionContent SectionId="SearchSection">
+    <HeaderSearch Action="@AppPaths.Search" Id="consultation-search" Label="@L["Search"]" Placeholder="@L["SearchPlaceholder"]" />
+</SectionContent>
+
+@code {
+    /// <summary>The section of the search of the header, which <see cref="NoHeaderSearch"/> empties.</summary>
+    internal static readonly object SearchSection = new();
+
+    private static readonly IReadOnlyList<NavigationEntry> Entries =
+    [
+        new("Menu.Home", AppPaths.Home, Exact: true),
+        new("Menu.Albums", AppPaths.Albums),
+        new("Menu.Series", AppPaths.Series),
+        new("Menu.Authors", AppPaths.Authors),
+        new("Menu.PurchaseIntents", AppPaths.PurchaseIntents),
+    ];
+
+    private string CurrentPath => new Uri(Navigation.Uri).AbsolutePath;
+}

@@ -11,3 +11,31 @@ h1:focus {
 #blazor-error-ui {
     display: none;
 }
+
+/* Read by assistive technologies only (e.g. the label of a search field of a header), always or on a smartphone only
+   (e.g. the label of a button reduced to its icon). */
+.visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@media (max-width: 47.99rem) {
+    .visually-hidden-on-smartphone {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+}
+
+/* While the menu of the administration is open, the page stays still: only the panel scrolls (visuel/administration.md
+   § En-tête et menu). */
+html:has(#admin-menu:popover-open) {
+    overflow: hidden;
+}

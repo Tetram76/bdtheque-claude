@@ -1,0 +1,25 @@
+@* The search field of a header, always visible (visuel/charte-graphique.md § Apparence propre à chaque alternative): it only
+   leads to the page of its results, whose content belongs to the chantier that implements it. A plain form sent by GET,
+   which needs no interactivity. *@
+<form class="header-search" role="search" method="get" action="@Action">
+    <label for="@Id" class="visually-hidden">@Label</label>
+    <Icon Name="IconName.Search" />
+    <input id="@Id" type="search" name="q" placeholder="@Placeholder" autocomplete="off" />
+</form>
+
+@code {
+    /// <summary>The page of the results.</summary>
+    [Parameter, EditorRequired]
+    public string Action { get; set; } = null!;
+
+    /// <summary>The identifier of the field, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name of the field, which only assistive technologies read.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Placeholder { get; set; } = null!;
+}

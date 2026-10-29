@@ -1,0 +1,25 @@
+@* A row of entries that never wraps: it scrolls sideways, and a fading edge with a chevron shows on each side that has
+   entries out of view (visuel/charte-graphique.md § Apparence propre à chaque alternative). It scrolls with a finger, the
+   mouse wheel, or a click on a chevron, which moves it by its width; on opening the page, it is centered on its current
+   entry. Without a touch screen, its scrollbar being hidden, nothing else would scroll it: the script of the element
+   (wwwroot/scroll-row.js) does. The chevrons are for the mouse only: the keyboard reaches each entry, which the browser
+   scrolls into view. *@
+<app-scroll-row @attributes="AdditionalAttributes" class="@CssClass">
+    <button type="button" class="scroll-row-chevron" data-direction="start" tabindex="-1" aria-hidden="true"><Icon Name="IconName.ChevronStart" /></button>
+    <div class="scroll-row-items">
+        @ChildContent
+    </div>
+    <button type="button" class="scroll-row-chevron" data-direction="end" tabindex="-1" aria-hidden="true"><Icon Name="IconName.ChevronEnd" /></button>
+</app-scroll-row>
+
+@code {
+    /// <summary>The entries, laid out on one line; the current one carries <c>aria-current="page"</c>.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    // A class given by the caller (e.g. to lay the row out in its header) comes in addition to the one of the row.
+    private string CssClass => AdditionalAttributes?.TryGetValue("class", out var extra) == true ? $"scroll-row {extra}" : "scroll-row";
+}

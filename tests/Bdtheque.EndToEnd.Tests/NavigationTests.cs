@@ -13,7 +13,7 @@ public sealed class NavigationTests(ApplicationHost application)
         var page = await application.NewPageAsync();
         await page.GotoAsync(AppPaths.Home);
 
-        await page.Locator($"header a[href='{AppPaths.Help}']").ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Aide sur cette page" }).ClickAsync();
         await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
         await Assertions.Expect(page.Locator("h1")).ToBeVisibleAsync();
 
@@ -40,6 +40,6 @@ public sealed class NavigationTests(ApplicationHost application)
 
         Assert.Equal(404, response!.Status);
         await Assertions.Expect(page.Locator("main h1")).ToBeVisibleAsync();
-        await Assertions.Expect(page.Locator($"header a[href='{AppPaths.Help}']")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Aide sur cette page" })).ToBeVisibleAsync();
     }
 }

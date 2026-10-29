@@ -1,0 +1,76 @@
+@inject IStringLocalizer<Pagination> L
+@inject DisplayFormatter Format
+
+@* The pagination of a list: its position in the list (« Albums 1 à 50 sur 143 »), its pages, the previous and the next one
+   (visuel/liste-albums.md § Contenu). Links, which need no interactivity; an empty list has none. *@
+@if (TotalCount > 0)
+{
+    <nav class="pagination" aria-label="@L["Label"]">
+        <span class="pagination-position">@L["Position", ItemsLabel, Format.Number(First), Format.Number(Last), Format.Number(TotalCount)]</span>
+        <span class="pagination-controls">
+            @if (Number > 1)
+            {
+                <a class="pagination-step" rel="prev" href="@PageHref(Number - 1)"><Icon Name="IconName.ChevronStart" /><span class="visually-hidden-on-smartphone">@L["Previous"]</span></a>
+            }
+            else
+            {
+                <span class="pagination-step" aria-disabled="true"><Icon Name="IconName.ChevronStart" /><span class="visually-hidden-on-smartphone">@L["Previous"]</span></span>
+            }
+            <ol class="pagination-pages">
+                @foreach (var page in PageWindow.Of(Number, PageCount))
+                {
+                    <li>
+                        @if (page is not { } number)
+                        {
+                            <span class="pagination-gap">…</span>
+                        }
+                        else if (number == Number)
+                        {
+                            <span aria-current="page" aria-label="@L["Page", number]">@Format.Number(number)</span>
+                        }
+                        else
+                        {
+                            <a href="@PageHref(number)" aria-label="@L["Page", number]">@Format.Number(number)</a>
+                        }
+                    </li>
+                }
+            </ol>
+            @if (Number < PageCount)
+            {
+                <a class="pagination-step" rel="next" href="@PageHref(Number + 1)"><span class="visually-hidden-on-smartphone">@L["Next"]</span><Icon Name="IconName.ChevronEnd" /></a>
+            }
+            else
+            {
+                <span class="pagination-step" aria-disabled="true"><span class="visually-hidden-on-smartphone">@L["Next"]</span><Icon Name="IconName.ChevronEnd" /></span>
+            }
+        </span>
+    </nav>
+}
+
+@code {
+    /// <summary>The page shown, from 1, as the API numbers its pages (<c>Page&lt;T&gt;.Number</c>).</summary>
+    [Parameter, EditorRequired]
+    public int Number { get; set; }
+
+    /// <summary>The size of a page.</summary>
+    [Parameter, EditorRequired]
+    public int Size { get; set; }
+
+    /// <summary>The number of items of the whole list.</summary>
+    [Parameter, EditorRequired]
+    public int TotalCount { get; set; }
+
+    /// <summary>What the list holds, as its position names it (e.g. « Albums »).</summary>
+    [Parameter, EditorRequired]
+    public string ItemsLabel { get; set; } = null!;
+
+    /// <summary>The address of a page of the list, which keeps its other criteria.</summary>
+    [Parameter, EditorRequired]
+    public Func<int, string> PageHref { get; set; } = null!;
+
+    private int PageCount => (TotalCount + Size - 1) / Size;
+
+    private int First => (Number - 1) * Size + 1;
+
+    private int Last => Math.Min(Number * Size, TotalCount);
+}

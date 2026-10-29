@@ -1,0 +1,29 @@
+@inject IStringLocalizer<InitialNavigation> L
+
+@* The navigation par initiale of a list: « Toutes », A to Z, # and @ (fonctionnel/presentation.md § Entrées de la navigation
+   par initiale), on a row that scrolls sideways like the menu of the consultation, the current entry marked
+   (visuel/liste-albums.md § Contenu). The list builds the address of each entry, which keeps its other criteria. *@
+<ScrollRow>
+    <nav class="initial-navigation" aria-label="@L["Label"]">
+        @foreach (var entry in AllEntries)
+        {
+            <a href="@EntryHref(entry)" aria-current="@(entry == Current ? "page" : null)">@(entry ?? L["All"])</a>
+        }
+    </nav>
+</ScrollRow>
+
+@code {
+    /// <summary>The entries of the navigation, as the API names them (<c>entry</c> of the lists).</summary>
+    public static readonly IReadOnlyList<string> Entries = [.. "ABCDEFGHIJKLMNOPQRSTUVWXYZ#@".Select(entry => entry.ToString())];
+
+    // « Toutes » first: no entry chosen.
+    private static readonly IReadOnlyList<string?> AllEntries = [null, .. Entries];
+
+    /// <summary>The entry of the list shown, <see langword="null"/> for the whole list.</summary>
+    [Parameter]
+    public string? Current { get; set; }
+
+    /// <summary>The address of the list on an entry, or on the whole list for <see langword="null"/>.</summary>
+    [Parameter, EditorRequired]
+    public Func<string?, string> EntryHref { get; set; } = null!;
+}

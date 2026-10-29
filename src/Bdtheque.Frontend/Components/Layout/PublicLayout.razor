@@ -1,14 +1,6 @@
 @inherits LayoutComponentBase
-@inject IStringLocalizer<LayoutText> L
 
-@* The header and the menu of the consultation come with #257: until then, its links only. *@
-<header class="app-header">
-    <a class="app-logo" href="@AppPaths.Home">@L["AppName"]</a>
-    <nav aria-label="@L["ConsultationMenu"]">
-        <a href="@AppPaths.AdminHome">@L["Administration"]</a>
-    </nav>
-    <a href="@AppPaths.Help">@L["Help"]</a>
-</header>
+<ConsultationHeader />
 
 <main class="app-main">
     @Body

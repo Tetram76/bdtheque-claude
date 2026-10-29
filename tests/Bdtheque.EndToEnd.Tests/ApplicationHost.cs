@@ -64,6 +64,9 @@ public sealed class ApplicationHost : IAsyncLifetime
     /// <summary>A page of a browser context of its own: no cookie nor history shared between tests.</summary>
     public Task<IPage> NewPageAsync() => NewPageAsync(new BrowserNewContextOptions());
 
+    /// <summary>A page of its own, at the size of the given screen (e.g. a smartphone).</summary>
+    public Task<IPage> NewPageAsync(ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions { ViewportSize = viewport });
+
     /// <summary>A page of its own presented in the given theme, at the size of the given screen, for its capture.</summary>
     public Task<IPage> NewCapturePageAsync(string themeKey, ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions
     {

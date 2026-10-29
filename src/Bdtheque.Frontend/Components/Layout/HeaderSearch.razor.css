@@ -1,0 +1,22 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). The magnifier sits
+   in the field, which keeps the look of every control of the base theme. */
+.header-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.header-search ::deep .icon {
+    position: absolute;
+    inset-inline-start: var(--control-padding-inline);
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.header-search input {
+    padding-inline-start: calc(var(--control-padding-inline) + 1.625rem);
+}

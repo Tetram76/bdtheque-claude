@@ -17,6 +17,49 @@ public static class AppPaths
     /// <summary>Login page of the administration (#199).</summary>
     public const string AdminLogin = NotYetImplemented;
 
+    /// <summary>Logout of the administration (#199).</summary>
+    public const string AdminLogout = NotYetImplemented;
+
     /// <summary>Contextual help (a later part of the Phase 3).</summary>
     public const string Help = NotYetImplemented;
+
+    // Consultation (#210 to #212 for the records; the lists and the search, a later part of the Phase 3).
+
+    public const string Search = NotYetImplemented;
+
+    public const string Albums = NotYetImplemented;
+
+    public const string Series = NotYetImplemented;
+
+    public const string Authors = NotYetImplemented;
+
+    public const string PurchaseIntents = NotYetImplemented;
+
+    // Administration (#200 to #209; the settings and the private statistics, a later part of the Phase 3).
+
+    /// <summary>Search of a record to modify, from the header of the administration.</summary>
+    public const string AdminSearch = NotYetImplemented;
+
+    /// <summary>A new edition, which starts with the choice of its album (visuel/administration.md § En-tête et menu).</summary>
+    public const string AdminNewEdition = NotYetImplemented;
+
+    public const string AdminAlbums = NotYetImplemented;
+
+    public const string AdminSeries = NotYetImplemented;
+
+    public const string AdminEditions = NotYetImplemented;
+
+    public const string AdminPurchaseIntents = NotYetImplemented;
+
+    public const string AdminAuthors = NotYetImplemented;
+
+    public const string AdminPublishers = NotYetImplemented;
+
+    public const string AdminGenres = NotYetImplemented;
+
+    public const string AdminUniverses = NotYetImplemented;
+
+    public const string AdminSettings = NotYetImplemented;
+
+    public const string AdminStatistics = NotYetImplemented;
 }

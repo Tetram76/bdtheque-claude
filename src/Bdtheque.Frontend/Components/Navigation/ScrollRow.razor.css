@@ -1,0 +1,58 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.scroll-row {
+    position: relative;
+    display: block;
+    min-inline-size: 0;
+}
+
+.scroll-row-items {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-inline: contain;
+}
+
+.scroll-row-items::-webkit-scrollbar {
+    display: none;
+}
+
+.scroll-row-items ::deep > * {
+    flex: none;
+}
+
+/* A fading edge of the surface around the row (--focus-gap, which each surface names), marked with a chevron; shown only
+   on a side that has entries out of view, which the script tells. */
+.scroll-row-chevron {
+    position: absolute;
+    inset-block: 0;
+    z-index: 1;
+    display: none;
+    align-items: center;
+    inline-size: 2.25rem;
+    padding: 0;
+    border: 0;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.scroll-row-chevron[data-direction="start"] {
+    inset-inline-start: 0;
+    justify-content: flex-start;
+    background: linear-gradient(to left, transparent, var(--focus-gap, var(--color-background)) 55%);
+}
+
+.scroll-row-chevron[data-direction="end"] {
+    inset-inline-end: 0;
+    justify-content: flex-end;
+    background: linear-gradient(to right, transparent, var(--focus-gap, var(--color-background)) 55%);
+}
+
+.scroll-row[data-more-start] .scroll-row-chevron[data-direction="start"],
+.scroll-row[data-more-end] .scroll-row-chevron[data-direction="end"] {
+    display: flex;
+}
+
+.scroll-row-chevron ::deep .icon {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+}
