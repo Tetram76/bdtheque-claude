@@ -212,7 +212,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#192~~ | Données du dashboard dans l'API avant la Phase 4 |
 | ~~#193~~ | Paramétrage de l'application dans le modèle de domaine et l'API |
 | ~~#254~~ | Contrats des thèmes, thème de base neutre et captures de référence des écrans |
-| #255 | Composants de présentation : blocs, boutons, étiquettes, couvertures et mention « Non renseigné » |
+| ~~#255~~ | Composants de présentation : blocs, boutons, étiquettes, couvertures et mention « Non renseigné » |
 | #256 | Contrôles de saisie et composants interactifs : champs, choix d'une fiche, menu « ⋯ », dialogue, barre d'enregistrement |
 | #257 | En-têtes, menus et navigation : consultation, administration, fil d'Ariane, navigation par initiale, pagination |
 | #258 | Tirage du thème de la visite |
