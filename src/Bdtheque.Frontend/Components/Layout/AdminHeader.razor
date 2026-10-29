@@ -1,0 +1,62 @@
+@inject IStringLocalizer<LayoutText> L
+@inject NavigationManager Navigation
+
+@* The header of the administration (visuel/administration.md § En-tête et menu): the logo, the « Administration » tag, the
+   search of a record to modify, the help, the way back to the consultation, then the « Menu » button. On a smartphone, it
+   takes two lines: the logo, the tag, the consultation and the menu, reduced to their icon, then the search and the help.
+   The menu is a popover of the browser, anchored to its button and floating over the page, which it never pushes aside: a
+   click outside it, Escape, its cross or the button close it, without any interactivity nor script
+   (choix-implementation/socle.md § Frontend). While it is open, the page stays still and the panel scrolls on its own. *@
+<header class="app-header admin-header">
+    <a class="app-logo" href="@AppPaths.AdminHome">@L["AppName"]</a>
+    <span class="admin-tag">@L["Administration"]</span>
+    <div class="admin-search">
+        <HeaderSearch Action="@AppPaths.AdminSearch" Id="admin-search" Label="@L["AdminSearch"]" Placeholder="@L["AdminSearchPlaceholder"]" />
+        <HelpLink />
+    </div>
+    <div class="admin-actions">
+        <a class="admin-action" href="@AppPaths.Home"><span class="visually-hidden-on-smartphone">@L["ToConsultation"]</span><Icon Name="IconName.Exit" /></a>
+        <button type="button" class="admin-action admin-menu-toggle" popovertarget="@MenuId"><Icon Name="IconName.Menu" /><span class="visually-hidden-on-smartphone">@L["Menu"]</span></button>
+        <div id="@MenuId" class="admin-menu" popover="auto">
+            <div class="admin-menu-head">
+                <span class="admin-menu-title">@L["Menu"]</span>
+                <button type="button" class="admin-menu-close" popovertarget="@MenuId" popovertargetaction="hide" aria-label="@L["CloseMenu"]"><Icon Name="IconName.Close" /></button>
+            </div>
+            <nav aria-label="@L["AdminPlan"]">
+                @foreach (var group in Groups)
+                {
+                    <div class="admin-menu-group">
+                        <p class="admin-menu-group-title" id="admin-menu-@group.Name">@L[$"Group.{group.Name}"]</p>
+                        <ul aria-labelledby="admin-menu-@group.Name">
+                            @foreach (var entry in group.Entries)
+                            {
+                                <li><a href="@entry.Path" aria-current="@(entry.IsCurrent(CurrentPath) ? "page" : null)">@L[entry.Name]</a></li>
+                            }
+                        </ul>
+                    </div>
+                }
+                <hr />
+                <a class="admin-menu-logout" href="@AppPaths.AdminLogout"><Icon Name="IconName.Logout" />@L["Logout"]</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+@code {
+    /// <summary>The identifier of the menu, which the page uses to stay still while it is open (app.css).</summary>
+    public const string MenuId = "admin-menu";
+
+    // The plan of the administration, by groups (visuel/administration.md § En-tête et menu). « Nouvelle édition » gives a
+    // direct access to the main action of the administration.
+    private static readonly IReadOnlyList<(string Name, IReadOnlyList<NavigationEntry> Entries)> Groups =
+    [
+        ("Home", [new("Admin.Dashboard", AppPaths.AdminHome, Exact: true), new("Admin.NewEdition", AppPaths.AdminNewEdition)]),
+        ("Collection", [new("Admin.Albums", AppPaths.AdminAlbums), new("Admin.Series", AppPaths.AdminSeries),
+            new("Admin.Editions", AppPaths.AdminEditions), new("Admin.PurchaseIntents", AppPaths.AdminPurchaseIntents)]),
+        ("AuthorsAndPublishers", [new("Admin.Authors", AppPaths.AdminAuthors), new("Admin.Publishers", AppPaths.AdminPublishers)]),
+        ("Referentials", [new("Admin.Genres", AppPaths.AdminGenres), new("Admin.Universes", AppPaths.AdminUniverses)]),
+        ("Settings", [new("Admin.Settings", AppPaths.AdminSettings), new("Admin.Statistics", AppPaths.AdminStatistics)]),
+    ];
+
+    private string CurrentPath => new Uri(Navigation.Uri).AbsolutePath;
+}

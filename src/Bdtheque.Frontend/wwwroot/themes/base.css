@@ -272,21 +272,22 @@ input[type="radio"] {
     cursor: not-allowed;
 }
 
-/* Frame shared by the layouts of the consultation and of the administration, until their headers and menus (#257). */
+/* The header of the consultation and of the administration: it stays at the top of the screen when the page scrolls
+   (visuel/charte-graphique.md § Apparence propre à chaque alternative), on an opaque surface. */
 
 .app-header {
     --focus-gap: var(--color-surface);
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 10;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-s) var(--space-l);
-    padding: var(--space-s) var(--page-gutter);
+    /* Its content aligned on the one of the page (.app-main), on a screen wider than the page. */
+    padding: var(--space-s) max(var(--page-gutter), calc((100% - var(--page-max-width)) / 2 + var(--page-gutter)));
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-rule);
-}
-
-.app-header nav {
-    flex: 1;
 }
 
 .app-main {

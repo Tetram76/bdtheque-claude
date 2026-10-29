@@ -1,0 +1,59 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.consultation-header ::deep .consultation-menu {
+    flex: 999 1 10rem;
+}
+
+.consultation-header ul {
+    display: flex;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+}
+
+.consultation-header nav a {
+    display: inline-flex;
+    align-items: center;
+    block-size: var(--control-height);
+    padding: 0 var(--space-m);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+}
+
+.consultation-header nav a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+}
+
+.consultation-header nav a[aria-current="page"] {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.header-tools {
+    display: flex;
+    flex: 1 1 24rem;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-s);
+    max-inline-size: 24rem;
+    margin-inline-start: auto;
+}
+
+/* On a small screen, the search goes under the menu, on the whole width; without search, the help stays on the line of
+   the menu. */
+@media (max-width: 47.99rem) {
+    .header-tools:has(form) {
+        order: 1;
+        flex-basis: 100%;
+        max-inline-size: none;
+    }
+
+    .header-tools:not(:has(form)) {
+        flex: none;
+    }
+}

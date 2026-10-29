@@ -1,0 +1,5 @@
+@inject IStringLocalizer<LayoutText> L
+
+@* The help button of a header, always visible: it leads to the help of the page (fonctionnel/index.md § Structure de
+   l'application, aide contextuelle), whose content belongs to the chantier that implements it. *@
+<a class="header-help" href="@AppPaths.Help" aria-label="@L["HelpOnThisPage"]">?</a>

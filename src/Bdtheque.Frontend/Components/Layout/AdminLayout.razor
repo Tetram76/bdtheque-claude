@@ -1,14 +1,6 @@
 @inherits LayoutComponentBase
-@inject IStringLocalizer<LayoutText> L
 
-@* The header and the floating menu of the administration come with #257: until then, its links only. *@
-<header class="app-header">
-    <a class="app-logo" href="@AppPaths.AdminHome">@L["AdminTitle"]</a>
-    <nav aria-label="@L["AdminMenu"]">
-        <a href="@AppPaths.Home">@L["Consultation"]</a>
-    </nav>
-    <a href="@AppPaths.Help">@L["Help"]</a>
-</header>
+<AdminHeader />
 
 <main class="app-main">
     @Body

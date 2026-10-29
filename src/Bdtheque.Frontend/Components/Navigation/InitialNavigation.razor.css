@@ -1,0 +1,34 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.initial-navigation {
+    display: flex;
+    gap: 0.125rem;
+    padding-block: 0.125rem;
+}
+
+.initial-navigation a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 2rem;
+    block-size: 2rem;
+    padding: 0 var(--space-xs);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    font-size: var(--font-size-small);
+    text-decoration: none;
+}
+
+.initial-navigation a:first-child {
+    padding-inline: var(--space-s);
+}
+
+.initial-navigation a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+}
+
+.initial-navigation a[aria-current="page"] {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}

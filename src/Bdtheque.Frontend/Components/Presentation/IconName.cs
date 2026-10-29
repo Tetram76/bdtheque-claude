@@ -11,4 +11,9 @@ public enum IconName
     Alert,
     Blocked,
     Search,
+    ChevronStart,
+    ChevronEnd,
+    Menu,
+    Exit,
+    Logout,
 }

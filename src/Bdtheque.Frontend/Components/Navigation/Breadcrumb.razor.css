@@ -1,0 +1,30 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.breadcrumb {
+    margin-block-end: var(--space-m);
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs) 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* The separator is drawn, not said: its alternative text is empty. */
+.breadcrumb li + li::before {
+    content: "›" / "";
+    margin-inline: var(--space-s);
+}
+
+.breadcrumb a {
+    font-weight: var(--font-weight-strong);
+}
+
+.breadcrumb [aria-current="page"] {
+    color: var(--color-text-secondary);
+}

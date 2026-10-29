@@ -1,0 +1,202 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.admin-tag {
+    padding: 0.125rem var(--space-s);
+    border-radius: var(--radius-control);
+    background: var(--color-tag);
+    color: var(--color-text-on-tag);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.admin-search {
+    display: flex;
+    flex: 1 1 16rem;
+    align-items: center;
+    gap: var(--space-s);
+    max-inline-size: 25rem;
+    min-inline-size: 0;
+    margin-inline-start: auto;
+}
+
+.admin-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+}
+
+.admin-action {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-s);
+    block-size: var(--control-height);
+    padding: 0 var(--space-s);
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-menu-toggle {
+    padding: 0 var(--control-padding-inline);
+    border: 1px solid var(--color-control-border);
+    background: var(--color-surface);
+    anchor-name: --admin-menu-toggle;
+}
+
+.admin-action:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+}
+
+.admin-action ::deep .icon {
+    flex: none;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+/* A floating panel under the button, right-aligned with it, over the page; always opaque, bordered and shadowed, whatever
+   the blocks of the theme (visuel/administration.md § En-tête et menu). It scrolls on its own within the screen. */
+.admin-menu {
+    --focus-gap: var(--color-surface-raised);
+    position-anchor: --admin-menu-toggle;
+    position-area: block-end span-inline-start;
+    inset: auto;
+    margin: var(--space-s) 0 0;
+    inline-size: min(21rem, calc(100vw - 2 * var(--page-gutter)));
+    max-block-size: calc(100dvh - 5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-m);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-block);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    box-shadow: var(--shadow-raised);
+}
+
+.admin-menu:popover-open {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.admin-menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block-end: var(--space-s);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.admin-menu-title {
+    padding-inline-start: var(--space-s);
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    font-size: var(--font-size-large);
+}
+
+.admin-menu-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
+    padding: 0;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.admin-menu-close ::deep .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+.admin-menu nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.admin-menu-group-title {
+    margin: 0;
+    padding: 0 var(--space-s);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.admin-menu ul {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-menu nav a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    min-block-size: var(--control-height);
+    padding: 0 var(--space-s);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+}
+
+.admin-menu nav a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+}
+
+.admin-menu nav a[aria-current="page"] {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.admin-menu hr {
+    inline-size: 100%;
+    margin: 0;
+    border: 0;
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.admin-menu-logout ::deep .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+/* On a smartphone, two lines: the logo, the tag, the consultation and the menu, reduced to their icon, then the search and
+   the help on the whole width. */
+@media (max-width: 47.99rem) {
+    .admin-actions {
+        margin-inline-start: auto;
+    }
+
+    .admin-search {
+        order: 1;
+        flex-basis: 100%;
+        max-inline-size: none;
+        margin-inline-start: 0;
+    }
+
+    .admin-menu-toggle {
+        inline-size: var(--control-height);
+        padding: 0;
+    }
+}

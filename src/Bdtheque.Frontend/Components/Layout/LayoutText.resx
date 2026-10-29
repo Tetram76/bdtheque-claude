@@ -15,23 +15,107 @@
   <data name="AppName" xml:space="preserve">
     <value>bdtheque-claude</value>
   </data>
-  <data name="AdminTitle" xml:space="preserve">
-    <value>bdtheque-claude — Administration</value>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
   </data>
   <data name="ConsultationMenu" xml:space="preserve">
     <value>Menu de la consultation</value>
   </data>
-  <data name="AdminMenu" xml:space="preserve">
-    <value>Menu de l&apos;administration</value>
+  <data name="Menu.Home" xml:space="preserve">
+    <value>Accueil</value>
   </data>
-  <data name="Administration" xml:space="preserve">
-    <value>Administration</value>
+  <data name="Menu.Albums" xml:space="preserve">
+    <value>Albums</value>
   </data>
-  <data name="Consultation" xml:space="preserve">
-    <value>Consultation</value>
+  <data name="Menu.Series" xml:space="preserve">
+    <value>Séries</value>
   </data>
-  <data name="Help" xml:space="preserve">
-    <value>Aide</value>
+  <data name="Menu.Authors" xml:space="preserve">
+    <value>Auteurs</value>
+  </data>
+  <data name="Menu.PurchaseIntents" xml:space="preserve">
+    <value>Intentions d&apos;achat</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Rechercher</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Un album, une série, un auteur…</value>
+  </data>
+  <data name="HelpOnThisPage" xml:space="preserve">
+    <value>Aide sur cette page</value>
+  </data>
+  <data name="AdminSearch" xml:space="preserve">
+    <value>Retrouver une fiche</value>
+  </data>
+  <data name="AdminSearchPlaceholder" xml:space="preserve">
+    <value>Retrouver une fiche à modifier…</value>
+  </data>
+  <data name="ToConsultation" xml:space="preserve">
+    <value>Aller à la consultation</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="CloseMenu" xml:space="preserve">
+    <value>Fermer le menu</value>
+  </data>
+  <data name="AdminPlan" xml:space="preserve">
+    <value>Plan de l&apos;administration</value>
+  </data>
+  <data name="Group.Home" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
+  <data name="Group.Collection" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Group.AuthorsAndPublishers" xml:space="preserve">
+    <value>Auteurs et éditeurs</value>
+  </data>
+  <data name="Group.Referentials" xml:space="preserve">
+    <value>Référentiels</value>
+  </data>
+  <data name="Group.Settings" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="Admin.Dashboard" xml:space="preserve">
+    <value>Tableau de bord</value>
+  </data>
+  <data name="Admin.NewEdition" xml:space="preserve">
+    <value>Nouvelle édition</value>
+  </data>
+  <data name="Admin.Albums" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="Admin.Series" xml:space="preserve">
+    <value>Séries</value>
+  </data>
+  <data name="Admin.Editions" xml:space="preserve">
+    <value>Éditions</value>
+  </data>
+  <data name="Admin.PurchaseIntents" xml:space="preserve">
+    <value>Intentions d&apos;achat</value>
+  </data>
+  <data name="Admin.Authors" xml:space="preserve">
+    <value>Auteurs</value>
+  </data>
+  <data name="Admin.Publishers" xml:space="preserve">
+    <value>Éditeurs</value>
+  </data>
+  <data name="Admin.Genres" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="Admin.Universes" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Admin.Settings" xml:space="preserve">
+    <value>Paramétrage</value>
+  </data>
+  <data name="Admin.Statistics" xml:space="preserve">
+    <value>Statistiques privées</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Se déconnecter</value>
   </data>
   <data name="UnhandledError" xml:space="preserve">
     <value>Une erreur inattendue s&apos;est produite.</value>

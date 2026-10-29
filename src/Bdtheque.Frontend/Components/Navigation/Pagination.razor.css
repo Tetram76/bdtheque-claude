@@ -1,0 +1,69 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-l);
+    font-size: var(--font-size-small);
+}
+
+.pagination-position {
+    color: var(--color-text-muted);
+}
+
+.pagination-controls,
+.pagination-pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.pagination-pages {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pagination-controls a,
+.pagination-controls span:is([aria-current], [aria-disabled]) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    min-inline-size: 2rem;
+    block-size: 2rem;
+    padding: 0 var(--space-s);
+    border-radius: var(--radius-control);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+}
+
+.pagination-controls a {
+    color: var(--color-text);
+}
+
+.pagination-controls a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+}
+
+.pagination-controls [aria-current="page"] {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.pagination-controls [aria-disabled="true"] {
+    color: var(--color-text-muted);
+}
+
+.pagination-gap {
+    color: var(--color-text-muted);
+}
+
+.pagination-step ::deep .icon {
+    inline-size: 1em;
+    block-size: 1em;
+}
+
