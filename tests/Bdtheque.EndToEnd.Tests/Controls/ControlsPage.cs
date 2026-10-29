@@ -20,6 +20,8 @@ public sealed class ControlsPage : ComponentBase
 {
     public const string Path = "/test/controls";
 
+    private static readonly string[] Months = ["—", "janvier", "février", "mars"];
+
     /// <summary>Opens the dialog of a deletion, the way a list opens it for the record to delete.</summary>
     [SupplyParameterFromQuery(Name = "dialog")]
     public bool ShowsDialog { get; set; }
@@ -119,7 +121,7 @@ public sealed class ControlsPage : ComponentBase
             {
                 select.OpenElement(0, "select");
                 select.AddAttribute(1, "id", context.Id);
-                foreach (var (month, index) in new[] { "—", "janvier", "février", "mars" }.Select((month, index) => (month, index)))
+                foreach (var (month, index) in Months.Select((month, index) => (month, index)))
                 {
                     select.OpenElement(2, "option");
                     select.SetKey(index);
