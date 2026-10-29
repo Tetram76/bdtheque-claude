@@ -20,6 +20,9 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.13" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.18.0" />
 
+    <!-- Frontend: streamed relay of the media of the visuals (MIT, Microsoft) -->
+    <PackageVersion Include="Yarp.ReverseProxy" Version="2.3.0" />
+
     <!-- Image processing of the visuals (MIT); native Linux assets without system dependency -->
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />

@@ -1,0 +1,46 @@
+@* A block of content and its title. Its classes are anchors of the base theme (themes/base.css), on which a theme hooks its
+   own touches: the bubble of the title, the mention above it (visuel/administration.md § Déclinaison par thème). *@
+<section class="@(Raised ? "block block-raised" : "block")" @attributes="AdditionalAttributes">
+    <header>
+        @if (Kicker is not null)
+        {
+            <p class="block-kicker">@Kicker</p>
+        }
+        @switch (HeadingLevel)
+        {
+            case 1:
+                <h1 class="block-title">@Title</h1>
+                break;
+            case 3:
+                <h3 class="block-title">@Title</h3>
+                break;
+            default:
+                <h2 class="block-title">@Title</h2>
+                break;
+        }
+    </header>
+    @ChildContent
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = null!;
+
+    /// <summary>The short mention above the title, which only some themes show (<c>--block-kicker-display</c>).</summary>
+    [Parameter]
+    public string? Kicker { get; set; }
+
+    /// <summary>Level of the title in the outline of the page: 2 by default, 1 for the block that holds the page title.</summary>
+    [Parameter]
+    public int HeadingLevel { get; set; } = 2;
+
+    /// <summary>Set in relief, for the block a page puts forward (e.g. the entry from an ISBN of the administration).</summary>
+    [Parameter]
+    public bool Raised { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

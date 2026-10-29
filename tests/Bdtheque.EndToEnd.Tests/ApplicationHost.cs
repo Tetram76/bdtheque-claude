@@ -34,6 +34,9 @@ public sealed class ApplicationHost : IAsyncLifetime
     /// <summary>Services of <c>frontend</c>, as the application configures them.</summary>
     public IServiceProvider FrontendServices => _frontend!.Services;
 
+    /// <summary>A client of <c>api</c> itself, as <c>frontend</c> calls it: for a test to write its own data.</summary>
+    public HttpClient CreateApiClient() => _api.CreateApiClient();
+
     public async Task InitializeAsync()
     {
         await _api.InitializeAsync();

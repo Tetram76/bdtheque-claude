@@ -1,0 +1,61 @@
+@* A button, or a link that looks like one when it leads to another page. Every button has the size of the controls
+   (--control-height), the same on every page for a given width of screen (visuel/charte-graphique.md § Convivialité et
+   efficacité). Reduced to its icon on a smartphone, it keeps its label for assistive technologies. *@
+@if (Href is not null)
+{
+    <a class="button" href="@Href" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnly" @attributes="AdditionalAttributes">
+        @Content
+    </a>
+}
+else
+{
+    <button class="button" type="@Type" disabled="@Disabled" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnly"
+            @onclick="OnClick" @attributes="AdditionalAttributes">
+        @Content
+    </button>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter]
+    public ButtonVariant Variant { get; set; }
+
+    [Parameter]
+    public IconName? Icon { get; set; }
+
+    /// <summary>Shows only the icon on a smartphone (e.g. Nouvel album, Modifier in a row of a list).</summary>
+    [Parameter]
+    public bool IconOnlyOnSmartphone { get; set; }
+
+    /// <summary>The page it leads to: a link rather than a button.</summary>
+    [Parameter]
+    public string? Href { get; set; }
+
+    /// <summary>The type of a button: <c>button</c>, or <c>submit</c> in a form.</summary>
+    [Parameter]
+    public string Type { get; set; } = "button";
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string VariantName => Variant.ToString().ToLowerInvariant();
+
+    // Rendered as a bare attribute when set, absent otherwise.
+    private bool? IconOnly => IconOnlyOnSmartphone && Icon is not null ? true : null;
+
+    private RenderFragment Content => @<text>
+        @if (Icon is { } icon)
+        {
+            <Icon Name="icon" />
+        }
+        <span class="button-label">@Label</span>
+    </text>;
+}

@@ -66,6 +66,9 @@
     --color-text-on-delete: #FFFFFF;
     --color-failure: #4A4A57;
     --color-text-on-failure: #FFFFFF;
+    /* A filled tag (e.g. « Dans la collection », an active filter): its own fill, which a theme sets apart from the accent. */
+    --color-tag: #E3E1DA;
+    --color-text-on-tag: #1D1D21;
     /* Secondary palette, to vary colors without hierarchy (genres, publishers, tags); one text color on all of them. */
     --color-palette-1: #BFD7F2;
     --color-palette-2: #F4C7B8;
@@ -94,6 +97,7 @@
     --radius-block: 0.5rem;
     --radius-control: 0.375rem;
     --radius-pill: 999px;
+    --radius-cover: 0.125rem;
     --border-block: 1px solid var(--color-rule);
     --shadow-block: none;
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
@@ -234,6 +238,11 @@ a:hover {
     padding: var(--space-l);
 }
 
+.block-raised {
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-raised);
+}
+
 .block-kicker {
     display: var(--block-kicker-display);
     margin: 0 0 var(--space-xs);
@@ -247,4 +256,11 @@ a:hover {
 .block-title {
     display: block;
     rotate: var(--tilt-block-title);
+}
+
+/* A cover, thumbnail or generic visual: the frame a theme gives it. Straight, as the content of a list stays; the tilt of
+   the covers is only for those a page puts forward (e.g. the edition of the day of the dashboard). */
+.cover {
+    border-radius: var(--radius-cover);
+    overflow: hidden;
 }

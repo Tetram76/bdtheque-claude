@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Bdtheque.Contracts\Bdtheque.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Yarp.ReverseProxy" />
+  </ItemGroup>
+
 </Project>
