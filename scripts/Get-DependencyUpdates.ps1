@@ -5,8 +5,8 @@
     vulnerabilities of its NuGet packages and the result of the daily security audit.
 
 .DESCRIPTION
-    Version watch of gestion-projet/depot.md § Mises à jour des dépendances, run by the agent at each
-    resumption of work. It only reads official sources and changes nothing: the upgrade itself, with
+    Version watch of gestion-projet/depot.md § Mises à jour des dépendances, run by the agent when work
+    resumes, at most once per run of the daily security audit. It only reads official sources and changes nothing: the upgrade itself, with
     its review, is the agent's work.
 
     Covered: NuGet packages (Directory.Packages.props) and local .NET tools, .NET SDK and runtime
