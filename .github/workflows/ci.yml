@@ -55,7 +55,7 @@ jobs:
           dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
 
       # The end-to-end tests drive the application in Chromium, with the system libraries it needs on
-      # the runner (choix-implementation/socle.md § Outillage de développement .NET).
+      # the runner (choix-implementation/outillage.md § Outillage de développement .NET).
       - name: Install the browser of the end-to-end tests
         run: pwsh tests/Bdtheque.EndToEnd.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 

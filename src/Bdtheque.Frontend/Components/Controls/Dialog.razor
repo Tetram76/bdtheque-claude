@@ -1,0 +1,74 @@
+@inject IStringLocalizer<Dialog> L
+
+@* A modal dialog: a confirmation, a refusal or a choice (visuel/liste-albums.md § Contenu). Rendered when the page asks for
+   it (e.g. a page opened with the record to delete), it is opened as a modal by the element that wraps it
+   (wwwroot/modal-dialog.js), which the browser then keeps above an inert page, focus included. Closing leads to the page
+   without it: a link, which Escape follows too. The closing comes first, the safe choice that the opening focuses. *@
+<app-modal-dialog>
+    <dialog class="dialog" role="@Role" data-tone="@ToneName" aria-labelledby="@TitleId" aria-describedby="@BodyId">
+        <header class="dialog-header">
+            <span class="dialog-icon"><Icon Name="ToneIcon" /></span>
+            <div>
+                <h2 id="@TitleId" class="dialog-title">@Title</h2>
+                @if (Subject is not null)
+                {
+                    <p class="dialog-subject">@Subject</p>
+                }
+            </div>
+        </header>
+        <div id="@BodyId" class="dialog-body">
+            @ChildContent
+        </div>
+        <div class="dialog-actions">
+            <Button Label="@(CloseLabel ?? L["Cancel"])" Href="@CloseHref" data-dialog-close="@true" />
+            @Actions
+        </div>
+    </dialog>
+</app-modal-dialog>
+
+@code {
+    /// <summary>The identifier of the dialog, unique in the page, from which those of its title and body derive.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = null!;
+
+    /// <summary>What the dialog is about (e.g. the label of the album to delete).</summary>
+    [Parameter]
+    public string? Subject { get; set; }
+
+    [Parameter]
+    public DialogTone Tone { get; set; }
+
+    /// <summary>The page without the dialog, that closing leads to.</summary>
+    [Parameter, EditorRequired]
+    public string CloseHref { get; set; } = null!;
+
+    /// <summary>The label of the closing: « Annuler » by default, « Fermer » for a refusal.</summary>
+    [Parameter]
+    public string? CloseLabel { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>The actions after the closing (e.g. the form of the confirmation).</summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+
+    private string TitleId => $"{Id}-title";
+
+    private string BodyId => $"{Id}-body";
+
+    private string ToneName => Tone.ToString().ToLowerInvariant();
+
+    // A confirmation or a refusal interrupts to warn; a choice does not.
+    private string Role => Tone == DialogTone.Choice ? "dialog" : "alertdialog";
+
+    private IconName ToneIcon => Tone switch
+    {
+        DialogTone.Deletion => IconName.Delete,
+        DialogTone.Refusal => IconName.Blocked,
+        _ => IconName.Search,
+    };
+}

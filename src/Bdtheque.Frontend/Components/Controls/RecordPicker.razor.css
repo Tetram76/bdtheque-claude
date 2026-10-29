@@ -1,0 +1,88 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre); the text field is
+   the base theme's. */
+.record-picker {
+    position: relative;
+}
+
+.record-picker input[type="text"] {
+    padding-inline-end: calc(var(--control-height) + var(--space-xs));
+}
+
+.record-picker-clear,
+.record-picker-search {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-height);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text-muted);
+}
+
+.record-picker-clear {
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.record-picker-search {
+    pointer-events: none;
+}
+
+.record-picker ::deep .icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.record-picker-list {
+    --focus-gap: var(--color-surface-raised);
+    position: absolute;
+    inset-block-start: calc(100% + var(--space-xs));
+    inset-inline: 0;
+    z-index: 20;
+    max-block-size: 18rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: var(--space-xs);
+    list-style: none;
+    border: var(--border-block);
+    border-radius: var(--radius-block);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    box-shadow: var(--shadow-raised);
+}
+
+.record-picker-option,
+.record-picker-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-s);
+    min-block-size: var(--control-height);
+    padding: var(--space-s);
+    border-radius: var(--radius-control);
+}
+
+.record-picker-option {
+    cursor: pointer;
+}
+
+.record-picker-option:hover,
+.record-picker-option[aria-selected="true"] {
+    background: var(--color-tag);
+    color: var(--color-text-on-tag);
+}
+
+.record-picker-detail,
+.record-picker-status {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.record-picker-option:is(:hover, [aria-selected="true"]) .record-picker-detail {
+    color: inherit;
+}

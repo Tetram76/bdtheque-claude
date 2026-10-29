@@ -7,4 +7,8 @@ public enum IconName
     Edit,
     Delete,
     Close,
+    More,
+    Alert,
+    Blocked,
+    Search,
 }

@@ -1,0 +1,16 @@
+@* A box to check, or a radio button, and its label, which a click or a touch anywhere on it checks: a data with two values is
+   entered by a box to check, never by a selector of buttons (visuel/saisie-album.md § Contenu). The input is the caller's
+   (a native input, an InputCheckbox bound to a form…), styled by the base theme. *@
+<label class="choice">
+    @ChildContent
+    <span>@Label</span>
+</label>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>The box to check or the radio button.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

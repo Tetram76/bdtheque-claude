@@ -54,6 +54,8 @@
     /* Decorative rules and separators, which need no contrast; the border of a control does (3:1). */
     --color-rule: #DEDCD6;
     --color-control-border: #85858C;
+    /* The inside of a field, a list or a box to check, on which its text and its placeholder are read. */
+    --color-control-background: #FFFFFF;
     /* The accent fills the active entry and the highlights; read as text, it takes its own color. */
     --color-accent: #2D5DA1;
     --color-text-on-accent: #FFFFFF;
@@ -189,16 +191,91 @@ a:hover {
 }
 
 /* The keyboard focus: an outline of the color of the text, set apart from the element by a band of the surface around
-   it, so that it stands out against the element, colored or not, and against the surface (liste-albums.md § Contrôles). */
+   it, so that it stands out against the element, colored or not, and against the surface (liste-albums.md § Contrôles).
+   Each surface names itself the band of what it holds (--focus-gap): the page by default, a block, a menu, a dialog. */
 :focus-visible {
     outline: 2px solid var(--color-text);
     outline-offset: 2px;
-    box-shadow: 0 0 0 2px var(--color-surface);
+    box-shadow: 0 0 0 2px var(--focus-gap, var(--color-background));
+}
+
+/* Controls: fields, lists and boxes to check, the same on every page, inside a Field or not. Their height is the one of
+   the buttons; their border keeps its contrast with the surface (--color-control-border), unlike a decorative rule. */
+
+input:not([type="checkbox"], [type="radio"], [type="hidden"]),
+select,
+textarea {
+    inline-size: 100%;
+    min-inline-size: 0;
+    padding: 0 var(--control-padding-inline);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    background-color: var(--color-control-background);
+    color: var(--color-text);
+    font: inherit;
+}
+
+input:not([type="checkbox"], [type="radio"], [type="hidden"]),
+select {
+    block-size: var(--control-height);
+}
+
+textarea {
+    min-block-size: 6rem;
+    padding-block: var(--space-s);
+    resize: vertical;
+}
+
+/* The placeholder keeps the contrast of the muted text, never faded by an opacity (liste-albums.md § Contrôles). */
+::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+}
+
+/* A list draws its own arrow, in the color of its text: the arrow of the system differs from one device to another. */
+select {
+    appearance: none;
+    padding-inline-end: calc(var(--control-padding-inline) + 1.25rem);
+    background-image:
+        linear-gradient(45deg, transparent 50%, currentColor 50%),
+        linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position:
+        right calc(var(--control-padding-inline) + 0.3125rem) center,
+        right var(--control-padding-inline) center;
+    background-size: 0.3125rem 0.3125rem;
+    background-repeat: no-repeat;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    flex: none;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    margin: 0;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+}
+
+/* A control in error is bordered with the alert color, its message under it (visuel/saisie-album.md § Contenu). More
+   specific than the rule of the controls above, which its :not() makes as specific as a class and an element. */
+:is(input, select, textarea)[aria-invalid="true"] {
+    border-color: var(--color-alert);
+    box-shadow: inset 0 0 0 1px var(--color-alert);
+}
+
+:is(input, select, textarea)[aria-invalid="true"]:focus-visible {
+    box-shadow: inset 0 0 0 1px var(--color-alert), 0 0 0 2px var(--focus-gap, var(--color-background));
+}
+
+:is(input, select, textarea):disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Frame shared by the layouts of the consultation and of the administration, until their headers and menus (#257). */
 
 .app-header {
+    --focus-gap: var(--color-surface);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -231,6 +308,7 @@ a:hover {
 }
 
 .block {
+    --focus-gap: var(--color-surface);
     background: var(--color-surface);
     border: var(--border-block);
     border-radius: var(--radius-block);
@@ -239,6 +317,7 @@ a:hover {
 }
 
 .block-raised {
+    --focus-gap: var(--color-surface-raised);
     background: var(--color-surface-raised);
     box-shadow: var(--shadow-raised);
 }

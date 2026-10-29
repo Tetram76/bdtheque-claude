@@ -1,0 +1,28 @@
+@* The « ⋯ » button of a row and the menu of its other actions (visuel/liste-albums.md § Contenu, actions d'une ligne). The
+   menu is a popover of the browser: a click outside it, or Escape, closes it, and it opens above the page, anchored to its
+   button, without any interactivity nor script (choix-implementation/socle.md § Frontend). Its items are links, or
+   buttons that close it. *@
+<span class="actions-menu" style="anchor-name: @AnchorName">
+    <button type="button" class="actions-menu-toggle" popovertarget="@Id" aria-label="@Label"><Icon Name="IconName.More" /></button>
+    <div id="@Id" class="actions-menu-panel" popover="auto" style="position-anchor: @AnchorName">
+        <CascadingValue Value="this" IsFixed="true">
+            @ChildContent
+        </CascadingValue>
+    </div>
+</span>
+
+@code {
+    /// <summary>The identifier of the menu, unique in the page; made of letters, digits and hyphens, it also names its anchor.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name of the button (e.g. « Autres actions sur Le Lotus bleu »), which shows only its icon.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>The <see cref="MenuItem"/> and <see cref="MenuSeparator"/> of the menu.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string AnchorName => $"--actions-menu-{Id}";
+}

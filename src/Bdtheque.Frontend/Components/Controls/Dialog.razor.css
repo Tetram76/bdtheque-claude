@@ -1,0 +1,85 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+.dialog {
+    --tone-color: var(--color-accent);
+    --tone-text-color: var(--color-text-on-accent);
+    --focus-gap: var(--color-surface-raised);
+    inline-size: min(30rem, calc(100vw - 2 * var(--page-gutter)));
+    max-block-size: calc(100dvh - 2 * var(--page-gutter));
+    padding: var(--space-l) var(--space-xl);
+    border: var(--border-block);
+    border-radius: var(--radius-block);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    box-shadow: var(--shadow-raised);
+}
+
+.dialog[open] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+.dialog::backdrop {
+    background: rgb(0 0 0 / 0.45);
+}
+
+.dialog[data-tone="deletion"] {
+    --tone-color: var(--color-delete);
+    --tone-text-color: var(--color-text-on-delete);
+}
+
+.dialog[data-tone="refusal"] {
+    --tone-color: var(--color-alert);
+    --tone-text-color: var(--color-text-on-alert);
+}
+
+.dialog-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-m);
+}
+
+.dialog-icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: var(--radius-pill);
+    background: var(--tone-color);
+    color: var(--tone-text-color);
+}
+
+.dialog-icon ::deep .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+.dialog-title {
+    margin: 0;
+    font-size: var(--font-size-title);
+}
+
+.dialog-subject {
+    margin: var(--space-xs) 0 0;
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.dialog-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.dialog-body ::deep p {
+    margin: 0;
+}
+
+.dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-s);
+}

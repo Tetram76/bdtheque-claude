@@ -1,0 +1,51 @@
+/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). The look of the
+   control itself is the base theme's (themes/base.css), the same inside a field or not. */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
+.field-label {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.field-note {
+    margin-inline-start: 0.35em;
+    font-weight: normal;
+    color: var(--color-text-muted);
+}
+
+/* Its characters, its inner margins and its border: never wider than the field. */
+.field[style] ::deep :is(input, select) {
+    inline-size: calc(var(--field-characters) * 1ch + 2 * var(--control-padding-inline) + 2px);
+    max-inline-size: 100%;
+}
+
+.field-error,
+.field-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+}
+
+.field-help {
+    color: var(--color-text-muted);
+}
+
+/* In the color of the text: the border of the control, in the alert color, and the icon point to the error. */
+.field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    font-weight: var(--font-weight-strong);
+}
+
+.field-error ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    margin-block-start: 0.2em;
+    color: var(--color-alert);
+}
