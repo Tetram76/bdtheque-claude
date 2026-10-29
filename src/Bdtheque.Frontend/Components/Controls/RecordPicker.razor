@@ -54,6 +54,7 @@
     private SearchStatus _status = SearchStatus.Done;
     private IReadOnlyList<RecordOption> _options = [];
     private int _active = -1;
+    private string? _revealedOptionId;
 
     /// <summary>The identifier of the text field, unique in the page, which a <see cref="Field"/> labels.</summary>
     [Parameter, EditorRequired]
@@ -104,11 +105,16 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
-            return;
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["record-picker.js"]}");
+            await _module.InvokeVoidAsync("keepKeysForTheList", _input);
+        }
 
-        _module = await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["record-picker.js"]}");
-        await _module.InvokeVoidAsync("keepKeysForTheList", _input);
+        // The focus stays on the text field: the list does not scroll by itself to the active suggestion.
+        if (_module is not null && ActiveOptionId is { } active && active != _revealedOptionId)
+            await _module.InvokeVoidAsync("reveal", active);
+        _revealedOptionId = ActiveOptionId;
     }
 
     private async Task SearchAsync()

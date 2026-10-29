@@ -108,6 +108,30 @@ public sealed partial class ControlsTests(ApplicationHost application)
     }
 
     [Fact]
+    public async Task RecordPicker_KeepsTheActiveSuggestionInView_WhenTheListOverflows()
+    {
+        var token = $"Gaston{Guid.NewGuid():N}"[..12];
+        for (var index = 0; index < 10; index++)
+            await CreateGenreAsync($"{token} {index}");
+        var page = await OpenAsync();
+        var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
+
+        // At once rather than letter by letter: a single search, whose answer no later one replaces.
+        await TypeUntilSuggestedAsync(page, input, token, atOnce: true);
+        // The ten records of the text, in their order.
+        await Assertions.Expect(Suggestions(page)).ToHaveTextAsync([.. Enumerable.Range(0, 10).Select(index => $"{token} {index}")]);
+        for (var index = 0; index < 10; index++)
+            await input.PressAsync("ArrowDown");
+
+        var last = Suggestions(page).Last;
+        await Assertions.Expect(last).ToHaveAttributeAsync("aria-selected", "true");
+        // Within the visible part of the list, to the rounding of a pixel, once the list has scrolled, which follows the
+        // rendering; the list, within the page.
+        await page.WaitForFunctionAsync("id => { const option = document.getElementById(id); const o = option.getBoundingClientRect(); const l = option.parentElement.getBoundingClientRect(); return o.top >= l.top - 1 && o.bottom <= l.bottom + 1; }", await last.GetAttributeAsync("id"), new() { Timeout = 5000 });
+        await Assertions.Expect(last).ToBeInViewportAsync();
+    }
+
+    [Fact]
     public async Task RecordPicker_Escape_ClosesTheSuggestions_WithoutErasingTheText()
     {
         var token = $"Marsupilami{Guid.NewGuid():N}"[..16];
@@ -194,12 +218,15 @@ public sealed partial class ControlsTests(ApplicationHost application)
     }
 
     // The combobox answers once its circuit is open, which nothing in the page announces: the text is typed again until it does.
-    private static async Task TypeUntilSuggestedAsync(IPage page, ILocator input, string text)
+    private static async Task TypeUntilSuggestedAsync(IPage page, ILocator input, string text, bool atOnce = false)
     {
         for (var attempt = 0; attempt < 5; attempt++)
         {
             await input.FillAsync("");
-            await input.PressSequentiallyAsync(text);
+            if (atOnce)
+                await input.FillAsync(text);
+            else
+                await input.PressSequentiallyAsync(text);
             try
             {
                 await Assertions.Expect(Suggestions(page).First).ToBeVisibleAsync(new() { Timeout = 5000 });

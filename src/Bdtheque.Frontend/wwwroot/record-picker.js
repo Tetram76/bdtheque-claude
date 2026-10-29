@@ -9,3 +9,9 @@ export function keepKeysForTheList(input) {
             event.preventDefault();
     });
 }
+
+// The focus staying on the text field (aria-activedescendant), the list does not scroll by itself to the active
+// suggestion: it is brought into view, the list scrolling no further than needed.
+export function reveal(optionId) {
+    document.getElementById(optionId)?.scrollIntoView({ block: "nearest" });
+}
