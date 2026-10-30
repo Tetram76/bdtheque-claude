@@ -16,7 +16,7 @@
 
 Application web de gestion de collection de bandes dessinées — réécriture d'une application client lourd (Delphi / Firebird) en architecture n-tiers.
 
-Ce document présente l'application, son installation et son exploitation. Pour maintenir le projet ou rejoindre l'équipe (organisation du code, développement local, tests, validation fonctionnelle, spécifications), voir [`README.dev.md`](README.dev.md).
+Ce document présente l'application, son installation et son exploitation. Pour maintenir le projet ou rejoindre l'équipe (organisation du code, développement local, tests, validation fonctionnelle, spécifications), ou pour valider une version avant de l'installer, voir [`README.dev.md`](README.dev.md).
 
 ## Fonctionnalités principales
 
@@ -96,23 +96,12 @@ docker compose exec db psql -U bdtheque -d bdtheque -c 'SELECT array_agg("Id"), 
 
 liste les genres devenus égaux, avec leurs identifiants (utilisateur et base selon `POSTGRES_USER` et `POSTGRES_DB`). Renommer l'un d'eux par son identifiant — la comparaison des libellés ignorant la casse et les accents, une condition sur le libellé les viserait tous —, par `UPDATE "Genres" SET "Label" = '…' WHERE "Id" = '…'`, puis `docker compose restart api`.
 
-### Plusieurs versions sur le NAS
-
-Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version de développement (alpha ou bêta). Chacune est un **projet distinct**, déployé selon la procédure ci-dessus dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-dev`), avec le `docker-compose.yml` de **sa** version (celui du dépôt au tag de la version, ou au commit de `sha-<commit>`), qui peut différer d'une version à l'autre, et son propre `.env` :
-
-- `BDTHEQUE_TAG` : le numéro de la version en production (ex. `0.1.0`), `sha-<commit>` pour une pré-version ;
-- `FRONTEND_PORT` : un port différent pour chaque version ;
-- `VISUELS_HOST_PATH` : un dossier différent pour chaque version ;
-- `PUBLIC_URL` : en production seulement ; les pré-versions sont atteintes en interne, sur `http://<NAS>:<FRONTEND_PORT>`.
-
-Le nom du projet (celui du dossier) distingue les conteneurs, les réseaux et le volume `db-data` de chaque version : chacune a sa propre base. Une pré-version ne doit **jamais** utiliser comme les siens la base ni le dossier des visuels de la production (au plus y lire, pour en récupérer une copie) : elle migrerait la base de production à son démarrage, et sa réconciliation supprimerait les visuels qu'elle ne connaît pas. Pour la tester sur des données réelles, on lui donne une **copie** des données de production (récupération automatisée à venir, #267).
-
 ### HTTPS : reverse proxy du NAS
 
 Le `frontend` ne sert que du HTTP : le chiffrement (HTTPS, certificats) est assuré par le **reverse proxy du NAS** (DSM), qui reçoit les requêtes en HTTPS et les relaie en HTTP au port `FRONTEND_PORT` du NAS. La même image sert deux déploiements :
 
 - **derrière le reverse proxy** : `PUBLIC_URL` donne, dans `.env`, l'adresse sous laquelle le navigateur atteint l'application (ex. `https://bdtheque.example.com`, port compris s'il n'est pas celui du schéma, sans chemin : l'application est servie à la racine). Le `frontend` construit ses redirections sur cette adresse et marque ses cookies `Secure`. Une adresse mal formée, avec un chemin ou un autre schéma que `http` ou `https`, empêche le démarrage du `frontend`, qui le signale dans son journal ;
-- **en interne**, sans reverse proxy (versions à valider ou à tester) : `PUBLIC_URL` reste vide, et l'application est accessible directement sur `http://<NAS>:<FRONTEND_PORT>`, sans rien d'autre à configurer.
+- **en interne**, sans reverse proxy (versions à valider ou à tester, cf. [`README.dev.md`](README.dev.md#plusieurs-versions-sur-le-nas)) : `PUBLIC_URL` reste vide, et l'application est accessible directement sur `http://<NAS>:<FRONTEND_PORT>`, sans rien d'autre à configurer.
 
 Le `frontend` ne redirige jamais vers HTTPS et n'envoie pas d'en-tête HSTS : une éventuelle politique HSTS se règle sur le reverse proxy.
 

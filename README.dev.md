@@ -1,6 +1,6 @@
 # BDthèque — développement
 
-Ce document s'adresse à qui maintient le projet ou souhaite rejoindre l'équipe. La présentation de l'application, son installation et son exploitation sont dans le [`README.md`](README.md).
+Ce document s'adresse à qui maintient le projet ou souhaite rejoindre l'équipe, ou veut valider une version avant de l'installer en production (§ Plusieurs versions sur le NAS). La présentation de l'application, son installation et son exploitation sont dans le [`README.md`](README.md).
 
 ## Spécifications
 
@@ -144,3 +144,14 @@ Les images construites restent sur le poste, pour accélérer la validation suiv
 ## Publication des images
 
 Les images de l'application (cf. [`README.md`](README.md#images-publiées)) sont publiées sur Docker Hub par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml) : chaque nuit sous le tag `nightly`, si `main` a changé, et à la demande. Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire ; lancée sur le tag d'une version, elle pose en outre le numéro de cette version.
+
+## Plusieurs versions sur le NAS
+
+Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version de développement (alpha ou bêta). Chacune est un **projet distinct**, déployé selon la procédure du [`README.md`](README.md#procédure-synology-container-manager) dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-dev`), avec le `docker-compose.yml` de **sa** version (celui du dépôt au tag de la version, ou au commit de `sha-<commit>`), qui peut différer d'une version à l'autre, et son propre `.env` :
+
+- `BDTHEQUE_TAG` : le numéro de la version en production (ex. `0.1.0`), `sha-<commit>` pour une pré-version ;
+- `FRONTEND_PORT` : un port différent pour chaque version ;
+- `VISUELS_HOST_PATH` : un dossier différent pour chaque version ;
+- `PUBLIC_URL` : en production seulement ; les pré-versions sont atteintes en interne, sur `http://<NAS>:<FRONTEND_PORT>`.
+
+Le nom du projet (celui du dossier) distingue les conteneurs, les réseaux et le volume `db-data` de chaque version : chacune a sa propre base. Une pré-version ne doit **jamais** utiliser comme les siens la base ni le dossier des visuels de la production (au plus y lire, pour en récupérer une copie) : elle migrerait la base de production à son démarrage, et sa réconciliation supprimerait les visuels qu'elle ne connaît pas. Pour la tester sur des données réelles, on lui donne une **copie** des données de production (récupération automatisée à venir, #267).

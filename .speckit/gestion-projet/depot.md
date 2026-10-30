@@ -14,8 +14,8 @@ Dépôt GitHub : configuration, documentation du dépôt, signature des commits,
   - Seul ce qui exige l'utilisateur en personne lui revient : se connecter à un service, créer un secret ou un jeton et en placer la valeur (secret de dépôt, variable d'environnement du poste), qu'aucun agent ne lit ni ne manipule.
   - Un acte que l'outillage de l'agent lui refuse (ex. une commande bloquée par le mode automatique de Claude Code) n'est pas contourné : l'agent nomme l'acte refusé, la commande et la raison du refus, et demande à l'utilisateur de l'autoriser.
 - **Documentation du dépôt**, en deux fichiers à la racine, selon leur lecteur :
-  - `README.md` : pour qui découvre le projet, l'installe ou l'utilise — présentation, fonctionnalités, stack et architecture, déploiement et exploitation (procédure sur le NAS, mises à jour, plusieurs versions, HTTPS, dossier des visuels), indicateurs de qualité en tête (§ Analyse de la qualité du code) ;
-  - `README.dev.md` : pour qui maintient le projet ou rejoint l'équipe — spécifications et démarche pilotée par elles, organisation du code, développement local (build, tests, captures de référence, lancement depuis les sources), validation fonctionnelle, publication des images.
+  - `README.md` : pour qui découvre le projet, l'installe ou l'utilise — présentation, fonctionnalités, stack et architecture, déploiement et exploitation de sa version de production (procédure sur le NAS, mises à jour, HTTPS, dossier des visuels), indicateurs de qualité en tête (§ Analyse de la qualité du code) ;
+  - `README.dev.md` : pour qui maintient le projet ou rejoint l'équipe, ou veut valider une version avant de l'installer, ce qui demande des connaissances techniques dont l'utilisateur se passe — spécifications et démarche pilotée par elles, organisation du code, développement local (build, tests, captures de référence, lancement depuis les sources), validation fonctionnelle, publication des images, plusieurs versions sur le NAS (pré-versions à côté de la production).
 
   Chacun renvoie à l'autre ; une information ne figure que dans celui de son lecteur.
 
