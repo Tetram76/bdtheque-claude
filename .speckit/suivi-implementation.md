@@ -186,6 +186,14 @@ Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le rever
 | --- | --- |
 | ~~#249~~ | Frontend derrière le reverse proxy du NAS Synology, qui assure la sécurisation SSL/TLS |
 
+### Ajustement issu de l'hébergement de plusieurs versions sur le NAS
+
+Répercussion dans le déploiement de la récupération des données de la production par une pré-version (`contraintes-techniques/architecture-deploiement.md` § Hébergement). Le déploiement relevant de la Phase 0, validée, un seul ticket la couvre ; sans objet avant la première mise en production (`1.0.0`), il est à réaliser avant la première pré-version qui la suivra.
+
+| Ticket | Titre |
+| --- | --- |
+| #267 | Récupération des données de production par une pré-version sur le NAS |
+
 ## Phase 3 — Frontend Blazor
 
 Pages de consultation (public) et d'administration (authentifié), composants partagés, aide contextuelle. Le rendu repose sur un thème de base neutre, qui définit les contrats des thèmes ; aucune alternative des maquettes n'en sert de base (`visuel/charte-graphique.md` § Thème de base).

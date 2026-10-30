@@ -1,6 +1,6 @@
 # Dépôt
 
-Dépôt GitHub : configuration, signature des commits, intégration continue, analyse de la qualité du code, mises à jour des dépendances, branches, conventions de commit, versions et releases.
+Dépôt GitHub : configuration, documentation du dépôt, signature des commits, intégration continue, analyse de la qualité du code, mises à jour des dépendances, branches, conventions de commit, versions et releases.
 
 ---
 
@@ -13,6 +13,11 @@ Dépôt GitHub : configuration, signature des commits, intégration continue, an
   - L'agent accomplit lui-même ces actes (`gestion-projet/gouvernance.md` § Prise de décision, acte de gestion du projet), et ne les laisse jamais à l'utilisateur comme une tâche à faire de son côté. Il passe par l'**API** de chaque service, avec l'accès que l'utilisateur a donné au poste : `gh` pour GitHub ; pour SonarQube Cloud, un jeton personnel de l'utilisateur (l'offre gratuite n'en connaît pas d'autre) placé dans la variable d'environnement `SONAR_TOKEN` du poste. L'agent agit ainsi au nom de l'utilisateur, comme sur GitHub. Il n'agit jamais par la session de l'utilisateur dans un navigateur.
   - Seul ce qui exige l'utilisateur en personne lui revient : se connecter à un service, créer un secret ou un jeton et en placer la valeur (secret de dépôt, variable d'environnement du poste), qu'aucun agent ne lit ni ne manipule.
   - Un acte que l'outillage de l'agent lui refuse (ex. une commande bloquée par le mode automatique de Claude Code) n'est pas contourné : l'agent nomme l'acte refusé, la commande et la raison du refus, et demande à l'utilisateur de l'autoriser.
+- **Documentation du dépôt**, en deux fichiers à la racine, selon leur lecteur :
+  - `README.md` : pour qui découvre le projet, l'installe ou l'utilise — présentation, fonctionnalités, stack et architecture, déploiement et exploitation de sa version de production (procédure sur le NAS, mises à jour, HTTPS, dossier des visuels), indicateurs de qualité en tête (§ Analyse de la qualité du code) ;
+  - `README.dev.md` : pour qui maintient le projet ou rejoint l'équipe, ou veut valider une version avant de l'installer, ce qui demande des connaissances techniques dont l'utilisateur se passe — spécifications et démarche pilotée par elles, organisation du code, développement local (build, tests, captures de référence, lancement depuis les sources), validation fonctionnelle, publication des images, plusieurs versions sur le NAS (pré-versions à côté de la production).
+
+  Chacun renvoie à l'autre ; une information ne figure que dans celui de son lecteur.
 
 ## Signature des commits
 
@@ -154,7 +159,7 @@ Les versions de l'application sont connues du dépôt avant leur publication : c
   - `1.0.0` : la version de la première mise en production (déploiement consigné dans `journal-evenements.md`) ; les versions suivantes gardent une version mineure par phase ou partie de phase ;
   - une version **corrective** (ex. `v0.1.1`) livre une correction publiée entre deux de ces versions.
 
-  Une **version candidate** (RC), testée sur le déploiement interne avant la publication de la version (`contraintes-techniques/architecture-deploiement.md` § Hébergement), n'a pas de numéro propre : elle est désignée par les images d'une publication à la demande, sous leur tag immuable `sha-<commit>` (`choix-implementation/deploiement.md` § Publication des images Docker).
+  Une **version candidate** (RC), testée sur le déploiement interne avant la publication de la version (`contraintes-techniques/architecture-deploiement.md` § Hébergement), n'a pas de numéro propre : elle est désignée par les images d'une publication à la demande, sous leur tag immuable `sha-<commit>` (`choix-implementation/deploiement.md` § Publication des images Docker). Une **version de développement** (alpha ou bêta), appelée à devenir la version candidate suivante, est désignée de même, et déployée en interne à côté de la production et de la version candidate (`choix-implementation/deploiement.md` § Plusieurs versions sur le NAS).
   - **Alternative écartée (numéro de pré-version, ex. `v0.1.0-rc.1`, avec son tag et sa release)** : un nom plus lisible que `sha-<commit>`, pour un coût réel : chaque version publiée fait repartir la période du nouveau code de SonarQube Cloud (§ Analyse de la qualité du code), qu'une version candidate amputerait du code ajouté depuis la version précédente, et jalons, tags et releases devraient distinguer les versions candidates des versions publiées.
 
   La version que livre chaque phase, ou partie de phase, est indiquée dans `suivi-implementation.md`.
