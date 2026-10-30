@@ -215,6 +215,17 @@ docker compose exec db psql -U bdtheque -d bdtheque -c 'SELECT array_agg("Id"), 
 
 liste les genres devenus égaux, avec leurs identifiants (utilisateur et base selon `POSTGRES_USER` et `POSTGRES_DB`). Renommer l'un d'eux par son identifiant — la comparaison des libellés ignorant la casse et les accents, une condition sur le libellé les viserait tous —, par `UPDATE "Genres" SET "Label" = '…' WHERE "Id" = '…'`, puis `docker compose restart api`.
 
+### Plusieurs versions sur le NAS
+
+Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version alpha ou bêta. Chacune est un **projet distinct**, déployé selon la procédure ci-dessus dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-beta`), avec le même `docker-compose.yml` et son propre `.env` :
+
+- `BDTHEQUE_TAG` : le numéro de la version en production (ex. `0.1.0`), `sha-<commit>` pour une pré-version ;
+- `FRONTEND_PORT` : un port différent pour chaque version ;
+- `VISUELS_HOST_PATH` : un dossier différent pour chaque version ;
+- `PUBLIC_URL` : en production seulement ; les pré-versions sont atteintes en interne, sur `http://<NAS>:<FRONTEND_PORT>`.
+
+Le nom du projet (celui du dossier) distingue les conteneurs, les réseaux et le volume `db-data` de chaque version : chacune a sa propre base. Une pré-version ne doit **jamais** partager la base ni le dossier des visuels de la production : elle migrerait la base de production à son démarrage, et sa réconciliation supprimerait les visuels qu'elle ne connaît pas. Pour la tester sur des données réelles, on lui donne une **copie** des données de production.
+
 ### HTTPS : reverse proxy du NAS
 
 Le `frontend` ne sert que du HTTP : le chiffrement (HTTPS, certificats) est assuré par le **reverse proxy du NAS** (DSM), qui reçoit les requêtes en HTTPS et les relaie en HTTP au port `FRONTEND_PORT` du NAS. La même image sert deux déploiements :
