@@ -21,8 +21,18 @@ public sealed class BrowserTimeZoneTests : IDisposable
     [InlineData("")]
     [InlineData("Nowhere/Atlantis")]
     [InlineData("Romance Standard Time")]
-    public void Zone_WithoutAKnownIanaName_IsUniversalTime(string? name) =>
-        Assert.Same(TimeZoneInfo.Utc, new BrowserTimeZone { Name = name }.Zone);
+    public void Zone_WithoutAKnownIanaName_IsUniversalTime(string? name)
+    {
+        var timeZone = new BrowserTimeZone { Name = name };
+
+        Assert.Same(TimeZoneInfo.Utc, timeZone.Zone);
+        Assert.False(timeZone.IsKnown);
+    }
+
+    [Theory]
+    [InlineData("Europe/Paris")]
+    [InlineData("Etc/UTC")]
+    public void Zone_WithAKnownIanaName_IsKnown(string name) => Assert.True(new BrowserTimeZone { Name = name }.IsKnown);
 
     [Fact]
     public void Today_IsTheDateOfTheBrowser_NotThatOfTheServer()
