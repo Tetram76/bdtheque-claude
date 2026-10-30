@@ -224,7 +224,7 @@ Le NAS fait tourner jusqu'à trois versions en même temps : la production, la v
 - `VISUELS_HOST_PATH` : un dossier différent pour chaque version ;
 - `PUBLIC_URL` : en production seulement ; les pré-versions sont atteintes en interne, sur `http://<NAS>:<FRONTEND_PORT>`.
 
-Le nom du projet (celui du dossier) distingue les conteneurs, les réseaux et le volume `db-data` de chaque version : chacune a sa propre base. Une pré-version ne doit **jamais** partager la base ni le dossier des visuels de la production : elle migrerait la base de production à son démarrage, et sa réconciliation supprimerait les visuels qu'elle ne connaît pas. Pour la tester sur des données réelles, on lui donne une **copie** des données de production (récupération automatisée à venir, #267).
+Le nom du projet (celui du dossier) distingue les conteneurs, les réseaux et le volume `db-data` de chaque version : chacune a sa propre base. Une pré-version ne doit **jamais** utiliser comme les siens la base ni le dossier des visuels de la production (au plus y lire, pour en récupérer une copie) : elle migrerait la base de production à son démarrage, et sa réconciliation supprimerait les visuels qu'elle ne connaît pas. Pour la tester sur des données réelles, on lui donne une **copie** des données de production (récupération automatisée à venir, #267).
 
 ### HTTPS : reverse proxy du NAS
 
