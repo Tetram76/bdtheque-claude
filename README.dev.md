@@ -66,9 +66,11 @@ Docker doit être démarré : les tests de persistance, d'API et de bout en bout
 
 ```bash
 dotnet restore Bdtheque.slnx
-dotnet build Bdtheque.slnx --configuration Release
-dotnet test Bdtheque.slnx --configuration Release
+dotnet build Bdtheque.slnx --configuration Release --no-restore
+dotnet test Bdtheque.slnx --configuration Release --no-build
 ```
+
+Chaque commande reprend ce que la précédente a produit, comme le CI : la compilation ne refait pas la restauration (`--no-restore`), et les tests ne refont ni la compilation ni la restauration (`--no-build`). Lancé seul, sans ces options, `dotnet test` restaure et compile lui-même.
 
 ### Captures de référence des écrans
 
