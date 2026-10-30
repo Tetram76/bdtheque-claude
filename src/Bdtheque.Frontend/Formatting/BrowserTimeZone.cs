@@ -25,10 +25,13 @@ public sealed class BrowserTimeZone
     /// The time zone of the browser; universal time as long as the browser has not given one this application knows by
     /// its IANA name (a first page, a cookie refused or altered).
     /// </summary>
-    public TimeZoneInfo Zone =>
-        !string.IsNullOrEmpty(Name) && TimeZoneInfo.TryFindSystemTimeZoneById(Name, out var zone) && zone.HasIanaId
-            ? zone
-            : TimeZoneInfo.Utc;
+    public TimeZoneInfo Zone => Known ?? TimeZoneInfo.Utc;
+
+    /// <summary>Whether the browser gave a time zone this application knows, without which <see cref="Today"/> is the date in universal time.</summary>
+    public bool IsKnown => Known is not null;
+
+    private TimeZoneInfo? Known =>
+        !string.IsNullOrEmpty(Name) && TimeZoneInfo.TryFindSystemTimeZoneById(Name, out var zone) && zone.HasIanaId ? zone : null;
 
     public DateTimeOffset ToLocal(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant, Zone);
 

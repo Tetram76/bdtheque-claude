@@ -36,7 +36,7 @@ builder.Services.AddScoped(services => new BrowserTimeZone
 builder.Services.AddScoped<DisplayFormatter>();
 builder.Services.AddScoped<RecordSearch>();
 builder.Services.AddSingleton(new PageAssemblies([]));
-builder.Services.AddSingleton<IThemeSelector, FirstOfferedThemeSelector>();
+builder.Services.AddScoped<IThemeSelector, VisitThemeSelector>();
 builder.Services.AddSingleton(TimeProvider.System);
 
 // The authentication cookie is owned exclusively by this container (BFF):
