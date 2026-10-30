@@ -145,7 +145,7 @@ Les images construites restent sur le poste, pour accélérer la validation suiv
 
 ## Publication des images
 
-Les images de l'application (cf. [`README.md`](README.md#images-publiées)) sont publiées sur Docker Hub par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml) : chaque nuit sous le tag `nightly`, si `main` a changé, et à la demande. Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire ; lancée sur le tag d'une version, elle pose en outre le numéro de cette version.
+Les images de l'application sont publiées sur Docker Hub par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml) de deux façons : chaque nuit, sous le tag `nightly`, si `main` a changé depuis la publication précédente ; ou à la demande, sous les tags décrits dans le [`README.md`](README.md#images-publiées). Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire ; lancée sur le tag d'une version, elle pose en outre le numéro de cette version.
 
 ## Plusieurs versions sur le NAS
 
