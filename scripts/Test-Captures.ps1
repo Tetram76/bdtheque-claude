@@ -52,7 +52,7 @@ cd /work
 dotnet build $project --configuration Release
 pwsh $project/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 status=0
-dotnet test $project --configuration Release --no-build --filter 'FullyQualifiedName~ScreenCaptureTests' || status=`$?
+dotnet test $project --configuration Release --no-build --filter 'FullyQualifiedName~Bdtheque.EndToEnd.Tests.Captures.' || status=`$?
 if [ -d $project/TestResults/captures ]; then mkdir -p /repo/$project/TestResults && cp -r $project/TestResults/captures /repo/$project/TestResults/; fi
 if [ "$($Update.IsPresent)" = "True" ]; then rm -rf /repo/$project/Captures/References && cp -r $project/Captures/References /repo/$project/Captures/; fi
 exit `$status

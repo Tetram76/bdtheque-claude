@@ -14,7 +14,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 public sealed class ScreenCaptureTests(ApplicationHost application)
 {
     /// <summary>The widths of the mockups: a desktop screen and a smartphone (visuel/charte-graphique.md § Maquettes).</summary>
-    private static readonly Dictionary<string, ViewportSize> Viewports = new()
+    internal static readonly Dictionary<string, ViewportSize> Viewports = new()
     {
         ["desktop"] = new ViewportSize { Width = 1440, Height = 900 },
         ["smartphone"] = new ViewportSize { Width = 414, Height = 896 },
@@ -51,15 +51,19 @@ public sealed class ScreenCaptureTests(ApplicationHost application)
     {
         var page = await application.NewCapturePageAsync(theme, Viewports[viewport]);
         await page.GotoAsync(Screens[screen], new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
-        await page.EvaluateAsync("() => document.fonts.ready");
 
-        var capture = await page.ScreenshotAsync(new PageScreenshotOptions
+        CaptureStore.Verify(theme, $"{screen}.{viewport}", await CaptureAsync(page));
+    }
+
+    /// <summary>The capture of the page once loaded, the way every screen is captured.</summary>
+    internal static async Task<byte[]> CaptureAsync(IPage page)
+    {
+        await page.EvaluateAsync("() => document.fonts.ready");
+        return await page.ScreenshotAsync(new PageScreenshotOptions
         {
             FullPage = true,
             Animations = ScreenshotAnimations.Disabled,
             Caret = ScreenshotCaret.Hide,
         });
-
-        CaptureStore.Verify(theme, $"{screen}.{viewport}", capture);
     }
 }
