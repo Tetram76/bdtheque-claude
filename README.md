@@ -217,7 +217,7 @@ liste les genres devenus égaux, avec leurs identifiants (utilisateur et base se
 
 ### Plusieurs versions sur le NAS
 
-Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version alpha ou bêta. Chacune est un **projet distinct**, déployé selon la procédure ci-dessus dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-beta`), avec le même `docker-compose.yml` et son propre `.env` :
+Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version de développement (alpha ou bêta). Chacune est un **projet distinct**, déployé selon la procédure ci-dessus dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-dev`), avec le `docker-compose.yml` de **sa** version (celui du dépôt au tag de la version, ou au commit de `sha-<commit>`), qui peut différer d'une version à l'autre, et son propre `.env` :
 
 - `BDTHEQUE_TAG` : le numéro de la version en production (ex. `0.1.0`), `sha-<commit>` pour une pré-version ;
 - `FRONTEND_PORT` : un port différent pour chaque version ;

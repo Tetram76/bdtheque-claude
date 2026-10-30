@@ -3,8 +3,9 @@ using System.Text.RegularExpressions;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// The NAS runs several versions side by side, each as a Compose project of its own, from the same
-/// docker-compose.yml (choix-implementation/deploiement.md § Plusieurs versions sur le NAS).
+/// The NAS runs several versions side by side, each as a Compose project of its own, from the
+/// docker-compose.yml of its version: every version of the file must let the others run beside it
+/// (choix-implementation/deploiement.md § Plusieurs versions sur le NAS).
 /// </summary>
 public sealed partial class DockerComposeTests
 {
