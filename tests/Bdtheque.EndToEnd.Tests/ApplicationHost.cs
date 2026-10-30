@@ -54,10 +54,13 @@ public sealed class ApplicationHost : IAsyncLifetime
         if (Microsoft.Playwright.Program.Main(["install", "chromium"]) != 0)
             throw new InvalidOperationException("The Chromium browser of Playwright could not be installed.");
         _playwright = await Playwright.CreateAsync();
-        // Glyphs drawn without hinting and colors in sRGB: the captures do not depend on settings of the machine.
+        // Glyphs drawn without hinting and colors in sRGB: the captures do not depend on settings of the machine. Without
+        // partial raster, a tile changed after the first paint (the interactive rendering of a component, a chevron that
+        // a script shows) is redrawn whole, with the same antialiased edges as a tile painted at once: the captures do not
+        // depend on when the page changed either.
         Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Args = ["--font-render-hinting=none", "--force-color-profile=srgb"],
+            Args = ["--font-render-hinting=none", "--force-color-profile=srgb", "--disable-partial-raster"],
         });
     }
 
