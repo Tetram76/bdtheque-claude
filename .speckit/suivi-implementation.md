@@ -223,7 +223,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#255~~ | Composants de présentation : blocs, boutons, étiquettes, couvertures et mention « Non renseigné » |
 | ~~#256~~ | Contrôles de saisie et composants interactifs : champs, choix d'une fiche, menu « ⋯ », dialogue, barre d'enregistrement |
 | ~~#257~~ | En-têtes, menus et navigation : consultation, administration, fil d'Ariane, navigation par initiale, pagination |
-| #258 | Tirage du thème de la visite |
+| ~~#258~~ | Tirage du thème de la visite |
 | #195 | Thème « Cases et bulles » (violine) |
 | #196 | Thème « La gazette » |
 | #197 | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
