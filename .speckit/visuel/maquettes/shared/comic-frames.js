@@ -69,6 +69,7 @@
     const corners = [corner(inset, inset), corner(w - inset, inset), corner(w - inset, h - inset), corner(inset, h - inset)];
     const svg = node('svg', { width: w, height: h, 'aria-hidden': 'true' });
     svg.dataset.frameArt = '';
+    svg.dataset.decoration = '';
     svg.dataset.key = key;
     // The SVG covers the border box: the frame keeps its (transparent) border, so that its
     // layout does not change, and an absolute position starts inside it.

@@ -216,6 +216,7 @@
     const specs = shapesFor(draw.shape, w, h, draw);
     const svg = document.createElementNS(SVG, 'svg');
     svg.dataset.bubbleArt = '';
+    svg.dataset.decoration = '';
     svg.dataset.size = size;
     svg.setAttribute('aria-hidden', 'true');
     svg.setAttribute('width', w);
