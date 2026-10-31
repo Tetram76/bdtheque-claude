@@ -12,8 +12,7 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 
 | Thème | Paramètre `theme` |
 | --- | --- |
-| Cases et bulles, violine | `violine` |
-| Cases et bulles, mûre | `mure` |
+| La planche | `planche` |
 | La gazette | `gazette` |
 | Le sommaire de magazine | `sommaire` |
 | Le festival en métro | `festival` |

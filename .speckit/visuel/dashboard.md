@@ -15,16 +15,13 @@ Toutes les alternatives sont présentées côte à côte par la visionneuse [`ma
 
 | Alternative | Fichier |
 | --- | --- |
-| Cases et bulles, violine | `cases-et-bulles.html`, paramètre `theme` : `violine` |
-| Cases et bulles, mûre | `cases-et-bulles.html`, paramètre `theme` : `mure` |
+| La planche (nom provisoire) | `planche.html` |
 | La gazette | `gazette.html` |
 | Le sommaire de magazine | `sommaire.html` |
 | Le festival en métro | `festival.html` |
 | Le fanzine en risographie | `riso.html` |
 | La vitrine de librairie | `librairie.html` |
 | L'album de vignettes | `vignettes.html` |
-
-`cases-et-bulles.html` est la source commune des deux alternatives « Cases et bulles », que chacune affiche avec sa teinte.
 
 ## Contenu commun
 
@@ -69,60 +66,37 @@ La présentation propre à chaque alternative est décrite avec elle (§ Alterna
 
 ## Alternatives
 
-### Cases et bulles, violine et mûre
+### La planche
 
-Deux alternatives, identiques à la teinte près : l'une en teinte violine, l'autre en teinte mûre. Source : `cases-et-bulles.html`, dont le paramètre `theme` choisit la teinte (`violine` ou `mure`).
+Le dashboard présenté comme une **page de bande dessinée** : cases et bulles. Son nom est provisoire : le thème sera renommé. Source : `planche.html`.
 
 #### Apparence
 
-- **Ton** :
-  - le clin d'œil à l'univers de la BD passe par ses **cases et bulles** ;
-  - sans pastiche de comics : ni police d'onomatopée, ni encarts de narration jaunes, ni gros contours noirs carrés, ni trame de points ;
-  - **sobriété du désordre** : le côté « pas aligné au cordeau » (éléments légèrement inclinés ou décalés) fait partie de l'identité, mais reste **ponctuel** : il est réservé au logo, aux bulles de titre, aux compteurs mis en avant et aux cadres de couverture. Les blocs et leur contenu (listes, étiquettes, chiffres) restent droits et alignés.
-- **Couleurs** : thème sombre, sur un fond **violet profond**. Deux teintes restent en lice, dont une seule sera retenue, le choix étant reporté aux maquettes des écrans suivants ; toutes deux restent à retravailler :
-
-  | Teinte | Fond | Blocs | Blocs en relief | Bordures | Texte secondaire | Texte atténué |
-  | --- | --- | --- | --- | --- | --- | --- |
-  | **Violine** | `#2B1030` | `#3A1641` | `#431B4B` | `#6A3375` | `#EBD3EF` | `#CFA9D6` |
-  | **Mûre** | `#1F1033` | `#2A1844` | `#321D4F` | `#533A78` | `#DCD1EE` | `#B9A8D8` |
-
-  - Texte principal et bulles : crème `#FBF3EA`.
-  - Couleur d'accent : ambre `#FFB547` — élément actif de la navigation, montants en euros du jour, chiffre principal.
-  - Palette secondaire, vive, pour varier les couleurs sans hiérarchie entre elles (catégories comme les genres et les éditeurs, compteurs, cadres de couverture, pastilles) : turquoise `#4FD1C5`, corail `#FF7A6B`, lilas `#B69CFF`, vert `#9BE07A`, bleu `#7FB8FF`, rose `#F7A8D0`, jaune `#FFD166`. Un texte posé sur ces couleurs est de la couleur du fond.
-- **Typographie** :
-  - titres et chiffres mis en avant : serif doux et gras (*Fraunces*) ;
-  - corps de texte : sans-serif lisible (*DM Sans*).
-- **Éléments graphiques** :
-  - **Cases** : chaque bloc de contenu est une case aux **coins arrondis irréguliers** (rayons différents à chaque coin, comme tracés à la main), à fine bordure, posée droite. Les cases ne sont pas animées au survol.
-  - **Bulles** : le titre d'une case est une **bulle** crème avec sa queue, légèrement inclinée, à cheval sur le bord supérieur de la case. Comme dans une BD lettrée à la main, la position de la queue le long de la bulle et son orientation, vers la gauche ou vers la droite, varient d'une bulle à l'autre : elles sont **tirées au hasard à chaque affichage**, et ne changent plus tant que la page reste affichée. Le titre est formulé comme une **phrase parlée** (question ou exclamation : « Plutôt quel genre ? », « Tout juste arrivés ! »), jamais comme un simple intitulé.
-  - **Couvertures** : les couvertures d'albums sont le principal élément visuel. Chacune est présentée dans un **cadre coloré** (bordure tirée de la palette secondaire), légèrement incliné ; au survol, la couverture se redresse et se soulève.
-  - **Logo** : le nom de l'application sur une étiquette crème inclinée, ponctuée de l'accent.
-  - **Navigation** : menu en forme de pilule, l'entrée active en accent ; champ de recherche et bouton d'aide arrondis.
+- **Ton** : elle assume les codes de la page de BD, par dérogation à la règle « sans pastiche de comics » de la charte (`charte-graphique.md` § Ton général) : liseré noir des cases, bulles de pensée et de bruit.
+- **La page** : le fond, hors des cases, est **blanc**. Les cases sont de **tailles variables**, rangées en bandes comme sur une planche, chacune cernée d'un **liseré noir légèrement épais**, **dessiné à la main** et tiré au hasard à chaque affichage : un trait encré qui tremble légèrement, d'épaisseur variable et affiné à ses extrémités ; des cases un peu de guingois, aux coins décalés de quelques pixels, dont les traits dépassent parfois le coin ; et, sous chaque trait encré, un fin trait de crayon gris légèrement décalé, comme le crayonné sous l'encrage. Le pied de page porte un numéro de page.
+- **Couleurs des cases** : chaque case a un fond de couleur **différente**, ni criarde ni fade, dans l'une des sept teintes jaune, bleu, corail, vert, violet, rose et turquoise. La plupart des cases les prennent dans leur version **quadri**, marquée comme une impression en quadrichromie (`#FFC93C`, `#4FB0E6`, `#F2775A`, `#63C36A`, `#A47AE0`, `#F483AE`, `#33C2B1`) ; quelques-unes, environ une sur quatre, dans leur version **ligne claire**, plus tendre (`#F4D35E`, `#8EC5E8`, `#F2A07B`, `#9FD39A`, `#C9A7E3`, `#F6B8C8`, `#7FD1C7`). Teintes et versions sont redistribuées à chaque affichage, deux cases voisines (côte à côte ou l'une au-dessus de l'autre) n'ayant jamais la même teinte. Le texte est noir `#111` ; bulles, encarts et cartouches restent blancs, cernés de noir. Les graphiques (barres) prennent les couleurs de la palette autres que celle de leur case.
+- **Bulles** : le titre d'une case est une bulle blanche cernée de noir, à cheval sur le bord haut de sa case (ce qui fait gagner de la hauteur), dont la **forme est tirée au hasard** à chaque affichage, comme la position et l'orientation de sa queue :
+  - **lisse** (parole) : la grande majorité, au moins 75 % ;
+  - **nuage** (pensée) : 20 % au plus, réservé aux titres qui sont une question ;
+  - **étoile** (bruit, onomatopée), dessinée comme un éclat de BD imprimée : silhouette irrégulière, beaucoup de pointes courtes et quelques longues, aux côtés légèrement creusés : 5 % au plus, réservé aux titres qui sont une exclamation, une au plus par page.
+- **Cartouches** : les mentions secondaires (ex. « Un album peut cumuler plusieurs genres. ») et le lien vers la liste des albums sont des cartouches blancs calés dans un coin de leur case, comme les récitatifs d'une BD.
+- **Sortie de case** : la mise en page joue avec le cadre. Dans un graphique en barres dont une barre domine nettement (au moins le double de la suivante), cette barre **dépasse de sa case par le haut**, pour exagérer sa prédominance ; la couverture à la une déborde de sa case sur le côté ; les longues pointes d'une bulle de bruit peuvent sortir de sa case.
+- **Typographie** : le lettrage des bulles est manuscrit (*Patrick Hand*) ou serif (*Fraunces*), les deux restant en lice ; titres et chiffres mis en avant en *Fraunces* ; texte en *Delius*, aux formes douces légèrement manuscrites, qui s'accorde à la planche sans gêner la lecture de longs textes.
+- **Navigation** : menu en pilules cernées de noir, l'entrée active en noir ; recherche et bouton d'aide cernés de noir ; logo dans un encart incliné à ombre noire décalée.
 
 #### Présentation
 
-De haut en bas :
+De haut en bas, en bandes :
 
-- **Accueil** : une grande bulle porte la **phrase d'accueil**. À côté, les **compteurs**.
-- **À la une aujourd'hui !** : la couverture de l'édition à la une, dans un cadre coloré incliné, à côté du libellé de son album en titre, du libellé de l'édition et du résumé de l'album.
-- **Tout juste arrivés !** : les dernières éditions entrées, par leur couverture, avec le libellé de l'album, l'éditeur et la date d'acquisition, omise lorsqu'elle n'est pas connue. Le lien vers la liste des albums passe sous la bulle de titre sur smartphone.
-- **Ça vaut combien, tout ça ?** : les montants, puis la mention des montants exclus.
-- **Tomes, intégrales ou hors-séries ?** :
-  - la répartition est représentée par des **piles de livres** posées sur une étagère, une par catégorie, à raison d'un livre pour environ 100 albums ;
-  - le nombre d'albums est écrit au-dessus de chaque pile, et le pourcentage en dessous ;
-  - les piles ont l'air **empilées à la main** : en tendance, les livres s'élargissent vers la base pour que la pile tienne, mais leur largeur, leur décalage et leur inclinaison varient ;
-  - cette variation est **tirée au hasard à chaque affichage**, dans des limites qui gardent la pile plausible.
-- **Plutôt quel genre ?** : les genres en étiquettes colorées, dont la taille suit le nombre d'albums.
-- **Chez quels éditeurs ?** : les éditeurs en barres horizontales.
+- **Accueil** : la phrase d'accueil dans une grande bulle ; à côté, les **compteurs** dans trois encarts blancs légèrement inclinés.
+- **À la une aujourd'hui !** : la couverture, qui déborde de la case, le libellé de l'album en titre, celui de l'édition et le résumé ; à côté, **Tout juste arrivés !**, les couvertures des dernières éditions entrées, avec le libellé de l'album, l'éditeur et la date.
+- **Ça vaut combien, tout ça ?** : les valeurs totales dans deux encarts blancs, puis les prix ; chaque montant en euros courants, suivi de son montant en euros du jour dans un petit encadré blanc. À côté, **Tomes, intégrales ou hors-séries ?** : trois barres verticales, dont celle des réguliers sort de la case.
+- **Plutôt quel genre ?** : les genres en étiquettes blanches cernées de noir, dont la taille suit le nombre d'albums ; à côté, **Chez quels éditeurs ?** : des barres horizontales.
 
 #### Collection vide
 
-- **En-tête** : sans le champ de recherche ; le bouton d'aide passe à droite et, sur smartphone, le logo, le menu, qui défile, et le bouton d'aide tiennent sur une ligne.
-- **Les étagères attendent leur premier album !** : une case pleine largeur, en relief, dont la bulle de titre, plus grande que les autres, porte la phrase. À gauche, les textes ; à droite, l'illustration, qui passe sous le texte sur smartphone.
-- **Illustration** : une étagère vide, sur la planche des piles de livres. Un seul tome turquoise, marqué « TOME 1 », penche contre un serre-livre de la couleur d'accent, à côté d'emplacements de hauteurs variées tracés en pointillés.
-- **On jette un œil quand même ?** : une case, avec des pastilles colorées : Albums, Séries et Auteurs sur une ligne, puis Recherche avancée.
-- **C'est votre collection ?** : une case, avec un bouton « Ouvrir l'administration → » dans la couleur d'accent, aux coins irréguliers.
-- Les deux dernières cases sont côte à côte, de même hauteur, sur grand écran, et l'une sous l'autre sur smartphone.
+- Une case pleine largeur : le titre dans une grande bulle, les textes et l'étagère vide (un tome penché contre un serre-livre noir, des emplacements en pointillés).
+- **On jette un œil quand même ?** et **C'est votre collection ?** : deux cases côte à côte, de largeurs différentes ; les liens en étiquettes blanches, le bouton « Ouvrir l'administration → » en noir, la mention de la connexion en cartouche.
 
 ### La gazette
 

@@ -5,21 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fiche d'album</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Patrick+Hand&amp;family=Delius&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 input::placeholder{color:inherit}
 :focus-visible{outline:3px solid currentColor;outline-offset:2px}
 summary{cursor:pointer}
+/* « La planche »: block titles become drawn balloons (comic-bubbles.js), whose shape decides their padding,
+   straddling the top edge of their case, as in a comic, which saves height. */
+[data-bubble]{padding:12px 24px !important;margin-top:-36px !important;margin-bottom:26px !important;font-family:'Patrick Hand',cursive !important;font-weight:400 !important;font-size:25px !important;transform:none !important}
+[data-bubble][data-shape=cloud]{padding:20px 36px 18px !important;margin-top:-24px !important;margin-bottom:46px !important}
+[data-bubble][data-shape=star]{padding:30px 44px !important;margin:-18px calc(5% + 16px) 46px !important}
 </style>
 <script src="../shared/mockup.js"></script>
-<script src="../shared/bubble-tails.js"></script>
+<script src="../shared/comic-bubbles.js"></script>
+<script src="../shared/comic-frames.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
 <template id="view">
-<div style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
+<div data-bubble-mode="random" data-frame-mode="{{frameMode}}" style="min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
 
   <header style="position: sticky; top: 0; z-index: 20; background: {{hintBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
     <div style="max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
@@ -219,9 +225,9 @@ summary{cursor:pointer}
         </div>
       </div>
 
-      <section aria-labelledby="f-recit" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+      <section aria-labelledby="f-recit" data-frame="{{frame}}" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{bg.recit}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.recit}}</span>
-        <h2 id="f-recit" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Ça raconte quoi ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
+        <h2 id="f-recit" data-bubble="{{bubble}}" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Ça raconte quoi ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
         <p style="margin: 0; max-width: 80ch; font-size: 15px">Venezuela, vers 1913. Amnésique, Corto Maltese est recueilli par son vieil ami Steiner, qui l'aide à retrouver la mémoire. Bientôt pris entre deux bandes rivales qui se disputent une mystérieuse valise, le Maltais va risquer sa vie pour un trésor dont il ignore tout, jusqu'à échouer sur l'île de Port-Ducal.</p>
         <div style="display: flex; flex-direction: column; gap: 2px; max-width: 80ch; padding-top: 10px; border-top: {{t.rowB}}">
           <span style="font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">Notes personnelles</span>
@@ -229,9 +235,9 @@ summary{cursor:pointer}
         </div>
       </section>
 
-      <section aria-labelledby="f-editions" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+      <section aria-labelledby="f-editions" data-frame="{{frame}}" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{bg.editions}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.editions}}</span>
-        <h2 id="f-editions" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Dans quelles éditions ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
+        <h2 id="f-editions" data-bubble="{{bubble}}" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Dans quelles éditions ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
 
         <sc-if value="{{hasEdition}}" hint-placeholder-val="{{true}}">
         <ul aria-label="Éditions de l'album" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 8px">
@@ -284,10 +290,10 @@ summary{cursor:pointer}
         </sc-if>
       </section>
 
-      <section aria-labelledby="f-serie" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+      <section aria-labelledby="f-serie" data-frame="{{frame}}" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{bg.serie}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.serie}}</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: {{t.rowAlign}}; gap: 12px 16px">
-          <h2 id="f-serie" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Et le reste de la série ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
+          <h2 id="f-serie" data-bubble="{{bubble}}" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Et le reste de la série ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
           <a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Voir la fiche de la série</a>
         </div>
         <details open="{{true}}"style="border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
@@ -329,29 +335,38 @@ const BASE = {
   cvPad: '0', cvB: '0', cvR: '0', cvBg: 'transparent', cvSh: 'none', cvRot: '0deg', imgR: '0', tape: false, shelf: false, shelfGap: '0'
 };
 
-// « Cases et bulles » comes in two tints that only differ by their purple shades.
-const CASES_INKS = ['#4FD1C5', '#FF7A6B', '#B69CFF', '#9BE07A', '#7FB8FF', '#F7A8D0', '#FFD166'];
-const cases = (c) => ({
+// « La planche »: a comic page, white outside its blocks. Each block is a case of its own colour, in
+// one of seven hues, most of them in their four-colour process version and about one in four in their
+// softer "ligne claire" version, dealt anew at each display; its edges are drawn by hand
+// (comic-frames.js) and its title is a balloon (comic-bubbles.js). Black text throughout.
+const PLANCHE_HUES = {
+  quadri: ['#FFC93C', '#4FB0E6', '#F2775A', '#63C36A', '#A47AE0', '#F483AE', '#33C2B1'],
+  soft: ['#F4D35E', '#8EC5E8', '#F2A07B', '#9FD39A', '#C9A7E3', '#F6B8C8', '#7FD1C7']
+};
+const PLANCHE_ORDER = [0, 1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5);
+const PLANCHE_SOFT = Math.floor(Math.random() * 3);
+const planche = {
   ...BASE,
-  bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
-  acc: '#FFB547', onAcc: c.bg, link: '#FFB547', colBg: '#9BE07A', colFg: c.bg,
-  fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
-  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
-  tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
-  inR: '999px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', chipR: '999px',
-  hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
-  helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
-  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
-  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '5px 16px', h2r: '26px 30px 28px 22px', h2size: '18px', h2rot: '-1.5deg', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px', rowAlign: 'flex-start', tail: true,
-  cvPad: '10px', cvB: '0', cvR: '16px 10px 18px 12px', cvBg: '#4FD1C5', cvRot: '-2.5deg', cvSh: '0 16px 30px rgba(0,0,0,.35)', imgR: '8px 4px 10px 6px',
-  pal: CASES_INKS.map((x) => [x, c.bg])
-});
+  bg: '#FFFFFF', text: '#111111', muted: '#111111', line: '#111111',
+  acc: '#111111', onAcc: '#FFFFFF', link: '#111111', colBg: '#63C36A', colFg: '#111111',
+  fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "Delius, 'DM Sans', system-ui, sans-serif",
+  cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
+  tBg: '#FFFFFF', tB: '3px solid #111111', tR: '0', rowB: '1px solid #111111',
+  inR: '999px', btnR: '999px', secB: '2px solid #111111', secText: '#111111', chipR: '999px',
+  hBg: '#FFFFFF', hText: '#111111', hLine: '3px solid #111111', hInBg: '#FFFFFF', hInB: '2px solid #111111', hInText: '#111111',
+  helpBg: '#FFC93C', helpText: '#111111', helpR: '50%', helpB: '2px solid #111111',
+  lgBg: '#FFFFFF', lgText: '#111111', lgPad: '3px 14px', lgRot: '-2deg', lgSh: '0 0 0 3px #111111, 7px 7px 0 #111111', lgFont: '800 22px Fraunces, Georgia, serif', lgTT: 'none', lgDot: 'transparent',
+  h2c: '#111111', h2size: '25px',
+  cvPad: '8px', cvB: '3px solid #111111', cvBg: '#FFFFFF', cvRot: '-2deg', cvSh: '6px 6px 0 #111111',
+  pal: [['#FFC93C', '#111111'], ['#4FB0E6', '#111111'], ['#F483AE', '#111111']],
+  // The colour of the n-th block of the page.
+  caseBg: (n) => PLANCHE_HUES[n % 4 === PLANCHE_SOFT ? 'soft' : 'quadri'][PLANCHE_ORDER[n % 7]]
+};
 
 // Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
 // another ink of the same theme carries the text or the fill.
 const THEMES = {
-  violine: cases({ bg: '#2B1030', panel: '#3A1641', border: '#6A3375', soft: '#EBD3EF', muted: '#CFA9D6' }),
-  mure: cases({ bg: '#1F1033', panel: '#2A1844', border: '#533A78', soft: '#DCD1EE', muted: '#B9A8D8' }),
+  planche,
   gazette: {
     ...BASE,
     bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
@@ -578,8 +593,8 @@ const NOT_OWNED = [12, 14];
 
 class View extends Mockup {
   renderVals() {
-    const key = this.props.theme ?? 'violine';
-    const t = THEMES[key] ?? THEMES.violine;
+    const key = this.props.theme ?? 'planche';
+    const t = THEMES[key] ?? THEMES.planche;
     const edIndex = this.state?.edition ?? 0;
     const visIndex = this.state?.visual ?? 0;
     // An intent is never one of the editions: the grid only holds owned ones, the intent is shown apart.
@@ -624,6 +639,11 @@ class View extends Mockup {
     });
     return {
       t,
+      // Only « La planche » draws its frames and balloons: elsewhere the attributes are left out.
+      frame: key === 'planche',
+      frameMode: key === 'planche' ? 'sketch' : 'ruler',
+      bubble: key === 'planche' ? 'question' : null,
+      bg: ['recit', 'editions', 'serie'].reduce((all, name, n) => ({ ...all, [name]: t.caseBg ? t.caseBg(n) : t.cBg }), {}),
       // The scroll hint of the menu fades into what lies behind it: the header, or the page under a transparent one.
       hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
       art: ed.art,
@@ -700,7 +720,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["violine", "mure", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "violine"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'achat", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "planche"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'achat", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
 </script>
 </body>
 </html>
