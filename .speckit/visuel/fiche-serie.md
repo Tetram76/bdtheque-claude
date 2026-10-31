@@ -12,7 +12,7 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 
 | Thème | Paramètre `theme` |
 | --- | --- |
-| La planche | `planche` |
+| La planche encrée | `planche` |
 | La gazette | `gazette` |
 | Le sommaire de magazine | `sommaire` |
 | Le festival en métro | `festival` |

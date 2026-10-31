@@ -309,7 +309,7 @@ const BASE = {
   fdTT: 'none', h1size: 'clamp(24px, 3vw, 36px)', cSh: 'none', hiSh: 'none', thR: '3px'
 };
 
-// Tokens of a theme drawn in cases, from its page, panel and border colours: « La planche » starts from them.
+// Tokens of a theme drawn in cases, from its page, panel and border colours: « La planche encrée » starts from them.
 const cases = (c) => ({
   ...BASE,
   bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
@@ -326,7 +326,7 @@ const cases = (c) => ({
   infoBg: '#4FD1C5', infoFg: c.bg
 });
 
-// « La planche »: a comic page, white outside its blocks, black ink throughout. Its blocks become
+// « La planche encrée »: a comic page, white outside its blocks, black ink throughout. Its blocks become
 // cases of their own colours, with hand-drawn edges and balloon titles (comic-skin.js): the theme
 // itself only sets what the template draws.
 const planche = {

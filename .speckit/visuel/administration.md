@@ -12,7 +12,7 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 
 | Thème | Paramètre `theme` |
 | --- | --- |
-| La planche | `planche` |
+| La planche encrée | `planche` |
 | La gazette | `gazette` |
 | Le sommaire de magazine | `sommaire` |
 | Le festival en métro | `festival` |
@@ -24,7 +24,7 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 
 - Un espace **technique**, qui privilégie l'efficacité et le fonctionnel, sans être lugubre, strict ni impersonnel : l'identité visuelle du thème actif est conservée.
 - Contrairement au dashboard, aucune recherche de ludique : chaque thème garde ses couleurs, sa typographie, ses formes et **une seule touche** qui lui est propre (cf. § Déclinaison par thème), sans ses mises en scène (aucune métaphore de page, aucun graphique décoratif).
-  - La touche de « La planche » est sa **case de bande dessinée** : la couleur de chaque bloc, ses bords dessinés à la main et la bulle de son titre forment un tout, qu'elle garde dans l'administration. Ses mises en scène de page (éléments qui sortent de leur case, numéro de page) restent propres au dashboard.
+  - La touche de « La planche encrée » est sa **case de bande dessinée** : la couleur de chaque bloc, ses bords dessinés à la main et la bulle de son titre forment un tout, qu'elle garde dans l'administration. Ses mises en scène de page (éléments qui sortent de leur case, numéro de page) restent propres au dashboard.
 - **Aucune inclinaison**, à l'exception du logo lorsque le thème l'incline.
 
 ## Contenu
@@ -57,7 +57,7 @@ Couleurs et typographie de chaque thème : cf. [`dashboard.md`](dashboard.md) §
 
 | Thème | Touche propre |
 | --- | --- |
-| La planche | Fond blanc ; chaque bloc est une case de sa propre couleur, aux bords dessinés à la main, et son titre une bulle à cheval sur le bord supérieur de la case, comme sur le dashboard (`dashboard.md` § La planche), sans inclinaison. |
+| La planche encrée | Fond blanc ; chaque bloc est une case de sa propre couleur, aux bords dessinés à la main, et son titre une bulle à cheval sur le bord supérieur de la case, comme sur le dashboard (`dashboard.md` § La planche encrée), sans inclinaison. |
 | La gazette | Double filet sous l'en-tête ; blocs ouverts par un filet d'encre, sans cadre ; petite mention en capitales au-dessus de chaque titre de bloc. |
 | Le sommaire de magazine | Gros filets noirs, titres en *Anton* soulignés d'un filet épais ; ombre noire décalée sur le bloc de saisie, logo sur fond rouge. |
 | Le festival en métro | Station (rond blanc cerclé de bleu nuit) devant chaque titre de bloc, précédé de « Station … » ; formes rondes, pastille « B » du logo. |

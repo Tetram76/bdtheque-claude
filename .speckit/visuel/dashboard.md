@@ -15,7 +15,7 @@ Toutes les alternatives sont présentées côte à côte par la visionneuse [`ma
 
 | Alternative | Fichier |
 | --- | --- |
-| La planche (nom provisoire) | `planche.html` |
+| La planche encrée | `planche.html` |
 | La gazette | `gazette.html` |
 | Le sommaire de magazine | `sommaire.html` |
 | Le festival en métro | `festival.html` |
@@ -66,9 +66,9 @@ La présentation propre à chaque alternative est décrite avec elle (§ Alterna
 
 ## Alternatives
 
-### La planche
+### La planche encrée
 
-Le dashboard présenté comme une **page de bande dessinée** : cases et bulles. Son nom est provisoire : le thème sera renommé. Source : `planche.html`.
+Le dashboard présenté comme une **page de bande dessinée** : cases et bulles. Source : `planche.html`.
 
 #### Apparence
 

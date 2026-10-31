@@ -1,4 +1,4 @@
-// « La planche » on a screen mockup whose blocks are <section> elements titled by an <h2>: while the
+// « La planche encrée » on a screen mockup whose blocks are <section> elements titled by an <h2>: while the
 // mockup shows this theme (its `theme` setting, « planche » by default), each block becomes a case of
 // its own colour, whose edges comic-frames.js draws by hand, and its title a balloon that
 // comic-bubbles.js draws, straddling the top edge of the case. Load it before those two scripts:

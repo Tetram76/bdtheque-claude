@@ -12,7 +12,7 @@ a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3
 input::placeholder{color:inherit}
 :focus-visible{outline:3px solid currentColor;outline-offset:2px}
 summary{cursor:pointer}
-/* « La planche »: block titles become drawn balloons (comic-bubbles.js), whose shape decides their padding,
+/* « La planche encrée »: block titles become drawn balloons (comic-bubbles.js), whose shape decides their padding,
    straddling the top edge of their case, as in a comic, which saves height. */
 [data-bubble]{padding:12px 24px !important;margin-top:-36px !important;margin-bottom:26px !important;font-family:'Patrick Hand',cursive !important;font-weight:400 !important;font-size:25px !important;transform:none !important}
 [data-bubble][data-shape=cloud]{padding:20px 36px 18px !important;margin-top:-24px !important;margin-bottom:46px !important}
@@ -335,7 +335,7 @@ const BASE = {
   cvPad: '0', cvB: '0', cvR: '0', cvBg: 'transparent', cvSh: 'none', cvRot: '0deg', imgR: '0', tape: false, shelf: false, shelfGap: '0'
 };
 
-// « La planche »: a comic page, white outside its blocks. Each block is a case of its own colour, in
+// « La planche encrée »: a comic page, white outside its blocks. Each block is a case of its own colour, in
 // one of seven hues, most of them in their four-colour process version and about one in four in their
 // softer "ligne claire" version, dealt anew at each display; its edges are drawn by hand
 // (comic-frames.js) and its title is a balloon (comic-bubbles.js). Black text throughout.
@@ -639,7 +639,7 @@ class View extends Mockup {
     });
     return {
       t,
-      // Only « La planche » draws its frames and balloons: elsewhere the attributes are left out.
+      // Only « La planche encrée » draws its frames and balloons: elsewhere the attributes are left out.
       frame: key === 'planche',
       frameMode: key === 'planche' ? 'sketch' : 'ruler',
       bubble: key === 'planche' ? 'question' : null,
