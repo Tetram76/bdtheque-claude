@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Administration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -23,7 +23,9 @@ input::placeholder{color:inherit;opacity:.6}
 }
 </style>
 <script src="../shared/mockup.js"></script>
-<script src="../shared/bubble-tails.js"></script>
+<script src="../shared/comic-skin.js"></script>
+<script src="../shared/comic-bubbles.js"></script>
+<script src="../shared/comic-frames.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
@@ -210,7 +212,7 @@ const BASE = {
   fdTT: 'none', h1size: 'clamp(24px, 3vw, 36px)', cSh: 'none', hiSh: 'none'
 };
 
-// « Cases et bulles » comes in two tints that only differ by their purple shades.
+// Tokens of a theme drawn in cases, from its page, panel and border colours: « La planche encrée » starts from them.
 const CASES_INKS = ['#FFB547', '#4FD1C5', '#FF7A6B', '#B69CFF', '#9BE07A', '#7FB8FF', '#F7A8D0', '#FFD166'];
 const cases = (c) => ({
   ...BASE,
@@ -228,11 +230,30 @@ const cases = (c) => ({
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
 
+// « La planche encrée »: a comic page, white outside its blocks, black ink throughout. Its blocks become
+// cases of their own colours, with hand-drawn edges and balloon titles (comic-skin.js): the theme
+// itself only sets what the template draws.
+const planche = {
+  ...cases({ bg: '#FFFFFF', panel: '#FFFFFF', border: '#111111', soft: '#111111', muted: '#111111' }),
+  text: '#111111', acc: '#111111', onAcc: '#FFFFFF', link: '#111111', warn: '#F2775A', onWarn: '#111111', del: '#B42318', nBg: '#FFFFFF', nFg: '#111111',
+  fb: "Delius, 'DM Sans', system-ui, sans-serif",
+  cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0',
+  tBg: '#FFFFFF', tB: '3px solid #111111', tR: '0', rowB: '1px solid #111111',
+  inBg: '#FFFFFF', inB: '2px solid #111111', secB: '2px solid #111111', secText: '#111111', thR: '0', chipR: '999px',
+  hBg: '#FFFFFF', hText: '#111111', hLine: '3px solid #111111', hInBg: '#FFFFFF', hInB: '2px solid #111111', hInText: '#111111',
+  helpBg: '#FFC93C', helpText: '#111111', helpR: '50%', helpB: '2px solid #111111',
+  lgBg: '#FFFFFF', lgText: '#111111', lgPad: '3px 14px', lgR: '0', lgSh: '0 0 0 3px #111111, 7px 7px 0 #111111', lgFont: '800 22px Fraunces, Georgia, serif', lgDot: 'transparent',
+  tagBg: '#FFFFFF', tagText: '#111111', tagB: '2px solid #111111',
+  h2c: '#111111', h2bg: 'transparent', h2pad: '0', h2r: '0', h2rot: '0deg', h2lift: '0', cTop: '0', tail: false,
+  infoBg: '#4FB0E6', infoFg: '#111111', colBg: '#63C36A', colFg: '#111111',
+  cvB: '3px solid #111111', cvBg: '#FFFFFF', cvR: '0', cvSh: '6px 6px 0 #111111', imgR: '0',
+  pal: [['#FFC93C', '#111111'], ['#4FB0E6', '#111111'], ['#F483AE', '#111111']]
+};
+
 // Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
 // another ink of the same theme carries the text or the fill.
 const THEMES = {
-  violine: cases({ bg: '#2B1030', panel: '#3A1641', border: '#6A3375', soft: '#EBD3EF', muted: '#CFA9D6' }),
-  mure: cases({ bg: '#1F1033', panel: '#2A1844', border: '#533A78', soft: '#DCD1EE', muted: '#B9A8D8' }),
+  planche,
   gazette: {
     ...BASE,
     bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
@@ -371,7 +392,7 @@ const CHECKS = [
 
 class View extends Mockup {
   renderVals() {
-    const t = THEMES[this.props.theme] ?? THEMES.violine;
+    const t = THEMES[this.props.theme] ?? THEMES.planche;
     // The menu is not permanent: it floats over the page on demand and never pushes the content aside.
     const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
     // The open panel scrolls on its own: the page under it stays still, so that scrolling the menu never moves the page.
@@ -427,7 +448,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["violine", "mure", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "violine"}, "menuOpen": {"label": "Menu ouvert", "editor": "boolean", "default": false}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "planche"}, "menuOpen": {"label": "Menu ouvert", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>

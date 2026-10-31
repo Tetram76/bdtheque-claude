@@ -9,7 +9,9 @@
 //   - <sc-if value="{{path}}"> to keep its content only when the value is truthy;
 //   - data-scroll-hint on a wrapper whose child [data-scroll] scrolls horizontally (by touch, by the mouse
 //     wheel, or by clicking an edge chevron), with --hint-bg
-//     set to the colour behind it, to show which edges have entries out of view.
+//     set to the colour behind it, to show which edges have entries out of view;
+//   - data-decoration on an element that a script draws into the page after a render (a hand-drawn
+//     frame, a balloon): it is not part of the template, and the reader's place ignores it.
 // Settings (theme, example…) come from the query string, typed and defaulted by the settings
 // declared with Mockup.mount; a viewer page embeds mockups in frames with these parameters.
 (function () {
@@ -106,11 +108,18 @@
 
   // A render replaces the whole page: the reader's place (page and inner scrolling, focused control)
   // is carried over, so that a click on a thumbnail strip or a fold button does not lose it.
+  // A node is found again by its rank among the children of the template, never counting a
+  // decoration ([data-decoration]) that a script draws into the page after a render: the new page
+  // does not have it yet, and counting it would shift every rank that follows.
+  const ranked = (node) => Array.prototype.filter.call(node.children, (child) => !child.hasAttribute('data-decoration'));
+
   function pathOf(node) {
     if (!node || node === root || !root.contains(node)) return null;
     const path = [];
     for (; node !== root; node = node.parentNode) {
-      path.unshift(Array.prototype.indexOf.call(node.parentNode.children, node));
+      const index = ranked(node.parentNode).indexOf(node);
+      if (index < 0) return null;
+      path.unshift(index);
     }
     return path;
   }
@@ -118,7 +127,7 @@
   function nodeAt(path) {
     let node = root;
     for (const index of path) {
-      node = node?.children[index];
+      node = node && ranked(node)[index];
     }
     return node;
   }
@@ -128,7 +137,8 @@
     const focused = pathOf(document.activeElement);
     const scrolled = [];
     for (const element of root.querySelectorAll('*')) {
-      if (element.scrollLeft || element.scrollTop) scrolled.push([pathOf(element), element.scrollLeft, element.scrollTop]);
+      const path = (element.scrollLeft || element.scrollTop) && pathOf(element);
+      if (path) scrolled.push([path, element.scrollLeft, element.scrollTop]);
     }
 
     const content = document.createDocumentFragment();
@@ -155,7 +165,7 @@
 [data-scroll-hint]{position:relative;min-width:0}
 [data-scroll]{overflow-x:auto;scrollbar-width:none}
 [data-scroll]::-webkit-scrollbar{display:none}
-[data-scroll-hint]::before,[data-scroll-hint]::after{position:absolute;top:0;bottom:0;width:34px;display:flex;align-items:center;font:800 20px/1 system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s}
+[data-scroll-hint]::before,[data-scroll-hint]::after{position:absolute;top:0;bottom:0;width:30px;display:flex;align-items:center;font:800 20px/1 system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s}
 [data-scroll-hint]::before{content:'‹';left:0;justify-content:flex-start;background:linear-gradient(to left,transparent,var(--hint-bg) 55%)}
 [data-scroll-hint]::after{content:'›';right:0;justify-content:flex-end;background:linear-gradient(to right,transparent,var(--hint-bg) 55%)}
 [data-scroll-hint].more-left::before,[data-scroll-hint].more-right::after{opacity:1;pointer-events:auto;cursor:pointer}`;

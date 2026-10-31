@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fiche de série</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -14,7 +14,9 @@ input::placeholder{color:inherit}
 summary{cursor:pointer}
 </style>
 <script src="../shared/mockup.js"></script>
-<script src="../shared/bubble-tails.js"></script>
+<script src="../shared/comic-skin.js"></script>
+<script src="../shared/comic-bubbles.js"></script>
+<script src="../shared/comic-frames.js"></script>
 </head>
 <body>
 <div id="mockup"></div>
@@ -153,8 +155,9 @@ summary{cursor:pointer}
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.albums}}</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: {{t.rowAlign}}; gap: 12px 16px">
           <h2 id="s-albums" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Combien d'albums ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
-          <span style="font-size: 13px; color: {{t.muted}}">{{albumsSummary}}</span>
+          <sc-if value="{{hasAlbums}}" hint-placeholder-val="{{true}}"><span style="font-size: 13px; color: {{t.muted}}">{{albumsSummary}}</span></sc-if>
         </div>
+        <sc-if value="{{noAlbums}}" hint-placeholder-val="{{false}}"><p style="margin: 0; color: {{t.muted}}">{{albumsSummary}}</p></sc-if>
         <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
           <div style="display: flex; flex-direction: column; gap: 8px">
             <h3 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">{{g.title}} <span style="font-family: {{t.fb}}; font-weight: 400; font-size: 14px; color: {{t.muted}}; text-transform: none">{{g.count}}</span></h3>
@@ -198,7 +201,7 @@ const BASE = {
   cvPad: '0', cvB: '0', cvR: '0', cvBg: 'transparent', cvSh: 'none', cvRot: '0deg', imgR: '0', tape: false, shelf: false
 };
 
-// « Cases et bulles » comes in two tints that only differ by their purple shades.
+// Tokens of a theme drawn in cases, from its page, panel and border colours: « La planche encrée » starts from them.
 const CASES_INKS = ['#4FD1C5', '#FF7A6B', '#B69CFF', '#9BE07A', '#7FB8FF', '#F7A8D0', '#FFD166'];
 const cases = (c) => ({
   ...BASE,
@@ -216,11 +219,30 @@ const cases = (c) => ({
   pal: CASES_INKS.map((x) => [x, c.bg])
 });
 
+// « La planche encrée »: a comic page, white outside its blocks, black ink throughout. Its blocks become
+// cases of their own colours, with hand-drawn edges and balloon titles (comic-skin.js): the theme
+// itself only sets what the template draws.
+const planche = {
+  ...cases({ bg: '#FFFFFF', panel: '#FFFFFF', border: '#111111', soft: '#111111', muted: '#111111' }),
+  text: '#111111', acc: '#111111', onAcc: '#FFFFFF', link: '#111111', warn: '#F2775A', onWarn: '#111111', del: '#B42318', nBg: '#FFFFFF', nFg: '#111111',
+  fb: "Delius, 'DM Sans', system-ui, sans-serif",
+  cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0',
+  tBg: '#FFFFFF', tB: '3px solid #111111', tR: '0', rowB: '1px solid #111111',
+  inBg: '#FFFFFF', inB: '2px solid #111111', secB: '2px solid #111111', secText: '#111111', thR: '0', chipR: '999px',
+  hBg: '#FFFFFF', hText: '#111111', hLine: '3px solid #111111', hInBg: '#FFFFFF', hInB: '2px solid #111111', hInText: '#111111',
+  helpBg: '#FFC93C', helpText: '#111111', helpR: '50%', helpB: '2px solid #111111',
+  lgBg: '#FFFFFF', lgText: '#111111', lgPad: '3px 14px', lgR: '0', lgSh: '0 0 0 3px #111111, 7px 7px 0 #111111', lgFont: '800 22px Fraunces, Georgia, serif', lgDot: 'transparent',
+  tagBg: '#FFFFFF', tagText: '#111111', tagB: '2px solid #111111',
+  h2c: '#111111', h2bg: 'transparent', h2pad: '0', h2r: '0', h2rot: '0deg', h2lift: '0', cTop: '0', tail: false,
+  infoBg: '#4FB0E6', infoFg: '#111111', colBg: '#63C36A', colFg: '#111111',
+  cvB: '3px solid #111111', cvBg: '#FFFFFF', cvR: '0', cvSh: '6px 6px 0 #111111', imgR: '0',
+  pal: [['#FFC93C', '#111111'], ['#4FB0E6', '#111111'], ['#F483AE', '#111111']]
+};
+
 // Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
 // another ink of the same theme carries the text or the fill.
 const THEMES = {
-  violine: cases({ bg: '#2B1030', panel: '#3A1641', border: '#6A3375', soft: '#EBD3EF', muted: '#CFA9D6' }),
-  mure: cases({ bg: '#1F1033', panel: '#2A1844', border: '#533A78', soft: '#DCD1EE', muted: '#B9A8D8' }),
+  planche,
   gazette: {
     ...BASE,
     bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
@@ -408,8 +430,8 @@ const SHOWN_PER_ROLE = 6;
 
 class View extends Mockup {
   renderVals() {
-    const key = this.props.theme ?? 'violine';
-    const t = THEMES[key] ?? THEMES.violine;
+    const key = this.props.theme ?? 'planche';
+    const t = THEMES[key] ?? THEMES.planche;
     const s = EXAMPLES[this.props.exemple] ?? EXAMPLES.longue;
     const unfolded = this.state?.unfolded ?? {};
     const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
@@ -530,6 +552,10 @@ class View extends Mockup {
         bg: t.pal[1][0], fg: t.pal[1][1],
         path: chain.map((name, i) => ({ name, sep: i > 0, leaf: i === chain.length - 1, parent: i < chain.length - 1 }))
       })),
+      // The count of the albums stands beside the title; a series without album says so under it, as the
+      // text of the block, rather than in the place of a count.
+      hasAlbums: s.albums.length > 0,
+      noAlbums: s.albums.length === 0,
       albumsSummary: s.albums.length === 0
         ? 'Aucun album dans cette série pour l\'instant.'
         : s.albums.length + (s.albums.length > 1 ? ' albums : ' : ' album : ') + parts.join(', '),
@@ -538,7 +564,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["violine", "mure", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "violine"}, "exemple": {"label": "Exemple", "editor": "enum", "options": ["longue", "heads", "courte", "vide"], "default": "longue"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "planche"}, "exemple": {"label": "Exemple", "editor": "enum", "options": ["longue", "heads", "courte", "vide"], "default": "longue"}});
 </script>
 </body>
 </html>

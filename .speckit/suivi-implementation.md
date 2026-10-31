@@ -202,7 +202,7 @@ La phase est réalisée en plusieurs parties, découpées l'une après l'autre ;
 
 - **Pages non implémentées** : tant qu'une page n'est pas implémentée, tout lien qui y mène affiche une page « Pas encore implémenté » (#238). Le chantier qui réalise une page remplace par le vrai lien tous les liens qui y mènent.
 - **Validation fonctionnelle** : les chantiers qui réalisent ce que l'utilisateur voit et utilise sont validés par lui avant fusion (`gestion-projet/revue-tickets.md` § Validation fonctionnelle), avec l'environnement de validation (#214), réalisé avant le premier d'entre eux ; chaque ticket précise s'il y est soumis.
-- **Thèmes** : la partie 1 réalise le thème de base et deux thèmes, « Cases et bulles » (violine) et « La gazette », retenus pour s'opposer sur presque tout (sombre et clair, blocs encadrés et ouverts, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. Un thème ajouté par une partie ultérieure est décliné sur tous les écrans déjà réalisés.
+- **Thèmes** : la partie 1 réalise le thème de base et deux thèmes, « La planche encrée » et « La gazette », retenus pour s'opposer sur presque tout (blocs encadrés et ouverts, une couleur par bloc et une seule surface, bords dessinés et filets, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. Un thème ajouté par une partie ultérieure est décliné sur tous les écrans déjà réalisés.
 
 ### Partie 1 — Éléments de base
 
@@ -224,7 +224,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#256~~ | Contrôles de saisie et composants interactifs : champs, choix d'une fiche, menu « ⋯ », dialogue, barre d'enregistrement |
 | ~~#257~~ | En-têtes, menus et navigation : consultation, administration, fil d'Ariane, navigation par initiale, pagination |
 | ~~#258~~ | Tirage du thème de la visite |
-| #195 | Thème « Cases et bulles » (violine) |
+| #195 | Thème « La planche encrée » |
 | #196 | Thème « La gazette » |
 | #197 | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
 | #198 | Dashboard et écran d'accueil d'une collection vide |

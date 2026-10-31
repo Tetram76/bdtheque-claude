@@ -14,14 +14,14 @@ La partie **Administration** suit cette identité dans un sens plus sobre : un e
 
 ## Thème de base
 
-Le rendu repose sur un **thème de base neutre**, qui définit les **contrats** que tout thème respecte. Aucune des alternatives des maquettes (cf. [`dashboard.md`](dashboard.md)), pas même « Cases et bulles » (violine ou mûre), n'est retenue à ce stade, et aucune ne sert de base au rendu : un thème issu des maquettes ne fait que s'appuyer sur ce thème de base.
+Le rendu repose sur un **thème de base neutre**, qui définit les **contrats** que tout thème respecte. Aucune des alternatives des maquettes (cf. [`dashboard.md`](dashboard.md)), pas même « La planche encrée », n'est retenue à ce stade, et aucune ne sert de base au rendu : un thème issu des maquettes ne fait que s'appuyer sur ce thème de base.
 
 ## Ton général
 
 - **Joyeux et chaleureux**, ni sérieux ni sévère : l'application présente une collection de BD, avec un clin d'œil à l'univers de la BD.
 - **Ludique.**
 - **Non conventionnel, borderline mais pas excentrique.**
-- **Sans pastiche de comics.**
+- **Sans pastiche de comics**, hormis pour « La planche encrée » (`dashboard.md` § Alternatives), qui assume les codes de la page de bande dessinée : liseré noir des cases, bulles de pensée et de bruit.
 
 ## Convivialité et efficacité
 
