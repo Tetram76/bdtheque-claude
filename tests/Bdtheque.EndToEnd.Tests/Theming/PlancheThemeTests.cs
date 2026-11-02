@@ -15,6 +15,8 @@ public sealed class PlancheThemeTests(ApplicationHost application)
 {
     private static readonly ViewportSize Desktop = new() { Width = 1440, Height = 900 };
 
+    private static readonly string[] Shapes = ["smooth", "cloud", "star"];
+
     private const string Cases = """
         () => [...document.querySelectorAll('.block')].map(block => {
             const title = block.querySelector('.block-title');
@@ -84,7 +86,7 @@ public sealed class PlancheThemeTests(ApplicationHost application)
 
             Assert.All(cases, @case =>
             {
-                Assert.Contains(@case.Shape, new[] { "smooth", "cloud", "star" });
+                Assert.Contains(@case.Shape, Shapes);
                 if (@case.Shape == "cloud")
                     Assert.EndsWith("?", @case.Title);
                 if (@case.Shape == "star")
