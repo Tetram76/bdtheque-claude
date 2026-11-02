@@ -17,6 +17,8 @@ public sealed class PlancheThemeTests(ApplicationHost application)
 
     private static readonly string[] Shapes = ["smooth", "cloud", "star"];
 
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+
     private const string Cases = """
         () => [...document.querySelectorAll('.block')].map(block => {
             const title = block.querySelector('.block-title');
@@ -157,7 +159,7 @@ public sealed class PlancheThemeTests(ApplicationHost application)
     }
 
     private static async Task<Case[]> CasesAsync(IPage page) =>
-        JsonSerializer.Deserialize<Case[]>(await page.EvaluateAsync<JsonElement>(Cases), new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        JsonSerializer.Deserialize<Case[]>(await page.EvaluateAsync<JsonElement>(Cases), Json)!;
 
     private sealed record Case(int Tint, string Fill, string Art, bool Drawn, string? Seed, string Title, string? Shape, string Bubble);
 }
