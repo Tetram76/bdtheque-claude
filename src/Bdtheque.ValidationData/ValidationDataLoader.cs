@@ -16,7 +16,7 @@ namespace Bdtheque.ValidationData;
 /// </summary>
 public sealed class ValidationDataLoader(HttpClient client)
 {
-    /// <summary>Header of the secret shared by `api` and its internal clients (choix-implementation/socle.md § Authentification : mise en œuvre).</summary>
+    /// <summary>Header of the secret shared by `api` and its internal clients (choix-implementation/socle/transverse.md § Authentification : mise en œuvre).</summary>
     public const string InternalApiKeyHeader = "X-Internal-Api-Key";
 
     public const string LongSeriesTitle = "Les Veilleurs d'Ombrelune";

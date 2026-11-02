@@ -6,7 +6,7 @@
     gap: var(--space-xs);
     max-inline-size: 100%;
     padding: 0.0625rem var(--space-s);
-    border: 1px solid var(--color-tag);
+    border: var(--border-width-control) solid var(--color-tag-border);
     border-radius: var(--radius-control);
     background: var(--color-tag);
     color: var(--color-text-on-tag);
@@ -17,7 +17,7 @@
 }
 
 .tag[data-variant="dashed"] {
-    border: 1px dashed var(--color-control-border);
+    border: var(--border-width-control) dashed var(--color-control-border);
     background: transparent;
     color: var(--color-text-secondary);
 }

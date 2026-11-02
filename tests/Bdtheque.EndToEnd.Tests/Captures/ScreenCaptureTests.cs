@@ -7,7 +7,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 
 /// <summary>
 /// Each screen implemented, captured in each offered theme, the theme being fixed rather than drawn: any difference with
-/// the reference capture fails (choix-implementation/socle.md § Thèmes : mise en œuvre, captures de référence). A screen
+/// the reference capture fails (choix-implementation/socle/themes.md § Thèmes : mise en œuvre, captures de référence). A screen
 /// implemented adds itself to <see cref="Screens"/>; a theme added to the catalog gets its captures of every screen.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
@@ -30,6 +30,8 @@ public sealed class ScreenCaptureTests(ApplicationHost application)
         ["controls"] = Controls.ControlsPage.Path,
         // Not a screen either: the header of the administration and the navigation of its lists, until a list uses them.
         ["admin-frame"] = Headers.AdminFramePage.Path + "?entry=B&page=2",
+        // Nor this one: blocks side by side and one above the other, on which a theme draws its cases, until a screen does.
+        ["cases"] = Theming.CasesPage.Path,
     };
 
     public static TheoryData<string, string, string> Captures

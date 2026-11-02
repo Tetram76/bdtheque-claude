@@ -91,7 +91,7 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 // Never in production, where `api` is not reachable anyway: in the validation environment, the user may consult
-// it for information (choix-implementation/socle.md § Documentation de l'API).
+// it for information (choix-implementation/socle/transverse.md § Documentation de l'API).
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(ApiEnvironments.Validation))
 {
     app.MapOpenApi();
@@ -99,7 +99,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(ApiEnvironm
 }
 
 // Defense in depth: `api` is only reachable by `frontend` over the internal Docker
-// network, but still requires this shared secret (see choix-implementation/socle.md § Authentification : mise en œuvre).
+// network, but still requires this shared secret (see choix-implementation/socle/transverse.md § Authentification : mise en œuvre).
 app.UseMiddleware<InternalApiKeyMiddleware>();
 
 var admin = app.MapAdmin();

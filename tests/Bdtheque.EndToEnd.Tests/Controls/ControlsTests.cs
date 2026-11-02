@@ -147,14 +147,14 @@ public sealed partial class ControlsTests(ApplicationHost application)
     }
 
     [Fact]
-    public async Task Placeholder_KeepsTheMutedText_WithoutOpacity()
+    public async Task Placeholder_KeepsItsColor_WithoutOpacity()
     {
         var page = await OpenAsync();
 
         var placeholder = await page.EvaluateAsync<string[]>("""
             () => {
                 const style = getComputedStyle(document.getElementById('f-title'), '::placeholder');
-                return [style.color, style.opacity, resolve('--color-text-muted')];
+                return [style.color, style.opacity, resolve('--color-placeholder')];
             }
             """.Replace("resolve(", ResolveColor));
 
@@ -168,9 +168,10 @@ public sealed partial class ControlsTests(ApplicationHost application)
         var page = await OpenAsync();
 
         await page.Locator("#f-title").FocusAsync();
-        var inBlock = await FocusOfAsync(page, "#f-title", "--color-surface");
+        // In a block, the band is its fill: the tint a theme deals it, or its surface.
+        var inBlock = await FocusOfAsync(page, "#f-title", "var(--block-fill, var(--color-surface))");
         await page.Locator(".actions-menu-toggle").FocusAsync();
-        var onPage = await FocusOfAsync(page, ".actions-menu-toggle", "--color-background");
+        var onPage = await FocusOfAsync(page, ".actions-menu-toggle", "var(--color-background)");
 
         foreach (var focus in new[] { inBlock, onPage })
         {
@@ -201,12 +202,19 @@ public sealed partial class ControlsTests(ApplicationHost application)
     private const string ResolveColor = "(name => { const probe = document.createElement('span'); probe.style.color = `var(${name})`; " +
         "document.body.append(probe); const color = getComputedStyle(probe).color; probe.remove(); return color; })(";
 
-    // The outline color, the box shadow, then the expected colors of the text and of the band.
+    // The outline color, the box shadow, then the expected colors of the text and of the band, a color of the surface
+    // around the element, computed beside it.
     private static Task<string[]> FocusOfAsync(IPage page, string selector, string band) =>
         page.EvaluateAsync<string[]>($$"""
             () => {
-                const style = getComputedStyle(document.querySelector('{{selector}}'));
-                return [style.outlineColor, style.boxShadow, resolve('--color-text'), resolve('{{band}}')];
+                const element = document.querySelector('{{selector}}');
+                const style = getComputedStyle(element);
+                const probe = document.createElement('span');
+                probe.style.color = '{{band}}';
+                element.parentElement.append(probe);
+                const around = getComputedStyle(probe).color;
+                probe.remove();
+                return [style.outlineColor, style.boxShadow, resolve('--color-text'), around];
             }
             """.Replace("resolve(", ResolveColor));
 

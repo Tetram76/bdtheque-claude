@@ -1,5 +1,5 @@
 /* Structural rules only: the look of the application belongs to the base theme and its themes
-   (choix-implementation/socle.md § Frontend, Styles). */
+   (choix-implementation/socle/frontend.md § Frontend, Styles). */
 
 /* Focused by FocusOnNavigate after each navigation, for screen readers: not a visible focus. */
 h1:focus {

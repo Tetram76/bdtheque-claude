@@ -16,7 +16,7 @@ Il ne concerne pas non plus les aspects gestion de projet (repo, branches, proce
 | Élément | Valeur |
 | --- | --- |
 | Langage | C# / .NET |
-| Frontend | Interface web (technologie : cf. `choix-implementation/socle.md` § Frontend) |
+| Frontend | Interface web (technologie : cf. `choix-implementation/socle/frontend.md` § Frontend) |
 | Backend API | ASP.NET Core (style d'API : cf. `choix-implementation/api.md` § Organisation de l'API) |
 | ORM | EF Core |
 | Base de données | PostgreSQL |

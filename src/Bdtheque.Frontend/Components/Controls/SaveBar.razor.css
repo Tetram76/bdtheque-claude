@@ -1,4 +1,4 @@
-/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). Sticky rather than
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md § Thèmes : mise en œuvre). Sticky rather than
    fixed: it holds at the bottom of the screen while its form is in view, and never covers what follows the form. */
 .save-bar {
     --focus-gap: var(--color-surface-raised);
