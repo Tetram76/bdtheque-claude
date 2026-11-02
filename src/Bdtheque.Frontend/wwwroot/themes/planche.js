@@ -4,8 +4,11 @@
 // kept as long as it is displayed: a block redrawn at a new size keeps its drawing, only stretched to it.
 // Nothing is inserted into the page, whose nodes belong to the renderer of Blazor: a drawing is an SVG image set as a
 // custom property of its element (--block-art, --bubble-art), which themes/planche.css paints in a pseudo-element.
+// Loaded with every page whatever its theme, it acts only on a page of its own: an enhanced navigation of Blazor, which
+// keeps the scripts of the page and never runs those it inserts, can change the theme of the page.
 (() => {
     const SVG = "http://www.w3.org/2000/svg";
+    const active = () => document.documentElement.dataset.theme === "planche";
     // Room around a drawing for what goes past its element: a line past a corner, a tail, the spikes of a noise.
     const FRAME_MARGIN = 10;
     const BUBBLE_MARGIN = 48;
@@ -290,7 +293,7 @@
     const resizes = new ResizeObserver((entries) => entries.forEach((entry) => draw(entry.target)));
 
     function draw(element) {
-        if (!element.isConnected || element.offsetWidth <= 1 || !sizeChanged(element))
+        if (!active() || !element.isConnected || element.offsetWidth <= 1 || !sizeChanged(element))
             return;
         const page = getComputedStyle(document.documentElement);
         const ink = page.getPropertyValue("--color-text").trim();
@@ -312,6 +315,8 @@
     // Deals what a block or a title has not been dealt yet in this display, then draws it. A title whose shape changes its
     // size (a cloud or a star takes more room) is drawn once its new size is laid out, by the observer of its size.
     function apply() {
+        if (!active())
+            return;
         const blocks = [...document.querySelectorAll(".block")];
         blocks.forEach((block, n) => {
             if (block.dataset.tint === undefined) {
@@ -354,13 +359,16 @@
     }).observe(document.body, { childList: true, subtree: true });
 
     // An enhanced navigation of Blazor displays a new page, which gets a new deal: its blocks may be those of the previous
-    // page, whose attributes it set again.
+    // page, whose attributes it set again. The new page may also be in another theme (the theme of a visit drawn again at
+    // a new date): it is then left as its theme presents it, or drawn when it enters this theme.
     document.addEventListener("DOMContentLoaded", () =>
         window.Blazor?.addEventListener("enhancedload", () => {
             newDisplay();
             for (const element of document.querySelectorAll(".block, .block-title")) {
                 for (const name of ["tint", "seed", "shape", "tailAt", "tailFlip", "drawn"])
                     delete element.dataset[name];
+                for (const property of ["--block-fill", "--block-art", "--block-art-inset", "--bubble-art", "--bubble-art-inset"])
+                    element.style.removeProperty(property);
                 drawnSizes.delete(element);
             }
             apply();

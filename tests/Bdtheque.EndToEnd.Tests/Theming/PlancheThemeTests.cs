@@ -127,6 +127,43 @@ public sealed class PlancheThemeTests(ApplicationHost application)
         Assert.All(await CasesAsync(page), @case => Assert.NotNull(@case.Shape));
     }
 
+    // A visit whose theme is drawn again (a new date, the browser left open) changes theme on an enhanced navigation of
+    // Blazor, which inserts the nodes of the new page without running their scripts.
+    [Fact]
+    public async Task EnhancedNavigation_IntoThisTheme_DrawsTheBlocksOfTheNewPage()
+    {
+        var page = await OpenAsync(ThemeCatalog.Base.Key);
+
+        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Planche.Key });
+        await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
+        await page.WaitForURLAsync(url => url.Contains("again=1"));
+        await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Planche.Key);
+
+        await page.WaitForFunctionAsync("() => [...document.querySelectorAll('.block')].every(block => block.dataset.drawn !== undefined)",
+            null, new() { Timeout = 5000 });
+        Assert.All(await CasesAsync(page), @case => Assert.NotNull(@case.Shape));
+    }
+
+    [Fact]
+    public async Task EnhancedNavigation_OutOfThisTheme_DrawsNothingOnTheNewPage()
+    {
+        var page = await OpenAsync(ThemeCatalog.Planche.Key);
+
+        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Base.Key });
+        await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
+        await page.WaitForURLAsync(url => url.Contains("again=1"));
+        await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Base.Key);
+        // Past the frame in which the script of the theme would deal and draw the new page.
+        await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
+
+        Assert.All(await CasesAsync(page), @case =>
+        {
+            Assert.False(@case.Drawn, @case.Title);
+            Assert.Null(@case.Shape);
+            Assert.Equal(0, @case.Tint);
+        });
+    }
+
     [Fact]
     public async Task BaseTheme_DrawsNothing()
     {

@@ -7,7 +7,7 @@ namespace Bdtheque.Frontend.Theming;
 /// </summary>
 /// <param name="Script">
 /// The script that draws the touches a stylesheet cannot (e.g. edges drawn by hand, tinted at random), hooked on the
-/// same anchors; none for most themes.
+/// same anchors; none for most themes. Loaded with every page, it acts only on a page of its theme.
 /// </param>
 /// <param name="PreloadedFont">The font of its text, which the page asks for before its stylesheets reveal it.</param>
 public sealed record Theme(string Key, string? Stylesheet, string? Script, string PreloadedFont);
