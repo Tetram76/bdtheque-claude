@@ -70,5 +70,6 @@ document.addEventListener("DOMContentLoaded", () =>
     window.Blazor?.addEventListener("enhancedload", () => document.querySelectorAll("app-scroll-row").forEach(center)));
 
 // A row is centered as soon as it is parsed, often before the fonts of the page arrive, which change the width of its
-// entries: it is centered again once they are laid out.
-document.fonts?.ready.then(() => document.querySelectorAll("app-scroll-row").forEach(center));
+// entries: it is centered again once they are laid out. Not awaited: the promise of the fonts is never rejected (CSS Font
+// Loading), and only their first loading recenters the row, never a later one, which would move it under the user.
+void document.fonts?.ready.then(() => document.querySelectorAll("app-scroll-row").forEach(center));
