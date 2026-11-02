@@ -3,7 +3,7 @@
 # Loader of the validation data, run once by the validation environment (choix-implementation/deploiement.md
 # § Environnement de validation fonctionnelle). Never published: built on the machine of the validation,
 # like the images of the pull request.
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.402 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.403 AS build
 ARG TARGETARCH
 WORKDIR /src
 
@@ -18,7 +18,7 @@ RUN dotnet publish src/Bdtheque.ValidationData/Bdtheque.ValidationData.csproj \
         -c Release -a $TARGETARCH --self-contained false --no-restore -p:DebugType=none -o /app
 
 # The runtime image of `api`, already on the machine: no other base image to pull nor to keep up to date.
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.13-noble-chiseled-extra AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.14-noble-chiseled-extra AS final
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "Bdtheque.ValidationData.dll"]
