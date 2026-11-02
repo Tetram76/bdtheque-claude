@@ -298,7 +298,7 @@
         const height = element.offsetHeight;
         if (element.classList.contains("block")) {
             const fill = getComputedStyle(element).getPropertyValue("--block-fill").trim();
-            const border = parseFloat(getComputedStyle(element).borderInlineStartWidth) || 0;
+            const border = Number.parseFloat(getComputedStyle(element).borderInlineStartWidth) || 0;
             element.style.setProperty("--block-art", frameArt(width, height, fill, ink, Number(element.dataset.seed)));
             element.style.setProperty("--block-art-inset", `${-(FRAME_MARGIN + border)}px`);
             element.dataset.drawn = "";
