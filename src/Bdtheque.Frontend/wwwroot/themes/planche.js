@@ -30,7 +30,7 @@
     let balloons;
 
     function newDisplay() {
-        const order = [...Array(HUES).keys()];
+        const order = Array.from({ length: HUES }, (_, hue) => hue);
         for (let i = order.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [order[i], order[j]] = [order[j], order[i]];
