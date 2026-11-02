@@ -224,7 +224,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#256~~ | Contrôles de saisie et composants interactifs : champs, choix d'une fiche, menu « ⋯ », dialogue, barre d'enregistrement |
 | ~~#257~~ | En-têtes, menus et navigation : consultation, administration, fil d'Ariane, navigation par initiale, pagination |
 | ~~#258~~ | Tirage du thème de la visite |
-| #195 | Thème « La planche encrée » |
+| ~~#195~~ | Thème « La planche encrée » |
 | #196 | Thème « La gazette » |
 | #197 | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
 | #198 | Dashboard et écran d'accueil d'une collection vide |
