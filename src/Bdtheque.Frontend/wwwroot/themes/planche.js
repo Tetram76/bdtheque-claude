@@ -110,7 +110,7 @@
             left.push([x - uy * half, y + ux * half]);
             right.push([x + uy * half, y - ux * half]);
         }
-        return closedPath([...left, ...right.reverse()]);
+        return closedPath([...left, ...right.toReversed()]);
     }
 
     // The edges of a case: a frame whose corners are a little off square, filled with the tint of the case, under an
