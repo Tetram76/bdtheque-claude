@@ -42,7 +42,13 @@
     // Tints 1 to 7: the four-color process version of a hue; 8 to 14: its softer « ligne claire » version.
     const tintOf = (n) => (n % 4 === deal.soft ? HUES + 1 : 1) + deal.order[n % HUES];
 
-    const kindOf = (text) => (/\?\s*$/.test(text) ? "question" : /!\s*$/.test(text) ? "exclamation" : "statement");
+    function kindOf(text) {
+        if (/\?\s*$/.test(text))
+            return "question";
+        if (/!\s*$/.test(text))
+            return "exclamation";
+        return "statement";
+    }
 
     // A smooth balloon (speech) for most titles; a cloud (thought) only on a question, a fifth of the balloons of a page
     // at most; a star (noise) only on an exclamation, one balloon in twenty over many displays, one per page at most.
