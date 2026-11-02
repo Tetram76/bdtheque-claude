@@ -17,7 +17,7 @@ services:
       - backend
 
   # Business logic, data access, ML.NET. Never published on the host: only
-  # `frontend` can reach it, over the `frontend-net` network (see choix-implementation/socle.md § Authentification : mise en œuvre).
+  # `frontend` can reach it, over the `frontend-net` network (see choix-implementation/socle/transverse.md § Authentification : mise en œuvre).
   api:
     image: tetram76/bdtheque-api:${BDTHEQUE_TAG:-nightly}
     build:

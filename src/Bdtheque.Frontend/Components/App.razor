@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <ResourcePreloader />
-    <link rel="preload" href="@Assets["fonts/inter/inter-latin-wght-normal.woff2"]" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="@Assets[Theme.PreloadedFont]" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["themes/base.css"]" />
     @if (Theme.Stylesheet is { } stylesheet)
@@ -30,6 +30,13 @@
     <script src="@Assets["browser-time-zone.js"]"></script>
     <script src="@Assets["modal-dialog.js"]"></script>
     <script src="@Assets["scroll-row.js"]"></script>
+    @* The scripts of every offered theme, on every page, each acting only on a page of its theme: an enhanced navigation
+       keeps the scripts of the page and never runs those it inserts, while the theme of the visit can change from one
+       page to the next (a new date). Before Blazor, as the other scripts: a script draws the page as soon as it is parsed. *@
+    @foreach (var script in ThemeCatalog.Offered.Select(theme => theme.Script).OfType<string>())
+    {
+        <script src="@Assets[script]"></script>
+    }
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 

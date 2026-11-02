@@ -17,7 +17,7 @@ builder.Services.AddRazorComponents()
     // An interactive component keeps the time zone of the request that opened its circuit, which brings no cookie.
     .RegisterPersistentService<BrowserTimeZone>(RenderMode.InteractiveServer);
 
-// No text shown to the user is written in the code: each component reads its own (choix-implementation/socle.md
+// No text shown to the user is written in the code: each component reads its own (choix-implementation/socle/transverse.md
 // § Internationalisation). The display culture is a setting of the application, French of France the only one
 // offered (fonctionnel/presentation.md § Langue et culture d'affichage): never the one the browser asks for.
 builder.Services.AddLocalization();
@@ -26,7 +26,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SetDefaultCulture(DisplayCulture.Name).AddSupportedCultures(DisplayCulture.Name).AddSupportedUICultures(DisplayCulture.Name);
     options.RequestCultureProviders.Clear();
 });
-// The time zone of the browser, which its cookie brings to every request (choix-implementation/socle.md § Internationalisation),
+// The time zone of the browser, which its cookie brings to every request (choix-implementation/socle/transverse.md § Internationalisation),
 // re-executed error pages included.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped(services => new BrowserTimeZone
@@ -40,7 +40,7 @@ builder.Services.AddScoped<IThemeSelector, VisitThemeSelector>();
 builder.Services.AddSingleton(TimeProvider.System);
 
 // The authentication cookie is owned exclusively by this container (BFF):
-// `api` has no knowledge of the user (see choix-implementation/socle.md § Authentification : mise en œuvre).
+// `api` has no knowledge of the user (see choix-implementation/socle/transverse.md § Authentification : mise en œuvre).
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

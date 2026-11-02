@@ -1,4 +1,4 @@
-/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). The look of the
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md § Thèmes : mise en œuvre). The look of the
    control itself is the base theme's (themes/base.css), the same inside a field or not. */
 .field {
     display: flex;
@@ -20,7 +20,7 @@
 
 /* Its characters, its inner margins and its border: never wider than the field. */
 .field[style] ::deep :is(input, select) {
-    inline-size: calc(var(--field-characters) * 1ch + 2 * var(--control-padding-inline) + 2px);
+    inline-size: calc(var(--field-characters) * 1ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
     max-inline-size: 100%;
 }
 

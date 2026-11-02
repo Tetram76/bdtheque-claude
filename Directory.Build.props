@@ -10,7 +10,7 @@
     <!-- The French UI needs culture-aware date/currency formatting and linguistic sorting
          (fr-FR), which the globalization-invariant mode would silently disable. The base
          images (aspnet, noble-chiseled-extra variant) ship ICU for that reason: the plain
-         chiseled variant does not. See choix-implementation/socle.md § Internationalisation. -->
+         chiseled variant does not. See choix-implementation/socle/transverse.md § Internationalisation. -->
     <InvariantGlobalization>false</InvariantGlobalization>
     <Deterministic>true</Deterministic>
     <!-- The XML comments are checked by the compiler, a malformed comment, or one that refers to a

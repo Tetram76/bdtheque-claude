@@ -70,8 +70,19 @@ public sealed class ApplicationHost : IAsyncLifetime
     /// <summary>A page of its own, at the size of the given screen (e.g. a smartphone).</summary>
     public Task<IPage> NewPageAsync(ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions { ViewportSize = viewport });
 
-    /// <summary>A page of its own presented in the given theme, at the size of the given screen, for its capture.</summary>
-    public Task<IPage> NewCapturePageAsync(string themeKey, ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions
+    /// <summary>
+    /// A page of its own presented in the given theme, at the size of the given screen, for its capture. What a theme
+    /// draws at random (themes/planche.js) is drawn from the same sequence of numbers at each capture.
+    /// </summary>
+    public async Task<IPage> NewCapturePageAsync(string themeKey, ViewportSize viewport)
+    {
+        var page = await NewPageInThemeAsync(themeKey, viewport);
+        await page.AddInitScriptAsync(SeededRandom);
+        return page;
+    }
+
+    /// <summary>A page of its own presented in the given theme, at the size of the given screen.</summary>
+    public Task<IPage> NewPageInThemeAsync(string themeKey, ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions
     {
         ViewportSize = viewport,
         DeviceScaleFactor = 1,
@@ -80,6 +91,9 @@ public sealed class ApplicationHost : IAsyncLifetime
         ReducedMotion = ReducedMotion.Reduce,
         ExtraHTTPHeaders = new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = themeKey },
     });
+
+    // Park-Miller, from a fixed seed, in place of the random numbers of the browser.
+    private const string SeededRandom = "(() => { let s = 20261102; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647; })()";
 
     private async Task<IPage> NewPageAsync(BrowserNewContextOptions options)
     {

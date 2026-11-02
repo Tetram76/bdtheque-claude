@@ -9,9 +9,9 @@ namespace Bdtheque.Frontend.Tests.Theming;
 /// </summary>
 public sealed class VisitThemeTests
 {
-    private static readonly Theme First = new("first", "themes/first.css");
-    private static readonly Theme Second = new("second", "themes/second.css");
-    private static readonly Theme Third = new("third", "themes/third.css");
+    private static readonly Theme First = new("first", "themes/first.css", Script: null, "fonts/first.woff2");
+    private static readonly Theme Second = new("second", "themes/second.css", Script: null, "fonts/second.woff2");
+    private static readonly Theme Third = new("third", "themes/third.css", Script: null, "fonts/third.woff2");
     private static readonly IReadOnlyList<Theme> Offered = [First, Second, Third];
 
     private static readonly DateOnly Today = new(2026, 10, 30);

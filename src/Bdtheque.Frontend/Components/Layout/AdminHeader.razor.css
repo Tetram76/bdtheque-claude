@@ -1,8 +1,10 @@
-/* Built on the contracts of the theme only (choix-implementation/socle.md § Thèmes : mise en œuvre). */
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md § Thèmes : mise en œuvre). */
 .admin-tag {
     padding: 0.125rem var(--space-s);
     border-radius: var(--radius-control);
     background: var(--color-tag);
+    /* The border of a tag, drawn inside it: the tag keeps its size whatever the width of the border. */
+    box-shadow: inset 0 0 0 var(--border-width-control) var(--color-tag-border);
     color: var(--color-text-on-tag);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
@@ -44,7 +46,7 @@
 
 .admin-menu-toggle {
     padding: 0 var(--control-padding-inline);
-    border: 1px solid var(--color-control-border);
+    border: var(--border-width-control) solid var(--color-control-border);
     background: var(--color-surface);
     anchor-name: --admin-menu-toggle;
 }
@@ -109,7 +111,7 @@
     inline-size: var(--control-height);
     block-size: var(--control-height);
     padding: 0;
-    border: 1px solid var(--color-control-border);
+    border: var(--border-width-control) solid var(--color-control-border);
     border-radius: var(--radius-control);
     background: transparent;
     color: var(--color-text);

@@ -23,7 +23,7 @@ L'application est la réécriture d'une application client lourd existante sous 
 
 ## Nom de l'application
 
-Le nom définitif de l'application n'est pas encore défini. Le **nom de travail** est **`bdtheque-claude`** (nom du dépôt git).
+Le nom définitif de l'application n'est pas encore défini. L'application s'affiche sous le nom **BDthèque** (logo des en-têtes) ; le **nom de travail** du dépôt git reste **`bdtheque-claude`**.
 
 ## Design et charte graphique
 

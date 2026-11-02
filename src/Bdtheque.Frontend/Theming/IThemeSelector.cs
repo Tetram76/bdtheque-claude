@@ -12,7 +12,7 @@ public interface IThemeSelector
 /// <summary>
 /// The theme of the visit of the browser (<see cref="VisitTheme"/>), read from its cookie and written back when the
 /// request continues the visit otherwise (new visit, new date, theme drawn again). Chosen while the page is rendered
-/// statically, by its root component, before the response starts (choix-implementation/socle.md § Thèmes : mise en
+/// statically, by its root component, before the response starts (choix-implementation/socle/themes.md § Thèmes : mise en
 /// œuvre): an interactive circuit has no request, and never asks.
 /// </summary>
 public sealed class VisitThemeSelector(IHttpContextAccessor httpContextAccessor, BrowserTimeZone timeZone, TimeProvider clock) : IThemeSelector

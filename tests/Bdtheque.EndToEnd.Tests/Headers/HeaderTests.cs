@@ -2,6 +2,7 @@ extern alias frontend;
 
 using System.Text.RegularExpressions;
 using frontend::Bdtheque.Frontend.Navigation;
+using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests.Headers;
 
@@ -185,6 +186,22 @@ public sealed partial class HeaderTests(ApplicationHost application)
         Assert.True(search!.Y >= toggle!.Y + toggle.Height, "The search is not under the line of the menu button.");
         Assert.True(toggle.Y < logo!.Y + logo.Height, "The menu button is not on the line of the logo.");
         Assert.Equal(toggle.Height, toggle.Width, 1);
+    }
+
+    public static TheoryData<string> OfferedThemes => [.. ThemeCatalog.Offered.Select(theme => theme.Key)];
+
+    [Theory]
+    [MemberData(nameof(OfferedThemes))]
+    public async Task ConsultationMenu_OnADesktopScreen_ShowsEveryEntry_WithoutScrolling(string theme)
+    {
+        var page = await application.NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
+        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.EvaluateAsync("() => document.fonts.ready");
+
+        var overflow = await page.Locator("app-scroll-row.consultation-menu .scroll-row-items")
+            .EvaluateAsync<int>("items => items.scrollWidth - items.clientWidth");
+
+        Assert.True(overflow <= 0, $"The menu of the consultation overflows its room by {overflow} px.");
     }
 
     [Fact]

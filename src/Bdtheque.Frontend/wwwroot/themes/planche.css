@@ -1,0 +1,237 @@
+/* « La planche encrée »: the page of a comic (visuel/dashboard.md § La planche encrée), white outside its blocks, black
+   ink throughout. Each block is a case of its own tint, with edges drawn by hand, and its title a balloon straddling the
+   top edge of the case: themes/planche.js deals the tints and draws edges and balloons at each display, which the rules
+   below only frame. In the administration, the case is kept whole, without any tilt but the logo's
+   (visuel/administration.md § Ton). Every pair of colors read together is checked by ThemeContrastTests. */
+
+/* Served by the application, SIL Open Font License 1.1 (fonts/…/OFL.txt): Delius for the text, Fraunces for the titles
+   and figures, Patrick Hand for the lettering of the balloons, in the subsets that cover the names of the catalog. Delius
+   has a Latin subset only: Inter, of the base theme, draws the letters it lacks. */
+@font-face {
+    font-family: "Delius";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url("../fonts/delius/delius-latin-400-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Fraunces";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/fraunces/fraunces-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Fraunces";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/fraunces/fraunces-latin-ext-wght-normal.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: "Patrick Hand";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url("../fonts/patrick-hand/patrick-hand-latin-400-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Patrick Hand";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url("../fonts/patrick-hand/patrick-hand-latin-ext-400-normal.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+[data-theme="planche"] {
+    /* Colors: black ink on white; balloons, insets, captions, fields and tags stay white, ringed with black. */
+    --color-background: #FFFFFF;
+    --color-surface: #FFFFFF;
+    --color-surface-raised: #FFFFFF;
+    --color-surface-inverse: #111111;
+    --color-text-on-inverse: #FFFFFF;
+    --color-text: #111111;
+    --color-text-secondary: #111111;
+    --color-text-muted: #111111;
+    --color-rule: #111111;
+    --color-control-border: #111111;
+    --color-control-background: #FFFFFF;
+    --color-placeholder: #5C5C5C;
+    --color-accent: #111111;
+    --color-text-on-accent: #FFFFFF;
+    --color-accent-text: #111111;
+    --color-alert: #C2410C;
+    --color-text-on-alert: #FFFFFF;
+    --color-info: #4FB0E6;
+    --color-text-on-info: #111111;
+    --color-delete: #B42318;
+    --color-text-on-delete: #FFFFFF;
+    --color-failure: #4A4A57;
+    --color-text-on-failure: #FFFFFF;
+    --color-tag: #FFFFFF;
+    --color-text-on-tag: #111111;
+    --color-tag-border: #111111;
+    /* The seven hues of the cases, in their four-color process version. */
+    --color-palette-1: #FFC93C;
+    --color-palette-2: #4FB0E6;
+    --color-palette-3: #F2775A;
+    --color-palette-4: #63C36A;
+    --color-palette-5: #A47AE0;
+    --color-palette-6: #F483AE;
+    --color-palette-7: #33C2B1;
+    --color-text-on-palette: #111111;
+    /* The tints of the cases: yellow, blue, coral, green, violet, pink and turquoise, in their four-color process version,
+       then in their softer « ligne claire » version. */
+    --color-block-tint-1: #FFC93C;
+    --color-block-tint-2: #4FB0E6;
+    --color-block-tint-3: #F2775A;
+    --color-block-tint-4: #63C36A;
+    --color-block-tint-5: #A47AE0;
+    --color-block-tint-6: #F483AE;
+    --color-block-tint-7: #33C2B1;
+    --color-block-tint-8: #F4D35E;
+    --color-block-tint-9: #8EC5E8;
+    --color-block-tint-10: #F2A07B;
+    --color-block-tint-11: #9FD39A;
+    --color-block-tint-12: #C9A7E3;
+    --color-block-tint-13: #F6B8C8;
+    --color-block-tint-14: #7FD1C7;
+
+    /* Typography */
+    --font-heading: "Fraunces", Georgia, serif;
+    --font-text: "Delius", "Inter", sans-serif;
+    --font-figures: "Fraunces", Georgia, serif;
+    --font-weight-heading: 800;
+    --font-weight-strong: 700;
+
+    /* Shapes: square cases ringed with ink, round fields and buttons. */
+    --radius-block: 0;
+    --radius-control: 999px;
+    --radius-multiline: 1rem;
+    --radius-cover: 0;
+    --border-block: 3px solid #111111;
+    --border-width-control: 2px;
+    --border-width-nav-entry: 2px;
+    --border-header: 3px solid #111111;
+    --shadow-raised: 6px 6px 0 #111111;
+
+    --tilt-logo: -2deg;
+    --tilt-cover: -3deg;
+}
+
+/* The logo, in an inset tilted with its black shadow. */
+[data-theme="planche"] .app-logo {
+    padding: 0.125rem 0.5rem;
+    border: 3px solid var(--color-text);
+    background: var(--color-surface);
+    box-shadow: 4px 4px 0 var(--color-text);
+    font-size: 1rem;
+}
+
+/* Smaller on a smartphone, where the header of the administration keeps the logo, its tag and its actions on one line. */
+@media (min-width: 48rem) {
+    [data-theme="planche"] .app-logo {
+        padding-inline: 0.875rem;
+        font-size: 1.375rem;
+    }
+}
+
+/* A cover in a white frame ringed with black. */
+[data-theme="planche"] .cover {
+    border: 2px solid var(--color-text);
+    background: var(--color-surface);
+}
+
+/* A case leaves room above it for the balloon of its title, which straddles its top edge. */
+[data-theme="planche"] .block:has(> header > .block-title) {
+    margin-block-start: 1.5rem;
+}
+
+/* The content of a case comes above the edges drawn behind it (::before), which precede it among positioned elements. */
+[data-theme="planche"] .block > * {
+    position: relative;
+}
+
+/* Once drawn, the edges and the fill of the case are those of the drawing, and follow its corners off square. */
+[data-theme="planche"] .block[data-drawn] {
+    background: transparent;
+    border-color: transparent;
+}
+
+[data-theme="planche"] .block[data-drawn]::before {
+    content: "";
+    position: absolute;
+    inset: var(--block-art-inset);
+    background: var(--block-art) no-repeat;
+    pointer-events: none;
+}
+
+/* The title, a white balloon lettered by hand; until it is drawn, a plain round box. */
+[data-theme="planche"] .block-title {
+    position: relative;
+    isolation: isolate;
+    /* A block fitted to its text, whose negative top margin lifts it over the edge, as that of an inline block does not. */
+    display: block;
+    inline-size: fit-content;
+    max-inline-size: min(100%, 35rem);
+    margin: calc(-1 * var(--space-l) - 1rem) 0 1.375rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1.5rem;
+    background: var(--color-surface);
+    box-shadow: 0 0 0 3px var(--color-text);
+    color: var(--color-text);
+    font-family: "Patrick Hand", "Delius", cursive;
+    font-weight: 400;
+    font-size: 1.3125rem;
+    line-height: 1.12;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+}
+
+[data-theme="planche"] h1.block-title {
+    font-size: 1.625rem;
+}
+
+@media (min-width: 48rem) {
+    [data-theme="planche"] .block-title {
+        font-size: 1.5625rem;
+    }
+
+    [data-theme="planche"] h1.block-title {
+        font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+    }
+}
+
+[data-theme="planche"] .block-title[data-shape] {
+    background: transparent;
+    box-shadow: none;
+}
+
+[data-theme="planche"] .block-title[data-shape]::before {
+    content: "";
+    position: absolute;
+    inset: var(--bubble-art-inset);
+    z-index: -1;
+    background: var(--bubble-art) no-repeat;
+    pointer-events: none;
+}
+
+/* A thought leaves room for its puffs under it, a noise for its spikes all around. */
+[data-theme="planche"] .block-title[data-shape="cloud"] {
+    margin-block: calc(-1 * var(--space-l) - 0.25rem) 2.625rem;
+    padding: 1.25rem 2.25rem 1.125rem;
+}
+
+[data-theme="planche"] .block-title[data-shape="star"] {
+    margin: calc(-1 * var(--space-l) + 0.125rem) calc(5% + 1rem) 2.625rem;
+    padding: 1.875rem 2.75rem;
+}

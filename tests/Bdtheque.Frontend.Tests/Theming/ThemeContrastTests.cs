@@ -7,7 +7,7 @@ namespace Bdtheque.Frontend.Tests.Theming;
 /// <summary>
 /// Every pair of colors of the contracts meant to be read together reaches its contrast, in every offered theme: 4.5:1
 /// for a text, 3:1 for the border of a control (WCAG 2.2, 1.4.3 and 1.4.11). A theme only redefines the contracts of the
-/// base theme (choix-implementation/socle.md § Thèmes : mise en œuvre), so its colors are those of the base theme
+/// base theme (choix-implementation/socle/themes.md § Thèmes : mise en œuvre), so its colors are those of the base theme
 /// overlaid with its own.
 /// </summary>
 public sealed partial class ThemeContrastTests
@@ -40,6 +40,7 @@ public sealed partial class ThemeContrastTests
         // A control: its text, its placeholder (liste-albums.md § Contrôles) and the border of a control in error.
         ("text", "control-background", Text),
         ("text-muted", "control-background", Text),
+        ("placeholder", "control-background", Text),
         ("control-border", "control-background", NonText),
         ("alert", "surface", NonText),
         ("alert", "surface-raised", NonText),
@@ -47,6 +48,16 @@ public sealed partial class ThemeContrastTests
         // An item of a menu that deletes, in the color of deletion on the menu (liste-albums.md § Contenu).
         ("delete", "surface-raised", Text),
         .. Enumerable.Range(1, 7).Select(index => ("text-on-palette", $"palette-{index}", Text)),
+        // A block of its own tint holds what a surface holds: texts, links and the borders of its controls. The border of a
+        // control in error is read against the inside of the control (alert on control-background, above), which suffices.
+        .. Enumerable.Range(1, 14).SelectMany(index => new[]
+        {
+            ("text", $"block-tint-{index}", Text),
+            ("text-secondary", $"block-tint-{index}", Text),
+            ("text-muted", $"block-tint-{index}", Text),
+            ("accent-text", $"block-tint-{index}", Text),
+            ("control-border", $"block-tint-{index}", NonText),
+        }),
     ];
 
     public static TheoryData<string> OfferedThemes => [.. ThemeCatalog.Offered.Select(theme => theme.Key)];

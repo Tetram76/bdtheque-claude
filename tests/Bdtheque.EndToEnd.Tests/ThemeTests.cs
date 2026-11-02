@@ -78,7 +78,11 @@ public sealed class ThemeTests(ApplicationHost application)
 
         await page.GotoAsync(AppPaths.Home);
 
-        Assert.Equal(new BrowserVisit(start, ThemeCatalog.Base.Key, today), VisitOf(await VisitCookieAsync(page)));
+        // Drawn again among the offered themes, possibly the same one, for the new date; the visit goes on.
+        var visit = VisitOf(await VisitCookieAsync(page));
+        Assert.Equal((start, today), (visit.Start, visit.ThemeDate));
+        Assert.Contains(ThemeCatalog.Offered, offered => offered.Key == visit.ThemeKey);
+        Assert.Equal(visit.ThemeKey, await page.Locator("html").GetAttributeAsync("data-theme"));
     }
 
     [Fact]
@@ -101,7 +105,8 @@ public sealed class ThemeTests(ApplicationHost application)
     [Fact]
     public async Task Page_UsesTheFontsServedByTheApplication()
     {
-        var page = await application.NewPageAsync();
+        // The font of the base theme; those of « La planche encrée » are checked with its drawings (PlancheThemeTests).
+        var page = await application.NewPageInThemeAsync(ThemeCatalog.Base.Key, new ViewportSize { Width = 1440, Height = 900 });
 
         await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
