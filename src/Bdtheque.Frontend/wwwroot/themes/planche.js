@@ -352,7 +352,6 @@
             apply();
         });
     }).observe(document.body, { childList: true, subtree: true });
-    document.fonts?.ready.then(apply);
 
     // An enhanced navigation of Blazor displays a new page, which gets a new deal: its blocks may be those of the previous
     // page, whose attributes it set again.
