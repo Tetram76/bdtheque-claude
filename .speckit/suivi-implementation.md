@@ -226,7 +226,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#258~~ | Tirage du thème de la visite |
 | ~~#195~~ | Thème « La planche encrée » |
 | ~~#196~~ | Thème « La gazette » |
-| #197 | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
+| ~~#197~~ | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
 | #198 | Dashboard et écran d'accueil d'une collection vide |
 | #199 | Connexion et page d'accueil de l'administration |
 | #200 | Liste des albums de l'administration |
