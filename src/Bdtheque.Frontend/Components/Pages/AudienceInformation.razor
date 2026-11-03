@@ -47,14 +47,8 @@
         <form method="post" @formname="@FormName" @onsubmit="ChooseAsync">
             <AntiforgeryToken />
             <input type="hidden" name="@nameof(Choice)" value="@(Opposition.IsOpposed ? Withdraw : Oppose)" />
-            @if (Opposition.IsOpposed)
-            {
-                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Choice.Withdraw"]" />
-            }
-            else
-            {
-                <Button Type="submit" Label="@L["Choice.Oppose"]" />
-            }
+            @* The main action of the block, whichever it is: the choice of the visitor. *@
+            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L[Opposition.IsOpposed ? "Choice.Withdraw" : "Choice.Oppose"]" />
         </form>
     </Block>
 </div>

@@ -25,8 +25,8 @@ browser of the agent, no reference captures shown as a validation.
 
 1. **Content complete, local checks green** → commit and push the branch, and
    open the pull request **as a draft** (template of `Tetram76/.github`), right
-   away. Do not wait for the reference captures: they come with the corrections
-   (step 4), and a capture failure of the CI does not prevent validation.
+   away. Do not wait for the reference captures: they come after the
+   validation (step 5), and a capture failure of the CI does not prevent it.
 2. **Load the validation data the screen needs** (`Bdtheque.ValidationData`),
    if the chantier adds cases, in the same draft.
 3. **Ask for the validation**, in one message, as § Validation fonctionnelle
@@ -39,12 +39,14 @@ browser of the agent, no reference captures shown as a validation.
      `-Empty` when the screen needs it), `pwsh ./scripts/Stop-Validation.ps1`.
      Never refer to an earlier message nor to the documentation.
    Then wait: nothing else on the chantier until the user answers.
-4. **Each feedback** → fixed in the draft PR (code, tests, reference captures
-   of what changed, `scripts/Test-Captures.ps1 -Update`), pushed, then step 3
-   again with the new head commit.
+4. **Each feedback** → fixed in the draft PR (code, tests), pushed at once,
+   then step 3 again with the new head commit. **No reference capture** in
+   between: the capture failures of the CI on the draft are expected, and are
+   not fixed until step 5.
 5. **Explicit validation of the head commit** → only then the reference
-   captures are complete, the SonarQube Cloud analysis is handled, and the PR
-   is marked « ready for review » (`codex-review-loop`).
+   captures are updated (`scripts/Test-Captures.ps1 -Update`), the SonarQube
+   Cloud analysis is handled, and the PR is marked « ready for review »
+   (`codex-review-loop`).
 
 A question of the user about this procedure is answered by quoting the
 `.speckit/` sections above, never by inventing another way.

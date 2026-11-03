@@ -13,7 +13,11 @@ public sealed class LayoutTests : BunitContext
 {
     private static readonly RenderFragment Body = builder => builder.AddMarkupContent(0, "<p id=\"body\">content</p>");
 
-    public LayoutTests() => Services.AddLocalization();
+    public LayoutTests()
+    {
+        Services.AddLocalization();
+        new Audience.FakeAudienceApi().AddServices(Services, new TestRequest());
+    }
 
     [Fact]
     public void PublicLayout_FramesThePage_UnderTheHeaderOfTheConsultation()

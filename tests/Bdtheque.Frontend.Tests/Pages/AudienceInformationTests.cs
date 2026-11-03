@@ -39,7 +39,8 @@ public sealed class AudienceInformationTests : BunitContext
 
         var form = page.Find("form[method='post']");
         Assert.Equal("oppose", form.QuerySelector("input[type='hidden'][name='Choice']")?.GetAttribute("value"));
-        Assert.Equal("Refuser la mesure d'audience", form.QuerySelector("button[type='submit']")?.TextContent.Trim());
+        var button = form.QuerySelector("button[type='submit']")!;
+        Assert.Equal(("Refuser la mesure d'audience", "primary"), (button.TextContent.Trim(), button.GetAttribute("data-variant")));
         Assert.Contains("Vos visites sont relevées", page.Find("#audience-choice").TextContent);
     }
 
@@ -50,7 +51,8 @@ public sealed class AudienceInformationTests : BunitContext
 
         var form = page.Find("form[method='post']");
         Assert.Equal("withdraw", form.QuerySelector("input[type='hidden'][name='Choice']")?.GetAttribute("value"));
-        Assert.Equal("Accepter de nouveau la mesure d'audience", form.QuerySelector("button[type='submit']")?.TextContent.Trim());
+        var button = form.QuerySelector("button[type='submit']")!;
+        Assert.Equal(("Accepter de nouveau la mesure d'audience", "primary"), (button.TextContent.Trim(), button.GetAttribute("data-variant")));
         Assert.Contains("aucune de vos visites n'est relevée", page.Find("#audience-choice").TextContent);
     }
 

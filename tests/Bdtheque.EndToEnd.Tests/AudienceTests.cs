@@ -79,11 +79,13 @@ public sealed class AudienceTests(ApplicationHost application)
         Assert.Equal([AudienceFunctions.AudienceInformation.Key], (await AudienceVisitByIdAsync(before)).Usages.Select(u => u.Function));
         Assert.Null((await BrowserVisitAsync(page)).AudienceVisitId);
         Assert.Equal("opposed", await page.Locator("html").GetAttributeAsync("data-audience"));
+        await Assertions.Expect(page.GetByRole(AriaRole.Contentinfo)).ToContainTextAsync("refusée");
 
         await page.GotoAsync(AppPaths.AudienceInformation);
         await page.GetByRole(AriaRole.Button, new() { Name = "Accepter de nouveau la mesure d'audience" }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Refuser la mesure d'audience" }).WaitForAsync();
 
+        await Assertions.Expect(page.GetByRole(AriaRole.Contentinfo)).ToContainTextAsync("active");
         var after = await AudienceVisitAsync(page);
         Assert.NotEqual(before, after.Visit.Id);
         Assert.Equal(
