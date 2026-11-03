@@ -9,6 +9,9 @@ public static class ThemeCatalog
     /// <summary>« La planche encrée », a page of comic (visuel/dashboard.md § La planche encrée).</summary>
     public static readonly Theme Planche = new("planche", "themes/planche.css", "themes/planche.js", "fonts/delius/delius-latin-400-normal.woff2");
 
+    /// <summary>« La gazette », the front page of a newspaper (visuel/dashboard.md § La gazette).</summary>
+    public static readonly Theme Gazette = new("gazette", "themes/gazette.css", Script: null, "fonts/dm-sans/dm-sans-latin-wght-normal.woff2");
+
     /// <summary>The themes offered. The reference captures of the screens are taken in each of them.</summary>
-    public static readonly IReadOnlyList<Theme> Offered = [Base, Planche];
+    public static readonly IReadOnlyList<Theme> Offered = [Base, Planche, Gazette];
 }

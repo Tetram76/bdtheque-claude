@@ -6,7 +6,7 @@
     padding: var(--space-m) calc(var(--page-gutter) + var(--control-height)) var(--space-m) var(--page-gutter);
     background: var(--color-failure);
     color: var(--color-text-on-failure);
-    box-shadow: var(--shadow-raised);
+    box-shadow: var(--shadow-floating);
 }
 
 #blazor-error-ui .reload {

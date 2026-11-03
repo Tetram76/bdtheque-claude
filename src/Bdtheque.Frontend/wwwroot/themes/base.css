@@ -41,6 +41,26 @@
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* Fraunces, SIL Open Font License 1.1 (fonts/fraunces/OFL.txt): the titles and figures of several themes (« La planche
+   encrée », « La gazette »), declared once; a declared font is only downloaded by a page that uses it. */
+@font-face {
+    font-family: "Fraunces";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/fraunces/fraunces-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Fraunces";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/fraunces/fraunces-latin-ext-wght-normal.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
     /* Colors */
     --color-background: #F6F5F2;
@@ -131,6 +151,15 @@
     --border-header: 1px solid var(--color-rule);
     --shadow-block: none;
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
+    /* A surface laid over the page (a menu, a dialog, the list of a field, the bar of a form): always bordered and
+       shadowed, even in a theme whose blocks are not (visuel/administration.md § En-tête et menu). */
+    --border-floating: var(--border-block);
+    --shadow-floating: var(--shadow-raised);
+    /* The current entry of the menu of the consultation: filled with the accent by default; a theme may underline it
+       instead, with a rule of its own color under a transparent fill. */
+    --nav-entry-current-fill: var(--color-accent);
+    --nav-entry-current-text: var(--color-text-on-accent);
+    --nav-entry-current-rule: transparent;
 
     /* Spacing and sizes: those of an application, tighter on a smartphone (visuel/charte-graphique.md § Convivialité et
        efficacité). A control has the same height on every page for a given screen width. */

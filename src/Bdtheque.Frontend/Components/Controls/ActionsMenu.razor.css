@@ -35,11 +35,11 @@
     min-inline-size: 12rem;
     max-inline-size: min(20rem, calc(100vw - 2 * var(--page-gutter)));
     padding: var(--space-xs);
-    border: var(--border-block);
+    border: var(--border-floating);
     border-radius: var(--radius-block);
     background: var(--color-surface-raised);
     color: var(--color-text);
-    box-shadow: var(--shadow-raised);
+    box-shadow: var(--shadow-floating);
 }
 
 .actions-menu-panel:popover-open {

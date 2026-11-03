@@ -28,9 +28,9 @@
     padding: var(--space-xl);
     background: var(--color-surface-raised);
     color: var(--color-text);
-    border: var(--border-block);
+    border: var(--border-floating);
     border-radius: var(--radius-block);
-    box-shadow: var(--shadow-raised);
+    box-shadow: var(--shadow-floating);
     opacity: 0;
     transition: display 0.5s allow-discrete, overlay 0.5s allow-discrete;
     animation: components-reconnect-modal-fadeOutOpacity 0.5s both;

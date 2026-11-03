@@ -31,8 +31,18 @@
 }
 
 .consultation-header nav a[aria-current="page"] {
-    background: var(--color-accent);
-    color: var(--color-text-on-accent);
+    position: relative;
+    background: var(--nav-entry-current-fill);
+    color: var(--nav-entry-current-text);
+}
+
+/* A straight rule under the text, which the radius of the entry would bend if it were its border or its shadow. */
+.consultation-header nav a[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    inset: auto var(--space-m) 0.25rem;
+    block-size: 3px;
+    background: var(--nav-entry-current-rule);
 }
 
 .header-tools {

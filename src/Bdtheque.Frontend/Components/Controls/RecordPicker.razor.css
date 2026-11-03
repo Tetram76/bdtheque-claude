@@ -49,11 +49,11 @@
     margin: 0;
     padding: var(--space-xs);
     list-style: none;
-    border: var(--border-block);
+    border: var(--border-floating);
     border-radius: var(--radius-block);
     background: var(--color-surface-raised);
     color: var(--color-text);
-    box-shadow: var(--shadow-raised);
+    box-shadow: var(--shadow-floating);
 }
 
 .record-picker-option,
