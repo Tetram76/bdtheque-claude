@@ -88,6 +88,20 @@ public sealed class LayoutTests : BunitContext
     }
 
     [Fact]
+    public void EveryPage_LeadsToTheInformationOnTheAudienceMeasurement()
+    {
+        // From any page, of the consultation as of the administration (fonctionnel/mesure-audience.md, Information et opposition).
+        IRenderedComponent<IComponent>[] layouts =
+        [
+            Render<PublicLayout>(parameters => parameters.Add(p => p.Body, Body)),
+            Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body)),
+        ];
+
+        Assert.All(layouts, layout =>
+            Assert.Equal("Mesure d'audience", layout.Find($"footer a[href='{AppPaths.AudienceInformation}']").TextContent.Trim()));
+    }
+
+    [Fact]
     public void AdminMenu_IsAPanelOpenedByTheMenuButton_AndClosedByItsCross()
     {
         var layout = Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body));

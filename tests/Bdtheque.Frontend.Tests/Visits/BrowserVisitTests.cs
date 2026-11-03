@@ -24,6 +24,14 @@ public sealed class BrowserVisitTests
         Assert.Equal(visit, BrowserVisit.Parse(visit.Format()));
     }
 
+    [Fact]
+    public void Visit_RecordedByTheAudienceMeasurement_KeepsItsAudienceVisit()
+    {
+        var visit = new BrowserVisit(new DateOnly(2026, 10, 30), "base", ThemeDate: null, Guid.CreateVersion7());
+
+        Assert.Equal(visit, BrowserVisit.Parse(visit.Format()));
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -31,7 +39,10 @@ public sealed class BrowserVisitTests
     [InlineData("2026-10-30|base")]
     [InlineData("30/10/2026||base")]
     [InlineData("2026-10-30|31/10/2026|base")]
-    [InlineData("2026-10-30|2026-10-31|")]
+    [InlineData("2026-10-30|2026-10-31||")]
+    // The form of the cookie before the audience measurement: a new visit.
+    [InlineData("2026-10-30|2026-10-31|base")]
+    [InlineData("2026-10-30|2026-10-31|base|not-a-visit")]
     public void Cookie_ThatIsNotAVisit_IsNoVisit(string? value) => Assert.Null(BrowserVisit.Parse(value));
 
     [Theory]

@@ -16,7 +16,7 @@ Ces choix ne sont pas imposés : ils peuvent être remis en cause si une meilleu
 | `domaine.md` | Intention d'achat, valeur d'une édition, devises, journal des modifications, paramétrage de l'application, édition « À la une », validation de l'ISBN, visuels. |
 | `recherche-avancee.md` | Recherche avancée et recherches enregistrées. |
 | `agents-ia.md` | Outil pour agents IA. |
-| `mesure-audience.md` | Mesure d'audience de l'interface web : enregistrement, compteurs, conservation, indicateurs. |
+| `mesure-audience.md` | Mesure d'audience de l'interface web : enregistrement, compteurs, conservation, indicateurs, relevé par le frontend. |
 | `reprise-donnees.md` | Accès à la base existante (Firebird), reprise des prix antérieurs à l'euro. Lu seulement pour la reprise des données (`AGENTS.md`). |
 
 ---

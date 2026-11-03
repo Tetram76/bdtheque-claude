@@ -1,0 +1,19 @@
+/* One block under the other, at the width of a text easy to read; the choice last, put forward. */
+.audience-information {
+    display: grid;
+    gap: var(--space-l);
+    max-width: 48rem;
+}
+
+.audience-information ::deep ul {
+    margin: 0 0 var(--space-m);
+    padding-inline-start: var(--space-l);
+}
+
+.audience-information ::deep li + li {
+    margin-block-start: var(--space-xs);
+}
+
+.audience-information ::deep form {
+    margin: 0;
+}

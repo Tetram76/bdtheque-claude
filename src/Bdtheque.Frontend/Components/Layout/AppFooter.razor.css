@@ -1,0 +1,8 @@
+/* Under the page, aligned on its content (.app-main), apart from it by a rule: discreet, but on every page. */
+.app-footer {
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+    padding: var(--space-m) var(--page-gutter) var(--space-l);
+    border-top: 1px solid var(--color-rule);
+    font-size: var(--font-size-small);
+}

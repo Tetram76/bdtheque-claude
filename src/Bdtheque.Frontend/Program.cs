@@ -1,4 +1,5 @@
 using Bdtheque.Frontend.Api;
+using Bdtheque.Frontend.Audience;
 using Bdtheque.Frontend.Components;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Formatting;
@@ -6,6 +7,7 @@ using Bdtheque.Frontend.Hosting;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Security;
 using Bdtheque.Frontend.Theming;
+using Bdtheque.Frontend.Visits;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Options;
@@ -36,7 +38,10 @@ builder.Services.AddScoped(services => new BrowserTimeZone
 builder.Services.AddScoped<DisplayFormatter>();
 builder.Services.AddScoped<RecordSearch>();
 builder.Services.AddSingleton(new PageAssemblies([]));
+builder.Services.AddScoped<VisitCookie>();
 builder.Services.AddScoped<IThemeSelector, VisitThemeSelector>();
+builder.Services.AddScoped<AudienceOpposition>();
+builder.Services.AddScoped<AudienceRecorder>();
 builder.Services.AddSingleton(TimeProvider.System);
 
 // The authentication cookie is owned exclusively by this container (BFF):

@@ -20,6 +20,9 @@ public static class AppPaths
     /// <summary>Logout of the administration (#199).</summary>
     public const string AdminLogout = NotYetImplemented;
 
+    /// <summary>Information of the visitor on the audience measurement, and their opposition (fonctionnel/mesure-audience.md).</summary>
+    public const string AudienceInformation = "/audience";
+
     /// <summary>Contextual help (a later part of the Phase 3).</summary>
     public const string Help = NotYetImplemented;
 

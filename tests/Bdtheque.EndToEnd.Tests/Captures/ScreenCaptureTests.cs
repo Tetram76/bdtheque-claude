@@ -26,6 +26,7 @@ public sealed class ScreenCaptureTests(ApplicationHost application)
         ["not-yet-implemented"] = AppPaths.NotYetImplemented,
         ["not-found"] = "/no-such-page",
         ["error"] = "/Error",
+        ["audience"] = AppPaths.AudienceInformation,
         // Not a screen: the page of the tests that presents the controls shared by the screens, until they use them.
         ["controls"] = Controls.ControlsPage.Path,
         // Not a screen either: the header of the administration and the navigation of its lists, until a list uses them.

@@ -1,0 +1,88 @@
+@attribute [Route(AppPaths.AudienceInformation)]
+@inject IStringLocalizer<AudienceInformation> L
+@inject AudienceOpposition Opposition
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The information of the visitor on the audience measurement, and their choice (fonctionnel/mesure-audience.md, Information
+   et opposition): its purpose, the data recorded and how long they are kept. A form rendered statically, like the page:
+   its choice is kept in a cookie, written by the response to its submission. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AudienceInformation" />
+
+<div class="audience-information">
+    <Block Title="@L["Title"]" HeadingLevel="1">
+        <p>@L["Purpose"]</p>
+        <p>@L["Exclusive"]</p>
+    </Block>
+
+    <Block Title="@L["Data.Title"]">
+        <ul>
+            <li>@L["Data.Screens"]</li>
+            <li>@L["Data.Actions"]</li>
+            <li>@L["Data.Visits"]</li>
+            <li>@L["Data.Device"]</li>
+        </ul>
+        <p>@L["Data.Minimization"]</p>
+    </Block>
+
+    <Block Title="@L["Retention.Title"]">
+        <ul>
+            <li>@L["Retention.Cookies"]</li>
+            <li>@L["Retention.Visits"]</li>
+            <li>@L["Retention.Counters"]</li>
+            <li>@L["Retention.Administrator"]</li>
+        </ul>
+    </Block>
+
+    <Block Title="@L["Choice.Title"]" Raised="true" id="audience-choice">
+        @if (Opposition.IsOpposed)
+        {
+            <p>@L["Choice.Opposed"]</p>
+        }
+        else
+        {
+            <p>@L["Choice.Recorded"]</p>
+        }
+        <form method="post" @formname="@FormName" @onsubmit="ChooseAsync">
+            <AntiforgeryToken />
+            <input type="hidden" name="@nameof(Choice)" value="@(Opposition.IsOpposed ? Withdraw : Oppose)" />
+            @if (Opposition.IsOpposed)
+            {
+                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Choice.Withdraw"]" />
+            }
+            else
+            {
+                <Button Type="submit" Label="@L["Choice.Oppose"]" />
+            }
+        </form>
+    </Block>
+</div>
+
+@code {
+    private const string FormName = "audience-choice";
+    private const string Oppose = "oppose";
+    private const string Withdraw = "withdraw";
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName)]
+    private string? Choice { get; set; }
+
+    // Then back to the page, by a redirection: reloading it does not submit the choice again.
+    private async Task ChooseAsync()
+    {
+        switch (Choice)
+        {
+            case Oppose:
+                Opposition.Oppose();
+                break;
+            case Withdraw:
+                Opposition.Withdraw();
+                await Recorder.RecordActionAsync(AudienceFunctions.AudienceOppositionWithdrawn, cancellationToken: HttpContext?.RequestAborted ?? default);
+                break;
+        }
+        Navigation.NavigateTo(AppPaths.AudienceInformation);
+    }
+}
