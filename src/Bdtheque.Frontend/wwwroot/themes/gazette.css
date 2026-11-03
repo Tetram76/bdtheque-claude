@@ -1,0 +1,107 @@
+/* « La gazette »: the front page of a newspaper (visuel/dashboard.md § La gazette), violet ink on cream paper, amber for
+   the accent and rust for the links. Its blocks are opened by a rule of ink, without a frame, each with a mention in
+   capitals above its title; a double rule sets the header apart; its only tilt is the one of a cover a page puts forward.
+   In the administration, the same, which is already sober (visuel/administration.md § Déclinaison par thème). Every pair
+   of colors read together is checked by ThemeContrastTests. */
+
+/* Served by the application, SIL Open Font License 1.1 (fonts/…/OFL.txt): DM Sans for the text, in the subsets that
+   cover the names of the catalog; Fraunces, for the titles and figures, is declared by themes/base.css. */
+@font-face {
+    font-family: "DM Sans";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 1000;
+    src: url("../fonts/dm-sans/dm-sans-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "DM Sans";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 1000;
+    src: url("../fonts/dm-sans/dm-sans-latin-ext-wght-normal.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+
+[data-theme="gazette"] {
+    /* Colors: one paper for the page, its blocks and what floats over it, violet ink for the text and the borders of the
+       controls; the rules of the paper are pale, decorative only. */
+    --color-background: #FBF3EA;
+    --color-surface: #FBF3EA;
+    --color-surface-raised: #FBF3EA;
+    --color-surface-inverse: #2B1030;
+    --color-text-on-inverse: #FBF3EA;
+    --color-text: #2B1030;
+    --color-text-secondary: #5E3F63;
+    --color-text-muted: #5E3F63;
+    --color-rule: #D9C6CF;
+    --color-control-border: #2B1030;
+    --color-control-background: #FBF3EA;
+    /* Amber fills, but is unreadable as text: links and what reads as the accent take the rust of the amounts in euros of
+       the day. */
+    --color-accent: #FFB547;
+    --color-text-on-accent: #2B1030;
+    --color-accent-text: #9A3D12;
+    --color-alert: #9A3D12;
+    --color-text-on-alert: #FBF3EA;
+    --color-info: #5E3F63;
+    --color-text-on-info: #FBF3EA;
+    --color-tag: #FFB547;
+    --color-text-on-tag: #2B1030;
+    --color-text-on-palette: #2B1030;
+
+    /* Typography */
+    --font-heading: "Fraunces", Georgia, serif;
+    --font-text: "DM Sans", "Inter", sans-serif;
+    --font-figures: "Fraunces", Georgia, serif;
+    --font-weight-heading: 800;
+    --font-weight-strong: 700;
+
+    /* Shapes: square blocks and covers, round fields and buttons. The rule of ink of a block also borders what floats
+       over the page, which keeps a shadow that the blocks, flat on the paper, do not have. */
+    --radius-block: 0;
+    --radius-control: 999px;
+    --radius-multiline: 1rem;
+    --radius-cover: 0;
+    --border-block: 2px solid #2B1030;
+    --border-width-control: 2px;
+    --border-header: 4px double #2B1030;
+    --shadow-raised: none;
+    --shadow-floating: 0 18px 40px rgb(0 0 0 / 0.28);
+    --nav-entry-current-fill: transparent;
+    --nav-entry-current-text: var(--color-text);
+    --nav-entry-current-rule: var(--color-accent);
+
+    --tilt-cover: -1.5deg;
+    --block-kicker-display: block;
+}
+
+/* The logo, set as the title of the paper, its last point in amber. */
+[data-theme="gazette"] .app-logo {
+    font-size: 1.375rem;
+    letter-spacing: -0.02em;
+}
+
+[data-theme="gazette"] .app-logo::after {
+    content: "." / "";
+    color: var(--color-accent);
+}
+
+@media (min-width: 48rem) {
+    [data-theme="gazette"] .app-logo {
+        font-size: 1.625rem;
+    }
+}
+
+/* A block, raised or not, is a column of the paper opened by its rule of ink, without a frame. */
+[data-theme="gazette"] .block {
+    border-width: 2px 0 0;
+    background: transparent;
+    padding: 0.875rem 0 0;
+}
+
+[data-theme="gazette"] .block-kicker {
+    letter-spacing: 0.1em;
+}

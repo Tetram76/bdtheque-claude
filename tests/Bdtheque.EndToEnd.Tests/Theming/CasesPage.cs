@@ -31,6 +31,9 @@ public sealed class CasesPage : ComponentBase
         "Dernières modifications",
     ];
 
+    /// <summary>The mention above each title, which only some themes show (e.g. « La gazette »).</summary>
+    public static readonly string[] Kickers = ["Saisie", "Arrivages", "Valeur", "Fiches", "Genres", "À la une", "Éditeurs", "Journal"];
+
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
         builder.OpenElement(0, "h1");
@@ -46,6 +49,7 @@ public sealed class CasesPage : ComponentBase
             builder.SetKey(title);
             builder.AddComponentParameter(21, nameof(Block.Title), title);
             builder.AddComponentParameter(22, nameof(Block.Raised), index == 0);
+            builder.AddComponentParameter(24, nameof(Block.Kicker), Kickers[index]);
             builder.AddComponentParameter(23, nameof(Block.ChildContent), (RenderFragment)Content);
             builder.CloseComponent();
         }

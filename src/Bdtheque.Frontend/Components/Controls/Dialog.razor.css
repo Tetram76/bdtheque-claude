@@ -6,11 +6,11 @@
     inline-size: min(30rem, calc(100vw - 2 * var(--page-gutter)));
     max-block-size: calc(100dvh - 2 * var(--page-gutter));
     padding: var(--space-l) var(--space-xl);
-    border: var(--border-block);
+    border: var(--border-floating);
     border-radius: var(--radius-block);
     background: var(--color-surface-raised);
     color: var(--color-text);
-    box-shadow: var(--shadow-raised);
+    box-shadow: var(--shadow-floating);
 }
 
 .dialog[open] {
