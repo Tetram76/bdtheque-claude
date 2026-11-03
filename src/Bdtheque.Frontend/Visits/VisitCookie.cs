@@ -1,3 +1,5 @@
+using Bdtheque.Frontend.Security;
+
 namespace Bdtheque.Frontend.Visits;
 
 /// <summary>
@@ -39,18 +41,9 @@ public sealed class VisitCookie(IHttpContextAccessor httpContextAccessor)
             throw new InvalidOperationException("The visit is continued within a request whose response has not started.");
         context.Response.OnStarting(() =>
         {
+            // Without an expiry: a session cookie, which the browser forgets with its session, as a visit ends.
             if (_current is { } current && current != _brought)
-                context.Response.Cookies.Append(BrowserVisit.CookieName, current.Format(), new CookieOptions
-                {
-                    // Without an expiry: a session cookie, which the browser forgets with its session, as a visit ends.
-                    Path = "/",
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.Lax,
-                    // Secure on an HTTPS request only, like the other cookies of frontend (choix-implementation/deploiement.md
-                    // § Frontend derrière le reverse proxy du NAS).
-                    Secure = context.Request.IsHttps,
-                    IsEssential = true,
-                });
+                context.Response.Cookies.Append(BrowserVisit.CookieName, current.Format(), FrontendCookies.For(context.Request));
             return Task.CompletedTask;
         });
         _writing = true;

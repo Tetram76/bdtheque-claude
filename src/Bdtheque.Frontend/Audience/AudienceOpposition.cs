@@ -1,3 +1,4 @@
+using Bdtheque.Frontend.Security;
 using Bdtheque.Frontend.Visits;
 
 namespace Bdtheque.Frontend.Audience;
@@ -25,8 +26,8 @@ public sealed class AudienceOpposition(IHttpContextAccessor httpContextAccessor,
     public void Oppose()
     {
         var context = Request();
-        context.Response.Cookies.Append(CookieName, "1", Options(context, Lifetime));
-        context.Response.Cookies.Delete(AudienceDevice.TouchScreenCookieName, Options(context, maxAge: null));
+        context.Response.Cookies.Append(CookieName, "1", FrontendCookies.For(context.Request, Lifetime));
+        context.Response.Cookies.Delete(AudienceDevice.TouchScreenCookieName, FrontendCookies.For(context.Request));
         if (visitCookie.Current is { AudienceVisitId: not null } visit)
             visitCookie.Set(visit with { AudienceVisitId = null });
         _opposed = true;
@@ -35,21 +36,9 @@ public sealed class AudienceOpposition(IHttpContextAccessor httpContextAccessor,
     public void Withdraw()
     {
         var context = Request();
-        context.Response.Cookies.Delete(CookieName, Options(context, maxAge: null));
+        context.Response.Cookies.Delete(CookieName, FrontendCookies.For(context.Request));
         _opposed = false;
     }
-
-    private static CookieOptions Options(HttpContext context, TimeSpan? maxAge) => new()
-    {
-        Path = "/",
-        MaxAge = maxAge,
-        HttpOnly = true,
-        SameSite = SameSiteMode.Lax,
-        // Secure on an HTTPS request only, like the other cookies of frontend (choix-implementation/deploiement.md
-        // § Frontend derrière le reverse proxy du NAS).
-        Secure = context.Request.IsHttps,
-        IsEssential = true,
-    };
 
     private HttpContext Request() => httpContextAccessor.HttpContext
         ?? throw new InvalidOperationException("The opposition to the audience measurement is read for a request, rendered statically.");
