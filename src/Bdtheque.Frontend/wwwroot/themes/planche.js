@@ -11,6 +11,8 @@
     const active = () => document.documentElement.dataset.theme === "planche";
     // Room around a drawing for what goes past its element: a line past a corner, a tail, the spikes of a noise.
     const FRAME_MARGIN = 10;
+    // The offset of the shadow of a case set in relief, that of --shadow-raised, which the drawing replaces.
+    const RAISED_OFFSET = 6;
     const BUBBLE_MARGIN = 48;
     const BUBBLE_STROKE = 2.5;
     const PENCIL = "#5A5A5A";
@@ -116,15 +118,40 @@
         return closedPath([...left, ...right.toReversed()]);
     }
 
+    // An outline through the corners whose edges waver a little, as a shape inked by hand does.
+    function wavyOutline(corners, waver, rand) {
+        const points = [];
+        corners.forEach((a, i) => {
+            const b = corners[(i + 1) % corners.length];
+            const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+            const [ux, uy] = [(b[0] - a[0]) / length, (b[1] - a[1]) / length];
+            const phase = rand() * 6.3;
+            const waves = 1 + rand() * 2;
+            const steps = Math.max(2, Math.ceil(length / 12));
+            for (let s = 0; s < steps; s++) {
+                const t = s / steps;
+                const offset = s === 0 ? 0 : waver * Math.sin(2 * Math.PI * waves * t + phase);
+                points.push([a[0] + ux * length * t - uy * offset, a[1] + uy * length * t + ux * offset]);
+            }
+        });
+        return closedPath(points);
+    }
+
     // The edges of a case: a frame whose corners are a little off square, filled with the tint of the case, under an
-    // inked line that overshoots some corners, over a thin pencil line slightly off the ink.
-    function frameArt(width, height, fill, ink, seed) {
+    // inked line that overshoots some corners, over a thin pencil line slightly off the ink. A case set in relief casts
+    // under it a shadow of ink offset down and to the right, following its corners and wavering like its edges: never the
+    // straight shadow of a box, under edges drawn by hand.
+    function frameArt(width, height, fill, ink, seed, raised) {
         const rand = seeded(seed);
         const m = FRAME_MARGIN;
         const corner = (x, y) => [m + x + (rand() - 0.5) * 6, m + y + (rand() - 0.5) * 6];
         const inset = 1.5;
         const corners = [corner(inset, inset), corner(width - inset, inset), corner(width - inset, height - inset), corner(inset, height - inset)];
         const edges = corners.map((c, i) => [c, corners[(i + 1) % 4]]);
+        // Drawn from a sequence of its own: the edges of the case are those it has without relief.
+        const shadow = raised
+            ? `<path d="${wavyOutline(corners.map(([x, y]) => [x + RAISED_OFFSET, y + RAISED_OFFSET]), 1.2, seeded(seed + 1))}" fill="${ink}"/>`
+            : "";
         const overshoot = ([a, b]) => {
             const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
             const u = [(b[0] - a[0]) / length, (b[1] - a[1]) / length];
@@ -132,7 +159,7 @@
             const after = rand() < 0.35 ? 2 + rand() * 5 : 0;
             return [[a[0] - u[0] * before, a[1] - u[1] * before], [b[0] + u[0] * after, b[1] + u[1] * after]];
         };
-        let body = `<path d="${closedPath(corners)}" fill="${fill}"/>`;
+        let body = `${shadow}<path d="${closedPath(corners)}" fill="${fill}"/>`;
         for (const edge of edges) {
             const [a, b] = overshoot(edge);
             const shift = () => [(rand() - 0.5) * 5, (rand() - 0.5) * 5];
@@ -302,7 +329,7 @@
         if (element.classList.contains("block")) {
             const fill = getComputedStyle(element).getPropertyValue("--block-fill").trim();
             const border = Number.parseFloat(getComputedStyle(element).borderInlineStartWidth) || 0;
-            element.style.setProperty("--block-art", frameArt(width, height, fill, ink, Number(element.dataset.seed)));
+            element.style.setProperty("--block-art", frameArt(width, height, fill, ink, Number(element.dataset.seed), element.classList.contains("block-raised")));
             element.style.setProperty("--block-art-inset", `${-(FRAME_MARGIN + border)}px`);
             element.dataset.drawn = "";
         } else {

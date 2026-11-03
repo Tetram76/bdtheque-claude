@@ -45,6 +45,15 @@
   <data name="HelpOnThisPage" xml:space="preserve">
     <value>Aide sur cette page</value>
   </data>
+  <data name="AudienceMeasurement" xml:space="preserve">
+    <value>Mesure d&apos;audience</value>
+  </data>
+  <data name="AudienceMeasurement.Active" xml:space="preserve">
+    <value>active</value>
+  </data>
+  <data name="AudienceMeasurement.Opposed" xml:space="preserve">
+    <value>refusée</value>
+  </data>
   <data name="AdminSearch" xml:space="preserve">
     <value>Retrouver une fiche</value>
   </data>

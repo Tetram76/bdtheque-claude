@@ -1,0 +1,22 @@
+@inject AudienceRecorder Recorder
+
+@* Records the display of the screen that renders it (fonctionnel/mesure-audience.md, Fonctions suivies), with the record it
+   presents, if any. Once per display: by the request that renders it, whose method is GET — not by the interactive
+   rendering that follows the prerendering of an interactive page, which has no request, nor by the rendering of a form
+   submitted, which records its action itself. *@
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [Parameter, EditorRequired]
+    public AudienceFunction Function { get; set; } = null!;
+
+    [Parameter]
+    public PresentedRecord? Record { get; set; }
+
+    protected override Task OnInitializedAsync() =>
+        HttpContext is { } context && HttpMethods.IsGet(context.Request.Method)
+            ? Recorder.RecordScreenAsync(Function, Record, context.RequestAborted)
+            : Task.CompletedTask;
+}

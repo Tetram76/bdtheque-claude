@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Mesure d&apos;audience</value>
+  </data>
+  <data name="Purpose" xml:space="preserve">
+    <value>BDthèque relève l&apos;utilisation de ses pages et de ses fonctions, pour savoir lesquelles sont utilisées, lesquelles le sont moins, et lesquelles ne le sont pas du tout.</value>
+  </data>
+  <data name="Exclusive" xml:space="preserve">
+    <value>Ces données ne servent qu&apos;à l&apos;application et à son administrateur : elles ne sont ni communiquées à un tiers, ni confiées à un service de mesure extérieur, ni utilisées pour vous suivre sur d&apos;autres sites. Elles ne produisent que des statistiques, consultées dans l&apos;administration.</value>
+  </data>
+  <data name="Data.Title" xml:space="preserve">
+    <value>Données relevées</value>
+  </data>
+  <data name="Data.Screens" xml:space="preserve">
+    <value>chaque page affichée, avec la fiche qu&apos;elle présente (par exemple la fiche d&apos;un album) ;</value>
+  </data>
+  <data name="Data.Actions" xml:space="preserve">
+    <value>chaque action déclenchée (par exemple une recherche, une page suivante, un enregistrement), avec ses paramètres, jamais un mot de passe ;</value>
+  </data>
+  <data name="Data.Visits" xml:space="preserve">
+    <value>la date et l&apos;heure de chaque utilisation, regroupées par visite : une visite couvre tous les onglets et toutes les fenêtres de votre navigateur, jusqu&apos;à sa fermeture ;</value>
+  </data>
+  <data name="Data.Device" xml:space="preserve">
+    <value>la catégorie de votre appareil (ordinateur, tablette ou smartphone), le moteur de rendu de votre navigateur et sa version, et si la visite est celle de l&apos;administrateur.</value>
+  </data>
+  <data name="Data.Minimization" xml:space="preserve">
+    <value>Rien ne vous identifie : ni adresse IP, ni identité, ni appareil précis, et rien ne permet de reconnaître vos visites d&apos;une fois sur l&apos;autre.</value>
+  </data>
+  <data name="Retention.Title" xml:space="preserve">
+    <value>Durées de conservation</value>
+  </data>
+  <data name="Retention.Cookies" xml:space="preserve">
+    <value>les cookies que la mesure d&apos;audience dépose dans votre navigateur ne vivent pas plus de 13 mois ;</value>
+  </data>
+  <data name="Retention.Visits" xml:space="preserve">
+    <value>le détail de vos visites est supprimé 25 mois après chacune d&apos;elles ;</value>
+  </data>
+  <data name="Retention.Counters" xml:space="preserve">
+    <value>les compteurs mensuels, qui ne portent plus aucune visite ni aucun parcours, sont conservés sans limite, pour suivre l&apos;évolution de l&apos;usage dans le temps ;</value>
+  </data>
+  <data name="Retention.Administrator" xml:space="preserve">
+    <value>les visites de l&apos;administrateur, utilisateur de sa propre application, sont conservées sans limite.</value>
+  </data>
+  <data name="Choice.Title" xml:space="preserve">
+    <value>Votre choix</value>
+  </data>
+  <data name="Choice.Recorded" xml:space="preserve">
+    <value>Vos visites sont relevées. Vous pouvez vous y opposer à tout moment : votre choix est retenu par ce navigateur pendant un an, et aucune de vos visites n&apos;est plus relevée jusqu&apos;à ce que vous reveniez dessus.</value>
+  </data>
+  <data name="Choice.Opposed" xml:space="preserve">
+    <value>Vous refusez la mesure d&apos;audience : aucune de vos visites n&apos;est relevée. Ce choix est retenu par ce navigateur pendant un an, ou jusqu&apos;à ce que vous reveniez dessus.</value>
+  </data>
+  <data name="Choice.Oppose" xml:space="preserve">
+    <value>Refuser la mesure d&apos;audience</value>
+  </data>
+  <data name="Choice.Withdraw" xml:space="preserve">
+    <value>Accepter de nouveau la mesure d&apos;audience</value>
+  </data>
+</root>

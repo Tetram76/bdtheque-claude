@@ -13,7 +13,11 @@ public sealed class LayoutTests : BunitContext
 {
     private static readonly RenderFragment Body = builder => builder.AddMarkupContent(0, "<p id=\"body\">content</p>");
 
-    public LayoutTests() => Services.AddLocalization();
+    public LayoutTests()
+    {
+        Services.AddLocalization();
+        new Audience.FakeAudienceApi().AddServices(Services, new TestRequest());
+    }
 
     [Fact]
     public void PublicLayout_FramesThePage_UnderTheHeaderOfTheConsultation()
@@ -85,6 +89,20 @@ public sealed class LayoutTests : BunitContext
         Assert.Equal(AppPaths.AdminSearch, header.QuerySelector("form[role='search']")?.GetAttribute("action"));
         Assert.NotNull(header.QuerySelector($"a[href='{AppPaths.Help}'][aria-label='Aide sur cette page']"));
         Assert.Equal("Aller à la consultation", header.QuerySelector($"a[href='{AppPaths.Home}']")?.TextContent.Trim());
+    }
+
+    [Fact]
+    public void EveryPage_LeadsToTheInformationOnTheAudienceMeasurement()
+    {
+        // From any page, of the consultation as of the administration (fonctionnel/mesure-audience.md, Information et opposition).
+        IRenderedComponent<IComponent>[] layouts =
+        [
+            Render<PublicLayout>(parameters => parameters.Add(p => p.Body, Body)),
+            Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body)),
+        ];
+
+        Assert.All(layouts, layout =>
+            Assert.Equal("Mesure d'audience", layout.Find($"footer a[href='{AppPaths.AudienceInformation}']").TextContent.Trim()));
     }
 
     [Fact]

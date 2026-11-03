@@ -21,6 +21,34 @@ public sealed class ApiClientTests
     }
 
     [Fact]
+    public async Task PostAsync_WithoutContentInReturn_SendsTheContract()
+    {
+        string? sent = null;
+        var client = new ApiClient(new HttpClient(new StubHandler(request =>
+        {
+            sent = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }))
+        {
+            BaseAddress = new Uri("http://api"),
+        });
+
+        await client.PostAsync("/audience/visits/1/usages", new { Function = "home" });
+
+        Assert.Equal("""{"function":"home"}""", sent);
+    }
+
+    [Fact]
+    public async Task PostAsync_WithoutContentInReturn_ThatFails_CarriesItsProblem()
+    {
+        var client = ClientAnswering(HttpStatusCode.NotFound, "application/problem+json", $$"""{"type":"{{ProblemTypes.Functional}}","status":404}""");
+
+        var problem = await ProblemOf(() => client.PostAsync("/audience/visits/1/usages", new { Function = "home" }));
+
+        Assert.Equal(new ApiProblem(ProblemCategory.Functional, 404, null, null), problem);
+    }
+
+    [Fact]
     public async Task BusinessProblem_CarriesItsRuleCode()
     {
         var client = ClientAnswering(HttpStatusCode.UnprocessableContent, "application/problem+json",

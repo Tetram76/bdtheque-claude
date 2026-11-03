@@ -1,0 +1,13 @@
+@inject IStringLocalizer<LayoutText> L
+@inject AudienceOpposition Opposition
+
+@* The foot of every page, of the consultation as of the administration: from any of them, the visitor is informed of the
+   audience measurement and can oppose it (fonctionnel/mesure-audience.md, Information et opposition). Its state for this
+   browser is shown next to the link, by a word as well as a dot: never by a color alone. *@
+<footer class="app-footer">
+    <a href="@AppPaths.AudienceInformation">@L["AudienceMeasurement"]</a>
+    <span class="audience-state" data-state="@(Opposition.IsOpposed ? "opposed" : "active")">
+        <span class="audience-dot" aria-hidden="true"></span>
+        @(Opposition.IsOpposed ? L["AudienceMeasurement.Opposed"] : L["AudienceMeasurement.Active"])
+    </span>
+</footer>

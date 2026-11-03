@@ -6,14 +6,18 @@ namespace Bdtheque.Frontend.Visits;
 /// The visit of the browser: its browsing session, shared by all its tabs and windows, another browser making another
 /// visit (fonctionnel/mesure-audience.md, Visites). Kept in a session cookie (<see cref="CookieName"/>), which the
 /// browser forgets with its session: the single delimitation of the visit, for its theme (fonctionnel/index.md § Design
-/// et charte graphique, Thème actif) as for the audience measurement (#197). It carries nothing that identifies the user.
+/// et charte graphique, Thème actif) as for the audience measurement. It carries nothing that identifies the user.
 /// </summary>
 /// <param name="Start">Date of the start of the visit, in universal time, which bounds its duration (<see cref="IsOver"/>).</param>
 /// <param name="ThemeKey">Theme of the visit.</param>
 /// <param name="ThemeDate">
 /// Date of the browser for which the theme was drawn; unknown while the browser has not given its time zone.
 /// </param>
-public sealed record BrowserVisit(DateOnly Start, string ThemeKey, DateOnly? ThemeDate)
+/// <param name="AudienceVisitId">
+/// The visit the audience measurement records the usages of this one in; none before its first usage recorded, nor
+/// while the visitor opposes the measurement.
+/// </param>
+public sealed record BrowserVisit(DateOnly Start, string ThemeKey, DateOnly? ThemeDate, Guid? AudienceVisitId = null)
 {
     public const string CookieName = "Bdtheque.Visit";
 
@@ -25,22 +29,33 @@ public sealed record BrowserVisit(DateOnly Start, string ThemeKey, DateOnly? The
 
     private const char Separator = '|';
     private const string DateFormat = "yyyy-MM-dd";
+    private const string GuidFormat = "N";
 
     /// <summary>The visit a cookie carries; <c>null</c> for no cookie, or one that is not a visit (altered, or of another form).</summary>
     public static BrowserVisit? Parse(string? value)
     {
-        if (value?.Split(Separator) is not [var start, var themeDate, var themeKey] || themeKey.Length == 0
+        if (value?.Split(Separator) is not [var start, var themeDate, var themeKey, var audienceVisit] || themeKey.Length == 0
             || !TryParseDate(start, out var startDate))
             return null;
+
+        Guid? audienceVisitId = null;
+        if (audienceVisit.Length > 0)
+        {
+            if (!Guid.TryParseExact(audienceVisit, GuidFormat, out var id))
+                return null;
+            audienceVisitId = id;
+        }
+
         if (themeDate.Length == 0)
-            return new BrowserVisit(startDate, themeKey, ThemeDate: null);
-        return TryParseDate(themeDate, out var date) ? new BrowserVisit(startDate, themeKey, date) : null;
+            return new BrowserVisit(startDate, themeKey, ThemeDate: null, audienceVisitId);
+        return TryParseDate(themeDate, out var date) ? new BrowserVisit(startDate, themeKey, date, audienceVisitId) : null;
     }
 
     public string Format() => string.Join(Separator,
         Start.ToString(DateFormat, CultureInfo.InvariantCulture),
         ThemeDate?.ToString(DateFormat, CultureInfo.InvariantCulture) ?? "",
-        ThemeKey);
+        ThemeKey,
+        AudienceVisitId?.ToString(GuidFormat, CultureInfo.InvariantCulture) ?? "");
 
     /// <summary>Whether the visit has lasted its maximum duration on the given date, in universal time.</summary>
     public bool IsOver(DateOnly today) => today >= Start.AddMonths(MaximumMonths);
