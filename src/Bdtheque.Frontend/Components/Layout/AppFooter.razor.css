@@ -11,8 +11,8 @@
     font-size: var(--font-size-small);
 }
 
-/* The state of the measurement for this browser: a dot, filled with the accent while active, hollow once refused, and
-   the word that says it. */
+/* The state of the measurement for this browser: a dot, filled with the accent while active, with the alert color once
+   refused, and the word that says it. */
 .audience-state {
     display: inline-flex;
     align-items: center;
@@ -24,10 +24,9 @@
     inline-size: 0.5rem;
     block-size: 0.5rem;
     border-radius: 50%;
-    border: 1px solid var(--color-text-secondary);
+    background: var(--color-accent);
 }
 
-.audience-state[data-state="active"] .audience-dot {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
+.audience-state[data-state="opposed"] .audience-dot {
+    background: var(--color-alert);
 }
