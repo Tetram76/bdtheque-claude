@@ -74,6 +74,30 @@ public sealed class PlancheThemeTests(ApplicationHost application)
     }
 
     [Fact]
+    public async Task CaseInRelief_CastsAShadowDrawnByHand_NotTheStraightShadowOfABox()
+    {
+        var page = await OpenAsync(ThemeCatalog.Planche.Key);
+
+        // The paths of each drawing: the fill, four pencil lines and four inked ones; and, under a case in relief, its shadow.
+        var drawings = JsonSerializer.Deserialize<Drawing[]>(await page.EvaluateAsync<JsonElement>("""
+            () => [...document.querySelectorAll('.block')].map(block => ({
+                raised: block.classList.contains('block-raised'),
+                shadow: getComputedStyle(block).boxShadow,
+                paths: decodeURIComponent(block.style.getPropertyValue('--block-art')).split('<path').length - 1,
+            }))
+            """), Json)!;
+
+        Assert.Contains(drawings, drawing => drawing.Raised);
+        Assert.All(drawings, drawing =>
+        {
+            Assert.Equal("none", drawing.Shadow);
+            Assert.Equal(drawing.Raised ? 10 : 9, drawing.Paths);
+        });
+    }
+
+    private sealed record Drawing(bool Raised, string Shadow, int Paths);
+
+    [Fact]
     public async Task Balloons_AreCloudsOnQuestionsOnly_AndStarsOnExclamationsOnly_OnePerPageAtMost()
     {
         var page = await OpenAsync(ThemeCatalog.Planche.Key);

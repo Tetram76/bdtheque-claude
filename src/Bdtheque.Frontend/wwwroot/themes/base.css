@@ -82,6 +82,9 @@
     --color-accent: #2D5DA1;
     --color-text-on-accent: #FFFFFF;
     --color-accent-text: #2D5DA1;
+    /* A state that is on (e.g. the audience measurement, active for this browser): the accent, unless the accent of the
+       theme cannot tell it from the text. */
+    --color-state-on: var(--color-accent);
     --color-alert: #A35200;
     --color-text-on-alert: #FFFFFF;
     --color-info: #1F6E8C;
@@ -146,6 +149,8 @@
     --border-block: 1px solid var(--color-rule);
     /* The border of a control, a button or a tag, and of an entry of the menu of the consultation (none by default). */
     --border-width-control: 1px;
+    /* The ring of ink around a state dot, none by default. */
+    --border-width-state-dot: 0;
     --border-width-nav-entry: 0;
     /* The rule under the header. */
     --border-header: 1px solid var(--color-rule);

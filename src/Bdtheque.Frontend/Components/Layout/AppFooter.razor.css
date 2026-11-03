@@ -11,8 +11,8 @@
     font-size: var(--font-size-small);
 }
 
-/* The state of the measurement for this browser: a dot, filled with the accent while active, with the alert color once
-   refused, and the word that says it. */
+/* The state of the measurement for this browser: a dot, in the color of a state that is on while active, in the alert
+   color once refused, ringed with ink in a theme that rings its elements, and the word that says it. */
 .audience-state {
     display: inline-flex;
     align-items: center;
@@ -23,8 +23,10 @@
 .audience-dot {
     inline-size: 0.5rem;
     block-size: 0.5rem;
+    box-sizing: content-box;
+    border: var(--border-width-state-dot) solid var(--color-text);
     border-radius: 50%;
-    background: var(--color-accent);
+    background: var(--color-state-on);
 }
 
 .audience-state[data-state="opposed"] .audience-dot {

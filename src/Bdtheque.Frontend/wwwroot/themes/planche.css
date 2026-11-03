@@ -51,6 +51,8 @@
     --color-accent: #111111;
     --color-text-on-accent: #FFFFFF;
     --color-accent-text: #111111;
+    /* Black, the accent could not tell a state that is on from the text: the green of the cases. */
+    --color-state-on: #63C36A;
     --color-alert: #C2410C;
     --color-text-on-alert: #FFFFFF;
     --color-info: #4FB0E6;
@@ -102,6 +104,7 @@
     --radius-cover: 0;
     --border-block: 3px solid #111111;
     --border-width-control: 2px;
+    --border-width-state-dot: 1.5px;
     --border-width-nav-entry: 2px;
     --border-header: 3px solid #111111;
     --shadow-raised: 6px 6px 0 #111111;
@@ -147,6 +150,8 @@
 [data-theme="planche"] .block[data-drawn] {
     background: transparent;
     border-color: transparent;
+    /* The shadow of a case set in relief is drawn with its edges (themes/planche.js). */
+    box-shadow: none;
 }
 
 [data-theme="planche"] .block[data-drawn]::before {
