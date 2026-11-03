@@ -42,20 +42,24 @@ public sealed partial record AudienceDevice(DeviceType DeviceType, RenderingEngi
         // Every browser of iOS and iPadOS draws with the WebKit of the system: that of Safari, or of the system itself,
         // whose version Chrome and Firefox report, Safari freezing it (since Safari 26).
         if (IOs().Match(userAgent) is { Success: true } ios)
-            return (RenderingEngine.WebKit, SafariVersion(userAgent) ?? MajorMinor(ios.Groups["major"].Value, ios.Groups["minor"].Value));
+            return (RenderingEngine.WebKit, SafariVersion(userAgent) ?? MajorMinor(ios.Groups[Major].Value, ios.Groups[Minor].Value));
         if (Firefox().Match(userAgent) is { Success: true } firefox)
-            return (RenderingEngine.Gecko, firefox.Groups["major"].Value);
+            return (RenderingEngine.Gecko, firefox.Groups[Major].Value);
         if (Chromium().Match(userAgent) is { Success: true } chromium)
-            return (RenderingEngine.Blink, chromium.Groups["major"].Value);
+            return (RenderingEngine.Blink, chromium.Groups[Major].Value);
         if (userAgent.Contains("AppleWebKit/", StringComparison.Ordinal) && SafariVersion(userAgent) is { } safari)
             return (RenderingEngine.WebKit, safari);
         return (RenderingEngine.Other, null);
     }
 
     private static string? SafariVersion(string userAgent) =>
-        Safari().Match(userAgent) is { Success: true } safari ? MajorMinor(safari.Groups["major"].Value, safari.Groups["minor"].Value) : null;
+        Safari().Match(userAgent) is { Success: true } safari ? MajorMinor(safari.Groups[Major].Value, safari.Groups[Minor].Value) : null;
 
     private static string MajorMinor(string major, string minor) => minor.Length == 0 ? major : $"{major}.{minor}";
+
+    // The groups of the expressions below that capture a version.
+    private const string Major = "major";
+    private const string Minor = "minor";
 
     [GeneratedRegex(@"\((?:iPhone|iPad|iPod);.*? OS (?<major>\d+)(?:_(?<minor>\d+))?")]
     private static partial Regex IOs();
