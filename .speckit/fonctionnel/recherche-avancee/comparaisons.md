@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Comparaisons'
+description: 'Comparaisons par type, donnée absente, texte, dates, montants, comparaison entre deux données.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

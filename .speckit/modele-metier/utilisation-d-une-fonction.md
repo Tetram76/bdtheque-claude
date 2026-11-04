@@ -1,6 +1,9 @@
 ---
 type: Modèle métier
 title: 'Utilisation d''une fonction'
+description: 'Attributs d''une utilisation de la mesure d''audience.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/AudienceUsage.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

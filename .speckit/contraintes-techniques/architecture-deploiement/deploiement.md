@@ -1,6 +1,11 @@
 ---
 type: Contrainte technique
 title: 'Déploiement'
+description: 'Isolation des tiers, Docker Compose, images publiées sur Docker Hub (nightly, à la demande), optimisées, sans vulnérabilité corrigeable introduite.'
+applies_to:
+  - 'docker-compose.yml'
+  - 'docker/**'
+  - '.github/workflows/docker-publish.yml'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

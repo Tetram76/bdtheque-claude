@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Gouvernance documentaire'
+description: 'Développement piloté par la spécification, primauté du .speckit, rôle de l''agent, qui décide du contenu de chaque dossier, mise à jour du .speckit.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

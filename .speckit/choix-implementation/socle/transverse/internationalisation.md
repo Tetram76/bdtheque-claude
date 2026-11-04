@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Internationalisation'
+description: 'Culture de la requête, textes en ressources, formatage, fuseau horaire du navigateur, ICU requis.'
+applies_to:
+  - 'src/Bdtheque.Frontend/Formatting/**'
+  - 'src/Bdtheque.Frontend/wwwroot/browser-time-zone.js'
+  - 'Directory.Build.props'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

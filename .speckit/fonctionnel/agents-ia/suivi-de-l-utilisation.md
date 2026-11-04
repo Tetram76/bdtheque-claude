@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Suivi de l''utilisation'
+description: 'Suivi par jeton et par session, objectif, indice d''efficacité et ses signaux, retour écrit de l''agent.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

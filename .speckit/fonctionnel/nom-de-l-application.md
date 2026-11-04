@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Nom de l''application'
+description: 'Nom affiché BDthèque, nom de travail du dépôt.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

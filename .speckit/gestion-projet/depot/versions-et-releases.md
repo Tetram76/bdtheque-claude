@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Versions et releases'
+description: 'Numérotation semver, jalons, rattachement des tickets et PR, publication d''une version (tag, release, analyse, images).'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

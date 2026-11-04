@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Saisie d''une série'
+description: 'Fiche de saisie d''une série.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

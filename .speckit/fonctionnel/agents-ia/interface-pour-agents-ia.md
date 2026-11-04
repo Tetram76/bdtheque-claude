@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Interface pour agents IA'
+description: 'Outil pour agents IA : aide à la saisie, recherche et consultation, analyses et statistiques (Phase 6).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

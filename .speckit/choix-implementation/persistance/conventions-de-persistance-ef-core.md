@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Conventions de persistance (EF Core)'
+description: 'Énumérations en entier à valeurs explicites et leur registre, chargement des collections en requêtes séparées.'
+applies_to:
+  - 'src/Bdtheque.Infrastructure/BdthequeDbContext.cs'
+  - 'src/Bdtheque.Domain/Enums/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

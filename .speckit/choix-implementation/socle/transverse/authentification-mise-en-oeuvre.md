@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Authentification : mise en œuvre'
+description: 'Cookie d''authentification porté par le frontend (BFF), secret interne exigé par api.'
+applies_to:
+  - 'src/Bdtheque.Api/Security/**'
+  - 'src/Bdtheque.Frontend/Security/**'
+  - 'src/Bdtheque.Frontend/Api/InternalApiKeyHandler.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

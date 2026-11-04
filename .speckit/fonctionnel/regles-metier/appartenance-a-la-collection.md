@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Appartenance à la collection'
+description: 'Un album fait partie de la collection s''il a une édition possédée ; seules les éditions d''intention ne sont pas possédées.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

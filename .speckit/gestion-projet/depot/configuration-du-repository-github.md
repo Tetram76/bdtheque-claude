@@ -1,6 +1,7 @@
 ---
 type: Gouvernance
 title: 'Configuration du repository GitHub'
+description: 'Réglages du dépôt GitHub, Ruleset de main, sécurité du dépôt, merge réservé à l''utilisateur ; à lire pour toute modification de la configuration GitHub.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

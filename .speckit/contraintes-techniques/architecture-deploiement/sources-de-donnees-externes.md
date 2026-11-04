@@ -1,6 +1,7 @@
 ---
 type: Contrainte technique
 title: 'Sources de données externes'
+description: 'Données des sources externes (taux de change, inflation) mises en cache.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

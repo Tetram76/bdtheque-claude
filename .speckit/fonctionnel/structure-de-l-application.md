@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Structure de l''application'
+description: 'Consultation publique (fiches, navigation, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

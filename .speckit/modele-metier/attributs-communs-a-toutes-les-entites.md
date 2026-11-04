@@ -1,6 +1,9 @@
 ---
 type: Modèle métier
 title: 'Attributs communs à toutes les entités'
+description: 'Dates de création et de dernière modification, renseignées automatiquement.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Common/EntityBase.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Album'
+description: 'Attributs d''un album : titre, clé de tri, type, hors-série, tomes, date de première publication, résumé, notes, appréciation.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Album.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/AlbumConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

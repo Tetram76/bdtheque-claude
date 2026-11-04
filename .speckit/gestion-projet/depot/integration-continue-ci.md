@@ -1,6 +1,10 @@
 ---
 type: Gouvernance
 title: 'Intégration continue (CI)'
+description: 'Workflows CI, checks requis tenus alignés sur le Ruleset, secrets, quotas de Docker Hub et de l''API GitHub consommés par chaque push.'
+tags: [socle]
+applies_to:
+  - '.github/workflows/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

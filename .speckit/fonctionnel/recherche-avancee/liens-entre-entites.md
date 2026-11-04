@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Liens entre entités'
+description: 'Critères sur les entités liées, choix du chemin, quantificateurs et groupes sur une même entité liée.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

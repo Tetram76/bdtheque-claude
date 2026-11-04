@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Gestion des devises'
+description: 'Montants dans leur devise, euros courants et euros du jour, date de référence, taux de change, ancien franc, montant non convertible.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

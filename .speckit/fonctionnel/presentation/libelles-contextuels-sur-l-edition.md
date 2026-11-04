@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Libellés contextuels sur l''édition'
+description: 'Libellés de la date et du montant selon le mode d''acquisition, gratuité.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

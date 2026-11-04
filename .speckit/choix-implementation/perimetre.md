@@ -1,6 +1,8 @@
 ---
 type: Périmètre
 title: 'Choix d''Implémentation'
+description: 'Ce que recense choix-implementation/ : choix de l''agent, remis en cause s''il le faut.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

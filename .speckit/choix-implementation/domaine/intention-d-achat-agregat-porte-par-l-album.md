@@ -1,6 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Intention d''achat : agrégat porté par l''album'
+description: 'Intentions d''achat portées par l''agrégat Album : acquisition, conversion, édition non possédée indissociable de son intention.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Album.cs'
+  - 'src/Bdtheque.Domain/Entities/PurchaseIntent.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/PurchaseIntentConfiguration.cs'
+  - 'src/Bdtheque.Api/Endpoints/PurchaseIntentEndpoints.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

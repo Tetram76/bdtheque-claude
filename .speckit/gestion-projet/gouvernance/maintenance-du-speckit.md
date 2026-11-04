@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Maintenance du .speckit'
+description: 'Restructuration du .speckit, taille des fichiers, forme des renvois ; à suivre pour toute modification du .speckit.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Images de base des conteneurs'
+description: 'Images de base épinglées, aspnet chiseled-extra, sonde de santé, contenu publié, connexion à db.'
+applies_to:
+  - 'docker/api/**'
+  - 'docker/frontend/**'
+  - 'src/Bdtheque.HealthProbe/**'
+  - 'docker-compose.yml'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

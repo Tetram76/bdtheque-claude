@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Mesure d''audience de l''interface web'
+description: 'Mesure d''audience de l''interface web conforme à la CNIL : fonctions suivies, visites, minimisation, indicateurs, information et opposition, conservation.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

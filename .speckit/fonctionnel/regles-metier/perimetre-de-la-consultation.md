@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Périmètre de la consultation'
+description: 'Base documentaire et inventaire : tout est consultable, l''appartenance est signalée, les statistiques ne portent que sur la collection.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

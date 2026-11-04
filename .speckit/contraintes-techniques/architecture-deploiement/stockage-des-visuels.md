@@ -1,6 +1,10 @@
 ---
 type: Contrainte technique
 title: 'Stockage des visuels'
+description: 'Visuels sur un volume Docker, chemin de montage configurable.'
+applies_to:
+  - 'docker-compose.yml'
+  - 'src/Bdtheque.Api/Visuals/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

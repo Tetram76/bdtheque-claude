@@ -1,6 +1,7 @@
 ---
 type: Contrainte technique
 title: 'Indépendance de l''outil pour agents IA'
+description: 'Outil pour agents IA indépendant de l''API ; conteneur souhaité, exposition non souhaitée (non-contraintes).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

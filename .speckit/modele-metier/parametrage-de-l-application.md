@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Paramétrage de l''application'
+description: 'Format du libellé des albums, culture d''affichage ; fiche unique.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/ApplicationSettings.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/ApplicationSettingsConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Intention d''achat'
+description: 'Intention sur un album ou une édition, exclusions, conversion, édition non possédée indissociable, réalisation d''une intention.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

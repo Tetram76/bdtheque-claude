@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Versions et bibliothèques'
+description: '.NET et EF Core 10 LTS, montée suivante vers .NET 12, Npgsql, ML.NET pour l''estimation.'
+applies_to:
+  - 'Directory.Packages.props'
+  - 'global.json'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

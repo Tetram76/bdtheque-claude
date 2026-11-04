@@ -1,6 +1,7 @@
 ---
 type: Choix d'implémentation
 title: 'Reprise des prix antérieurs à l''euro : devise retenue'
+description: 'Règle déterministe de la devise d''un prix antérieur à l''euro ; à lire pour la reprise des données.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

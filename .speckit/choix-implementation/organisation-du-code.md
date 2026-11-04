@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Organisation du code'
+description: 'Projets de la solution et leur rôle, projets de tests ; à lire pour ajouter un projet ou placer du code.'
+applies_to:
+  - 'Bdtheque.slnx'
+  - 'src/*/*.csproj'
+  - 'tests/*/*.csproj'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

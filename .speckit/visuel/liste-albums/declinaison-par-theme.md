@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Déclinaison par thème'
+description: 'Déclinaison par thème de la liste des albums.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

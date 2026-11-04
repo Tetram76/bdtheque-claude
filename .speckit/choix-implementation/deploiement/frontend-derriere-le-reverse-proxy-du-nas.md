@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Frontend derrière le reverse proxy du NAS'
+description: 'Une image pour le reverse proxy et l''accès interne en HTTP, adresse publique déclarée, cookies selon la requête.'
+applies_to:
+  - 'src/Bdtheque.Frontend/Hosting/**'
+  - 'src/Bdtheque.Frontend/Security/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

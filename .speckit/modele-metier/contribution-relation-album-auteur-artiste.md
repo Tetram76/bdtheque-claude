@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Contribution *(relation Album ↔ Auteur/Artiste)*'
+description: 'Rôle et artiste d''une contribution.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Contribution.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/ContributionConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

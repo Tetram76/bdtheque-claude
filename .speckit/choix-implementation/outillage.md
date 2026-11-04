@@ -1,6 +1,15 @@
 ---
 type: Choix d'implémentation
 title: 'Outillage de développement'
+description: 'Outillage .NET : packages centralisés, xunit, Testcontainers, bUnit, Playwright, couverture, commentaires XML, CI ; à lire pour tout test ou build.'
+applies_to:
+  - 'Directory.Packages.props'
+  - 'Directory.Build.props'
+  - 'tests/**'
+  - '.github/workflows/ci.yml'
+  - '.github/workflows/code-quality.yml'
+  - 'global.json'
+  - 'dotnet-tools.json'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

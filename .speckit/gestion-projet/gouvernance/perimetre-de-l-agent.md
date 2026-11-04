@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Périmètre de l''agent'
+description: 'Livrables que produit l''agent, aide contextuelle comprise.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Collation des colonnes texte'
+description: 'Collation ICU française, unicité insensible à la casse et aux accents, versions des collations vérifiées au démarrage.'
+applies_to:
+  - 'src/Bdtheque.Infrastructure/BdthequeDbContext.cs'
+  - 'src/Bdtheque.Infrastructure/CollationVersions.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Ton'
+description: 'Ton de l''administration : technique, une seule touche propre par thème, aucune inclinaison.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

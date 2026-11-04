@@ -1,6 +1,7 @@
 ---
 type: Contrainte technique
 title: 'Application existante'
+description: 'Application client lourd à réécrire : Delphi, Firebird 2.5 embarqué, dépôt des sources ; à lire pour la reprise des données.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Coût de remplacement de la collection'
+description: 'Statistique envisagée, non statuée (YAGNI).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

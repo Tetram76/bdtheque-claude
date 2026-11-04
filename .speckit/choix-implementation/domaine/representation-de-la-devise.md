@@ -1,6 +1,9 @@
 ---
 type: Choix d'implémentation
 title: 'Représentation de la devise'
+description: 'Devise en code ISO 4217, ancien franc sous le code QZF.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/EditionAcquisition.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

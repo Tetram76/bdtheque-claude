@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Plusieurs versions sur le NAS'
+description: 'Un projet Compose par version, aucun nom fixé, aucune donnée partagée entre versions.'
+applies_to:
+  - 'docker-compose.yml'
+  - '.env.example'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

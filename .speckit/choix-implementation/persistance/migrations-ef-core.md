@@ -1,6 +1,9 @@
 ---
 type: Choix d'implémentation
 title: 'Migrations EF Core'
+description: 'Migration unique avant le premier déploiement, append-only ensuite.'
+applies_to:
+  - 'src/Bdtheque.Infrastructure/Migrations/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

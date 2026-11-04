@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Cohérence entre tables'
+description: 'Règles multi-lignes garanties par le domaine seul, verrou consultatif de la hiérarchie des univers.'
+applies_to:
+  - 'src/Bdtheque.Infrastructure/UniverseHierarchy.cs'
+  - 'src/Bdtheque.Domain/Entities/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

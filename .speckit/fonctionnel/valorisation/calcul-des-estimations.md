@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Calcul des estimations'
+description: 'Toute estimation est calculée dynamiquement sur l''état courant, jamais stockée.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

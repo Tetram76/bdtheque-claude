@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Estimation de sortie d''un nouvel album'
+description: 'Estimation de la sortie du prochain tome d''une série en cours, d''après le rythme de parution.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

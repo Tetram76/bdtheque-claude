@@ -1,6 +1,8 @@
 ---
 type: Contrainte technique
 title: 'Licences'
+description: 'Aucune licence payante ; open source ou Community Edition, projets reconnus et maintenus ; à vérifier pour toute dépendance ajoutée.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

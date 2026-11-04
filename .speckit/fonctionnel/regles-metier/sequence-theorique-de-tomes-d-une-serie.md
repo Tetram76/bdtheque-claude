@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Séquence théorique de tomes d''une série'
+description: 'Séquence des tomes attendus d''une série, référence des manquants et des rythmes de parution.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

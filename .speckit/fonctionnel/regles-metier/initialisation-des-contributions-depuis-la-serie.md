@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Initialisation des contributions depuis la série'
+description: 'Contributions de la série recopiées sur un album rattaché qui n''en a pas.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

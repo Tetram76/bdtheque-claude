@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'En-tête et menu'
+description: 'En-tête et menu flottant de l''administration ; communs à ses pages.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

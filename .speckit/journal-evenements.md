@@ -1,6 +1,8 @@
 ---
 type: Journal
 title: 'Journal des évènements externes'
+description: 'Journal des évènements externes au dépôt (déploiements, incidents) ; tenu sur demande de l''utilisateur seulement ; conditionne les règles liées au premier déploiement.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

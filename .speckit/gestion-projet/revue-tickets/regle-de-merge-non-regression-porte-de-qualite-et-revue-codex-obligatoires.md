@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Règle de merge : non-régression, porte de qualité et revue Codex obligatoires'
+description: 'Conditions de fusion d''une PR : non-régression, porte de qualité, approbation de Codex, validation fonctionnelle s''il y a lieu ; contrôles locaux avant push.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Erreurs métier, fonctionnelles et techniques'
+description: 'Erreurs métier par code de règle, réponses ProblemDetails en trois catégories, traduction des violations de contraintes en base.'
+applies_to:
+  - 'src/Bdtheque.Api/Errors/**'
+  - 'src/Bdtheque.Domain/Common/DomainRule*.cs'
+  - 'src/Bdtheque.Contracts/Errors/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

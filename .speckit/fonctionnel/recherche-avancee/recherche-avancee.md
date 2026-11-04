@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Recherche avancée'
+description: 'Recherche de toute entité sur toute combinaison de critères, utilisable sans connaissance de SQL.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Le fanzine en risographie'
+description: 'Alternative « Le fanzine en risographie » : apparence, présentation, collection vide.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

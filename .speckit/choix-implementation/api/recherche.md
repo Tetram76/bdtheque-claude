@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Recherche'
+description: 'Recherche simple par inclusion, texte recherché, filtres croisés des listes, ordre des listes, expressions partagées.'
+applies_to:
+  - 'src/Bdtheque.Api/Endpoints/CatalogFilters.cs'
+  - 'src/Bdtheque.Api/Endpoints/CatalogExpressions.cs'
+  - 'src/Bdtheque.Api/Endpoints/UniverseTree.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

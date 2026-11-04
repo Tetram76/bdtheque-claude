@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Organisation de l''API'
+description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modification, fiches de consultation, dashboard, pagination, contrats ; à lire pour tout endpoint.'
+applies_to:
+  - 'src/Bdtheque.Api/Endpoints/**'
+  - 'src/Bdtheque.Contracts/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

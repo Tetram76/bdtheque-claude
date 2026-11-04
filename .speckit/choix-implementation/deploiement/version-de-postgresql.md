@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Version de PostgreSQL'
+description: 'postgres 18 alpine, épinglé, identique en production et dans les tests.'
+applies_to:
+  - 'docker-compose.yml'
+  - 'tests/Bdtheque.Testing/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Publication des images Docker'
+description: 'Images publiées, tags, nightly unique, paire cohérente, analyse des vulnérabilités, architecture, workflow de publication.'
+applies_to:
+  - '.github/workflows/docker-publish.yml'
+  - '.github/scripts/**'
+  - '.github/workflows/ci.yml'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

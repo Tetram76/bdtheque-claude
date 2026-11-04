@@ -1,6 +1,7 @@
 ---
 type: Plan d'implémentation
 title: 'Phase 1 — Modèle de domaine'
+description: 'Phase 1, modèle de domaine (v0.0.2), consolidation et ajustement de la reprise.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

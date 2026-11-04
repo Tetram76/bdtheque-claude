@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Règles de travail de l''agent'
+description: 'Contre-vérification par des sources externes avant toute décision technique ; titre de la conversation selon le chantier.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

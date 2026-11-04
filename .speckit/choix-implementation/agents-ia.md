@@ -1,6 +1,7 @@
 ---
 type: Choix d'implémentation
 title: 'Outil pour agents IA'
+description: 'Outil pour agents IA (Phase 6) : MCP, conteneur mcp, outils, jetons d''accès et de session, relevé de l''utilisation, archivage et réarmement.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

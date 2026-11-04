@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Lien entre Pull Requests et Issues'
+description: 'Référencement du ticket dans la PR, mot-clé de fermeture, tickets associés.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

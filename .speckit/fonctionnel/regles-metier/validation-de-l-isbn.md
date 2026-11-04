@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Validation de l''ISBN'
+description: 'ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l''enregistrement.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

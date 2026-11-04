@@ -1,6 +1,8 @@
 ---
 type: Périmètre
 title: 'Fonctionnel'
+description: 'Ce que contient fonctionnel/ : règles au niveau métier, aucun détail d''implémentation laissé à l''agent.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

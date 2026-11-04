@@ -1,6 +1,9 @@
 ---
 type: Choix d'implémentation
 title: 'Frontend'
+description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, erreurs ; à lire pour tout écran.'
+applies_to:
+  - 'src/Bdtheque.Frontend/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

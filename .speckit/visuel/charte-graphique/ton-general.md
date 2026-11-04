@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Ton général'
+description: 'Ton joyeux, ludique, non conventionnel, sans pastiche de comics (sauf la planche encrée).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

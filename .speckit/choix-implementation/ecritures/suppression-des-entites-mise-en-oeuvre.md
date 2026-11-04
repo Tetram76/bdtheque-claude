@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Suppression des entités : mise en œuvre'
+description: 'Impact et empreinte de suppression, verrouillage racine puis enfant, mécanisme commun, règles ON DELETE, fichiers des visuels.'
+applies_to:
+  - 'src/Bdtheque.Api/Deletion/**'
+  - 'src/Bdtheque.Api/Endpoints/DeletionEndpoints.cs'
+  - 'src/Bdtheque.Contracts/Deletion/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Éditions et intentions d''achat d''un album'
+description: 'Page des éditions et intentions d''achat d''un album dans l''administration.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

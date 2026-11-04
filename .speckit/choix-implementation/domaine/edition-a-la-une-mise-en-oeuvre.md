@@ -1,6 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Édition « À la une » : mise en œuvre'
+description: 'Historique des mises à la une, un tirage par jour sans verrou, règles du tirage en fonction pure.'
+applies_to:
+  - 'src/Bdtheque.Domain/Common/SpotlightDraw.cs'
+  - 'src/Bdtheque.Domain/Entities/EditionSpotlight.cs'
+  - 'src/Bdtheque.Infrastructure/EditionSpotlightWrites.cs'
+  - 'src/Bdtheque.Api/Endpoints/DashboardEndpoints.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

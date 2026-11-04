@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Navigation par initiale : mise en œuvre'
+description: 'Entrée de navigation calculée par le domaine selon la collation française, stockée et indexée ; clé de tri des auteurs.'
+applies_to:
+  - 'src/Bdtheque.Domain/Common/NavigationEntryCalculator.cs'
+  - 'src/Bdtheque.Domain/Common/TitleSortKeyCalculator.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/NavigationEntryColumn.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Couverture d''un album'
+description: 'Couverture d''un album : première couverture de sa plus ancienne édition illustrée, selon le contexte d''affichage.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

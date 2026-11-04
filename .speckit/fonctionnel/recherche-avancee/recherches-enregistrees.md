@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Recherches enregistrées'
+description: 'Enregistrement, rejeu avec variables, aucune intention désignée, modèle de nouvelle recherche, gestion.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

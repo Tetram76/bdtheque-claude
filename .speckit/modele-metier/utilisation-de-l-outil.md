@@ -1,6 +1,7 @@
 ---
 type: Modèle métier
 title: 'Utilisation de l''outil'
+description: 'Trace d''un appel de l''outil pour agents IA (Phase 6).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

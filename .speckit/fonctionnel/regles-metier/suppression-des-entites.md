@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Suppression des entités'
+description: 'Confirmation, impact par type d''entité, natures de lien (référence, association, composition) entité par entité.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

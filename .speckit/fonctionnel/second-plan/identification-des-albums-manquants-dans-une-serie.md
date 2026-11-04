@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Identification des albums manquants dans une série'
+description: 'Tomes manquants d''une série, intervalles, options sur les intégrales et les intentions.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

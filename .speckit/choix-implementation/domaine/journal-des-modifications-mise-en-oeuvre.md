@@ -1,6 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Journal des modifications : mise en œuvre'
+description: 'Capture des écritures à l''enregistrement, correspondance des attributs, libellés et valeurs en données, stockage JSON, API ; à lire pour toute fiche ou attribut ajouté.'
+applies_to:
+  - 'src/Bdtheque.Infrastructure/ChangeLog*.cs'
+  - 'src/Bdtheque.Domain/Entities/ChangeLog*.cs'
+  - 'src/Bdtheque.Domain/Entities/RecordLabel.cs'
+  - 'src/Bdtheque.Api/Endpoints/ChangeLogEndpoints.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

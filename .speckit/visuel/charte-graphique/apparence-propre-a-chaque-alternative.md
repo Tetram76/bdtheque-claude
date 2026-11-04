@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Apparence propre à chaque alternative'
+description: 'Règles communes aux alternatives : recherche et aide visibles, menu horizontal figé qui défile.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

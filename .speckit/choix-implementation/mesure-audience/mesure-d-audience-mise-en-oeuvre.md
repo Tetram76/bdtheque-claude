@@ -1,6 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Mesure d''audience : mise en œuvre'
+description: 'Visites, utilisations et compteurs dans l''API : enregistrement, utilisations répétées, clôture des mois, conservation, indicateurs.'
+applies_to:
+  - 'src/Bdtheque.Api/Audience/**'
+  - 'src/Bdtheque.Api/Endpoints/AudienceEndpoints.cs'
+  - 'src/Bdtheque.Contracts/Audience/**'
+  - 'src/Bdtheque.Domain/Entities/Audience*.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Saisie selon l''entité'
+description: 'Saisie d''une fiche selon l''entité : page dédiée, dans la ligne, panneau latéral.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

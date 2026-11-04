@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Accès par jeton'
+description: 'Jetons d''accès : génération dans l''administration, niveau d''accès, archivage, refus expliqué, réarmement.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Recherches enregistrées : mise en œuvre'
+description: 'Critères stockés en texte, variables par pointeur JSON, fiches désignées protégées par clé étrangère, administration et rejeu.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/SavedSearch.cs'
+  - 'src/Bdtheque.Api/Endpoints/SavedSearchEndpoints.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/SavedSearch*.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

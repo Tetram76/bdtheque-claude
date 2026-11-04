@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Valeur d''une édition : mise en œuvre'
+description: 'Règles des montants d''une édition, écriture atomique de l''acquisition, date de référence.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Edition.cs'
+  - 'src/Bdtheque.Domain/Entities/EditionAcquisition.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/EditionConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

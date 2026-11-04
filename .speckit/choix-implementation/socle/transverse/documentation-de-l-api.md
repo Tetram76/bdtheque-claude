@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Documentation de l''API'
+description: 'OpenAPI et Scalar, servis hors production.'
+applies_to:
+  - 'src/Bdtheque.Api/Program.cs'
+  - 'src/Bdtheque.Api/Hosting/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

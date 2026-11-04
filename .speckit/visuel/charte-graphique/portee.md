@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Portée'
+description: 'Toute page suit l''identité visuelle du thème actif ; l''administration dans un sens plus sobre.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

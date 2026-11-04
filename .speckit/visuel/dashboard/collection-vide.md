@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Collection vide'
+description: 'Écran d''accueil d''une collection vide, commun à toutes les alternatives.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

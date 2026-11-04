@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Design et charte graphique'
+description: 'Rendu soigné et personnel, thème tiré au hasard par visite, visuel/ référence visuelle et non contenu ; à lire pour tout écran.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

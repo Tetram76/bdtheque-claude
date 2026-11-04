@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Budget IA'
+description: 'Efficacité permanente : pas d''itération exploratoire, un push = une revue Codex et des quotas, sollicitations proportionnées, mention de Codex.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

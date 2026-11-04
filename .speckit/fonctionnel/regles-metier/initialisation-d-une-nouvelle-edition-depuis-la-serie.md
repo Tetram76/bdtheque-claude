@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Initialisation d''une nouvelle édition depuis la série'
+description: 'Pré-remplissage d''une nouvelle édition par le template de la série, ou les valeurs par défaut.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

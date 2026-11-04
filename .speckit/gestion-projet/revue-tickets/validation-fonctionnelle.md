@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Validation fonctionnelle'
+description: 'Quand un chantier est validé par l''utilisateur, avec quel environnement, à quel moment et comment la demander.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

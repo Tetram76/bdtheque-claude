@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Genres et univers d''un album'
+description: 'Genres et univers affichés d''un album : union avec ceux de sa série.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

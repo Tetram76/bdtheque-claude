@@ -1,6 +1,7 @@
 ---
 type: Modèle métier
 title: 'Session de l''outil pour agents IA'
+description: 'Ouverture et expiration d''une session de l''outil (Phase 6).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

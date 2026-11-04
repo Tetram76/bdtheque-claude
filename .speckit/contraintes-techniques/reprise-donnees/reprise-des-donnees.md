@@ -1,6 +1,7 @@
 ---
 type: Contrainte technique
 title: 'Reprise des données'
+description: 'Migration unique depuis Firebird : base existante, données non reprises, correspondances particulières ; à lire pour la reprise ou un changement du modèle qui la touche.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

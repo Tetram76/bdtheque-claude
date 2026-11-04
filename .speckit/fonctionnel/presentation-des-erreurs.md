@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Présentation des erreurs'
+description: 'Erreurs métier, fonctionnelles et techniques distinguées au premier coup d''œil.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

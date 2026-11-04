@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Paramétrage de l''application : mise en œuvre'
+description: 'Paramétrage en fiche unique, provisionnée au démarrage, adressée sans identifiant.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/ApplicationSettings.cs'
+  - 'src/Bdtheque.Infrastructure/ApplicationSettingsProvisioning.cs'
+  - 'src/Bdtheque.Api/Endpoints/ApplicationSettingsEndpoints.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

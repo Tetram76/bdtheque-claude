@@ -1,6 +1,7 @@
 ---
 type: Modèle métier
 title: 'Jeton d''accès'
+description: 'Attributs d''un jeton d''accès de l''outil pour agents IA (Phase 6).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

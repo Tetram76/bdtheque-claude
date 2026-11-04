@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Tri et navigation par initiale'
+description: 'Clé de tri des titres (article en suffixe) et des artistes, entrées A à Z, # et @, clé auto ou manuelle.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Concurrence d''accès'
+description: 'Concurrence optimiste par xmin sur les racines d''agrégat, verrou et marquage de la racine à toute écriture.'
+applies_to:
+  - 'src/Bdtheque.Infrastructure/AggregateWriteExtensions.cs'
+  - 'src/Bdtheque.Domain/Entities/Common/IAggregateRoot.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

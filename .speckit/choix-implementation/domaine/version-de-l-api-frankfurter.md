@@ -1,6 +1,7 @@
 ---
 type: Choix d'implémentation
 title: 'Version de l''API Frankfurter'
+description: 'Taux de change par l''API Frankfurter v2, taux fixes en constantes (Phase 4).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

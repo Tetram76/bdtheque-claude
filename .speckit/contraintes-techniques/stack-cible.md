@@ -1,6 +1,8 @@
 ---
 type: Contrainte technique
 title: 'Stack cible'
+description: 'Stack imposée : C# / .NET, interface web, ASP.NET Core, EF Core, PostgreSQL.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

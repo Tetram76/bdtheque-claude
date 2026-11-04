@@ -1,6 +1,7 @@
 ---
 type: Plan d'implémentation
 title: 'Phase 5 — Fonctionnalités de second plan'
+description: 'Phase 5, fonctionnalités de second plan, et sa note.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

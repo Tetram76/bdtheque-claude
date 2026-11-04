@@ -1,6 +1,7 @@
 ---
 type: Plan d'implémentation
 title: 'Phase 4 — Statistiques, devises et estimation de valeur'
+description: 'Phase 4, statistiques, devises et estimation de valeur, et ses notes.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

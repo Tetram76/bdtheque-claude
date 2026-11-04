@@ -1,6 +1,13 @@
 ---
 type: Choix d'implémentation
 title: 'Thèmes'
+description: 'Contrats du thème de base, thèmes et scripts, thème de la visite, composants de présentation, contrastes, polices, captures de référence ; à lire pour tout écran.'
+applies_to:
+  - 'src/Bdtheque.Frontend/Theming/**'
+  - 'src/Bdtheque.Frontend/wwwroot/**'
+  - 'src/Bdtheque.Frontend/Components/**'
+  - 'tests/Bdtheque.EndToEnd.Tests/**'
+  - 'scripts/Test-Captures.ps1'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

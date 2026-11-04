@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Conventions de commit'
+description: 'Conventional Commits pour les commits et titres de PR, description de PR devenue corps du commit squashé, template de PR.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

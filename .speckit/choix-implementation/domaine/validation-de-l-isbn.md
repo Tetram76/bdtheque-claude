@@ -1,6 +1,9 @@
 ---
 type: Choix d'implémentation
 title: 'Validation de l''ISBN'
+description: 'Contrôle non bloquant du chiffre de vérification de l''ISBN, exposé par l''API.'
+applies_to:
+  - 'src/Bdtheque.Domain/Common/IsbnChecksumValidator.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

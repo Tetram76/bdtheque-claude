@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Visuel d''édition'
+description: 'Type, fichier et ordre d''un visuel d''édition.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/EditionVisual.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/EditionVisualConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

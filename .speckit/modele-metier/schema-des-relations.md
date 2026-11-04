@@ -1,6 +1,7 @@
 ---
 type: Modèle métier
 title: 'Schéma des relations'
+description: 'Diagramme des relations, collection utilisateur, contrainte des contributions.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

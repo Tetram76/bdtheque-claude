@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Entrée du journal des modifications'
+description: 'Attributs d''une entrée du journal des modifications et ses règles.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/ChangeLogEntry.cs'
+  - 'src/Bdtheque.Domain/Entities/ChangeLogValue.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

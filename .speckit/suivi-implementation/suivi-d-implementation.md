@@ -1,6 +1,7 @@
 ---
 type: Plan d'implémentation
 title: 'Suivi d''implémentation'
+description: 'Ce que décrit le suivi : un chantier par ligne, état porté par le ticket, version de chaque phase.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Genre'
+description: 'Libellé d''un genre, unique sans casse ni accents.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Genre.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/GenreConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

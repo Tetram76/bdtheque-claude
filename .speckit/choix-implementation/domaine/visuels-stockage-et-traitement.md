@@ -1,6 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Visuels : stockage et traitement'
+description: 'Volume privé à api, médias servis et relayés, téléversement validé et borné, cohérence fichiers/base, version d''affichage WebP, SkiaSharp.'
+applies_to:
+  - 'src/Bdtheque.Api/Visuals/**'
+  - 'src/Bdtheque.Api/Endpoints/EditionVisualEndpoints.cs'
+  - 'src/Bdtheque.Api/Endpoints/VisualMediaEndpoints.cs'
+  - 'src/Bdtheque.Frontend/Api/VisualMediaRelay.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

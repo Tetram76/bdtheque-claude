@@ -1,6 +1,11 @@
 ---
 type: Modèle métier
 title: 'Édition'
+description: 'Attributs d''une édition : publication, fabrication, acquisition, montants, gratuité, valeurs proposées, contraintes d''intégrité.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Edition.cs'
+  - 'src/Bdtheque.Domain/Entities/EditionAcquisition.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/EditionConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

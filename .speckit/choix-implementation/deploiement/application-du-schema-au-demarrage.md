@@ -1,6 +1,9 @@
 ---
 type: Choix d'implémentation
 title: 'Application du schéma au démarrage'
+description: 'Migrations appliquées au démarrage d''api.'
+applies_to:
+  - 'src/Bdtheque.Api/Program.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

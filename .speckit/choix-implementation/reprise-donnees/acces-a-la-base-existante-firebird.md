@@ -1,6 +1,7 @@
 ---
 type: Choix d'implémentation
 title: 'Accès à la base existante (Firebird)'
+description: 'Accès à la base Firebird : kits officiels, ICU 52, UDF, copie de la base, pistes déjà explorées ; à lire pour la reprise des données.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

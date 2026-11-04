@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Journalisation'
+description: 'Journal de production sans requêtes SQL, échecs journalisés une fois par leur appelant.'
+applies_to:
+  - 'src/Bdtheque.Api/appsettings.json'
+  - 'src/Bdtheque.Infrastructure/BdthequeDbContext.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

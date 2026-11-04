@@ -1,6 +1,7 @@
 ---
 type: Plan d'implémentation
 title: 'Phase 0 — Architecture'
+description: 'Phase 0, architecture (v0.0.1).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

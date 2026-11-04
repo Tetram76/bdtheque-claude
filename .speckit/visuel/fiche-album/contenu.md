@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Contenu'
+description: 'Contenu de la fiche d''un album : visuels, identité, contributions, éditions, intentions, reste de la série.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

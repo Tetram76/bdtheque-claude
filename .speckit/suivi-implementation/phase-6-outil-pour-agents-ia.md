@@ -1,6 +1,7 @@
 ---
 type: Plan d'implémentation
 title: 'Phase 6 — Outil pour agents IA'
+description: 'Phase 6, outil pour agents IA, et ses notes.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

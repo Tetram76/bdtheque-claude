@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Langue et culture d''affichage'
+description: 'Culture d''affichage en paramètre, textes produits à la présentation, fuseau horaire du navigateur, temps universel côté serveur.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

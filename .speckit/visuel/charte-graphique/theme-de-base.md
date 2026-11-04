@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Thème de base'
+description: 'Thème de base neutre qui définit les contrats des thèmes.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

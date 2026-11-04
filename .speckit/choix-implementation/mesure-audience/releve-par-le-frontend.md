@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Relevé par le frontend'
+description: 'Relevé par le frontend : cookie de visite, écrans et actions, fonctions suivies, appareil et moteur, information et opposition ; à lire pour tout écran.'
+applies_to:
+  - 'src/Bdtheque.Frontend/Audience/**'
+  - 'src/Bdtheque.Frontend/Visits/**'
+  - 'src/Bdtheque.Frontend/wwwroot/touch-screen.js'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

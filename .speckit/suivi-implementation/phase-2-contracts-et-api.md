@@ -1,6 +1,7 @@
 ---
 type: Plan d'implémentation
 title: 'Phase 2 — Contracts et API'
+description: 'Phase 2, contrats et API (v0.0.3), consolidation et ajustements issus des maquettes et des contraintes.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

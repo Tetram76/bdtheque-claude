@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Objectifs du projet'
+description: 'Les deux objectifs du projet : réécriture de l''application, évaluation de l''agent en autonomie gouvernée.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

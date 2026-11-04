@@ -1,6 +1,10 @@
 ---
 type: Contrainte technique
 title: 'Hébergement'
+description: 'NAS Synology, TLS par son reverse proxy, accès direct en HTTP en interne, plusieurs versions sur le NAS et données d''une pré-version.'
+applies_to:
+  - 'docker-compose.yml'
+  - '.env.example'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

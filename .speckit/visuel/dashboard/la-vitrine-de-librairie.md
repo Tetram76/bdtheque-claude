@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'La vitrine de librairie'
+description: 'Alternative « La vitrine de librairie » : apparence, présentation, collection vide.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Contexte'
+description: 'L''application réécrit une BDthèque, gestionnaire de collection de bandes dessinées.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

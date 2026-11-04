@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Analyse SonarQube Cloud'
+description: 'Traitement de l''analyse SonarQube Cloud de chaque PR : moment, problèmes, porte de qualité, marquage, dispense, indisponibilité.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

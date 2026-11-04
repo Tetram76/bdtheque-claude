@@ -1,6 +1,9 @@
 ---
 type: Modèle métier
 title: 'Visite de l''interface web'
+description: 'Attributs d''une visite de la mesure d''audience.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/AudienceVisit.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

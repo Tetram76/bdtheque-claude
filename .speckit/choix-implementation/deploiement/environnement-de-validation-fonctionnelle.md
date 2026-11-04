@@ -1,6 +1,14 @@
 ---
 type: Choix d'implémentation
 title: 'Environnement de validation fonctionnelle'
+description: 'Version d''une PR lancée sur le poste en une commande, images construites localement, données de validation fictives.'
+applies_to:
+  - 'scripts/Start-Validation.ps1'
+  - 'scripts/Stop-Validation.ps1'
+  - 'docker/validation/**'
+  - 'docker/validation-data/**'
+  - 'src/Bdtheque.ValidationData/**'
+  - 'tests/Bdtheque.ValidationData.Tests/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

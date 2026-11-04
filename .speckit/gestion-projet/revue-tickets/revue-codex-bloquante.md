@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Revue Codex (bloquante)'
+description: 'Revue Codex, condition du merge : ouverture de la PR, budget épuisé, statut et traitement des retours, cycle et surveillance.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

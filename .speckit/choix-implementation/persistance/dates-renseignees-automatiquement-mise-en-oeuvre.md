@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Dates renseignées automatiquement : mise en œuvre'
+description: 'Dates de création, de modification et d''entrée dans la collection posées par le contexte, horloge de l''application, horloge des tests.'
+applies_to:
+  - 'src/Bdtheque.Infrastructure/BdthequeDbContext.cs'
+  - 'src/Bdtheque.Domain/Entities/Common/EntityBase.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

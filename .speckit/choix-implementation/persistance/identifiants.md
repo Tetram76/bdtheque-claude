@@ -1,6 +1,9 @@
 ---
 type: Choix d'implémentation
 title: 'Identifiants'
+description: 'Identifiants Guid v7 créés par le domaine.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Common/EntityBase.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

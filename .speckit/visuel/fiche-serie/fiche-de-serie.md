@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Fiche de série'
+description: 'Fiche d''une série dans la consultation.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

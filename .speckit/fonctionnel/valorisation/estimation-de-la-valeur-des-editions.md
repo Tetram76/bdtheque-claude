@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Estimation de la valeur des éditions'
+description: 'Valeur estimée des éditions possédées sans prix, par Random Forest (Phase 4).'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

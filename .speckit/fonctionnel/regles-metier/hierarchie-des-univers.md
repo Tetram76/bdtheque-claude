@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Hiérarchie des univers'
+description: 'Un élément rattaché à un univers l''est à ses ancêtres.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

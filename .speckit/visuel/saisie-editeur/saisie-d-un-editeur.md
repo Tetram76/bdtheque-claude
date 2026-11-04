@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Saisie d''un éditeur'
+description: 'Fiche de saisie d''un éditeur et de ses collections.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

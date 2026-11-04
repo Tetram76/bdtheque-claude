@@ -1,6 +1,10 @@
 ---
 type: Gouvernance
 title: 'Analyse de la qualité du code'
+description: 'Analyse SonarQube Cloud : workflow, porte de qualité, jetons, périmètre et exclusions, nouveau code ; à lire pour modifier l''analyse ou sa configuration.'
+applies_to:
+  - '.github/workflows/code-quality.yml'
+  - 'tests/Directory.Build.props'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

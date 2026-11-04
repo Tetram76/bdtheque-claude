@@ -1,6 +1,11 @@
 ---
 type: Gouvernance
 title: 'Analyse des vulnérabilités des images Docker'
+description: 'Analyse Docker Scout des images à chaque PR et avant publication ; traitement d''une vulnérabilité relevée.'
+applies_to:
+  - 'docker/**'
+  - '.github/workflows/ci.yml'
+  - '.github/workflows/docker-publish.yml'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,8 @@
 ---
 type: Périmètre
 title: 'Contraintes Techniques'
+description: 'Ce que recense contraintes-techniques/ (contraintes imposées, non-contraintes) ; l''agent n''y ajoute rien de sa propre initiative.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'L''album de vignettes'
+description: 'Alternative « L''album de vignettes » : apparence, présentation, collection vide.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

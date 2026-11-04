@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Recherche enregistrée'
+description: 'Nom, entité, critères et variables d''une recherche enregistrée.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/SavedSearch.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/SavedSearchConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

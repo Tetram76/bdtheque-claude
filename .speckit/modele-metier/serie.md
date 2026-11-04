@@ -1,6 +1,10 @@
 ---
 type: Modèle métier
 title: 'Série'
+description: 'Attributs d''une série : titre, clé de tri, statut, tomes prévus, indicateurs, valeurs template.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/Series.cs'
+  - 'src/Bdtheque.Infrastructure/Configurations/SeriesConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

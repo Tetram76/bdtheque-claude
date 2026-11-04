@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Maquettes'
+description: 'Maquettes de la fiche d''un album.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

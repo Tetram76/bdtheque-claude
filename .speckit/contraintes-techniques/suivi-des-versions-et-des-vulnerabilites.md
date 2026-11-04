@@ -1,6 +1,8 @@
 ---
 type: Contrainte technique
 title: 'Suivi des versions et des vulnérabilités'
+description: 'Suivi des versions, surveillance et correction au plus tôt des vulnérabilités, sans blocage ni mise à jour pour elle-même.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

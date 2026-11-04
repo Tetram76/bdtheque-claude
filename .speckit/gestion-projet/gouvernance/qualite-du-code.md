@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Qualité du code'
+description: 'KISS, DRY, YAGNI, SOLID, bonnes pratiques, TDD, non-régression, commentaires, langue des fichiers techniques ; s''applique à tout code.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

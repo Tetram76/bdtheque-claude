@@ -1,6 +1,9 @@
 ---
 type: Contrainte technique
 title: 'Statistiques du dashboard'
+description: 'Seules les statistiques présentées par un affichage du dashboard sont calculées : le tirage précède le chargement.'
+applies_to:
+  - 'src/Bdtheque.Api/Endpoints/DashboardEndpoints.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Suivi par tickets'
+description: 'Un ticket par chantier, correspondance ticket/PR, découpage, consolidation, clôture et verrouillage, statut dans le suivi ; contenu d''un ticket.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

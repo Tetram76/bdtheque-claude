@@ -1,6 +1,9 @@
 ---
 type: Contrainte technique
 title: 'Architecture des tiers'
+description: 'Socle de trois conteneurs (frontend, api, db), seul frontend exposé, seul api accède à db.'
+applies_to:
+  - 'docker-compose.yml'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

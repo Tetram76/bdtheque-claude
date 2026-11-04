@@ -1,6 +1,11 @@
 ---
 type: Choix d'implémentation
 title: 'Recherche avancée : mise en œuvre'
+description: 'Arbre des critères, schéma, traduction en prédicat EF Core, comparaison entre deux données, exécution et erreurs.'
+applies_to:
+  - 'src/Bdtheque.Api/Search/**'
+  - 'src/Bdtheque.Contracts/Search/**'
+  - 'src/Bdtheque.Api/Endpoints/AdvancedSearchEndpoints.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

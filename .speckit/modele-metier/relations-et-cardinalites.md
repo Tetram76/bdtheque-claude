@@ -1,6 +1,7 @@
 ---
 type: Modèle métier
 title: 'Relations et cardinalités'
+description: 'Relations et cardinalités de chaque entité, contraintes des intentions d''achat, du suivi de l''outil et des visites.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

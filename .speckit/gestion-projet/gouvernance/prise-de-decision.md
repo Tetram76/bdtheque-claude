@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Prise de décision'
+description: 'Ce que l''agent décide seul (technique, actes de gestion) et ce qui revient à l''utilisateur (fonctionnel, métier) ; traitement d''une question de l''utilisateur.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

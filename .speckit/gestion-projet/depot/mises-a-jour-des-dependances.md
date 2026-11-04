@@ -1,6 +1,16 @@
 ---
 type: Gouvernance
 title: 'Mises à jour des dépendances'
+description: 'Versions épinglées, relevé des versions à chaque reprise du travail, vulnérabilités connues, montées et leur revue de l''existant.'
+tags: [socle]
+applies_to:
+  - 'Directory.Packages.props'
+  - 'dotnet-tools.json'
+  - 'global.json'
+  - 'docker/**'
+  - 'docker-compose.yml'
+  - '.github/workflows/**'
+  - 'scripts/Get-DependencyUpdates.ps1'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

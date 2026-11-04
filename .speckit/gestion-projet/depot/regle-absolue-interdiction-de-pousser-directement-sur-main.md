@@ -1,6 +1,8 @@
 ---
 type: Gouvernance
 title: 'Règle absolue : interdiction de pousser directement sur `main`'
+description: 'Interdiction de commiter ou pousser sur main : toute modification passe par une Pull Request.'
+tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

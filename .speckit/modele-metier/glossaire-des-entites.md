@@ -1,6 +1,7 @@
 ---
 type: Modèle métier
 title: 'Glossaire des entités'
+description: 'Définition de chaque entité du domaine ; point d''entrée du modèle.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

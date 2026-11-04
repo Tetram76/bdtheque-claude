@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Contenu'
+description: 'Contenu de la saisie d''un auteur : identité, nom affiché et clé calculés, biographie.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

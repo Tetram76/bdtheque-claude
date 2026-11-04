@@ -1,6 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Collections de navigation du domaine'
+description: 'Collections en lecture seule, enfants créés par leur parent, AutoInclude des collections de l''album.'
+applies_to:
+  - 'src/Bdtheque.Domain/Entities/**'
+  - 'src/Bdtheque.Infrastructure/Configurations/AlbumConfiguration.cs'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

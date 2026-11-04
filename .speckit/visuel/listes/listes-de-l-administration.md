@@ -1,6 +1,7 @@
 ---
 type: Référence visuelle
 title: 'Listes de l''administration'
+description: 'Listes de l''administration autres que celle des albums.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

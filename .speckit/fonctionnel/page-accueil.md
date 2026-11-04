@@ -1,6 +1,7 @@
 ---
 type: Règle métier
 title: 'Page d''accueil'
+description: 'Dashboard public : blocs fixes, édition à la une, statistiques tirées au hasard et règles du tirage, écran d''une collection vide.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 
