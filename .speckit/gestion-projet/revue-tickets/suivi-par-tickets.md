@@ -3,12 +3,12 @@ type: Gouvernance
 title: 'Suivi par tickets'
 description: 'Un ticket par chantier, correspondance ticket/PR, découpage, consolidation, clôture et verrouillage, statut dans le suivi ; contenu d''un ticket.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:35:19Z }
 ---
 
 # Suivi par tickets
 
-Chaque chantier listé dans [`suivi-implementation.md`](/suivi-implementation/index.md) **doit** faire l'objet d'un ticket GitHub.
+Chaque chantier listé dans [`suivi-implementation/`](/suivi-implementation/index.md) **doit** faire l'objet d'un ticket GitHub.
 
 - **Correspondance** : un ticket correspond à une seule Pull Request ; une Pull Request correspond à zéro ou un ticket (jamais plusieurs), son **ticket de référence**, qu'elle réalise **entièrement**. Lorsque plusieurs tickets correspondent au chantier d'une PR, l'un d'eux est désigné comme ticket de référence, et les autres lui sont **associés** par les relations de GitHub (doublon, ticket lié…) :
   - la PR n'étant pas celle d'un ticket associé, elle peut ne le réaliser que **partiellement** sans enfreindre la correspondance « un ticket, une PR » ;

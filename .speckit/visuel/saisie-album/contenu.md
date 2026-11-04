@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''un album : erreurs, blocs du formulaire, barre d''enregistrement.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:35:19Z }
 ---
 
 # Contenu
@@ -28,6 +28,6 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
   - **Les auteurs** : une ligne par rôle (scénario, dessin, couleurs), chaque auteur en étiquette retirable, « Personne » sans auteur, et **Ajouter**, qui trouve un auteur en tapant son nom ou le crée sur place. Quand ils viennent d'être repris de la série ([Initialisation des contributions depuis la série](/fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)), un encadré le dit, et rappelle qu'ils appartiennent désormais à l'album.
   - **Genres et univers** : ceux de l'album, en étiquettes retirables, avec **Ajouter** ; en dessous, **par la série**, ceux qu'il affiche par sa série, en étiquettes en tirets, non modifiables ici ([Genres et univers d'un album](/fonctionnel/regles-metier/genres-et-univers-d-un-album.md)). Un univers est présenté avec ses ancêtres.
   - **Résumé, notes et appréciation** : le résumé et les notes personnelles en zones de texte, puis l'appréciation en cinq étoiles, avec son libellé (« Bien », « Pas encore noté ») et **Retirer**.
-- **Pas de colonne des éditions** : les éditions et les intentions d'achat de l'album ne se gèrent pas depuis sa fiche de saisie, qu'on ne quitte ainsi jamais pour une autre fiche avec des changements non enregistrés ; elles ont leur propre page, **Éditions et intentions d'achat** ([`editions-album.md`](/visuel/editions-album/index.md)), ouverte depuis la liste des albums. Le formulaire garde la largeur qu'il a à côté d'une colonne latérale sur la fiche d'une édition ; sous lui, en modification, les dates de création et de modification de la fiche.
+- **Pas de colonne des éditions** : les éditions et les intentions d'achat de l'album ne se gèrent pas depuis sa fiche de saisie, qu'on ne quitte ainsi jamais pour une autre fiche avec des changements non enregistrés ; elles ont leur propre page, **Éditions et intentions d'achat** ([`editions-album/`](/visuel/editions-album/index.md)), ouverte depuis la liste des albums. Le formulaire garde la largeur qu'il a à côté d'une colonne latérale sur la fiche d'une édition ; sous lui, en modification, les dates de création et de modification de la fiche.
 - **La barre d'enregistrement**, figée en bas de l'écran : l'état de la fiche (« Modifications non enregistrées », signalé d'un point de couleur d'accent ; « Nouvelle fiche »), **Annuler** et **Enregistrer** (« Créer l'album » en création), mis en relief. Sur smartphone, elle tient sur une ligne, l'état réduit à quelques mots.
 - **Smartphone** : les blocs s'empilent sur une colonne ; « Tomaison » et « Parution » aussi ; les champs de la tomaison passent à la ligne en gardant leur taille, les tomes couverts et la date de première publication restant chacun sur une ligne ; les rôles des auteurs passent au-dessus de leurs étiquettes.

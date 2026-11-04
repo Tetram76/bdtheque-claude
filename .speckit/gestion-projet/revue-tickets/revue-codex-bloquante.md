@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Revue Codex (bloquante)'
 description: 'Revue Codex, condition du merge : ouverture de la PR, budget épuisé, statut et traitement des retours, cycle et surveillance.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:35:19Z }
 ---
 
 # Revue Codex (bloquante)
@@ -46,7 +46,7 @@ Codex ne connaît **ni le contexte du projet** (`.speckit/`, architecture, conve
    - **Point qui sort de l'objectif de la PR**, par ce qu'il relève, par sa cause ou par sa correction, y compris lorsque le symptôme se trouve dans le diff : sa correction peut être **différée**, sans qu'aucun correctif de surface ne compense dans la PR la cause laissée en place. Elle n'est jamais perdue pour autant, et sa trace dépend de la phase du plan d'implémentation dont relève le point :
      - **phase déjà terminée** : la correction prend la forme d'un **ticket** ([Issues](/gestion-projet/revue-tickets/issues.md)) ;
      - **phase déjà découpée** : elle est reportée dans le ticket ouvert du chantier dont elle relève, ou, à défaut, prend la forme d'un **nouveau ticket** ;
-     - **phase pas encore découpée** : aucun ticket ; une **note** est ajoutée sur cette phase dans [`suivi-implementation.md`](/suivi-implementation/index.md), pour que le point soit intégré au plan lors de son découpage.
+     - **phase pas encore découpée** : aucun ticket ; une **note** est ajoutée sur cette phase dans [`suivi-implementation/`](/suivi-implementation/index.md), pour que le point soit intégré au plan lors de son découpage.
 4. **Corriger à la racine** un retour validé dont la correction n'est pas différée : corriger la cause établie, jamais un correctif de surface (« sparadrap ») qui ne traite que le symptôme relevé. Un **commit dédié** par retour appliqué. Un retour qui persiste après sa correction signale une cause non atteinte : le traitement reprend à l'étape 2, sans retoucher le passage relevé jusqu'à ce que le retour disparaisse, ni conclure automatiquement à une erreur de l'outil qui l'a émis.
 5. **Répondre à chaque retour**, toujours, qu'il soit appliqué (avec le commit correspondant), différé (avec le ticket ou la note du plan qui porte sa correction) ou rejeté (avec la justification du rejet).
 6. **Apprécier chaque commentaire** de Codex, toujours, par une réaction : 👍 s'il était utile, 👎 sinon (Codex le demande dans chacun de ses commentaires). Un retour pertinent est utile, même lorsque sa correction est différée.

@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la page des éditions et intentions d''achat d''un album.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:35:19Z }
 ---
 
 # Contenu
@@ -20,9 +20,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
   - le décompte (« 1 intention d'achat », « Aucune intention d'achat »), et à droite le bouton qui en ajoute une ([Intention d'achat](/fonctionnel/regles-metier/intention-d-achat.md)) :
     - pour un album **sans édition ni intention**, **Nouvelle intention d'achat**, qui propose deux choix : **Sur l'album…**, toute édition de l'album faisant l'affaire, et **Sur une nouvelle édition…** ; un clic en dehors des choix ouverts les referme ;
     - pour un album qui a une édition, possédée ou visée, seule une édition précise peut l'être : un bouton direct, **Nouvelle intention sur une édition…**, sans choix à faire ; plusieurs éditions d'un même album peuvent être visées, une intention chacune ;
-    - dans les deux cas, viser une édition ouvre la fiche de saisie d'une nouvelle intention d'achat ([`saisie-edition.md`](/visuel/saisie-edition/index.md)), sans exemplaire ni valeur ;
+    - dans les deux cas, viser une édition ouvre la fiche de saisie d'une nouvelle intention d'achat ([`saisie-edition/`](/visuel/saisie-edition/index.md)), sans exemplaire ni valeur ;
     - aucun bouton pour un album lui-même visé ;
-  - chaque **intention**, une ligne, distinguée comme dans la liste des intentions d'achat ([`listes.md`](/visuel/listes/index.md)) par une étiquette : **Album**, pleine, suivie de « toute édition », ou **Édition**, en contour, suivie du libellé de l'édition visée en gras, avec sa catégorie et sa reliure en petit dessous ; la date où elle a été posée ; puis ses actions : **Confirmer l'achat** ([Réalisation d'une intention](/fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)) et un menu « ⋯ » : **Modifier l'intention**, pour une intention sur une édition ; **Viser plutôt une édition…** pour une intention sur l'album, ou **Viser plutôt l'album…** pour la seule intention d'un album sans édition, la conversion supprimant l'édition visée ; et, séparée par un filet, **Retirer l'intention…**, qui supprime avec elle l'édition visée ([Suppression des entités](/fonctionnel/regles-metier/suppression-des-entites.md)). Un clic en dehors d'un menu ouvert le referme ;
+  - chaque **intention**, une ligne, distinguée comme dans la liste des intentions d'achat ([`listes/`](/visuel/listes/index.md)) par une étiquette : **Album**, pleine, suivie de « toute édition », ou **Édition**, en contour, suivie du libellé de l'édition visée en gras, avec sa catégorie et sa reliure en petit dessous ; la date où elle a été posée ; puis ses actions : **Confirmer l'achat** ([Réalisation d'une intention](/fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)) et un menu « ⋯ » : **Modifier l'intention**, pour une intention sur une édition ; **Viser plutôt une édition…** pour une intention sur l'album, ou **Viser plutôt l'album…** pour la seule intention d'un album sans édition, la conversion supprimant l'édition visée ; et, séparée par un filet, **Retirer l'intention…**, qui supprime avec elle l'édition visée ([Suppression des entités](/fonctionnel/regles-metier/suppression-des-entites.md)). Un clic en dehors d'un menu ouvert le referme ;
   - sans intention, « Aucune intention d'achat » ;
   - l'aide rappelle qu'une intention ne vise l'album entier que tant qu'il n'a aucune édition, possédée ou visée.
 - Sous les blocs, les dates de création et de modification de l'album, introduites par ce qu'elles concernent (« Album créé le …, modifié le … »), jamais par « Fiche ».

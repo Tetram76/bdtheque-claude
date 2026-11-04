@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Page d''accueil'
 description: 'Dashboard public : blocs fixes, édition à la une, statistiques tirées au hasard et règles du tirage, écran d''une collection vide.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:35:19Z }
 ---
 
 # Page d'accueil
@@ -13,7 +13,7 @@ Dashboard public de la page d'accueil, écran d'accueil d'une collection vide et
 
 La page d'accueil est un **dashboard public** présentant les statistiques principales de la collection. Elle n'est pas personnalisée (pas d'authentification sur la partie consultation). Certaines statistiques pourront être présentées sous forme de **graphiques** lorsque c'est pertinent.
 
-Sa présentation est décrite dans [`visuel/dashboard.md`](/visuel/dashboard/index.md). Étant public, il n'affiche que des statistiques de niveau **public** (cf. [Règles d'accès](/fonctionnel/regles-d-acces.md)) : il est considéré comme **purement public** dans un premier temps, sans variante pour une session authentifiée. Afficher aussi des données privées dans une session authentifiée est une ouverture **envisagée**, si une raison particulière le justifiait, mais **rien n'est statué** : elle n'est pas à implémenter tant qu'elle n'est pas décidée (YAGNI).
+Sa présentation est décrite dans [`visuel/dashboard/`](/visuel/dashboard/index.md). Étant public, il n'affiche que des statistiques de niveau **public** (cf. [Règles d'accès](/fonctionnel/regles-d-acces.md)) : il est considéré comme **purement public** dans un premier temps, sans variante pour une session authentifiée. Afficher aussi des données privées dans une session authentifiée est une ouverture **envisagée**, si une raison particulière le justifiait, mais **rien n'est statué** : elle n'est pas à implémenter tant qu'elle n'est pas décidée (YAGNI).
 
 **Collection vide** : sans édition possédée, la page d'accueil ne présente pas le dashboard, qui n'aurait rien à montrer, mais un **écran d'accueil**. Celui-ci annonce que le dashboard s'affichera dès la première édition entrée, propose de parcourir la base documentaire (albums, séries, auteurs et recherche avancée, cf. [Périmètre de la consultation](/fonctionnel/regles-metier/perimetre-de-la-consultation.md)) et mène à l'administration pour commencer la collection. Sa présentation est décrite dans [Collection vide](/visuel/dashboard/collection-vide.md).
 
