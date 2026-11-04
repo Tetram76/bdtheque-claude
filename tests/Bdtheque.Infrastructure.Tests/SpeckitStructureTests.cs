@@ -139,6 +139,18 @@ public sealed partial class SpeckitStructureTests
     }
 
     [Fact]
+    public void Moments_DesignateExistingConcepts()
+    {
+        // The table of moments of AGENTS.md is what the hook of the repository reads to name the concepts of a moment.
+        var concepts = AgentsConceptPattern().Matches(RepositoryFiles.Read("AGENTS.md"))
+            .Select(link => link.Groups["path"].Value)
+            .ToList();
+
+        Assert.NotEmpty(concepts);
+        Assert.All(concepts, path => Assert.True(File.Exists(Path.Combine(RepositoryFiles.Root, path)), $"{path} does not exist"));
+    }
+
+    [Fact]
     public void Log_GroupsItsEntriesByDateNewestFirst()
     {
         var dates = LogDatePattern().Matches(File.ReadAllText(Path.Combine(Speckit, "log.md")))
@@ -247,6 +259,9 @@ public sealed partial class SpeckitStructureTests
 
     [GeneratedRegex(@"\s")]
     private static partial Regex AnchorSpacePattern();
+
+    [GeneratedRegex(@"\]\((?<path>\.speckit/[^)#]+)\)")]
+    private static partial Regex AgentsConceptPattern();
 
     [GeneratedRegex(@"^## (?<date>\d{4}-\d{2}-\d{2})\r?$", RegexOptions.Multiline)]
     private static partial Regex LogDatePattern();

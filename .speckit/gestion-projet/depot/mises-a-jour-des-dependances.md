@@ -1,8 +1,7 @@
 ---
 type: Gouvernance
 title: 'Mises à jour des dépendances'
-description: 'Versions épinglées, relevé des versions à chaque reprise du travail, vulnérabilités connues, montées et leur revue de l''existant.'
-tags: [socle]
+description: 'Versions épinglées, relevé des versions, vulnérabilités connues, montées et leur revue de l''existant ; à lire quand le relevé est dû ou pour toute montée de version.'
 applies_to:
   - 'Directory.Packages.props'
   - 'dotnet-tools.json'
@@ -11,7 +10,7 @@ applies_to:
   - 'docker-compose.yml'
   - '.github/workflows/**'
   - 'scripts/Get-DependencyUpdates.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:51:55Z }
 ---
 
 # Mises à jour des dépendances
@@ -26,10 +25,7 @@ Les montées de version relèvent de l'agent (point technique, [Prise de décisi
 
   Les images de l'application, publiées par le dépôt lui-même, n'en sont pas.
 - **Relevé par l'agent** (`scripts/Get-DependencyUpdates.ps1`) : à chaque reprise du travail, l'agent vérifie si le relevé est dû (au plus un par contrôle de sécurité quotidien, ci-dessous, fréquence) et, s'il l'est, exécute ce script, qui interroge les sources officielles (NuGet, métadonnées de publication de .NET, registres Docker Hub et Microsoft, versions publiées des actions GitHub). Il liste, pour chaque technologie épinglée, la version la plus récente de sa version majeure et, à part, la version majeure la plus récente, pour qu'une version majeure écartée (ex. une version de .NET qui n'est pas LTS) ne masque pas les correctifs de celle en usage ; chacune avec sa portée (corrective, mineure, majeure) et sa date de publication, ainsi que les vulnérabilités connues, celles des packages NuGet et celles que tient le contrôle de sécurité quotidien (ci-dessous), sans rien modifier. Il s'arrête sur une action dont l'empreinte n'est pas celle de la version de son commentaire.
-  - **Fréquence : un relevé par contrôle de sécurité quotidien.** Entre deux exécutions du contrôle quotidien (ci-dessous), rien de ce qui décide d'une montée ne change : les vulnérabilités connues sont celles du contrôle, et une version tout juste publiée attend 7 jours (ci-dessous). Plusieurs chantiers lancés le même jour ne refont donc ni le relevé ni sa revue. Chaque relevé laisse une **trace** dans la **description** du ticket des vulnérabilités connues, que l'agent modifie : une section « Relevé des versions du `<date>` », ajoutée après la liste des vulnérabilités, qui donne sa conclusion (rien à appliquer, ou la Pull Request de la correction ou de la montée). Le contrôle quotidien réécrit cette description en entier à chaque exécution, si bien que la section disparaît avec lui : à la reprise du travail, le relevé n'est dû que si la description du ticket ne porte pas cette section. Sinon, la reprise passe directement au chantier, la conclusion du relevé restant valable jusqu'au contrôle suivant (une Pull Request qu'il a ouverte se poursuit selon ses propres règles).
-    - **Alternative écartée (commentaire du ticket à chaque relevé)** : les commentaires s'accumuleraient sans fin sur un ticket qui reste ouvert tant qu'une vulnérabilité est connue, alors que seule compte la conclusion du dernier relevé.
-    - **Alternative écartée (trace dans un fichier du dépôt)** : elle exigerait un commit sur `main` à chaque relevé, ce qu'interdit [Règle absolue : interdiction de pousser directement sur `main`](/gestion-projet/depot/regle-absolue-interdiction-de-pousser-directement-sur-main.md).
-    - **Alternative écartée (relevé exécuté par le contrôle quotidien lui-même)** : le script n'est que la moitié du travail ; décider, pour chaque vulnérabilité et chaque version, de ce qui est applicable reste la revue de l'agent, qu'il faudrait tracer de toute façon.
+  - **Fréquence** : [Relevé des versions à la reprise du travail](/gestion-projet/depot/releve-des-versions-a-la-reprise-du-travail.md).
   - **Aucun outil externe** : le relevé et le contrôle de sécurité n'emploient que les sources officielles, l'outillage du SDK .NET, Docker Scout (déjà employé par le CI) et la base des vulnérabilités de GitHub (*GitHub Advisory Database*), qui n'ouvre aucune PR. Aucun robot ne modifie le contenu du dépôt ni n'ouvre de Pull Request, le contrôle de sécurité ne tenant qu'un ticket : une montée est une Pull Request de l'agent, faite de ses commits signés.
     - **Alternative écartée (mises à jour de Dependabot, *version updates* et *security updates*)** : leurs PR, prêtes pour la revue dès leur ouverture, déclencheraient une revue Codex avant même la revue de l'agent ([Budget IA](/gestion-projet/gouvernance/budget-ia.md)).
     - **Alternative écartée (Renovate, application hébergée ou auto-hébergée)** : un outil externe de plus, doté d'un accès en écriture au dépôt ; auto-hébergé, il exige en outre une application GitHub et ses secrets, seule identité sous laquelle ses commits seraient signés (`required_signatures`). Son apport, ouvrir lui-même les PR, est sans objet : la montée n'est traitée qu'à la reprise du travail, par l'agent, qui fait sa revue et ses adaptations.

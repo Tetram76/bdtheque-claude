@@ -2,7 +2,6 @@
 type: Gouvernance
 title: 'Verrouillage des Pull Requests fusionnées'
 description: 'Verrouillage « Resolved » des commentaires d''une PR fusionnée.'
-tags: [socle]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 ---
 

@@ -4,3 +4,4 @@
 
 * **Restructuration** : le `.speckit/` est réécrit au format OKF, découpé en une carte (les `index.md`) et des concepts ; sa lecture est guidée par le chantier ; la forme d'un document dépend de sa nature, référence ou journal (#280).
 * **Règle** : un contrôle local de non-régression ne s'exécute avant un push que si le push modifie ce qu'il vérifie ; les captures de référence, seulement pour un changement qui peut modifier le rendu (#280).
+* **Socle allégé** : les règles qui ne valent qu'à un moment du travail (Pull Request, revue, merge, version, relevé des versions dû) sortent du socle ; la table des moments d'`AGENTS.md` les désigne et le hook du dépôt les rappelle (#280).
