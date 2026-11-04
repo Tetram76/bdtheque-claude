@@ -201,7 +201,7 @@ public sealed partial class SpeckitStructureTests
     private static string Unquote(string value) =>
         value.Length >= 2 && value[0] == '\'' && value[^1] == '\'' ? value[1..^1].Replace("''", "'") : value;
 
-    private static IEnumerable<string> TagsOf(Dictionary<string, List<string>> header) =>
+    private static string[] TagsOf(Dictionary<string, List<string>> header) =>
         (Value(header, "tags") ?? "").Trim('[', ']').Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
     // Anchors as GitHub renders them, which the links of the bundle follow.
