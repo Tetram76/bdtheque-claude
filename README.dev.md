@@ -10,14 +10,17 @@ Les spécifications du projet, dans le dossier [`.speckit/`](.speckit/), constit
 
 Le développement est mené par un agent IA disposant d'une **autonomie gouvernée** : il décide librement, dans les limites des règles et contraintes imposées par le `.speckit/`. Il décide seul des choix techniques ; sur un point fonctionnel ou métier, il ne fait qu'appliquer ce que la spécification établit, l'utilisateur décidant de tout changement d'exigence et de toute ambiguïté. Les fichiers `.speckit/` sont son unique canal d'expression des besoins et exigences.
 
-| Fichier | Contenu |
+Le `.speckit/` est écrit au format [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md) (*Open Knowledge Format*) : des **concepts**, un par fichier Markdown, chacun avec un en-tête qui le décrit, et une **carte**, l'`index.md` de chaque dossier, qui liste ses concepts avec leur description. L'agent lit la carte et les règles qui valent pour tout chantier, puis les seuls concepts qu'exige le chantier en cours ([`AGENTS.md`](AGENTS.md)). `SpeckitStructureTests` vérifie la structure du bundle, et [`scripts/Get-SpeckitConcepts.ps1`](scripts/Get-SpeckitConcepts.ps1) liste les concepts qui régissent les fichiers modifiés d'une branche.
+
+| Dossier | Contenu |
 | --- | --- |
 | [`fonctionnel/`](.speckit/fonctionnel/index.md) | Fonctionnalités, règles métier, flux |
-| [`modele-metier/`](.speckit/modele-metier/) | Entités, attributs, relations |
+| [`modele-metier/`](.speckit/modele-metier/index.md) | Entités, attributs, relations |
 | [`contraintes-techniques/`](.speckit/contraintes-techniques/index.md) | Stack, architecture, déploiement |
 | [`choix-implementation/`](.speckit/choix-implementation/index.md) | Choix techniques retenus par l'agent de sa propre initiative |
 | [`gestion-projet/`](.speckit/gestion-projet/index.md) | Branches, commits, CI/CD |
-| [`suivi-implementation/`](.speckit/suivi-implementation/) | Avancement du plan d'implémentation (phases, PR, statut) |
+| [`suivi-implementation/`](.speckit/suivi-implementation/index.md) | Avancement du plan d'implémentation (phases, PR, statut) |
+| [`visuel/`](.speckit/visuel/index.md) | Charte graphique, présentation des écrans, maquettes |
 
 ## Organisation du code
 
