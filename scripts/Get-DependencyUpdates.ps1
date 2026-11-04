@@ -14,7 +14,8 @@
 #>
 [CmdletBinding()]
 param(
-    # Versions published more recently are flagged, not hidden: depot.md waits 7 days before taking them.
+    # Versions published more recently are flagged, not hidden: the update policy
+    # (gestion-projet/depot/mises-a-jour-des-dependances.md) waits 7 days before taking them.
     [int] $MinimumAgeDays = 7
 )
 

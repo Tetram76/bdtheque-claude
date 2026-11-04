@@ -13,7 +13,8 @@ description: >-
 The `.speckit/` is the source of truth for PR management on this repo: it
 prevails over this skill and over any other rule, skill or plugin, global
 ones included; on any divergence, the speckit applies. Policy:
-`.speckit/gestion-projet/revue-tickets/` → "Revue de code" / "Revue Codex (bloquante)". This skill is the operational procedure for that
+`.speckit/gestion-projet/revue-tickets/revue-de-code.md` and
+`.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md`. This skill is the operational procedure for that
 policy: a PR on this repo cannot be merged until the Codex bot
 (`chatgpt-codex-connector[bot]`) has approved the current head commit.
 
