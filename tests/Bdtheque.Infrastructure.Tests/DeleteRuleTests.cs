@@ -6,9 +6,10 @@ using Npgsql;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Verifies that the database applies the deletion rules of fonctionnel/regles-metier.md § Suppression des
-/// entités: <c>ON DELETE CASCADE</c> for every composition and association, <c>RESTRICT</c> for
-/// every reference (choix-implementation/ecritures.md § Suppression des entités : mise en œuvre).
+/// Verifies that the database applies the deletion rules of
+/// fonctionnel/regles-metier/suppression-des-entites.md: <c>ON DELETE CASCADE</c> for every composition
+/// and association, <c>RESTRICT</c> for
+/// every reference (choix-implementation/ecritures/suppression-des-entites-mise-en-oeuvre.md).
 /// </summary>
 /// <remarks>
 /// Deletions go through <c>ExecuteDeleteAsync</c>, which EF Core sends as a single SQL statement

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Formatting;
 
-/// <summary>Values formatted in the display culture of the request, French of France (fonctionnel/presentation.md).</summary>
+/// <summary>Values formatted in the display culture of the request, French of France (fonctionnel/presentation/).</summary>
 public sealed class DisplayFormatterTests : IDisposable
 {
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;

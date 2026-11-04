@@ -6,7 +6,7 @@ using frontend::Bdtheque.Frontend.Theming;
 namespace Bdtheque.EndToEnd.Tests.Theming;
 
 /// <summary>
-/// What « La planche encrée » draws at random on its blocks (themes/planche.js, visuel/dashboard.md § La planche encrée),
+/// What « La planche encrée » draws at random on its blocks (themes/planche.js, visuel/dashboard/la-planche-encree.md),
 /// in a browser: the tints of the cases, their edges drawn by hand, the balloons of their titles, drawn at each display
 /// and kept while the page is displayed. The coverage of the .NET tests does not measure the scripts of the frontend.
 /// </summary>

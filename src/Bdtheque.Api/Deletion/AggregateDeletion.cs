@@ -15,8 +15,9 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Deletion;
 
 /// <summary>
-/// Common deletion mechanism of the API (choix-implementation/ecritures.md § Suppression des entités : mise en
-/// œuvre): the impact of a deletion, computed from the links each resource declares, and the
+/// Common deletion mechanism of the API
+/// (choix-implementation/ecritures/suppression-des-entites-mise-en-oeuvre.md): the impact of a deletion,
+/// computed from the links each resource declares, and the
 /// deletion itself, which never does more than the impact the user confirmed.
 /// </summary>
 internal static class AggregateDeletion
@@ -87,8 +88,9 @@ internal static class AggregateDeletion
     }
 
     /// <summary>
-    /// The saved searches designating the deleted record or one of the records deleted with it (fonctionnel/regles-metier.md §
-    /// Suppression des entités, line « Toute fiche »): references of every resource, which none declares.
+    /// The saved searches designating the deleted record or one of the records deleted with it
+    /// (fonctionnel/regles-metier/suppression-des-entites.md, line « Toute fiche »): references of every resource, which none
+    /// declares.
     /// </summary>
     private static async Task<SortedSet<Guid>> DesignatingSearchesAsync<TDeleted>(
         BdthequeDbContext context, Guid id, SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>> records,

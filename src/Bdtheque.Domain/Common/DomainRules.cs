@@ -22,8 +22,8 @@ public static class DomainRules
     public const string PurchaseIntentAlbumAlreadyTargeted = "PurchaseIntent.AlbumAlreadyTargeted";
 
     /// <summary>
-    /// An intent on the whole album while it has an edition, owned or targeted (fonctionnel/regles-metier.md § Intention
-    /// d'achat): the user then targets a specific edition.
+    /// An intent on the whole album while it has an edition, owned or targeted
+    /// (fonctionnel/regles-metier/intention-d-achat.md): the user then targets a specific edition.
     /// </summary>
     public const string PurchaseIntentAlbumHasEditions = "PurchaseIntent.AlbumHasEditions";
     public const string PurchaseIntentEditionAlreadyTargeted = "PurchaseIntent.EditionAlreadyTargeted";
@@ -48,21 +48,22 @@ public static class DomainRules
 
     /// <summary>
     /// An acquisition price with none of its reference dates known (acquisition date, edition year,
-    /// album's first publication), or a write that would clear the last one (fonctionnel/valorisation.md § Gestion des devises).
+    /// album's first publication), or a write that would clear the last one (fonctionnel/valorisation/gestion-des-devises.md).
     /// </summary>
     public const string EditionAcquisitionPriceReferenceDateRequired = "Edition.AcquisitionPriceReferenceDateRequired";
 
     /// <summary>
     /// An initial value with none of its reference dates known (edition year, album's first
-    /// publication), or a write that would clear the last one (fonctionnel/valorisation.md § Gestion des devises).
+    /// publication), or a write that would clear the last one (fonctionnel/valorisation/gestion-des-devises.md).
     /// </summary>
     public const string EditionInitialValueReferenceDateRequired = "Edition.InitialValueReferenceDateRequired";
 
     public const string EditionVisualMediaReferenceRequired = "EditionVisual.MediaReferenceRequired";
     public const string EditionVisualDisplayOrderNotNegative = "EditionVisual.DisplayOrderNotNegative";
 
-    // Upload rules: only the API, which receives the file, can check them (choix-implementation/domaine.md §
-    // Visuels : stockage et traitement), but they remain input the administrator can correct.
+    // Upload rules: only the API, which receives the file, can check them
+    // (choix-implementation/domaine/visuels-stockage-et-traitement.md), but they remain input the
+    // administrator can correct.
 
     /// <summary>An uploaded file that does not decode as an image of a supported format (JPEG, PNG, WebP, GIF).</summary>
     public const string EditionVisualFileNotSupportedImage = "EditionVisual.FileNotSupportedImage";
@@ -110,22 +111,22 @@ public static class DomainRules
     public const string TextTooLong = "Text.TooLong";
 
     /// <summary>
-    /// A deletion refused because other records still reference the deleted one (fonctionnel/regles-metier.md §
-    /// Suppression des entités); the error carries the impact naming them.
+    /// A deletion refused because other records still reference the deleted one
+    /// (fonctionnel/regles-metier/suppression-des-entites.md); the error carries the impact naming them.
     /// </summary>
     public const string DeletionBlockedByReferences = "Deletion.BlockedByReferences";
 
     /// <summary>
-    /// A criterion of the advanced search left without the value its comparison needs (fonctionnel/recherche-avancee.md §
-    /// Recherche avancée), e.g. an empty text: the user fills it in.
+    /// A criterion of the advanced search left without the value its comparison needs
+    /// (fonctionnel/recherche-avancee/recherche-avancee.md), e.g. an empty text: the user fills it in.
     /// </summary>
     public const string AdvancedSearchValueMissing = "AdvancedSearch.ValueMissing";
 
     public const string SavedSearchNameRequired = "SavedSearch.NameRequired";
 
     /// <summary>
-    /// A name already given to another saved search, ignoring case and accents (modele-metier.md §
-    /// Recherche enregistrée): the database enforces it, as the label of a genre.
+    /// A name already given to another saved search, ignoring case and accents
+    /// (modele-metier/recherche-enregistree.md): the database enforces it, as the label of a genre.
     /// </summary>
     public const string SavedSearchNameAlreadyUsed = "SavedSearch.NameAlreadyUsed";
 
@@ -138,15 +139,15 @@ public static class DomainRules
     public const string SavedSearchVariableNameAlreadyUsed = "SavedSearch.VariableNameAlreadyUsed";
 
     /// <summary>
-    /// A saved search designating a purchase intent (fonctionnel/recherche-avancee.md § Recherches enregistrées): an intent is
+    /// A saved search designating a purchase intent (fonctionnel/recherche-avancee/recherches-enregistrees.md): an intent is
     /// only the wish to acquire another record, which a saved search designates instead.
     /// </summary>
     public const string SavedSearchPurchaseIntentDesignated = "SavedSearch.PurchaseIntentDesignated";
 
     /// <summary>
     /// A write removing a record that a saved search designates, other than its deletion (e.g. a contribution
-    /// removed from the form of its album): refused as the deletion would be (fonctionnel/regles-metier.md § Suppression des
-    /// entités), the database enforcing it.
+    /// removed from the form of its album): refused as the deletion would be
+    /// (fonctionnel/regles-metier/suppression-des-entites.md), the database enforcing it.
     /// </summary>
     public const string SavedSearchDesignatedRecordRemoved = "SavedSearch.DesignatedRecordRemoved";
 }

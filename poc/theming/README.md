@@ -1,6 +1,6 @@
 # Prototype : thèmes de rendu
 
-Prototype **exploratoire et jetable** : il valide un mécanisme de thèmes pour la partie Consultation, sur les maquettes du dashboard (`.speckit/visuel/dashboard.md`). Rien de ce qu'il contient n'est statué : le `.speckit/` ne le mentionne pas, et il ne fait partie ni de la solution (`Bdtheque.slnx`), ni du CI, ni des images Docker. Ses données sont fictives.
+Prototype **exploratoire et jetable** : il valide un mécanisme de thèmes pour la partie Consultation, sur les maquettes du dashboard (`.speckit/visuel/dashboard/`). Rien de ce qu'il contient n'est statué : le `.speckit/` ne le mentionne pas, et il ne fait partie ni de la solution (`Bdtheque.slnx`), ni du CI, ni des images Docker. Ses données sont fictives.
 
 ## Idée explorée
 

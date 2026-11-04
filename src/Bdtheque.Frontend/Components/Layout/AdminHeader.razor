@@ -1,12 +1,12 @@
 @inject IStringLocalizer<LayoutText> L
 @inject NavigationManager Navigation
 
-@* The header of the administration (visuel/administration.md § En-tête et menu): the logo, the « Administration » tag, the
+@* The header of the administration (visuel/administration/en-tete-et-menu.md): the logo, the « Administration » tag, the
    search of a record to modify, the help, the way back to the consultation, then the « Menu » button. On a smartphone, it
    takes two lines: the logo, the tag, the consultation and the menu, reduced to their icon, then the search and the help.
    The menu is a popover of the browser, anchored to its button and floating over the page, which it never pushes aside: a
    click outside it, Escape, its cross or the button close it, without any interactivity nor script
-   (choix-implementation/socle/frontend.md § Frontend). While it is open, the page stays still and the panel scrolls on its own. *@
+   (choix-implementation/socle/frontend.md). While it is open, the page stays still and the panel scrolls on its own. *@
 <header class="app-header admin-header">
     <a class="app-logo" href="@AppPaths.AdminHome">@L["AppName"]</a>
     <span class="admin-tag">@L["Administration"]</span>
@@ -46,7 +46,7 @@
     /// <summary>The identifier of the menu, which the page uses to stay still while it is open (app.css).</summary>
     public const string MenuId = "admin-menu";
 
-    // The plan of the administration, by groups (visuel/administration.md § En-tête et menu). « Nouvelle édition » gives a
+    // The plan of the administration, by groups (visuel/administration/en-tete-et-menu.md). « Nouvelle édition » gives a
     // direct access to the main action of the administration.
     private static readonly IReadOnlyList<(string Name, IReadOnlyList<NavigationEntry> Entries)> Groups =
     [

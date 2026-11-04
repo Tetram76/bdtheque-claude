@@ -3,7 +3,7 @@ using Bdtheque.Domain.Common;
 namespace Bdtheque.Domain.Tests;
 
 /// <summary>
-/// The draw of the edition put in the spotlight of the day (fonctionnel/page-accueil.md § Page d'accueil, À la une): the
+/// The draw of the edition put in the spotlight of the day (fonctionnel/page-accueil.md, À la une): the
 /// repetitions it avoids, its preference for a cover, then its fairness. The roll stands for the random number, so
 /// that each rule is checked on the edition it leads to.
 /// </summary>

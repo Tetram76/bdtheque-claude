@@ -11,8 +11,9 @@ using ModelEnums = Bdtheque.Domain.Enums;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The audience measurement of the web interface (choix-implementation/mesure-audience.md § Mesure d'audience :
-/// mise en œuvre): recorded by the frontend for any user (<c>/audience</c>), read in the administration only
+/// The audience measurement of the web interface
+/// (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md): recorded by the frontend for any
+/// user (<c>/audience</c>), read in the administration only
 /// (<c>/admin/audience</c>).
 /// </summary>
 internal static class AudienceEndpoints

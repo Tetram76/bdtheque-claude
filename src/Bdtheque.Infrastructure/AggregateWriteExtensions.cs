@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Entry point of every write on an existing aggregate (choix-implementation/persistance.md § Concurrence
-/// d'accès).
+/// Entry point of every write on an existing aggregate
+/// (choix-implementation/persistance/concurrence-d-acces.md).
 /// </summary>
 public static class AggregateWriteExtensions
 {

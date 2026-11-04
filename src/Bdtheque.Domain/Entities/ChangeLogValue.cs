@@ -3,10 +3,11 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// A value of an attribute changed by a modification, as recorded in the record (modele-metier.md §
-/// Entrée du journal des modifications): never a text formatted for display, so that it is presented
-/// in the display culture in force when the change log is read (fonctionnel/presentation.md § Langue et culture
-/// d'affichage).
+/// A value of an attribute changed by a modification, as recorded in the record
+/// (modele-metier/entree-du-journal-des-modifications.md): never a text formatted for display, so
+/// that it is presented
+/// in the display culture in force when the change log is read
+/// (fonctionnel/presentation/langue-et-culture-d-affichage.md).
 /// </summary>
 public abstract record ChangeLogValue;
 
@@ -38,7 +39,7 @@ public sealed record ContributionValue(Guid AuthorId, AuthorLabel Author, Contri
 
 /// <summary>
 /// A visual of an edition, with its rank among the visuals of its type; without the reference of its
-/// media, a technical datum the change log does not record (modele-metier.md § Visuel d'édition).
+/// media, a technical datum the change log does not record (modele-metier/visuel-d-edition.md).
 /// </summary>
 public sealed record VisualValue(Guid Id, VisualType Type, int DisplayOrder) : ChangeLogValue;
 

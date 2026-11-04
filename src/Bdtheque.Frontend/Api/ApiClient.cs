@@ -4,8 +4,9 @@ using System.Text.Json;
 namespace Bdtheque.Frontend.Api;
 
 /// <summary>
-/// Client of <c>api</c>, over the internal Docker network with the shared secret (choix-implementation/socle/transverse.md
-/// § Authentification : mise en œuvre), exchanging the contracts of <c>Bdtheque.Contracts</c>. Every call
+/// Client of <c>api</c>, over the internal Docker network with the shared secret
+/// (choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md), exchanging the contracts of
+/// <c>Bdtheque.Contracts</c>. Every call
 /// that does not succeed throws an <see cref="ApiProblemException"/>, whatever the cause: an error the API
 /// reported, or an API out of reach.
 /// </summary>

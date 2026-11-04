@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace Bdtheque.Contracts.Enums;
 
 /// <summary>
-/// Rendering engine of the browser of a visit (Moteur de rendu, modele-metier.md § Visite de l'interface web),
+/// Rendering engine of the browser of a visit (Moteur de rendu, modele-metier/visite-de-l-interface-web.md),
 /// rather than the browser itself: several browsers share an engine, and display the pages alike.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<RenderingEngine>))]

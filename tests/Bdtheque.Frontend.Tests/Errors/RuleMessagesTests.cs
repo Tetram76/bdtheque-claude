@@ -8,7 +8,7 @@ using Microsoft.Extensions.Localization;
 namespace Bdtheque.Frontend.Tests.Errors;
 
 /// <summary>
-/// The frontend never references the domain (choix-implementation/api.md § Organisation de l'API, Contrats): only
+/// The frontend never references the domain (choix-implementation/api/organisation-de-l-api.md, Contrats): only
 /// these tests confront its texts with the rule codes the API can report.
 /// </summary>
 public sealed class RuleMessagesTests

@@ -6,8 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Frontend.Tests.Layout;
 
 /// <summary>
-/// The headers and menus of the consultation and of the administration (visuel/charte-graphique.md § Apparence propre à
-/// chaque alternative; visuel/administration.md § En-tête et menu), told apart by role, link and accessible name.
+/// The headers and menus of the consultation and of the administration
+/// (visuel/charte-graphique/apparence-propre-a-chaque-alternative.md; visuel/administration/en-tete-et-menu.md), told
+/// apart by role, link and accessible name.
 /// </summary>
 public sealed class LayoutTests : BunitContext
 {

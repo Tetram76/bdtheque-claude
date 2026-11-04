@@ -8,7 +8,7 @@ using Bdtheque.EndToEnd.Tests.Headers;
 namespace Bdtheque.EndToEnd.Tests.Theming;
 
 /// <summary>
-/// The touches of « La gazette » (visuel/dashboard.md § La gazette ; visuel/administration.md § Déclinaison par thème),
+/// The touches of « La gazette » (visuel/dashboard/la-gazette.md ; visuel/administration/declinaison-par-theme.md),
 /// in a browser: blocks opened by a rule of ink without a frame, a mention in capitals above their title, a double rule
 /// under the header, the current entry of the menu underlined with the accent, and the floating panel of the menu of the
 /// administration opaque, bordered and shadowed although the blocks are not.

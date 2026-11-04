@@ -4,7 +4,7 @@ namespace Bdtheque.Frontend.Formatting;
 
 /// <summary>
 /// The time zone of the browser, in which every date and time is presented to the user and read from them
-/// (fonctionnel/presentation.md § Langue et culture d'affichage), whereas the server stores and handles them in universal time.
+/// (fonctionnel/presentation/langue-et-culture-d-affichage.md), whereas the server stores and handles them in universal time.
 /// No request carries it: a script of every page keeps it in a cookie (<see cref="CookieName"/>), which each request
 /// brings, so that even a page rendered statically knows it. An interactive component gets it from the request that
 /// opened its circuit (<see cref="Name"/>, persisted from the prerendering).

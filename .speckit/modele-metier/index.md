@@ -1,0 +1,32 @@
+# Modèle Métier
+
+* [Domaine](domaine.md)
+* [Glossaire des entités](glossaire-des-entites.md)
+* [Relations et cardinalités](relations-et-cardinalites.md)
+* [Schéma des relations](schema-des-relations.md)
+
+## Attributs des entités
+
+* [Attributs communs à toutes les entités](attributs-communs-a-toutes-les-entites.md)
+* [Album](album.md)
+* [Série](serie.md)
+* [Édition](edition.md)
+* [Auteur / Artiste](auteur-artiste.md)
+* [Contribution *(relation Album ↔ Auteur/Artiste)*](contribution-relation-album-auteur-artiste.md)
+* [Éditeur](editeur.md)
+* [Collection éditeur](collection-editeur.md)
+* [Genre](genre.md)
+* [Univers](univers.md)
+* [Visuel d'édition](visuel-d-edition.md)
+* [Intention d'achat](intention-d-achat.md)
+* [Recherche enregistrée](recherche-enregistree.md)
+* [Paramétrage de l'application](parametrage-de-l-application.md)
+* [Jeton d'accès](jeton-d-acces.md)
+* [Session de l'outil pour agents IA](session-de-l-outil-pour-agents-ia.md)
+* [Objectif de session](objectif-de-session.md)
+* [Utilisation de l'outil](utilisation-de-l-outil.md)
+* [Retour écrit](retour-ecrit.md)
+* [Visite de l'interface web](visite-de-l-interface-web.md)
+* [Utilisation d'une fonction](utilisation-d-une-fonction.md)
+* [Compteur d'audience mensuel](compteur-d-audience-mensuel.md)
+* [Entrée du journal des modifications](entree-du-journal-des-modifications.md)

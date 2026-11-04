@@ -6,8 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Every write on a record adds its entry to the change log, in the same save (modele-metier.md §
-/// Entrée du journal des modifications), recording data rather than texts formatted for display.
+/// Every write on a record adds its entry to the change log, in the same save
+/// (modele-metier/entree-du-journal-des-modifications.md), recording data rather than texts
+/// formatted for display.
 /// </summary>
 public sealed class ChangeLogTests : IAsyncLifetime
 {

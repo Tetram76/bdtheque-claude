@@ -8,7 +8,7 @@ namespace Bdtheque.Infrastructure;
 
 /// <summary>
 /// JSON form of the labels and changes of the change log, stored in <c>jsonb</c> columns
-/// (choix-implementation/domaine.md § Journal des modifications : mise en œuvre).
+/// (choix-implementation/domaine/journal-des-modifications-mise-en-oeuvre.md).
 /// </summary>
 /// <remarks>
 /// The change log is never purged, so this form must read back forever: the kinds below are never

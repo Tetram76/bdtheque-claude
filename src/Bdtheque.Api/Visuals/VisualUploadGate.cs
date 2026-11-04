@@ -1,8 +1,9 @@
 namespace Bdtheque.Api.Visuals;
 
 /// <summary>
-/// Lets one upload of a visual through at a time (choix-implementation/domaine.md § Visuels : stockage et
-/// traitement). Each upload holds its file and its decoded image in memory — up to some 400 MB for
+/// Lets one upload of a visual through at a time
+/// (choix-implementation/domaine/visuels-stockage-et-traitement.md). Each upload holds its file and its
+/// decoded image in memory — up to some 400 MB for
 /// the largest scan accepted —, a bound per request only: several uploads at once, as when the
 /// administrator drops several scans together, would add up and could exhaust the memory of the NAS,
 /// stopping <c>api</c> altogether.

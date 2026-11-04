@@ -21,7 +21,7 @@ namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// <c>frontend</c> behind the reverse proxy of the NAS, which terminates TLS and relays in HTTP, and deployed
-/// internally, in HTTP (choix-implementation/deploiement.md § Frontend derrière le reverse proxy du NAS): the same
+/// internally, in HTTP (choix-implementation/deploiement/frontend-derriere-le-reverse-proxy-du-nas.md): the same
 /// image, the public address of the deployment behind the reverse proxy alone telling them apart. The requests of
 /// these tests reach <c>frontend</c> in HTTP, as the reverse proxy relays them.
 /// </summary>

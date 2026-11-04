@@ -9,7 +9,7 @@ namespace Bdtheque.Api.Tests;
 /// <summary>
 /// The albums as cards — cover, rating, membership of the collection, purchase intent — and the series
 /// represented by their number of albums and the covers of their first ones, in the record of a series,
-/// the bibliography of an author and the works of a genre (visuel/fiche-serie.md, visuel/fiche-auteur.md).
+/// the bibliography of an author and the works of a genre (visuel/fiche-serie/, visuel/fiche-auteur/).
 /// </summary>
 public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFactory>
 {
@@ -33,7 +33,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         // Without year: after those with one.
         var undated = await CreateOwnedEditionAsync(album.Id, publisher.Id, null);
         await UploadAsync(album.Id, undated, VisualType.Cover);
-        // The oldest with a cover, though not owned (fonctionnel/regles-metier.md § Couverture d'un album: no filter here).
+        // The oldest with a cover, though not owned (fonctionnel/regles-metier/couverture-d-un-album.md: no filter here).
         var intended = await CreateIntendedEditionAsync(album.Id, publisher.Id, 1985);
         var expected = await UploadAsync(album.Id, intended, VisualType.Cover);
 
@@ -67,7 +67,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         var edition = await CreateOwnedEditionAsync(album.Id, publisher.Id, 1980);
         var jacket = await UploadAsync(album.Id, edition, VisualType.Cover);
         var underneath = await UploadAsync(album.Id, edition, VisualType.Cover);
-        // The user puts the second cover first (fonctionnel/regles-metier.md § Ordre des visuels d'une édition).
+        // The user puts the second cover first (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md).
         var visuals = await GetAsync<EditionVisualsForm>(VisualsUri(album.Id, edition));
         var arrangement = visuals.Visuals.OrderBy(v => v.Id == underneath.VisualId ? 0 : 1).Select(v => new VisualArrangement(v.Id, v.Type));
         (await _client.PutAsJsonAsync(VisualsUri(album.Id, edition), new ArrangeVisualsRequest(arrangement.ToList(), visuals.AlbumVersion)))
@@ -138,7 +138,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         var overview = (await GetAsync<SeriesDetail>($"/catalog/series/{series.Id}")).Overview;
 
         // The pile of the mockups shows the first regular volumes only, a missing one being a generic card
-        // (visuel/fiche-serie.md): neither the omnibus nor the special issue stands in for the third.
+        // (visuel/fiche-serie/): neither the omnibus nor the special issue stands in for the third.
         Assert.Equal(4, overview.AlbumCount);
         Assert.Equal([cover1, cover2], overview.FirstVolumeCovers);
     }

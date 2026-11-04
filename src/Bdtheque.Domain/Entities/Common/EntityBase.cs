@@ -12,8 +12,9 @@ public abstract class EntityBase
     // For a record whose identity is known beforehand: the single setting of the application.
     protected EntityBase(Guid id) => Id = id;
 
-    // Set automatically when the record is saved, never entered (modele-metier.md § Attributs
-    // communs à toutes les entités): no domain operation writes them, the persistence layer does.
+    // Set automatically when the record is saved, never entered
+    // (modele-metier/attributs-communs-a-toutes-les-entites.md): no domain operation writes them,
+    // the persistence layer does.
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset ModifiedAt { get; private set; }
 }

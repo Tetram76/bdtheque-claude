@@ -1,0 +1,15 @@
+---
+type: Gouvernance
+title: 'Budget IA'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+---
+
+# Budget IA
+
+Le projet dispose d'un **budget IA limité**, pour l'agent (Claude) comme pour la revue Codex : l'**efficacité** est une contrainte de travail permanente. Budget limité ne veut pas dire travail à l'économie : tout le travail est réalisé **intégralement**, dans le respect des demandes de l'utilisateur et des contraintes du projet. L'efficacité porte sur la manière de travailler, jamais sur le résultat ni sur l'application des règles de ce `.speckit/` : aucune demande n'est partiellement traitée et aucune règle (lecture du `.speckit/`, contre-vérification, TDD, non-régression, revue Codex) n'est allégée au nom du budget.
+
+- **Pas d'itération exploratoire** : « itérer juste pour voir » n'est pas viable. Chaque action sert un objectif identifié ; l'agent établit les faits (lecture du code, exécution locale, documentation) **avant** d'agir, plutôt que d'essayer puis de corriger.
+- **Un push, une revue Codex** : tout push sur une PR qui n'est pas en brouillon déclenche une revue Codex (cf. [Revue Codex (bloquante)](/gestion-projet/revue-tickets/revue-codex-bloquante.md), dont [Ouverture de la PR](/gestion-projet/revue-tickets/revue-codex-bloquante.md#ouverture-de-la-pr)). Avant de pousser, l'agent relit l'intégralité du diff, exécute localement les contrôles de non-régression et met à jour la description de la PR, pour qu'un **seul push** porte un état complet et vérifié. Jamais de push intermédiaire « pour voir ce qu'en dit Codex ». Budget de Codex épuisé, aucune revue n'est déclenchée pendant 5 heures ([Budget de Codex épuisé](/gestion-projet/revue-tickets/revue-codex-bloquante.md#budget-de-codex-épuisé)).
+- **Un push, des quotas consommés** : chaque push sur une PR exécute aussi le CI, qui consomme les **quotas** de Docker Hub et de l'API GitHub ([Intégration continue (CI)](/gestion-projet/depot/integration-continue-ci.md)). Multiplier les commits poussés sur une branche épuise ces quotas, ce qui fait échouer des checks requis sans rapport avec le contenu de la PR. C'est une raison de plus de ne pousser qu'un état complet et vérifié.
+- **Sollicitations proportionnées** : un sous-agent ou une relance de Codex (`@codex review`) n'intervient que lorsque les règles du projet l'exigent ou qu'il apporte un gain réel ; jamais par confort ou par précaution non justifiée.
+- **Mention de Codex** : toute mention de Codex sur GitHub (son identifiant précédé d'une arobase), dans une description de PR, un commentaire ou une réponse, lance une tâche Codex payante, y compris entre guillemets, dans un bloc de code ou pour citer une règle. Seul un commentaire de tête limité exactement à la demande de revue (`@codex review`) la contient. L'agent ne l'écrit **nulle part ailleurs** — ni sur GitHub, ni dans un message de commit, ni dans ses messages à l'utilisateur, où il parle de « la mention de Codex » ou de « la demande de revue » —, et vérifie chaque texte qu'il publie sur GitHub avant de le publier.

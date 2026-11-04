@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// The history of the spotlights of the dashboard (choix-implementation/domaine.md § Édition « À la une » : mise en
-/// œuvre): one edition per day, the first drawn for a day staying that of every display of the day, and an edition
+/// The history of the spotlights of the dashboard
+/// (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md): one edition per day, the first drawn for a
+/// day staying that of every display of the day, and an edition
 /// deleted between its draw and its insertion leaving the day without edition.
 /// </summary>
 public sealed class EditionSpotlightTests : IAsyncLifetime

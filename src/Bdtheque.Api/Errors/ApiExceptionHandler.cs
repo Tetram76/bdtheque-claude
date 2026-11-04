@@ -12,8 +12,9 @@ namespace Bdtheque.Api.Errors;
 
 /// <summary>
 /// Single point turning an exception into an error response, categorized as business, functional
-/// or technical (fonctionnel/index.md § Présentation des erreurs; choix-implementation/ecritures.md § Erreurs
-/// métier, fonctionnelles et techniques). No endpoint builds an error response itself.
+/// or technical (fonctionnel/presentation-des-erreurs.md;
+/// choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md). No endpoint builds an error
+/// response itself.
 /// </summary>
 internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsService, ILogger<ApiExceptionHandler> logger)
     : IExceptionHandler

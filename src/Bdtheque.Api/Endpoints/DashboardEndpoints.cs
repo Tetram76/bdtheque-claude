@@ -9,7 +9,7 @@ using DomainEnums = Bdtheque.Domain.Enums;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The dashboard of the home page (fonctionnel/page-accueil.md § Page d'accueil), public: what the API computes
+/// The dashboard of the home page (fonctionnel/page-accueil.md), public: what the API computes
 /// before Phase 4, the value indicators and the statistics drawn at random being signalled as not computable.
 /// </summary>
 internal static class DashboardEndpoints
@@ -42,7 +42,7 @@ internal static class DashboardEndpoints
         ArgumentOutOfRangeException.ThrowIfGreaterThan(latestCount, MaxLatestCount);
 
         // The spotlight first, which finds out an empty collection: nothing is then drawn nor computed
-        // (contraintes-techniques/architecture-deploiement.md § Statistiques du dashboard).
+        // (contraintes-techniques/architecture-deploiement/statistiques-du-dashboard.md).
         var spotlight = await SpotlightOfTheDayAsync(context, day, cancellationToken);
         if (spotlight is null)
             return new Dashboard(null);
@@ -71,7 +71,7 @@ internal static class DashboardEndpoints
 
     /// <summary>
     /// The edition in the spotlight of <paramref name="day"/>, drawn by the first display of the day without one
-    /// (choix-implementation/domaine.md § Édition « À la une » : mise en œuvre).
+    /// (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md).
     /// </summary>
     /// <returns><c>null</c> if the collection is empty.</returns>
     private static async Task<SpotlightEdition?> SpotlightOfTheDayAsync(BdthequeDbContext context, DateOnly day, CancellationToken cancellationToken)

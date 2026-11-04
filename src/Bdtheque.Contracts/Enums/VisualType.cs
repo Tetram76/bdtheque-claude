@@ -4,7 +4,7 @@ namespace Bdtheque.Contracts.Enums;
 
 /// <summary>
 /// Type of visual attached to an edition (Type de visuel), its values following the fixed display
-/// order of fonctionnel/regles-metier.md § Ordre des visuels d'une édition.
+/// order of fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<VisualType>))]
 public enum VisualType

@@ -3,7 +3,7 @@ namespace Bdtheque.Frontend.Navigation;
 /// <summary>
 /// Paths of the pages of the application, which every link uses. A page not implemented yet points
 /// to <see cref="NotYetImplemented"/>: the chantier that implements it gives it its own path here,
-/// and every link that leads to it follows (suivi-implementation.md, Phase 3, pages non implémentées).
+/// and every link that leads to it follows (suivi-implementation/, Phase 3, pages non implémentées).
 /// The pages still to come are thus those whose path is <see cref="NotYetImplemented"/>.
 /// </summary>
 public static class AppPaths
@@ -43,7 +43,7 @@ public static class AppPaths
     /// <summary>Search of a record to modify, from the header of the administration.</summary>
     public const string AdminSearch = NotYetImplemented;
 
-    /// <summary>A new edition, which starts with the choice of its album (visuel/administration.md § En-tête et menu).</summary>
+    /// <summary>A new edition, which starts with the choice of its album (visuel/administration/en-tete-et-menu.md).</summary>
     public const string AdminNewEdition = NotYetImplemented;
 
     public const string AdminAlbums = NotYetImplemented;

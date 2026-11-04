@@ -1,4 +1,4 @@
-/* Built on the contracts of the theme only (choix-implementation/socle/themes.md § Thèmes : mise en œuvre). */
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). */
 .admin-tag {
     padding: 0.125rem var(--space-s);
     border-radius: var(--radius-control);
@@ -64,7 +64,7 @@
 }
 
 /* A floating panel under the button, right-aligned with it, over the page; always opaque, bordered and shadowed, whatever
-   the blocks of the theme (visuel/administration.md § En-tête et menu). It scrolls on its own within the screen. */
+   the blocks of the theme (visuel/administration/en-tete-et-menu.md). It scrolls on its own within the screen. */
 .admin-menu {
     --focus-gap: var(--color-surface-raised);
     position-anchor: --admin-menu-toggle;

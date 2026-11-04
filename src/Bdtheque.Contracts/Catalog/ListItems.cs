@@ -7,13 +7,14 @@ namespace Bdtheque.Contracts.Catalog;
 
 public sealed record SeriesListItem(Guid Id, string Title);
 
-/// <summary>What the main identifier of an author is built from (fonctionnel/presentation.md § Artistes).</summary>
+/// <summary>What the main identifier of an author is built from
+/// (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).</summary>
 public sealed record AuthorListItem(Guid Id, string? LastName, string? FirstName, string? Pseudonym);
 
-/// <param name="IsInCollection">Whether the edition is owned (fonctionnel/regles-metier.md § Appartenance à la collection).</param>
+/// <param name="IsInCollection">Whether the edition is owned (fonctionnel/regles-metier/appartenance-a-la-collection.md).</param>
 public sealed record EditionListItem(AlbumSummary Album, EditionSummary Edition, bool IsInCollection);
 
-/// <param name="Website">Where a publisher leads, having no record of its own (fonctionnel/index.md § Structure de l'application).</param>
+/// <param name="Website">Where a publisher leads, having no record of its own (fonctionnel/structure-de-l-application.md).</param>
 public sealed record PublisherListItem(Guid Id, string Name, string? Website);
 
 public sealed record PublisherCollectionListItem(Guid Id, string Name, Guid PublisherId, string PublisherName);

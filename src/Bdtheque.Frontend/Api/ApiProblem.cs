@@ -2,7 +2,7 @@ using Bdtheque.Contracts.Deletion;
 
 namespace Bdtheque.Frontend.Api;
 
-/// <summary>The three categories of errors the user tells apart at first glance (fonctionnel/index.md § Présentation des erreurs).</summary>
+/// <summary>The three categories of errors the user tells apart at first glance (fonctionnel/presentation-des-erreurs.md).</summary>
 public enum ProblemCategory
 {
     Business,
@@ -11,8 +11,9 @@ public enum ProblemCategory
 }
 
 /// <summary>
-/// An error the API reported, read from its ProblemDetails response (choix-implementation/ecritures.md § Erreurs
-/// métier, fonctionnelles et techniques): what its presentation needs, and nothing internal.
+/// An error the API reported, read from its ProblemDetails response
+/// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md): what its presentation needs,
+/// and nothing internal.
 /// </summary>
 /// <param name="Status">HTTP status, which refines the nature of the error within its category (e.g. 409 or 404).</param>
 /// <param name="RuleCode">Code of the broken rule of a business error, from which its text is produced.</param>

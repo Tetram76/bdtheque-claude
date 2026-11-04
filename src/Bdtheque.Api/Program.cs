@@ -21,7 +21,7 @@ builder.Services.AddHealthChecks()
 builder.Services.AddOpenApi();
 
 // Every error response is a ProblemDetails whose type is one of the three error categories, and
-// no other (choix-implementation/ecritures.md § Erreurs métier, fonctionnelles et techniques).
+// no other (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md).
 // ApiExceptionHandler categorizes the exceptions; whatever the framework or a middleware emits
 // without one (unbindable request, unknown route, missing internal key…) gets the technical
 // category here, no user input being able to produce it.
@@ -37,7 +37,7 @@ builder.Services.AddOptions<InternalApiKeyOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-// The visuals volume (choix-implementation/domaine.md § Visuels : stockage et traitement), and the daily
+// The visuals volume (choix-implementation/domaine/visuels-stockage-et-traitement.md), and the daily
 // removal of the files no visual references any more — resolvable on its own to be run on demand.
 builder.Services.AddOptions<VisualStorageOptions>()
     .Bind(builder.Configuration.GetSection(VisualStorageOptions.SectionName))
@@ -50,7 +50,7 @@ builder.Services.AddSingleton<VisualReconciliation>();
 builder.Services.AddHostedService(services => services.GetRequiredService<VisualReconciliation>());
 
 // The daily closing of the audience months into counters and removal of the public visits at the end of their
-// retention (choix-implementation/mesure-audience.md § Mesure d'audience : mise en œuvre).
+// retention (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md).
 builder.Services.AddSingleton<AudienceRetention>();
 builder.Services.AddHostedService(services => services.GetRequiredService<AudienceRetention>());
 
@@ -66,14 +66,14 @@ await using (var migrationScope = app.Services.CreateAsyncScope())
 
     // An update of the database image may bring another version of ICU, which PostgreSQL only warns
     // about while the indexes of the text columns may be corrupt: rebuilt here, the one step every
-    // deployment goes through (choix-implementation/persistance.md § Collation des colonnes texte).
+    // deployment goes through (choix-implementation/persistance/collation-des-colonnes-texte.md).
     var refreshed = await CollationVersions.RefreshAsync(context, CancellationToken.None);
     if (refreshed.Count > 0)
         app.Logger.LogWarning(
             "The version of the collations {Collations} changed with the database image: every index was rebuilt.", refreshed);
 
-    // The setting of the application is always present, from the first startup on (choix-implementation/domaine.md §
-    // Paramétrage de l'application : mise en œuvre).
+    // The setting of the application is always present, from the first startup on
+    // (choix-implementation/domaine/parametrage-de-l-application-mise-en-oeuvre.md).
     await context.ProvisionApplicationSettingsAsync();
 }
 
@@ -91,7 +91,7 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 // Never in production, where `api` is not reachable anyway: in the validation environment, the user may consult
-// it for information (choix-implementation/socle/transverse.md § Documentation de l'API).
+// it for information (choix-implementation/socle/transverse/documentation-de-l-api.md).
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(ApiEnvironments.Validation))
 {
     app.MapOpenApi();
@@ -99,7 +99,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment(ApiEnvironm
 }
 
 // Defense in depth: `api` is only reachable by `frontend` over the internal Docker
-// network, but still requires this shared secret (see choix-implementation/socle/transverse.md § Authentification : mise en œuvre).
+// network, but still requires this shared secret (see choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md).
 app.UseMiddleware<InternalApiKeyMiddleware>();
 
 var admin = app.MapAdmin();

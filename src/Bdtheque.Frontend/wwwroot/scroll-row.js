@@ -1,5 +1,5 @@
 // A row of entries that scrolls sideways rather than wraps (the menu of the consultation, the navigation par initiale,
-// visuel/charte-graphique.md § Apparence propre à chaque alternative). Its scrollbar is hidden: without a touch screen, the
+// visuel/charte-graphique/apparence-propre-a-chaque-alternative.md). Its scrollbar is hidden: without a touch screen, the
 // mouse wheel and the chevrons are the only ways to scroll it, and a chevron shows only on a side with entries out of view.
 // On opening the page (first load or enhanced navigation of Blazor), the row is centered on its current entry.
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");

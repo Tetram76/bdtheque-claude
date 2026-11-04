@@ -18,7 +18,7 @@ internal sealed class ContributionConfiguration : IEntityTypeConfiguration<Contr
 
         // Cascade from the owner, Restrict from the author: a contribution is part of its album
         // (or series template), whereas it merely references its author, whose deletion is
-        // refused while still credited (fonctionnel/regles-metier.md § Suppression des entités).
+        // refused while still credited (fonctionnel/regles-metier/suppression-des-entites.md).
         builder.HasOne(c => c.Album)
             .WithMany(a => a.Contributions)
             .HasForeignKey(c => c.AlbumId)
@@ -38,7 +38,8 @@ internal sealed class ContributionConfiguration : IEntityTypeConfiguration<Contr
             .OnDelete(DeleteBehavior.Restrict);
 
         // A given author can only be credited once per role on the same album (or, symmetrically,
-        // the same series template) — see modele-metier.md § Contribution. Each owner uses its own
+        // the same series template) — see
+        // modele-metier/contribution-relation-album-auteur-artiste.md. Each owner uses its own
         // partial unique index (rather than a single index over both nullable columns) because
         // NULLs are not equal to one another in a unique index: two series-owned rows sharing the
         // same SeriesId/Role/AuthorId but both having AlbumId = NULL would otherwise not collide.

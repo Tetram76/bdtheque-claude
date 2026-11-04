@@ -1,5 +1,4 @@
-/* A hit area of the height of the controls, which a finger reaches (contraintes-techniques/architecture-deploiement.md
-   § Compatibilité multi-supports). */
+/* A hit area of the height of the controls, which a finger reaches (contraintes-techniques/architecture-deploiement/compatibilite-multi-supports.md). */
 .choice {
     display: inline-flex;
     align-items: center;

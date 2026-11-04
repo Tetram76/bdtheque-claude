@@ -4,14 +4,14 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// Trace of one write on a record (Entrée du journal des modifications, modele-metier.md): added
+/// Trace of one write on a record (Entrée du journal des modifications, modele-metier/): added
 /// automatically with the write, in the same operation, then never modified nor deleted. Its creation
 /// date is the date of the write.
 /// </summary>
 /// <remarks>
 /// Nothing in an entry is a text fixed at the time of the write: the type of record, the operation,
 /// the attributes, the values and the label are presented in the display culture in force when the
-/// change log is read (fonctionnel/presentation.md § Langue et culture d'affichage).
+/// change log is read (fonctionnel/presentation/langue-et-culture-d-affichage.md).
 /// </remarks>
 public sealed class ChangeLogEntry : EntityBase
 {

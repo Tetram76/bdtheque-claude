@@ -3,8 +3,9 @@ using Bdtheque.Contracts.Enums;
 namespace Bdtheque.Contracts.Admin;
 
 /// <summary>
-/// The visuals of an edition, in their presentation order (fonctionnel/regles-metier.md § Ordre des visuels d'une
-/// édition). The edition belongs to the aggregate of its album: the version sent back with any
+/// The visuals of an edition, in their presentation order
+/// (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md). The edition belongs to the aggregate of its
+/// album: the version sent back with any
 /// upload, rearrangement or deletion is the album's.
 /// </summary>
 /// <param name="AlbumVersion">Version of the album, sent back with any write on the visuals.</param>

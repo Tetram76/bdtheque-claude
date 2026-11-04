@@ -7,8 +7,8 @@ namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
 /// The setting of the application is a single record, always present, which is modified but neither created nor
-/// deleted (modele-metier.md § Paramétrage de l'application; choix-implementation/domaine.md § Paramétrage de
-/// l'application : mise en œuvre).
+/// deleted (modele-metier/parametrage-de-l-application.md;
+/// choix-implementation/domaine/parametrage-de-l-application-mise-en-oeuvre.md).
 /// </summary>
 public sealed class ApplicationSettingsPersistenceTests : IAsyncLifetime
 {

@@ -1,4 +1,4 @@
-# Validation environment (choix-implementation/deploiement.md § Environnement de validation fonctionnelle):
+# Validation environment (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md):
 # overrides docker-compose.yml, with the values of validation.env, under a project name of its own.
 # Run by scripts/Start-Validation.ps1, stopped by scripts/Stop-Validation.ps1.
 services:

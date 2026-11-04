@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Api.Audience;
 
 /// <summary>
-/// Retention of the audience measurement (fonctionnel/mesure-audience.md § Mesure d'audience de l'interface web,
-/// Durées de conservation; choix-implementation/mesure-audience.md § Mesure d'audience : mise en œuvre): closes
+/// Retention of the audience measurement (fonctionnel/mesure-audience.md,
+/// Durées de conservation; choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md): closes
 /// into counters the months whose first visits reach the end of their retention, then removes the public visits
 /// that reached it. Run at startup, then daily; a failed run is caught up by the next.
 /// </summary>

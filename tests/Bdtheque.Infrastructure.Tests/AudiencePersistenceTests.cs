@@ -6,8 +6,9 @@ using Npgsql;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Persistence of the audience measurement (choix-implementation/mesure-audience.md § Mesure d'audience : mise en
-/// œuvre): visits and usages, which are not records, and the monthly counters, unique per function, month and
+/// Persistence of the audience measurement
+/// (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md): visits and usages, which are not
+/// records, and the monthly counters, unique per function, month and
 /// compartment.
 /// </summary>
 public sealed class AudiencePersistenceTests : IAsyncLifetime

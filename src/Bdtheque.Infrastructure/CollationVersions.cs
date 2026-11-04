@@ -4,7 +4,7 @@ namespace Bdtheque.Infrastructure;
 
 /// <summary>
 /// Keeps the indexes of the text columns consistent with the ICU collations they sort and compare
-/// along (choix-implementation/persistance.md § Collation des colonnes texte).
+/// along (choix-implementation/persistance/collation-des-colonnes-texte.md).
 /// </summary>
 /// <remarks>
 /// A collation's definition comes with the version of ICU the database image ships, which an update

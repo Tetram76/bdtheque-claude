@@ -5,7 +5,7 @@ using Npgsql;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Pins the uniqueness rules of referential names (modele-metier.md): a genre label is unique
+/// Pins the uniqueness rules of referential names (modele-metier/): a genre label is unique
 /// regardless of case and accents, a publisher name is unique as typed.
 /// </summary>
 public sealed class NameUniquenessTests : IAsyncLifetime

@@ -11,8 +11,8 @@ description: >-
 # SonarQube Cloud PR analysis
 
 The `.speckit/` is the source of truth: policy in
-`.speckit/gestion-projet/revue-tickets.md` → « Analyse SonarQube Cloud », setup
-in `.speckit/gestion-projet/depot.md` → « Analyse de la qualité du code ». This
+`.speckit/gestion-projet/revue-tickets/` → « Analyse SonarQube Cloud », setup
+in `.speckit/gestion-projet/depot/` → « Analyse de la qualité du code ». This
 skill is only the operational procedure; on any divergence, the speckit applies.
 
 The project (`Tetram76_bdtheque-claude`) is public: every query below works

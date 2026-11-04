@@ -3,8 +3,9 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// The values the form of a new edition starts from (fonctionnel/regles-metier.md § Initialisation d'une nouvelle
-/// édition depuis la série): only a starting point, never applied to an edition by the domain.
+/// The values the form of a new edition starts from
+/// (fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md): only a starting point,
+/// never applied to an edition by the domain.
 /// </summary>
 public sealed record EditionPreset(
     Guid? PublisherId,
@@ -17,7 +18,7 @@ public sealed record EditionPreset(
     EditionFormat? Format,
     bool IsColor)
 {
-    // modele-metier.md § Édition: the values proposed on entry, which the database never carries.
+    // modele-metier/edition.md: the values proposed on entry, which the database never carries.
     private static readonly EditionPreset Defaults = new(
         null, null, null, EditionCondition.Excellent, BindingType.Hardcover, BookOrientation.Portrait,
         Enums.ReadingDirection.LeftToRight, EditionFormat.Standard, IsColor: true);

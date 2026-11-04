@@ -5,13 +5,13 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// Visit of the web interface (Visite de l'interface web, modele-metier.md): the usages of one user during one
+/// Visit of the web interface (Visite de l'interface web, modele-metier/): the usages of one user during one
 /// browsing session, with nothing that identifies the user or the device. Never modified once recorded; its
 /// beginning is its creation date, the date of its first usage, recorded with it.
 /// </summary>
 /// <remarks>
-/// Not a record: neither in the change log nor versioned (choix-implementation/mesure-audience.md § Mesure
-/// d'audience : mise en œuvre).
+/// Not a record: neither in the change log nor versioned
+/// (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md).
 /// </remarks>
 public sealed class AudienceVisit : EntityBase
 {

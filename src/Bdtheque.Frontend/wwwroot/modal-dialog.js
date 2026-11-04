@@ -1,5 +1,5 @@
 // Opens as a modal the dialog it wraps, whenever it enters the page: on the first load, by an enhanced navigation of Blazor
-// or by an interactive rendering (choix-implementation/socle/frontend.md § Frontend). Only a script can open a dialog as a modal,
+// or by an interactive rendering (choix-implementation/socle/frontend.md). Only a script can open a dialog as a modal,
 // which the browser keeps above an inert page, focus included. Escape follows the closing link of the dialog, rather than
 // closing it in place, so that the page without it is the one shown.
 customElements.define("app-modal-dialog", class extends HTMLElement {

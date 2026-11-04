@@ -10,7 +10,7 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>
 /// The media of the visuals (<see cref="VisualMediaRoutes"/>), which <c>api</c> alone serves: the volume
 /// is private to it, as the database is, and its clients know neither its organization nor its
-/// location (choix-implementation/domaine.md § Visuels : stockage et traitement).
+/// location (choix-implementation/domaine/visuels-stockage-et-traitement.md).
 /// </summary>
 internal static class VisualMediaEndpoints
 {

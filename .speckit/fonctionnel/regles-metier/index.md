@@ -1,0 +1,16 @@
+# Règles métier
+
+* [Appartenance à la collection](appartenance-a-la-collection.md)
+* [Périmètre de la consultation](perimetre-de-la-consultation.md)
+* [Initialisation d'une nouvelle édition depuis la série](initialisation-d-une-nouvelle-edition-depuis-la-serie.md)
+* [Initialisation des contributions depuis la série](initialisation-des-contributions-depuis-la-serie.md)
+* [Genres et univers d'un album](genres-et-univers-d-un-album.md)
+* [Hiérarchie des univers](hierarchie-des-univers.md)
+* [Ordre des albums dans une série](ordre-des-albums-dans-une-serie.md)
+* [Ordre des visuels d'une édition](ordre-des-visuels-d-une-edition.md)
+* [Visuel par défaut](visuel-par-defaut.md)
+* [Couverture d'un album](couverture-d-un-album.md)
+* [Validation de l'ISBN](validation-de-l-isbn.md)
+* [Séquence théorique de tomes d'une série](sequence-theorique-de-tomes-d-une-serie.md)
+* [Suppression des entités](suppression-des-entites.md)
+* [Intention d'achat](intention-d-achat.md)

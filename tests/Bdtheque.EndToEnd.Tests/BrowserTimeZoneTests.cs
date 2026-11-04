@@ -7,7 +7,7 @@ namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// The server knows the time zone of the browser, in which it presents the dates and times, even in the pages it
-/// renders statically (fonctionnel/presentation.md § Langue et culture d'affichage).
+/// renders statically (fonctionnel/presentation/langue-et-culture-d-affichage.md).
 /// </summary>
 [Collection(ApplicationCollection.Name)]
 public sealed class BrowserTimeZoneTests(ApplicationHost application)

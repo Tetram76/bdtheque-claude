@@ -1,4 +1,4 @@
-// « La planche encrée » (visuel/dashboard.md § La planche encrée): each block of the page (.block anchor of the base
+// « La planche encrée » (visuel/dashboard/la-planche-encree.md): each block of the page (.block anchor of the base
 // theme) becomes a case of its own tint, whose edges are drawn by hand, and its title (.block-title) a balloon straddling
 // its top edge. Tints, edges, shapes of the balloons and their tails are drawn at random at each display of a page, then
 // kept as long as it is displayed: a block redrawn at a new size keeps its drawing, only stretched to it.

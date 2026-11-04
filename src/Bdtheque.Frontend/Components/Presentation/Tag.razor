@@ -1,7 +1,7 @@
 @inject IStringLocalizer<Tag> L
 
 @* A short mark: the membership of the collection, an active filter… A removable tag leads to the page without it (e.g. the
-   list without this filter): a link, which needs no interactivity (choix-implementation/socle/frontend.md § Frontend). *@
+   list without this filter): a link, which needs no interactivity (choix-implementation/socle/frontend.md). *@
 <span class="tag" data-variant="@Variant.ToString().ToLowerInvariant()">
     @if (Icon is { } icon)
     {

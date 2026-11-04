@@ -1,4 +1,4 @@
-/* Built on the contracts of the theme only (choix-implementation/socle/themes.md § Thèmes : mise en œuvre). The look of the
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). The look of the
    control itself is the base theme's (themes/base.css), the same inside a field or not. */
 .field {
     display: flex;

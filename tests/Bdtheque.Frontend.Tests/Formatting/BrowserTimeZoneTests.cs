@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Formatting;
 
-/// <summary>The time zone of the browser, in which the dates and times are presented (fonctionnel/presentation.md).</summary>
+/// <summary>The time zone of the browser, in which the dates and times are presented (fonctionnel/presentation/).</summary>
 public sealed class BrowserTimeZoneTests : IDisposable
 {
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;

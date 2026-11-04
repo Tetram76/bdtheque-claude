@@ -1,0 +1,12 @@
+---
+type: Gouvernance
+title: 'Issues'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+---
+
+# Issues
+
+Les Issues GitHub (« tickets ») servent à :
+
+- tracer **chaque chantier** du plan d'implémentation (cf. [Suivi par tickets](/gestion-projet/revue-tickets/suivi-par-tickets.md) ci-dessous) ;
+- tracer ponctuellement des **bugs** à corriger ou des **fonctionnalités** à implémenter dans le futur, hors plan d'implémentation.

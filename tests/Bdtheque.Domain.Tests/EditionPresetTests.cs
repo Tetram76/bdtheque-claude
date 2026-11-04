@@ -4,15 +4,15 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Tests;
 
 /// <summary>
-/// Values a new edition's form starts from (fonctionnel/regles-metier.md § Initialisation d'une nouvelle édition
-/// depuis la série).
+/// Values a new edition's form starts from
+/// (fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md).
 /// </summary>
 public sealed class EditionPresetTests
 {
     [Fact]
     public void For_AlbumWithoutSeries_ProposesTheDefaultValues()
     {
-        // modele-metier.md § Édition: the values proposed on entry; no publisher nor category is.
+        // modele-metier/edition.md: the values proposed on entry; no publisher nor category is.
         var preset = EditionPreset.For(new Album("Le Lotus bleu", null));
 
         Assert.Equal(

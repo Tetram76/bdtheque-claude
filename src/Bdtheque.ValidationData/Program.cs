@@ -1,7 +1,7 @@
 using Bdtheque.ValidationData;
 
 // Loads the validation data into the `api` of the validation environment, which runs this program once, on
-// an empty database (choix-implementation/deploiement.md § Environnement de validation fonctionnelle). Same
+// an empty database (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md). Same
 // configuration as `frontend`, the client of the API it stands for.
 var baseUrl = Required("Api__BaseUrl");
 var internalApiKey = Required("InternalApiKey__Key");

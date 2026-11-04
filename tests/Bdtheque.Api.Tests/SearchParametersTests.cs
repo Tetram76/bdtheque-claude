@@ -12,7 +12,7 @@ namespace Bdtheque.Api.Tests;
 /// <summary>
 /// The values of the criteria are sent to the database as parameters, never written into the SQL: a same form
 /// of criteria remains a single query, cached once, whatever its values, their number included
-/// (choix-implementation/recherche-avancee.md § Recherche avancée : mise en œuvre, Traduction).
+/// (choix-implementation/recherche-avancee/recherche-avancee-mise-en-oeuvre.md, Traduction).
 /// </summary>
 public sealed class SearchParametersTests : IClassFixture<ApiWebApplicationFactory>
 {

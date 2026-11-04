@@ -1,4 +1,4 @@
-/* Built on the contracts of the theme only (choix-implementation/socle/themes.md § Thèmes : mise en œuvre). */
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). */
 .dialog {
     --tone-color: var(--color-accent);
     --tone-text-color: var(--color-text-on-accent);

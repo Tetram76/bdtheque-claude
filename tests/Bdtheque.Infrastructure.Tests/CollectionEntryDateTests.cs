@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// The date an edition entered the collection (modele-metier.md § Édition) is set on save when the
+/// The date an edition entered the collection (modele-metier/edition.md) is set on save when the
 /// edition becomes owned, never entered, and never rewritten afterwards.
 /// </summary>
 public sealed class CollectionEntryDateTests : IAsyncLifetime

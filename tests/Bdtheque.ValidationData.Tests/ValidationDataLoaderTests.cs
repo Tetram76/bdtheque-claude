@@ -7,7 +7,7 @@ namespace Bdtheque.ValidationData.Tests;
 /// <summary>
 /// The validation data, loaded through the API as the validation environment loads it: the load must
 /// keep going through every rule of the API as they evolve, and the data must keep presenting the cases
-/// the screens show (choix-implementation/deploiement.md § Environnement de validation fonctionnelle).
+/// the screens show (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md).
 /// </summary>
 public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedApi api) : IClassFixture<ValidationDataLoaderTests.LoadedApi>
 {

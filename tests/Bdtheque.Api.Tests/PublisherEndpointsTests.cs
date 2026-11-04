@@ -93,7 +93,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     [Fact]
     public async Task Create_WithANameDifferingOnlyByCase_IsAccepted()
     {
-        // modele-metier.md § Éditeur: unique as typed, 'Dargaud' and 'dargaud' remain distinct.
+        // modele-metier/editeur.md: unique as typed, 'Dargaud' and 'dargaud' remain distinct.
         await CreateAsync("Delcourt");
 
         var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest("delcourt", null));

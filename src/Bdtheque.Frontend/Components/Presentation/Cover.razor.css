@@ -1,4 +1,4 @@
-/* A thumbnail, never a full-width visual in a list (visuel/charte-graphique.md § Convivialité et efficacité). Its width is
+/* A thumbnail, never a full-width visual in a list (visuel/charte-graphique/convivialite-et-efficacite.md). Its width is
    that of a row of a list, which a screen changes by setting --cover-width on a parent; its shape, radius and frame belong
    to the theme (.cover anchor of themes/base.css). The whole cover is shown, never cropped: a landscape cover keeps its
    width, standing at the bottom of its box like a book on a shelf. */

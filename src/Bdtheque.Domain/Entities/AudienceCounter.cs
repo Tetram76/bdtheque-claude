@@ -5,7 +5,7 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// Monthly audience counter (Compteur d'audience mensuel, modele-metier.md): the indicators of a function for
+/// Monthly audience counter (Compteur d'audience mensuel, modele-metier/): the indicators of a function for
 /// the visits begun in a month, in one compartment (administrator or visitor, device type, rendering engine and
 /// its version), without any visit or path. Established once, from the visits of its month, then never
 /// modified, and kept without limit.
@@ -71,7 +71,7 @@ public sealed class AudienceCounter : EntityBase
 /// <summary>A record presented or a set of parameters used by the usages a counter counts, with their number.</summary>
 public sealed class AudienceCounterObject
 {
-    // Assigned here like any entity's (choix-implementation/persistance.md § Identifiants), never by the database.
+    // Assigned here like any entity's (choix-implementation/persistance/identifiants.md), never by the database.
     public Guid Id { get; private set; } = Guid.CreateVersion7();
 
     public RecordType? RecordType { get; private set; }

@@ -16,7 +16,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     // Follows the album's own sort key only: for an album with no title, the series' entry is
     // substituted at read time, never copied here, where it would go stale whenever the series
-    // changes (choix-implementation/api.md § Navigation par initiale : mise en œuvre).
+    // changes (choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md).
     public string? NavigationEntry { get; private set; }
 
     public Guid? SeriesId { get; private set; }
@@ -67,8 +67,8 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Creates an album, attached to <paramref name="series"/> if any: having no contribution yet,
-    /// it receives those of the series template (fonctionnel/regles-metier.md § Initialisation des contributions
-    /// depuis la série).
+    /// it receives those of the series template
+    /// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
     /// </summary>
     public Album(string? title, Series? series) : this(title, series, []) { }
 
@@ -83,7 +83,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// A title is required unless the album is attached to a series (the series and volume
-    /// number can then suffice to identify it) — see modele-metier.md § Album.
+    /// number can then suffice to identify it) — see modele-metier/album.md.
     /// </summary>
     private static void EnsureTitleOrSeries(string? title, Series? series)
     {
@@ -120,7 +120,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
         if (Title is null)
         {
-            // Absent title implies an absent sort key (modele-metier.md § Album): the caller
+            // Absent title implies an absent sort key (modele-metier/album.md): the caller
             // falls back to the attached series' own sort key for sorting/navigation instead.
             ApplySortKey(null);
             IsManualSortKey = false;
@@ -183,7 +183,7 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// Sets the type and the start/end volume range covered by an omnibus, together: the range is
     /// only meaningful for <see cref="AlbumType.Omnibus"/> albums, so that changing one without the
     /// other would be refused in one order or the other. Both bounds must be provided together or
-    /// not at all (modele-metier.md § Album).
+    /// not at all (modele-metier/album.md).
     /// </summary>
     public void SetTypeAndVolumeRange(AlbumType type, int? start, int? end)
     {
@@ -211,7 +211,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Sets the first publication date at year, or year + month, granularity — never a full
-    /// date (modele-metier.md § Album).
+    /// date (modele-metier/album.md).
     /// </summary>
     public void SetFirstPublicationDate(int? year, int? month)
     {
@@ -255,7 +255,7 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// <summary>
     /// Records an intent to acquire this album in any edition. Refused if the album is already
     /// targeted as a whole, or has any edition, owned or targeted: an album targeted as a whole has
-    /// no edition (modele-metier.md § Intention d'achat).
+    /// no edition (modele-metier/intention-d-achat.md).
     /// </summary>
     public PurchaseIntent AddPurchaseIntent()
     {
@@ -268,7 +268,7 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// <summary>
     /// Records an intent to acquire one specific edition of this album. Several editions of the
     /// same album may each be targeted, but never while the album itself is
-    /// (modele-metier.md § Intention d'achat).
+    /// (modele-metier/intention-d-achat.md).
     /// </summary>
     public PurchaseIntent AddPurchaseIntent(Edition edition)
     {
@@ -280,7 +280,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Removes an intent of this album. An intent on an edition takes the edition along: an edition
-    /// not owned and its intent are inseparable (fonctionnel/regles-metier.md § Intention d'achat).
+    /// not owned and its intent are inseparable (fonctionnel/regles-metier/intention-d-achat.md).
     /// </summary>
     public void RemovePurchaseIntent(PurchaseIntent intent)
     {
@@ -292,7 +292,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Converts the intent on the whole album into an intent on <paramref name="edition"/>, an edition
-    /// of the album neither owned nor targeted yet (fonctionnel/regles-metier.md § Intention d'achat).
+    /// of the album neither owned nor targeted yet (fonctionnel/regles-metier/intention-d-achat.md).
     /// </summary>
     /// <exception cref="ArgumentException">The intent does not target the whole album.</exception>
     public PurchaseIntent ConvertPurchaseIntentToEdition(PurchaseIntent intent, Edition edition)
@@ -309,7 +309,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Converts an intent on an edition into an intent on the whole album, which removes the edition
-    /// targeted, not owned (fonctionnel/regles-metier.md § Intention d'achat). Refused unless this edition is the
+    /// targeted, not owned (fonctionnel/regles-metier/intention-d-achat.md). Refused unless this edition is the
     /// only one of the album: an album targeted as a whole has no edition.
     /// </summary>
     /// <exception cref="ArgumentException">The intent already targets the whole album.</exception>
@@ -327,14 +327,15 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Records the acquisition of one of this album's editions — the only way for an edition to
-    /// become owned, since only this aggregate sees every intent it may realize (fonctionnel/regles-metier.md §
-    /// Intention d'achat › Réalisation d'une intention): the intent on this edition, or else the
+    /// become owned, since only this aggregate sees every intent it may realize
+    /// (fonctionnel/regles-metier/intention-d-achat.md › Réalisation d'une intention): the intent on this
+    /// edition, or else the
     /// one on the whole album, is removed; other editions' intents are kept.
     /// </summary>
     /// <param name="acquisition">
     /// The acquisition and value of the edition, whose mode is required: entering an edition
-    /// requires it, only an intent creating an edition not owned (fonctionnel/regles-metier.md § Appartenance à la
-    /// collection).
+    /// requires it, only an intent creating an edition not owned
+    /// (fonctionnel/regles-metier/appartenance-a-la-collection.md).
     /// </param>
     public void RecordAcquisition(Edition edition, EditionAcquisition acquisition)
     {
@@ -378,8 +379,8 @@ public sealed class Album : EntityBase, IAggregateRoot
     {
         EnsureOwnEdition(edition);
         // An edition already bought cannot become an intent again: a second copy is recorded as
-        // a new edition of the album, which then carries the intent (fonctionnel/regles-metier.md § Intention
-        // d'achat).
+        // a new edition of the album, which then carries the intent
+        // (fonctionnel/regles-metier/intention-d-achat.md).
         if (edition.AcquisitionMode is not null)
             throw new DomainRuleViolationException(
                 DomainRules.PurchaseIntentEditionAlreadyOwned, "An edition already owned cannot be targeted by a purchase intent.");
@@ -398,7 +399,7 @@ public sealed class Album : EntityBase, IAggregateRoot
                 DomainRules.PurchaseIntentAlbumAlreadyTargeted, "This album is already targeted as a whole by a purchase intent.");
     }
 
-    // An album targeted as a whole has no edition (modele-metier.md § Intention d'achat): once it has
+    // An album targeted as a whole has no edition (modele-metier/intention-d-achat.md): once it has
     // one, owned or targeted, a specific edition is wished for, not any. The edition excepted is the one
     // a conversion to the whole album removes.
     private void EnsureWithoutEditionBut(Guid? removedEditionId)

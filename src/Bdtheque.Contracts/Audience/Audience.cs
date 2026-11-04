@@ -2,8 +2,9 @@ using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Audience;
 
-// The audience measurement of the web interface (choix-implementation/mesure-audience.md § Mesure d'audience :
-// mise en œuvre): recorded by the frontend under /audience, read under /admin/audience.
+// The audience measurement of the web interface
+// (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md): recorded by the frontend under
+// /audience, read under /admin/audience.
 
 /// <summary>A record a screen presents.</summary>
 public sealed record PresentedRecord(RecordType Type, Guid Id);

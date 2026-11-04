@@ -2,7 +2,7 @@ namespace Bdtheque.Frontend.Hosting;
 
 /// <summary>
 /// Address under which the browser reaches the application behind the reverse proxy of the NAS, which terminates TLS
-/// and relays in HTTP (choix-implementation/deploiement.md § Frontend derrière le reverse proxy du NAS). Supplied via
+/// and relays in HTTP (choix-implementation/deploiement/frontend-derriere-le-reverse-proxy-du-nas.md). Supplied via
 /// the <c>PublicAddress__Url</c> environment variable; absent for a deployment reached directly in HTTP.
 /// </summary>
 public sealed class PublicAddressOptions

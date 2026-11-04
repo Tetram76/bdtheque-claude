@@ -7,7 +7,7 @@ namespace Bdtheque.Domain.Entities;
 /// <summary>
 /// A media item attached to an edition (Visuel d'édition): cover, dedication, endpaper, plate
 /// or back cover. Display order is the rank among visuals of the same type; the type itself
-/// orders visuals per fonctionnel/regles-metier.md § Ordre des visuels d'une édition. An
+/// orders visuals per fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md. An
 /// <see cref="EditionVisual"/> cannot exist without its <see cref="Entities.Edition"/>.
 /// </summary>
 public sealed class EditionVisual : EntityBase
@@ -49,8 +49,9 @@ public sealed class EditionVisual : EntityBase
             mediaReference, DomainRules.EditionVisualMediaReferenceRequired, "A visual must reference its media.");
 
     /// <summary>
-    /// Sets the display rank among visuals of the same type (fonctionnel/regles-metier.md § Ordre des
-    /// visuels d'une édition) — adjustable manually by the user to reorder them, through
+    /// Sets the display rank among visuals of the same type
+    /// (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md) — adjustable manually by the
+    /// user to reorder them, through
     /// <see cref="Entities.Edition.ArrangeVisuals"/>.
     /// </summary>
     internal void SetDisplayOrder(int displayOrder)

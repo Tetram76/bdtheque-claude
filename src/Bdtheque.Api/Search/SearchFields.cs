@@ -12,11 +12,11 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Search;
 
 /// <summary>
-/// A data of an entity a criterion compares (fonctionnel/recherche-avancee.md § Données interrogées), translated into the
+/// A data of an entity a criterion compares (fonctionnel/recherche-avancee/donnees-interrogees.md), translated into the
 /// condition of a query.
 /// </summary>
 /// <remarks>
-/// A comparison holds only if the known data establish it (fonctionnel/recherche-avancee.md § Comparaisons): every condition
+/// A comparison holds only if the known data establish it (fonctionnel/recherche-avancee/comparaisons.md): every condition
 /// requires the data to be set — "is not set" aside —, so that a NOT of the criterion keeps what it does not
 /// establish. EF Core gives the C# meaning to <c>null</c>, which a NOT then negates as such.
 /// </remarks>
@@ -31,7 +31,7 @@ internal abstract class SearchField(string key, LambdaExpression selector, bool 
 
     public IReadOnlyList<SearchComparison> Comparisons => isOptional ? [.. TypeComparisons, IsSet, IsNotSet] : TypeComparisons;
 
-    /// <summary>The comparisons of the type to another data, those taking a single value (fonctionnel/recherche-avancee.md § Comparaisons).</summary>
+    /// <summary>The comparisons of the type to another data, those taking a single value (fonctionnel/recherche-avancee/comparaisons.md).</summary>
     public virtual IReadOnlyList<SearchComparison> DataComparisons => [];
 
     public virtual SearchFieldDescription Describe() => new(Key, Type, isOptional, Comparisons, DataComparisons);
@@ -302,7 +302,7 @@ internal sealed class RecordField(string key, LambdaExpression selector, bool is
 
 /// <summary>
 /// An amount: only whether it is set, the comparison of its value joining the search with its conversion
-/// into euros (suivi-implementation.md, Phase 4).
+/// into euros (suivi-implementation/, Phase 4).
 /// </summary>
 internal sealed class AmountField(string key, LambdaExpression selector) : SearchField(key, selector, isOptional: true)
 {
@@ -315,7 +315,7 @@ internal sealed class AmountField(string key, LambdaExpression selector) : Searc
 }
 
 /// <summary>
-/// A date, known to a precision of its own and compared at that of the value (fonctionnel/recherche-avancee.md § Comparaisons):
+/// A date, known to a precision of its own and compared at that of the value (fonctionnel/recherche-avancee/comparaisons.md):
 /// both are periods — a year, a month, a day —, and a comparison holds only if it holds for every day of the
 /// period of the data. Equal: within the period of the value; different: outside it; before or after: before
 /// or after the whole of it.
@@ -436,7 +436,7 @@ internal sealed class DayField(string key, LambdaExpression selector, bool isOpt
 
 /// <summary>
 /// A date and time, compared to dates by its day in the time zone of the search (<see cref="SearchScope.TimeZone"/>), that of
-/// the browser, in which the frontend presents it (fonctionnel/presentation.md § Langue et culture d'affichage): a date
+/// the browser, in which the frontend presents it (fonctionnel/presentation/langue-et-culture-d-affichage.md): a date
 /// presented and the same date searched designate the same day, whereas it is stored in universal time.
 /// </summary>
 internal sealed class InstantField(string key, LambdaExpression selector, bool isOptional)
@@ -481,7 +481,7 @@ internal sealed class InstantField(string key, LambdaExpression selector, bool i
 }
 
 /// <summary>
-/// A partial date, a year with or without its month (modele-metier.md § Album), or a year alone. Its period
+/// A partial date, a year with or without its month (modele-metier/album.md), or a year alone. Its period
 /// and that of the value compare as numbers <c>yyyyMMdd</c>, every month ending on a 31st: the comparisons
 /// only need the order of the periods, which a missing day does not change.
 /// </summary>

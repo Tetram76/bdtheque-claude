@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// Lists presented as the bibliography of an author (fonctionnel/index.md § Structure de l'application): the
+/// Lists presented as the bibliography of an author (fonctionnel/structure-de-l-application.md): the
 /// series and the albums without series together at the first level, by sort key, each series grouping
 /// its albums, in the order of the series. Shared by the bibliography of an author and by the works of a
 /// genre or of a universe.
@@ -72,7 +72,7 @@ internal static class CatalogWorks
     /// <summary>
     /// Each of <paramref name="seriesIds"/> as a whole, whichever of its albums the list presents: the number
     /// of its albums, and the covers of its first regular volumes, in its order — the pile of covers of the
-    /// mockups, where neither an omnibus nor a special issue stands in for a volume (visuel/fiche-serie.md).
+    /// mockups, where neither an omnibus nor a special issue stands in for a volume (visuel/fiche-serie/).
     /// </summary>
     /// <remarks>
     /// Every album of these series is read, rather than its first volumes only: a series counts a few dozen

@@ -19,16 +19,17 @@ builder.Services.AddRazorComponents()
     // An interactive component keeps the time zone of the request that opened its circuit, which brings no cookie.
     .RegisterPersistentService<BrowserTimeZone>(RenderMode.InteractiveServer);
 
-// No text shown to the user is written in the code: each component reads its own (choix-implementation/socle/transverse.md
-// § Internationalisation). The display culture is a setting of the application, French of France the only one
-// offered (fonctionnel/presentation.md § Langue et culture d'affichage): never the one the browser asks for.
+// No text shown to the user is written in the code: each component reads its own
+// (choix-implementation/socle/transverse/internationalisation.md). The display culture is a setting of the application,
+// French of France the only one
+// offered (fonctionnel/presentation/langue-et-culture-d-affichage.md): never the one the browser asks for.
 builder.Services.AddLocalization();
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.SetDefaultCulture(DisplayCulture.Name).AddSupportedCultures(DisplayCulture.Name).AddSupportedUICultures(DisplayCulture.Name);
     options.RequestCultureProviders.Clear();
 });
-// The time zone of the browser, which its cookie brings to every request (choix-implementation/socle/transverse.md § Internationalisation),
+// The time zone of the browser, which its cookie brings to every request (choix-implementation/socle/transverse/internationalisation.md),
 // re-executed error pages included.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped(services => new BrowserTimeZone
@@ -45,7 +46,7 @@ builder.Services.AddScoped<AudienceRecorder>();
 builder.Services.AddSingleton(TimeProvider.System);
 
 // The authentication cookie is owned exclusively by this container (BFF):
-// `api` has no knowledge of the user (see choix-implementation/socle/transverse.md § Authentification : mise en œuvre).
+// `api` has no knowledge of the user (see choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md).
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -56,8 +57,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 // Secure on an HTTPS request only, like the authentication cookie: never Secure by default, and always Secure would
-// not be sent back by the browser on the internal deployment in HTTP (choix-implementation/deploiement.md § Frontend
-// derrière le reverse proxy du NAS).
+// not be sent back by the browser on the internal deployment in HTTP
+// (choix-implementation/deploiement/frontend-derriere-le-reverse-proxy-du-nas.md).
 builder.Services.AddAntiforgery(options => options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest);
 
 builder.Services.AddOptions<PublicAddressOptions>()
@@ -88,7 +89,7 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 // TLS is terminated by the reverse proxy of the NAS, and the internal deployment is reached in HTTP: neither
-// UseHttpsRedirection nor UseHsts (choix-implementation/deploiement.md § Frontend derrière le reverse proxy du NAS).
+// UseHttpsRedirection nor UseHsts (choix-implementation/deploiement/frontend-derriere-le-reverse-proxy-du-nas.md).
 // Before any other middleware, so that everything follows the public address rather than the connection of the proxy.
 if (app.Services.GetRequiredService<IOptions<PublicAddressOptions>>().Value.ParsedUrl is { } publicAddress)
 {

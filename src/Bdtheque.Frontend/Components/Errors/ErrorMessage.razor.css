@@ -1,5 +1,5 @@
 /* Each category has its own color, carried both by the named pill and by the side stripe, so that the three kinds of
-   errors are told apart at first glance (fonctionnel/index.md § Présentation des erreurs): a business error asks the
+   errors are told apart at first glance (fonctionnel/presentation-des-erreurs.md): a business error asks the
    user to correct, a functional one to take the new state of the data into account, a technical one is the application's. */
 .error-message {
     --error-color: var(--color-failure);

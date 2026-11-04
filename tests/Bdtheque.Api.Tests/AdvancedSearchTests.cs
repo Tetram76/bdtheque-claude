@@ -37,7 +37,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     [Fact]
     public async Task Schema_LeavesOutTheMediaReferenceOfAVisual()
     {
-        // A technical datum, meaningless to the user (fonctionnel/recherche-avancee.md § Données interrogées).
+        // A technical datum, meaningless to the user (fonctionnel/recherche-avancee/donnees-interrogees.md).
         var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
 
         var visual = schema.Entities.Single(e => e.Entity == EntityKind.EditionVisual);
@@ -49,7 +49,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     {
         var schema = (await _client.GetFromJsonAsync<SearchSchema>("/catalog/search/schema"))!;
 
-        // Every entity but the saved searches themselves (fonctionnel/recherche-avancee.md § Entités recherchées).
+        // Every entity but the saved searches themselves (fonctionnel/recherche-avancee/entites-recherchees.md).
         Assert.Equal(
             Enum.GetValues<EntityKind>().Where(k => k != EntityKind.SavedSearch).Order(), schema.Entities.Select(e => e.Entity).Order());
         foreach (var entity in schema.Entities)
@@ -252,7 +252,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     [Fact]
     public async Task DateAndTime_IsComparedByItsDayInTheTimeZoneOfTheBrowser()
     {
-        // fonctionnel/presentation.md § Langue et culture d'affichage: a date presented and the same date searched
+        // fonctionnel/presentation/langue-et-culture-d-affichage.md: a date presented and the same date searched
         // designate the same day. 23:30 universal time on New Year's Eve is already New Year's Day in Paris.
         var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
         var album = await CreateAlbumAsync($"Album {_marker}");
@@ -306,7 +306,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var acquisition = new SearchOperand("acquisitionDate");
         var albumPublication = new SearchOperand("firstPublicationDate", ["album"]);
 
-        // fonctionnel/recherche-avancee.md § Comparaisons: editions published after their acquisition, or before the first publication of their album.
+        // fonctionnel/recherche-avancee/comparaisons.md: editions published after their acquisition, or before the first publication of their album.
         AssertIds([reprint.Id], await EditionIdsAsync(And(mine, Data("publicationYear", GreaterThan, acquisition, SearchDatePrecision.Year))));
         AssertIds([sameYear.Id, original.Id], await EditionIdsAsync(And(mine, Data("publicationYear", EqualTo, acquisition, SearchDatePrecision.Year))));
         AssertIds([original.Id, notAcquiredOn.Id], await EditionIdsAsync(And(mine, Data("publicationYear", LessThanOrEqualTo, albumPublication, SearchDatePrecision.Year))));
@@ -373,7 +373,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var atDargaud = new SearchLink("publisher", Text("name", StartsWith, "Dargaud"));
         var in2000 = Text("publicationYear", EqualTo, "2000");
 
-        // fonctionnel/recherche-avancee.md § Liens entre entités: one edition satisfying both, or each by a different edition.
+        // fonctionnel/recherche-avancee/liens-entre-entites.md: one edition satisfying both, or each by a different edition.
         AssertIds([sameEdition.Id], await AlbumIdsAsync(Editions(SearchQuantifierKind.Any, And(atDargaud, in2000))));
         AssertIds(
             [twoEditions.Id, sameEdition.Id],
@@ -401,7 +401,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         await CreateEditionAsync((await CreateAlbumAsync(null, partly.Id, volumeNumber: 1)).Id, dargaud.Id);
         await CreateAlbumAsync(null, partly.Id, volumeNumber: 2);
 
-        // fonctionnel/recherche-avancee.md § Liens entre entités: series all of whose albums have at least one edition at Dargaud.
+        // fonctionnel/recherche-avancee/liens-entre-entites.md: series all of whose albums have at least one edition at Dargaud.
         var criteria = And(
             Text("title", Contains, _marker),
             new SearchLink("albums", Editions(SearchQuantifierKind.Any, new SearchLink("publisher", Text("name", StartsWith, "Dargaud"))),
@@ -425,7 +425,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var edition = await CreateEditionAsync(twoIllustrators.Id, publisher.Id);
         await CreateEditionAsync(oneIllustrator.Id, publisher.Id);
 
-        // fonctionnel/recherche-avancee.md § Liens entre entités: editions whose album has more than one illustrator.
+        // fonctionnel/recherche-avancee/liens-entre-entites.md: editions whose album has more than one illustrator.
         var criteria = And(
             new SearchLink("publisher", Text("name", Contains, _marker)),
             new SearchLink("album", new SearchLink(
@@ -480,7 +480,8 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var onEdition = await CreateAlbumAsync($"Intention édition {_marker}");
         var editionIntent = await CreateIntentAsync(onEdition.Id, publisher.Id);
 
-        // modele-metier.md § Intention d'achat — relations: an intent targets an album or an edition, exclusively.
+        // modele-metier/relations-et-cardinalites.md#intention-dachat--relations: an intent targets an album or an
+        // edition, exclusively.
         AssertIds([onAlbum.Id], await AlbumIdsAsync(new SearchLink("purchaseIntent")));
         AssertIds(
             [onEdition.Id],

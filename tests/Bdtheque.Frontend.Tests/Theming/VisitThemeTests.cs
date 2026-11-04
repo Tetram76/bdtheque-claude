@@ -4,7 +4,7 @@ using Bdtheque.Frontend.Visits;
 namespace Bdtheque.Frontend.Tests.Theming;
 
 /// <summary>
-/// The theme of the visit (fonctionnel/index.md § Design et charte graphique, Thème actif): drawn at random among the
+/// The theme of the visit (fonctionnel/design-et-charte-graphique.md, Thème actif): drawn at random among the
 /// offered themes at the start of a visit, kept for the whole visit, drawn again for each new date of the browser.
 /// </summary>
 public sealed class VisitThemeTests

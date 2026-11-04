@@ -11,9 +11,10 @@ description: >-
 
 # Validation fonctionnelle
 
-The `.speckit/` is the source of truth: `.speckit/gestion-projet/revue-tickets.md`
-§ Validation fonctionnelle, and `.speckit/choix-implementation/deploiement.md`
-§ Environnement de validation fonctionnelle. **Read both sections again, in
+The `.speckit/` is the source of truth:
+`.speckit/gestion-projet/revue-tickets/validation-fonctionnelle.md`, and
+`.speckit/choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md`. **Read
+both sections again, in
 full, before step 1**: this skill only orders their steps, it adds no rule.
 
 The one way the user validates what they see: the version of the draft pull
@@ -29,7 +30,7 @@ browser of the agent, no reference captures shown as a validation.
    validation (step 5), and a capture failure of the CI does not prevent it.
 2. **Load the validation data the screen needs** (`Bdtheque.ValidationData`),
    if the chantier adds cases, in the same draft.
-3. **Ask for the validation**, in one message, as § Validation fonctionnelle
+3. **Ask for the validation**, in one message, as the first of these two sections
    prescribes:
    - screen by screen, what is new or changed, the state or case to observe,
      the address and the width where to observe it; what does not change;

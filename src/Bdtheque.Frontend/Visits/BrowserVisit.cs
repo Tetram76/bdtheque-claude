@@ -5,8 +5,9 @@ namespace Bdtheque.Frontend.Visits;
 /// <summary>
 /// The visit of the browser: its browsing session, shared by all its tabs and windows, another browser making another
 /// visit (fonctionnel/mesure-audience.md, Visites). Kept in a session cookie (<see cref="CookieName"/>), which the
-/// browser forgets with its session: the single delimitation of the visit, for its theme (fonctionnel/index.md § Design
-/// et charte graphique, Thème actif) as for the audience measurement. It carries nothing that identifies the user.
+/// browser forgets with its session: the single delimitation of the visit, for its theme
+/// (fonctionnel/design-et-charte-graphique.md, Thème actif) as for the audience measurement. It carries nothing that
+/// identifies the user.
 /// </summary>
 /// <param name="Start">Date of the start of the visit, in universal time, which bounds its duration (<see cref="IsOver"/>).</param>
 /// <param name="ThemeKey">Theme of the visit.</param>
