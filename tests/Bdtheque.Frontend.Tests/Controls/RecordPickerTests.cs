@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Frontend.Tests.Controls;
 
 /// <summary>
-/// The choice of a record by typing its name (visuel/liste-albums.md § Contenu, filtres ; visuel/saisie-album.md § Contenu,
+/// The choice of a record by typing its name (visuel/liste-albums/contenu.md, filtres ; visuel/saisie-album/contenu.md,
 /// série) : a combobox whose suggestions are the records of the consultation that contain the text typed.
 /// </summary>
 public sealed class RecordPickerTests : BunitContext

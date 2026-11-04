@@ -13,7 +13,7 @@ using SkiaSharp;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// The data of the dashboard before Phase 4 (fonctionnel/page-accueil.md § Page d'accueil): the empty collection,
+/// The data of the dashboard before Phase 4 (fonctionnel/page-accueil.md): the empty collection,
 /// the counters, the edition in the spotlight of the day and the latest entries, the other blocks signalled as not
 /// computable yet.
 /// </summary>

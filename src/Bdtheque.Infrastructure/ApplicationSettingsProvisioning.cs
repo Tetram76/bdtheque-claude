@@ -4,8 +4,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Provisions the database with the setting of the application (choix-implementation/domaine.md § Paramétrage de
-/// l'application : mise en œuvre), a record always present that the application never creates.
+/// Provisions the database with the setting of the application
+/// (choix-implementation/domaine/parametrage-de-l-application-mise-en-oeuvre.md), a record always present that
+/// the application never creates.
 /// </summary>
 public static class ApplicationSettingsProvisioning
 {

@@ -7,8 +7,8 @@ namespace Bdtheque.Contracts.Catalog;
 /// and the works of a genre or of a universe.
 /// </summary>
 /// <param name="Cover">
-/// That of the album (fonctionnel/regles-metier.md § Couverture d'un album), among all its editions, owned or not;
-/// <c>null</c> without any, the generic visual standing in for it (fonctionnel/regles-metier.md § Visuel par défaut).
+/// That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not;
+/// <c>null</c> without any, the generic visual standing in for it (fonctionnel/regles-metier/visuel-par-defaut.md).
 /// </param>
 /// <param name="HasPurchaseIntent">Whether a purchase intent targets the album, or one of its editions.</param>
 public sealed record AlbumCard(AlbumSummary Album, AlbumRating? Rating, AlbumCover? Cover, bool HasPurchaseIntent);
@@ -24,11 +24,12 @@ public sealed record AlbumCover(Guid VisualId);
 /// <param name="AlbumCount">Every album of the series, omnibuses and special issues included.</param>
 /// <param name="FirstVolumeCovers">
 /// Those of its first <see cref="SeriesOverview.FirstVolumeCount"/> regular volumes at most — neither
-/// omnibus nor special issue —, in the order of the series (fonctionnel/regles-metier.md § Ordre des albums dans une
-/// série), <c>null</c> for a volume without cover. A place beyond them is a generic card (visuel/fiche-serie.md).
+/// omnibus nor special issue —, in the order of the series
+/// (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), <c>null</c> for a volume without cover. A place
+/// beyond them is a generic card (visuel/fiche-serie/).
 /// </param>
 public sealed record SeriesOverview(int AlbumCount, IReadOnlyList<AlbumCover?> FirstVolumeCovers)
 {
-    /// <summary>How many first volumes represent a series: the pile of three covers of the mockups (visuel/fiche-serie.md).</summary>
+    /// <summary>How many first volumes represent a series: the pile of three covers of the mockups (visuel/fiche-serie/).</summary>
     public const int FirstVolumeCount = 3;
 }

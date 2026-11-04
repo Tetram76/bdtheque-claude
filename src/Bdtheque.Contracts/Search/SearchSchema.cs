@@ -5,7 +5,7 @@ namespace Bdtheque.Contracts.Search;
 
 /// <summary>
 /// What the advanced search can query, for the clients to build its form in the terms of the business
-/// (fonctionnel/recherche-avancee.md § Recherche avancée): its keys are localized by the client, never shown as they are.
+/// (fonctionnel/recherche-avancee/recherche-avancee.md): its keys are localized by the client, never shown as they are.
 /// </summary>
 public sealed record SearchSchema(IReadOnlyList<SearchEntityDescription> Entities);
 
@@ -34,7 +34,7 @@ public sealed record SearchFieldDescription(
     IReadOnlyList<string>? Members = null,
     EntityKind? Record = null);
 
-/// <summary>A link of the model from an entity to related records (fonctionnel/recherche-avancee.md § Liens entre entités).</summary>
+/// <summary>A link of the model from an entity to related records (fonctionnel/recherche-avancee/liens-entre-entites.md).</summary>
 /// <param name="IsMultiple">Whether it leads to several records, its condition then being quantified.</param>
 public sealed record SearchLinkDescription(string Key, EntityKind Target, bool IsMultiple);
 
@@ -53,7 +53,7 @@ public enum SearchDataType
 
     /// <summary>
     /// An amount with its currency: only whether it is set, the comparison of its value joining the search
-    /// with its conversion into euros (suivi-implementation.md, Phase 4).
+    /// with its conversion into euros (suivi-implementation/, Phase 4).
     /// </summary>
     Amount,
 }

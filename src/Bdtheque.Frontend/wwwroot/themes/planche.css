@@ -1,8 +1,8 @@
-/* « La planche encrée »: the page of a comic (visuel/dashboard.md § La planche encrée), white outside its blocks, black
+/* « La planche encrée »: the page of a comic (visuel/dashboard/la-planche-encree.md), white outside its blocks, black
    ink throughout. Each block is a case of its own tint, with edges drawn by hand, and its title a balloon straddling the
    top edge of the case: themes/planche.js deals the tints and draws edges and balloons at each display, which the rules
    below only frame. In the administration, the case is kept whole, without any tilt but the logo's
-   (visuel/administration.md § Ton). Every pair of colors read together is checked by ThemeContrastTests. */
+   (visuel/administration/ton.md). Every pair of colors read together is checked by ThemeContrastTests. */
 
 /* Served by the application, SIL Open Font License 1.1 (fonts/…/OFL.txt): Delius for the text, Patrick Hand for the
    lettering of the balloons, in the subsets that cover the names of the catalog; Fraunces, for the titles and figures, is

@@ -1,13 +1,15 @@
 namespace Bdtheque.Domain.Enums;
 
 /// <summary>
-/// Attribute of a record changed by a modification, as the change log names it (modele-metier.md §
-/// Entrée du journal des modifications). The type of the record gives it its context: the title of
+/// Attribute of a record changed by a modification, as the change log names it
+/// (modele-metier/entree-du-journal-des-modifications.md). The type of the record gives it its
+/// context: the title of
 /// an album and the title of a series are both <see cref="Title"/>.
 /// </summary>
 /// <remarks>
 /// Persisted in the change log, never purged: a value keeps its meaning forever, whatever the
-/// properties of the entities become (choix-implementation/persistance.md § Conventions de persistance).
+/// properties of the entities become
+/// (choix-implementation/persistance/conventions-de-persistance-ef-core.md).
 /// </remarks>
 public enum ChangeLogAttribute
 {

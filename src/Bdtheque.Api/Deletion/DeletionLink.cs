@@ -5,8 +5,9 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Deletion;
 
 /// <summary>
-/// One kind of link uniting a record to the rest of the data, as listed by fonctionnel/regles-metier.md §
-/// Suppression des entités: its nature decides what deleting the record does to the records it
+/// One kind of link uniting a record to the rest of the data, as listed by
+/// fonctionnel/regles-metier/suppression-des-entites.md: its nature decides what deleting the record does
+/// to the records it
 /// selects.
 /// </summary>
 /// <param name="Records">Identifiers of the records linked to the record with the given identifier.</param>

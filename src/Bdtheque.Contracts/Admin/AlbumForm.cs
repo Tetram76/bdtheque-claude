@@ -18,8 +18,9 @@ public sealed record AlbumForm(Guid Id, string? SortKey, AlbumContent Content, u
 /// <param name="Title">Required unless the album is attached to a series.</param>
 /// <param name="ManualSortKey">
 /// The sort key entered by hand, which is then kept whatever the title becomes; <c>null</c> for the
-/// automatic mode, where the sort key follows the title (fonctionnel/presentation.md § Calcul et stockage de la
-/// clé de tri). Requires a title.
+/// automatic mode, where the sort key follows the title
+/// (fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri). Requires a
+/// title.
 /// </param>
 /// <param name="StartVolumeNumber">Omnibus only, together with <paramref name="EndVolumeNumber"/>.</param>
 /// <param name="FirstPublicationMonth">Requires <paramref name="FirstPublicationYear"/>.</param>
@@ -27,7 +28,7 @@ public sealed record AlbumForm(Guid Id, string? SortKey, AlbumContent Content, u
 /// <param name="UniverseIds">Universes of the album itself, without those of its series.</param>
 /// <param name="Contributions">
 /// Contributions of the album. Left empty while attaching the album to a series, they are copied
-/// from the template of that series (fonctionnel/regles-metier.md § Initialisation des contributions depuis la série).
+/// from the template of that series (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
 /// </param>
 public sealed record AlbumContent(
     string? Title,

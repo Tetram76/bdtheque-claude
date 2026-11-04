@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Bdtheque.Api.Security;
 
 /// <summary>
-/// Secret shared between `frontend` and `api` (see choix-implementation/socle/transverse.md,
-/// § Authentification : mise en œuvre). Supplied via the <c>InternalApiKey__Key</c>
+/// Secret shared between `frontend` and `api` (see
+/// choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md). Supplied via the
+/// <c>InternalApiKey__Key</c>
 /// environment variable.
 /// </summary>
 public sealed class InternalApiKeyOptions

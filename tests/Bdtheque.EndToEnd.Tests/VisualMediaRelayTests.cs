@@ -11,7 +11,7 @@ namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// The media of the visuals, which the browser obtains from <c>frontend</c> only: <c>frontend</c> relays those of
-/// <c>api</c>, which alone reads the volume (choix-implementation/domaine.md § Visuels : stockage et traitement).
+/// <c>api</c>, which alone reads the volume (choix-implementation/domaine/visuels-stockage-et-traitement.md).
 /// </summary>
 [Collection(ApplicationCollection.Name)]
 public sealed class VisualMediaRelayTests(ApplicationHost application)

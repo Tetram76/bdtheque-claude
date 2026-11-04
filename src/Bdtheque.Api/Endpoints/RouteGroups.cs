@@ -1,7 +1,7 @@
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The families of routes of the API (choix-implementation/api.md § Organisation de l'API), on
+/// The families of routes of the API (choix-implementation/api/organisation-de-l-api.md), on
 /// which each resource maps its own group: <c>/admin</c> for data entry, reserved by
 /// <c>frontend</c> to the authenticated administrator, <c>/catalog</c> for public consultation, and
 /// <c>/audience</c>, where <c>frontend</c> records the audience measurement for any user.

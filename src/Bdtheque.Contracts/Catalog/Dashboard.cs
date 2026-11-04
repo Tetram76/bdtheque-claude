@@ -1,6 +1,6 @@
 namespace Bdtheque.Contracts.Catalog;
 
-/// <summary>The dashboard of the home page (fonctionnel/page-accueil.md § Page d'accueil), public.</summary>
+/// <summary>The dashboard of the home page (fonctionnel/page-accueil.md), public.</summary>
 /// <param name="Content">
 /// <c>null</c> when the collection is empty, without any draw nor statistic: the home page then presents its
 /// welcome screen instead of the dashboard.

@@ -1,8 +1,7 @@
 @inject IStringLocalizer<InitialNavigation> L
 
-@* The navigation par initiale of a list: « Toutes », A to Z, # and @ (fonctionnel/presentation.md § Entrées de la navigation
-   par initiale), on a row that scrolls sideways like the menu of the consultation, the current entry marked
-   (visuel/liste-albums.md § Contenu). The list builds the address of each entry, which keeps its other criteria. *@
+@* The navigation par initiale of a list: « Toutes », A to Z, # and @ (fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale), on a row that scrolls sideways like the menu of the consultation, the current entry marked
+   (visuel/liste-albums/contenu.md). The list builds the address of each entry, which keeps its other criteria. *@
 <ScrollRow>
     <nav class="initial-navigation" aria-label="@L["Label"]">
         @foreach (var entry in AllEntries)

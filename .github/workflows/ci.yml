@@ -10,8 +10,9 @@ permissions:
   contents: read
 
 # A push to a pull request makes the run of its previous commit useless: that run is cancelled rather
-# than left to consume the quotas of Docker Hub and of the GitHub API (gestion-projet/depot.md
-# § Intégration continue (CI)). Each push to main has a group of its own: a shared one would hold a
+# than left to consume the quotas of Docker Hub and of the GitHub API
+# (gestion-projet/depot/integration-continue-ci.md). Each push to main has a group of its own: a
+# shared one would hold a
 # second run pending, and cancel it when a third one arrives.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -55,7 +56,7 @@ jobs:
           dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
 
       # The end-to-end tests drive the application in Chromium, with the system libraries it needs on
-      # the runner (choix-implementation/outillage.md § Outillage de développement .NET).
+      # the runner (choix-implementation/outillage.md).
       - name: Install the browser of the end-to-end tests
         run: pwsh tests/Bdtheque.EndToEnd.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
@@ -95,8 +96,8 @@ jobs:
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       # The publishing token: the code of the branch and of its dependencies only runs inside the
-      # build containers, which never get the registry credentials (gestion-projet/depot.md § Intégration
-      # continue (CI)).
+      # build containers, which never get the registry credentials
+      # (gestion-projet/depot/integration-continue-ci.md).
       - name: Log in to Docker Hub
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
@@ -126,8 +127,9 @@ jobs:
           [ -n "$digest" ] && echo "published=true" >> "$GITHUB_OUTPUT" || true
 
       # Fails when the image adds a fixable vulnerability to the published one: a vulnerability it
-      # already holds is not introduced by this change (choix-implementation/deploiement.md § Publication des
-      # images Docker). Without a published image, no fixable vulnerability is accepted at all.
+      # already holds is not introduced by this change
+      # (choix-implementation/deploiement/publication-des-images-docker.md). Without a published image, no
+      # fixable vulnerability is accepted at all.
       - name: Check vulnerabilities of the ${{ matrix.image }} image
         uses: docker/scout-action@a4119c5a8c5076236a54e4ce99531f7e4dd2ef84 # v1.27.0
         with:

@@ -9,15 +9,15 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Search;
 
 /// <summary>
-/// What the advanced search queries (fonctionnel/recherche-avancee.md § Recherche avancée): every entity of the consultation,
+/// What the advanced search queries (fonctionnel/recherche-avancee/recherche-avancee.md): every entity of the consultation,
 /// every data of the business model — public, of management or deduced —, and every link of the model, in
-/// both directions (modele-metier.md § Relations et cardinalités).
+/// both directions (modele-metier/relations-et-cardinalites.md).
 /// </summary>
 /// <remarks>
 /// The keys are a contract, which saved searches will store: a key is never renamed nor reused for other
 /// data. The amounts are only queried for being set, and the data computed by later phases (amounts in
 /// euros, estimated value, missing volumes, estimated release) join the search with them
-/// (suivi-implementation.md).
+/// (suivi-implementation/).
 /// </remarks>
 internal static class AdvancedSearchSchema
 {
@@ -25,7 +25,7 @@ internal static class AdvancedSearchSchema
     {
         new SearchEntityBuilder<Album>(EntityKind.Album)
             .Text("title", a => a.Title)
-            // That of the series standing in for an album without a title of its own (modele-metier.md § Album).
+            // That of the series standing in for an album without a title of its own (modele-metier/album.md).
             .Text("sortKey", a => a.SortKey ?? a.Series!.SortKey, isOptional: false)
             .Boolean("manualSortKey", a => a.IsManualSortKey)
             .Text("initial", a => a.NavigationEntry ?? a.Series!.NavigationEntry, isOptional: false)
@@ -48,7 +48,8 @@ internal static class AdvancedSearchSchema
             .Attached("universes", EntityKind.Universe, SearchAttachments.UniversesOf<Album>(a => a.Universes))
             .Attached("displayedUniverses", EntityKind.Universe, SearchAttachments.UniversesOf<Album>(a => a.Universes, a => a.Series!.Universes))
             // The intent on the album itself: those on its editions carry its identifier too, but target them
-            // (modele-metier.md § Intention d'achat — relations), and are reached through them.
+            // (modele-metier/relations-et-cardinalites.md#intention-dachat--relations), and are
+            // reached through them.
             .ZeroOrOne("purchaseIntent", EntityKind.PurchaseIntent, a => a.PurchaseIntents.Where(p => p.EditionId == null))
             .Build(),
 
@@ -150,7 +151,7 @@ internal static class AdvancedSearchSchema
             .Text("description", u => u.Description)
             .One("parent", EntityKind.Universe, u => u.Parent)
             .Many("children", EntityKind.Universe, u => u.Children)
-            // Attached to the universe or one of its descendants (fonctionnel/regles-metier.md § Hiérarchie des univers): the reverse
+            // Attached to the universe or one of its descendants (fonctionnel/regles-metier/hierarchie-des-univers.md): the reverse
             // of the link `universes` of an album, those of its series being reached through the series.
             .Attached("albums", EntityKind.Album, SearchAttachments.RecordsOfUniverse<Album>(a => a.Universes))
             .Attached("series", EntityKind.Series, SearchAttachments.RecordsOfUniverse<Series>(s => s.Universes))
@@ -159,7 +160,7 @@ internal static class AdvancedSearchSchema
         new SearchEntityBuilder<EditionVisual>(EntityKind.EditionVisual)
             .Enumeration<D.VisualType, C.VisualType>("type", v => v.Type, isOptional: false)
             .Number("displayOrder", v => v.DisplayOrder, isOptional: false)
-            // Not the reference of its media, a technical datum (fonctionnel/recherche-avancee.md § Données interrogées).
+            // Not the reference of its media, a technical datum (fonctionnel/recherche-avancee/donnees-interrogees.md).
             .One("edition", EntityKind.Edition, v => v.Edition)
             .Build(),
 

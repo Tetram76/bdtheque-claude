@@ -391,7 +391,8 @@ public sealed class AlbumTests
     public void Constructor_WithoutTitle_LeavesNavigationEntryNull()
     {
         // The entry follows the album's own sort key: the series' entry is substituted at read
-        // time, never copied onto the album (choix-implementation/api.md § Navigation par initiale).
+        // time, never copied onto the album
+        // (choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md).
         var album = new Album(null, new Series("Tintin"));
 
         Assert.Null(album.NavigationEntry);

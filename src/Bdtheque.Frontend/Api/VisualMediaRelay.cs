@@ -8,8 +8,9 @@ namespace Bdtheque.Frontend.Api;
 
 /// <summary>
 /// Relays the media of the visuals that <c>api</c> serves (<see cref="VisualMediaRoutes"/>), under the same paths: the
-/// browser only talks to <c>frontend</c>, and the volume is private to <c>api</c> (choix-implementation/domaine.md § Visuels :
-/// stockage et traitement). Streamed, never held in memory, and with the cache headers of <c>api</c>, which alone knows
+/// browser only talks to <c>frontend</c>, and the volume is private to <c>api</c>
+/// (choix-implementation/domaine/visuels-stockage-et-traitement.md). Streamed, never held in memory, and with the cache
+/// headers of <c>api</c>, which alone knows
 /// the rule that justifies them.
 /// </summary>
 public static class VisualMediaRelay

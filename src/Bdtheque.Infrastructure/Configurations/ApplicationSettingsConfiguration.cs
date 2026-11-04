@@ -11,7 +11,7 @@ internal sealed class ApplicationSettingsConfiguration : IEntityTypeConfiguratio
         builder.ToTable(ApplicationSettingsProvisioning.Table);
         builder.HasKey(s => s.Id);
 
-        // A single record (modele-metier.md § Paramétrage de l'application): its identifier is the only one accepted,
+        // A single record (modele-metier/parametrage-de-l-application.md): its identifier is the only one accepted,
         // which the primary key makes unique.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_ApplicationSettings_Single",

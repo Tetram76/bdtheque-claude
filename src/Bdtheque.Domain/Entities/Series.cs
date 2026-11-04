@@ -116,7 +116,8 @@ public sealed class Series : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Replaces the contributions of the series — its authors, and the starting point of the credits
-    /// of an album attached to it (modele-metier.md § Série — relations) — as the form sends them
+    /// of an album attached to it (modele-metier/relations-et-cardinalites.md#série--relations) —
+    /// as the form sends them
     /// whole. A contribution already credited is kept as it is; nothing is changed if any is refused.
     /// </summary>
     public void SetTemplateContributions(IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions) =>

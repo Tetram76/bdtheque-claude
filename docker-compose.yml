@@ -17,7 +17,7 @@ services:
       - backend
 
   # Business logic, data access, ML.NET. Never published on the host: only
-  # `frontend` can reach it, over the `frontend-net` network (see choix-implementation/socle/transverse.md § Authentification : mise en œuvre).
+  # `frontend` can reach it, over the `frontend-net` network (see choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md).
   api:
     image: tetram76/bdtheque-api:${BDTHEQUE_TAG:-nightly}
     build:
@@ -27,7 +27,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       # GSS encryption (Kerberos) disabled: `db` is only reachable over the internal network, with a
-      # password, and its library is missing from the chiseled image (see choix-implementation/deploiement.md § Images de base des conteneurs).
+      # password, and its library is missing from the chiseled image (see choix-implementation/deploiement/images-de-base-des-conteneurs.md).
       ConnectionStrings__Bdtheque: Host=db;Port=5432;Database=${POSTGRES_DB:-bdtheque};Username=${POSTGRES_USER:-bdtheque};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required};GSS Encryption Mode=Disable
       InternalApiKey__Key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
     volumes:
@@ -52,10 +52,10 @@ services:
       Api__BaseUrl: http://api:8080
       InternalApiKey__Key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
       # Behind the reverse proxy of the NAS only, which terminates TLS; empty for a deployment reached directly in HTTP
-      # (see choix-implementation/deploiement.md § Frontend derrière le reverse proxy du NAS).
+      # (see choix-implementation/deploiement/frontend-derriere-le-reverse-proxy-du-nas.md).
       PublicAddress__Url: ${PUBLIC_URL:-}
     # No visuals volume: like `db`, it is private to `api`, which serves the media
-    # (see choix-implementation/domaine.md § Visuels : stockage et traitement).
+    # (see choix-implementation/domaine/visuels-stockage-et-traitement.md).
     ports:
       - "${FRONTEND_PORT:-8080}:8080"
     depends_on:

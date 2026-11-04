@@ -1,8 +1,7 @@
 @using Bdtheque.Contracts.Catalog
 @inject IStringLocalizer<Cover> L
 
-@* The thumbnail of a cover, or the generic visual for an edition or an album without cover (fonctionnel/regles-metier.md
-   § Visuel par défaut, § Couverture d'un album). Its media is the display version relayed by frontend (VisualMediaRelay).
+@* The thumbnail of a cover, or the generic visual for an edition or an album without cover (fonctionnel/regles-metier/visuel-par-defaut.md, fonctionnel/regles-metier/couverture-d-un-album.md). Its media is the display version relayed by frontend (VisualMediaRelay).
    Without text, it is decorative: the label next to it names what it shows. *@
 <span class="cover">
     @if (VisualId is { } visual)

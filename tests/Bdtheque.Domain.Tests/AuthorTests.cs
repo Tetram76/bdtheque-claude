@@ -72,7 +72,7 @@ public sealed class AuthorTests
         Assert.NotEqual(a1.Id, a2.Id);
     }
 
-    // Examples of fonctionnel/presentation.md § Artistes.
+    // Examples of fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes.
     [Theory]
     [InlineData("Van Hamme", "Jean", null, "Van Hamme Jean", "V")]
     [InlineData(null, null, "Moebius", "Moebius", "M")]

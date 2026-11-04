@@ -1,5 +1,5 @@
-/* Base theme: the contracts every theme follows, with their neutral values (visuel/charte-graphique.md § Thème de base;
-   choix-implementation/socle/themes.md § Thèmes : mise en œuvre). A theme only redefines these custom properties under its own
+/* Base theme: the contracts every theme follows, with their neutral values (visuel/charte-graphique/theme-de-base.md;
+   choix-implementation/socle/themes.md). A theme only redefines these custom properties under its own
    [data-theme] selector, and hooks its own touches on the anchors below: it never styles a component directly.
    Every pair of colors meant to be read together is checked by ThemeContrastTests, for every theme. */
 
@@ -157,7 +157,7 @@
     --shadow-block: none;
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
     /* A surface laid over the page (a menu, a dialog, the list of a field, the bar of a form): always bordered and
-       shadowed, even in a theme whose blocks are not (visuel/administration.md § En-tête et menu). */
+       shadowed, even in a theme whose blocks are not (visuel/administration/en-tete-et-menu.md). */
     --border-floating: var(--border-block);
     --shadow-floating: var(--shadow-raised);
     /* The current entry of the menu of the consultation: filled with the accent by default; a theme may underline it
@@ -166,8 +166,7 @@
     --nav-entry-current-text: var(--color-text-on-accent);
     --nav-entry-current-rule: transparent;
 
-    /* Spacing and sizes: those of an application, tighter on a smartphone (visuel/charte-graphique.md § Convivialité et
-       efficacité). A control has the same height on every page for a given screen width. */
+    /* Spacing and sizes: those of an application, tighter on a smartphone (visuel/charte-graphique/convivialite-et-efficacite.md). A control has the same height on every page for a given screen width. */
     --space-unit: 0.25rem;
     --space-xs: var(--space-unit);
     --space-s: calc(2 * var(--space-unit));
@@ -253,7 +252,7 @@ a:hover {
 }
 
 /* The keyboard focus: an outline of the color of the text, set apart from the element by a band of the surface around
-   it, so that it stands out against the element, colored or not, and against the surface (liste-albums.md § Contrôles).
+   it, so that it stands out against the element, colored or not, and against the surface (visuel/liste-albums/controles.md).
    Each surface names itself the band of what it holds (--focus-gap): the page by default, a block, a menu, a dialog. */
 :focus-visible {
     outline: 2px solid var(--color-text);
@@ -289,7 +288,7 @@ textarea {
     resize: vertical;
 }
 
-/* The placeholder keeps its contrast, never faded by an opacity (liste-albums.md § Contrôles). */
+/* The placeholder keeps its contrast, never faded by an opacity (visuel/liste-albums/controles.md). */
 ::placeholder {
     color: var(--color-placeholder);
     opacity: 1;
@@ -319,7 +318,7 @@ input[type="radio"] {
     cursor: pointer;
 }
 
-/* A control in error is bordered with the alert color, its message under it (visuel/saisie-album.md § Contenu). More
+/* A control in error is bordered with the alert color, its message under it (visuel/saisie-album/contenu.md). More
    specific than the rule of the controls above, which its :not() makes as specific as a class and an element. */
 :is(input, select, textarea)[aria-invalid="true"] {
     border-color: var(--color-alert);
@@ -336,7 +335,7 @@ input[type="radio"] {
 }
 
 /* The header of the consultation and of the administration: it stays at the top of the screen when the page scrolls
-   (visuel/charte-graphique.md § Apparence propre à chaque alternative), on an opaque surface. */
+   (visuel/charte-graphique/apparence-propre-a-chaque-alternative.md), on an opaque surface. */
 
 .app-header {
     --focus-gap: var(--color-surface);

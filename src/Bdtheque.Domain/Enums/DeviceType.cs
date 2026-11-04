@@ -1,7 +1,7 @@
 namespace Bdtheque.Domain.Enums;
 
 /// <summary>
-/// Category of the device of a visit (Type d'appareil, modele-metier.md § Visite de l'interface web): with the
+/// Category of the device of a visit (Type d'appareil, modele-metier/visite-de-l-interface-web.md): with the
 /// rendering engine, the only characteristic of the device the audience measurement keeps.
 /// </summary>
 public enum DeviceType

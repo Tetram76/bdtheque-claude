@@ -12,7 +12,7 @@ namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// Reading of the change log (<c>/admin/change-log</c>), consulted in the administration only
-/// (modele-metier.md § Entrée du journal des modifications). The entries are data, mapped as they
+/// (modele-metier/entree-du-journal-des-modifications.md). The entries are data, mapped as they
 /// were recorded: the same entry always reads the same.
 /// </summary>
 internal static class ChangeLogEndpoints

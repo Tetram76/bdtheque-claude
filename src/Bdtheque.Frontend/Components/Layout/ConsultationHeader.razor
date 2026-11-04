@@ -1,11 +1,11 @@
 @inject IStringLocalizer<LayoutText> L
 @inject NavigationManager Navigation
 
-@* The header of the consultation (visuel/charte-graphique.md § Apparence propre à chaque alternative): the logo, the menu,
+@* The header of the consultation (visuel/charte-graphique/apparence-propre-a-chaque-alternative.md): the logo, the menu,
    whose entry of the current page is marked, then the search and the help, always visible. The menu never wraps: it
    scrolls sideways. The header stays at the top of the screen when the page scrolls; on a small screen, the search goes
    under the menu. The search is a section, which a page may leave out (NoHeaderSearch): the welcome screen of an empty
-   collection, whose search would have almost nothing to find (visuel/dashboard.md § Collection vide). *@
+   collection, whose search would have almost nothing to find (visuel/dashboard/collection-vide.md). *@
 <header class="app-header consultation-header">
     <a class="app-logo" href="@AppPaths.Home">@L["AppName"]</a>
     <ScrollRow class="consultation-menu">

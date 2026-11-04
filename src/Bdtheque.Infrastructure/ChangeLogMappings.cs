@@ -17,8 +17,9 @@ internal sealed record AttributeMapping(ChangeLogAttribute Attribute, string[] P
 internal sealed record RecordMapping(RecordType RecordType, AttributeMapping[] Attributes, string[] LeftOut);
 
 /// <summary>
-/// The records of the change log and their attributes (modele-metier.md § Entrée du journal des
-/// modifications). Every property of a record is either recorded here or left out on purpose, which
+/// The records of the change log and their attributes
+/// (modele-metier/entree-du-journal-des-modifications.md). Every property of a record is either
+/// recorded here or left out on purpose, which
 /// <c>ChangeLogMappingTests</c> checks; the elements a record carries without a record of their own
 /// (genres, universes, contributions, visuals) are recorded by <see cref="ChangeLogRecorder"/>.
 /// </summary>
@@ -175,7 +176,8 @@ internal static class ChangeLogMappings
     private static AttributeMapping Date(ChangeLogAttribute attribute, string property) =>
         Scalar(attribute, property, value => value is DateOnly date ? new DateValue(date) : null);
 
-    // Its persisted value, which keeps its meaning forever (choix-implementation/persistance.md § Conventions de persistance).
+    // Its persisted value, which keeps its meaning forever
+    // (choix-implementation/persistance/conventions-de-persistance-ef-core.md).
     private static AttributeMapping Enum<TRecord>(ChangeLogAttribute attribute, string property)
     {
         var type = typeof(TRecord).GetProperty(property)!.PropertyType;

@@ -6,7 +6,7 @@ namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// The display culture is a setting of the application, French of France the only one offered
-/// (fonctionnel/presentation.md § Langue et culture d'affichage): never the language the browser asks for.
+/// (fonctionnel/presentation/langue-et-culture-d-affichage.md): never the language the browser asks for.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
 public sealed class LocalizationTests(ApplicationHost application)

@@ -5,9 +5,9 @@ using Bdtheque.Contracts.Search;
 namespace Bdtheque.Contracts.Admin;
 
 /// <summary>
-/// An entry of the change log (modele-metier.md § Entrée du journal des modifications). It carries
+/// An entry of the change log (modele-metier/entree-du-journal-des-modifications.md). It carries
 /// data, never a text: the client builds the message in the display culture in force when it presents
-/// it (fonctionnel/presentation.md § Langue et culture d'affichage), and always the same message for the same entry.
+/// it (fonctionnel/presentation/langue-et-culture-d-affichage.md), and always the same message for the same entry.
 /// </summary>
 /// <param name="Date">Date of the write.</param>
 /// <param name="RecordId">Identifier of the record written, kept after its deletion.</param>
@@ -89,7 +89,7 @@ public sealed record SearchVariablesValue(IReadOnlyList<SavedSearchVariable> Var
 [JsonDerivedType(typeof(ApplicationSettingsLabel), "applicationSettings")]
 public abstract record RecordLabel;
 
-/// <summary>What the label of an album is built from (fonctionnel/presentation.md § Libellé d'un album).</summary>
+/// <summary>What the label of an album is built from (fonctionnel/presentation/libelle-d-un-album.md).</summary>
 public sealed record AlbumLabel(
     string? Title,
     string? SeriesTitle,
@@ -99,7 +99,7 @@ public sealed record AlbumLabel(
     int? StartVolumeNumber,
     int? EndVolumeNumber) : RecordLabel;
 
-/// <summary>What the label of an edition is built from (fonctionnel/presentation.md § Libellé d'une édition), with the label of its album.</summary>
+/// <summary>What the label of an edition is built from (fonctionnel/presentation/libelle-d-une-edition.md), with the label of its album.</summary>
 public sealed record EditionLabel(
     AlbumLabel Album,
     string PublisherName,
@@ -110,7 +110,8 @@ public sealed record EditionLabel(
 /// <summary>The target of a purchase intent: its album as a whole, or one of its editions.</summary>
 public sealed record PurchaseIntentLabel(AlbumLabel? Album, EditionLabel? Edition) : RecordLabel;
 
-/// <summary>What the main identifier of an author is built from (fonctionnel/presentation.md § Artistes).</summary>
+/// <summary>What the main identifier of an author is built from
+/// (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).</summary>
 public sealed record AuthorLabel(string? LastName, string? FirstName, string? Pseudonym) : RecordLabel;
 
 /// <summary>A publisher collection, with its publisher.</summary>

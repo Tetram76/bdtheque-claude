@@ -3,7 +3,7 @@ using Bdtheque.Domain.Enums;
 
 namespace Bdtheque.Domain.Tests;
 
-/// <summary>The setting of the application (modele-metier.md § Paramétrage de l'application).</summary>
+/// <summary>The setting of the application (modele-metier/parametrage-de-l-application.md).</summary>
 public sealed class ApplicationSettingsTests
 {
     [Fact]

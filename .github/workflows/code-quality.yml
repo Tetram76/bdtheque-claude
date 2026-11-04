@@ -1,7 +1,7 @@
 name: Code quality
 
 # SonarQube Cloud analysis of the code, with the test coverage, for the quality indicators of the
-# README and the pull request decoration (gestion-projet/depot.md § Analyse de la qualité du code).
+# README and the pull request decoration (gestion-projet/depot/analyse-de-la-qualite-du-code.md).
 # It is kept out of ci.yml: the scanner switches off TreatWarningsAsErrors in the build it wraps, so
 # it cannot stand in for the strict build of the CI. The merge requires the quality gate through the
 # check that the SonarQube Cloud app publishes after this analysis, not through this job.
@@ -12,7 +12,7 @@ on:
     branches: [main]
   # Run on main once a version is tagged: the new code period of the project starts at the first
   # analysis carrying that version, which must be the one of the published commit
-  # (gestion-projet/depot.md § Versions et releases).
+  # (gestion-projet/depot/versions-et-releases.md).
   workflow_dispatch:
 
 permissions:

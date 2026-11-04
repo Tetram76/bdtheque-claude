@@ -1,6 +1,14 @@
+---
+type: Journal
+title: 'Journal des évènements externes'
+description: 'Journal des évènements externes au dépôt (déploiements, incidents) ; tenu sur demande de l''utilisateur seulement ; conditionne les règles liées au premier déploiement.'
+tags: [socle]
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+---
+
 # Journal des évènements externes
 
-Ce fichier est un **journal**, pas un document de référence : contrairement aux autres fichiers `.speckit/`, il déroge intentionnellement à leurs règles de mise à jour et de format (cf. [`gestion-projet/gouvernance.md`](gestion-projet/gouvernance.md) § « Mise à jour du .speckit »).
+Ce fichier est un **journal**, pas un document de référence : contrairement aux autres fichiers `.speckit/`, il déroge intentionnellement à leurs règles de mise à jour et de format (cf. [Mise à jour du .speckit](/gestion-projet/gouvernance/gouvernance-documentaire.md#mise-à-jour-du-speckit)).
 
 - **Mise à jour** : uniquement sur demande explicite de l'utilisateur. Contrairement aux autres fichiers `.speckit/`, l'agent ne doit **jamais** y ajouter d'entrée de sa propre initiative, même s'il a connaissance d'un évènement pertinent (ex. déploiement effectué au cours de la conversation). Il peut le signaler à l'utilisateur, mais l'ajout attend sa demande explicite.
 - **Contenu** : évènements **externes au repo** susceptibles d'influencer son développement (déploiement d'une version en test/production, incident constaté, changement d'infrastructure ou d'environnement externe, etc.). Les décisions ou changements internes au code/projet n'y figurent pas — ils relèvent des fichiers de référence appropriés.

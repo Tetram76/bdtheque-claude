@@ -1,5 +1,5 @@
 /* Structural rules only: the look of the application belongs to the base theme and its themes
-   (choix-implementation/socle/frontend.md § Frontend, Styles). */
+   (choix-implementation/socle/frontend.md, Styles). */
 
 /* Focused by FocusOnNavigate after each navigation, for screen readers: not a visible focus. */
 h1:focus {
@@ -34,8 +34,7 @@ h1:focus {
     }
 }
 
-/* While the menu of the administration is open, the page stays still: only the panel scrolls (visuel/administration.md
-   § En-tête et menu). */
+/* While the menu of the administration is open, the page stays still: only the panel scrolls (visuel/administration/en-tete-et-menu.md). */
 html:has(#admin-menu:popover-open) {
     overflow: hidden;
 }

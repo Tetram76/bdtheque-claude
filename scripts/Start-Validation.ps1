@@ -4,7 +4,7 @@
     Starts the version of a pull request on this machine, for its functional validation.
 
 .DESCRIPTION
-    Validation environment of choix-implementation/deploiement.md § Environnement de validation fonctionnelle:
+    Validation environment of choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md:
     the whole application (frontend, api, db), built from the sources of the pull request by Docker alone,
     with the validation data. Each start begins from an empty database, so that nothing is left from one
     validation to the next: starting again resets the environment. Stopped by Stop-Validation.ps1.

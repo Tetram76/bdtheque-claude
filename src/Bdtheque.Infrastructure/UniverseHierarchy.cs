@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Serializes the changes to the hierarchy of the universes (choix-implementation/persistance.md § Cohérence
-/// entre tables).
+/// Serializes the changes to the hierarchy of the universes
+/// (choix-implementation/persistance/coherence-entre-tables.md).
 /// </summary>
 /// <remarks>
 /// Acyclicity spans the whole ancestor chain, which no row lock covers: two re-parentings of

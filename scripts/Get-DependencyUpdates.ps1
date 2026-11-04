@@ -5,7 +5,7 @@
     vulnerabilities of its NuGet packages and the result of the daily security audit.
 
 .DESCRIPTION
-    Version watch of gestion-projet/depot.md § Mises à jour des dépendances, checked by the agent at
+    Version watch of gestion-projet/depot/mises-a-jour-des-dependances.md, checked by the agent at
     each resumption of work, and run at most once per run of the daily security audit. It only reads official sources and changes nothing: the upgrade itself, with
     its review, is the agent's work.
 
@@ -14,7 +14,8 @@
 #>
 [CmdletBinding()]
 param(
-    # Versions published more recently are flagged, not hidden: depot.md waits 7 days before taking them.
+    # Versions published more recently are flagged, not hidden: the update policy
+    # (gestion-projet/depot/mises-a-jour-des-dependances.md) waits 7 days before taking them.
     [int] $MinimumAgeDays = 7
 )
 

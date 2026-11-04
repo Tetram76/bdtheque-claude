@@ -1,7 +1,7 @@
 namespace Bdtheque.Domain.Enums;
 
 /// <summary>
-/// Format of the label of an album, a setting of the application (fonctionnel/presentation.md § Libellé d'un album).
+/// Format of the label of an album, a setting of the application (fonctionnel/presentation/libelle-d-un-album.md).
 /// </summary>
 public enum AlbumLabelFormat
 {

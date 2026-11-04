@@ -1,4 +1,4 @@
-/* Compact, as everything in a list (visuel/charte-graphique.md § Convivialité et efficacité). The dashed border is a
+/* Compact, as everything in a list (visuel/charte-graphique/convivialite-et-efficacite.md). The dashed border is a
    control border: it alone tells a dashed tag from text, so it keeps its contrast. */
 .tag {
     display: inline-flex;

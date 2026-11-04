@@ -5,13 +5,13 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// The setting of the application (modele-metier.md § Paramétrage de l'application): a single record, always present,
+/// The setting of the application (modele-metier/parametrage-de-l-application.md): a single record, always present,
 /// which is modified but neither created nor deleted.
 /// </summary>
 /// <remarks>
 /// The application never creates it: the database is provisioned with it, under <see cref="SingletonId"/> and with
-/// the defaults below, when <c>api</c> starts (choix-implementation/domaine.md § Paramétrage de l'application : mise
-/// en œuvre).
+/// the defaults below, when <c>api</c> starts
+/// (choix-implementation/domaine/parametrage-de-l-application-mise-en-oeuvre.md).
 /// </remarks>
 public sealed class ApplicationSettings : EntityBase, IAggregateRoot
 {

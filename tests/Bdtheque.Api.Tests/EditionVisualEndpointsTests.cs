@@ -16,8 +16,9 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// Administration of the visuals of an edition (<c>/admin/albums/{albumId}/editions/{editionId}/visuals</c>),
-/// the consistency between their rows and their files on the volume (choix-implementation/domaine.md §
-/// Visuels : stockage et traitement), deletions of editions and albums included, and their media, which
+/// the consistency between their rows and their files on the volume
+/// (choix-implementation/domaine/visuels-stockage-et-traitement.md), deletions of editions and albums
+/// included, and their media, which
 /// <c>api</c> alone serves (<c>/catalog/visuals/{id}/…</c>).
 /// </summary>
 public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicationFactory>
@@ -432,8 +433,9 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
     }
 
-    // A media is never rewritten under the same address (choix-implementation/domaine.md § Visuels : stockage et
-    // traitement): a browser keeps it without ever asking again.
+    // A media is never rewritten under the same address
+    // (choix-implementation/domaine/visuels-stockage-et-traitement.md): a browser keeps it without ever asking
+    // again.
     private static void AssertCachedForLong(HttpResponseMessage response)
     {
         var cacheControl = response.Headers.CacheControl!;

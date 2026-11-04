@@ -3,7 +3,7 @@ using Bdtheque.Frontend.Visits;
 namespace Bdtheque.Frontend.Theming;
 
 /// <summary>
-/// The rules of the theme of the visit (fonctionnel/index.md § Design et charte graphique, Thème actif): drawn at random
+/// The rules of the theme of the visit (fonctionnel/design-et-charte-graphique.md, Thème actif): drawn at random
 /// among the offered themes at the start of a visit, kept for the whole visit, and drawn again for each new date of the
 /// browser, in its current time zone, from the first page displayed at that date.
 /// </summary>

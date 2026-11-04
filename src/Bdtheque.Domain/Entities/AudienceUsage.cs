@@ -5,7 +5,7 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// Usage of a function of the web interface during a visit (Utilisation d'une fonction, modele-metier.md): a
+/// Usage of a function of the web interface during a visit (Utilisation d'une fonction, modele-metier/): a
 /// screen displayed or an action triggered. Never modified once recorded; its date is its creation date.
 /// </summary>
 public sealed class AudienceUsage : EntityBase
@@ -25,7 +25,7 @@ public sealed class AudienceUsage : EntityBase
 
     /// <summary>
     /// The usage immediately preceding it in its visit was of the same function, on the same record and with the
-    /// same parameters (modele-metier.md § Compteur d'audience mensuel). Set when it is recorded, the preceding
+    /// same parameters (modele-metier/compteur-d-audience-mensuel.md). Set when it is recorded, the preceding
     /// usage being known then, and never changed.
     /// </summary>
     public bool IsRepeat { get; private set; }
@@ -62,7 +62,7 @@ public sealed class AudienceUsage : EntityBase
     }
 }
 
-/// <summary>A record a screen presents (Fiche présentée, modele-metier.md § Utilisation d'une fonction).</summary>
+/// <summary>A record a screen presents (Fiche présentée, modele-metier/utilisation-d-une-fonction.md).</summary>
 public sealed record PresentedRecord
 {
     public RecordType Type { get; }

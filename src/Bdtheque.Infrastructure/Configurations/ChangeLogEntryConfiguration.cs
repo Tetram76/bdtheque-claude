@@ -13,12 +13,12 @@ internal sealed class ChangeLogEntryConfiguration : IEntityTypeConfiguration<Cha
         builder.ToTable("ChangeLogEntries");
         builder.HasKey(e => e.Id);
 
-        // No foreign key to the record: the entry outlives its deletion (modele-metier.md § Entrée du
-        // journal des modifications).
+        // No foreign key to the record: the entry outlives its deletion
+        // (modele-metier/entree-du-journal-des-modifications.md).
         builder.Property(e => e.RecordId);
 
         // Data rather than texts, so that they are presented in the display culture in force when they
-        // are read (fonctionnel/presentation.md § Langue et culture d'affichage): JSON, in the form ChangeLogJson pins.
+        // are read (fonctionnel/presentation/langue-et-culture-d-affichage.md): JSON, in the form ChangeLogJson pins.
         builder.Property(e => e.Label)
             .HasColumnType("jsonb")
             .HasConversion(label => ChangeLogJson.SerializeLabel(label), json => ChangeLogJson.DeserializeLabel(json));

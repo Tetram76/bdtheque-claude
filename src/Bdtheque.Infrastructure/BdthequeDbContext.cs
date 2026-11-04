@@ -67,8 +67,9 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
                 .ValueGeneratedNever();
         }
 
-        // Optimistic concurrency on whole aggregates (choix-implementation/persistance.md § Concurrence
-        // d'accès): the root's xmin, a native PostgreSQL row version needing no column of its own,
+        // Optimistic concurrency on whole aggregates
+        // (choix-implementation/persistance/concurrence-d-acces.md): the root's xmin, a native
+        // PostgreSQL row version needing no column of its own,
         // stands for the aggregate. A shadow property keeps this persistence concern out of the
         // domain.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes()
@@ -102,8 +103,8 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     {
         ChangeTracker.DetectChanges();
         DeleteSeveredContributions();
-        // Every write on a record adds its entry to the change log, in the same save (modele-metier.md §
-        // Entrée du journal des modifications); dated below, like any other entity.
+        // Every write on a record adds its entry to the change log, in the same save
+        // (modele-metier/entree-du-journal-des-modifications.md); dated below, like any other entity.
         // Changes were just detected: the recorder enumerates the tracked entities many times over,
         // each enumeration otherwise detecting them all again.
         var autoDetectChanges = ChangeTracker.AutoDetectChangesEnabled;
@@ -134,8 +135,9 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
             entry.State = EntityState.Deleted;
     }
 
-    // Creation and last modification dates are set here, never entered (modele-metier.md §
-    // Attributs communs à toutes les entités): the single place every save goes through. A write on
+    // Creation and last modification dates are set here, never entered
+    // (modele-metier/attributs-communs-a-toutes-les-entites.md): the single place every save goes
+    // through. A write on
     // an aggregate marks its root modified (AggregateWriteExtensions), so the root's modification
     // date follows any change to its children or associations.
     private void StampAuditDates()
@@ -190,14 +192,15 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
         // already-persisted rows — the same guarantee a string conversion would give, without
         // coupling persisted data (and the occasional CHECK constraint referencing a member by
         // name, e.g. AlbumConfiguration) to a C# identifier that renaming would silently break
-        // (see choix-implementation/persistance.md § Conventions de persistance (EF Core)).
+        // (see choix-implementation/persistance/conventions-de-persistance-ef-core.md).
         configurationBuilder.Properties<Enum>().HaveConversion<int>();
 
-        // Every text column sorts in French linguistic order (fonctionnel/presentation.md § Langue et culture
-        // d'affichage): the database default collation of the postgres image compares bytes,
+        // Every text column sorts in French linguistic order
+        // (fonctionnel/presentation/langue-et-culture-d-affichage.md): the database default collation of the
+        // postgres image compares bytes,
         // which puts lowercase and accented initials after "Z". Declared on the columns rather
         // than relied upon from the database default, so the order travels with the schema
-        // whatever locale the database was initialized with (see choix-implementation/persistance.md § Collation des colonnes texte).
+        // whatever locale the database was initialized with (see choix-implementation/persistance/collation-des-colonnes-texte.md).
         configurationBuilder.Properties<string>().UseCollation(FrenchCollation);
     }
 

@@ -14,8 +14,8 @@ public sealed record PurchaseIntentsForm(Guid AlbumId, IReadOnlyList<PurchaseInt
 public sealed record PurchaseIntentForm(Guid Id, Guid? EditionId);
 
 /// <summary>
-/// The form of an intent on a new edition, pre-filled as the form of a new edition is (fonctionnel/regles-metier.md
-/// § Initialisation d'une nouvelle édition depuis la série).
+/// The form of an intent on a new edition, pre-filled as the form of a new edition is
+/// (fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md).
 /// </summary>
 /// <param name="AlbumVersion">Version of the album, sent back with the creation or the conversion of the intent.</param>
 public sealed record NewPurchaseIntentForm(Guid AlbumId, PurchaseIntentEditionContent Edition, uint AlbumVersion);
@@ -23,7 +23,8 @@ public sealed record NewPurchaseIntentForm(Guid AlbumId, PurchaseIntentEditionCo
 /// <summary>
 /// The edition an intent targets, entered with the minimum of fields: those of the published edition,
 /// without the traits of the copy once owned (condition, second hand, dedication, freeness,
-/// acquisition, personal reference and notes — fonctionnel/regles-metier.md § Réalisation d'une intention).
+/// acquisition, personal reference and notes —
+/// fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention).
 /// </summary>
 /// <param name="PublisherId">Required.</param>
 /// <param name="PublisherCollectionId">Must belong to the publisher.</param>

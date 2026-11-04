@@ -7,8 +7,9 @@ using Bdtheque.Contracts.Enums;
 namespace Bdtheque.ValidationData;
 
 /// <summary>
-/// Loads the fictitious data of the validation environment (choix-implementation/deploiement.md
-/// § Environnement de validation fonctionnelle) through the administration API, like any client of the API:
+/// Loads the fictitious data of the validation environment
+/// (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md) through the
+/// administration API, like any client of the API:
 /// every rule of the application applies to it, and the change log records it. The data covers the cases the
 /// screens present — a long series with omnibuses, special issues and missing volumes, purchase intents on a
 /// whole album and on an edition, many authors, nested universes, editions without cover or with every type of
@@ -16,7 +17,7 @@ namespace Bdtheque.ValidationData;
 /// </summary>
 public sealed class ValidationDataLoader(HttpClient client)
 {
-    /// <summary>Header of the secret shared by `api` and its internal clients (choix-implementation/socle/transverse.md § Authentification : mise en œuvre).</summary>
+    /// <summary>Header of the secret shared by `api` and its internal clients (choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md).</summary>
     public const string InternalApiKeyHeader = "X-Internal-Api-Key";
 
     public const string LongSeriesTitle = "Les Veilleurs d'Ombrelune";

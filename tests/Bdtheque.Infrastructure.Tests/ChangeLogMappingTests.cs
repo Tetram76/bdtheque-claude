@@ -4,8 +4,9 @@ using Bdtheque.Domain.Enums;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// The change log records every attribute of every record (modele-metier.md § Entrée du journal des
-/// modifications): a property added to an entity must be either recorded or deliberately left out,
+/// The change log records every attribute of every record
+/// (modele-metier/entree-du-journal-des-modifications.md): a property added to an entity must be
+/// either recorded or deliberately left out,
 /// never silently ignored.
 /// </summary>
 public sealed class ChangeLogMappingTests : IAsyncLifetime

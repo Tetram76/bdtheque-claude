@@ -6,7 +6,7 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// The interactive documentation of the API, served in development and in the validation environment only
-/// (choix-implementation/socle/transverse.md § Documentation de l'API), from a plain browser, without the internal key.
+/// (choix-implementation/socle/transverse/documentation-de-l-api.md), from a plain browser, without the internal key.
 /// </summary>
 public sealed class ApiDocumentationTests(ApiDocumentationTests.ValidationApi validationApi, ApiWebApplicationFactory production)
     : IClassFixture<ApiDocumentationTests.ValidationApi>, IClassFixture<ApiWebApplicationFactory>

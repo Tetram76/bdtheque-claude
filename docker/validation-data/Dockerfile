@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
-# Loader of the validation data, run once by the validation environment (choix-implementation/deploiement.md
-# § Environnement de validation fonctionnelle). Never published: built on the machine of the validation,
+# Loader of the validation data, run once by the validation environment
+# (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md). Never published: built on
+# the machine of the validation,
 # like the images of the pull request.
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.403 AS build
 ARG TARGETARCH

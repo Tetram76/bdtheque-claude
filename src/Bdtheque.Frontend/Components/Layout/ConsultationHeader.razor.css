@@ -1,4 +1,4 @@
-/* Built on the contracts of the theme only (choix-implementation/socle/themes.md § Thèmes : mise en œuvre). */
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). */
 .consultation-header ::deep .consultation-menu {
     flex: 999 1 10rem;
 }

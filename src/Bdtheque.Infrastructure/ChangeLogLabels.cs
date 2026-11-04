@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Builds the labels the change log records (modele-metier.md § Entrée du journal des
-/// modifications), from the records as the save under way leaves them.
+/// Builds the labels the change log records (modele-metier/entree-du-journal-des-modifications.md),
+/// from the records as the save under way leaves them.
 /// </summary>
 /// <remarks>
 /// A record involved in the save is read from the change tracker, whatever its state; any other is

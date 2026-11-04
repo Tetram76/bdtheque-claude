@@ -12,7 +12,7 @@ namespace Bdtheque.Domain.Entities;
 /// <see cref="AlbumId"/> is set for both kinds of intent (for an edition intent, it is the
 /// edition's album): the target is the edition when <see cref="EditionId"/> is set, the album
 /// otherwise. Storing the album in both cases is what lets the album aggregate — and the
-/// database — see every intent concerning it (see choix-implementation/domaine.md § Intention d'achat : agrégat porté par l'album).
+/// database — see every intent concerning it (see choix-implementation/domaine/intention-d-achat-agregat-porte-par-l-album.md).
 /// </remarks>
 public sealed class PurchaseIntent : EntityBase
 {

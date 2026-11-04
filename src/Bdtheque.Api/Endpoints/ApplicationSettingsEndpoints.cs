@@ -9,7 +9,7 @@ using DomainEnums = Bdtheque.Domain.Enums;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The setting of the application (modele-metier.md § Paramétrage de l'application): read by the consultation
+/// The setting of the application (modele-metier/parametrage-de-l-application.md): read by the consultation
 /// (<c>/catalog/settings</c>) and by the administration, which modifies it (<c>/admin/settings</c>). A single record,
 /// always present, addressed without identifier and neither created nor deleted.
 /// </summary>

@@ -16,8 +16,9 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
         builder.Property(e => e.PersonalNotes);
         builder.Property(e => e.AcquisitionCurrency).HasMaxLength(3);
         // Scale 4 (not 2) so that ISO 4217 currencies with three minor-unit digits (e.g. KWD,
-        // BHD, OMR, JOD, TND) aren't silently rounded on persistence — fonctionnel/valorisation.md §
-        // Gestion des devises requires supporting any currency, not just 2-decimal ones.
+        // BHD, OMR, JOD, TND) aren't silently rounded on persistence —
+        // fonctionnel/valorisation/gestion-des-devises.md requires supporting any currency, not just
+        // 2-decimal ones.
         builder.Property(e => e.AcquisitionAmount).HasPrecision(14, 4);
         builder.Property(e => e.InitialValueCurrency).HasMaxLength(3);
         builder.Property(e => e.InitialValueAmount).HasPrecision(14, 4);
@@ -46,7 +47,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             "CK_Editions_InitialValueAmountPositive",
             $"\"{nameof(Edition.InitialValueAmount)}\" IS NULL OR \"{nameof(Edition.InitialValueAmount)}\" > 0"));
 
-        // Mirrors the model constraint (modele-metier.md § Édition): an edition not possessed
+        // Mirrors the model constraint (modele-metier/edition.md): an edition not possessed
         // (no acquisition mode) cannot carry an acquisition date, a price or an initial value.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Editions_AcquisitionModeRequiredForDateOrAmounts",
@@ -55,7 +56,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             $"AND \"{nameof(Edition.InitialValueAmount)}\" IS NULL)"));
 
         // The date an edition entered the collection is known if and only if it is owned
-        // (modele-metier.md § Édition), stamped on save by BdthequeDbContext.
+        // (modele-metier/edition.md), stamped on save by BdthequeDbContext.
         builder.ToTable(t => t.HasCheckConstraint(
             "CK_Editions_EnteredCollectionIffOwned",
             $"(\"{nameof(Edition.AcquisitionMode)}\" IS NULL) = (\"{nameof(Edition.EnteredCollectionAt)}\" IS NULL)"));
@@ -70,8 +71,8 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
             $"\"{nameof(Edition.IsFree)}\" = false OR \"{nameof(Edition.AcquisitionMode)}\" IS DISTINCT FROM {(int)AcquisitionMode.Purchase}"));
 
         // The reference date every amount needs (Edition.EnsureAmountsDated) may be the album's first
-        // publication: a cross-table rule, left to the domain only (choix-implementation/persistance.md §
-        // Cohérence entre tables).
+        // publication: a cross-table rule, left to the domain only
+        // (choix-implementation/persistance/coherence-entre-tables.md).
 
         // An edition is part of its album and goes with it; publisher and collection are mere
         // references, whose deletion is refused while an edition uses them.
@@ -89,7 +90,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
 
         // Cross-table half of the constraint (the collection must belong to this publisher) is
         // intentionally left to the domain layer only, as with Series' own template collection
-        // (see choix-implementation/persistance.md § Cohérence entre tables).
+        // (see choix-implementation/persistance/coherence-entre-tables.md).
         builder.HasOne(e => e.PublisherCollection)
             .WithMany()
             .HasForeignKey(e => e.PublisherCollectionId)

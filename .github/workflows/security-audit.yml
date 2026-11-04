@@ -1,13 +1,13 @@
 name: Security audit
 
 # Daily check of the known vulnerabilities of every technology in use, whether or not the repository is
-# being worked on (contraintes-techniques/index.md § Suivi des versions et des vulnérabilités). The
+# being worked on (contraintes-techniques/suivi-des-versions-et-des-vulnerabilites.md). The
 # current list is kept in the "Vulnérabilités connues" issue; the run only fails, hence only notifies
 # the user who created the workflow, when a vulnerability absent from that list shows up: a known one
 # does not repeat the notification every day. It is no required check: a vulnerability that no
 # correction fixes yet never blocks a pull request. The agent reads the issue in its version watch, once
 # per run of this audit, and records the watch in the issue body: rewriting the whole body here removes
-# that record, which makes the next watch due (gestion-projet/depot.md § Mises à jour des dépendances).
+# that record, which makes the next watch due (gestion-projet/depot/mises-a-jour-des-dependances.md).
 on:
   schedule:
     - cron: "11 6 * * *"
@@ -166,7 +166,7 @@ jobs:
           fi
           comm -23 current.txt known.txt > new.txt
           {
-            echo "Vulnérabilités connues des technologies du dépôt, tenues à jour chaque jour par le contrôle de sécurité (\`.github/workflows/security-audit.yml\`, \`gestion-projet/depot.md\` § Mises à jour des dépendances). Chacune est corrigée dès qu'une correction est disponible."
+            echo "Vulnérabilités connues des technologies du dépôt, tenues à jour chaque jour par le contrôle de sécurité (\`.github/workflows/security-audit.yml\`, \`gestion-projet/depot/mises-a-jour-des-dependances.md\`). Chacune est corrigée dès qu'une correction est disponible."
             echo
             echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) vulnérabilité(s)."
             echo

@@ -4,7 +4,7 @@
     Compares the captures of the screens with their references, or updates the references, in a Linux container.
 
 .DESCRIPTION
-    Reference captures of choix-implementation/socle/themes.md § Thèmes : mise en œuvre: the screens are captured in the
+    Reference captures of choix-implementation/socle/themes.md: the screens are captured in the
     environment of the CI (Linux, the Chromium of Playwright), the only one where a same page always gives the same
     pixels; on another system, the capture tests are skipped. This script runs them in the SDK image of the
     Dockerfiles, on a copy of the working tree, uncommitted changes included.

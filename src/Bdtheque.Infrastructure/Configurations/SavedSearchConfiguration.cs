@@ -14,8 +14,9 @@ internal sealed class SavedSearchConfiguration : IEntityTypeConfiguration<SavedS
     {
         builder.HasKey(s => s.Id);
 
-        // The searches are told apart by their name alone in the consultation (modele-metier.md § Recherche
-        // enregistrée): unique regardless of case and accents, as the label of a genre.
+        // The searches are told apart by their name alone in the consultation
+        // (modele-metier/recherche-enregistree.md): unique regardless of case and accents, as the label of
+        // a genre.
         builder.Property(s => s.Name).IsRequired().HasMaxLength(200)
             .UseCollation(BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation);
         builder.HasIndex(s => s.Name).IsUnique();

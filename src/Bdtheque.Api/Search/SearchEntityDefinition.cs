@@ -30,7 +30,7 @@ internal sealed class SearchEntityDefinition(
 
 /// <summary>
 /// Declares an entity of the search: the identity and the dates of creation and of modification of the
-/// record, common to every entity (modele-metier.md § Attributs communs à toutes les entités), then its own
+/// record, common to every entity (modele-metier/attributs-communs-a-toutes-les-entites.md), then its own
 /// data and links.
 /// </summary>
 internal sealed class SearchEntityBuilder<T>(EntityKind kind) where T : EntityBase

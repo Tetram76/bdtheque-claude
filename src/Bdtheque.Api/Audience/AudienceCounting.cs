@@ -14,9 +14,10 @@ internal sealed record AudienceSelection(
     DateOnly? From, DateOnly? To, bool? Administrator, DeviceType? DeviceType, RenderingEngine? RenderingEngine, string? EngineVersion);
 
 /// <summary>
-/// The counters of the audience measurement (choix-implementation/mesure-audience.md § Mesure d'audience : mise
-/// en œuvre): established from the visits when a month is closed, computed the same way for the months still
-/// open, and every indicator recomposed from them (modele-metier.md § Compteur d'audience mensuel).
+/// The counters of the audience measurement
+/// (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md): established from the visits when
+/// a month is closed, computed the same way for the months still
+/// open, and every indicator recomposed from them (modele-metier/compteur-d-audience-mensuel.md).
 /// </summary>
 internal static class AudienceCounting
 {
@@ -139,7 +140,7 @@ internal static class AudienceCounting
     /// <summary>First instant of a month, in universal time, the time the beginnings of the visits are counted in.</summary>
     public static DateTimeOffset StartOf(DateOnly month) => new(month.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
-    // modele-metier.md § Compteur d'audience mensuel: the numbers add up, a visit belonging to a single counter per
+    // modele-metier/compteur-d-audience-mensuel.md: the numbers add up, a visit belonging to a single counter per
     // function; the last usage is the latest; the different objects are those of the union of the counters.
     private static FunctionIndicators Recompose(IGrouping<string, AudienceCounter> counters) =>
         new(

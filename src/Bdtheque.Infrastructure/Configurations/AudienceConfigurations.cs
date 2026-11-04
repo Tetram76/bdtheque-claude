@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Bdtheque.Infrastructure.Configurations;
 
-// The audience measurement (choix-implementation/mesure-audience.md § Mesure d'audience : mise en œuvre):
+// The audience measurement (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md):
 // visits, their usages and the monthly counters. None of them is a record.
 
 internal sealed class AudienceVisitConfiguration : IEntityTypeConfiguration<AudienceVisit>
@@ -64,7 +64,7 @@ internal sealed class AudienceCounterConfiguration : IEntityTypeConfiguration<Au
         builder.Property(c => c.Function).IsRequired().HasMaxLength(200);
         builder.Property(c => c.EngineVersion).HasMaxLength(50);
 
-        // One counter per function, month and compartment (modele-metier.md § Compteur d'audience mensuel). The
+        // One counter per function, month and compartment (modele-metier/compteur-d-audience-mensuel.md). The
         // engine version may be unknown: two counters without one must collide too, hence NULLS NOT DISTINCT.
         builder.HasIndex(c => new { c.Month, c.Function, c.IsAdministrator, c.DeviceType, c.RenderingEngine, c.EngineVersion })
             .IsUnique()

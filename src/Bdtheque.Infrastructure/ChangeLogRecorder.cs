@@ -8,9 +8,10 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// Adds to the save under way the change log entry of every write on a record (modele-metier.md §
-/// Entrée du journal des modifications), from what the change tracker is about to write
-/// (choix-implementation/domaine.md § Journal des modifications : mise en œuvre).
+/// Adds to the save under way the change log entry of every write on a record
+/// (modele-metier/entree-du-journal-des-modifications.md), from what the change tracker is about to
+/// write
+/// (choix-implementation/domaine/journal-des-modifications-mise-en-oeuvre.md).
 /// </summary>
 internal sealed class ChangeLogRecorder(BdthequeDbContext context)
 {

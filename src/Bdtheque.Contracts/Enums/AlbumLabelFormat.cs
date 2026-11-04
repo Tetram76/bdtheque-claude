@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace Bdtheque.Contracts.Enums;
 
 /// <summary>
-/// Format of the label of an album, a setting of the application (fonctionnel/presentation.md § Libellé d'un album).
+/// Format of the label of an album, a setting of the application (fonctionnel/presentation/libelle-d-un-album.md).
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<AlbumLabelFormat>))]
 public enum AlbumLabelFormat

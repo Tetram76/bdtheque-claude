@@ -11,7 +11,7 @@ namespace Bdtheque.Api.Endpoints;
 /// Expressions shared by the lists and records of the consultation — what the labels of an album and of
 /// an edition are built from, the card of an album, the cover of an album or of an edition, the membership
 /// of the collection, the purchase intents, the order of the albums —, written once and inserted into each query
-/// (choix-implementation/api.md § Recherche).
+/// (choix-implementation/api/recherche.md).
 /// </summary>
 /// <remarks>
 /// EF Core translates an expression tree, never the call of a C# method: a query calls the shared
@@ -85,7 +85,7 @@ internal static class CatalogExpressions
         ToCover(a.CoverVisualId()),
         a.PurchaseIntents.Any());
 
-    // fonctionnel/regles-metier.md § Couverture d'un album, among all the editions: the oldest edition with a cover, by
+    // fonctionnel/regles-metier/couverture-d-un-album.md, among all the editions: the oldest edition with a cover, by
     // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
     // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered:
     // the first created.
@@ -144,7 +144,7 @@ internal static class CatalogExpressions
 
     /// <summary>
     /// Sorts in the order of the albums: by sort key, that of the series standing in for an album without
-    /// a title of its own (modele-metier.md § Album), then by volume, then by album for a total order.
+    /// a title of its own (modele-metier/album.md), then by volume, then by album for a total order.
     /// </summary>
     public static IOrderedQueryable<T> OrderByAlbum<T>(this IQueryable<T> source, Expression<Func<T, Album>> album) =>
         source
@@ -153,8 +153,9 @@ internal static class CatalogExpressions
             .ThenBy(Of(album, a => a.Id));
 
     /// <summary>
-    /// Sorts albums by series, each series in its order (fonctionnel/regles-metier.md § Ordre des albums dans une
-    /// série): the albums not special issues first, then the special issues; in each, by volume — its
+    /// Sorts albums by series, each series in its order
+    /// (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md): the albums not special issues first, then
+    /// the special issues; in each, by volume — its
     /// first one for an omnibus —, failing which by first publication, the albums without volume coming
     /// after those with one (PostgreSQL sorts nulls last); then by sort key and album, for a total order.
     /// </summary>

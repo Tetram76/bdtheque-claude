@@ -8,8 +8,8 @@ public sealed partial class SdkVersionTests
     public void Workflows_UseTheSdkOfTheDockerfiles()
     {
         // The CI vouches for the images only if it builds with their SDK; global.json, a minimum for
-        // the development machines, cannot carry that exact version (gestion-projet/depot.md § Mises
-        // à jour des dépendances).
+        // the development machines, cannot carry that exact version
+        // (gestion-projet/depot/mises-a-jour-des-dependances.md).
         var dockerfiles = Directory.GetFiles(Path.Combine(RepositoryFiles.Root, "docker"), "Dockerfile", SearchOption.AllDirectories);
         var workflows = Directory.GetFiles(Path.Combine(RepositoryFiles.Root, ".github", "workflows"), "*.yml");
 

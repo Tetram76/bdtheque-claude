@@ -5,7 +5,7 @@ namespace Bdtheque.Frontend.Components.Controls;
 
 /// <summary>
 /// The suggestions of a <see cref="RecordPicker"/>: the first records of the list of the consultation of their kind that
-/// contain the text typed, as the search of the lists finds them (choix-implementation/api.md § Recherche), in their order.
+/// contain the text typed, as the search of the lists finds them (choix-implementation/api/recherche.md), in their order.
 /// </summary>
 public sealed class RecordSearch(ApiClient api)
 {
@@ -31,7 +31,7 @@ public sealed class RecordSearch(ApiClient api)
 
     /// <summary>
     /// The main identifier of an author: the pseudonym if any, otherwise « Prénom Nom », or the last name alone
-    /// (fonctionnel/presentation.md § Artistes).
+    /// (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
     /// </summary>
     public static string AuthorName(string? lastName, string? firstName, string? pseudonym) =>
         !string.IsNullOrWhiteSpace(pseudonym)

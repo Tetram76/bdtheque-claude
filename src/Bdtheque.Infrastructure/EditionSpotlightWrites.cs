@@ -4,8 +4,8 @@ using Npgsql;
 namespace Bdtheque.Infrastructure;
 
 /// <summary>
-/// The only write of the history of the spotlights (choix-implementation/domaine.md § Édition « À la une » : mise en
-/// œuvre).
+/// The only write of the history of the spotlights
+/// (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md).
 /// </summary>
 public static class EditionSpotlightWrites
 {

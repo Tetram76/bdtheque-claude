@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// The creation and last modification dates common to every entity (modele-metier.md § Attributs
-/// communs à toutes les entités) are set on save, never entered.
+/// The creation and last modification dates common to every entity
+/// (modele-metier/attributs-communs-a-toutes-les-entites.md) are set on save, never entered.
 /// </summary>
 public sealed class AuditTimestampsTests : IAsyncLifetime
 {
@@ -94,8 +94,8 @@ public sealed class AuditTimestampsTests : IAsyncLifetime
     [Fact]
     public async Task WriteOnAChildThroughItsAggregate_UpdatesTheRootModificationDate()
     {
-        // A child written through its aggregate modifies the root's record (choix-implementation/persistance.md
-        // § Concurrence d'accès), whose modification date follows.
+        // A child written through its aggregate modifies the root's record
+        // (choix-implementation/persistance/concurrence-d-acces.md), whose modification date follows.
         _fixture.Clock.UtcNow = Created;
         var publisher = new Publisher("Dupuis");
         _fixture.Context.Publishers.Add(publisher);

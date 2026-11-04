@@ -10,8 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>
-/// Retention of the audience measurement (choix-implementation/mesure-audience.md § Mesure d'audience : mise en
-/// œuvre): a month is closed into counters once its first visits reach 25 months, a public visit removed 25 months
+/// Retention of the audience measurement
+/// (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md): a month is closed into counters once
+/// its first visits reach 25 months, a public visit removed 25 months
 /// after its beginning, and the indicators of a period read the same before and after.
 /// </summary>
 public sealed class AudienceRetentionTests : IClassFixture<ApiWebApplicationFactory>

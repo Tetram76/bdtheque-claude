@@ -1,13 +1,13 @@
 namespace Bdtheque.Domain.Common;
 
 /// <summary>An owned edition that may be put in the spotlight of a day, with what the draw weighs.</summary>
-/// <param name="SpotlightCount">How many days the edition was in the spotlight (modele-metier.md § Édition).</param>
+/// <param name="SpotlightCount">How many days the edition was in the spotlight (modele-metier/edition.md).</param>
 /// <param name="IsRecent">Whether it was in the spotlight within the <see cref="SpotlightDraw.RepetitionWindow"/> of the day.</param>
 /// <param name="HasCover">Whether one of its visuals is a cover.</param>
 public sealed record SpotlightCandidate(Guid EditionId, int SpotlightCount, bool IsRecent, bool HasCover);
 
 /// <summary>
-/// The draw of the edition in the spotlight of a day (fonctionnel/page-accueil.md § Page d'accueil, À la une): it avoids
+/// The draw of the edition in the spotlight of a day (fonctionnel/page-accueil.md, À la une): it avoids
 /// close repetitions without forbidding them, prefers the editions with a cover, then favours the least often
 /// spotlighted.
 /// </summary>

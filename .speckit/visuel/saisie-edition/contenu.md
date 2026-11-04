@@ -1,0 +1,29 @@
+---
+type: Référence visuelle
+title: 'Contenu'
+description: 'Contenu de la saisie d''une édition : pré-remplissage, blocs, exemplaire et valeur, visuels, intention.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:35:19Z }
+---
+
+# Contenu
+
+- **En-tête et menu** de l'administration, l'entrée « Albums » étant l'entrée courante du menu.
+- **Fil d'Ariane** : Administration, Albums, l'album, qui mène à la page de ses éditions et intentions d'achat, puis l'édition (« Nouvelle édition » en création, « Nouvelle intention d'achat » pour une édition visée).
+- **Titre** « Modifier l'édition » ou « Nouvelle édition » (« Modifier l'intention d'achat » ou « Nouvelle intention d'achat » pour une édition visée par une intention d'achat, ce qui suffit à la distinguer d'une édition possédée), suivi du **libellé de l'édition** ([Libellé d'une édition](/fonctionnel/presentation/libelle-d-une-edition.md)), recalculé au fil de la saisie, et du lien vers la fiche de saisie de l'**album**. La fiche ne propose ni lien vers la consultation, qui ne présenterait pas les données en cours de modification, ni suppression de l'édition, ni confirmation de l'achat, ni retrait de l'intention : on y modifie l'édition, et ces actions se font depuis la page des éditions et intentions d'achat de l'album ou depuis les listes.
+- **Erreur d'enregistrement**, en tête de page, présentée comme sur la fiche de saisie d'un album ; l'erreur métier pointe en outre le champ en cause (ex. un prix sans date de référence).
+- **Pré-remplissage** : en création, un encadré indique que la fiche est pré-remplie d'après la série de l'album, et quels champs, ces valeurs n'étant que des propositions ([Initialisation d'une nouvelle édition depuis la série](/fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)).
+- **Le formulaire**, en blocs :
+  - **L'édition** : l'**éditeur**, obligatoire, et la **collection**, parmi celles de l'éditeur, chacun choisi en tapant son nom ; puis l'**année d'édition**, l'**ISBN** et la **catégorie**. Le chiffre de contrôle de l'ISBN est vérifié pendant la saisie : correct, une coche ; incohérent, un cadre et un message d'avertissement, qui rappellent que l'ISBN peut être enregistré tel quel ([Validation de l'ISBN](/fonctionnel/regles-metier/validation-de-l-isbn.md)).
+  - **Fabrication** : format, reliure, orientation et sens de lecture, en listes courtes où « — » laisse la donnée vide, puis le nombre de **pages** et la case **En couleur**.
+  - **L'exemplaire**, pour une édition possédée : le **mode d'acquisition**, obligatoire ; la **date**, dont le libellé suit le mode (« Date d'achat », « Date d'acquisition », [Libellés contextuels sur l'édition](/fonctionnel/presentation/libelles-contextuels-sur-l-edition.md)) ; l'**état** ; les cases **D'occasion** et **Dédicacée** ; la **numérotation personnelle** ; les **notes personnelles**.
+  - **Valeur**, pour une édition possédée : le **montant d'acquisition**, dont le libellé suit le mode (« Prix d'achat », « Valeur d'acquisition »), et la **valeur initiale**, chacun en montant et devise côte à côte (devise d'origine, ancien franc compris), avec ce qui le date ; puis la case **Gratuite**, qui vide et désactive les deux montants, et que le mode « Achat » désactive (une édition achetée n'est jamais gratuite).
+  - pour une édition visée par une intention d'achat, ni l'exemplaire ni la valeur : la fiche présente le minimum de champs ([Réalisation d'une intention](/fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)), seul l'éditeur étant obligatoire. L'exemplaire se saisit en confirmant l'achat, depuis la page des éditions et intentions d'achat de l'album ([`editions-album/`](/visuel/editions-album/index.md)) ou depuis la liste des intentions d'achat, où se retire aussi l'intention. Une nouvelle édition visée, ouverte par les boutons d'intention d'achat de cette page, est pré-remplie d'après la série comme toute nouvelle édition.
+- **Les visuels**, en colonne latérale sur grand écran (après le formulaire sur smartphone), car ils ne s'enregistrent pas avec le formulaire : chaque visuel est enregistré dès son ajout, son ordre et son type dès qu'on les change, ce que le bloc rappelle.
+  - une **zone de dépôt**, avec le choix de fichiers et le type des visuels ajoutés (« Couverture » proposé), les formats acceptés et la taille maximale ;
+  - les **envois en cours**, traités un à la fois : progression de l'envoi, « En attente » pour les suivants ; un fichier refusé (format, taille) l'est avec sa raison, en couleur d'alerte, et se retire de la liste ;
+  - le **nombre de visuels**, puis tous les visuels en **une seule grille**, dans l'ordre des types ([Ordre des visuels d'une édition](/fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md)), chaque vignette marquée de son type (« Couv. », « Garde », « Pl. 3 », « 4e »), pour qu'un type d'un seul visuel n'occupe pas une ligne à lui seul ;
+  - sur chaque vignette, un bouton « ⋯ » qui ouvre son menu : **Changer le type**, **Ouvrir l'original** et **Supprimer le visuel…** ; une vignette se glisse pour la réordonner parmi celles de son type ;
+  - en création, le bloc indique que les visuels s'ajoutent une fois l'édition enregistrée ;
+  - sous le bloc, les dates de création, d'entrée dans la collection et de modification de l'édition ; pour une édition visée, la date où l'intention d'achat a été posée et celle de sa dernière modification.
+- **La barre d'enregistrement**, comme sur la fiche de saisie d'un album (« Créer l'édition » en création, « Créer l'intention d'achat » pour une nouvelle édition visée).
+- **Smartphone** : les blocs s'empilent ; les champs passent à la ligne en gardant leur taille, et les cases à cocher s'alignent sur le bas des champs voisins.

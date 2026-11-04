@@ -5,7 +5,7 @@ namespace Bdtheque.Domain.Entities;
 /// <summary>
 /// The acquisition of an edition and its value, written as a whole: each of these fields depends on
 /// another — an amount requires an acquisition mode and a reference date, a free edition has no
-/// amount, a purchase is never free (modele-metier.md § Édition) — so that separate setters would
+/// amount, a purchase is never free (modele-metier/edition.md) — so that separate setters would
 /// succeed or fail depending on the order they are called in.
 /// </summary>
 /// <param name="Mode"><c>null</c> for an edition not owned, which then carries neither date nor amount.</param>

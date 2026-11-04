@@ -16,7 +16,7 @@ namespace Bdtheque.Api.Tests;
 /// <summary>
 /// The records a saved search designates, by a criterion or by the default value of a variable: their
 /// deletion is refused while a saved search designates them, or one of the records deleted with them
-/// (fonctionnel/regles-metier.md § Suppression des entités, line « Toute fiche »).
+/// (fonctionnel/regles-metier/suppression-des-entites.md, line « Toute fiche »).
 /// </summary>
 public sealed class SavedSearchDesignationTests : IClassFixture<ApiWebApplicationFactory>
 {
@@ -113,7 +113,7 @@ public sealed class SavedSearchDesignationTests : IClassFixture<ApiWebApplicatio
     [Fact]
     public async Task Create_DesignatingAPurchaseIntent_IsABusinessError()
     {
-        // An intent is only the wish to acquire another record (fonctionnel/recherche-avancee.md § Recherches enregistrées).
+        // An intent is only the wish to acquire another record (fonctionnel/recherche-avancee/recherches-enregistrees.md).
         var response = await _client.PostAsJsonAsync("/admin/saved-searches", new SavedSearchContent(
             Name(), EntityKind.PurchaseIntent, new SearchCriterion("record", Is, [Guid.CreateVersion7().ToString()]), []));
 

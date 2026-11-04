@@ -3,8 +3,8 @@ using System.Text.Json.Serialization;
 namespace Bdtheque.Contracts.Enums;
 
 /// <summary>
-/// Type of a record written by the application, as the change log names it (modele-metier.md §
-/// Entrée du journal des modifications).
+/// Type of a record written by the application, as the change log names it
+/// (modele-metier/entree-du-journal-des-modifications.md).
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<RecordType>))]
 public enum RecordType
