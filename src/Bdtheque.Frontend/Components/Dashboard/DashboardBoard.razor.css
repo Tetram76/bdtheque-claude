@@ -1,0 +1,70 @@
+/* One block under the other on a smartphone; on a wide screen, the greeting across the page, then the spotlight and the
+   latest entries side by side, then the blocks of the value and of the statistics (visuel/dashboard/). */
+.dashboard {
+    display: grid;
+    gap: var(--space-l);
+}
+
+@media (min-width: 48rem) {
+    .dashboard {
+        grid-template-columns: 3fr 2fr;
+        align-items: start;
+    }
+
+    .dashboard > ::deep .block:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+.dashboard-counters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-xl);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-figures);
+    font-size: var(--font-size-large);
+}
+
+.dashboard-spotlight {
+    display: flex;
+    gap: var(--space-l);
+    align-items: flex-start;
+    --cover-width: 7rem;
+}
+
+/* The cover the page puts forward: the only one a theme may tilt (themes/base.css, .cover). */
+.dashboard-spotlight ::deep .cover {
+    rotate: var(--tilt-cover);
+}
+
+.dashboard-spotlight p {
+    margin: 0 0 var(--space-s);
+}
+
+.dashboard-spotlight-album {
+    font-weight: var(--font-weight-strong);
+}
+
+.dashboard-latest {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0 0 var(--space-m);
+    padding: 0;
+    list-style: none;
+}
+
+.dashboard-latest li {
+    display: flex;
+    gap: var(--space-m);
+    align-items: center;
+}
+
+.dashboard-latest li > div {
+    display: grid;
+}
+
+.dashboard-muted {
+    color: var(--color-text-secondary);
+}

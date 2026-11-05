@@ -1,0 +1,41 @@
+@inject IStringLocalizer<EmptyCollectionWelcome> L
+
+@* The welcome screen of an empty collection (visuel/dashboard/collection-vide.md), in place of the dashboard, which would
+   have nothing to show: no counter, and no search in the header, which would have almost nothing to find. *@
+<NoHeaderSearch />
+
+<div class="empty-collection">
+    <Block Title="@L["Title"]" HeadingLevel="1">
+        <div class="empty-collection-text">
+            <p class="empty-collection-lead">@L["Empty"]</p>
+            <p>@L["Dashboard"]</p>
+            <p class="empty-collection-aside">@L["Documentary"]</p>
+        </div>
+        @* An illustration, without meaning of its own: shelves waiting for their first album. *@
+        <svg class="empty-collection-shelf" viewBox="0 0 160 90" aria-hidden="true">
+            <rect class="shelf-slot" x="24" y="22" width="16" height="56" />
+            <rect class="shelf-slot" x="44" y="16" width="14" height="62" />
+            <rect class="shelf-slot" x="62" y="26" width="18" height="52" />
+            <rect class="shelf-slot" x="84" y="20" width="14" height="58" />
+            <rect class="shelf-book" x="104" y="24" width="16" height="54" transform="rotate(14 120 78)" />
+            <rect class="shelf-end" x="138" y="40" width="6" height="38" />
+            <line class="shelf-board" x1="8" y1="80" x2="152" y2="80" />
+        </svg>
+    </Block>
+
+    <Block Title="@L["Browse.Title"]">
+        <p>@L["Browse.Text"]</p>
+        <ul class="empty-collection-links">
+            <li><a href="@AppPaths.Albums">@L["Browse.Albums"] →</a></li>
+            <li><a href="@AppPaths.Series">@L["Browse.Series"] →</a></li>
+            <li><a href="@AppPaths.Authors">@L["Browse.Authors"] →</a></li>
+        </ul>
+        <p class="empty-collection-links"><a href="@AppPaths.AdvancedSearch">@L["Browse.AdvancedSearch"] →</a></p>
+    </Block>
+
+    <Block Title="@L["Start.Title"]" Raised="true">
+        <p>@L["Start.Text"]</p>
+        <Button Label="@($"{L["Start.Open"]} →")" Href="@AppPaths.AdminHome" />
+        <p class="empty-collection-aside">@L["Start.Login"]</p>
+    </Block>
+</div>

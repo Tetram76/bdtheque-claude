@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Les étagères attendent leur premier album !</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>La collection ne compte encore aucune édition.</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</value>
+  </data>
+  <data name="Documentary" xml:space="preserve">
+    <value>Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection.</value>
+  </data>
+  <data name="Browse.Title" xml:space="preserve">
+    <value>On jette un œil quand même ?</value>
+  </data>
+  <data name="Browse.Text" xml:space="preserve">
+    <value>La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</value>
+  </data>
+  <data name="Browse.Albums" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="Browse.Series" xml:space="preserve">
+    <value>Séries</value>
+  </data>
+  <data name="Browse.Authors" xml:space="preserve">
+    <value>Auteurs</value>
+  </data>
+  <data name="Browse.AdvancedSearch" xml:space="preserve">
+    <value>Recherche avancée</value>
+  </data>
+  <data name="Start.Title" xml:space="preserve">
+    <value>C'est votre collection ?</value>
+  </data>
+  <data name="Start.Text" xml:space="preserve">
+    <value>Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</value>
+  </data>
+  <data name="Start.Open" xml:space="preserve">
+    <value>Ouvrir l'administration</value>
+  </data>
+  <data name="Start.Login" xml:space="preserve">
+    <value>La connexion est demandée à l'ouverture.</value>
+  </data>
+</root>

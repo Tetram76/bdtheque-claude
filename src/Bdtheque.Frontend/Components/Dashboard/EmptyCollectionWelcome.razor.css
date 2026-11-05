@@ -1,0 +1,65 @@
+/* The main block across the page, then the two others side by side on a wide screen, of different widths
+   (visuel/dashboard/collection-vide.md). */
+.empty-collection {
+    display: grid;
+    gap: var(--space-l);
+}
+
+@media (min-width: 48rem) {
+    .empty-collection {
+        grid-template-columns: 3fr 2fr;
+        align-items: start;
+    }
+
+    .empty-collection > ::deep .block:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+.empty-collection p {
+    margin: 0 0 var(--space-m);
+}
+
+.empty-collection-lead {
+    font-weight: var(--font-weight-strong);
+}
+
+.empty-collection-aside {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+}
+
+.empty-collection-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-l);
+    margin: 0 0 var(--space-m);
+    padding: 0;
+    list-style: none;
+}
+
+.empty-collection-shelf {
+    display: block;
+    inline-size: min(100%, 16rem);
+    margin-block-start: var(--space-m);
+}
+
+.shelf-slot {
+    fill: none;
+    stroke: var(--color-text-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+}
+
+.shelf-book {
+    fill: var(--color-accent);
+    stroke: var(--color-text);
+    stroke-width: 1.5;
+}
+
+.shelf-end,
+.shelf-board {
+    fill: var(--color-text);
+    stroke: var(--color-text);
+    stroke-width: 2;
+}

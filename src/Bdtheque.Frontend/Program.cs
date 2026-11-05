@@ -37,6 +37,9 @@ builder.Services.AddScoped(services => new BrowserTimeZone
     Name = services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request.Cookies[BrowserTimeZone.CookieName],
 });
 builder.Services.AddScoped<DisplayFormatter>();
+builder.Services.AddSingleton<RecordLabels>();
+// What the pages draw at random at each display (e.g. the greeting of the dashboard), which the tests fix.
+builder.Services.AddSingleton(Random.Shared);
 builder.Services.AddScoped<RecordSearch>();
 builder.Services.AddSingleton(new PageAssemblies([]));
 builder.Services.AddScoped<VisitCookie>();

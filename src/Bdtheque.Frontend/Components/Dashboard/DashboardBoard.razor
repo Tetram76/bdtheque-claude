@@ -1,0 +1,80 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<DashboardBoard> L
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+@inject BrowserTimeZone TimeZone
+@inject Random Draw
+
+@* The dashboard (fonctionnel/page-accueil.md; visuel/dashboard/contenu-commun.md): the four blocks always present, the
+   value indicators and the statistics drawn at random being presented without any data until the Phase 4 computes them
+   (Bloc sans donnée). *@
+<div class="dashboard">
+    <Block Title="@L[_greeting]" HeadingLevel="1">
+        <ul class="dashboard-counters">
+            <li data-counter>@Counter(Content.Counters.AlbumCount, "Albums")</li>
+            <li data-counter>@Counter(Content.Counters.SeriesCount, "Series")</li>
+            <li data-counter>@Counter(Content.Counters.EditionCount, "Editions")</li>
+        </ul>
+    </Block>
+
+    <Block Title="@L["Spotlight.Title"]" Raised="true">
+        <div class="dashboard-spotlight">
+            <Cover VisualId="Content.Spotlight.Cover?.VisualId" />
+            <div>
+                <p class="dashboard-spotlight-album"><a href="@AppPaths.Album(Content.Spotlight.Album.Id)">@Labels.Album(Content.Spotlight.Album, LabelFormat)</a></p>
+                <p class="dashboard-muted">@Labels.Edition(Content.Spotlight.Edition)</p>
+                @if (Content.Spotlight.Summary is { } summary)
+                {
+                    <p class="dashboard-spotlight-summary">@summary</p>
+                }
+            </div>
+        </div>
+    </Block>
+
+    <Block Title="@L["Latest.Title"]">
+        <ul class="dashboard-latest">
+            @foreach (var entry in Content.LatestEntries)
+            {
+                <li>
+                    <Cover VisualId="entry.Cover?.VisualId" />
+                    <div>
+                        <a href="@AppPaths.Album(entry.Album.Id)">@Labels.Album(entry.Album, LabelFormat)</a>
+                        <span class="dashboard-muted">@entry.Edition.PublisherName · @Format.Date(DayOf(entry))</span>
+                    </div>
+                </li>
+            }
+        </ul>
+        <p><a href="@AppPaths.Albums">@L["Latest.AllAlbums"] →</a></p>
+    </Block>
+
+    <Block Title="@L["Value.Title"]">
+        <p class="dashboard-muted">@L["Value.NotYet"]</p>
+    </Block>
+
+    <Block Title="@L["Statistics.Title"]">
+        <p class="dashboard-muted">@L["Statistics.NotYet"]</p>
+    </Block>
+</div>
+
+@code {
+    private static readonly string[] Greetings = ["Greeting.1", "Greeting.2", "Greeting.3", "Greeting.4", "Greeting.5"];
+
+    private string _greeting = Greetings[0];
+
+    [Parameter, EditorRequired]
+    public DashboardContent Content { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public AlbumLabelFormat LabelFormat { get; set; }
+
+    // Drawn at each display (visuel/dashboard/contenu-commun.md, Accueil).
+    protected override void OnInitialized() => _greeting = Greetings[Draw.Next(Greetings.Length)];
+
+    private string Counter(int count, string name) =>
+        $"{Format.Number(count)} {L[count == 1 ? $"Counter.{name}.One" : $"Counter.{name}.Other"]}";
+
+    // The acquisition date when known, otherwise the day of the entry in the collection, in the time zone of the browser.
+    private DateOnly DayOf(LatestEntry entry) =>
+        entry.AcquisitionDate ?? DateOnly.FromDateTime(TimeZone.ToLocal(entry.EnteredCollectionAt).DateTime);
+}

@@ -38,6 +38,11 @@ public static class AppPaths
 
     public const string PurchaseIntents = NotYetImplemented;
 
+    public const string AdvancedSearch = NotYetImplemented;
+
+    /// <summary>The record of an album (#210).</summary>
+    public static string Album(Guid id) => NotYetImplemented;
+
     // Administration (#200 to #209; the settings and the private statistics, a later part of the Phase 3).
 
     /// <summary>Search of a record to modify, from the header of the administration.</summary>

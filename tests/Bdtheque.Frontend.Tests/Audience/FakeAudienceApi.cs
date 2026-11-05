@@ -32,11 +32,14 @@ internal sealed class FakeAudienceApi : HttpMessageHandler
 
     public ApiClient Client() => new(new HttpClient(this) { BaseAddress = new Uri("http://api") });
 
-    /// <summary>The services of the audience measurement, for the given request, on this API.</summary>
-    public void AddServices(IServiceCollection services, TestRequest request)
+    /// <summary>
+    /// The services of the audience measurement, for the given request, on this API, or on a client of the page under test
+    /// that relays the audience requests to it.
+    /// </summary>
+    public void AddServices(IServiceCollection services, TestRequest request, ApiClient? client = null)
     {
         services.AddSingleton(request.Accessor);
-        services.AddSingleton(Client());
+        services.AddSingleton(client ?? Client());
         services.AddSingleton<ILogger<AudienceRecorder>>(NullLogger<AudienceRecorder>.Instance);
         services.AddScoped<VisitCookie>();
         services.AddScoped<AudienceOpposition>();
