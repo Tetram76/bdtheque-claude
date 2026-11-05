@@ -3,16 +3,14 @@ extern alias frontend;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
-using Bdtheque.EndToEnd.Tests.Captures;
 using frontend::Bdtheque.Frontend.Navigation;
-using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// The home page (fonctionnel/page-accueil.md), on applications of their own: its rendering depends on the whole
-/// collection, which the other tests change with their own data. Its two versions are captured in each offered theme
-/// (choix-implementation/socle/themes.md, captures de référence).
+/// collection, which the other tests change with their own data. Its captures are in
+/// <see cref="Captures.EmptyCollectionHomeCaptureTests"/> and <see cref="Captures.DashboardHomeCaptureTests"/>.
 /// </summary>
 [Collection(EmptyCollectionApplication.Name)]
 public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication application)
@@ -41,13 +39,6 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
         // The administration asks for the login first.
         await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.AdminLogin);
     }
-
-    public static TheoryData<string, string> Captures => HomeCaptures.All;
-
-    [LinuxTheory]
-    [MemberData(nameof(Captures))]
-    public Task Screen_LooksLikeItsReference(string theme, string viewport) =>
-        HomeCaptures.VerifyAsync(application, "home-empty", theme, viewport);
 }
 
 [Collection(CollectionApplication.Name)]
@@ -79,36 +70,6 @@ public sealed class DashboardHomeTests(CollectionApplication application)
         await Assertions.Expect(latest.Locator("li")).ToHaveCountAsync(2);
         await Assertions.Expect(latest.Locator("li").First).ToContainTextAsync("Le Port des brumes");
         await Assertions.Expect(latest.Locator("li").First).ToContainTextAsync("12/10/2026");
-    }
-
-    public static TheoryData<string, string> Captures => HomeCaptures.All;
-
-    [LinuxTheory]
-    [MemberData(nameof(Captures))]
-    public Task Screen_LooksLikeItsReference(string theme, string viewport) =>
-        HomeCaptures.VerifyAsync(application, "home", theme, viewport);
-}
-
-internal static class HomeCaptures
-{
-    public static TheoryData<string, string> All
-    {
-        get
-        {
-            var captures = new TheoryData<string, string>();
-            foreach (var theme in ThemeCatalog.Offered)
-            foreach (var viewport in ScreenCaptureTests.Viewports.Keys)
-                captures.Add(theme.Key, viewport);
-            return captures;
-        }
-    }
-
-    public static async Task VerifyAsync(ApplicationHost application, string screen, string theme, string viewport)
-    {
-        var page = await application.NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
-
-        CaptureStore.Verify(theme, $"{screen}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }
 }
 
