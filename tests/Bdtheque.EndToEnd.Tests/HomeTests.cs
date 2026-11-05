@@ -1,8 +1,12 @@
 extern alias frontend;
 
+using System.Globalization;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
+using SkiaSharp;
 using frontend::Bdtheque.Frontend.Navigation;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -98,21 +102,43 @@ public sealed class CollectionApplication : ApplicationHost
             "Nestor Burma", null, null, null, false, false, false, null, null,
             new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));
 
-        await OwnedAsync(api, publisher.Id, new("Le Port des brumes", null, series.Id, AlbumType.Regular, false, 3, null, null, 1990, null,
-            "Un hiver brumeux sur le port.", null, null, [], [], []), new DateOnly(2026, 10, 12));
+        // The only edition with a cover: the draw of the spotlight keeps only those (fonctionnel/page-accueil.md), so the
+        // spotlight is the same at each capture.
+        var spotlight = await OwnedAsync(api, publisher.Id, new("Le Port des brumes", null, series.Id, AlbumType.Regular, false, 3, null,
+            null, 1990, null, "Un hiver brumeux sur le port.", null, null, [], [], []), new DateOnly(2026, 10, 12));
+        await AddCoverAsync(api, spotlight);
         await OwnedAsync(api, publisher.Id, new("Brouillard au pont de Tolbiac", null, series.Id, AlbumType.Regular, false, 1, null, null,
             1982, null, null, null, null, [], [], []), new DateOnly(2026, 9, 3));
         await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", new("Album catalogué", null, null, AlbumType.Regular, false, null,
             null, null, 2001, null, null, null, null, [], [], []));
     }
 
-    private static async Task OwnedAsync(HttpClient api, Guid publisher, AlbumContent album, DateOnly acquired)
+    private static async Task<EditionForm> OwnedAsync(HttpClient api, Guid publisher, AlbumContent album, DateOnly acquired)
     {
         var created = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", album);
-        await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{created.Id}/editions", new(
+        return await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{created.Id}/editions", new(
             new(publisher, null, album.FirstPublicationYear, null, null, null, null, null, null, null, false, true, null,
                 AcquisitionMode.Purchase, false, acquired, null, null, false, null, null, null, null),
             created.Version));
+    }
+
+    private static async Task AddCoverAsync(HttpClient api, EditionForm edition)
+    {
+        using var bitmap = new SKBitmap(300, 400);
+        bitmap.Erase(SKColors.SteelBlue);
+        using var image = SKImage.FromBitmap(bitmap);
+        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+
+        var file = new ByteArrayContent(png.ToArray());
+        file.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        using var form = new MultipartFormDataContent
+        {
+            { file, UploadVisualFields.File, "cover.png" },
+            { new StringContent(nameof(VisualType.Cover)), UploadVisualFields.Type },
+            { new StringContent(edition.AlbumVersion.ToString(CultureInfo.InvariantCulture)), UploadVisualFields.AlbumVersion },
+        };
+        using var response = await api.PostAsync($"/admin/albums/{edition.AlbumId}/editions/{edition.Id}/visuals", form);
+        response.EnsureSuccessStatusCode();
     }
 
     private static async Task<TResponse> PostAsync<TRequest, TResponse>(HttpClient api, string path, TRequest request)

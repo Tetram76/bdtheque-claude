@@ -111,6 +111,16 @@
 
     --tilt-logo: -2deg;
     --tilt-cover: -3deg;
+
+    /* The home page as a page of cases in bands, of varying widths on twelve columns: the greeting and the counters,
+       then the spotlight and the latest arrivals as a grid of covers, then the value and the statistics; the counters
+       in slightly tilted insets (visuel/dashboard/la-planche-encree.md). */
+    --home-columns: minmax(0, 5fr) minmax(0, 2fr) minmax(0, 5fr);
+    --home-areas: "greeting greeting counters" "spotlight latest latest" "value value statistics";
+    --home-latest-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+    --home-latest-direction: column;
+    --home-latest-cover-width: 100%;
+    --home-counter-tilt: -2deg;
 }
 
 /* The logo, in an inset tilted with its black shadow. */

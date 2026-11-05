@@ -1,5 +1,5 @@
-/* One block under the other on a smartphone; on a wide screen, the greeting across the page, then the spotlight and the
-   latest entries side by side, then the blocks of the value and of the statistics (visuel/dashboard/). */
+/* One block under the other on a smartphone; on a wide screen, the grid of the theme (--home-columns, --home-areas,
+   themes/base.css), each block in its own area (visuel/dashboard/). */
 .dashboard {
     display: grid;
     gap: var(--space-l);
@@ -7,24 +7,48 @@
 
 @media (min-width: 48rem) {
     .dashboard {
-        grid-template-columns: 3fr 2fr;
+        grid-template-columns: var(--home-columns);
+        grid-template-areas: var(--home-areas);
         align-items: start;
     }
 
-    .dashboard > ::deep .block:first-child {
-        grid-column: 1 / -1;
-    }
+    .dashboard > ::deep [data-area="greeting"] { grid-area: greeting; }
+    .dashboard > ::deep [data-area="counters"] { grid-area: counters; }
+    .dashboard > ::deep [data-area="spotlight"] { grid-area: spotlight; }
+    .dashboard > ::deep [data-area="latest"] { grid-area: latest; }
+    .dashboard > ::deep [data-area="value"] { grid-area: value; }
+    .dashboard > ::deep [data-area="statistics"] { grid-area: statistics; }
+}
+
+/* The number of the issue, which only a newspaper prints. */
+.dashboard-issue {
+    display: var(--home-issue-display);
+    margin: 0 0 var(--space-m);
+    font-weight: var(--font-weight-strong);
+    font-size: var(--font-size-small);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .dashboard-counters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-s) var(--space-xl);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-m);
     margin: 0;
     padding: 0;
     list-style: none;
+    text-align: center;
+}
+
+.dashboard-counters li {
+    rotate: var(--home-counter-tilt);
+}
+
+.dashboard-counters strong {
+    display: block;
     font-family: var(--font-figures);
-    font-size: var(--font-size-large);
+    font-size: var(--font-size-page-title);
+    line-height: 1;
 }
 
 .dashboard-spotlight {
@@ -47,22 +71,30 @@
     font-weight: var(--font-weight-strong);
 }
 
+/* The latest entries: rows with their thumbnail, or a grid of covers, as the theme presents them. */
 .dashboard-latest {
     display: grid;
-    gap: var(--space-s);
+    grid-template-columns: var(--home-latest-columns);
+    gap: var(--space-s) var(--space-m);
     margin: 0 0 var(--space-m);
     padding: 0;
     list-style: none;
+    --cover-width: var(--home-latest-cover-width);
 }
 
 .dashboard-latest li {
     display: flex;
-    gap: var(--space-m);
-    align-items: center;
+    flex-direction: var(--home-latest-direction);
+    gap: var(--space-s) var(--space-m);
+}
+
+.dashboard-latest ::deep .cover {
+    display: var(--home-latest-cover-display);
 }
 
 .dashboard-latest li > div {
     display: grid;
+    min-width: 0;
 }
 
 .dashboard-muted {

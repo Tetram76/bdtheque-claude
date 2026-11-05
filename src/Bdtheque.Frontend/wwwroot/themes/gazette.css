@@ -76,6 +76,19 @@
 
     --tilt-cover: -1.5deg;
     --block-kicker-display: block;
+
+    /* The home page as a front page: the main story on two thirds of the width, the latest arrivals under it as a
+       dated list, the price and the rankings in the side column; the number of the issue; for an empty collection, a
+       photo to come, and the call to the administration in reversed colors (visuel/dashboard/la-gazette.md). */
+    --home-columns: minmax(0, 2fr) minmax(0, 1fr);
+    --home-areas: "greeting value" "counters value" "spotlight statistics" "latest statistics";
+    --home-empty-columns: minmax(0, 2fr) minmax(0, 1fr);
+    --home-empty-areas: "main browse" "main start";
+    --home-issue-display: block;
+    --home-latest-cover-display: none;
+    --home-photo-display: block;
+    --home-start-background: var(--color-surface-inverse);
+    --home-start-text: var(--color-text-on-inverse);
 }
 
 /* The logo, set as the title of the paper, its last point in amber. */
