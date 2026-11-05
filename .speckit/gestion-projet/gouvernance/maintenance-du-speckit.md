@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Maintenance du .speckit'
-description: 'Format OKF des concepts (en-tête, socle, applies_to), carte, log.md, contrôles du bundle, forme des renvois ; à suivre pour toute modification du .speckit.'
+description: 'Format OKF des concepts (en-tête, socle, applies_to), carte, log.md, contrôles du bundle, forme des renvois, y compris dans les tickets ouverts ; à suivre pour toute modification du .speckit.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:54:42Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:58:21Z }
 ---
 
 # Maintenance du .speckit
@@ -22,3 +22,4 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:54:42Z }
 - **[`log.md`](/log.md)** : toute Pull Request qui modifie le `.speckit/` y ajoute, dans son propre contenu, une entrée courte : ce qui a changé et la PR qui le porte ; le pourquoi reste dans le concept modifié.
 - **Contrôles** : `SpeckitStructureTests` (`Bdtheque.Infrastructure.Tests`) vérifie la structure du bundle (en-têtes, `type`, `description`, cartes, liens internes, `applies_to`) ; `scripts/Get-SpeckitConcepts.ps1` liste les concepts dont `applies_to` couvre les fichiers modifiés d'une branche ; le hook du dépôt (`.claude/settings.json`) rappelle, avant chaque commande d'un moment, les concepts que la table des moments d'`AGENTS.md` lui associe.
 - **Renvois** : un renvoi est un lien vers le concept qui porte ce qu'il désigne, par son chemin depuis la racine du `.speckit/` (`[Titre](/chemin/du/concept.md)`), suivi d'une ancre pour une section du concept (`#titre-de-la-section`) ; un dossier entier est désigné par son index (``[`fonctionnel/`](/fonctionnel/index.md)``). Hors du `.speckit/` (code, tests, configuration, skills), le renvoi est le chemin du concept depuis la racine du `.speckit/` (ex. `gestion-projet/depot/integration-continue-ci.md`). Tout déplacement ou renommage d'un concept ou d'une section met à jour les renvois qui le désignent, dans le `.speckit/` comme dans le reste du dépôt.
+- **Tickets ouverts** : leur description renvoie au `.speckit/` comme le reste du dépôt, et un ticket qui reste à réaliser ne mène jamais à un concept ou à une section qui n'existe plus. La Pull Request qui déplace ou renomme un concept ou une section met donc à jour, à sa fusion, les renvois des tickets ouverts qui le désignent ; de même pour un nom que le `.speckit/` change (ex. celui d'un thème), repris par les tickets ouverts qui le citent. Ces tickets sont hors du dépôt : aucun contrôle ne le vérifie, et la recherche de leurs renvois fait partie de cette fusion.
