@@ -3,6 +3,7 @@
 ## 2026-11-05
 
 * **Règle** : le déplacement ou le renommage d'un concept ou d'une section met aussi à jour, à la fusion de sa Pull Request, les renvois des tickets ouverts qui le désignent, comme un nom que le `.speckit/` change (#282).
+* **Règle** : la forme de `log.md` est celle d'OKF : entrées regroupées par date, les plus récentes en premier (#282).
 
 ## 2026-11-04
 
