@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Maintenance du .speckit'
-description: 'Format OKF des concepts (en-tête, socle, applies_to), carte, log.md, contrôles du bundle, forme des renvois ; à suivre pour toute modification du .speckit.'
+description: 'Format OKF des concepts (en-tête, socle, applies_to), carte, log.md, contrôles du bundle, forme des renvois, y compris dans les tickets ouverts ; à suivre pour toute modification du .speckit.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:54:42Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T18:03:06Z }
 ---
 
 # Maintenance du .speckit
@@ -19,6 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:54:42Z }
   - `generated: { by, at }` : l'auteur (`claude-code/<modèle>`, ou `human:<identifiant>`) et l'instant (ISO 8601, UTC) de la dernière modification du contenu, mis à jour par toute modification ;
   - `verified` : seulement pour un contenu que l'utilisateur a explicitement validé, `{ by: human:<identifiant>, at: <instant> }`, jamais apposé d'office.
 - **Carte** : chaque dossier a un `index.md`, sans en-tête (sauf celui de la racine, qui déclare `okf_version`), qui ne fait que lister ses concepts et ses sous-dossiers, chacun avec sa description, dans l'ordre de lecture. Tout concept ajouté, retiré, déplacé ou dont la description change met à jour son `index.md` dans le même commit.
-- **[`log.md`](/log.md)** : toute Pull Request qui modifie le `.speckit/` y ajoute, dans son propre contenu, une entrée courte : ce qui a changé et la PR qui le porte ; le pourquoi reste dans le concept modifié.
+- **[`log.md`](/log.md)** : toute Pull Request qui modifie le `.speckit/` y ajoute, dans son propre contenu, une entrée courte : ce qui a changé et la PR qui le porte ; le pourquoi reste dans le concept modifié. Sa forme est celle d'OKF (§ 9, *Log files*) : une liste à plat d'entrées regroupées sous le titre de leur date (`## AAAA-MM-JJ`, ISO 8601), les dates les plus récentes en premier ; une entrée s'ajoute sous la date du jour, créée en tête du journal si elle n'y est pas encore.
 - **Contrôles** : `SpeckitStructureTests` (`Bdtheque.Infrastructure.Tests`) vérifie la structure du bundle (en-têtes, `type`, `description`, cartes, liens internes, `applies_to`) ; `scripts/Get-SpeckitConcepts.ps1` liste les concepts dont `applies_to` couvre les fichiers modifiés d'une branche ; le hook du dépôt (`.claude/settings.json`) rappelle, avant chaque commande d'un moment, les concepts que la table des moments d'`AGENTS.md` lui associe.
 - **Renvois** : un renvoi est un lien vers le concept qui porte ce qu'il désigne, par son chemin depuis la racine du `.speckit/` (`[Titre](/chemin/du/concept.md)`), suivi d'une ancre pour une section du concept (`#titre-de-la-section`) ; un dossier entier est désigné par son index (``[`fonctionnel/`](/fonctionnel/index.md)``). Hors du `.speckit/` (code, tests, configuration, skills), le renvoi est le chemin du concept depuis la racine du `.speckit/` (ex. `gestion-projet/depot/integration-continue-ci.md`). Tout déplacement ou renommage d'un concept ou d'une section met à jour les renvois qui le désignent, dans le `.speckit/` comme dans le reste du dépôt.
+- **Tickets ouverts** : leur description renvoie au `.speckit/` comme le reste du dépôt, et un ticket qui reste à réaliser ne mène jamais à un concept ou à une section qui n'existe plus. La Pull Request qui déplace ou renomme un concept ou une section met donc à jour, à sa fusion, les renvois des tickets ouverts qui le désignent ; de même pour un nom que le `.speckit/` change (ex. celui d'un thème), repris par les tickets ouverts qui le citent. Ces tickets sont hors du dépôt : aucun contrôle ne le vérifie, et la recherche de leurs renvois fait partie de cette fusion.
