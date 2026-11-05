@@ -41,7 +41,15 @@
 }
 
 .dashboard-counters li {
+    padding: var(--space-s);
+    border: var(--home-counter-border);
+    background: var(--home-counter-background);
     rotate: var(--home-counter-tilt);
+}
+
+/* Tilted the other way every second one, as insets laid by hand. */
+.dashboard-counters li:nth-child(even) {
+    rotate: calc(-1 * var(--home-counter-tilt));
 }
 
 .dashboard-counters strong {
@@ -55,11 +63,14 @@
     display: flex;
     gap: var(--space-l);
     align-items: flex-start;
-    --cover-width: 7rem;
+    --cover-width: clamp(6.25rem, 13vw, 9.375rem);
 }
 
-/* The cover the page puts forward: the only one a theme may tilt (themes/base.css, .cover). */
+/* The cover the page puts forward: the only one a theme may tilt (themes/base.css, .cover), or let break out of its
+   block. */
 .dashboard-spotlight ::deep .cover {
+    margin-inline-start: var(--home-spotlight-cover-offset);
+    box-shadow: var(--home-spotlight-cover-shadow);
     rotate: var(--tilt-cover);
 }
 
@@ -68,7 +79,10 @@
 }
 
 .dashboard-spotlight-album {
-    font-weight: var(--font-weight-strong);
+    font-family: var(--font-heading);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-heading);
+    line-height: 1.1;
 }
 
 /* The latest entries: rows with their thumbnail, or a grid of covers, as the theme presents them. */
@@ -90,6 +104,23 @@
 
 .dashboard-latest ::deep .cover {
     display: var(--home-latest-cover-display);
+    rotate: var(--home-latest-tilt);
+}
+
+.dashboard-latest li:nth-child(even) ::deep .cover {
+    rotate: calc(-1 * var(--home-latest-tilt));
+}
+
+/* The link to the albums, as a caption box set in a corner of its block in a comic, or a plain line. */
+.dashboard-caption {
+    position: var(--home-caption-position);
+    inset: auto var(--home-caption-inset) var(--home-caption-inset) auto;
+    margin: 0;
+    padding: var(--home-caption-padding);
+    border: var(--home-caption-border);
+    background: var(--home-caption-background);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
 }
 
 .dashboard-latest li > div {

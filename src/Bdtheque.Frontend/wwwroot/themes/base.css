@@ -204,6 +204,16 @@
     --home-photo-display: none;
     --home-start-background: transparent;
     --home-start-text: inherit;
+    --home-counter-border: none;
+    --home-counter-background: transparent;
+    --home-spotlight-cover-offset: 0;
+    --home-spotlight-cover-shadow: none;
+    --home-latest-tilt: 0deg;
+    --home-caption-position: static;
+    --home-caption-inset: 0;
+    --home-caption-padding: 0;
+    --home-caption-border: none;
+    --home-caption-background: transparent;
 }
 
 @media (min-width: 48rem) {

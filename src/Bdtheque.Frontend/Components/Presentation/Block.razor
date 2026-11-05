@@ -9,13 +9,13 @@
         @switch (HeadingLevel)
         {
             case 1:
-                <h1 class="block-title">@Title</h1>
+                <h1 class="@TitleClass">@Title</h1>
                 break;
             case 3:
-                <h3 class="block-title">@Title</h3>
+                <h3 class="@TitleClass">@Title</h3>
                 break;
             default:
-                <h2 class="block-title">@Title</h2>
+                <h2 class="@TitleClass">@Title</h2>
                 break;
         }
     </header>
@@ -37,6 +37,12 @@
     /// <summary>Set in relief, for the block a page puts forward (e.g. the entry from an ISBN of the administration).</summary>
     [Parameter]
     public bool Raised { get; set; }
+
+    /// <summary>A title read by assistive technologies only, for a block whose content speaks for itself (e.g. counters).</summary>
+    [Parameter]
+    public bool TitleHidden { get; set; }
+
+    private string TitleClass => TitleHidden ? "block-title visually-hidden" : "block-title";
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

@@ -14,7 +14,7 @@
 <div class="dashboard">
     <Block Title="@L[_greeting]" HeadingLevel="1" data-area="greeting" />
 
-    <Block Title="@L["Counters.Title"]" data-area="counters">
+    <Block Title="@L["Counters.Title"]" TitleHidden="true" data-area="counters">
         <ul class="dashboard-counters">
             <li data-counter><strong>@Format.Number(Content.Counters.AlbumCount)</strong> @Unit(Content.Counters.AlbumCount, "Albums")</li>
             <li data-counter><strong>@Format.Number(Content.Counters.SeriesCount)</strong> @Unit(Content.Counters.SeriesCount, "Series")</li>
@@ -49,7 +49,7 @@
                 </li>
             }
         </ul>
-        <p><a href="@AppPaths.Albums">@L["Latest.AllAlbums"] →</a></p>
+        <p class="dashboard-caption"><a href="@AppPaths.Albums">@L["Latest.AllAlbums"] →</a></p>
     </Block>
 
     <Block Title="@L["Value.Title"]" data-area="value">
