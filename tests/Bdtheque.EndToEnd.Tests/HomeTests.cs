@@ -1,0 +1,166 @@
+extern alias frontend;
+
+using System.Net.Http.Json;
+using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Enums;
+using Bdtheque.EndToEnd.Tests.Captures;
+using frontend::Bdtheque.Frontend.Navigation;
+using frontend::Bdtheque.Frontend.Theming;
+
+namespace Bdtheque.EndToEnd.Tests;
+
+/// <summary>
+/// The home page (fonctionnel/page-accueil.md), on applications of their own: its rendering depends on the whole
+/// collection, which the other tests change with their own data. Its two versions are captured in each offered theme
+/// (choix-implementation/socle/themes.md, captures de référence).
+/// </summary>
+[Collection(EmptyCollectionApplication.Name)]
+public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication application)
+{
+    [Fact]
+    public async Task Visitor_IsWelcomed_AndBrowsesTheDocumentaryBase()
+    {
+        var page = await application.NewPageAsync();
+        await page.GotoAsync(AppPaths.Home);
+
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Les étagères attendent leur premier album !");
+        await Assertions.Expect(page.Locator("header form[role='search']")).ToHaveCountAsync(0);
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Albums →" }).ClickAsync();
+        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
+    }
+
+    [Fact]
+    public async Task Visitor_IsLedToTheAdministration()
+    {
+        var page = await application.NewPageAsync();
+        await page.GotoAsync(AppPaths.Home);
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Ouvrir l'administration →" }).ClickAsync();
+
+        // The administration asks for the login first.
+        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.AdminLogin);
+    }
+
+    public static TheoryData<string, string> Captures => HomeCaptures.All;
+
+    [LinuxTheory]
+    [MemberData(nameof(Captures))]
+    public Task Screen_LooksLikeItsReference(string theme, string viewport) =>
+        HomeCaptures.VerifyAsync(application, "home-empty", theme, viewport);
+}
+
+[Collection(CollectionApplication.Name)]
+public sealed class DashboardHomeTests(CollectionApplication application)
+{
+    [Fact]
+    public async Task Visitor_SeesTheDashboard_AndGoesToTheAlbumInTheSpotlight()
+    {
+        var page = await application.NewPageAsync();
+        await page.GotoAsync(AppPaths.Home);
+
+        // The first greeting, the draws of the tests always picking the first choice.
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Entrez donc, il y a de quoi lire !");
+        await Assertions.Expect(page.Locator("header form[role='search']")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator("[data-counter]")).ToHaveTextAsync(["2 albums", "1 série", "2 éditions"]);
+
+        var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
+        await spotlight.GetByRole(AriaRole.Link).ClickAsync();
+        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
+    }
+
+    [Fact]
+    public async Task LatestEntries_FromTheMostRecentAcquisition()
+    {
+        var page = await application.NewPageAsync();
+        await page.GotoAsync(AppPaths.Home);
+
+        var latest = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Tout juste arrivés !" }) });
+        await Assertions.Expect(latest.Locator("li")).ToHaveCountAsync(2);
+        await Assertions.Expect(latest.Locator("li").First).ToContainTextAsync("Le Port des brumes");
+        await Assertions.Expect(latest.Locator("li").First).ToContainTextAsync("12/10/2026");
+    }
+
+    public static TheoryData<string, string> Captures => HomeCaptures.All;
+
+    [LinuxTheory]
+    [MemberData(nameof(Captures))]
+    public Task Screen_LooksLikeItsReference(string theme, string viewport) =>
+        HomeCaptures.VerifyAsync(application, "home", theme, viewport);
+}
+
+internal static class HomeCaptures
+{
+    public static TheoryData<string, string> All
+    {
+        get
+        {
+            var captures = new TheoryData<string, string>();
+            foreach (var theme in ThemeCatalog.Offered)
+            foreach (var viewport in ScreenCaptureTests.Viewports.Keys)
+                captures.Add(theme.Key, viewport);
+            return captures;
+        }
+    }
+
+    public static async Task VerifyAsync(ApplicationHost application, string screen, string theme, string viewport)
+    {
+        var page = await application.NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
+        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+
+        CaptureStore.Verify(theme, $"{screen}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
+    }
+}
+
+/// <summary>An application without any data: the welcome screen of an empty collection.</summary>
+public sealed class EmptyCollectionApplication : ApplicationHost
+{
+    public const string Name = "Empty collection";
+}
+
+[CollectionDefinition(EmptyCollectionApplication.Name)]
+public sealed class EmptyCollectionCollection : ICollectionFixture<EmptyCollectionApplication>;
+
+/// <summary>
+/// An application whose collection holds two owned editions, one of an album of a series with its summary, and an album
+/// catalogued without any owned edition, which the dashboard does not count.
+/// </summary>
+public sealed class CollectionApplication : ApplicationHost
+{
+    public const string Name = "Collection";
+
+    protected override async Task SeedAsync()
+    {
+        using var api = CreateApiClient();
+        var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Casterman", null));
+        var series = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", new SeriesContent(
+            "Nestor Burma", null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));
+
+        await OwnedAsync(api, publisher.Id, new("Le Port des brumes", null, series.Id, AlbumType.Regular, false, 3, null, null, 1990, null,
+            "Un hiver brumeux sur le port.", null, null, [], [], []), new DateOnly(2026, 10, 12));
+        await OwnedAsync(api, publisher.Id, new("Brouillard au pont de Tolbiac", null, series.Id, AlbumType.Regular, false, 1, null, null,
+            1982, null, null, null, null, [], [], []), new DateOnly(2026, 9, 3));
+        await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", new("Album catalogué", null, null, AlbumType.Regular, false, null,
+            null, null, 2001, null, null, null, null, [], [], []));
+    }
+
+    private static async Task OwnedAsync(HttpClient api, Guid publisher, AlbumContent album, DateOnly acquired)
+    {
+        var created = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", album);
+        await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{created.Id}/editions", new(
+            new(publisher, null, album.FirstPublicationYear, null, null, null, null, null, null, null, false, true, null,
+                AcquisitionMode.Purchase, false, acquired, null, null, false, null, null, null, null),
+            created.Version));
+    }
+
+    private static async Task<TResponse> PostAsync<TRequest, TResponse>(HttpClient api, string path, TRequest request)
+    {
+        using var response = await api.PostAsJsonAsync(path, request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<TResponse>())!;
+    }
+}
+
+[CollectionDefinition(CollectionApplication.Name)]
+public sealed class CollectionCollection : ICollectionFixture<CollectionApplication>;
