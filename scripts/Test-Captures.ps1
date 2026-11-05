@@ -6,8 +6,9 @@
 .DESCRIPTION
     Reference captures of choix-implementation/socle/themes.md: the screens are captured in the
     environment of the CI (Linux, the Chromium of Playwright), the only one where a same page always gives the same
-    pixels; on another system, the capture tests are skipped. This script runs them in the SDK image of the
-    Dockerfiles, on a copy of the working tree, uncommitted changes included.
+    pixels; on another system, the capture tests are skipped. This script runs them in the official image of Playwright
+    for .NET, at the version of the Microsoft.Playwright package, whose Chromium and its system dependencies are
+    installed already, on a copy of the working tree, uncommitted changes included.
 
     A failed comparison leaves the capture taken and its difference image in
     tests/Bdtheque.EndToEnd.Tests/TestResults/captures. With -Update, the captures replace the references, to be
@@ -34,10 +35,11 @@ $PSNativeCommandUseErrorActionPreference = $true
 $root = Split-Path $PSScriptRoot -Parent
 $project = 'tests/Bdtheque.EndToEnd.Tests'
 
-# The SDK of the Dockerfiles, which SdkVersionTests keeps aligned with the CI.
-$sdk = Select-String -Path (Join-Path $root 'docker/api/Dockerfile') -Pattern 'mcr\.microsoft\.com/dotnet/sdk:(\S+)' |
+# The image of Playwright at the version of the package that the tests drive: Playwright finds only the browsers of its
+# own version. Its .NET SDK follows Playwright, not the SDK of the Dockerfiles, which global.json accepts.
+$playwright = Select-String -Path (Join-Path $root 'Directory.Packages.props') -Pattern 'Include="Microsoft\.Playwright" Version="([^"]+)"' |
     Select-Object -First 1 | ForEach-Object { $_.Matches[0].Groups[1].Value }
-if (-not $sdk) { throw 'The SDK image of docker/api/Dockerfile was not found.' }
+if (-not $playwright) { throw 'The version of Microsoft.Playwright was not found in Directory.Packages.props.' }
 
 $results = Join-Path $root "$project/TestResults/captures"
 if (Test-Path $results) { Remove-Item $results -Recurse -Force }
@@ -50,7 +52,6 @@ mkdir -p /work
 tar -C /repo --exclude=./.git --exclude='*/bin' --exclude='*/obj' --exclude='*/TestResults' -cf - . | tar -C /work -xf -
 cd /work
 dotnet build $project --configuration Release
-pwsh $project/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 status=0
 dotnet test $project --configuration Release --no-build --filter 'FullyQualifiedName~Bdtheque.EndToEnd.Tests.Captures.' || status=`$?
 if [ -d $project/TestResults/captures ]; then mkdir -p /repo/$project/TestResults && cp -r $project/TestResults/captures /repo/$project/TestResults/; fi
@@ -63,12 +64,11 @@ $arguments = @(
     '--volume', "${root}:/repo",
     '--volume', '/var/run/docker.sock:/var/run/docker.sock',
     '--volume', 'bdtheque-captures-nuget:/root/.nuget/packages',
-    '--volume', 'bdtheque-captures-playwright:/root/.cache/ms-playwright',
     # The database of the tests is a sibling container, reached through the ports it publishes on the host.
     '--add-host', 'host.docker.internal:host-gateway',
     '--env', 'TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal',
     '--env', "BDTHEQUE_UPDATE_CAPTURES=$(if ($Update) { '1' } else { '0' })",
-    "mcr.microsoft.com/dotnet/sdk:$sdk",
+    "mcr.microsoft.com/playwright/dotnet:v$playwright-noble",
     'bash', '-c', $inside
 )
 
