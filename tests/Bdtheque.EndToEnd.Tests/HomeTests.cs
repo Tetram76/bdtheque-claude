@@ -3,6 +3,7 @@ extern alias frontend;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
@@ -43,8 +44,10 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Ouvrir l'administration →" }).ClickAsync();
 
-        // The administration asks for the login first.
-        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.AdminLogin);
+        // The administration asks for the login first: the address is polled rather than a load event awaited, which an
+        // enhanced navigation of Blazor, patching the page instead of loading it, need not fire; on failure, it tells the
+        // address reached.
+        await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"^[a-z]+://[^/]+{Regex.Escape(AppPaths.AdminLogin)}(\?.*)?$"));
     }
 }
 
