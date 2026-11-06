@@ -43,7 +43,15 @@ builder.Services.AddSingleton(Random.Shared);
 builder.Services.AddScoped<RecordSearch>();
 builder.Services.AddSingleton(new PageAssemblies([]));
 builder.Services.AddScoped<VisitCookie>();
-builder.Services.AddScoped<IThemeSelector, VisitThemeSelector>();
+if (builder.Environment.IsEnvironment(FrontendEnvironments.Validation))
+{
+    builder.Services.AddScoped<VisitThemeSelector>();
+    builder.Services.AddScoped<IThemeSelector, ChosenThemeSelector>();
+}
+else
+{
+    builder.Services.AddScoped<IThemeSelector, VisitThemeSelector>();
+}
 builder.Services.AddScoped<AudienceOpposition>();
 builder.Services.AddScoped<AudienceRecorder>();
 builder.Services.AddSingleton(TimeProvider.System);

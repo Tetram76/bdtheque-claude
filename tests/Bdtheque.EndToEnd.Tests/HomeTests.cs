@@ -32,10 +32,13 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
         await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
     }
 
-    [Fact]
-    public async Task Visitor_IsLedToTheAdministration()
+    [Theory]
+    [InlineData("base")]
+    [InlineData("planche")]
+    [InlineData("gazette")]
+    public async Task Visitor_IsLedToTheAdministration(string theme)
     {
-        var page = await application.NewPageAsync();
+        var page = await application.NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
         await page.GotoAsync(AppPaths.Home);
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Ouvrir l'administration →" }).ClickAsync();

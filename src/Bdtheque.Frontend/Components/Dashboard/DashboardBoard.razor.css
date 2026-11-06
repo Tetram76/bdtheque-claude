@@ -2,14 +2,14 @@
    themes/base.css), each block in its own area (visuel/dashboard/). */
 .dashboard {
     display: grid;
-    gap: var(--space-l);
+    gap: var(--home-gap);
 }
 
 @media (min-width: 48rem) {
     .dashboard {
         grid-template-columns: var(--home-columns);
         grid-template-areas: var(--home-areas);
-        align-items: start;
+        align-items: var(--home-align);
     }
 
     .dashboard > ::deep [data-area="greeting"] { grid-area: greeting; }

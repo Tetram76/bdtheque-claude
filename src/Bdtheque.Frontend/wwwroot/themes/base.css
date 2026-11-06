@@ -204,6 +204,8 @@
     --home-photo-display: none;
     --home-start-background: transparent;
     --home-start-text: inherit;
+    --home-gap: var(--space-l);
+    --home-align: start;
     --home-counter-border: none;
     --home-counter-background: transparent;
     --home-spotlight-cover-offset: 0;

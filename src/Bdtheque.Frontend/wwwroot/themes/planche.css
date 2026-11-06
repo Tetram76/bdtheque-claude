@@ -121,6 +121,8 @@
     --home-latest-direction: column;
     --home-latest-cover-width: 100%;
     --home-counter-tilt: -2deg;
+    --home-gap: 1.625rem 1rem;
+    --home-align: stretch;
     --home-counter-border: 3px solid #111111;
     --home-counter-background: #FFFFFF;
     --home-spotlight-cover-offset: -2.125rem;

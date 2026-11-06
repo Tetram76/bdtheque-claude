@@ -128,6 +128,8 @@ Le premier lancement construit les images, en quelques minutes ; les suivants ne
 
 Ces ports ne sont ouverts qu'au poste lui-même.
 
+Le thème, tiré au hasard à chaque visite en production, se choisit ici par l'adresse : `?theme=base`, `?theme=planche` ou `?theme=gazette` (ex. `http://localhost:8180/?theme=planche`). Il reste celui de la visite pour les pages suivantes, jusqu'au prochain choix.
+
 ### Options
 
 | Option | Effet |
