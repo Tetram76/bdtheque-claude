@@ -58,8 +58,13 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         return label;
     }
 
-    private static string TitleWithSeries(string? title, string? series) =>
-        title is null ? series! : series is null ? title : $"{title} ({series})";
+    // Never both null: the caller has already stood the volume in for a label without either.
+    private static string TitleWithSeries(string? title, string? series) => (title, series) switch
+    {
+        (null, _) => series!,
+        (_, null) => title,
+        _ => $"{title} ({series})",
+    };
 
     // The volume of the album, as its type wants it; null for a regular album without number.
     private string? Volume(AlbumSummary album, bool abbreviated)
