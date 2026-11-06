@@ -15,9 +15,9 @@ public sealed class NavigationTests(ApplicationHost application)
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Aide sur cette page" }).ClickAsync();
         await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
-        await Assertions.Expect(page.Locator("h1")).ToBeVisibleAsync();
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Bientôt disponible");
 
-        await page.Locator("main a").ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Revenir à la page précédente" }).ClickAsync();
         await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.Home);
     }
 

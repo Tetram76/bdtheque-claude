@@ -22,7 +22,6 @@ public sealed class ScreenCaptureTests(ApplicationHost application)
 
     private static readonly Dictionary<string, string> Screens = new()
     {
-        ["home"] = AppPaths.Home,
         ["not-yet-implemented"] = AppPaths.NotYetImplemented,
         ["not-found"] = "/no-such-page",
         ["error"] = "/Error",

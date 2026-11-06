@@ -1,8 +1,51 @@
 ﻿@attribute [Route(AppPaths.Home)]
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Frontend.Api
+@using Bdtheque.Frontend.Components.Dashboard
+@inject ApiClient Api
+@inject BrowserTimeZone TimeZone
+@inject TimeProvider Clock
 @inject IStringLocalizer<Home> L
 
-@* Home of the consultation: the dashboard comes with #198. *@
+@* The home page of the consultation (fonctionnel/page-accueil.md): the dashboard, or, without any owned edition, the welcome
+   screen of an empty collection, which the API tells by a dashboard without content. *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.Home" />
 
-<h1>@L["Title"]</h1>
+@if (_problem is not null)
+{
+    <h1 class="visually-hidden">@L["Title"]</h1>
+    <ErrorMessage Problem="_problem" />
+}
+else if (_dashboard?.Content is { } content)
+{
+    <DashboardBoard Content="content" LabelFormat="_settings!.AlbumLabelFormat" />
+}
+else if (_dashboard is not null)
+{
+    <EmptyCollectionWelcome />
+}
+
+@code {
+    /// <summary>The latest entries the themes present: those of the mockups (visuel/dashboard/).</summary>
+    internal const int LatestCount = 6;
+
+    private ApplicationSettings? _settings;
+    private Contracts.Catalog.Dashboard? _dashboard;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // The day of the visitor, in the time zone of their browser: that of the edition in the spotlight.
+            var day = TimeZone.Today(Clock).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
+            _dashboard = await Api.GetAsync<Contracts.Catalog.Dashboard>($"/catalog/dashboard?day={day}&latestCount={LatestCount}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+    }
+}

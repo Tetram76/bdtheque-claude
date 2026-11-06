@@ -23,7 +23,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// browser needs, and calls <c>api</c>, itself on its own PostgreSQL database
 /// (<see cref="ApiHostFactory"/>), the way the Docker network carries its calls.
 /// </summary>
-public sealed class ApplicationHost : IAsyncLifetime
+public class ApplicationHost : IAsyncLifetime
 {
     private readonly ApiHostFactory _api = new();
     private FrontendFactory? _frontend;
@@ -62,7 +62,15 @@ public sealed class ApplicationHost : IAsyncLifetime
         {
             Args = ["--font-render-hinting=none", "--force-color-profile=srgb", "--disable-partial-raster"],
         });
+
+        await SeedAsync();
     }
+
+    /// <summary>
+    /// The data of an application of its own, written through the API once it runs: a screen whose rendering depends on the
+    /// whole collection (e.g. the dashboard) cannot share the database of the other tests, which write their own data.
+    /// </summary>
+    protected virtual Task SeedAsync() => Task.CompletedTask;
 
     /// <summary>A page of a browser context of its own: no cookie nor history shared between tests.</summary>
     public Task<IPage> NewPageAsync() => NewPageAsync(new BrowserNewContextOptions());
@@ -133,6 +141,9 @@ public sealed class ApplicationHost : IAsyncLifetime
                 services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler());
                 FixTheThemeByRequest(services);
                 services.Replace(ServiceDescriptor.Singleton(new PageAssemblies([typeof(ControlsPage).Assembly])));
+                // What a page draws at each display (e.g. the greeting of the dashboard) is always the first choice: a page
+                // looks the same at each capture.
+                services.Replace(ServiceDescriptor.Singleton<Random>(new FirstChoice()));
             });
         }
 
@@ -156,4 +167,12 @@ public sealed class ApplicationHost : IAsyncLifetime
 public sealed class ApplicationCollection : ICollectionFixture<ApplicationHost>
 {
     public const string Name = "Application";
+}
+
+/// <summary>A draw that always picks the first possibility.</summary>
+internal sealed class FirstChoice : Random
+{
+    public override int Next(int maxValue) => 0;
+
+    public override int Next(int minValue, int maxValue) => minValue;
 }

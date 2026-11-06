@@ -1,0 +1,131 @@
+/* One block under the other on a smartphone; on a wide screen, the grid of the theme (--home-empty-columns,
+   --home-empty-areas, themes/base.css), each block in its own area (visuel/dashboard/collection-vide.md). */
+.empty-collection {
+    display: grid;
+    gap: var(--home-gap);
+}
+
+@media (min-width: 48rem) {
+    .empty-collection {
+        grid-template-columns: var(--home-empty-columns);
+        grid-template-areas: var(--home-empty-areas);
+        align-items: var(--home-align);
+    }
+
+    .empty-collection > ::deep [data-area="main"] { grid-area: main; }
+    .empty-collection > ::deep [data-area="browse"] { grid-area: browse; }
+    .empty-collection > ::deep [data-area="start"] { grid-area: start; }
+}
+
+.empty-collection p {
+    margin: 0 0 var(--space-m);
+}
+
+.empty-collection-main {
+    display: flex;
+    gap: var(--space-l);
+    align-items: flex-start;
+}
+
+.empty-collection-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.empty-collection-lead {
+    font-weight: var(--font-weight-strong);
+}
+
+.empty-collection-aside {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+}
+
+.empty-collection-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-l);
+    margin: 0 0 var(--space-m);
+    padding: 0;
+    list-style: none;
+}
+
+/* The call to the administration, in the surface the theme gives it (reversed colors in a newspaper). */
+.empty-collection-start {
+    padding: var(--space-m);
+    background: var(--home-start-background);
+    color: var(--home-start-text);
+}
+
+.empty-collection-start p:last-child {
+    margin: var(--space-m) 0 0;
+}
+
+/* A photo to come: a frame crossed out, tilted like the cover a page puts forward. */
+.empty-collection-photo {
+    display: var(--home-photo-display);
+    position: relative;
+    flex: none;
+    inline-size: clamp(6.5rem, 28%, 15rem);
+    aspect-ratio: 3 / 4;
+    border: 2px dashed var(--color-text-secondary);
+    outline: var(--space-s) solid var(--color-accent);
+    rotate: var(--tilt-cover);
+}
+
+.empty-collection-photo svg {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+}
+
+.empty-collection-photo path {
+    stroke: var(--color-rule);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+}
+
+.empty-collection-photo span {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    padding: 0.125rem var(--space-s);
+    border: 1px solid var(--color-text);
+    background: var(--color-background);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.empty-collection-shelf {
+    display: var(--home-shelf-display);
+    inline-size: min(100%, 16rem);
+    margin-block-start: var(--space-m);
+}
+
+.shelf-slot {
+    fill: none;
+    stroke: var(--color-text-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+}
+
+.shelf-book {
+    fill: var(--color-accent);
+    stroke: var(--color-text);
+    stroke-width: 1.5;
+}
+
+.shelf-end,
+.shelf-board {
+    fill: var(--color-text);
+    stroke: var(--color-text);
+    stroke-width: 2;
+}
+
+/* On the surface of the call, whatever it is, the mention keeps the color of its text. */
+.empty-collection-start .empty-collection-aside {
+    color: inherit;
+}

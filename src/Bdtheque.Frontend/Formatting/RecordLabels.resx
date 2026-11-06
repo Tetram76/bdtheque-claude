@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Volume.Short" xml:space="preserve">
+    <value>T.</value>
+  </data>
+  <data name="Volume.Full" xml:space="preserve">
+    <value>Tome</value>
+  </data>
+  <data name="SpecialIssue.Short" xml:space="preserve">
+    <value>HS</value>
+  </data>
+  <data name="SpecialIssue.Full" xml:space="preserve">
+    <value>Hors-série</value>
+  </data>
+  <data name="Omnibus.Short" xml:space="preserve">
+    <value>INT.</value>
+  </data>
+  <data name="Omnibus.Full" xml:space="preserve">
+    <value>Intégrale</value>
+  </data>
+  <data name="SpecialOmnibus.Short" xml:space="preserve">
+    <value>INT.HS</value>
+  </data>
+  <data name="SpecialOmnibus.Full" xml:space="preserve">
+    <value>Intégrale hors-série</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>{0} à {1}</value>
+  </data>
+  <data name="Isbn" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="Untitled" xml:space="preserve">
+    <value>&lt;Sans titre&gt;</value>
+  </data>
+</root>

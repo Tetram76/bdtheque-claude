@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Greeting.1" xml:space="preserve">
+    <value>Entrez donc, il y a de quoi lire !</value>
+  </data>
+  <data name="Greeting.2" xml:space="preserve">
+    <value>Installez-vous, la collection vous attend !</value>
+  </data>
+  <data name="Greeting.3" xml:space="preserve">
+    <value>Alors, on bouquine ?</value>
+  </data>
+  <data name="Greeting.4" xml:space="preserve">
+    <value>Encore de la place sur les étagères ? Pas sûr…</value>
+  </data>
+  <data name="Greeting.5" xml:space="preserve">
+    <value>Attention, ça déborde des étagères !</value>
+  </data>
+  <data name="Issue" xml:space="preserve">
+    <value>Édition du jour · n°</value>
+  </data>
+  <data name="Counters.Title" xml:space="preserve">
+    <value>La collection en chiffres</value>
+  </data>
+  <data name="Counter.Albums.One" xml:space="preserve">
+    <value>album</value>
+  </data>
+  <data name="Counter.Albums.Other" xml:space="preserve">
+    <value>albums</value>
+  </data>
+  <data name="Counter.Series.One" xml:space="preserve">
+    <value>série</value>
+  </data>
+  <data name="Counter.Series.Other" xml:space="preserve">
+    <value>séries</value>
+  </data>
+  <data name="Counter.Editions.One" xml:space="preserve">
+    <value>édition</value>
+  </data>
+  <data name="Counter.Editions.Other" xml:space="preserve">
+    <value>éditions</value>
+  </data>
+  <data name="Spotlight.Title" xml:space="preserve">
+    <value>À la une aujourd'hui !</value>
+  </data>
+  <data name="Latest.Title" xml:space="preserve">
+    <value>Tout juste arrivés !</value>
+  </data>
+  <data name="Latest.AllAlbums" xml:space="preserve">
+    <value>Tous les albums</value>
+  </data>
+  <data name="Value.Title" xml:space="preserve">
+    <value>Ça vaut combien, tout ça ?</value>
+  </data>
+  <data name="Value.NotYet" xml:space="preserve">
+    <value>La valeur de la collection sera estimée dans une prochaine version de BDthèque.</value>
+  </data>
+  <data name="Statistics.Title" xml:space="preserve">
+    <value>Et la collection, alors ?</value>
+  </data>
+  <data name="Statistics.NotYet" xml:space="preserve">
+    <value>Les statistiques de la collection arriveront dans une prochaine version de BDthèque.</value>
+  </data>
+</root>

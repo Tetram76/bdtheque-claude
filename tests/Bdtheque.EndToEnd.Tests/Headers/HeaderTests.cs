@@ -14,12 +14,16 @@ namespace Bdtheque.EndToEnd.Tests.Headers;
 [Collection(ApplicationCollection.Name)]
 public sealed partial class HeaderTests(ApplicationHost application)
 {
+    // A page of the consultation whose header is always the full one: that of the home page depends on the collection, an
+    // empty one leaving out the search (visuel/dashboard/collection-vide.md).
+    private const string ConsultationPage = AppPaths.AudienceInformation;
+
     private static readonly ViewportSize Smartphone = new() { Width = 414, Height = 896 };
 
     [Fact]
     public async Task ConsultationMenu_OnASmartphone_ShowsAChevronOnTheSideWithEntriesOutOfView_AndItsChevronScrollsItByItsWidth()
     {
-        var page = await OpenAsync(AppPaths.Home, Smartphone);
+        var page = await OpenAsync(ConsultationPage, Smartphone);
         var row = page.Locator("app-scroll-row.consultation-menu");
         var items = row.Locator(".scroll-row-items");
 
@@ -195,7 +199,7 @@ public sealed partial class HeaderTests(ApplicationHost application)
     public async Task ConsultationMenu_OnADesktopScreen_ShowsEveryEntry_WithoutScrolling(string theme)
     {
         var page = await application.NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.GotoAsync(ConsultationPage, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
         await page.EvaluateAsync("() => document.fonts.ready");
 
         var overflow = await page.Locator("app-scroll-row.consultation-menu .scroll-row-items")
@@ -207,7 +211,7 @@ public sealed partial class HeaderTests(ApplicationHost application)
     [Fact]
     public async Task ConsultationHeader_OnASmartphone_PutsTheSearchUnderTheMenu()
     {
-        var page = await OpenAsync(AppPaths.Home, Smartphone);
+        var page = await OpenAsync(ConsultationPage, Smartphone);
 
         var menu = await page.Locator("app-scroll-row.consultation-menu").BoundingBoxAsync();
         var search = await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher" }).BoundingBoxAsync();

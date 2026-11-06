@@ -1,0 +1,85 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<DashboardBoard> L
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+@inject BrowserTimeZone TimeZone
+@inject Random Draw
+
+@* The dashboard (fonctionnel/page-accueil.md; visuel/dashboard/contenu-commun.md): the four blocks always present, the
+   value indicators and the statistics drawn at random being presented without any data until the Phase 4 computes them
+   (Bloc sans donnée). Each block names its area, which the theme lays out (--home-areas, themes/base.css). *@
+<p class="dashboard-issue">@L["Issue"] @Format.Number(Content.Counters.AlbumCount)</p>
+
+@* Computed in the time zone of the browser (the day of the spotlight, the dates of the entries): marked for the script that
+   renders the page again once it knows that time zone (wwwroot/browser-time-zone.js). *@
+<div class="dashboard" data-local>
+    <Block Title="@L[_greeting]" HeadingLevel="1" data-area="greeting" />
+
+    <Block Title="@L["Counters.Title"]" TitleHidden="true" data-area="counters">
+        <ul class="dashboard-counters">
+            <li data-counter><strong>@Format.Number(Content.Counters.AlbumCount)</strong> @Unit(Content.Counters.AlbumCount, "Albums")</li>
+            <li data-counter><strong>@Format.Number(Content.Counters.SeriesCount)</strong> @Unit(Content.Counters.SeriesCount, "Series")</li>
+            <li data-counter><strong>@Format.Number(Content.Counters.EditionCount)</strong> @Unit(Content.Counters.EditionCount, "Editions")</li>
+        </ul>
+    </Block>
+
+    <Block Title="@L["Spotlight.Title"]" Raised="true" data-area="spotlight">
+        <div class="dashboard-spotlight">
+            <Cover VisualId="Content.Spotlight.Cover?.VisualId" />
+            <div>
+                <p class="dashboard-spotlight-album"><a href="@AppPaths.Album(Content.Spotlight.Album.Id)">@Labels.Album(Content.Spotlight.Album, LabelFormat)</a></p>
+                <p class="dashboard-muted">@Labels.Edition(Content.Spotlight.Edition)</p>
+                @if (Content.Spotlight.Summary is { } summary)
+                {
+                    <p class="dashboard-spotlight-summary">@summary</p>
+                }
+            </div>
+        </div>
+    </Block>
+
+    <Block Title="@L["Latest.Title"]" data-area="latest">
+        <ul class="dashboard-latest">
+            @foreach (var entry in Content.LatestEntries)
+            {
+                <li>
+                    <Cover VisualId="entry.Cover?.VisualId" />
+                    <div>
+                        <a href="@AppPaths.Album(entry.Album.Id)">@Labels.Album(entry.Album, LabelFormat)</a>
+                        <span class="dashboard-muted">@entry.Edition.PublisherName · @Format.Date(DayOf(entry))</span>
+                    </div>
+                </li>
+            }
+        </ul>
+        <p class="dashboard-caption"><a href="@AppPaths.Albums">@L["Latest.AllAlbums"] →</a></p>
+    </Block>
+
+    <Block Title="@L["Value.Title"]" data-area="value">
+        <p class="dashboard-muted">@L["Value.NotYet"]</p>
+    </Block>
+
+    <Block Title="@L["Statistics.Title"]" data-area="statistics">
+        <p class="dashboard-muted">@L["Statistics.NotYet"]</p>
+    </Block>
+</div>
+
+@code {
+    private static readonly string[] Greetings = ["Greeting.1", "Greeting.2", "Greeting.3", "Greeting.4", "Greeting.5"];
+
+    private string _greeting = Greetings[0];
+
+    [Parameter, EditorRequired]
+    public DashboardContent Content { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public AlbumLabelFormat LabelFormat { get; set; }
+
+    // Drawn at each display (visuel/dashboard/contenu-commun.md, Accueil).
+    protected override void OnInitialized() => _greeting = Greetings[Draw.Next(Greetings.Length)];
+
+    private string Unit(int count, string name) => L[count == 1 ? $"Counter.{name}.One" : $"Counter.{name}.Other"];
+
+    // The acquisition date when known, otherwise the day of the entry in the collection, in the time zone of the browser.
+    private DateOnly DayOf(LatestEntry entry) =>
+        entry.AcquisitionDate ?? DateOnly.FromDateTime(TimeZone.ToLocal(entry.EnteredCollectionAt).DateTime);
+}

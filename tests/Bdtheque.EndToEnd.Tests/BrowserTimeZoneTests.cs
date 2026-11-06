@@ -12,13 +12,17 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(ApplicationCollection.Name)]
 public sealed class BrowserTimeZoneTests(ApplicationHost application)
 {
+    // A page of the consultation that presents no date and whose content depends on no data: that of the home page depends
+    // on the collection the other tests change (the dashboard is rendered in the time zone of the browser).
+    private const string Page = AppPaths.NotYetImplemented;
+
     [Fact]
     public async Task Server_LearnsTheTimeZoneOfTheBrowser_FromItsFirstPage()
     {
         var page = await PageInAsync("Asia/Tokyo");
 
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.GotoAsync(Page);
 
         Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
     }
@@ -37,9 +41,9 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         }]);
         var page = await context.NewPageAsync();
 
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
         Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
 
         Assert.Equal("Europe/Paris", await page.Locator("html").GetAttributeAsync("data-time-zone"));
     }
@@ -50,7 +54,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         var page = await PageInAsync("Asia/Tokyo");
         var renders = await PresentingADateAndTimeAsync(page);
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
         await WaitForRendersAsync(renders, 2);
 
         Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
@@ -66,7 +70,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
             "Object.defineProperty(Document.prototype, 'cookie', { get: () => '', set: () => {}, configurable: true });");
         var renders = await PresentingADateAndTimeAsync(page);
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
         await WaitForRendersAsync(renders, 1);
 
         Assert.Null(await page.Locator("html").GetAttributeAsync("data-time-zone"));
@@ -81,7 +85,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         var page = await PageInAsync("Asia/Tokyo");
         await page.AddInitScriptAsync(ZoneOfTheBrowser("Asia/Tokyo"));
         var renders = await PresentingADateAndTimeAsync(page);
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
         await WaitForRendersAsync(renders, 2);
         Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
 
@@ -107,7 +111,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         await page.AddInitScriptAsync(ZoneOfTheBrowser("Nowhere/Atlantis"));
         var renders = await PresentingADateAndTimeAsync(page);
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
         await WaitForRendersAsync(renders, 3);
 
         Assert.Equal(2, renders.Count);
@@ -120,7 +124,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         var page = await PageInAsync("Asia/Tokyo");
         var renders = RendersOf(page);
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
         await WaitForRendersAsync(renders, 1);
 
         Assert.Single(renders);
@@ -154,7 +158,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
     // No page presents a date and time yet: the home page served gets one, as a page that does would render it.
     private static async Task<List<string>> PresentingADateAndTimeAsync(IPage page)
     {
-        await page.RouteAsync(url => new Uri(url).AbsolutePath == AppPaths.Home, async route =>
+        await page.RouteAsync(url => new Uri(url).AbsolutePath == Page, async route =>
         {
             var response = await route.FetchAsync();
             var html = (await response.TextAsync()).Replace(

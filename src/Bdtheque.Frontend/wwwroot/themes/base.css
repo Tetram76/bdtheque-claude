@@ -184,6 +184,38 @@
     --tilt-block-title: 0deg;
     --tilt-cover: 0deg;
     --block-kicker-display: none;
+
+    /* The home page, whose layout each theme presents its own way (visuel/dashboard/): on a wide screen, the grid of its
+       blocks (columns and named areas: greeting, counters, spotlight, latest, value, statistics; for an empty
+       collection: main, browse, start); the number of the issue, which only a newspaper prints; the latest entries, as
+       rows with their thumbnail or as a grid of covers (column template, direction, width of a cover); the counters,
+       and their tilt; the illustration of an empty collection, a shelf or a photo to come; the surface of its call to the administration. */
+    --home-columns: minmax(0, 7fr) minmax(0, 5fr);
+    --home-areas: "greeting counters" "spotlight latest" "value statistics";
+    --home-empty-columns: minmax(0, 5fr) minmax(0, 7fr);
+    --home-empty-areas: "main main" "browse start";
+    --home-issue-display: none;
+    --home-latest-columns: minmax(0, 1fr);
+    --home-latest-cover-display: block;
+    --home-latest-direction: row;
+    --home-latest-cover-width: 2.5rem;
+    --home-counter-tilt: 0deg;
+    --home-shelf-display: block;
+    --home-photo-display: none;
+    --home-start-background: transparent;
+    --home-start-text: inherit;
+    --home-gap: var(--space-l);
+    --home-align: start;
+    --home-counter-border: none;
+    --home-counter-background: transparent;
+    --home-spotlight-cover-offset: 0;
+    --home-spotlight-cover-shadow: none;
+    --home-latest-tilt: 0deg;
+    --home-caption-position: static;
+    --home-caption-inset: 0;
+    --home-caption-padding: 0;
+    --home-caption-border: none;
+    --home-caption-background: transparent;
 }
 
 @media (min-width: 48rem) {

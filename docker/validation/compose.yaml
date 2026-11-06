@@ -21,6 +21,9 @@ services:
 
   frontend:
     image: bdtheque-validation-frontend
+    environment:
+      # Production, plus the theme chosen by the address of a page (?theme=).
+      ASPNETCORE_ENVIRONMENT: Validation
     # From this machine only.
     ports: !override
       - "127.0.0.1:${FRONTEND_PORT}:8080"
