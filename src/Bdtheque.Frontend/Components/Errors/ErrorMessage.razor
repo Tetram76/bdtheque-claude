@@ -4,29 +4,37 @@
 @inject IStringLocalizer<RuleMessages> Rules
 @inject IStringLocalizer<EntityNames> Entities
 
-@* The category, both named and carried by an attribute that gives it its color (ErrorMessage.razor.css), tells the three kinds of
-   errors apart at first glance (fonctionnel/presentation-des-erreurs.md). *@
+@* The category tells the three kinds of errors apart at first glance (fonctionnel/presentation-des-erreurs.md), by its
+   name, its icon, its color and its frame (visuel/saisie-album/contenu.md), carried by an attribute
+   (ErrorMessage.razor.css). *@
 <div role="alert" class="error-message" data-error-category="@CategoryName">
-    <p data-error-label>@L[$"Category.{Problem.Category}"]</p>
-    <p data-error-text>@Text</p>
-    @if (Problem.Category != ProblemCategory.Technical && Problem.Impact is { BlockedBy.Count: > 0 } impact)
-    {
-        <ul data-error-impact>
-            @foreach (var count in impact.BlockedBy)
-            {
-                <li>@CountText(count)</li>
-            }
-        </ul>
-    }
+    <span class="error-icon"><Icon Name="CategoryIcon" /></span>
+    <div class="error-content">
+        <p data-error-label>@(Label ?? L[$"Category.{Problem.Category}"])</p>
+        <p data-error-text>@Text</p>
+        @if (Problem.Category != ProblemCategory.Technical && Problem.Impact is { BlockedBy.Count: > 0 } impact)
+        {
+            <ul data-error-impact>
+                @foreach (var count in impact.BlockedBy)
+                {
+                    <li>@CountText(count)</li>
+                }
+            </ul>
+        }
+    </div>
 </div>
 
 @code {
     [Parameter, EditorRequired]
     public ApiProblem Problem { get; set; } = null!;
 
-    private string CategoryName => Problem.Category.ToString().ToLowerInvariant();
+    /// <summary>
+    /// The name of an error the frontend finds itself, without any call to the API, when the name of its category would
+    /// say more than it (e.g. too many attempts of login, which no data modified in the meantime explains).
+    /// </summary>
+    [Parameter]
+    public string? Label { get; set; }
 
-    // A technical error discloses nothing of its cause, which only the logs of the API hold.
     /// <summary>
     /// The text of an error the frontend finds itself, without any call to the API (e.g. a refused login), in place of the
     /// text the API would give.
@@ -34,6 +42,16 @@
     [Parameter]
     public string? Message { get; set; }
 
+    private string CategoryName => Problem.Category.ToString().ToLowerInvariant();
+
+    private IconName CategoryIcon => Problem.Category switch
+    {
+        ProblemCategory.Business => IconName.Exclamation,
+        ProblemCategory.Functional => IconName.Reload,
+        _ => IconName.Wrench,
+    };
+
+    // A technical error discloses nothing of its cause, which only the logs of the API hold.
     private string Text => Message ?? Problem.Category switch
     {
         ProblemCategory.Business when Problem.RuleCode is { } code && Rules[code] is { ResourceNotFound: false } rule => rule.Value,

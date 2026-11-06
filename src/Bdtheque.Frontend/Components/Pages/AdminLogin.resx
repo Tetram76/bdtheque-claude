@@ -33,4 +33,7 @@
   <data name="TooManyAttempts" xml:space="preserve">
     <value>Trop de tentatives de connexion ont échoué : réessayez dans quelques minutes.</value>
   </data>
+  <data name="TooManyAttempts.Label" xml:space="preserve">
+    <value>Connexion suspendue</value>
+  </data>
 </root>

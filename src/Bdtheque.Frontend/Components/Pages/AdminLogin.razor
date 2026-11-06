@@ -23,7 +23,7 @@
         <p>@L["Intro"]</p>
         @if (_problem is not null)
         {
-            <ErrorMessage Problem="_problem" Message="@_message" />
+            <ErrorMessage Problem="_problem" Label="@_label" Message="@_message" />
         }
         <form method="post" @formname="@FormName" @onsubmit="SignInAsync">
             <AntiforgeryToken />
@@ -43,6 +43,7 @@
     private const string FormName = "admin-login";
 
     private ApiProblem? _problem;
+    private string? _label;
     private string? _message;
 
     [CascadingParameter]
@@ -69,7 +70,7 @@
         // Too many failures of late: refused without even checking, which would otherwise go on telling a right guess.
         if (Throttle.IsBlocked())
         {
-            Refuse(ProblemCategory.Functional, "TooManyAttempts");
+            Refuse(ProblemCategory.Functional, "TooManyAttempts", L["TooManyAttempts.Label"]);
             return;
         }
 
@@ -88,9 +89,10 @@
     }
 
     // The login is kept, never the password, which is typed again.
-    private void Refuse(ProblemCategory category, string message)
+    private void Refuse(ProblemCategory category, string message, string? label = null)
     {
         _problem = new ApiProblem(category, null, null, null);
+        _label = label;
         _message = L[message];
     }
 }

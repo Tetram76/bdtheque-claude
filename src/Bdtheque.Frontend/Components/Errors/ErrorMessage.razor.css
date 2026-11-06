@@ -1,37 +1,66 @@
-/* Each category has its own color, carried both by the named pill and by the side stripe, so that the three kinds of
-   errors are told apart at first glance (fonctionnel/presentation-des-erreurs.md): a business error asks the
-   user to correct, a functional one to take the new state of the data into account, a technical one is the application's. */
+/* Each category has its own color, frame and icon, so that the three kinds of errors are told apart at first glance
+   (fonctionnel/presentation-des-erreurs.md; visuel/saisie-album/contenu.md): a business error asks the user to correct, in
+   a full frame of the alert color; a functional one to take the new state of the data into account, in a dashed frame of
+   the information color; a technical one is the application's, in a dotted neutral frame. A box within the page, never a
+   control: the radius of a tile, never the pill of a control. */
 .error-message {
-    --error-color: var(--color-failure);
-    --error-text-color: var(--color-text-on-failure);
+    --error-color: var(--color-text-muted);
+    --error-icon-fill: var(--color-tag);
+    --error-icon-text: var(--color-text-on-tag);
+    --error-frame: dotted;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-m);
     margin: 0 0 var(--space-m);
     padding: var(--space-m) var(--space-l);
-    background: var(--color-surface);
+    border: 2px var(--error-frame) var(--error-color);
+    border-inline-start-width: 8px;
+    border-radius: var(--radius-tile);
     color: var(--color-text);
-    border: 1px solid var(--color-rule);
-    border-inline-start: 4px solid var(--error-color);
-    border-radius: var(--radius-control);
 }
 
 .error-message[data-error-category="business"] {
     --error-color: var(--color-alert);
-    --error-text-color: var(--color-text-on-alert);
+    --error-icon-fill: var(--color-alert);
+    --error-icon-text: var(--color-text-on-alert);
+    --error-frame: solid;
 }
 
 .error-message[data-error-category="functional"] {
     --error-color: var(--color-info);
-    --error-text-color: var(--color-text-on-info);
+    --error-icon-fill: var(--color-info);
+    --error-icon-text: var(--color-text-on-info);
+    --error-frame: dashed;
+}
+
+.error-icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.875rem;
+    block-size: 1.875rem;
+    border-radius: 50%;
+    background: var(--error-icon-fill);
+    color: var(--error-icon-text);
+}
+
+.error-icon ::deep .icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+    stroke-width: 2.6;
+}
+
+.error-content {
+    min-inline-size: 0;
 }
 
 [data-error-label] {
-    display: inline-block;
-    margin: 0 0 var(--space-s);
-    padding: 0 var(--space-s);
-    border-radius: var(--radius-pill);
-    background: var(--error-color);
-    color: var(--error-text-color);
+    margin: 0 0 var(--space-xs);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 [data-error-text] {

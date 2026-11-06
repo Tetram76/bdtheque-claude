@@ -139,7 +139,7 @@
     --admin-gap: 1.625rem 1rem;
     --color-tile: #FFFFFF;
     --admin-tile-border: 3px solid #111111;
-    --admin-tile-radius: 0;
+    --radius-tile: 0;
     --admin-chip-radius: 999px;
 }
 
