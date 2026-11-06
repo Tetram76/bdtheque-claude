@@ -10,12 +10,16 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(ApplicationCollection.Name)]
 public sealed class ThemeTests(ApplicationHost application)
 {
+    // A page of the consultation that presents no date and whose content depends on no data: that of the home page depends
+    // on the collection the other tests change (the dashboard is rendered in the time zone of the browser).
+    private const string Page = AppPaths.NotYetImplemented;
+
     [Fact]
     public async Task Page_IsPresentedInAnOfferedTheme_WithTheContractsOfTheBaseTheme()
     {
         var page = await application.NewPageAsync();
 
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
         var theme = await page.Locator("html").GetAttributeAsync("data-theme");
         Assert.Contains(ThemeCatalog.Offered, offered => offered.Key == theme);
@@ -28,7 +32,7 @@ public sealed class ThemeTests(ApplicationHost application)
     {
         var page = await application.NewPageAsync();
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
 
         // A session cookie: shared by every tab and window of the browser, gone with its session (fonctionnel/mesure-audience.md, Visites).
         var cookie = await VisitCookieAsync(page);
@@ -41,12 +45,12 @@ public sealed class ThemeTests(ApplicationHost application)
     public async Task Visit_KeepsItsTheme_InEveryPageAndTabOfTheBrowser()
     {
         var page = await PageInAsync("Europe/Paris");
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.GotoAsync(Page);
         var visit = (await VisitCookieAsync(page)).Value;
 
         var tab = await page.Context.NewPageAsync();
-        await tab.GotoAsync(AppPaths.Home);
+        await tab.GotoAsync(Page);
 
         Assert.Equal(visit, (await VisitCookieAsync(tab)).Value);
         Assert.Equal(VisitOf(await VisitCookieAsync(tab)).ThemeKey, await tab.Locator("html").GetAttributeAsync("data-theme"));
@@ -58,9 +62,9 @@ public sealed class ThemeTests(ApplicationHost application)
         // Already the next day in Kiribati while it is still the day before in universal time, for a part of each day.
         var page = await PageInAsync("Pacific/Kiritimati");
 
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
         Assert.Null(VisitOf(await VisitCookieAsync(page)).ThemeDate);
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
 
         Assert.Equal(TodayIn("Pacific/Kiritimati"), VisitOf(await VisitCookieAsync(page)).ThemeDate);
     }
@@ -76,7 +80,7 @@ public sealed class ThemeTests(ApplicationHost application)
             Cookie(BrowserVisit.CookieName, new BrowserVisit(start, ThemeCatalog.Base.Key, today.AddDays(-1)).Format()),
         ]);
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
 
         // Drawn again among the offered themes, possibly the same one, for the new date; the visit goes on.
         var visit = VisitOf(await VisitCookieAsync(page));
@@ -95,7 +99,7 @@ public sealed class ThemeTests(ApplicationHost application)
             Cookie(BrowserVisit.CookieName, new BrowserVisit(today, "withdrawn", today).Format()),
         ]);
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(Page);
 
         var theme = await page.Locator("html").GetAttributeAsync("data-theme");
         Assert.Contains(ThemeCatalog.Offered, offered => offered.Key == theme);
@@ -110,7 +114,7 @@ public sealed class ThemeTests(ApplicationHost application)
         // The font of the base theme; those of « La planche encrée » are checked with its drawings (PlancheThemeTests).
         var page = await application.NewPageInThemeAsync(ThemeCatalog.Base.Key, new ViewportSize { Width = 1440, Height = 900 });
 
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
         Assert.True(await page.EvaluateAsync<bool>("async () => (await document.fonts.ready, document.fonts.check('16px Inter'))"),
             "The font of the base theme is not loaded.");

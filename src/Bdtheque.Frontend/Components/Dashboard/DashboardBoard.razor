@@ -11,7 +11,9 @@
    (Bloc sans donnée). Each block names its area, which the theme lays out (--home-areas, themes/base.css). *@
 <p class="dashboard-issue">@L["Issue"] @Format.Number(Content.Counters.AlbumCount)</p>
 
-<div class="dashboard">
+@* Computed in the time zone of the browser (the day of the spotlight, the dates of the entries): marked for the script that
+   renders the page again once it knows that time zone (wwwroot/browser-time-zone.js). *@
+<div class="dashboard" data-local>
     <Block Title="@L[_greeting]" HeadingLevel="1" data-area="greeting" />
 
     <Block Title="@L["Counters.Title"]" TitleHidden="true" data-area="counters">

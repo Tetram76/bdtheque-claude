@@ -19,9 +19,10 @@
             document.cookie = `${cookieName}=${encodeURIComponent(zone)}; path=/; max-age=31536000; samesite=lax`;
         }
         // Whoever updated the cookie (this tab or another one), a page whose request did not bring the current time zone
-        // and that presents dates and times is rendered again: once, its new request bringing it; never while the
+        // and whose content depends on it (an element marked data-local: a date and time, or what the date of the browser
+        // decides, e.g. the edition of the day) is rendered again: once, its new request bringing it; never while the
         // cookie is refused, which would render it again and again.
-        if (stored() === zone && document.documentElement.dataset.timeZone !== zone && document.querySelector("time[data-local]")) {
+        if (stored() === zone && document.documentElement.dataset.timeZone !== zone && document.querySelector("[data-local]")) {
             location.reload();
         }
     };

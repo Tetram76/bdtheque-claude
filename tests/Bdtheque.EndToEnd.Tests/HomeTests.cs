@@ -70,6 +70,24 @@ public sealed class DashboardHomeTests(CollectionApplication application)
         await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
     }
 
+    // The day of the spotlight and the dates of the entries are those of the browser (fonctionnel/page-accueil.md): a
+    // first visit, whose request does not bring its time zone yet, gets the dashboard again once the browser gave it.
+    [Fact]
+    public async Task FirstVisit_GetsTheDashboardAgain_InTheTimeZoneOfTheBrowser()
+    {
+        var context = await application.Browser.NewContextAsync(new BrowserNewContextOptions
+        {
+            BaseURL = application.BaseAddress.ToString(),
+            TimezoneId = "Pacific/Kiritimati",
+        });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(AppPaths.Home);
+
+        await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", "Pacific/Kiritimati");
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Entrez donc, il y a de quoi lire !");
+    }
+
     [Fact]
     public async Task LatestEntries_FromTheMostRecentAcquisition()
     {

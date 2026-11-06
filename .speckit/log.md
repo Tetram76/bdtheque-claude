@@ -2,7 +2,7 @@
 
 ## 2026-11-05
 
-* **Choix** : libellés des albums et des éditions construits par le frontend, tirages d'une page fixés par les tests, applications de test propres à un écran qui dépend de toute la collection, contrôle local des captures dans l'image de Playwright, contrats de la présentation d'un écran propre à chaque thème et règle du chantier d'un écran, thème choisi par l'adresse dans l'environnement de validation (#284).
+* **Choix** : libellés des albums et des éditions construits par le frontend, tirages d'une page fixés par les tests, applications de test propres à un écran qui dépend de toute la collection, contrôle local des captures dans l'image de Playwright, contrats de la présentation d'un écran propre à chaque thème et règle du chantier d'un écran, thème choisi par l'adresse dans l'environnement de validation, nouveau rendu de toute page dont le contenu dépend du fuseau du navigateur (#284).
 * **Règle** : le déplacement ou le renommage d'un concept ou d'une section met aussi à jour, à la fusion de sa Pull Request, les renvois des tickets ouverts qui le désignent, comme un nom que le `.speckit/` change (#282).
 * **Règle** : la forme de `log.md` est celle d'OKF : entrées regroupées par date, les plus récentes en premier (#282).
 
