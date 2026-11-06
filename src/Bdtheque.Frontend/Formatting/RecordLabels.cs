@@ -8,7 +8,7 @@ namespace Bdtheque.Frontend.Formatting;
 /// <summary>
 /// Labels of the albums and editions, built when they are presented, from their components
 /// (fonctionnel/presentation/libelle-d-un-album.md, fonctionnel/presentation/libelle-d-une-edition.md). The words of the
-/// volume are texts of the display culture (<c>RecordLabels.resx</c>).
+/// volume and the ISBN mention are texts of the display culture (<c>RecordLabels.resx</c>).
 /// </summary>
 public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
 {
@@ -54,7 +54,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         if (edition.PublicationYear is { } year)
             label += string.Create(CultureInfo.InvariantCulture, $" [{year}]");
         if (edition.Isbn is { } isbn)
-            label += $" - ISBN {isbn}";
+            label += $" - {texts["Isbn"]} {isbn}";
         return label;
     }
 
