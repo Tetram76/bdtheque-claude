@@ -144,7 +144,7 @@ public sealed class HomeTests : BunitContext, IDisposable
         Assert.Contains("Astérix", entries[1].TextContent);
         // Entered at 23:30 universal time, the 4th: already the 5th in Paris.
         Assert.Contains("05/10/2026", entries[1].TextContent);
-        Assert.Equal(AppPaths.Albums, BlockOf(page, "Tout juste arrivés !").QuerySelectorAll("a").Last().GetAttribute("href"));
+        Assert.Equal(AppPaths.Albums, BlockOf(page, "Tout juste arrivés !").QuerySelectorAll("a")[^1].GetAttribute("href"));
     }
 
     [Fact]
