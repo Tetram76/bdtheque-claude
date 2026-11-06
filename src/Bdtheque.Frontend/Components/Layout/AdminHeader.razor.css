@@ -178,7 +178,43 @@
     border-block-start: 1px solid var(--color-rule);
 }
 
-.admin-menu-logout ::deep .icon {
+/* The number of records of an entry, at the end of its line. */
+.admin-menu-count {
+    margin-inline-start: auto;
+    font-size: var(--font-size-small);
+    font-weight: normal;
+    font-variant-numeric: tabular-nums;
+}
+
+/* The logout, a button of a form (AdminLogoutForm), drawn as the entries of the menu. */
+.admin-menu ::deep .admin-logout-form {
+    margin: 0;
+}
+
+.admin-menu ::deep .admin-menu-logout {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    inline-size: 100%;
+    min-block-size: var(--control-height);
+    padding: 0 var(--space-s);
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    text-align: start;
+    cursor: pointer;
+}
+
+.admin-menu ::deep .admin-menu-logout:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+}
+
+.admin-menu ::deep .admin-menu-logout .icon {
     inline-size: 1.125rem;
     block-size: 1.125rem;
 }

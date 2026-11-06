@@ -1,0 +1,8 @@
+.admin-logout {
+    max-width: 28rem;
+    margin-inline: auto;
+}
+
+.admin-logout form {
+    margin: 0;
+}

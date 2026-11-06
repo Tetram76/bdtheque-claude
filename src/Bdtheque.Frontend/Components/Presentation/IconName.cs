@@ -16,4 +16,12 @@ public enum IconName
     Menu,
     Exit,
     Logout,
+    Album,
+    Edition,
+    Series,
+    PurchaseIntent,
+    Author,
+    Publisher,
+    Genre,
+    Universe,
 }

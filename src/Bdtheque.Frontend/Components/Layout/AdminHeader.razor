@@ -1,5 +1,10 @@
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Frontend.Api
 @inject IStringLocalizer<LayoutText> L
 @inject NavigationManager Navigation
+@inject DisplayFormatter Format
+@inject AdminRecordCounts RecordCounts
+@inject ILogger<AdminHeader> Logger
 
 @* The header of the administration (visuel/administration/en-tete-et-menu.md): the logo, the « Administration » tag, the
    search of a record to modify, the help, the way back to the consultation, then the « Menu » button. On a smartphone, it
@@ -30,13 +35,21 @@
                         <ul aria-labelledby="admin-menu-@group.Name">
                             @foreach (var entry in group.Entries)
                             {
-                                <li><a href="@entry.Path" aria-current="@(entry.IsCurrent(CurrentPath) ? "page" : null)">@L[entry.Name]</a></li>
+                                <li>
+                                    <a href="@entry.Path" aria-current="@(entry.IsCurrent(CurrentPath) ? "page" : null)">
+                                        <span>@L[entry.Name]</span>
+                                        @if (_counts is not null && Counts.TryGetValue(entry.Name, out var count))
+                                        {
+                                            <span class="admin-menu-count">@Format.Number(count(_counts))</span>
+                                        }
+                                    </a>
+                                </li>
                             }
                         </ul>
                     </div>
                 }
                 <hr />
-                <a class="admin-menu-logout" href="@AppPaths.AdminLogout"><Icon Name="IconName.Logout" />@L["Logout"]</a>
+                <AdminLogoutForm />
             </nav>
         </div>
     </div>
@@ -58,5 +71,33 @@
         ("Settings", [new("Admin.Settings", AppPaths.AdminSettings), new("Admin.Statistics", AppPaths.AdminStatistics)]),
     ];
 
+    // The number of records of the entries that lead to a list (visuel/administration/en-tete-et-menu.md, « le cas échéant »).
+    private static readonly IReadOnlyDictionary<string, Func<RecordCounts, int>> Counts = new Dictionary<string, Func<RecordCounts, int>>
+    {
+        ["Admin.Albums"] = c => c.Albums,
+        ["Admin.Series"] = c => c.Series,
+        ["Admin.Editions"] = c => c.Editions,
+        ["Admin.PurchaseIntents"] = c => c.PurchaseIntents,
+        ["Admin.Authors"] = c => c.Authors,
+        ["Admin.Publishers"] = c => c.Publishers,
+        ["Admin.Genres"] = c => c.Genres,
+        ["Admin.Universes"] = c => c.Universes,
+    };
+
+    private RecordCounts? _counts;
+
     private string CurrentPath => new Uri(Navigation.Uri).AbsolutePath;
+
+    // Without them, the menu still leads everywhere: the page, which needs them or not, presents the error itself.
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _counts = await RecordCounts.GetAsync();
+        }
+        catch (ApiProblemException exception)
+        {
+            Logger.LogWarning(exception, "The menu of the administration is presented without the number of records.");
+        }
+    }
 }

@@ -133,6 +133,14 @@
     --home-caption-padding: 0.25rem 0.625rem;
     --home-caption-border: 3px solid #111111;
     --home-caption-background: #FFFFFF;
+
+    /* The home page of the administration: the same gap as the cases of the dashboard, for the balloons of their titles;
+       the tiles white, ringed with ink, in their case; round chips (visuel/administration/declinaison-par-theme.md). */
+    --admin-gap: 1.625rem 1rem;
+    --color-tile: #FFFFFF;
+    --admin-tile-border: 3px solid #111111;
+    --admin-tile-radius: 0;
+    --admin-chip-radius: 999px;
 }
 
 /* The logo, in an inset tilted with its black shadow. */

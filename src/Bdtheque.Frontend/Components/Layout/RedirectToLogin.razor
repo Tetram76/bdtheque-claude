@@ -5,8 +5,9 @@
     {
         // `forceLoad` triggers a full page reload so the login page runs through the
         // regular ASP.NET Core authentication pipeline instead of an interactive render.
+        // The page to return to as the authentication cookie gives it: a path of the application, from its root.
         NavigationManager.NavigateTo(
-            $"{AppPaths.AdminLogin}?returnUrl={Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}",
+            $"{AppPaths.AdminLogin}?{AppPaths.ReturnUrlParameter}={Uri.EscapeDataString(new Uri(NavigationManager.Uri).PathAndQuery)}",
             forceLoad: true);
     }
 }

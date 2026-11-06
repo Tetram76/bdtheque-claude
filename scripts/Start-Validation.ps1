@@ -79,4 +79,8 @@ Write-Host ''
 Write-Host "Version validated: $commit"
 Write-Host "Application:       http://localhost:$($settings.FRONTEND_PORT)"
 Write-Host "API documentation: http://localhost:$($settings.API_PORT)/scalar/v1"
+# The account of the administration, fixed and fictitious, for the versions that have one.
+if ($settings.ADMIN_LOGIN) {
+    Write-Host "Administration:    login '$($settings.ADMIN_LOGIN)', password '$($settings.ADMIN_PASSWORD)'"
+}
 Write-Host 'Stop: ./scripts/Stop-Validation.ps1'

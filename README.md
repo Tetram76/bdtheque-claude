@@ -80,7 +80,7 @@ Les dépôts sont privés : leur téléchargement exige une authentification (cf
 ### Procédure (Synology Container Manager)
 
 1. Créer sur le NAS un dossier pour le projet (ex. `/volume1/docker/bdtheque`) et y copier [`docker-compose.yml`](docker-compose.yml) et [`.env.example`](.env.example), renommé en `.env`.
-2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), `BDTHEQUE_TAG`, `FRONTEND_PORT`, `VISUELS_HOST_PATH` et, derrière le reverse proxy, `PUBLIC_URL` (ci-dessous).
+2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), le compte administrateur `ADMIN_LOGIN` et `ADMIN_PASSWORD` (un mot de passe long, ex. une phrase de plusieurs mots), `BDTHEQUE_TAG`, `FRONTEND_PORT`, `VISUELS_HOST_PATH` et, derrière le reverse proxy, `PUBLIC_URL` (ci-dessous).
 3. Préparer le dossier des visuels (ci-dessous).
 4. Les dépôts Docker Hub étant **privés**, authentifier le NAS auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès en **lecture seule** (*Personal Access Token*, droits *Read-only*), sans quoi le téléchargement des images est refusé. En SSH : `sudo docker login -u tetram76` (le jeton tient lieu de mot de passe).
 5. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.

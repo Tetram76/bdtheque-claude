@@ -1,0 +1,96 @@
+@attribute [Route(AppPaths.AdminLogin)]
+@using System.Security.Claims
+@using Bdtheque.Frontend.Api
+@using Bdtheque.Frontend.Security
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.Extensions.Options
+@inject IStringLocalizer<AdminLogin> L
+@inject AdminCredentials Credentials
+@inject IOptions<AdminAccountOptions> Account
+@inject LoginThrottle Throttle
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The login of the administration (contraintes-techniques/architecture-deploiement/authentification.md), outside it: open
+   to anyone, in the theme of the visit. Rendered statically, as a page that writes the authentication cookie must be
+   (choix-implementation/socle/frontend.md); once signed in, back to the page that asked for it. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminLogin" />
+
+<div class="admin-login">
+    <Block Title="@L["Title"]" HeadingLevel="1" Raised="true">
+        <p>@L["Intro"]</p>
+        @if (_problem is not null)
+        {
+            <ErrorMessage Problem="_problem" Message="@_message" />
+        }
+        <form method="post" @formname="@FormName" @onsubmit="SignInAsync">
+            <AntiforgeryToken />
+            <Field Id="admin-login-name" Label="@L["Login"]" Context="field">
+                <input id="@field.Id" name="@nameof(Login)" type="text" value="@Login" autocomplete="username"
+                       autocapitalize="none" spellcheck="false" required />
+            </Field>
+            <Field Id="admin-login-password" Label="@L["Password"]" Context="field">
+                <input id="@field.Id" name="@nameof(Password)" type="password" autocomplete="current-password" required />
+            </Field>
+            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["SignIn"]" />
+        </form>
+    </Block>
+</div>
+
+@code {
+    private const string FormName = "admin-login";
+
+    private ApiProblem? _problem;
+    private string? _message;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = null!;
+
+    [SupplyParameterFromQuery(Name = AppPaths.ReturnUrlParameter)]
+    private string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName)]
+    private string? Login { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName)]
+    private string? Password { get; set; }
+
+    // Already signed in: nothing to ask, straight to the page asked for.
+    protected override void OnInitialized()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method) && HttpContext.User.Identity?.IsAuthenticated == true)
+            Navigation.NavigateTo(ReturnPath.AfterSignIn(ReturnUrl));
+    }
+
+    private async Task SignInAsync()
+    {
+        // Too many failures of late: refused without even checking, which would otherwise go on telling a right guess.
+        if (Throttle.IsBlocked())
+        {
+            Refuse(ProblemCategory.Functional, "TooManyAttempts");
+            return;
+        }
+
+        if (!Credentials.AreValid(Login, Password))
+        {
+            Throttle.RecordFailure();
+            Refuse(ProblemCategory.Business, "InvalidCredentials");
+            return;
+        }
+
+        Throttle.Reset();
+        var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, Account.Value.Login)], CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminSignedIn, cancellationToken: HttpContext.RequestAborted);
+        Navigation.NavigateTo(ReturnPath.AfterSignIn(ReturnUrl));
+    }
+
+    // The login is kept, never the password, which is typed again.
+    private void Refuse(ProblemCategory category, string message)
+    {
+        _problem = new ApiProblem(category, null, null, null);
+        _message = L[message];
+    }
+}

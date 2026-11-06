@@ -24,4 +24,23 @@ public sealed class ReturnPathTests
     [InlineData("https://bdtheque.example/not-yet-implemented")]
     public void FromReferer_NoPageOfTheApplicationToReturnTo_ReturnsHome(string? referer) =>
         Assert.Equal(AppPaths.Home, ReturnPath.FromReferer(referer, CurrentPage));
+
+    [Theory]
+    [InlineData("/admin", "/admin")]
+    [InlineData("/admin/albums?entry=B", "/admin/albums?entry=B")]
+    [InlineData("/", "/")]
+    public void AfterSignIn_PathOfTheApplication_IsReturnedTo(string returnUrl, string expected) =>
+        Assert.Equal(expected, ReturnPath.AfterSignIn(returnUrl));
+
+    // Never a way out of the application: another site, written in full or by a path that the browser reads as one.
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("admin")]
+    [InlineData("https://other.example/admin")]
+    [InlineData("//other.example/admin")]
+    [InlineData(@"/\other.example/admin")]
+    [InlineData("javascript:alert(1)")]
+    public void AfterSignIn_NoPathOfTheApplication_ReturnsTheAdministration(string? returnUrl) =>
+        Assert.Equal(AppPaths.AdminHome, ReturnPath.AfterSignIn(returnUrl));
 }

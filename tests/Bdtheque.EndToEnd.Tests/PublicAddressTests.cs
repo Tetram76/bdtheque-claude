@@ -151,6 +151,8 @@ public sealed class PublicAddressTests
                 {
                     ["Api:BaseUrl"] = "http://api",
                     ["InternalApiKey:Key"] = ApiHostFactory.InternalApiKey,
+                    ["AdminAccount:Login"] = ApplicationHost.AdminLogin,
+                    ["AdminAccount:Password"] = ApplicationHost.AdminPassword,
                     ["PublicAddress:Url"] = publicAddress,
                     ["https_port"] = httpsPort?.ToString(CultureInfo.InvariantCulture),
                 }));

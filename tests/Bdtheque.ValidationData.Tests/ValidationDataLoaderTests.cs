@@ -79,6 +79,17 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.NotEmpty(page!.Items);
     }
 
+    // The home page of the administration: a record modified among the latest changes, a deleted one left out.
+    [Fact]
+    public async Task LatestChanges_PresentAModification_AndLeaveTheDeletedRecordOut()
+    {
+        var latest = await _client.GetFromJsonAsync<IReadOnlyList<Contracts.Admin.ChangeLogEntryItem>>("/admin/change-log/latest-records?count=6");
+
+        Assert.Equal((ChangeLogOperation.Modification, (Contracts.Admin.RecordLabel)new Contracts.Admin.NameLabel("Western spaghetti")),
+            (latest![0].Operation, latest[0].Label));
+        Assert.DoesNotContain(latest, entry => entry.Label == new Contracts.Admin.NameLabel(ValidationDataLoader.DeletedGenre));
+    }
+
     private async Task<SeriesDetail> SeriesAsync(string title)
     {
         var found = await _client.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q={Uri.EscapeDataString(title)}");

@@ -1,8 +1,187 @@
 @attribute [Route(AppPaths.AdminHome)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Api
 @inject IStringLocalizer<AdminHome> L
+@inject ApiClient Api
+@inject AdminRecordCounts RecordCounts
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
 
-@* Home of the administration: its content comes with #199. *@
+@* The home page of the administration (visuel/administration/contenu.md): the most useful functions, from top to bottom. Its
+   blocks are those of every theme (visuel/administration/declinaison-par-theme.md): what varies from one theme to another
+   is read from the contracts of the base theme only (themes/base.css, --admin-…). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminHome" />
 
-<h1>@L["Title"]</h1>
+<div class="admin-home">
+    <div class="admin-home-title">
+        <h1>@L["Title"]</h1>
+        <p>@L["Summary"]</p>
+    </div>
+
+    @if (_problem is not null)
+    {
+        <ErrorMessage Problem="_problem" />
+    }
+    else if (_counts is not null)
+    {
+        <Block Title="@L["Entry.Title"]" Kicker="@L["Entry.Kicker"]" Raised="true">
+            <form class="admin-isbn" method="get" action="@AppPaths.AdminIsbnLookup" role="search">
+                <Field Id="admin-isbn" Label="@L["Entry.Isbn"]" Context="field">
+                    <input id="@field.Id" name="isbn" type="text" inputmode="text" autocomplete="off" autocapitalize="characters"
+                           spellcheck="false" placeholder="@L["Entry.IsbnPlaceholder"]" />
+                </Field>
+                <Button Type="submit" Variant="ButtonVariant.Primary" Icon="IconName.Search" Label="@L["Entry.Lookup"]" />
+            </form>
+            <p class="admin-home-note">@L["Entry.Note"]</p>
+            <div class="admin-create">
+                <span class="admin-create-label">@L["Entry.Create"]</span>
+                <ul>
+                    @foreach (var (name, path) in Creations)
+                    {
+                        <li><Button Href="@path" Variant="ButtonVariant.Secondary" Icon="IconName.Add" Label="@L[$"Entry.Create.{name}"]" /></li>
+                    }
+                </ul>
+            </div>
+        </Block>
+
+        <Block Title="@L["Records.Title"]" Kicker="@L["Records.Kicker"]">
+            <p class="admin-home-note">@L["Records.Note"]</p>
+            <ul class="admin-records">
+                @foreach (var record in Records)
+                {
+                    <li class="admin-record">
+                        <span class="admin-record-chip"><Icon Name="record.Icon" /></span>
+                        <a class="admin-record-name" href="@record.List">@L[$"Records.{record.Name}"]</a>
+                        <strong class="admin-record-count">@Format.Number(record.Count(_counts))</strong>
+                        <span class="admin-record-detail">@Detail(record)</span>
+                        <span class="admin-record-links">
+                            <a href="@record.List">@L["Records.List"]</a>
+                            @if (record.New is { } create)
+                            {
+                                <a href="@create">+ @L[$"Records.New.{record.Name}"]</a>
+                            }
+                        </span>
+                    </li>
+                }
+            </ul>
+        </Block>
+
+        <div class="admin-home-pair">
+            <Block Title="@L["Checks.Title"]" Kicker="@L["Checks.Kicker"]">
+                <ul class="admin-rows">
+                    <li>
+                        <a class="admin-check" href="@AppPaths.AdminInvalidIsbns">
+                            <span>@L["Checks.InvalidIsbn"]</span>
+                            <span class="admin-check-count" data-alert="@(_checks!.InvalidIsbnCount > 0)">@Format.Number(_checks.InvalidIsbnCount)</span>
+                            <Icon Name="IconName.ChevronEnd" />
+                        </a>
+                    </li>
+                </ul>
+            </Block>
+
+            @* Its dates in the time zone of the browser: marked for the script that renders the page again once it knows it
+               (wwwroot/browser-time-zone.js). *@
+            <Block Title="@L["Latest.Title"]" Kicker="@L["Latest.Kicker"]" data-local>
+                @if (_latest!.Count == 0)
+                {
+                    <p class="admin-home-note">@L["Latest.None"]</p>
+                }
+                else
+                {
+                    <ul class="admin-rows">
+                        @foreach (var entry in _latest)
+                        {
+                            <li class="admin-change">
+                                <span>
+                                    <span class="admin-change-label">@Labels.Record(entry.Label, _settings!.AlbumLabelFormat)</span>
+                                    <span class="admin-home-note">@L[$"Latest.{entry.RecordType}.{entry.Operation}"] · <LocalDateTime Value="entry.Date" /></span>
+                                </span>
+                                <a href="@AppPaths.AdminEdit(entry.RecordType, entry.RecordId)">@L["Edit"]</a>
+                            </li>
+                        }
+                    </ul>
+                }
+            </Block>
+        </div>
+
+        <div class="admin-home-pair">
+            <Block Title="@L["Settings.Title"]" Kicker="@L["Settings.Kicker"]">
+                <dl class="admin-rows">
+                    <div class="admin-setting">
+                        <dt>@L["Settings.AlbumLabelFormat"]</dt>
+                        <dd>@L[$"Settings.AlbumLabelFormat.{_settings!.AlbumLabelFormat}"]</dd>
+                        <dd><a href="@AppPaths.AdminSettings">@L["Edit"]</a></dd>
+                    </div>
+                    <div class="admin-setting">
+                        <dt>@L["Settings.DisplayCulture"]</dt>
+                        <dd>@L[$"Settings.DisplayCulture.{_settings.DisplayCulture}"]</dd>
+                        <dd><a href="@AppPaths.AdminSettings">@L["Edit"]</a></dd>
+                    </div>
+                </dl>
+            </Block>
+
+            <Block Title="@L["Statistics.Title"]" Kicker="@L["Statistics.Kicker"]">
+                <p class="admin-statistics-none">@L["Statistics.None"]</p>
+            </Block>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The latest records written, which the page presents.</summary>
+    internal const int LatestCount = 6;
+
+    private static readonly IReadOnlyList<(string Name, string Path)> Creations =
+    [
+        ("Album", AppPaths.AdminNewAlbum), ("Series", AppPaths.AdminNewSeries), ("Author", AppPaths.AdminNewAuthor),
+        ("Publisher", AppPaths.AdminNewPublisher),
+    ];
+
+    // A card per type of record; the editions and the purchase intents are entered from their album, never created here.
+    private static readonly IReadOnlyList<RecordCard> Records =
+    [
+        new("Albums", IconName.Album, AppPaths.AdminAlbums, AppPaths.AdminNewAlbum, c => c.Albums, c => c.AlbumsOutsideCollection),
+        new("Editions", IconName.Edition, AppPaths.AdminEditions, null, c => c.Editions, null),
+        new("Series", IconName.Series, AppPaths.AdminSeries, AppPaths.AdminNewSeries, c => c.Series, c => c.SeriesWithoutStatus),
+        new("PurchaseIntents", IconName.PurchaseIntent, AppPaths.AdminPurchaseIntents, null, c => c.PurchaseIntents, null),
+        new("Authors", IconName.Author, AppPaths.AdminAuthors, AppPaths.AdminNewAuthor, c => c.Authors, null),
+        new("Publishers", IconName.Publisher, AppPaths.AdminPublishers, AppPaths.AdminNewPublisher, c => c.Publishers, c => c.PublisherCollections),
+        new("Genres", IconName.Genre, AppPaths.AdminGenres, AppPaths.AdminNewGenre, c => c.Genres, null),
+        new("Universes", IconName.Universe, AppPaths.AdminUniverses, AppPaths.AdminNewUniverse, c => c.Universes, c => c.SubUniverses),
+    ];
+
+    private RecordCounts? _counts;
+    private AdminChecks? _checks;
+    private IReadOnlyList<ChangeLogEntryItem>? _latest;
+    private ApplicationSettings? _settings;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _counts = await RecordCounts.GetAsync();
+            _checks = await Api.GetAsync<AdminChecks>("/admin/checks");
+            _latest = await Api.GetAsync<IReadOnlyList<ChangeLogEntryItem>>($"/admin/change-log/latest-records?count={LatestCount}");
+            _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _counts = null;
+        }
+    }
+
+    // The detail of a card: a number of its own when the type has one, a fixed text otherwise.
+    private string Detail(RecordCard record) => record.Detail is { } detail
+        ? L[$"Records.{record.Name}.Detail", Format.Number(detail(_counts!))]
+        : L[$"Records.{record.Name}.Detail"];
+
+    /// <param name="New">The page that creates a record of the type, none for those entered from their album.</param>
+    /// <param name="Detail">The number the detail of the card gives, none for a fixed text.</param>
+    private sealed record RecordCard(
+        string Name, IconName Icon, string List, string? New, Func<RecordCounts, int> Count, Func<RecordCounts, int>? Detail);
+}

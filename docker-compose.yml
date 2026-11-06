@@ -51,6 +51,9 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       Api__BaseUrl: http://api:8080
       InternalApiKey__Key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
+      # The single administrator account (see choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md).
+      AdminAccount__Login: ${ADMIN_LOGIN:?ADMIN_LOGIN is required}
+      AdminAccount__Password: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
       # Behind the reverse proxy of the NAS only, which terminates TLS; empty for a deployment reached directly in HTTP
       # (see choix-implementation/deploiement/frontend-derriere-le-reverse-proxy-du-nas.md).
       PublicAddress__Url: ${PUBLIC_URL:-}

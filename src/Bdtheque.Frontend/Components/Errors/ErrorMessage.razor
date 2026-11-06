@@ -27,7 +27,14 @@
     private string CategoryName => Problem.Category.ToString().ToLowerInvariant();
 
     // A technical error discloses nothing of its cause, which only the logs of the API hold.
-    private string Text => Problem.Category switch
+    /// <summary>
+    /// The text of an error the frontend finds itself, without any call to the API (e.g. a refused login), in place of the
+    /// text the API would give.
+    /// </summary>
+    [Parameter]
+    public string? Message { get; set; }
+
+    private string Text => Message ?? Problem.Category switch
     {
         ProblemCategory.Business when Problem.RuleCode is { } code && Rules[code] is { ResourceNotFound: false } rule => rule.Value,
         ProblemCategory.Business => L["Business.Generic"],

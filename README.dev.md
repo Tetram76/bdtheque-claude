@@ -92,7 +92,7 @@ Un changement de rendu voulu met à jour les références, à relire avant de le
 ### Lancer la stack complète depuis les sources (Docker Compose)
 
 ```bash
-cp .env.example .env   # puis renseigner POSTGRES_PASSWORD et INTERNAL_API_KEY
+cp .env.example .env   # puis renseigner POSTGRES_PASSWORD, INTERNAL_API_KEY, ADMIN_LOGIN et ADMIN_PASSWORD
 mkdir -p ./data/visuels && sudo chown 1654:1654 ./data/visuels   # cf. README.md, « Dossier des visuels »
 docker compose up -d --build
 ```
@@ -127,6 +127,8 @@ Le premier lancement construit les images, en quelques minutes ; les suivants ne
 - la documentation de l'API (Scalar), pour information : `http://localhost:8181/scalar/v1`. Pour y essayer un appel, lui ajouter l'en-tête `X-Internal-Api-Key` avec la valeur de `INTERNAL_API_KEY` de `validation.env`.
 
 Ces ports ne sont ouverts qu'au poste lui-même.
+
+L'administration s'ouvre avec le compte fictif de `validation.env` : identifiant `admin`, mot de passe `validation`, que le script affiche aussi.
 
 Le thème, tiré au hasard à chaque visite en production, se choisit ici par l'adresse : `?theme=base`, `?theme=planche` ou `?theme=gazette` (ex. `http://localhost:8180/?theme=planche`). Il reste celui de la visite pour les pages suivantes, jusqu'au prochain choix.
 

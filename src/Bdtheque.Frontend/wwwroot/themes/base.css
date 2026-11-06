@@ -216,6 +216,16 @@
     --home-caption-padding: 0;
     --home-caption-border: none;
     --home-caption-background: transparent;
+
+    /* The home page of the administration, which every theme lays out alike but frames its own way
+       (visuel/administration/declinaison-par-theme.md): the gap between its blocks, which a title straddling the top
+       edge of its block needs wider; the tile of a type of record, its frame and its fill (--color-tile, read with the
+       texts of a block); the shape of the colored chip of its icon. */
+    --admin-gap: var(--space-l);
+    --color-tile: var(--color-surface);
+    --admin-tile-border: 1px solid var(--color-rule);
+    --admin-tile-radius: var(--radius-control);
+    --admin-chip-radius: var(--radius-control);
 }
 
 @media (min-width: 48rem) {

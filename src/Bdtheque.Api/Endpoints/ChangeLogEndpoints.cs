@@ -17,7 +17,13 @@ namespace Bdtheque.Api.Endpoints;
 /// </summary>
 internal static class ChangeLogEndpoints
 {
-    public static void MapChangeLog(this RouteGroupBuilder admin) => admin.MapGet("/change-log", ListAsync);
+    public const int MaxLatestRecordCount = 20;
+
+    public static void MapChangeLog(this RouteGroupBuilder admin)
+    {
+        admin.MapGet("/change-log", ListAsync);
+        admin.MapGet("/change-log/latest-records", LatestRecordsAsync);
+    }
 
     // From the latest entry to the oldest; the entries of a same save share their date, and follow
     // the order of their time-ordered identifiers.
@@ -30,6 +36,44 @@ internal static class ChangeLogEndpoints
             .ToPageAsync(page, pageSize, e => e, cancellationToken);
 
         return new Page<Contract.ChangeLogEntryItem>(entries.Items.Select(ToItem).ToList(), entries.Number, entries.Size, entries.TotalCount);
+    }
+
+    /// <summary>
+    /// The latest records created or modified (visuel/administration/contenu.md, Dernières modifications): each record
+    /// once, by its latest entry, from the latest to the oldest; a record whose latest entry is its deletion is no record
+    /// any more, and is left out.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// A count outside 1 to <see cref="MaxLatestRecordCount"/>: a technical error, the frontend asking for it, never the user.
+    /// </exception>
+    private static async Task<IReadOnlyList<Contract.ChangeLogEntryItem>> LatestRecordsAsync(
+        int count, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(count, MaxLatestRecordCount);
+
+        // The records first, then their entries: EF Core translates the first entry of a group as the last operator of a
+        // query only, never filtered nor ordered afterwards (EF Core documentation, Complex query operators). A record
+        // whose latest entry is its deletion is one that has a deletion at all, an identifier never being given again.
+        var records = await context.ChangeLog
+            .GroupBy(e => new { e.RecordType, e.RecordId })
+            .Where(record => !record.Any(e => e.Operation == Bdtheque.Domain.Enums.ChangeLogOperation.Deletion))
+            .OrderByDescending(record => record.Max(e => e.CreatedAt))
+            .ThenBy(record => record.Key.RecordId)
+            .Take(count)
+            .Select(record => record.Key)
+            .ToListAsync(cancellationToken);
+
+        var ids = records.Select(r => r.RecordId).ToList();
+        var entries = await context.ChangeLog.AsNoTracking()
+            .Where(e => ids.Contains(e.RecordId))
+            .OrderByDescending(e => e.CreatedAt)
+            .ThenByDescending(e => e.Id)
+            .ToListAsync(cancellationToken);
+
+        return records
+            .Select(r => ToItem(entries.First(e => e.RecordType == r.RecordType && e.RecordId == r.RecordId)))
+            .ToList();
     }
 
     private static Contract.ChangeLogEntryItem ToItem(Model.ChangeLogEntry entry) =>

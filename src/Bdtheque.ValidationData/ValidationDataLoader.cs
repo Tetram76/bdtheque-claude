@@ -177,7 +177,15 @@ public sealed class ValidationDataLoader(HttpClient client)
         // Wished for as a whole, with no edition known yet.
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
         await data.IntentOnAlbumAsync(convoy);
+
+        // The latest writes, which the home page of the administration presents: a record modified, under its new name,
+        // and a record deleted, left out of the latest changes.
+        await data.RenameGenreAsync(western, "Western spaghetti");
+        await data.DeleteGenreAsync(await data.GenreAsync(DeletedGenre));
     }
+
+    /// <summary>A genre created then deleted, which the latest changes leave out.</summary>
+    public const string DeletedGenre = "Genre supprimé";
 
     private static async Task LoadLongSeriesAsync(
         Loading data, Publisher lagoon, Publisher bubbles, Guid[] genres, Guid universe, Guid specialIssueUniverse, ContributionContent[] credits)
@@ -321,6 +329,24 @@ public sealed class ValidationDataLoader(HttpClient client)
         public async Task<Guid> GenreAsync(string label) =>
             (await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new(label))).Id;
 
+        public async Task RenameGenreAsync(Guid id, string label)
+        {
+            var genre = await GetAsync<GenreForm>($"/admin/genres/{id}");
+            using var response = await client.PutAsJsonAsync($"/admin/genres/{id}", new UpdateGenreRequest(label, genre.Version), cancellationToken);
+            await ReadAsync<GenreForm>(response);
+        }
+
+        // As the administration confirms a deletion: with the version of the record and the fingerprint of its impact.
+        public async Task DeleteGenreAsync(Guid id)
+        {
+            var genre = await GetAsync<GenreForm>($"/admin/genres/{id}");
+            var impact = await GetAsync<Contracts.Deletion.DeletionImpact>($"/admin/genres/{id}/deletion-impact");
+            using var response = await client.DeleteAsync(
+                $"/admin/genres/{id}?version={genre.Version}&fingerprint={Uri.EscapeDataString(impact.Fingerprint)}", cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                await ReadAsync<object>(response);
+        }
+
         public async Task<Guid> UniverseAsync(string name, string? description, Guid? parent) =>
             (await PostAsync<CreateUniverseRequest, UniverseForm>("/admin/universes", new(name, description, parent))).Id;
 
@@ -381,6 +407,12 @@ public sealed class ValidationDataLoader(HttpClient client)
         private async Task IntentAsync(AlbumWrite album, PurchaseIntentEditionContent? edition) =>
             album.Version = (await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(
                 $"/admin/albums/{album.Id}/purchase-intents", new(edition, album.Version))).AlbumVersion;
+
+        private async Task<T> GetAsync<T>(string path)
+        {
+            using var response = await client.GetAsync(path, cancellationToken);
+            return await ReadAsync<T>(response);
+        }
 
         private async Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest request)
         {

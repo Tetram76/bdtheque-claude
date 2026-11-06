@@ -17,4 +17,14 @@ public static class ReturnPath
 
         return AppPaths.Home;
     }
+
+    /// <summary>
+    /// The page to return to once signed in, which the address of the login carries: a path of the application only, the
+    /// home of the administration otherwise. A path that starts with two slashes, or a slash and a backslash, is read by the
+    /// browser as another site: following it would make of the login a way out of the application.
+    /// </summary>
+    public static string AfterSignIn(string? returnUrl) =>
+        returnUrl is { Length: > 0 } path && path[0] == '/' && (path.Length == 1 || path[1] is not ('/' or '\\'))
+            ? path
+            : AppPaths.AdminHome;
 }

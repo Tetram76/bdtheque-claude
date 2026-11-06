@@ -1,0 +1,14 @@
+@inject IStringLocalizer<LayoutText> L
+
+@* The last entry of the menu of the administration: a form posted to the logout page (AdminLogout), which handles it by its
+   name (_handler), with the antiforgery token that Blazor requires of any form it handles. *@
+<form class="admin-logout-form" method="post" action="@AppPaths.AdminLogout">
+    <AntiforgeryToken />
+    <input type="hidden" name="_handler" value="@FormName" />
+    <button type="submit" class="admin-menu-logout"><Icon Name="IconName.Logout" />@L["Logout"]</button>
+</form>
+
+@code {
+    /// <summary>The name under which the logout page handles the form.</summary>
+    public const string FormName = "admin-logout";
+}
