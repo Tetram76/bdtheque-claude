@@ -2,7 +2,7 @@
 
 ## 2026-11-06
 
-* **Choix** : compte administrateur par variables d'environnement, comparé en temps constant, tentatives de connexion limitées, pages de connexion et de déconnexion, retour à la page demandée ; nombre de fiches du menu de l'administration ; contrats de l'accueil de l'administration (`--admin-`, `--color-tile`) ; API de l'accueil de l'administration (décomptes, contrôles, dernières fiches écrites) ; compte et cas de l'environnement de validation ; erreurs présentées par leur cadre, leur icône et leur couleur, comme dans les maquettes, à l'arrondi d'une tuile (`--radius-tile`) (#287).
+* **Choix** : compte administrateur par variables d'environnement, comparé en temps constant, tentatives de connexion limitées, pages de connexion et de déconnexion, retour à la page demandée ; nombre de fiches du menu de l'administration ; contrats de l'accueil de l'administration (`--admin-`, `--color-tile`) ; API de l'accueil de l'administration (décomptes, contrôles, dernières fiches écrites) ; compte et cas de l'environnement de validation ; erreurs présentées par leur cadre, leur icône et leur couleur, comme dans les maquettes, à l'arrondi d'une tuile (`--radius-tile`) ; lien vers l'administration au pied de l'accueil de la consultation (#287).
 
 ## 2026-11-05
 

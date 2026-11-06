@@ -1,0 +1,5 @@
+/* At the far end of the foot, as in the mockups of the dashboard. */
+.footer-administration {
+    margin-inline-start: auto;
+    font-weight: var(--font-weight-strong);
+}

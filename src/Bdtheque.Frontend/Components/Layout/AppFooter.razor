@@ -10,4 +10,11 @@
         <span class="audience-dot" aria-hidden="true"></span>
         @(Opposition.IsOpposed ? L["AudienceMeasurement.Opposed"] : L["AudienceMeasurement.Active"])
     </span>
+    @* What a page adds to its foot, at its end: the link to the administration of the home page (FooterAdministrationLink). *@
+    <SectionOutlet SectionId="EndSection" />
 </footer>
+
+@code {
+    /// <summary>The end of the foot, which a page fills (<see cref="FooterAdministrationLink"/>).</summary>
+    internal static readonly object EndSection = new();
+}

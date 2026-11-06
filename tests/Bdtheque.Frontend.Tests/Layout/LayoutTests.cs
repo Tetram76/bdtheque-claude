@@ -102,18 +102,21 @@ public sealed class LayoutTests : BunitContext, IDisposable
         Assert.Equal("Aller à la consultation", header.QuerySelector($"a[href='{AppPaths.Home}']")?.TextContent.Trim());
     }
 
-    [Fact]
-    public void EveryPage_LeadsToTheInformationOnTheAudienceMeasurement()
+    // From any page, of the consultation as of the administration (fonctionnel/mesure-audience.md, Information et opposition):
+    // each layout on its own, as a page has a single foot.
+    [Theory]
+    [InlineData(typeof(PublicLayout))]
+    [InlineData(typeof(AdminLayout))]
+    public void EveryPage_LeadsToTheInformationOnTheAudienceMeasurement(Type layoutType)
     {
-        // From any page, of the consultation as of the administration (fonctionnel/mesure-audience.md, Information et opposition).
-        IRenderedComponent<IComponent>[] layouts =
-        [
-            Render<PublicLayout>(parameters => parameters.Add(p => p.Body, Body)),
-            Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body)),
-        ];
+        var layout = Render(builder =>
+        {
+            builder.OpenComponent(0, layoutType);
+            builder.AddComponentParameter(1, nameof(LayoutComponentBase.Body), Body);
+            builder.CloseComponent();
+        });
 
-        Assert.All(layouts, layout =>
-            Assert.Equal("Mesure d'audience", layout.Find($"footer a[href='{AppPaths.AudienceInformation}']").TextContent.Trim()));
+        Assert.Equal("Mesure d'audience", layout.Find($"footer a[href='{AppPaths.AudienceInformation}']").TextContent.Trim());
     }
 
     [Fact]
