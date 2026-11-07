@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Controls;
@@ -20,14 +21,16 @@ public sealed class RecordPickerTests : BunitContext
     private Task<HttpResponseMessage>? _pending;
     private Func<HttpRequestMessage, HttpResponseMessage> _answer = _ => Json(
         $$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"},{"id":"{{Titeuf}}","title":"Titeuf"}],"number":1,"size":10,"totalCount":2}""");
+    // The whole sending of a request, for a test that holds it or watches its cancellation; none, the two above.
+    private Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>? _send;
 
     public RecordPickerTests()
     {
         Services.AddLocalization();
-        Services.AddSingleton(new ApiClient(new HttpClient(new StubHandler(request =>
+        Services.AddSingleton(new ApiClient(new HttpClient(new StubHandler((request, cancellationToken) =>
         {
             _requests.Add(request.RequestUri!.PathAndQuery);
-            return _pending ?? Task.FromResult(_answer(request));
+            return _send?.Invoke(request, cancellationToken) ?? _pending ?? Task.FromResult(_answer(request));
         }))
         {
             BaseAddress = new Uri("http://api"),
@@ -147,6 +150,61 @@ public sealed class RecordPickerTests : BunitContext
         picker.Find("input").KeyDown("Enter");
         Assert.Equal(Tintin, chosen?.Id);
     }
+
+    [Fact]
+    public async Task KeystrokeHandledWhileTheEarlierSearchIsBeingCancelled_LeavesOnlyTheSearchOfTheTextShown()
+    {
+        // The circuit handles the next keystroke while the cancellation of a search gives way (#275): no search of an
+        // earlier text may outlive it, whose answer would replace the suggestions of the text shown.
+        var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
+        var input = picker.Find("input");
+        // Each search, held until the test answers it, unless sent once the answers are given.
+        var searches = new List<(string Text, CancellationToken Cancellation, TaskCompletionSource<HttpResponseMessage> Answer)>();
+        var answered = false;
+        var typedMeanwhile = new TaskCompletionSource<Task>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _send = (request, cancellation) =>
+        {
+            var text = Uri.UnescapeDataString(request.RequestUri!.Query.Split('&')[0]["?q=".Length..]);
+            var answer = new TaskCompletionSource<HttpResponseMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
+            lock (searches)
+            {
+                searches.Add((text, cancellation, answer));
+                if (answered)
+                    answer.SetResult(Options(text));
+                else if (searches.Count == 1)
+                {
+                    // Typed while this first search is being cancelled. A cancellation run apart from the circuit lets it
+                    // be handled before the keystroke that cancels resumes; one run by the circuit itself, as the circuit
+                    // queues a keystroke while it handles another, after it.
+                    cancellation.Register(() => typedMeanwhile.SetResult(Renderer.Dispatcher.CheckAccess()
+                        ? Task.Run(() => input.InputAsync(new ChangeEventArgs { Value = "tin" }))
+                        : input.InputAsync(new ChangeEventArgs { Value = "tin" })));
+                }
+            }
+            return answer.Task;
+        };
+
+        var first = input.InputAsync(new ChangeEventArgs { Value = "t" });
+        var replacing = input.InputAsync(new ChangeEventArgs { Value = "ti" });
+        var typed = await typedMeanwhile.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        // Every search is answered, the searches still to come as well: all three keystrokes are then handled to the end.
+        lock (searches)
+        {
+            answered = true;
+            foreach (var search in searches)
+                search.Answer.TrySetResult(Options(search.Text));
+        }
+        await Task.WhenAll(first, replacing, typed).WaitAsync(TimeSpan.FromSeconds(5));
+
+        lock (searches)
+            Assert.Equal("tin", Assert.Single(searches, search => !search.Cancellation.IsCancellationRequested).Text);
+        picker.WaitForAssertion(() => Assert.Equal(["tin"], picker.FindAll("[role=option]").Select(option => option.TextContent.Trim())));
+    }
+
+    // A single record named after the text searched.
+    private static HttpResponseMessage Options(string text) =>
+        Json($$"""{"items":[{"id":"{{Tintin}}","title":"{{text}}"}],"number":1,"size":10,"totalCount":1}""");
 
     [Fact]
     public void LeavingTheField_EndsTheSuggestionsOfTheTextLeft_NoneReopeningForTheRecordRestored()
@@ -270,9 +328,9 @@ public sealed class RecordPickerTests : BunitContext
     private static HttpResponseMessage Json(string body) =>
         new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
 
-    private sealed class StubHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> answer) : HttpMessageHandler
+    private sealed class StubHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> answer) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            answer(request);
+            answer(request, cancellationToken);
     }
 }

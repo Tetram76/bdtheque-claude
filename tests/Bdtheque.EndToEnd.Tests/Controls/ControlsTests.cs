@@ -88,6 +88,7 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         var token = $"Zorglub{Guid.NewGuid():N}"[..14];
         var genre = await CreateGenreAsync($"{token} cosmique");
         await CreateGenreAsync($"{token} galactique");
+        await CreateDecoyAsync(token);
         var page = await OpenAsync();
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
@@ -136,10 +137,12 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
     {
         var token = $"Marsupilami{Guid.NewGuid():N}"[..16];
         await CreateGenreAsync(token);
+        await CreateDecoyAsync(token);
         var page = await OpenAsync();
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
         await TypeAndAwaitSuggestionsAsync(page, input, token);
+        await Assertions.Expect(Suggestions(page)).ToHaveTextAsync([token]);
         await input.PressAsync("Escape");
 
         await Assertions.Expect(input).ToHaveAttributeAsync("aria-expanded", "false");
@@ -238,6 +241,10 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
 
     private static ILocator Suggestions(IPage page) =>
         page.GetByRole(AriaRole.Listbox, new() { Name = "Suggestions" }).GetByRole(AriaRole.Option);
+
+    // A genre that only the beginnings of the text find: the suggestions of an earlier text, which the field must never
+    // show once the text has changed (#275), include it, those of the whole text not.
+    private Task<Guid> CreateDecoyAsync(string text) => CreateGenreAsync($"{text[..^1]} leurre");
 
     private async Task<Guid> CreateGenreAsync(string label)
     {
