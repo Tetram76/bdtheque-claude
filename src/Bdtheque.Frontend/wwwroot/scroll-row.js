@@ -17,7 +17,18 @@ function update(row) {
     row.toggleAttribute("data-more-end", items.scrollLeft < max - 1);
 }
 
+// The chevrons follow the width of the entries as well as that of the row: an entry widens without the row doing so (a
+// font that arrives once the row is laid out), and an enhanced navigation replaces the entries. The row and its entries
+// of the moment are observed, those of an earlier page no longer.
+function observe(row) {
+    row.sizes.disconnect();
+    row.sizes.observe(row);
+    for (const entry of itemsOf(row)?.children ?? [])
+        row.sizes.observe(entry);
+}
+
 function center(row) {
+    observe(row);
     const items = itemsOf(row);
     const current = items?.querySelector('[aria-current="page"]');
     if (current) {
@@ -58,7 +69,7 @@ customElements.define("app-scroll-row", class extends HTMLElement {
                     const direction = chevron.dataset.direction === "start" ? -1 : 1;
                     items.scrollBy({ left: direction * items.clientWidth, behavior: reducedMotion.matches ? "instant" : "smooth" });
                 });
-                new ResizeObserver(() => update(this)).observe(this);
+                this.sizes = new ResizeObserver(() => update(this));
             }
             center(this);
         });
@@ -70,6 +81,8 @@ document.addEventListener("DOMContentLoaded", () =>
     window.Blazor?.addEventListener("enhancedload", () => document.querySelectorAll("app-scroll-row").forEach(center)));
 
 // A row is centered as soon as it is parsed, often before the fonts of the page arrive, which change the width of its
-// entries: it is centered again once they are laid out. Not awaited: the promise of the fonts is never rejected (CSS Font
-// Loading), and only their first loading recenters the row, never a later one, which would move it under the user.
-void document.fonts?.ready.then(() => document.querySelectorAll("app-scroll-row").forEach(center));
+// entries: it is centered again once they are laid out. On the end of the first loading of fonts, not on the promise of
+// the fonts (document.fonts.ready), already resolved when this script runs before the font of the text is asked for, and
+// never replaced for whoever awaited it (CSS Font Loading). Fonts loaded before this script were laid out before the row
+// was centered. Only their first loading recenters the row, never a later one, which would move it under the user.
+document.fonts?.addEventListener("loadingdone", () => document.querySelectorAll("app-scroll-row").forEach(center), { once: true });

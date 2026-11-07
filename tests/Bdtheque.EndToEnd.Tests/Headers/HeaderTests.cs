@@ -41,6 +41,22 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
     }
 
     [Fact]
+    public async Task ConsultationMenu_ShowsItsChevron_WhileItsEntriesOverflow_WhateverChangesTheirWidth()
+    {
+        // The entries change width without the row doing so: a font that arrives once the row is laid out, as when the
+        // script of the row runs before the font of the text is asked for (document.fonts.ready already resolved), #283.
+        var page = await OpenAsync(ConsultationPage, Smartphone);
+        var row = page.Locator("app-scroll-row.consultation-menu");
+        await Assertions.Expect(row).ToHaveAttributeAsync("data-more-end", "");
+
+        var narrow = await page.AddStyleTagAsync(new() { Content = "app-scroll-row.consultation-menu .scroll-row-items > * { font-size: 2px; }" });
+        await Assertions.Expect(row).Not.ToHaveAttributeAsync("data-more-end", "", new() { Timeout = 2000 });
+
+        await narrow.EvaluateAsync("style => style.remove()");
+        await Assertions.Expect(row).ToHaveAttributeAsync("data-more-end", "", new() { Timeout = 2000 });
+    }
+
+    [Fact]
     public async Task ConsultationMenu_MarksTheCurrentPage_AndLeadsToTheOtherEntries()
     {
         var page = await OpenAsync(AppPaths.Home);
