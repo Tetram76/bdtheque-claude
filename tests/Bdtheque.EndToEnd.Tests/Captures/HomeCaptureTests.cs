@@ -11,25 +11,25 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// the whole collection, which the other tests change.
 /// </summary>
 [Collection(EmptyCollectionApplication.Name)]
-public sealed class EmptyCollectionHomeCaptureTests(EmptyCollectionApplication application)
+public sealed class EmptyCollectionHomeCaptureTests(EmptyCollectionApplication application) : BrowserTest<EmptyCollectionApplication>(application)
 {
     public static TheoryData<string, string> Captures => HomeCaptures.All;
 
     [LinuxTheory]
     [MemberData(nameof(Captures))]
-    public Task Screen_LooksLikeItsReference(string theme, string viewport) =>
-        HomeCaptures.VerifyAsync(application, "home-empty", theme, viewport);
+    public async Task Screen_LooksLikeItsReference(string theme, string viewport) =>
+        await HomeCaptures.VerifyAsync(await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]), "home-empty", theme, viewport);
 }
 
 [Collection(CollectionApplication.Name)]
-public sealed class DashboardHomeCaptureTests(CollectionApplication application)
+public sealed class DashboardHomeCaptureTests(CollectionApplication application) : BrowserTest<CollectionApplication>(application)
 {
     public static TheoryData<string, string> Captures => HomeCaptures.All;
 
     [LinuxTheory]
     [MemberData(nameof(Captures))]
-    public Task Screen_LooksLikeItsReference(string theme, string viewport) =>
-        HomeCaptures.VerifyAsync(application, "home", theme, viewport);
+    public async Task Screen_LooksLikeItsReference(string theme, string viewport) =>
+        await HomeCaptures.VerifyAsync(await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]), "home", theme, viewport);
 }
 
 internal static class HomeCaptures
@@ -46,10 +46,9 @@ internal static class HomeCaptures
         }
     }
 
-    public static async Task VerifyAsync(ApplicationHost application, string screen, string theme, string viewport)
+    public static async Task VerifyAsync(IPage page, string screen, string theme, string viewport)
     {
-        var page = await application.NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, AppPaths.Home);
 
         CaptureStore.Verify(theme, $"{screen}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }

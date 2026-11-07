@@ -60,6 +60,15 @@ $playwright = Select-String -Path (Join-Path $root 'Directory.Packages.props') -
     Select-Object -First 1 | ForEach-Object { $_.Matches[0].Groups[1].Value }
 if (-not $playwright) { throw 'The version of Microsoft.Playwright was not found in Directory.Packages.props.' }
 
+# Bounds of a run (gestion-projet/gouvernance/regles-de-travail-de-l-agent.md, durée d'une commande). A test longer than a
+# minute is stuck: a capture takes about a second, the longest test a few seconds, and each action of the browser gives up
+# after 30 s; VSTest then stops the run. The whole run, from the start of the container to its end, lasts about a minute
+# and a half (copy and build, 40 s; the 78 captures, 30 s), three minutes when the packages of the NuGet volume are
+# restored again: past four minutes and a half, the container is stopped, whatever holds it (e.g. a Docker engine that no
+# longer answers), rather than left running without an end.
+$hangTimeout = '1min'
+$runTimeout = [TimeSpan]::FromMinutes(4.5)
+
 $results = Join-Path $root "$project/TestResults/captures"
 if (Test-Path $results) { Remove-Item $results -Recurse -Force }
 
@@ -72,14 +81,22 @@ tar -C /repo --exclude=./.git --exclude='*/bin' --exclude='*/obj' --exclude='*/T
 cd /work
 dotnet build $project --configuration Release
 status=0
-dotnet test $project --configuration Release --no-build --filter '$testFilter' || status=`$?
+dotnet test $project --configuration Release --no-build --filter '$testFilter' --blame-hang-timeout $hangTimeout || status=`$?
 if [ -d $project/TestResults/captures ]; then mkdir -p /repo/$project/TestResults && cp -r $project/TestResults/captures /repo/$project/TestResults/; fi
 if [ "$($Update.IsPresent)" = "True" ]; then rm -rf /repo/$project/Captures/References && cp -r $project/Captures/References /repo/$project/Captures/; fi
 exit `$status
 "@ -replace "`r", ''
 
+$image = "mcr.microsoft.com/playwright/dotnet:v$playwright-noble"
+# Pulled apart from the run, which its bound does not cover: a first pull downloads well over a gigabyte.
+docker pull --quiet $image | Out-Null
+
+$container = "bdtheque-captures-$PID"
 $arguments = @(
-    'run', '--rm',
+    'run', '--rm', '--name', $container,
+    # As the documentation of Playwright recommends for its image: an init process, which reaps the processes of the
+    # browser, and the shared memory of the host, without which Chromium runs out of memory and crashes.
+    '--init', '--ipc=host',
     '--volume', "${root}:/repo",
     '--volume', '/var/run/docker.sock:/var/run/docker.sock',
     '--volume', 'bdtheque-captures-nuget:/root/.nuget/packages',
@@ -87,13 +104,26 @@ $arguments = @(
     '--add-host', 'host.docker.internal:host-gateway',
     '--env', 'TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal',
     '--env', "BDTHEQUE_UPDATE_CAPTURES=$(if ($Update) { '1' } else { '0' })",
-    "mcr.microsoft.com/playwright/dotnet:v$playwright-noble",
+    $image,
     'bash', '-c', $inside
 )
 
 $PSNativeCommandUseErrorActionPreference = $false
-docker @arguments
-$status = $LASTEXITCODE
+# Each argument passed as it is (the script of the container spans several lines), the output left on the console.
+$startInfo = [System.Diagnostics.ProcessStartInfo]::new('docker')
+$arguments | ForEach-Object { $startInfo.ArgumentList.Add($_) }
+$run = [System.Diagnostics.Process]::Start($startInfo)
+try {
+    if (-not $run.WaitForExit($runTimeout)) {
+        docker kill $container | Out-Null
+        $run.WaitForExit()
+        throw "The captures did not end within $($runTimeout): the container was stopped. Check the Docker engine before running them again."
+    }
+    $status = $run.ExitCode
+}
+finally {
+    $run.Dispose()
+}
 
 if ($Update) {
     Write-Host 'References updated: review the changes of' (Join-Path $project 'Captures/References') 'before committing them.'

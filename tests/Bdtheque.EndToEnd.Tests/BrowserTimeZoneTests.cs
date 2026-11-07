@@ -10,7 +10,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// renders statically (fonctionnel/presentation/langue-et-culture-d-affichage.md).
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed class BrowserTimeZoneTests(ApplicationHost application)
+public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     // A page of the consultation that presents no date and whose content depends on no data: that of the home page depends
     // on the collection the other tests change (the dashboard is rendered in the time zone of the browser).
@@ -21,7 +21,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
     {
         var page = await PageInAsync("Asia/Tokyo");
 
-        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, Page);
         await page.GotoAsync(Page);
 
         Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
@@ -30,18 +30,17 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
     [Fact]
     public async Task Browser_ThatChangesTimeZone_IsFollowed()
     {
-        var context = await application.Browser.NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(new BrowserNewContextOptions
         {
-            BaseURL = application.BaseAddress.ToString(),
             TimezoneId = "Europe/Paris",
         });
         await context.AddCookiesAsync([new Cookie
         {
-            Name = BrowserTimeZone.CookieName, Value = "Asia/Tokyo", Url = application.BaseAddress.ToString(),
+            Name = BrowserTimeZone.CookieName, Value = "Asia/Tokyo", Url = Application.BaseAddress.ToString(),
         }]);
         var page = await context.NewPageAsync();
 
-        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, Page);
         Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
         await page.GotoAsync(Page);
 
@@ -132,9 +131,8 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
 
     private async Task<IPage> PageInAsync(string timeZone)
     {
-        var context = await application.Browser.NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(new BrowserNewContextOptions
         {
-            BaseURL = application.BaseAddress.ToString(),
             TimezoneId = timeZone,
         });
         return await context.NewPageAsync();
@@ -153,7 +151,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application)
         """;
 
     private Cookie TimeZoneCookie(string zone) =>
-        new() { Name = BrowserTimeZone.CookieName, Value = zone, Url = application.BaseAddress.ToString() };
+        new() { Name = BrowserTimeZone.CookieName, Value = zone, Url = Application.BaseAddress.ToString() };
 
     // No page presents a date and time yet: the home page served gets one, as a page that does would render it.
     private static async Task<List<string>> PresentingADateAndTimeAsync(IPage page)

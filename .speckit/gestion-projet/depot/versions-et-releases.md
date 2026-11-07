@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Versions et releases'
 description: 'Numérotation semver, jalons, rattachement des tickets et PR, publication d''une version (tag, release, analyse, images).'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T12:55:48Z }
 ---
 
 # Versions et releases
@@ -24,7 +24,7 @@ Les versions de l'application sont connues du dépôt avant leur publication : c
 - **Publication** : une version est publiée quand tous les tickets de son jalon sont fermés :
   - **tag** annoté et signé (clé GPG de [Signature des commits](signature-des-commits.md)), posé sur le commit de `main` qui la complète ;
   - **release** GitHub sur ce tag, dont les notes sont générées par GitHub à partir des Pull Requests fusionnées depuis le tag de la version précédente, et vérifiées avant publication comme tout texte publié ([Budget IA](../gouvernance/budget-ia.md), mention de Codex). Une version `0.0.x`, qui ne livre pas d'application utilisable, est marquée **pré-release** ;
-  - **analyse SonarQube Cloud** de `main`, relancée dès le tag posé (`gh workflow run code-quality.yml --ref main`) : la période du nouveau code commence à la première analyse qui porte la version ([Analyse de la qualité du code](analyse-de-la-qualite-du-code.md)), qui doit être celle du commit publié, et non celle de la fusion suivante, dont les changements en seraient exclus ;
+  - **analyse SonarQube Cloud** de `main`, relancée dès le tag posé : la période du nouveau code commence à la première analyse qui porte la version ([Analyse de la qualité du code](analyse-de-la-qualite-du-code.md)), qui doit être celle du commit publié, et non celle de la fusion suivante, dont les changements en seraient exclus ;
   - **images Docker** de la version, publiées à la demande depuis son tag ([Publication des images Docker](../../choix-implementation/deploiement/publication-des-images-docker.md)) ; les versions `0.0.x` n'en ont pas, faute d'interface ;
   - **fermeture du jalon**.
 - La publication d'une version est un acte de gestion du projet ([Prise de décision](../gouvernance/prise-de-decision.md)) : l'agent l'accomplit dès que la règle ci-dessus la prescrit, puis en informe l'utilisateur. Le déploiement de la version, lui, appartient à l'utilisateur.

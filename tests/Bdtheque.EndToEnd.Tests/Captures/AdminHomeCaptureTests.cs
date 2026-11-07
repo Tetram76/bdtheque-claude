@@ -9,7 +9,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// (<see cref="AdministrationApplication"/>): it presents the whole base, which the other tests change.
 /// </summary>
 [Collection(AdministrationApplication.Name)]
-public sealed class AdminHomeCaptureTests(AdministrationApplication application)
+public sealed class AdminHomeCaptureTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)
 {
     public static TheoryData<string, string> Captures => HomeCaptures.All;
 
@@ -17,9 +17,9 @@ public sealed class AdminHomeCaptureTests(AdministrationApplication application)
     [MemberData(nameof(Captures))]
     public async Task Screen_LooksLikeItsReference(string theme, string viewport)
     {
-        var page = await application.NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
+        var page = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await PageReadiness.WaitAsync(page);
 
         CaptureStore.Verify(theme, $"admin-home.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }

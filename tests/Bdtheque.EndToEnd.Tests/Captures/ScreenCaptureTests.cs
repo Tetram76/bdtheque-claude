@@ -11,7 +11,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// implemented adds itself to <see cref="Screens"/>; a theme added to the catalog gets its captures of every screen.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed class ScreenCaptureTests(ApplicationHost application)
+public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     /// <summary>The widths of the mockups: a desktop screen and a smartphone (visuel/charte-graphique/maquettes.md).</summary>
     internal static readonly Dictionary<string, ViewportSize> Viewports = new()
@@ -53,8 +53,8 @@ public sealed class ScreenCaptureTests(ApplicationHost application)
     [MemberData(nameof(Captures))]
     public async Task Screen_LooksLikeItsReference(string theme, string screen, string viewport)
     {
-        var page = await application.NewCapturePageAsync(theme, Viewports[viewport]);
-        await page.GotoAsync(Screens[screen], new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewCapturePageAsync(theme, Viewports[viewport]);
+        await PageReadiness.GotoAsync(page, Screens[screen]);
 
         CaptureStore.Verify(theme, $"{screen}.{viewport}", await CaptureAsync(page));
     }

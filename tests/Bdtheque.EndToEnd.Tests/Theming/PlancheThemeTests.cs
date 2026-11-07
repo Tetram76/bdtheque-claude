@@ -11,7 +11,7 @@ namespace Bdtheque.EndToEnd.Tests.Theming;
 /// and kept while the page is displayed. The coverage of the .NET tests does not measure the scripts of the frontend.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed class PlancheThemeTests(ApplicationHost application)
+public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     private static readonly ViewportSize Desktop = new() { Width = 1440, Height = 900 };
 
@@ -107,7 +107,10 @@ public sealed class PlancheThemeTests(ApplicationHost application)
         for (var display = 0; display < 15; display++)
         {
             if (display > 0)
-                await page.ReloadAsync(new PageReloadOptions { WaitUntil = WaitUntilState.NetworkIdle });
+            {
+                await page.ReloadAsync();
+                await PageReadiness.WaitAsync(page);
+            }
             var cases = await CasesAsync(page);
 
             Assert.All(cases, @case =>
@@ -208,13 +211,13 @@ public sealed class PlancheThemeTests(ApplicationHost application)
         foreach (var family in new[] { "Delius", "Fraunces", "Patrick Hand" })
             Assert.True(await page.EvaluateAsync<bool>(
                 "family => [...document.fonts].some(font => font.family.replaceAll('\"', '') === family && font.status === 'loaded')", family),
-                $"No face of {family} was loaded from the application.");
+                $"No face of {family} was loaded from the Application.");
     }
 
     private async Task<IPage> OpenAsync(string themeKey)
     {
-        var page = await application.NewPageInThemeAsync(themeKey, Desktop);
-        await page.GotoAsync(CasesPage.Path, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewPageInThemeAsync(themeKey, Desktop);
+        await PageReadiness.GotoAsync(page, CasesPage.Path);
         await page.EvaluateAsync("() => document.fonts.ready");
         return page;
     }
