@@ -1,0 +1,854 @@
+diff --git a/scripts/Test-Captures.ps1 b/scripts/Test-Captures.ps1
+index ac768c0..d2d02aa 100644
+--- a/scripts/Test-Captures.ps1
++++ b/scripts/Test-Captures.ps1
+@@ -1,134 +1,139 @@
+-#Requires -Version 7.3
+-<#
+-.SYNOPSIS
+-    Compares the captures of the screens with their references, or updates the references, in a Linux container.
+-
+-.DESCRIPTION
+-    Reference captures of choix-implementation/socle/themes.md: the screens are captured in the
+-    environment of the CI (Linux, the Chromium of Playwright), the only one where a same page always gives the same
+-    pixels; on another system, the capture tests are skipped. This script runs them in the official image of Playwright
+-    for .NET, at the version of the Microsoft.Playwright package, whose Chromium and its system dependencies are
+-    installed already, on a copy of the working tree, uncommitted changes included.
+-
+-    A failed comparison leaves the capture taken and its difference image in
+-    tests/Bdtheque.EndToEnd.Tests/TestResults/captures. With -Update, the captures replace the references, to be
+-    reviewed before they are committed: the pull request then shows each changed capture before and after.
+-
+-    Requires a running Docker service (Docker Desktop, Rancher Desktop), whose socket the container uses to start the
+-    PostgreSQL database of the tests.
+-
+-.EXAMPLE
+-    ./scripts/Test-Captures.ps1
+-
+-.EXAMPLE
+-    ./scripts/Test-Captures.ps1 -Update
+-
+-.EXAMPLE
+-    ./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
+-
+-    Takes again only the captures of the logout page and of the home page of the administration, in every theme and
+-    width; the other references are left as they are.
+-#>
+-[CmdletBinding()]
+-param(
+-    # Makes the captures taken the new references, instead of comparing them.
+-    [switch] $Update,
+-
+-    # Takes only the captures whose test name contains one of these texts: a screen of ScreenCaptureTests
+-    # ('admin-logout'), a class of its own ('AdminHome'), a theme ('gazette'). All the captures when omitted.
+-    [string[]] $Filter
+-)
+-
+-$ErrorActionPreference = 'Stop'
+-$PSNativeCommandUseErrorActionPreference = $true
+-
+-$root = Split-Path $PSScriptRoot -Parent
+-$project = 'tests/Bdtheque.EndToEnd.Tests'
+-
+-# The test filter of VSTest: the captures, narrowed to the names that contain one of the texts asked. Its operators and
+-# the quotes of the shell are refused rather than escaped: a name of a screen, a class or a theme never has them.
+-$testFilter = 'FullyQualifiedName~Bdtheque.EndToEnd.Tests.Captures.'
+-if ($Filter) {
+-    $invalid = $Filter | Where-Object { [string]::IsNullOrWhiteSpace($_) -or $_ -match "[()&|=!~\\'`"]" }
+-    if ($invalid) { throw "Invalid capture filter: '$($invalid -join "', '")'." }
+-    $testFilter += '&(' + (($Filter | ForEach-Object { "DisplayName~$_" }) -join '|') + ')'
+-}
+-
+-# The image of Playwright at the version of the package that the tests drive: Playwright finds only the browsers of its
+-# own version. Its .NET SDK follows Playwright, not the SDK of the Dockerfiles, which global.json accepts.
+-$playwright = Select-String -Path (Join-Path $root 'Directory.Packages.props') -Pattern 'Include="Microsoft\.Playwright" Version="([^"]+)"' |
+-    Select-Object -First 1 | ForEach-Object { $_.Matches[0].Groups[1].Value }
+-if (-not $playwright) { throw 'The version of Microsoft.Playwright was not found in Directory.Packages.props.' }
+-
+-# Bounds of a run (gestion-projet/gouvernance/regles-de-travail-de-l-agent.md, durée d'une commande). A test longer than a
+-# minute is stuck: a capture takes about a second, the longest test a few seconds, and each action of the browser gives up
+-# after 30 s; VSTest then stops the run. The whole run, from the start of the container to its end, lasts about a minute
+-# and a half (copy and build, 40 s; the 78 captures, 30 s), three minutes when the packages of the NuGet volume are
+-# restored again: past four minutes and a half, the container is stopped, whatever holds it (e.g. a Docker engine that no
+-# longer answers), rather than left running without an end.
+-$hangTimeout = '1min'
+-$runTimeout = [TimeSpan]::FromMinutes(4.5)
+-
+-$results = Join-Path $root "$project/TestResults/captures"
+-if (Test-Path $results) { Remove-Item $results -Recurse -Force }
+-
+-# Copied rather than built in place: the build outputs of the machine stay out of the container, and the container's
+-# out of the working tree. Only the references (with -Update) and the results of a failed comparison come back.
+-$inside = @"
+-set -e
+-mkdir -p /work
+-tar -C /repo --exclude=./.git --exclude='*/bin' --exclude='*/obj' --exclude='*/TestResults' -cf - . | tar -C /work -xf -
+-cd /work
+-dotnet build $project --configuration Release
+-status=0
+-dotnet test $project --configuration Release --no-build --filter '$testFilter' --blame-hang-timeout $hangTimeout || status=`$?
+-if [ -d $project/TestResults/captures ]; then mkdir -p /repo/$project/TestResults && cp -r $project/TestResults/captures /repo/$project/TestResults/; fi
+-if [ "$($Update.IsPresent)" = "True" ]; then rm -rf /repo/$project/Captures/References && cp -r $project/Captures/References /repo/$project/Captures/; fi
+-exit `$status
+-"@ -replace "`r", ''
+-
+-$image = "mcr.microsoft.com/playwright/dotnet:v$playwright-noble"
+-# Pulled apart from the run, which its bound does not cover: a first pull downloads well over a gigabyte.
+-docker pull --quiet $image | Out-Null
+-
+-$container = "bdtheque-captures-$PID"
+-$arguments = @(
+-    'run', '--rm', '--name', $container,
+-    # As the documentation of Playwright recommends for its image: an init process, which reaps the processes of the
+-    # browser, and the shared memory of the host, without which Chromium runs out of memory and crashes.
+-    '--init', '--ipc=host',
+-    '--volume', "${root}:/repo",
+-    '--volume', '/var/run/docker.sock:/var/run/docker.sock',
+-    '--volume', 'bdtheque-captures-nuget:/root/.nuget/packages',
+-    # The database of the tests is a sibling container, reached through the ports it publishes on the host.
+-    '--add-host', 'host.docker.internal:host-gateway',
+-    '--env', 'TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal',
+-    '--env', "BDTHEQUE_UPDATE_CAPTURES=$(if ($Update) { '1' } else { '0' })",
+-    $image,
+-    'bash', '-c', $inside
+-)
+-
+-$PSNativeCommandUseErrorActionPreference = $false
+-# Each argument passed as it is (the script of the container spans several lines), the output left on the console.
+-$startInfo = [System.Diagnostics.ProcessStartInfo]::new('docker')
+-$arguments | ForEach-Object { $startInfo.ArgumentList.Add($_) }
+-$run = [System.Diagnostics.Process]::Start($startInfo)
+-try {
+-    if (-not $run.WaitForExit($runTimeout)) {
+-        docker kill $container | Out-Null
+-        $run.WaitForExit()
+-        throw "The captures did not end within $($runTimeout): the container was stopped. Check the Docker engine before running them again."
+-    }
+-    $status = $run.ExitCode
+-}
+-finally {
+-    $run.Dispose()
+-}
+-
+-if ($Update) {
+-    Write-Host 'References updated: review the changes of' (Join-Path $project 'Captures/References') 'before committing them.'
+-}
+-elseif ($status -ne 0 -and (Test-Path $results)) {
+-    Write-Host "Captures that differ from their reference, with their difference image: $results"
+-}
+-exit $status
++#Requires -Version 7.3
++<#
++.SYNOPSIS
++    Compares the captures of the screens with their references, or updates the references, in a Linux container.
++
++.DESCRIPTION
++    Reference captures of choix-implementation/socle/themes.md: the screens are captured in the
++    environment of the CI (Linux, the Chromium of Playwright), the only one where a same page always gives the same
++    pixels; on another system, the capture tests are skipped. This script runs them in the official image of Playwright
++    for .NET, at the version of the Microsoft.Playwright package, whose Chromium and its system dependencies are
++    installed already, on a copy of the working tree, uncommitted changes included.
++
++    A failed comparison leaves the capture taken and its difference image in
++    tests/Bdtheque.EndToEnd.Tests/TestResults/captures. A capture identical to its reference whose fingerprint changed (what
++    the page is painted from changed, not its pixels) brings the fingerprint of the reference up to date, to be committed:
++    the CI fails on an outdated fingerprint. With -Update, the captures replace the references, to be
++    reviewed before they are committed: the pull request then shows each changed capture before and after.
++
++    Requires a running Docker service (Docker Desktop, Rancher Desktop), whose socket the container uses to start the
++    PostgreSQL database of the tests.
++
++.EXAMPLE
++    ./scripts/Test-Captures.ps1
++
++.EXAMPLE
++    ./scripts/Test-Captures.ps1 -Update
++
++.EXAMPLE
++    ./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
++
++    Takes again only the captures of the logout page and of the home page of the administration, in every theme and
++    width; the other references are left as they are.
++#>
++[CmdletBinding()]
++param(
++    # Makes the captures taken the new references, instead of comparing them.
++    [switch] $Update,
++
++    # Takes only the captures whose test name contains one of these texts: a screen of ScreenCaptureTests
++    # ('admin-logout'), a class of its own ('AdminHome'), a theme ('gazette'). All the captures when omitted.
++    [string[]] $Filter
++)
++
++$ErrorActionPreference = 'Stop'
++$PSNativeCommandUseErrorActionPreference = $true
++
++$root = Split-Path $PSScriptRoot -Parent
++$project = 'tests/Bdtheque.EndToEnd.Tests'
++
++# The test filter of VSTest: the captures, narrowed to the names that contain one of the texts asked. Its operators and
++# the quotes of the shell are refused rather than escaped: a name of a screen, a class or a theme never has them.
++$testFilter = 'FullyQualifiedName~Bdtheque.EndToEnd.Tests.Captures.'
++if ($Filter) {
++    $invalid = $Filter | Where-Object { [string]::IsNullOrWhiteSpace($_) -or $_ -match "[()&|=!~\\'`"]" }
++    if ($invalid) { throw "Invalid capture filter: '$($invalid -join "', '")'." }
++    $testFilter += '&(' + (($Filter | ForEach-Object { "DisplayName~$_" }) -join '|') + ')'
++}
++
++# The image of Playwright at the version of the package that the tests drive: Playwright finds only the browsers of its
++# own version. Its .NET SDK follows Playwright, not the SDK of the Dockerfiles, which global.json accepts.
++$playwright = Select-String -Path (Join-Path $root 'Directory.Packages.props') -Pattern 'Include="Microsoft\.Playwright" Version="([^"]+)"' |
++    Select-Object -First 1 | ForEach-Object { $_.Matches[0].Groups[1].Value }
++if (-not $playwright) { throw 'The version of Microsoft.Playwright was not found in Directory.Packages.props.' }
++
++# Bounds of a run (gestion-projet/gouvernance/regles-de-travail-de-l-agent.md, durée d'une commande). A test longer than a
++# minute is stuck: a capture takes about a second, the longest test a few seconds, and each action of the browser gives up
++# after 30 s; VSTest then stops the run. The whole run, from the start of the container to its end, lasts about a minute
++# and a half (copy and build, 40 s; the 78 captures, 30 s), three minutes when the packages of the NuGet volume are
++# restored again: past four minutes and a half, the container is stopped, whatever holds it (e.g. a Docker engine that no
++# longer answers), rather than left running without an end.
++$hangTimeout = '1min'
++$runTimeout = [TimeSpan]::FromMinutes(4.5)
++
++$results = Join-Path $root "$project/TestResults/captures"
++if (Test-Path $results) { Remove-Item $results -Recurse -Force }
++
++# Copied rather than built in place: the build outputs of the machine stay out of the container, and the container's
++# out of the working tree. Only the references (with -Update), the fingerprints that a comparison brought up to date and the
++# results of a failed comparison come back.
++$inside = @"
++set -e
++mkdir -p /work
++tar -C /repo --exclude=./.git --exclude='*/bin' --exclude='*/obj' --exclude='*/TestResults' -cf - . | tar -C /work -xf -
++touch /work/.copied
++cd /work
++dotnet build $project --configuration Release
++status=0
++dotnet test $project --configuration Release --no-build --filter '$testFilter' --blame-hang-timeout $hangTimeout || status=`$?
++if [ -d $project/TestResults/captures ]; then mkdir -p /repo/$project/TestResults && cp -r $project/TestResults/captures /repo/$project/TestResults/; fi
++if [ "$($Update.IsPresent)" = "True" ]; then rm -rf /repo/$project/Captures/References && cp -r $project/Captures/References /repo/$project/Captures/
++else cd $project/Captures/References && find . -name '*.fingerprint' -newer /work/.copied -exec cp --parents {} /repo/$project/Captures/References/ \; ; fi
++exit `$status
++"@ -replace "`r", ''
++
++$image = "mcr.microsoft.com/playwright/dotnet:v$playwright-noble"
++# Pulled apart from the run, which its bound does not cover: a first pull downloads well over a gigabyte.
++docker pull --quiet $image | Out-Null
++
++$container = "bdtheque-captures-$PID"
++$arguments = @(
++    'run', '--rm', '--name', $container,
++    # As the documentation of Playwright recommends for its image: an init process, which reaps the processes of the
++    # browser, and the shared memory of the host, without which Chromium runs out of memory and crashes.
++    '--init', '--ipc=host',
++    '--volume', "${root}:/repo",
++    '--volume', '/var/run/docker.sock:/var/run/docker.sock',
++    '--volume', 'bdtheque-captures-nuget:/root/.nuget/packages',
++    # The database of the tests is a sibling container, reached through the ports it publishes on the host.
++    '--add-host', 'host.docker.internal:host-gateway',
++    '--env', 'TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal',
++    '--env', "BDTHEQUE_UPDATE_CAPTURES=$(if ($Update) { '1' } else { '0' })",
++    $image,
++    'bash', '-c', $inside
++)
++
++$PSNativeCommandUseErrorActionPreference = $false
++# Each argument passed as it is (the script of the container spans several lines), the output left on the console.
++$startInfo = [System.Diagnostics.ProcessStartInfo]::new('docker')
++$arguments | ForEach-Object { $startInfo.ArgumentList.Add($_) }
++$run = [System.Diagnostics.Process]::Start($startInfo)
++try {
++    if (-not $run.WaitForExit($runTimeout)) {
++        docker kill $container | Out-Null
++        $run.WaitForExit()
++        throw "The captures did not end within $($runTimeout): the container was stopped. Check the Docker engine before running them again."
++    }
++    $status = $run.ExitCode
++}
++finally {
++    $run.Dispose()
++}
++
++if ($Update) {
++    Write-Host 'References updated: review the changes of' (Join-Path $project 'Captures/References') 'before committing them.'
++}
++elseif ($status -ne 0 -and (Test-Path $results)) {
++    Write-Host "Captures that differ from their reference, with their difference image: $results"
++}
++exit $status
+diff --git a/tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs b/tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs
+index 2b3fc4c..23e07c0 100644
+--- a/tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs
++++ b/tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs
+@@ -30,6 +30,9 @@ public class ApplicationHost : IAsyncLifetime
+     private FrontendFactory? _frontend;
+     private IPlaywright? _playwright;
+ 
++    /// <summary>The switches of the browser, which decide how it paints a page (<see cref="InitializeAsync"/>).</summary>
++    internal static readonly string[] BrowserArguments = ["--font-render-hinting=none", "--force-color-profile=srgb", "--disable-partial-raster"];
++
+     public IBrowser Browser { get; private set; } = null!;
+ 
+     /// <summary>Address of <c>frontend</c>, the only container a browser talks to.</summary>
+@@ -79,7 +82,7 @@ public class ApplicationHost : IAsyncLifetime
+         // depend on when the page changed either.
+         Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+         {
+-            Args = ["--font-render-hinting=none", "--force-color-profile=srgb", "--disable-partial-raster"],
++            Args = BrowserArguments,
+         });
+ 
+         await SeedAsync();
+diff --git a/tests/Bdtheque.EndToEnd.Tests/Captures/AdminHomeCaptureTests.cs b/tests/Bdtheque.EndToEnd.Tests/Captures/AdminHomeCaptureTests.cs
+index 69ff594..1df9cb9 100644
+--- a/tests/Bdtheque.EndToEnd.Tests/Captures/AdminHomeCaptureTests.cs
++++ b/tests/Bdtheque.EndToEnd.Tests/Captures/AdminHomeCaptureTests.cs
+@@ -21,6 +21,6 @@ public sealed class AdminHomeCaptureTests(AdministrationApplication application)
+         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
+         await PageReadiness.WaitAsync(page);
+ 
+-        CaptureStore.Verify(theme, $"admin-home.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
++        await CaptureStore.VerifyAsync(theme, $"admin-home.{viewport}", page);
+     }
+ }
+diff --git a/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureDeterminismTests.cs b/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureDeterminismTests.cs
+index a2a62ad..ff72b70 100644
+--- a/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureDeterminismTests.cs
++++ b/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureDeterminismTests.cs
+@@ -30,7 +30,7 @@ public sealed class CaptureDeterminismTests(ApplicationHost application) : Brows
+         await PageReadiness.WaitAsync(painted);
+         await SettleAsync(painted);
+ 
+-        var comparison = CaptureComparison.Compare(await ScreenCaptureTests.CaptureAsync(settled), await ScreenCaptureTests.CaptureAsync(painted));
++        var comparison = CaptureComparison.Compare(await CaptureStore.CaptureAsync(settled), await CaptureStore.CaptureAsync(painted));
+ 
+         Assert.True(comparison.Identical, $"The page painted before it changed differs in {comparison.DifferentPixels} pixels.");
+     }
+diff --git a/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureStore.cs b/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureStore.cs
+index ce2f284..136911c 100644
+--- a/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureStore.cs
++++ b/tests/Bdtheque.EndToEnd.Tests/Captures/CaptureStore.cs
+@@ -3,15 +3,25 @@ using System.Reflection;
+ namespace Bdtheque.EndToEnd.Tests.Captures;
+ 
+ /// <summary>
+-/// The reference captures, kept in the repository (<c>Captures/References/{theme}/{screen}.png</c>), and what a failed
++/// The reference captures, kept in the repository (<c>Captures/References/{theme}/{screen}.png</c>), each with the
++/// fingerprint of the rendering it shows (<c>{screen}.fingerprint</c>, <see cref="RenderFingerprint"/>), and what a failed
+ /// comparison leaves for the reviewer (<c>TestResults/captures</c>, an artifact of the CI): the capture taken and the
+-/// difference image. With <see cref="UpdateVariable"/> set, a capture becomes the new reference instead of being compared:
++/// difference image. A page whose fingerprint is that of its reference is the rendering the reference shows: it is not
++/// captured again. With <see cref="UpdateVariable"/> set, a capture becomes the new reference instead of being compared:
+ /// a wanted change of the rendering updates the references it concerns, which the pull request shows before and after.
+ /// </summary>
+ public static class CaptureStore
+ {
+     public const string UpdateVariable = "BDTHEQUE_UPDATE_CAPTURES";
+ 
++    /// <summary>How every screen is captured: the whole page, in a still state.</summary>
++    internal static readonly PageScreenshotOptions Options = new()
++    {
++        FullPage = true,
++        Animations = ScreenshotAnimations.Disabled,
++        Caret = ScreenshotCaret.Hide,
++    };
++
+     private static readonly string ProjectDirectory = typeof(CaptureStore).Assembly
+         .GetCustomAttributes<AssemblyMetadataAttribute>()
+         .Single(attribute => attribute.Key == "ProjectDirectory").Value!;
+@@ -22,34 +32,66 @@ public static class CaptureStore
+ 
+     private static bool Updating => Environment.GetEnvironmentVariable(UpdateVariable) == "1";
+ 
+-    /// <summary>Compares the capture with its reference, or makes it the reference when updating.</summary>
+-    public static void Verify(string theme, string screen, byte[] capture)
++    // GitHub Actions sets CI on each of its runners.
++    private static bool InCi => Environment.GetEnvironmentVariable("CI") == "true";
++
++    /// <summary>The capture of the page once ready (<see cref="PageReadiness"/>), the way every screen is captured.</summary>
++    public static async Task<byte[]> CaptureAsync(IPage page)
++    {
++        await page.EvaluateAsync("() => document.fonts.ready");
++        return await page.ScreenshotAsync(Options);
++    }
++
++    /// <summary>
++    /// Checks that the page, once ready, looks like its reference: by its fingerprint, or by its capture when its
++    /// fingerprint changed. Makes its capture the reference when updating.
++    /// </summary>
++    public static async Task VerifyAsync(string theme, string screen, IPage page)
+     {
+         var reference = Path.Combine(ReferencesDirectory, theme, $"{screen}.png");
++        var referenceFingerprint = Path.Combine(ReferencesDirectory, theme, $"{screen}.fingerprint");
++        var fingerprint = await RenderFingerprint.ComputeAsync(page);
+         if (Updating)
+         {
+             Directory.CreateDirectory(Path.GetDirectoryName(reference)!);
+-            File.WriteAllBytes(reference, capture);
++            await File.WriteAllBytesAsync(reference, await CaptureAsync(page));
++            await File.WriteAllTextAsync(referenceFingerprint, fingerprint);
+             return;
+         }
+ 
++        if (File.Exists(reference) && File.Exists(referenceFingerprint)
++            && (await File.ReadAllTextAsync(referenceFingerprint)).ReplaceLineEndings("\n") == fingerprint)
++            return;
++
+         var name = $"{theme}-{screen}";
++        var capture = await CaptureAsync(page);
+         if (!File.Exists(reference))
+         {
+             Keep($"{name}.actual.png", capture);
+             Assert.Fail($"No reference capture for {name}: run scripts/Test-Captures.ps1 -Update, and review the new reference.");
+         }
+ 
+-        var comparison = CaptureComparison.Compare(File.ReadAllBytes(reference), capture);
+-        if (comparison.Identical)
+-            return;
++        var comparison = CaptureComparison.Compare(await File.ReadAllBytesAsync(reference), capture);
++        if (!comparison.Identical)
++        {
++            Keep($"{name}.actual.png", capture);
++            if (comparison.Difference is { } difference)
++                Keep($"{name}.difference.png", difference);
++            Assert.Fail(comparison.SizeMismatch is { } sizes
++                ? $"The capture of {name} changed size ({sizes})."
++                : $"The capture of {name} differs from its reference in {comparison.DifferentPixels} pixels.");
++        }
++
++        // The same capture from another fingerprint: what the page is painted from changed without changing its pixels.
++        // Locally, the fingerprint of the reference follows; in the CI, which keeps nothing, an outdated fingerprint would
++        // have this capture taken at every run, unnoticed.
++        if (InCi)
++        {
++            Keep($"{name}.fingerprint", fingerprint);
++            Assert.Fail($"The capture of {name} is that of its reference, but not its fingerprint: run scripts/Test-Captures.ps1, which updates it, and commit it.");
++        }
+ 
+-        Keep($"{name}.actual.png", capture);
+-        if (comparison.Difference is { } difference)
+-            Keep($"{name}.difference.png", difference);
+-        Assert.Fail(comparison.SizeMismatch is { } sizes
+-            ? $"The capture of {name} changed size ({sizes})."
+-            : $"The capture of {name} differs from its reference in {comparison.DifferentPixels} pixels.");
++        await File.WriteAllTextAsync(referenceFingerprint, fingerprint);
+     }
+ 
+     private static void Keep(string fileName, byte[] content)
+@@ -57,4 +99,10 @@ public static class CaptureStore
+         Directory.CreateDirectory(ResultsDirectory);
+         File.WriteAllBytes(Path.Combine(ResultsDirectory, fileName), content);
+     }
++
++    private static void Keep(string fileName, string content)
++    {
++        Directory.CreateDirectory(ResultsDirectory);
++        File.WriteAllText(Path.Combine(ResultsDirectory, fileName), content);
++    }
+ }
+diff --git a/tests/Bdtheque.EndToEnd.Tests/Captures/HomeCaptureTests.cs b/tests/Bdtheque.EndToEnd.Tests/Captures/HomeCaptureTests.cs
+index 0454986..ff91871 100644
+--- a/tests/Bdtheque.EndToEnd.Tests/Captures/HomeCaptureTests.cs
++++ b/tests/Bdtheque.EndToEnd.Tests/Captures/HomeCaptureTests.cs
+@@ -50,6 +50,6 @@ internal static class HomeCaptures
+     {
+         await PageReadiness.GotoAsync(page, AppPaths.Home);
+ 
+-        CaptureStore.Verify(theme, $"{screen}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
++        await CaptureStore.VerifyAsync(theme, $"{screen}.{viewport}", page);
+     }
+ }
+diff --git a/tests/Bdtheque.EndToEnd.Tests/Captures/RenderFingerprint.cs b/tests/Bdtheque.EndToEnd.Tests/Captures/RenderFingerprint.cs
+new file mode 100644
+index 0000000..ca74756
+--- /dev/null
++++ b/tests/Bdtheque.EndToEnd.Tests/Captures/RenderFingerprint.cs
+@@ -0,0 +1,125 @@
++using System.Security.Cryptography;
++using System.Text;
++using System.Text.Json;
++using System.Text.Json.Serialization;
++
++namespace Bdtheque.EndToEnd.Tests.Captures;
++
++/// <summary>
++/// The fingerprint of what the browser paints a page from: its rendered state (the document and what its scripts made of
++/// it, the rules of its stylesheets, the position of what scrolls, the focus, the values of its fields), the bytes of the
++/// fonts and images it designates, the browser and its switches, the size of the screen, and how the page is captured.
++/// The same fingerprint stands for the same capture, which is then not taken again (<see cref="CaptureStore"/>): the cost
++/// of the control follows what changed, no longer the number of themes and screens (#285).
++/// </summary>
++/// <remarks>
++/// It is written as one line per input, each with its hash, so that the change of a fingerprint, which a pull request
++/// shows, names what changed. Everything is read from the page as it is, never from what the network carried until then:
++/// a font or an image may be asked for later in one run than in another. What the page holds without the browser ever
++/// painting it is left out, as it changes from one rendering to the next: the comments of Blazor, the attributes of its
++/// element references (<c>_bl_</c>), the attribute of the default value of a field, which Blazor drops once the field is
++/// interactive (the value painted is kept), a hidden field (the antiforgery token of a form), the identifiers that the
++/// application draws (a Guid, only ever in an address: shown, it would make the capture itself change from one run to the
++/// next), the address of the application, whose port is drawn. The scripts are left out too: what they do is in the state
++/// they leave.
++/// </remarks>
++public static class RenderFingerprint
++{
++    private const string RenderedState = """
++        async () => {
++            const guid = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
++            const clean = text => text.replaceAll(location.origin, "").replace(guid, "{guid}");
++
++            // The fonts and images that the page designates, by their address resolved from where they are written.
++            const resources = new Set();
++            const designate = (url, base) => {
++                if (url && !url.startsWith("data:"))
++                    resources.add(new URL(url, base).href);
++            };
++            const designateIn = (text, base) => {
++                for (const [, , url] of (text ?? "").matchAll(/url\(\s*(["']?)(.*?)\1\s*\)/g))
++                    designate(url, base);
++            };
++
++            const lines = [];
++            const describe = (node, depth) => {
++                for (const child of node.childNodes) {
++                    if (child.nodeType === Node.TEXT_NODE) {
++                        lines.push(`${depth} ${JSON.stringify(clean(child.data))}`);
++                        continue;
++                    }
++                    if (child.nodeType !== Node.ELEMENT_NODE)
++                        continue;
++                    const field = ["input", "textarea", "select"].includes(child.localName);
++                    const hidden = child.localName === "input" && child.type === "hidden";
++                    const attributes = [...child.attributes]
++                        .filter(attribute => !attribute.name.startsWith("_bl_") && !(field && attribute.name === "value"))
++                        .map(attribute => `${attribute.name}=${JSON.stringify(clean(attribute.value))}`)
++                        .sort();
++                    const state = [];
++                    if (field && !hidden)
++                        state.push(`value=${JSON.stringify(child.value)}`, `checked=${child.checked === true}`);
++                    if (child.scrollLeft || child.scrollTop)
++                        state.push(`scroll=${child.scrollLeft},${child.scrollTop}`);
++                    if (child === document.activeElement)
++                        state.push("focused");
++                    lines.push(`${depth} <${child.localName} ${attributes.join(" ")}> ${state.join(" ")}`);
++                    designateIn(child.getAttribute("style"), document.baseURI);
++                    if (child.localName === "img")
++                        designate(child.currentSrc || child.src, document.baseURI);
++                    if (child.localName === "image")
++                        designate(child.getAttribute("href"), document.baseURI);
++                    describe(child, depth + 1);
++                }
++            };
++            describe(document, 0);
++            const page = document.scrollingElement;
++            lines.push(`window ${innerWidth}x${innerHeight}@${devicePixelRatio} scroll=${page.scrollLeft},${page.scrollTop}`);
++
++            const styles = [...document.styleSheets, ...document.adoptedStyleSheets].map(sheet => {
++                const rules = [...sheet.cssRules].map(rule => rule.cssText);
++                rules.forEach(rule => designateIn(rule, sheet.href ?? document.baseURI));
++                return `${sheet.disabled} ${sheet.media.mediaText}\n${rules.map(clean).join("\n")}`;
++            });
++
++            // Read again from the cache of the browser, as the page received them.
++            const hex = buffer => [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2, "0")).join("");
++            const painted = await Promise.all([...resources].map(async url => {
++                const response = await fetch(url, { cache: "force-cache", signal: AbortSignal.timeout(10000) });
++                if (!response.ok)
++                    throw new Error(`${url} could not be read (status ${response.status})`);
++                return `resource ${clean(url)} ${hex(await crypto.subtle.digest("SHA-256", await response.arrayBuffer()))}`;
++            }));
++            return { document: lines.join("\n"), styles: styles.join("\n\n"), resources: [...new Set(painted)].sort() };
++        }
++        """;
++
++    private static readonly JsonSerializerOptions CaptureOptionsFormat = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
++
++    /// <summary>The fingerprint of the page as it is, once ready (<see cref="PageReadiness"/>).</summary>
++    public static async Task<string> ComputeAsync(IPage page)
++    {
++        var state = await page.EvaluateAsync<RenderedPage>(RenderedState);
++        var lines = new List<string>
++        {
++            $"capture {JsonSerializer.Serialize(CaptureStore.Options, CaptureOptionsFormat)}",
++            $"browser {page.Context.Browser!.BrowserType.Name} {page.Context.Browser.Version} {string.Join(' ', ApplicationHost.BrowserArguments)}",
++            $"document {Hash(state.Document)}",
++            $"styles {Hash(state.Styles)}",
++        };
++        lines.AddRange(state.Resources);
++        return string.Join('\n', lines) + '\n';
++    }
++
++    private static string Hash(string text) => Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(text)));
++
++    // Built by Playwright, which sets the properties of an instance it creates.
++    private sealed class RenderedPage
++    {
++        public string Document { get; set; } = "";
++
++        public string Styles { get; set; } = "";
++
++        public string[] Resources { get; set; } = [];
++    }
++}
+diff --git a/tests/Bdtheque.EndToEnd.Tests/Captures/RenderFingerprintTests.cs b/tests/Bdtheque.EndToEnd.Tests/Captures/RenderFingerprintTests.cs
+new file mode 100644
+index 0000000..2dce49f
+--- /dev/null
++++ b/tests/Bdtheque.EndToEnd.Tests/Captures/RenderFingerprintTests.cs
+@@ -0,0 +1,118 @@
++extern alias frontend;
++
++using Bdtheque.EndToEnd.Tests.Controls;
++using frontend::Bdtheque.Frontend.Navigation;
++using frontend::Bdtheque.Frontend.Theming;
++
++namespace Bdtheque.EndToEnd.Tests.Captures;
++
++/// <summary>
++/// The fingerprint of a rendering (<see cref="RenderFingerprint"/>) stands for its capture: the same rendering always has
++/// the same fingerprint, whatever the page holds that the browser never paints (the token of a form, the identifiers that
++/// the application draws), and any change of what the browser paints from changes it.
++/// </summary>
++[Collection(ApplicationCollection.Name)]
++public sealed class RenderFingerprintTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
++{
++    private static readonly ViewportSize Smartphone = ScreenCaptureTests.Viewports["smartphone"];
++
++    [Fact]
++    public async Task APageRenderedAgain_HasTheSameFingerprint()
++    {
++        // The page of the login holds the antiforgery token of its form, drawn for each rendering.
++        var first = await RenderAsync(AppPaths.AdminLogin);
++        var second = await RenderAsync(AppPaths.AdminLogin);
++
++        Assert.Equal(await RenderFingerprint.ComputeAsync(first), await RenderFingerprint.ComputeAsync(second));
++    }
++
++    [Fact]
++    public async Task APageMadeInteractive_HasTheFingerprintOfThePageRenderedByTheServer()
++    {
++        // Whether the circuit has rendered the fields of the page yet depends on the speed of the run: here, never.
++        var interactive = await RenderAsync(ControlsPage.Path);
++        var rendered = await NewCapturePageAsync(ThemeCatalog.Planche.Key, Smartphone);
++        await rendered.RouteAsync("**/_blazor/**", route => route.AbortAsync());
++        await PageReadiness.GotoAsync(rendered, ControlsPage.Path);
++
++        Assert.Equal(await RenderFingerprint.ComputeAsync(interactive), await RenderFingerprint.ComputeAsync(rendered));
++    }
++
++    [Fact]
++    public async Task AStyleChanged_ChangesTheFingerprint()
++    {
++        var page = await RenderAsync(ControlsPage.Path);
++        var before = await RenderFingerprint.ComputeAsync(page);
++
++        await page.AddStyleTagAsync(new PageAddStyleTagOptions { Content = "body { letter-spacing: 1px; }" });
++
++        Assert.NotEqual(before, await RenderFingerprint.ComputeAsync(page));
++    }
++
++    [Fact]
++    public async Task ATextChanged_ChangesTheFingerprint()
++    {
++        var page = await RenderAsync(ControlsPage.Path);
++        var before = await RenderFingerprint.ComputeAsync(page);
++
++        await page.EvaluateAsync("() => document.querySelector('h1').textContent += '!'");
++
++        Assert.NotEqual(before, await RenderFingerprint.ComputeAsync(page));
++    }
++
++    [Fact]
++    public async Task ARowScrolledElsewhere_ChangesTheFingerprint()
++    {
++        var page = await RenderAsync(ControlsPage.Path);
++        var before = await RenderFingerprint.ComputeAsync(page);
++
++        // Only the position of the row changes: the attributes that its script toggles on scroll are put back.
++        await page.EvaluateAsync("""
++            async () => {
++                const row = [...document.querySelectorAll("app-scroll-row")]
++                    .find(row => row.querySelector(".scroll-row-items").scrollWidth > row.querySelector(".scroll-row-items").clientWidth);
++                const items = row.querySelector(".scroll-row-items");
++                const attributes = [...row.attributes].map(attribute => [attribute.name, attribute.value]);
++                items.scrollLeft = items.scrollLeft > 0 ? 0 : 10;
++                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
++                [...row.attributes].forEach(attribute => row.removeAttribute(attribute.name));
++                attributes.forEach(([name, value]) => row.setAttribute(name, value));
++            }
++            """);
++
++        Assert.NotEqual(before, await RenderFingerprint.ComputeAsync(page));
++    }
++
++    [Fact]
++    public async Task AFontChanged_ChangesTheFingerprint()
++    {
++        var original = await RenderAsync(ControlsPage.Path);
++
++        var page = await NewCapturePageAsync(ThemeCatalog.Planche.Key, Smartphone);
++        await page.RouteAsync("**/*.woff2", async route =>
++        {
++            var response = await route.FetchAsync();
++            var body = await response.BodyAsync();
++            body[^1] ^= 1;
++            await route.FulfillAsync(new RouteFulfillOptions { Response = response, BodyBytes = body });
++        });
++        await PageReadiness.GotoAsync(page, ControlsPage.Path);
++        await ControlsPage.WaitUntilInteractiveAsync(page);
++        await PageReadiness.WaitAsync(page);
++
++        Assert.NotEqual(await RenderFingerprint.ComputeAsync(original), await RenderFingerprint.ComputeAsync(page));
++    }
++
++    private async Task<IPage> RenderAsync(string path)
++    {
++        var page = await NewCapturePageAsync(ThemeCatalog.Planche.Key, Smartphone);
++        await PageReadiness.GotoAsync(page, path);
++        if (path == ControlsPage.Path)
++        {
++            await ControlsPage.WaitUntilInteractiveAsync(page);
++            await PageReadiness.WaitAsync(page);
++        }
++
++        return page;
++    }
++}
+diff --git a/tests/Bdtheque.EndToEnd.Tests/Captures/ScreenCaptureTests.cs b/tests/Bdtheque.EndToEnd.Tests/Captures/ScreenCaptureTests.cs
+index 09dec9c..b8dcb1e 100644
+--- a/tests/Bdtheque.EndToEnd.Tests/Captures/ScreenCaptureTests.cs
++++ b/tests/Bdtheque.EndToEnd.Tests/Captures/ScreenCaptureTests.cs
+@@ -1,73 +1,61 @@
+-extern alias frontend;
+-
+-using frontend::Bdtheque.Frontend.Navigation;
+-using frontend::Bdtheque.Frontend.Theming;
+-
+-namespace Bdtheque.EndToEnd.Tests.Captures;
+-
+-/// <summary>
+-/// Each screen implemented, captured in each offered theme, the theme being fixed rather than drawn: any difference with
+-/// the reference capture fails (choix-implementation/socle/themes.md, captures de référence). A screen
+-/// implemented adds itself to <see cref="Screens"/>; a theme added to the catalog gets its captures of every screen.
+-/// </summary>
+-[Collection(ApplicationCollection.Name)]
+-public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
+-{
+-    /// <summary>The widths of the mockups: a desktop screen and a smartphone (visuel/charte-graphique/maquettes.md).</summary>
+-    internal static readonly Dictionary<string, ViewportSize> Viewports = new()
+-    {
+-        ["desktop"] = new ViewportSize { Width = 1440, Height = 900 },
+-        ["smartphone"] = new ViewportSize { Width = 414, Height = 896 },
+-    };
+-
+-    private static readonly Dictionary<string, string> Screens = new()
+-    {
+-        ["not-yet-implemented"] = AppPaths.NotYetImplemented,
+-        ["not-found"] = "/no-such-page",
+-        ["error"] = "/Error",
+-        ["audience"] = AppPaths.AudienceInformation,
+-        ["admin-login"] = AppPaths.AdminLogin,
+-        ["admin-logout"] = AppPaths.AdminLogout,
+-        // Not a screen: the page of the tests that presents the controls shared by the screens, until they use them.
+-        ["controls"] = Controls.ControlsPage.Path,
+-        // Not a screen either: the header of the administration and the navigation of its lists, until a list uses them.
+-        ["admin-frame"] = Headers.AdminFramePage.Path + "?entry=B&page=2",
+-        // Nor this one: blocks side by side and one above the other, on which a theme draws its cases, until a screen does.
+-        ["cases"] = Theming.CasesPage.Path,
+-    };
+-
+-    public static TheoryData<string, string, string> Captures
+-    {
+-        get
+-        {
+-            var captures = new TheoryData<string, string, string>();
+-            foreach (var theme in ThemeCatalog.Offered)
+-            foreach (var screen in Screens.Keys)
+-            foreach (var viewport in Viewports.Keys)
+-                captures.Add(theme.Key, screen, viewport);
+-            return captures;
+-        }
+-    }
+-
+-    [LinuxTheory]
+-    [MemberData(nameof(Captures))]
+-    public async Task Screen_LooksLikeItsReference(string theme, string screen, string viewport)
+-    {
+-        var page = await NewCapturePageAsync(theme, Viewports[viewport]);
+-        await PageReadiness.GotoAsync(page, Screens[screen]);
+-
+-        CaptureStore.Verify(theme, $"{screen}.{viewport}", await CaptureAsync(page));
+-    }
+-
+-    /// <summary>The capture of the page once loaded, the way every screen is captured.</summary>
+-    internal static async Task<byte[]> CaptureAsync(IPage page)
+-    {
+-        await page.EvaluateAsync("() => document.fonts.ready");
+-        return await page.ScreenshotAsync(new PageScreenshotOptions
+-        {
+-            FullPage = true,
+-            Animations = ScreenshotAnimations.Disabled,
+-            Caret = ScreenshotCaret.Hide,
+-        });
+-    }
+-}
++extern alias frontend;
++
++using frontend::Bdtheque.Frontend.Navigation;
++using frontend::Bdtheque.Frontend.Theming;
++
++namespace Bdtheque.EndToEnd.Tests.Captures;
++
++/// <summary>
++/// Each screen implemented, captured in each offered theme, the theme being fixed rather than drawn: any difference with
++/// the reference capture fails (choix-implementation/socle/themes.md, captures de référence). A screen
++/// implemented adds itself to <see cref="Screens"/>; a theme added to the catalog gets its captures of every screen.
++/// </summary>
++[Collection(ApplicationCollection.Name)]
++public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
++{
++    /// <summary>The widths of the mockups: a desktop screen and a smartphone (visuel/charte-graphique/maquettes.md).</summary>
++    internal static readonly Dictionary<string, ViewportSize> Viewports = new()
++    {
++        ["desktop"] = new ViewportSize { Width = 1440, Height = 900 },
++        ["smartphone"] = new ViewportSize { Width = 414, Height = 896 },
++    };
++
++    private static readonly Dictionary<string, string> Screens = new()
++    {
++        ["not-yet-implemented"] = AppPaths.NotYetImplemented,
++        ["not-found"] = "/no-such-page",
++        ["error"] = "/Error",
++        ["audience"] = AppPaths.AudienceInformation,
++        ["admin-login"] = AppPaths.AdminLogin,
++        ["admin-logout"] = AppPaths.AdminLogout,
++        // Not a screen: the page of the tests that presents the controls shared by the screens, until they use them.
++        ["controls"] = Controls.ControlsPage.Path,
++        // Not a screen either: the header of the administration and the navigation of its lists, until a list uses them.
++        ["admin-frame"] = Headers.AdminFramePage.Path + "?entry=B&page=2",
++        // Nor this one: blocks side by side and one above the other, on which a theme draws its cases, until a screen does.
++        ["cases"] = Theming.CasesPage.Path,
++    };
++
++    public static TheoryData<string, string, string> Captures
++    {
++        get
++        {
++            var captures = new TheoryData<string, string, string>();
++            foreach (var theme in ThemeCatalog.Offered)
++            foreach (var screen in Screens.Keys)
++            foreach (var viewport in Viewports.Keys)
++                captures.Add(theme.Key, screen, viewport);
++            return captures;
++        }
++    }
++
++    [LinuxTheory]
++    [MemberData(nameof(Captures))]
++    public async Task Screen_LooksLikeItsReference(string theme, string screen, string viewport)
++    {
++        var page = await NewCapturePageAsync(theme, Viewports[viewport]);
++        await PageReadiness.GotoAsync(page, Screens[screen]);
++
++        await CaptureStore.VerifyAsync(theme, $"{screen}.{viewport}", page);
++    }
++}
