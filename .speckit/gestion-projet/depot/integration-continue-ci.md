@@ -5,13 +5,14 @@ description: 'Workflows CI, checks requis tenus alignés sur le Ruleset, secrets
 tags: [socle]
 applies_to:
   - '.github/workflows/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T12:55:48Z }
 ---
 
 # Intégration continue (CI)
 
 - **GitHub Actions** héberge le pipeline de non-régression (`.github/workflows/ci.yml`), déclenché sur chaque Pull Request et sur push vers `main`.
 - Le contenu du pipeline (étapes, outillage de build et de test) est un choix d'implémentation : cf. [Outillage de développement .NET](../../choix-implementation/outillage.md).
+- **Une seule exécution des tests par push**, quels que soient les workflows et les jobs qu'il déclenche.
 - Le workflow CI (`ci.yml`) constitue le **check de statut requis** de la règle de merge ci-dessous : ses jobs sont imposés par le Ruleset GitHub (cf. [Configuration du repository GitHub](configuration-du-repository-github.md)). Le Ruleset les désigne par leur nom : toute modification de la liste des jobs du workflow est reportée dans le Ruleset dans le même mouvement. Sans cela, un job ajouté n'est pas requis — son échec n'empêche pas la fusion —, et un job renommé ou retiré reste attendu sous son ancien nom sans jamais se présenter, ce qui bloque toute fusion.
 - **Publication des images Docker** sur Docker Hub ([Déploiement](../../contraintes-techniques/architecture-deploiement/deploiement.md)) : workflow distinct, `.github/workflows/docker-publish.yml` (cf. [Publication des images Docker](../../choix-implementation/deploiement/publication-des-images-docker.md)). Il s'authentifie auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès (*Personal Access Token* Docker Hub, droits *Read, Write & Delete*, la suppression de l'image `nightly` remplacée l'exigeant) stocké dans le secret de dépôt GitHub `DOCKERHUB_TOKEN`.
 - **Analyse des vulnérabilités dans le CI** ([Analyse des vulnérabilités des images Docker](../revue-tickets/analyse-des-vulnerabilites-des-images-docker.md)) : le CI lit les images publiées sur Docker Hub avec le même jeton (`DOCKERHUB_TOKEN`). Le code de la branche et de ses dépendances ne s'exécute que dans les conteneurs de construction des images, qui ne reçoivent pas les identifiants du registre, et seuls l'utilisateur et l'agent agissant en son nom ouvrent des Pull Requests qui accèdent aux secrets. Une PR venant d'un **fork** n'y a pas accès : elle échoue à ce contrôle et ne peut pas être fusionnée en l'état. C'est assumé : il revient à son auteur de s'en accommoder, et aucun chemin de contrôle sans secret n'est prévu pour elle.

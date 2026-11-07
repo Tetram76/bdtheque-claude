@@ -8,7 +8,7 @@ using frontend::Bdtheque.Frontend.Theming;
 namespace Bdtheque.EndToEnd.Tests;
 
 [Collection(ApplicationCollection.Name)]
-public sealed class ThemeTests(ApplicationHost application)
+public sealed class ThemeTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     // A page of the consultation that presents no date and whose content depends on no data: that of the home page depends
     // on the collection the other tests change (the dashboard is rendered in the time zone of the browser).
@@ -17,9 +17,9 @@ public sealed class ThemeTests(ApplicationHost application)
     [Fact]
     public async Task Page_IsPresentedInAnOfferedTheme_WithTheContractsOfTheBaseTheme()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
 
-        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, Page);
 
         var theme = await page.Locator("html").GetAttributeAsync("data-theme");
         Assert.Contains(ThemeCatalog.Offered, offered => offered.Key == theme);
@@ -30,7 +30,7 @@ public sealed class ThemeTests(ApplicationHost application)
     [Fact]
     public async Task FirstPage_StartsTheVisit_InASessionCookie_WithTheThemeOfThePage()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
 
         await page.GotoAsync(Page);
 
@@ -45,7 +45,7 @@ public sealed class ThemeTests(ApplicationHost application)
     public async Task Visit_KeepsItsTheme_InEveryPageAndTabOfTheBrowser()
     {
         var page = await PageInAsync("Europe/Paris");
-        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, Page);
         await page.GotoAsync(Page);
         var visit = (await VisitCookieAsync(page)).Value;
 
@@ -62,7 +62,7 @@ public sealed class ThemeTests(ApplicationHost application)
         // Already the next day in Kiribati while it is still the day before in universal time, for a part of each day.
         var page = await PageInAsync("Pacific/Kiritimati");
 
-        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, Page);
         Assert.Null(VisitOf(await VisitCookieAsync(page)).ThemeDate);
         await page.GotoAsync(Page);
 
@@ -112,28 +112,27 @@ public sealed class ThemeTests(ApplicationHost application)
     public async Task Page_UsesTheFontsServedByTheApplication()
     {
         // The font of the base theme; those of « La planche encrée » are checked with its drawings (PlancheThemeTests).
-        var page = await application.NewPageInThemeAsync(ThemeCatalog.Base.Key, new ViewportSize { Width = 1440, Height = 900 });
+        var page = await NewPageInThemeAsync(ThemeCatalog.Base.Key, new ViewportSize { Width = 1440, Height = 900 });
 
-        await page.GotoAsync(Page, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, Page);
 
         Assert.True(await page.EvaluateAsync<bool>("async () => (await document.fonts.ready, document.fonts.check('16px Inter'))"),
             "The font of the base theme is not loaded.");
         Assert.True(await page.EvaluateAsync<bool>(
             "() => [...document.fonts].some(font => font.family.replaceAll('\"', '') === 'Inter' && font.status === 'loaded')"),
-            "No face of the font of the base theme was loaded from the application.");
+            "No face of the font of the base theme was loaded from the Application.");
     }
 
     private async Task<IPage> PageInAsync(string timeZone)
     {
-        var context = await application.Browser.NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(new BrowserNewContextOptions
         {
-            BaseURL = application.BaseAddress.ToString(),
             TimezoneId = timeZone,
         });
         return await context.NewPageAsync();
     }
 
-    private Cookie Cookie(string name, string value) => new() { Name = name, Value = value, Url = application.BaseAddress.ToString() };
+    private Cookie Cookie(string name, string value) => new() { Name = name, Value = value, Url = Application.BaseAddress.ToString() };
 
     private static async Task<BrowserContextCookiesResult> VisitCookieAsync(IPage page) =>
         (await page.Context.CookiesAsync()).Single(cookie => cookie.Name == BrowserVisit.CookieName);

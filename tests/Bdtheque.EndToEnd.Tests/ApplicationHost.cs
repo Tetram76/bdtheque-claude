@@ -70,7 +70,7 @@ public class ApplicationHost : IAsyncLifetime
             .Features.Get<IServerAddressesFeature>()!.Addresses.Single());
 
         // A no-op once the browser is installed: a local run needs no manual step before it.
-        if (Microsoft.Playwright.Program.Main(["install", "chromium"]) != 0)
+        if (Microsoft.Playwright.Program.Main(["install", "--only-shell", "chromium"]) != 0)
             throw new InvalidOperationException("The Chromium browser of Playwright could not be installed.");
         _playwright = await Playwright.CreateAsync();
         // Glyphs drawn without hinting and colors in sRGB: the captures do not depend on settings of the machine. Without
@@ -91,42 +91,15 @@ public class ApplicationHost : IAsyncLifetime
     /// </summary>
     protected virtual Task SeedAsync() => Task.CompletedTask;
 
-    /// <summary>A page of a browser context of its own: no cookie nor history shared between tests.</summary>
-    public Task<IPage> NewPageAsync() => NewPageAsync(new BrowserNewContextOptions());
-
-    /// <summary>A page of its own, at the size of the given screen (e.g. a smartphone).</summary>
-    public Task<IPage> NewPageAsync(ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions { ViewportSize = viewport });
-
     /// <summary>
-    /// A page of its own presented in the given theme, at the size of the given screen, for its capture. What a theme
-    /// draws at random (themes/planche.js) is drawn from the same sequence of numbers at each capture.
+    /// A browser context of its own, on <c>frontend</c>: no cookie nor history shared with another one. The caller owns
+    /// it, and closes it once done (<see cref="BrowserTest{TApplication}"/>): an open context keeps its pages, their
+    /// connections to the application, and on the server the circuits of their interactive components.
     /// </summary>
-    public async Task<IPage> NewCapturePageAsync(string themeKey, ViewportSize viewport)
-    {
-        var page = await NewPageInThemeAsync(themeKey, viewport);
-        await page.AddInitScriptAsync(SeededRandom);
-        return page;
-    }
-
-    /// <summary>A page of its own presented in the given theme, at the size of the given screen.</summary>
-    public Task<IPage> NewPageInThemeAsync(string themeKey, ViewportSize viewport) => NewPageAsync(new BrowserNewContextOptions
-    {
-        ViewportSize = viewport,
-        DeviceScaleFactor = 1,
-        Locale = "fr-FR",
-        TimezoneId = "Europe/Paris",
-        ReducedMotion = ReducedMotion.Reduce,
-        ExtraHTTPHeaders = new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = themeKey },
-    });
-
-    // Park-Miller, from a fixed seed, in place of the random numbers of the browser.
-    private const string SeededRandom = "(() => { let s = 20261102; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647; })()";
-
-    private async Task<IPage> NewPageAsync(BrowserNewContextOptions options)
+    public Task<IBrowserContext> NewContextAsync(BrowserNewContextOptions options)
     {
         options.BaseURL = BaseAddress.ToString();
-        var context = await Browser.NewContextAsync(options);
-        return await context.NewPageAsync();
+        return Browser.NewContextAsync(options);
     }
 
     public async Task DisposeAsync()

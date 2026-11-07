@@ -31,6 +31,21 @@ public sealed class CaptureComparisonTests
         Assert.NotEqual(CaptureComparison.DifferenceMark, difference.GetPixel(0, 0));
     }
 
+    // Every pixel is compared, the last one included, and the image of the differences shows the reference faded elsewhere.
+    [Fact]
+    public void ImagesThatDifferByTheirLastPixel_AreDifferent_OverTheReferenceFaded()
+    {
+        var reference = Png(4, 3, SKColors.Black);
+        var actual = Png(4, 3, SKColors.Black, (3, 2, SKColors.White));
+
+        var comparison = CaptureComparison.Compare(reference, actual);
+
+        Assert.Equal(1, comparison.DifferentPixels);
+        using var difference = SKBitmap.Decode(comparison.Difference);
+        Assert.Equal(CaptureComparison.DifferenceMark, difference.GetPixel(3, 2));
+        Assert.Equal(new SKColor(191, 191, 191), difference.GetPixel(0, 0));
+    }
+
     [Fact]
     public void ImagesOfDifferentSizes_AreDifferent()
     {

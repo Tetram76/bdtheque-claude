@@ -12,7 +12,7 @@ namespace Bdtheque.EndToEnd.Tests.Headers;
 /// centering on the current entry), which the coverage of the .NET tests does not measure.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed partial class HeaderTests(ApplicationHost application)
+public sealed partial class HeaderTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     // A page of the consultation whose header is always the full one: that of the home page depends on the collection, an
     // empty one leaving out the search (visuel/dashboard/collection-vide.md).
@@ -198,8 +198,8 @@ public sealed partial class HeaderTests(ApplicationHost application)
     [MemberData(nameof(OfferedThemes))]
     public async Task ConsultationMenu_OnADesktopScreen_ShowsEveryEntry_WithoutScrolling(string theme)
     {
-        var page = await application.NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
-        await page.GotoAsync(ConsultationPage, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
+        await PageReadiness.GotoAsync(page, ConsultationPage);
         await page.EvaluateAsync("() => document.fonts.ready");
 
         var overflow = await page.Locator("app-scroll-row.consultation-menu .scroll-row-items")
@@ -227,8 +227,8 @@ public sealed partial class HeaderTests(ApplicationHost application)
 
     private async Task<IPage> OpenAsync(string path, ViewportSize? viewport = null)
     {
-        var page = await application.NewPageAsync(viewport ?? new ViewportSize { Width = 1440, Height = 900 });
-        await page.GotoAsync(path, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewPageAsync(viewport ?? new ViewportSize { Width = 1440, Height = 900 });
+        await PageReadiness.GotoAsync(page, path);
         return page;
     }
 }

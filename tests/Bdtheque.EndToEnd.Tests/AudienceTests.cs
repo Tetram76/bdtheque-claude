@@ -15,7 +15,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// visit, the screens it displays and the actions it triggers, recorded by <c>api</c>, and the opposition of the visitor.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed class AudienceTests(ApplicationHost application)
+public sealed class AudienceTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     private const string SafariOnAMac =
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15";
@@ -24,11 +24,11 @@ public sealed class AudienceTests(ApplicationHost application)
     // its screen a second time (the dashboard, which the shared collection of the tests may show, depends on it).
     private async Task<IPage> NewPageKnowingItsTimeZoneAsync()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         var zone = await page.EvaluateAsync<string>("() => Intl.DateTimeFormat().resolvedOptions().timeZone");
         await page.Context.AddCookiesAsync([new Cookie
         {
-            Name = BrowserTimeZone.CookieName, Value = zone, Url = application.BaseAddress.ToString(),
+            Name = BrowserTimeZone.CookieName, Value = zone, Url = Application.BaseAddress.ToString(),
         }]);
         return page;
     }
@@ -45,7 +45,7 @@ public sealed class AudienceTests(ApplicationHost application)
             (false, DeviceType.Computer, RenderingEngine.Blink),
             (visit.Visit.IsAdministrator, visit.Visit.DeviceType, visit.Visit.RenderingEngine));
         // The major version of Chromium, that of its Blink.
-        Assert.Equal(application.Browser.Version.Split('.')[0], visit.Visit.EngineVersion);
+        Assert.Equal(Application.Browser.Version.Split('.')[0], visit.Visit.EngineVersion);
         Assert.Equal([AudienceFunctions.Home.Key], visit.Usages.Select(u => u.Function));
     }
 
@@ -156,7 +156,7 @@ public sealed class AudienceTests(ApplicationHost application)
     {
         // The touch screen, which only the browser tells, is known from the first page on: the visits that follow are a tablet's.
         var page = await TouchScreenMacAsync();
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, AppPaths.Home);
         Assert.Contains(await page.Context.CookiesAsync(), c => c.Name == AudienceDevice.TouchScreenCookieName);
 
         await page.Context.ClearCookiesAsync(new BrowserContextClearCookiesOptions { Name = BrowserVisit.CookieName });
@@ -172,19 +172,18 @@ public sealed class AudienceTests(ApplicationHost application)
         var page = await TouchScreenMacAsync();
         await page.Context.AddCookiesAsync([new Cookie
         {
-            Name = AudienceOpposition.CookieName, Value = "1", Url = application.BaseAddress.ToString(),
+            Name = AudienceOpposition.CookieName, Value = "1", Url = Application.BaseAddress.ToString(),
         }]);
 
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, AppPaths.Home);
 
         Assert.DoesNotContain(await page.Context.CookiesAsync(), c => c.Name == AudienceDevice.TouchScreenCookieName);
     }
 
     private async Task<IPage> TouchScreenMacAsync()
     {
-        var context = await application.Browser.NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(new BrowserNewContextOptions
         {
-            BaseURL = application.BaseAddress.ToString(),
             UserAgent = SafariOnAMac,
         });
         await context.AddInitScriptAsync("Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 5 })");
@@ -201,7 +200,7 @@ public sealed class AudienceTests(ApplicationHost application)
 
     private async Task<AudienceVisitDetail> AudienceVisitByIdAsync(Guid id)
     {
-        using var api = application.CreateApiClient();
+        using var api = Application.CreateApiClient();
         return (await api.GetFromJsonAsync<AudienceVisitDetail>($"/admin/audience/visits/{id}"))!;
     }
 }

@@ -9,12 +9,12 @@ namespace Bdtheque.EndToEnd.Tests;
 /// user sees, and an interactive component would never run.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed class StaticAssetsTests(ApplicationHost application)
+public sealed class StaticAssetsTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     [Fact]
     public async Task Page_LoadsItsStylesAndScripts()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         var failures = new List<string>();
         page.Response += (_, response) =>
         {
@@ -22,7 +22,7 @@ public sealed class StaticAssetsTests(ApplicationHost application)
                 failures.Add($"{response.Status} {response.Url}");
         };
 
-        await page.GotoAsync(AppPaths.Home, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await PageReadiness.GotoAsync(page, AppPaths.Home);
 
         Assert.Empty(failures);
         Assert.True(await page.EvaluateAsync<bool>("() => typeof window.Blazor === 'object'"), "The script of Blazor did not run.");

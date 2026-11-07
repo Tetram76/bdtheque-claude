@@ -32,7 +32,7 @@ $analysis = (Invoke-RestMethod "$base/project_pull_requests/list?project=$p").pu
 ```
 
 The analysis is the head's only when `IsHead` is true. Otherwise check the run
-(`gh run list --workflow code-quality.yml --branch <branch> -L 1`): still
+(the `SonarQube Cloud analysis` job of `gh run list --workflow ci.yml --branch <branch> -L 1`): still
 running → wait for it in the background (never a foreground sleep); failed or
 absent → no quality gate, so the PR cannot be merged (the Ruleset requires the
 `SonarCloud Code Analysis` check): find the cause of a failed run and fix it;

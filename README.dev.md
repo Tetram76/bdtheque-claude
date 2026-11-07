@@ -95,6 +95,8 @@ L'une comme l'autre peut se limiter aux captures dont le nom du test contient l'
 ./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
 ```
 
+Le script est borné : un test bloqué plus d'une minute arrête le passage, et le conteneur est arrêté s'il n'a pas fini en quatre minutes et demie (un passage complet en dure environ une et demie) ; un tel arrêt signale d'abord un moteur Docker à vérifier.
+
 ### Lancer la stack complète depuis les sources (Docker Compose)
 
 ```bash
