@@ -1,14 +1,20 @@
 ---
 type: Gouvernance
 title: 'Qualité du code'
-description: 'KISS, DRY, YAGNI, SOLID, bonnes pratiques, TDD, non-régression, commentaires, langue des fichiers techniques ; s''applique à tout code.'
+description: 'Exigence de rigueur (même exigence pour tout le code, usage documenté des outils, ressources libérées, son propre code d''abord, relecture exigeante), KISS, DRY, YAGNI, SOLID, bonnes pratiques, TDD, non-régression, commentaires, langue des fichiers techniques ; s''applique à tout code.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:22:21Z }
 ---
 
 # Qualité du code
 
 - La **qualité du code est une préoccupation majeure** et permanente.
+- **Exigence de rigueur** : un code qui fonctionne ne suffit pas. L'agent tient tout ce qu'il produit au niveau d'exigence d'un développeur expérimenté et intransigeant : une implémentation approximative est inacceptable, qu'un contrôle la signale ou non.
+  - **Même exigence pour tout le code** : code de l'application, tests, scripts, outillage, configuration, workflows. Un test mal écrit ne garantit plus la non-régression qu'il porte, et rend instable ce qu'il vérifie.
+  - **Usage documenté de chaque outil** : avant d'employer un outil, une bibliothèque ou une API, l'agent prend connaissance, dans sa documentation officielle, des pratiques qu'elle recommande et de celles qu'elle déconseille (cycle de vie des objets, libération des ressources, façons d'attendre, pièges signalés), et pas seulement de l'appel dont il a besoin ([Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md), [Règles de travail de l'agent](regles-de-travail-de-l-agent.md)). Un usage que la documentation déconseille n'est retenu qu'avec sa justification dans `choix-implementation/`.
+  - **Ressources libérées** : toute ressource que le code ouvre (connexion, contexte ou page d'un navigateur, flux, fichier, client, processus, conteneur) a un propriétaire, qui la libère explicitement dès qu'elle ne sert plus. Un code qui ouvre une ressource sans la libérer est défectueux, même si rien ne le signale encore.
+  - **Son propre code d'abord** : face à un comportement anormal ou instable (test instable, lenteur, délai dépassé), l'agent relit d'abord son propre code, et l'usage qu'il fait des outils au regard de leur documentation, avant de mettre en cause un outil largement adopté, son moteur ou l'environnement.
+  - **Relecture exigeante** : avant de présenter un travail comme terminé, et avant tout push, l'agent le relit comme le ferait un relecteur exigeant, documentation à l'appui. Il ne compte ni sur la revue de code ni sur le CI pour trouver ce qu'il aurait dû voir.
 - Le projet est guidé par les principes **KISS, DRY, YAGNI et SOLID**. Toute décision (architecture, conception, implémentation, revue) doit s'y conformer :
   - **KISS** (*Keep It Simple, Stupid*) : privilégier la solution la plus simple qui répond au besoin réel, éviter la complexité non justifiée.
   - **DRY** (*Don't Repeat Yourself*) : éviter la duplication de logique ou de connaissance ; factoriser lorsque c'est pertinent, sans sur-factoriser prématurément.
