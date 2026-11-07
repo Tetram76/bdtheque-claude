@@ -16,10 +16,11 @@ public sealed class AdminCredentials(IOptions<AdminAccountOptions> options)
     /// </summary>
     public bool AreValid(string? login, string? password)
     {
-        // Both compared whatever the first one gives: no shortcut that would tell the login apart from the password.
+        // Both compared whatever the first one gives, before being combined: no shortcut that would tell the login apart
+        // from the password.
         var loginMatches = CryptographicOperations.FixedTimeEquals(Digest(login), _login);
         var passwordMatches = CryptographicOperations.FixedTimeEquals(Digest(password), _password);
-        return loginMatches & passwordMatches;
+        return loginMatches && passwordMatches;
     }
 
     private static byte[] Digest(string? value) => SHA256.HashData(Encoding.UTF8.GetBytes(value ?? string.Empty));
