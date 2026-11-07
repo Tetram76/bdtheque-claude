@@ -1,13 +1,16 @@
 ---
 type: Gouvernance
 title: 'Règles de travail de l''agent'
-description: 'Contre-vérification par des sources externes avant toute décision technique ; titre de la conversation selon le chantier.'
+description: 'Contre-vérification par des sources externes avant toute décision technique ; ressources et durée de toute commande lancée ; titre de la conversation selon le chantier.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T12:00:00Z }
 ---
 
 # Règles de travail de l'agent
 
 - La base de connaissance de l'agent est considérée **toujours potentiellement obsolète**. Avant toute décision technique (choix de bibliothèque, version, API, configuration, bonne pratique), l'agent **doit contre-vérifier** ses connaissances via des sources externes reconnues et fiables (documentation officielle, dépôts GitHub officiels, etc.).
 - Aucune décision technique ne peut reposer uniquement sur la mémoire de l'agent.
+- **Ressources d'une commande** : lancer une commande sans s'être demandé si les ressources qu'elle exige sont disponibles est irresponsable. Avant de lancer une commande, l'agent vérifie que chacune de ces ressources est là et répond : service dont elle dépend (ex. le service Docker, interrogé avec un délai borné), outils, espace disque et mémoire qu'elle consomme, ports, réseau et quotas, absence d'une autre exécution qui se les dispute (ex. des tests ou des captures déjà en cours, dans cette conversation ou une autre). Une ressource manquante ou figée est rétablie avant le lancement si l'agent le peut ; sinon, la commande n'est pas lancée et l'agent le signale à l'utilisateur, avec la ressource en cause.
+- **Durée d'une commande** : lancer une commande sans se préoccuper du temps qu'elle mettra à aboutir, et la laisser tourner indéfiniment, est inacceptable. Avant de la lancer, l'agent estime sa durée et la borne : toute commande a un délai maximal ; une commande longue, lancée en arrière-plan, est en outre surveillée sur sa progression (journal ou sortie qui avance), et arrêtée dès qu'elle cesse de progresser pendant plusieurs minutes ou atteint son délai maximal. Aucune attente n'est sans borne ni aveugle.
+  - **Calcul du délai maximal** : la durée attendue est la plus longue durée légitime de la commande, établie par des faits (durée mesurée de ses exécutions récentes, délais que fixe le `.speckit/` pour ce qu'elle attend, ex. ceux de la revue Codex) ; le délai maximal est cette durée **majorée d'au plus la moitié**. Un délai plus large, « de secours », multiple arbitraire de la durée attendue, est interdit : il laisse tourner une commande bloquée bien après qu'elle aurait dû aboutir. Une durée attendue qu'aucun fait ne permet d'établir (première exécution) est estimée d'après le volume du travail, puis mesurée pour les fois suivantes. Une commande arrêtée ainsi n'est pas relancée à l'identique : l'agent établit d'abord, par des faits vérifiés, la cause du blocage ou de la lenteur, la corrige si elle relève de lui, et la signale sinon.
 - **Titre de la conversation** : dès qu'un chantier est choisi pour être réalisé (chantier du plan, ticket hors plan, montée de version…), l'agent renomme la conversation pour que son titre corresponde à ce chantier (ex. le numéro et le titre de son ticket) : la liste des conversations dit ainsi, sans les ouvrir, ce que chacune réalise. Le choix d'un autre chantier dans la même conversation la renomme de même.

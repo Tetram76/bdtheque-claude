@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-07
+
+* **Règle** : avant de lancer une commande, l'agent vérifie que les ressources qu'elle exige sont disponibles, estime sa durée et la borne (délai maximal, surveillance de la progression d'une commande longue, aucune attente sans borne) ; le délai maximal est la plus longue durée légitime majorée d'au plus la moitié, jamais un multiple arbitraire ; la surveillance de la revue Codex est bornée à 18 minutes et chacun de ses appels à GitHub à 1,3 seconde (#288).
+
 ## 2026-11-06
 
 * **Choix** : compte administrateur par variables d'environnement, comparé en temps constant, tentatives de connexion limitées, pages de connexion et de déconnexion, retour à la page demandée ; nombre de fiches du menu de l'administration ; contrats de l'accueil de l'administration (`--admin-`, `--color-tile`) ; API de l'accueil de l'administration (décomptes, contrôles, dernières fiches écrites) ; compte et cas de l'environnement de validation ; erreurs présentées par leur cadre, leur icône et leur couleur, comme dans les maquettes, à l'arrondi d'une tuile (`--radius-tile`) ; lien vers l'administration au pied de l'accueil de la consultation ; captures de référence reprises écran par écran (`-Filter`) ; visite de la mesure d'audience retenue avec son genre, administrateur ou visiteur, une autre s'ouvrant quand l'authentification change (#287).
