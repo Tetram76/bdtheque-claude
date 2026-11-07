@@ -22,11 +22,21 @@
 
 .EXAMPLE
     ./scripts/Test-Captures.ps1 -Update
+
+.EXAMPLE
+    ./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
+
+    Takes again only the captures of the logout page and of the home page of the administration, in every theme and
+    width; the other references are left as they are.
 #>
 [CmdletBinding()]
 param(
     # Makes the captures taken the new references, instead of comparing them.
-    [switch] $Update
+    [switch] $Update,
+
+    # Takes only the captures whose test name contains one of these texts: a screen of ScreenCaptureTests
+    # ('admin-logout'), a class of its own ('AdminHome'), a theme ('gazette'). All the captures when omitted.
+    [string[]] $Filter
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,6 +44,15 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 $root = Split-Path $PSScriptRoot -Parent
 $project = 'tests/Bdtheque.EndToEnd.Tests'
+
+# The test filter of VSTest: the captures, narrowed to the names that contain one of the texts asked. Its operators and
+# the quotes of the shell are refused rather than escaped: a name of a screen, a class or a theme never has them.
+$testFilter = 'FullyQualifiedName~Bdtheque.EndToEnd.Tests.Captures.'
+if ($Filter) {
+    $invalid = $Filter | Where-Object { [string]::IsNullOrWhiteSpace($_) -or $_ -match "[()&|=!~\\'`"]" }
+    if ($invalid) { throw "Invalid capture filter: '$($invalid -join "', '")'." }
+    $testFilter += '&(' + (($Filter | ForEach-Object { "DisplayName~$_" }) -join '|') + ')'
+}
 
 # The image of Playwright at the version of the package that the tests drive: Playwright finds only the browsers of its
 # own version. Its .NET SDK follows Playwright, not the SDK of the Dockerfiles, which global.json accepts.
@@ -53,7 +72,7 @@ tar -C /repo --exclude=./.git --exclude='*/bin' --exclude='*/obj' --exclude='*/T
 cd /work
 dotnet build $project --configuration Release
 status=0
-dotnet test $project --configuration Release --no-build --filter 'FullyQualifiedName~Bdtheque.EndToEnd.Tests.Captures.' || status=`$?
+dotnet test $project --configuration Release --no-build --filter '$testFilter' || status=`$?
 if [ -d $project/TestResults/captures ]; then mkdir -p /repo/$project/TestResults && cp -r $project/TestResults/captures /repo/$project/TestResults/; fi
 if [ "$($Update.IsPresent)" = "True" ]; then rm -rf /repo/$project/Captures/References && cp -r $project/Captures/References /repo/$project/Captures/; fi
 exit `$status

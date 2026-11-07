@@ -89,6 +89,12 @@ Un changement de rendu voulu met à jour les références, à relire avant de le
 ./scripts/Test-Captures.ps1 -Update
 ```
 
+L'une comme l'autre peut se limiter aux captures dont le nom du test contient l'un des textes donnés (un écran, une classe de captures, un thème), les autres références restant telles quelles :
+
+```bash
+./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
+```
+
 ### Lancer la stack complète depuis les sources (Docker Compose)
 
 ```bash
