@@ -64,11 +64,24 @@ jobs:
       - name: Install the browser of the end-to-end tests
         run: pwsh tests/Bdtheque.EndToEnd.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps --only-shell chromium
 
-      # The only run of the tests: it collects the coverage that the SonarQube Cloud analysis reports, on the code of the
-      # application only, the library shared by the tests being left out.
+      # The only run of each test, in two steps: Chromium drops the requests of the pages it is loading when a network
+      # interface appears on the runner (net::ERR_NETWORK_CHANGED), as when a test process starts its PostgreSQL container,
+      # and the test projects run side by side. The tests without a browser run first, side by side; the end-to-end tests
+      # then run alone, their only container started before any browser. Both collect the coverage that the SonarQube
+      # Cloud analysis reports, on the code of the application only, the library shared by the tests being left out
+      # (choix-implementation/outillage.md).
       - name: Run tests
         run: >-
           dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+          --filter "FullyQualifiedName!~Bdtheque.EndToEnd.Tests."
+          --collect "XPlat Code Coverage"
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
+
+      - name: Run end-to-end tests
+        if: success() || failure()
+        run: >-
+          dotnet test tests/Bdtheque.EndToEnd.Tests --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
           --collect "XPlat Code Coverage"
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
