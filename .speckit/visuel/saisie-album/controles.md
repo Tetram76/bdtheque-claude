@@ -2,9 +2,9 @@
 type: Référence visuelle
 title: 'Contrôles'
 description: 'Contrôles de la saisie d''un album.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Contrôles
 
-Ceux de la liste des albums ([Contrôles](/visuel/liste-albums/controles.md)) : texte indicatif de la couleur du texte atténué, sans opacité, et focus clavier détaché du contrôle par une bande de la couleur de la surface qui l'entoure.
+Ceux de la liste des albums ([Contrôles](../liste-albums/controles.md)) : texte indicatif de la couleur du texte atténué, sans opacité, et focus clavier détaché du contrôle par une bande de la couleur de la surface qui l'entoure.

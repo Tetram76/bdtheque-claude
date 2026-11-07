@@ -2,14 +2,14 @@
 type: Plan d'implémentation
 title: 'Phase 1 — Modèle de domaine'
 description: 'Phase 1, modèle de domaine (v0.0.2), consolidation et ajustement de la reprise.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Phase 1 — Modèle de domaine
 
 **Version** : `v0.0.2`.
 
-Implémentation des entités du modèle métier ([`modele-metier/`](/modele-metier/index.md)) dans `Bdtheque.Domain` et `Bdtheque.Infrastructure` (configurations EF Core + migrations), séquencée selon les dépendances entre entités. Le `DbContext` reçoit progressivement ses `DbSet`.
+Implémentation des entités du modèle métier ([`modele-metier/`](../modele-metier/index.md)) dans `Bdtheque.Domain` et `Bdtheque.Infrastructure` (configurations EF Core + migrations), séquencée selon les dépendances entre entités. Le `DbContext` reçoit progressivement ses `DbSet`.
 
 | Ticket | Titre |
 | --- | --- |

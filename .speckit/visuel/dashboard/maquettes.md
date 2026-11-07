@@ -2,12 +2,12 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Fichiers des maquettes de chaque alternative du dashboard.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Maquettes
 
-Toutes les alternatives sont présentées côte à côte par la visionneuse [`maquettes/dashboard/`](/visuel/maquettes/dashboard/index.html) (cf. [Maquettes](/visuel/charte-graphique/maquettes.md)).
+Toutes les alternatives sont présentées côte à côte par la visionneuse [`maquettes/dashboard/`](../maquettes/dashboard/index.html) (cf. [Maquettes](../charte-graphique/maquettes.md)).
 
 | Alternative | Fichier |
 | --- | --- |

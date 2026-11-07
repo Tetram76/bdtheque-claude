@@ -5,10 +5,10 @@ description: 'Journal de production sans requêtes SQL, échecs journalisés une
 applies_to:
   - 'src/Bdtheque.Api/appsettings.json'
   - 'src/Bdtheque.Infrastructure/BdthequeDbContext.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Journalisation
 
 - Le journal de production garde ce qui sert à l'exploitation (démarrage, avertissements, erreurs techniques, migrations appliquées) sans les requêtes SQL : la catégorie `Microsoft.EntityFrameworkCore` est au niveau `Warning`, sauf ses migrations (`Information`), dans `appsettings.json` ; les niveaux restent réglables au déploiement (configuration ASP.NET Core, ex. variable `Logging__LogLevel__Microsoft.EntityFrameworkCore`).
-- Une instruction, un enregistrement ou une requête en échec n'est pas journalisé par EF Core (`CommandError`, `SaveChangesFailed`, `QueryIterationFailed` ignorés, `BdthequeDbContext.OnConfiguring`) : l'échec parvient toujours à son appelant sous forme d'exception, qui le journalise une fois au niveau que sa nature appelle — `ApiExceptionHandler` pour une requête HTTP ([Erreurs métier, fonctionnelles et techniques](/choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md)), la réconciliation des visuels pour sa tâche de fond, l'arrêt du processus au démarrage. Journalisé aussi par EF Core, au niveau `Error`, un libellé déjà utilisé, erreur de saisie que l'utilisateur corrige, passerait pour une défaillance de l'application. Vérifié par `ProductionLoggingTests`.
+- Une instruction, un enregistrement ou une requête en échec n'est pas journalisé par EF Core (`CommandError`, `SaveChangesFailed`, `QueryIterationFailed` ignorés, `BdthequeDbContext.OnConfiguring`) : l'échec parvient toujours à son appelant sous forme d'exception, qui le journalise une fois au niveau que sa nature appelle — `ApiExceptionHandler` pour une requête HTTP ([Erreurs métier, fonctionnelles et techniques](../../ecritures/erreurs-metier-fonctionnelles-et-techniques.md)), la réconciliation des visuels pour sa tâche de fond, l'arrêt du processus au démarrage. Journalisé aussi par EF Core, au niveau `Error`, un libellé déjà utilisé, erreur de saisie que l'utilisateur corrige, passerait pour une défaillance de l'application. Vérifié par `ProductionLoggingTests`.

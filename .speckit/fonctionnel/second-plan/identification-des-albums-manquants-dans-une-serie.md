@@ -2,14 +2,14 @@
 type: Règle métier
 title: 'Identification des albums manquants dans une série'
 description: 'Tomes manquants d''une série, intervalles, options sur les intégrales et les intentions.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Identification des albums manquants dans une série
 
 Accessible en **mode consultation** (public). Permet de savoir quels albums d'une série ne sont pas encore présents dans la collection.
 
-Un tome est **manquant** s'il est absent de la séquence théorique de tomes de la série (voir [Séquence théorique de tomes d'une série](/fonctionnel/regles-metier/sequence-theorique-de-tomes-d-une-serie.md)).
+Un tome est **manquant** s'il est absent de la séquence théorique de tomes de la série (voir [Séquence théorique de tomes d'une série](../regles-metier/sequence-theorique-de-tomes-d-une-serie.md)).
 
 Les intégrales **couvrent** la plage `tome de début → tome de fin` de la séquence (chaque tome de la plage est considéré présent).
 

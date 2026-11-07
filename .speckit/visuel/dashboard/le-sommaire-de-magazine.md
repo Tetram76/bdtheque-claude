@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Le sommaire de magazine'
 description: 'Alternative « Le sommaire de magazine » : apparence, présentation, collection vide.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Le sommaire de magazine
@@ -23,7 +23,7 @@ Le dashboard présenté comme la couverture et le sommaire d'un magazine populai
 - **La couverture**, à gauche, au format d'une page de magazine, rouge, légèrement inclinée et portant une ombre noire décalée :
   - le nom de l'application en blanc ;
   - un bandeau entre deux filets : « N° », suivi du nombre d'albums, le mois et la mention « Gratuit » ;
-  - la couverture de l'édition **à la une** ([Page d'accueil](/fonctionnel/page-accueil.md)), sur presque toute la hauteur ;
+  - la couverture de l'édition **à la une** ([Page d'accueil](../../fonctionnel/page-accueil.md)), sur presque toute la hauteur ;
   - la **phrase d'accueil** en gros titre blanc, tirée au hasard dans la liste commune ;
   - des étiquettes noires, qui donnent le nombre de séries et d'éditions ;
   - une étiquette jaune inclinée, posée sur la couverture, qui annonce l'édition à la une : le libellé de son album, une accroche tirée du résumé de l'album, abrégé, et, en petit, le libellé de l'édition.

@@ -2,9 +2,9 @@
 type: Référence visuelle
 title: 'Contrôles'
 description: 'Contrôles de la saisie d''un éditeur.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Contrôles
 
-Ceux de la liste des albums ([Contrôles](/visuel/liste-albums/controles.md)).
+Ceux de la liste des albums ([Contrôles](../liste-albums/controles.md)).

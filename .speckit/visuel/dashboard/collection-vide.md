@@ -2,14 +2,14 @@
 type: Référence visuelle
 title: 'Collection vide'
 description: 'Écran d''accueil d''une collection vide, commun à toutes les alternatives.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Collection vide
 
-Sans édition possédée, un **écran d'accueil** remplace le dashboard ([Page d'accueil](/fonctionnel/page-accueil.md)). Toutes les alternatives en présentent le même contenu, chacune dans son apparence ; les maquettes le montrent avec le réglage « Collection vide ».
+Sans édition possédée, un **écran d'accueil** remplace le dashboard ([Page d'accueil](../../fonctionnel/page-accueil.md)). Toutes les alternatives en présentent le même contenu, chacune dans son apparence ; les maquettes le montrent avec le réglage « Collection vide ».
 
-- **En-tête** : celui de l'alternative, **sans le champ de recherche** ([Apparence propre à chaque alternative](/visuel/charte-graphique/apparence-propre-a-chaque-alternative.md)) ; le menu et le bouton d'aide restent.
+- **En-tête** : celui de l'alternative, **sans le champ de recherche** ([Apparence propre à chaque alternative](../charte-graphique/apparence-propre-a-chaque-alternative.md)) ; le menu et le bouton d'aide restent.
 - **Un bloc principal** :
   - le titre « Les étagères attendent leur premier album ! » ;
   - « La collection ne compte encore aucune édition. », puis « Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques. » ;
@@ -20,4 +20,4 @@ Sans édition possédée, un **écran d'accueil** remplace le dashboard ([Page d
 - **Aucun compteur** : l'écran n'affiche ni compteurs à zéro ni numéro tiré du nombre d'albums, qui ne diraient rien.
 - **Pied de page** : sans montant à présenter, il ne porte plus la mention des montants convertis en euro ; le lien vers l'administration reste.
 
-La présentation propre à chaque alternative est décrite avec elle ([Alternatives](/visuel/dashboard/index.md), rubriques « Collection vide »).
+La présentation propre à chaque alternative est décrite avec elle ([Alternatives](index.md), rubriques « Collection vide »).

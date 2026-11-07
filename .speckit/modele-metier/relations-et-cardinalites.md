@@ -2,7 +2,7 @@
 type: Modèle métier
 title: 'Relations et cardinalités'
 description: 'Relations et cardinalités de chaque entité, contraintes des intentions d''achat, du suivi de l''outil et des visites.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Relations et cardinalités
@@ -54,15 +54,15 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 > - Une intention d'achat doit cibler exactement l'un des deux : un Album ou une Édition, jamais les deux, jamais aucun.
 > - Une cible ne fait l'objet que d'**une seule** intention d'achat : un album est visé par au plus une intention, une édition par au plus une intention.
 > - Pour un même album, l'intention porte **soit** sur l'album, **soit** sur ses éditions, jamais les deux : un album visé par une intention ne peut pas avoir en même temps une de ses éditions visée par une autre intention, et réciproquement.
-> - Un album visé par une intention portant sur lui-même n'a **aucune édition**, possédée ou non (voir [Intention d'achat](/fonctionnel/regles-metier/intention-d-achat.md)).
+> - Un album visé par une intention portant sur lui-même n'a **aucune édition**, possédée ou non (voir [Intention d'achat](../fonctionnel/regles-metier/intention-d-achat.md)).
 > - Une édition **possédée** (`Mode d'acquisition` renseigné) ne peut pas être visée par une intention d'achat.
 
 ## Jeton d'accès et suivi de l'outil — relations
 
 | Relation | Cardinalité | Remarques |
 | --- | --- | --- |
-| Jeton d'accès → Session | 0..n | Sessions ouvertes par le jeton ; supprimées avec lui (voir [Suppression des entités](/fonctionnel/regles-metier/suppression-des-entites.md)). |
-| Session → Session précédente | 0..1 | Session que la session prolonge (voir [Suivi de l'utilisation](/fonctionnel/agents-ia/suivi-de-l-utilisation.md)) ; ouverte avec le même jeton d'accès. Les sessions successives d'une conversation se relient ainsi de proche en proche. |
+| Jeton d'accès → Session | 0..n | Sessions ouvertes par le jeton ; supprimées avec lui (voir [Suppression des entités](../fonctionnel/regles-metier/suppression-des-entites.md)). |
+| Session → Session précédente | 0..1 | Session que la session prolonge (voir [Suivi de l'utilisation](../fonctionnel/agents-ia/suivi-de-l-utilisation.md)) ; ouverte avec le même jeton d'accès. Les sessions successives d'une conversation se relient ainsi de proche en proche. |
 | Session → Objectif de session | 0..n | Objectifs successifs, dans l'ordre de leur date ; aucun si l'agent n'en a jamais donné. |
 | Jeton d'accès → Utilisation de l'outil | 0..n | Utilisations faites avec le jeton ; supprimées avec lui. Une requête refusée faute de jeton d'accès valable n'est rattachée à aucun jeton et n'est pas relevée. |
 | Utilisation de l'outil → Session | 0..1 | Session sous laquelle l'utilisation a été faite ; absente pour une utilisation refusée faute de jeton de session valable, rattachée à son seul jeton d'accès. |
@@ -80,6 +80,6 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 | --- | --- | --- |
 | Visite → Utilisation d'une fonction | 1..n | Utilisations faites au cours de la visite, dans l'ordre de leur date : le parcours de la visite. |
 
-> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement. Une visite d'un visiteur public est supprimée avec ses utilisations 25 mois après son début, une visite de l'administrateur est conservée sans limite (voir [Mesure d'audience de l'interface web](/fonctionnel/mesure-audience.md)). Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou son appareil, ou permette de le reconnaître d'une visite à l'autre : de l'appareil, elle ne retient que sa catégorie et le moteur de rendu de son navigateur, avec sa version.
+> **Contraintes :** les visites et leurs utilisations ne sont jamais modifiées après leur enregistrement. Une visite d'un visiteur public est supprimée avec ses utilisations 25 mois après son début, une visite de l'administrateur est conservée sans limite (voir [Mesure d'audience de l'interface web](../fonctionnel/mesure-audience.md)). Ce ne sont pas des fiches : leur enregistrement n'est pas consigné au journal des modifications. Une visite ne porte aucune donnée qui identifie l'utilisateur ou son appareil, ou permette de le reconnaître d'une visite à l'autre : de l'appareil, elle ne retient que sa catégorie et le moteur de rendu de son navigateur, avec sa version.
 
 ---

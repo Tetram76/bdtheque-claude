@@ -2,12 +2,12 @@
 type: Règle métier
 title: 'Libellé d''un album'
 description: 'Libellé d''un album : tome selon le type, deux formats paramétrables, repli.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Libellé d'un album
 
-Le libellé d'un album utilise son titre en forme naturelle (cf. [Tri et navigation par initiale](/fonctionnel/presentation/tri-et-navigation-par-initiale.md)).
+Le libellé d'un album utilise son titre en forme naturelle (cf. [Tri et navigation par initiale](tri-et-navigation-par-initiale.md)).
 
 Il peut optionnellement inclure le **titre de la série**, utilisé quand le contexte ne rend pas la série évidente (ex. résultat de recherche multi-séries). Quand la série est incluse et que l'album n'a pas de titre propre, le titre de la série tient lieu de titre.
 

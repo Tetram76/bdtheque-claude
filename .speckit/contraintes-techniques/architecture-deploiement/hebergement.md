@@ -5,7 +5,7 @@ description: 'NAS Synology, TLS par son reverse proxy, accès direct en HTTP en 
 applies_to:
   - 'docker-compose.yml'
   - '.env.example'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Hébergement
@@ -16,4 +16,4 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 - **Accès direct en HTTP** : pendant le développement, les versions à valider ou à tester (validation fonctionnelle, versions candidates, RC, versions de développement) sont déployées **en interne**, sans reverse proxy et sans accès depuis l'extérieur : le `frontend` y est accessible directement en HTTP.
 - **Plusieurs versions sur le même NAS** : le NAS qui héberge la version en **production** héberge aussi les **pré-versions** : la version candidate (RC) et une version de développement (alpha ou bêta, termes équivalents), appelée à devenir la version candidate suivante. À un instant donné, le NAS peut donc faire tourner jusqu'à **trois versions** de l'application en même temps.
 - **Données d'une pré-version** : la mise en place d'une pré-version permet, et idéalement réalise elle-même, la **récupération des données de la production**.
-  - **Non-contrainte** (ouverture de dernier recours) : si la récupération l'exige, la pré-version peut recevoir un accès **en lecture seule** aux données de la production (base et visuels), par exception à [Architecture des tiers](/contraintes-techniques/architecture-deploiement/architecture-des-tiers.md) (seul `api` accède à `db`). Une récupération qui s'en passe reste préférable.
+  - **Non-contrainte** (ouverture de dernier recours) : si la récupération l'exige, la pré-version peut recevoir un accès **en lecture seule** aux données de la production (base et visuels), par exception à [Architecture des tiers](architecture-des-tiers.md) (seul `api` accède à `db`). Une récupération qui s'en passe reste préférable.
