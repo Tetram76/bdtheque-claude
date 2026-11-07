@@ -10,7 +10,7 @@ namespace Bdtheque.EndToEnd.Tests.Controls;
 /// script, the styles of the controls — fixed before any screen uses them.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed partial class ControlsTests(ApplicationHost application)
+public sealed partial class ControlsTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     [Fact]
     public async Task Menu_OpensFromItsButton_UnderIt_AndClosesOnAClickOutside()
@@ -70,7 +70,7 @@ public sealed partial class ControlsTests(ApplicationHost application)
     [Fact]
     public async Task Dialog_OfAPageLoadedWithIt_OpensAsAModal_AndClosesByItsLink()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(ControlsPage.Path + "?dialog=true");
 
         var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Supprimer l'album ?" });
@@ -91,7 +91,7 @@ public sealed partial class ControlsTests(ApplicationHost application)
         var page = await OpenAsync();
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
-        await TypeUntilSuggestedAsync(page, input, token);
+        await TypeAndAwaitSuggestionsAsync(page, input, token);
         await Assertions.Expect(Suggestions(page)).ToHaveTextAsync([$"{token} cosmique", $"{token} galactique"]);
 
         await input.PressAsync("ArrowDown");
@@ -117,7 +117,7 @@ public sealed partial class ControlsTests(ApplicationHost application)
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
         // At once rather than letter by letter: a single search, whose answer no later one replaces.
-        await TypeUntilSuggestedAsync(page, input, token, atOnce: true);
+        await TypeAndAwaitSuggestionsAsync(page, input, token, atOnce: true);
         // The ten records of the text, in their order.
         await Assertions.Expect(Suggestions(page)).ToHaveTextAsync([.. Enumerable.Range(0, 10).Select(index => $"{token} {index}")]);
         for (var index = 0; index < 10; index++)
@@ -139,7 +139,7 @@ public sealed partial class ControlsTests(ApplicationHost application)
         var page = await OpenAsync();
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
-        await TypeUntilSuggestedAsync(page, input, token);
+        await TypeAndAwaitSuggestionsAsync(page, input, token);
         await input.PressAsync("Escape");
 
         await Assertions.Expect(input).ToHaveAttributeAsync("aria-expanded", "false");
@@ -220,33 +220,20 @@ public sealed partial class ControlsTests(ApplicationHost application)
 
     private async Task<IPage> OpenAsync()
     {
-        var page = await application.NewPageAsync();
-        await page.GotoAsync(ControlsPage.Path, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewPageAsync();
+        await PageReadiness.GotoAsync(page, ControlsPage.Path);
+        await ControlsPage.WaitUntilInteractiveAsync(page);
         return page;
     }
 
-    // The combobox answers once its circuit is open, which nothing in the page announces: the text is typed again until it does.
-    private static async Task TypeUntilSuggestedAsync(IPage page, ILocator input, string text, bool atOnce = false)
+    // The page is interactive (OpenAsync): the text typed once is answered.
+    private static async Task TypeAndAwaitSuggestionsAsync(IPage page, ILocator input, string text, bool atOnce = false)
     {
-        for (var attempt = 0; attempt < 5; attempt++)
-        {
-            await input.FillAsync("");
-            if (atOnce)
-                await input.FillAsync(text);
-            else
-                await input.PressSequentiallyAsync(text);
-            try
-            {
-                await Assertions.Expect(Suggestions(page).First).ToBeVisibleAsync(new() { Timeout = 5000 });
-                return;
-            }
-            catch (PlaywrightException)
-            {
-                // Not interactive yet.
-            }
-        }
-
-        throw new InvalidOperationException("The record picker never suggested anything.");
+        if (atOnce)
+            await input.FillAsync(text);
+        else
+            await input.PressSequentiallyAsync(text);
+        await Assertions.Expect(Suggestions(page).First).ToBeVisibleAsync();
     }
 
     private static ILocator Suggestions(IPage page) =>
@@ -254,7 +241,7 @@ public sealed partial class ControlsTests(ApplicationHost application)
 
     private async Task<Guid> CreateGenreAsync(string label)
     {
-        using var api = application.CreateApiClient();
+        using var api = Application.CreateApiClient();
         using var response = await api.PostAsJsonAsync("/admin/genres", new CreateGenreRequest(label));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<GenreForm>())!.Id;

@@ -12,7 +12,7 @@ namespace Bdtheque.EndToEnd.Tests.Headers;
 /// centering on the current entry), which the coverage of the .NET tests does not measure.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed partial class HeaderTests(ApplicationHost application)
+public sealed partial class HeaderTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     // A page of the consultation whose header is always the full one: that of the home page depends on the collection, an
     // empty one leaving out the search (visuel/dashboard/collection-vide.md).
@@ -38,6 +38,22 @@ public sealed partial class HeaderTests(ApplicationHost application)
         await page.WaitForFunctionAsync("([selector, expected]) => Math.abs(document.querySelector(selector).scrollLeft - expected) <= 1",
             new object[] { "app-scroll-row.consultation-menu .scroll-row-items", Math.Min(width, max) });
         await Assertions.Expect(row.Locator(".scroll-row-chevron[data-direction='start']")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task ConsultationMenu_ShowsItsChevron_WhileItsEntriesOverflow_WhateverChangesTheirWidth()
+    {
+        // The entries change width without the row doing so: a font that arrives once the row is laid out, as when the
+        // script of the row runs before the font of the text is asked for (document.fonts.ready already resolved), #283.
+        var page = await OpenAsync(ConsultationPage, Smartphone);
+        var row = page.Locator("app-scroll-row.consultation-menu");
+        await Assertions.Expect(row).ToHaveAttributeAsync("data-more-end", "");
+
+        var narrow = await page.AddStyleTagAsync(new() { Content = "app-scroll-row.consultation-menu .scroll-row-items > * { font-size: 2px; }" });
+        await Assertions.Expect(row).Not.ToHaveAttributeAsync("data-more-end", "", new() { Timeout = 2000 });
+
+        await narrow.EvaluateAsync("style => style.remove()");
+        await Assertions.Expect(row).ToHaveAttributeAsync("data-more-end", "", new() { Timeout = 2000 });
     }
 
     [Fact]
@@ -198,8 +214,8 @@ public sealed partial class HeaderTests(ApplicationHost application)
     [MemberData(nameof(OfferedThemes))]
     public async Task ConsultationMenu_OnADesktopScreen_ShowsEveryEntry_WithoutScrolling(string theme)
     {
-        var page = await application.NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
-        await page.GotoAsync(ConsultationPage, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
+        await PageReadiness.GotoAsync(page, ConsultationPage);
         await page.EvaluateAsync("() => document.fonts.ready");
 
         var overflow = await page.Locator("app-scroll-row.consultation-menu .scroll-row-items")
@@ -227,8 +243,8 @@ public sealed partial class HeaderTests(ApplicationHost application)
 
     private async Task<IPage> OpenAsync(string path, ViewportSize? viewport = null)
     {
-        var page = await application.NewPageAsync(viewport ?? new ViewportSize { Width = 1440, Height = 900 });
-        await page.GotoAsync(path, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewPageAsync(viewport ?? new ViewportSize { Width = 1440, Height = 900 });
+        await PageReadiness.GotoAsync(page, path);
         return page;
     }
 }

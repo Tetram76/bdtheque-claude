@@ -14,12 +14,12 @@ namespace Bdtheque.EndToEnd.Tests;
 /// the page asked for, the refusal of wrong credentials, and the logout from the menu.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed partial class AdministrationAccessTests(ApplicationHost application)
+public sealed partial class AdministrationAccessTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     [Fact]
     public async Task Administrator_SignsIn_AndIsLedBackToThePageAskedFor()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
 
         await page.GotoAsync(AppPaths.AdminHome);
 
@@ -36,7 +36,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
     [Fact]
     public async Task WrongPassword_IsRefused_AsAnErrorToCorrect()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.AdminLogin);
 
         await page.GetByLabel("Identifiant").FillAsync(ApplicationHost.AdminLogin);
@@ -55,7 +55,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
     [Fact]
     public async Task ReturnPage_OfAnotherSite_IsNeverFollowed()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync($"{AppPaths.AdminLogin}?{AppPaths.ReturnUrlParameter}=%2F%2Fother.example%2F");
 
         await page.GetByLabel("Identifiant").FillAsync(ApplicationHost.AdminLogin);
@@ -68,7 +68,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
     [Fact]
     public async Task Administrator_SignsOutFromTheMenu_AndTheAdministrationAsksForTheLoginAgain()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -82,7 +82,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
     [Fact]
     public async Task LoginPage_OnceSignedIn_LeadsStraightToTheAdministration()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GotoAsync(AppPaths.AdminLogin);
@@ -99,12 +99,12 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
 /// whole base, which the other tests change. Its captures are in <see cref="Captures.AdminHomeCaptureTests"/>.
 /// </summary>
 [Collection(AdministrationApplication.Name)]
-public sealed class AdminHomeTests(AdministrationApplication application)
+public sealed class AdminHomeTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)
 {
     [Fact]
     public async Task Administrator_SeesTheRecordsTheChecksAndTheLatestChanges()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         var albums = page.Locator(".admin-record", new() { Has = page.GetByRole(AriaRole.Link, new() { Name = "Albums", Exact = true }) });
@@ -121,7 +121,7 @@ public sealed class AdminHomeTests(AdministrationApplication application)
     [Fact]
     public async Task Menu_GivesTheNumberOfRecords_AndLeadsToTheListsToCome()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();

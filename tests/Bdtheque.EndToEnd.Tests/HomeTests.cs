@@ -18,12 +18,12 @@ namespace Bdtheque.EndToEnd.Tests;
 /// <see cref="Captures.EmptyCollectionHomeCaptureTests"/> and <see cref="Captures.DashboardHomeCaptureTests"/>.
 /// </summary>
 [Collection(EmptyCollectionApplication.Name)]
-public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication application)
+public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication application) : BrowserTest<EmptyCollectionApplication>(application)
 {
     [Fact]
     public async Task Visitor_IsWelcomed_AndBrowsesTheDocumentaryBase()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Home);
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Les étagères attendent leur premier album !");
@@ -37,7 +37,7 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
     [Fact]
     public async Task Foot_LeadsToTheAdministration()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Home);
 
         await Assertions.Expect(page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" }))
@@ -50,7 +50,7 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
     [InlineData("gazette")]
     public async Task Visitor_IsLedToTheAdministration(string theme)
     {
-        var page = await application.NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
         await page.GotoAsync(AppPaths.Home);
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Ouvrir l'administration →" }).ClickAsync();
@@ -63,12 +63,12 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
 }
 
 [Collection(CollectionApplication.Name)]
-public sealed class DashboardHomeTests(CollectionApplication application)
+public sealed class DashboardHomeTests(CollectionApplication application) : BrowserTest<CollectionApplication>(application)
 {
     [Fact]
     public async Task Visitor_SeesTheDashboard_AndGoesToTheAlbumInTheSpotlight()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Home);
 
         // The first greeting, the draws of the tests always picking the first choice.
@@ -86,9 +86,8 @@ public sealed class DashboardHomeTests(CollectionApplication application)
     [Fact]
     public async Task FirstVisit_GetsTheDashboardAgain_InTheTimeZoneOfTheBrowser()
     {
-        var context = await application.Browser.NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(new BrowserNewContextOptions
         {
-            BaseURL = application.BaseAddress.ToString(),
             TimezoneId = "Pacific/Kiritimati",
         });
         var page = await context.NewPageAsync();
@@ -102,7 +101,7 @@ public sealed class DashboardHomeTests(CollectionApplication application)
     [Fact]
     public async Task Foot_LeadsToTheAdministration()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Home);
 
         await page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" }).ClickAsync();
@@ -114,7 +113,7 @@ public sealed class DashboardHomeTests(CollectionApplication application)
     [Fact]
     public async Task OtherPagesOfTheConsultation_HaveNoLinkToTheAdministrationInTheirFoot()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.AudienceInformation);
 
         await Assertions.Expect(page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" })).ToHaveCountAsync(0);
@@ -123,7 +122,7 @@ public sealed class DashboardHomeTests(CollectionApplication application)
     [Fact]
     public async Task LatestEntries_FromTheMostRecentAcquisition()
     {
-        var page = await application.NewPageAsync();
+        var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Home);
 
         var latest = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Tout juste arrivés !" }) });

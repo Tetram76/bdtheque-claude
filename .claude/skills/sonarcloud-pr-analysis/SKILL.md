@@ -21,7 +21,7 @@ are PowerShell (`Invoke-RestMethod`): neither Python nor `jq` is installed.
 
 ## 1. Wait for the analysis of the head commit
 
-The `Code quality` workflow analyzes every push, draft PRs included.
+The `SonarQube Cloud analysis` job of the CI analyzes every push, draft PRs included.
 
 ```powershell
 $base = 'https://sonarcloud.io/api'; $p = 'Tetram76_bdtheque-claude'; $pr = '<PR>'
@@ -32,7 +32,7 @@ $analysis = (Invoke-RestMethod "$base/project_pull_requests/list?project=$p").pu
 ```
 
 The analysis is the head's only when `IsHead` is true. Otherwise check the run
-(`gh run list --workflow code-quality.yml --branch <branch> -L 1`): still
+(the `SonarQube Cloud analysis` job of `gh run list --workflow ci.yml --branch <branch> -L 1`): still
 running → wait for it in the background (never a foreground sleep); failed or
 absent → no quality gate, so the PR cannot be merged (the Ruleset requires the
 `SonarCloud Code Analysis` check): find the cause of a failed run and fix it;

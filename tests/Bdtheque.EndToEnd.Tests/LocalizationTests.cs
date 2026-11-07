@@ -9,12 +9,12 @@ namespace Bdtheque.EndToEnd.Tests;
 /// (fonctionnel/presentation/langue-et-culture-d-affichage.md): never the language the browser asks for.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed class LocalizationTests(ApplicationHost application)
+public sealed class LocalizationTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     [Fact]
     public void EveryRequest_IsServedInFrenchOfFrance_WhateverTheBrowserAsks()
     {
-        var options = application.FrontendServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+        var options = Application.FrontendServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 
         Assert.Equal("fr-FR", options.DefaultRequestCulture.Culture.Name);
         Assert.Equal("fr-FR", options.DefaultRequestCulture.UICulture.Name);
@@ -24,9 +24,8 @@ public sealed class LocalizationTests(ApplicationHost application)
     [Fact]
     public async Task Page_AskedInEnglish_IsInFrench()
     {
-        var context = await application.Browser.NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(new BrowserNewContextOptions
         {
-            BaseURL = application.BaseAddress.ToString(),
             Locale = "en-US",
         });
         var page = await context.NewPageAsync();

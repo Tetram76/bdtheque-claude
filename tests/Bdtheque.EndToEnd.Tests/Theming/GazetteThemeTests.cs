@@ -14,7 +14,7 @@ namespace Bdtheque.EndToEnd.Tests.Theming;
 /// administration opaque, bordered and shadowed although the blocks are not.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
-public sealed class GazetteThemeTests(ApplicationHost application)
+public sealed class GazetteThemeTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     private static readonly ViewportSize Desktop = new() { Width = 1440, Height = 900 };
 
@@ -111,13 +111,13 @@ public sealed class GazetteThemeTests(ApplicationHost application)
         foreach (var family in new[] { "DM Sans", "Fraunces" })
             Assert.True(await page.EvaluateAsync<bool>(
                 "family => [...document.fonts].some(font => font.family.replaceAll('\"', '') === family && font.status === 'loaded')", family),
-                $"No face of {family} was loaded from the application.");
+                $"No face of {family} was loaded from the Application.");
     }
 
     private async Task<IPage> OpenAsync(string path)
     {
-        var page = await application.NewPageInThemeAsync(ThemeCatalog.Gazette.Key, Desktop);
-        await page.GotoAsync(path, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await NewPageInThemeAsync(ThemeCatalog.Gazette.Key, Desktop);
+        await PageReadiness.GotoAsync(page, path);
         await page.EvaluateAsync("() => document.fonts.ready");
         return page;
     }

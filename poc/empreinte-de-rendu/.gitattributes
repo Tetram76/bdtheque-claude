@@ -1,0 +1,2 @@
+# A patch applies only with the line endings of the files it changes: never converted on checkout.
+*.patch -text
