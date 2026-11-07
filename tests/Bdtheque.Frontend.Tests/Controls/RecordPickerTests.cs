@@ -2,7 +2,9 @@ using System.Net;
 using System.Text;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 
 namespace Bdtheque.Frontend.Tests.Controls;
 
@@ -15,18 +17,24 @@ public sealed class RecordPickerTests : BunitContext
     private static readonly Guid Tintin = Guid.Parse("0199b6a4-0000-7000-8000-000000000001");
     private static readonly Guid Titeuf = Guid.Parse("0199b6a4-0000-7000-8000-000000000002");
 
+    // The clock of the pause the field awaits before searching, moved on by the test.
+    private readonly FakeTimeProvider _clock = new();
     private readonly List<string> _requests = [];
     // A response still awaited, until the test gives it; none, the answer is immediate.
     private Task<HttpResponseMessage>? _pending;
     private Func<HttpRequestMessage, HttpResponseMessage> _answer = _ => Json(
         $$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"},{"id":"{{Titeuf}}","title":"Titeuf"}],"number":1,"size":10,"totalCount":2}""");
 
+
     public RecordPickerTests()
     {
         Services.AddLocalization();
+        Services.AddSingleton<TimeProvider>(_clock);
         Services.AddSingleton(new ApiClient(new HttpClient(new StubHandler(request =>
         {
-            _requests.Add(request.RequestUri!.PathAndQuery);
+            // Sent from the circuit, at the end of a pause, while the test watches it.
+            lock (_requests)
+                _requests.Add(request.RequestUri!.PathAndQuery);
             return _pending ?? Task.FromResult(_answer(request));
         }))
         {
@@ -63,7 +71,7 @@ public sealed class RecordPickerTests : BunitContext
     {
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
 
-        picker.Find("input").Input("ti n");
+        Type(picker, "ti n");
 
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
         Assert.Equal("/catalog/series?q=ti%20n&pageSize=10", Assert.Single(_requests));
@@ -81,7 +89,7 @@ public sealed class RecordPickerTests : BunitContext
             .Add(p => p.Kind, RecordKind.Series)
             .Add(p => p.ValueChanged, value => chosen = value));
 
-        picker.Find("input").Input("ti");
+        Type(picker, "ti");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
         picker.FindAll("[role=option]")[1].Click();
 
@@ -98,9 +106,8 @@ public sealed class RecordPickerTests : BunitContext
             .Add(p => p.Id, "f-series")
             .Add(p => p.Kind, RecordKind.Series)
             .Add(p => p.ValueChanged, value => chosen = value));
-        var input = picker.Find("input");
 
-        input.Input("ti");
+        Type(picker, "ti");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
         picker.Find("input").KeyDown("ArrowDown");
         picker.Find("input").KeyDown("ArrowDown");
@@ -123,14 +130,14 @@ public sealed class RecordPickerTests : BunitContext
             .Add(p => p.Id, "f-series")
             .Add(p => p.Kind, RecordKind.Series)
             .Add(p => p.ValueChanged, value => chosen = value));
-        picker.Find("input").Input("ti");
+        Type(picker, "ti");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
         picker.Find("input").KeyDown("ArrowDown");
         picker.Find("input").KeyDown("ArrowDown");
 
         var answer = new TaskCompletionSource<HttpResponseMessage>();
         _pending = answer.Task;
-        picker.Find("input").Input("tin");
+        Type(picker, "tin");
 
         Assert.Empty(picker.FindAll("[role=option]"));
         Assert.Null(picker.Find("input").GetAttribute("aria-activedescendant"));
@@ -149,13 +156,76 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
+    public async Task AnswerToAnEarlierText_ArrivingLast_NeverReplacesTheSuggestionsOfTheTextShown()
+    {
+        // The circuit handles the next keystroke while the search of the earlier text is under way (#275).
+        var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
+        var earlier = new TaskCompletionSource<HttpResponseMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pending = earlier.Task;
+        var earlierSearch = picker.Find("input").InputAsync(new ChangeEventArgs { Value = "ti" });
+        PauseUntil(() => { lock (_requests) return _requests.Count == 1; });
+        _pending = null;
+        _answer = _ => Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}""");
+        Type(picker, "tin");
+        picker.WaitForAssertion(() => Assert.Equal(["Tintin"], picker.FindAll("[role=option]").Select(option => option.TextContent.Trim())));
+
+        earlier.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"},{"id":"{{Titeuf}}","title":"Titeuf"}],"number":1,"size":10,"totalCount":2}"""));
+        await earlierSearch.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.Equal(["Tintin"], picker.FindAll("[role=option]").Select(option => option.TextContent.Trim()));
+    }
+
+    [Fact]
+    public async Task KeystrokesInQuickSuccession_SearchOnlyOnceTheTypingPauses()
+    {
+        var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
+
+        // Typed within a pause, the clock standing still. Each keystroke is found and raised on the circuit, the field
+        // being rendered again between two of them (bUnit, InvokeAsync).
+        foreach (var text in new[] { "t", "ti", "tin" })
+            await picker.InvokeAsync(() => picker.Find("input").Input(text));
+        _clock.Advance(RecordPicker.TypingPause - TimeSpan.FromMilliseconds(1));
+
+        lock (_requests)
+            Assert.Empty(_requests);
+        // Until then, the suggestions are those of no text: the search of the text shown is under way.
+        Assert.Equal("Recherche…", picker.Find("[role=listbox] .record-picker-status").TextContent.Trim());
+
+        PauseUntil(() => { lock (_requests) return _requests.Count > 0; });
+
+        picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+        lock (_requests)
+            Assert.Equal("/catalog/series?q=tin&pageSize=10", Assert.Single(_requests));
+    }
+
+    // Types the text, then pauses until the field has searched for it.
+    private void Type(IRenderedComponent<RecordPicker> picker, string text)
+    {
+        int Sent() { lock (_requests) return _requests.Count; }
+        var sent = Sent();
+        // Found and raised on the circuit: the field may be rendered again meanwhile (bUnit, InvokeAsync).
+        picker.InvokeAsync(() => picker.Find("input").Input(text)).Wait(TimeSpan.FromSeconds(5));
+        PauseUntil(() => Sent() > sent);
+    }
+
+    // The typing pauses, as long as needed for what the field does at the end of a pause (search sent from the circuit,
+    // apart from the test) to be done.
+    private void PauseUntil(Func<bool> done) => Assert.True(
+        SpinWait.SpinUntil(() =>
+        {
+            _clock.Advance(RecordPicker.TypingPause);
+            return done();
+        }, TimeSpan.FromSeconds(5)),
+        "The field never searched once the typing paused.");
+
+    [Fact]
     public void LeavingTheField_EndsTheSuggestionsOfTheTextLeft_NoneReopeningForTheRecordRestored()
     {
         var picker = Render<RecordPicker>(parameters => parameters
             .Add(p => p.Id, "f-series")
             .Add(p => p.Kind, RecordKind.Series)
             .Add(p => p.Value, new RecordOption(Tintin, "Tintin", null)));
-        picker.Find("input").Input("tit");
+        Type(picker, "tit");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
 
         picker.Find("input").Blur();
@@ -172,7 +242,7 @@ public sealed class RecordPickerTests : BunitContext
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
         var answer = new TaskCompletionSource<HttpResponseMessage>();
         _pending = answer.Task;
-        picker.Find("input").Input("ti");
+        Type(picker, "ti");
 
         picker.Find("input").Blur();
         answer.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
@@ -186,7 +256,7 @@ public sealed class RecordPickerTests : BunitContext
     public void ChoosingASuggestion_EndsTheSuggestionsOfTheTextTyped()
     {
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
-        picker.Find("input").Input("ti");
+        Type(picker, "ti");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
 
         picker.FindAll("[role=option]")[1].Click();
@@ -204,7 +274,7 @@ public sealed class RecordPickerTests : BunitContext
             .Add(p => p.Kind, RecordKind.Series)
             .Add(p => p.Value, new RecordOption(Tintin, "Tintin", null)));
 
-        picker.Find("input").Input("tit");
+        Type(picker, "tit");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
         picker.Find("input").KeyDown("Escape");
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
@@ -238,7 +308,7 @@ public sealed class RecordPickerTests : BunitContext
         _answer = _ => Json("""{"items":[],"number":1,"size":10,"totalCount":0}""");
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
 
-        picker.Find("input").Input("zz");
+        Type(picker, "zz");
 
         picker.WaitForAssertion(() => Assert.Equal("Aucun résultat", picker.Find("[role=listbox] .record-picker-status").TextContent.Trim()));
         Assert.Empty(picker.FindAll("[role=option]"));
@@ -250,7 +320,7 @@ public sealed class RecordPickerTests : BunitContext
         _answer = _ => new HttpResponseMessage(HttpStatusCode.InternalServerError);
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
 
-        picker.Find("input").Input("ti");
+        Type(picker, "ti");
 
         picker.WaitForAssertion(() => Assert.Equal(
             "La recherche n'a pas abouti. Réessayez dans un instant.", picker.Find("[role=listbox] .record-picker-status").TextContent.Trim()));

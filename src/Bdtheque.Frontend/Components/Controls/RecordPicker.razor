@@ -2,6 +2,7 @@
 @inject RecordSearch Search
 @inject IStringLocalizer<RecordPicker> L
 @inject IJSRuntime JS
+@inject TimeProvider Clock
 
 @* The choice of a record by typing its name (e.g. a series, an author, a publisher: visuel/liste-albums/contenu.md,
    visuel/saisie-album/contenu.md): a combobox whose list suggests the records that contain the text typed, chosen with
@@ -11,7 +12,7 @@
 <div class="record-picker">
     <input @ref="_input" id="@Id" type="text" role="combobox" autocomplete="off" aria-autocomplete="list"
            aria-expanded="@(IsOpen ? "true" : "false")" aria-controls="@ListId" aria-activedescendant="@ActiveOptionId"
-           placeholder="@Placeholder" @bind="_text" @bind:event="oninput" @bind:after="SearchAsync" @onkeydown="OnKeyDownAsync" @onblur="LeaveAsync"
+           placeholder="@Placeholder" @bind="_text" @bind:event="oninput" @bind:after="SearchAsync" @onkeydown="OnKeyDownAsync" @onblur="Leave"
            @attributes="AdditionalAttributes" />
     @if (Value is { } value)
     {
@@ -46,9 +47,19 @@
 </div>
 
 @code {
+    /// <summary>
+    /// The pause of the typing after which the text typed is searched: longer than the interval between two keystrokes of
+    /// a word typed in one go, short enough for the suggestions to follow the typing.
+    /// </summary>
+    public static readonly TimeSpan TypingPause = TimeSpan.FromMilliseconds(500);
+
     private ElementReference _input;
     private IJSObjectReference? _module;
-    private CancellationTokenSource? _search;
+    // The number of the text shown: each change of the text, typed or not, gets the next one. Only the search of the
+    // text shown asks the server and writes the suggestions.
+    private int _textNumber;
+    // Ends a pause or a request under way when the component is disposed.
+    private readonly CancellationTokenSource _disposal = new();
     private string _text = "";
     private bool _open;
     private SearchStatus _status = SearchStatus.Done;
@@ -97,10 +108,10 @@
 
     private string OptionId(int index) => $"{Id}-suggestion-{index}";
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
         if (!_open && _text != (Value?.Label ?? ""))
-            await ShowTextAsync(Value?.Label ?? "");
+            ShowText(Value?.Label ?? "");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -125,8 +136,11 @@
 
     private async Task SearchAsync()
     {
-        await CancelSearchAsync();
         // The suggestions of the earlier text are no longer valid: none is shown, nor chosen, until those of this one.
+        // The text gets its number before anything is awaited, the circuit being free to handle the next keystroke at
+        // any await: only the search of the last text typed asks the server and writes the suggestions, and the answer
+        // to an earlier text, slower, never overwrites them (#275).
+        var number = ++_textNumber;
         Suggest([], SearchStatus.Searching);
         if (string.IsNullOrWhiteSpace(_text))
         {
@@ -134,32 +148,29 @@
             return;
         }
 
-        // Only the latest text typed is answered: an earlier search, slower, would overwrite its suggestions. A search
-        // replaced or abandoned is cancelled, which is all it needs to know. The search owns its source, which it frees
-        // once done; the field only lets a later one, or the disposal of the component, cancel it.
-        using var search = new CancellationTokenSource();
-        _search = search;
-        var cancellation = search.Token;
         _open = true;
+        var cancellation = _disposal.Token;
         try
         {
-            var options = await Search.FindAsync(Kind, _text, cancellation);
-            if (cancellation.IsCancellationRequested)
+            // Searched once the typing pauses: the server is not asked for each letter of a word typed in one go.
+            await Task.Delay(TypingPause, Clock, cancellation);
+            if (number != _textNumber)
                 return;
-            Suggest(options, options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done);
+            var options = await Search.FindAsync(Kind, _text, cancellation);
+            if (number == _textNumber)
+                Suggest(options, options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done);
         }
-        catch (ApiProblemException) when (!cancellation.IsCancellationRequested)
+        catch (ApiProblemException) when (number == _textNumber)
         {
             Suggest([], SearchStatus.Failed);
         }
+        catch (ApiProblemException)
+        {
+            // The failure of the search of an earlier text no longer matters.
+        }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
-            // Replaced by a later search.
-        }
-        finally
-        {
-            if (_search == search)
-                _search = null;
+            // The component is disposed.
         }
     }
 
@@ -188,27 +199,27 @@
     private async Task ChooseAsync(RecordOption option)
     {
         Value = option;
-        await ShowTextAsync(option.Label);
+        ShowText(option.Label);
         await ValueChanged.InvokeAsync(option);
     }
 
     private async Task ClearAsync()
     {
         Value = null;
-        await ShowTextAsync("");
+        ShowText("");
         await ValueChanged.InvokeAsync(null);
         await _input.FocusAsync();
     }
 
-    private Task LeaveAsync() => ShowTextAsync(Value?.Label ?? "");
+    private void Leave() => ShowText(Value?.Label ?? "");
 
     // The only change of the text other than typing (choice, clearing, leaving the field, a new value): the suggestions
     // are always those of the text shown, so those of the text replaced, and its search under way, end with it.
-    private async Task ShowTextAsync(string text)
+    private void ShowText(string text)
     {
         _text = text;
+        _textNumber++;
         Close();
-        await CancelSearchAsync();
         Suggest([], SearchStatus.Done);
     }
 
@@ -226,19 +237,10 @@
         _active = -1;
     }
 
-    // Cancels the search under way, replaced or abandoned; the search itself frees its source.
-    private async Task CancelSearchAsync()
-    {
-        if (_search is not { } search)
-            return;
-
-        _search = null;
-        await search.CancelAsync();
-    }
-
     public async ValueTask DisposeAsync()
     {
-        await CancelSearchAsync();
+        await _disposal.CancelAsync();
+        _disposal.Dispose();
         if (_module is not null)
         {
             try
