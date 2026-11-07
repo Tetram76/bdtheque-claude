@@ -21,7 +21,7 @@ are PowerShell (`Invoke-RestMethod`): neither Python nor `jq` is installed.
 
 ## 1. Wait for the analysis of the head commit
 
-The `Code quality` workflow analyzes every push, draft PRs included.
+The `SonarQube Cloud analysis` job of the CI analyzes every push, draft PRs included.
 
 ```powershell
 $base = 'https://sonarcloud.io/api'; $p = 'Tetram76_bdtheque-claude'; $pr = '<PR>'
