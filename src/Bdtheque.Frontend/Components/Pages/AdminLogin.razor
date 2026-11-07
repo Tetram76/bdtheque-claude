@@ -62,7 +62,7 @@
     protected override void OnInitialized()
     {
         if (HttpMethods.IsGet(HttpContext.Request.Method) && HttpContext.User.Identity?.IsAuthenticated == true)
-            Navigation.NavigateTo(ReturnPath.AfterSignIn(ReturnUrl));
+            Navigation.NavigateTo(ReturnPath.AfterSignIn(ReturnUrl, new Uri(Navigation.BaseUri)));
     }
 
     private async Task SignInAsync()
@@ -85,7 +85,7 @@
         var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, Account.Value.Login)], CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
         await Recorder.RecordActionAsync(AudienceFunctions.AdminSignedIn, cancellationToken: HttpContext.RequestAborted);
-        Navigation.NavigateTo(ReturnPath.AfterSignIn(ReturnUrl));
+        Navigation.NavigateTo(ReturnPath.AfterSignIn(ReturnUrl, new Uri(Navigation.BaseUri)));
     }
 
     // The login is kept, never the password, which is typed again.
