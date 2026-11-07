@@ -2,6 +2,7 @@
 
 ## 2026-11-07
 
+* **Règle** : exigence de rigueur sur tout ce que produit l'agent : même exigence pour les tests, scripts et outillage que pour le code de l'application, pratiques recommandées et déconseillées de chaque outil lues dans sa documentation officielle avant de l'employer, toute ressource ouverte libérée par son propriétaire, son propre code relu d'abord face à une instabilité, relecture exigeante avant tout push ; toute commande, et ce qu'elle lance, est dimensionnée d'après les ressources réellement disponibles (parallélisme, processus, navigateurs, conteneurs) (#289).
 * **Forme** : les renvois du `.speckit/` sont des chemins relatifs depuis le fichier qui les contient, que GitHub et les éditeurs savent suivre ; un lien qui commence par `/` est refusé par `SpeckitStructureTests` (#290).
 * **Règle** : avant de lancer une commande, l'agent vérifie que les ressources qu'elle exige sont disponibles, estime sa durée et la borne (délai maximal, surveillance de la progression d'une commande longue, aucune attente sans borne) ; le délai maximal est la plus longue durée légitime majorée d'au plus la moitié, jamais un multiple arbitraire ; la surveillance de la revue Codex est bornée à 18 minutes et chacun de ses appels à GitHub à 1,3 seconde (#288).
 
