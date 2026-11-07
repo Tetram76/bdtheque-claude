@@ -48,18 +48,18 @@ public sealed class VisitThemeTests
     public void Visit_ThatGoesOnAtANewDate_KeepsItsAudienceVisit()
     {
         // The same browsing session: the audience measurement goes on recording its usages in the same visit.
-        var audienceVisit = Guid.CreateVersion7();
+        var audienceVisit = new MeasuredVisit(Guid.CreateVersion7(), false);
         var visit = new BrowserVisit(Today, Second.Key, Today, audienceVisit);
 
-        Assert.Equal(audienceVisit, VisitTheme.Continue(visit, Tomorrow, Tomorrow, Offered, Draw(2)).AudienceVisitId);
+        Assert.Equal(audienceVisit, VisitTheme.Continue(visit, Tomorrow, Tomorrow, Offered, Draw(2)).AudienceVisit);
     }
 
     [Fact]
     public void Visit_ThatIsOver_StartsWithoutAudienceVisit()
     {
-        var visit = new BrowserVisit(new DateOnly(2025, 9, 30), Second.Key, Today, Guid.CreateVersion7());
+        var visit = new BrowserVisit(new DateOnly(2025, 9, 30), Second.Key, Today, new MeasuredVisit(Guid.CreateVersion7(), false));
 
-        Assert.Null(VisitTheme.Continue(visit, Today, Today, Offered, Draw(2)).AudienceVisitId);
+        Assert.Null(VisitTheme.Continue(visit, Today, Today, Offered, Draw(2)).AudienceVisit);
     }
 
     [Fact]

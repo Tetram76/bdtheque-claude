@@ -39,13 +39,17 @@ public sealed class AudienceRecorder(
 
         try
         {
-            if (visit.AudienceVisitId is { } id && await TryAddAsync(id, use, cancellationToken))
+            // A visit of the measurement is that of the administrator or of a visitor from its opening: once the
+            // authentication changed (login, logout, end of the session), the usage goes into another one, of its kind.
+            var administrator = context.User.Identity?.IsAuthenticated == true;
+            if (visit.AudienceVisit is { } current && current.OfAdministrator == administrator
+                && await TryAddAsync(current.Id, use, cancellationToken))
                 return;
 
             var device = AudienceDevice.Of(context.Request.Headers.UserAgent, context.Request.Cookies.ContainsKey(AudienceDevice.TouchScreenCookieName));
             var opened = await api.PostAsync<OpenVisitRequest, OpenedVisit>("/audience/visits", new OpenVisitRequest(
-                context.User.Identity?.IsAuthenticated == true, device.DeviceType, device.RenderingEngine, device.EngineVersion, use), cancellationToken);
-            visitCookie.Set(visit with { AudienceVisitId = opened.VisitId });
+                administrator, device.DeviceType, device.RenderingEngine, device.EngineVersion, use), cancellationToken);
+            visitCookie.Set(visit with { AudienceVisit = new MeasuredVisit(opened.VisitId, administrator) });
         }
         catch (ApiProblemException exception)
         {

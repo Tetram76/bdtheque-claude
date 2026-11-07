@@ -83,7 +83,11 @@
 
         Throttle.Reset();
         var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, Account.Value.Login)], CookieAuthenticationDefaults.AuthenticationScheme);
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+        var administrator = new ClaimsPrincipal(identity);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, administrator);
+        // The cookie only authenticates the requests that follow: this one, from now on that of the administrator, records
+        // the login in a visit of the administrator.
+        HttpContext.User = administrator;
         await Recorder.RecordActionAsync(AudienceFunctions.AdminSignedIn, cancellationToken: HttpContext.RequestAborted);
         Navigation.NavigateTo(ReturnPath.AfterSignIn(ReturnUrl, new Uri(Navigation.BaseUri)));
     }

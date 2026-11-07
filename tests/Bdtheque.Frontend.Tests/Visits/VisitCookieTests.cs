@@ -29,7 +29,7 @@ public sealed class VisitCookieTests
     {
         var request = new TestRequest();
         var cookie = new VisitCookie(request.Accessor);
-        var continued = Visit with { AudienceVisitId = Guid.CreateVersion7() };
+        var continued = Visit with { AudienceVisit = new(Guid.CreateVersion7(), false) };
 
         cookie.Set(Visit);
         cookie.Set(continued);
@@ -73,7 +73,7 @@ public sealed class VisitCookieTests
         var request = RequestWith(Visit);
         var cookie = new VisitCookie(request.Accessor);
 
-        cookie.Set(Visit with { AudienceVisitId = Guid.CreateVersion7() });
+        cookie.Set(Visit with { AudienceVisit = new(Guid.CreateVersion7(), false) });
         cookie.Set(Visit);
         await request.StartResponseAsync();
 

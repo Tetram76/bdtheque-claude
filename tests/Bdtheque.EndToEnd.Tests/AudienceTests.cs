@@ -91,7 +91,7 @@ public sealed class AudienceTests(ApplicationHost application)
 
         // Nothing recorded since: neither the opposition, nor the pages that follow; nothing of the measurement kept by the browser.
         Assert.Equal([AudienceFunctions.AudienceInformation.Key], (await AudienceVisitByIdAsync(before)).Usages.Select(u => u.Function));
-        Assert.Null((await BrowserVisitAsync(page)).AudienceVisitId);
+        Assert.Null((await BrowserVisitAsync(page)).AudienceVisit);
         Assert.Equal("opposed", await page.Locator("html").GetAttributeAsync("data-audience"));
         await Assertions.Expect(page.GetByRole(AriaRole.Contentinfo)).ToContainTextAsync("refusée");
 
@@ -105,6 +105,36 @@ public sealed class AudienceTests(ApplicationHost application)
         Assert.Equal(
             [AudienceFunctions.AudienceOppositionWithdrawn.Key, AudienceFunctions.AudienceInformation.Key],
             after.Usages.Select(u => u.Function));
+    }
+
+    // A visit is that of the administrator or of a visitor (fonctionnel/mesure-audience.md, Administrateur et visiteurs):
+    // the login, displayed to a visitor, stays in their visit; what follows the login goes into a visit of the
+    // administrator, and what follows the logout into a visit of a visitor again.
+    [Fact]
+    public async Task Login_AndLogout_GoOnInAVisitOfTheirKind()
+    {
+        var page = await NewPageKnowingItsTimeZoneAsync();
+        await page.GotoAsync(AppPaths.AdminHome);
+        var visitor = (await AudienceVisitAsync(page)).Visit.Id;
+
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
+        var administrator = (await AudienceVisitAsync(page)).Visit.Id;
+        await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Se déconnecter" }).ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Contentinfo)).ToContainTextAsync("active");
+        var visitorAgain = await AudienceVisitAsync(page);
+
+        var before = await AudienceVisitByIdAsync(visitor);
+        Assert.False(before.Visit.IsAdministrator);
+        Assert.All(before.Usages, u => Assert.Equal(AudienceFunctions.AdminLogin.Key, u.Function));
+        var signedIn = await AudienceVisitByIdAsync(administrator);
+        Assert.True(signedIn.Visit.IsAdministrator);
+        Assert.Equal(
+            [AudienceFunctions.AdminSignedIn.Key, AudienceFunctions.AdminHome.Key, AudienceFunctions.AdminSignedOut.Key],
+            signedIn.Usages.Select(u => u.Function));
+        Assert.False(visitorAgain.Visit.IsAdministrator);
+        Assert.NotEqual(visitor, visitorAgain.Visit.Id);
+        Assert.Equal([AudienceFunctions.Home.Key], visitorAgain.Usages.Select(u => u.Function));
     }
 
     [Fact]
@@ -166,7 +196,7 @@ public sealed class AudienceTests(ApplicationHost application)
         ?? throw new InvalidOperationException("The browser keeps no visit.");
 
     private async Task<AudienceVisitDetail> AudienceVisitAsync(IPage page) =>
-        await AudienceVisitByIdAsync((await BrowserVisitAsync(page)).AudienceVisitId
+        await AudienceVisitByIdAsync((await BrowserVisitAsync(page)).AudienceVisit?.Id
             ?? throw new InvalidOperationException("The visit of the browser has no visit of the audience measurement."));
 
     private async Task<AudienceVisitDetail> AudienceVisitByIdAsync(Guid id)
