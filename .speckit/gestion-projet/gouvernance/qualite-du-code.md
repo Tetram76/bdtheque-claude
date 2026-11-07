@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Qualité du code'
-description: 'Exigence de rigueur (même exigence pour tout le code, usage documenté des outils, ressources libérées, son propre code d''abord, relecture exigeante), KISS, DRY, YAGNI, SOLID, bonnes pratiques, TDD, non-régression, commentaires, langue des fichiers techniques ; s''applique à tout code.'
+description: 'Exigence de rigueur (même exigence pour tout le code, usage documenté des outils, ressources libérées, son propre code d''abord, relecture exigeante), pragmatisme (pas de code parfait), KISS, DRY, YAGNI, SOLID, bonnes pratiques, TDD, non-régression, commentaires, langue des fichiers techniques ; s''applique à tout code.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:22:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T18:13:44Z }
 ---
 
 # Qualité du code
@@ -15,6 +15,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:22:21Z }
   - **Ressources libérées** : toute ressource que le code ouvre (connexion, contexte ou page d'un navigateur, flux, fichier, client, processus, conteneur) a un propriétaire, qui la libère explicitement dès qu'elle ne sert plus. Un code qui ouvre une ressource sans la libérer est défectueux, même si rien ne le signale encore.
   - **Son propre code d'abord** : face à un comportement anormal ou instable (test instable, lenteur, délai dépassé), l'agent relit d'abord son propre code, et l'usage qu'il fait des outils au regard de leur documentation, avant de mettre en cause un outil largement adopté, son moteur ou l'environnement.
   - **Relecture exigeante** : avant de présenter un travail comme terminé, et avant tout push, l'agent le relit comme le ferait un relecteur exigeant, documentation à l'appui. Il ne compte ni sur la revue de code ni sur le CI pour trouver ce qu'il aurait dû voir.
+- **Pragmatisme : on ne cherche pas le code parfait.** L'exigence de rigueur porte sur un code correct, simple et vérifié, pas sur un code parfait : la solution retenue est la plus simple qui répond au besoin réel, et le travail s'arrête dès qu'elle y répond, vérifiée dans la proportion de son risque (non-régression, ci-dessous). Ne sont jamais une raison de poursuivre : un mécanisme de plus pour un cas que la solution rend déjà rare et sans effet visible, la réécriture répétée d'un code ou d'un test qui fait déjà ce qu'on attend de lui, la recherche d'une forme idéale. Une conception qui se complique au fil des corrections signale une mauvaise piste : l'agent revient alors au besoin et à la règle la plus simple qui le satisfait, plutôt que d'ajouter un mécanisme de plus.
 - Le projet est guidé par les principes **KISS, DRY, YAGNI et SOLID**. Toute décision (architecture, conception, implémentation, revue) doit s'y conformer :
   - **KISS** (*Keep It Simple, Stupid*) : privilégier la solution la plus simple qui répond au besoin réel, éviter la complexité non justifiée.
   - **DRY** (*Don't Repeat Yourself*) : éviter la duplication de logique ou de connaissance ; factoriser lorsque c'est pertinent, sans sur-factoriser prématurément.
