@@ -2,12 +2,12 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes de la page des éditions et intentions d''achat.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Maquettes
 
-Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/editions-album/`](/visuel/maquettes/editions-album/index.html) (cf. [Maquettes](/visuel/charte-graphique/maquettes.md)). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` (mêmes valeurs que pour la page d'accueil de l'administration, [Maquettes](/visuel/administration/maquettes.md)).
+Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/editions-album/`](../maquettes/editions-album/index.html) (cf. [Maquettes](../charte-graphique/maquettes.md)). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` (mêmes valeurs que pour la page d'accueil de l'administration, [Maquettes](../administration/maquettes.md)).
 
 Réglages de la source commune :
 

@@ -5,7 +5,7 @@ description: 'Attributs d''un album : titre, clé de tri, type, hors-série, tom
 applies_to:
   - 'src/Bdtheque.Domain/Entities/Album.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/AlbumConfiguration.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Album
@@ -13,7 +13,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Titre | texte | conditionnel | Obligatoire si l'album n'appartient à aucune série. Optionnel si une série est rattachée (la série + le tome peuvent suffire à identifier l'album). |
-| Clé de tri | texte | non | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir [Tri et navigation par initiale](/fonctionnel/presentation/tri-et-navigation-par-initiale.md)). Absente si le titre est absent ; dans ce cas, la clé de tri de la série rattachée est utilisée comme valeur de substitution pour le tri et la navigation par initiale. |
+| Clé de tri | texte | non | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir [Tri et navigation par initiale](../fonctionnel/presentation/tri-et-navigation-par-initiale.md)). Absente si le titre est absent ; dans ce cas, la clé de tri de la série rattachée est utilisée comme valeur de substitution pour le tri et la navigation par initiale. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Type | énuméré | oui | `Régulier` (défaut) / `Intégrale`. |
 | Hors-série | booléen | oui | `false` par défaut. Indépendant du type : une intégrale peut être hors-série. |

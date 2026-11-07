@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'La gazette'
 description: 'Alternative « La gazette » : apparence, présentation, collection vide.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # La gazette
@@ -22,7 +22,7 @@ De haut en bas :
 - **La une**, sur deux tiers de la largeur :
   - La **phrase d'accueil** est le gros titre, en italique et entre guillemets, tirée au hasard dans la liste commune.
   - Les **compteurs** (albums, séries, éditions) forment un bandeau de trois colonnes.
-  - L'édition **à la une** ([Page d'accueil](/fonctionnel/page-accueil.md)) : sa couverture, le libellé de son album, le sien et le résumé de l'album.
+  - L'édition **à la une** ([Page d'accueil](../../fonctionnel/page-accueil.md)) : sa couverture, le libellé de son album, le sien et le résumé de l'album.
   - Sous « Tout juste arrivés ! », les dernières éditions entrées, la plus récente comprise, sont listées avec leur date. Un lien mène à la liste des albums.
 - **La colonne latérale** :
   - **Le cours de la collection** : la valeur totale estimée dans un encadré en couleurs inversées, avec son montant en euros du jour. Un tableau donne ensuite la valeur totale connue et les prix moyen, médian, minimum et maximum, en euros courants et en euros du jour. Une mention indique les montants non convertibles exclus et les éditions gratuites non valorisées.

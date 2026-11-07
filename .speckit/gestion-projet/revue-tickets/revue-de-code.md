@@ -3,12 +3,12 @@ type: Gouvernance
 title: 'Revue de code'
 description: 'Règles générales d''application des retours des agents de revue : contre-vérification, application ou rejet, robustesse à l''épreuve de l''utilisateur.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Revue de code
 
-Des agents de revue de code (ex. Bugbot, outils d'analyse statique comme SonarQube Cloud, [Analyse de la qualité du code](/gestion-projet/depot/analyse-de-la-qualite-du-code.md)) peuvent intervenir sur les Pull Requests. Règles générales d'application de leurs retours :
+Des agents de revue de code (ex. Bugbot, outils d'analyse statique comme SonarQube Cloud, [Analyse de la qualité du code](../depot/analyse-de-la-qualite-du-code.md)) peuvent intervenir sur les Pull Requests. Règles générales d'application de leurs retours :
 
 - Les retours ne sont **pas une source de vérité** : ils sont systématiquement soumis à contre-vérification.
 - Un retour est **appliqué** s'il est pertinent et que le gain justifie le coût de la modification.

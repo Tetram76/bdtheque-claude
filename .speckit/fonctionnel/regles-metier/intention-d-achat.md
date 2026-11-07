@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Intention d''achat'
 description: 'Intention sur un album ou une édition, exclusions, conversion, édition non possédée indissociable, réalisation d''une intention.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Intention d'achat
@@ -24,7 +24,7 @@ Un cas d'usage permettra de **convertir** une intention portant sur l'album en i
 
 Une intention d'achat est toujours **présentée comme une intention d'achat**, jamais comme un album ou une édition : une édition visée ne figure jamais parmi les éditions (d'un album, d'une liste, d'un décompte), mais parmi les intentions d'achat, avec ce qu'elle vise. Un album visé reste en revanche un album, dont l'appartenance à la collection signale qu'il fait l'objet d'une intention d'achat.
 
-Une édition **non possédée** et l'intention qui la vise sont **indissociables** : l'une ne va pas sans l'autre. Supprimer l'une supprime l'autre, après confirmation (cf. [Suppression des entités](/fonctionnel/regles-metier/suppression-des-entites.md)) ; de même, convertir une intention portant sur une édition en intention portant sur l'album supprime l'édition visée, après confirmation. Une édition non possédée ne peut donc jamais exister sans intention d'achat.
+Une édition **non possédée** et l'intention qui la vise sont **indissociables** : l'une ne va pas sans l'autre. Supprimer l'une supprime l'autre, après confirmation (cf. [Suppression des entités](suppression-des-entites.md)) ; de même, convertir une intention portant sur une édition en intention portant sur l'album supprime l'édition visée, après confirmation. Une édition non possédée ne peut donc jamais exister sans intention d'achat.
 
 ## Réalisation d'une intention
 

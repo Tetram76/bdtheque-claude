@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Estimation de sortie d''un nouvel album'
 description: 'Estimation de la sortie du prochain tome d''une série en cours, d''après le rythme de parution.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Estimation de sortie d'un nouvel album
@@ -10,7 +10,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 Accessible en **mode consultation** (public). Permet d'estimer la date de sortie du prochain tome d'une série, sur la base du rythme de parution observé.
 On parle d'**estimation** et non de prévision : le facteur humain rend toute prédiction précise impossible, et l'objectif est uniquement de donner un ordre de grandeur.
 
-Comme toute estimation, elle suit la règle de [Calcul des estimations](/fonctionnel/valorisation/calcul-des-estimations.md).
+Comme toute estimation, elle suit la règle de [Calcul des estimations](../valorisation/calcul-des-estimations.md).
 
 Règles de calcul :
 

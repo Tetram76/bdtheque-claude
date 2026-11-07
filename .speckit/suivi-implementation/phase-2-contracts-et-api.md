@@ -2,14 +2,14 @@
 type: Plan d'implémentation
 title: 'Phase 2 — Contracts et API'
 description: 'Phase 2, contrats et API (v0.0.3), consolidation et ajustements issus des maquettes et des contraintes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Phase 2 — Contracts et API
 
 **Version** : `v0.0.3`, avec l'ajustement issu de la reprise des données (#102), réalisé pendant la phase.
 
-Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` — administration (`/admin` : saisie, suppression selon [Suppression des entités](/fonctionnel/regles-metier/suppression-des-entites.md)) et consultation (`/catalog` : listes, navigation par initiale, recherche, fiches). Choix techniques : [Organisation de l'API](/choix-implementation/api/organisation-de-l-api.md) et sections suivantes.
+Exposition du modèle de domaine via l'API : DTOs dans `Bdtheque.Contracts`, endpoints Minimal API dans `Bdtheque.Api` — administration (`/admin` : saisie, suppression selon [Suppression des entités](../fonctionnel/regles-metier/suppression-des-entites.md)) et consultation (`/catalog` : listes, navigation par initiale, recherche, fiches). Choix techniques : [Organisation de l'API](../choix-implementation/api/organisation-de-l-api.md) et sections suivantes.
 
 Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de devises, estimations.
 
@@ -79,7 +79,7 @@ Répercussion dans l'API de la règle qui réserve les fiches de consultation au
 
 ## Ajustement issu de la définition de la recherche avancée
 
-Répercussion dans le modèle de domaine et dans l'API de la recherche avancée ([Recherche avancée](/fonctionnel/recherche-avancee/recherche-avancee.md)) : recherche de toute entité consultable sur toute combinaison de critères portant sur les données du modèle métier, et recherches enregistrées, avec leurs variables. Les phases 1 et 2 étant validées, un seul ticket couvre les deux (ticket parent #162), découpé en sous-tickets, le chantier étant trop vaste pour une seule Pull Request. Les critères sur des données que calculent des phases ultérieures (montants en euros, valeur estimée : phase 4 ; tomes manquants, sortie estimée : phase 5) en sont exclus, et rejoignent la recherche avancée avec ces phases.
+Répercussion dans le modèle de domaine et dans l'API de la recherche avancée ([Recherche avancée](../fonctionnel/recherche-avancee/recherche-avancee.md)) : recherche de toute entité consultable sur toute combinaison de critères portant sur les données du modèle métier, et recherches enregistrées, avec leurs variables. Les phases 1 et 2 étant validées, un seul ticket couvre les deux (ticket parent #162), découpé en sous-tickets, le chantier étant trop vaste pour une seule Pull Request. Les critères sur des données que calculent des phases ultérieures (montants en euros, valeur estimée : phase 4 ; tomes manquants, sortie estimée : phase 5) en sont exclus, et rejoignent la recherche avancée avec ces phases.
 
 | Ticket | Titre |
 | --- | --- |
@@ -90,7 +90,7 @@ Répercussion dans le modèle de domaine et dans l'API de la recherche avancée 
 
 ## Ajustement issu des maquettes des listes et saisies de l'administration
 
-Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'achat sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'achat d'un album ([Intention d'achat](/fonctionnel/regles-metier/intention-d-achat.md)). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'achat sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'achat d'un album ([Intention d'achat](../fonctionnel/regles-metier/intention-d-achat.md)). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
 
 | Ticket | Titre |
 | --- | --- |
@@ -98,7 +98,7 @@ Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve
 
 ## Ajustement issu de la mesure d'audience de l'interface web
 
-Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience de l'interface web ([Mesure d'audience de l'interface web](/fonctionnel/mesure-audience.md)) : visites, utilisations des fonctions et compteurs d'audience mensuels, leur conservation et la lecture de leurs indicateurs. Les phases 1 et 2 étant validées, un seul ticket couvre les deux ; la part de la Phase 3, pas encore découpée, y est notée.
+Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience de l'interface web ([Mesure d'audience de l'interface web](../fonctionnel/mesure-audience.md)) : visites, utilisations des fonctions et compteurs d'audience mensuels, leur conservation et la lecture de leurs indicateurs. Les phases 1 et 2 étant validées, un seul ticket couvre les deux ; la part de la Phase 3, pas encore découpée, y est notée.
 
 | Ticket | Titre |
 | --- | --- |
@@ -106,7 +106,7 @@ Répercussion dans le modèle de domaine et dans l'API de la mesure d'audience d
 
 ## Ajustement issu de l'exploitation des technologies retenues
 
-Revue de l'existant au regard de la contrainte d'exploitation au mieux des technologies retenues ([Exploitation des technologies retenues](/contraintes-techniques/exploitation-des-technologies-retenues.md)), pour en identifier les chantiers d'amélioration, chacun avec son ticket. Les phases 0 à 2 étant validées, un seul ticket les couvre.
+Revue de l'existant au regard de la contrainte d'exploitation au mieux des technologies retenues ([Exploitation des technologies retenues](../contraintes-techniques/exploitation-des-technologies-retenues.md)), pour en identifier les chantiers d'amélioration, chacun avec son ticket. Les phases 0 à 2 étant validées, un seul ticket les couvre.
 
 | Ticket | Titre |
 | --- | --- |
@@ -122,7 +122,7 @@ Chantiers d'amélioration identifiés par cette revue, chacun réalisé par sa p
 
 ## Ajustement issu de la sécurisation SSL/TLS par le reverse proxy du NAS
 
-Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le reverse proxy du NAS Synology ([Hébergement](/contraintes-techniques/architecture-deploiement/hebergement.md)) : une même image derrière le reverse proxy et en déploiement interne en HTTP, adresse publique déclarée par le déploiement derrière le reverse proxy. La configuration du frontend relevant de la Phase 0, validée, un seul ticket la couvre ; il précède la connexion de l'administration (#199), qui en dépend.
+Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le reverse proxy du NAS Synology ([Hébergement](../contraintes-techniques/architecture-deploiement/hebergement.md)) : une même image derrière le reverse proxy et en déploiement interne en HTTP, adresse publique déclarée par le déploiement derrière le reverse proxy. La configuration du frontend relevant de la Phase 0, validée, un seul ticket la couvre ; il précède la connexion de l'administration (#199), qui en dépend.
 
 | Ticket | Titre |
 | --- | --- |
@@ -130,7 +130,7 @@ Répercussion dans le frontend de la sécurisation SSL/TLS assurée par le rever
 
 ## Ajustement issu de l'hébergement de plusieurs versions sur le NAS
 
-Répercussion dans le déploiement de la récupération des données de la production par une pré-version ([Hébergement](/contraintes-techniques/architecture-deploiement/hebergement.md)). Le déploiement relevant de la Phase 0, validée, un seul ticket la couvre ; sans objet avant la première mise en production (`1.0.0`), il est à réaliser avant la première pré-version qui la suivra.
+Répercussion dans le déploiement de la récupération des données de la production par une pré-version ([Hébergement](../contraintes-techniques/architecture-deploiement/hebergement.md)). Le déploiement relevant de la Phase 0, validée, un seul ticket la couvre ; sans objet avant la première mise en production (`1.0.0`), il est à réaliser avant la première pré-version qui la suivra.
 
 | Ticket | Titre |
 | --- | --- |

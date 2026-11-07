@@ -2,12 +2,12 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes de la fiche d''un auteur.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Maquettes
 
-Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/fiche-auteur/`](/visuel/maquettes/fiche-auteur/index.html) (cf. [Maquettes](/visuel/charte-graphique/maquettes.md)). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` :
+Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`maquettes/fiche-auteur/`](../maquettes/fiche-auteur/index.html) (cf. [Maquettes](../charte-graphique/maquettes.md)). Elles ont une source commune, `mockup.html`, que chacune affiche avec son thème, choisi par le paramètre `theme` :
 
 | Thème | Paramètre `theme` |
 | --- | --- |

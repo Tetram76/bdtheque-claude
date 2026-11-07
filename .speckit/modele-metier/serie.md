@@ -5,7 +5,7 @@ description: 'Attributs d''une série : titre, clé de tri, statut, tomes prévu
 applies_to:
   - 'src/Bdtheque.Domain/Entities/Series.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/SeriesConfiguration.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Série
@@ -13,7 +13,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
 | Titre | texte | oui | |
-| Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir [Tri et navigation par initiale](/fonctionnel/presentation/tri-et-navigation-par-initiale.md)). Toujours présente car le titre est obligatoire. |
+| Clé de tri | texte | oui (auto) | Calculée automatiquement depuis le titre et stockée explicitement (règle de calcul : voir [Tri et navigation par initiale](../fonctionnel/presentation/tri-et-navigation-par-initiale.md)). Toujours présente car le titre est obligatoire. |
 | Clé de tri manuelle | booléen | oui | `false` par défaut. Passe à `true` si l'utilisateur a explicitement modifié la clé de tri. Quand `false`, la clé est recalculée automatiquement à chaque modification du titre. |
 | Statut | énuméré | non | `En cours` / `Terminée` / `Abandonnée`. `Terminée` signifie que tous les albums prévus par les auteurs ont été publiés. |
 | Nombre de tomes numérotés (théorique) | entier | non | Nombre de tomes numérotés attendus dans la séquence principale de la série, selon l'utilisateur. Ne compte pas les hors-série ni les albums sans numéro de tome. Non calculé depuis la base — sert de borne supérieure pour la détection des albums manquants (queue théorique) et à évaluer la complétude de la collection. |
@@ -30,4 +30,4 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
 | *(template)* État | énuméré | non | Valeur par défaut pour les nouvelles éditions. |
 | *(template)* En couleur | booléen | non | Valeur par défaut pour les nouvelles éditions. |
 
-> Le formulaire de création d'une série pré-remplit ses valeurs template avec les **valeurs par défaut** des attributs correspondants de l'édition (cf. [Édition](/modele-metier/edition.md)) ; elles restent modifiables, et ne sont pas portées par la base (aucune clause `DEFAULT`).
+> Le formulaire de création d'une série pré-remplit ses valeurs template avec les **valeurs par défaut** des attributs correspondants de l'édition (cf. [Édition](edition.md)) ; elles restent modifiables, et ne sont pas portées par la base (aucune clause `DEFAULT`).

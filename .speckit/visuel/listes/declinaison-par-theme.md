@@ -2,9 +2,9 @@
 type: Référence visuelle
 title: 'Déclinaison par thème'
 description: 'Déclinaison par thème des listes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Déclinaison par thème
 
-Celle de la liste des albums ([Déclinaison par thème](/visuel/liste-albums/declinaison-par-theme.md)). La mention du bloc de la liste est « Fiches », ou « Référentiel » pour les genres et les univers.
+Celle de la liste des albums ([Déclinaison par thème](../liste-albums/declinaison-par-theme.md)). La mention du bloc de la liste est « Fiches », ou « Référentiel » pour les genres et les univers.

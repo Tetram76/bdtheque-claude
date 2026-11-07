@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'La planche encrée'
 description: 'Alternative « La planche encrée » : apparence, présentation, collection vide.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # La planche encrée
@@ -11,7 +11,7 @@ Le dashboard présenté comme une **page de bande dessinée** : cases et bulles.
 
 ## Apparence
 
-- **Ton** : elle assume les codes de la page de BD, par dérogation à la règle « sans pastiche de comics » de la charte ([Ton général](/visuel/charte-graphique/ton-general.md)) : liseré noir des cases, bulles de pensée et de bruit.
+- **Ton** : elle assume les codes de la page de BD, par dérogation à la règle « sans pastiche de comics » de la charte ([Ton général](../charte-graphique/ton-general.md)) : liseré noir des cases, bulles de pensée et de bruit.
 - **La page** : le fond, hors des cases, est **blanc**. Les cases sont de **tailles variables**, rangées en bandes comme sur une planche, chacune cernée d'un **liseré noir légèrement épais**, **dessiné à la main** et tiré au hasard à chaque affichage : un trait encré qui tremble légèrement, d'épaisseur variable et affiné à ses extrémités ; des cases un peu de guingois, aux coins décalés de quelques pixels, dont les traits dépassent parfois le coin ; et, sous chaque trait encré, un fin trait de crayon gris légèrement décalé, comme le crayonné sous l'encrage. Le pied de page porte un numéro de page.
 - **Couleurs des cases** : chaque case a un fond de couleur **différente**, ni criarde ni fade, dans l'une des sept teintes jaune, bleu, corail, vert, violet, rose et turquoise. La plupart des cases les prennent dans leur version **quadri**, marquée comme une impression en quadrichromie (`#FFC93C`, `#4FB0E6`, `#F2775A`, `#63C36A`, `#A47AE0`, `#F483AE`, `#33C2B1`) ; quelques-unes, environ une sur quatre, dans leur version **ligne claire**, plus tendre (`#F4D35E`, `#8EC5E8`, `#F2A07B`, `#9FD39A`, `#C9A7E3`, `#F6B8C8`, `#7FD1C7`). Teintes et versions sont redistribuées à chaque affichage, deux cases voisines (côte à côte ou l'une au-dessus de l'autre) n'ayant jamais la même teinte. Le texte est noir `#111` ; bulles, encarts et cartouches restent blancs, cernés de noir. Les graphiques (barres) prennent les couleurs de la palette autres que celle de leur case.
 - **Bulles** : le titre d'une case est une bulle blanche cernée de noir, à cheval sur le bord haut de sa case (ce qui fait gagner de la hauteur), dont la **forme est tirée au hasard** à chaque affichage, comme la position et l'orientation de sa queue :

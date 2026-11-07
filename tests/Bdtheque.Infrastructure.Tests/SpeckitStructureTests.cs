@@ -108,12 +108,18 @@ public sealed partial class SpeckitStructureTests
                 if (href.StartsWith("http:", StringComparison.Ordinal) || href.StartsWith("https:", StringComparison.Ordinal))
                     continue;
 
+                // GitHub and editors resolve a path that begins with '/' from the root of the repository, not of the
+                // bundle: such a link, though the bundle-relative form of OKF, leads nowhere for its reader.
+                if (href.StartsWith('/'))
+                {
+                    violations.Add($"{Relative(file)}: {href} starts from the root, which its reader resolves outside the bundle");
+                    continue;
+                }
+
                 var parts = href.Split('#', 2);
                 var target = parts[0].Length == 0
                     ? file
-                    : Path.GetFullPath(parts[0].StartsWith('/')
-                        ? Path.Combine(Speckit, parts[0].TrimStart('/'))
-                        : Path.Combine(Path.GetDirectoryName(file)!, parts[0]));
+                    : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file)!, parts[0]));
                 if (!File.Exists(target) && !Directory.Exists(target))
                     violations.Add($"{Relative(file)}: {href} designates nothing");
                 else if (parts.Length == 2 && File.Exists(target) && !Anchors(target).Contains(Uri.UnescapeDataString(parts[1])))

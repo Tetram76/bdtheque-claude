@@ -2,12 +2,12 @@
 type: Référence visuelle
 title: 'Déclinaison par thème'
 description: 'Touche propre de chaque thème dans les fiches de consultation.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 ---
 
 # Déclinaison par thème
 
-Couleurs et typographie de chaque thème : cf. [Alternatives](/visuel/dashboard/index.md). Leur touche propre dans la fiche :
+Couleurs et typographie de chaque thème : cf. [Alternatives](../dashboard/index.md). Leur touche propre dans la fiche :
 
 | Thème | Touche propre |
 | --- | --- |
