@@ -2,7 +2,7 @@
 
 ## 2026-11-07
 
-* **Règle** : avant de lancer une commande, l'agent vérifie que les ressources qu'elle exige sont disponibles, estime sa durée et la borne (délai maximal, surveillance de la progression d'une commande longue, aucune attente sans borne) (#288).
+* **Règle** : avant de lancer une commande, l'agent vérifie que les ressources qu'elle exige sont disponibles, estime sa durée et la borne (délai maximal, surveillance de la progression d'une commande longue, aucune attente sans borne) ; le délai maximal est la plus longue durée légitime majorée d'au plus la moitié, jamais un multiple arbitraire ; la surveillance de la revue Codex est bornée à 18 minutes et chacun de ses appels à GitHub à 1,3 seconde (#288).
 
 ## 2026-11-06
 

@@ -46,17 +46,22 @@ any comment with an `@codex` mention (Step 5 included) — run the check below.
 It scans the PRs that are open, or were closed less than 5 hours ago — not
 every PR: closing or merging the PR that carries the notice does not end the
 cooldown. A notice posted within the window bumped its PR's `updated_at`, so
-reading the comments of the PRs updated since the cutoff is enough.
+reading the comments of the PRs updated since the cutoff is enough. The PRs
+come most recently updated first, so the first page (100 PRs) holds every PR
+updated within 5 hours: paginating would read every PR of the repo, a cost
+that grows with it (3.5 s measured at 288 PRs, against 2.1 s for one page).
 
 ```bash
 set -o pipefail
 window=18000
 cutoff=$(date -u -d "@$(( $(date -u +%s) - window ))" +%FT%TZ)
-prs=$(gh api --paginate "repos/{owner}/{repo}/pulls?state=all&sort=updated&direction=desc&per_page=100" \
+# bounds per policy « Calcul du délai maximal »: longest measured duration
+# plus half — PR list 2.1 s → 3.2 s; comments 0.9 s → 1.3 s
+prs=$(timeout 3.2 gh api "repos/{owner}/{repo}/pulls?state=all&sort=updated&direction=desc&per_page=100" \
         --jq ".[]|select(.updated_at>=\"$cutoff\")|.number") || { echo "query failed: retry"; exit 1; }
 last=""
 for n in $prs; do
-  t=$(gh api --paginate "repos/{owner}/{repo}/issues/$n/comments?since=$cutoff&per_page=100" \
+  t=$(timeout 1.3 gh api --paginate "repos/{owner}/{repo}/issues/$n/comments?since=$cutoff&per_page=100" \
         --jq ".[]|select(.user.login==\"chatgpt-codex-connector[bot]\" and .created_at>=\"$cutoff\" and (.body|test(\"reached your Codex usage limits\")))|.created_at" \
       | sort | tail -1) || { echo "query failed: retry"; exit 1; }
   [[ "$t" > "$last" ]] && last=$t
@@ -145,8 +150,15 @@ active obligatoire »):
   `<LAST_TRIGGER_AT>` —, a stuck Codex — no verdict 10 minutes after the 👀
   that started the review (policy:
   `.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md#cycle`, « Revue non démarrée », « Codex
-  bloqué ») —, or timeout (about one hour, e.g. CI never completing after an
-  approval). It prints why (`exit: …`) and the final CI conclusions.
+  bloqué ») —, or timeout (18 minutes, e.g. CI never completing after an
+  approval). The timeout follows the policy's computation
+  (`.speckit/gestion-projet/gouvernance/regles-de-travail-de-l-agent.md`,
+  « Calcul du délai maximal »): the longest legitimate wait is 12 minutes —
+  a review starts within 2 minutes of its trigger and concludes within 10,
+  while the CI, started by the same trigger, runs in parallel and takes 6 to
+  10 minutes —, plus at most half of it. Reaching it means something is
+  wrong. Re-derive it whenever those durations change. It prints why
+  (`exit: …`) and the final CI conclusions.
 - Any other top-level Codex comment (e.g. "You have reached your Codex usage
   limits", which no review follows; the "Codex Review Summary" table; a
   receipt naming an older commit) only hands control back so it gets read; it
@@ -188,10 +200,12 @@ active obligatoire »):
 # A failed query (expired auth, network, rate limit) must never be read as
 # data — "0 events" or "PR not open": every query is checked, a failure is
 # retried, and a lasting one ends the watcher with its own reason.
+# Every gh call is bounded: measured at 0.9 s at most, so 1.3 s (policy:
+# « Calcul du délai maximal »); a hung call counts as a failed query.
 set -o pipefail
 # Counts matches across ALL pages (an endpoint returns at most 100 items per
 # page, and reviews come oldest first): the --jq filter must be per-page safe.
-count() { local n; n=$(gh api --paginate "$1?per_page=100" --jq "$2" | wc -l) && echo "$n"; }
+count() { local n; n=$(timeout 1.3 gh api --paginate "$1?per_page=100" --jq "$2" | wc -l) && echo "$n"; }
 bot='.user.login=="chatgpt-codex-connector[bot]"'
 # approving receipt naming the head: its "Reviewed commit" (abbreviated SHA)
 # must be a prefix of <HEAD_SHA>; a receipt about an older commit is ordinary
@@ -208,7 +222,7 @@ receipt='((.body|test("codex-review-receipt")) and (.body|test("find any major i
 epoch() { date -u -d "$1" +%s; }
 trigger=$(epoch "<LAST_TRIGGER_AT>") started=""
 reason=timeout fails=0 saw_old=0
-for i in $(seq 1 60); do
+for i in $(seq 1 18); do
   # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
   # an issue for the API), not a ticket's
   if up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
@@ -223,9 +237,9 @@ for i in $(seq 1 60); do
           ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\" and ($receipt|not))") &&
      rc=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
           ".[]|select($bot and $receipt)") &&
-     eyes=$(gh api --paginate "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
+     eyes=$(timeout 1.3 gh api --paginate "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
           --jq ".[]|select(.content==\"eyes\" and $bot and .created_at>=\"<HEAD_AT>\")|.created_at" | sort | head -1) &&
-     sp=$(gh pr view <PR_NUMBER> --json state,headRefOid,statusCheckRollup \
+     sp=$(timeout 1.3 gh pr view <PR_NUMBER> --json state,headRefOid,statusCheckRollup \
           -q '"\(.state) \(.headRefOid) \(.statusCheckRollup|length) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"')
   then
     fails=0; read -r st head checks pending <<< "$sp"
@@ -265,7 +279,7 @@ for i in $(seq 1 60); do
   sleep 60
 done
 echo "exit: $reason"
-gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
+timeout 1.3 gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
 ```
 
 ### Step 1 — Wait for Codex
