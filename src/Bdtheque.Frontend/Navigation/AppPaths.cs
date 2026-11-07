@@ -1,3 +1,5 @@
+using Bdtheque.Contracts.Enums;
+
 namespace Bdtheque.Frontend.Navigation;
 
 /// <summary>
@@ -14,11 +16,14 @@ public static class AppPaths
 
     public const string NotYetImplemented = "/not-yet-implemented";
 
-    /// <summary>Login page of the administration (#199).</summary>
-    public const string AdminLogin = NotYetImplemented;
+    /// <summary>Login page of the administration, the only one of its pages open to anyone (Components/Pages, not Pages/Admin).</summary>
+    public const string AdminLogin = "/admin/login";
 
-    /// <summary>Logout of the administration (#199).</summary>
-    public const string AdminLogout = NotYetImplemented;
+    /// <summary>Logout of the administration, which the last entry of its menu sends.</summary>
+    public const string AdminLogout = "/admin/logout";
+
+    /// <summary>The query parameter of the page to return to once signed in: that of the authentication cookie.</summary>
+    public const string ReturnUrlParameter = "ReturnUrl";
 
     /// <summary>Information of the visitor on the audience measurement, and their opposition (fonctionnel/mesure-audience.md).</summary>
     public const string AudienceInformation = "/audience";
@@ -70,4 +75,25 @@ public static class AppPaths
     public const string AdminSettings = NotYetImplemented;
 
     public const string AdminStatistics = NotYetImplemented;
+
+    /// <summary>The search of an edition in the external sources, from its ISBN (visuel/administration/contenu.md).</summary>
+    public const string AdminIsbnLookup = NotYetImplemented;
+
+    public const string AdminNewAlbum = NotYetImplemented;
+
+    public const string AdminNewSeries = NotYetImplemented;
+
+    public const string AdminNewAuthor = NotYetImplemented;
+
+    public const string AdminNewPublisher = NotYetImplemented;
+
+    public const string AdminNewGenre = NotYetImplemented;
+
+    public const string AdminNewUniverse = NotYetImplemented;
+
+    /// <summary>The editions whose ISBN has a check digit that disagrees with it (visuel/administration/contenu.md, À vérifier).</summary>
+    public const string AdminInvalidIsbns = NotYetImplemented;
+
+    /// <summary>The page that modifies a record of the given type.</summary>
+    public static string AdminEdit(RecordType type, Guid id) => type == RecordType.ApplicationSettings ? AdminSettings : NotYetImplemented;
 }

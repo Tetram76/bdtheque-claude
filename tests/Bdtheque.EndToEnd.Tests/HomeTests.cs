@@ -33,6 +33,17 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
         await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
     }
 
+    // The link to the administration of the foot stays with an empty collection (visuel/dashboard/collection-vide.md).
+    [Fact]
+    public async Task Foot_LeadsToTheAdministration()
+    {
+        var page = await application.NewPageAsync();
+        await page.GotoAsync(AppPaths.Home);
+
+        await Assertions.Expect(page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" }))
+            .ToHaveAttributeAsync("href", AppPaths.AdminHome);
+    }
+
     [Theory]
     [InlineData("base")]
     [InlineData("planche")]
@@ -86,6 +97,27 @@ public sealed class DashboardHomeTests(CollectionApplication application)
 
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", "Pacific/Kiritimati");
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Entrez donc, il y a de quoi lire !");
+    }
+
+    [Fact]
+    public async Task Foot_LeadsToTheAdministration()
+    {
+        var page = await application.NewPageAsync();
+        await page.GotoAsync(AppPaths.Home);
+
+        await page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"^[a-z]+://[^/]+{Regex.Escape(AppPaths.AdminLogin)}\?"));
+    }
+
+    // The link belongs to the home page: the other pages of the consultation keep their foot as it is.
+    [Fact]
+    public async Task OtherPagesOfTheConsultation_HaveNoLinkToTheAdministrationInTheirFoot()
+    {
+        var page = await application.NewPageAsync();
+        await page.GotoAsync(AppPaths.AudienceInformation);
+
+        await Assertions.Expect(page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" })).ToHaveCountAsync(0);
     }
 
     [Fact]

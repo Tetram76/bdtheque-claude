@@ -10,14 +10,24 @@ namespace Bdtheque.Frontend.Tests.Layout;
 /// (visuel/charte-graphique/apparence-propre-a-chaque-alternative.md; visuel/administration/en-tete-et-menu.md), told
 /// apart by role, link and accessible name.
 /// </summary>
-public sealed class LayoutTests : BunitContext
+public sealed class LayoutTests : BunitContext, IDisposable
 {
     private static readonly RenderFragment Body = builder => builder.AddMarkupContent(0, "<p id=\"body\">content</p>");
 
+    private readonly System.Globalization.CultureInfo _previous = System.Globalization.CultureInfo.CurrentCulture;
+    private readonly Pages.FakeAdminApi _api = new(new Audience.FakeAudienceApi());
+
     public LayoutTests()
     {
-        Services.AddLocalization();
-        new Audience.FakeAudienceApi().AddServices(Services, new TestRequest());
+        // The culture of the requests, which the numbers of the menu of the administration follow.
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("fr-FR");
+        _api.AddServices(Services, new TestRequest());
+    }
+
+    void IDisposable.Dispose()
+    {
+        System.Globalization.CultureInfo.CurrentCulture = _previous;
+        Dispose();
     }
 
     [Fact]
@@ -92,18 +102,21 @@ public sealed class LayoutTests : BunitContext
         Assert.Equal("Aller à la consultation", header.QuerySelector($"a[href='{AppPaths.Home}']")?.TextContent.Trim());
     }
 
-    [Fact]
-    public void EveryPage_LeadsToTheInformationOnTheAudienceMeasurement()
+    // From any page, of the consultation as of the administration (fonctionnel/mesure-audience.md, Information et opposition):
+    // each layout on its own, as a page has a single foot.
+    [Theory]
+    [InlineData(typeof(PublicLayout))]
+    [InlineData(typeof(AdminLayout))]
+    public void EveryPage_LeadsToTheInformationOnTheAudienceMeasurement(Type layoutType)
     {
-        // From any page, of the consultation as of the administration (fonctionnel/mesure-audience.md, Information et opposition).
-        IRenderedComponent<IComponent>[] layouts =
-        [
-            Render<PublicLayout>(parameters => parameters.Add(p => p.Body, Body)),
-            Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body)),
-        ];
+        var layout = Render(builder =>
+        {
+            builder.OpenComponent(0, layoutType);
+            builder.AddComponentParameter(1, nameof(LayoutComponentBase.Body), Body);
+            builder.CloseComponent();
+        });
 
-        Assert.All(layouts, layout =>
-            Assert.Equal("Mesure d'audience", layout.Find($"footer a[href='{AppPaths.AudienceInformation}']").TextContent.Trim()));
+        Assert.Equal("Mesure d'audience", layout.Find($"footer a[href='{AppPaths.AudienceInformation}']").TextContent.Trim());
     }
 
     [Fact]
@@ -131,11 +144,38 @@ public sealed class LayoutTests : BunitContext
             plan.QuerySelectorAll(".admin-menu-group-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(
             ["Tableau de bord", "Nouvelle édition", "Albums", "Séries", "Éditions", "Intentions d'achat", "Auteurs", "Éditeurs",
-                "Genres", "Univers", "Paramétrage", "Statistiques privées", "Se déconnecter"],
-            plan.QuerySelectorAll("a").Select(link => link.TextContent.Trim()));
+                "Genres", "Univers", "Paramétrage", "Statistiques privées"],
+            plan.QuerySelectorAll("a > span:first-child").Select(entry => entry.TextContent.Trim()));
         Assert.Equal(AppPaths.AdminHome, plan.QuerySelector("a")?.GetAttribute("href"));
-        Assert.Equal(AppPaths.AdminLogout, plan.QuerySelectorAll("a")[^1].GetAttribute("href"));
-        Assert.NotNull(plan.QuerySelector("hr + a, hr + * a"));
+        // The logout last, after a rule: a form posted to its page, never a link that any page could follow.
+        var logout = plan.QuerySelector("hr + form")!;
+        Assert.Equal(("post", AppPaths.AdminLogout), (logout.GetAttribute("method"), logout.GetAttribute("action")));
+        Assert.Equal("Se déconnecter", logout.QuerySelector("button[type='submit']")?.TextContent.Trim());
+        Assert.Equal("admin-logout", logout.QuerySelector("input[name='_handler']")?.GetAttribute("value"));
+    }
+
+    [Fact]
+    public void AdminMenu_GivesTheNumberOfRecordsOfTheEntriesThatLeadToAList()
+    {
+        var layout = Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body));
+
+        var counts = layout.FindAll("nav a").Where(link => link.QuerySelector(".admin-menu-count") is not null)
+            .Select(link => (link.QuerySelector("span")!.TextContent.Trim(), string.Join(" ", link.QuerySelector(".admin-menu-count")!.TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))));
+        Assert.Equal(
+            [("Albums", "2 847"), ("Séries", "412"), ("Éditions", "2 913"), ("Intentions d'achat", "18"), ("Auteurs", "1 106"),
+                ("Éditeurs", "96"), ("Genres", "24"), ("Univers", "37")],
+            counts.ToList());
+    }
+
+    [Fact]
+    public void AdminMenu_WithoutTheNumbers_StillLeadsEverywhere()
+    {
+        _api.Failures["/admin/record-counts"] = System.Net.HttpStatusCode.ServiceUnavailable;
+
+        var layout = Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body));
+
+        Assert.Empty(layout.FindAll(".admin-menu-count"));
+        Assert.Equal(12, layout.FindAll("nav[aria-label=\"Plan de l'administration\"] a").Count);
     }
 
     [Fact]

@@ -45,4 +45,7 @@
   <data name="Untitled" xml:space="preserve">
     <value>&lt;Sans titre&gt;</value>
   </data>
+  <data name="ApplicationSettings" xml:space="preserve">
+    <value>Paramétrage de l&apos;application</value>
+  </data>
 </root>

@@ -105,7 +105,7 @@ public sealed class ThemeTests(ApplicationHost application)
         Assert.Contains(ThemeCatalog.Offered, offered => offered.Key == theme);
         // The visit goes on, and with it the visit of the audience measurement, which its page records.
         var visit = VisitOf(await VisitCookieAsync(page));
-        Assert.Equal(new BrowserVisit(today, theme!, today), visit with { AudienceVisitId = null });
+        Assert.Equal(new BrowserVisit(today, theme!, today), visit with { AudienceVisit = null });
     }
 
     [Fact]

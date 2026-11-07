@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-06
+
+* **Choix** : compte administrateur par variables d'environnement, comparé en temps constant, tentatives de connexion limitées, pages de connexion et de déconnexion, retour à la page demandée ; nombre de fiches du menu de l'administration ; contrats de l'accueil de l'administration (`--admin-`, `--color-tile`) ; API de l'accueil de l'administration (décomptes, contrôles, dernières fiches écrites) ; compte et cas de l'environnement de validation ; erreurs présentées par leur cadre, leur icône et leur couleur, comme dans les maquettes, à l'arrondi d'une tuile (`--radius-tile`) ; lien vers l'administration au pied de l'accueil de la consultation ; captures de référence reprises écran par écran (`-Filter`) ; visite de la mesure d'audience retenue avec son genre, administrateur ou visiteur, une autre s'ouvrant quand l'authentification change (#287).
+
 ## 2026-11-05
 
 * **Choix** : libellés des albums et des éditions construits par le frontend, tirages d'une page fixés par les tests, applications de test propres à un écran qui dépend de toute la collection, contrôle local des captures dans l'image de Playwright, contrats de la présentation d'un écran propre à chaque thème et règle du chantier d'un écran, thème choisi par l'adresse dans l'environnement de validation, nouveau rendu de toute page dont le contenu dépend du fuseau du navigateur (#284).

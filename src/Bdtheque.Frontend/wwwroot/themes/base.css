@@ -146,6 +146,9 @@
     --radius-cover: 0.125rem;
     /* A field on several lines, which the radius of a pill would not suit. */
     --radius-multiline: var(--radius-control);
+    /* A box laid within a block, never a control: a tile (e.g. a type of record of the home page of the administration)
+       or the frame of an error message, which the radius of a pill would turn into a stadium. */
+    --radius-tile: var(--radius-control);
     --border-block: 1px solid var(--color-rule);
     /* The border of a control, a button or a tag, and of an entry of the menu of the consultation (none by default). */
     --border-width-control: 1px;
@@ -216,6 +219,15 @@
     --home-caption-padding: 0;
     --home-caption-border: none;
     --home-caption-background: transparent;
+
+    /* The home page of the administration, which every theme lays out alike but frames its own way
+       (visuel/administration/declinaison-par-theme.md): the gap between its blocks, which a title straddling the top
+       edge of its block needs wider; the tile of a type of record, its frame and its fill (--color-tile, read with the
+       texts of a block); the shape of the colored chip of its icon. */
+    --admin-gap: var(--space-l);
+    --color-tile: var(--color-surface);
+    --admin-tile-border: 1px solid var(--color-rule);
+    --admin-chip-radius: var(--radius-control);
 }
 
 @media (min-width: 48rem) {

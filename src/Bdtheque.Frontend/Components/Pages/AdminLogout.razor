@@ -1,0 +1,38 @@
+@attribute [Route(AppPaths.AdminLogout)]
+@using Bdtheque.Frontend.Security
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject IStringLocalizer<AdminLogout> L
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The logout of the administration, which the last entry of its menu sends (AdminLogoutForm): a form, never a link, so that
+   no page of another site signs the administrator out by a mere link or image. Open to anyone, like the login: a session
+   already over leads to the consultation all the same. Reached by its address, it offers the same form. *@
+<PageTitle>@L["Title"]</PageTitle>
+
+<div class="admin-logout">
+    <Block Title="@L["Title"]" HeadingLevel="1">
+        <p>@L["Intro"]</p>
+        <form method="post" @formname="@AdminLogoutForm.FormName" @onsubmit="SignOutAsync">
+            <AntiforgeryToken />
+            <Button Type="submit" Variant="ButtonVariant.Primary" Icon="IconName.Logout" Label="@L["SignOut"]" />
+        </form>
+    </Block>
+</div>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = null!;
+
+    // Recorded first, as the visit of the administrator it ends.
+    private async Task SignOutAsync()
+    {
+        if (HttpContext.User.Identity?.IsAuthenticated == true)
+        {
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminSignedOut, cancellationToken: HttpContext.RequestAborted);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+        Navigation.NavigateTo(AppPaths.Home);
+    }
+}

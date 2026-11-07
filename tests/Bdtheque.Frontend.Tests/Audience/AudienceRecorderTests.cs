@@ -36,7 +36,7 @@ public sealed class AudienceRecorderTests
         Assert.Equal(
             new OpenVisitRequest(false, DeviceType.Smartphone, RenderingEngine.WebKit, "26.0", new FunctionUse("screen", record, null)),
             opened.Deserialize<OpenVisitRequest>(JsonSerializerOptions.Web));
-        Assert.Equal((Visit with { AudienceVisitId = api.OpenedVisit }).Format(), request.SetCookie(BrowserVisit.CookieName));
+        Assert.Equal((Visit with { AudienceVisit = new(api.OpenedVisit, false) }).Format(), request.SetCookie(BrowserVisit.CookieName));
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public sealed class AudienceRecorderTests
     {
         var api = new FakeAudienceApi();
         var audienceVisit = Guid.CreateVersion7();
-        var request = RequestOf(Visit with { AudienceVisitId = audienceVisit });
+        var request = RequestOf(Visit with { AudienceVisit = new(audienceVisit, false) });
 
         await RecorderOf(request, api).RecordActionAsync(Action, "page=2");
         await request.StartResponseAsync();
@@ -60,14 +60,14 @@ public sealed class AudienceRecorderTests
     {
         // Deleted at the end of its retention, or with the data of the deployment: the browser goes on in a new one.
         var api = new FakeAudienceApi { UsagesAnswer = HttpStatusCode.NotFound };
-        var request = RequestOf(Visit with { AudienceVisitId = Guid.CreateVersion7() });
+        var request = RequestOf(Visit with { AudienceVisit = new(Guid.CreateVersion7(), false) });
 
         await RecorderOf(request, api).RecordScreenAsync(Screen);
         await request.StartResponseAsync();
 
         Assert.Equal(2, api.Sent.Count);
         Assert.Equal("/audience/visits", api.Sent[1].Path);
-        Assert.Equal((Visit with { AudienceVisitId = api.OpenedVisit }).Format(), request.SetCookie(BrowserVisit.CookieName));
+        Assert.Equal((Visit with { AudienceVisit = new(api.OpenedVisit, false) }).Format(), request.SetCookie(BrowserVisit.CookieName));
     }
 
     [Fact]
@@ -78,6 +78,25 @@ public sealed class AudienceRecorderTests
         await RecorderOf(RequestOf(Visit, authenticated: true), api).RecordScreenAsync(Screen);
 
         Assert.True(api.Sent.Single().Content.Deserialize<OpenVisitRequest>(JsonSerializerOptions.Web)!.IsAdministrator);
+    }
+
+    // A visit is that of the administrator or of a visitor from its opening: once the authentication changed (login,
+    // logout, end of the session), the usage goes into another visit, of its kind, which the browser keeps.
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public async Task Usage_OnceTheAuthenticationChanged_OpensAVisitOfItsKind(bool visitOfAdministrator, bool authenticated)
+    {
+        var api = new FakeAudienceApi();
+        var request = RequestOf(Visit with { AudienceVisit = new(Guid.CreateVersion7(), visitOfAdministrator) }, authenticated: authenticated);
+
+        await RecorderOf(request, api).RecordScreenAsync(Screen);
+        await request.StartResponseAsync();
+
+        var (path, opened) = Assert.Single(api.Sent);
+        Assert.Equal("/audience/visits", path);
+        Assert.Equal(authenticated, opened.Deserialize<OpenVisitRequest>(JsonSerializerOptions.Web)!.IsAdministrator);
+        Assert.Equal((Visit with { AudienceVisit = new(api.OpenedVisit, authenticated) }).Format(), request.SetCookie(BrowserVisit.CookieName));
     }
 
     [Fact]

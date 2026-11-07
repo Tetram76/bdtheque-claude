@@ -48,6 +48,10 @@ public sealed partial class ThemeContrastTests
         // An item of a menu that deletes, in the color of deletion on the menu (visuel/liste-albums/contenu.md).
         ("delete", "surface-raised", Text),
         .. Enumerable.Range(1, 7).Select(index => ("text-on-palette", $"palette-{index}", Text)),
+        // The tile of a type of record of the home page of the administration: its name, detail and links.
+        ("text", "tile", Text),
+        ("text-muted", "tile", Text),
+        ("accent-text", "tile", Text),
         // A block of its own tint holds what a surface holds: texts, links and the borders of its controls. The border of a
         // control in error is read against the inside of the control (alert on control-background, above), which suffices.
         .. Enumerable.Range(1, 14).SelectMany(index => new[]

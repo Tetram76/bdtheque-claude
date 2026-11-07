@@ -28,8 +28,8 @@ public sealed class AudienceOpposition(IHttpContextAccessor httpContextAccessor,
         var context = Request();
         context.Response.Cookies.Append(CookieName, "1", FrontendCookies.For(context.Request, Lifetime));
         context.Response.Cookies.Delete(AudienceDevice.TouchScreenCookieName, FrontendCookies.For(context.Request));
-        if (visitCookie.Current is { AudienceVisitId: not null } visit)
-            visitCookie.Set(visit with { AudienceVisitId = null });
+        if (visitCookie.Current is { AudienceVisit: not null } visit)
+            visitCookie.Set(visit with { AudienceVisit = null });
         _opposed = true;
     }
 

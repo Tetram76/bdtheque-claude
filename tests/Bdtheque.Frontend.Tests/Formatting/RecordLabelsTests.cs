@@ -1,3 +1,4 @@
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Formatting;
@@ -67,6 +68,31 @@ public sealed class RecordLabelsTests
     public void Edition_DropsWhatIsMissing(string? collection, int? year, string? isbn, string expected) =>
         Assert.Equal(expected, _labels.Edition(
             new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Dargaud", collection is null ? null : Guid.NewGuid(), collection, year, isbn)));
+
+    // The label of a record of the change log, from what it was built from at the time of the write
+    // (modele-metier/entree-du-journal-des-modifications.md): an album and an edition as above, an author by its main
+    // identifier (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
+    public static TheoryData<RecordLabel, string> RecordsOfTheChangeLog => new()
+    {
+        { new AlbumLabel("Le Lotus bleu", "Tintin", AlbumType.Regular, false, 5, null, null), "Le Lotus bleu (Tintin - T. 5)" },
+        { new EditionLabel(new AlbumLabel(null, "Blacksad", AlbumType.Regular, false, 7, null, null), "Dargaud", null, 2023, null),
+            "Blacksad - T. 7 · Dargaud [2023]" },
+        { new PurchaseIntentLabel(new AlbumLabel(null, "Les Vieux Fourneaux", AlbumType.Regular, false, 8, null, null), null),
+            "Les Vieux Fourneaux - T. 8" },
+        { new PurchaseIntentLabel(null, new EditionLabel(new AlbumLabel("Undertaker", null, AlbumType.Regular, false, null, null, null),
+            "Dargaud", null, null, null)), "Undertaker · Dargaud" },
+        { new AuthorLabel("Van Hamme", "Jean", null), "Jean Van Hamme" },
+        { new AuthorLabel("Remi", "Georges", "Hergé"), "Hergé" },
+        { new AuthorLabel("Franquin", null, null), "Franquin" },
+        { new PublisherCollectionLabel("Repérages", "Dupuis"), "Repérages (Dupuis)" },
+        { new NameLabel("Western"), "Western" },
+        { new ApplicationSettingsLabel(), "Paramétrage de l'application" },
+    };
+
+    [Theory]
+    [MemberData(nameof(RecordsOfTheChangeLog))]
+    public void Record_OfTheChangeLog_IsLabelledAsItsTypeWants(RecordLabel label, string expected) =>
+        Assert.Equal(expected, _labels.Record(label, AlbumLabelFormat.TitleSeriesVolume));
 
     private static AlbumSummary Regular(string? title, string? series, int? volume) =>
         new(Guid.NewGuid(), title, series is null ? null : Guid.NewGuid(), series, AlbumType.Regular, false, volume, null, null, true);

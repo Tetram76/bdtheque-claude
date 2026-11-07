@@ -1,0 +1,263 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): one block under the other, then the
+   checks beside the latest changes, and the settings beside the private statistics, on a wide screen
+   (visuel/administration/contenu.md). */
+.admin-home {
+    display: grid;
+    gap: var(--admin-gap);
+}
+
+.admin-home-title h1 {
+    margin: 0 0 var(--space-xs);
+}
+
+.admin-home-title p,
+.admin-home-note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.admin-home-pair {
+    display: grid;
+    gap: var(--admin-gap);
+    align-items: start;
+}
+
+@media (min-width: 48rem) {
+    .admin-home-pair {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    }
+
+    .admin-home-pair + .admin-home-pair {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+}
+
+/* Saisir à partir d'un ISBN: the field and its button on a line, then the direct creations, four buttons always on a
+   single line. */
+.admin-isbn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-s) var(--space-m);
+    margin: 0 0 var(--space-s);
+}
+
+.admin-isbn ::deep .field {
+    flex: 1 1 18rem;
+    min-inline-size: 0;
+}
+
+.admin-create {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+    margin-block-start: var(--space-m);
+    padding-block-start: var(--space-m);
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.admin-create-label {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    color: var(--color-text-muted);
+}
+
+.admin-create ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    flex: 1 1 20rem;
+    max-inline-size: 34rem;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-create ::deep .button {
+    inline-size: 100%;
+    justify-content: center;
+    padding-inline: var(--space-xs);
+    white-space: nowrap;
+}
+
+/* Les fiches: a tile per type of record, as many on a line as the width allows. */
+.admin-records {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+    gap: var(--space-s);
+    margin: var(--space-s) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-record {
+    --focus-gap: var(--color-tile);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    border: var(--admin-tile-border);
+    border-radius: var(--radius-tile);
+    background: var(--color-tile);
+}
+
+.admin-record-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: var(--admin-chip-radius);
+    background: var(--color-palette-1);
+    color: var(--color-text-on-palette);
+}
+
+/* The secondary palette, without hierarchy, a color per type of record. */
+.admin-record:nth-child(7n + 2) .admin-record-chip { background: var(--color-palette-2); }
+.admin-record:nth-child(7n + 3) .admin-record-chip { background: var(--color-palette-3); }
+.admin-record:nth-child(7n + 4) .admin-record-chip { background: var(--color-palette-4); }
+.admin-record:nth-child(7n + 5) .admin-record-chip { background: var(--color-palette-5); }
+.admin-record:nth-child(7n + 6) .admin-record-chip { background: var(--color-palette-6); }
+.admin-record:nth-child(7n + 7) .admin-record-chip { background: var(--color-palette-7); }
+
+.admin-record-chip ::deep .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+.admin-record-name {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+}
+
+.admin-record-name:hover {
+    text-decoration: underline;
+}
+
+.admin-record-count {
+    font-family: var(--font-figures);
+    font-weight: var(--font-weight-heading);
+    font-size: var(--font-size-title);
+    line-height: 1;
+}
+
+.admin-record-detail,
+.admin-record-links {
+    grid-column: 1 / -1;
+}
+
+.admin-record-detail {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.admin-record-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-m);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+/* The rows of the checks, of the latest changes and of the settings: separated by a rule, at the height of a control. */
+.admin-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-rows > li,
+.admin-setting {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+    min-block-size: var(--control-height);
+    padding-block: var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.admin-check {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--space-m);
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.admin-check > span:first-child {
+    flex: 1;
+}
+
+.admin-check:hover > span:first-child {
+    text-decoration: underline;
+}
+
+.admin-check ::deep .icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+    color: var(--color-text-muted);
+}
+
+/* The number of a check: only an inconsistency to correct takes the alert color (visuel/administration/contenu.md). */
+.admin-check-count {
+    min-inline-size: 2.5rem;
+    padding: 0 var(--space-s);
+    border-radius: var(--radius-pill);
+    background: var(--color-tag);
+    color: var(--color-text-on-tag);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-align: center;
+}
+
+.admin-check-count[data-alert] {
+    background: var(--color-alert);
+    color: var(--color-text-on-alert);
+}
+
+.admin-change {
+    justify-content: space-between;
+}
+
+.admin-change > span {
+    display: grid;
+    min-inline-size: 0;
+}
+
+.admin-change-label {
+    font-weight: var(--font-weight-strong);
+}
+
+.admin-change a,
+.admin-setting a {
+    font-weight: var(--font-weight-strong);
+}
+
+.admin-setting dt {
+    flex: 1 1 12rem;
+    font-weight: var(--font-weight-strong);
+}
+
+.admin-setting dd {
+    margin: 0;
+}
+
+.admin-setting dd:first-of-type {
+    flex: 1 1 12rem;
+    color: var(--color-text-muted);
+}
+
+.admin-statistics-none {
+    margin: 0;
+    padding: var(--space-m) var(--space-l);
+    border: 2px dashed var(--color-rule);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    text-align: center;
+}

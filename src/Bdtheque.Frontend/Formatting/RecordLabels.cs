@@ -1,4 +1,5 @@
 using System.Globalization;
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Microsoft.Extensions.Localization;
@@ -6,9 +7,10 @@ using Microsoft.Extensions.Localization;
 namespace Bdtheque.Frontend.Formatting;
 
 /// <summary>
-/// Labels of the albums and editions, built when they are presented, from their components
-/// (fonctionnel/presentation/libelle-d-un-album.md, fonctionnel/presentation/libelle-d-une-edition.md). The words of the
-/// volume and the ISBN mention are texts of the display culture (<c>RecordLabels.resx</c>).
+/// Labels of the records, built when they are presented, from their components
+/// (fonctionnel/presentation/libelle-d-un-album.md, fonctionnel/presentation/libelle-d-une-edition.md), whether a list
+/// gives them or the change log kept them from the time of a write (modele-metier/entree-du-journal-des-modifications.md).
+/// The words of the volume and the ISBN mention are texts of the display culture (<c>RecordLabels.resx</c>).
 /// </summary>
 public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
 {
@@ -17,7 +19,32 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
     /// context makes it plain; with it, the series stands in for a missing title, and the volume is then abbreviated as
     /// next to any title (fonctionnel/presentation/libelle-d-un-album.md, examples).
     /// </summary>
-    public string Album(AlbumSummary album, AlbumLabelFormat format, bool withSeries = true)
+    public string Album(AlbumSummary album, AlbumLabelFormat format, bool withSeries = true) =>
+        Album(new AlbumLabel(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue, album.VolumeNumber,
+            album.StartVolumeNumber, album.EndVolumeNumber), format, withSeries);
+
+    /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
+    public string Edition(EditionSummary edition) =>
+        Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
+
+    /// <summary>
+    /// The label of a record of the change log, with its series for an album, the log mixing every series: an edition is
+    /// hardly told apart without its album, which comes first.
+    /// </summary>
+    public string Record(RecordLabel label, AlbumLabelFormat format) => label switch
+    {
+        AlbumLabel album => Album(album, format),
+        EditionLabel edition => EditionWithItsAlbum(edition, format),
+        PurchaseIntentLabel { Edition: { } edition } => EditionWithItsAlbum(edition, format),
+        PurchaseIntentLabel { Album: { } album } => Album(album, format),
+        AuthorLabel author => Author(author),
+        PublisherCollectionLabel collection => $"{collection.Name} ({collection.PublisherName})",
+        NameLabel name => name.Name,
+        ApplicationSettingsLabel => texts["ApplicationSettings"],
+        _ => texts["Untitled"],
+    };
+
+    private string Album(AlbumLabel album, AlbumLabelFormat format, bool withSeries = true)
     {
         var series = withSeries ? album.SeriesTitle : null;
         var title = album.Title;
@@ -45,17 +72,29 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         };
     }
 
-    /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
-    public string Edition(EditionSummary edition)
+    private string Edition(string publisher, string? collectionName, int? publicationYear, string? isbn)
     {
-        var label = edition.PublisherName;
-        if (edition.PublisherCollectionName is { } collection)
+        var label = publisher;
+        if (collectionName is { } collection)
             label += $" ({collection})";
-        if (edition.PublicationYear is { } year)
+        if (publicationYear is { } year)
             label += string.Create(CultureInfo.InvariantCulture, $" [{year}]");
-        if (edition.Isbn is { } isbn)
+        if (isbn is not null)
             label += $" - {texts["Isbn"]} {isbn}";
         return label;
+    }
+
+    private string EditionWithItsAlbum(EditionLabel edition, AlbumLabelFormat format) =>
+        $"{Album(edition.Album, format)} · {Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn)}";
+
+    // Its main identifier: the pseudonym, else « First name Last name », or the last name alone
+    // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
+    private string Author(AuthorLabel author)
+    {
+        if (author.Pseudonym is { } pseudonym)
+            return pseudonym;
+        var name = string.Join(' ', new[] { author.FirstName, author.LastName }.OfType<string>());
+        return name.Length > 0 ? name : texts["Untitled"];
     }
 
     // Never both null: the caller has already stood the volume in for a label without either.
@@ -67,7 +106,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
     };
 
     // The volume of the album, as its type wants it; null for a regular album without number.
-    private string? Volume(AlbumSummary album, bool abbreviated)
+    private string? Volume(AlbumLabel album, bool abbreviated)
     {
         var form = abbreviated ? "Short" : "Full";
         if (album.Type != AlbumType.Omnibus)

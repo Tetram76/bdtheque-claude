@@ -1,0 +1,8 @@
+@inject IStringLocalizer<LayoutText> L
+
+@* The way from the home page to the administration, at the end of its foot, for a full collection as for an empty one
+   (visuel/dashboard/, foot of the mockups; visuel/dashboard/collection-vide.md, « le lien vers l'administration reste »).
+   A section of the foot, which the page that renders this fills. *@
+<SectionContent SectionId="AppFooter.EndSection">
+    <a class="footer-administration" href="@AppPaths.AdminHome">@L["Administration"]</a>
+</SectionContent>

@@ -115,6 +115,7 @@ admin.MapPurchaseIntents();
 admin.MapSavedSearches();
 admin.MapApplicationSettings();
 admin.MapChangeLog();
+admin.MapAdministrationOverview();
 admin.MapAudienceReading();
 
 var catalog = app.MapCatalog();

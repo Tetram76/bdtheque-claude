@@ -1,5 +1,6 @@
 extern alias frontend;
 
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -37,8 +38,26 @@ public class ApplicationHost : IAsyncLifetime
     /// <summary>Services of <c>frontend</c>, as the application configures them.</summary>
     public IServiceProvider FrontendServices => _frontend!.Services;
 
+    /// <summary>The administrator account of the tests.</summary>
+    public const string AdminLogin = "admin";
+
+    public const string AdminPassword = "test-admin-password";
+
     /// <summary>A client of <c>api</c> itself, as <c>frontend</c> calls it: for a test to write its own data.</summary>
     public HttpClient CreateApiClient() => _api.CreateApiClient();
+
+    /// <summary>The clock of <c>api</c>, which dates its writes: fixed by an application whose captures show their dates.</summary>
+    protected TestClock ApiClock => _api.Clock;
+
+    /// <summary>Signs the administrator in, by the login page, as a user does: the page then goes to <paramref name="path"/>.</summary>
+    public static async Task SignInAsync(IPage page, string path)
+    {
+        await page.GotoAsync(path);
+        await page.GetByLabel("Identifiant").FillAsync(AdminLogin);
+        await page.GetByLabel("Mot de passe").FillAsync(AdminPassword);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Se connecter" }).ClickAsync();
+        await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"^[a-z]+://[^/]+{Regex.Escape(path)}$"));
+    }
 
     public async Task InitializeAsync()
     {
@@ -134,6 +153,8 @@ public class ApplicationHost : IAsyncLifetime
                 {
                     ["Api:BaseUrl"] = "http://api",
                     ["InternalApiKey:Key"] = ApiHostFactory.InternalApiKey,
+                    ["AdminAccount:Login"] = AdminLogin,
+                    ["AdminAccount:Password"] = AdminPassword,
                 }));
 
             builder.ConfigureTestServices(services =>

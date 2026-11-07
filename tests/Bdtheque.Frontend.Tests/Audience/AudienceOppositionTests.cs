@@ -9,7 +9,7 @@ namespace Bdtheque.Frontend.Tests.Audience;
 /// </summary>
 public sealed class AudienceOppositionTests
 {
-    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3), Guid.CreateVersion7());
+    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3), new MeasuredVisit(Guid.CreateVersion7(), false));
 
     [Fact]
     public void Visitor_WithoutChoice_IsNotOpposed()
@@ -55,7 +55,7 @@ public sealed class AudienceOppositionTests
         OppositionOf(request).Oppose();
         await request.StartResponseAsync();
 
-        Assert.Equal((Visit with { AudienceVisitId = null }).Format(), request.SetCookie(BrowserVisit.CookieName));
+        Assert.Equal((Visit with { AudienceVisit = null }).Format(), request.SetCookie(BrowserVisit.CookieName));
         var touchScreen = Assert.Single(request.SetCookies, c => c.StartsWith($"{AudienceDevice.TouchScreenCookieName}=", StringComparison.Ordinal));
         Assert.Contains("expires=Thu, 01 Jan 1970", touchScreen, StringComparison.OrdinalIgnoreCase);
     }

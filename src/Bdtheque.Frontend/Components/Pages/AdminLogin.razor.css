@@ -1,0 +1,15 @@
+/* A single block at the width of a form easy to fill in, its fields one under the other. */
+.admin-login {
+    max-width: 28rem;
+    margin-inline: auto;
+}
+
+.admin-login form {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+}
+
+.admin-login ::deep .field {
+    inline-size: 100%;
+}

@@ -23,6 +23,31 @@ public sealed class ErrorMessageTests : BunitContext
         Assert.False(string.IsNullOrWhiteSpace(alert.QuerySelector("[data-error-label]")?.TextContent));
     }
 
+    // Each with its own icon besides its name (visuel/saisie-album/contenu.md): to correct, to reload, the application's.
+    [Theory]
+    [InlineData(ProblemCategory.Business, "M12 7v6M12 17h.01")]
+    [InlineData(ProblemCategory.Functional, "M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4")]
+    [InlineData(ProblemCategory.Technical, "M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z")]
+    public void EachCategory_HasItsOwnIcon(ProblemCategory category, string path)
+    {
+        var message = Render<ErrorMessage>(parameters => parameters.Add(p => p.Problem, new ApiProblem(category, null, null, null)));
+
+        Assert.Equal(path, message.Find(".error-icon path").GetAttribute("d"));
+    }
+
+    [Fact]
+    public void ErrorFoundByTheFrontend_IsNamedAndWordedByIt()
+    {
+        var message = Render<ErrorMessage>(parameters => parameters
+            .Add(p => p.Problem, new ApiProblem(ProblemCategory.Functional, null, null, null))
+            .Add(p => p.Label, "Connexion suspendue")
+            .Add(p => p.Message, "Réessayez dans quelques minutes."));
+
+        Assert.Equal("Connexion suspendue", message.Find("[data-error-label]").TextContent.Trim());
+        Assert.Equal("Réessayez dans quelques minutes.", message.Find("[data-error-text]").TextContent.Trim());
+        Assert.Equal("functional", message.Find("[role=alert]").GetAttribute("data-error-category"));
+    }
+
     [Fact]
     public void BusinessError_ShowsTheTextOfItsRule_NotItsCode()
     {

@@ -66,6 +66,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = AppPaths.AdminLogin;
     });
 builder.Services.AddAuthorization();
+// The single administrator account, from the environment: missing, the application does not start.
+builder.Services.AddOptions<AdminAccountOptions>()
+    .Bind(builder.Configuration.GetSection(AdminAccountOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddSingleton<AdminCredentials>();
+// One for the application: the failures of every request count against the same window.
+builder.Services.AddSingleton<LoginThrottle>();
+builder.Services.AddScoped<AdminRecordCounts>();
 builder.Services.AddCascadingAuthenticationState();
 // Secure on an HTTPS request only, like the authentication cookie: never Secure by default, and always Secure would
 // not be sent back by the browser on the internal deployment in HTTP

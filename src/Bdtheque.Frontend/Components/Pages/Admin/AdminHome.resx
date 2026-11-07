@@ -15,4 +15,235 @@
   <data name="Title" xml:space="preserve">
     <value>Administration</value>
   </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Saisir et corriger les fiches, tenir les référentiels, régler l&apos;application.</value>
+  </data>
+  <data name="Entry.Title" xml:space="preserve">
+    <value>Saisir à partir d&apos;un ISBN</value>
+  </data>
+  <data name="Entry.Kicker" xml:space="preserve">
+    <value>Saisie</value>
+  </data>
+  <data name="Entry.Isbn" xml:space="preserve">
+    <value>ISBN de l&apos;édition</value>
+  </data>
+  <data name="Entry.IsbnPlaceholder" xml:space="preserve">
+    <value>978-2-205-08889-2</value>
+  </data>
+  <data name="Entry.Lookup" xml:space="preserve">
+    <value>Chercher dans les sources</value>
+  </data>
+  <data name="Entry.Note" xml:space="preserve">
+    <value>Album, édition et visuels, série, auteurs, éditeur et collection : chaque fiche est créée ou complétée à partir des sources externes, puis relue avant enregistrement.</value>
+  </data>
+  <data name="Entry.Create" xml:space="preserve">
+    <value>Ou créer directement :</value>
+  </data>
+  <data name="Entry.Create.Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="Entry.Create.Series" xml:space="preserve">
+    <value>Série</value>
+  </data>
+  <data name="Entry.Create.Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="Entry.Create.Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="Records.Title" xml:space="preserve">
+    <value>Les fiches</value>
+  </data>
+  <data name="Records.Kicker" xml:space="preserve">
+    <value>Fiches</value>
+  </data>
+  <data name="Records.Note" xml:space="preserve">
+    <value>Les éditions, leurs visuels et les intentions d&apos;achat se saisissent depuis leur album.</value>
+  </data>
+  <data name="Records.List" xml:space="preserve">
+    <value>Gérer la liste</value>
+  </data>
+  <data name="Records.Albums" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="Records.Albums.Detail" xml:space="preserve">
+    <value>dont {0} hors de la collection</value>
+  </data>
+  <data name="Records.New.Albums" xml:space="preserve">
+    <value>Nouvel album</value>
+  </data>
+  <data name="Records.Editions" xml:space="preserve">
+    <value>Éditions</value>
+  </data>
+  <data name="Records.Editions.Detail" xml:space="preserve">
+    <value>saisies depuis leur album, avec leurs visuels</value>
+  </data>
+  <data name="Records.Series" xml:space="preserve">
+    <value>Séries</value>
+  </data>
+  <data name="Records.Series.Detail" xml:space="preserve">
+    <value>dont {0} sans statut</value>
+  </data>
+  <data name="Records.New.Series" xml:space="preserve">
+    <value>Nouvelle série</value>
+  </data>
+  <data name="Records.PurchaseIntents" xml:space="preserve">
+    <value>Intentions d&apos;achat</value>
+  </data>
+  <data name="Records.PurchaseIntents.Detail" xml:space="preserve">
+    <value>posées depuis leur album</value>
+  </data>
+  <data name="Records.Authors" xml:space="preserve">
+    <value>Auteurs</value>
+  </data>
+  <data name="Records.Authors.Detail" xml:space="preserve">
+    <value>scénaristes, dessinateurs, coloristes…</value>
+  </data>
+  <data name="Records.New.Authors" xml:space="preserve">
+    <value>Nouvel auteur</value>
+  </data>
+  <data name="Records.Publishers" xml:space="preserve">
+    <value>Éditeurs</value>
+  </data>
+  <data name="Records.Publishers.Detail" xml:space="preserve">
+    <value>collections éditeur : {0}</value>
+  </data>
+  <data name="Records.New.Publishers" xml:space="preserve">
+    <value>Nouvel éditeur</value>
+  </data>
+  <data name="Records.Genres" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="Records.Genres.Detail" xml:space="preserve">
+    <value>référentiel</value>
+  </data>
+  <data name="Records.New.Genres" xml:space="preserve">
+    <value>Nouveau genre</value>
+  </data>
+  <data name="Records.Universes" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Records.Universes.Detail" xml:space="preserve">
+    <value>dont {0} sous-univers</value>
+  </data>
+  <data name="Records.New.Universes" xml:space="preserve">
+    <value>Nouvel univers</value>
+  </data>
+  <data name="Checks.Title" xml:space="preserve">
+    <value>À vérifier</value>
+  </data>
+  <data name="Checks.Kicker" xml:space="preserve">
+    <value>Contrôles</value>
+  </data>
+  <data name="Checks.InvalidIsbn" xml:space="preserve">
+    <value>ISBN au chiffre de contrôle incohérent</value>
+  </data>
+  <data name="Latest.Title" xml:space="preserve">
+    <value>Dernières modifications</value>
+  </data>
+  <data name="Latest.Kicker" xml:space="preserve">
+    <value>Journal</value>
+  </data>
+  <data name="Latest.None" xml:space="preserve">
+    <value>Aucune fiche n&apos;a encore été saisie.</value>
+  </data>
+  <data name="Latest.Album.Creation" xml:space="preserve">
+    <value>Album créé</value>
+  </data>
+  <data name="Latest.Album.Modification" xml:space="preserve">
+    <value>Album modifié</value>
+  </data>
+  <data name="Latest.Edition.Creation" xml:space="preserve">
+    <value>Édition créée</value>
+  </data>
+  <data name="Latest.Edition.Modification" xml:space="preserve">
+    <value>Édition modifiée</value>
+  </data>
+  <data name="Latest.Series.Creation" xml:space="preserve">
+    <value>Série créée</value>
+  </data>
+  <data name="Latest.Series.Modification" xml:space="preserve">
+    <value>Série modifiée</value>
+  </data>
+  <data name="Latest.PurchaseIntent.Creation" xml:space="preserve">
+    <value>Intention d&apos;achat créée</value>
+  </data>
+  <data name="Latest.PurchaseIntent.Modification" xml:space="preserve">
+    <value>Intention d&apos;achat modifiée</value>
+  </data>
+  <data name="Latest.Author.Creation" xml:space="preserve">
+    <value>Auteur créé</value>
+  </data>
+  <data name="Latest.Author.Modification" xml:space="preserve">
+    <value>Auteur modifié</value>
+  </data>
+  <data name="Latest.Publisher.Creation" xml:space="preserve">
+    <value>Éditeur créé</value>
+  </data>
+  <data name="Latest.Publisher.Modification" xml:space="preserve">
+    <value>Éditeur modifié</value>
+  </data>
+  <data name="Latest.PublisherCollection.Creation" xml:space="preserve">
+    <value>Collection éditeur créée</value>
+  </data>
+  <data name="Latest.PublisherCollection.Modification" xml:space="preserve">
+    <value>Collection éditeur modifiée</value>
+  </data>
+  <data name="Latest.Genre.Creation" xml:space="preserve">
+    <value>Genre créé</value>
+  </data>
+  <data name="Latest.Genre.Modification" xml:space="preserve">
+    <value>Genre modifié</value>
+  </data>
+  <data name="Latest.Universe.Creation" xml:space="preserve">
+    <value>Univers créé</value>
+  </data>
+  <data name="Latest.Universe.Modification" xml:space="preserve">
+    <value>Univers modifié</value>
+  </data>
+  <data name="Latest.SavedSearch.Creation" xml:space="preserve">
+    <value>Recherche enregistrée créée</value>
+  </data>
+  <data name="Latest.SavedSearch.Modification" xml:space="preserve">
+    <value>Recherche enregistrée modifiée</value>
+  </data>
+  <data name="Latest.ApplicationSettings.Creation" xml:space="preserve">
+    <value>Paramétrage créé</value>
+  </data>
+  <data name="Latest.ApplicationSettings.Modification" xml:space="preserve">
+    <value>Paramétrage modifié</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>Paramétrage</value>
+  </data>
+  <data name="Settings.Kicker" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="Settings.AlbumLabelFormat" xml:space="preserve">
+    <value>Libellé des albums</value>
+  </data>
+  <data name="Settings.AlbumLabelFormat.TitleSeriesVolume" xml:space="preserve">
+    <value>Album (Série - Tome)</value>
+  </data>
+  <data name="Settings.AlbumLabelFormat.VolumeTitleSeries" xml:space="preserve">
+    <value>Tome - Album (Série)</value>
+  </data>
+  <data name="Settings.DisplayCulture" xml:space="preserve">
+    <value>Culture d&apos;affichage</value>
+  </data>
+  <data name="Settings.DisplayCulture.FrenchFrance" xml:space="preserve">
+    <value>Français (France)</value>
+  </data>
+  <data name="Statistics.Title" xml:space="preserve">
+    <value>Statistiques privées</value>
+  </data>
+  <data name="Statistics.Kicker" xml:space="preserve">
+    <value>Statistiques</value>
+  </data>
+  <data name="Statistics.None" xml:space="preserve">
+    <value>Aucune statistique privée n&apos;est encore définie : celles qui le seront apparaîtront ici, réservées au compte administrateur.</value>
+  </data>
 </root>

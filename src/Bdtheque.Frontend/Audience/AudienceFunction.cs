@@ -36,5 +36,13 @@ public static class AudienceFunctions
     /// </summary>
     public static readonly AudienceFunction AudienceOppositionWithdrawn = new("audience.opposition-withdrawn", AudienceFunctionKind.Action);
 
-    public static readonly IReadOnlyList<AudienceFunction> Followed = [Home, AdminHome, AudienceInformation, AudienceOppositionWithdrawn];
+    public static readonly AudienceFunction AdminLogin = new("admin.login", AudienceFunctionKind.Screen);
+
+    /// <summary>The login of the administrator, without any parameter: neither the login nor, above all, the password.</summary>
+    public static readonly AudienceFunction AdminSignedIn = new("admin.signed-in", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminSignedOut = new("admin.signed-out", AudienceFunctionKind.Action);
+
+    public static readonly IReadOnlyList<AudienceFunction> Followed =
+        [Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn];
 }
