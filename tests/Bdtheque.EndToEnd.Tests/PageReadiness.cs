@@ -48,7 +48,7 @@ public static class PageReadiness
         """;
 
     // The requests of each context that failed or were answered by an error, which tell why a page is not complete.
-    private static readonly ConditionalWeakTable<IBrowserContext, ConcurrentQueue<string>> FailedRequests = new();
+    private static readonly ConditionalWeakTable<IBrowserContext, ConcurrentQueue<string>> FailedRequests = [];
 
     /// <summary>Notes the requests of the context that fail, for the message of a page that is not ready.</summary>
     public static void Track(IBrowserContext context)
