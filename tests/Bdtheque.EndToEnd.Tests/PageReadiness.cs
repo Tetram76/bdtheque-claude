@@ -47,34 +47,51 @@ public static class PageReadiness
             || [...document.querySelectorAll(".block")].every(block => block.offsetWidth <= 1 || block.dataset.drawn !== undefined)
         """;
 
-    // The requests of each context that failed or were answered by an error, which tell why a page is not complete.
-    private static readonly ConditionalWeakTable<IBrowserContext, ConcurrentQueue<string>> FailedRequests = [];
+    // The requests of each context that failed or were answered by an error, and those still running, which tell why a
+    // page is not complete: a request that never ends holds back its load.
+    private static readonly ConditionalWeakTable<IBrowserContext, Requests> Network = [];
 
-    /// <summary>Notes the requests of the context that fail, for the message of a page that is not ready.</summary>
+    private sealed class Requests
+    {
+        public ConcurrentQueue<string> Failed { get; } = new();
+
+        public ConcurrentDictionary<IRequest, byte> Running { get; } = new();
+    }
+
+    /// <summary>Notes the requests of the context that fail or are still running, for the message of a page that is not ready.</summary>
     public static void Track(IBrowserContext context)
     {
-        var failed = FailedRequests.GetOrCreateValue(context);
-        context.RequestFailed += (_, request) => failed.Enqueue($"{request.Url} ({request.Failure})");
+        var requests = Network.GetOrCreateValue(context);
+        context.Request += (_, request) => requests.Running.TryAdd(request, 0);
+        context.RequestFinished += (_, request) => requests.Running.TryRemove(request, out byte _);
+        context.RequestFailed += (_, request) =>
+        {
+            requests.Running.TryRemove(request, out byte _);
+            requests.Failed.Enqueue($"{request.Url} ({request.Failure})");
+        };
         // A document may answer an error legitimately (e.g. the page of an unknown address): only what it loads is noted.
         context.Response += (_, response) =>
         {
             if (response.Status >= 400 && response.Request.ResourceType != "document")
-                failed.Enqueue($"{response.Url} (status {response.Status})");
+                requests.Failed.Enqueue($"{response.Url} (status {response.Status})");
         };
     }
 
     /// <summary>Waits for the page loaded, its stylesheets applied, its fonts laid out, and what its scripts draw done.</summary>
     public static async Task WaitAsync(IPage page)
     {
-        await page.WaitForLoadStateAsync(LoadState.Load);
-        await page.WaitForFunctionAsync(ThemeDrawn);
         try
         {
+            await page.WaitForLoadStateAsync(LoadState.Load);
+            await page.WaitForFunctionAsync(ThemeDrawn);
             await page.EvaluateAsync(Settled);
         }
-        catch (PlaywrightException exception) when (FailedRequests.TryGetValue(page.Context, out var failed) && !failed.IsEmpty)
+        catch (Exception exception) when (exception is PlaywrightException or TimeoutException
+            && Network.TryGetValue(page.Context, out var requests) && (!requests.Failed.IsEmpty || !requests.Running.IsEmpty))
         {
-            throw new PlaywrightException($"{exception.Message}; requests failed: {string.Join(", ", failed)}", exception);
+            throw new PlaywrightException(
+                $"{exception.Message}; requests failed: [{string.Join(", ", requests.Failed)}]; requests running: [{string.Join(", ", requests.Running.Keys.Select(request => request.Url))}]",
+                exception);
         }
     }
 

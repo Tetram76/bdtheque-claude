@@ -28,6 +28,16 @@ public sealed class PageReadinessTests(ApplicationHost application) : BrowserTes
     }
 
     [Fact]
+    public async Task Page_IsReady_OnceBlazorHasMovedTheFocusToItsTitle()
+    {
+        var page = await NewPageInThemeAsync(ThemeCatalog.Base.Key, Desktop);
+
+        await PageReadiness.GotoAsync(page, CasesPage.Path);
+
+        Assert.True(await page.EvaluateAsync<bool>("() => document.activeElement?.localName === 'h1'"));
+    }
+
+    [Fact]
     public async Task PageWithAllItsStylesheets_IsReady_OnceTheScriptOfItsThemeHasDrawnIt()
     {
         var page = await NewPageInThemeAsync(ThemeCatalog.Planche.Key, Desktop);
