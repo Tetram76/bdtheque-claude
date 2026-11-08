@@ -1,6 +1,5 @@
 extern alias frontend;
 
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -56,7 +55,7 @@ public class ApplicationHost : IAsyncLifetime
         await page.GetByLabel("Identifiant").FillAsync(AdminLogin);
         await page.GetByLabel("Mot de passe").FillAsync(AdminPassword);
         await page.GetByRole(AriaRole.Button, new() { Name = "Se connecter" }).ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"^[a-z]+://[^/]+{Regex.Escape(path)}$"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(path));
     }
 
     public async Task InitializeAsync()

@@ -30,7 +30,7 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
         await Assertions.Expect(page.Locator("header form[role='search']")).ToHaveCountAsync(0);
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Albums →" }).ClickAsync();
-        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.NotYetImplemented));
     }
 
     // The link to the administration of the foot stays with an empty collection (visuel/dashboard/collection-vide.md).
@@ -58,7 +58,7 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
         // The administration asks for the login first: the address is polled rather than a load event awaited, which an
         // enhanced navigation of Blazor, patching the page instead of loading it, need not fire; on failure, it tells the
         // address reached.
-        await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"^[a-z]+://[^/]+{Regex.Escape(AppPaths.AdminLogin)}(\?.*)?$"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.AdminLogin));
     }
 }
 
@@ -78,7 +78,7 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
 
         var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
         await spotlight.GetByRole(AriaRole.Link).ClickAsync();
-        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.NotYetImplemented));
     }
 
     // The day of the spotlight and the dates of the entries are those of the browser (fonctionnel/page-accueil.md): a

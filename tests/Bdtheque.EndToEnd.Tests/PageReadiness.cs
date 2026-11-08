@@ -41,10 +41,14 @@ public static class PageReadiness
         }
         """;
 
-    // « La planche encrée » draws each block of the page laid out (themes/planche.js), title balloons included.
-    private const string ThemeDrawn = """
-        () => document.documentElement.dataset.theme !== "planche"
-            || [...document.querySelectorAll(".block")].every(block => block.offsetWidth <= 1 || block.dataset.drawn !== undefined)
+    // The page loaded, its document complete as its load event fires, and drawn: « La planche encrée » draws each block of
+    // the page laid out (themes/planche.js), title balloons included. Judged in the page, by a single call that the driver
+    // polls: the client of Playwright waits for a load state in two steps, checking those it received then subscribing to
+    // those to come, and loses one that arrives in between (microsoft/playwright-dotnet#3364, #298).
+    private const string LoadedAndDrawn = """
+        () => document.readyState === "complete"
+            && (document.documentElement.dataset.theme !== "planche"
+                || [...document.querySelectorAll(".block")].every(block => block.offsetWidth <= 1 || block.dataset.drawn !== undefined))
         """;
 
     // The requests of each context that failed or were answered by an error, and those still running, which tell why a
@@ -82,8 +86,8 @@ public static class PageReadiness
     {
         try
         {
-            await page.WaitForLoadStateAsync(LoadState.Load);
-            await page.WaitForFunctionAsync(ThemeDrawn);
+            // The handle of the value the wait returns, of no use.
+            await (await page.WaitForFunctionAsync(LoadedAndDrawn)).DisposeAsync();
             await page.EvaluateAsync(Settled);
         }
         catch (Exception exception) when (exception is PlaywrightException or TimeoutException

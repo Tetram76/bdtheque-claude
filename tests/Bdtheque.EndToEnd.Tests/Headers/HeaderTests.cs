@@ -66,7 +66,7 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
 
         await menu.GetByRole(AriaRole.Link, new() { Name = "Albums" }).ClickAsync();
 
-        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.Albums);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.Albums));
     }
 
     [Fact]
@@ -180,7 +180,7 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
 
         await toggle.ClickAsync();
         await menu.GetByRole(AriaRole.Link, new() { Name = "Albums" }).ClickAsync();
-        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.AdminAlbums);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.AdminAlbums));
     }
 
     [Fact]

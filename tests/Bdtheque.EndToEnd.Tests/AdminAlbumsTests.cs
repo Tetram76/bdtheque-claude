@@ -3,7 +3,6 @@ extern alias frontend;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.EndToEnd.Tests.Controls;
@@ -31,10 +30,10 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await page.GetByRole(AriaRole.Navigation, new() { Name = "Plan de l'administration" })
             .GetByRole(AriaRole.Link, new() { Name = "Albums" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminAlbums));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
         await Assertions.Expect(page.Locator("h1")).ToContainTextAsync("Albums");
         await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Administration" }).ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminHome));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
     [Fact]
@@ -50,7 +49,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Astérix {_marker}", $"Le Lotus bleu {_marker}"]);
         await page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" }).GetByRole(AriaRole.Link, new() { Name = "L", Exact = true }).ClickAsync();
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Le Lotus bleu {_marker}"]);
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminAlbums, $"?q={_marker}&entry=L"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums, $"?q={_marker}&entry=L"));
     }
 
     [Fact]
@@ -86,7 +85,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         Assert.True(await dialog.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminAlbums, $"?q={_marker}"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums, $"?q={_marker}"));
         await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucun album ne correspond à « {_marker} ».");
     }
 
@@ -101,7 +100,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
 
         await page.Keyboard.PressAsync("Escape");
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminAlbums, $"?q={_marker}"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums, $"?q={_marker}"));
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"À garder {_marker}"]);
     }
 
@@ -120,7 +119,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(dialog.GetByRole(AriaRole.Radio)).ToHaveCountAsync(1);
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Continuer" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminMergeAlbums, $"?other={other.Id}&album={album.Id}"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminMergeAlbums, $"?other={other.Id}&album={album.Id}"));
     }
 
     [Fact]
@@ -203,8 +202,6 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
     }
 
     private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Albums" }).Locator(".album-label");
-
-    private static Regex AtPath(string path, string query = "") => new($@"^[a-z]+://[^/]+{Regex.Escape(path + query)}$");
 
     private Task<AlbumForm> CreateAlbumAsync(string title, Guid[]? genreIds = null) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
