@@ -26,7 +26,9 @@
     // corners on the forms, whose text areas a pill would crop.
     inBg: '#F3F5F9', inB: '1px solid #CDD3DF', btnR: '999px', secB: '1px solid ' + DEEP, secText: DEEP,
     // The header is the touch of the theme: the deep colour of the day's cover, as on the dashboard.
-    hBg: DEEP, hText: '#FFFFFF', hLine: '0', hInBg: 'rgba(255,255,255,.14)', hInB: '1px solid rgba(255,255,255,.22)', hInText: '#FFFFFF',
+    // The header's own muted colour (hMuted: the search's placeholder) is light, as on every dark header: the
+    // festival, whose header is transparent, has none, and the page's muted grey would not show on the deep blue.
+    hBg: DEEP, hText: '#FFFFFF', hLine: '0', hInBg: 'rgba(255,255,255,.14)', hInB: '1px solid rgba(255,255,255,.22)', hInText: '#FFFFFF', hMuted: '#C8D1E6',
     helpBg: ACCENT, helpText: '#FFFFFF', helpR: '50%', helpB: '0',
     lgMark: false, lgText: '#FFFFFF', lgFont: "900 21px 'Inter Tight', sans-serif", lgTT: 'none', lgDot: ACCENT,
     tagBg: 'rgba(255,255,255,.14)', tagText: '#FFFFFF', tagB: '0', tagR: '999px',
