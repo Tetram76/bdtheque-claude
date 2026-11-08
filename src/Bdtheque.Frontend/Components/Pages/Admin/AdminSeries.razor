@@ -170,7 +170,7 @@
         try
         {
             // The number of series is the one of the menu, read once per request; without it, the list goes on.
-            _counts = await TryAsync(RecordCounts.GetAsync());
+            _counts = await RecordCounts.TryGetAsync();
             _list = await Api.GetAsync<SeriesAdminList>(_query.ApiPath());
             // A page beyond the last one (the page of its only series once deleted, an old address) is no empty list: its
             // series are on the pages before it, the last of which it leads to, with the same criteria.
@@ -245,18 +245,6 @@
 
         await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesDeleted, $"series={_dialogSeries.Id}", HttpContext?.RequestAborted ?? default);
         Navigation.NavigateTo(ListOnly.Href());
-    }
-
-    private static async Task<T?> TryAsync<T>(Task<T> task) where T : class
-    {
-        try
-        {
-            return await task;
-        }
-        catch (ApiProblemException)
-        {
-            return null;
-        }
     }
 
     private string CountText() => _list!.Series.TotalCount switch

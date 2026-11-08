@@ -252,6 +252,18 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Counts_NotGivenByTheApi_LeaveTheListWithoutItsNumber()
+    {
+        _api.Failures["/admin/record-counts"] = HttpStatusCode.InternalServerError;
+
+        var page = Open("q=barra");
+
+        Assert.Empty(page.FindAll(".list-heading-count"));
+        Assert.Equal("31 séries", Text(page.Find(".list-summary").Children[0]));
+        Assert.Equal(4, page.FindAll(".series-row:not(.series-row-head)").Count);
+    }
+
+    [Fact]
     public void Audience_TheActionOfItsCriteria_ThenTheScreen()
     {
         Open("q=barra&entry=B", recorded: true);

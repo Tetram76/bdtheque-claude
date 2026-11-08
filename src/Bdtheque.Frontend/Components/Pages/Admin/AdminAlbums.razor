@@ -171,7 +171,7 @@
         try
         {
             // The number of albums is the one of the menu, read once per request; without it, the list goes on.
-            _counts = await TryAsync(RecordCounts.GetAsync());
+            _counts = await RecordCounts.TryGetAsync();
             _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
             _list = await Api.GetAsync<AlbumAdminList>(_query.ApiPath());
             // A page beyond the last one (the page of its only album once deleted, an old address) is no empty list: its
@@ -247,18 +247,6 @@
 
         await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumsDeleted, $"album={_dialogAlbum.Album.Id}", HttpContext?.RequestAborted ?? default);
         Navigation.NavigateTo(ListOnly.Href());
-    }
-
-    private static async Task<T?> TryAsync<T>(Task<T> task) where T : class
-    {
-        try
-        {
-            return await task;
-        }
-        catch (ApiProblemException)
-        {
-            return null;
-        }
     }
 
     private string CountText() => _list!.Albums.TotalCount switch
