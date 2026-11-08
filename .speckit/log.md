@@ -2,7 +2,7 @@
 
 ## 2026-11-08
 
-* **Choix** : les interfaces que Docker crée sur l'exécuteur du CI n'ont pas d'adresse IPv6 de lien local, dont l'apparition et le retrait, au fil des conteneurs des tests, faisaient abandonner à Chromium des requêtes de pages ; tous les projets de test de nouveau dans une seule étape ; relevé des changements réseau pendant les tests, et échec du job si une interface de Docker change d'adresse (#295).
+* **Choix** : les interfaces que Docker crée sur l'exécuteur du CI n'ont pas d'adresse IPv6 de lien local, dont l'apparition et le retrait, au fil des conteneurs des tests, faisaient abandonner à Chromium des requêtes de pages ; tests de bout en bout exécutés seuls pour ne pas se disputer les processeurs de l'exécuteur ; relevé des changements réseau pendant les tests, et échec du job si une interface de Docker change d'adresse (#295).
 
 ## 2026-11-07
 

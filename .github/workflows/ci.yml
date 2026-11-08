@@ -85,12 +85,23 @@ jobs:
           nohup docker events --format '{{.TimeNano}} {{.Type}} {{.Action}} {{.Actor.ID}} {{index .Actor.Attributes "name"}}' > "$RUNNER_TEMP/network/docker-events.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/network-docker-events.pid"
 
-      # The only run of each test, the test projects side by side. It collects the coverage that the SonarQube Cloud
-      # analysis reports, on the code of the application only, the library shared by the tests being left out
+      # The only run of each test, in two steps: the tests without a browser side by side, then the end-to-end tests
+      # alone, which side by side with the others take twice as long for the processors of the runner, nearer to the
+      # timeouts of their browser, for no shorter run. Both collect the coverage that the SonarQube Cloud analysis
+      # reports, on the code of the application only, the library shared by the tests being left out
       # (choix-implementation/outillage.md).
       - name: Run tests
         run: >-
           dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+          --filter "FullyQualifiedName!~Bdtheque.EndToEnd.Tests."
+          --collect "XPlat Code Coverage"
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
+
+      - name: Run end-to-end tests
+        if: success() || failure()
+        run: >-
+          dotnet test tests/Bdtheque.EndToEnd.Tests --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
           --collect "XPlat Code Coverage"
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
