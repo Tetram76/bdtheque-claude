@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fiche d'album</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Patrick+Hand&amp;family=Delius&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Patrick+Hand&amp;family=Delius&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Inter+Tight:wght@400..900&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -19,6 +19,7 @@ summary{cursor:pointer}
 [data-bubble][data-shape=star]{padding:30px 44px !important;margin:-18px calc(5% + 16px) 46px !important}
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/couverture-theme.js"></script>
 <script src="../shared/comic-bubbles.js"></script>
 <script src="../shared/comic-frames.js"></script>
 </head>
@@ -59,7 +60,7 @@ summary{cursor:pointer}
 
         <section aria-label="Visuels de l'édition" style="flex: 0 1 280px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 auto">
           <sc-if value="{{hasEdition}}" hint-placeholder-val="{{true}}">
-          <div style="width: clamp(160px, 42vw, 250px); margin-bottom: {{t.shelfGap}}; box-sizing: border-box; position: relative; padding: {{t.cvPad}}; border: {{t.cvB}}; border-radius: {{t.cvR}}; background: {{t.cvBg}}; box-shadow: {{t.cvSh}}; transform: rotate({{t.cvRot}})">
+          <div style="width: clamp(160px, 42vw, 250px); margin-bottom: {{t.shelfGap}}; box-sizing: border-box; position: relative; padding: {{t.cvPad}}; border: {{t.cvB}}; border-radius: {{t.cvR}}; background: {{t.cvBg}}; box-shadow: {{t.cvSh}}; transform: {{t.cvTf}} rotate({{t.cvRot}})">
             <sc-if value="{{t.tape}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; top: -12px; left: 50%; width: 96px; height: 26px; margin-left: -48px; background: rgba(255,232,0,.75); transform: rotate(-4deg)"></span></sc-if>
             <div role="img" aria-label="{{vis.alt}}" style="display: block; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: {{t.imgR}}; background: #FFFFFF">
               <sc-if value="{{vis.isCover}}" hint-placeholder-val="{{true}}">
@@ -465,8 +466,12 @@ const THEMES = {
   }
 };
 
+// « La couverture du jour »: the colours of the day's featured cover, on the festival's rounded forms
+// (shared/couverture-theme.js).
+THEMES.couverture = { ...THEMES.festival, ...COUVERTURE_THEME };
+
 // On a coloured header, the active entry takes the header's own highlight rather than the page accent.
-const NAV_ACTIVE = { vignettes: ['#FFD23F', '#23323A'] };
+const NAV_ACTIVE = { vignettes: ['#FFD23F', '#23323A'], couverture: ['#FFFFFF', '#14295A'] };
 
 // Visuals: [full name, kind, short label under the thumbnail].
 const PLANCHES = Array.from({ length: 10 }, (_, i) => ['Planche ' + (i + 1), 'planche', String(i + 1)]);
@@ -720,7 +725,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes"], "default": "planche"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'achat", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'achat", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
 </script>
 </body>
 </html>

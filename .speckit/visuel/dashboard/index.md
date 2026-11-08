@@ -14,3 +14,4 @@
 * [Le fanzine en risographie](le-fanzine-en-risographie.md) - Alternative « Le fanzine en risographie » : apparence, présentation, collection vide.
 * [La vitrine de librairie](la-vitrine-de-librairie.md) - Alternative « La vitrine de librairie » : apparence, présentation, collection vide.
 * [L'album de vignettes](l-album-de-vignettes.md) - Alternative « L'album de vignettes » : apparence, présentation, collection vide.
+* [La couverture du jour](la-couverture-du-jour.md) - Alternative « La couverture du jour » : apparence, présentation, collection vide.

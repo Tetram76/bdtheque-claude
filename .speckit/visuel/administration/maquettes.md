@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes de l''administration et valeurs du paramètre theme.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:00:00Z }
 ---
 
 # Maquettes
@@ -18,3 +18,4 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 | Le fanzine en risographie | `riso` |
 | La vitrine de librairie | `librairie` |
 | L'album de vignettes | `vignettes` |
+| La couverture du jour | `couverture` |
