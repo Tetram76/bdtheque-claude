@@ -1,0 +1,126 @@
+@inject IStringLocalizer<MergeDialog> L
+
+@* The merge of a record of a list of the administration with another one of the same type (visuel/liste-albums/contenu.md,
+   fonctionnel/structure-de-l-application.md): from the record chosen, the other one is found by a search, a form of the
+   dialog that leads to the list with it, and « Continuer » leads to the next step, whose presentation awaits the terms of
+   the merge. *@
+<Dialog Id="@Id" Title="@Title" Subject="@Subject" Tone="DialogTone.Choice" CloseHref="@CloseHref">
+    <ChildContent>
+        <p>@Lead</p>
+        <form class="merge-search" method="get" action="@Action" role="search">
+            <QueryFields Parameters="Criteria" />
+            <label class="visually-hidden" for="@($"{Id}-text")">@SearchLabel</label>
+            <input id="@($"{Id}-text")" name="@AdminListQuery.MergeTextName" type="search" value="@Text" placeholder="@Placeholder"
+                   autocomplete="off" />
+            <Button Type="submit" Icon="IconName.Search" Label="@L["Search"]" />
+        </form>
+        @if (Candidates is null)
+        {
+            <p class="dialog-note">@Prompt</p>
+        }
+        else if (Candidates.Count == 0)
+        {
+            <p class="dialog-note">@None</p>
+        }
+        else
+        {
+            <div class="merge-candidates" role="radiogroup" aria-label="@CandidatesLabel">
+                @foreach (var (candidate, index) in Candidates.Select((candidate, index) => (candidate, index)))
+                {
+                    <label class="merge-candidate">
+                        <input type="radio" name="other" value="@candidate.Id" form="@ContinueId" checked="@(index == 0)" />
+                        <span>
+                            <strong>@candidate.Label</strong>
+                            <span>@candidate.Detail</span>
+                        </span>
+                    </label>
+                }
+            </div>
+        }
+        <p class="dialog-note">@Note</p>
+    </ChildContent>
+    <Actions>
+        <form id="@ContinueId" method="get" action="@ContinueAction">
+            <input type="hidden" name="@SubjectName" value="@SubjectId" />
+            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Continue"]" Disabled="@(Candidates is not { Count: > 0 })" />
+        </form>
+    </Actions>
+</Dialog>
+
+@code {
+    /// <summary>The identifier of the dialog, from which those of its search and of its continuation derive.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The title of the dialog (e.g. « Fusionner deux albums »).</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = null!;
+
+    /// <summary>The label of the record chosen.</summary>
+    [Parameter, EditorRequired]
+    public string Subject { get; set; } = null!;
+
+    /// <summary>The question the dialog asks (e.g. « Avec quel album fusionner celui-ci ? »).</summary>
+    [Parameter, EditorRequired]
+    public string Lead { get; set; } = null!;
+
+    /// <summary>The list without the dialog, that closing leads to.</summary>
+    [Parameter, EditorRequired]
+    public string CloseHref { get; set; } = null!;
+
+    /// <summary>The path of the list, which the search of the other record leads to.</summary>
+    [Parameter, EditorRequired]
+    public string Action { get; set; } = null!;
+
+    /// <summary>The criteria of the list with the dialog open, which the search keeps.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<(string Name, string Value)> Criteria { get; set; } = [];
+
+    /// <summary>The search of the other record.</summary>
+    [Parameter]
+    public string? Text { get; set; }
+
+    /// <summary>What the field is, for assistive technologies (e.g. « Rechercher l'autre album »).</summary>
+    [Parameter, EditorRequired]
+    public string SearchLabel { get; set; } = null!;
+
+    /// <summary>What the search looks into.</summary>
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    /// <summary>The other records the search found; <c>null</c> before any search.</summary>
+    [Parameter]
+    public IReadOnlyList<MergeCandidate>? Candidates { get; set; }
+
+    /// <summary>What to search, before any search.</summary>
+    [Parameter, EditorRequired]
+    public string Prompt { get; set; } = null!;
+
+    /// <summary>What a search that found no other record says.</summary>
+    [Parameter, EditorRequired]
+    public string None { get; set; } = null!;
+
+    /// <summary>The name of the choice of the other record (e.g. « Autre album »).</summary>
+    [Parameter, EditorRequired]
+    public string CandidatesLabel { get; set; } = null!;
+
+    /// <summary>What the next step will present (e.g. the two albums side by side).</summary>
+    [Parameter, EditorRequired]
+    public string Note { get; set; } = null!;
+
+    /// <summary>The next step of the merge.</summary>
+    [Parameter, EditorRequired]
+    public string ContinueAction { get; set; } = null!;
+
+    /// <summary>The name of the record chosen in the address of the next step (e.g. <c>album</c>), the other one being <c>other</c>.</summary>
+    [Parameter, EditorRequired]
+    public string SubjectName { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    private string ContinueId => $"{Id}-continue";
+
+    /// <summary>Another record of the type, as the dialog proposes it: its label, and what tells it apart.</summary>
+    public sealed record MergeCandidate(Guid Id, string Label, string Detail);
+}

@@ -1,0 +1,12 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the heading, then the list in a single
+   block (visuel/liste-albums/contenu.md). */
+.admin-list {
+    display: grid;
+    gap: var(--admin-gap);
+}
+
+.admin-list-body {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
+}

@@ -18,201 +18,122 @@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminAlbums" />
 
-<div class="admin-list">
-    <ListHeading Title="@L["Title"]" TotalCount="_counts?.Albums" NewHref="@AppPaths.AdminNewAlbum" NewLabel="@L["New"]" />
+<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_counts?.Albums" NewHref="@AppPaths.AdminNewAlbum" NewLabel="@L["New"]" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.AdminAlbums" FieldId="albums-search" TextName="@AlbumListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" PanelId="albums-filters"
+                    FiltersName="@AlbumListQuery.FiltersName" FiltersOpenValue="@AlbumListQuery.FiltersOpenValue"
+                    FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel"
+                    HiddenFilters="KeptFilters" />
 
-    @if (_problem is not null)
-    {
-        <ErrorMessage Problem="_problem" />
-    }
-    else if (_list is not null)
-    {
-        <Block Title="@L["ListTitle"]" Kicker="@L["Kicker"]" TitleHidden="true">
-            <div class="admin-list-body">
-                <ListSearch Action="@AppPaths.AdminAlbums" FieldId="albums-search" TextName="@AlbumListQuery.TextName" Text="@_query.Text"
-                            SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" PanelId="albums-filters"
-                            FiltersName="@AlbumListQuery.FiltersName" FiltersOpenValue="@AlbumListQuery.FiltersOpenValue"
-                            FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel"
-                            HiddenFilters="@(HiddenFields(_query with { Text = null, Entry = null, Page = 1 }))" />
+        <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
 
-                <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
 
-                <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@(_query.Text is not null || _query.ActiveFilterCount > 0)"
+                     WholeCount="_counts?.Albums" Order="@L["Order"]" />
 
-                <p class="admin-list-summary">
-                    <span><strong>@CountText()</strong> @CountDetail()</span>
-                    <span>@L["Order"]</span>
-                </p>
-
-                @if (_list.Albums.Items.Count == 0)
+        @if (_list!.Albums.Items.Count == 0)
+        {
+            <EmptyList Message="@(_query.Text is { } text ? L["Empty.Text", text] : L["Empty.Criteria"])" Hint="@L["Empty.Hint"]">
+                <Actions>
+                    @if (_query.Text is { } text)
+                    {
+                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                        <Button Href="@AppPaths.AdminNewAlbum" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
+                    }
+                    else
+                    {
+                        <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                    }
+                </Actions>
+            </EmptyList>
+        }
+        else
+        {
+            <div class="album-rows" role="table" aria-label="@L["Title"]">
+                <div class="album-row album-row-head" role="row">
+                    <span class="album-cover" role="columnheader"><span class="visually-hidden">@L["Column.Cover"]</span></span>
+                    <span class="album-main" role="columnheader">@L["Column.Album"]</span>
+                    <span class="album-date" role="columnheader">@L["Column.Date"]</span>
+                    <span class="album-editions" role="columnheader">@L["Column.Editions"]</span>
+                    <span class="album-state" role="columnheader">@L["Column.State"]</span>
+                    <span class="album-modified" role="columnheader">@L["Column.Modified"]</span>
+                    <span class="album-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
+                </div>
+                @foreach (var row in _list.Albums.Items)
                 {
-                    <EmptyList Message="@(_query.Text is { } text ? L["Empty.Text", text] : L["Empty.Criteria"])" Hint="@L["Empty.Hint"]">
-                        <Actions>
-                            @if (_query.Text is { } text)
-                            {
-                                <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                                <Button Href="@AppPaths.AdminNewAlbum" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
-                            }
-                            else
-                            {
-                                <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
-                            }
-                        </Actions>
-                    </EmptyList>
-                }
-                else
-                {
-                    <div class="album-rows" role="table" aria-label="@L["Title"]">
-                        <div class="album-row album-row-head" role="row">
-                            <span class="album-cover" role="columnheader"><span class="visually-hidden">@L["Column.Cover"]</span></span>
-                            <span class="album-main" role="columnheader">@L["Column.Album"]</span>
-                            <span class="album-date" role="columnheader">@L["Column.Date"]</span>
-                            <span class="album-editions" role="columnheader">@L["Column.Editions"]</span>
-                            <span class="album-state" role="columnheader">@L["Column.State"]</span>
-                            <span class="album-modified" role="columnheader">@L["Column.Modified"]</span>
-                            <span class="album-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
-                        </div>
-                        @foreach (var row in _list.Albums.Items)
-                        {
-                            var label = Labels.Album(row.Album, _settings!.AlbumLabelFormat);
-                            <div class="album-row" role="row">
-                                <span class="album-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
-                                <span class="album-main" role="cell">
-                                    <a class="album-label" href="@AppPaths.AdminEditAlbum(row.Album.Id)">@label</a>
-                                    <span class="album-authors">@AuthorsText(row)</span>
-                                </span>
-                                <span class="album-meta">
-                                    <span class="album-date" role="cell">
-                                        @if (row.FirstPublicationYear is { } year)
-                                        {
-                                            @Format.PartialDate(year, row.FirstPublicationMonth)
-                                        }
-                                        else
-                                        {
-                                            <NotSet Gender="GrammaticalGender.Feminine" />
-                                        }
-                                    </span>
-                                    <span class="album-editions" role="cell">
-                                        <a href="@AppPaths.AdminAlbumEditions(row.Album.Id)" title="@L["Menu.Editions"]"
-                                           data-empty="@(row.EditionCount + row.PurchaseIntentCount == 0)">@EditionsText(row)</a>
-                                    </span>
-                                    <span class="album-state" role="cell"><CollectionStateTag State="row.State" /></span>
-                                </span>
-                                <span class="album-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
-                                <span class="album-actions" role="cell">
-                                    <Button Href="@AppPaths.AdminEditAlbum(row.Album.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
-                                            IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", label]" />
-                                    <ActionsMenu Id="@($"album-actions-{row.Album.Id:N}")" Label="@L["More", label]">
-                                        <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["Menu.Editions"]" />
-                                        <MenuItem Href="@AppPaths.Album(row.Album.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
-                                        <MenuItem Href="@((ListOnly with { Merge = row.Album.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
-                                        <MenuSeparator />
-                                        <MenuItem Href="@((ListOnly with { Delete = row.Album.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"
-                                                  Variant="ButtonVariant.Delete" />
-                                    </ActionsMenu>
-                                </span>
-                            </div>
-                        }
+                    var label = Labels.Album(row.Album, _settings!.AlbumLabelFormat);
+                    <div class="album-row" role="row">
+                        <span class="album-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
+                        <span class="album-main" role="cell">
+                            <a class="album-label" href="@AppPaths.AdminEditAlbum(row.Album.Id)">@label</a>
+                            <span class="album-authors">@AuthorsText(row)</span>
+                        </span>
+                        <span class="album-meta">
+                            <span class="album-date" role="cell">
+                                @if (row.FirstPublicationYear is { } year)
+                                {
+                                    @Format.PartialDate(year, row.FirstPublicationMonth)
+                                }
+                                else
+                                {
+                                    <NotSet Gender="GrammaticalGender.Feminine" />
+                                }
+                            </span>
+                            <span class="album-editions" role="cell">
+                                <a href="@AppPaths.AdminAlbumEditions(row.Album.Id)" title="@L["Menu.Editions"]"
+                                   data-empty="@(row.EditionCount + row.PurchaseIntentCount == 0)">@EditionsText(row)</a>
+                            </span>
+                            <span class="album-state" role="cell"><CollectionStateTag State="row.State" /></span>
+                        </span>
+                        <span class="album-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
+                        <span class="album-actions" role="cell">
+                            <Button Href="@AppPaths.AdminEditAlbum(row.Album.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
+                                    IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", label]" />
+                            <ActionsMenu Id="@($"album-actions-{row.Album.Id:N}")" Label="@L["More", label]">
+                                <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["Menu.Editions"]" />
+                                <MenuItem Href="@AppPaths.Album(row.Album.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
+                                <MenuItem Href="@((ListOnly with { Merge = row.Album.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
+                                <MenuSeparator />
+                                <MenuItem Href="@((ListOnly with { Delete = row.Album.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"
+                                          Variant="ButtonVariant.Delete" />
+                            </ActionsMenu>
+                        </span>
                     </div>
-
-                    <Pagination Number="_list.Albums.Number" Size="_list.Albums.Size" TotalCount="_list.Albums.TotalCount"
-                                ItemsLabel="@L["Title"]" PageHref="@(page => (ListOnly with { Page = page }).Href())" />
                 }
             </div>
-        </Block>
 
+            <Pagination Number="_list.Albums.Number" Size="_list.Albums.Size" TotalCount="_list.Albums.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (ListOnly with { Page = page }).Href())" />
+        }
+    </ChildContent>
+    <Dialogs>
         @if (_dialogAlbum is not null)
         {
-            var closeHref = ListOnly.Href();
             var subject = Labels.Album(_dialogAlbum.Album, _settings!.AlbumLabelFormat);
             if (_query.Merge is not null)
             {
-                <Dialog Id="album-merge" Title="@L["Merge.Title"]" Subject="@subject" Tone="DialogTone.Choice" CloseHref="@closeHref">
-                    <ChildContent>
-                        <p>@L["Merge.Lead"]</p>
-                        <form class="album-merge-search" method="get" action="@AppPaths.AdminAlbums" role="search">
-                            @HiddenFields(ListOnly with { Merge = _dialogAlbum.Album.Id })
-                            <label class="visually-hidden" for="album-merge-text">@L["Merge.Search"]</label>
-                            <input id="album-merge-text" name="@AlbumListQuery.MergeTextName" type="search" value="@_query.MergeText"
-                                   placeholder="@L["Merge.Placeholder"]" autocomplete="off" />
-                            <Button Type="submit" Icon="IconName.Search" Label="@L["Merge.SearchButton"]" />
-                        </form>
-                        @if (_candidates is null)
-                        {
-                            <p class="album-dialog-note">@L["Merge.Prompt"]</p>
-                        }
-                        else if (_candidates.Count == 0)
-                        {
-                            <p class="album-dialog-note">@L["Merge.None", _query.MergeText!]</p>
-                        }
-                        else
-                        {
-                            <div class="album-merge-candidates" role="radiogroup" aria-label="@L["Merge.Candidates"]">
-                                @foreach (var (candidate, index) in _candidates.Select((candidate, index) => (candidate, index)))
-                                {
-                                    <label class="album-merge-candidate">
-                                        <input type="radio" name="other" value="@candidate.Album.Id" form="album-merge-continue" checked="@(index == 0)" />
-                                        <span>
-                                            <strong>@Labels.Album(candidate.Album, _settings.AlbumLabelFormat)</strong>
-                                            <span>@CandidateDetail(candidate)</span>
-                                        </span>
-                                    </label>
-                                }
-                            </div>
-                        }
-                        <p class="album-dialog-note">@L["Merge.Note"]</p>
-                    </ChildContent>
-                    <Actions>
-                        <form id="album-merge-continue" method="get" action="@AppPaths.AdminMergeAlbums">
-                            <input type="hidden" name="album" value="@_dialogAlbum.Album.Id" />
-                            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Merge.Continue"]" Disabled="@(_candidates is not { Count: > 0 })" />
-                        </form>
-                    </Actions>
-                </Dialog>
+                <MergeDialog Id="album-merge" Title="@L["Merge.Title"]" Subject="@subject" Lead="@L["Merge.Lead"]" CloseHref="@ListOnly.Href()"
+                             Action="@AppPaths.AdminAlbums" Criteria="@((ListOnly with { Merge = _dialogAlbum.Album.Id }).Parameters())"
+                             Text="@_query.MergeText" SearchLabel="@L["Merge.Search"]" Placeholder="@L["Merge.Placeholder"]"
+                             Candidates="_candidates" Prompt="@L["Merge.Prompt"]" None="@L["Merge.None", _query.MergeText ?? ""]"
+                             CandidatesLabel="@L["Merge.Candidates"]" Note="@L["Merge.Note"]" ContinueAction="@AppPaths.AdminMergeAlbums"
+                             SubjectName="album" SubjectId="_dialogAlbum.Album.Id" />
             }
-            else if (_impact is { BlockedBy.Count: > 0 })
+            else
             {
-                <Dialog Id="album-deletion" Title="@L["Refusal.Title"]" Subject="@subject" Tone="DialogTone.Refusal" CloseHref="@closeHref"
-                        CloseLabel="@L["Refusal.Close"]">
-                    <p>@L["Refusal.Lead"]</p>
-                    <DeletionImpactSummary Impact="_impact" />
-                    @foreach (var kind in _impact.BlockedBy.Select(count => count.Kind).Distinct())
-                    {
-                        <p class="album-dialog-note">@L[$"Refusal.Hint.{kind}"]</p>
-                    }
-                </Dialog>
-            }
-            else if (_impact is not null)
-            {
-                <Dialog Id="album-deletion" Title="@L["Deletion.Title"]" Subject="@subject" Tone="DialogTone.Deletion" CloseHref="@closeHref">
-                    <ChildContent>
-                        <p>@L["Deletion.Lead"]</p>
-                        <DeletionImpactSummary Impact="_impact" />
-                        @if (_deletionProblem is not null)
-                        {
-                            <ErrorMessage Problem="_deletionProblem" />
-                        }
-                    </ChildContent>
-                    <Actions>
-                        <form method="post" @formname="@DeletionFormName" @onsubmit="DeleteAsync">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="@nameof(Version)" value="@_dialogAlbum.Version" />
-                            <input type="hidden" name="@nameof(Fingerprint)" value="@_impact.Fingerprint" />
-                            <Button Type="submit" Variant="ButtonVariant.Delete" Label="@L["Deletion.Confirm"]" />
-                        </form>
-                    </Actions>
-                </Dialog>
-            }
-            else if (_deletionProblem is not null)
-            {
-                <Dialog Id="album-deletion" Title="@L["Deletion.Title"]" Subject="@subject" Tone="DialogTone.Refusal" CloseHref="@closeHref"
-                        CloseLabel="@L["Refusal.Close"]">
-                    <ErrorMessage Problem="_deletionProblem" />
-                </Dialog>
+                <DeletionDialog Id="album-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@subject"
+                                CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                                RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_deletionProblem"
+                                Version="_dialogAlbum.Version" OnConfirm="DeleteAsync" />
             }
         }
-    }
-</div>
+    </Dialogs>
+</ListLayout>
 
 @code {
     private const string DeletionFormName = "album-deletion";
@@ -224,11 +145,11 @@
     private HttpContext? HttpContext { get; set; }
 
     /// <summary>The version of the album whose deletion is confirmed.</summary>
-    [SupplyParameterFromForm(FormName = DeletionFormName)]
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.VersionName)]
     private uint? Version { get; set; }
 
     /// <summary>The fingerprint of the impact of the deletion the administrator confirmed.</summary>
-    [SupplyParameterFromForm(FormName = DeletionFormName)]
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.FingerprintName)]
     private string? Fingerprint { get; set; }
 
     private AlbumListQuery _query = AlbumListQuery.All;
@@ -239,7 +160,7 @@
     private AlbumAdminListItem? _dialogAlbum;
     private DeletionImpact? _impact;
     private ApiProblem? _deletionProblem;
-    private IReadOnlyList<AlbumAdminListItem>? _candidates;
+    private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
 
     // The list with its criteria, without its dialogs: where a link of the list, or the closing of a dialog, leads.
     private AlbumListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null };
@@ -250,7 +171,7 @@
         try
         {
             // The number of albums is the one of the menu, read once per request; without it, the list goes on.
-            _counts = await TryAsync(RecordCounts.GetAsync());
+            _counts = await RecordCounts.TryGetAsync();
             _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
             _list = await Api.GetAsync<AlbumAdminList>(_query.ApiPath());
             // A page beyond the last one (the page of its only album once deleted, an old address) is no empty list: its
@@ -292,11 +213,16 @@
     }
 
     // The other albums found by the search of the dialog, the album itself excepted.
-    private async Task<IReadOnlyList<AlbumAdminListItem>?> LoadCandidatesAsync(string text)
+    private async Task<IReadOnlyList<MergeDialog.MergeCandidate>?> LoadCandidatesAsync(string text)
     {
-        var found = await Api.GetAsync<AlbumAdminList>(
-            $"/admin/albums?{AlbumListQuery.TextName}={Uri.EscapeDataString(text)}&pageSize={CandidateCount + 1}");
-        return [.. found.Albums.Items.Where(row => row.Album.Id != _dialogAlbum!.Album.Id).Take(CandidateCount)];
+        var found = await Api.GetAsync<AlbumAdminList>(_query.MergeCandidatesApiPath(text, CandidateCount));
+        return
+        [
+            .. found.Albums.Items
+                .Where(row => row.Album.Id != _dialogAlbum!.Album.Id)
+                .Take(CandidateCount)
+                .Select(row => new MergeDialog.MergeCandidate(row.Album.Id, Labels.Album(row.Album, _settings!.AlbumLabelFormat), CandidateDetail(row))),
+        ];
     }
 
     private async Task DeleteAsync()
@@ -323,33 +249,11 @@
         Navigation.NavigateTo(ListOnly.Href());
     }
 
-    private static async Task<T?> TryAsync<T>(Task<T> task) where T : class
-    {
-        try
-        {
-            return await task;
-        }
-        catch (ApiProblemException)
-        {
-            return null;
-        }
-    }
-
     private string CountText() => _list!.Albums.TotalCount switch
     {
         0 => L["Count.None"],
         1 => L["Count.One"],
         var count => L["Count.Other", Format.Number(count)],
-    };
-
-    // Under an entry of the navigation, or out of all the albums once searched or filtered.
-    private string? CountDetail() => _query.Entry switch
-    {
-        "#" => L["Count.Digits"].Value,
-        "@" => L["Count.Others"].Value,
-        { } letter => L["Count.Letter", letter].Value,
-        null when (_query.Text is not null || _query.ActiveFilterCount > 0) && _counts is not null => L["Count.Of", Format.Number(_counts.Albums)].Value,
-        _ => null,
     };
 
     private static string AuthorsText(AlbumAdminListItem row) =>
@@ -403,8 +307,7 @@
     }
 
     // The fields of the filters: each record chosen by typing its name, interactive, and the state in a list.
-    private RenderFragment FiltersPanel => @<text>
-        <div class="album-filters">
+    private RenderFragment FiltersPanel => @<ListFilters Note="@L["Filters.Note"]">
             <Field Id="filter-series" Label="@L["Filter.Series"]" Context="control">
                 <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Series" Name="@AlbumListQuery.SeriesName"
                               Value="@Option(_list!.Filters.Series, s => new(s.Id, s.Title, null))" Placeholder="@L["Filter.Any"]" />
@@ -440,25 +343,10 @@
                     }
                 </select>
             </Field>
-        </div>
-        <div class="album-filters-foot">
-            <p>@L["Filters.Note"]</p>
-            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Filters.Apply"]" />
-        </div>
-    </text>;
+        </ListFilters>;
 
     private static RecordOption? Option<T>(T? item, Func<T, RecordOption> option) where T : class => item is null ? null : option(item);
 
-    // The criteria of a query as hidden fields of a form that leads to the list, so that it keeps them.
-    private static RenderFragment HiddenFields(AlbumListQuery query) => builder =>
-    {
-        foreach (var (name, value) in query.Parameters())
-        {
-            builder.OpenElement(0, "input");
-            builder.AddAttribute(1, "type", "hidden");
-            builder.AddAttribute(2, "name", name);
-            builder.AddAttribute(3, "value", value);
-            builder.CloseElement();
-        }
-    };
+    // The filters chosen, kept by the search while their panel is folded.
+    private RenderFragment KeptFilters => @<QueryFields Parameters="@((_query with { Text = null, Entry = null, Page = 1 }).Parameters())" />;
 }

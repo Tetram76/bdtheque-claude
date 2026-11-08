@@ -1,0 +1,41 @@
+@inject IStringLocalizer<ListSummary> L
+@inject DisplayFormatter Format
+
+@* The count of a list of the administration and its order, recalled in plain words (visuel/liste-albums/contenu.md):
+   « 143 albums sous la lettre B », « 38 albums sur 2 847 ». *@
+<p class="list-summary">
+    <span><strong>@Count</strong> @Detail()</span>
+    <span>@Order</span>
+</p>
+
+@code {
+    /// <summary>The number of records of the list, in words (e.g. « 143 albums »).</summary>
+    [Parameter, EditorRequired]
+    public string Count { get; set; } = null!;
+
+    /// <summary>The entry of the navigation by initial the list is under; <c>null</c> for « Toutes ».</summary>
+    [Parameter]
+    public string? Entry { get; set; }
+
+    /// <summary>Whether the list is searched or filtered, a part of all the records of its type.</summary>
+    [Parameter]
+    public bool Narrowed { get; set; }
+
+    /// <summary>The number of all the records of its type; none when the API did not give it.</summary>
+    [Parameter]
+    public int? WholeCount { get; set; }
+
+    /// <summary>The order of the list (e.g. « Triées par titre »).</summary>
+    [Parameter, EditorRequired]
+    public string Order { get; set; } = null!;
+
+    // Under an entry of the navigation, or out of all the records once searched or filtered.
+    private string? Detail() => Entry switch
+    {
+        "#" => L["Digits"].Value,
+        "@" => L["Others"].Value,
+        { } letter => L["Letter", letter].Value,
+        null when Narrowed && WholeCount is { } whole => L["Of", Format.Number(whole)].Value,
+        _ => null,
+    };
+}

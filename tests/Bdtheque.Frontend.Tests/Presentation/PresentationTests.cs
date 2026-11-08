@@ -144,7 +144,33 @@ public sealed class PresentationTests : BunitContext
         var cover = Render<Cover>();
 
         Assert.Empty(cover.FindAll("img"));
-        Assert.Equal("true", cover.Find("svg.cover").GetAttribute("aria-hidden"));
+        // The stripes of the mockups, painted by the theme (--cover-generic), nothing drawn in it.
+        var generic = cover.Find("svg.cover.cover-generic");
+        Assert.Equal("true", generic.GetAttribute("aria-hidden"));
+        Assert.Empty(generic.Children);
+    }
+
+    [Fact]
+    public void Cover_OfAPlaceWithoutAlbum_IsABlankCard()
+    {
+        var cover = Render<Cover>(parameters => parameters.Add(p => p.Blank, true));
+
+        var blank = cover.Find("svg.cover.cover-blank");
+        Assert.Equal("true", blank.GetAttribute("aria-hidden"));
+        Assert.Empty(cover.FindAll(".cover-generic"));
+    }
+
+    [Fact]
+    public void CoverPile_TellsAVolumeWithoutCoverFromAPlaceBeyondTheVolumes()
+    {
+        var first = new AlbumCover(Guid.CreateVersion7());
+
+        // Two regular volumes, the second without cover: the third place has no album.
+        var pile = Render<CoverPile>(parameters => parameters.Add(p => p.Covers, [first, null]));
+
+        Assert.Equal(
+            ["cover cover-blank", "cover cover-generic", "cover"],
+            pile.FindAll(".cover").Select(cover => cover.GetAttribute("class")));
     }
 
     [Fact]

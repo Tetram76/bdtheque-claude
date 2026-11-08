@@ -57,9 +57,6 @@
   <data name="Filters.Note" xml:space="preserve">
     <value>Série, auteur, éditeur, collection, genre et univers se choisissent en tapant leur nom. Un univers retient aussi les albums de ses sous-univers ; genres et univers sont ceux qu'affiche l'album, les siens et ceux de sa série.</value>
   </data>
-  <data name="Filters.Apply" xml:space="preserve">
-    <value>Filtrer</value>
-  </data>
   <data name="State.All" xml:space="preserve">
     <value>Tous les albums</value>
   </data>
@@ -80,18 +77,6 @@
   </data>
   <data name="Count.Other" xml:space="preserve">
     <value>{0} albums</value>
-  </data>
-  <data name="Count.Letter" xml:space="preserve">
-    <value>sous la lettre {0}</value>
-  </data>
-  <data name="Count.Digits" xml:space="preserve">
-    <value>sous « # », commençant par un chiffre</value>
-  </data>
-  <data name="Count.Others" xml:space="preserve">
-    <value>sous « @ », commençant par un autre signe</value>
-  </data>
-  <data name="Count.Of" xml:space="preserve">
-    <value>sur {0}</value>
   </data>
   <data name="Order" xml:space="preserve">
     <value>Triés par titre, la série tenant lieu de titre aux albums qui n'en ont pas</value>
@@ -177,20 +162,11 @@
   <data name="Deletion.Lead" xml:space="preserve">
     <value>La suppression est définitive et emporte avec l'album :</value>
   </data>
-  <data name="Deletion.Confirm" xml:space="preserve">
-    <value>Supprimer définitivement</value>
-  </data>
-  <data name="Refusal.Title" xml:space="preserve">
-    <value>Suppression impossible</value>
-  </data>
   <data name="Refusal.Lead" xml:space="preserve">
     <value>L'album est encore désigné ailleurs : la suppression est refusée tant que ce lien existe.</value>
   </data>
   <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
     <value>Retirez d'abord l'album des critères de ces recherches enregistrées, puis recommencez.</value>
-  </data>
-  <data name="Refusal.Close" xml:space="preserve">
-    <value>Fermer</value>
   </data>
   <data name="Merge.Title" xml:space="preserve">
     <value>Fusionner deux albums</value>
@@ -204,9 +180,6 @@
   <data name="Merge.Placeholder" xml:space="preserve">
     <value>Titre de l'autre album ou de sa série…</value>
   </data>
-  <data name="Merge.SearchButton" xml:space="preserve">
-    <value>Rechercher</value>
-  </data>
   <data name="Merge.Prompt" xml:space="preserve">
     <value>Recherchez l'autre album par son titre ou par celui de sa série.</value>
   </data>
@@ -218,8 +191,5 @@
   </data>
   <data name="Merge.Note" xml:space="preserve">
     <value>L'étape suivante présentera les deux albums côte à côte, avec ce que la fusion garde de chacun.</value>
-  </data>
-  <data name="Merge.Continue" xml:space="preserve">
-    <value>Continuer</value>
   </data>
 </root>
