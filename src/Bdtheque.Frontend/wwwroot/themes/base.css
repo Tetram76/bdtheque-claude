@@ -439,6 +439,11 @@ input[type="radio"] {
     border-bottom: var(--border-header);
 }
 
+/* The focus within the header, read on its own surface. */
+.app-header :focus-visible {
+    outline-color: var(--color-text-on-header);
+}
+
 .app-main {
     max-width: var(--page-max-width);
     margin: 0 auto;

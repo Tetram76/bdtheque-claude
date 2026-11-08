@@ -83,6 +83,11 @@
     box-shadow: var(--shadow-floating);
 }
 
+/* The focus within the panel, read on the panel rather than on the header that holds it. */
+.admin-menu ::deep :focus-visible {
+    outline-color: var(--color-text);
+}
+
 .admin-menu:popover-open {
     display: flex;
     flex-direction: column;

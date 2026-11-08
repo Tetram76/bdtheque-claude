@@ -77,6 +77,17 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
     }
 
     [Fact]
+    public async Task FocusInTheHeader_IsOfItsWhiteText()
+    {
+        var page = await OpenAsync(AppPaths.Home);
+        var help = page.Locator(".header-help");
+
+        await help.FocusAsync();
+
+        Assert.Equal("rgb(255, 255, 255)", await help.EvaluateAsync<string>("help => getComputedStyle(help).outlineColor"));
+    }
+
+    [Fact]
     public async Task Page_UsesInterTight_ServedByTheApplication()
     {
         var page = await OpenAsync(AppPaths.Home);
