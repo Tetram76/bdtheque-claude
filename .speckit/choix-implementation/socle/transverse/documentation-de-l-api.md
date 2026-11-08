@@ -5,10 +5,11 @@ description: 'OpenAPI et Scalar, servis hors production.'
 applies_to:
   - 'src/Bdtheque.Api/Program.cs'
   - 'src/Bdtheque.Api/Hosting/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 ---
 
 # Documentation de l'API
 
-- L'API expose sa spécification via **OpenAPI** (génération native ASP.NET Core, `Microsoft.AspNetCore.OpenApi`).
-- Une interface de documentation interactive (**Scalar**, open source MIT) est exposée par `api` en environnement de développement et dans l'environnement de validation fonctionnelle ([Environnement de validation fonctionnelle](../../deploiement/environnement-de-validation-fonctionnelle.md)) uniquement, jamais en production.
+- La spécification **OpenAPI** de l'API est produite par la génération native d'ASP.NET Core, sans bibliothèque tierce.
+  - **Alternative écartée (Swashbuckle)** : ASP.NET Core ne l'inclut plus depuis .NET 9, la génération native l'ayant remplacée.
+- Son interface interactive, **Scalar** (open source, MIT), n'est servie qu'en développement et dans l'[Environnement de validation fonctionnelle](../../deploiement/environnement-de-validation-fonctionnelle.md), là où l'on explore l'API ; jamais en production, où elle ne servirait personne.
