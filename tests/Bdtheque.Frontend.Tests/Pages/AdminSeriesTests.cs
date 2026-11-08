@@ -23,7 +23,7 @@ namespace Bdtheque.Frontend.Tests.Pages;
 public sealed class AdminSeriesTests : BunitContext, IDisposable
 {
     private static readonly Guid Genre = Guid.Parse("01900000-0000-7000-8000-0000000000a2");
-    private static readonly AlbumCover FirstCover = new(Guid.Parse("01900000-0000-7000-8000-0000000000c1"));
+    private static readonly AlbumCover FirstCover = new(Guid.Parse("01900000-0000-7000-8000-0000000000c1"), TestCovers.Palette);
 
     private static readonly SeriesAdminListItem Barracuda = new(
         Guid.Parse("01900000-0000-7000-8000-000000000001"), "Barracuda", SeriesStatus.Completed,

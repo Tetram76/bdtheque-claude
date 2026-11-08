@@ -15,7 +15,17 @@ public sealed record AlbumCard(AlbumSummary Album, AlbumRating? Rating, AlbumCov
 
 /// <summary>The cover of an album: a visual of one of its editions.</summary>
 /// <param name="VisualId">The visual, whose media <c>api</c> serves (<see cref="VisualMediaRoutes"/>).</param>
-public sealed record AlbumCover(Guid VisualId);
+/// <param name="Palette">The colours drawn from it, e.g. for the spine of the album shown as a book.</param>
+public sealed record AlbumCover(Guid VisualId, CoverPalette Palette);
+
+/// <summary>
+/// The three colours drawn from a cover (visuel/dashboard/la-couverture-du-jour.md), each in the hexadecimal notation
+/// of CSS, <c>#RRGGBB</c>. Legibility of a text set on them is up to the theme that paints them.
+/// </summary>
+/// <param name="Dominant">The colour that most stands out on the cover.</param>
+/// <param name="Deep">A deep version of <paramref name="Dominant"/>, on which white text is legible.</param>
+/// <param name="Accent">A colour of the cover that sets itself apart from <paramref name="Dominant"/>.</param>
+public sealed record CoverPalette(string Dominant, string Deep, string Accent);
 
 /// <summary>
 /// What represents a series: the number of its albums, and the covers of its first volumes, whether the

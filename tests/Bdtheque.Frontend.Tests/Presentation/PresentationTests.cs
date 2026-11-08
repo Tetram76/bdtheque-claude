@@ -163,7 +163,7 @@ public sealed class PresentationTests : BunitContext
     [Fact]
     public void CoverPile_TellsAVolumeWithoutCoverFromAPlaceBeyondTheVolumes()
     {
-        var first = new AlbumCover(Guid.CreateVersion7());
+        var first = new AlbumCover(Guid.CreateVersion7(), TestCovers.Palette);
 
         // Two regular volumes, the second without cover: the third place has no album.
         var pile = Render<CoverPile>(parameters => parameters.Add(p => p.Covers, [first, null]));

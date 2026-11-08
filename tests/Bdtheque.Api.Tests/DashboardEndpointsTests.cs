@@ -208,6 +208,47 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         Assert.Equal([edition], found!.Items.Select(i => i.Edition.Id));
     }
 
+    [Fact]
+    public async Task SpotlightColors_AreThoseOfTheCoverOfTheEditionOfTheDay_DrawnByTheFirstDisplay()
+    {
+        var publisher = await CreatePublisherAsync("Dargaud");
+        var album = await CreateAlbumAsync("Blacksad", null);
+        var edition = await CreateOwnedEditionAsync(album.Id, publisher.Id);
+        var cover = await UploadAsync(album.Id, edition, VisualType.Cover);
+        await CreateOwnedEditionAsync(album.Id, publisher.Id);
+
+        // Any page of the theme may be the first of the day, before the dashboard.
+        var colors = await GetSpotlightColorsAsync(Day);
+        var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight;
+
+        Assert.Equal(edition, spotlight.Edition.Id);
+        Assert.Equal(cover.Palette, colors.Palette);
+        Assert.Equal(1, await SpotlightCountAsync());
+    }
+
+    [Fact]
+    public async Task SpotlightColors_OfAnEditionWithoutCover_AreNone()
+    {
+        var publisher = await CreatePublisherAsync("Casterman");
+        await CreateOwnedEditionAsync((await CreateAlbumAsync("Corto Maltese", null)).Id, publisher.Id);
+
+        var colors = await GetSpotlightColorsAsync(Day);
+
+        Assert.Null(colors.Palette);
+        Assert.Equal(1, await SpotlightCountAsync());
+    }
+
+    [Fact]
+    public async Task SpotlightColors_OfAnEmptyCollection_AreNone_WithoutAnyDraw()
+    {
+        await CreateAlbumAsync("Blueberry", null);
+
+        var colors = await GetSpotlightColorsAsync(Day);
+
+        Assert.Null(colors.Palette);
+        Assert.Equal(0, await SpotlightCountAsync());
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(21)]
@@ -224,6 +265,9 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
     private async Task<Dashboard> GetDashboardAsync(DateOnly day, int? latestCount = null) =>
         (await _client.GetFromJsonAsync<Dashboard>(
             $"/catalog/dashboard?day={day:yyyy-MM-dd}{(latestCount is null ? "" : $"&latestCount={latestCount}")}"))!;
+
+    private async Task<SpotlightColors> GetSpotlightColorsAsync(DateOnly day) =>
+        (await _client.GetFromJsonAsync<SpotlightColors>($"/catalog/spotlight/colors?day={day:yyyy-MM-dd}"))!;
 
     private async Task<int> SpotlightCountAsync()
     {
@@ -287,7 +331,7 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         var response = await _client.PostAsync(VisualsUri(albumId, editionId), form);
         response.EnsureSuccessStatusCode();
         var visual = (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals.Single(v => !before.Contains(v.Id));
-        return new AlbumCover(visual.Id);
+        return new AlbumCover(visual.Id, TestImages.UploadedPalette);
     }
 
     private async Task<uint> GetAlbumVersionAsync(Guid albumId) =>

@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Query;
 using ContractEnums = Bdtheque.Contracts.Enums;
@@ -53,13 +54,21 @@ internal static class CatalogExpressions
     public static AlbumCard ToCard(this Album album) => throw NotExpanded();
 
     /// <summary>Marker of the visual of the cover of an album, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
-    public static Guid? CoverVisualId(this Album album) => throw NotExpanded();
+    public static CoverVisual? CoverVisualOf(this Album album) => throw NotExpanded();
 
     /// <summary>Marker of the visual of the first cover of an edition, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
-    public static Guid? CoverVisualId(this Edition edition) => throw NotExpanded();
+    public static CoverVisual? CoverVisualOf(this Edition edition) => throw NotExpanded();
 
     /// <summary>The cover of an album, from its visual.</summary>
-    public static AlbumCover? ToCover(Guid? visualId) => visualId is { } id ? new AlbumCover(id) : null;
+    /// <remarks>Built once read: the database stores the colours as numbers, which it does not write in CSS.</remarks>
+    public static AlbumCover? ToCover(CoverVisual? visual) => visual is null ? null : new AlbumCover(visual.Id, ToPalette(visual)!);
+
+    /// <summary>The colours of a cover, from its visual, built once read like <see cref="ToCover"/>.</summary>
+    public static CoverPalette? ToPalette(CoverVisual? visual) =>
+        visual is null ? null : new CoverPalette(visual.Dominant.ToString(), visual.Deep.ToString(), visual.Accent.ToString());
+
+    /// <summary>The visual of a cover as read: its identifier and its colours.</summary>
+    public sealed record CoverVisual(Guid Id, RgbColor Dominant, RgbColor Deep, RgbColor Accent);
 
     private static readonly Expression<Func<Album, AlbumSummary>> AlbumSummaryOf = a => new AlbumSummary(
         a.Id,
@@ -86,31 +95,31 @@ internal static class CatalogExpressions
     private static readonly Expression<Func<Album, AlbumCard>> AlbumCardOf = a => new AlbumCard(
         a.ToSummary(),
         EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating),
-        ToCover(a.CoverVisualId()),
+        ToCover(a.CoverVisualOf()),
         a.PurchaseIntents.Any());
 
     // fonctionnel/regles-metier/couverture-d-un-album.md, among all the editions: the oldest edition with a cover, by
     // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
     // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered:
     // the first created.
-    private static readonly Expression<Func<Album, Guid?>> CoverVisualIdOf = a => a.Editions
+    private static readonly Expression<Func<Album, CoverVisual?>> AlbumCoverVisualOf = a => a.Editions
         .SelectMany(e => e.Visuals
             .Where(v => v.Type == DomainEnums.VisualType.Cover)
-            .Select(v => new { e.PublicationYear, EditionId = e.Id, v.DisplayOrder, VisualId = v.Id }))
+            .Select(v => new { e.PublicationYear, EditionId = e.Id, Visual = v }))
         .OrderBy(c => c.PublicationYear)
         .ThenBy(c => c.EditionId)
-        .ThenBy(c => c.DisplayOrder)
-        .ThenBy(c => c.VisualId)
-        .Select(c => (Guid?)c.VisualId)
+        .ThenBy(c => c.Visual.DisplayOrder)
+        .ThenBy(c => c.Visual.Id)
+        .Select(c => new CoverVisual(c.Visual.Id, c.Visual.Palette.Dominant, c.Visual.Palette.Deep, c.Visual.Palette.Accent))
         .FirstOrDefault();
 
     // The first cover of an edition in the order of its visuals (that of Edition.GetOrderedVisuals): an edition
     // represented by its own cover, e.g. in the spotlight of the dashboard.
-    private static readonly Expression<Func<Edition, Guid?>> EditionCoverVisualIdOf = e => e.Visuals
+    private static readonly Expression<Func<Edition, CoverVisual?>> EditionCoverVisualOf = e => e.Visuals
         .Where(v => v.Type == DomainEnums.VisualType.Cover)
         .OrderBy(v => v.DisplayOrder)
         .ThenBy(v => v.Id)
-        .Select(v => (Guid?)v.Id)
+        .Select(v => new CoverVisual(v.Id, v.Palette.Dominant, v.Palette.Deep, v.Palette.Accent))
         .FirstOrDefault();
 
     // Owned first, whatever its intents; then aimed at by an intent, on the album or on one of its editions.
@@ -201,8 +210,8 @@ internal static class CatalogExpressions
                 nameof(ToSummary) => EditionSummaryOf,
                 nameof(ToCard) => AlbumCardOf,
                 nameof(CollectionState) => CollectionStateOf,
-                nameof(CoverVisualId) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => CoverVisualIdOf,
-                nameof(CoverVisualId) => EditionCoverVisualIdOf,
+                nameof(CoverVisualOf) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => AlbumCoverVisualOf,
+                nameof(CoverVisualOf) => EditionCoverVisualOf,
                 _ => null,
             };
             if (expression is null)

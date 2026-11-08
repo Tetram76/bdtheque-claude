@@ -28,7 +28,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
     private static readonly AlbumAdminListItem Bijoux = new(
         new AlbumSummary(Guid.Parse("01900000-0000-7000-8000-000000000001"), "Les Bijoux de la Castafiore", Series, "Tintin",
             AlbumType.Regular, false, 21, null, null, true),
-        new AlbumCover(Guid.Parse("01900000-0000-7000-8000-0000000000c1")),
+        new AlbumCover(Guid.Parse("01900000-0000-7000-8000-0000000000c1"), TestCovers.Palette),
         [new AuthorListItem(Guid.NewGuid(), "Remi", "Georges", "Hergé")],
         1963, null, 2, 1, AlbumCollectionState.InCollection, new DateTimeOffset(2026, 10, 12, 22, 30, 0, TimeSpan.Zero), 41);
 
