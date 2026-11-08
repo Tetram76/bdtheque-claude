@@ -127,7 +127,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
     [InlineData("q=tintin", "143 albums sur 2 847", "")]
     public void Summary_TheCountUnderTheEntryOrOutOfAllTheAlbums_AndTheOrder(string criteria, string count, string _)
     {
-        var summary = Open(criteria).Find(".admin-list-summary");
+        var summary = Open(criteria).Find(".list-summary");
 
         Assert.Equal(count, Text(summary.Children[0]));
         Assert.Equal("Triés par titre, la série tenant lieu de titre aux albums qui n'en ont pas", Text(summary.Children[1]));
@@ -159,16 +159,16 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         Assert.Equal("true", form.QuerySelector("button[aria-controls]")!.GetAttribute("aria-expanded"));
         Assert.Equal(
             ["Série", "Auteur", "Éditeur", "Collection éditeur", "Genre", "Univers", "Collection"],
-            form.QuerySelectorAll(".album-filters label").Select(Text));
+            form.QuerySelectorAll(".list-filters label").Select(Text));
         Assert.Equal(
             ["seriesId", "authorId", "publisherId", "publisherCollectionId", "genreId", "universeId"],
-            form.QuerySelectorAll(".album-filters input[type='hidden']").Select(input => input.GetAttribute("name")));
-        Assert.Equal(Genre.ToString(), form.QuerySelector(".album-filters input[name='genreId']")!.GetAttribute("value"));
+            form.QuerySelectorAll(".list-filters input[type='hidden']").Select(input => input.GetAttribute("name")));
+        Assert.Equal(Genre.ToString(), form.QuerySelector(".list-filters input[name='genreId']")!.GetAttribute("value"));
         Assert.Equal(
             [("", "Tous les albums"), ("InCollection", "Dans la collection"), ("PurchaseIntent", "Intention d'achat"), ("OutsideCollection", "Hors collection")],
             form.QuerySelectorAll("select[name='state'] option").Select(option => (option.GetAttribute("value"), Text(option))));
         Assert.Equal("PurchaseIntent", form.QuerySelector("select[name='state'] option[selected]")!.GetAttribute("value"));
-        Assert.Equal("Filtrer", Text(form.QuerySelector(".album-filters-foot button[type='submit']")!));
+        Assert.Equal("Filtrer", Text(form.QuerySelector(".list-filters-foot button[type='submit']")!));
     }
 
     [Fact]
@@ -261,7 +261,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
                 ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido · octobre 2023 · Aucune édition · 1 intention"),
                 ("Le Bleu est une couleur chaude", "Aucune édition"),
             ],
-            dialog.QuerySelectorAll(".album-merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
+            dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
         Assert.Equal(Blacksad.Album.Id.ToString(), dialog.QuerySelector("input[name='other'][checked]")!.GetAttribute("value"));
         var next = dialog.QuerySelector("#album-merge-continue")!;
         Assert.Equal(AppPaths.AdminMergeAlbums, next.GetAttribute("action"));

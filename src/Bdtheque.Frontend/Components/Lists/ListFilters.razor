@@ -1,0 +1,21 @@
+@inject IStringLocalizer<ListFilters> L
+
+@* The panel of the filters of a list of the administration (visuel/liste-albums/contenu.md), in the form of its search: their
+   fields on a grid, then what they choose from and the button that applies them. *@
+<div class="list-filters">
+    @ChildContent
+</div>
+<div class="list-filters-foot">
+    <p>@Note</p>
+    <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Apply"]" />
+</div>
+
+@code {
+    /// <summary>The fields of the filters.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = null!;
+
+    /// <summary>What the filters choose from, and how (e.g. a universe keeps its sub-universes too).</summary>
+    [Parameter, EditorRequired]
+    public string Note { get; set; } = null!;
+}
