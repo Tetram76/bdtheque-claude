@@ -138,7 +138,7 @@ Ces ports ne sont ouverts qu'au poste lui-même.
 
 L'administration s'ouvre avec le compte fictif de `validation.env` : identifiant `admin`, mot de passe `validation`, que le script affiche aussi.
 
-Le thème, tiré au hasard à chaque visite en production, se choisit ici par l'adresse : `?theme=base`, `?theme=planche` ou `?theme=gazette` (ex. `http://localhost:8180/?theme=planche`). Il reste celui de la visite pour les pages suivantes, jusqu'au prochain choix.
+Le thème, tiré au hasard à chaque visite en production, se choisit ici par l'adresse : `?theme=base`, `?theme=planche`, `?theme=gazette` ou `?theme=couverture` (ex. `http://localhost:8180/?theme=planche`). Il reste celui de la visite pour les pages suivantes, jusqu'au prochain choix.
 
 ### Options
 
