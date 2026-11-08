@@ -41,6 +41,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task Series_ACompleteOneAndOneWithoutAlbum_WhoseDeletionIsAccepted()
+    {
+        var list = (await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.SeriesAdminList>("/admin/series?pageSize=100"))!.Series.Items;
+
+        Assert.Contains(list, series => series.IsComplete);
+        var empty = Assert.Single(list, series => series.Title == ValidationDataLoader.SeriesWithoutAlbumTitle);
+        Assert.Equal(0, empty.Overview.AlbumCount);
+        var impact = await _client.GetFromJsonAsync<Bdtheque.Contracts.Deletion.DeletionImpact>($"/admin/series/{empty.Id}/deletion-impact");
+        Assert.Empty(impact!.BlockedBy);
+    }
+
+    [Fact]
     public async Task PurchaseIntents_TargetWholeAlbumsAndEditions()
     {
         var intents = await _client.GetFromJsonAsync<Page<PurchaseIntentListItem>>("/catalog/purchase-intents?pageSize=100");

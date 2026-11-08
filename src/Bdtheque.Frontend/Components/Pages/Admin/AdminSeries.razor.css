@@ -1,0 +1,133 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the
+   page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
+   row holds on two lines, the pile of covers on the left: the title and the actions, then the status, the albums and
+   whether the series is complete, « À compléter » giving way. A list wide enough for its columns, the fixed ones and at
+   least 12rem for the title, is a table; wider still, the table adds the last modification
+   (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
+.series-rows {
+    container: series-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
+       so that their columns line up. It holds « Modifier » and the « ⋯ » button. */
+    --series-actions-width: 10rem;
+}
+
+.series-row {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+    grid-template-areas: "pile main actions" "pile meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.series-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.series-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+}
+
+/* The pile of covers, a step wider than a cover of the list of the albums for the covers behind the first one. */
+.series-pile {
+    grid-area: pile;
+    --cover-width: 2.25rem;
+}
+
+.series-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.series-title {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.series-status {
+    grid-area: status;
+}
+
+.series-albums {
+    grid-area: albums;
+}
+
+.series-albums[data-empty="True"] {
+    color: var(--color-text-muted);
+}
+
+.series-complete {
+    grid-area: complete;
+}
+
+/* On two lines, a series to complete says nothing: only a complete one is marked. */
+.series-row:not(.series-row-head) .series-complete[data-complete="False"] {
+    display: none;
+}
+
+.series-modified {
+    display: none;
+    grid-area: modified;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.series-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container series-rows (min-width: 60rem) {
+    .series-row {
+        grid-template-columns: 2.75rem minmax(0, 1fr) 6.5rem 14.5rem 7.75rem var(--series-actions-width);
+        grid-template-areas: "pile main status albums complete actions";
+        align-items: center;
+    }
+
+    .series-row-head {
+        display: grid;
+    }
+
+    .series-meta {
+        display: contents;
+        font-size: inherit;
+    }
+
+    .series-row:not(.series-row-head) .series-complete[data-complete="False"] {
+        display: block;
+    }
+}
+
+@container series-rows (min-width: 68rem) {
+    .series-row {
+        grid-template-columns: 2.75rem minmax(0, 1fr) 6.5rem 14.5rem 7.75rem 6.75rem var(--series-actions-width);
+        grid-template-areas: "pile main status albums complete modified actions";
+    }
+
+    .series-modified {
+        display: block;
+    }
+}

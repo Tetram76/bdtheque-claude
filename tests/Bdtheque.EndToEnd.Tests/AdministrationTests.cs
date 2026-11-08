@@ -147,8 +147,10 @@ public sealed class AdministrationApplication : ApplicationHost
         var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Dupuis", null));
         await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(api,
             $"/admin/publishers/{publisher.Id}/collections", new("Repérages", publisher.Version));
-        var series = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", new("Spirou et Fantasio", null, SeriesStatus.InProgress,
-            null, false, false, false, null, null, new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));
+        var series = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Spirou et Fantasio", SeriesStatus.InProgress, false));
+        // The cases of the list of the series: a complete one, and one without status nor album.
+        await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Barracuda", SeriesStatus.Completed, true));
+        await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Bone", null, false));
         var album = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Le Nid des Marsupilamis", series.Id, 12));
         await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id, "978-2-8001-0012-8"), album.Version));
         var wanted = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Le Prisonnier du Bouddha", series.Id, 14));
@@ -182,6 +184,10 @@ public sealed class AdministrationApplication : ApplicationHost
     }
 
     private void Tick() => ApiClock.UtcNow += TimeSpan.FromMinutes(15);
+
+    private static SeriesContent Series(string title, SeriesStatus? status, bool isComplete) =>
+        new(title, null, status, null, isComplete, false, false, null, null, new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null),
+            [], [], []);
 
     private static AlbumContent Album(string? title, Guid series, int volume) =>
         new(title, null, series, AlbumType.Regular, false, volume, null, null, null, null, null, null, null, [], [], []);
