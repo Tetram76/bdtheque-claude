@@ -2,16 +2,18 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// The search, navigation by initial and cross filters of a list of albums (choix-implementation/api/recherche.md),
-/// which the list of the consultation and that of the administration share.
+/// which the list of the consultation and that of the administration share, bound as a whole from the query of their request
+/// (<c>[AsParameters]</c>): the search is its parameter <c>q</c>, each other criterion that of its name.
 /// </summary>
 internal sealed record AlbumFilters(
-    string? Text, string? Entry, Guid? SeriesId, Guid? AuthorId, Guid? PublisherId, Guid? PublisherCollectionId, Guid? GenreId,
+    [FromQuery(Name = "q")] string? Text, string? Entry, Guid? SeriesId, Guid? AuthorId, Guid? PublisherId, Guid? PublisherCollectionId, Guid? GenreId,
     Guid? UniverseId)
 {
     /// <summary>

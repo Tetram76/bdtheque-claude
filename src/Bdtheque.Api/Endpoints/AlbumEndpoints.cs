@@ -103,11 +103,9 @@ internal static class AlbumEndpoints
     /// without a title of its own is filed under the current sort key and entry of its series.
     /// </summary>
     private static async Task<Page<AlbumSummary>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, Guid? seriesId = null,
-        Guid? authorId = null, Guid? publisherId = null, Guid? publisherCollectionId = null, Guid? genreId = null,
-        Guid? universeId = null, int page = 1, int pageSize = Paging.DefaultSize)
+        BdthequeDbContext context, [AsParameters] AlbumFilters filters, CancellationToken cancellationToken, int page = 1,
+        int pageSize = Paging.DefaultSize)
     {
-        var filters = new AlbumFilters(q, entry, seriesId, authorId, publisherId, publisherCollectionId, genreId, universeId);
         var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
         return await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, ListItem, cancellationToken);
     }
@@ -117,11 +115,9 @@ internal static class AlbumEndpoints
     /// filters of the consultation, and where each album stands with regard to the collection, in the same order.
     /// </summary>
     private static async Task<AlbumAdminList> ListForAdministrationAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, Guid? seriesId = null,
-        Guid? authorId = null, Guid? publisherId = null, Guid? publisherCollectionId = null, Guid? genreId = null,
-        Guid? universeId = null, AlbumCollectionState? state = null, int page = 1, int pageSize = Paging.DefaultSize)
+        BdthequeDbContext context, [AsParameters] AlbumFilters filters, CancellationToken cancellationToken,
+        AlbumCollectionState? state = null, int page = 1, int pageSize = Paging.DefaultSize)
     {
-        var filters = new AlbumFilters(q, entry, seriesId, authorId, publisherId, publisherCollectionId, genreId, universeId);
         var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
         if (state is { } kept)
             albums = albums.Where(CatalogExpressions.Expand((Album a) => a.CollectionState() == kept));
