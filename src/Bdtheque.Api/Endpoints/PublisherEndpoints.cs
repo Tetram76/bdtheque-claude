@@ -41,6 +41,7 @@ internal static class PublisherEndpoints
     public static void MapPublishers(this RouteGroupBuilder admin)
     {
         var publishers = admin.MapGroup("/publishers");
+        publishers.MapGet("/", ListForAdministrationAsync);
         publishers.MapGet("/{id:guid}", GetAsync);
         publishers.MapPost("/", CreateAsync);
         publishers.MapPut("/{id:guid}", UpdateAsync);
@@ -72,6 +73,26 @@ internal static class PublisherEndpoints
             .OrderBy(p => p.Name)
             .ThenBy(p => p.Id)
             .ToPageAsync(page, pageSize, p => new PublisherListItem(p.Id, p.Name, p.Website), cancellationToken);
+
+    /// <summary>
+    /// The list of the publishers of the administration (visuel/listes/liste-par-liste.md): the search on the name and the
+    /// order of the list of the consultation. Each row carries the website of the publisher, its collections, its editions
+    /// in the collection, its modification and its version, which its deletion sends back.
+    /// </summary>
+    private static Task<Page<PublisherAdminListItem>> ListForAdministrationAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
+        context.Publishers.AsNoTracking()
+            .WhereContains(q, p => p.Name)
+            .OrderBy(p => p.Name)
+            .ThenBy(p => p.Id)
+            .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Publisher p) => new PublisherAdminListItem(
+                p.Id,
+                p.Name,
+                p.Website,
+                p.Collections.OrderBy(c => c.Name).ThenBy(c => c.Id).Select(c => c.Name).ToList(),
+                context.Editions.Count(e => e.PublisherId == p.Id && e.IsOwned()),
+                p.ModifiedAt,
+                EF.Property<uint>(p, BdthequeDbContext.VersionProperty))), cancellationToken);
 
     /// <summary>The collections of all publishers, or of one of them (choix-implementation/api/recherche.md).</summary>
     private static Task<Page<PublisherCollectionListItem>> ListAllCollectionsAsync(

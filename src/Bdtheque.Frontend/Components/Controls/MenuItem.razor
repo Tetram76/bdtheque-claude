@@ -1,7 +1,9 @@
 @* An item of an ActionsMenu: a link to another page, or a button, which closes the menu as it acts. *@
 @if (Href is not null)
 {
-    <a class="menu-item" href="@Href" data-variant="@VariantName">@Content</a>
+    @* A site outside the application opens beside it, so that the page it was opened from stays as it was. *@
+    <a class="menu-item" href="@Href" data-variant="@VariantName" target="@(External ? "_blank" : null)"
+       rel="@(External ? "noopener noreferrer" : null)">@Content</a>
 }
 else
 {
@@ -28,6 +30,10 @@ else
     /// <summary>The page it leads to: a link rather than a button.</summary>
     [Parameter]
     public string? Href { get; set; }
+
+    /// <summary>Whether <see cref="Href"/> is a site outside the application (e.g. the website of a publisher).</summary>
+    [Parameter]
+    public bool External { get; set; }
 
     [Parameter]
     public EventCallback OnClick { get; set; }

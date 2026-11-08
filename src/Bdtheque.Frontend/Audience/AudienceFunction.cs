@@ -108,12 +108,32 @@ public static class AudienceFunctions
     /// <summary>The dialog of the merge of an author, opened from its row, with the search of the other author.</summary>
     public static readonly AudienceFunction AdminAuthorsMerge = new("admin.authors.merge", AudienceFunctionKind.Action);
 
+    /// <summary>The list of the publishers of the administration (visuel/listes/liste-par-liste.md).</summary>
+    public static readonly AudienceFunction AdminPublishers = new("admin.publishers", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/PublisherListQuery.cs);
+    // without filters nor navigation by initial.
+
+    public static readonly AudienceFunction AdminPublishersSearch = new("admin.publishers.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminPublishersPage = new("admin.publishers.page", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the deletion of a publisher, opened from its row.</summary>
+    public static readonly AudienceFunction AdminPublishersDeletion = new("admin.publishers.deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a publisher, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminPublishersDeleted = new("admin.publishers.deleted", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the merge of a publisher, opened from its row, with the search of the other publisher.</summary>
+    public static readonly AudienceFunction AdminPublishersMerge = new("admin.publishers.merge", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
         AdminSeriesMerge, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
-        AdminAuthorsMerge,
+        AdminAuthorsMerge, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
+        AdminPublishersMerge,
     ];
 }
