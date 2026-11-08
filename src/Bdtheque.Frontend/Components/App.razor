@@ -8,8 +8,10 @@
    whenever its request brought it, even when the server, not knowing it, presents in universal time.
    The theme is carried by the root element, so that a theme redefines the contracts of the base theme for the whole page.
    The opposition of the visitor to the audience measurement too, which the scripts of the page respect. So are the colours
-   of the day of a theme painted by them, only known at each request: an enhanced navigation brings them with the theme. *@
-<html lang="fr" data-time-zone="@TimeZone.Name" data-theme="@Theme.Key" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)" style="@_dayStyle">
+   of the day of a theme painted by them, only known at each request: an enhanced navigation brings them with the theme.
+   Those colours are the ones of the date of the browser: the whole page then depends on its time zone (data-local), and is
+   rendered again once its request brings it (wwwroot/browser-time-zone.js), dates and times or not. *@
+<html lang="fr" data-time-zone="@TimeZone.Name" data-theme="@Theme.Key" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)" style="@_dayStyle" data-local="@Theme.PaintedByTheDay">
 
 <head>
     <meta charset="utf-8" />

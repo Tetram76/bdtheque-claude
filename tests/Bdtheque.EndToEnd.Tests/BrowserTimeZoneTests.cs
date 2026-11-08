@@ -2,6 +2,7 @@ extern alias frontend;
 
 using frontend::Bdtheque.Frontend.Formatting;
 using frontend::Bdtheque.Frontend.Navigation;
+using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests;
 
@@ -15,6 +16,11 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
     // A page of the consultation that presents no date and whose content depends on no data: that of the home page depends
     // on the collection the other tests change (the dashboard is rendered in the time zone of the browser).
     private const string Page = AppPaths.NotYetImplemented;
+
+    // That page depends on the time zone in a theme painted by the cover of the day, whose colours are those of the date of
+    // the browser: the base theme is fixed, rather than the theme drawn for the visit.
+    private static readonly Dictionary<string, string> WithoutColorsOfTheDay =
+        new() { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Base.Key };
 
     [Fact]
     public async Task Server_LearnsTheTimeZoneOfTheBrowser_FromItsFirstPage()
@@ -33,6 +39,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
         var context = await NewContextAsync(new BrowserNewContextOptions
         {
             TimezoneId = "Europe/Paris",
+            ExtraHTTPHeaders = WithoutColorsOfTheDay,
         });
         await context.AddCookiesAsync([new Cookie
         {
@@ -117,6 +124,26 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
         Assert.Equal("Nowhere/Atlantis", await page.Locator("html").GetAttributeAsync("data-time-zone"));
     }
 
+    // The colours of a theme painted by the cover of the day (« La couverture du jour ») are those of the date of the browser:
+    // any page of it depends on the time zone, dates and times or not.
+    [Fact]
+    public async Task FirstPageInAThemePaintedByTheDay_IsRenderedAgainInTheTimeZoneOfTheBrowser_Once()
+    {
+        var context = await NewContextAsync(new BrowserNewContextOptions
+        {
+            TimezoneId = "Asia/Tokyo",
+            ExtraHTTPHeaders = new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Couverture.Key },
+        });
+        var page = await context.NewPageAsync();
+        var renders = RendersOf(page);
+
+        await page.GotoAsync(Page);
+        await WaitForRendersAsync(renders, 2);
+
+        Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
+        Assert.Equal(2, renders.Count);
+    }
+
     [Fact]
     public async Task PageWithoutDatesAndTimes_IsNotRenderedAgain()
     {
@@ -134,6 +161,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
         var context = await NewContextAsync(new BrowserNewContextOptions
         {
             TimezoneId = timeZone,
+            ExtraHTTPHeaders = WithoutColorsOfTheDay,
         });
         return await context.NewPageAsync();
     }
