@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-08
+
+* **Choix** : les interfaces que Docker crée sur l'exécuteur du CI n'ont pas d'adresse IPv6 de lien local, dont l'apparition et le retrait, au fil des conteneurs des tests, faisaient abandonner à Chromium des requêtes de pages ; tests de bout en bout exécutés seuls pour ne pas se disputer les processeurs de l'exécuteur ; relevé des changements réseau pendant les tests, et échec du job si une interface de Docker change d'adresse (#295).
+
 ## 2026-11-07
 
 * **Règle** : pragmatisme, on ne cherche pas le code parfait : la solution la plus simple qui répond au besoin réel, et le travail s'arrête dès qu'elle y répond ; une conception qui se complique au fil des corrections signale une mauvaise piste (#293).
