@@ -44,7 +44,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#301~~ | Liste des séries de l'administration |
 | ~~#311~~ | Couleurs des couvertures : dominante, profonde et accent de chaque visuel |
 | ~~#312~~ | Thème « La couverture du jour » : identité, déclinaison et captures |
-| #302 | Liste des auteurs de l'administration |
+| ~~#302~~ | Liste des auteurs de l'administration |
 | #303 | Liste des éditeurs de l'administration |
 | #202 | Listes des éditions et des intentions d'achat de l'administration |
 | #203 | Genres et univers : listes et saisie de l'administration |
