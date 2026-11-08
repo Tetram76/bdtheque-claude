@@ -47,7 +47,7 @@
     text-align: center;
 }
 
-.list-search-filters[aria-expanded="true"] {
+.list-search-bar ::deep .button[aria-expanded="true"] {
     background: var(--color-tag);
     color: var(--color-text-on-tag);
 }

@@ -59,9 +59,15 @@
 
 /* A row of the list is the line of a table on a wide screen: the thumbnail, the album and its authors, its publication, its
    editions and intents, its membership of the collection, its last modification, then its actions. */
+/* Each row is a grid of its own: the column of the actions has a fixed width, the same in the head as in the rows, so that
+   their columns line up. It holds « Modifier » and the « ⋯ » button. */
+.album-rows {
+    --album-actions-width: 10rem;
+}
+
 .album-row {
     display: grid;
-    grid-template-columns: 2.25rem minmax(0, 1fr) 6.75rem 11.875rem 10.625rem 6.75rem auto;
+    grid-template-columns: 2.25rem minmax(0, 1fr) 7.5rem 11.875rem 10.625rem 6.75rem var(--album-actions-width);
     grid-template-areas: "cover main date editions state modified actions";
     align-items: center;
     column-gap: var(--space-m);
@@ -153,7 +159,7 @@
 /* A narrower screen lets go of the last modification first (visuel/listes/principes-communs.md). */
 @media (max-width: 67.5rem) {
     .album-row {
-        grid-template-columns: 2.25rem minmax(0, 1fr) 6.75rem 11.875rem 10.625rem auto;
+        grid-template-columns: 2.25rem minmax(0, 1fr) 7.5rem 11.875rem 10.625rem var(--album-actions-width);
         grid-template-areas: "cover main date editions state actions";
     }
 

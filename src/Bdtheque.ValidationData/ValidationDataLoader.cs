@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Search;
 
 namespace Bdtheque.ValidationData;
 
@@ -23,6 +24,9 @@ public sealed class ValidationDataLoader(HttpClient client)
     public const string LongSeriesTitle = "Les Veilleurs d'Ombrelune";
     public const string MultiEditionOneShotTitle = "Le Phare aux mille lanternes";
     public const string CollectiveTitle = "...Et après ?";
+
+    /// <summary>The volumes of the series catalogued only, enough for the albums to count more than a page of a list.</summary>
+    private const int ChroniclesVolumeCount = 25;
 
     private static readonly string[] LongSeriesVolumeTitles =
     [
@@ -122,7 +126,15 @@ public sealed class ValidationDataLoader(HttpClient client)
         // A series whose title begins with a letter of another alphabet, under `@`, catalogued only.
         var omega = await data.SeriesAsync(Series("Ωmega", null, Template(null, null, null), [scienceFiction], [],
             [Credit(lund, ContributionRole.Scenarist), Credit(tanabe, ContributionRole.Illustrator)]));
-        await data.AlbumAsync(Album("Point zéro", omega, 1, 2024));
+        var pointZero = await data.AlbumAsync(Album("Point zéro", omega, 1, 2024));
+        // Designated by a saved search: the deletion of the album is refused while the search designates it.
+        await data.SavedSearchAsync("Albums à suivre", pointZero.Id);
+
+        // A series catalogued only, volume after volume: the list of the albums of the administration counts more than a page.
+        var chronicles = await data.SeriesAsync(Series("Chroniques de Port-Grisé", SeriesStatus.InProgress, Template(null, null, null),
+            [humour], [greyPort], [Credit(quintin, ContributionRole.Scenarist), Credit(keita, ContributionRole.Illustrator)]));
+        for (var volume = 1; volume <= ChroniclesVolumeCount; volume++)
+            await data.AlbumAsync(Album(null, chronicles, volume, 1999 + volume));
 
         // A one-shot in two editions: the first one with every type of visual, two covers among them; the
         // second one with an ISBN whose check digit is wrong, as printed by some publishers.
@@ -385,6 +397,11 @@ public sealed class ValidationDataLoader(HttpClient client)
             album.Version = edition.AlbumVersion;
             return edition.Id;
         }
+
+        /// <summary>A saved search of the albums that designates one of them.</summary>
+        public async Task SavedSearchAsync(string name, Guid album) =>
+            await PostAsync<SavedSearchContent, SavedSearchForm>("/admin/saved-searches", new(
+                name, EntityKind.Album, new SearchCriterion("record", SearchComparison.Is, [album.ToString()]), []));
 
         public async Task VisualAsync(AlbumWrite album, Guid edition, VisualType type, byte[] image)
         {

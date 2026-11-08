@@ -14,15 +14,14 @@
         <button class="visually-hidden" type="submit">@L["Search"]</button>
         @if (PanelId is not null)
         {
-            <button class="button list-search-filters" type="submit" data-variant="secondary" name="@FiltersName"
-                    value="@(FiltersOpen ? "" : FiltersOpenValue)" aria-expanded="@(FiltersOpen ? "true" : "false")" aria-controls="@PanelId">
-                <Icon Name="IconName.Filter" />
-                <span class="button-label">@L["Filters"]</span>
+            <Button Type="submit" Variant="ButtonVariant.Secondary" Icon="IconName.Filter" Label="@L["Filters"]"
+                    name="@FiltersName" value="@(FiltersOpen ? "" : FiltersOpenValue)" aria-expanded="@(FiltersOpen ? "true" : "false")"
+                    aria-controls="@PanelId">
                 @if (FilterCount > 0)
                 {
                     <span class="list-search-count">@FilterCount</span>
                 }
-            </button>
+            </Button>
         }
     </div>
     @if (FiltersOpen && Panel is not null)

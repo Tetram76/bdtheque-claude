@@ -11,9 +11,10 @@ namespace Bdtheque.EndToEnd.Tests.Headers;
 /// <summary>
 /// A page of the tests only, framed by the header of the administration, which presents the navigation shared by the
 /// lists — fil d'Ariane, navigation par initiale, pagination — the way a list of the administration lays them out
-/// (visuel/liste-albums/contenu.md), before any list uses them. Unlike the pages of the administration, it needs no
-/// login, which comes with #199. Routed by the application through <c>PageAssemblies</c>; written in C#, the alias of the
-/// frontend not being reachable from Razor.
+/// (visuel/liste-albums/contenu.md). Unlike the pages of the administration, it needs no login: the tests of the header
+/// and of its navigation run on it without signing in, and without the data of a list, whose rendering the captures of the
+/// list of the albums fix (<c>AdminAlbumsCaptureTests</c>). Routed by the application through <c>PageAssemblies</c>; written
+/// in C#, the alias of the frontend not being reachable from Razor.
 /// </summary>
 [Route(Path)]
 [Layout(typeof(AdminLayout))]

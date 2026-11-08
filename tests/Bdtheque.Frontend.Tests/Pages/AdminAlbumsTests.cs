@@ -144,7 +144,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
             [("genreId", Genre.ToString()), ("state", "InCollection")],
             form.QuerySelectorAll("input[type='hidden']").Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
         Assert.Null(form.QuerySelector("input[name='entry']"));
-        var filters = form.QuerySelector(".list-search-filters")!;
+        var filters = form.QuerySelector("button[aria-controls]")!;
         Assert.Equal(("false", "open", "2"), (filters.GetAttribute("aria-expanded"), filters.GetAttribute("value"), Text(filters.QuerySelector(".list-search-count")!)));
     }
 
@@ -156,7 +156,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
 
         var form = Open($"filters=open&genreId={Genre}&state=PurchaseIntent").Find("form.list-search");
 
-        Assert.Equal("true", form.QuerySelector(".list-search-filters")!.GetAttribute("aria-expanded"));
+        Assert.Equal("true", form.QuerySelector("button[aria-controls]")!.GetAttribute("aria-expanded"));
         Assert.Equal(
             ["Série", "Auteur", "Éditeur", "Collection éditeur", "Genre", "Univers", "Collection"],
             form.QuerySelectorAll(".album-filters label").Select(Text));

@@ -42,6 +42,10 @@ else
     [Parameter]
     public EventCallback OnClick { get; set; }
 
+    /// <summary>What follows the label (e.g. the number of filters chosen on the button of the filters).</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
@@ -56,5 +60,6 @@ else
             <Icon Name="icon" />
         }
         <span class="button-label">@Label</span>
+        @ChildContent
     </text>;
 }
