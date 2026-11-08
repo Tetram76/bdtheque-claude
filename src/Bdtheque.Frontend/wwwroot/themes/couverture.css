@@ -56,6 +56,13 @@
     --color-palette-6: #D9EBF2;
     --color-palette-7: #F9E7D9;
     --color-text-on-palette: #15151A;
+    /* The monograms take in turn the deep colour, the accent and a tint of the day, as in the mockups. */
+    --color-monogram-1: var(--day-deep);
+    --color-monogram-2: var(--day-accent);
+    --color-monogram-3: var(--day-tint);
+    --color-text-on-monogram-1: #FFFFFF;
+    --color-text-on-monogram-2: var(--day-text-on-accent);
+    --color-text-on-monogram-3: var(--day-deep-text);
 
     /* The header, of the deep colour, its texts white; its field lighter, the help a disk of the accent. */
     --color-header: var(--day-deep);

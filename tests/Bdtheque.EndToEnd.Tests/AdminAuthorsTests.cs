@@ -112,7 +112,7 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
     public async Task Rows_AtEveryWidth_LeaveTheNameItsRoom_WithoutTheListOverflowing(int width)
     {
         await CreateAuthorAsync($"Van den Bogaert-Delacroix {_marker}", "Jean-Christophe", null);
-        foreach (var theme in new[] { "base", "planche", "gazette" })
+        foreach (var theme in new[] { "base", "planche", "gazette", "couverture" })
         {
             var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
             await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAuthors}?q={_marker}");
