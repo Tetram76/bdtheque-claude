@@ -67,28 +67,31 @@ a{text-decoration:none;color:inherit}
 <template id="view">
 <div class="app" style="--dom: {{palette.dominant}}; --deep: {{palette.deep}}; --acc: {{palette.accent}}">
 
-  <div class="stage">
-    <header style="position: sticky; top: 0; z-index: 20; background: var(--deep)">
-      <div class="wrap" style="padding-top: 12px; padding-bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px">
-        <a href="#" style="display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 21px; letter-spacing: -.03em"><span aria-hidden="true" style="width: 22px; height: 28px; border-radius: 2px 5px 5px 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--acc) 70%, #000000) 0 4px, var(--acc) 4px); box-shadow: 2px 3px 6px rgba(0,0,0,.35)"></span>BDthèque</a>
-        <nav class="menu" aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: var(--deep)"><div data-scroll="">
-          <div style="display: flex; gap: 4px; width: max-content; white-space: nowrap; font-weight: 700; font-size: 15px">
-            <a href="#" aria-current="page" style="padding: 7px 15px; border-radius: 999px; background: #FFFFFF; color: var(--deep)">Accueil</a>
-            <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Albums</a>
-            <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Séries</a>
-            <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Auteurs</a>
-            <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Intentions d'achat</a>
-          </div>
-        </div></nav>
-        <div class="tools {{tools.cls}}" style="display: flex; gap: 8px; flex: {{tools.flex}}">
-          <sc-if value="{{full}}">
-          <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
-          <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(255,255,255,.14); color: #FFFFFF; font: inherit; outline-color: #FFFFFF">
-          </sc-if>
-          <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: var(--acc); color: #FFFFFF; font: 900 17px 'Inter Tight', sans-serif; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.35)">?</button>
+  <!-- Outside the stage: a sticky element stays within its parent, and the header stays at the top of the
+       screen down to the bottom of the page. -->
+  <header style="position: sticky; top: 0; z-index: 20; background: var(--deep); color: #FFFFFF">
+    <div class="wrap" style="padding-top: 12px; padding-bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 21px; letter-spacing: -.03em"><span aria-hidden="true" style="width: 22px; height: 28px; border-radius: 2px 5px 5px 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--acc) 70%, #000000) 0 4px, var(--acc) 4px); box-shadow: 2px 3px 6px rgba(0,0,0,.35)"></span>BDthèque</a>
+      <nav class="menu" aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: var(--deep)"><div data-scroll="">
+        <div style="display: flex; gap: 4px; width: max-content; white-space: nowrap; font-weight: 700; font-size: 15px">
+          <a href="#" aria-current="page" style="padding: 7px 15px; border-radius: 999px; background: #FFFFFF; color: var(--deep)">Accueil</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Albums</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Séries</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Auteurs</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Intentions d'achat</a>
         </div>
+      </div></nav>
+      <div class="tools {{tools.cls}}" style="display: flex; gap: 8px; flex: {{tools.flex}}">
+        <sc-if value="{{full}}">
+        <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
+        <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(255,255,255,.14); color: #FFFFFF; font: inherit; outline-color: #FFFFFF">
+        </sc-if>
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: var(--acc); color: #FFFFFF; font: 900 17px 'Inter Tight', sans-serif; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.35)">?</button>
       </div>
-    </header>
+    </div>
+  </header>
+
+  <div class="stage">
 
     <sc-if value="{{vide}}">
     <section aria-labelledby="h-welcome" class="wrap" style="padding-top: clamp(16px, 3.6vw, 40px); padding-bottom: clamp(70px, 8vw, 110px)">
