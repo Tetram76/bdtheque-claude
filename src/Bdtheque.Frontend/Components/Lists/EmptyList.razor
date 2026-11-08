@@ -1,0 +1,24 @@
+@* A list that finds nothing (visuel/liste-albums/contenu.md): it says so, recalls what the search looks into, and offers what
+   to do next (e.g. clear the search, create the record looked for). *@
+<div class="empty-list" role="status">
+    <strong>@Message</strong>
+    @if (Hint is not null)
+    {
+        <span>@Hint</span>
+    }
+    @if (Actions is not null)
+    {
+        <span class="empty-list-actions">@Actions</span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Message { get; set; } = null!;
+
+    [Parameter]
+    public string? Hint { get; set; }
+
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+}

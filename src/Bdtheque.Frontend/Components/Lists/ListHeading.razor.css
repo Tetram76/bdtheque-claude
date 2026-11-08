@@ -1,0 +1,26 @@
+/* The fil d'Ariane above the title; the title, its number in muted figures, and the creation at the other end. */
+.list-heading {
+    display: grid;
+    gap: var(--space-xs);
+}
+
+.list-heading-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-m);
+}
+
+.list-heading-title h1 {
+    margin: 0;
+    min-inline-size: 0;
+}
+
+.list-heading-count {
+    margin-inline-start: var(--space-s);
+    color: var(--color-text-muted);
+    font-family: var(--font-figures);
+    font-size: var(--font-size-title);
+    font-variant-numeric: tabular-nums;
+}

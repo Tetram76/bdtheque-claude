@@ -33,6 +33,9 @@ public sealed class DisplayFormatter(IStringLocalizer<CurrencySymbols> symbols, 
     /// <summary>A date and time, in the time zone of the browser (<see cref="BrowserTimeZone"/>).</summary>
     public string DateTime(DateTimeOffset instant) => timeZone.ToLocal(instant).ToString("g", CultureInfo.CurrentCulture);
 
+    /// <summary>The date of an instant, in the time zone of the browser (<see cref="BrowserTimeZone"/>).</summary>
+    public string LocalDate(DateTimeOffset instant) => timeZone.ToLocal(instant).ToString("d", CultureInfo.CurrentCulture);
+
     /// <summary>A date known to the year, or to the month and year (modele-metier/album.md, date de première publication).</summary>
     public string PartialDate(int year, int? month) =>
         month is { } known

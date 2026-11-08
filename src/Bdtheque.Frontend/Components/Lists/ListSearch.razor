@@ -1,0 +1,88 @@
+@inject IStringLocalizer<ListSearch> L
+
+@* The search of a list of the administration and the button of its filters (visuel/liste-albums/contenu.md), a form that
+   leads to the list with its criteria, the page being rendered statically. Pressing Enter in the field searches: the first
+   button of the form, which the browser submits then, is the search itself, read by assistive technologies only. The
+   button of the filters submits the form too, folding or unfolding their panel, so that a text typed is never lost. *@
+<form class="list-search" method="get" action="@Action" role="search">
+    <div class="list-search-bar">
+        <label class="visually-hidden" for="@FieldId">@SearchLabel</label>
+        <span class="list-search-field">
+            <Icon Name="IconName.Search" />
+            <input id="@FieldId" name="@TextName" type="search" value="@Text" placeholder="@Placeholder" autocomplete="off" />
+        </span>
+        <button class="visually-hidden" type="submit">@L["Search"]</button>
+        @if (PanelId is not null)
+        {
+            <button class="button list-search-filters" type="submit" data-variant="secondary" name="@FiltersName"
+                    value="@(FiltersOpen ? "" : FiltersOpenValue)" aria-expanded="@(FiltersOpen ? "true" : "false")" aria-controls="@PanelId">
+                <Icon Name="IconName.Filter" />
+                <span class="button-label">@L["Filters"]</span>
+                @if (FilterCount > 0)
+                {
+                    <span class="list-search-count">@FilterCount</span>
+                }
+            </button>
+        }
+    </div>
+    @if (FiltersOpen && Panel is not null)
+    {
+        <div id="@PanelId" class="list-search-panel">
+            @Panel
+        </div>
+    }
+    else
+    {
+        @HiddenFilters
+    }
+</form>
+
+@code {
+    /// <summary>The path of the list.</summary>
+    [Parameter, EditorRequired]
+    public string Action { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string FieldId { get; set; } = null!;
+
+    /// <summary>The name of the search in the address of the list.</summary>
+    [Parameter, EditorRequired]
+    public string TextName { get; set; } = null!;
+
+    [Parameter]
+    public string? Text { get; set; }
+
+    /// <summary>What the field is, for assistive technologies (e.g. « Rechercher un album »).</summary>
+    [Parameter, EditorRequired]
+    public string SearchLabel { get; set; } = null!;
+
+    /// <summary>What the search looks into (e.g. « Titre de l'album ou de sa série… »).</summary>
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    /// <summary>The identifier of the panel of the filters; none for a list without filters.</summary>
+    [Parameter]
+    public string? PanelId { get; set; }
+
+    /// <summary>The name and value in the address of the list that unfold the panel.</summary>
+    [Parameter]
+    public string FiltersName { get; set; } = "filters";
+
+    [Parameter]
+    public string FiltersOpenValue { get; set; } = "open";
+
+    [Parameter]
+    public bool FiltersOpen { get; set; }
+
+    /// <summary>The filters chosen, which the button counts.</summary>
+    [Parameter]
+    public int FilterCount { get; set; }
+
+    /// <summary>The fields of the filters, in the panel unfolded, with its button that applies them.</summary>
+    [Parameter]
+    public RenderFragment? Panel { get; set; }
+
+    /// <summary>The filters chosen, kept by hidden fields while the panel is folded, so that a search keeps them.</summary>
+    [Parameter]
+    public RenderFragment? HiddenFilters { get; set; }
+}

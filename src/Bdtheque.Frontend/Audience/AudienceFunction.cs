@@ -43,6 +43,31 @@ public static class AudienceFunctions
 
     public static readonly AudienceFunction AdminSignedOut = new("admin.signed-out", AudienceFunctionKind.Action);
 
+    /// <summary>The list of the albums of the administration (visuel/liste-albums/contenu.md).</summary>
+    public static readonly AudienceFunction AdminAlbums = new("admin.albums", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/AlbumListQuery.cs).
+
+    public static readonly AudienceFunction AdminAlbumsSearch = new("admin.albums.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminAlbumsFilter = new("admin.albums.filter", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminAlbumsInitial = new("admin.albums.initial", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminAlbumsPage = new("admin.albums.page", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the deletion of an album, opened from its row.</summary>
+    public static readonly AudienceFunction AdminAlbumsDeletion = new("admin.albums.deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of an album, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminAlbumsDeleted = new("admin.albums.deleted", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the merge of an album, opened from its row, with the search of the other album.</summary>
+    public static readonly AudienceFunction AdminAlbumsMerge = new("admin.albums.merge", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
-        [Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn];
+    [
+        Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
+        AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
+    ];
 }

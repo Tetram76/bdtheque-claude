@@ -1,0 +1,12 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<CollectionStateTag> L
+
+@* Where an album stands with regard to the collection, at first glance (visuel/liste-albums/contenu.md): « Dans la collection »
+   filled, « Hors collection » dashed, « Intention d'achat » dashed with its own icon. *@
+<Tag Text="@L[State.ToString()]" Variant="@(State == AlbumCollectionState.InCollection ? TagVariant.Filled : TagVariant.Dashed)"
+     Icon="@(State == AlbumCollectionState.PurchaseIntent ? IconName.PurchaseIntent : null)" />
+
+@code {
+    [Parameter, EditorRequired]
+    public AlbumCollectionState State { get; set; }
+}

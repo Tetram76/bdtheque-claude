@@ -1,0 +1,242 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the heading, then the list in a single
+   block (visuel/liste-albums/contenu.md). */
+.admin-list {
+    display: grid;
+    gap: var(--admin-gap);
+}
+
+.admin-list-body {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
+}
+
+/* The count and the order of the list, recalled in plain words. */
+.admin-list-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-m);
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.admin-list-summary strong {
+    color: var(--color-text);
+}
+
+/* The panel of the filters: their fields on a grid, then what they choose from and the button that applies them. */
+.album-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+    gap: var(--space-s) var(--space-m);
+}
+
+.album-filters ::deep .field,
+.album-filters ::deep .record-picker,
+.album-filters select {
+    inline-size: 100%;
+    min-inline-size: 0;
+}
+
+.album-filters-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-m);
+    margin-block-start: var(--space-s);
+}
+
+.album-filters-foot p {
+    flex: 1 1 20rem;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+/* A row of the list is the line of a table on a wide screen: the thumbnail, the album and its authors, its publication, its
+   editions and intents, its membership of the collection, its last modification, then its actions. */
+.album-row {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) 6.75rem 11.875rem 10.625rem 6.75rem auto;
+    grid-template-areas: "cover main date editions state modified actions";
+    align-items: center;
+    column-gap: var(--space-m);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.album-row-head {
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.album-meta {
+    display: contents;
+}
+
+.album-cover {
+    grid-area: cover;
+}
+
+.album-cover ::deep .cover {
+    inline-size: 2.25rem;
+}
+
+.album-main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.album-label {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.album-authors {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.album-date {
+    grid-area: date;
+    font-variant-numeric: tabular-nums;
+}
+
+.album-editions {
+    grid-area: editions;
+}
+
+.album-editions a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.1875rem;
+}
+
+.album-editions a[data-empty="True"] {
+    color: var(--color-text-muted);
+}
+
+.album-state {
+    grid-area: state;
+}
+
+.album-modified {
+    grid-area: modified;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.album-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+/* A narrower screen lets go of the last modification first (visuel/listes/principes-communs.md). */
+@media (max-width: 67.5rem) {
+    .album-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 6.75rem 11.875rem 10.625rem auto;
+        grid-template-areas: "cover main date editions state actions";
+    }
+
+    .album-modified {
+        display: none;
+    }
+}
+
+/* On a smartphone, each row holds on two lines, the thumbnail on the left: the label and the actions, then the date, the
+   editions and the membership of the collection; the filters on two columns. */
+@media (max-width: 47.5rem) {
+    .album-row-head {
+        display: none;
+    }
+
+    .album-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+        grid-template-areas: "cover main actions" "cover meta meta";
+        row-gap: var(--space-xs);
+        align-items: start;
+    }
+
+    .album-main {
+        align-self: center;
+    }
+
+    .album-meta {
+        grid-area: meta;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-xs) var(--space-s);
+        font-size: var(--font-size-small);
+    }
+
+    .album-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* The dialogs of a row: the search of the other album and its candidates, the notes in muted text. */
+.album-dialog-note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.album-merge-search {
+    display: flex;
+    gap: var(--space-s);
+}
+
+.album-merge-search input {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.album-merge-candidates {
+    display: grid;
+    gap: var(--space-xs);
+}
+
+.album-merge-candidate {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-s);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-tile);
+    cursor: pointer;
+}
+
+.album-merge-candidate:has(input:checked) {
+    border: 2px solid var(--color-accent);
+}
+
+.album-merge-candidate > span {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.album-merge-candidate > span > span {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}

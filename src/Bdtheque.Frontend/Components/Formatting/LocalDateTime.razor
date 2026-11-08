@@ -2,9 +2,13 @@
 
 @* The way any date and time is presented: in the time zone of the browser, and marked (data-local) for the script that
    renders the page again once it knows that time zone (wwwroot/browser-time-zone.js). *@
-<time datetime="@Value.ToString("O", CultureInfo.InvariantCulture)" data-local>@Formatter.DateTime(Value)</time>
+<time datetime="@Value.ToString("O", CultureInfo.InvariantCulture)" data-local>@(DateOnly ? Formatter.LocalDate(Value) : Formatter.DateTime(Value))</time>
 
 @code {
     [Parameter, EditorRequired]
     public DateTimeOffset Value { get; set; }
+
+    /// <summary>Its date only, where its time would say nothing more (e.g. the last modification in a list).</summary>
+    [Parameter]
+    public bool DateOnly { get; set; }
 }

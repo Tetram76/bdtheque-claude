@@ -11,6 +11,8 @@ public enum IconName
     Alert,
     Blocked,
     Search,
+    Filter,
+    Merge,
     ChevronStart,
     ChevronEnd,
     Menu,
