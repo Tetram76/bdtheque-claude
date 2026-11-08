@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et ses chantiers, notes des parties suivantes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:05:00Z }
 ---
 
 # Phase 3 — Frontend Blazor
