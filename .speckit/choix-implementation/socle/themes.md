@@ -46,7 +46,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
 
 ## Composants, accessibilité et polices
 
-- **Composants de présentation partagés, construits sur les seuls contrats** (bloc, bouton, étiquette, couverture, pile de couvertures…). Une couverture n'est **jamais rognée** : l'image garde ses proportions dans la place d'une couverture, et le cadre que lui donne un thème est porté par l'image, qu'il épouse quel que soit son format.
+- **Composants de présentation partagés, construits sur les seuls contrats** (bloc, bouton, étiquette, couverture, pile de couvertures, monogramme…). Une couverture n'est **jamais rognée** : l'image garde ses proportions dans la place d'une couverture, et le cadre que lui donne un thème est porté par l'image, qu'il épouse quel que soit son format.
+- **Teintes des monogrammes d'une liste distribuées tour à tour selon la place de la ligne**, parmi trois contrats que chaque thème définit : deux lignes voisines ne se ressemblent jamais, comme dans les maquettes ([`visuel/listes/`](../../visuel/listes/index.md)).
+  - **Alternative écartée (teinte tirée de l'auteur lui-même)** : stable d'une page à l'autre, mais deux voisins pourraient partager leur teinte, que rien ne rattache à l'auteur pour l'utilisateur.
 - **Icônes dessinées pour l'application**, en SVG de la couleur du texte : aucune police d'icônes ni bibliothèque à servir ou à licencier.
 - **Contrastes vérifiés par un test** dans chaque thème (WCAG 2.2, 1.4.3 et 1.4.11) : 4,5:1 pour un texte, 3:1 pour la bordure d'un contrôle. Un filet décoratif n'y est pas soumis : la bordure des contrôles est donc un contrat distinct.
 - **Focus en contour de la couleur du texte, détaché par une bande de la couleur de la surface** : il contraste avec l'élément, coloré ou non, comme avec cette surface ([Contrôles](../../visuel/liste-albums/controles.md)). Le texte indicatif est du texte atténué, sans opacité.
