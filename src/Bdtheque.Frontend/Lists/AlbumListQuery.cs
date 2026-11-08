@@ -121,10 +121,13 @@ public sealed record AlbumListQuery(
             var criteria = Criteria(includePage: true);
             if (criteria.Count == 0)
                 return null;
-            var function = Page > 1 ? AudienceFunctions.AdminAlbumsPage
-                : Entry is not null ? AudienceFunctions.AdminAlbumsInitial
-                : ActiveFilterCount > 0 ? AudienceFunctions.AdminAlbumsFilter
-                : AudienceFunctions.AdminAlbumsSearch;
+            var function = this switch
+            {
+                { Page: > 1 } => AudienceFunctions.AdminAlbumsPage,
+                { Entry: not null } => AudienceFunctions.AdminAlbumsInitial,
+                { ActiveFilterCount: > 0 } => AudienceFunctions.AdminAlbumsFilter,
+                _ => AudienceFunctions.AdminAlbumsSearch,
+            };
             return (function, Join(criteria));
         }
     }
