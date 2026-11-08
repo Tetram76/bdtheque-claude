@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
+using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests;
 
@@ -132,7 +133,7 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         foreach (var collection in new[] { "Carnets de voyage", "Escapades", "Horizons lointains", "Lumières du Nord" })
             version = (await PostAsync<PublisherCollectionForm>(
                 $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest(collection, version))).PublisherVersion;
-        foreach (var theme in new[] { "base", "planche", "gazette" })
+        foreach (var theme in ThemeCatalog.Offered.Select(theme => theme.Key))
         {
             var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
             await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPublishers}?q={_marker}");
