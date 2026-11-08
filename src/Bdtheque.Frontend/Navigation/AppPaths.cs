@@ -51,6 +51,9 @@ public static class AppPaths
     /// <summary>The record of a series (#211).</summary>
     public static string SeriesRecord(Guid id) => NotYetImplemented;
 
+    /// <summary>The record of an author (#212).</summary>
+    public static string AuthorRecord(Guid id) => NotYetImplemented;
+
     // Administration (#200 to #209; the settings and the private statistics, a later part of the Phase 3).
 
     /// <summary>Search of a record to modify, from the header of the administration.</summary>
@@ -90,7 +93,17 @@ public static class AppPaths
 
     public const string AdminPurchaseIntents = NotYetImplemented;
 
-    public const string AdminAuthors = NotYetImplemented;
+    /// <summary>The list of the authors of the administration (visuel/listes/).</summary>
+    public const string AdminAuthors = "/admin/authors";
+
+    /// <summary>The entry form of an author (#207).</summary>
+    public static string AdminEditAuthor(Guid id) => NotYetImplemented;
+
+    /// <summary>
+    /// The next step of the merge of two authors, whose presentation awaits the terms of the merge
+    /// (fonctionnel/structure-de-l-application.md): it receives the author and the other one, <c>author</c> and <c>other</c>.
+    /// </summary>
+    public const string AdminMergeAuthors = NotYetImplemented;
 
     /// <summary>The list of the publishers of the administration (visuel/listes/).</summary>
     public const string AdminPublishers = "/admin/publishers";

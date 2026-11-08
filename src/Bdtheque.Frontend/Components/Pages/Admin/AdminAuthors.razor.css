@@ -1,0 +1,135 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the
+   page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
+   row holds on two lines, the monogram on the left: the name and the actions, then the albums and the roles. A list wide
+   enough for these columns, the fixed ones and at least 12rem for the name, is a table; wider still, the table adds the
+   secondary columns, the nationality and the last modification (visuel/listes/principes-communs.md: on a narrower screen,
+   the secondary columns go first). */
+.author-rows {
+    container: author-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
+       so that their columns line up. It holds « Modifier » and the « ⋯ » button. */
+    --author-actions-width: 10rem;
+}
+
+.author-row {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+    grid-template-areas: "monogram main actions" "monogram meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.author-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.author-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+}
+
+.author-monogram {
+    grid-area: monogram;
+}
+
+.author-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.author-name {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+/* The first name and the last name under a pseudonym, in small. */
+.author-identity {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.author-nationality {
+    display: none;
+    grid-area: nationality;
+}
+
+.author-albums {
+    grid-area: albums;
+}
+
+.author-roles {
+    grid-area: roles;
+}
+
+.author-albums[data-empty],
+.author-roles[data-empty] {
+    color: var(--color-text-muted);
+}
+
+.author-modified {
+    display: none;
+    grid-area: modified;
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The date in small, the heading of its column keeping the size of the other headings. */
+.author-row:not(.author-row-head) .author-modified {
+    font-size: var(--font-size-small);
+}
+
+.author-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container author-rows (min-width: 50rem) {
+    .author-row {
+        grid-template-columns: 2.75rem minmax(0, 1fr) 7.5rem 11.875rem var(--author-actions-width);
+        grid-template-areas: "monogram main albums roles actions";
+        align-items: center;
+    }
+
+    .author-row-head {
+        display: grid;
+    }
+
+    .author-meta {
+        display: contents;
+        font-size: inherit;
+    }
+}
+
+@container author-rows (min-width: 64rem) {
+    .author-row {
+        grid-template-columns: 2.75rem minmax(0, 1fr) 6.875rem 7.5rem 11.875rem 6.5rem var(--author-actions-width);
+        grid-template-areas: "monogram main nationality albums roles modified actions";
+    }
+
+    .author-nationality,
+    .author-modified {
+        display: block;
+    }
+}

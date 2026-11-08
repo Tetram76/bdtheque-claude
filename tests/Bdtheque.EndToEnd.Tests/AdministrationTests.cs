@@ -157,15 +157,25 @@ public sealed class AdministrationApplication : ApplicationHost
             $"/admin/publishers/{dargaud.Id}/collections", new("Long courrier", dargaudVersion));
         await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Futuropolis", null));
         var series = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Spirou et Fantasio", SeriesStatus.InProgress, false));
+        // The cases of the list of the authors: a pseudonym over a name, credited on a series only; one credited with several
+        // roles on an album; one credited on nothing, without nationality.
+        var franquin = await PostAsync<CreateAuthorRequest, AuthorForm>(api, "/admin/authors", new("Franquin", "André", null, null, "Belge"));
+        var gotlib = await PostAsync<CreateAuthorRequest, AuthorForm>(api, "/admin/authors", new("Gotlieb", "Marcel", "Gotlib", null, "Française"));
+        await PostAsync<CreateAuthorRequest, AuthorForm>(api, "/admin/authors", new("Gomez", "Alain", null, null, null));
         // The cases of the list of the series: a complete one, and one without status nor album.
-        await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Barracuda", SeriesStatus.Completed, true));
+        await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Barracuda", SeriesStatus.Completed, true) with
+        {
+            Contributions = [new(gotlib.Id, ContributionRole.Scenarist), new(gotlib.Id, ContributionRole.Illustrator)],
+        });
         await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Bone", null, false));
-        var album = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Le Nid des Marsupilamis", series.Id, 12));
+        var album = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Le Nid des Marsupilamis", series.Id, 12) with
+        {
+            Contributions = [new(franquin.Id, ContributionRole.Scenarist), new(franquin.Id, ContributionRole.Illustrator)],
+        });
         await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id, "978-2-8001-0012-8"), album.Version));
         var wanted = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Le Prisonnier du Bouddha", series.Id, 14));
         await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(api, $"/admin/albums/{wanted.Id}/purchase-intents", new(null, wanted.Version));
         await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Z comme Zorglub", series.Id, 15));
-        await PostAsync<CreateAuthorRequest, AuthorForm>(api, "/admin/authors", new("Franquin", "André", null, null, null));
         await PostAsync<CreateGenreRequest, GenreForm>(api, "/admin/genres", new("Humour"));
         var deleted = await PostAsync<CreateGenreRequest, GenreForm>(api, "/admin/genres", new("Polar"));
         var universe = await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Spirouverse", null, null));

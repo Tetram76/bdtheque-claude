@@ -28,6 +28,8 @@ public sealed class ValidationDataLoader(HttpClient client)
     public const string SeriesWithoutAlbumTitle = "Les Gardiens du phare";
     public const string PaleCoverTitle = "Soleil pâle";
 
+    public const string UncreditedAuthorLastName = "Delorme";
+
     /// <summary>A publisher with nothing but its name, whose deletion is accepted.</summary>
     public const string UnusedPublisherName = "Éditions Sans Rivage";
 
@@ -89,6 +91,8 @@ public sealed class ValidationDataLoader(HttpClient client)
         var ferraz = await data.AuthorAsync("Ferraz", "Inès");
         var benali = await data.AuthorAsync("Benali", "Malik");
         var lemaire = await data.AuthorAsync("Lemaire");
+        // An author credited on nothing yet, without nationality: the list of the authors says so, and its deletion is accepted.
+        await data.AuthorAsync(UncreditedAuthorLastName, "Sacha");
 
         // The edition in the spotlight of the days around the load, drawn while it is the only one with a cover: a pale cover
         // with an accent of middle tone, the most demanding one for « La couverture du jour », which takes its colours on

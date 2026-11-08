@@ -41,6 +41,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task Authors_UnderAPseudonym_WithSeveralRoles_AndOneCreditedOnNothing_WhoseDeletionIsAccepted()
+    {
+        var list = (await _client.GetFromJsonAsync<Bdtheque.Contracts.Catalog.Page<Bdtheque.Contracts.Admin.AuthorAdminListItem>>(
+            "/admin/authors?pageSize=100"))!.Items;
+
+        Assert.Contains(list, author => author is { Pseudonym: not null, LastName: not null });
+        Assert.Contains(list, author => author.Roles.Count > 1);
+        Assert.Contains(list, author => author.Nationality is null);
+        var uncredited = Assert.Single(list, author => author.LastName == ValidationDataLoader.UncreditedAuthorLastName);
+        Assert.Equal((0, 0), (uncredited.CreditedAlbumCount, uncredited.Roles.Count));
+        var impact = await _client.GetFromJsonAsync<Bdtheque.Contracts.Deletion.DeletionImpact>($"/admin/authors/{uncredited.Id}/deletion-impact");
+        Assert.Empty(impact!.BlockedBy);
+    }
+
+    [Fact]
     public async Task Series_ACompleteOneAndOneWithoutAlbum_WhoseDeletionIsAccepted()
     {
         var list = (await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.SeriesAdminList>("/admin/series?pageSize=100"))!.Series.Items;

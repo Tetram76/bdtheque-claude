@@ -46,7 +46,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
 
 ## Composants, accessibilité et polices
 
-- **Composants de présentation partagés, construits sur les seuls contrats** (bloc, bouton, étiquette, couverture, pile de couvertures…). Une couverture n'est **jamais rognée** : l'image garde ses proportions dans la place d'une couverture, et le cadre que lui donne un thème est porté par l'image, qu'il épouse quel que soit son format.
+- **Composants de présentation partagés, construits sur les seuls contrats** (bloc, bouton, étiquette, couverture, pile de couvertures, monogramme…). Une couverture n'est **jamais rognée** : l'image garde ses proportions dans la place d'une couverture, et le cadre que lui donne un thème est porté par l'image, qu'il épouse quel que soit son format.
+- **Teinte du monogramme d'un auteur tirée de l'auteur lui-même** (d'une empreinte de son nom affiché, la même d'une exécution à l'autre), parmi sept contrats que chaque thème définit, sa palette secondaire par défaut : un même auteur garde sa couleur quels que soient le tri, la recherche ou la page de la liste, et sept teintes rendent rare que deux voisins se ressemblent.
+  - **Alternative écartée (teinte tirée de l'identifiant de l'auteur)** : tiré au hasard à chaque création, il changerait la couleur d'un auteur saisi de nouveau, et celle des données que les tests recréent à chaque exécution, dont les captures ne seraient plus stables.
+  - **Alternative écartée (teintes distribuées tour à tour selon la place de la ligne, comme dans les maquettes)** : deux voisins ne se ressemblaient jamais, mais un auteur changeait de couleur avec sa place dans la liste.
 - **Icônes dessinées pour l'application**, en SVG de la couleur du texte : aucune police d'icônes ni bibliothèque à servir ou à licencier.
 - **Contrastes vérifiés par un test** dans chaque thème (WCAG 2.2, 1.4.3 et 1.4.11) : 4,5:1 pour un texte, 3:1 pour la bordure d'un contrôle. Un filet décoratif n'y est pas soumis : la bordure des contrôles est donc un contrat distinct.
 - **Focus en contour de la couleur du texte, détaché par une bande de la couleur de la surface** : il contraste avec l'élément, coloré ou non, comme avec cette surface ([Contrôles](../../visuel/liste-albums/controles.md)). Le texte indicatif est du texte atténué, sans opacité.

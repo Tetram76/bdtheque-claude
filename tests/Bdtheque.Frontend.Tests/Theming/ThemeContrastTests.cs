@@ -49,6 +49,7 @@ public sealed partial class ThemeContrastTests
         // An item of a menu that deletes, in the color of deletion on the menu (visuel/liste-albums/contenu.md).
         ("delete", "surface-raised", Text),
         .. Enumerable.Range(1, 7).Select(index => ("text-on-palette", $"palette-{index}", Text)),
+        .. Enumerable.Range(1, 7).Select(index => ($"text-on-monogram-{index}", $"monogram-{index}", Text)),
         // The header: its texts, its search field, the tag of the administration and the help button.
         ("text-on-header", "header", Text),
         ("text-on-header", "header-field", Text),

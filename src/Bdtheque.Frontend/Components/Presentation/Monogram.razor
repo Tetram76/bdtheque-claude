@@ -1,0 +1,69 @@
+@using System.Globalization
+
+@* The visual of an author, who has no cover: the initials of its main identifier on a round of color
+   (visuel/listes/liste-par-liste.md). Decorative: the name next to it names the author. Its tone, one of those of the theme,
+   follows the author itself, never its place in a list: an author keeps its color whatever the order, the search or the
+   page. *@
+<span class="monogram monogram-tone-@(Tone())" aria-hidden="true">@Initials(LastName, FirstName, Pseudonym)</span>
+
+@code {
+    /// <summary>The number of tones of a monogram, which each theme defines (--color-monogram-n).</summary>
+    private const int ToneCount = 7;
+
+    [Parameter]
+    public string? LastName { get; set; }
+
+    [Parameter]
+    public string? FirstName { get; set; }
+
+    [Parameter]
+    public string? Pseudonym { get; set; }
+
+    // The tone of the main identifier of the author, by a hash of its text (FNV-1a), the same from one run to the other,
+    // unlike string.GetHashCode: an author keeps its color everywhere and always, until its name changes. Not its
+    // identifier, drawn at random at each creation: an author entered again would change color.
+    private int Tone()
+    {
+        var hash = 2166136261u;
+        foreach (var character in RecordSearch.AuthorName(LastName, FirstName, Pseudonym))
+            hash = (hash ^ character) * 16777619u;
+        return (int)(hash % ToneCount) + 1;
+    }
+
+    /// <summary>
+    /// The initials of the main identifier of the author (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes):
+    /// those of the first and last words of its pseudonym; otherwise those of its first name and of its last name. An
+    /// initial is the first letter or digit of a word, so that punctuation before it (« ...Et après ») is no initial.
+    /// </summary>
+    internal static string Initials(string? lastName, string? firstName, string? pseudonym)
+    {
+        string?[] words;
+        if (!string.IsNullOrWhiteSpace(pseudonym))
+        {
+            var parts = pseudonym.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+            words = parts.Length == 1 ? [parts[0]] : [parts[0], parts[^1]];
+        }
+        else
+        {
+            words = [firstName, lastName];
+        }
+
+        return string.Concat(words.Select(Initial).Where(initial => initial is not null)).ToUpper(CultureInfo.CurrentCulture);
+    }
+
+    // The first letter or digit of the word, whole: a letter written with a combining accent stays one.
+    private static string? Initial(string? word)
+    {
+        if (string.IsNullOrWhiteSpace(word))
+            return null;
+        var elements = StringInfo.GetTextElementEnumerator(word);
+        while (elements.MoveNext())
+        {
+            var element = (string)elements.Current;
+            if (char.IsLetterOrDigit(element, 0))
+                return element;
+        }
+
+        return null;
+    }
+}

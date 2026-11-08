@@ -104,6 +104,8 @@
     --radius-cover: 0;
     --border-block: 3px solid #111111;
     --border-width-control: 2px;
+    /* A monogram ringed with ink: its tint may be that of its case. */
+    --monogram-border: 2px solid var(--color-text);
     --border-width-state-dot: 1.5px;
     --border-width-nav-entry: 2px;
     --border-header: 3px solid #111111;

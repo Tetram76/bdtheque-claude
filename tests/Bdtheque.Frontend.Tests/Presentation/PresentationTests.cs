@@ -220,6 +220,47 @@ public sealed class PresentationTests : BunitContext
         Assert.Equal(expected, mention.Find(".not-set").TextContent);
     }
 
+    [Theory]
+    [InlineData("Gibelin", "Christophe", null, "CG")]
+    [InlineData("Gibrat", "Jean-Pierre", null, "JG")]
+    [InlineData("Van Hamme", "Jean", null, "JV")]
+    [InlineData("Franquin", null, null, "F")]
+    [InlineData("Gotlieb", "Marcel", "Gotlib", "G")]
+    [InlineData(null, null, "bob de Moor", "BM")]
+    [InlineData("Œuvre", "élise", null, "ÉŒ")]
+    [InlineData(null, null, "...Et après", "EA")]
+    [InlineData(null, null, "13", "1")]
+    public void Monogram_TheInitialsOfTheMainIdentifier(string? lastName, string? firstName, string? pseudonym, string expected)
+    {
+        // A pseudonym stands for the name, as in the main identifier
+        // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes): the initials of its first and last words;
+        // otherwise the initials of the first name and of the last name.
+        var monogram = Render<Monogram>(parameters => parameters
+            .Add(p => p.LastName, lastName).Add(p => p.FirstName, firstName).Add(p => p.Pseudonym, pseudonym));
+
+        var mark = monogram.Find(".monogram");
+        Assert.Equal(expected, mark.TextContent);
+        // Decorative: the name next to it names the author.
+        Assert.Equal("true", mark.GetAttribute("aria-hidden"));
+    }
+
+    [Theory]
+    [InlineData("Franquin", null, null, "monogram monogram-tone-1")]
+    [InlineData(null, null, "Moebius", "monogram monogram-tone-2")]
+    [InlineData("Remi", "Georges", "Hergé", "monogram monogram-tone-3")]
+    [InlineData("Gibelin", "Christophe", null, "monogram monogram-tone-4")]
+    [InlineData("Franquin", "André", null, "monogram monogram-tone-5")]
+    [InlineData("Gibrat", "Jean-Pierre", null, "monogram monogram-tone-6")]
+    public void Monogram_TakesTheToneOfTheNameOfItsAuthor(string? lastName, string? firstName, string? pseudonym, string expected)
+    {
+        // The tone follows the main identifier of the author, never its place in a list nor its identifier, drawn at random at
+        // each creation: the same author keeps its color whatever the order, the search, the page or the run.
+        var monogram = Render<Monogram>(parameters => parameters
+            .Add(p => p.LastName, lastName).Add(p => p.FirstName, firstName).Add(p => p.Pseudonym, pseudonym));
+
+        Assert.Equal(expected, monogram.Find(".monogram").GetAttribute("class"));
+    }
+
     [Fact]
     public void Icon_IsDecorative()
     {
