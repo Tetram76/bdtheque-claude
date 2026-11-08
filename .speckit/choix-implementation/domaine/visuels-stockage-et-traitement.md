@@ -1,13 +1,13 @@
 ---
 type: Choix d'implémentation
 title: 'Visuels : stockage et traitement'
-description: 'Volume privé à api, médias servis et relayés, téléversement validé et borné, cohérence fichiers/base, version d''affichage WebP, SkiaSharp.'
+description: 'Volume privé à api, médias servis et relayés, téléversement validé et borné, cohérence fichiers/base, version d''affichage WebP, SkiaSharp, couleurs d''un visuel et couleurs du jour.'
 applies_to:
   - 'src/Bdtheque.Api/Visuals/**'
   - 'src/Bdtheque.Api/Endpoints/EditionVisualEndpoints.cs'
   - 'src/Bdtheque.Api/Endpoints/VisualMediaEndpoints.cs'
   - 'src/Bdtheque.Frontend/Api/VisualMediaRelay.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:00:00Z }
 ---
 
 # Visuels : stockage et traitement
@@ -44,3 +44,12 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 - Elle applique l'**orientation que l'original déclare** (EXIF), comme le font les navigateurs pour l'original, la version WebP ne conservant pas la balise ; aucune rotation n'est déduite des proportions (un scan de double page reste en paysage). Le décodage se fait à l'échelle réduite quand le format le permet, pour épargner la mémoire.
 - **SkiaSharp** (licence MIT, .NET Foundation), avec ses bibliothèques natives sans dépendance système.
   - **Alternative écartée (ImageSharp)** : licence *Six Labors Split*, et clé de licence exigée à la compilation depuis la version 4.
+
+## Couleurs d'un visuel
+
+- **Trois couleurs tirées une fois, au téléversement**, de la version d'affichage, redressée et réduite, l'image que voit le visiteur ; enregistrées avec le visuel, quel que soit son type ([Visuel d'édition](../../modele-metier/visuel-d-edition.md)). Le thème « La couverture du jour » ([La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) les lit sur chaque page, et pour chaque album en volume : les calculer à l'affichage décoderait plusieurs images par page.
+  - **Alternative écartée (couleurs calculées dans le navigateur, sur l'image affichée)** : la page arriverait dans les couleurs du thème, puis changerait une fois l'image chargée, comme le tirage du thème écarté pour la même raison ([Thèmes](../socle/themes.md)) ; et les couleurs d'une page de l'administration, sans couverture affichée, seraient inconnues.
+- **Couleurs comptées par teinte, une couleur franche l'emportant sur le papier et l'encre** : une page peinte du blanc d'un fond de couverture n'en montrerait rien ; seule une couverture sans couleur franche garde ses gris. La **profonde** est la dominante assombrie jusqu'à une luminosité où le texte blanc reste lisible quelle que soit la teinte ; l'**accent**, la couleur la plus présente d'une autre teinte, et à défaut une nuance claire ou sombre de la dominante : aucune teinte n'est inventée.
+  - **Alternative écartée (bibliothèque d'extraction de palette)** : une dépendance de plus à épingler et à surveiller ([Suivi des versions et des vulnérabilités](../../contraintes-techniques/suivi-des-versions-et-des-vulnerabilites.md)), pour un histogramme de l'image réduite qui tient en quelques lignes sur SkiaSharp, déjà employé.
+  - **Alternative écartée (k-moyennes)** : un résultat qui dépend de son initialisation, pour départager des couleurs qu'un histogramme par teinte sépare déjà.
+- **Couleurs du jour lues par un point d'accès propre**, celles de la couverture de l'édition à la une, que toute page du thème demande : il tire l'édition du jour si elle ne l'est pas encore, comme le dashboard ([Édition « À la une » : mise en œuvre](edition-a-la-une-mise-en-oeuvre.md)), sans calculer aucune statistique ([Statistiques du dashboard](../../contraintes-techniques/architecture-deploiement/statistiques-du-dashboard.md)).

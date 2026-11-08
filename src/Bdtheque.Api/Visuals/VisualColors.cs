@@ -45,14 +45,16 @@ internal static class VisualColors
     private const double LightAccent = 0.72;
     private const double DarkAccent = 0.32;
 
-    /// <summary>The palette of <paramref name="image"/>, whose fully transparent pixels are ignored.</summary>
-    /// <exception cref="ArgumentException">The image has no visible pixel.</exception>
+    /// <summary>
+    /// The palette of <paramref name="image"/>, whose fully transparent pixels are ignored — unless it has no other, an
+    /// accepted image all the same.
+    /// </summary>
     public static VisualPalette PaletteOf(SKBitmap image)
     {
-        var colors = CountColors(image);
+        var colors = CountColors(image, ignoreTransparent: true);
+        if (colors.Count == 0)
+            colors = CountColors(image, ignoreTransparent: false);
         var total = colors.Sum(c => c.Count);
-        if (total == 0)
-            throw new ArgumentException("The image has no visible pixel.", nameof(image));
 
         var frank = colors.Where(c => c.Chroma >= FrankChroma).ToList();
         var dominant = (frank.Sum(c => c.Count) >= FrankShare * total ? MostPresentFamily(frank) : null)
@@ -77,7 +79,7 @@ internal static class VisualColors
             .MaxBy(family => family.Sum(c => c.Count))
             ?.MaxBy(c => c.Count);
 
-    private static List<ColorCount> CountColors(SKBitmap image)
+    private static List<ColorCount> CountColors(SKBitmap image, bool ignoreTransparent)
     {
         var step = Math.Max(1, (int)Math.Sqrt((double)image.Width * image.Height / TargetSamples));
         var counts = new Dictionary<int, (int Count, long R, long G, long B)>();
@@ -86,7 +88,7 @@ internal static class VisualColors
         {
             var pixel = image.GetPixel(x, y);
             // A half-transparent edge counts as its colour; only what is not shown at all is ignored.
-            if (pixel.Alpha == 0)
+            if (ignoreTransparent && pixel.Alpha == 0)
                 continue;
 
             var key = (pixel.Red >> ChannelShift << 8 | pixel.Green >> ChannelShift) << 4 | pixel.Blue >> ChannelShift;
@@ -121,13 +123,12 @@ internal static class VisualColors
         public double Saturation => Hsl.Saturation;
         public double Lightness => Hsl.Lightness;
 
-        private (double Hue, double Saturation, double Lightness) Hsl
+        private (double Hue, double Saturation, double Lightness) Hsl { get; } = HslOf(Rgb);
+
+        private static (double Hue, double Saturation, double Lightness) HslOf(RgbColor rgb)
         {
-            get
-            {
-                new SKColor(Rgb.R, Rgb.G, Rgb.B).ToHsl(out var hue, out var saturation, out var lightness);
-                return (hue, saturation / 100, lightness / 100);
-            }
+            new SKColor(rgb.R, rgb.G, rgb.B).ToHsl(out var hue, out var saturation, out var lightness);
+            return (hue, saturation / 100, lightness / 100);
         }
     }
 }

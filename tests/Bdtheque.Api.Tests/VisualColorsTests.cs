@@ -113,6 +113,17 @@ public sealed class VisualColorsTests
         Assert.Equal(new RgbColor(0xD8, 0x34, 0x2B), palette.Dominant);
     }
 
+    [Fact]
+    public void PaletteOf_FullyTransparentImage_StillHasColours()
+    {
+        // A valid image all the same, accepted at upload: its palette is that of its hidden pixels, not a failure.
+        using var image = Stripes((SKColors.Transparent, 100));
+
+        var palette = VisualColors.PaletteOf(image);
+
+        Assert.Equal(new RgbColor(0, 0, 0), palette.Dominant);
+    }
+
     /// <summary>A 100-pixel wide image of horizontal stripes, one row per share point of each colour.</summary>
     private static SKBitmap Stripes(params (SKColor Color, int Share)[] stripes)
     {
