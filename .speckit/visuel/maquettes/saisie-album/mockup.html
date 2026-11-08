@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Saisie d'un album — administration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Inter+Tight:wght@400..900&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -36,6 +36,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 }
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/couverture-theme.js"></script>
 <script src="../shared/comic-skin.js"></script>
 <script src="../shared/comic-bubbles.js"></script>
 <script src="../shared/comic-frames.js"></script>
@@ -446,6 +447,10 @@ const THEMES = {
   }
 };
 
+// « La couverture du jour »: the colours of the day's featured cover, on the festival's rounded forms
+// (shared/couverture-theme.js).
+THEMES.couverture = { ...THEMES.festival, ...COUVERTURE_THEME };
+
 const ICONS = {
   search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4',
   intent: 'M6 3h12v18l-6-4-6 4V3z',
@@ -630,7 +635,7 @@ class View extends Mockup {
 }
 
 Mockup.mount(View, {
-  theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes'], default: 'planche' },
+  theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
   exemple: { label: 'Exemple', editor: 'enum', options: ['modification', 'creation', 'integrale'], default: 'modification' },
   cleManuelle: { label: 'Clé de tri manuelle', editor: 'boolean', default: false },
   erreur: { label: 'Erreur', editor: 'enum', options: ['aucune', 'metier', 'fonctionnelle', 'technique'], default: 'aucune' },

@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — la couverture du jour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}
+/* The whole page takes its colours from the cover of the featured edition (--dom, --deep, --acc):
+   they change every day with it. */
+.app{min-height:100vh;background:color-mix(in srgb,var(--dom) 9%,#F7F6F3);color:#15151A;font-family:'Inter Tight',system-ui,sans-serif;font-size:15px;line-height:1.5;font-feature-settings:'tnum' 1}
+.wrap{max-width:1240px;margin:0 auto;padding-left:clamp(14px,3vw,28px);padding-right:clamp(14px,3vw,28px);box-sizing:border-box}
+/* The halo stays behind the featured album and keeps some of the deep colour, so that white text
+   remains legible beside it even when the cover is pale (a yellow one, say). */
+.stage{color:#FFFFFF;background:radial-gradient(ellipse 34% 60% at 82% 22%,color-mix(in srgb,var(--dom) 70%,var(--deep)) 0,transparent 75%),radial-gradient(ellipse 50% 60% at 8% 90%,color-mix(in srgb,var(--acc) 35%,transparent) 0,transparent 70%),var(--deep)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,22vw,290px);gap:clamp(24px,5vw,80px);align-items:center}
+.h2{margin:0;font-size:clamp(21px,2.2vw,26px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.glass{background:rgba(255,255,255,.1);border-radius:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+.glass:hover{background:rgba(255,255,255,.16)}
+/* An album in volume: its cover, the spine on its left and the edge of its pages on its right, turned
+   a little away; it turns to face the reader when hovered. */
+.book{position:relative;display:block;transform-style:preserve-3d;transform:perspective(1100px) rotateY(22deg);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.book .cv{border-radius:2px 5px 5px 2px;box-shadow:inset 6px 0 8px -6px rgba(0,0,0,.45)}
+.book .spine{position:absolute;top:0;bottom:0;left:0;width:var(--t,16px);background:linear-gradient(90deg,var(--sp),color-mix(in srgb,var(--sp) 72%,#FFFFFF));transform-origin:left center;transform:rotateY(90deg)}
+.book .pages{position:absolute;top:1.5%;bottom:1.5%;right:0;width:var(--t,16px);background:repeating-linear-gradient(90deg,#F6F2E8 0 2px,#E2DCCD 2px 3px);transform-origin:right center;transform:rotateY(-90deg)}
+.lift:hover .book{transform:perspective(1100px) rotateY(0deg) translateY(-8px)}
+.glow{display:block;height:22px;margin:-4px 6% 0;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.45),transparent 70%)}
+/* The featured album floats gently; the albums just arrived come in one after the other. */
+.hero-book .book{animation:float 6s ease-in-out infinite}
+@keyframes float{50%{translate:0 -8px}}
+.shelf{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(14px,2.4vw,34px);padding:0 clamp(4px,1vw,14px)}
+.shelf>a{animation:arrive .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 80ms)}
+@keyframes arrive{from{opacity:0;translate:0 26px}}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+.card{background:color-mix(in srgb,var(--dom) 4%,#FFFFFF);border-radius:26px;padding:22px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px color-mix(in srgb,var(--deep) 10%,transparent),0 20px 40px -22px color-mix(in srgb,var(--deep) 45%,transparent)}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:999px;font-weight:700;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 3px 8px -3px color-mix(in srgb,var(--deep) 40%,transparent);transition:transform .15s ease}
+.pill:hover{transform:translateY(-2px)}
+.pill.plain{padding-left:14px}
+/* A genre's pill carries the cover of one of its albums, too small for its lettering. */
+.mini{flex:none;width:1.25em;transform:perspective(200px) rotateY(18deg);filter:drop-shadow(1px 2px 2px rgba(0,0,0,.3))}
+.mini .cv-series,.mini .cv-title{display:none}
+.tube{display:block;height:100%;border-radius:999px;box-shadow:inset 0 2px 2px rgba(255,255,255,.4),inset 0 -3px 4px rgba(0,0,0,.2)}
+.ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;aspect-ratio:3/4;border:3px dashed rgba(255,255,255,.55);border-radius:4px 8px 8px 4px;background:rgba(255,255,255,.06);font-weight:800;text-align:center;transform:perspective(1100px) rotateY(22deg)}
+@media (max-width:980px){.grid>*{grid-column:1 / -1 !important}}
+@media (max-width:720px){
+  .menu{flex-basis:0 !important}
+  .tools.search{flex:1 1 100% !important}
+  .hero{grid-template-columns:minmax(0,1fr);gap:14px}
+  .hero-book{order:-1;width:40%;justify-self:center}
+  .stage{background-position:50% 0,0 0,0 0}
+  .shelf{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:24px}
+  .card{border-radius:20px;padding:16px;gap:10px}
+  .counters{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px !important}
+  .counters a{flex-direction:column;gap:0 !important;padding:6px 12px !important}
+  .counters strong{font-size:22px !important}
+}
+@media (prefers-reduced-motion:reduce){.book,.pill{transition:none}.hero-book .book,.shelf>a{animation:none}}
+</style>
+<script src="../shared/mockup.js"></script>
+<script src="../shared/fake-covers.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
+<div class="app" style="--dom: {{palette.dominant}}; --deep: {{palette.deep}}; --acc: {{palette.accent}}; --on-acc: {{palette.onAccent}}">
+
+  <!-- Outside the stage: a sticky element stays within its parent, and the header stays at the top of the
+       screen down to the bottom of the page. -->
+  <header style="position: sticky; top: 0; z-index: 20; background: var(--deep); color: #FFFFFF">
+    <div class="wrap" style="padding-top: 12px; padding-bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 21px; letter-spacing: -.03em"><span aria-hidden="true" style="width: 22px; height: 28px; border-radius: 2px 5px 5px 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--acc) 70%, #000000) 0 4px, var(--acc) 4px); box-shadow: 2px 3px 6px rgba(0,0,0,.35)"></span>BDthèque</a>
+      <nav class="menu" aria-label="Navigation principale" data-scroll-hint="" style="flex: 999 1 220px; --hint-bg: var(--deep)"><div data-scroll="">
+        <div style="display: flex; gap: 4px; width: max-content; white-space: nowrap; font-weight: 700; font-size: 15px">
+          <a href="#" aria-current="page" style="padding: 7px 15px; border-radius: 999px; background: #FFFFFF; color: var(--deep)">Accueil</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Albums</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Séries</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Auteurs</a>
+          <a href="#" style="padding: 7px 13px; color: rgba(255,255,255,.75)">Intentions d'achat</a>
+        </div>
+      </div></nav>
+      <div class="tools {{tools.cls}}" style="display: flex; gap: 8px; flex: {{tools.flex}}">
+        <sc-if value="{{full}}">
+        <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
+        <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(255,255,255,.14); color: #FFFFFF; font: inherit; outline-color: #FFFFFF">
+        </sc-if>
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: var(--acc); color: var(--on-acc); font: 900 17px 'Inter Tight', sans-serif; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.35)">?</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="stage">
+
+    <sc-if value="{{vide}}">
+    <section aria-labelledby="h-welcome" class="wrap" style="padding-top: clamp(16px, 3.6vw, 40px); padding-bottom: clamp(70px, 8vw, 110px)">
+      <div class="hero">
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-width: 0">
+          <span style="padding: 3px 11px; border-radius: 999px; background: var(--acc); color: var(--on-acc); font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase">Collection à démarrer</span>
+          <h1 id="h-welcome" style="margin: 0; font-size: clamp(30px, 4.6vw, 60px); font-weight: 900; line-height: 1; letter-spacing: -.045em; text-wrap: balance">Les étagères attendent leur premier album !</h1>
+          <p style="margin: 0; font-size: clamp(17px, 1.6vw, 20px); font-weight: 700">La collection ne compte encore aucune édition.</p>
+          <p style="margin: 0; max-width: 60ch; color: rgba(255,255,255,.88)">Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</p>
+          <p style="margin: 0; max-width: 60ch; font-size: 13px; color: rgba(255,255,255,.68)">Les albums, séries et auteurs déjà présents dans la base restent consultables, même s'ils ne font pas encore partie de la collection.</p>
+        </div>
+        <!-- The place of the first album: an album drawn in dashes, turned like the featured one. -->
+        <div class="hero-book" aria-hidden="true" style="padding: 0 7%">
+          <span class="ghost"><span style="font-size: 40px; line-height: 1; font-weight: 500">+</span>Premier album</span>
+          <span class="glow" style="height: 30px"></span>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <sc-if value="{{full}}">
+    <section aria-labelledby="h-hero" class="wrap" style="padding-top: clamp(16px, 3.6vw, 40px); padding-bottom: clamp(20px, 3vw, 36px)">
+      <div class="hero">
+        <div style="display: flex; flex-direction: column; gap: clamp(14px, 2.4vw, 24px); min-width: 0">
+          <h1 id="h-hero" style="margin: 0; font-size: clamp(30px, 4.6vw, 60px); font-weight: 900; line-height: 1; letter-spacing: -.045em; text-wrap: balance">{{heroLine}}</h1>
+          <div class="counters" style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{counters}}" as="c">
+              <a href="#" class="glass" style="padding: 8px 16px; display: flex; align-items: baseline; gap: 8px"><strong style="font-size: 28px; font-weight: 900; letter-spacing: -.03em">{{c.n}}</strong><span style="font-weight: 600; color: rgba(255,255,255,.75)">{{c.label}}</span></a>
+            </sc-for>
+          </div>
+          <a href="#" aria-labelledby="h-featured" style="display: flex; flex-direction: column; gap: 7px; padding-top: clamp(12px, 2vw, 20px); border-top: 1px solid rgba(255,255,255,.22)">
+            <span style="align-self: flex-start; padding: 3px 11px; border-radius: 999px; background: var(--acc); color: var(--on-acc); font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase">À la une aujourd'hui</span>
+            <span id="h-featured" style="font-size: clamp(22px, 2.6vw, 32px); font-weight: 800; line-height: 1.08; letter-spacing: -.03em">{{une.label}}</span>
+            <span style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,.75)">{{une.edition}}</span>
+            <span style="max-width: 62ch; color: rgba(255,255,255,.92)">{{une.summary}}</span>
+            <span style="font-weight: 800">Voir l'album →</span>
+          </a>
+        </div>
+        <a href="#" class="lift hero-book" aria-hidden="true" tabindex="-1" style="display: block; padding: 0 7%">
+          <span class="book" style="--sp: color-mix(in srgb, var(--deep) 80%, #000000); --t: 26px"><span class="cv" style="background: {{une.cv.bg}}"><span class="cv-art" style="background: {{une.cv.art}}"></span><span class="cv-series" style="color: {{une.cv.ink}}">{{une.cv.series}}</span><span class="cv-title" style="color: {{une.cv.titleInk}}">{{une.cv.title}}</span></span><span class="spine"></span><span class="pages"></span></span>
+          <span class="glow" style="height: 30px"></span>
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-recent" class="wrap" style="padding-bottom: clamp(56px, 7vw, 96px)">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 18px">
+        <h2 id="h-recent" class="h2">Tout juste arrivés !</h2>
+        <a href="#" style="font-weight: 800">Tous les albums →</a>
+      </div>
+      <div class="shelf">
+        <sc-for list="{{recents}}" as="r">
+          <a href="#" class="lift" style="--i: {{r.i}}; display: flex; flex-direction: column; gap: 6px; min-width: 0">
+            <span class="book" style="--sp: {{r.cv.deep}}"><span class="cv" style="background: {{r.cv.bg}}"><span class="cv-art" style="background: {{r.cv.art}}"></span><span class="cv-series" style="color: {{r.cv.ink}}">{{r.cv.series}}</span><span class="cv-title" style="color: {{r.cv.titleInk}}">{{r.cv.title}}</span></span><span class="spine"></span><span class="pages"></span></span>
+            <span class="glow"></span>
+            <span style="display: flex; flex-direction: column; line-height: 1.3; margin-top: 4px">
+              <span style="font-weight: 700; font-size: 14px">{{r.label}}</span>
+              <span style="font-size: 13px; color: rgba(255,255,255,.7)">{{r.pub}} · {{r.date}}</span>
+            </span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+    </sc-if>
+  </div>
+
+  <!-- The blocks below rise over the coloured stage, so that the page reads as one piece. -->
+  <main class="wrap" style="padding-bottom: 44px">
+    <div class="grid" style="margin-top: calc(-1 * clamp(36px, 5vw, 70px))">
+
+      <sc-if value="{{vide}}">
+      <section aria-labelledby="h-browse" class="card" style="grid-column: span 7">
+        <h2 id="h-browse" class="h2">On jette un œil quand même ?</h2>
+        <p style="margin: 0; color: #4F4F57">La base documentaire se parcourt déjà : fiches d'albums, de séries et d'auteurs, et recherche avancée.</p>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px">
+            <sc-for list="{{browse}}" as="b">
+              <a href="#" class="pill plain" style="background: color-mix(in srgb, {{b.c}} 16%, #FFFFFF); color: color-mix(in srgb, {{b.c}} 70%, #000000)">{{b.label}} →</a>
+            </sc-for>
+          </div>
+          <a href="#" class="pill plain" style="background: color-mix(in srgb, var(--dom) 16%, #FFFFFF); color: var(--deep)">Recherche avancée →</a>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-admin" class="card" style="grid-column: span 5; background: color-mix(in srgb, var(--deep) 86%, #FFFFFF); color: #FFFFFF; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 20px 40px -22px color-mix(in srgb, var(--deep) 60%, transparent)">
+        <h2 id="h-admin" class="h2">C'est votre collection ?</h2>
+        <p style="margin: 0; color: rgba(255,255,255,.85)">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
+          <a href="#" class="pill plain" style="padding: 10px 18px; background: var(--acc); color: var(--on-acc)">Ouvrir l'administration →</a>
+          <span style="font-size: 13px; color: rgba(255,255,255,.7)">La connexion est demandée à l'ouverture.</span>
+        </div>
+      </section>
+      </sc-if>
+
+      <sc-if value="{{full}}">
+      <section aria-labelledby="h-value" class="card" style="grid-column: span 7">
+        <h2 id="h-value" class="h2">Ça vaut combien, tout ça ?</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+          <div style="padding: 16px 18px; border-radius: 20px; background: var(--deep); color: #FFFFFF; box-shadow: inset 0 1px 0 rgba(255,255,255,.2)">
+            <div style="font-size: 14px; font-weight: 700; opacity: .8">Valeur totale estimée</div>
+            <div style="font-size: clamp(32px, 3.4vw, 46px); font-weight: 900; line-height: 1.05; letter-spacing: -.045em">38 760 €</div>
+            <div style="font-weight: 700; opacity: .85">55 230 € en euros du jour</div>
+          </div>
+          <div style="padding: 16px 18px; border-radius: 20px; background: color-mix(in srgb, var(--dom) 12%, #FFFFFF)">
+            <div style="font-size: 14px; font-weight: 700; color: var(--deep)">Valeur totale connue</div>
+            <div style="font-size: clamp(28px, 2.8vw, 36px); font-weight: 900; line-height: 1.05; letter-spacing: -.035em">31 482 €</div>
+            <div style="font-weight: 700; color: var(--deep)">44 910 € en euros du jour</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px">
+          <sc-for list="{{prices}}" as="p">
+            <div style="padding: 10px 14px; border-radius: 16px; background: color-mix(in srgb, var(--dom) 5%, #F3F3F0)">
+              <div style="font-size: 13px; color: #5F5F66">{{p.label}}</div>
+              <div style="font-weight: 900; font-size: 17px">{{p.cur}}</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--deep)">{{p.today}} du jour</div>
+            </div>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-size: 12px; color: #5F5F66">Euros courants, puis euros du jour. Estimation : prix connus + 497 éditions sans prix. 12 montants non convertibles exclus · 25 éditions gratuites non valorisées.</p>
+      </section>
+
+      <section aria-labelledby="h-type" class="card" style="grid-column: span 5">
+        <h2 id="h-type" class="h2">Tomes, intégrales ou hors-séries ?</h2>
+        <!-- Three piles of albums seen from the side: the height of a pile follows its share. -->
+        <div role="img" aria-label="Répartition des albums : 2 571 réguliers (90 %), 184 intégrales (6 %), 92 hors-séries (3 %)" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 14px; height: 170px; padding: 0 6px; border-bottom: 10px solid color-mix(in srgb, var(--dom) 18%, #E6E3DD); border-radius: 0 0 6px 6px">
+          <sc-for list="{{types}}" as="t">
+            <span style="display: block; height: {{t.h}}; min-height: 14px; border-radius: 6px 6px 2px 2px; background: repeating-linear-gradient(180deg, {{t.c}} 0 11px, color-mix(in srgb, {{t.c}} 75%, #000000) 11px 13px); box-shadow: inset 0 2px 0 rgba(255,255,255,.3), 0 10px 18px -12px rgba(0,0,0,.6)"></span>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 0 6px">
+          <sc-for list="{{types}}" as="t">
+            <div style="display: flex; flex-direction: column; line-height: 1.25">
+              <strong style="font-size: 22px; font-weight: 900">{{t.pct}}</strong>
+              <span style="font-size: 13px; color: #5F5F66">{{t.n}} {{t.label}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-genre" class="card" style="grid-column: span 6">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap">
+          <h2 id="h-genre" class="h2">Plutôt quel genre ?</h2>
+          <span style="font-size: 13px; color: #5F5F66">Un album peut cumuler plusieurs genres.</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+          <sc-for list="{{genres}}" as="g">
+            <a href="#" class="pill {{g.cls}}" style="font-size: {{g.size}}; background: color-mix(in srgb, {{g.c}} 18%, #FFFFFF); color: color-mix(in srgb, {{g.c}} 70%, #000000)">
+              <sc-if value="{{g.cv}}"><span class="mini"><span class="cv" style="background: {{g.cv.bg}}; border-radius: 1px 2px 2px 1px"><span class="cv-art" style="background: {{g.cv.art}}"></span></span></span></sc-if>
+              <span>{{g.name}} <span style="font-size: 12px; font-weight: 700; opacity: .7">{{g.n}}</span></span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-pub" class="card" style="grid-column: span 6">
+        <h2 id="h-pub" class="h2">Chez quels éditeurs ?</h2>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <sc-for list="{{publishers}}" as="e">
+            <a href="#" style="display: grid; grid-template-columns: minmax(80px, 110px) minmax(0, 1fr) 40px; align-items: center; gap: 12px; font-size: 14px">
+              <span style="font-weight: 700">{{e.name}}</span>
+              <span style="height: 14px; border-radius: 999px; background: color-mix(in srgb, var(--dom) 10%, #EFEEEA); box-shadow: inset 0 2px 3px rgba(0,0,0,.08)"><span class="tube" style="width: {{e.w}}; background: {{e.c}}"></span></span>
+              <span style="text-align: right; color: #5F5F66">{{e.n}}</span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+      </sc-if>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap" style="padding-top: 6px; padding-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: {{footerJustify}}; gap: 10px 24px; font-size: 13px; color: #5F5F66">
+      <sc-if value="{{full}}"><span>Montants convertis en euro (taux Frankfurter, inflation INSEE)</span></sc-if>
+      <a href="#" style="font-weight: 800; color: #15151A">Administration</a>
+    </div>
+  </footer>
+</div>
+</template>
+<script>
+const HERO_LINES = [
+  'Entrez donc, il y a de quoi lire !',
+  'Installez-vous, la collection vous attend !',
+  'Alors, on bouquine ?',
+  'Encore de la place sur les étagères ? Pas sûr…',
+  'Attention, ça déborde des étagères !'
+];
+// Editions that may be featured, by the label offered in the viewer's setting.
+const FEATURED = {
+  'Le Lotus bleu': { cover: 'lotus', label: 'Le Lotus bleu (Les Aventures de Tintin - T. 5)', edition: 'Casterman (Les Aventures de Tintin) [1946]', summary: "Invité en Chine, Tintin s'attaque à un réseau de trafiquants d'opium, déjoue les manœuvres de l'occupant et se lie d'amitié avec le jeune Tchang." },
+  'Alors, tout tombe': { cover: 'blacksad', label: 'Alors, tout tombe (Blacksad - T. 7)', edition: 'Dargaud [2023]', summary: "À New York, John Blacksad enquête pour le syndicat des ouvriers du métro, entre chantiers à ciel ouvert, corruption et règlements de comptes." },
+  "L'Iris blanc": { cover: 'iris', label: "L'Iris blanc (Astérix - T. 40)", edition: 'Albert René [2023]', summary: "Un médecin-chef venu de Rome prône la pensée positive au camp de Babaorum, puis jusque dans le village gaulois, où l'humeur change étrangement." },
+  'Les Indes fourbes': { cover: 'indes', label: 'Les Indes fourbes', edition: 'Delcourt [2019]', summary: "Pablos de Ségovie, gueux et filou, part chercher fortune aux Amériques et raconte, à sa manière, sa quête de l'Eldorado." },
+  'Mister Prairie': { cover: 'undertaker', label: 'Mister Prairie (Undertaker - T. 7)', edition: 'Dargaud [2024]', summary: "Jonas Crow, croque-mort de l'Ouest, croise la route d'un mystérieux justicier de la prairie, et d'un passé qu'il croyait enterré." }
+};
+// Without an edition to feature, the page keeps the theme's own colours.
+const NEUTRAL = { dominant: '#3D5A80', deep: '#1E2A44', accent: '#FF6B57' };
+// A cover's accent may be pale (a yellow) as well as dark, and text is set on it: white or near-black,
+// whichever reaches a 4.5:1 contrast (WCAG). A mid-tone accent that neither reaches is darkened until
+// white does.
+const INK = '#15151A';
+function luminance(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+const darken = (hex, share) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - share)).toString(16).padStart(2, '0')).join('');
+function legibleAccent(hex) {
+  let accent = hex;
+  while (contrast(accent, '#FFFFFF') < 4.5 && contrast(accent, INK) < 4.5) accent = darken(accent, 0.05);
+  return { accent, onAccent: contrast(accent, '#FFFFFF') >= contrast(accent, INK) ? '#FFFFFF' : INK };
+}
+class View extends Mockup {
+  componentDidMount() {
+    this.setState({ heroIndex: Math.floor(Math.random() * HERO_LINES.length) });
+  }
+  renderVals() {
+    // The browser's narrow no-break space is not in every font: a no-break space stands in.
+    const fmt = (v) => v.toLocaleString('fr-FR').replace(/ /g, ' ');
+    const covers = FakeCovers.all;
+    const vide = this.props.vide;
+    const featured = FEATURED[this.props.une] ?? FEATURED['Le Lotus bleu'];
+    const cv = covers[featured.cover];
+    // The charts take the colours of the day's cover; the genres keep their own, so that they stay apart.
+    const genreColors = ['#2F5BA8', '#D8342B', '#E0A21B', '#2E8B4A', '#8E5BB8', '#2C8FB8', '#E07A2C', '#7A7A7A'];
+    // Each genre shows the cover of one of its albums; « Autres » gathers too many to pick one.
+    const genres = [['Aventure', 612, 'lotus'], ['Humour', 488, 'iris'], ['Science-fiction', 341, 'chateau'], ['Policier', 297, 'blacksad'], ['Fantastique', 254, 'spirou'], ['Historique', 231, 'indes'], ['Western', 118, 'undertaker'], ['Autres', 506, null]];
+    const pubs = [['Dargaud', 548], ['Dupuis', 506], ['Casterman', 351], ['Glénat', 318], ['Delcourt', 294], ['Le Lombard', 247], ['Soleil', 181], ['Autres', 468]];
+    return {
+      vide,
+      full: !vide,
+      palette: ((p) => ({ ...p, ...legibleAccent(p.accent) }))(vide ? NEUTRAL : { dominant: cv.dominant, deep: cv.deep, accent: cv.accent }),
+      // Without the search field, the help button no longer needs room beside the menu; with it, on a
+      // phone, the search takes a line of its own under the menu.
+      tools: { flex: vide ? 'none' : '0 1 320px', cls: vide ? '' : 'search' },
+      footerJustify: vide ? 'flex-end' : 'space-between',
+      browse: [
+        { label: 'Albums', c: '#D8342B' },
+        { label: 'Séries', c: '#2E8B4A' },
+        { label: 'Auteurs', c: '#8E5BB8' }
+      ],
+      heroLine: HERO_LINES[this.state?.heroIndex ?? 0],
+      une: { ...featured, cv },
+      counters: [
+        { n: fmt(2847), label: 'albums' },
+        { n: fmt(412), label: 'séries' },
+        { n: fmt(2913), label: 'éditions' }
+      ],
+      recents: [
+        { cv: covers.blacksad, label: 'Alors, tout tombe (Blacksad - T. 7)', pub: 'Dargaud', date: '3 oct.' },
+        { cv: covers.iris, label: "L'Iris blanc (Astérix - T. 40)", pub: 'Albert René', date: '28 sept.' },
+        { cv: covers.indes, label: 'Les Indes fourbes', pub: 'Delcourt', date: '21 sept.' },
+        { cv: covers.chateau, label: 'Le Château des étoiles - INT. [1 à 2]', pub: 'Rue de Sèvres', date: '14 sept.' },
+        { cv: covers.undertaker, label: 'Mister Prairie (Undertaker - T. 7)', pub: 'Dargaud', date: '9 sept.' },
+        { cv: covers.spirou, label: 'Spirou et Fantasio - Hors-série 2', pub: 'Dupuis', date: '2 sept.' }
+      ].map((r, i) => ({ ...r, i })),
+      prices: [
+        { label: 'Prix moyen', cur: '13,10 €', today: '18,70 €' },
+        { label: 'Prix médian', cur: '11,90 €', today: '16,40 €' },
+        { label: 'Le moins cher', cur: '0,90 €', today: '3,20 €' },
+        { label: 'Le plus cher', cur: '189,00 €', today: '214,50 €' }
+      ],
+      types: [
+        { label: 'réguliers', n: '2 571', pct: '90 %', h: '90%', c: cv.deep },
+        { label: 'intégrales', n: '184', pct: '6 %', h: '6%', c: cv.accent },
+        { label: 'hors-séries', n: '92', pct: '3 %', h: '3%', c: cv.dominant }
+      ],
+      // A genre's pill grows with its number of albums.
+      genres: genres.map(([name, v, cover], i) => ({ name, n: fmt(v), size: Math.round(13 + v / 612 * 9) + 'px', c: genreColors[i], cv: cover && covers[cover], cls: cover ? '' : 'plain' })),
+      publishers: pubs.map(([name, v], i) => ({ name, n: fmt(v), w: Math.round(v / 548 * 100) + '%', c: i === 0 ? cv.accent : cv.deep }))
+    };
+  }
+}
+
+Mockup.mount(View, {
+  "une": {"label": "Couverture du jour", "options": ["Le Lotus bleu", "Alors, tout tombe", "L'Iris blanc", "Les Indes fourbes", "Mister Prairie"], "default": "Le Lotus bleu"},
+  "vide": {"label": "Collection vide", "editor": "boolean", "default": false}
+});
+</script>
+</body>
+</html>
