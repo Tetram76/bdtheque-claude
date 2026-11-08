@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Listes — administration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Inter+Tight:wght@400..900&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -48,6 +48,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 }
 </style>
 <script src="../shared/mockup.js"></script>
+<script src="../shared/couverture-theme.js"></script>
 <script src="../shared/comic-skin.js"></script>
 <script src="../shared/comic-bubbles.js"></script>
 <script src="../shared/comic-frames.js"></script>
@@ -417,6 +418,10 @@ const THEMES = {
   }
 };
 
+// « La couverture du jour »: the colours of the day's featured cover, on the festival's rounded forms
+// (shared/couverture-theme.js).
+THEMES.couverture = { ...THEMES.festival, ...COUVERTURE_THEME };
+
 const ICON = {
   edit: 'M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4',
   view: 'M7 17L17 7 M9 7h8v8',
@@ -746,7 +751,7 @@ class View extends Mockup {
 }
 
 Mockup.mount(View, {
-  theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes'], default: 'planche' },
+  theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
   entite: { label: 'Liste', editor: 'enum', options: ['series', 'editions', 'intentions', 'auteurs', 'editeurs', 'genres', 'univers'], default: 'series' },
   filtres: { label: 'Filtres ouverts', editor: 'boolean', default: false },
   actions: { label: 'Actions d’une ligne', editor: 'boolean', default: false },

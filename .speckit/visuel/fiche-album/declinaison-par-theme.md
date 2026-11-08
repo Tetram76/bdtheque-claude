@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Déclinaison par thème'
 description: 'Touche propre de chaque thème dans les fiches de consultation.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:00:00Z }
 ---
 
 # Déclinaison par thème
@@ -18,3 +18,4 @@ Couleurs et typographie de chaque thème : cf. [Alternatives](../dashboard/index
 | Le fanzine en risographie | Cadres en pointillés ; ombre rose décalée des titres et du visuel, tenu par un morceau de scotch jaune. |
 | La vitrine de librairie | En-tête vert bouteille filet de laiton, entrée active soulignée de laiton ; titres de bloc en serif d'enseigne italique ; visuel posé sur une tablette en noyer. |
 | L'album de vignettes | En-tête bleu canard ; pastille « Page n · … » à cheval sur le bord de chaque bloc ; visuel en vignette à liseré blanc, légèrement inclinée. |
+| La couverture du jour | En-tête de la couleur profonde de la couverture du jour, entrée active du menu en pilule blanche, bouton d'aide de sa couleur d'accent ; blocs blancs aux grands coins arrondis, à l'ombre douce teintée de cette couleur profonde ; visuel en volume, un peu tourné, à l'ombre portée ([La couverture du jour](../dashboard/la-couverture-du-jour.md)). |
