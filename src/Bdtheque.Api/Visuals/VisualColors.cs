@@ -84,16 +84,18 @@ internal static class VisualColors
         var step = Math.Max(1, (int)Math.Sqrt((double)image.Width * image.Height / TargetSamples));
         var counts = new Dictionary<int, (int Count, long R, long G, long B)>();
         for (var y = 0; y < image.Height; y += step)
-        for (var x = 0; x < image.Width; x += step)
         {
-            var pixel = image.GetPixel(x, y);
-            // A half-transparent edge counts as its colour; only what is not shown at all is ignored.
-            if (ignoreTransparent && pixel.Alpha == 0)
-                continue;
+            for (var x = 0; x < image.Width; x += step)
+            {
+                var pixel = image.GetPixel(x, y);
+                // A half-transparent edge counts as its colour; only what is not shown at all is ignored.
+                if (ignoreTransparent && pixel.Alpha == 0)
+                    continue;
 
-            var key = (pixel.Red >> ChannelShift << 8 | pixel.Green >> ChannelShift) << 4 | pixel.Blue >> ChannelShift;
-            var (count, r, g, b) = counts.GetValueOrDefault(key);
-            counts[key] = (count + 1, r + pixel.Red, g + pixel.Green, b + pixel.Blue);
+                var key = (pixel.Red >> ChannelShift << 8 | pixel.Green >> ChannelShift) << 4 | pixel.Blue >> ChannelShift;
+                var (count, r, g, b) = counts.GetValueOrDefault(key);
+                counts[key] = (count + 1, r + pixel.Red, g + pixel.Green, b + pixel.Blue);
+            }
         }
 
         return counts.Values
