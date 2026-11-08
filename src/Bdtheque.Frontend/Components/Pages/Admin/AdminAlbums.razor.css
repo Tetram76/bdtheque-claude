@@ -85,7 +85,7 @@
     text-underline-offset: 0.1875rem;
 }
 
-.album-editions a[data-empty="True"] {
+.album-editions a[data-empty] {
     color: var(--color-text-muted);
 }
 

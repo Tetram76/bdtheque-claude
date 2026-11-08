@@ -102,6 +102,15 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Rows_MarkAnAlbumWithoutEditionNorIntent_ByThePresenceOfTheAttribute()
+    {
+        // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
+        var rows = Open("").FindAll(".album-row:not(.album-row-head)").Select(row => row.QuerySelector(".album-editions a")!.HasAttribute("data-empty"));
+
+        Assert.Equal([false, false, true], rows);
+    }
+
+    [Fact]
     public void Rows_LeadToTheEditionTheEditionsAndTheConsultation_AndOpenTheirDialogsInTheList()
     {
         var row = Open("q=bijoux").FindAll(".album-row:not(.album-row-head)")[0];

@@ -99,6 +99,17 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Rows_MarkASeriesWithoutAlbumAndACompleteOne_ByThePresenceOfTheirAttribute()
+    {
+        // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
+        var rows = Open("").FindAll(".series-row:not(.series-row-head)").Select(row => (
+            row.QuerySelector(".series-albums")!.HasAttribute("data-empty"),
+            row.QuerySelector(".series-complete")!.HasAttribute("data-complete")));
+
+        Assert.Equal([(false, true), (false, false), (false, false), (true, false)], rows);
+    }
+
+    [Fact]
     public void Rows_APileOfThreeCovers_TheFirstVolumeInFront()
     {
         var pile = Open("").FindAll(".series-row:not(.series-row-head)")[0].QuerySelector(".cover-pile")!;

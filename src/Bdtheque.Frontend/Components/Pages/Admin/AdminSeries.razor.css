@@ -71,7 +71,7 @@
     grid-area: albums;
 }
 
-.series-albums[data-empty="True"] {
+.series-albums[data-empty] {
     color: var(--color-text-muted);
 }
 
@@ -80,7 +80,7 @@
 }
 
 /* On two lines, a series to complete says nothing: only a complete one is marked. */
-.series-row:not(.series-row-head) .series-complete[data-complete="False"] {
+.series-row:not(.series-row-head) .series-complete:not([data-complete]) {
     display: none;
 }
 
@@ -116,7 +116,7 @@
         font-size: inherit;
     }
 
-    .series-row:not(.series-row-head) .series-complete[data-complete="False"] {
+    .series-row:not(.series-row-head) .series-complete:not([data-complete]) {
         display: block;
     }
 }
