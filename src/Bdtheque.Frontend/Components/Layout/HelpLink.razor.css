@@ -7,10 +7,10 @@
     justify-content: center;
     inline-size: var(--control-height);
     block-size: var(--control-height);
-    border: var(--border-width-control) solid var(--color-control-border);
-    border-radius: var(--radius-control);
-    background: var(--color-surface);
-    color: var(--color-text);
+    border: var(--border-width-help) solid var(--color-header-field-border);
+    border-radius: var(--radius-help);
+    background: var(--color-help);
+    color: var(--color-text-on-help);
     font-family: var(--font-heading);
     font-weight: var(--font-weight-heading);
     font-size: var(--font-size-large);

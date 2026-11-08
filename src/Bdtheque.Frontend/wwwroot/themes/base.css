@@ -98,6 +98,19 @@
     --color-text-on-tag: #1D1D21;
     /* The border of a tag: none to see by default, its fill showing through it. */
     --color-tag-border: transparent;
+    /* The header, of the surface by default; a theme may give it a color of its own (the deep color of « La couverture
+       du jour »), with what is read on it: its texts and entries, its search field, the tag of the administration. */
+    --color-header: var(--color-surface);
+    --color-text-on-header: var(--color-text);
+    --color-header-field: var(--color-control-background);
+    --color-header-field-border: var(--color-control-border);
+    --color-header-placeholder: var(--color-placeholder);
+    --color-header-icon: var(--color-text-muted);
+    --color-header-tag: var(--color-tag);
+    --color-text-on-header-tag: var(--color-text-on-tag);
+    /* The help button of a header: a control of the surface by default, a disk of the accent in a theme that sets it apart. */
+    --color-help: var(--color-surface);
+    --color-text-on-help: var(--color-text);
     /* Secondary palette, to vary colors without hierarchy (genres, publishers, tags); one text color on all of them. */
     --color-palette-1: #BFD7F2;
     --color-palette-2: #F4C7B8;
@@ -160,6 +173,9 @@
     /* The ring of ink around a state dot, none by default. */
     --border-width-state-dot: 0;
     --border-width-nav-entry: 0;
+    /* The help button, a control by default. */
+    --border-width-help: var(--border-width-control);
+    --radius-help: var(--radius-control);
     /* The rule under the header. */
     --border-header: 1px solid var(--color-rule);
     --shadow-block: none;
@@ -224,6 +240,22 @@
     --home-caption-padding: 0;
     --home-caption-border: none;
     --home-caption-background: transparent;
+    /* The edition in the spotlight: its cover beside its text, or, larger, after it; the radius of a counter; the place of
+       the first album of an empty collection, which a theme draws as an album to come. */
+    --home-spotlight-direction: row;
+    --home-spotlight-cover-width: clamp(6.25rem, 13vw, 9.375rem);
+    --home-counter-radius: 0;
+    --home-first-album-display: none;
+    --home-empty-direction: row;
+    --home-badge-display: none;
+    /* The button of the call to the administration of an empty collection: a control by default. */
+    --home-start-button-fill: var(--color-surface);
+    --home-start-button-text: var(--color-text);
+    --home-start-button-border: var(--color-control-border);
+    /* An album a page puts forward, which a theme may show as a book in volume (the .cover-volume anchor): its turn, and
+       its shadow on the ground. */
+    --book-turn: none;
+    --book-ground: none;
 
     /* The home page of the administration, which every theme lays out alike but frames its own way
        (visuel/administration/declinaison-par-theme.md): the gap between its blocks, which a title straddling the top
@@ -233,6 +265,11 @@
     --color-tile: var(--color-surface);
     --admin-tile-border: 1px solid var(--color-rule);
     --admin-chip-radius: var(--radius-control);
+
+    /* The colors of the day (--day-dominant, --day-deep, --day-accent and the colors derived from them): a theme painted
+       by the cover of the edition in the spotlight of the day (Theme.PaintedByTheDay) reads them, and the page sets them
+       on its root element at each request (DayPalette), being only known then. No value here: the base theme and the
+       other themes never read them. */
 }
 
 @media (min-width: 48rem) {
@@ -387,7 +424,7 @@ input[type="radio"] {
    (visuel/charte-graphique/apparence-propre-a-chaque-alternative.md), on an opaque surface. */
 
 .app-header {
-    --focus-gap: var(--color-surface);
+    --focus-gap: var(--color-header);
     position: sticky;
     inset-block-start: 0;
     z-index: 10;
@@ -397,7 +434,8 @@ input[type="radio"] {
     gap: var(--space-s) var(--space-l);
     /* Its content aligned on the one of the page (.app-main), on a screen wider than the page. */
     padding: var(--space-s) max(var(--page-gutter), calc((100% - var(--page-max-width)) / 2 + var(--page-gutter)));
-    background: var(--color-surface);
+    background: var(--color-header);
+    color: var(--color-text-on-header);
     border-bottom: var(--border-header);
 }
 
@@ -414,7 +452,7 @@ input[type="radio"] {
     font-family: var(--font-heading);
     font-weight: var(--font-weight-heading);
     font-size: var(--font-size-large);
-    color: var(--color-text);
+    color: var(--color-text-on-header);
     text-decoration: none;
     rotate: var(--tilt-logo);
 }

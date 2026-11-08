@@ -1,13 +1,15 @@
 @inject BrowserTimeZone TimeZone
 @inject IThemeSelector ThemeSelector
 @inject AudienceOpposition AudienceOpposition
+@inject IDayColorsSource DayColors
 
 <!DOCTYPE html>
 @* The time zone of the browser the request brought, which the script compares to the current one: the page is current
    whenever its request brought it, even when the server, not knowing it, presents in universal time.
    The theme is carried by the root element, so that a theme redefines the contracts of the base theme for the whole page.
-   The opposition of the visitor to the audience measurement too, which the scripts of the page respect. *@
-<html lang="fr" data-time-zone="@TimeZone.Name" data-theme="@Theme.Key" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)">
+   The opposition of the visitor to the audience measurement too, which the scripts of the page respect. So are the colours
+   of the day of a theme painted by them, only known at each request: an enhanced navigation brings them with the theme. *@
+<html lang="fr" data-time-zone="@TimeZone.Name" data-theme="@Theme.Key" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)" style="@_dayStyle">
 
 <head>
     <meta charset="utf-8" />
@@ -46,5 +48,13 @@
 </html>
 
 @code {
+    private string? _dayStyle;
+
     private Theme Theme => ThemeSelector.Current;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Theme.PaintedByTheDay)
+            _dayStyle = DayPalette.Of(await DayColors.GetAsync()).Style;
+    }
 }

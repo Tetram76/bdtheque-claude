@@ -1,0 +1,323 @@
+/* « La couverture du jour »: an application for reading of today, where the albums come first
+   (visuel/dashboard/la-couverture-du-jour.md). The cover of the edition in the spotlight gives its colours to the whole
+   page: the page sets them on its root element at each request (--day-…, DayPalette), the theme's own colours without it.
+   The header and the head of the home page are a stage of the deep colour, lit by a halo of the dominant colour and a
+   reflection of the accent; the rest of the page is a light paper tinted with the dominant colour, its blocks white, with
+   large rounded corners and a soft shadow of the deep colour; the albums put forward are books in volume. In the
+   administration, its touch: the header of the deep colour, the help of the accent, the white blocks
+   (visuel/administration/declinaison-par-theme.md). Every pair of colours read together is checked by ThemeContrastTests,
+   on covers of every kind. */
+
+/* Served by the application, SIL Open Font License 1.1 (fonts/inter-tight/OFL.txt): Inter Tight, the only font of the
+   theme, in the subsets that cover the names of the catalog. */
+@font-face {
+    font-family: "Inter Tight";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/inter-tight/inter-tight-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Inter Tight";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("../fonts/inter-tight/inter-tight-latin-ext-wght-normal.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+[data-theme="couverture"] {
+    /* Colours: the papers of the page tinted with the dominant colour of the day, a nearly black text; the links of the
+       dominant colour, the tags of a tint of it with a text of the deep colour, each darkened as legibility needs. */
+    --color-background: var(--day-background);
+    --color-surface: var(--day-surface);
+    --color-surface-raised: var(--day-surface);
+    --color-surface-inverse: var(--day-deep);
+    --color-text-on-inverse: #FFFFFF;
+    --color-text: #15151A;
+    --color-text-secondary: #4F4F57;
+    --color-text-muted: #5F5F66;
+    --color-rule: #DCDCE2;
+    --color-control-border: #73777F;
+    --color-control-background: var(--day-field);
+    --color-accent: var(--day-accent);
+    --color-text-on-accent: var(--day-text-on-accent);
+    --color-accent-text: var(--day-link);
+    --color-tag: var(--day-tint);
+    --color-text-on-tag: var(--day-deep-text);
+    /* The genres keep each their own colour, to stay apart (a tint of blue, red, yellow, green, violet, cyan, orange). */
+    --color-palette-1: #DAE2EF;
+    --color-palette-2: #F8DAD9;
+    --color-palette-3: #F9EED6;
+    --color-palette-4: #D9EADE;
+    --color-palette-5: #EBE1F2;
+    --color-palette-6: #D9EBF2;
+    --color-palette-7: #F9E7D9;
+    --color-text-on-palette: #15151A;
+
+    /* The header, of the deep colour, its texts white; its field lighter, the help a disk of the accent. */
+    --color-header: var(--day-deep);
+    --color-text-on-header: #FFFFFF;
+    --color-header-field: var(--day-header-field);
+    --color-header-field-border: var(--day-header-field-border);
+    --color-header-placeholder: var(--day-light-on-deep);
+    --color-header-icon: var(--day-light-on-deep);
+    --color-header-tag: var(--day-header-field);
+    --color-text-on-header-tag: #FFFFFF;
+    --color-help: var(--day-accent);
+    --color-text-on-help: var(--day-text-on-accent);
+    --border-width-help: 0;
+    --radius-help: 50%;
+    --border-header: 0 solid transparent;
+    --nav-entry-current-fill: #FFFFFF;
+    --nav-entry-current-text: var(--day-deep);
+
+    /* Typography: Inter Tight only, very bold and tight for the titles and the large figures, tabular figures. */
+    --font-heading: "Inter Tight", "Inter", sans-serif;
+    --font-text: "Inter Tight", "Inter", sans-serif;
+    --font-figures: "Inter Tight", "Inter", sans-serif;
+    --font-weight-heading: 800;
+    --font-weight-strong: 700;
+
+    /* Shapes: large rounded corners, pills; white blocks without border, in a soft shadow of the deep colour. */
+    --radius-block: 1.25rem;
+    --radius-control: 999px;
+    --radius-multiline: 1rem;
+    --radius-tile: 1rem;
+    --radius-cover: 0.125rem 0.3125rem 0.3125rem 0.125rem;
+    --border-block: 0 solid transparent;
+    --shadow-block: 0 1px 2px color-mix(in srgb, var(--day-deep) 10%, transparent), 0 20px 40px -22px color-mix(in srgb, var(--day-deep) 45%, transparent);
+    --shadow-raised: var(--shadow-block);
+    --border-floating: 1px solid var(--color-rule);
+    --shadow-floating: 0 1px 2px color-mix(in srgb, var(--day-deep) 12%, transparent), 0 24px 48px -16px color-mix(in srgb, var(--day-deep) 55%, transparent);
+
+    /* The home page: a stage of the deep colour, greeting, counters, spotlight and latest arrivals one under the other,
+       then the value and the statistics rising over the stage (.home-board, below); the albums put forward as books in
+       volume, a little turned, with their shadow on the ground. */
+    --home-columns: minmax(0, 7fr) minmax(0, 5fr);
+    --home-areas: "greeting greeting" "counters counters" "spotlight spotlight" "latest latest" "value statistics";
+    --home-empty-columns: minmax(0, 7fr) minmax(0, 5fr);
+    --home-empty-areas: "main main" "browse start";
+    --home-latest-columns: repeat(3, minmax(0, 1fr));
+    --home-latest-direction: column;
+    --home-latest-cover-width: 100%;
+    --home-counter-background: rgb(255 255 255 / 0.1);
+    --home-counter-radius: 1rem;
+    --home-shelf-display: none;
+    --home-first-album-display: flex;
+    --home-start-button-fill: var(--day-accent);
+    --home-start-button-text: var(--day-text-on-accent);
+    --home-start-button-border: var(--day-accent);
+    --home-badge-display: block;
+    --home-empty-direction: column;
+    --home-spotlight-direction: column;
+    --home-spotlight-cover-width: min(40%, 11rem);
+    --book-turn: perspective(1100px) rotateY(22deg);
+    --book-ground: 0 34px 44px -24px rgb(0 0 0 / 0.6);
+
+    /* The home page of the administration: tiles of the paper of the fields, round chips. */
+    --color-tile: var(--day-field);
+    --admin-chip-radius: 999px;
+}
+
+@media (min-width: 48rem) {
+    [data-theme="couverture"] {
+        --radius-block: 1.625rem;
+        --home-latest-columns: repeat(6, minmax(0, 1fr));
+        --home-spotlight-direction: row-reverse;
+        --home-spotlight-cover-width: clamp(12rem, 22vw, 18rem);
+        --home-empty-direction: row-reverse;
+    }
+}
+
+/* The logo, preceded by a small album of the accent. */
+[data-theme="couverture"] .app-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-weight: 900;
+    font-size: 1.3125rem;
+    letter-spacing: -0.03em;
+}
+
+[data-theme="couverture"] .app-logo::before {
+    content: "";
+    inline-size: 1.375rem;
+    block-size: 1.75rem;
+    border-radius: 2px 5px 5px 2px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--day-accent) 70%, #000000) 0 4px, var(--day-accent) 4px);
+    box-shadow: 2px 3px 6px rgb(0 0 0 / 0.35);
+}
+
+[data-theme="couverture"] .block-title {
+    letter-spacing: -0.03em;
+}
+
+/* The stage of the home page, behind its first rows, over the whole width of the screen and up to the header: the deep
+   colour, the halo of the dominant colour behind the album in the spotlight, the reflection of the accent in the opposite
+   corner. Its edge goes beyond the page as a shadow, which never makes it scroll sideways; the blocks that follow rise
+   over it. */
+[data-theme="couverture"] .home-board {
+    position: relative;
+}
+
+[data-theme="couverture"] .home-board::before {
+    content: "";
+    position: absolute;
+    grid-column: 1 / -1;
+    grid-row: 1 / span 4;
+    inset: calc(-1 * var(--space-l)) 0 -3.5rem;
+    background:
+        radial-gradient(ellipse 30% 28% at 84% 42%, var(--day-halo) 0, transparent 75%),
+        radial-gradient(ellipse 50% 40% at 8% 92%, var(--day-reflection) 0, transparent 70%),
+        var(--day-deep);
+    box-shadow: 0 0 0 100vmax var(--day-deep);
+    clip-path: inset(0 -100vmax);
+    pointer-events: none;
+}
+
+[data-theme="couverture"] .home-board-empty::before {
+    grid-row: 1 / span 1;
+    background:
+        radial-gradient(ellipse 34% 60% at 82% 40%, var(--day-halo) 0, transparent 75%),
+        radial-gradient(ellipse 50% 60% at 8% 90%, var(--day-reflection) 0, transparent 70%),
+        var(--day-deep);
+}
+
+/* On the stage, a block has no paper of its own: its texts are white, and light versions of the deep colour. */
+[data-theme="couverture"] [data-scene] {
+    --block-fill: transparent;
+    --focus-gap: var(--day-deep);
+    --color-text: #FFFFFF;
+    --color-text-secondary: var(--day-light-on-deep);
+    --color-text-muted: var(--day-light-on-deep);
+    --color-accent-text: #FFFFFF;
+    padding: 0;
+    box-shadow: none;
+    color: #FFFFFF;
+}
+
+/* The greeting and the title of an empty collection, in very large letters. */
+[data-theme="couverture"] :is([data-area="greeting"], [data-area="main"]) .block-title {
+    margin: 0 0 var(--space-m);
+    font-size: clamp(1.875rem, 4.6vw, 3.75rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+}
+
+/* The edition in the spotlight under a rule, its title a badge of the accent. */
+[data-theme="couverture"] [data-area="spotlight"] {
+    padding-block-start: var(--space-l);
+    border-radius: 0;
+    border-block-start: 1px solid rgb(255 255 255 / 0.22);
+}
+
+[data-theme="couverture"] [data-area="spotlight"] .block-title {
+    display: inline-block;
+    padding: 0.1875rem 0.6875rem;
+    border-radius: 999px;
+    background: var(--day-accent);
+    color: var(--day-text-on-accent);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* The call to the administration of an empty collection, a block of the deep colour. */
+[data-theme="couverture"] [data-area="start"] {
+    --block-fill: var(--day-deep);
+    --focus-gap: var(--day-deep);
+    --color-text: #FFFFFF;
+    --color-text-secondary: var(--day-light-on-deep);
+    --color-accent-text: #FFFFFF;
+    color: #FFFFFF;
+}
+
+/* An album in volume: its cover, its spine on its left, of the deep colour of its own cover, and the edge of its pages on
+   its right, a little turned away; it turns to face the reader and rises when hovered. */
+[data-theme="couverture"] .cover-slot.cover-volume {
+    --book-thickness: 1rem;
+    position: relative;
+    aspect-ratio: auto;
+    transform-style: preserve-3d;
+    transform: var(--book-turn);
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-theme="couverture"] .cover-volume:hover {
+    transform: perspective(1100px) rotateY(0deg) translateY(-8px);
+}
+
+[data-theme="couverture"] .cover-volume .cover {
+    box-shadow: var(--book-ground);
+}
+
+[data-theme="couverture"] .cover-volume::before,
+[data-theme="couverture"] .cover-volume::after {
+    content: "";
+    position: absolute;
+    inline-size: var(--book-thickness);
+}
+
+[data-theme="couverture"] .cover-volume::before {
+    inset-block: 0;
+    inset-inline-start: 0;
+    background: linear-gradient(90deg, var(--cover-spine, var(--day-deep)), color-mix(in srgb, var(--cover-spine, var(--day-deep)) 72%, #FFFFFF));
+    transform-origin: left center;
+    transform: rotateY(90deg);
+}
+
+[data-theme="couverture"] .cover-volume::after {
+    inset-block: 1.5%;
+    inset-inline-end: 0;
+    background: repeating-linear-gradient(90deg, #F6F2E8 0 2px, #E2DCCD 2px 3px);
+    transform-origin: right center;
+    transform: rotateY(-90deg);
+}
+
+/* The album in the spotlight, larger and thicker, floats gently; the latest arrivals come in one after the other. */
+[data-theme="couverture"] [data-area="spotlight"] .cover-volume {
+    --book-thickness: 1.625rem;
+    animation: couverture-float 6s ease-in-out infinite;
+}
+
+[data-theme="couverture"] [data-area="latest"] li {
+    animation: couverture-arrive 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+[data-theme="couverture"] [data-area="latest"] li:nth-child(2) { animation-delay: 80ms; }
+[data-theme="couverture"] [data-area="latest"] li:nth-child(3) { animation-delay: 160ms; }
+[data-theme="couverture"] [data-area="latest"] li:nth-child(4) { animation-delay: 240ms; }
+[data-theme="couverture"] [data-area="latest"] li:nth-child(5) { animation-delay: 320ms; }
+[data-theme="couverture"] [data-area="latest"] li:nth-child(6) { animation-delay: 400ms; }
+
+@keyframes couverture-float {
+    50% {
+        translate: 0 -8px;
+    }
+}
+
+@keyframes couverture-arrive {
+    from {
+        opacity: 0;
+        translate: 0 26px;
+    }
+}
+
+/* Moves, those of the hover included, are left out when the reader asks for fewer animations. */
+@media (prefers-reduced-motion: reduce) {
+    [data-theme="couverture"] .cover-slot.cover-volume,
+    [data-theme="couverture"] [data-area="spotlight"] .cover-volume,
+    [data-theme="couverture"] [data-area="latest"] li {
+        transition: none;
+        animation: none;
+    }
+
+    [data-theme="couverture"] .cover-volume:hover {
+        transform: var(--book-turn);
+    }
+}

@@ -19,7 +19,7 @@
     padding: 0 var(--space-m);
     border: var(--border-width-nav-entry) solid var(--color-control-border);
     border-radius: var(--radius-control);
-    color: var(--color-text);
+    color: inherit;
     font-weight: var(--font-weight-strong);
     text-decoration: none;
 }

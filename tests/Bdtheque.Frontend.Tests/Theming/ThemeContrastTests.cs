@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.Frontend.Tests.Theming;
@@ -48,6 +49,13 @@ public sealed partial class ThemeContrastTests
         // An item of a menu that deletes, in the color of deletion on the menu (visuel/liste-albums/contenu.md).
         ("delete", "surface-raised", Text),
         .. Enumerable.Range(1, 7).Select(index => ("text-on-palette", $"palette-{index}", Text)),
+        // The header: its texts, its search field, the tag of the administration and the help button.
+        ("text-on-header", "header", Text),
+        ("text-on-header", "header-field", Text),
+        ("header-placeholder", "header-field", Text),
+        ("header-field-border", "header", NonText),
+        ("text-on-header-tag", "header-tag", Text),
+        ("text-on-help", "help", Text),
         // The tile of a type of record of the home page of the administration: its name, detail and links.
         ("text", "tile", Text),
         ("text-muted", "tile", Text),
@@ -64,15 +72,51 @@ public sealed partial class ThemeContrastTests
         }),
     ];
 
-    public static TheoryData<string> OfferedThemes => [.. ThemeCatalog.Offered.Select(theme => theme.Key)];
+    // A theme painted by the day: the stage of the home page, of the deep colour (surface-inverse), white texts and their
+    // light version, on the deep colour, on the reflection of the accent in a corner of the stage, and on a field of the header.
+    private static readonly (string Foreground, string Background, double Minimum)[] DayPairs =
+    [
+        ("text-on-inverse", "day-reflection", Text),
+        ("day-light-on-deep", "surface-inverse", Text),
+        ("day-light-on-deep", "day-reflection", Text),
+        ("day-light-on-deep", "header-field", Text),
+    ];
+
+    // Covers of every kind (visuel/dashboard/la-couverture-du-jour.md, Lisibilité): none (the theme's own colours), pale
+    // (yellow, white), of middle tone, dark, grey, saturated, and a deep colour the API would have left too light.
+    private static readonly Dictionary<string, CoverPalette?> Covers = new()
+    {
+        ["none"] = null,
+        ["blue"] = new("#2F5BA8", "#14295A", "#D8342B"),
+        ["pale yellow"] = new("#F5E663", "#5C5208", "#F2D23C"),
+        ["white"] = new("#FFFFFF", "#383838", "#FAFAFA"),
+        ["middle tone"] = new("#7A7A7A", "#383838", "#7A7A7A"),
+        ["black"] = new("#000000", "#000000", "#000000"),
+        ["red"] = new("#FF0000", "#700000", "#00FF00"),
+        ["cyan"] = new("#00FFFF", "#007070", "#FF00FF"),
+        ["light deep"] = new("#F5E663", "#F5E663", "#2F5BA8"),
+    };
+
+    public static TheoryData<string, string> OfferedThemes
+    {
+        get
+        {
+            var data = new TheoryData<string, string>();
+            foreach (var theme in ThemeCatalog.Offered)
+            foreach (var cover in theme.PaintedByTheDay ? [.. Covers.Keys] : (string[])["none"])
+                data.Add(theme.Key, cover);
+            return data;
+        }
+    }
 
     [Theory]
     [MemberData(nameof(OfferedThemes))]
-    public void ColorsReadTogether_ReachTheirContrast(string themeKey)
+    public void ColorsReadTogether_ReachTheirContrast(string themeKey, string cover)
     {
-        var colors = ColorsOf(ThemeCatalog.Offered.Single(theme => theme.Key == themeKey));
+        var theme = ThemeCatalog.Offered.Single(theme => theme.Key == themeKey);
+        var colors = ColorsOf(theme, theme.PaintedByTheDay ? DayPalette.Of(Covers[cover]) : null);
 
-        var failures = Pairs
+        var failures = Pairs.Concat(theme.PaintedByTheDay ? DayPairs : [])
             .Select(pair => (pair, ratio: ContrastRatio(colors[pair.Foreground], colors[pair.Background])))
             .Where(result => result.ratio < result.pair.Minimum)
             .Select(result => $"{result.pair.Foreground} on {result.pair.Background}: {result.ratio:0.00}:1 < {result.pair.Minimum}:1");
@@ -95,7 +139,9 @@ public sealed partial class ThemeContrastTests
         Assert.Equal(4.54, ContrastRatio("#767676", "#FFFFFF"), 2);
     }
 
-    private static Dictionary<string, string> ColorsOf(Theme theme)
+    // The colours of the day, set by the page on its root element, are read by the declarations of the theme: overlaid on
+    // them, they keep their own names (day-…).
+    private static Dictionary<string, string> ColorsOf(Theme theme, DayPalette? day = null)
     {
         var declarations = Declarations("base.css");
         if (theme.Stylesheet is { } stylesheet)
@@ -104,9 +150,14 @@ public sealed partial class ThemeContrastTests
                 declarations[name] = value;
         }
 
+        foreach (var (name, value) in day?.Properties ?? new Dictionary<string, string>())
+            declarations[name] = value;
+
         return declarations
-            .Where(declaration => declaration.Key.StartsWith("color-", StringComparison.Ordinal))
-            .ToDictionary(declaration => declaration.Key["color-".Length..], declaration => Resolve(declarations, declaration.Value));
+            .Where(declaration => declaration.Key.StartsWith("color-", StringComparison.Ordinal) || declaration.Key.StartsWith("day-", StringComparison.Ordinal))
+            .ToDictionary(
+                declaration => declaration.Key.StartsWith("color-", StringComparison.Ordinal) ? declaration.Key["color-".Length..] : declaration.Key,
+                declaration => Resolve(declarations, declaration.Value));
     }
 
     // The first declaration of a property is its default value; a later one only adapts it to a wider screen.

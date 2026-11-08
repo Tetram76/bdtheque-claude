@@ -161,6 +161,29 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Fact]
+    public void Cover_ThatAPagePutsForward_IsAnAlbumInVolume_WhoseSpineIsTheDeepColorOfItsCover()
+    {
+        var cover = Render<Cover>(parameters => parameters
+            .Add(p => p.VisualId, Guid.CreateVersion7())
+            .Add(p => p.Palette, TestCovers.Palette)
+            .Add(p => p.Volume, true));
+
+        var slot = cover.Find(".cover-slot.cover-volume");
+        Assert.Equal("--cover-spine: #14295A;", slot.GetAttribute("style"));
+    }
+
+    [Fact]
+    public void Cover_InAList_IsNoAlbumInVolume()
+    {
+        var cover = Render<Cover>(parameters => parameters
+            .Add(p => p.VisualId, Guid.CreateVersion7())
+            .Add(p => p.Palette, TestCovers.Palette));
+
+        Assert.Empty(cover.FindAll(".cover-volume"));
+        Assert.Null(cover.Find(".cover-slot").GetAttribute("style"));
+    }
+
+    [Fact]
     public void CoverPile_TellsAVolumeWithoutCoverFromAPlaceBeyondTheVolumes()
     {
         var first = new AlbumCover(Guid.CreateVersion7(), TestCovers.Palette);

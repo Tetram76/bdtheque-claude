@@ -43,6 +43,7 @@
 .dashboard-counters li {
     padding: var(--space-s);
     border: var(--home-counter-border);
+    border-radius: var(--home-counter-radius);
     background: var(--home-counter-background);
     rotate: var(--home-counter-tilt);
 }
@@ -61,9 +62,10 @@
 
 .dashboard-spotlight {
     display: flex;
+    flex-direction: var(--home-spotlight-direction);
     gap: var(--space-l);
     align-items: flex-start;
-    --cover-width: clamp(6.25rem, 13vw, 9.375rem);
+    --cover-width: var(--home-spotlight-cover-width);
 }
 
 /* The cover the page puts forward: the only one a theme may tilt (themes/base.css, .cover), or let break out of its
@@ -136,4 +138,10 @@
 
 .dashboard-muted {
     color: var(--color-text-secondary);
+}
+
+/* The text of the edition in the spotlight takes the room its cover leaves, on whichever side the cover stands. */
+.dashboard-spotlight > div {
+    flex: 1;
+    min-width: 0;
 }

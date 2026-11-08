@@ -13,10 +13,18 @@
     inset-inline-start: var(--control-padding-inline);
     inline-size: 1.125rem;
     block-size: 1.125rem;
-    color: var(--color-text-muted);
+    color: var(--color-header-icon);
     pointer-events: none;
 }
 
 .header-search input {
+    border-color: var(--color-header-field-border);
+    background-color: var(--color-header-field);
+    color: var(--color-text-on-header);
     padding-inline-start: calc(var(--control-padding-inline) + 1.625rem);
+}
+
+/* Read on the field of the header, which a theme may set apart from the fields of the page. */
+.header-search input::placeholder {
+    color: var(--color-header-placeholder);
 }

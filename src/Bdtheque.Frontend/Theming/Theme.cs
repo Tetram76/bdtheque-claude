@@ -10,4 +10,8 @@ namespace Bdtheque.Frontend.Theming;
 /// same anchors; none for most themes. Loaded with every page, it acts only on a page of its theme.
 /// </param>
 /// <param name="PreloadedFont">The font of its text, which the page asks for before its stylesheets reveal it.</param>
-public sealed record Theme(string Key, string? Stylesheet, string? Script, string PreloadedFont);
+/// <param name="PaintedByTheDay">
+/// Whether its colours are those of the cover of the edition in the spotlight of the day (<see cref="DayPalette"/>), which
+/// the page sets on its root element: only known at each request.
+/// </param>
+public sealed record Theme(string Key, string? Stylesheet, string? Script, string PreloadedFont, bool PaintedByTheDay = false);

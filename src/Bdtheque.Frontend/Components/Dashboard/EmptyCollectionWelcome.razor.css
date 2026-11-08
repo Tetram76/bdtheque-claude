@@ -23,6 +23,7 @@
 
 .empty-collection-main {
     display: flex;
+    flex-direction: var(--home-empty-direction);
     gap: var(--space-l);
     align-items: flex-start;
 }
@@ -128,4 +129,52 @@
 /* On the surface of the call, whatever it is, the mention keeps the color of its text. */
 .empty-collection-start .empty-collection-aside {
     color: inherit;
+}
+
+/* The place of the first album: an album drawn in dashes, turned like the album in the spotlight, with its shadow on the
+   ground, in a theme that shows its albums in volume (--home-first-album-display). */
+.empty-collection-first-album {
+    display: var(--home-first-album-display);
+    flex: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    inline-size: var(--home-spotlight-cover-width);
+    aspect-ratio: 3 / 4;
+    margin-inline: auto;
+    border: 3px dashed var(--color-text-secondary);
+    border-radius: var(--radius-cover);
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    text-align: center;
+    transform: var(--book-turn);
+    box-shadow: var(--book-ground);
+}
+
+.empty-collection-first-album span {
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+/* A mention of the state of the collection above its texts, which a theme shows as a badge (--home-badge-display). */
+.empty-collection-badge {
+    display: var(--home-badge-display);
+    inline-size: fit-content;
+    padding: 0.125rem var(--space-m);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-heading);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* The button of the call, in the colours the theme gives it (a control by default, the accent on a block of colour). */
+.empty-collection-start ::deep a.button {
+    border-color: var(--home-start-button-border);
+    background: var(--home-start-button-fill);
+    color: var(--home-start-button-text);
 }

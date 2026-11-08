@@ -5,15 +5,18 @@
    names its area, which the theme lays out (--home-empty-areas, themes/base.css), as it chooses its illustration. *@
 <NoHeaderSearch />
 
-<div class="empty-collection">
-    <Block Title="@L["Title"]" HeadingLevel="1" data-area="main">
+<div class="empty-collection home-board home-board-empty">
+    <Block Title="@L["Title"]" HeadingLevel="1" data-area="main" data-scene>
         <div class="empty-collection-main">
             @* The place of the first album on the front page, as a page is laid out before its photo arrives. *@
             <div class="empty-collection-photo" aria-hidden="true">
                 <svg viewBox="0 0 30 40" preserveAspectRatio="none"><path d="M0 0L30 40M30 0L0 40" /></svg>
                 <span>@L["PhotoToCome"]</span>
             </div>
+            @* The place of the first album, an album to come drawn in dashes, as the album in the spotlight will stand. *@
+            <div class="empty-collection-first-album" aria-hidden="true"><span>+</span>@L["FirstAlbum"]</div>
             <div class="empty-collection-text">
+                <p class="empty-collection-badge">@L["ToStart"]</p>
                 <p class="empty-collection-lead">@L["Empty"]</p>
                 <p>@L["Dashboard"]</p>
                 <p class="empty-collection-aside">@L["Documentary"]</p>
