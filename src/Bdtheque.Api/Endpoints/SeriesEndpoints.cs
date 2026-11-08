@@ -30,6 +30,7 @@ internal static class SeriesEndpoints
     public static void MapSeries(this RouteGroupBuilder admin)
     {
         var series = admin.MapGroup("/series");
+        series.MapGet("/", ListForAdministrationAsync);
         series.MapGet("/{id:guid}", GetAsync);
         series.MapPost("/", CreateAsync);
         series.MapPut("/{id:guid}", UpdateAsync);
@@ -92,46 +93,52 @@ internal static class SeriesEndpoints
             series.Contributions, overview, albums, series.CreatedAt, series.ModifiedAt);
     }
 
-    /// <summary>
-    /// The series found by their title, narrowed by the cross filters
-    /// (choix-implementation/api/recherche.md): credited, published or collected on the series itself —
-    /// its contributions, publisher
-    /// and collection are data of the series as much as a template
-    /// (modele-metier/relations-et-cardinalites.md#série--relations) — or through its albums.
-    /// </summary>
+    /// <summary>The series found by their title, narrowed by the cross filters (choix-implementation/api/recherche.md).</summary>
     private static async Task<Page<SeriesListItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, Guid? authorId = null,
-        Guid? publisherId = null, Guid? publisherCollectionId = null, Guid? genreId = null, Guid? universeId = null, int page = 1,
+        BdthequeDbContext context, [AsParameters] SeriesFilters filters, CancellationToken cancellationToken, int page = 1,
         int pageSize = Paging.DefaultSize)
     {
-        CatalogFilters.EnsureNavigationEntry(entry);
-        var series = context.Series.AsNoTracking().WhereContains(q, s => s.Title);
-        if (entry is not null)
-            series = series.Where(s => s.NavigationEntry == entry);
-        if (authorId is not null)
-            series = series.Where(s =>
-                s.TemplateContributions.Any(c => c.AuthorId == authorId)
-                || context.Albums.Any(a => a.SeriesId == s.Id && a.Contributions.Any(c => c.AuthorId == authorId)));
-        if (publisherId is not null)
-            series = series.Where(s =>
-                s.TemplatePublisherId == publisherId
-                || context.Albums.Any(a => a.SeriesId == s.Id && a.Editions.Any(e => e.PublisherId == publisherId)));
-        if (publisherCollectionId is not null)
-            series = series.Where(s =>
-                s.TemplatePublisherCollectionId == publisherCollectionId
-                || context.Albums.Any(a => a.SeriesId == s.Id && a.Editions.Any(e => e.PublisherCollectionId == publisherCollectionId)));
-        if (genreId is not null)
-            series = series.Where(s => s.Genres.Any(g => g.Id == genreId));
-        if (universeId is not null)
-        {
-            var universeIds = await CatalogFilters.UniverseAndDescendantsAsync(context, universeId.Value, cancellationToken);
-            series = series.Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)));
-        }
-
+        var series = await filters.ApplyAsync(context.Series.AsNoTracking(), context, cancellationToken);
         return await series
             .OrderBy(s => s.SortKey)
             .ThenBy(s => s.Id)
             .ToPageAsync(page, pageSize, s => new SeriesListItem(s.Id, s.Title), cancellationToken);
+    }
+
+    /// <summary>
+    /// The list of the series of the administration (visuel/listes/liste-par-liste.md): the search, navigation and cross
+    /// filters of the list of the consultation, in the same order. Each row carries the pile of covers and the number of
+    /// albums of the series, as the consultation presents them, its albums in the collection, its status, whether it is
+    /// complete, its modification and its version, which its deletion sends back.
+    /// </summary>
+    private static async Task<SeriesAdminList> ListForAdministrationAsync(
+        BdthequeDbContext context, [AsParameters] SeriesFilters filters, CancellationToken cancellationToken, int page = 1,
+        int pageSize = Paging.DefaultSize)
+    {
+        var series = await filters.ApplyAsync(context.Series.AsNoTracking(), context, cancellationToken);
+        var rows = await series
+            .OrderBy(s => s.SortKey)
+            .ThenBy(s => s.Id)
+            .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Series s) => new
+            {
+                s.Id,
+                s.Title,
+                s.Status,
+                AlbumsInCollectionCount = context.Albums.Count(a => a.SeriesId == s.Id && a.Editions.Any(e => e.IsOwned())),
+                s.IsComplete,
+                s.ModifiedAt,
+                Version = EF.Property<uint>(s, BdthequeDbContext.VersionProperty),
+            }), cancellationToken);
+        var overviews = await CatalogWorks.OverviewsAsync(context, [.. rows.Items.Select(r => r.Id)], cancellationToken);
+
+        var items = rows.Items
+            .Select(r => new SeriesAdminListItem(
+                r.Id, r.Title, EnumMapping.Map<ContractEnums.SeriesStatus>(r.Status), overviews[r.Id], r.AlbumsInCollectionCount, r.IsComplete,
+                r.ModifiedAt, r.Version))
+            .ToList();
+        return new SeriesAdminList(
+            new Page<SeriesAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount),
+            await filters.NameAsync(context, cancellationToken));
     }
 
     private static async Task<SeriesForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
