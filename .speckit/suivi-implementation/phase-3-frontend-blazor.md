@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et ses chantiers, notes des parties suivantes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T14:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:05:00Z }
 ---
 
 # Phase 3 — Frontend Blazor
@@ -13,13 +13,13 @@ La phase est réalisée en plusieurs parties, découpées l'une après l'autre ;
 
 - **Pages non implémentées** : tant qu'une page n'est pas implémentée, tout lien qui y mène affiche une page « Pas encore implémenté » (#238). Le chantier qui réalise une page remplace par le vrai lien tous les liens qui y mènent.
 - **Validation fonctionnelle** : les chantiers qui réalisent ce que l'utilisateur voit et utilise sont validés par lui avant fusion ([Validation fonctionnelle](../gestion-projet/revue-tickets/validation-fonctionnelle.md)), avec l'environnement de validation (#214), réalisé avant le premier d'entre eux ; chaque ticket précise s'il y est soumis.
-- **Thèmes** : la partie 1 réalise le thème de base et deux thèmes, « La planche encrée » et « La gazette », retenus pour s'opposer sur presque tout (blocs encadrés et ouverts, une couleur par bloc et une seule surface, bords dessinés et filets, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. Un thème ajouté par une partie ultérieure est décliné sur tous les écrans déjà réalisés.
+- **Thèmes** : la partie 1 réalise le thème de base et trois thèmes. « La planche encrée » et « La gazette » sont retenus pour s'opposer sur presque tout (blocs encadrés et ouverts, une couleur par bloc et une seule surface, bords dessinés et filets, titre en bulle et mention au-dessus du titre, désordre ponctuel et sobriété), pour que les contrats du thème de base couvrent ces extrêmes. « La couverture du jour » l'est pour ses couleurs, tirées chaque jour de la couverture de l'édition à la une, que les contrats accueillent sans les connaître d'avance ; il est réalisé avant les écrans qui restent, écrits ainsi sur des contrats qui le couvrent déjà. Un thème ajouté après des écrans déjà réalisés, dans la partie 1 comme dans une partie ultérieure, est décliné sur chacun d'eux.
 
 ## Partie 1 — Éléments de base
 
 **Version** : `v0.1.0`, avec les ajustements des phases 0 à 2 qui suivent la consolidation de la Phase 2.
 
-Socle du frontend, environnement de validation fonctionnelle, thème de base et deux thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240 ; le thème de base neutre, les contrats des thèmes et le thème de la visite (ticket parent #194), par cinq sous-tickets, #254 à #258 ; les listes des séries, des auteurs et des éditeurs de l'administration (ticket parent #201), par trois sous-tickets, #301 à #303.
+Socle du frontend, environnement de validation fonctionnelle, thème de base et trois thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240 ; le thème de base neutre, les contrats des thèmes et le thème de la visite (ticket parent #194), par cinq sous-tickets, #254 à #258 ; les listes des séries, des auteurs et des éditeurs de l'administration (ticket parent #201), par trois sous-tickets, #301 à #303.
 
 | Ticket | Titre |
 | --- | --- |
@@ -42,6 +42,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#199~~ | Connexion et page d'accueil de l'administration |
 | ~~#200~~ | Liste des albums de l'administration |
 | ~~#301~~ | Liste des séries de l'administration |
+| #309 | Thème « La couverture du jour » |
 | #302 | Liste des auteurs de l'administration |
 | #303 | Liste des éditeurs de l'administration |
 | #202 | Listes des éditions et des intentions d'achat de l'administration |
