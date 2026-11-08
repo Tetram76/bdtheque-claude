@@ -121,7 +121,7 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
             {
                 { Page: > 1 } => Functions.Page,
                 { Entry: not null } => Functions.Initial,
-                { ActiveFilterCount: > 0 } => Functions.Filter,
+                _ when ActiveFilterCount > 0 && Functions.Filter is { } filter => filter,
                 _ => Functions.Search,
             };
             return (function, Join(criteria));
@@ -187,10 +187,11 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
 
 /// <summary>The functions the audience measurement follows for the actions of a list of the administration.</summary>
 /// <param name="Subject">The name of the record a dialog is opened on, in the parameters of its action (e.g. <c>album</c>).</param>
+/// <param name="Filter">The choice of its filters; none for a list without filters, so that no function is followed that can never be used.</param>
 public sealed record ListFunctions(
     string Subject,
     AudienceFunction Search,
-    AudienceFunction Filter,
+    AudienceFunction? Filter,
     AudienceFunction Initial,
     AudienceFunction Page,
     AudienceFunction Deletion,

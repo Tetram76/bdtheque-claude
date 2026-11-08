@@ -1,0 +1,30 @@
+/* A round of the tone of its place, the initials centered on it, of the size of a cover of a row of a list in width
+   (--monogram-size, which the screen may set). Its tones are contracts of the base theme, which each theme defines. */
+.monogram {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--monogram-size, 2.25rem);
+    block-size: var(--monogram-size, 2.25rem);
+    border-radius: 50%;
+    font-family: var(--font-heading);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-heading);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+}
+
+.monogram-tone-1 {
+    background: var(--color-monogram-1);
+    color: var(--color-text-on-monogram-1);
+}
+
+.monogram-tone-2 {
+    background: var(--color-monogram-2);
+    color: var(--color-text-on-monogram-2);
+}
+
+.monogram-tone-3 {
+    background: var(--color-monogram-3);
+    color: var(--color-text-on-monogram-3);
+}

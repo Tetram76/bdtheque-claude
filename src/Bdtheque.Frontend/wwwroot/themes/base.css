@@ -120,6 +120,14 @@
     --color-palette-6: #BFE4DF;
     --color-palette-7: #F0C6DA;
     --color-text-on-palette: #1D1D21;
+    /* The tones of the monogram of an author, who has no cover (visuel/listes/liste-par-liste.md), dealt in turn to the rows
+       of a list: the accent by default, which a theme varies. */
+    --color-monogram-1: var(--color-accent);
+    --color-monogram-2: var(--color-accent);
+    --color-monogram-3: var(--color-accent);
+    --color-text-on-monogram-1: var(--color-text-on-accent);
+    --color-text-on-monogram-2: var(--color-text-on-accent);
+    --color-text-on-monogram-3: var(--color-text-on-accent);
     /* Tints of the blocks: a theme that gives each block its own color deals them to its blocks (--block-fill), the
        first seven in their main version, the next seven in a softer one; every text of a block is read on them. The
        base theme has a single surface. */

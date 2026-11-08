@@ -1,0 +1,61 @@
+@using System.Globalization
+
+@* The visual of an author, who has no cover: the initials of its main identifier on a round of color
+   (visuel/listes/liste-par-liste.md). Decorative: the name next to it names the author. The rounds of a list take the tones
+   of the theme in turn, from the place of their row, so that two neighbours never look alike. *@
+<span class="monogram monogram-tone-@(Place % ToneCount + 1)" aria-hidden="true">@Initials(LastName, FirstName, Pseudonym)</span>
+
+@code {
+    /// <summary>The number of tones of a monogram, which each theme defines (--color-monogram-n).</summary>
+    private const int ToneCount = 3;
+
+    [Parameter]
+    public string? LastName { get; set; }
+
+    [Parameter]
+    public string? FirstName { get; set; }
+
+    [Parameter]
+    public string? Pseudonym { get; set; }
+
+    /// <summary>The place of the monogram in its list, from 0, which decides its tone.</summary>
+    [Parameter]
+    public int Place { get; set; }
+
+    /// <summary>
+    /// The initials of the main identifier of the author (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes):
+    /// those of the first and last words of its pseudonym; otherwise those of its first name and of its last name. An
+    /// initial is the first letter or digit of a word, so that punctuation before it (« ...Et après ») is no initial.
+    /// </summary>
+    internal static string Initials(string? lastName, string? firstName, string? pseudonym)
+    {
+        string?[] words;
+        if (!string.IsNullOrWhiteSpace(pseudonym))
+        {
+            var parts = pseudonym.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+            words = parts.Length == 1 ? [parts[0]] : [parts[0], parts[^1]];
+        }
+        else
+        {
+            words = [firstName, lastName];
+        }
+
+        return string.Concat(words.Select(Initial).Where(initial => initial is not null)).ToUpper(CultureInfo.CurrentCulture);
+    }
+
+    // The first letter or digit of the word, whole: a letter written with a combining accent stays one.
+    private static string? Initial(string? word)
+    {
+        if (string.IsNullOrWhiteSpace(word))
+            return null;
+        var elements = StringInfo.GetTextElementEnumerator(word);
+        while (elements.MoveNext())
+        {
+            var element = (string)elements.Current;
+            if (char.IsLetterOrDigit(element, 0))
+                return element;
+        }
+
+        return null;
+    }
+}

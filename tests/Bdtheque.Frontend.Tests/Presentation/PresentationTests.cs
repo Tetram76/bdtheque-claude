@@ -220,6 +220,42 @@ public sealed class PresentationTests : BunitContext
         Assert.Equal(expected, mention.Find(".not-set").TextContent);
     }
 
+    [Theory]
+    [InlineData("Gibelin", "Christophe", null, "CG")]
+    [InlineData("Gibrat", "Jean-Pierre", null, "JG")]
+    [InlineData("Van Hamme", "Jean", null, "JV")]
+    [InlineData("Franquin", null, null, "F")]
+    [InlineData("Gotlieb", "Marcel", "Gotlib", "G")]
+    [InlineData(null, null, "bob de Moor", "BM")]
+    [InlineData("Œuvre", "élise", null, "ÉŒ")]
+    [InlineData(null, null, "...Et après", "EA")]
+    [InlineData(null, null, "13", "1")]
+    public void Monogram_TheInitialsOfTheMainIdentifier(string? lastName, string? firstName, string? pseudonym, string expected)
+    {
+        // A pseudonym stands for the name, as in the main identifier
+        // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes): the initials of its first and last words;
+        // otherwise the initials of the first name and of the last name.
+        var monogram = Render<Monogram>(parameters => parameters
+            .Add(p => p.LastName, lastName).Add(p => p.FirstName, firstName).Add(p => p.Pseudonym, pseudonym));
+
+        var mark = monogram.Find(".monogram");
+        Assert.Equal(expected, mark.TextContent);
+        // Decorative: the name next to it names the author.
+        Assert.Equal("true", mark.GetAttribute("aria-hidden"));
+    }
+
+    [Theory]
+    [InlineData(0, "monogram monogram-tone-1")]
+    [InlineData(1, "monogram monogram-tone-2")]
+    [InlineData(2, "monogram monogram-tone-3")]
+    [InlineData(3, "monogram monogram-tone-1")]
+    public void Monogram_TakesTheToneOfItsPlace_InTurn(int place, string expected)
+    {
+        var monogram = Render<Monogram>(parameters => parameters.Add(p => p.Pseudonym, "Moebius").Add(p => p.Place, place));
+
+        Assert.Equal(expected, monogram.Find(".monogram").GetAttribute("class"));
+    }
+
     [Fact]
     public void Icon_IsDecorative()
     {

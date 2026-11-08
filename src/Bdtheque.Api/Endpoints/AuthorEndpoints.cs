@@ -33,6 +33,7 @@ internal static class AuthorEndpoints
     public static void MapAuthors(this RouteGroupBuilder admin)
     {
         var authors = admin.MapGroup("/authors");
+        authors.MapGet("/", ListForAdministrationAsync);
         authors.MapGet("/{id:guid}", GetAsync);
         authors.MapPost("/", CreateAsync);
         authors.MapPut("/{id:guid}", UpdateAsync);
@@ -100,25 +101,59 @@ internal static class AuthorEndpoints
             author.ModifiedAt);
     }
 
-    /// <summary>
-    /// The authors found by any part of their name: last name, first name, pseudonym, or full name, as
-    /// displayed ("First Last") or as sorted ("Last First",
-    /// fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
-    /// </summary>
+    /// <summary>The authors of the consultation, found by their name (<see cref="Search"/>).</summary>
     private static Task<Page<AuthorListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        Search(context, q, entry)
+            .ToPageAsync(page, pageSize, a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym), cancellationToken);
+
+    /// <summary>
+    /// The list of the authors of the administration (visuel/listes/liste-par-liste.md): the search and navigation of the list
+    /// of the consultation, in the same order. Each row carries the identity and the nationality of the author, the albums it
+    /// is credited on, the roles it holds on albums and series, its modification and its version, which its deletion sends
+    /// back.
+    /// </summary>
+    private static async Task<Page<AuthorAdminListItem>> ListForAdministrationAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
         int pageSize = Paging.DefaultSize)
     {
+        var rows = await Search(context, q, entry).ToPageAsync(page, pageSize, a => new
+        {
+            a.Id,
+            a.LastName,
+            a.FirstName,
+            a.Pseudonym,
+            a.Nationality,
+            // An album credited with several roles of the author counts once.
+            CreditedAlbumCount = context.Contributions.Where(c => c.AuthorId == a.Id && c.AlbumId != null).Select(c => c.AlbumId).Distinct().Count(),
+            Roles = context.Contributions.Where(c => c.AuthorId == a.Id).Select(c => c.Role).Distinct().OrderBy(r => r).ToList(),
+            a.ModifiedAt,
+            Version = EF.Property<uint>(a, BdthequeDbContext.VersionProperty),
+        }, cancellationToken);
+
+        var items = rows.Items
+            .Select(r => new AuthorAdminListItem(
+                r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount,
+                [.. r.Roles.Select(role => EnumMapping.Map<ContractEnums.ContributionRole>(role)!.Value)], r.ModifiedAt, r.Version))
+            .ToList();
+        return new Page<AuthorAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount);
+    }
+
+    /// <summary>
+    /// The authors found by any part of their name: last name, first name, pseudonym, or full name, as
+    /// displayed ("First Last") or as sorted ("Last First",
+    /// fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), under the entry of the navigation, by sort key.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
+    private static IOrderedQueryable<Author> Search(BdthequeDbContext context, string? text, string? entry)
+    {
         CatalogFilters.EnsureNavigationEntry(entry);
         var authors = context.Authors.AsNoTracking()
-            .WhereContains(q, a => a.LastName, a => a.FirstName, a => a.Pseudonym, a => a.FirstName + " " + a.LastName, a => a.SortKey);
+            .WhereContains(text, a => a.LastName, a => a.FirstName, a => a.Pseudonym, a => a.FirstName + " " + a.LastName, a => a.SortKey);
         if (entry is not null)
             authors = authors.Where(a => a.NavigationEntry == entry);
-
-        return authors
-            .OrderBy(a => a.SortKey)
-            .ThenBy(a => a.Id)
-            .ToPageAsync(page, pageSize, a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym), cancellationToken);
+        return authors.OrderBy(a => a.SortKey).ThenBy(a => a.Id);
     }
 
     private static async Task<AuthorForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
