@@ -248,7 +248,7 @@ public sealed class ChangeLogTests : IAsyncLifetime
     public async Task VisualsAddedThenRearranged_AreChangesOfTheirEdition()
     {
         var (album, edition) = await CreateOwnedEditionAsync();
-        var cover = edition.AppendVisual(VisualType.Cover, "cover.jpg");
+        var cover = edition.AppendVisual(VisualType.Cover, "cover.jpg", TestPalette.Any);
         await Context.SaveChangesAsync();
 
         Assert.Equal(

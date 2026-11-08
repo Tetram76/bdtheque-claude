@@ -265,10 +265,10 @@ public sealed class EditionTests
         // display order within the same type. Added out of order and across types on
         // purpose so a naive Visuals enumeration (unordered) would fail this assertion.
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        var plate2 = edition.AddVisual(VisualType.Plate, "plate-2.jpg", 2);
-        var backCover = edition.AddVisual(VisualType.BackCover, "back-cover.jpg", 0);
-        var cover = edition.AddVisual(VisualType.Cover, "cover.jpg", 0);
-        var plate1 = edition.AddVisual(VisualType.Plate, "plate-1.jpg", 1);
+        var plate2 = edition.AddVisual(VisualType.Plate, "plate-2.jpg", 2, TestPalette.Any);
+        var backCover = edition.AddVisual(VisualType.BackCover, "back-cover.jpg", 0, TestPalette.Any);
+        var cover = edition.AddVisual(VisualType.Cover, "cover.jpg", 0, TestPalette.Any);
+        var plate1 = edition.AddVisual(VisualType.Plate, "plate-1.jpg", 1, TestPalette.Any);
 
         var ordered = edition.GetOrderedVisuals().ToList();
 
@@ -282,8 +282,8 @@ public sealed class EditionTests
         // ORDER BY): two visuals tied on type and display order must still always come out in
         // the same order, or the page would shuffle them from one load to the next.
         var edition = new Edition(CreateAlbum(), CreatePublisher());
-        edition.AddVisual(VisualType.Plate, "plate-a.jpg", 1);
-        edition.AddVisual(VisualType.Plate, "plate-b.jpg", 1);
+        edition.AddVisual(VisualType.Plate, "plate-a.jpg", 1, TestPalette.Any);
+        edition.AddVisual(VisualType.Plate, "plate-b.jpg", 1, TestPalette.Any);
 
         var firstLoad = edition.GetOrderedVisuals().ToList();
         ReverseLoadedVisuals(edition);
@@ -297,7 +297,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        var visual = edition.AddVisual(VisualType.Cover, "cover.jpg", 0);
+        var visual = edition.AddVisual(VisualType.Cover, "cover.jpg", 0, TestPalette.Any);
 
         Assert.Contains(visual, edition.Visuals);
     }

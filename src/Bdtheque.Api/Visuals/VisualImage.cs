@@ -1,12 +1,17 @@
+using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Common;
 using SkiaSharp;
 
 namespace Bdtheque.Api.Visuals;
 
-/// <summary>An uploaded visual once validated: its original, kept as is, and its reduced display version.</summary>
+/// <summary>
+/// An uploaded visual once validated: its original, kept as is, its reduced display version, and the colours drawn
+/// from it.
+/// </summary>
 /// <param name="OriginalExtension">Extension of the original, from its decoded format, never from the client's file name.</param>
 /// <param name="Display">The display version, in WebP.</param>
-internal sealed record PreparedVisual(byte[] Original, string OriginalExtension, byte[] Display);
+/// <param name="Palette">Drawn from the display version, upright and reduced: the image the visitor sees.</param>
+internal sealed record PreparedVisual(byte[] Original, string OriginalExtension, byte[] Display, VisualPalette Palette);
 
 /// <summary>
 /// Validation and conversion of an uploaded visual
@@ -65,7 +70,7 @@ internal static class VisualImage
             display = Replace(display, Orient(display, codec.EncodedOrigin));
             using var image = SKImage.FromBitmap(display);
             using var encoded = image.Encode(SKEncodedImageFormat.Webp, DisplayQuality);
-            return new PreparedVisual(content, extension, encoded.ToArray());
+            return new PreparedVisual(content, extension, encoded.ToArray(), VisualColors.PaletteOf(display));
         }
         finally
         {

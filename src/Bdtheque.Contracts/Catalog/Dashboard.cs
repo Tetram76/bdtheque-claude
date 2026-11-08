@@ -40,3 +40,13 @@ public sealed record SpotlightEdition(AlbumSummary Album, EditionSummary Edition
 /// <param name="EnteredCollectionAt">When the edition became owned, always known.</param>
 public sealed record LatestEntry(
     AlbumSummary Album, EditionSummary Edition, AlbumCover? Cover, DateOnly? AcquisitionDate, DateTimeOffset EnteredCollectionAt);
+
+/// <summary>
+/// The colours of the day (visuel/dashboard/la-couverture-du-jour.md): those of the cover of the edition in the spotlight
+/// of the day, which the theme « La couverture du jour » paints every page with, in the consultation as in the
+/// administration.
+/// </summary>
+/// <param name="Palette">
+/// <c>null</c> for an empty collection, or an edition of the day without cover: the theme then keeps its own colours.
+/// </param>
+public sealed record SpotlightColors(CoverPalette? Palette);

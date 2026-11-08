@@ -71,7 +71,7 @@ internal static class EditionVisualEndpoints
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, upload.AlbumVersion, WithVisuals, cancellationToken);
         var edition = EditionOf(album, editionId);
         var mediaReference = VisualStorage.NewMediaReference(prepared);
-        var visual = edition.AppendVisual(EnumMapping.Map<DomainEnums.VisualType>(upload.Type)!.Value, mediaReference);
+        var visual = edition.AppendVisual(EnumMapping.Map<DomainEnums.VisualType>(upload.Type)!.Value, mediaReference, prepared.Palette);
         context.EditionVisuals.Add(visual);
 
         await storage.WriteAsync(mediaReference, prepared, cancellationToken);

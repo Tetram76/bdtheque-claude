@@ -263,7 +263,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         var response = await _client.PostAsync(VisualsUri(albumId, editionId), form);
         response.EnsureSuccessStatusCode();
         var visual = (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals.Single(v => !before.Contains(v.Id));
-        return new AlbumCover(visual.Id);
+        return new AlbumCover(visual.Id, TestImages.UploadedPalette);
     }
 
     private async Task<uint> GetAlbumVersionAsync(Guid albumId) =>

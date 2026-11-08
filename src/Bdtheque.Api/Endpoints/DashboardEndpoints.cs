@@ -17,15 +17,23 @@ internal static class DashboardEndpoints
     public const int DefaultLatestCount = 6;
     public const int MaxLatestCount = 20;
 
-    public static void MapDashboard(this RouteGroupBuilder catalog) => catalog.MapGet("/dashboard", GetAsync);
+    public static void MapDashboard(this RouteGroupBuilder catalog)
+    {
+        catalog.MapGet("/dashboard", GetAsync);
+        catalog.MapGet("/spotlight/colors", GetSpotlightColorsAsync);
+    }
 
     private static readonly Expression<Func<EditionSpotlight, SpotlightEdition>> SpotlightOf = CatalogExpressions.Expand(
         (EditionSpotlight s) => new SpotlightEdition(
-            s.Edition.Album.ToSummary(), s.Edition.ToSummary(), CatalogExpressions.ToCover(s.Edition.CoverVisualId()), s.Edition.Album.Summary));
+            s.Edition.Album.ToSummary(), s.Edition.ToSummary(), CatalogExpressions.ToCover(s.Edition.CoverVisualOf()), s.Edition.Album.Summary));
+
+    // Wrapped, so that a day with an edition but without cover is told apart from a day without edition.
+    private static readonly Expression<Func<EditionSpotlight, SpotlightColors>> ColorsOf = CatalogExpressions.Expand(
+        (EditionSpotlight s) => new SpotlightColors(CatalogExpressions.ToPalette(s.Edition.CoverVisualOf())));
 
     private static readonly Expression<Func<Edition, LatestEntry>> LatestEntryOf = CatalogExpressions.Expand(
         (Edition e) => new LatestEntry(
-            e.Album.ToSummary(), e.ToSummary(), CatalogExpressions.ToCover(e.CoverVisualId()), e.AcquisitionDate, e.EnteredCollectionAt!.Value));
+            e.Album.ToSummary(), e.ToSummary(), CatalogExpressions.ToCover(e.CoverVisualOf()), e.AcquisitionDate, e.EnteredCollectionAt!.Value));
 
     /// <param name="day">
     /// The date of the visitor, in the time zone of the browser, which the frontend sends: that of the edition in the
@@ -43,7 +51,7 @@ internal static class DashboardEndpoints
 
         // The spotlight first, which finds out an empty collection: nothing is then drawn nor computed
         // (contraintes-techniques/architecture-deploiement/statistiques-du-dashboard.md).
-        var spotlight = await SpotlightOfTheDayAsync(context, day, cancellationToken);
+        var spotlight = await SpotlightOfTheDayAsync(context, day, SpotlightOf, cancellationToken);
         if (spotlight is null)
             return new Dashboard(null);
 
@@ -70,11 +78,24 @@ internal static class DashboardEndpoints
     }
 
     /// <summary>
-    /// The edition in the spotlight of <paramref name="day"/>, drawn by the first display of the day without one
-    /// (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md).
+    /// The colours of the cover of the edition in the spotlight of <paramref name="day"/>, which every page of the theme
+    /// « La couverture du jour » needs: the first of the day may be any page, which then draws the edition, as the
+    /// dashboard would. Nothing else is computed
+    /// (contraintes-techniques/architecture-deploiement/statistiques-du-dashboard.md).
+    /// </summary>
+    /// <param name="day">As for the dashboard: the date of the visitor, in the time zone of the browser.</param>
+    private static async Task<SpotlightColors> GetSpotlightColorsAsync(
+        DateOnly day, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        await SpotlightOfTheDayAsync(context, day, ColorsOf, cancellationToken) ?? new SpotlightColors(null);
+
+    /// <summary>
+    /// The edition in the spotlight of <paramref name="day"/>, as <paramref name="projection"/> presents it, drawn by the
+    /// first display of the day without one (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md).
     /// </summary>
     /// <returns><c>null</c> if the collection is empty.</returns>
-    private static async Task<SpotlightEdition?> SpotlightOfTheDayAsync(BdthequeDbContext context, DateOnly day, CancellationToken cancellationToken)
+    private static async Task<T?> SpotlightOfTheDayAsync<T>(
+        BdthequeDbContext context, DateOnly day, Expression<Func<EditionSpotlight, T>> projection, CancellationToken cancellationToken)
+        where T : class
     {
         var (from, to) = SpotlightDraw.RepetitionWindow(day);
         while (true)
@@ -82,7 +103,7 @@ internal static class DashboardEndpoints
             // A day keeps its edition, unless deleted, which takes its spotlights with it: drawn again.
             var spotlight = await context.EditionSpotlights.AsNoTracking()
                 .Where(s => s.Day == day)
-                .Select(SpotlightOf)
+                .Select(projection)
                 .SingleOrDefaultAsync(cancellationToken);
             if (spotlight is not null)
                 return spotlight;

@@ -1,4 +1,6 @@
 using System.Buffers.Binary;
+using Bdtheque.Api.Visuals;
+using Bdtheque.Contracts.Catalog;
 using SkiaSharp;
 
 namespace Bdtheque.Api.Tests;
@@ -6,6 +8,20 @@ namespace Bdtheque.Api.Tests;
 /// <summary>Images built on the fly for the tests of the visuals.</summary>
 internal static class TestImages
 {
+    /// <summary>
+    /// The colours of the cover the tests upload, an image of <see cref="Encode"/>: those the API must present with it,
+    /// drawn here from that very image so that the tests of the API do not depend on the drawing rules, which
+    /// <see cref="VisualColorsTests"/> fixes.
+    /// </summary>
+    public static readonly CoverPalette UploadedPalette = PaletteOf(Encode(8, 8, SKEncodedImageFormat.Jpeg));
+
+    private static CoverPalette PaletteOf(byte[] image)
+    {
+        using var bitmap = SKBitmap.Decode(image);
+        var palette = VisualColors.PaletteOf(bitmap);
+        return new CoverPalette(palette.Dominant.ToString(), palette.Deep.ToString(), palette.Accent.ToString());
+    }
+
     public static byte[] Encode(int width, int height, SKEncodedImageFormat format)
     {
         using var bitmap = new SKBitmap(width, height);

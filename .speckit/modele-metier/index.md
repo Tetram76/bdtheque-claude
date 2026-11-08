@@ -17,7 +17,7 @@
 * [Collection éditeur](collection-editeur.md) - Nom d'une collection éditeur.
 * [Genre](genre.md) - Libellé d'un genre, unique sans casse ni accents.
 * [Univers](univers.md) - Nom et description d'un univers.
-* [Visuel d'édition](visuel-d-edition.md) - Type, fichier et ordre d'un visuel d'édition.
+* [Visuel d'édition](visuel-d-edition.md) - Type, fichier, ordre et couleurs d'un visuel d'édition.
 * [Intention d'achat](intention-d-achat.md) - Cible album ou édition d'une intention d'achat et ses contraintes.
 * [Recherche enregistrée](recherche-enregistree.md) - Nom, entité, critères et variables d'une recherche enregistrée.
 * [Paramétrage de l'application](parametrage-de-l-application.md) - Format du libellé des albums, culture d'affichage ; fiche unique.

@@ -134,7 +134,7 @@ internal static class AlbumEndpoints
     // tells them apart once read.
     private static readonly Expression<Func<Album, AlbumAdminListItem>> AdminListItem = CatalogExpressions.Expand((Album a) => new AlbumAdminListItem(
         a.ToSummary(),
-        CatalogExpressions.ToCover(a.CoverVisualId()),
+        CatalogExpressions.ToCover(a.CoverVisualOf()),
         a.Contributions
             .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
             .Select(c => new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym))

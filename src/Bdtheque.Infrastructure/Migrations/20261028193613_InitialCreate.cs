@@ -592,6 +592,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     Type = table.Column<int>(type: "integer", nullable: false),
                     MediaReference = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false, collation: "fr-FR-x-icu"),
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    Palette_Accent = table.Column<int>(type: "integer", nullable: false),
+                    Palette_Deep = table.Column<int>(type: "integer", nullable: false),
+                    Palette_Dominant = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
@@ -600,6 +603,9 @@ namespace Bdtheque.Infrastructure.Migrations
                     table.PrimaryKey("PK_EditionVisuals", x => x.Id);
                     table.CheckConstraint("CK_EditionVisuals_DisplayOrderNotNegative", "\"DisplayOrder\" >= 0");
                     table.CheckConstraint("CK_EditionVisuals_MediaReferenceNotBlank", "COALESCE(LENGTH(TRIM(\"MediaReference\")), 0) > 0");
+                    table.CheckConstraint("CK_EditionVisuals_Palette_AccentIsRgb", "\"Palette_Accent\" BETWEEN 0 AND 16777215");
+                    table.CheckConstraint("CK_EditionVisuals_Palette_DeepIsRgb", "\"Palette_Deep\" BETWEEN 0 AND 16777215");
+                    table.CheckConstraint("CK_EditionVisuals_Palette_DominantIsRgb", "\"Palette_Dominant\" BETWEEN 0 AND 16777215");
                     table.ForeignKey(
                         name: "FK_EditionVisuals_Editions_EditionId",
                         column: x => x.EditionId,

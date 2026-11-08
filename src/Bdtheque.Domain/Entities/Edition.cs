@@ -277,16 +277,16 @@ public sealed class Edition : EntityBase
 
     // Internal: a rank chosen by the caller could duplicate another; the application adds a visual
     // after those of its type (AppendVisual) and reorders them by ArrangeVisuals.
-    internal EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder)
+    internal EditionVisual AddVisual(VisualType type, string mediaReference, int displayOrder, VisualPalette palette)
     {
-        var visual = new EditionVisual(this, type, mediaReference, displayOrder);
+        var visual = new EditionVisual(this, type, mediaReference, displayOrder, palette);
         _visuals.Add(visual);
         return visual;
     }
 
     /// <summary>Adds a visual after the visuals of the same type, as a newly uploaded one comes last.</summary>
-    public EditionVisual AppendVisual(VisualType type, string mediaReference) =>
-        AddVisual(type, mediaReference, _visuals.Where(v => v.Type == type).Select(v => v.DisplayOrder + 1).DefaultIfEmpty(0).Max());
+    public EditionVisual AppendVisual(VisualType type, string mediaReference, VisualPalette palette) =>
+        AddVisual(type, mediaReference, _visuals.Where(v => v.Type == type).Select(v => v.DisplayOrder + 1).DefaultIfEmpty(0).Max(), palette);
 
     /// <summary>
     /// Rearranges the visuals as the user ordered them

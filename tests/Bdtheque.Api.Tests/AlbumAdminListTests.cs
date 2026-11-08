@@ -191,7 +191,7 @@ public sealed class AlbumAdminListTests : IClassFixture<ApiWebApplicationFactory
         };
         var response = await _client.PostAsync(uri, form);
         response.EnsureSuccessStatusCode();
-        return new AlbumCover(Assert.Single((await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals).Id);
+        return new AlbumCover(Assert.Single((await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.Visuals).Id, TestImages.UploadedPalette);
     }
 
     private async Task<uint> GetAlbumVersionAsync(Guid albumId) => (await GetAsync<AlbumForm>($"/admin/albums/{albumId}")).Version;

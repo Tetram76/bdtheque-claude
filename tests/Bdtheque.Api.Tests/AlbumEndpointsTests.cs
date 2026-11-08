@@ -530,10 +530,10 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var publisher = new Publisher($"Éditeur {Guid.NewGuid():N}");
         var owned = new Edition(album, publisher);
         album.RecordAcquisition(owned, DomainEnums.AcquisitionMode.Purchase);
-        owned.AppendVisual(DomainEnums.VisualType.Cover, $"{Guid.NewGuid():N}.jpg");
-        owned.AppendVisual(DomainEnums.VisualType.BackCover, $"{Guid.NewGuid():N}.jpg");
+        owned.AppendVisual(DomainEnums.VisualType.Cover, $"{Guid.NewGuid():N}.jpg", TestPalette.Any);
+        owned.AppendVisual(DomainEnums.VisualType.BackCover, $"{Guid.NewGuid():N}.jpg", TestPalette.Any);
         var wished = new Edition(album, publisher);
-        wished.AppendVisual(DomainEnums.VisualType.Cover, $"{Guid.NewGuid():N}.jpg");
+        wished.AppendVisual(DomainEnums.VisualType.Cover, $"{Guid.NewGuid():N}.jpg", TestPalette.Any);
         album.AddPurchaseIntent(wished);
         context.AddRange(publisher, owned, wished);
         await context.SaveChangesAsync();
