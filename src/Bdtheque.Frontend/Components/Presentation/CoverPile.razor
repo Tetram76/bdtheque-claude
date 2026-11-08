@@ -1,12 +1,13 @@
 @using Bdtheque.Contracts.Catalog
 
 @* A series as a small pile of three covers, as in the consultation, never a single album (visuel/listes/liste-par-liste.md,
-   visuel/fiche-serie/): those of its first regular volumes, in its order, the first in front; a volume without cover, or a
-   place beyond its first volumes, is the generic visual. Decorative, as each cover: the title next to it names the series. *@
+   visuel/fiche-serie/): those of its first regular volumes, in its order, the first in front; a volume without cover is the
+   generic visual, and a place beyond the volumes of the series a blank card, as in the mockups. Decorative, as each cover:
+   the title next to it names the series. *@
 <span class="cover-pile">
     @for (var place = SeriesOverview.FirstVolumeCount - 1; place >= 0; place--)
     {
-        <Cover VisualId="@(place < Covers.Count ? Covers[place]?.VisualId : null)" />
+        <Cover VisualId="@(place < Covers.Count ? Covers[place]?.VisualId : null)" Blank="@(place >= Covers.Count)" />
     }
 </span>
 

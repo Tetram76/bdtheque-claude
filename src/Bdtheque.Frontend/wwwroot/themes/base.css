@@ -144,6 +144,11 @@
     --radius-control: 0.375rem;
     --radius-pill: 999px;
     --radius-cover: 0.125rem;
+    /* The generic visual of an edition without cover, grey diagonal stripes, and a place of a pile of covers beyond the
+       volumes of a series, a plain grey card (visuel/maquettes/liste-albums/, visuel/maquettes/fiche-serie/): translucent,
+       they suit the surface of any theme. */
+    --cover-generic: repeating-linear-gradient(135deg, rgb(127 127 127 / 0.42) 0 0.375rem, rgb(127 127 127 / 0.24) 0.375rem 0.75rem);
+    --cover-blank: rgb(127 127 127 / 0.35);
     /* A field on several lines, which the radius of a pill would not suit. */
     --radius-multiline: var(--radius-control);
     /* A box laid within a block, never a control: a tile (e.g. a type of record of the home page of the administration)
