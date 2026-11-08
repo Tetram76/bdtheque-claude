@@ -269,6 +269,19 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         Assert.Contains(_api.Requested, path => path == "/admin/albums?q=bl&pageSize=11");
     }
 
+    [Theory]
+    [InlineData(120, $"q=tintin&page=3")]
+    [InlineData(50, "q=tintin")]
+    public void Page_BeyondTheLastOne_LeadsToTheLastPage_KeepingTheCriteria(int totalCount, string lastPage)
+    {
+        // e.g. the page of its only album, once deleted: its albums are on the pages before it, never an empty list.
+        _api.Answers["/admin/albums"] = new AlbumAdminList(new Page<AlbumAdminListItem>([], 4, AlbumListQuery.PageSize, totalCount), NoFilters);
+
+        Open("q=tintin&page=4");
+
+        Assert.EndsWith($"{AppPaths.AdminAlbums}?{lastPage}", Services.GetRequiredService<NavigationManager>().Uri);
+    }
+
     [Fact]
     public void Error_OfTheApi_IsPresentedInsteadOfTheList()
     {

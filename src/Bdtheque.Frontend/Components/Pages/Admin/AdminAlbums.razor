@@ -253,6 +253,13 @@
             _counts = await TryAsync(RecordCounts.GetAsync());
             _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
             _list = await Api.GetAsync<AlbumAdminList>(_query.ApiPath());
+            // A page beyond the last one (the page of its only album once deleted, an old address) is no empty list: its
+            // albums are on the pages before it, the last of which it leads to, with the same criteria.
+            if (_list.Albums is { Items.Count: 0, TotalCount: > 0 } albums && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (albums.TotalCount + albums.Size - 1) / albums.Size }).Href());
+                return;
+            }
             // A dialog opens on an album of the page, from its row: an address written by hand on another album opens none.
             _dialogAlbum = _list.Albums.Items.FirstOrDefault(row => row.Album.Id == (_query.Delete ?? _query.Merge));
         }
