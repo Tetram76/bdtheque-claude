@@ -11,7 +11,7 @@ applies_to:
   - 'tests/Bdtheque.ValidationData.Tests/**'
   - 'src/Bdtheque.Frontend/Theming/ChosenThemeSelector.cs'
   - 'src/Bdtheque.Frontend/Hosting/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
 ---
 
 # Environnement de validation fonctionnelle
@@ -22,7 +22,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 - **Un projet Compose distinct**, surchargeant celui de production sans le modifier, avec des valeurs fixes et fictives : ses conteneurs, réseaux, volumes et images locales ne touchent ni un déploiement local ni les images publiées, et ses ports ne s'ouvrent qu'au poste lui-même.
 - **Environnement ASP.NET Core `Validation`**, qui se comporte comme la production, avec deux ajouts : la documentation de l'API ([Documentation de l'API](../socle/transverse/documentation-de-l-api.md)), et le **thème choisi par l'adresse**, qui devient celui de la visite, pour juger chaque thème sans attendre qu'il soit tiré ([Design et charte graphique](../../fonctionnel/design-et-charte-graphique.md)).
   - **Alternative écartée (environnement `Development`)** : il change d'autres comportements (page d'exception du développeur, liaison des requêtes, validation des services), que l'utilisateur validerait à tort pour ceux de la production.
-- **Données de validation fictives, chargées par l'API d'administration**, comme le ferait un client : chaque règle de l'application s'y applique, le journal des modifications les consigne, et elles suivent le schéma sans rien à tenir aligné. Elles **évoluent avec les écrans** : le chantier d'un écran y ajoute les cas qu'il présente. Leur chargement est vérifié par les tests : une évolution de l'API qui les refuserait fait échouer le CI.
+- **Données de validation fictives, chargées par l'API d'administration**, comme le ferait un client : chaque règle de l'application s'y applique, le journal des modifications les consigne, et elles suivent le schéma sans rien à tenir aligné. Elles **évoluent avec les écrans** : le chantier d'un écran y ajoute les cas qu'il présente. Leur chargement est vérifié par les tests : une évolution de l'API qui les refuserait fait échouer le CI. L'édition à la une des jours qui entourent le chargement est tirée quand seule une couverture pâle, à l'accent de ton moyen, est chargée : le thème « La couverture du jour » ([La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) se juge sur son cas le plus exigeant, qu'un tirage au hasard ne présenterait qu'une fois sur trente.
   - **Alternative écartée (sauvegarde SQL restaurée)** : à régénérer à chaque évolution du schéma, et écrite hors du domaine, sans ses règles ni le journal.
 - **Chaque lancement repart d'une base vide**, sauf demande contraire : rien ne passe d'une validation à l'autre.
 - **Compte administrateur fixe et fictif**, affiché au lancement : la validation de l'administration ne demande aucun secret ([Authentification : mise en œuvre](../socle/transverse/authentification-mise-en-oeuvre.md)).
