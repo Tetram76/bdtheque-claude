@@ -2,6 +2,7 @@
 
 ## 2026-11-08
 
+* **Règle** : sur une Pull Request, le CI n'exécute que les tests que ses modifications peuvent faire échouer : sans source modifiée, les seuls tests du dépôt ; sans source du rendu modifiée, aucun test de bout en bout ni capture ; un push sur `main` les exécute tous. **Choix** : classement des fichiers du commit de fusion au regard de `main`, tests du dépôt désignés par un trait, analyse SonarQube Cloud sans couverture quand aucune source n'a changé (#299).
 * **Choix** : les interfaces que Docker crée sur l'exécuteur du CI n'ont pas d'adresse IPv6 de lien local, dont l'apparition et le retrait, au fil des conteneurs des tests, faisaient abandonner à Chromium des requêtes de pages ; tests de bout en bout exécutés seuls pour ne pas se disputer les processeurs de l'exécuteur ; relevé des changements réseau pendant les tests, et échec du job si une interface de Docker change d'adresse (#295).
 
 ## 2026-11-07
