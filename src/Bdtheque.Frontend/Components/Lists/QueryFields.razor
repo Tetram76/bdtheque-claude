@@ -1,0 +1,11 @@
+@* The criteria of a list as hidden fields of a form that leads to the list, so that it keeps them (Lists/AdminListQuery.cs). *@
+@foreach (var (name, value) in Parameters)
+{
+    <input type="hidden" name="@name" value="@value" />
+}
+
+@code {
+    /// <summary>The parameters of the address of the list, in their order (<c>AdminListQuery.Parameters</c>).</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<(string Name, string Value)> Parameters { get; set; } = [];
+}

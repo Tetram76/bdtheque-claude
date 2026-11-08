@@ -48,6 +48,9 @@ public static class AppPaths
     /// <summary>The record of an album (#210).</summary>
     public static string Album(Guid id) => NotYetImplemented;
 
+    /// <summary>The record of a series (#211).</summary>
+    public static string SeriesRecord(Guid id) => NotYetImplemented;
+
     // Administration (#200 to #209; the settings and the private statistics, a later part of the Phase 3).
 
     /// <summary>Search of a record to modify, from the header of the administration.</summary>
@@ -71,7 +74,17 @@ public static class AppPaths
     /// </summary>
     public const string AdminMergeAlbums = NotYetImplemented;
 
-    public const string AdminSeries = NotYetImplemented;
+    /// <summary>The list of the series of the administration (visuel/listes/).</summary>
+    public const string AdminSeries = "/admin/series";
+
+    /// <summary>The entry form of a series (#206).</summary>
+    public static string AdminEditSeries(Guid id) => NotYetImplemented;
+
+    /// <summary>
+    /// The next step of the merge of two series, whose presentation awaits the terms of the merge
+    /// (fonctionnel/structure-de-l-application.md): it receives the series and the other one, <c>series</c> and <c>other</c>.
+    /// </summary>
+    public const string AdminMergeSeries = NotYetImplemented;
 
     public const string AdminEditions = NotYetImplemented;
 

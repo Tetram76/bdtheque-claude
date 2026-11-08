@@ -1,0 +1,6 @@
+/* The hints of a refused deletion, in muted text. */
+.dialog-note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}

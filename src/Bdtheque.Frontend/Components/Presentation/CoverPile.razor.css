@@ -1,0 +1,23 @@
+/* The three covers on top of one another, each further one a step up and to the right, the first volume in front. Their
+   width is that of a cover of a row of a list (--cover-width, which the screen sets); the steps leave room for the pile
+   within the place of its row. */
+.cover-pile {
+    --pile-step: 0.25rem;
+    display: inline-grid;
+    grid-template: 1fr / 1fr;
+    padding-block-start: calc(2 * var(--pile-step));
+    padding-inline-end: calc(2 * var(--pile-step));
+    vertical-align: middle;
+}
+
+.cover-pile ::deep .cover-slot {
+    grid-area: 1 / 1;
+}
+
+.cover-pile ::deep .cover-slot:nth-child(1) {
+    translate: calc(2 * var(--pile-step)) calc(-2 * var(--pile-step));
+}
+
+.cover-pile ::deep .cover-slot:nth-child(2) {
+    translate: var(--pile-step) calc(-1 * var(--pile-step));
+}

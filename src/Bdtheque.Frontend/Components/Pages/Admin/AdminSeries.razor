@@ -1,0 +1,325 @@
+@attribute [Route(AppPaths.AdminSeries)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Deletion
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<AdminSeries> L
+@inject ApiClient Api
+@inject AdminRecordCounts RecordCounts
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The list of the series of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the albums
+   (visuel/listes/listes-de-l-administration.md): rendered statically, every criterion, the panel of the filters and the
+   dialogs are carried by its address (Lists/SeriesListQuery.cs); only the choice of a record of the filters is interactive.
+   Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminSeries" />
+
+<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_counts?.Series" NewHref="@AppPaths.AdminNewSeries" NewLabel="@L["New"]" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.AdminSeries" FieldId="series-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" PanelId="series-filters"
+                    FiltersName="@AdminListQuery.FiltersName" FiltersOpenValue="@AdminListQuery.FiltersOpenValue"
+                    FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel" HiddenFilters="KeptFilters" />
+
+        <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
+
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
+
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@(_query.Text is not null || _query.ActiveFilterCount > 0)"
+                     WholeCount="_counts?.Series" Order="@L["Order"]" />
+
+        @if (_list!.Series.Items.Count == 0)
+        {
+            <EmptyList Message="@(_query.Text is { } text ? L["Empty.Text", text] : L["Empty.Criteria"])" Hint="@L["Empty.Hint"]">
+                <Actions>
+                    @if (_query.Text is { } text)
+                    {
+                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                        <Button Href="@AppPaths.AdminNewSeries" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
+                    }
+                    else
+                    {
+                        <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                    }
+                </Actions>
+            </EmptyList>
+        }
+        else
+        {
+            <div class="series-rows" role="table" aria-label="@L["Title"]">
+                <div class="series-row series-row-head" role="row">
+                    <span class="series-pile" role="columnheader"><span class="visually-hidden">@L["Column.Covers"]</span></span>
+                    <span class="series-main" role="columnheader">@L["Column.Series"]</span>
+                    <span class="series-status" role="columnheader">@L["Column.Status"]</span>
+                    <span class="series-albums" role="columnheader">@L["Column.Albums"]</span>
+                    <span class="series-complete" role="columnheader">@L["Column.Complete"]</span>
+                    <span class="series-modified" role="columnheader">@L["Column.Modified"]</span>
+                    <span class="series-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
+                </div>
+                @foreach (var row in _list.Series.Items)
+                {
+                    <div class="series-row" role="row">
+                        <span class="series-pile" role="cell"><CoverPile Covers="row.Overview.FirstVolumeCovers" /></span>
+                        <span class="series-main" role="cell">
+                            <a class="series-title" href="@AppPaths.AdminEditSeries(row.Id)">@row.Title</a>
+                        </span>
+                        <span class="series-meta">
+                            <span class="series-status" role="cell">
+                                @if (row.Status is { } status)
+                                {
+                                    @L[$"Status.{status}"]
+                                }
+                                else
+                                {
+                                    <NotSet />
+                                }
+                            </span>
+                            <span class="series-albums" role="cell" data-empty="@(row.Overview.AlbumCount == 0)">@AlbumsText(row)</span>
+                            <span class="series-complete" role="cell" data-complete="@row.IsComplete">
+                                @if (row.IsComplete)
+                                {
+                                    <Tag Text="@L["Complete"]" Variant="TagVariant.Filled" />
+                                }
+                                else
+                                {
+                                    @L["Incomplete"]
+                                }
+                            </span>
+                        </span>
+                        <span class="series-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
+                        <span class="series-actions" role="cell">
+                            <Button Href="@AppPaths.AdminEditSeries(row.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
+                                    IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", row.Title]" />
+                            <ActionsMenu Id="@($"series-actions-{row.Id:N}")" Label="@L["More", row.Title]">
+                                <MenuItem Href="@AppPaths.SeriesRecord(row.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
+                                <MenuItem Href="@((ListOnly with { Merge = row.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
+                                <MenuSeparator />
+                                <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"
+                                          Variant="ButtonVariant.Delete" />
+                            </ActionsMenu>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <Pagination Number="_list.Series.Number" Size="_list.Series.Size" TotalCount="_list.Series.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (ListOnly with { Page = page }).Href())" />
+        }
+    </ChildContent>
+    <Dialogs>
+        @if (_dialogSeries is not null)
+        {
+            if (_query.Merge is not null)
+            {
+                <MergeDialog Id="series-merge" Title="@L["Merge.Title"]" Subject="@_dialogSeries.Title" Lead="@L["Merge.Lead"]"
+                             CloseHref="@ListOnly.Href()" Action="@AppPaths.AdminSeries"
+                             Criteria="@((ListOnly with { Merge = _dialogSeries.Id }).Parameters())" Text="@_query.MergeText"
+                             SearchLabel="@L["Merge.Search"]" Placeholder="@L["Merge.Placeholder"]" Candidates="_candidates"
+                             Prompt="@L["Merge.Prompt"]" None="@L["Merge.None", _query.MergeText ?? ""]" CandidatesLabel="@L["Merge.Candidates"]"
+                             Note="@L["Merge.Note"]" ContinueAction="@AppPaths.AdminMergeSeries" SubjectName="series" SubjectId="_dialogSeries.Id" />
+            }
+            else
+            {
+                <DeletionDialog Id="series-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@_dialogSeries.Title"
+                                CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                                RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_deletionProblem"
+                                Version="_dialogSeries.Version" OnConfirm="DeleteAsync" />
+            }
+        }
+    </Dialogs>
+</ListLayout>
+
+@code {
+    private const string DeletionFormName = "series-deletion";
+
+    /// <summary>How many other series the merge dialog proposes: enough to choose, few enough to read at a glance.</summary>
+    internal const int CandidateCount = 10;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    /// <summary>The version of the series whose deletion is confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.VersionName)]
+    private uint? Version { get; set; }
+
+    /// <summary>The fingerprint of the impact of the deletion the administrator confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.FingerprintName)]
+    private string? Fingerprint { get; set; }
+
+    private SeriesListQuery _query = new();
+    private RecordCounts? _counts;
+    private SeriesAdminList? _list;
+    private ApiProblem? _problem;
+    private SeriesAdminListItem? _dialogSeries;
+    private DeletionImpact? _impact;
+    private ApiProblem? _deletionProblem;
+    private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
+
+    // The list with its criteria, without its dialogs: where a link of the list, or the closing of a dialog, leads.
+    private SeriesListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = SeriesListQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            // The number of series is the one of the menu, read once per request; without it, the list goes on.
+            _counts = await RecordCounts.TryGetAsync();
+            _list = await Api.GetAsync<SeriesAdminList>(_query.ApiPath());
+            // A page beyond the last one (the page of its only series once deleted, an old address) is no empty list: its
+            // series are on the pages before it, the last of which it leads to, with the same criteria.
+            if (_list.Series is { Items.Count: 0, TotalCount: > 0 } series && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (series.TotalCount + series.Size - 1) / series.Size }).Href());
+                return;
+            }
+            // A dialog opens on a series of the page, from its row: an address written by hand on another series opens none.
+            _dialogSeries = _list.Series.Items.FirstOrDefault(row => row.Id == (_query.Delete ?? _query.Merge));
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        if (_dialogSeries is not null && _query.Delete is { } deleted)
+            await LoadImpactAsync(deleted);
+        else if (_dialogSeries is not null && _query.MergeText is { } text)
+            _candidates = await LoadCandidatesAsync(text);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    private async Task LoadImpactAsync(Guid seriesId)
+    {
+        try
+        {
+            _impact = await Api.GetAsync<DeletionImpact>($"/admin/series/{seriesId}/deletion-impact");
+        }
+        catch (ApiProblemException exception)
+        {
+            _deletionProblem = exception.Problem;
+        }
+    }
+
+    // The other series found by the search of the dialog, the series itself excepted.
+    private async Task<IReadOnlyList<MergeDialog.MergeCandidate>?> LoadCandidatesAsync(string text)
+    {
+        var found = await Api.GetAsync<SeriesAdminList>(_query.MergeCandidatesApiPath(text, CandidateCount));
+        return
+        [
+            .. found.Series.Items
+                .Where(row => row.Id != _dialogSeries!.Id)
+                .Take(CandidateCount)
+                .Select(row => new MergeDialog.MergeCandidate(row.Id, row.Title, CandidateDetail(row))),
+        ];
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (_dialogSeries is null || Version is not { } version || Fingerprint is null)
+            return;
+
+        try
+        {
+            await Api.DeleteAsync($"/admin/series/{_dialogSeries.Id}?version={version}&fingerprint={Uri.EscapeDataString(Fingerprint)}");
+        }
+        catch (ApiProblemException exception)
+        {
+            // A deletion refused, or whose impact changed since its confirmation, announces the current impact, to confirm
+            // again or to resolve; any other error is presented as it is.
+            _deletionProblem = exception.Problem;
+            _impact = exception.Problem.Impact;
+            if (_impact is { BlockedBy.Count: > 0 })
+                _deletionProblem = null;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesDeleted, $"series={_dialogSeries.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    private string CountText() => _list!.Series.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+
+    // « 6 albums · 6 dans la collection »: its albums, and those of them that are part of the collection.
+    private string AlbumsText(SeriesAdminListItem row)
+    {
+        if (row.Overview.AlbumCount == 0)
+            return L["Albums.None"];
+        var albums = row.Overview.AlbumCount == 1 ? L["Albums.One"].Value : L["Albums.Other", Format.Number(row.Overview.AlbumCount)].Value;
+        return row.AlbumsInCollectionCount == 0
+            ? L["Albums.NoneInCollection", albums]
+            : L["Albums.InCollection", albums, Format.Number(row.AlbumsInCollectionCount)];
+    }
+
+    private string CandidateDetail(SeriesAdminListItem candidate) => string.Join(" · ", new[]
+    {
+        candidate.Status is { } status ? L[$"Status.{status}"].Value : null,
+        AlbumsText(candidate),
+    }.Where(part => part is not null));
+
+    // The filters chosen, each with the list without it; a record that no longer exists is no filter of the list.
+    private IReadOnlyList<ActiveFilters.ActiveFilter> ActiveFilterTags()
+    {
+        var filters = _list!.Filters;
+        var tags = new List<ActiveFilters.ActiveFilter>();
+        void Add(string name, string? value, SeriesListQuery without)
+        {
+            if (value is not null)
+                tags.Add(new(L[$"Filter.{name}"].Value, value, (without with { Page = 1 }).Href()));
+        }
+
+        var list = ListOnly;
+        Add("Author", filters.Author is { } author ? RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym) : null,
+            list with { AuthorId = null });
+        Add("Publisher", filters.Publisher?.Name, list with { PublisherId = null });
+        Add("PublisherCollection", filters.PublisherCollection?.Name, list with { PublisherCollectionId = null });
+        Add("Genre", filters.Genre?.Label, list with { GenreId = null });
+        Add("Universe", filters.Universe?.Name, list with { UniverseId = null });
+        return tags;
+    }
+
+    // The fields of the filters: each record chosen by typing its name, interactive.
+    private RenderFragment FiltersPanel => @<ListFilters Note="@L["Filters.Note"]">
+            <Field Id="filter-author" Label="@L["Filter.Author"]" Context="control">
+                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Author" Name="@SeriesListQuery.AuthorName"
+                              Value="@Option(_list!.Filters.Author, a => new(a.Id, RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym), null))"
+                              Placeholder="@L["Filter.Any"]" />
+            </Field>
+            <Field Id="filter-publisher" Label="@L["Filter.Publisher"]" Context="control">
+                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Publisher" Name="@SeriesListQuery.PublisherName"
+                              Value="@Option(_list!.Filters.Publisher, p => new(p.Id, p.Name, null))" Placeholder="@L["Filter.Any"]" />
+            </Field>
+            <Field Id="filter-collection" Label="@L["Filter.PublisherCollection"]" Context="control">
+                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.PublisherCollection"
+                              Name="@SeriesListQuery.PublisherCollectionName"
+                              Value="@Option(_list!.Filters.PublisherCollection, c => new(c.Id, c.Name, c.PublisherName))" Placeholder="@L["Filter.Any"]" />
+            </Field>
+            <Field Id="filter-genre" Label="@L["Filter.Genre"]" Context="control">
+                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Genre" Name="@SeriesListQuery.GenreName"
+                              Value="@Option(_list!.Filters.Genre, g => new(g.Id, g.Label, null))" Placeholder="@L["Filter.Any"]" />
+            </Field>
+            <Field Id="filter-universe" Label="@L["Filter.Universe"]" Context="control">
+                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Universe" Name="@SeriesListQuery.UniverseName"
+                              Value="@Option(_list!.Filters.Universe, u => new(u.Id, u.Name, u.ParentName))" Placeholder="@L["Filter.Any"]" />
+            </Field>
+        </ListFilters>;
+
+    private static RecordOption? Option<T>(T? item, Func<T, RecordOption> option) where T : class => item is null ? null : option(item);
+
+    // The filters chosen, kept by the search while their panel is folded.
+    private RenderFragment KeptFilters => @<QueryFields Parameters="@((_query with { Text = null, Entry = null, Page = 1 }).Parameters())" />;
+}

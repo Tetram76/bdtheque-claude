@@ -1,0 +1,46 @@
+/* The search of the other record and its candidates, the notes in muted text. */
+.dialog-note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.merge-search {
+    display: flex;
+    gap: var(--space-s);
+}
+
+.merge-search input {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.merge-candidates {
+    display: grid;
+    gap: var(--space-xs);
+}
+
+.merge-candidate {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-s);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-tile);
+    cursor: pointer;
+}
+
+.merge-candidate:has(input:checked) {
+    border: 2px solid var(--color-accent);
+}
+
+.merge-candidate > span {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.merge-candidate > span > span {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}

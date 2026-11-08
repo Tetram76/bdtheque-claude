@@ -1,0 +1,101 @@
+@using Bdtheque.Contracts.Deletion
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<DeletionDialog> L
+
+@* The deletion of a record of a list of the administration (visuel/liste-albums/contenu.md): the dialog announces the impact of
+   the deletion (fonctionnel/regles-metier/suppression-des-entites.md) and confirms it by a form protected against forgery,
+   which sends the version of the record and the fingerprint of the impact shown
+   (choix-implementation/ecritures/suppression-des-entites-mise-en-oeuvre.md); a refused deletion says what blocks it and what
+   to do, without any other button than « Fermer ». The page receives the form (VersionName, FingerprintName) and deletes. *@
+@if (Impact is { BlockedBy.Count: > 0 })
+{
+    <Dialog Id="@Id" Title="@L["Refusal.Title"]" Subject="@Subject" Tone="DialogTone.Refusal" CloseHref="@CloseHref" CloseLabel="@L["Close"]">
+        <p>@RefusalLead</p>
+        <DeletionImpactSummary Impact="Impact" />
+        @foreach (var kind in Impact.BlockedBy.Select(count => count.Kind).Distinct())
+        {
+            <p class="dialog-note">@RefusalHint(kind)</p>
+        }
+    </Dialog>
+}
+else if (Impact is not null)
+{
+    <Dialog Id="@Id" Title="@Title" Subject="@Subject" Tone="DialogTone.Deletion" CloseHref="@CloseHref">
+        <ChildContent>
+            <p>@Lead</p>
+            <DeletionImpactSummary Impact="Impact" />
+            @if (Problem is not null)
+            {
+                <ErrorMessage Problem="Problem" />
+            }
+        </ChildContent>
+        <Actions>
+            <form method="post" @formname="@FormName" @onsubmit="OnConfirm">
+                <AntiforgeryToken />
+                <input type="hidden" name="@VersionName" value="@Version" />
+                <input type="hidden" name="@FingerprintName" value="@Impact.Fingerprint" />
+                <Button Type="submit" Variant="ButtonVariant.Delete" Label="@L["Confirm"]" />
+            </form>
+        </Actions>
+    </Dialog>
+}
+else if (Problem is not null)
+{
+    <Dialog Id="@Id" Title="@Title" Subject="@Subject" Tone="DialogTone.Refusal" CloseHref="@CloseHref" CloseLabel="@L["Close"]">
+        <ErrorMessage Problem="Problem" />
+    </Dialog>
+}
+
+@code {
+    /// <summary>The names of the fields of the confirmation, those of the parameters the page receives them in.</summary>
+    public const string VersionName = "Version";
+
+    public const string FingerprintName = "Fingerprint";
+
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name of the form of the confirmation, unique in the page, which the page receives.</summary>
+    [Parameter, EditorRequired]
+    public string FormName { get; set; } = null!;
+
+    /// <summary>The question of the confirmation (e.g. « Supprimer cet album ? »).</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = null!;
+
+    /// <summary>The label of the record to delete.</summary>
+    [Parameter, EditorRequired]
+    public string Subject { get; set; } = null!;
+
+    /// <summary>The list without the dialog, that closing leads to.</summary>
+    [Parameter, EditorRequired]
+    public string CloseHref { get; set; } = null!;
+
+    /// <summary>What the deletion takes with the record, before its impact.</summary>
+    [Parameter, EditorRequired]
+    public string Lead { get; set; } = null!;
+
+    /// <summary>Why the deletion is refused, before what blocks it.</summary>
+    [Parameter, EditorRequired]
+    public string RefusalLead { get; set; } = null!;
+
+    /// <summary>What to do about the records of a type that block the deletion.</summary>
+    [Parameter, EditorRequired]
+    public Func<EntityKind, string> RefusalHint { get; set; } = null!;
+
+    /// <summary>The impact of the deletion; <c>null</c> when it could not be read.</summary>
+    [Parameter]
+    public DeletionImpact? Impact { get; set; }
+
+    /// <summary>The error of the reading of the impact, or of the deletion.</summary>
+    [Parameter]
+    public ApiProblem? Problem { get; set; }
+
+    /// <summary>The version of the record, sent back with its deletion.</summary>
+    [Parameter]
+    public uint Version { get; set; }
+
+    /// <summary>The deletion confirmed, which the page carries out.</summary>
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+}

@@ -71,12 +71,16 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
                 ("Univers", "37", "dont 9 sous-univers", "Gérer la liste | + Nouvel univers"),
             ],
             cards);
-        // The list of the albums is implemented (#200); the other pages are still to come.
+        // The lists of the albums (#200) and of the series (#301) are implemented; the other pages are still to come.
         var links = BlockOf(page, "Les fiches").QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))).ToList();
         Assert.Equal(
-            [("Albums", AppPaths.AdminAlbums), ("Gérer la liste", AppPaths.AdminAlbums), ("+ Nouvel album", AppPaths.NotYetImplemented)],
-            links.Take(3));
-        Assert.All(links.Skip(3), link => Assert.Equal(AppPaths.NotYetImplemented, link.Item2));
+            [
+                ("Albums", AppPaths.AdminAlbums), ("Gérer la liste", AppPaths.AdminAlbums), ("+ Nouvel album", AppPaths.NotYetImplemented),
+                ("Éditions", AppPaths.NotYetImplemented), ("Gérer la liste", AppPaths.NotYetImplemented),
+                ("Séries", AppPaths.AdminSeries), ("Gérer la liste", AppPaths.AdminSeries), ("+ Nouvelle série", AppPaths.NotYetImplemented),
+            ],
+            links.Take(8));
+        Assert.All(links.Skip(8), link => Assert.Equal(AppPaths.NotYetImplemented, link.Item2));
     }
 
     [Theory]

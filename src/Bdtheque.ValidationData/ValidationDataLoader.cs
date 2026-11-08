@@ -24,6 +24,7 @@ public sealed class ValidationDataLoader(HttpClient client)
     public const string LongSeriesTitle = "Les Veilleurs d'Ombrelune";
     public const string MultiEditionOneShotTitle = "Le Phare aux mille lanternes";
     public const string CollectiveTitle = "...Et après ?";
+    public const string SeriesWithoutAlbumTitle = "Les Gardiens du phare";
 
     /// <summary>The volumes of the series catalogued only, enough for the albums to count more than a page of a list.</summary>
     private const int ChroniclesVolumeCount = 25;
@@ -135,6 +136,10 @@ public sealed class ValidationDataLoader(HttpClient client)
             [humour], [greyPort], [Credit(quintin, ContributionRole.Scenarist), Credit(keita, ContributionRole.Illustrator)]));
         for (var volume = 1; volume <= ChroniclesVolumeCount; volume++)
             await data.AlbumAsync(Album(null, chronicles, volume, 1999 + volume));
+
+        // A series announced, without any album yet: the list of the series says so, and its deletion is accepted.
+        await data.SeriesAsync(Series(SeriesWithoutAlbumTitle, SeriesStatus.InProgress, Template(null, null, null), [fantasy], [],
+            [Credit(rambert, ContributionRole.Scenarist)]));
 
         // A one-shot in two editions: the first one with every type of visual, two covers among them; the
         // second one with an ISBN whose check digit is wrong, as printed by some publishers.
