@@ -1,9 +1,10 @@
 @using System.Globalization
 
 @* The visual of an author, who has no cover: the initials of its main identifier on a round of color
-   (visuel/listes/liste-par-liste.md). Decorative: the name next to it names the author. The rounds of a list take the tones
-   of the theme in turn, from the place of their row, so that two neighbours never look alike. *@
-<span class="monogram monogram-tone-@(Place % ToneCount + 1)" aria-hidden="true">@Initials(LastName, FirstName, Pseudonym)</span>
+   (visuel/listes/liste-par-liste.md). Decorative: the name next to it names the author. Its tone, one of those of the theme,
+   follows the author itself, never its place in a list: an author keeps its color whatever the order, the search or the
+   page. *@
+<span class="monogram monogram-tone-@(Tone())" aria-hidden="true">@Initials(LastName, FirstName, Pseudonym)</span>
 
 @code {
     /// <summary>The number of tones of a monogram, which each theme defines (--color-monogram-n).</summary>
@@ -18,9 +19,13 @@
     [Parameter]
     public string? Pseudonym { get; set; }
 
-    /// <summary>The place of the monogram in its list, from 0, which decides its tone.</summary>
+    /// <summary>The identifier of the author, which decides its tone.</summary>
     [Parameter]
-    public int Place { get; set; }
+    public Guid Id { get; set; }
+
+    // The last byte of the identifier, random in a Guid v7 (its first ones are a time): the tones are spread evenly among
+    // the authors, as their place in a list would.
+    private int Tone() => Id.ToByteArray()[^1] % ToneCount + 1;
 
     /// <summary>
     /// The initials of the main identifier of the author (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes):

@@ -116,13 +116,19 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_AMonogramOfItsInitials_TheTonesInTurn()
+    public void Rows_AMonogramOfItsInitials_InTheToneOfItsAuthor_WhateverItsPlace()
     {
-        var monograms = Open("").FindAll(".author-row:not(.author-row-head) .monogram");
+        var monograms = Open("").FindAll(".author-row:not(.author-row-head) .monogram")
+            .Select(monogram => (monogram.TextContent, monogram.GetAttribute("class"))).ToList();
+        Answer([Gotlib, Gomez, Gibrat, Gibelin], totalCount: 38);
+        var reversed = Open("").FindAll(".author-row:not(.author-row-head) .monogram")
+            .Select(monogram => (monogram.TextContent, monogram.GetAttribute("class")));
 
         Assert.Equal(
-            [("CG", "monogram monogram-tone-1"), ("JG", "monogram monogram-tone-2"), ("AG", "monogram monogram-tone-3"), ("G", "monogram monogram-tone-1")],
-            monograms.Select(monogram => (monogram.TextContent, monogram.GetAttribute("class"))));
+            [("CG", "monogram monogram-tone-2"), ("JG", "monogram monogram-tone-3"), ("AG", "monogram monogram-tone-1"), ("G", "monogram monogram-tone-2")],
+            monograms);
+        // In another order, each author keeps its tone.
+        Assert.Equal(Enumerable.Reverse(monograms), reversed);
     }
 
     [Fact]

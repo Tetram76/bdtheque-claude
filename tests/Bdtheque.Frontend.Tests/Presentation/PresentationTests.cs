@@ -245,13 +245,15 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Theory]
-    [InlineData(0, "monogram monogram-tone-1")]
-    [InlineData(1, "monogram monogram-tone-2")]
-    [InlineData(2, "monogram monogram-tone-3")]
-    [InlineData(3, "monogram monogram-tone-1")]
-    public void Monogram_TakesTheToneOfItsPlace_InTurn(int place, string expected)
+    [InlineData("01900000-0000-7000-8000-000000000003", "monogram monogram-tone-1")]
+    [InlineData("01900000-0000-7000-8000-000000000001", "monogram monogram-tone-2")]
+    [InlineData("01900000-0000-7000-8000-000000000002", "monogram monogram-tone-3")]
+    [InlineData("01900000-0000-7000-8000-0000000000ff", "monogram monogram-tone-1")]
+    public void Monogram_TakesTheToneOfItsAuthor(string author, string expected)
     {
-        var monogram = Render<Monogram>(parameters => parameters.Add(p => p.Pseudonym, "Moebius").Add(p => p.Place, place));
+        // The tone follows the author, whatever its place in a list: the same author keeps its color whatever the order,
+        // the search or the page.
+        var monogram = Render<Monogram>(parameters => parameters.Add(p => p.Pseudonym, "Moebius").Add(p => p.Id, Guid.Parse(author)));
 
         Assert.Equal(expected, monogram.Find(".monogram").GetAttribute("class"));
     }
