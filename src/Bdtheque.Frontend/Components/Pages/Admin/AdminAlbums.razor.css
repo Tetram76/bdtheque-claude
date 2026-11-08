@@ -91,10 +91,7 @@
 
 .album-cover {
     grid-area: cover;
-}
-
-.album-cover ::deep .cover {
-    inline-size: 2.25rem;
+    --cover-width: 2.25rem;
 }
 
 .album-main {

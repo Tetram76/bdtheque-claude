@@ -1,11 +1,14 @@
 extern alias frontend;
 
+using System.Globalization;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
+using SkiaSharp;
 
 namespace Bdtheque.EndToEnd.Tests;
 
@@ -118,6 +121,50 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Continuer" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminMergeAlbums, $"?other={other.Id}&album={album.Id}"));
+    }
+
+    [Fact]
+    public async Task Cover_WhateverItsFormat_IsHuggedByTheFrameOfTheTheme()
+    {
+        // Narrower than the slot of a cover (3:4): the white frame of « La planche encrée » once showed in the gap.
+        var album = await CreateAlbumAsync($"Couverture étroite {_marker}");
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur {_marker}", null));
+        var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
+            new EditionContent(publisher.Id, null, null, null, null, null, null, null, null, null, false, true, null,
+                AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null),
+            album.Version));
+        await UploadCoverAsync(edition, 300, 420);
+        var page = await NewPageInThemeAsync("planche", new ViewportSize { Width = 1440, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAlbums}?q={_marker}");
+        await PageReadiness.WaitAsync(page);
+
+        var cover = page.Locator(".album-row img.cover");
+        await Assertions.Expect(cover).ToHaveJSPropertyAsync("complete", true);
+        var size = await cover.EvaluateAsync<double[]>("image => { const box = image.getBoundingClientRect(); return [box.width, box.height]; }");
+        var border = await cover.EvaluateAsync<string>("image => getComputedStyle(image).borderTopWidth");
+
+        // The frame is the border of the image itself, whose box has the proportions of the cover: no gap can show.
+        Assert.Equal("2px", border);
+        Assert.Equal(300.0 / 420, (size[0] - 4) / (size[1] - 4), 2);
+    }
+
+    private async Task UploadCoverAsync(EditionForm edition, int width, int height)
+    {
+        using var bitmap = new SKBitmap(width, height);
+        bitmap.Erase(SKColors.SteelBlue);
+        using var image = SKImage.FromBitmap(bitmap);
+        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+        var file = new ByteArrayContent(png.ToArray());
+        file.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        using var form = new MultipartFormDataContent
+        {
+            { file, UploadVisualFields.File, "cover.png" },
+            { new StringContent(nameof(VisualType.Cover)), UploadVisualFields.Type },
+            { new StringContent(edition.AlbumVersion.ToString(CultureInfo.InvariantCulture)), UploadVisualFields.AlbumVersion },
+        };
+        using var api = Application.CreateApiClient();
+        using var response = await api.PostAsync($"/admin/albums/{edition.AlbumId}/editions/{edition.Id}/visuals", form);
+        response.EnsureSuccessStatusCode();
     }
 
     private async Task<IPage> OpenAsync(string path)
