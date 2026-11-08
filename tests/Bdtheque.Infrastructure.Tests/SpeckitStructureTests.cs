@@ -8,6 +8,7 @@ namespace Bdtheque.Infrastructure.Tests;
 /// a concept missing from its index, without description, behind a broken link or with an outdated
 /// <c>applies_to</c> would be a rule the agent never reads.
 /// </summary>
+[Trait("Category", RepositoryFiles.Category)]
 public sealed partial class SpeckitStructureTests
 {
     private static readonly string Speckit = Path.Combine(RepositoryFiles.Root, ".speckit");

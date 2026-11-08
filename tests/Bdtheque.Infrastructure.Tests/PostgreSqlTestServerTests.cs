@@ -7,6 +7,7 @@ namespace Bdtheque.Infrastructure.Tests;
 public sealed partial class PostgreSqlTestServerTests
 {
     [Fact]
+    [Trait("Category", RepositoryFiles.Category)]
     public void Image_MatchesDockerComposeDbService()
     {
         // The persistence tests only vouch for the engine they run on: an image bump in
