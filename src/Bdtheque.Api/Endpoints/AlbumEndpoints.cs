@@ -36,6 +36,7 @@ internal static class AlbumEndpoints
     public static void MapAlbums(this RouteGroupBuilder admin)
     {
         var albums = admin.MapGroup("/albums");
+        albums.MapGet("/", ListForAdministrationAsync);
         albums.MapGet("/{id:guid}", GetAsync);
         albums.MapPost("/", CreateAsync);
         albums.MapPut("/{id:guid}", UpdateAsync);
@@ -106,25 +107,49 @@ internal static class AlbumEndpoints
         Guid? authorId = null, Guid? publisherId = null, Guid? publisherCollectionId = null, Guid? genreId = null,
         Guid? universeId = null, int page = 1, int pageSize = Paging.DefaultSize)
     {
-        CatalogFilters.EnsureNavigationEntry(entry);
-        var albums = context.Albums.AsNoTracking().WhereContains(q, a => a.Title, a => a.Series!.Title);
-        if (entry is not null)
-            albums = albums.Where(a => (a.NavigationEntry ?? a.Series!.NavigationEntry) == entry);
-        if (seriesId is not null)
-            albums = albums.Where(a => a.SeriesId == seriesId);
-        if (authorId is not null)
-            albums = albums.Where(a => a.Contributions.Any(c => c.AuthorId == authorId));
-        if (publisherId is not null)
-            albums = albums.Where(a => a.Editions.Any(e => e.PublisherId == publisherId));
-        if (publisherCollectionId is not null)
-            albums = albums.Where(a => a.Editions.Any(e => e.PublisherCollectionId == publisherCollectionId));
-        if (genreId is not null)
-            albums = albums.WhereGenre(genreId.Value);
-        if (universeId is not null)
-            albums = albums.WhereUniverse(await CatalogFilters.UniverseAndDescendantsAsync(context, universeId.Value, cancellationToken));
-
+        var filters = new AlbumFilters(q, entry, seriesId, authorId, publisherId, publisherCollectionId, genreId, universeId);
+        var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
         return await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, ListItem, cancellationToken);
     }
+
+    /// <summary>
+    /// The list of the albums of the administration (visuel/liste-albums/contenu.md): the search, navigation and cross
+    /// filters of the consultation, and where each album stands with regard to the collection, in the same order.
+    /// </summary>
+    private static async Task<AlbumAdminList> ListForAdministrationAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, Guid? seriesId = null,
+        Guid? authorId = null, Guid? publisherId = null, Guid? publisherCollectionId = null, Guid? genreId = null,
+        Guid? universeId = null, AlbumCollectionState? state = null, int page = 1, int pageSize = Paging.DefaultSize)
+    {
+        var filters = new AlbumFilters(q, entry, seriesId, authorId, publisherId, publisherCollectionId, genreId, universeId);
+        var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
+        if (state is { } kept)
+            albums = albums.Where(CatalogExpressions.Expand((Album a) => a.CollectionState() == kept));
+
+        var rows = await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, AdminListItem, cancellationToken);
+        // An author credited with several roles is one of the authors once, at the place of their first role.
+        var items = rows.Items.Select(item => item with { Authors = [.. item.Authors.DistinctBy(a => a.Id)] }).ToList();
+        return new AlbumAdminList(
+            new Page<AlbumAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount),
+            await filters.NameAsync(context, cancellationToken));
+    }
+
+    // Its authors in the order of its contributions, an author credited with several roles once per role: the list
+    // tells them apart once read.
+    private static readonly Expression<Func<Album, AlbumAdminListItem>> AdminListItem = CatalogExpressions.Expand((Album a) => new AlbumAdminListItem(
+        a.ToSummary(),
+        CatalogExpressions.ToCover(a.CoverVisualId()),
+        a.Contributions
+            .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
+            .Select(c => new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym))
+            .ToList(),
+        a.FirstPublicationYear,
+        a.FirstPublicationMonth,
+        a.Editions.Count(e => e.IsOwned()),
+        a.PurchaseIntents.Count,
+        a.CollectionState(),
+        a.ModifiedAt,
+        EF.Property<uint>(a, BdthequeDbContext.VersionProperty)));
 
     private static async Task<AlbumForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
