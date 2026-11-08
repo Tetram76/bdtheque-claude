@@ -66,6 +66,16 @@ public sealed record AlbumListQuery(
     /// <summary>The address of the list with these criteria.</summary>
     public string Href()
     {
+        var parameters = Parameters();
+        return parameters.Count == 0 ? AppPaths.AdminAlbums : $"{AppPaths.AdminAlbums}?{Join(parameters)}";
+    }
+
+    /// <summary>
+    /// The parameters of the address of the list, in their fixed order: those of <see cref="Href"/>, which a form that leads
+    /// to the list carries as hidden fields to keep them.
+    /// </summary>
+    public IReadOnlyList<(string Name, string Value)> Parameters()
+    {
         var parameters = Criteria(includePage: true);
         if (FiltersOpen)
             parameters.Add((FiltersName, FiltersOpenValue));
@@ -78,7 +88,7 @@ public sealed record AlbumListQuery(
                 parameters.Add((MergeTextName, MergeText));
         }
 
-        return parameters.Count == 0 ? AppPaths.AdminAlbums : $"{AppPaths.AdminAlbums}?{Join(parameters)}";
+        return parameters;
     }
 
     /// <summary>The page of the list of the API with these criteria (<c>GET /admin/albums</c>).</summary>

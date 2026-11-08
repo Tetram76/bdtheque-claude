@@ -445,13 +445,12 @@
     // The criteria of a query as hidden fields of a form that leads to the list, so that it keeps them.
     private static RenderFragment HiddenFields(AlbumListQuery query) => builder =>
     {
-        var parameters = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(new Uri("http://list"), query.Href()).Query);
-        foreach (var (name, values) in parameters)
+        foreach (var (name, value) in query.Parameters())
         {
             builder.OpenElement(0, "input");
             builder.AddAttribute(1, "type", "hidden");
             builder.AddAttribute(2, "name", name);
-            builder.AddAttribute(3, "value", values.ToString());
+            builder.AddAttribute(3, "value", value);
             builder.CloseElement();
         }
     };
