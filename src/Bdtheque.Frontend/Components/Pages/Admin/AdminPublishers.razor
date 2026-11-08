@@ -1,0 +1,276 @@
+@attribute [Route(AppPaths.AdminPublishers)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Deletion
+@inject IStringLocalizer<AdminPublishers> L
+@inject ApiClient Api
+@inject AdminRecordCounts RecordCounts
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The list of the publishers of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the
+   albums (visuel/listes/listes-de-l-administration.md): rendered statically, its search, its page and its dialogs are carried
+   by its address (Lists/PublisherListQuery.cs). A publisher has no record in the consultation
+   (fonctionnel/structure-de-l-application.md): its menu leads to its website instead. Its styles read the contracts of the
+   base theme only (visuel/listes/declinaison-par-theme.md). *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminPublishers" />
+
+<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_counts?.Publishers" NewHref="@AppPaths.AdminNewPublisher" NewLabel="@L["New"]" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.AdminPublishers" FieldId="publisher-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
+
+        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Publishers" Order="@L["Order"]" />
+
+        @if (_list!.Items.Count == 0)
+        {
+            if (_query.Text is { } text)
+            {
+                <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
+                    <Actions>
+                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                        <Button Href="@AppPaths.AdminNewPublisher" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
+                    </Actions>
+                </EmptyList>
+            }
+            else
+            {
+                <EmptyList Message="@L["Empty.None"]">
+                    <Actions>
+                        <Button Href="@AppPaths.AdminNewPublisher" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                    </Actions>
+                </EmptyList>
+            }
+        }
+        else
+        {
+            <div class="publisher-rows" role="table" aria-label="@L["Title"]">
+                <div class="publisher-row publisher-row-head" role="row">
+                    <span class="publisher-main" role="columnheader">@L["Column.Publisher"]</span>
+                    <span class="publisher-website" role="columnheader">@L["Column.Website"]</span>
+                    <span class="publisher-collections" role="columnheader">@L["Column.Collections"]</span>
+                    <span class="publisher-editions" role="columnheader">@L["Column.Editions"]</span>
+                    <span class="publisher-modified" role="columnheader">@L["Column.Modified"]</span>
+                    <span class="publisher-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
+                </div>
+                @foreach (var row in _list.Items)
+                {
+                    <div class="publisher-row" role="row">
+                        <span class="publisher-main" role="cell">
+                            <a class="publisher-name" href="@AppPaths.AdminEditPublisher(row.Id)">@row.Name</a>
+                            <span class="publisher-collection-names" data-empty="@(row.Collections.Count == 0)">
+                                @(row.Collections.Count == 0 ? L["Collections.Zero"] : string.Join(", ", row.Collections))
+                            </span>
+                        </span>
+                        <span class="publisher-meta">
+                            <span class="publisher-website" role="cell">
+                                @if (row.Website is { } website)
+                                {
+                                    <a href="@website" target="_blank" rel="noopener noreferrer">@WebsiteText(website)</a>
+                                }
+                                else
+                                {
+                                    <NotSet />
+                                }
+                            </span>
+                            @* On two lines, a number loses its column header: it carries the name of its column. *@
+                            <span class="publisher-collections" role="cell" data-empty="@(row.Collections.Count == 0)">
+                                <span class="publisher-caption">@L["Column.Collections"]</span> @Format.Number(row.Collections.Count)
+                            </span>
+                            <span class="publisher-editions" role="cell" data-empty="@(row.EditionCount == 0)">
+                                <span class="publisher-caption">@L["Column.Editions"]</span> @Format.Number(row.EditionCount)
+                            </span>
+                        </span>
+                        <span class="publisher-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
+                        <span class="publisher-actions" role="cell">
+                            <Button Href="@AppPaths.AdminEditPublisher(row.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
+                                    IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", row.Name]" />
+                            <ActionsMenu Id="@($"publisher-actions-{row.Id:N}")" Label="@L["More", row.Name]">
+                                @if (row.Website is { } website)
+                                {
+                                    <MenuItem Href="@website" External="true" Icon="IconName.Exit" Label="@L["Menu.Website"]" />
+                                }
+                                <MenuItem Href="@((ListOnly with { Merge = row.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
+                                <MenuSeparator />
+                                <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"
+                                          Variant="ButtonVariant.Delete" />
+                            </ActionsMenu>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <Pagination Number="_list.Number" Size="_list.Size" TotalCount="_list.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (ListOnly with { Page = page }).Href())" />
+        }
+    </ChildContent>
+    <Dialogs>
+        @if (_dialogPublisher is not null)
+        {
+            if (_query.Merge is not null)
+            {
+                <MergeDialog Id="publisher-merge" Title="@L["Merge.Title"]" Subject="@_dialogPublisher.Name" Lead="@L["Merge.Lead"]"
+                             CloseHref="@ListOnly.Href()" Action="@AppPaths.AdminPublishers"
+                             Criteria="@((ListOnly with { Merge = _dialogPublisher.Id }).Parameters())" Text="@_query.MergeText"
+                             SearchLabel="@L["Merge.Search"]" Placeholder="@L["Merge.Placeholder"]" Candidates="_candidates"
+                             Prompt="@L["Merge.Prompt"]" None="@L["Merge.None", _query.MergeText ?? ""]" CandidatesLabel="@L["Merge.Candidates"]"
+                             Note="@L["Merge.Note"]" ContinueAction="@AppPaths.AdminMergePublishers" SubjectName="publisher"
+                             SubjectId="_dialogPublisher.Id" />
+            }
+            else
+            {
+                <DeletionDialog Id="publisher-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@_dialogPublisher.Name"
+                                CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                                RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_deletionProblem"
+                                Version="_dialogPublisher.Version" OnConfirm="DeleteAsync" />
+            }
+        }
+    </Dialogs>
+</ListLayout>
+
+@code {
+    private const string DeletionFormName = "publisher-deletion";
+
+    /// <summary>How many other publishers the merge dialog proposes: enough to choose, few enough to read at a glance.</summary>
+    internal const int CandidateCount = 10;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    /// <summary>The version of the publisher whose deletion is confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.VersionName)]
+    private uint? Version { get; set; }
+
+    /// <summary>The fingerprint of the impact of the deletion the administrator confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.FingerprintName)]
+    private string? Fingerprint { get; set; }
+
+    private PublisherListQuery _query = new();
+    private RecordCounts? _counts;
+    private Page<PublisherAdminListItem>? _list;
+    private ApiProblem? _problem;
+    private PublisherAdminListItem? _dialogPublisher;
+    private DeletionImpact? _impact;
+    private ApiProblem? _deletionProblem;
+    private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
+
+    // The list with its criteria, without its dialogs: where a link of the list, or the closing of a dialog, leads.
+    private PublisherListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = PublisherListQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            // The number of publishers is the one of the menu, read once per request; without it, the list goes on.
+            _counts = await RecordCounts.TryGetAsync();
+            _list = await Api.GetAsync<Page<PublisherAdminListItem>>(_query.ApiPath());
+            // A page beyond the last one (the page of its only publisher once deleted, an old address) is no empty list: its
+            // publishers are on the pages before it, the last of which it leads to, with the same criteria.
+            if (_list is { Items.Count: 0, TotalCount: > 0 } && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (_list.TotalCount + _list.Size - 1) / _list.Size }).Href());
+                return;
+            }
+            // A dialog opens on a publisher of the page, from its row: an address written by hand on another one opens none.
+            _dialogPublisher = _list.Items.FirstOrDefault(row => row.Id == (_query.Delete ?? _query.Merge));
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        if (_dialogPublisher is not null && _query.Delete is { } deleted)
+            await LoadImpactAsync(deleted);
+        else if (_dialogPublisher is not null && _query.MergeText is { } text)
+            _candidates = await LoadCandidatesAsync(text);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    private async Task LoadImpactAsync(Guid publisherId)
+    {
+        try
+        {
+            _impact = await Api.GetAsync<DeletionImpact>($"/admin/publishers/{publisherId}/deletion-impact");
+        }
+        catch (ApiProblemException exception)
+        {
+            _deletionProblem = exception.Problem;
+        }
+    }
+
+    // The other publishers found by the search of the dialog, the publisher itself excepted.
+    private async Task<IReadOnlyList<MergeDialog.MergeCandidate>?> LoadCandidatesAsync(string text)
+    {
+        var found = await Api.GetAsync<Page<PublisherAdminListItem>>(_query.MergeCandidatesApiPath(text, CandidateCount));
+        return
+        [
+            .. found.Items
+                .Where(row => row.Id != _dialogPublisher!.Id)
+                .Take(CandidateCount)
+                .Select(row => new MergeDialog.MergeCandidate(row.Id, row.Name, CandidateDetail(row))),
+        ];
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (_dialogPublisher is null || Version is not { } version || Fingerprint is null)
+            return;
+
+        try
+        {
+            await Api.DeleteAsync($"/admin/publishers/{_dialogPublisher.Id}?version={version}&fingerprint={Uri.EscapeDataString(Fingerprint)}");
+        }
+        catch (ApiProblemException exception)
+        {
+            // A deletion refused, or whose impact changed since its confirmation, announces the current impact, to confirm
+            // again or to resolve; any other error is presented as it is.
+            _deletionProblem = exception.Problem;
+            _impact = exception.Problem.Impact;
+            if (_impact is { BlockedBy.Count: > 0 })
+                _deletionProblem = null;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(
+            AudienceFunctions.AdminPublishersDeleted, $"publisher={_dialogPublisher.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    private string CountText() => _list!.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+
+    // « 2 collections · 688 éditions »: what tells two publishers of close names apart.
+    private string CandidateDetail(PublisherAdminListItem candidate) =>
+        $"{Plural("Collections", candidate.Collections.Count)} · {Plural("Editions", candidate.EditionCount)}";
+
+    private string Plural(string name, int count) => count switch
+    {
+        0 => L[$"{name}.Zero"],
+        1 => L[$"{name}.One"],
+        _ => L[$"{name}.Other", Format.Number(count)],
+    };
+
+    // The website as read at a glance: its host, without its scheme nor « www. », and its path if it has one
+    // (« casterman.com », « example.com/bd »); the link keeps the whole address.
+    private static string WebsiteText(string website)
+    {
+        if (!Uri.TryCreate(website, UriKind.Absolute, out var uri))
+            return website;
+        var host = uri.Host.StartsWith("www.", StringComparison.OrdinalIgnoreCase) ? uri.Host[4..] : uri.Host;
+        return host + uri.AbsolutePath.TrimEnd('/');
+    }
+}

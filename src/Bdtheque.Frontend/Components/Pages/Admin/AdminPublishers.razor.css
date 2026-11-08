@@ -1,0 +1,147 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the
+   page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
+   row holds on two lines: the name, its collections below, and the actions, then its numbers of collections and of
+   editions, each preceded by the name of its column. A list wide enough for its columns, the fixed ones and at least 12rem
+   for the name, is a table; wider still, the table adds the website and the last modification
+   (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
+.publisher-rows {
+    container: publisher-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
+       so that their columns line up. It holds « Modifier » and the « ⋯ » button. */
+    --publisher-actions-width: 10rem;
+}
+
+.publisher-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "main actions" "meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.publisher-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.publisher-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.publisher-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.publisher-name {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+/* Its collections, on a single line that an ellipsis ends when they do not fit. */
+.publisher-collection-names {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.publisher-website {
+    display: none;
+    grid-area: website;
+    min-inline-size: 0;
+}
+
+.publisher-website a {
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.publisher-collections {
+    grid-area: collections;
+}
+
+.publisher-editions {
+    grid-area: editions;
+}
+
+.publisher-caption,
+.publisher-collections[data-empty],
+.publisher-editions[data-empty] {
+    color: var(--color-text-muted);
+}
+
+.publisher-modified {
+    display: none;
+    grid-area: modified;
+}
+
+/* The date of a row, not the head of its column, which keeps the size of the other heads. */
+.publisher-row:not(.publisher-row-head) .publisher-modified {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.publisher-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container publisher-rows (min-width: 40rem) {
+    .publisher-row {
+        grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--publisher-actions-width);
+        grid-template-areas: "main collections editions actions";
+        align-items: center;
+    }
+
+    .publisher-row-head {
+        display: grid;
+    }
+
+    .publisher-meta {
+        display: contents;
+        font-size: inherit;
+    }
+
+    /* In a table, the head names the columns. */
+    .publisher-caption {
+        display: none;
+    }
+}
+
+@container publisher-rows (min-width: 58rem) {
+    .publisher-row {
+        grid-template-columns: minmax(0, 1fr) 10.5rem 6rem 6rem 6.75rem var(--publisher-actions-width);
+        grid-template-areas: "main website collections editions modified actions";
+    }
+
+    .publisher-website,
+    .publisher-modified {
+        display: block;
+    }
+}

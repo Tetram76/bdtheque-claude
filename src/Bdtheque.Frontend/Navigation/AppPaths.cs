@@ -92,7 +92,17 @@ public static class AppPaths
 
     public const string AdminAuthors = NotYetImplemented;
 
-    public const string AdminPublishers = NotYetImplemented;
+    /// <summary>The list of the publishers of the administration (visuel/listes/).</summary>
+    public const string AdminPublishers = "/admin/publishers";
+
+    /// <summary>The entry form of a publisher and of its collections (#208).</summary>
+    public static string AdminEditPublisher(Guid id) => NotYetImplemented;
+
+    /// <summary>
+    /// The next step of the merge of two publishers, whose presentation awaits the terms of the merge
+    /// (fonctionnel/structure-de-l-application.md): it receives the publisher and the other one, <c>publisher</c> and <c>other</c>.
+    /// </summary>
+    public const string AdminMergePublishers = NotYetImplemented;
 
     public const string AdminGenres = NotYetImplemented;
 

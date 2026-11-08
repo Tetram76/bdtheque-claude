@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
 ---
 
 # Frontend
@@ -57,6 +57,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
   - **Alternative écartée (styles communs des lignes appliqués par `::deep`)** : leur spécificité dépasserait celle des règles de la page, que chaque page devrait forcer.
 - **Recherche et filtres en formulaire `GET`**, dont le premier bouton, que le navigateur soumet sur Entrée, est la recherche ; replier ou déplier les filtres soumet aussi le formulaire, sans perdre un texte tapé.
 - **Suppression confirmée par un formulaire `POST`** qui envoie version et empreinte de l'impact affiché ([Suppression des entités : mise en œuvre](../ecritures/suppression-des-entites-mise-en-oeuvre.md)), puis redirige vers la liste ; un refus ou un impact changé est présenté dans le même dialogue.
+- **Site extérieur ouvert dans un nouvel onglet** (site web d'un éditeur, depuis sa ligne ou son menu), sans accès à la page d'origine ni adresse de provenance (`noopener noreferrer`) : la liste reste telle qu'elle était, avec ses critères.
+  - **Alternative écartée (même onglet)** : l'administrateur quitterait l'application pour un site qui n'en fait pas partie, et n'y reviendrait que par l'historique du navigateur.
 
 ## Présentation
 
