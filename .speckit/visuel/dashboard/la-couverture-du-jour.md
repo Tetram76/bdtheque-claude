@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'La couverture du jour'
 description: 'Alternative « La couverture du jour » : apparence, présentation, collection vide.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T20:00:00Z }
 ---
 
 # La couverture du jour
@@ -15,7 +15,9 @@ Le dashboard présenté comme une application de lecture d'aujourd'hui, où les 
   - Le haut de la page (en-tête, accueil, dernières arrivées) est une **scène** de la couleur profonde, éclairée d'un halo de la couleur dominante derrière l'album à la une et d'un reflet de l'accent dans le coin opposé. Le texte y est blanc.
   - Le reste de la page est d'un fond clair légèrement teinté de la couleur dominante ; les blocs y sont blancs, à peine teintés, avec une ombre douce de la couleur profonde.
   - Les graphiques (valeur, types d'album, éditeurs) prennent les couleurs de la couverture du jour. Les genres gardent chacun la leur, pour rester distincts.
-  - **Lisibilité** : quelle que soit la couverture, même pâle (jaune, par exemple), le texte reste lisible sur la scène : le halo reste derrière l'album à la une et garde une part de la couleur profonde.
+  - **Lisibilité** : quelle que soit la couverture, même pâle (jaune, par exemple), le texte reste lisible :
+    - sur la scène, le halo reste derrière l'album à la une et garde une part de la couleur profonde ;
+    - sur la couleur d'accent (bouton d'aide, pastilles, bouton de l'administration), le texte est blanc ou presque noir, celui des deux qui atteint un contraste de 4,5:1 ; un accent de ton moyen, qu'aucun des deux n'atteint, est assombri jusqu'à ce que le blanc l'atteigne.
   - **Collection vide** : sans édition à la une, la page prend les couleurs propres au thème, bleu nuit `#1E2A44`, bleu `#3D5A80` et corail `#FF6B57`.
 - **Typographie** : une seule police, *Inter Tight*, une grotesque contemporaine, très grasse et au crénage resserré pour les titres et les grands chiffres ; les chiffres sont tabulaires.
 - **Albums en volume** : l'album à la une et les dernières éditions entrées sont des livres en volume, un peu tournés, qui montrent leur dos (de la couleur profonde de leur couverture) et posent une ombre au sol. Au survol, un album se tourne face au lecteur et se soulève.

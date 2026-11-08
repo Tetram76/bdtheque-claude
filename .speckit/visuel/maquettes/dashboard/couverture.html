@@ -65,7 +65,7 @@ a{text-decoration:none;color:inherit}
 <body>
 <div id="mockup"></div>
 <template id="view">
-<div class="app" style="--dom: {{palette.dominant}}; --deep: {{palette.deep}}; --acc: {{palette.accent}}">
+<div class="app" style="--dom: {{palette.dominant}}; --deep: {{palette.deep}}; --acc: {{palette.accent}}; --on-acc: {{palette.onAccent}}">
 
   <!-- Outside the stage: a sticky element stays within its parent, and the header stays at the top of the
        screen down to the bottom of the page. -->
@@ -86,7 +86,7 @@ a{text-decoration:none;color:inherit}
         <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</label>
         <input id="q" type="search" placeholder="Une série, un auteur…" style="flex: 1; min-width: 0; height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(255,255,255,.14); color: #FFFFFF; font: inherit; outline-color: #FFFFFF">
         </sc-if>
-        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: var(--acc); color: #FFFFFF; font: 900 17px 'Inter Tight', sans-serif; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.35)">?</button>
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: 0; border-radius: 50%; background: var(--acc); color: var(--on-acc); font: 900 17px 'Inter Tight', sans-serif; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.35)">?</button>
       </div>
     </div>
   </header>
@@ -97,7 +97,7 @@ a{text-decoration:none;color:inherit}
     <section aria-labelledby="h-welcome" class="wrap" style="padding-top: clamp(16px, 3.6vw, 40px); padding-bottom: clamp(70px, 8vw, 110px)">
       <div class="hero">
         <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-width: 0">
-          <span style="padding: 3px 11px; border-radius: 999px; background: var(--acc); color: #FFFFFF; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase">Collection à démarrer</span>
+          <span style="padding: 3px 11px; border-radius: 999px; background: var(--acc); color: var(--on-acc); font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase">Collection à démarrer</span>
           <h1 id="h-welcome" style="margin: 0; font-size: clamp(30px, 4.6vw, 60px); font-weight: 900; line-height: 1; letter-spacing: -.045em; text-wrap: balance">Les étagères attendent leur premier album !</h1>
           <p style="margin: 0; font-size: clamp(17px, 1.6vw, 20px); font-weight: 700">La collection ne compte encore aucune édition.</p>
           <p style="margin: 0; max-width: 60ch; color: rgba(255,255,255,.88)">Le tableau de bord s'affichera dès la première édition entrée : l'édition à la une, les dernières arrivées, la valeur de la collection et ses statistiques.</p>
@@ -123,7 +123,7 @@ a{text-decoration:none;color:inherit}
             </sc-for>
           </div>
           <a href="#" aria-labelledby="h-featured" style="display: flex; flex-direction: column; gap: 7px; padding-top: clamp(12px, 2vw, 20px); border-top: 1px solid rgba(255,255,255,.22)">
-            <span style="align-self: flex-start; padding: 3px 11px; border-radius: 999px; background: var(--acc); color: #FFFFFF; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase">À la une aujourd'hui</span>
+            <span style="align-self: flex-start; padding: 3px 11px; border-radius: 999px; background: var(--acc); color: var(--on-acc); font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase">À la une aujourd'hui</span>
             <span id="h-featured" style="font-size: clamp(22px, 2.6vw, 32px); font-weight: 800; line-height: 1.08; letter-spacing: -.03em">{{une.label}}</span>
             <span style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,.75)">{{une.edition}}</span>
             <span style="max-width: 62ch; color: rgba(255,255,255,.92)">{{une.summary}}</span>
@@ -180,7 +180,7 @@ a{text-decoration:none;color:inherit}
         <h2 id="h-admin" class="h2">C'est votre collection ?</h2>
         <p style="margin: 0; color: rgba(255,255,255,.85)">Ajoutez une première édition, ou reprenez les données de l'application existante, depuis l'administration.</p>
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
-          <a href="#" class="pill plain" style="padding: 10px 18px; background: var(--acc); color: #FFFFFF">Ouvrir l'administration →</a>
+          <a href="#" class="pill plain" style="padding: 10px 18px; background: var(--acc); color: var(--on-acc)">Ouvrir l'administration →</a>
           <span style="font-size: 13px; color: rgba(255,255,255,.7)">La connexion est demandée à l'ouverture.</span>
         </div>
       </section>
@@ -288,6 +288,25 @@ const FEATURED = {
 };
 // Without an edition to feature, the page keeps the theme's own colours.
 const NEUTRAL = { dominant: '#3D5A80', deep: '#1E2A44', accent: '#FF6B57' };
+// A cover's accent may be pale (a yellow) as well as dark, and text is set on it: white or near-black,
+// whichever reaches a 4.5:1 contrast (WCAG). A mid-tone accent that neither reaches is darkened until
+// white does.
+const INK = '#15151A';
+function luminance(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+const darken = (hex, share) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - share)).toString(16).padStart(2, '0')).join('');
+function legibleAccent(hex) {
+  let accent = hex;
+  while (contrast(accent, '#FFFFFF') < 4.5 && contrast(accent, INK) < 4.5) accent = darken(accent, 0.05);
+  return { accent, onAccent: contrast(accent, '#FFFFFF') >= contrast(accent, INK) ? '#FFFFFF' : INK };
+}
 class View extends Mockup {
   componentDidMount() {
     this.setState({ heroIndex: Math.floor(Math.random() * HERO_LINES.length) });
@@ -307,7 +326,7 @@ class View extends Mockup {
     return {
       vide,
       full: !vide,
-      palette: vide ? NEUTRAL : { dominant: cv.dominant, deep: cv.deep, accent: cv.accent },
+      palette: ((p) => ({ ...p, ...legibleAccent(p.accent) }))(vide ? NEUTRAL : { dominant: cv.dominant, deep: cv.deep, accent: cv.accent }),
       // Without the search field, the help button no longer needs room beside the menu; with it, on a
       // phone, the search takes a line of its own under the menu.
       tools: { flex: vide ? 'none' : '0 1 320px', cls: vide ? '' : 'search' },
