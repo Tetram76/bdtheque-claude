@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Bdtheque.Frontend.Audience;
 using Bdtheque.Frontend.Components.Navigation;
@@ -117,11 +118,12 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
             var criteria = Criteria(includePage: true);
             if (criteria.Count == 0)
                 return null;
+            // A list without navigation or filters never reads an entry or a filter from its address.
             var function = this switch
             {
                 { Page: > 1 } => Functions.Page,
-                { Entry: not null } => Functions.Initial,
-                { ActiveFilterCount: > 0 } => Functions.Filter,
+                { Entry: not null } => Functions.Initial ?? throw new UnreachableException("An entry in a list without navigation."),
+                { ActiveFilterCount: > 0 } => Functions.Filter ?? throw new UnreachableException("A filter in a list without filters."),
                 _ => Functions.Search,
             };
             return (function, Join(criteria));
@@ -187,11 +189,13 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
 
 /// <summary>The functions the audience measurement follows for the actions of a list of the administration.</summary>
 /// <param name="Subject">The name of the record a dialog is opened on, in the parameters of its action (e.g. <c>album</c>).</param>
+/// <param name="Filter">None for a list without filters, so that no function the list cannot use is followed.</param>
+/// <param name="Initial">None for a list without navigation by initial.</param>
 public sealed record ListFunctions(
     string Subject,
     AudienceFunction Search,
-    AudienceFunction Filter,
-    AudienceFunction Initial,
+    AudienceFunction? Filter,
+    AudienceFunction? Initial,
     AudienceFunction Page,
     AudienceFunction Deletion,
     AudienceFunction Merge);

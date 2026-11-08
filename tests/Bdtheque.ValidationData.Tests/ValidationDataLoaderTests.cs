@@ -53,6 +53,25 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task Publishers_WithAndWithoutWebsiteCollectionsOrEditions_TheDeletionOfAnUnusedOneAccepted()
+    {
+        var list = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.PublisherAdminListItem>>("/admin/publishers?pageSize=100"))!.Items;
+
+        Assert.Contains(list, publisher => publisher.Website is not null && publisher.Collections.Count > 0 && publisher.EditionCount > 0);
+        Assert.Contains(list, publisher => publisher.Website is null && publisher.EditionCount > 0);
+        Assert.Contains(list, publisher => publisher.Collections.Count >= 5);
+        var unused = Assert.Single(list, publisher => publisher.Name == ValidationDataLoader.UnusedPublisherName);
+        Assert.Equal((null, 0, 0), (unused.Website, unused.Collections.Count, unused.EditionCount));
+        // A publisher only named by the editions to buy of a purchase intent has none in the collection.
+        Assert.Contains(list, publisher => publisher.Name == ValidationDataLoader.IntendedPublisherName && publisher.EditionCount == 0);
+        foreach (var publisher in list.Where(publisher => publisher.EditionCount == 0 && publisher.Name != ValidationDataLoader.IntendedPublisherName))
+        {
+            var impact = await _client.GetFromJsonAsync<Bdtheque.Contracts.Deletion.DeletionImpact>($"/admin/publishers/{publisher.Id}/deletion-impact");
+            Assert.Empty(impact!.BlockedBy);
+        }
+    }
+
+    [Fact]
     public async Task PurchaseIntents_TargetWholeAlbumsAndEditions()
     {
         var intents = await _client.GetFromJsonAsync<Page<PurchaseIntentListItem>>("/catalog/purchase-intents?pageSize=100");

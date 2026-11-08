@@ -28,6 +28,12 @@ public sealed class ValidationDataLoader(HttpClient client)
     public const string SeriesWithoutAlbumTitle = "Les Gardiens du phare";
     public const string PaleCoverTitle = "Soleil pâle";
 
+    /// <summary>A publisher with nothing but its name, whose deletion is accepted.</summary>
+    public const string UnusedPublisherName = "Éditions Sans Rivage";
+
+    /// <summary>A publisher only named by the edition to buy of a purchase intent.</summary>
+    public const string IntendedPublisherName = "Éditions de l'Horizon";
+
     /// <summary>The volumes of the series catalogued only, enough for the albums to count more than a page of a list.</summary>
     private const int ChroniclesVolumeCount = 25;
 
@@ -61,6 +67,11 @@ public sealed class ValidationDataLoader(HttpClient client)
         var lagoon = await data.PublisherAsync("Éditions du Lagon", "https://www.example.org/lagon", "Grand Large", "Escales");
         var bubbles = await data.PublisherAsync("Bulles & Cie", null, "Petit Format");
         var blackPlate = await data.PublisherAsync("Planche Noire", "https://www.example.com/planche-noire");
+        // The cases of the list of the publishers: many collections and no edition, whose deletion takes the collections with
+        // it; nothing but a name, whose deletion is accepted; only named by an edition to buy, none in the collection.
+        await data.PublisherAsync("Atelier Mistral", "https://www.example.net/atelier-mistral", "Carnets", "Escapades", "Horizons", "Lumières", "Traversées");
+        await data.PublisherAsync(UnusedPublisherName, null);
+        var horizon = await data.PublisherAsync(IntendedPublisherName, "https://www.example.org/horizon");
 
         var arnaud = await data.AuthorAsync("Arnaud", "Émile", nationality: "Française", biography: "Scénariste au long cours, conteur des marées d'Ombrelune.");
         var vanSluys = await data.AuthorAsync("Van Sluys", "Jeanne", nationality: "Belge");
@@ -200,6 +211,8 @@ public sealed class ValidationDataLoader(HttpClient client)
         // A free gift, without cover.
         var fog = await data.AlbumAsync(OneShot("Brouillard sur Ombrelune", 2008, null, [fantasy], [ombrelune], [Credit(brume, ContributionRole.Scenarist), Credit(pinceau, ContributionRole.Illustrator)]));
         await data.EditionAsync(fog, Owned(lagoon.Id, null, 2008, AcquisitionMode.Gift, new DateOnly(2008, 12, 24)) with { IsFree = true });
+        // Owned, and wished for again from another publisher, which no owned edition names.
+        await data.IntentOnEditionAsync(fog, new PurchaseIntentEditionContent(horizon.Id, null, 2023, null, null, null, null, null, null, null, true));
 
         // Wished for as a whole, with no edition known yet.
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));

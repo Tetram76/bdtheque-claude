@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Éditeurs</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouvel éditeur</value>
+  </data>
+  <data name="Kicker" xml:space="preserve">
+    <value>Fiches</value>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Liste des éditeurs</value>
+  </data>
+  <data name="Search.Label" xml:space="preserve">
+    <value>Rechercher un éditeur</value>
+  </data>
+  <data name="Search.Placeholder" xml:space="preserve">
+    <value>Nom de l'éditeur…</value>
+  </data>
+  <data name="Count.None" xml:space="preserve">
+    <value>Aucun éditeur</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>1 éditeur</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} éditeurs</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Triés par nom</value>
+  </data>
+  <data name="Column.Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="Column.Website" xml:space="preserve">
+    <value>Site web</value>
+  </data>
+  <data name="Column.Collections" xml:space="preserve">
+    <value>Collections</value>
+  </data>
+  <data name="Column.Editions" xml:space="preserve">
+    <value>Éditions</value>
+  </data>
+  <data name="Column.Modified" xml:space="preserve">
+    <value>Modifié</value>
+  </data>
+  <data name="Column.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Collections.Zero" xml:space="preserve">
+    <value>Aucune collection</value>
+  </data>
+  <data name="Collections.One" xml:space="preserve">
+    <value>1 collection</value>
+  </data>
+  <data name="Collections.Other" xml:space="preserve">
+    <value>{0} collections</value>
+  </data>
+  <data name="Editions.Zero" xml:space="preserve">
+    <value>aucune édition</value>
+  </data>
+  <data name="Editions.One" xml:space="preserve">
+    <value>1 édition</value>
+  </data>
+  <data name="Editions.Other" xml:space="preserve">
+    <value>{0} éditions</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Edit.Label" xml:space="preserve">
+    <value>Modifier {0}</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>Autres actions sur {0}</value>
+  </data>
+  <data name="Menu.Website" xml:space="preserve">
+    <value>Ouvrir le site web</value>
+  </data>
+  <data name="Menu.Merge" xml:space="preserve">
+    <value>Fusionner avec un autre éditeur…</value>
+  </data>
+  <data name="Menu.Delete" xml:space="preserve">
+    <value>Supprimer…</value>
+  </data>
+  <data name="Empty.Text" xml:space="preserve">
+    <value>Aucun éditeur ne correspond à « {0} ».</value>
+  </data>
+  <data name="Empty.Hint" xml:space="preserve">
+    <value>La recherche porte sur le nom de l'éditeur, sans tenir compte des majuscules ni des accents.</value>
+  </data>
+  <data name="Empty.Clear" xml:space="preserve">
+    <value>Effacer la recherche</value>
+  </data>
+  <data name="Empty.Create" xml:space="preserve">
+    <value>Créer l'éditeur « {0} »</value>
+  </data>
+  <data name="Empty.None" xml:space="preserve">
+    <value>Aucun éditeur n'est encore enregistré.</value>
+  </data>
+  <data name="Deletion.Title" xml:space="preserve">
+    <value>Supprimer cet éditeur ?</value>
+  </data>
+  <data name="Deletion.Lead" xml:space="preserve">
+    <value>La suppression est définitive et emporte avec l'éditeur :</value>
+  </data>
+  <data name="Refusal.Lead" xml:space="preserve">
+    <value>L'éditeur est encore lié à d'autres fiches : la suppression est refusée tant que ces liens existent.</value>
+  </data>
+  <data name="Refusal.Hint.Edition" xml:space="preserve">
+    <value>Rattachez d'abord ses éditions à un autre éditeur, ou supprimez-les, puis recommencez.</value>
+  </data>
+  <data name="Refusal.Hint.Series" xml:space="preserve">
+    <value>Retirez d'abord l'éditeur des valeurs des nouvelles éditions de ces séries, puis recommencez.</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
+    <value>Retirez d'abord l'éditeur, ou ses collections, des critères de ces recherches enregistrées, puis recommencez.</value>
+  </data>
+  <data name="Merge.Title" xml:space="preserve">
+    <value>Fusionner deux éditeurs</value>
+  </data>
+  <data name="Merge.Lead" xml:space="preserve">
+    <value>Avec quel éditeur fusionner celui-ci ?</value>
+  </data>
+  <data name="Merge.Search" xml:space="preserve">
+    <value>Rechercher l'autre éditeur</value>
+  </data>
+  <data name="Merge.Placeholder" xml:space="preserve">
+    <value>Nom de l'autre éditeur…</value>
+  </data>
+  <data name="Merge.Prompt" xml:space="preserve">
+    <value>Recherchez l'autre éditeur par son nom.</value>
+  </data>
+  <data name="Merge.None" xml:space="preserve">
+    <value>Aucun autre éditeur ne correspond à « {0} ».</value>
+  </data>
+  <data name="Merge.Candidates" xml:space="preserve">
+    <value>Autre éditeur</value>
+  </data>
+  <data name="Merge.Note" xml:space="preserve">
+    <value>L'étape suivante présentera les deux éditeurs côte à côte, avec ce que la fusion garde de chacun.</value>
+  </data>
+</root>
