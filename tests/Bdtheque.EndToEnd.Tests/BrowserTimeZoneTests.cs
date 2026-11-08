@@ -17,6 +17,11 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
     // on the collection the other tests change (the dashboard is rendered in the time zone of the browser).
     private const string Page = AppPaths.NotYetImplemented;
 
+    // That page depends on the time zone in a theme painted by the cover of the day, whose colours are those of the date of
+    // the browser: the base theme is fixed, rather than the theme drawn for the visit.
+    private static readonly Dictionary<string, string> WithoutColorsOfTheDay =
+        new() { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Base.Key };
+
     [Fact]
     public async Task Server_LearnsTheTimeZoneOfTheBrowser_FromItsFirstPage()
     {
@@ -34,6 +39,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
         var context = await NewContextAsync(new BrowserNewContextOptions
         {
             TimezoneId = "Europe/Paris",
+            ExtraHTTPHeaders = WithoutColorsOfTheDay,
         });
         await context.AddCookiesAsync([new Cookie
         {
@@ -155,6 +161,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
         var context = await NewContextAsync(new BrowserNewContextOptions
         {
             TimezoneId = timeZone,
+            ExtraHTTPHeaders = WithoutColorsOfTheDay,
         });
         return await context.NewPageAsync();
     }
