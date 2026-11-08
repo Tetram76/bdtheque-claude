@@ -14,7 +14,8 @@ namespace Bdtheque.ValidationData;
 /// every rule of the application applies to it, and the change log records it. The data covers the cases the
 /// screens present — a long series with omnibuses, special issues and missing volumes, purchase intents on a
 /// whole album and on an edition, many authors, nested universes, editions without cover or with every type of
-/// visual, amounts in several currencies, navigation entries outside the letters — and evolves with the screens.
+/// visual, amounts in several currencies, navigation entries outside the letters, a pale cover in the spotlight of the day — and
+/// evolves with the screens.
 /// </summary>
 public sealed class ValidationDataLoader(HttpClient client)
 {
@@ -25,6 +26,7 @@ public sealed class ValidationDataLoader(HttpClient client)
     public const string MultiEditionOneShotTitle = "Le Phare aux mille lanternes";
     public const string CollectiveTitle = "...Et après ?";
     public const string SeriesWithoutAlbumTitle = "Les Gardiens du phare";
+    public const string PaleCoverTitle = "Soleil pâle";
 
     /// <summary>The volumes of the series catalogued only, enough for the albums to count more than a page of a list.</summary>
     private const int ChroniclesVolumeCount = 25;
@@ -76,6 +78,14 @@ public sealed class ValidationDataLoader(HttpClient client)
         var ferraz = await data.AuthorAsync("Ferraz", "Inès");
         var benali = await data.AuthorAsync("Benali", "Malik");
         var lemaire = await data.AuthorAsync("Lemaire");
+
+        // The edition in the spotlight of the days around the load, drawn while it is the only one with a cover: a pale cover
+        // with an accent of middle tone, the most demanding one for « La couverture du jour », which takes its colours on
+        // every page (visuel/dashboard/la-couverture-du-jour.md, Lisibilité). Acquired lately, it is among the latest arrivals.
+        var paleSun = await data.AlbumAsync(OneShot(PaleCoverTitle, 2026, 9, [humour], [], [Credit(quintin, ContributionRole.Illustrator)]));
+        var paleSunEdition = await data.EditionAsync(paleSun, Owned(bubbles.Id, null, 2026, AcquisitionMode.Purchase, new DateOnly(2026, 10, 25)));
+        await data.VisualAsync(paleSun, paleSunEdition, VisualType.Cover, Images.Banded("#F7E98E", "#B85AA2"));
+        await data.SpotlightAroundTodayAsync();
 
         await LoadLongSeriesAsync(data, lagoon, bubbles, [adventure, fantasy], watchersCity, archipelago,
             [Credit(arnaud, ContributionRole.Scenarist), Credit(vanSluys, ContributionRole.Illustrator), Credit(ostrova, ContributionRole.Colorist)]);
@@ -407,6 +417,17 @@ public sealed class ValidationDataLoader(HttpClient client)
         public async Task SavedSearchAsync(string name, Guid album) =>
             await PostAsync<SavedSearchContent, SavedSearchForm>("/admin/saved-searches", new(
                 name, EntityKind.Album, new SearchCriterion("record", SearchComparison.Is, [album.ToString()]), []));
+
+        /// <summary>
+        /// Draws the edition in the spotlight of the days around today in universal time, which cover the date of the browser
+        /// of the validation, whatever its time zone.
+        /// </summary>
+        public async Task SpotlightAroundTodayAsync()
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            foreach (var day in new[] { today.AddDays(-1), today, today.AddDays(1) })
+                await GetAsync<Contracts.Catalog.SpotlightColors>($"/catalog/spotlight/colors?day={day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
+        }
 
         public async Task VisualAsync(AlbumWrite album, Guid edition, VisualType type, byte[] image)
         {
