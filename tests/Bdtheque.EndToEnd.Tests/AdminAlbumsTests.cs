@@ -148,6 +148,33 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         Assert.Equal(300.0 / 420, (size[0] - 4) / (size[1] - 4), 2);
     }
 
+    [Theory]
+    [InlineData(414)]
+    [InlineData(768)]
+    [InlineData(1024)]
+    [InlineData(1180)]
+    [InlineData(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(int width)
+    {
+        // A label long enough to wrap: squeezed by the columns, it once stood one letter per line on a tablet.
+        await CreateAlbumAsync($"L'Horloger d'Ombrelune et les veilleurs du port {_marker}");
+        foreach (var theme in new[] { "base", "planche", "gazette" })
+        {
+            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+            await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAlbums}?q={_marker}");
+            await PageReadiness.WaitAsync(page);
+
+            var label = await page.Locator(".album-label").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+
+            Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
+            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+            // At the width of the mockups' desktop, the table has all its columns, the last modification included.
+            if (width == 1440)
+                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifié" })).ToBeVisibleAsync();
+        }
+    }
+
     private async Task UploadCoverAsync(EditionForm edition, int width, int height)
     {
         using var bitmap = new SKBitmap(width, height);

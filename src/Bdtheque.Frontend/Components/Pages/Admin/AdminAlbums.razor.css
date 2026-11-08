@@ -57,25 +57,31 @@
     font-size: var(--font-size-small);
 }
 
-/* A row of the list is the line of a table on a wide screen: the thumbnail, the album and its authors, its publication, its
-   editions and intents, its membership of the collection, its last modification, then its actions. */
-/* Each row is a grid of its own: the column of the actions has a fixed width, the same in the head as in the rows, so that
-   their columns line up. It holds « Modifier » and the « ⋯ » button. */
+/* The layout of the rows follows the width of the list itself, not that of the screen: the room the rows have depends on
+   the margins of the page and of the block, which a theme sets. Mobile-first, each row holds on two lines, the thumbnail
+   on the left: the label and the actions, then the date, the editions and the membership of the collection. A list wide
+   enough for its columns, the fixed ones and at least 12rem for the label, is a table; wider still, the table adds the last
+   modification (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
 .album-rows {
+    container: album-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
+       so that their columns line up. It holds « Modifier » and the « ⋯ » button. */
     --album-actions-width: 10rem;
 }
 
 .album-row {
     display: grid;
-    grid-template-columns: 2.25rem minmax(0, 1fr) 7.5rem 11.875rem 10.625rem 6.75rem var(--album-actions-width);
-    grid-template-areas: "cover main date editions state modified actions";
-    align-items: center;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    grid-template-areas: "cover main actions" "cover meta meta";
+    align-items: start;
     column-gap: var(--space-m);
+    row-gap: var(--space-xs);
     padding: var(--space-s) var(--space-xs);
     border-block-end: 1px solid var(--color-rule);
 }
 
 .album-row-head {
+    display: none;
     padding-block: 0 var(--space-xs);
     border-block-end-width: 2px;
     color: var(--color-text-muted);
@@ -86,7 +92,12 @@
 }
 
 .album-meta {
-    display: contents;
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
 }
 
 .album-cover {
@@ -96,6 +107,7 @@
 
 .album-main {
     grid-area: main;
+    align-self: center;
     display: flex;
     flex-direction: column;
     min-inline-size: 0;
@@ -139,6 +151,7 @@
 }
 
 .album-modified {
+    display: none;
     grid-area: modified;
     color: var(--color-text-muted);
     font-size: var(--font-size-small);
@@ -153,45 +166,36 @@
     gap: var(--space-xs);
 }
 
-/* A narrower screen lets go of the last modification first (visuel/listes/principes-communs.md). */
-@media (max-width: 67.5rem) {
+@container album-rows (min-width: 59rem) {
     .album-row {
         grid-template-columns: 2.25rem minmax(0, 1fr) 7.5rem 11.875rem 10.625rem var(--album-actions-width);
         grid-template-areas: "cover main date editions state actions";
+        align-items: center;
     }
 
-    .album-modified {
-        display: none;
-    }
-}
-
-/* On a smartphone, each row holds on two lines, the thumbnail on the left: the label and the actions, then the date, the
-   editions and the membership of the collection; the filters on two columns. */
-@media (max-width: 47.5rem) {
     .album-row-head {
-        display: none;
-    }
-
-    .album-row {
-        grid-template-columns: 2.25rem minmax(0, 1fr) auto;
-        grid-template-areas: "cover main actions" "cover meta meta";
-        row-gap: var(--space-xs);
-        align-items: start;
-    }
-
-    .album-main {
-        align-self: center;
+        display: grid;
     }
 
     .album-meta {
-        grid-area: meta;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: var(--space-xs) var(--space-s);
-        font-size: var(--font-size-small);
+        display: contents;
+        font-size: inherit;
+    }
+}
+
+@container album-rows (min-width: 66rem) {
+    .album-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 7.5rem 11.875rem 10.625rem 6.75rem var(--album-actions-width);
+        grid-template-areas: "cover main date editions state modified actions";
     }
 
+    .album-modified {
+        display: block;
+    }
+}
+
+/* On a smartphone, the filters on two columns. */
+@media (max-width: 47.5rem) {
     .album-filters {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
