@@ -14,6 +14,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     private readonly HttpClient _client = api.CreateApiClient();
 
     [Fact]
+    public async Task AlbumList_CountsMoreThanAPage_AndAnAlbumWhoseDeletionASavedSearchBlocks()
+    {
+        var list = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.AlbumAdminList>("/admin/albums");
+        Assert.True(list!.Albums.TotalCount > list.Albums.Size);
+
+        var blocked = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.AlbumAdminList>("/admin/albums?q=Point%20z%C3%A9ro");
+        var impact = await _client.GetFromJsonAsync<Bdtheque.Contracts.Deletion.DeletionImpact>(
+            $"/admin/albums/{Assert.Single(blocked!.Albums.Items).Album.Id}/deletion-impact");
+        Assert.Contains(impact!.BlockedBy, count => count.Kind == EntityKind.SavedSearch);
+    }
+
+    [Fact]
     public async Task LongSeries_HasRegularVolumesOmnibusesAndSpecialIssues_WithAndWithoutCover()
     {
         var series = await SeriesAsync(ValidationDataLoader.LongSeriesTitle);

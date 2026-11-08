@@ -1,25 +1,36 @@
 /* A thumbnail, never a full-width visual in a list (visuel/charte-graphique/convivialite-et-efficacite.md). Its width is
    that of a row of a list, which a screen changes by setting --cover-width on a parent; its shape, radius and frame belong
-   to the theme (.cover anchor of themes/base.css). The whole cover is shown, never cropped: a landscape cover keeps its
-   width, standing at the bottom of its box like a book on a shelf. */
-.cover {
-    display: inline-block;
+   to the theme (.cover anchor of themes/base.css), borne by the image itself. The whole cover is shown, never cropped:
+   the image keeps its own proportions within the slot, standing at its bottom like a book on a shelf, so that the frame
+   always hugs it, with no gap between the frame and the cover. The slot's single track is definite, for the image to be
+   bounded by its height as well as by its width. */
+.cover-slot {
+    display: inline-grid;
+    grid-template: 100% / 100%;
+    place-items: end center;
     flex: none;
     inline-size: var(--cover-width, 2.5rem);
     aspect-ratio: 3 / 4;
     vertical-align: middle;
 }
 
-.cover img,
-.cover svg {
+.cover {
     display: block;
-    inline-size: 100%;
-    block-size: 100%;
+    box-sizing: border-box;
+    max-inline-size: 100%;
+    max-block-size: 100%;
 }
 
-.cover img {
-    object-fit: contain;
-    object-position: bottom;
+/* Its natural size, scaled down within the slot without changing its proportions. */
+img.cover {
+    inline-size: auto;
+    block-size: auto;
+}
+
+/* The generic visual has the proportions of the slot. */
+svg.cover {
+    inline-size: 100%;
+    block-size: 100%;
 }
 
 .cover-generic-page {

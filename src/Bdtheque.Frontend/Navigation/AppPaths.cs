@@ -56,7 +56,20 @@ public static class AppPaths
     /// <summary>A new edition, which starts with the choice of its album (visuel/administration/en-tete-et-menu.md).</summary>
     public const string AdminNewEdition = NotYetImplemented;
 
-    public const string AdminAlbums = NotYetImplemented;
+    /// <summary>The list of the albums of the administration (visuel/liste-albums/).</summary>
+    public const string AdminAlbums = "/admin/albums";
+
+    /// <summary>The entry form of an album (#205).</summary>
+    public static string AdminEditAlbum(Guid id) => NotYetImplemented;
+
+    /// <summary>The page of the editions and purchase intents of an album (#204).</summary>
+    public static string AdminAlbumEditions(Guid albumId) => NotYetImplemented;
+
+    /// <summary>
+    /// The next step of the merge of two albums, whose presentation awaits the terms of the merge
+    /// (fonctionnel/structure-de-l-application.md): it receives the album and the other one, <c>album</c> and <c>other</c>.
+    /// </summary>
+    public const string AdminMergeAlbums = NotYetImplemented;
 
     public const string AdminSeries = NotYetImplemented;
 

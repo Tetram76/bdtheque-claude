@@ -1,0 +1,28 @@
+@inject IStringLocalizer<ActiveFilters> L
+
+@* The filters chosen on a list (visuel/liste-albums/contenu.md), as tags removable one by one, then « Tout effacer »: links to
+   the list without them, which need no interactivity. Nothing when no filter is chosen. *@
+@if (Filters.Count > 0)
+{
+    <div class="active-filters">
+        <ul aria-label="@L["Label"]">
+            @foreach (var filter in Filters)
+            {
+                <li><Tag Text="@L["Filter", filter.Name, filter.Value]" RemoveHref="@filter.RemoveHref" /></li>
+            }
+        </ul>
+        <a href="@ClearHref">@L["Clear"]</a>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ActiveFilter> Filters { get; set; } = [];
+
+    /// <summary>The list without any of its filters.</summary>
+    [Parameter, EditorRequired]
+    public string ClearHref { get; set; } = null!;
+
+    /// <summary>A filter chosen: what it filters on, the record or value chosen, and the list without it.</summary>
+    public sealed record ActiveFilter(string Name, string Value, string RemoveHref);
+}

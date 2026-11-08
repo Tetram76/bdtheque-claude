@@ -68,8 +68,11 @@
 
 /* The cover the page puts forward: the only one a theme may tilt (themes/base.css, .cover), or let break out of its
    block. */
-.dashboard-spotlight ::deep .cover {
+.dashboard-spotlight ::deep .cover-slot {
     margin-inline-start: var(--home-spotlight-cover-offset);
+}
+
+.dashboard-spotlight ::deep .cover {
     box-shadow: var(--home-spotlight-cover-shadow);
     rotate: var(--tilt-cover);
 }
@@ -102,8 +105,11 @@
     gap: var(--space-s) var(--space-m);
 }
 
-.dashboard-latest ::deep .cover {
+.dashboard-latest ::deep .cover-slot {
     display: var(--home-latest-cover-display);
+}
+
+.dashboard-latest ::deep .cover {
     rotate: var(--home-latest-tilt);
 }
 

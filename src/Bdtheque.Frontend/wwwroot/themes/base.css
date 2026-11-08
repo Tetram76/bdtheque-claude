@@ -199,7 +199,7 @@
     --home-empty-areas: "main main" "browse start";
     --home-issue-display: none;
     --home-latest-columns: minmax(0, 1fr);
-    --home-latest-cover-display: block;
+    --home-latest-cover-display: inline-grid;
     --home-latest-direction: row;
     --home-latest-cover-width: 2.5rem;
     --home-counter-tilt: 0deg;

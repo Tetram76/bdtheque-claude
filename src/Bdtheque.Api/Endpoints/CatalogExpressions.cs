@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Query;
@@ -44,6 +45,9 @@ internal static class CatalogExpressions
 
     /// <summary>Marker of the summary of an edition, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static EditionSummary ToSummary(this Edition edition) => throw NotExpanded();
+
+    /// <summary>Marker of where an album stands with regard to the collection, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static AlbumCollectionState CollectionState(this Album album) => throw NotExpanded();
 
     /// <summary>Marker of the card of an album, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumCard ToCard(this Album album) => throw NotExpanded();
@@ -108,6 +112,12 @@ internal static class CatalogExpressions
         .ThenBy(v => v.Id)
         .Select(v => (Guid?)v.Id)
         .FirstOrDefault();
+
+    // Owned first, whatever its intents; then aimed at by an intent, on the album or on one of its editions.
+    private static readonly Expression<Func<Album, AlbumCollectionState>> CollectionStateOf = a =>
+        a.Editions.Any(e => e.IsOwned())
+            ? AlbumCollectionState.InCollection
+            : a.PurchaseIntents.Any() ? AlbumCollectionState.PurchaseIntent : AlbumCollectionState.OutsideCollection;
 
     private static readonly Expression<Func<Universe, UniverseListItem>> UniverseListItemOf =
         u => new UniverseListItem(u.Id, u.Name, u.ParentId, u.Parent != null ? u.Parent.Name : null);
@@ -190,6 +200,7 @@ internal static class CatalogExpressions
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
                 nameof(ToCard) => AlbumCardOf,
+                nameof(CollectionState) => CollectionStateOf,
                 nameof(CoverVisualId) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => CoverVisualIdOf,
                 nameof(CoverVisualId) => EditionCoverVisualIdOf,
                 _ => null,

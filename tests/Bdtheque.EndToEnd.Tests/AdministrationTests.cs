@@ -119,7 +119,7 @@ public sealed class AdminHomeTests(AdministrationApplication application) : Brow
     }
 
     [Fact]
-    public async Task Menu_GivesTheNumberOfRecords_AndLeadsToTheListsToCome()
+    public async Task Menu_GivesTheNumberOfRecords_AndLeadsToTheLists()
     {
         var page = await NewPageAsync();
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
@@ -129,7 +129,7 @@ public sealed class AdminHomeTests(AdministrationApplication application) : Brow
         await Assertions.Expect(albums.Locator(".admin-menu-count")).ToHaveTextAsync("4");
 
         await albums.ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(AdministrationAccessTests.AtPath(AppPaths.NotYetImplemented));
+        await Assertions.Expect(page).ToHaveURLAsync(AdministrationAccessTests.AtPath(AppPaths.AdminAlbums));
     }
 }
 

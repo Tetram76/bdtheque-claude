@@ -132,7 +132,7 @@ public sealed class PresentationTests : BunitContext
 
         var cover = Render<Cover>(parameters => parameters.Add(p => p.VisualId, visual));
 
-        var image = cover.Find(".cover img");
+        var image = cover.Find("img.cover");
         Assert.Equal(VisualMediaRoutes.Display(visual), image.GetAttribute("src"));
         Assert.Equal("", image.GetAttribute("alt"));
         Assert.Empty(cover.FindAll("svg"));
@@ -144,7 +144,7 @@ public sealed class PresentationTests : BunitContext
         var cover = Render<Cover>();
 
         Assert.Empty(cover.FindAll("img"));
-        Assert.Equal("true", cover.Find(".cover svg").GetAttribute("aria-hidden"));
+        Assert.Equal("true", cover.Find("svg.cover").GetAttribute("aria-hidden"));
     }
 
     [Fact]

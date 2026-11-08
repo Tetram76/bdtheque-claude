@@ -2,15 +2,17 @@
 @inject IStringLocalizer<Cover> L
 
 @* The thumbnail of a cover, or the generic visual for an edition or an album without cover (fonctionnel/regles-metier/visuel-par-defaut.md, fonctionnel/regles-metier/couverture-d-un-album.md). Its media is the display version relayed by frontend (VisualMediaRelay).
-   Without text, it is decorative: the label next to it names what it shows. *@
-<span class="cover">
+   Without text, it is decorative: the label next to it names what it shows. The frame a theme gives a cover (the .cover
+   anchor: border, background, shadow, tilt) is borne by the image itself, at its own proportions, so that it hugs the
+   cover whatever its format: the slot around it only keeps the room of a cover in a list or a grid. *@
+<span class="cover-slot">
     @if (VisualId is { } visual)
     {
-        <img src="@VisualMediaRoutes.Display(visual)" alt="@(Alt ?? "")" loading="lazy" decoding="async" />
+        <img class="cover" src="@VisualMediaRoutes.Display(visual)" alt="@(Alt ?? "")" loading="lazy" decoding="async" />
     }
     else
     {
-        <svg viewBox="0 0 30 40" preserveAspectRatio="xMidYMid slice" role="@(Alt is null ? null : "img")"
+        <svg class="cover" viewBox="0 0 30 40" preserveAspectRatio="xMidYMid slice" role="@(Alt is null ? null : "img")"
              aria-label="@(Alt is null ? null : L["Generic"].Value)" aria-hidden="@(Alt is null ? "true" : null)">
             <rect class="cover-generic-page" x="0.5" y="0.5" width="29" height="39" />
             <rect class="cover-generic-spine" width="3" height="40" />

@@ -40,7 +40,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#197~~ | Mesure d'audience dans l'interface web : relevé, visites, information et opposition |
 | ~~#198~~ | Dashboard et écran d'accueil d'une collection vide |
 | ~~#199~~ | Connexion et page d'accueil de l'administration |
-| #200 | Liste des albums de l'administration |
+| ~~#200~~ | Liste des albums de l'administration |
 | #201 | Listes des séries, des auteurs et des éditeurs de l'administration |
 | #202 | Listes des éditions et des intentions d'achat de l'administration |
 | #203 | Genres et univers : listes et saisie de l'administration |

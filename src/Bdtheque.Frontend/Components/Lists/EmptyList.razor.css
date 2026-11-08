@@ -1,0 +1,23 @@
+/* A dashed frame, the message, what the search looks into, then the actions, centred. */
+.empty-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-xl) var(--space-m);
+    border: 2px dashed var(--color-control-border);
+    border-radius: var(--radius-tile);
+    text-align: center;
+}
+
+.empty-list > span:not(.empty-list-actions) {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.empty-list-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-s);
+}

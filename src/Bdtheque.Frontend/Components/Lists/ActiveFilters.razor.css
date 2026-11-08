@@ -1,0 +1,20 @@
+.active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+}
+
+.active-filters ul {
+    display: contents;
+    list-style: none;
+}
+
+.active-filters li {
+    max-inline-size: 100%;
+}
+
+.active-filters a {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}

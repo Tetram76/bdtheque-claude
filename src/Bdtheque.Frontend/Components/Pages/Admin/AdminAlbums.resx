@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouvel album</value>
+  </data>
+  <data name="Kicker" xml:space="preserve">
+    <value>Fiches</value>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Liste des albums</value>
+  </data>
+  <data name="Search.Label" xml:space="preserve">
+    <value>Rechercher un album</value>
+  </data>
+  <data name="Search.Placeholder" xml:space="preserve">
+    <value>Titre de l'album ou de sa série…</value>
+  </data>
+  <data name="Filter.Series" xml:space="preserve">
+    <value>Série</value>
+  </data>
+  <data name="Filter.Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="Filter.Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="Filter.PublisherCollection" xml:space="preserve">
+    <value>Collection éditeur</value>
+  </data>
+  <data name="Filter.Genre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="Filter.Universe" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Filter.State" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Filter.Any" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="Filters.Note" xml:space="preserve">
+    <value>Série, auteur, éditeur, collection, genre et univers se choisissent en tapant leur nom. Un univers retient aussi les albums de ses sous-univers ; genres et univers sont ceux qu'affiche l'album, les siens et ceux de sa série.</value>
+  </data>
+  <data name="Filters.Apply" xml:space="preserve">
+    <value>Filtrer</value>
+  </data>
+  <data name="State.All" xml:space="preserve">
+    <value>Tous les albums</value>
+  </data>
+  <data name="State.InCollection" xml:space="preserve">
+    <value>Dans la collection</value>
+  </data>
+  <data name="State.PurchaseIntent" xml:space="preserve">
+    <value>Intention d'achat</value>
+  </data>
+  <data name="State.OutsideCollection" xml:space="preserve">
+    <value>Hors collection</value>
+  </data>
+  <data name="Count.None" xml:space="preserve">
+    <value>Aucun album</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>1 album</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Count.Letter" xml:space="preserve">
+    <value>sous la lettre {0}</value>
+  </data>
+  <data name="Count.Digits" xml:space="preserve">
+    <value>sous « # », commençant par un chiffre</value>
+  </data>
+  <data name="Count.Others" xml:space="preserve">
+    <value>sous « @ », commençant par un autre signe</value>
+  </data>
+  <data name="Count.Of" xml:space="preserve">
+    <value>sur {0}</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Triés par titre, la série tenant lieu de titre aux albums qui n'en ont pas</value>
+  </data>
+  <data name="Column.Cover" xml:space="preserve">
+    <value>Couverture</value>
+  </data>
+  <data name="Column.Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="Column.Date" xml:space="preserve">
+    <value>Parution</value>
+  </data>
+  <data name="Column.Editions" xml:space="preserve">
+    <value>Éditions</value>
+  </data>
+  <data name="Column.State" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Column.Modified" xml:space="preserve">
+    <value>Modifié</value>
+  </data>
+  <data name="Column.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Editions.None" xml:space="preserve">
+    <value>Aucune édition</value>
+  </data>
+  <data name="Editions.One" xml:space="preserve">
+    <value>1 édition</value>
+  </data>
+  <data name="Editions.Other" xml:space="preserve">
+    <value>{0} éditions</value>
+  </data>
+  <data name="Editions.WithIntent" xml:space="preserve">
+    <value>{0} · 1 intention</value>
+  </data>
+  <data name="Editions.WithIntents" xml:space="preserve">
+    <value>{0} · {1} intentions</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Edit.Label" xml:space="preserve">
+    <value>Modifier {0}</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>Autres actions sur {0}</value>
+  </data>
+  <data name="Menu.Editions" xml:space="preserve">
+    <value>Éditions et intentions d'achat</value>
+  </data>
+  <data name="Menu.View" xml:space="preserve">
+    <value>Voir dans la consultation</value>
+  </data>
+  <data name="Menu.Merge" xml:space="preserve">
+    <value>Fusionner avec un autre album…</value>
+  </data>
+  <data name="Menu.Delete" xml:space="preserve">
+    <value>Supprimer…</value>
+  </data>
+  <data name="Empty.Text" xml:space="preserve">
+    <value>Aucun album ne correspond à « {0} ».</value>
+  </data>
+  <data name="Empty.Criteria" xml:space="preserve">
+    <value>Aucun album ne correspond à ces critères.</value>
+  </data>
+  <data name="Empty.Hint" xml:space="preserve">
+    <value>La recherche porte sur le titre de l'album et sur celui de sa série, sans tenir compte des majuscules ni des accents.</value>
+  </data>
+  <data name="Empty.Clear" xml:space="preserve">
+    <value>Effacer la recherche</value>
+  </data>
+  <data name="Empty.Create" xml:space="preserve">
+    <value>Créer l'album « {0} »</value>
+  </data>
+  <data name="Empty.ClearFilters" xml:space="preserve">
+    <value>Effacer les filtres</value>
+  </data>
+  <data name="Deletion.Title" xml:space="preserve">
+    <value>Supprimer cet album ?</value>
+  </data>
+  <data name="Deletion.Lead" xml:space="preserve">
+    <value>La suppression est définitive et emporte avec l'album :</value>
+  </data>
+  <data name="Deletion.Confirm" xml:space="preserve">
+    <value>Supprimer définitivement</value>
+  </data>
+  <data name="Refusal.Title" xml:space="preserve">
+    <value>Suppression impossible</value>
+  </data>
+  <data name="Refusal.Lead" xml:space="preserve">
+    <value>L'album est encore désigné ailleurs : la suppression est refusée tant que ce lien existe.</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
+    <value>Retirez d'abord l'album des critères de ces recherches enregistrées, puis recommencez.</value>
+  </data>
+  <data name="Refusal.Close" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="Merge.Title" xml:space="preserve">
+    <value>Fusionner deux albums</value>
+  </data>
+  <data name="Merge.Lead" xml:space="preserve">
+    <value>Avec quel album fusionner celui-ci ?</value>
+  </data>
+  <data name="Merge.Search" xml:space="preserve">
+    <value>Rechercher l'autre album</value>
+  </data>
+  <data name="Merge.Placeholder" xml:space="preserve">
+    <value>Titre de l'autre album ou de sa série…</value>
+  </data>
+  <data name="Merge.SearchButton" xml:space="preserve">
+    <value>Rechercher</value>
+  </data>
+  <data name="Merge.Prompt" xml:space="preserve">
+    <value>Recherchez l'autre album par son titre ou par celui de sa série.</value>
+  </data>
+  <data name="Merge.None" xml:space="preserve">
+    <value>Aucun autre album ne correspond à « {0} ».</value>
+  </data>
+  <data name="Merge.Candidates" xml:space="preserve">
+    <value>Autre album</value>
+  </data>
+  <data name="Merge.Note" xml:space="preserve">
+    <value>L'étape suivante présentera les deux albums côte à côte, avec ce que la fusion garde de chacun.</value>
+  </data>
+  <data name="Merge.Continue" xml:space="preserve">
+    <value>Continuer</value>
+  </data>
+</root>
