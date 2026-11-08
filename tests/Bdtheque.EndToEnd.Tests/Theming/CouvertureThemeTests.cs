@@ -42,6 +42,8 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
         Assert.NotEqual("none", await spotlight.EvaluateAsync<string>("book => getComputedStyle(book).transform"));
         Assert.Equal(Rgb(palette.Deep), await spotlight.EvaluateAsync<string>(
             "book => getComputedStyle(book, '::before').backgroundImage.match(/rgb\\([^)]*\\)/)[0]"));
+        Assert.Equal(["2px", "5px"], await page.Locator("[data-area='spotlight'] .cover").EvaluateAsync<string[]>(
+            "cover => [getComputedStyle(cover).borderTopLeftRadius, getComputedStyle(cover).borderTopRightRadius]"));
         await Assertions.Expect(page.Locator("[data-area='latest'] .cover-volume")).ToHaveCountAsync(2);
     }
 
@@ -159,5 +161,24 @@ public sealed class AdministrationCouvertureThemeTests(ApplicationHost applicati
         Assert.Equal("0px", block[0]);
         Assert.Equal("26px", block[1]);
         Assert.NotEqual("none", block[2]);
+    }
+}
+
+/// <summary>A thumbnail of a list is no book: its corners are regular, the profile of a book being for the albums in volume.</summary>
+[Collection(AdministrationApplication.Name)]
+public sealed class ListCouvertureThemeTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)
+{
+    [Fact]
+    public async Task ThumbnailsOfAList_HaveRegularCorners()
+    {
+        var page = await NewPageInThemeAsync(ThemeCatalog.Couverture.Key, CouvertureThemeTests.Desktop);
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminAlbums);
+        await PageReadiness.WaitAsync(page);
+
+        var corners = await page.Locator(".cover").First.EvaluateAsync<string[]>("""
+            cover => ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'].map(corner => getComputedStyle(cover)[`border${corner}Radius`])
+            """);
+
+        Assert.Equal(["6px", "6px", "6px", "6px"], corners);
     }
 }
