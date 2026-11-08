@@ -11,7 +11,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 
 # Recherche
 
-- **Recherche par inclusion** (« contient »), insensible à la casse et aux accents par la collation non déterministe des colonnes ([Collation des colonnes texte](../persistance/collation-des-colonnes-texte.md)), **sans index dédié** : un parcours de quelques milliers de lignes reste instantané.
+- **Recherche par inclusion** (« contient »), insensible à la casse et aux accents par la collation non déterministe ([Collation des colonnes texte](../persistance/collation-des-colonnes-texte.md)), **appliquée à la recherche** et non portée par les colonnes, qui gardent la collation française déterministe ; **sans index dédié** : un parcours de quelques milliers de lignes reste instantané.
   - **Alternative écartée (`pg_trgm` / `unaccent`, recherche plein texte)** : extensions et index de plus pour un gain nul à ce volume ; le plein texte découpe en mots et en racines, ce qui ne correspond pas à la recherche d'un fragment de titre ou de nom.
 - **Texte recherché : ce qui identifie chaque fiche dans les listes** (titre, nom, nom complet d'un auteur dans ses deux ordres ; titre de la série pour un album, qu'elle identifie dans son libellé, [Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md)). Une édition se recherche par son ISBN, séparateurs ignorés de part et d'autre, un ISBN étant saisi tel qu'imprimé ; ses autres composantes, par les filtres croisés.
 - **Filtres croisés des listes de consultation**, combinables avec la recherche et la navigation par initiale : ils servent aux fiches liées en nombre non borné ([Organisation de l'API](organisation-de-l-api.md), fiches de consultation).
