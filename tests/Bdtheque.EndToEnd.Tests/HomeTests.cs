@@ -136,6 +136,8 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
 public sealed class EmptyCollectionApplication : ApplicationHost
 {
     public const string Name = "Empty collection";
+
+    protected override bool PaintedByItsSpotlight => true;
 }
 
 [CollectionDefinition(EmptyCollectionApplication.Name)]
@@ -148,6 +150,8 @@ public sealed class EmptyCollectionCollection : ICollectionFixture<EmptyCollecti
 public sealed class CollectionApplication : ApplicationHost
 {
     public const string Name = "Collection";
+
+    protected override bool PaintedByItsSpotlight => true;
 
     protected override async Task SeedAsync()
     {

@@ -138,6 +138,8 @@ public sealed class AdministrationApplication : ApplicationHost
 {
     public const string Name = "Administration";
 
+    protected override bool PaintedByItsSpotlight => true;
+
     private static readonly DateTimeOffset Start = new(2026, 11, 2, 8, 0, 0, TimeSpan.Zero);
 
     protected override async Task SeedAsync()

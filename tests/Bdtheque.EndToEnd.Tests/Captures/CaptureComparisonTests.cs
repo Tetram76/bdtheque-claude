@@ -46,6 +46,25 @@ public sealed class CaptureComparisonTests
         Assert.Equal(new SKColor(191, 191, 191), difference.GetPixel(0, 0));
     }
 
+    // The edges of a layer composited in 3D (an album in volume) vary by one unit from one run of the CI to the next.
+    [Fact]
+    public void ImagesThatDifferByOneUnitOfAComponent_AreIdentical()
+    {
+        var reference = Png(4, 3, new SKColor(120, 132, 151));
+        var actual = Png(4, 3, new SKColor(120, 132, 151), (1, 1, new SKColor(121, 131, 151)));
+
+        Assert.True(CaptureComparison.Compare(reference, actual).Identical);
+    }
+
+    [Fact]
+    public void ImagesThatDifferByTwoUnitsOfAComponent_AreDifferent()
+    {
+        var reference = Png(4, 3, new SKColor(120, 132, 151));
+        var actual = Png(4, 3, new SKColor(120, 132, 151), (1, 1, new SKColor(122, 132, 151)));
+
+        Assert.Equal(1, CaptureComparison.Compare(reference, actual).DifferentPixels);
+    }
+
     [Fact]
     public void ImagesOfDifferentSizes_AreDifferent()
     {

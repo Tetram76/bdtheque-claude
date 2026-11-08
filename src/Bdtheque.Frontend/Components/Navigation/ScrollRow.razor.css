@@ -31,7 +31,7 @@
     inline-size: 2.25rem;
     padding: 0;
     border: 0;
-    color: var(--color-text);
+    color: inherit;
     cursor: pointer;
 }
 

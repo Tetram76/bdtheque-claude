@@ -6,8 +6,10 @@
    anchor: border, background, shadow, tilt) is borne by the image itself, at its own proportions, so that it hugs the
    cover whatever its format: the slot around it only keeps the room of a cover in a list or a grid. The generic visual and
    the blank card of a pile are painted by the theme (--cover-generic, --cover-blank), as in the mockups: nothing is drawn
-   in them. *@
-<span class="cover-slot">
+   in them.
+   An album a page puts forward (Volume) may be shown by a theme as a book in volume (the .cover-volume anchor), whose
+   spine takes the deep colour of its own cover (--cover-spine). *@
+<span class="@(Volume ? "cover-slot cover-volume" : "cover-slot")" style="@(Volume && Palette is { } palette ? $"--cover-spine: {palette.Deep};" : null)">
     @if (VisualId is { } visual)
     {
         <img class="cover" src="@VisualMediaRoutes.Display(visual)" alt="@(Alt ?? "")" loading="lazy" decoding="async" />
@@ -38,4 +40,12 @@
     /// </summary>
     [Parameter]
     public bool Blank { get; set; }
+
+    /// <summary>An album a page puts forward (e.g. the edition in the spotlight), which a theme may show in volume.</summary>
+    [Parameter]
+    public bool Volume { get; set; }
+
+    /// <summary>The colours of the cover, whose deep one colours the spine of the album in volume.</summary>
+    [Parameter]
+    public CoverPalette? Palette { get; set; }
 }

@@ -6,28 +6,41 @@ namespace Bdtheque.ValidationData;
 
 /// <summary>
 /// The images of the validation data, drawn here rather than kept as files: a vertical gradient of a hue,
-/// enough for every visual to be told apart from the others, encoded as PNG with no image library.
+/// enough for every visual to be told apart from the others, or a cover of two colours, encoded as PNG with no image library.
 /// </summary>
 internal static class Images
 {
-    public static byte[] Portrait(double hue) => Png(300, 420, hue);
+    public static byte[] Portrait(double hue) => Gradient(300, 420, hue);
 
-    public static byte[] Landscape(double hue) => Png(420, 300, hue);
+    public static byte[] Landscape(double hue) => Gradient(420, 300, hue);
 
-    private static byte[] Png(int width, int height, double hue)
+    /// <summary>
+    /// A portrait of a flat <paramref name="paper"/> colour crossed by a band of <paramref name="band"/>, in the CSS notation
+    /// <c>#RRGGBB</c>: a cover of two colours, its dominant one and its accent (visuel/dashboard/la-couverture-du-jour.md).
+    /// </summary>
+    public static byte[] Banded(string paper, string band)
+    {
+        var (paperColor, bandColor) = (Hex(paper), Hex(band));
+        return Png(300, 420, ratio => ratio is >= 0.55 and < 0.75 ? bandColor : paperColor);
+    }
+
+    private static byte[] Gradient(int width, int height, double hue)
     {
         var (top, bottom) = (Rgb(hue, 0.55, 0.62), Rgb(hue, 0.65, 0.22));
+        return Png(width, height, ratio => [.. top.Zip(bottom, (from, to) => (byte)(from + (to - from) * ratio))]);
+    }
+
+    // Each row of a single colour, given by its height in the image, from 0 at the top to 1 at the bottom.
+    private static byte[] Png(int width, int height, Func<double, byte[]> rowColor)
+    {
         var stride = 1 + width * 3;
         var pixels = new byte[height * stride];
         for (var y = 0; y < height; y++)
         {
             // Each scanline starts with its filter type, 0 for none.
-            var ratio = (double)y / (height - 1);
+            var color = rowColor((double)y / (height - 1));
             for (var x = 0; x < width; x++)
-            {
-                for (var channel = 0; channel < 3; channel++)
-                    pixels[y * stride + 1 + x * 3 + channel] = (byte)(top[channel] + (bottom[channel] - top[channel]) * ratio);
-            }
+                color.CopyTo(pixels, y * stride + 1 + x * 3);
         }
 
         var header = new byte[13];
@@ -66,6 +79,8 @@ internal static class Images
 
         return ~crc;
     }
+
+    private static byte[] Hex(string hex) => Convert.FromHexString(hex.AsSpan(1));
 
     // HSL to RGB, the hue in turns (0 to 1).
     private static byte[] Rgb(double hue, double saturation, double lightness)

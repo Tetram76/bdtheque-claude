@@ -52,6 +52,8 @@ else
 {
     builder.Services.AddScoped<IThemeSelector, VisitThemeSelector>();
 }
+// The colours of the day of a theme painted by the cover of the spotlight, read by the root of the page.
+builder.Services.AddScoped<IDayColorsSource, SpotlightDayColors>();
 builder.Services.AddScoped<AudienceOpposition>();
 builder.Services.AddScoped<AudienceRecorder>();
 builder.Services.AddSingleton(TimeProvider.System);

@@ -2,10 +2,10 @@
 .admin-tag {
     padding: 0.125rem var(--space-s);
     border-radius: var(--radius-control);
-    background: var(--color-tag);
+    background: var(--color-header-tag);
     /* The border of a tag, drawn inside it: the tag keeps its size whatever the width of the border. */
     box-shadow: inset 0 0 0 var(--border-width-control) var(--color-tag-border);
-    color: var(--color-text-on-tag);
+    color: var(--color-text-on-header-tag);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
 }
@@ -37,7 +37,7 @@
     border: 0;
     border-radius: var(--radius-control);
     background: transparent;
-    color: var(--color-text);
+    color: inherit;
     font: inherit;
     font-weight: var(--font-weight-strong);
     text-decoration: none;
@@ -46,8 +46,8 @@
 
 .admin-menu-toggle {
     padding: 0 var(--control-padding-inline);
-    border: var(--border-width-control) solid var(--color-control-border);
-    background: var(--color-surface);
+    border: var(--border-width-control) solid var(--color-header-field-border);
+    background: var(--color-header);
     anchor-name: --admin-menu-toggle;
 }
 
@@ -81,6 +81,11 @@
     background: var(--color-surface-raised);
     color: var(--color-text);
     box-shadow: var(--shadow-floating);
+}
+
+/* The focus within the panel, read on the panel rather than on the header that holds it. */
+.admin-menu ::deep :focus-visible {
+    outline-color: var(--color-text);
 }
 
 .admin-menu:popover-open {

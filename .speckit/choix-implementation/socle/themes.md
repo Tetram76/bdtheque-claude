@@ -1,14 +1,14 @@
 ---
 type: Choix d'implémentation
 title: 'Thèmes'
-description: 'Contrats du thème de base, thèmes et scripts, thème de la visite, composants de présentation, contrastes, polices, captures de référence ; à lire pour tout écran.'
+description: 'Contrats du thème de base, thèmes et scripts, couleurs du jour, thème de la visite, composants de présentation, contrastes, polices, captures de référence ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/Theming/**'
   - 'src/Bdtheque.Frontend/wwwroot/**'
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
 ---
 
 # Thèmes
@@ -24,6 +24,16 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
   - ses tirages restent ceux de la page tant qu'elle est affichée, et emploient le générateur du navigateur, que les captures remplacent par une suite fixe.
 - **Le bloc est positionné sans créer de contexte d'empilement**, pour qu'un thème dessine sur ses bords dans ses pseudo-éléments : un contexte d'empilement ferait passer sous le bloc suivant la liste d'un champ qu'il contient.
 - **Inclinaison réservée aux couvertures mises en avant** : une vignette, contenu d'une liste, reste droite.
+
+## Couleurs du jour
+
+- **Couleurs d'un thème peint par la couverture du jour posées sur la racine de la page**, à chaque requête, en propriétés personnalisées (`--day-…`) que lit sa feuille ([La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) : connues seulement avec l'édition à la une, elles sont un contrat du thème de base sans valeur, que seul ce thème lit. Le frontend les lit au point d'accès des couleurs du jour ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)) ; sans elles (collection vide, édition du jour sans couverture, API qui ne répond pas), le thème garde ses propres couleurs : elles ne font jamais échouer une page. Une navigation améliorée les reçoit avec le thème, Blazor synchronisant les attributs de `<html>`.
+  - **Alternative écartée (couleurs calculées dans le navigateur)** : la page arriverait dans d'autres couleurs, puis changerait, comme le tirage du thème écarté pour la même raison.
+- **Toute couleur lue avec une autre dérivée par le frontend**, en notation hexadécimale, plutôt que mélangée par la feuille : fonds teintés de la dominante, liens et textes assombris jusqu'au contraste attendu, accent dont le texte est blanc ou presque noir (un accent de ton moyen étant assombri jusqu'à ce que le blanc l'atteigne), champ et reflet sur la couleur profonde. Le test des contrastes vérifie ainsi le thème sur des couvertures de toute sorte (pâle, de ton moyen, sombre, grise, couleur profonde trop claire), et non sur une seule palette.
+  - **Alternative écartée (`color-mix()` dans la feuille)** : aucun test ne lirait les couleurs obtenues, et la lisibilité d'une couverture pâle ne serait vérifiée que par l'œil.
+- **En-tête et bouton d'aide portés par des contrats propres**, valant par défaut ceux de la surface et des contrôles : un thème leur donne une couleur sans redéfinir celles de la page dans l'en-tête, qui porte aussi le menu flottant de l'administration.
+- **Albums mis en avant marqués comme tels** (`.cover-volume`), avec la couleur profonde de leur couverture : un thème les présente en volume, leur dos de cette couleur ; leurs mouvements sont omis en mouvement réduit par la feuille qui les déclare.
+- **Couleurs du jour fixées dans les tests** par l'application qui porte ses propres données (accueil, administration) ; celle que partagent les autres tests garde les couleurs propres au thème, l'édition à la une de sa base dépendant de l'ordre des écritures de ces tests.
 
 ## Thème de la visite
 
@@ -54,6 +64,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
   - **Alternative écartée (références propres à chaque système)** : chaque changement de rendu les demanderait toutes, sans garantie qu'elles montrent le même rendu.
 - **Tuiles redessinées en entier** par le navigateur des captures (commutateur de Blink `--disable-partial-raster`) : une tuile redessinée en partie n'arrondit pas l'anticrénelage comme une tuile dessinée d'un coup, et la même page donnerait deux captures selon le moment de son premier rendu. La capture ne dépend ainsi que de l'état de la page.
   - **Alternative écartée (attendre une page stable)** : la course porte sur le premier rendu, pendant le chargement ; une capture prise trois secondes après différait encore une fois sur cinq.
-  - **Alternative écartée (tolérance d'une unité par composante)** : elle masquerait un rendu instable au lieu de le signaler, alors que sa cause se corrige ; elle ne se justifierait que face à une instabilité du moteur qu'aucun réglage ne corrige.
+- **Une unité d'écart tolérée par composante de couleur**, et rien au-delà : les bords d'un élément composé en 3D (un album en volume, tourné avec une perspective, [La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) varient d'une unité d'une exécution du CI à l'autre, sur l'exécuteur seulement, ce qu'aucun réglage du navigateur ne corrige (sans GPU, constaté #314). Un changement réel de rendu (une couleur, un pixel de décalage) dépasse cette unité.
+  - **Alternative écartée (albums en volume dessinés sans perspective)** : un rendu validé par l'utilisateur, qu'il a choisi de garder.
 - **Toute la matrice à chaque contrôle**, écrans, thèmes et largeurs : une capture coûte surtout le rendu de sa page. Au-delà de 5 minutes de tests de bout en bout dans le CI, les captures sont réparties par thème entre plusieurs jobs.
   - **Alternative écartée (empreinte de rendu : ne reprendre que les captures dont l'empreinte a changé)** : réalisée et mesurée ; elle n'épargne que la prise et la comparaison, le rendu restant à faire, et ajoute une empreinte à tenir et des échecs sans changement de pixels. Conservée dans `poc/empreinte-de-rendu/`, à reconsidérer si la prise et la comparaison redevenaient la part dominante.

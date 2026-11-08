@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.EndToEnd.Tests.Captures;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Api;
@@ -62,7 +63,7 @@ public class ApplicationHost : IAsyncLifetime
     {
         await _api.InitializeAsync();
 
-        _frontend = new FrontendFactory(_api);
+        _frontend = new FrontendFactory(_api, PaintedByItsSpotlight);
         _frontend.UseKestrel(0);
         _frontend.StartServer();
         BaseAddress = new Uri(_frontend.Services.GetRequiredService<IServer>()
@@ -91,6 +92,13 @@ public class ApplicationHost : IAsyncLifetime
     protected virtual Task SeedAsync() => Task.CompletedTask;
 
     /// <summary>
+    /// Whether a theme painted by the cover of the day (« La couverture du jour ») takes the colours of the spotlight of the
+    /// data of this application, which an application of its own fixes; otherwise the theme keeps its own colours: the
+    /// spotlight of a database the tests share depends on the order in which they write.
+    /// </summary>
+    protected virtual bool PaintedByItsSpotlight => false;
+
+    /// <summary>
     /// A browser context of its own, on <c>frontend</c>: no cookie nor history shared with another one. The caller owns
     /// it, and closes it once done (<see cref="BrowserTest{TApplication}"/>): an open context keeps its pages, their
     /// connections to the application, and on the server the circuits of their interactive components.
@@ -111,7 +119,7 @@ public class ApplicationHost : IAsyncLifetime
         await _api.DisposeAsync();
     }
 
-    private sealed class FrontendFactory(ApiHostFactory api) : WebApplicationFactory<FrontendProgram>
+    private sealed class FrontendFactory(ApiHostFactory api, bool paintedByItsSpotlight) : WebApplicationFactory<FrontendProgram>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -133,6 +141,8 @@ public class ApplicationHost : IAsyncLifetime
             {
                 services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler());
                 FixTheThemeByRequest(services);
+                if (!paintedByItsSpotlight)
+                    services.Replace(ServiceDescriptor.Scoped<IDayColorsSource, OwnDayColors>());
                 services.Replace(ServiceDescriptor.Singleton(new PageAssemblies([typeof(ControlsPage).Assembly])));
                 // What a page draws at each display (e.g. the greeting of the dashboard) is always the first choice: a page
                 // looks the same at each capture.
@@ -168,4 +178,10 @@ internal sealed class FirstChoice : Random
     public override int Next(int maxValue) => 0;
 
     public override int Next(int minValue, int maxValue) => minValue;
+}
+
+/// <summary>No colours of the day: a theme painted by them keeps its own.</summary>
+internal sealed class OwnDayColors : IDayColorsSource
+{
+    public Task<CoverPalette?> GetAsync(CancellationToken cancellationToken = default) => Task.FromResult<CoverPalette?>(null);
 }

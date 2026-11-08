@@ -13,10 +13,10 @@
 
 @* Computed in the time zone of the browser (the day of the spotlight, the dates of the entries): marked for the script that
    renders the page again once it knows that time zone (wwwroot/browser-time-zone.js). *@
-<div class="dashboard" data-local>
-    <Block Title="@L[_greeting]" HeadingLevel="1" data-area="greeting" />
+<div class="dashboard home-board" data-local>
+    <Block Title="@L[_greeting]" HeadingLevel="1" data-area="greeting" data-scene />
 
-    <Block Title="@L["Counters.Title"]" TitleHidden="true" data-area="counters">
+    <Block Title="@L["Counters.Title"]" TitleHidden="true" data-area="counters" data-scene>
         <ul class="dashboard-counters">
             <li data-counter><strong>@Format.Number(Content.Counters.AlbumCount)</strong> @Unit(Content.Counters.AlbumCount, "Albums")</li>
             <li data-counter><strong>@Format.Number(Content.Counters.SeriesCount)</strong> @Unit(Content.Counters.SeriesCount, "Series")</li>
@@ -24,9 +24,9 @@
         </ul>
     </Block>
 
-    <Block Title="@L["Spotlight.Title"]" Raised="true" data-area="spotlight">
+    <Block Title="@L["Spotlight.Title"]" Raised="true" data-area="spotlight" data-scene>
         <div class="dashboard-spotlight">
-            <Cover VisualId="Content.Spotlight.Cover?.VisualId" />
+            <Cover VisualId="Content.Spotlight.Cover?.VisualId" Palette="Content.Spotlight.Cover?.Palette" Volume="true" />
             <div>
                 <p class="dashboard-spotlight-album"><a href="@AppPaths.Album(Content.Spotlight.Album.Id)">@Labels.Album(Content.Spotlight.Album, LabelFormat)</a></p>
                 <p class="dashboard-muted">@Labels.Edition(Content.Spotlight.Edition)</p>
@@ -38,12 +38,12 @@
         </div>
     </Block>
 
-    <Block Title="@L["Latest.Title"]" data-area="latest">
+    <Block Title="@L["Latest.Title"]" data-area="latest" data-scene>
         <ul class="dashboard-latest">
             @foreach (var entry in Content.LatestEntries)
             {
                 <li>
-                    <Cover VisualId="entry.Cover?.VisualId" />
+                    <Cover VisualId="entry.Cover?.VisualId" Palette="entry.Cover?.Palette" Volume="true" />
                     <div>
                         <a href="@AppPaths.Album(entry.Album.Id)">@Labels.Album(entry.Album, LabelFormat)</a>
                         <span class="dashboard-muted">@entry.Edition.PublisherName · @Format.Date(DayOf(entry))</span>
