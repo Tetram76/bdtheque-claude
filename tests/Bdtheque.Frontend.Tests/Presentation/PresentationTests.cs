@@ -245,15 +245,18 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Theory]
-    [InlineData("01900000-0000-7000-8000-000000000003", "monogram monogram-tone-1")]
-    [InlineData("01900000-0000-7000-8000-000000000001", "monogram monogram-tone-2")]
-    [InlineData("01900000-0000-7000-8000-000000000002", "monogram monogram-tone-3")]
-    [InlineData("01900000-0000-7000-8000-0000000000ff", "monogram monogram-tone-1")]
-    public void Monogram_TakesTheToneOfItsAuthor(string author, string expected)
+    [InlineData("Franquin", null, null, "monogram monogram-tone-1")]
+    [InlineData(null, null, "Moebius", "monogram monogram-tone-2")]
+    [InlineData("Remi", "Georges", "Hergé", "monogram monogram-tone-3")]
+    [InlineData("Gibelin", "Christophe", null, "monogram monogram-tone-4")]
+    [InlineData("Franquin", "André", null, "monogram monogram-tone-5")]
+    [InlineData("Gibrat", "Jean-Pierre", null, "monogram monogram-tone-6")]
+    public void Monogram_TakesTheToneOfTheNameOfItsAuthor(string? lastName, string? firstName, string? pseudonym, string expected)
     {
-        // The tone follows the author, whatever its place in a list: the same author keeps its color whatever the order,
-        // the search or the page.
-        var monogram = Render<Monogram>(parameters => parameters.Add(p => p.Pseudonym, "Moebius").Add(p => p.Id, Guid.Parse(author)));
+        // The tone follows the main identifier of the author, never its place in a list nor its identifier, drawn at random at
+        // each creation: the same author keeps its color whatever the order, the search, the page or the run.
+        var monogram = Render<Monogram>(parameters => parameters
+            .Add(p => p.LastName, lastName).Add(p => p.FirstName, firstName).Add(p => p.Pseudonym, pseudonym));
 
         Assert.Equal(expected, monogram.Find(".monogram").GetAttribute("class"));
     }

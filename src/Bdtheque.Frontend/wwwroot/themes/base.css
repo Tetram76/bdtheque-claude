@@ -120,14 +120,25 @@
     --color-palette-6: #BFE4DF;
     --color-palette-7: #F0C6DA;
     --color-text-on-palette: #1D1D21;
-    /* The tones of the monogram of an author, who has no cover (visuel/listes/liste-par-liste.md), dealt in turn to the rows
-       of a list: the accent by default, which a theme varies. */
-    --color-monogram-1: var(--color-accent);
-    --color-monogram-2: var(--color-accent);
-    --color-monogram-3: var(--color-accent);
-    --color-text-on-monogram-1: var(--color-text-on-accent);
-    --color-text-on-monogram-2: var(--color-text-on-accent);
-    --color-text-on-monogram-3: var(--color-text-on-accent);
+    /* The tones of the monogram of an author, who has no cover (visuel/listes/liste-par-liste.md), each drawn from the author
+       itself: the secondary palette by default, its seven colors making two neighbours rarely alike. */
+    --color-monogram-1: var(--color-palette-1);
+    --color-monogram-2: var(--color-palette-2);
+    --color-monogram-3: var(--color-palette-3);
+    --color-monogram-4: var(--color-palette-4);
+    --color-monogram-5: var(--color-palette-5);
+    --color-monogram-6: var(--color-palette-6);
+    --color-monogram-7: var(--color-palette-7);
+    --color-text-on-monogram-1: var(--color-text-on-palette);
+    --color-text-on-monogram-2: var(--color-text-on-palette);
+    --color-text-on-monogram-3: var(--color-text-on-palette);
+    --color-text-on-monogram-4: var(--color-text-on-palette);
+    --color-text-on-monogram-5: var(--color-text-on-palette);
+    --color-text-on-monogram-6: var(--color-text-on-palette);
+    --color-text-on-monogram-7: var(--color-text-on-palette);
+    /* The ring of a monogram: none by default; a theme whose blocks take the colors of the palette rings it, so that it never
+       melts into a block of its own color. */
+    --monogram-border: none;
     /* Tints of the blocks: a theme that gives each block its own color deals them to its blocks (--block-fill), the
        first seven in their main version, the next seven in a softer one; every text of a block is read on them. The
        base theme has a single surface. */

@@ -125,7 +125,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
             .Select(monogram => (monogram.TextContent, monogram.GetAttribute("class")));
 
         Assert.Equal(
-            [("CG", "monogram monogram-tone-2"), ("JG", "monogram monogram-tone-3"), ("AG", "monogram monogram-tone-1"), ("G", "monogram monogram-tone-2")],
+            [("CG", "monogram monogram-tone-4"), ("JG", "monogram monogram-tone-6"), ("AG", "monogram monogram-tone-2"), ("G", "monogram monogram-tone-4")],
             monograms);
         // In another order, each author keeps its tone.
         Assert.Equal(Enumerable.Reverse(monograms), reversed);

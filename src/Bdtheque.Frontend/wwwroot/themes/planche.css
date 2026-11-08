@@ -73,13 +73,6 @@
     --color-palette-6: #F483AE;
     --color-palette-7: #33C2B1;
     --color-text-on-palette: #111111;
-    /* The monograms take three colors of the cases in turn, yellow, blue and pink, as in the mockups. */
-    --color-monogram-1: var(--color-palette-1);
-    --color-monogram-2: var(--color-palette-2);
-    --color-monogram-3: var(--color-palette-6);
-    --color-text-on-monogram-1: var(--color-text-on-palette);
-    --color-text-on-monogram-2: var(--color-text-on-palette);
-    --color-text-on-monogram-3: var(--color-text-on-palette);
     /* The tints of the cases: yellow, blue, coral, green, violet, pink and turquoise, in their four-color process version,
        then in their softer « ligne claire » version. */
     --color-block-tint-1: #FFC93C;
@@ -111,6 +104,8 @@
     --radius-cover: 0;
     --border-block: 3px solid #111111;
     --border-width-control: 2px;
+    /* A monogram ringed with ink: its tint may be that of its case. */
+    --monogram-border: 2px solid var(--color-text);
     --border-width-state-dot: 1.5px;
     --border-width-nav-entry: 2px;
     --border-header: 3px solid #111111;

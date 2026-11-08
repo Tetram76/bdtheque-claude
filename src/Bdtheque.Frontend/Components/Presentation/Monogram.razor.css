@@ -1,4 +1,4 @@
-/* A round of the tone of its place, the initials centered on it, of the size of a cover of a row of a list in width
+/* A round of the tone of its author, the initials centered on it, of the size of a cover of a row of a list in width
    (--monogram-size, which the screen may set). Its tones are contracts of the base theme, which each theme defines. */
 .monogram {
     display: inline-grid;
@@ -6,6 +6,7 @@
     inline-size: var(--monogram-size, 2.25rem);
     block-size: var(--monogram-size, 2.25rem);
     border-radius: 50%;
+    border: var(--monogram-border);
     font-family: var(--font-heading);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-heading);
@@ -27,4 +28,24 @@
 .monogram-tone-3 {
     background: var(--color-monogram-3);
     color: var(--color-text-on-monogram-3);
+}
+
+.monogram-tone-4 {
+    background: var(--color-monogram-4);
+    color: var(--color-text-on-monogram-4);
+}
+
+.monogram-tone-5 {
+    background: var(--color-monogram-5);
+    color: var(--color-text-on-monogram-5);
+}
+
+.monogram-tone-6 {
+    background: var(--color-monogram-6);
+    color: var(--color-text-on-monogram-6);
+}
+
+.monogram-tone-7 {
+    background: var(--color-monogram-7);
+    color: var(--color-text-on-monogram-7);
 }

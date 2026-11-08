@@ -72,7 +72,7 @@
                     var name = Name(row);
                     <div class="author-row" role="row">
                         <span class="author-monogram" role="cell">
-                            <Monogram LastName="@row.LastName" FirstName="@row.FirstName" Pseudonym="@row.Pseudonym" Id="@row.Id" />
+                            <Monogram LastName="@row.LastName" FirstName="@row.FirstName" Pseudonym="@row.Pseudonym" />
                         </span>
                         <span class="author-main" role="cell">
                             <a class="author-name" href="@AppPaths.AdminEditAuthor(row.Id)">@name</a>

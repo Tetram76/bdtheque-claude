@@ -8,7 +8,7 @@
 
 @code {
     /// <summary>The number of tones of a monogram, which each theme defines (--color-monogram-n).</summary>
-    private const int ToneCount = 3;
+    private const int ToneCount = 7;
 
     [Parameter]
     public string? LastName { get; set; }
@@ -19,13 +19,16 @@
     [Parameter]
     public string? Pseudonym { get; set; }
 
-    /// <summary>The identifier of the author, which decides its tone.</summary>
-    [Parameter]
-    public Guid Id { get; set; }
-
-    // The last byte of the identifier, random in a Guid v7 (its first ones are a time): the tones are spread evenly among
-    // the authors, as their place in a list would.
-    private int Tone() => Id.ToByteArray()[^1] % ToneCount + 1;
+    // The tone of the main identifier of the author, by a hash of its text (FNV-1a), the same from one run to the other,
+    // unlike string.GetHashCode: an author keeps its color everywhere and always, until its name changes. Not its
+    // identifier, drawn at random at each creation: an author entered again would change color.
+    private int Tone()
+    {
+        var hash = 2166136261u;
+        foreach (var character in RecordSearch.AuthorName(LastName, FirstName, Pseudonym))
+            hash = (hash ^ character) * 16777619u;
+        return (int)(hash % ToneCount) + 1;
+    }
 
     /// <summary>
     /// The initials of the main identifier of the author (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes):
