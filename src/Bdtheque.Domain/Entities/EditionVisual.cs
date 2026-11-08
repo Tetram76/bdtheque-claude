@@ -19,20 +19,28 @@ public sealed class EditionVisual : EntityBase
     public string MediaReference { get; private set; } = string.Empty;
     public int DisplayOrder { get; private set; }
 
+    /// <summary>
+    /// The colours drawn from the image, as fixed as its media: computed for any type of visual, a visual being able
+    /// to become a cover by <see cref="Entities.Edition.ArrangeVisuals"/>.
+    /// </summary>
+    public VisualPalette Palette { get; private set; } = null!;
+
     // EF Core parameterless constructor
     private EditionVisual() { }
 
     // Only reachable through Edition.AddVisual, the single place that registers it with its
     // edition.
-    internal EditionVisual(Edition edition, VisualType type, string mediaReference, int displayOrder)
+    internal EditionVisual(Edition edition, VisualType type, string mediaReference, int displayOrder, VisualPalette palette)
     {
         EnumGuard.EnsureDefined(type, nameof(type));
+        ArgumentNullException.ThrowIfNull(palette);
 
         Edition = edition;
         EditionId = edition.Id;
         Type = type;
         SetMediaReference(mediaReference);
         SetDisplayOrder(displayOrder);
+        Palette = palette;
     }
 
     // Type and rank change through Edition.ArrangeVisuals only, which ranks the visuals of each type

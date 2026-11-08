@@ -661,7 +661,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Astérix", null);
         var publisher = new Publisher("Dargaud");
         var edition = new Edition(album, publisher);
-        var visual = edition.AppendVisual(VisualType.Cover, "covers/asterix-01.jpg");
+        var visual = edition.AppendVisual(VisualType.Cover, "covers/asterix-01.jpg", TestPalette.Any);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);
@@ -677,6 +677,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         Assert.Equal(VisualType.Cover, saved.Type);
         Assert.Equal("covers/asterix-01.jpg", saved.MediaReference);
         Assert.Equal(0, saved.DisplayOrder);
+        Assert.Equal(TestPalette.Any, saved.Palette);
         Assert.Equal(edition.Id, saved.EditionId);
     }
 
@@ -711,7 +712,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         _fixture.Context.ChangeTracker.Clear();
 
         var reloaded = await _fixture.Context.Editions.Include(e => e.Visuals).FirstAsync(e => e.Id == edition.Id);
-        reloaded.AppendVisual(VisualType.BackCover, "back-covers/gaston-01.jpg");
+        reloaded.AppendVisual(VisualType.BackCover, "back-covers/gaston-01.jpg", TestPalette.Any);
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
@@ -730,7 +731,7 @@ public sealed class ModelCreationTests : IAsyncLifetime
         var album = new Album("Spirou", null);
         var publisher = new Publisher("Dupuis");
         var edition = new Edition(album, publisher);
-        var visual = edition.AppendVisual(VisualType.Endpaper, "endpapers/spirou-01.jpg");
+        var visual = edition.AppendVisual(VisualType.Endpaper, "endpapers/spirou-01.jpg", TestPalette.Any);
 
         _fixture.Context.Albums.Add(album);
         _fixture.Context.Publishers.Add(publisher);

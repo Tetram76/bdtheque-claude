@@ -538,7 +538,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
         var edition = await context.Editions.SingleAsync(e => e.Id == editionId);
         for (var i = 0; i < count; i++)
-            context.Add(edition.AppendVisual(DomainEnums.VisualType.Plate, $"{Guid.NewGuid():N}.jpg"));
+            context.Add(edition.AppendVisual(DomainEnums.VisualType.Plate, $"{Guid.NewGuid():N}.jpg", TestPalette.Any));
         await context.SaveChangesAsync();
     }
 

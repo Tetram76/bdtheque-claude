@@ -716,8 +716,9 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     }
 
     private const string InsertEditionVisualSql =
-        "INSERT INTO \"EditionVisuals\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"EditionId\", \"Type\", \"MediaReference\", \"DisplayOrder\") " +
-        "VALUES ({0}, now(), now(), {1}, {2}, {3}, {4})";
+        "INSERT INTO \"EditionVisuals\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"EditionId\", \"Type\", \"MediaReference\", \"DisplayOrder\", " +
+        "\"Palette_Dominant\", \"Palette_Deep\", \"Palette_Accent\") " +
+        "VALUES ({0}, now(), now(), {1}, {2}, {3}, {4}, {5}, {6}, {7})";
 
     [Fact]
     public async Task EditionVisualCheckConstraint_BlankMediaReference_ThrowsAtDatabase()
@@ -727,7 +728,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_EditionVisuals_MediaReferenceNotBlank", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "   ", 0));
+                InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "   ", 0, 0x2F5BA8, 0x14295A, 0xD8342B));
     }
 
     [Fact]
@@ -738,7 +739,22 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_EditionVisuals_DisplayOrderNotNegative", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", -1));
+                InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", -1, 0x2F5BA8, 0x14295A, 0xD8342B));
+    }
+
+    [Theory]
+    [InlineData("Palette_Dominant", -1, 0, 0)]
+    [InlineData("Palette_Deep", 0, 0x1000000, 0)]
+    [InlineData("Palette_Accent", 0, 0, int.MaxValue)]
+    public async Task EditionVisualCheckConstraint_ColourBeyondTwentyFourBits_ThrowsAtDatabase(
+        string column, int dominant, int deep, int accent)
+    {
+        var editionId = await InsertEditionAsync();
+
+        var id = Guid.CreateVersion7();
+        await AssertViolatesAsync($"CK_EditionVisuals_{column}IsRgb", () =>
+            _fixture.Context.Database.ExecuteSqlRawAsync(
+                InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", 0, dominant, deep, accent));
     }
 
     [Fact]
@@ -748,7 +764,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
 
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", 0);
+            InsertEditionVisualSql, id, editionId, (int)VisualType.Cover, "cover.jpg", 0, 0x2F5BA8, 0x14295A, 0xD8342B);
 
         var count = await _fixture.Context.EditionVisuals.CountAsync(v => v.Id == id);
         Assert.Equal(1, count);
