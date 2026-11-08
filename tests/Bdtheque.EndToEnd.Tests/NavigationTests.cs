@@ -14,11 +14,11 @@ public sealed class NavigationTests(ApplicationHost application) : BrowserTest<A
         await page.GotoAsync(AppPaths.Home);
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Aide sur cette page" }).ClickAsync();
-        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.NotYetImplemented));
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Bientôt disponible");
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Revenir à la page précédente" }).ClickAsync();
-        await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == AppPaths.Home);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.Home));
     }
 
     [Fact]

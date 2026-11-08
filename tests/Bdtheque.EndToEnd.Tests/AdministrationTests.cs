@@ -23,13 +23,13 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
 
         await page.GotoAsync(AppPaths.AdminHome);
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminLogin, $"?{AppPaths.ReturnUrlParameter}=%2Fadmin"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminLogin, $"?{AppPaths.ReturnUrlParameter}=%2Fadmin"));
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Connexion à l'administration");
         await page.GetByLabel("Identifiant").FillAsync(ApplicationHost.AdminLogin);
         await page.GetByLabel("Mot de passe").FillAsync(ApplicationHost.AdminPassword);
         await page.GetByRole(AriaRole.Button, new() { Name = "Se connecter" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminHome));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Administration");
     }
 
@@ -46,7 +46,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         var error = page.GetByRole(AriaRole.Alert);
         await Assertions.Expect(error).ToHaveAttributeAsync("data-error-category", "business");
         await Assertions.Expect(error).ToContainTextAsync("Identifiant ou mot de passe incorrect");
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminLogin));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminLogin));
         // Still refused at the address of the administration: no cookie was given.
         await page.GotoAsync(AppPaths.AdminHome);
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AdminLogin)}\?"));
@@ -62,7 +62,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         await page.GetByLabel("Mot de passe").FillAsync(ApplicationHost.AdminPassword);
         await page.GetByRole(AriaRole.Button, new() { Name = "Se connecter" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminHome));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Se déconnecter" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.Home));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.Home));
         await page.GotoAsync(AppPaths.AdminHome);
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AdminLogin)}\?"));
     }
@@ -87,11 +87,8 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
 
         await page.GotoAsync(AppPaths.AdminLogin);
 
-        await Assertions.Expect(page).ToHaveURLAsync(AtPath(AppPaths.AdminHome));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
-
-    // The address polled rather than a load event awaited: on failure, it tells the address reached.
-    internal static Regex AtPath(string path, string query = "") => new($@"^[a-z]+://[^/]+{Regex.Escape(path + query)}$");
 }
 
 /// <summary>
@@ -129,7 +126,7 @@ public sealed class AdminHomeTests(AdministrationApplication application) : Brow
         await Assertions.Expect(albums.Locator(".admin-menu-count")).ToHaveTextAsync("4");
 
         await albums.ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(AdministrationAccessTests.AtPath(AppPaths.AdminAlbums));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
     }
 }
 

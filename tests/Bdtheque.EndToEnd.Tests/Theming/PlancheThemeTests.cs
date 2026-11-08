@@ -148,7 +148,7 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
         var page = await OpenAsync(ThemeCatalog.Planche.Key);
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
-        await page.WaitForURLAsync(url => url.Contains("again=1"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(CasesPage.Path, "?again=1"));
         await page.WaitForFunctionAsync("() => [...document.querySelectorAll('.block')].every(block => block.dataset.drawn !== undefined)");
 
         Assert.All(await CasesAsync(page), @case => Assert.NotNull(@case.Shape));
@@ -163,7 +163,7 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
 
         await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Planche.Key });
         await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
-        await page.WaitForURLAsync(url => url.Contains("again=1"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(CasesPage.Path, "?again=1"));
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Planche.Key);
 
         await page.WaitForFunctionAsync("() => [...document.querySelectorAll('.block')].every(block => block.dataset.drawn !== undefined)",
@@ -178,7 +178,7 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
 
         await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Base.Key });
         await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
-        await page.WaitForURLAsync(url => url.Contains("again=1"));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(CasesPage.Path, "?again=1"));
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Base.Key);
         // Past the frame in which the script of the theme would deal and draw the new page.
         await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
