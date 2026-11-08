@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Bdtheque.Infrastructure.Tests;
 
+[Trait("Category", RepositoryFiles.Category)]
 public sealed partial class RuntimeImageTests
 {
     [Fact]

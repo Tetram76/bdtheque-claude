@@ -25,9 +25,40 @@ jobs:
   build-and-test:
     name: Build & tests (.NET)
     runs-on: ubuntu-latest
+    outputs:
+      sources: ${{ steps.changes.outputs.sources }}
     steps:
+      # The merge commit of a pull request (refs/pull/<number>/merge) and its first parent, the head of main it merges
+      # into: their difference is the pull request as it would be merged.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+
+      # A pull request runs only the tests that its changes can fail; a push to main or a run on demand runs them all
+      # (gestion-projet/depot/integration-continue-ci.md). Safe by default: a file that no pattern leaves out is a source,
+      # and a source of the rendering; a moved file counts at both paths (--no-renames). The skipped steps leave the job,
+      # hence its required check, in place.
+      - name: Classify the changed files
+        id: changes
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
+            echo "sources=true" >> "$GITHUB_OUTPUT"
+            echo "rendering=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          cd "$RUNNER_TEMP"
+          git -C "$GITHUB_WORKSPACE" diff --name-only --no-renames HEAD^1 HEAD > changed.txt
+          # Documentation, and tooling that no test runs: the tests of the repository check what they read of it.
+          not_sources='^(\.speckit/|\.claude/|poc/|scripts/|docker/|\.github/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.dockerignore$|\.gitignore$)'
+          { grep -vE "$not_sources" changed.txt || true; grep -xF .github/workflows/ci.yml changed.txt || true; } > sources.txt
+          # The tests without a browser render no screen.
+          grep -vE '^tests/Bdtheque\.(Api|Domain|Frontend|Infrastructure|ValidationData)\.Tests/' sources.txt > rendering.txt || true
+          echo "sources=$([ -s sources.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "rendering=$([ -s rendering.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          for list in changed sources rendering; do
+            echo "::group::$list ($(wc -l < "$list.txt"))"; cat "$list.txt"; echo "::endgroup::"
+          done
 
       # The SDK of the Dockerfiles (SdkVersionTests).
       - name: Setup .NET
@@ -54,6 +85,7 @@ jobs:
       # A model change committed without its migration would otherwise go unnoticed: the tests
       # run the migrations, not the model, so they would still pass against the stale schema.
       - name: Check migrations are in sync with the model
+        if: steps.changes.outputs.sources == 'true'
         run: |
           dotnet tool restore
           dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
@@ -62,6 +94,7 @@ jobs:
       # on the runner: neither the full browser, which only a headed run uses, nor FFmpeg, which only a video does
       # (choix-implementation/outillage.md).
       - name: Install the browser of the end-to-end tests
+        if: steps.changes.outputs.rendering == 'true'
         run: pwsh tests/Bdtheque.EndToEnd.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps --only-shell chromium
 
       # Chromium drops the requests of the pages it is loading whenever an address of the machine is added or deleted
@@ -71,12 +104,14 @@ jobs:
       # the runner at any moment of the run. Docker's interfaces, its bridge included, carry no link-local address: its
       # default bridge is IPv4 only, and nothing else of the machine changes (choix-implementation/outillage.md).
       - name: Keep the interfaces of Docker without link-local address
+        if: steps.changes.outputs.rendering == 'true'
         run: sudo sysctl -w net.ipv6.conf.default.addr_gen_mode=1 net.ipv6.conf.docker0.addr_gen_mode=1
 
       # The links and addresses of the runner, as Chromium watches them (netlink), and the Docker events that create
       # them, over the whole run of the tests: the check of the step after the tests, and the facts of a failure.
       - name: Record the network changes of the runner
         id: network-record
+        if: steps.changes.outputs.rendering == 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/network"
           ip -o address > "$RUNNER_TEMP/network/initial-addresses.txt"
@@ -91,6 +126,7 @@ jobs:
       # reports, on the code of the application only, the library shared by the tests being left out
       # (choix-implementation/outillage.md).
       - name: Run tests
+        if: steps.changes.outputs.sources == 'true'
         run: >-
           dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
           --filter "FullyQualifiedName!~Bdtheque.EndToEnd.Tests."
@@ -98,8 +134,16 @@ jobs:
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
 
+      # Without a source changed, only the tests that confront the files of the repository with their rules, all in this
+      # project: no container, no browser, and no coverage, since no code it measures changed.
+      - name: Run the tests of the repository
+        if: steps.changes.outputs.sources != 'true'
+        run: >-
+          dotnet test tests/Bdtheque.Infrastructure.Tests --configuration Release --no-build
+          --logger "trx;LogFileName=test-results.trx" --filter "Category=Repository"
+
       - name: Run end-to-end tests
-        if: success() || failure()
+        if: (success() || failure()) && steps.changes.outputs.rendering == 'true'
         run: >-
           dotnet test tests/Bdtheque.EndToEnd.Tests --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
           --collect "XPlat Code Coverage"
@@ -118,6 +162,7 @@ jobs:
           fi
 
       - name: Publish the coverage
+        if: steps.changes.outputs.sources == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage
@@ -192,8 +237,10 @@ jobs:
           dotnet tool restore
           dotnet restore Bdtheque.slnx
 
-      # The reports name the files of the application by their path on the runner, the same in every job.
+      # The reports name the files of the application by their path on the runner, the same in every job. A pull request
+      # that changes no source has none, no code it measures having changed: the analysis then imports no report.
       - name: Get the coverage of the tests
+        if: needs.build-and-test.outputs.sources == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: coverage
@@ -214,7 +261,7 @@ jobs:
           /d:sonar.token="$SONAR_TOKEN"
           /d:sonar.exclusions=".speckit/**,poc/**,**/Migrations/**,coverage/**"
           /d:sonar.coverage.exclusions="**/*.ps1,src/Bdtheque.Frontend/wwwroot/**/*.js"
-          /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.xml"
+          ${{ needs.build-and-test.outputs.sources == 'true' && '/d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.xml"' || '' }}
 
       - name: Build
         run: dotnet build Bdtheque.slnx --configuration Release --no-restore

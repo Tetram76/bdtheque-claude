@@ -7,6 +7,7 @@ namespace Bdtheque.Infrastructure.Tests;
 /// docker-compose.yml of its version: every version of the file must let the others run beside it
 /// (choix-implementation/deploiement/plusieurs-versions-sur-le-nas.md).
 /// </summary>
+[Trait("Category", RepositoryFiles.Category)]
 public sealed partial class DockerComposeTests
 {
     private static readonly string Compose = RepositoryFiles.Read("docker-compose.yml");
