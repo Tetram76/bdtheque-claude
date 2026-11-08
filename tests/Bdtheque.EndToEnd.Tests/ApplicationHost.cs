@@ -77,9 +77,12 @@ public class ApplicationHost : IAsyncLifetime
         // partial raster, a tile changed after the first paint (the interactive rendering of a component, a chevron that
         // a script shows) is redrawn whole, with the same antialiased edges as a tile painted at once: the captures do not
         // depend on when the page changed either.
+        // Without GPU, the layers composited in 3D (an album in volume, turned with a perspective) are drawn by the software
+        // compositor, as everything else: the GPU of the container, SwiftShader, compiles its code for the processor of the
+        // machine, and drew their edges one shade apart from one machine to another.
         Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Args = ["--font-render-hinting=none", "--force-color-profile=srgb", "--disable-partial-raster"],
+            Args = ["--font-render-hinting=none", "--force-color-profile=srgb", "--disable-partial-raster", "--disable-gpu"],
         });
 
         await SeedAsync();
