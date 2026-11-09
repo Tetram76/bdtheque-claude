@@ -45,6 +45,8 @@ internal static class PurchaseIntentEndpoints
         // The intents and the editions are always loaded with their album (AlbumConfiguration).
         intents.MapChildDeletion<Album, PurchaseIntent>(
             query => query, album => album.PurchaseIntents, DeletionLinks, (album, intent) => album.RemovePurchaseIntent(intent));
+
+        admin.MapGet("/purchase-intents", ListForAdministrationAsync);
     }
 
     public static void MapPurchaseIntentList(this RouteGroupBuilder catalog) => catalog.MapGet("/purchase-intents", ListAsync);
@@ -128,10 +130,30 @@ internal static class PurchaseIntentEndpoints
     /// <summary>The public list of the intents, in the order of their albums.</summary>
     private static Task<Page<PurchaseIntentListItem>> ListAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, int page = 1, int pageSize = Paging.DefaultSize) =>
-        context.PurchaseIntents.AsNoTracking()
-            .OrderByAlbum(p => p.Album)
-            .ThenBy(p => p.Id)
-            .ToPageAsync(page, pageSize, ListItem, cancellationToken);
+        InListOrder(context.PurchaseIntents.AsNoTracking()).ToPageAsync(page, pageSize, ListItem, cancellationToken);
+
+    /// <summary>
+    /// The list of the intents of the administration (visuel/listes/liste-par-liste.md), found by the title of their album or
+    /// of its series, part of its label (fonctionnel/presentation/libelle-d-un-album.md), in the order of the public list. Each
+    /// row carries the album and what the intent targets, the cover of the album, whether the intent can turn into one on the
+    /// other target, when it was set, and the version of its album, which its removal sends back.
+    /// </summary>
+    private static Task<Page<PurchaseIntentAdminListItem>> ListForAdministrationAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
+        InListOrder(context.PurchaseIntents.AsNoTracking().WhereContains(q, p => p.Album.Title, p => p.Album.Series!.Title))
+            .ToPageAsync(page, pageSize, CatalogExpressions.Expand((PurchaseIntent p) => new PurchaseIntentAdminListItem(
+                p.Id,
+                p.Album.ToSummary(),
+                p.Edition == null ? null : p.Edition.ToSummary(),
+                CatalogExpressions.ToCover(p.Album.CoverVisualOf()),
+                // fonctionnel/regles-metier/intention-d-achat.md: an intent on an edition turns into one on the album only when
+                // that edition is the only one of the album; one on the album, which has no edition, always into one on an edition.
+                p.EditionId == null || p.Album.Editions.Count() == 1,
+                p.CreatedAt,
+                EF.Property<uint>(p.Album, BdthequeDbContext.VersionProperty))), cancellationToken);
+
+    private static IOrderedQueryable<PurchaseIntent> InListOrder(IQueryable<PurchaseIntent> intents) =>
+        intents.OrderByAlbum(p => p.Album).ThenBy(p => p.Id);
 
     // Entered with the minimum of fields: the traits of the copy keep the values of an edition not
     // owned (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention).
