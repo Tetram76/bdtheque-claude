@@ -156,7 +156,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Contributions_BeyondSixNames_AreFoldedBehindTheOthers_WhichUnfold()
+    public void Contributions_NameEveryAuthorOfARole_WithTheLinkThatUnfoldsWhatItsLineDoesNotHold()
     {
         var authors = Enumerable.Range(1, 9).Select(n => new AuthorListItem(Guid.NewGuid(), $"Auteur {n}", null, null)).ToList();
         _catalog.Album = Album() with
@@ -166,11 +166,12 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        var drawing = page.FindAll(".contributions dd")[1];
-        Assert.Equal(6, drawing.Children.Count(child => child.LocalName == "a"));
-        Assert.Equal(["Auteur 7", "Auteur 8", "Auteur 9"], drawing.QuerySelectorAll(".contributions-folded a").Select(a => a.TextContent.Trim()));
-        var toggle = drawing.QuerySelector("details summary")!;
-        Assert.Equal("et 3 autres", toggle.QuerySelector(".contributions-more")!.TextContent.Trim());
+        // Which names the line holds, only the browser knows (wwwroot/fold-row.js): each is in the row, and the link is ready.
+        var row = page.FindAll(".contributions dd")[1].QuerySelector("app-fold-row")!;
+        Assert.Equal(authors.Select(a => a.LastName), row.QuerySelectorAll(".contributor").Select(a => a.TextContent.Trim()));
+        var toggle = row.QuerySelector("details summary")!;
+        Assert.Equal(("et {0} autre", "et {0} autres"),
+            (toggle.QuerySelector(".contributions-more")!.GetAttribute("data-one"), toggle.QuerySelector(".contributions-more")!.GetAttribute("data-other")));
         Assert.Equal("Réduire", toggle.QuerySelector(".contributions-less")!.TextContent.Trim());
         Assert.Equal("(9)", page.FindAll(".contributions dt")[1].QuerySelector(".contributions-count")!.TextContent.Trim());
     }

@@ -31,19 +31,49 @@ public sealed class AlbumRecordTests(RecordsApplication application) : BrowserTe
     }
 
     [Fact]
-    public async Task AuthorsOfARole_BeyondSix_UnfoldAndFold()
+    public async Task AuthorsOfARole_OnANarrowScreen_HoldOnOneLine_TheOthersUnfoldAndFold()
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(new ViewportSize { Width = 414, Height = 896 });
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
-        // The drawers by their sort key: the last three beyond the sixth.
-        var folded = page.GetByRole(AriaRole.Link, new() { Name = "Nina Okafor" });
+        var drawing = page.Locator(".contributions app-fold-row").Nth(1);
+        // The drawers by their sort key: the last one is folded first.
+        var last = drawing.GetByRole(AriaRole.Link, new() { Name = "Inès Vasseur" });
 
-        await Assertions.Expect(folded).ToBeHiddenAsync();
-        await page.GetByText("et 3 autres").ClickAsync();
-        await Assertions.Expect(folded).ToBeVisibleAsync();
-        await page.GetByText("Réduire").ClickAsync();
-        await Assertions.Expect(folded).ToBeHiddenAsync();
+        await Assertions.Expect(last).ToBeHiddenAsync();
+        await Assertions.Expect(drawing.Locator(".contributions-more")).ToHaveTextAsync(new Regex(@"^et \d+ autres?$"));
+        Assert.True(await OnOneLineAsync(drawing));
+
+        await drawing.Locator(".contributions-more").ClickAsync();
+        await Assertions.Expect(last).ToBeVisibleAsync();
+        await drawing.GetByText("Réduire").ClickAsync();
+        await Assertions.Expect(last).ToBeHiddenAsync();
+        Assert.True(await OnOneLineAsync(drawing));
     }
+
+    [Fact]
+    public async Task AuthorsOfARole_OnAWideScreen_AllHold_UntilTheScreenNarrows()
+    {
+        var page = await NewPageAsync(new ViewportSize { Width = 1440, Height = 900 });
+        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+        var drawing = page.Locator(".contributions app-fold-row").Nth(1);
+        var last = drawing.GetByRole(AriaRole.Link, new() { Name = "Inès Vasseur" });
+
+        await Assertions.Expect(last).ToBeVisibleAsync();
+        await Assertions.Expect(drawing.Locator(".contributions-toggle")).ToBeHiddenAsync();
+
+        await page.SetViewportSizeAsync(414, 896);
+        await Assertions.Expect(last).ToBeHiddenAsync();
+        Assert.True(await OnOneLineAsync(drawing));
+    }
+
+    // The names shown of a row, and the link that unfolds the others, all on the line of the first name.
+    private static Task<bool> OnOneLineAsync(ILocator row) => row.EvaluateAsync<bool>("""
+        row => {
+            const shown = [...row.children].filter(child => child.checkVisibility());
+            const bottom = shown[0].getBoundingClientRect().bottom;
+            return shown.every(child => child.getBoundingClientRect().top < bottom);
+        }
+        """);
 
 }
 

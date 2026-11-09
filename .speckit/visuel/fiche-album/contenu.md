@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''un album : visuels, identité, contributions, éditions, intentions, reste de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:30:00Z }
 ---
 
 # Contenu
@@ -14,7 +14,7 @@ De haut en bas :
 - **En-tête de la fiche**, sur deux colonnes, qui s'empilent sur smartphone :
   - **Visuels de l'édition** sélectionnée, dans l'ordre des visuels ([Ordre des visuels d'une édition](../../fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md)) : le visuel courant, son type (numéroté pour les planches) et sa position (« 6 sur 13 »), des boutons précédent et suivant, puis une **bande de vignettes** qui défile horizontalement, une par visuel, marquée de son type abrégé (« Couv. », « Garde », numéro de planche, « 4e »), la vignette courante encadrée de l'accent ; enfin le lien vers l'image originale.
   - **Identité de l'album** : le lien vers la série, le titre, puis des étiquettes : le tome ([Représentation du tome selon le type d'album](../../fonctionnel/presentation/libelle-d-un-album.md#représentation-du-tome-selon-le-type-dalbum)), la date de première publication et l'appartenance à la collection, avec le nombre d'éditions possédées. Puis l'appréciation, en cinq étoiles, ou « Pas encore noté ».
-  - **Contributions** : un encadré annonce le nombre d'auteurs distincts crédités, puis une ligne par rôle (scénario, dessin, couleurs), avec le nombre d'auteurs du rôle et leurs noms en étiquettes, chacun menant à la fiche de l'auteur. Au-delà de six noms, le rôle est replié derrière un lien « et N autres », qui le déplie (« Réduire » le replie) : un album collectif ne repousse pas le reste de la fiche. Un rôle sans contribution indique « Non crédité ».
+  - **Contributions** : un encadré annonce le nombre d'auteurs distincts crédités, puis une ligne par rôle (scénario, dessin, couleurs), avec le nombre d'auteurs du rôle et leurs noms en étiquettes, chacun menant à la fiche de l'auteur. Les noms d'un rôle tiennent sur une ligne, à la largeur de l'écran : ceux qu'elle ne tient pas sont repliés derrière un lien « et N autres », qui le déplie (« Réduire » le replie) ; un album collectif ne repousse pas le reste de la fiche, et aucun rôle ne passe à la ligne sur un écran étroit. Un rôle sans contribution indique « Non crédité ».
   - **Genres et univers** affichés ([Genres et univers d'un album](../../fonctionnel/regles-metier/genres-et-univers-d-un-album.md)). Chaque univers est présenté avec la **chaîne de ses ancêtres**, de la racine à l'univers rattaché (« Univers Hugo Pratt › Corto Maltese › Les Antilles ») : les ancêtres sont de simples liens, l'univers rattaché une étiquette colorée ; chacun mène à la liste de ses séries et albums, sous-univers compris, présentée comme la bibliographie d'un auteur ([Structure de l'application](../../fonctionnel/structure-de-l-application.md), [Hiérarchie des univers](../../fonctionnel/regles-metier/hierarchie-des-univers.md)).
 - **Ça raconte quoi ?** : le résumé, puis les notes personnelles de l'album.
 - **Dans quelles éditions ?** :

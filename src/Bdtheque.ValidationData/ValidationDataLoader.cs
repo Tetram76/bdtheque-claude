@@ -191,8 +191,8 @@ public sealed class ValidationDataLoader(HttpClient client)
         });
         await data.VisualAsync(lighthouse, lighthouseReissue, VisualType.Cover, Images.Portrait(0.60));
 
-        // A collective album, many authors credited, under `@`, won in a contest: more drawers than the record of an album
-        // shows before folding them (visuel/fiche-album/contenu.md, Contributions).
+        // A collective album, many authors credited, under `@`, won in a contest: more drawers than the line of a role
+        // of its record holds on a smartphone (visuel/fiche-album/contenu.md, Contributions).
         var collective = await data.AlbumAsync(OneShot(CollectiveTitle, 2019, null, [humour], [],
         [
             Credit(ganier, ContributionRole.Scenarist), Credit(keita, ContributionRole.Scenarist), Credit(rambert, ContributionRole.Illustrator),

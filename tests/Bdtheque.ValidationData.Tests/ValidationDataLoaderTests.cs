@@ -123,7 +123,7 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         var album = await AlbumAsync(ValidationDataLoader.CollectiveTitle);
 
         Assert.True(album.Contributions.Select(contribution => contribution.Author.Id).Distinct().Count() >= 6);
-        // visuel/fiche-album/contenu.md: a role beyond six names is folded.
+        // More names in a role than the line of a smartphone holds (visuel/fiche-album/contenu.md).
         Assert.Contains(album.Contributions.GroupBy(contribution => contribution.Role), role => role.Count() > 6);
     }
 

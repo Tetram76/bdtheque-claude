@@ -66,12 +66,26 @@
     text-decoration: underline;
 }
 
-.contributions-folded {
-    display: contents;
+/* The names of a role on one line, those it does not hold folded (wwwroot/fold-row.js); the link that unfolds them is shown
+   only once something is folded. */
+.contributions-names {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    min-inline-size: 0;
 }
 
-/* The names beyond the sixth are shown only once the role is unfolded. */
-dd:has(> .contributions-toggle:not([open])) > .contributions-folded {
+.contributions-toggle {
+    display: none;
+}
+
+.contributions-names[data-folding] > .contributions-toggle {
+    display: block;
+}
+
+.contributions-names[data-folding]:has(> .contributions-toggle:not([open])) > [data-folded] {
     display: none;
 }
 

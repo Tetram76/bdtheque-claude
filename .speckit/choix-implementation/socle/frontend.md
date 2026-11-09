@@ -63,7 +63,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
 
 ## Fiches de la consultation
 
-- **Repli des auteurs d'un rôle par une divulgation du navigateur** (`<details>`, [`visuel/fiche-album/`](../../visuel/fiche-album/index.md)) : les noms repliés, placés avant elle, ne se montrent qu'une fois elle ouverte (`:has()`), si bien que « Réduire » suit le dernier nom. Ni script ni requête pour montrer des noms déjà reçus ; l'ouverture n'est pas une action suivie, comme celle du panneau des filtres d'une liste.
+- **Repli des auteurs d'un rôle selon la largeur de sa ligne** ([`visuel/fiche-album/`](../../visuel/fiche-album/index.md)) : seul le navigateur connaît la place des noms, si bien qu'un script (élément personnalisé) marque ceux que la ligne ne tient pas, avec le lien « et N autres », de nouveau quand la ligne change de largeur et à la fin du premier chargement de polices, comme une ligne défilante. Le dépliage est une divulgation du navigateur (`<details>`), placée après les noms, qui ne se cachent que tant qu'elle est fermée (`:has()`) : « Réduire » suit le dernier nom. Ni requête pour montrer des noms déjà reçus, ni action suivie, comme le panneau des filtres d'une liste ; sans script, tous les noms sont montrés.
+  - **Alternative écartée (nombre fixe de noms, rendu par le serveur)** : un rôle passe à la ligne sur un écran étroit, ou se replie sur un grand écran qui le tenait.
+  - **Alternative écartée (ligne coupée par la seule feuille de style)** : elle ne sait pas compter les noms cachés, que le lien annonce.
   - **Alternative écartée (rôles dépliés portés par l'adresse, comme les critères d'une liste)** : une requête et un nouveau rendu de la fiche pour des noms déjà présents dans la page.
 
 ## Présentation
