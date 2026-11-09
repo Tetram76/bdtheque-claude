@@ -8,7 +8,9 @@
    visuel/saisie-album/contenu.md): a combobox whose list suggests the records that contain the text typed, chosen with
    the mouse, the finger or the keyboard. It needs interactivity (choix-implementation/socle/frontend.md): in a static
    page, the caller renders it in the InteractiveServer mode; in a static form, it sends the record chosen by its
-   identifier (Name). The text typed is never a value: leaving the field without choosing gives back the record chosen. *@
+   identifier (Name). The text typed is never a value: leaving the field without choosing gives back the record chosen.
+   It may offer to create the record typed when none suits (e.g. an author, created on the spot from an album being
+   entered), which the caller does. *@
 <div class="record-picker">
     <input @ref="_input" id="@Id" type="text" role="combobox" autocomplete="off" aria-autocomplete="list"
            aria-expanded="@(IsOpen ? "true" : "false")" aria-controls="@ListId" aria-activedescendant="@ActiveOptionId"
@@ -34,13 +36,20 @@
         @for (var index = 0; index < _options.Count; index++)
         {
             var option = _options[index];
-            <li id="@OptionId(index)" class="record-picker-option" role="option" aria-selected="@(index == _active ? "true" : "false")"
+            <li id="@OptionId(index)" class="record-picker-option @(IsPending(option) ? "record-picker-pending" : null)" role="option" aria-selected="@(index == _active ? "true" : "false")"
                 @onmousedown:preventDefault @onclick="() => ChooseAsync(option)">
                 <span>@option.Label</span>
                 @if (option.Detail is not null)
                 {
                     <span class="record-picker-detail">@option.Detail</span>
                 }
+            </li>
+        }
+        @if (CanCreate)
+        {
+            <li id="@OptionId(_options.Count)" class="record-picker-option record-picker-create" role="option"
+                aria-selected="@(_active == _options.Count ? "true" : "false")" @onmousedown:preventDefault @onclick="CreateAsync">
+                <Icon Name="IconName.Add" /><span>@CreateLabel!(_text.Trim())</span>
             </li>
         }
     </ul>
@@ -88,6 +97,33 @@
     [Parameter]
     public string? Placeholder { get; set; }
 
+    /// <summary>
+    /// Offers to create the record typed, once its search is done, with the text typed; the caller creates it (e.g. in a
+    /// dialog) and chooses it. Requires <see cref="CreateLabel"/>.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnCreate { get; set; }
+
+    /// <summary>
+    /// The records added on the spot by the form, created only with the record it saves: the search does not know them, so
+    /// they are suggested too, before the others, when their label contains the text typed, under the key the form gave them
+    /// (e.g. an author added for a role, to credit with another, rather than created twice).
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<RecordOption> Pending { get; set; } = [];
+
+    /// <summary>The label of the creation, from the text typed (e.g. « Créer l'auteur « Moebius » »).</summary>
+    [Parameter]
+    public Func<string, string>? CreateLabel { get; set; }
+
+    /// <summary>Takes the focus once rendered: a field opened by an action (e.g. « Ajouter ») is typed in at once.</summary>
+    [Parameter]
+    public bool AutoFocus { get; set; }
+
+    /// <summary>The field is left without a record chosen nor created (e.g. to close a field opened by « Ajouter »).</summary>
+    [Parameter]
+    public EventCallback OnLeave { get; set; }
+
     /// <summary>Set on the text field (e.g. the <c>aria-describedby</c> and <c>aria-invalid</c> of its <see cref="Field"/>).</summary>
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
@@ -101,6 +137,13 @@
     }
 
     private bool IsOpen => _open && !string.IsNullOrWhiteSpace(_text);
+
+    // Offered once the search of the text shown is over, failed or not: never for a text whose suggestions are to come.
+    private bool CanCreate => OnCreate.HasDelegate && CreateLabel is not null && _status is SearchStatus.Done or SearchStatus.NoResult
+                              && !string.IsNullOrWhiteSpace(_text);
+
+    // The suggestions, then the creation, if offered.
+    private int OptionCount => _options.Count + (CanCreate ? 1 : 0);
 
     private string ListId => $"{Id}-suggestions";
 
@@ -120,6 +163,8 @@
         {
             _module = await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["record-picker.js"]}");
             await _module.InvokeVoidAsync("keepKeysForTheList", _input);
+            if (AutoFocus)
+                await _input.FocusAsync();
         }
 
         // The focus stays on the text field: the list does not scroll by itself to the active suggestion. The suggestion
@@ -156,9 +201,11 @@
             await Task.Delay(TypingPause, Clock, cancellation);
             if (number != _textNumber)
                 return;
-            var options = await Search.FindAsync(Kind, _text, cancellation);
-            if (number == _textNumber)
-                Suggest(options, options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done);
+            var found = await Search.FindAsync(Kind, _text, cancellation);
+            if (number != _textNumber)
+                return;
+            IReadOnlyList<RecordOption> options = [.. PendingMatching(_text), .. found];
+            Suggest(options, options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done);
         }
         catch (ApiProblemException) when (number == _textNumber)
         {
@@ -174,21 +221,32 @@
         }
     }
 
+    // A record added on the spot: its detail says so, marked apart from the name.
+    private bool IsPending(RecordOption option) => Pending.Any(p => p.Id == option.Id);
+
+    // Compared as the search of the lists compares, whatever the case and the accents.
+    private IEnumerable<RecordOption> PendingMatching(string text) =>
+        Pending.Where(p => CultureInfo.CurrentCulture.CompareInfo.IndexOf(
+            p.Label, text.Trim(), CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0);
+
     private async Task OnKeyDownAsync(KeyboardEventArgs args)
     {
         switch (args.Key)
         {
-            case "ArrowDown" when !IsOpen && _options.Count > 0 && !string.IsNullOrWhiteSpace(_text):
+            case "ArrowDown" when !IsOpen && OptionCount > 0 && !string.IsNullOrWhiteSpace(_text):
                 _open = true;
                 break;
-            case "ArrowDown" when IsOpen && _options.Count > 0:
-                _active = Math.Min(_active + 1, _options.Count - 1);
+            case "ArrowDown" when IsOpen && OptionCount > 0:
+                _active = Math.Min(_active + 1, OptionCount - 1);
                 break;
-            case "ArrowUp" when IsOpen && _options.Count > 0:
+            case "ArrowUp" when IsOpen && OptionCount > 0:
                 _active = Math.Max(_active - 1, 0);
                 break;
-            case "Enter" when IsOpen && _active >= 0:
+            case "Enter" when IsOpen && _active >= 0 && _active < _options.Count:
                 await ChooseAsync(_options[_active]);
+                break;
+            case "Enter" when IsOpen && _active == _options.Count && CanCreate:
+                await CreateAsync();
                 break;
             case "Escape" when IsOpen:
                 Close();
@@ -203,6 +261,14 @@
         await ValueChanged.InvokeAsync(option);
     }
 
+    // The text typed goes to the caller, which creates the record; the field shows the record chosen meanwhile.
+    private async Task CreateAsync()
+    {
+        var text = _text.Trim();
+        ShowText(Value?.Label ?? "");
+        await OnCreate.InvokeAsync(text);
+    }
+
     private async Task ClearAsync()
     {
         Value = null;
@@ -211,7 +277,11 @@
         await _input.FocusAsync();
     }
 
-    private void Leave() => ShowText(Value?.Label ?? "");
+    private async Task Leave()
+    {
+        ShowText(Value?.Label ?? "");
+        await OnLeave.InvokeAsync();
+    }
 
     // The only change of the text other than typing (choice, clearing, leaving the field, a new value): the suggestions
     // are always those of the text shown, so those of the text replaced, and its search under way, end with it.

@@ -4,9 +4,9 @@
     <RootNamespace>Bdtheque.Frontend</RootNamespace>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     <UserSecretsId>bdtheque-frontend</UserSecretsId>
-    <!-- The scripts of Blazor (_framework/blazor.web.js) come from a package the SDK restores only when it sees components
-         (.razor) at restore time: the image restores from the project files alone, before copying the sources, and would
-         publish a frontend without them, every link then reloading the whole page. -->
+    <!-- The script of Blazor, in a package the SDK restores only for a project it infers to require it, from the .razor files
+         present at restore: the Dockerfile restores the project from its .csproj alone, before copying its sources
+         (choix-implementation/deploiement/images-de-base-des-conteneurs.md). -->
     <RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
   </PropertyGroup>
 

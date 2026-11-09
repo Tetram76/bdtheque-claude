@@ -1,7 +1,7 @@
 ---
 type: Choix d'implémentation
 title: 'Frontend'
-description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
+description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
   - **Alternative écartée (Razor Pages / MVC)** : compatible, mais sans composants réutilisables ni interactivité ponctuelle sans JavaScript.
 - **Rendu statique par défaut**, l'interactivité réservée aux composants qui en ont besoin : la consultation, en lecture et sur smartphone ([Compatibilité multi-supports](../../contraintes-techniques/architecture-deploiement/compatibilite-multi-supports.md)), n'a pas besoin d'une connexion SignalR par visiteur, coûteuse en mémoire sur le NAS et coupée à chaque changement de réseau mobile ; et ASP.NET Core réserve au rendu statique les pages qui écrivent des cookies (connexion, [Authentification : mise en œuvre](transverse/authentification-mise-en-oeuvre.md)).
   - **Alternative écartée (interactivité globale)** : une connexion permanente par visiteur pour des pages surtout statiques, et une exclusion à gérer pour chaque page à cookie.
+- **JavaScript réservé à ce que seul le navigateur sait faire**, et que ni le rendu du serveur ni une feuille de style n'atteignent : une API du navigateur (dialogue modal, fuseau horaire, écran tactile, défilement vers un élément), une mesure de la mise en page (largeurs, fin du chargement des polices), l'action d'une touche que Blazor ne sait pas retenir seule, le dessin tiré au hasard d'un thème. Un script est court, écrit à la main, sans dépendance ni outil de construction, et ne porte ni règle métier ni donnée de l'application : ce que l'application sait et décide reste en C#. Chaque script a sa raison dans le concept de ce qu'il sert ; ce que le HTML et le CSS du navigateur offrent se passe de script (menus en *popover*, divulgation `<details>`).
+  - **Alternative écartée (aucun script, tout par l'interactivité de Blazor)** : Blazor n'offre pas ces API du navigateur et ne les atteint que par l'interopérabilité JavaScript, qui demande le même script ; l'interactivité y ajouterait le coût d'une connexion par visiteur, qu'écarte le rendu statique par défaut.
 - **Aucun framework CSS** : CSS natif, propriétés personnalisées qui portent les contrats du thème de base ([Thème de base](../../visuel/charte-graphique/theme-de-base.md)), isolation CSS par composant, mise en page *mobile-first*.
   - **Alternative écartée (Bootstrap)** : son apparence, que l'exigence de rendu exclut ([Design et charte graphique](../../fonctionnel/design-et-charte-graphique.md)), devrait être neutralisée règle par règle par chaque thème, devenu une surcharge de Bootstrap plutôt qu'une variante du thème de base.
   - **Alternative écartée (MudBlazor ou toute bibliothèque de composants)** : une apparence propre tout aussi présente, et des composants qui exigent l'interactivité.
@@ -42,7 +44,21 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
   - **Alternative écartée (menu interactif, ou `<details>` refermé par un script)** : une connexion ou un script pour ce que le navigateur offre.
 - **Dialogues `<dialog>` modaux**, ouverts par un script dès leur insertion (seul un script ouvre un dialogue en modal, au-dessus d'une page inerte), et de nouveau après une navigation améliorée qui garde le dialogue dans un autre état (la synchronisation des attributs par Blazor lui retire l'attribut qui le montre ouvert), rendus quand l'adresse les demande ; la fermeture, choix sûr, a le focus.
   - **Alternative écartée (dialogue non modal rendu par le serveur)** : la page resterait accessible au clavier dessous, et Échap ne le fermerait pas.
-- **Barre d'enregistrement collée au bas de l'écran** (`sticky`), qui ne masque jamais ce qui suit le formulaire.
+- **Barre d'enregistrement collée au bas de l'écran** (`sticky`), qui ne masque jamais ce qui suit le formulaire ; sur toute la largeur de l'écran, comme l'en-tête, par une image peinte au-delà de sa boîte (`border-image-outset`), qui ne fait jamais défiler la page en largeur.
+  - **Alternative écartée (élément large de `100vw`)** : la barre de défilement verticale compte dans `100vw`, la page défilerait en largeur sur ordinateur.
+
+## Fiches de saisie
+
+- **Une fiche de saisie est une page interactive** ([Contenu](../../visuel/saisie-album/contenu.md)) : son libellé et la clé de tri suivent la frappe, les fiches qu'elle cite se choisissent en tapant leur nom, l'erreur d'un enregistrement s'affiche sans quitter la saisie. Elle est lue une fois, au prérendu, et son état passe au circuit par l'état persistant des composants, sans seconde lecture ; elle s'enregistre depuis le circuit. Ses composants (cadre de la fiche, étiquettes retirables avec ajout, clé de tri, date partielle, appréciation, création d'un auteur, d'un genre ou d'un univers sur place) sont communs aux fiches de saisie.
+  - **Alternative écartée (formulaire statique, comme les listes)** : chaque frappe du titre devrait recharger la page pour en recalculer le libellé et la clé.
+- **Aucune règle de saisie dans le frontend** ([Erreurs métier, fonctionnelles et techniques](../ecritures/erreurs-metier-fonctionnelles-et-techniques.md)) : la clé de tri du mode Auto est demandée à l'API à chaque changement du titre, numérotée comme les suggestions du choix d'une fiche, et le formulaire envoie ce qui est saisi, l'enregistrement rapportant ce qui est à corriger. Une erreur métier désigne son champ par son code de règle ; les auteurs repris d'une série choisie sont demandés à l'API, qui les calcule par le domaine.
+  - **Alternative écartée (clé calculée par le frontend)** : la règle de calcul serait écrite deux fois, et la clé affichée pourrait différer de celle enregistrée.
+- **Fiche créée : la page de sa modification**, chargée de nouveau par la navigation, la fiche y étant lue telle qu'enregistrée. Une fiche modifiée reste affichée, à jour.
+- **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi.
+- **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme.
+- **Genre ou univers créé sur place** de même, depuis leur choix : le dialogue reprend le texte tapé, et, pour un univers, propose de choisir l'univers qui le contient.
+- **Fiche créée sur place, créée à l'enregistrement de la fiche qui la cite**, dans la même transaction, jamais avant : une saisie annulée n'en laisse aucune. La fiche saisie la cite par une clé qu'elle lui donne, et l'envoie avec ce qu'elle enregistre, si elle la cite encore ; les règles de la fiche créée sont celles du domaine, et une erreur est présentée avec l'enregistrement.
+  - **Alternative écartée (fiche créée dès la confirmation du dialogue)** : une saisie annulée laisserait des auteurs, genres ou univers créés pour elle, et que rien ne cite.
 
 ## En-têtes et navigation
 

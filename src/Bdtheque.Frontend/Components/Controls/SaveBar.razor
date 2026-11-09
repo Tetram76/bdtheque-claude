@@ -10,7 +10,7 @@
         </p>
         <div class="save-bar-actions">
             <Button Label="@L["Cancel"]" Href="@CancelHref" />
-            <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" />
+            <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" Disabled="Saving" />
         </div>
     </div>
 </div>
@@ -26,6 +26,10 @@
     /// <summary>The page cancelling leads back to, leaving the changes.</summary>
     [Parameter, EditorRequired]
     public string CancelHref { get; set; } = null!;
+
+    /// <summary>The record is being saved: it is not saved twice.</summary>
+    [Parameter]
+    public bool Saving { get; set; }
 
     private string StateName => State.ToString().ToLowerInvariant();
 }

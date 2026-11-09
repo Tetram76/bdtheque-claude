@@ -21,6 +21,10 @@
                 }
             </ul>
         }
+        @if (Actions is not null)
+        {
+            <div class="error-actions">@Actions</div>
+        }
     </div>
 </div>
 
@@ -41,6 +45,10 @@
     /// </summary>
     [Parameter]
     public string? Message { get; set; }
+
+    /// <summary>What the user can do about the error (e.g. reload the record, try again).</summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
 
     private string CategoryName => Problem.Category.ToString().ToLowerInvariant();
 

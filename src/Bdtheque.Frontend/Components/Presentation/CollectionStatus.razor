@@ -1,0 +1,21 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<CollectionStatus> L
+
+@* An album not in the collection, at first glance (visuel/fiche-album/contenu.md, visuel/saisie-album/contenu.md): a banner
+   filled with the color of information for a purchase intent, dashed and muted for an album catalogued only, so that the two
+   read apart; nothing for an album of the collection. *@
+@if (State is not AlbumCollectionState.InCollection)
+{
+    <p class="collection-status" data-status="@(IsIntended ? "intent" : "out")">
+        <Icon Name="@(IsIntended ? IconName.PurchaseIntent : IconName.Blocked)" />
+        <strong>@L[IsIntended ? "Intent" : "Out"]</strong>
+        <span>@L[IsIntended ? "Intent.Detail" : "Out.Detail"]</span>
+    </p>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public AlbumCollectionState State { get; set; }
+
+    private bool IsIntended => State == AlbumCollectionState.PurchaseIntent;
+}

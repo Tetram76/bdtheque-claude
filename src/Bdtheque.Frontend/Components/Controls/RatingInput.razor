@@ -1,0 +1,42 @@
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<RatingInput> L
+@inject ValueLabels Values
+
+@* The appreciation of an album in five stars, with its name (« Bien », « Pas encore noté ») and Retirer
+   (visuel/saisie-album/contenu.md; modele-metier/album.md): native radio buttons, which the arrows of the keyboard move
+   through, each drawn as a star, filled up to the one chosen. Interactive. *@
+<fieldset class="rating">
+    <legend class="rating-legend">@Legend</legend>
+    <div class="rating-line">
+        <div class="rating-stars">
+            @foreach (var rating in Enum.GetValues<AlbumRating>())
+            {
+                <label class="rating-star" data-filled="@(Value >= rating)" title="@Values.Of(rating)">
+                    <input class="visually-hidden" type="radio" name="@Id" value="@rating" checked="@(Value == rating)"
+                           @onchange="() => ValueChanged.InvokeAsync(rating)" />
+                    <Icon Name="IconName.Star" /><span class="visually-hidden">@Values.Of(rating)</span>
+                </label>
+            }
+        </div>
+        <span class="rating-name">@(Value is { } value ? Values.Of(value) : L["None"])</span>
+        @if (Value is not null)
+        {
+            <button type="button" class="rating-clear" @onclick="() => ValueChanged.InvokeAsync(null)">@L["Clear"]</button>
+        }
+    </div>
+</fieldset>
+
+@code {
+    /// <summary>The name of the group of radio buttons, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Legend { get; set; } = null!;
+
+    [Parameter]
+    public AlbumRating? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<AlbumRating?> ValueChanged { get; set; }
+}

@@ -1,0 +1,43 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<GenreCreationDialog> L
+
+@* The creation of a genre on the spot, from a record being entered that is classified in it (visuel/saisie-album/contenu.md,
+   Genres et univers): the label typed in the choice of a genre, which the user checks. The genre is created only with the
+   record that cites it, when that record is saved (choix-implementation/socle/frontend.md): the domain then applies its
+   rules, and an error is presented with the saving. Interactive. *@
+<Dialog Id="@Id" Title="@L["Title"]" Tone="DialogTone.Creation" OnClose="OnCancel">
+    <ChildContent>
+        <p class="record-creation-lead">@L["Lead"]</p>
+        <div class="record-creation-fields">
+            <Field Id="@($"{Id}-label")" Label="@L["Label"]" Context="control">
+                <input id="@control.Id" type="text" @bind="_label" />
+            </Field>
+        </div>
+    </ChildContent>
+    <Actions>
+        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" OnClick="CreateAsync" />
+    </Actions>
+</Dialog>
+
+@code {
+    private string? _label;
+
+    /// <summary>The identifier of the dialog, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The label typed in the choice of a genre.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>The genre to create with the record, to classify it in.</summary>
+    [Parameter]
+    public EventCallback<NewGenre> OnCreated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    protected override void OnInitialized() => _label = Label.Trim();
+
+    private Task CreateAsync() => OnCreated.InvokeAsync(new NewGenre(Guid.NewGuid(), _label?.Trim() ?? ""));
+}

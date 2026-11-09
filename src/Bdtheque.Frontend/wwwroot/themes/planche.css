@@ -64,6 +64,8 @@
     --color-tag: #FFFFFF;
     --color-text-on-tag: #111111;
     --color-tag-border: #111111;
+    /* A notice is an inset ringed with ink, as the captions of the cases: its blue would not stand out from white. */
+    --color-notice-border: #111111;
     /* The seven hues of the cases, in their four-color process version. */
     --color-palette-1: #FFC93C;
     --color-palette-2: #4FB0E6;

@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Add" xml:space="preserve">
+    <value>Ajouter</value>
+  </data>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Albums" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="Authors.Copied" xml:space="preserve">
+    <value>Auteurs repris de la série {0}. Les modifier ici ne change pas ceux de la série.</value>
+  </data>
+  <data name="Authors.Create" xml:space="preserve">
+    <value>Créer l&apos;auteur « {0} »</value>
+  </data>
+  <data name="Authors.Pending" xml:space="preserve">
+    <value>nouvel auteur</value>
+  </data>
+  <data name="Authors.Help" xml:space="preserve">
+    <value>Un auteur se trouve en tapant son nom ; s&apos;il n&apos;existe pas encore, il se crée sur place.</value>
+  </data>
+  <data name="Authors.Remove" xml:space="preserve">
+    <value>Retirer {0} ({1})</value>
+  </data>
+  <data name="Block.Album" xml:space="preserve">
+    <value>L&apos;album</value>
+  </data>
+  <data name="Block.Authors" xml:space="preserve">
+    <value>Les auteurs</value>
+  </data>
+  <data name="Block.Classification" xml:space="preserve">
+    <value>Genres et univers</value>
+  </data>
+  <data name="Block.Publication" xml:space="preserve">
+    <value>Parution</value>
+  </data>
+  <data name="Block.Reading" xml:space="preserve">
+    <value>Résumé, notes et appréciation</value>
+  </data>
+  <data name="Block.Volume" xml:space="preserve">
+    <value>Tomaison</value>
+  </data>
+  <data name="Breadcrumb.Unknown" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="BySeries" xml:space="preserve">
+    <value>Par la série :</value>
+  </data>
+  <data name="Changes.Close" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="Changes.Empty" xml:space="preserve">
+    <value>—</value>
+  </data>
+  <data name="Changes.Lead" xml:space="preserve">
+    <value>Ce que vous avez changé depuis l&apos;ouverture de la fiche, à saisir de nouveau une fois la fiche rechargée.</value>
+  </data>
+  <data name="Changes.Range" xml:space="preserve">
+    <value>{0} à {1}</value>
+  </data>
+  <data name="Changes.SortKey" xml:space="preserve">
+    <value>Clé de tri</value>
+  </data>
+  <data name="Changes.SortKey.Auto" xml:space="preserve">
+    <value>Auto, calculée à partir du titre</value>
+  </data>
+  <data name="Changes.Title" xml:space="preserve">
+    <value>Mes changements</value>
+  </data>
+  <data name="Classification.Help" xml:space="preserve">
+    <value>L&apos;album affiche les siens et ceux de sa série ; ceux de la série se modifient sur sa fiche. Un univers est présenté avec ses ancêtres.</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Créer l&apos;album</value>
+  </data>
+  <data name="Dates.Created" xml:space="preserve">
+    <value>Album créé le</value>
+  </data>
+  <data name="Dates.Modified" xml:space="preserve">
+    <value>, modifié le</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier l&apos;album</value>
+  </data>
+  <data name="FieldError.Album.ManualSortKeyRequiresTitle" xml:space="preserve">
+    <value>Sans titre, l&apos;album est rangé à la clé de sa série : réinitialisez la clé.</value>
+  </data>
+  <data name="FieldError.Album.PublicationMonthRange" xml:space="preserve">
+    <value>Un mois de l&apos;année.</value>
+  </data>
+  <data name="FieldError.Album.PublicationMonthRequiresYear" xml:space="preserve">
+    <value>Le mois demande son année.</value>
+  </data>
+  <data name="FieldError.Album.PublicationYearPositive" xml:space="preserve">
+    <value>Une année supérieure à zéro.</value>
+  </data>
+  <data name="FieldError.Album.SortKeyRequired" xml:space="preserve">
+    <value>Saisissez une clé, ou réinitialisez-la.</value>
+  </data>
+  <data name="FieldError.Album.TitleRequiredWithoutSeries" xml:space="preserve">
+    <value>Obligatoire pour un album sans série.</value>
+  </data>
+  <data name="FieldError.Album.VolumeNumberPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="FieldError.Album.VolumeRangeBothOrNeither" xml:space="preserve">
+    <value>Les deux, ou aucun.</value>
+  </data>
+  <data name="FieldError.Album.VolumeRangeOmnibusOnly" xml:space="preserve">
+    <value>Seule une intégrale couvre des tomes.</value>
+  </data>
+  <data name="FieldError.Album.VolumeRangeOrder" xml:space="preserve">
+    <value>Le premier tome ne dépasse pas le dernier.</value>
+  </data>
+  <data name="FieldError.Album.VolumeRangeStartPositive" xml:space="preserve">
+    <value>Le premier tome est supérieur à zéro.</value>
+  </data>
+  <data name="Genres" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="Genres.Add" xml:space="preserve">
+    <value>Ajouter un genre</value>
+  </data>
+  <data name="Genres.Create" xml:space="preserve">
+    <value>Créer le genre « {0} »</value>
+  </data>
+  <data name="Kicker.Album" xml:space="preserve">
+    <value>Identification</value>
+  </data>
+  <data name="Kicker.Authors" xml:space="preserve">
+    <value>Contributions</value>
+  </data>
+  <data name="Kicker.Classification" xml:space="preserve">
+    <value>Classement</value>
+  </data>
+  <data name="Kicker.Publication" xml:space="preserve">
+    <value>Calendrier</value>
+  </data>
+  <data name="Kicker.Reading" xml:space="preserve">
+    <value>Lecture</value>
+  </data>
+  <data name="Kicker.Volume" xml:space="preserve">
+    <value>Dans la série</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouvel album</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes personnelles</value>
+  </data>
+  <data name="Notes.Placeholder" xml:space="preserve">
+    <value>Vos annotations, visibles dans la consultation…</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Modifier l&apos;album {0}</value>
+  </data>
+  <data name="Problem.Business" xml:space="preserve">
+    <value>À corriger</value>
+  </data>
+  <data name="Problem.Functional" xml:space="preserve">
+    <value>Modifiée entre-temps</value>
+  </data>
+  <data name="Problem.Functional.Conflict" xml:space="preserve">
+    <value>L&apos;album a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
+  </data>
+  <data name="Problem.Functional.NotFound" xml:space="preserve">
+    <value>Une fiche que cite le formulaire (l&apos;album, sa série, un auteur, un genre ou un univers) a été supprimée entre-temps : rien n&apos;a été enregistré.</value>
+  </data>
+  <data name="Problem.Technical" xml:space="preserve">
+    <value>Problème technique</value>
+  </data>
+  <data name="Problem.Technical.Text" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas pu enregistrer l&apos;album. Vos changements sont toujours là, dans le formulaire : réessayez dans quelques instants.</value>
+  </data>
+  <data name="Publication" xml:space="preserve">
+    <value>Première publication</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Tomes couverts</value>
+  </data>
+  <data name="Range.End" xml:space="preserve">
+    <value>Au tome</value>
+  </data>
+  <data name="Range.Help" xml:space="preserve">
+    <value>Les deux, ou aucun.</value>
+  </data>
+  <data name="Range.Start" xml:space="preserve">
+    <value>Du tome</value>
+  </data>
+  <data name="Range.To" xml:space="preserve">
+    <value>à</value>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>Appréciation</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Pas encore noté</value>
+  </data>
+  <data name="Reload" xml:space="preserve">
+    <value>Recharger la fiche</value>
+  </data>
+  <data name="Retry" xml:space="preserve">
+    <value>Réessayer</value>
+  </data>
+  <data name="Role.Colorist.Add" xml:space="preserve">
+    <value>Ajouter un auteur aux couleurs</value>
+  </data>
+  <data name="Role.Illustrator.Add" xml:space="preserve">
+    <value>Ajouter un auteur au dessin</value>
+  </data>
+  <data name="Role.Scenarist.Add" xml:space="preserve">
+    <value>Ajouter un auteur au scénario</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Series" xml:space="preserve">
+    <value>Série</value>
+  </data>
+  <data name="Series.Help" xml:space="preserve">
+    <value>Rattaché à une série, l&apos;album peut se passer de titre : la série et le tome l&apos;identifient.</value>
+  </data>
+  <data name="Series.Help.None" xml:space="preserve">
+    <value>Sans série, l&apos;album est isolé : son titre est alors obligatoire.</value>
+  </data>
+  <data name="Series.Placeholder" xml:space="preserve">
+    <value>Aucune série : album isolé</value>
+  </data>
+  <data name="ShowChanges" xml:space="preserve">
+    <value>Voir mes changements</value>
+  </data>
+  <data name="SortKey.Help.None" xml:space="preserve">
+    <value>Calculée à partir du titre, article reporté à la fin ; la modifier la fige.</value>
+  </data>
+  <data name="SortKey.Help.Series" xml:space="preserve">
+    <value>Sans titre propre, l&apos;album est rangé à la clé de sa série.</value>
+  </data>
+  <data name="SortKey.Placeholder" xml:space="preserve">
+    <value>Calculée à partir du titre</value>
+  </data>
+  <data name="SortKey.Placeholder.Series" xml:space="preserve">
+    <value>Sans titre, l&apos;album est rangé à la clé de la série</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Résumé</value>
+  </data>
+  <data name="Summary.Placeholder" xml:space="preserve">
+    <value>Ce que raconte l&apos;album…</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Title.Note.Optional" xml:space="preserve">
+    <value>(facultatif dans une série)</value>
+  </data>
+  <data name="Title.Note.Required" xml:space="preserve">
+    <value>(obligatoire sans série)</value>
+  </data>
+  <data name="Title.Placeholder" xml:space="preserve">
+    <value>Titre de l&apos;album</value>
+  </data>
+  <data name="Title.Placeholder.Series" xml:space="preserve">
+    <value>Sans titre, l&apos;album prend celui de la série</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Type.Omnibus" xml:space="preserve">
+    <value>Intégrale</value>
+  </data>
+  <data name="Type.Regular" xml:space="preserve">
+    <value>Régulier</value>
+  </data>
+  <data name="Type.SpecialIssue" xml:space="preserve">
+    <value>Hors-série</value>
+  </data>
+  <data name="Universes" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Universes.Add" xml:space="preserve">
+    <value>Ajouter un univers</value>
+  </data>
+  <data name="Universes.Create" xml:space="preserve">
+    <value>Créer l&apos;univers « {0} »</value>
+  </data>
+  <data name="Volume" xml:space="preserve">
+    <value>Tome</value>
+  </data>
+  <data name="Volume.Omnibus" xml:space="preserve">
+    <value>Numéro</value>
+  </data>
+</root>

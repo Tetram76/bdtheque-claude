@@ -1,0 +1,15 @@
+@* A short information within a block, which is no error (e.g. the authors of an album just taken from its series,
+   visuel/saisie-album/contenu.md): an icon and its text, in a frame of the information color. A box within the page, never a
+   control: the radius of a tile. *@
+<div class="notice" role="status">
+    <Icon Name="Icon" />
+    <p class="notice-text">@ChildContent</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IconName Icon { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

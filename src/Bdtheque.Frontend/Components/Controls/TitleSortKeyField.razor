@@ -1,0 +1,145 @@
+@using Bdtheque.Contracts.Admin
+@implements IDisposable
+@inject ApiClient Api
+@inject IStringLocalizer<TitleSortKeyField> L
+
+@* The sort key of a title, always visible in the entry form (fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri),
+   marked Auto or Manuelle: in the automatic mode, the key the domain computes from the title, asked for to the API at each
+   change of the title, never computed here; typing a key of one's own fixes it, and Réinitialiser computes it again from the
+   title. Interactive. *@
+<div class="sort-key">
+    <div class="sort-key-heading">
+        <label class="sort-key-label" for="@Id">@L["Label"]</label>
+        <span class="sort-key-mode" data-mode="@(IsManual ? "manual" : "auto")">@L[IsManual ? "Manual" : "Auto"]</span>
+        @if (IsManual)
+        {
+            <button type="button" class="sort-key-reset" @onclick="ResetAsync">@L["Reset"]</button>
+        }
+    </div>
+    <input id="@Id" type="text" value="@Shown" placeholder="@(HasTitle ? null : UntitledPlaceholder)" aria-describedby="@DescribedBy"
+           aria-invalid="@(Error is null ? null : "true")" @oninput="EnterAsync" />
+    @if (Error is not null)
+    {
+        <p class="sort-key-error" id="@ErrorId"><Icon Name="IconName.Alert" />@Error</p>
+    }
+    <p class="sort-key-help" id="@HelpId">@Help</p>
+</div>
+
+@code {
+    // The number of the title whose key is shown: each change of the title gets the next one, before anything is awaited,
+    // and only the answer for the last title is shown (as the suggestions of a RecordPicker, #275).
+    private int _titleNumber;
+    private string? _title;
+    private string? _computed;
+    private readonly CancellationTokenSource _disposal = new();
+
+    /// <summary>The identifier of the field, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>The key entered by hand; <c>null</c> for the automatic mode, where the key follows the title.</summary>
+    [Parameter]
+    public string? ManualKey { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ManualKeyChanged { get; set; }
+
+    /// <summary>The key the record was read with, shown in the automatic mode until the title changes.</summary>
+    [Parameter]
+    public string? StoredKey { get; set; }
+
+    /// <summary>What stands in the field for a record without title (e.g. an album sorted by its series).</summary>
+    [Parameter, EditorRequired]
+    public string UntitledPlaceholder { get; set; } = null!;
+
+    /// <summary>The help of a record without title.</summary>
+    [Parameter, EditorRequired]
+    public string UntitledHelp { get; set; } = null!;
+
+    /// <summary>What to correct: the field is then in error.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    private bool IsManual => ManualKey is not null;
+
+    private bool HasTitle => !string.IsNullOrWhiteSpace(Title);
+
+    private string? Shown => IsManual ? ManualKey : _computed;
+
+    private string Help => (IsManual, HasTitle) switch
+    {
+        (true, _) => L["Help.Manual"],
+        (false, true) => L["Help.Auto"],
+        _ => UntitledHelp,
+    };
+
+    private string ErrorId => $"{Id}-error";
+
+    private string HelpId => $"{Id}-help";
+
+    private string DescribedBy => Error is null ? HelpId : $"{ErrorId} {HelpId}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_titleNumber == 0)
+        {
+            // The key the record was read with: the title has not changed yet.
+            _titleNumber = 1;
+            _title = Title;
+            _computed = StoredKey;
+            return;
+        }
+        if (Title != _title)
+        {
+            _title = Title;
+            await ComputeAsync();
+        }
+    }
+
+    private async Task ComputeAsync()
+    {
+        var number = ++_titleNumber;
+        if (!HasTitle)
+        {
+            _computed = null;
+            return;
+        }
+
+        try
+        {
+            var key = await Api.GetAsync<TitleSortKey>($"/admin/sort-keys/title?title={Uri.EscapeDataString(_title!)}", _disposal.Token);
+            if (number == _titleNumber)
+                _computed = key.SortKey;
+        }
+        catch (ApiProblemException) when (number == _titleNumber)
+        {
+            // Shown again at the next change of the title; the key stored is the domain's anyway, whatever is shown.
+            _computed = null;
+        }
+        catch (ApiProblemException)
+        {
+            // The key of an earlier title no longer matters.
+        }
+        catch (OperationCanceledException) when (_disposal.IsCancellationRequested)
+        {
+            // The form is gone.
+        }
+    }
+
+    private Task EnterAsync(ChangeEventArgs args) => ManualKeyChanged.InvokeAsync(args.Value as string ?? "");
+
+    private async Task ResetAsync()
+    {
+        await ManualKeyChanged.InvokeAsync(null);
+        await ComputeAsync();
+    }
+
+    public void Dispose()
+    {
+        _disposal.Cancel();
+        _disposal.Dispose();
+    }
+}

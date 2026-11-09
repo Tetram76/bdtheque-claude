@@ -225,6 +225,12 @@ public sealed class ValidationDataLoader(HttpClient client)
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
         await data.IntentOnAlbumAsync(convoy);
 
+        // The cases of the entry form of an album (visuel/saisie-album/contenu.md): a sort key entered by hand, a universe
+        // two levels down, shown with its ancestors, and no author nor series yet, so that attaching it to a series with
+        // authors credits them and says so.
+        await data.AlbumAsync(new AlbumContent("Les Carnets de Port-Grisé", "Port-Grisé (carnets)", null, AlbumType.Regular, false, null, null, null,
+            2019, null, null, "À relier à sa série.", null, [humour], [greyPort], []));
+
         // The latest writes, which the home page of the administration presents: a record modified, under its new name,
         // and a record deleted, left out of the latest changes.
         await data.RenameGenreAsync(western, "Western spaghetti");
@@ -341,7 +347,7 @@ public sealed class ValidationDataLoader(HttpClient client)
         string title, SeriesStatus? status, SeriesEditionTemplate template, Guid[] genres, Guid[] universes, ContributionContent[] credits) =>
         new(title, null, status, null, false, false, false, null, null, template, genres, universes, credits);
 
-    // Without contributions of its own, an album attached to a series gets those of the series.
+    // Without contributions of its own, an album attached to a series gets those of the series (AlbumAsync).
     private static AlbumContent Album(string? title, Guid series, int? volume, int year, int? month = null, AlbumRating? rating = null) =>
         new(title, null, series, AlbumType.Regular, false, volume, null, null, year, month, null, null, rating, [], [], []);
 
@@ -420,8 +426,18 @@ public sealed class ValidationDataLoader(HttpClient client)
         public async Task<Guid> SeriesAsync(SeriesContent content) =>
             (await PostAsync<SeriesContent, SeriesForm>("/admin/series", content)).Id;
 
+        // As the entry form does once the series is chosen, an album attached to a series gets the authors it gives it
+        // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
         public async Task<AlbumWrite> AlbumAsync(AlbumContent content)
         {
+            if (content.SeriesId is { } series)
+            {
+                var given = await PostAsync<SeriesAlbumContributionsRequest, SeriesAlbumContributions>(
+                    $"/admin/series/{series}/album-contributions", new SeriesAlbumContributionsRequest(true, null, content.Contributions));
+                if (given.Applied)
+                    content = content with { Contributions = [.. given.Contributions.Select(c => new ContributionContent(c.Author.Id, c.Role))] };
+            }
+
             var album = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", content);
             return new AlbumWrite(album.Id, album.Version);
         }
