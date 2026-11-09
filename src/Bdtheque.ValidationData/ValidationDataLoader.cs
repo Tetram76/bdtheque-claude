@@ -226,6 +226,11 @@ public sealed class ValidationDataLoader(HttpClient client)
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
         await data.IntentOnAlbumAsync(convoy);
 
+        // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
+        // whole album (visuel/listes/saisie-selon-l-entite.md).
+        var tide = await data.AlbumAsync(OneShot("La Marée des phares", 2024, 9, [adventure], [], [Credit(arnaud, ContributionRole.Scenarist), Credit(keita, ContributionRole.Illustrator)]));
+        await data.IntentOnEditionAsync(tide, new PurchaseIntentEditionContent(horizon.Id, null, 2024, null, null, null, null, null, null, null, true));
+
         // The cases of the entry form of an album (visuel/saisie-album/contenu.md): a sort key entered by hand, a universe
         // two levels down, shown with its ancestors, and no author nor series yet, so that attaching it to a series with
         // authors credits them and says so.

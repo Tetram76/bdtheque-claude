@@ -1,0 +1,150 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the
+   page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen: the room the rows have depends on
+   the margins of the page and of the block, which a theme sets. Mobile-first, each row holds on two lines, the thumbnail
+   on the left: the album and the actions, then what the intent targets and its date, the date carrying the name of its
+   column. A list wide enough for those columns, the fixed ones and at least 12rem for the album, is a table, what the
+   intent targets taking the room left and wrapping in it; wider still, the table adds the membership of the collection
+   (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
+.intent-rows {
+    container: intent-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
+       so that their columns line up. It holds « Confirmer l'achat » and the « ⋯ » button. */
+    --intent-actions-width: 13rem;
+}
+
+.intent-row {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    grid-template-areas: "cover main actions" "cover meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.intent-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.intent-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+}
+
+.intent-cover {
+    grid-area: cover;
+    --cover-width: 2.25rem;
+}
+
+.intent-main {
+    grid-area: main;
+    align-self: center;
+    min-inline-size: 0;
+}
+
+.intent-label {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+/* The tag, then what it targets beside it, wrapping under it when the room lacks. */
+.intent-target {
+    grid-area: target;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    min-inline-size: 0;
+}
+
+.intent-target-detail {
+    min-inline-size: 0;
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.intent-target-edition {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+}
+
+.intent-row-head .intent-target {
+    display: block;
+}
+
+.intent-collection {
+    display: none;
+    grid-area: collection;
+}
+
+.intent-created {
+    grid-area: created;
+}
+
+.intent-caption {
+    color: var(--color-text-muted);
+}
+
+/* The dates of a row, not the head of their column, which keeps the size of the other heads (#319). */
+.intent-row:not(.intent-row-head) .intent-created {
+    font-variant-numeric: tabular-nums;
+}
+
+.intent-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container intent-rows (min-width: 42rem) {
+    .intent-row {
+        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(0, 1.4fr) 6.75rem var(--intent-actions-width);
+        grid-template-areas: "cover main target created actions";
+        align-items: center;
+    }
+
+    .intent-row-head {
+        display: grid;
+    }
+
+    .intent-meta {
+        display: contents;
+        font-size: inherit;
+    }
+
+    .intent-caption {
+        display: none;
+    }
+
+    .intent-row:not(.intent-row-head) .intent-created {
+        color: var(--color-text-muted);
+        font-size: var(--font-size-small);
+    }
+}
+
+@container intent-rows (min-width: 60rem) {
+    .intent-row {
+        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(0, 1.4fr) 10.5rem 6.75rem var(--intent-actions-width);
+        grid-template-areas: "cover main target collection created actions";
+    }
+
+    .intent-collection {
+        display: block;
+    }
+}

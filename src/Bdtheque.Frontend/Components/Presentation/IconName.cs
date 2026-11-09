@@ -31,4 +31,6 @@ public enum IconName
     Universe,
     Star,
     Copy,
+    Check,
+    Swap,
 }

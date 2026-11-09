@@ -2,7 +2,8 @@
 @inject DisplayFormatter Format
 
 @* The heading of a list of the administration (visuel/liste-albums/contenu.md): its fil d'Ariane, its title followed by the
-   number of its records, and the creation of a new record, put forward and reduced to its icon on a smartphone. *@
+   number of its records, and the creation of a new record, put forward and reduced to its icon on a smartphone; for records
+   entered from another one, a mention of where they are entered in its place (visuel/listes/principes-communs.md). *@
 <div class="list-heading">
     <Breadcrumb Items="@([new BreadcrumbItem(L["Administration"], AppPaths.AdminHome), new BreadcrumbItem(Title)])" />
     <div class="list-heading-title">
@@ -14,6 +15,10 @@
         @if (NewHref is not null)
         {
             <Button Href="@NewHref" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@(NewLabel!)" IconOnlyOnSmartphone="true" />
+        }
+        else if (Note is not null)
+        {
+            <p class="list-heading-note">@Note</p>
         }
     </div>
 </div>
@@ -33,4 +38,8 @@
     /// <summary>The label of the creation (e.g. « Nouvel album »), required with <see cref="NewHref"/>.</summary>
     [Parameter]
     public string? NewLabel { get; set; }
+
+    /// <summary>Where the records of the type are entered, in place of a creation they do not have.</summary>
+    [Parameter]
+    public string? Note { get; set; }
 }

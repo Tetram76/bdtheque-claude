@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T21:30:00Z }
 ---
 
 # Organisation de l'API
@@ -53,6 +53,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
 - **Couleurs du jour en dehors du dashboard**, celles de la couverture de l'édition à la une, que toute page du thème « La couverture du jour » demande ; le tirage du jour est commun aux deux ([Édition « À la une » : mise en œuvre](../domaine/edition-a-la-une-mise-en-oeuvre.md)).
 - **Contrôles de l'accueil de l'administration** : ceux seuls que définit la spécification, l'ISBN étant vérifié en mémoire par le validateur du domaine, qu'aucun SQL ne traduit ([Validation de l'ISBN](../domaine/validation-de-l-isbn.md)).
 - **Listes de l'administration** : recherche, navigation et filtres partagés avec la consultation ; l'**état dans la collection** est une expression unique que la projection et le filtre partagent ; la réponse **nomme les fiches de ses filtres**, pour que l'écran les présente sans autre requête.
+  - **Conversion d'une intention d'achat proposée d'après la liste elle-même** : chaque intention de la liste de l'administration dit si elle se convertit vers l'autre cible, ce que l'API calcule par la même règle que le domaine ([Intention d'achat](../../fonctionnel/regles-metier/intention-d-achat.md) : toujours pour une intention sur l'album, pour une intention sur une édition seulement si c'est la seule de l'album). Le frontend n'offre ainsi que la conversion que le domaine acceptera, sans y écrire la règle ([Frontend](../socle/frontend.md), aucune règle de saisie).
+    - **Alternative écartée (conversion toujours offerte, refusée à l'enregistrement)** : l'utilisateur ne l'apprendrait qu'après l'avoir demandée, pour un refus que la ligne savait déjà.
 
 ## Pagination et contrats
 

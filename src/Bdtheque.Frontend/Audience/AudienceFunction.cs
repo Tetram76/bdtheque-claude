@@ -182,6 +182,22 @@ public static class AudienceFunctions
     /// <summary>The dialog of the merge of an edition, opened from its row, with the search of the other edition.</summary>
     public static readonly AudienceFunction AdminEditionsMerge = new("admin.editions.merge", AudienceFunctionKind.Action);
 
+    /// <summary>The list of the purchase intents of the administration (visuel/listes/liste-par-liste.md).</summary>
+    public static readonly AudienceFunction AdminPurchaseIntents = new("admin.purchase-intents", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/PurchaseIntentListQuery.cs);
+    // without filters nor navigation by initial, an intent being no record to merge.
+
+    public static readonly AudienceFunction AdminPurchaseIntentsSearch = new("admin.purchase-intents.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminPurchaseIntentsPage = new("admin.purchase-intents.page", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the removal of an intent, opened from its row.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentsRemoval = new("admin.purchase-intents.removal", AudienceFunctionKind.Action);
+
+    /// <summary>The removal of an intent, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentsRemoved = new("admin.purchase-intents.removed", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -193,6 +209,7 @@ public static class AudienceFunctions
         AdminSeriesMerge, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
         AdminAuthorsMerge, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
         AdminPublishersMerge, AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
-        AdminEditionsDeleted, AdminEditionsMerge,
+        AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsPage,
+        AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved,
     ];
 }

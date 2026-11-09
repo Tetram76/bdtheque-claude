@@ -22,6 +22,18 @@
     color: var(--color-text-secondary);
 }
 
+.tag[data-variant="accent"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.tag[data-variant="outlined"] {
+    border-color: var(--color-text);
+    background: transparent;
+    color: var(--color-text);
+}
+
 .tag ::deep .icon {
     flex: none;
     inline-size: 1em;

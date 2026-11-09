@@ -102,12 +102,19 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
-    public async Task PurchaseIntents_TargetWholeAlbumsAndEditions()
+    public async Task PurchaseIntents_TargetWholeAlbumsAndEditions_OfAlbumsInAndOutsideTheCollection()
     {
-        var intents = await _client.GetFromJsonAsync<Page<PurchaseIntentListItem>>("/catalog/purchase-intents?pageSize=100");
+        var intents = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.PurchaseIntentAdminListItem>>(
+            "/admin/purchase-intents?pageSize=100"))!.Items;
 
-        Assert.Contains(intents!.Items, intent => intent.Edition is null);
-        Assert.Contains(intents.Items, intent => intent.Edition is not null && intent.Album.IsInCollection);
+        // What the list of the intents presents (visuel/listes/liste-par-liste.md): an intent on the whole album, one on an
+        // edition of an album of the collection, which has others, and one on the only edition of an album outside it, which
+        // may turn into one on the album; covers and generic visuals.
+        Assert.Contains(intents, intent => intent.Edition is null);
+        Assert.Contains(intents, intent => intent is { Edition: not null, Album.IsInCollection: true, IsConvertible: false });
+        Assert.Contains(intents, intent => intent is { Edition: not null, Album.IsInCollection: false, IsConvertible: true });
+        Assert.Contains(intents, intent => intent.Cover is not null);
+        Assert.Contains(intents, intent => intent.Cover is null);
     }
 
     [Fact]
