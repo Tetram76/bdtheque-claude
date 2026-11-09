@@ -2,7 +2,7 @@
 
 ## 2026-11-09
 
-* **Plan** : #210 découpé en trois sous-tickets : structure de la fiche d'un album et éléments que réutilisent les fiches d'une série et d'un auteur (#321), visuels et éditions (#322), intentions d'achat et reste de la série (#323). **Choix** : fiche d'un album : auteurs d'un rôle repliés au-delà de six noms par une divulgation du navigateur, sans action suivie ; entrée du menu courante sur les pages de sa section avant que sa propre page existe ; valeurs des énumérations nommées en un seul lieu ; couleurs du jour fixées par l'application des fiches dans les tests ; données de validation : un rôle de plus de six auteurs (#PR).
+* **Plan** : #210 découpé en trois sous-tickets : structure de la fiche d'un album et éléments que réutilisent les fiches d'une série et d'un auteur (#321), visuels et éditions (#322), intentions d'achat et reste de la série (#323). **Choix** : fiche d'un album : auteurs d'un rôle repliés au-delà de six noms par une divulgation du navigateur, sans action suivie ; entrée du menu courante sur les pages de sa section avant que sa propre page existe ; valeurs des énumérations nommées en un seul lieu ; couleurs du jour fixées par l'application des fiches dans les tests ; données de validation : un rôle de plus de six auteurs (#324).
 
 ## 2026-11-08
 
