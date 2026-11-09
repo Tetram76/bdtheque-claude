@@ -422,4 +422,50 @@ public sealed class SeriesTests
         Assert.Throws<ArgumentOutOfRangeException>(
             () => series.SetTemplateContributions([(new Author("Hergé", null, null), (ContributionRole)42)]));
     }
+
+    [Fact]
+    public void ContributionsForAlbum_WithoutCreditedRoles_GivesTheWholeTemplate()
+    {
+        var (series, scenarist, illustrator) = SeriesWithTemplate();
+
+        var contributions = series.ContributionsForAlbum([]);
+
+        Assert.Equal(
+            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
+            contributions.Select(c => (c.Author.Id, c.Role)).OrderBy(c => c.Role));
+    }
+
+    [Fact]
+    public void ContributionsForAlbum_RoleAlreadyCredited_KeepsItForTheAlbum()
+    {
+        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: role by role, a role where
+        // the album already has authors keeps its own.
+        var (series, _, illustrator) = SeriesWithTemplate();
+
+        var contributions = series.ContributionsForAlbum([ContributionRole.Scenarist]);
+
+        Assert.Equal([(illustrator.Id, ContributionRole.Illustrator)], contributions.Select(c => (c.Author.Id, c.Role)));
+    }
+
+    [Fact]
+    public void ContributionsForAlbum_SeveralAuthorsForARole_GivesThemAll()
+    {
+        var series = new Series("Tintin");
+        var first = new Author(null, null, "Hergé");
+        var second = new Author(null, null, "Jacobs");
+        series.SetTemplateContributions([(first, ContributionRole.Illustrator), (second, ContributionRole.Illustrator)]);
+
+        var contributions = series.ContributionsForAlbum([ContributionRole.Scenarist]);
+
+        Assert.Equal(new[] { first.Id, second.Id }.Order(), contributions.Select(c => c.Author.Id).Order());
+    }
+
+    private static (Series Series, Author Scenarist, Author Illustrator) SeriesWithTemplate()
+    {
+        var series = new Series("Tintin");
+        var scenarist = new Author(null, null, "Hergé");
+        var illustrator = new Author(null, null, "Jacobs");
+        series.SetTemplateContributions([(scenarist, ContributionRole.Scenarist), (illustrator, ContributionRole.Illustrator)]);
+        return (series, scenarist, illustrator);
+    }
 }

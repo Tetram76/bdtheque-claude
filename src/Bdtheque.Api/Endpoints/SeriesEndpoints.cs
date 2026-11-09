@@ -32,6 +32,7 @@ internal static class SeriesEndpoints
         var series = admin.MapGroup("/series");
         series.MapGet("/", ListForAdministrationAsync);
         series.MapGet("/{id:guid}", GetAsync);
+        series.MapGet("/{id:guid}/album-contributions", GetAlbumContributionsAsync);
         series.MapPost("/", CreateAsync);
         series.MapPut("/{id:guid}", UpdateAsync);
         series.MapDeletion<Series>(DeletionLinks);
@@ -91,6 +92,29 @@ internal static class SeriesEndpoints
             id, series.Title, EnumMapping.Map<ContractEnums.SeriesStatus>(series.Status), series.TheoreticalVolumeCount, series.IsComplete,
             series.Summary, series.PersonalNotes, series.Publisher, series.PublisherCollection, series.Genres, universes,
             series.Contributions, overview, albums, series.CreatedAt, series.ModifiedAt);
+    }
+
+    /// <summary>
+    /// The authors the series gives an album attached to it, computed by the domain: the entry form of the album asks for them as
+    /// soon as the series is chosen (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+    /// </summary>
+    /// <param name="creditedRoles">The roles where the album already has authors, which keep theirs.</param>
+    private static async Task<IReadOnlyList<SeriesAlbumContribution>> GetAlbumContributionsAsync(
+        Guid id, BdthequeDbContext context, CancellationToken cancellationToken, ContractEnums.ContributionRole[]? creditedRoles = null)
+    {
+        var series = await context.Series.AsNoTracking()
+                         .Include(s => s.TemplateContributions).ThenInclude(c => c.Author)
+                         .SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
+                     ?? throw new EntityNotFoundException(typeof(Series), id);
+
+        return
+        [
+            .. series.ContributionsForAlbum([.. (creditedRoles ?? []).Select(r => EnumMapping.Map<DomainEnums.ContributionRole>(r)!.Value)])
+                .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
+                .Select(c => new SeriesAlbumContribution(
+                    new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym),
+                    EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value)),
+        ];
     }
 
     /// <summary>The series found by their title, narrowed by the cross filters (choix-implementation/api/recherche.md).</summary>

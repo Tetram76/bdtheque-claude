@@ -120,6 +120,18 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// as the form sends them
     /// whole. A contribution already credited is kept as it is; nothing is changed if any is refused.
     /// </summary>
+    /// <summary>
+    /// The authors the series gives an album attached to it, role by role: those of its template for each role where the album
+    /// has no author yet (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md). The entry form asks for
+    /// them as soon as the series is chosen; saving the album copies nothing.
+    /// </summary>
+    /// <param name="creditedRoles">The roles where the album already has authors, which keep theirs.</param>
+    public IReadOnlyList<Contribution> ContributionsForAlbum(IReadOnlyCollection<ContributionRole> creditedRoles)
+    {
+        ArgumentNullException.ThrowIfNull(creditedRoles);
+        return [.. _templateContributions.Where(c => !creditedRoles.Contains(c.Role))];
+    }
+
     public void SetTemplateContributions(IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions) =>
         Contribution.Replace(_templateContributions, contributions, (author, role) => Contribution.ForSeriesTemplate(this, author, role));
 

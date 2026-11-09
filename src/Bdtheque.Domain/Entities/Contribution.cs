@@ -7,7 +7,7 @@ namespace Bdtheque.Domain.Entities;
 /// <summary>
 /// A single role credited to an author (Contribution), belonging either to a specific
 /// <see cref="Entities.Album"/> (a real credit) or to a <see cref="Entities.Series"/> (a
-/// template credit copied onto an album attached to the series when it has none yet) —
+/// template credit given to an album attached to the series, for each role where it has no author yet) —
 /// never both, never neither.
 /// </summary>
 public sealed class Contribution : EntityBase
@@ -54,8 +54,8 @@ public sealed class Contribution : EntityBase
     }
 
     /// <summary>
-    /// Creates a template contribution on a series, copied onto an album attached to the series
-    /// when it has no contribution of its own yet.
+    /// Creates a template contribution on a series, given to an album attached to the series
+    /// for each role where it has no author yet.
     /// </summary>
     internal static Contribution ForSeriesTemplate(Series series, Author author, ContributionRole role)
     {

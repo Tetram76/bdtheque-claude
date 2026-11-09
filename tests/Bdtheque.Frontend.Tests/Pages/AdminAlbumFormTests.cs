@@ -252,19 +252,6 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_ThatTookTheAuthorsOfTheSeries_SaysSo()
-    {
-        var page = OpenAlbum();
-        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
-
-        foreach (var remove in page.FindAll(".album-role .tag-remove").ToList())
-            page.Find(".album-role .tag-remove").Click();
-        page.Find("form").Submit();
-
-        page.WaitForAssertion(() => Assert.Contains("Repris de la série Tintin", page.Find(".notice").TextContent));
-    }
-
-    [Fact]
     public void Create_LeadsToTheFormOfTheAlbumCreated()
     {
         var page = OpenNew();
@@ -352,6 +339,37 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Series_Chosen_TakesItsAuthorsAtOnce_AndSaysSo()
+    {
+        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: as soon as the series is chosen.
+        var guarnido = Guid.NewGuid();
+        _api.Answers[$"/admin/series/{OtherSeriesId}/album-contributions"] = new List<SeriesAlbumContribution>
+        {
+            new(new AuthorListItem(guarnido, "Guarnido", "Juanjo", null), ContributionRole.Illustrator),
+        };
+        var page = OpenNew();
+
+        await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
+
+        Assert.Contains($"/admin/series/{OtherSeriesId}/album-contributions", _api.Requested);
+        Assert.Equal("Juanjo Guarnido", page.FindAll(".album-role")[1].QuerySelector(".tag")!.TextContent.Trim());
+        Assert.Contains("Repris de la série Blacksad", page.Find(".notice").TextContent);
+        Assert.Empty(_api.Written);
+    }
+
+    [Fact]
+    public async Task Series_Chosen_ForAnAlbumWithAuthors_KeepsThemForTheirRoles()
+    {
+        _api.Answers[$"/admin/series/{OtherSeriesId}/album-contributions"] = new List<SeriesAlbumContribution>();
+        var page = OpenAlbum();
+
+        await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
+
+        Assert.Contains($"/admin/series/{OtherSeriesId}/album-contributions?creditedRoles=Scenarist&creditedRoles=Illustrator", _api.Requested);
+        Assert.Empty(page.FindAll(".notice"));
+    }
+
+    [Fact]
     public void LoadError_IsPresentedInsteadOfTheForm()
     {
         _api.Failures[$"/admin/albums/{AlbumId}"] = HttpStatusCode.InternalServerError;
@@ -383,6 +401,12 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminNewAlbum);
         return Render<AdminAlbumForm>(parameters => parameters.AddCascadingValue(_request.Context));
+    }
+
+    private static Task ChooseSeriesAsync(IRenderedComponent<AdminAlbumForm> page, RecordOption series)
+    {
+        var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Series);
+        return picker.InvokeAsync(() => picker.Instance.ValueChanged.InvokeAsync(series));
     }
 
     private static SeriesDetail Series(Guid id, string title, string[] genres, string[] universes) => new(

@@ -22,7 +22,7 @@
     <value>Albums</value>
   </data>
   <data name="Authors.Copied" xml:space="preserve">
-    <value>Repris de la série {0}, l&apos;album n&apos;ayant encore aucun auteur. Ils sont à l&apos;album désormais : les modifier ne touche pas la série.</value>
+    <value>Repris de la série {0}, pour les rôles où l&apos;album n&apos;avait encore aucun auteur. Ils sont à l&apos;album désormais : les modifier ne touche pas la série.</value>
   </data>
   <data name="Authors.Create" xml:space="preserve">
     <value>Créer l&apos;auteur « {0} »</value>
@@ -207,23 +207,8 @@
   <data name="Rating" xml:space="preserve">
     <value>Appréciation</value>
   </data>
-  <data name="Rating.Average" xml:space="preserve">
-    <value>Moyen</value>
-  </data>
-  <data name="Rating.Good" xml:space="preserve">
-    <value>Bien</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Pas encore noté</value>
-  </data>
-  <data name="Rating.Poor" xml:space="preserve">
-    <value>Mauvais</value>
-  </data>
-  <data name="Rating.VeryGood" xml:space="preserve">
-    <value>Très bien</value>
-  </data>
-  <data name="Rating.VeryPoor" xml:space="preserve">
-    <value>Très mauvais</value>
   </data>
   <data name="Reload" xml:space="preserve">
     <value>Recharger la fiche</value>
@@ -231,20 +216,11 @@
   <data name="Retry" xml:space="preserve">
     <value>Réessayer</value>
   </data>
-  <data name="Role.Colorist" xml:space="preserve">
-    <value>Couleurs</value>
-  </data>
   <data name="Role.Colorist.Add" xml:space="preserve">
     <value>Ajouter un auteur aux couleurs</value>
   </data>
-  <data name="Role.Illustrator" xml:space="preserve">
-    <value>Dessin</value>
-  </data>
   <data name="Role.Illustrator.Add" xml:space="preserve">
     <value>Ajouter un auteur au dessin</value>
-  </data>
-  <data name="Role.Scenarist" xml:space="preserve">
-    <value>Scénario</value>
   </data>
   <data name="Role.Scenarist.Add" xml:space="preserve">
     <value>Ajouter un auteur au scénario</value>

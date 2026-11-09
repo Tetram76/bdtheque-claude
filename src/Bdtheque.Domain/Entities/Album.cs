@@ -56,25 +56,19 @@ public sealed class Album : EntityBase, IAggregateRoot
     private readonly List<Edition> _editions = [];
     public IReadOnlyCollection<Edition> Editions => _editions;
 
-    // Read-only from outside: only the album's own operations credit an author. The copy of the
-    // series' contributions depends on the album having none, which the persistence layer
-    // guarantees by always loading this collection with the album.
+    // Read-only from outside: only the album's own operations credit an author.
     private readonly List<Contribution> _contributions = [];
     public IReadOnlyCollection<Contribution> Contributions => _contributions;
 
     // EF Core parameterless constructor
     private Album() { }
 
-    /// <summary>
-    /// Creates an album, attached to <paramref name="series"/> if any: having no contribution yet,
-    /// it receives those of the series template
-    /// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
-    /// </summary>
+    /// <summary>Creates an album without contributions, attached to <paramref name="series"/> if any.</summary>
     public Album(string? title, Series? series) : this(title, series, []) { }
 
     /// <summary>
-    /// Creates an album credited with <paramref name="contributions"/>; without any, an album
-    /// attached to a series receives those of the series template.
+    /// Creates an album credited with <paramref name="contributions"/>, and with them only: the authors a series gives it are
+    /// taken by the form as soon as the series is chosen (<see cref="Entities.Series.ContributionsForAlbum"/>).
     /// </summary>
     public Album(string? title, Series? series, IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions)
     {
@@ -93,15 +87,14 @@ public sealed class Album : EntityBase, IAggregateRoot
     }
 
     /// <summary>
-    /// Sets the title, the series and the contributions together, as the form sends them: each
-    /// depends on another — the title is required without a series, and attaching an album with no
-    /// contribution copies those of the series — so that separate setters would succeed or fail
-    /// depending on the order they are called in. Nothing is changed if any of them is refused.
+    /// Sets the title, the series and the contributions together, as the form sends them: the title
+    /// is required without a series, so that separate setters would succeed or fail depending on the
+    /// order they are called in. Nothing is changed if any of them is refused.
     /// </summary>
     /// <param name="contributions">
     /// The album's contributions, replacing the current ones; a contribution already credited is
-    /// kept as it is. Empty while the album is attached to another series than its current one,
-    /// they are copied from the template of that series.
+    /// kept as it is. Attaching the album to a series copies nothing: authors removed from the form
+    /// after they were taken from the series do not come back.
     /// </param>
     public void SetTitleSeriesAndContributions(
         string? title, Series? series, IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions)
@@ -110,7 +103,8 @@ public sealed class Album : EntityBase, IAggregateRoot
         EnsureTitleOrSeries(normalizedTitle, series);
 
         Contribution.Replace(_contributions, contributions, (author, role) => Contribution.ForAlbum(this, author, role));
-        AttachSeries(series);
+        Series = series;
+        SeriesId = series?.Id;
         ApplyTitle(normalizedTitle);
     }
 
@@ -129,22 +123,6 @@ public sealed class Album : EntityBase, IAggregateRoot
         {
             ApplySortKey(TitleSortKeyCalculator.Compute(Title));
         }
-    }
-
-    // Attaching to another series than the current one, while the album has no contribution, gives
-    // it the contributions of the series template as a starting point; staying in the same series
-    // copies nothing, so that contributions removed since never come back.
-    private void AttachSeries(Series? series)
-    {
-        var attaching = series is not null && series.Id != SeriesId;
-        Series = series;
-        SeriesId = series?.Id;
-        if (!attaching || _contributions.Count > 0)
-            return;
-
-        // The template's authors must be loaded: the copy credits the same authors.
-        foreach (var template in series!.TemplateContributions)
-            _contributions.Add(Contribution.ForAlbum(this, template.Author, template.Role));
     }
 
     public void SetSortKey(string sortKey)

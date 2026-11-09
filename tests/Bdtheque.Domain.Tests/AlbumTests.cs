@@ -451,62 +451,23 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void Constructor_InASeriesWithTemplateContributions_CopiesThemOntoTheAlbum()
+    public void Constructor_InASeriesWithTemplateContributions_CopiesNothing()
     {
-        var (series, scenarist, illustrator) = SeriesWithTemplate();
+        // The form takes the authors of the series as soon as the series is chosen
+        // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md): the album
+        // is credited with those it is given, and nothing more.
+        var (series, _, _) = SeriesWithTemplate();
 
         var album = new Album(null, series);
 
-        Assert.Equal(
-            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
-            Credits(album));
-        Assert.All(album.Contributions, c => Assert.Equal((album.Id, (Guid?)null), (c.AlbumId!.Value, c.SeriesId)));
+        Assert.Empty(album.Contributions);
     }
 
     [Fact]
-    public void Constructor_WithContributionsOfItsOwn_DoesNotCopyTheSeriesTemplate()
+    public void Series_AttachingAnAlbumWithoutContributions_CopiesNothing()
     {
         var (series, _, _) = SeriesWithTemplate();
-        var colorist = new Author(null, null, "Studio");
-
-        var album = new Album(null, series, [(colorist, ContributionRole.Colorist)]);
-
-        Assert.Equal([(colorist.Id, ContributionRole.Colorist)], Credits(album));
-    }
-
-    [Fact]
-    public void Series_AttachingAnAlbumWithoutContributions_CopiesTheSeriesTemplate()
-    {
-        var (series, scenarist, illustrator) = SeriesWithTemplate();
         var album = new Album("Le Lotus bleu", null);
-
-        SetSeries(album, series);
-
-        Assert.Equal(
-            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
-            Credits(album));
-    }
-
-    [Fact]
-    public void Series_AttachingAnAlbumWithContributions_KeepsThemAsTheyAre()
-    {
-        var (series, _, _) = SeriesWithTemplate();
-        var colorist = new Author(null, null, "Studio");
-        var album = new Album("Le Lotus bleu", null, [(colorist, ContributionRole.Colorist)]);
-
-        SetSeries(album, series);
-
-        Assert.Equal([(colorist.Id, ContributionRole.Colorist)], Credits(album));
-    }
-
-    [Fact]
-    public void Series_ToTheSameSeries_DoesNotCopyTheTemplateAgain()
-    {
-        // The album is the source of truth once attached: contributions removed since must not
-        // come back at the next save of the album.
-        var (series, _, _) = SeriesWithTemplate();
-        var album = new Album(null, series);
-        album.SetTitleSeriesAndContributions(null, series, []);
 
         SetSeries(album, series);
 
@@ -592,39 +553,13 @@ public sealed class AlbumTests
     }
 
     [Fact]
-    public void SetTitleSeriesAndContributions_AttachingWithNoContribution_CopiesTheSeriesTemplate()
+    public void SetTitleSeriesAndContributions_AttachingWithNoContribution_LeavesNone()
     {
-        // The album's contributions are those of the form: emptied by the form while the album is
-        // attached to a series, they are taken from the series as a starting point.
-        var (series, scenarist, illustrator) = SeriesWithTemplate();
+        // Authors removed from the form after they were taken from the series do not come back.
+        var (series, _, _) = SeriesWithTemplate();
         var album = new Album("Le Lotus bleu", null, [(new Author(null, null, "Studio"), ContributionRole.Colorist)]);
 
         album.SetTitleSeriesAndContributions("Le Lotus bleu", series, []);
-
-        Assert.Equal(
-            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
-            Credits(album));
-    }
-
-    [Fact]
-    public void SetTitleSeriesAndContributions_AttachingWithContributions_KeepsThoseOfTheForm()
-    {
-        var (series, _, _) = SeriesWithTemplate();
-        var album = new Album("Le Lotus bleu", null);
-        var colorist = new Author(null, null, "Studio");
-
-        album.SetTitleSeriesAndContributions("Le Lotus bleu", series, [(colorist, ContributionRole.Colorist)]);
-
-        Assert.Equal([(colorist.Id, ContributionRole.Colorist)], Credits(album));
-    }
-
-    [Fact]
-    public void SetTitleSeriesAndContributions_StayingInTheSameSeriesWithNoContribution_LeavesNone()
-    {
-        var (series, _, _) = SeriesWithTemplate();
-        var album = new Album(null, series);
-
-        album.SetTitleSeriesAndContributions(null, series, []);
 
         Assert.Empty(album.Contributions);
     }

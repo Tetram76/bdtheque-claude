@@ -121,7 +121,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Fact]
-    public async Task Series_WithAuthors_AttachedToAnAlbumWithout_GivesThemToIt_AndSaysSo()
+    public async Task Series_WithAuthors_ChosenForAnAlbumWithout_GivesThemAtOnce_AndSaysSo()
     {
         var author = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest($"Auteur{_marker}", null, null, null, null));
         await PostAsync<SeriesForm>("/admin/series", Series($"Série {_marker}", [new ContributionContent(author.Id, ContributionRole.Scenarist)]));
@@ -131,10 +131,13 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Série" }).PressSequentiallyAsync($"Série {_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Série {_marker}" }).ClickAsync();
-        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
+        // As soon as the series is chosen, before any saving.
         await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Repris de la série" })).ToContainTextAsync($"Série {_marker}");
         await Assertions.Expect(page.Locator(".album-role").First).ToContainTextAsync($"Auteur{_marker}");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+        await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToHaveCountAsync(0);
+        Assert.Equal([new ContributionContent(author.Id, ContributionRole.Scenarist)], (await GetAsync(album.Id)).Content.Contributions);
     }
 
     private async Task<IPage> OpenAsync(string path)

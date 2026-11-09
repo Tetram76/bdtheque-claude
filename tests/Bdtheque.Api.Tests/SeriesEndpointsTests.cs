@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
@@ -381,6 +382,47 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     }
 
     private static string UniqueTitle() => $"Série {Guid.NewGuid():N}";
+
+    [Fact]
+    public async Task AlbumContributions_GiveTheAuthorsOfTheSeriesForTheRolesTheAlbumHasNoAuthorFor()
+    {
+        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: role by role.
+        var scenarist = await CreateAuthorAsync();
+        var illustrator = await CreateAuthorAsync();
+        var series = await CreateAsync(Content(UniqueTitle()) with
+        {
+            Contributions = [new ContributionContent(scenarist.Id, ContributionRole.Scenarist), new ContributionContent(illustrator.Id, ContributionRole.Illustrator)],
+        });
+
+        var contributions = await _client.GetFromJsonAsync<List<SeriesAlbumContribution>>(
+            $"/admin/series/{series.Id}/album-contributions?creditedRoles=Scenarist&creditedRoles=Colorist");
+
+        Assert.Equal(
+            [new SeriesAlbumContribution(new AuthorListItem(illustrator.Id, illustrator.LastName, null, null), ContributionRole.Illustrator)],
+            contributions);
+    }
+
+    [Fact]
+    public async Task AlbumContributions_WithoutCreditedRoles_GiveTheWholeTemplate()
+    {
+        var author = await CreateAuthorAsync();
+        var series = await CreateAsync(Content(UniqueTitle()) with
+        {
+            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist), new ContributionContent(author.Id, ContributionRole.Illustrator)],
+        });
+
+        var contributions = await _client.GetFromJsonAsync<List<SeriesAlbumContribution>>($"/admin/series/{series.Id}/album-contributions");
+
+        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], contributions!.Select(c => c.Role));
+    }
+
+    [Fact]
+    public async Task AlbumContributions_OfAnUnknownSeries_IsAFunctionalError()
+    {
+        var response = await _client.GetAsync($"/admin/series/{Guid.NewGuid()}/album-contributions");
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
+    }
 
     private static string DeleteUri(SeriesForm series, string fingerprint) =>
         $"/admin/series/{series.Id}?version={series.Version}&fingerprint={Uri.EscapeDataString(fingerprint)}";

@@ -164,6 +164,18 @@ public sealed class AlbumEntry
             Credits.Add(new Credit(role, author));
     }
 
+    /// <summary>The roles the album has authors for.</summary>
+    public IReadOnlyList<ContributionRole> CreditedRoles() => [.. Credits.Select(c => c.Role).Distinct().Order()];
+
+    /// <summary>Credits the authors a series gives the album; how many it did not have yet.</summary>
+    public int Credit(IEnumerable<SeriesAlbumContribution> contributions)
+    {
+        var count = Credits.Count;
+        foreach (var contribution in contributions)
+            Credit(contribution.Role, Author(contribution.Author));
+        return Credits.Count - count;
+    }
+
     public static RecordOption Author(AuthorListItem author) =>
         new(author.Id, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null);
 

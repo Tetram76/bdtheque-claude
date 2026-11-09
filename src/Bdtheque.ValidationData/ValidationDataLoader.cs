@@ -346,7 +346,7 @@ public sealed class ValidationDataLoader(HttpClient client)
         string title, SeriesStatus? status, SeriesEditionTemplate template, Guid[] genres, Guid[] universes, ContributionContent[] credits) =>
         new(title, null, status, null, false, false, false, null, null, template, genres, universes, credits);
 
-    // Without contributions of its own, an album attached to a series gets those of the series.
+    // Without contributions of its own, an album attached to a series gets those of the series (AlbumAsync).
     private static AlbumContent Album(string? title, Guid series, int? volume, int year, int? month = null, AlbumRating? rating = null) =>
         new(title, null, series, AlbumType.Regular, false, volume, null, null, year, month, null, null, rating, [], [], []);
 
@@ -425,8 +425,17 @@ public sealed class ValidationDataLoader(HttpClient client)
         public async Task<Guid> SeriesAsync(SeriesContent content) =>
             (await PostAsync<SeriesContent, SeriesForm>("/admin/series", content)).Id;
 
+        // As the entry form does once the series is chosen, an album attached to a series gets the authors it gives it
+        // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
         public async Task<AlbumWrite> AlbumAsync(AlbumContent content)
         {
+            if (content.SeriesId is { } series)
+            {
+                var roles = string.Concat(content.Contributions.Select(c => c.Role).Distinct().Select((r, i) => $"{(i == 0 ? '?' : '&')}creditedRoles={r}"));
+                var given = await GetAsync<List<SeriesAlbumContribution>>($"/admin/series/{series}/album-contributions{roles}");
+                content = content with { Contributions = [.. content.Contributions, .. given.Select(c => new ContributionContent(c.Author.Id, c.Role))] };
+            }
+
             var album = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", content);
             return new AlbumWrite(album.Id, album.Version);
         }

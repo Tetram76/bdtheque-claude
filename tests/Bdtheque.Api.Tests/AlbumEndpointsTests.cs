@@ -145,17 +145,15 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
-    public async Task Create_InASeriesWithoutContributions_CopiesThoseOfTheSeries()
+    public async Task Create_InASeriesWithoutContributions_CopiesNothing()
     {
-        var scenarist = await CreateAuthorAsync();
-        var illustrator = await CreateAuthorAsync();
-        var series = await CreateSeriesAsync(
-            new ContributionContent(scenarist.Id, ContributionRole.Scenarist), new ContributionContent(illustrator.Id, ContributionRole.Illustrator));
+        // The form takes the authors of the series as soon as the series is chosen
+        // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md); saving copies nothing.
+        var series = await CreateSeriesAsync(new ContributionContent((await CreateAuthorAsync()).Id, ContributionRole.Scenarist));
 
         var created = await CreateAsync(Content(null) with { SeriesId = series.Id });
 
-        Assert.Equal(series.Content.Contributions, created.Content.Contributions);
-        Assert.Equal(created, await GetAsync(created.Id), AlbumFormComparer.Instance);
+        Assert.Empty(created.Content.Contributions);
     }
 
     [Fact]
@@ -170,7 +168,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
-    public async Task Update_AttachingToASeriesWithoutContributions_CopiesThoseOfTheSeries()
+    public async Task Update_AttachingToASeriesWithoutContributions_CopiesNothing()
     {
         var series = await CreateSeriesAsync(new ContributionContent((await CreateAuthorAsync()).Id, ContributionRole.Scenarist));
         var created = await CreateAsync(Content(UniqueTitle()) with
@@ -180,8 +178,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var updated = await UpdateAsync(created, created.Content with { SeriesId = series.Id, Contributions = [] });
 
-        Assert.Equal(series.Content.Contributions, updated.Content.Contributions);
-        Assert.Equal(updated, await GetAsync(created.Id), AlbumFormComparer.Instance);
+        Assert.Empty(updated.Content.Contributions);
     }
 
     [Fact]

@@ -8,6 +8,7 @@
 @inject IStringLocalizer<AdminAlbumForm> L
 @inject ApiClient Api
 @inject RecordLabels Labels
+@inject ValueLabels Values
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 
@@ -103,11 +104,11 @@ else
                     @foreach (var role in Enum.GetValues<ContributionRole>())
                     {
                         <div class="album-role">
-                            <span class="album-role-name" id="@($"album-role-{role}")">@L[$"Role.{role}"]</span>
+                            <span class="album-role-name" id="@($"album-role-{role}")">@Values.Of(role)</span>
                             <RecordTags Id="@($"album-add-{role}")" Kind="RecordKind.Author" Items="@Entry.AuthorsOf(role)" None="@L["Authors.None"]"
                                         AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => Entry.Credit(role, author)"
                                         OnRemove="author => Entry.Credits.RemoveAll(c => c.Role == role && c.Author.Id == author.Id)"
-                                        RemoveLabel="@(author => L["Authors.Remove", author.Label, L[$"Role.{role}"]].Value)"
+                                        RemoveLabel="@(author => L["Authors.Remove", author.Label, Values.Of(role)].Value)"
                                         OnCreate="text => _authorCreation = (role, text)" CreateLabel="@(text => L["Authors.Create", text].Value)" />
                         </div>
                     }
@@ -169,9 +170,6 @@ else
 }
 
 @code {
-    /// <summary>Set on the address of a new album once created, whose authors were taken from its series.</summary>
-    public const string AuthorsCopiedParameter = "authorsCopied";
-
     private ApiProblem? _loadProblem;
     private ApiProblem? _saveProblem;
     private bool _saving;
@@ -183,9 +181,6 @@ else
     /// <summary>The album to modify; none for a new album.</summary>
     [Parameter]
     public Guid? Id { get; set; }
-
-    [SupplyParameterFromQuery(Name = AuthorsCopiedParameter)]
-    public bool AuthorsCopied { get; set; }
 
     /// <summary>The album as the form holds it, read once, by the prerendering.</summary>
     [PersistentState]
@@ -229,8 +224,6 @@ else
         }
 
         _savedFingerprint = ReadEntry!.Fingerprint();
-        if (AuthorsCopied && Entry.Series is { } series)
-            _authorsCopiedFrom = series.Label;
     }
 
     private async Task<AlbumEntry> ReadAsync(Guid id)
@@ -256,10 +249,28 @@ else
         }
     }
 
+    // The authors of the series are taken as soon as it is chosen, for the roles the album has no author for, as the domain
+    // computes them (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md): the user sees them
+    // before saving. A series that cannot be read gives none, and the saving tells what became of it.
     private async Task ChooseSeriesAsync(RecordOption? series)
     {
         Entry!.Series = series;
+        _authorsCopiedFrom = null;
         Entry.ShowSeries(await SeriesOrNoneAsync(series?.Id));
+        if (series is null)
+            return;
+        try
+        {
+            var roles = string.Join("&", Entry.CreditedRoles().Select(r => $"creditedRoles={r}"));
+            var contributions = await Api.GetAsync<List<SeriesAlbumContribution>>(
+                $"/admin/series/{series.Id}/album-contributions{(roles.Length > 0 ? "?" + roles : "")}");
+            if (Entry.Credit(contributions) > 0)
+                _authorsCopiedFrom = series.Label;
+        }
+        catch (ApiProblemException)
+        {
+            // Nothing taken from a series that cannot be read.
+        }
     }
 
     private void AddGenre(RecordOption genre)
@@ -306,16 +317,13 @@ else
                 Entry = AlbumEntry.Of(saved, await SeriesOrNoneAsync(saved.Content.SeriesId));
                 ReadEntry = Entry.Copy();
                 _savedFingerprint = Entry.Fingerprint();
-                if (content.Contributions.Count == 0 && saved.Content.Contributions.Count > 0)
-                    _authorsCopiedFrom = Entry.Series?.Label;
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumSaved, $"album={id}");
             }
             else
             {
                 var created = await Api.PostAsync<AlbumContent, AlbumForm>("/admin/albums", content);
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumCreated, $"album={created.Id}");
-                var copied = content.Contributions.Count == 0 && created.Content.Contributions.Count > 0;
-                Navigation.NavigateTo(AppPaths.AdminEditAlbum(created.Id) + (copied ? $"?{AuthorsCopiedParameter}=true" : ""));
+                Navigation.NavigateTo(AppPaths.AdminEditAlbum(created.Id));
             }
         }
         catch (ApiProblemException exception)
@@ -410,7 +418,7 @@ else
             }.OfType<string>())));
         foreach (var role in Enum.GetValues<ContributionRole>())
             if (!Same(read.AuthorsOf(role), entry.AuthorsOf(role)))
-                yield return (L[$"Role.{role}"], Names(entry.AuthorsOf(role)));
+                yield return (Values.Of(role), Names(entry.AuthorsOf(role)));
         if (!Same(read.Genres, entry.Genres))
             yield return (L["Genres"], Names(entry.Genres));
         if (!Same(read.Universes, entry.Universes))
@@ -420,6 +428,6 @@ else
         if (read.PersonalNotes != entry.PersonalNotes)
             yield return (L["Notes"], Text(entry.PersonalNotes));
         if (read.Rating != entry.Rating)
-            yield return (L["Rating"], entry.Rating is { } rating ? L[$"Rating.{rating}"] : L["Rating.None"]);
+            yield return (L["Rating"], entry.Rating is { } rating ? Values.Of(rating) : L["Rating.None"]);
     }
 }

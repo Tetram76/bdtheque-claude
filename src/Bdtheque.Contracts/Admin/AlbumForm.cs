@@ -64,3 +64,9 @@ public sealed record AlbumContent(
 
 /// <param name="Version">Version of the album the form was read at.</param>
 public sealed record UpdateAlbumRequest(AlbumContent Content, uint Version);
+
+/// <summary>
+/// An author a series gives an album attached to it, in a role
+/// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// </summary>
+public sealed record SeriesAlbumContribution(AuthorListItem Author, ContributionRole Role);
