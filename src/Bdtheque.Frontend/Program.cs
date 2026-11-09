@@ -17,7 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     // An interactive component keeps the time zone of the request that opened its circuit, which brings no cookie.
-    .RegisterPersistentService<BrowserTimeZone>(RenderMode.InteractiveServer);
+    .RegisterPersistentService<BrowserTimeZone>(RenderMode.InteractiveServer)
+    // Nor does it bring the visit of the audience measurement, in which it records its actions.
+    .RegisterPersistentService<CircuitAudienceVisit>(RenderMode.InteractiveServer);
 
 // No text shown to the user is written in the code: each component reads its own
 // (choix-implementation/socle/transverse/internationalisation.md). The display culture is a setting of the application,
@@ -56,6 +58,7 @@ else
 // The colours of the day of a theme painted by the cover of the spotlight, read by the root of the page.
 builder.Services.AddScoped<IDayColorsSource, SpotlightDayColors>();
 builder.Services.AddScoped<AudienceOpposition>();
+builder.Services.AddScoped<CircuitAudienceVisit>();
 builder.Services.AddScoped<AudienceRecorder>();
 builder.Services.AddSingleton(TimeProvider.System);
 

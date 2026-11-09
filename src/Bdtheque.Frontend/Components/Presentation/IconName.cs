@@ -29,4 +29,6 @@ public enum IconName
     Publisher,
     Genre,
     Universe,
+    Star,
+    Copy,
 }

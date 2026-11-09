@@ -1,0 +1,57 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<AuthorCreationDialog> L
+
+@* The creation of an author on the spot, from a record being entered that credits them (visuel/saisie-album/contenu.md, Les
+   auteurs): the name typed in the choice of an author, split into first name and last name, which the user corrects or
+   turns into a pseudonym. The author is created only with the record that cites it, when that record is saved
+   (choix-implementation/socle/frontend.md): the domain then applies its rules (at least a last name or a pseudonym), and an
+   error is presented with the saving. Interactive. *@
+<Dialog Id="@Id" Title="@L["Title"]" Tone="DialogTone.Creation" OnClose="OnCancel">
+    <ChildContent>
+        <p class="author-creation-lead">@L["Lead"]</p>
+        <div class="author-creation-fields">
+            <Field Id="@($"{Id}-first-name")" Label="@L["FirstName"]" Context="control">
+                <input id="@control.Id" type="text" @bind="_firstName" />
+            </Field>
+            <Field Id="@($"{Id}-last-name")" Label="@L["LastName"]" Context="control">
+                <input id="@control.Id" type="text" @bind="_lastName" />
+            </Field>
+            <Field Id="@($"{Id}-pseudonym")" Label="@L["Pseudonym"]" Help="@L["Pseudonym.Help"]" Context="control">
+                <input id="@control.Id" type="text" aria-describedby="@control.DescribedBy" @bind="_pseudonym" />
+            </Field>
+        </div>
+    </ChildContent>
+    <Actions>
+        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" OnClick="CreateAsync" />
+    </Actions>
+</Dialog>
+
+@code {
+    private string? _firstName;
+    private string? _lastName;
+    private string? _pseudonym;
+
+    /// <summary>The identifier of the dialog, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name typed in the choice of an author.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = null!;
+
+    /// <summary>The author to create with the record, to credit.</summary>
+    [Parameter]
+    public EventCallback<NewAuthor> OnCreated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    // « Jean Van Hamme »: the first word the first name, the rest the last name; a single word, the last name.
+    protected override void OnInitialized()
+    {
+        var words = Name.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        (_firstName, _lastName) = words is [var first, var rest] ? (first, rest) : (null, Name.Trim());
+    }
+
+    private Task CreateAsync() => OnCreated.InvokeAsync(new NewAuthor(Guid.NewGuid(), _lastName, _firstName, _pseudonym));
+}

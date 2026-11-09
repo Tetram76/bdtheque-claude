@@ -197,7 +197,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                     <sc-for list="{{r.people}}" as="p">
                       <span style="{{chip}}">{{p}}<button type="button" aria-label="Retirer {{p}} ({{r.label}})" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
                     </sc-for>
-                    <sc-if value="{{r.none}}"><span style="font-size: 13px; color: {{t.muted}}">Personne</span></sc-if>
                     <button type="button" style="{{addBtn}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter</button>
                   </div>
                 </div>
@@ -241,7 +240,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                   <sc-for list="{{g.own}}" as="p">
                     <span style="{{chip}}">{{p}}<button type="button" aria-label="Retirer {{p}}" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
                   </sc-for>
-                  <sc-if value="{{g.noneOwn}}"><span style="font-size: 13px; color: {{t.muted}}">Aucun</span></sc-if>
                   <button type="button" style="{{addBtn}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter</button>
                 </div>
               </div>
@@ -595,14 +593,14 @@ class View extends Mockup {
         { label: 'Exclure des albums manquants', checked: noMissing, toggle: () => this.setState({ noMissing: !noMissing }) },
         { label: 'Exclure des estimations de sortie', checked: noRelease, toggle: () => this.setState({ noRelease: !noRelease }) }
       ],
-      roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people, none: people.length === 0 })),
+      roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people })),
       // The imprint is one of the publisher's: it waits for the publisher.
       noPublisher: !x.publisher,
       imprintPh: x.publisher ? 'Aucune collection' : 'Choisissez d\'abord l\'éditeur',
       imprintStyle: x.publisher ? '' : 'border-style: dashed; background: transparent; cursor: not-allowed;',
       tagGroups: [
-        { label: 'Genres', own: x.genres, noneOwn: x.genres.length === 0 },
-        { label: 'Univers', own: x.universes, noneOwn: x.universes.length === 0 }
+        { label: 'Genres', own: x.genres },
+        { label: 'Univers', own: x.universes }
       ],
       templates: TEMPLATES.map((f) => {
         const picked = x.tpl ? x.tpl[f.key] : f.initial;

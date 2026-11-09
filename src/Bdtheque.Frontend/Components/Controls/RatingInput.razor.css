@@ -1,0 +1,71 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md); laid out as a Field. */
+.rating {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-inline-size: 0;
+}
+
+.rating-legend {
+    padding: 0 0 var(--space-xs);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.rating-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+}
+
+.rating-stars {
+    display: flex;
+    gap: 0.125rem;
+}
+
+/* A hit area of the height of the controls, which a finger reaches. */
+.rating-star {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.rating-star ::deep .icon {
+    inline-size: 1.625rem;
+    block-size: 1.625rem;
+    stroke-width: 1.75;
+}
+
+.rating-star[data-filled] ::deep .icon {
+    fill: currentColor;
+}
+
+/* The radio button is hidden: its focus is drawn on the star that holds it. */
+.rating-star:has(:focus-visible) {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--focus-gap, var(--color-background));
+}
+
+.rating-name {
+    font-weight: var(--font-weight-strong);
+}
+
+.rating-clear {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-accent-text);
+    font: inherit;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+}

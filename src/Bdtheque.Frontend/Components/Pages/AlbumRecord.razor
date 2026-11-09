@@ -24,15 +24,8 @@ else if (_album is { } album)
 
     <div class="album-record">
         <div class="album-identity">
-            @if (!album.Album.IsInCollection)
-            {
-                @* Not in the collection, at first glance: wished for, or catalogued only (visuel/fiche-album/contenu.md). *@
-                <p class="album-status" data-status="@(IsIntended ? "intent" : "out")">
-                    <Icon Name="@(IsIntended ? IconName.PurchaseIntent : IconName.Blocked)" />
-                    <strong>@L[IsIntended ? "Status.Intent" : "Status.Out"]</strong>
-                    <span>@L[IsIntended ? "Status.Intent.Detail" : "Status.Out.Detail"]</span>
-                </p>
-            }
+            @* Not in the collection, at first glance: wished for, or catalogued only (visuel/fiche-album/contenu.md). *@
+            <CollectionStatus State="CollectionState" />
             <div class="album-title">
                 @if (album.Album.SeriesId is { } seriesId)
                 {
@@ -129,6 +122,13 @@ else if (_album is { } album)
     // Only the editions of the collection are counted; an edition targeted by an intent is one of the intents
     // (fonctionnel/regles-metier/intention-d-achat.md).
     private int OwnedEditionCount => _album!.Editions.Count(e => e.IsInCollection);
+
+    private Bdtheque.Contracts.Admin.AlbumCollectionState CollectionState => (_album!.Album.IsInCollection, IsIntended) switch
+    {
+        (true, _) => Bdtheque.Contracts.Admin.AlbumCollectionState.InCollection,
+        (false, true) => Bdtheque.Contracts.Admin.AlbumCollectionState.PurchaseIntent,
+        _ => Bdtheque.Contracts.Admin.AlbumCollectionState.OutsideCollection,
+    };
 
     private bool IsIntended => _album!.PurchaseIntent is not null || _album.Editions.Any(e => e.PurchaseIntent is not null);
 

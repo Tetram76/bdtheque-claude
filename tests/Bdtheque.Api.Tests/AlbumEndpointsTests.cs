@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
@@ -72,6 +73,68 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
+    public async Task Get_NamesTheRecordsTheFormReferences()
+    {
+        var author = await CreateAuthorAsync();
+        var series = await CreateSeriesAsync();
+        var genre = await CreateGenreAsync();
+        var parent = await CreateUniverseAsync();
+        var universe = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Univers {Guid.NewGuid():N}", null, parent.Id));
+        var album = await CreateAsync(Content(UniqueTitle()) with
+        {
+            SeriesId = series.Id,
+            GenreIds = [genre.Id],
+            UniverseIds = [universe.Id],
+            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist), new ContributionContent(author.Id, ContributionRole.Colorist)],
+        });
+
+        var references = (await GetAsync(album.Id)).References;
+
+        Assert.Equal((series.Id, series.Content.Title), (references.Series!.Id, references.Series.Title));
+        Assert.Equal([(genre.Id, genre.Label)], references.Genres.Select(g => (g.Id, g.Label)));
+        var named = Assert.Single(references.Universes);
+        Assert.Equal((universe.Id, parent.Id), (named.Universe.Id, Assert.Single(named.Ancestors).Id));
+        Assert.Equal([(author.Id, author.LastName)], references.Authors.Select(a => (a.Id, a.LastName)));
+    }
+
+    [Fact]
+    public async Task Get_GivesTheDatesOfTheRecord()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+
+        var modified = await UpdateAsync(created, created.Content with { Summary = "Résumé" });
+
+        Assert.Equal(created.CreatedAt, modified.CreatedAt);
+        Assert.True(modified.ModifiedAt > created.ModifiedAt);
+        Assert.Equal((modified.CreatedAt, modified.ModifiedAt), ((await GetAsync(created.Id)).CreatedAt, (await GetAsync(created.Id)).ModifiedAt));
+    }
+
+    [Fact]
+    public async Task Get_TellsWhereTheAlbumStandsWithRegardToTheCollection()
+    {
+        var catalogued = await CreateAsync(Content(UniqueTitle()));
+        var wished = await CreateAsync(Content(UniqueTitle()));
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{wished.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, wished.Version));
+        var owned = await CreateAsync(Content(UniqueTitle()));
+        await SeedEditionsAsync(owned.Id);
+
+        Assert.Equal(AlbumCollectionState.OutsideCollection, catalogued.CollectionState);
+        Assert.Equal(AlbumCollectionState.PurchaseIntent, (await GetAsync(wished.Id)).CollectionState);
+        Assert.Equal(AlbumCollectionState.InCollection, (await GetAsync(owned.Id)).CollectionState);
+    }
+
+    [Fact]
+    public async Task Get_WithoutSeries_NamesNoSeries()
+    {
+        var album = await CreateAsync(Content(UniqueTitle()));
+
+        var references = (await GetAsync(album.Id)).References;
+
+        Assert.Null(references.Series);
+        Assert.Empty(references.Authors);
+    }
+
+    [Fact]
     public async Task Create_InASeriesWithoutTitle_HasNoSortKeyOfItsOwn()
     {
         var series = await CreateSeriesAsync();
@@ -83,17 +146,15 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
-    public async Task Create_InASeriesWithoutContributions_CopiesThoseOfTheSeries()
+    public async Task Create_InASeriesWithoutContributions_CopiesNothing()
     {
-        var scenarist = await CreateAuthorAsync();
-        var illustrator = await CreateAuthorAsync();
-        var series = await CreateSeriesAsync(
-            new ContributionContent(scenarist.Id, ContributionRole.Scenarist), new ContributionContent(illustrator.Id, ContributionRole.Illustrator));
+        // The form takes the authors of the series as soon as the series is chosen
+        // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md); saving copies nothing.
+        var series = await CreateSeriesAsync(new ContributionContent((await CreateAuthorAsync()).Id, ContributionRole.Scenarist));
 
         var created = await CreateAsync(Content(null) with { SeriesId = series.Id });
 
-        Assert.Equal(series.Content.Contributions, created.Content.Contributions);
-        Assert.Equal(created, await GetAsync(created.Id), AlbumFormComparer.Instance);
+        Assert.Empty(created.Content.Contributions);
     }
 
     [Fact]
@@ -108,7 +169,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
-    public async Task Update_AttachingToASeriesWithoutContributions_CopiesThoseOfTheSeries()
+    public async Task Update_AttachingToASeriesWithoutContributions_CopiesNothing()
     {
         var series = await CreateSeriesAsync(new ContributionContent((await CreateAuthorAsync()).Id, ContributionRole.Scenarist));
         var created = await CreateAsync(Content(UniqueTitle()) with
@@ -118,8 +179,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var updated = await UpdateAsync(created, created.Content with { SeriesId = series.Id, Contributions = [] });
 
-        Assert.Equal(series.Content.Contributions, updated.Content.Contributions);
-        Assert.Equal(updated, await GetAsync(created.Id), AlbumFormComparer.Instance);
+        Assert.Empty(updated.Content.Contributions);
     }
 
     [Fact]
@@ -250,6 +310,71 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var updated = await UpdateAsync(created, Content(created.Content.Title));
 
         Assert.Equal(Content(created.Content.Title), updated.Content, AlbumContentComparer.Instance);
+    }
+
+    [Fact]
+    public async Task Create_WithRecordsAddedOnTheSpot_CreatesThemWithTheAlbum()
+    {
+        // The authors, genres and universes the form added are created when the album is saved, not before.
+        var parent = await CreateUniverseAsync();
+        var (author, genre, universe) = (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+        var marker = Guid.NewGuid().ToString("N");
+        var content = Content(UniqueTitle()) with
+        {
+            Contributions = [new ContributionContent(author, ContributionRole.Scenarist), new ContributionContent(author, ContributionRole.Illustrator)],
+            GenreIds = [genre],
+            UniverseIds = [universe],
+            NewRecords = new NewRecords(
+                [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
+                [new NewGenre(genre, $"Genre{marker}")],
+                [new NewUniverse(universe, $"Univers{marker}", parent.Id)]),
+        };
+
+        var created = await CreateAsync(content);
+
+        var references = created.References;
+        Assert.Equal($"Nouveau{marker}", Assert.Single(references.Authors).LastName);
+        Assert.Equal(2, created.Content.Contributions.Count(c => c.AuthorId == references.Authors[0].Id));
+        Assert.Equal($"Genre{marker}", Assert.Single(references.Genres).Label);
+        var inHierarchy = Assert.Single(references.Universes);
+        Assert.Equal(($"Univers{marker}", parent.Id), (inHierarchy.Universe.Name, Assert.Single(inHierarchy.Ancestors).Id));
+        Assert.Null(created.Content.NewRecords);
+    }
+
+    [Fact]
+    public async Task Update_WithRecordsAddedOnTheSpot_CreatesThemWithTheAlbum()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+        var genre = Guid.NewGuid();
+        var label = $"Genre{Guid.NewGuid():N}";
+
+        var updated = await UpdateAsync(created, created.Content with
+        {
+            GenreIds = [genre],
+            NewRecords = new NewRecords([], [new NewGenre(genre, label)], []),
+        });
+
+        Assert.Equal(label, Assert.Single(updated.References.Genres).Label);
+    }
+
+    [Fact]
+    public async Task Create_WithARecordAddedOnTheSpotRefused_CreatesNothing()
+    {
+        // An author without a last name nor a pseudonym: the genre added with it is not created either.
+        var (author, genre) = (Guid.NewGuid(), Guid.NewGuid());
+        var label = $"Genre{Guid.NewGuid():N}";
+        var content = Content(UniqueTitle()) with
+        {
+            Contributions = [new ContributionContent(author, ContributionRole.Scenarist)],
+            GenreIds = [genre],
+            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], []),
+        };
+
+        var response = await _client.PostAsJsonAsync("/admin/albums", content);
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired);
+        var genres = await _client.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q={label}");
+        Assert.Empty(genres!.Items);
     }
 
     [Fact]

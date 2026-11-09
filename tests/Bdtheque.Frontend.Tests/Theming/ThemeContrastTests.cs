@@ -57,6 +57,10 @@ public sealed partial class ThemeContrastTests
         ("header-field-border", "header", NonText),
         ("text-on-header-tag", "header-tag", Text),
         ("text-on-help", "help", Text),
+        // A notice within a block (e.g. the authors of an album taken from its series): its text, and its frame, which alone
+        // tells it from the block.
+        ("text-on-notice", "notice", Text),
+        ("notice-border", "notice", NonText),
         // The tile of a type of record of the home page of the administration: its name, detail and links.
         ("text", "tile", Text),
         ("text-muted", "tile", Text),

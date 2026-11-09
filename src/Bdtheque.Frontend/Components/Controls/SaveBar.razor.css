@@ -1,14 +1,15 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md). Sticky rather than
-   fixed: it holds at the bottom of the screen while its form is in view, and never covers what follows the form. */
+   fixed: it holds at the bottom of the screen while its form is in view, and never covers what follows the form. Across the
+   whole width of the screen, as the header: its surface and its rule are an image drawn beyond its box (border-image-outset),
+   which never makes the page scroll sideways, unlike an element wider than the screen; its shadow is cast upwards. */
 .save-bar {
     --focus-gap: var(--color-surface-raised);
     position: sticky;
     inset-block-end: 0;
     z-index: 10;
     margin-block-start: var(--space-xl);
-    background: var(--color-surface-raised);
-    border-block-start: 1px solid var(--color-rule);
-    box-shadow: var(--shadow-floating);
+    border-image: linear-gradient(var(--color-rule) 0 1px, var(--color-surface-raised) 1px) fill 0 / 0 / 0 100vmax;
+    filter: drop-shadow(0 -6px 8px var(--shadow-save-bar-color));
 }
 
 .save-bar-content {

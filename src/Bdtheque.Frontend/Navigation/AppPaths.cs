@@ -80,8 +80,8 @@ public static class AppPaths
     /// <summary>The list of the albums of the administration (visuel/liste-albums/).</summary>
     public const string AdminAlbums = "/admin/albums";
 
-    /// <summary>The entry form of an album (#205).</summary>
-    public static string AdminEditAlbum(Guid id) => NotYetImplemented;
+    /// <summary>The entry form of an album (visuel/saisie-album/).</summary>
+    public static string AdminEditAlbum(Guid id) => $"{AdminAlbums}/{id}";
 
     /// <summary>The page of the editions and purchase intents of an album (#204).</summary>
     public static string AdminAlbumEditions(Guid albumId) => NotYetImplemented;
@@ -143,7 +143,8 @@ public static class AppPaths
     /// <summary>The search of an edition in the external sources, from its ISBN (visuel/administration/contenu.md).</summary>
     public const string AdminIsbnLookup = NotYetImplemented;
 
-    public const string AdminNewAlbum = NotYetImplemented;
+    /// <summary>The entry form of a new album (visuel/saisie-album/).</summary>
+    public const string AdminNewAlbum = $"{AdminAlbums}/new";
 
     public const string AdminNewSeries = NotYetImplemented;
 
@@ -159,5 +160,10 @@ public static class AppPaths
     public const string AdminInvalidIsbns = NotYetImplemented;
 
     /// <summary>The page that modifies a record of the given type.</summary>
-    public static string AdminEdit(RecordType type, Guid id) => type == RecordType.ApplicationSettings ? AdminSettings : NotYetImplemented;
+    public static string AdminEdit(RecordType type, Guid id) => type switch
+    {
+        RecordType.ApplicationSettings => AdminSettings,
+        RecordType.Album => AdminEditAlbum(id),
+        _ => NotYetImplemented,
+    };
 }

@@ -4,6 +4,10 @@
     <RootNamespace>Bdtheque.Frontend</RootNamespace>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     <UserSecretsId>bdtheque-frontend</UserSecretsId>
+    <!-- The script of Blazor, in a package the SDK restores only for a project it infers to require it, from the .razor files
+         present at restore: the Dockerfile restores the project from its .csproj alone, before copying its sources
+         (choix-implementation/deploiement/images-de-base-des-conteneurs.md). -->
+    <RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
   </PropertyGroup>
 
   <ItemGroup>

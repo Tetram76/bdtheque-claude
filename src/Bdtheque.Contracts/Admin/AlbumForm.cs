@@ -1,3 +1,4 @@
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Admin;
@@ -9,7 +10,20 @@ namespace Bdtheque.Contracts.Admin;
 /// series.
 /// </param>
 /// <param name="Version">Version of the album, sent back with any modification or deletion.</param>
-public sealed record AlbumForm(Guid Id, string? SortKey, AlbumContent Content, uint Version);
+/// <param name="References">The records the content references by their identifier, named for the form to present them.</param>
+/// <param name="CollectionState">Where the album stands with regard to the collection, which the form tells at first glance.</param>
+public sealed record AlbumForm(
+    Guid Id, string? SortKey, AlbumContent Content, uint Version, AlbumFormReferences References,
+    AlbumCollectionState CollectionState, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
+
+/// <summary>The records an <see cref="AlbumContent"/> references, named as the lists name them.</summary>
+/// <param name="Universes">Each with its ancestors, a universe being presented with them (visuel/saisie-album/contenu.md).</param>
+/// <param name="Authors">The authors of its contributions, each once.</param>
+public sealed record AlbumFormReferences(
+    SeriesListItem? Series,
+    IReadOnlyList<GenreListItem> Genres,
+    IReadOnlyList<UniverseInHierarchy> Universes,
+    IReadOnlyList<AuthorListItem> Authors);
 
 /// <summary>
 /// Everything the user edits on an album, sent to create it, and sent whole to modify it (the form
@@ -27,8 +41,11 @@ public sealed record AlbumForm(Guid Id, string? SortKey, AlbumContent Content, u
 /// <param name="GenreIds">Genres of the album itself, without those of its series.</param>
 /// <param name="UniverseIds">Universes of the album itself, without those of its series.</param>
 /// <param name="Contributions">
-/// Contributions of the album. Left empty while attaching the album to a series, they are copied
-/// from the template of that series (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// Contributions of the album, as the form holds them: saving copies nothing from the series, the form having taken its
+/// authors when it was chosen (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// </param>
+/// <param name="NewRecords">
+/// The authors, genres and universes the form added on the spot, created with the album; none when the album is read.
 /// </param>
 public sealed record AlbumContent(
     string? Title,
@@ -46,7 +63,24 @@ public sealed record AlbumContent(
     AlbumRating? Rating,
     IReadOnlyList<Guid> GenreIds,
     IReadOnlyList<Guid> UniverseIds,
-    IReadOnlyList<ContributionContent> Contributions);
+    IReadOnlyList<ContributionContent> Contributions,
+    NewRecords? NewRecords = null);
 
 /// <param name="Version">Version of the album the form was read at.</param>
 public sealed record UpdateAlbumRequest(AlbumContent Content, uint Version);
+
+/// <summary>
+/// What the entry form of an album holds when a series is chosen: whether the album is being created, the series whose
+/// contributions it last received (<paramref name="PreviousSeriesId"/>), whatever series was chosen since, and its
+/// contributions (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// </summary>
+public sealed record SeriesAlbumContributionsRequest(bool NewAlbum, Guid? PreviousSeriesId, IReadOnlyList<ContributionContent> Contributions);
+
+/// <summary>
+/// The contributions a series gives an album attached to it: <paramref name="Applied"/> when they replace those of the album
+/// (none yet, or, being created, still exactly those of the series chosen before); otherwise it keeps its own.
+/// </summary>
+public sealed record SeriesAlbumContributions(bool Applied, IReadOnlyList<SeriesAlbumContribution> Contributions);
+
+/// <summary>An author a series gives an album attached to it, in a role.</summary>
+public sealed record SeriesAlbumContribution(AuthorListItem Author, ContributionRole Role);

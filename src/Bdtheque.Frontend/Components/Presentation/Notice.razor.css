@@ -1,0 +1,24 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): read on its own fill, whatever the tint of
+   the block it lies in. */
+.notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    border: 2px solid var(--color-notice-border);
+    border-radius: var(--radius-tile);
+    background: var(--color-notice);
+    color: var(--color-text-on-notice);
+    font-size: var(--font-size-small);
+}
+
+.notice ::deep .icon {
+    flex: none;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    margin-block-start: 0.125rem;
+}
+
+.notice-text {
+    margin: 0;
+}

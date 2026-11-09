@@ -76,6 +76,10 @@ $settings = Get-Content (Join-Path $sources 'docker/validation/validation.env') 
     Where-Object { $_ -match '^\w+=' } |
     ConvertFrom-StringData
 Write-Host ''
+# The pull request validated, if any: the commit alone does not tell which one is on screen.
+if ($PullRequest) {
+    Write-Host "Pull request:      #$PullRequest"
+}
 Write-Host "Version validated: $commit"
 Write-Host "Application:       http://localhost:$($settings.FRONTEND_PORT)"
 Write-Host "API documentation: http://localhost:$($settings.API_PORT)/scalar/v1"

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Domain.Common;
@@ -23,6 +24,27 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     {
         _factory = factory;
         _client = factory.CreateApiClient();
+    }
+
+    [Fact]
+    public async Task Hierarchy_OfAUniverse_GivesItsAncestorsFromTheTop()
+    {
+        var top = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var middle = await CreateAsync($"Univers {Guid.NewGuid():N}", top.Id);
+        var universe = await CreateAsync($"Univers {Guid.NewGuid():N}", middle.Id);
+
+        var hierarchy = await _client.GetFromJsonAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy");
+
+        Assert.Equal(universe.Id, hierarchy!.Universe.Id);
+        Assert.Equal([top.Name, middle.Name], hierarchy.Ancestors.Select(a => a.Name));
+    }
+
+    [Fact]
+    public async Task Hierarchy_OfAnUnknownUniverse_IsAFunctionalError()
+    {
+        var response = await _client.GetAsync($"/admin/universes/{Guid.NewGuid()}/hierarchy");
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
     }
 
     [Fact]

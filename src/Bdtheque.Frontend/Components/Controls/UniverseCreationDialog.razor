@@ -1,0 +1,49 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<UniverseCreationDialog> L
+
+@* The creation of a universe on the spot, from a record being entered that belongs to it (visuel/saisie-album/contenu.md,
+   Genres et univers): the name typed in the choice of a universe, which the user checks, and the universe that contains it,
+   if any, chosen by typing its name. The universe is created only with the record that cites it, when that record is saved
+   (choix-implementation/socle/frontend.md): the domain then applies its rules, and an error is presented with the saving.
+   Interactive. *@
+<Dialog Id="@Id" Title="@L["Title"]" Tone="DialogTone.Creation" OnClose="OnCancel">
+    <ChildContent>
+        <p class="record-creation-lead">@L["Lead"]</p>
+        <div class="record-creation-fields">
+            <Field Id="@($"{Id}-name")" Label="@L["Name"]" Context="control">
+                <input id="@control.Id" type="text" @bind="_name" />
+            </Field>
+            <Field Id="@($"{Id}-parent")" Label="@L["Parent"]" Note="@L["Parent.Note"]" Help="@L["Parent.Help"]" Context="control">
+                <RecordPicker Id="@control.Id" Kind="RecordKind.Universe" @bind-Value="_parent" Placeholder="@L["Parent.Placeholder"]"
+                              aria-describedby="@control.DescribedBy" />
+            </Field>
+        </div>
+    </ChildContent>
+    <Actions>
+        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" OnClick="CreateAsync" />
+    </Actions>
+</Dialog>
+
+@code {
+    private string? _name;
+    private RecordOption? _parent;
+
+    /// <summary>The identifier of the dialog, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name typed in the choice of a universe.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = null!;
+
+    /// <summary>The universe to create with the record, to attach it to, and the universe that contains it, if any.</summary>
+    [Parameter]
+    public EventCallback<(NewUniverse Universe, RecordOption? Parent)> OnCreated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    protected override void OnInitialized() => _name = Name.Trim();
+
+    private Task CreateAsync() => OnCreated.InvokeAsync((new NewUniverse(Guid.NewGuid(), _name?.Trim() ?? "", _parent?.Id), _parent));
+}

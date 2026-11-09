@@ -1,0 +1,30 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). */
+.collection-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-tile);
+}
+
+.collection-status[data-status="intent"] {
+    background: var(--color-info);
+    color: var(--color-text-on-info);
+}
+
+.collection-status[data-status="out"] {
+    border: var(--border-width-control) dashed var(--color-control-border);
+    color: var(--color-text-muted);
+}
+
+.collection-status ::deep .icon {
+    flex: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+}
+
+.collection-status strong {
+    font-size: var(--font-size-large);
+}

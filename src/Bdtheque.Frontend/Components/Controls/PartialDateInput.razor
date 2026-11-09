@@ -1,0 +1,64 @@
+@inject IStringLocalizer<PartialDateInput> L
+
+@* A date known to the year, or to the month and year, never to the day (modele-metier/album.md, date de première
+   publication): a list of months, « — » for a month unknown, and the year, side by side (visuel/saisie-album/contenu.md).
+   Each sized to its content. Interactive. *@
+<fieldset class="partial-date" aria-describedby="@DescribedBy">
+    <legend class="partial-date-legend">@Legend</legend>
+    <div class="partial-date-fields">
+        <label class="visually-hidden" for="@($"{Id}-month")">@L["Month"]</label>
+        <select id="@($"{Id}-month")" class="partial-date-month" aria-invalid="@Invalid" @onchange="ChooseMonthAsync">
+            <option value="" selected="@(Month is null)">@L["UnknownMonth"]</option>
+            @for (var month = 1; month <= 12; month++)
+            {
+                <option value="@month" selected="@(Month == month)">@CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month)</option>
+            }
+        </select>
+        <label class="visually-hidden" for="@($"{Id}-year")">@L["Year"]</label>
+        <input id="@($"{Id}-year")" class="partial-date-year" type="text" inputmode="numeric" maxlength="4" placeholder="@L["YearPlaceholder"]"
+               aria-invalid="@Invalid" @bind:get="Year" @bind:set="SetYearAsync" />
+    </div>
+    @if (Error is not null)
+    {
+        <p class="partial-date-error" id="@ErrorId"><Icon Name="IconName.Alert" />@Error</p>
+    }
+    <p class="partial-date-help" id="@HelpId">@L["Help"]</p>
+</fieldset>
+
+@code {
+    /// <summary>The identifier of the date, unique in the page, from which those of its fields derive.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Legend { get; set; } = null!;
+
+    [Parameter]
+    public int? Year { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> YearChanged { get; set; }
+
+    [Parameter]
+    public int? Month { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> MonthChanged { get; set; }
+
+    /// <summary>What to correct: the date is then in error.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    private string? Invalid => Error is null ? null : "true";
+
+    private string ErrorId => $"{Id}-error";
+
+    private string HelpId => $"{Id}-help";
+
+    private string DescribedBy => Error is null ? HelpId : $"{ErrorId} {HelpId}";
+
+    private Task SetYearAsync(int? year) => YearChanged.InvokeAsync(year);
+
+    private Task ChooseMonthAsync(ChangeEventArgs args) =>
+        MonthChanged.InvokeAsync(int.TryParse(args.Value as string, CultureInfo.InvariantCulture, out var month) ? month : null);
+}
