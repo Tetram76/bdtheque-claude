@@ -115,6 +115,8 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
             Enum.GetValues<VisualType>().All(type => edition.Visuals.Any(visual => visual.Type == type))
             && edition.Visuals.Count(visual => visual.Type == VisualType.Cover) >= 2);
         Assert.Contains(album.Editions, edition => edition.IsbnChecksumValid == false);
+        // The notes of a copy belong to its edition, not to the album (visuel/fiche-album/contenu.md).
+        Assert.Contains(album.Editions, edition => edition.IsDedicated && edition.PersonalNotes is not null);
     }
 
     [Fact]
