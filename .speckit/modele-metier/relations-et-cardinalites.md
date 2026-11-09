@@ -2,7 +2,7 @@
 type: Modèle métier
 title: 'Relations et cardinalités'
 description: 'Relations et cardinalités de chaque entité, contraintes des intentions d''achat, du suivi de l''outil et des visites.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:00:00Z }
 ---
 
 # Relations et cardinalités
@@ -11,7 +11,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 
 | Relation | Cardinalité | Remarques |
 | --- | --- | --- |
-| Album → Édition | 0..n | Un album peut n'avoir aucune édition (non encore publié). |
+| Album → Édition | 0..n | Un album peut n'avoir aucune édition (non encore publié). À titre d'information, et non de contrainte : en pratique, un album n'a qu'une édition ; deux sont rares, trois un cas presque extrême. Un écran peut donc présenter toutes les éditions d'un album à la fois (ex. la fiche d'un album, [`visuel/fiche-album/`](../visuel/fiche-album/index.md)). |
 | Album → Série | 0..1 | Un album peut n'appartenir à aucune série (album standalone). L'attribut `Hors-série` est indépendant : un album peut être hors-série tout en appartenant à une série. |
 | Album → Contribution | 0..n | Un album peut avoir plusieurs contributions. Chaque contribution a un rôle et un artiste obligatoire. |
 | Album → Genre | 0..n | Genres propres à l'album. Si l'album appartient à une série, les genres affichés sont l'union des genres de l'album et de ceux de la série. |
