@@ -59,6 +59,8 @@ public sealed class ValidationDataLoader(HttpClient client)
         var history = await data.GenreAsync("Historique");
         var western = await data.GenreAsync("Western");
         await data.GenreAsync("Policier");
+        // Accented and without album: the list of the genres refuses « epopee » as already taken (modele-metier/genre.md).
+        await data.GenreAsync(AccentedGenre);
 
         var ombrelune = await data.UniverseAsync("Ombrelune", "Monde imaginaire de lunes et de marées.", null);
         var archipelago = await data.UniverseAsync("Archipel des Brumes", "Îles perdues aux confins d'Ombrelune.", ombrelune);
@@ -242,6 +244,9 @@ public sealed class ValidationDataLoader(HttpClient client)
         await data.RenameGenreAsync(western, "Western spaghetti");
         await data.DeleteGenreAsync(await data.GenreAsync(DeletedGenre));
     }
+
+    /// <summary>A genre whose label differs from another typed only by its case and its accents.</summary>
+    public const string AccentedGenre = "Épopée";
 
     /// <summary>A genre created then deleted, which the latest changes leave out.</summary>
     public const string DeletedGenre = "Genre supprimé";

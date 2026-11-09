@@ -78,8 +78,18 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
                 parameters.Add((MergeTextName, MergeText));
         }
 
+        parameters.AddRange(EntryParameters);
         return parameters;
     }
+
+    /// <summary>
+    /// The entry of a record the address opens over the list, for a list whose records are entered in it
+    /// (visuel/listes/saisie-selon-l-entite.md): none by default, the records being entered on a page of their own.
+    /// </summary>
+    protected virtual IEnumerable<(string Name, string Value)> EntryParameters => [];
+
+    /// <summary>The action of the entry opened by the address, if any, which <see cref="Action"/> records.</summary>
+    protected virtual (AudienceFunction Function, string? Parameters)? EntryAction => null;
 
     /// <summary>The page of the list of the API with these criteria.</summary>
     public string ApiPath()
@@ -104,10 +114,12 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
     /// entry keeps the search and the filters and returns to the first page, the form of the search and of the filters
     /// leaves the entry and returns to the first page. None for the whole list.
     /// </summary>
-    public (AudienceFunction Function, string Parameters)? Action
+    public (AudienceFunction Function, string? Parameters)? Action
     {
         get
         {
+            if (EntryAction is { } entry)
+                return entry;
             if (Delete is { } deleted)
                 return (Functions.Deletion, $"{Functions.Subject}={deleted}");
             if (Merge is { } merged)

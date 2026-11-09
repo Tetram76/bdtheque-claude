@@ -34,6 +34,15 @@ internal static class CatalogExpressions
     /// <summary>Marker of the entry of a universe, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static UniverseListItem ToListItem(this Universe universe) => throw NotExpanded();
 
+    /// <summary>
+    /// Marker of an album of the genre, its own or that of its series (fonctionnel/regles-metier/genres-et-univers-d-un-album.md),
+    /// for <see cref="Expand{TSource, TResult}"/> only.
+    /// </summary>
+    public static bool IsOfGenre(this Album album, Guid genreId) => throw NotExpanded();
+
+    /// <summary>Marker of a series of the genre, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static bool IsOfGenre(this Series series, Guid genreId) => throw NotExpanded();
+
     /// <summary>Marker of contributions as presented, by role then by author, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static IEnumerable<ContributionItem> ToItems(this IEnumerable<Contribution> contributions) => throw NotExpanded();
 
@@ -128,6 +137,11 @@ internal static class CatalogExpressions
             ? AlbumCollectionState.InCollection
             : a.PurchaseIntents.Any() ? AlbumCollectionState.PurchaseIntent : AlbumCollectionState.OutsideCollection;
 
+    private static readonly Expression<Func<Album, Guid, bool>> AlbumOfGenre =
+        (album, genreId) => album.Genres.Any(g => g.Id == genreId) || album.Series!.Genres.Any(g => g.Id == genreId);
+
+    private static readonly Expression<Func<Series, Guid, bool>> SeriesOfGenre = (series, genreId) => series.Genres.Any(g => g.Id == genreId);
+
     private static readonly Expression<Func<Universe, UniverseListItem>> UniverseListItemOf =
         u => new UniverseListItem(u.Id, u.Name, u.ParentId, u.Parent != null ? u.Parent.Name : null);
 
@@ -204,6 +218,8 @@ internal static class CatalogExpressions
                 nameof(ToItem) => PurchaseIntentItemOf,
                 nameof(PurchaseIntentOf) => PurchaseIntentOfEdition,
                 nameof(ToListItem) => UniverseListItemOf,
+                nameof(IsOfGenre) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => AlbumOfGenre,
+                nameof(IsOfGenre) => SeriesOfGenre,
                 nameof(ToItems) => ContributionItemsOf,
                 nameof(RolesOf) => RolesOfAuthor,
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,

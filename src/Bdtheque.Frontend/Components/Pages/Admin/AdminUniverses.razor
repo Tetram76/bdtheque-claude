@@ -1,0 +1,418 @@
+@attribute [Route(AppPaths.AdminUniverses)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Deletion
+@inject IStringLocalizer<AdminUniverses> L
+@inject ApiClient Api
+@inject AdminRecordCounts RecordCounts
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The list of the universes of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the albums
+   (visuel/listes/listes-de-l-administration.md): in the order of the hierarchy, each universe in retreat under its parent.
+   Rendered statically, its search, its page and its dialogs are carried by its address (Lists/UniverseListQuery.cs). A universe
+   is entered in a side panel over the list (visuel/listes/saisie-selon-l-entite.md), which the address opens, its form sent to
+   the list, whose error is presented in place; only the choice of the parent is interactive. Its styles read the contracts of
+   the base theme only (visuel/listes/declinaison-par-theme.md). *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminUniverses" />
+
+<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_counts?.Universes" NewHref="@NewHref" NewLabel="@L["New"]" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.AdminUniverses" FieldId="universe-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
+
+        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Universes" Order="@L["Order"]" />
+
+        @if (_list!.Items.Count == 0)
+        {
+            if (_query.Text is { } text)
+            {
+                <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
+                    <Actions>
+                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                        <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
+                    </Actions>
+                </EmptyList>
+            }
+            else
+            {
+                <EmptyList Message="@L["Empty.None"]">
+                    <Actions>
+                        <Button Href="@NewHref" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                    </Actions>
+                </EmptyList>
+            }
+        }
+        else
+        {
+            var onPage = _list.Items.Select(row => row.Id).ToHashSet();
+            <div class="universe-rows" role="table" aria-label="@L["Title"]">
+                <div class="universe-row universe-row-head" role="row">
+                    <span class="universe-main" role="columnheader">@L["Column.Universe"]</span>
+                    <span class="universe-albums" role="columnheader">@L["Column.Albums"]</span>
+                    <span class="universe-series" role="columnheader">@L["Column.Series"]</span>
+                    <span class="universe-subuniverses" role="columnheader">@L["Column.SubUniverses"]</span>
+                    <span class="universe-modified" role="columnheader">@L["Column.Modified"]</span>
+                    <span class="universe-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
+                </div>
+                @foreach (var row in _list.Items)
+                {
+                    // In retreat under those of its ancestors the page shows; a parent the page does not show (a search, a page that
+                    // begins below it) is named under it, with its own ancestors.
+                    var depth = row.Ancestors.Count(ancestor => onPage.Contains(ancestor.Id));
+                    var parentShown = row.ParentId is not { } parentId || onPage.Contains(parentId);
+                    <div class="universe-row" role="row" data-depth="@depth" style="--depth: @depth">
+                        <span class="universe-main" role="cell">
+                            <span class="universe-entry">
+                                @if (depth > 0)
+                                {
+                                    <span class="universe-branch" aria-hidden="true">└</span>
+                                }
+                                <a class="universe-name" href="@((ListOnly with { Edit = row.Id }).Href())">@row.Name</a>
+                            </span>
+                            @if (!parentShown)
+                            {
+                                <span class="universe-path">@string.Join(" › ", row.Ancestors.Select(ancestor => ancestor.Name))</span>
+                            }
+                        </span>
+                        <span class="universe-meta">
+                            @* On two lines, a number loses its column header: it carries the name of its column. *@
+                            <span class="universe-albums" role="cell" data-empty="@(row.AlbumCount == 0)">
+                                <span class="universe-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)
+                            </span>
+                            <span class="universe-series" role="cell" data-empty="@(row.SeriesCount == 0)">
+                                <span class="universe-caption">@L["Column.Series"]</span> @Format.Number(row.SeriesCount)
+                            </span>
+                            <span class="universe-subuniverses" role="cell" data-empty="@(row.SubUniverseCount == 0)">
+                                <span class="universe-caption">@L["Column.SubUniverses"]</span> @Format.Number(row.SubUniverseCount)
+                            </span>
+                        </span>
+                        <span class="universe-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
+                        <span class="universe-actions" role="cell">
+                            <Button Href="@((ListOnly with { Edit = row.Id }).Href())" Icon="IconName.Edit" Label="@L["Edit"]"
+                                    IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", row.Name]" />
+                            <ActionsMenu Id="@($"universe-actions-{row.Id:N}")" Label="@L["More", row.Name]">
+                                <MenuItem Href="@AppPaths.UniverseWorks(row.Id)" Icon="IconName.Exit" Label="@L["Menu.Works"]" />
+                                <MenuItem Href="@((ListOnly with { Merge = row.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
+                                <MenuSeparator />
+                                <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"
+                                          Variant="ButtonVariant.Delete" />
+                            </ActionsMenu>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <Pagination Number="_list.Number" Size="_list.Size" TotalCount="_list.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (ListOnly with { Page = page }).Href())" />
+        }
+    </ChildContent>
+    <Dialogs>
+        @if (_query.Edit is not null && _universe is not null || _query.Edit is null && _query.Adding)
+        {
+            <form class="side-panel-form" method="post" @formname="@EntryFormName" @onsubmit="SaveAsync">
+                <AntiforgeryToken />
+                @if (_universe is not null)
+                {
+                    <input type="hidden" name="@VersionName" value="@EntryVersion" />
+                }
+                <SidePanel Id="universe-panel" Title="@(_universe is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@ListOnly.Href()">
+                    <ChildContent>
+                        @if (OtherProblem is { } problem)
+                        {
+                            <ErrorMessage Problem="problem" />
+                        }
+                        <Field Id="universe-name" Label="@L["Name"]" Note="@L["Required"]" Error="@FieldError("name")" Context="control">
+                            <input id="@control.Id" type="text" name="@NameName" autofocus aria-describedby="@control.DescribedBy"
+                                   aria-invalid="@control.Invalid" @bind="EntryName" />
+                        </Field>
+                        <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" Parent="_parent"
+                                             Error="@FieldError("parent")" />
+                        <Field Id="universe-description" Label="@L["Description"]" Error="@FieldError("description")" Context="control">
+                            <textarea id="@control.Id" name="@DescriptionName" rows="5" placeholder="@L["Description.Placeholder"]"
+                                      aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid">@EntryDescription</textarea>
+                        </Field>
+                        @if (_universe is not null)
+                        {
+                            <p class="side-panel-dates">
+                                @L["Dates.Created"] <LocalDateTime Value="_universe.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_universe.ModifiedAt" />.
+                            </p>
+                        }
+                    </ChildContent>
+                    <Actions>
+                        <Button Type="submit" Variant="ButtonVariant.Primary" Label="@(_universe is null ? L["Create"] : L["Save"])" />
+                    </Actions>
+                </SidePanel>
+            </form>
+        }
+        else if (_dialogUniverse is not null)
+        {
+            if (_query.Merge is not null)
+            {
+                <MergeDialog Id="universe-merge" Title="@L["Merge.Title"]" Subject="@_dialogUniverse.Name" Lead="@L["Merge.Lead"]"
+                             CloseHref="@ListOnly.Href()" Action="@AppPaths.AdminUniverses"
+                             Criteria="@((ListOnly with { Merge = _dialogUniverse.Id }).Parameters())" Text="@_query.MergeText"
+                             SearchLabel="@L["Merge.Search"]" Placeholder="@L["Merge.Placeholder"]" Candidates="_candidates"
+                             Prompt="@L["Merge.Prompt"]" None="@L["Merge.None", _query.MergeText ?? ""]" CandidatesLabel="@L["Merge.Candidates"]"
+                             Note="@L["Merge.Note"]" ContinueAction="@AppPaths.AdminMergeUniverses" SubjectName="universe"
+                             SubjectId="_dialogUniverse.Id" />
+            }
+            else
+            {
+                <DeletionDialog Id="universe-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@_dialogUniverse.Name"
+                                CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                                RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_deletionProblem"
+                                Version="_dialogUniverse.Version" OnConfirm="DeleteAsync" />
+            }
+        }
+    </Dialogs>
+</ListLayout>
+
+@code {
+    private const string DeletionFormName = "universe-deletion";
+    private const string EntryFormName = "universe-entry";
+    private const string NameName = "name";
+    private const string DescriptionName = "description";
+    private const string ParentName = "parentId";
+    private const string VersionName = "version";
+
+    /// <summary>How many other universes the merge dialog proposes: enough to choose, few enough to read at a glance.</summary>
+    internal const int CandidateCount = 10;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    /// <summary>The version of the universe whose deletion is confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.VersionName)]
+    private uint? Version { get; set; }
+
+    /// <summary>The fingerprint of the impact of the deletion the administrator confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.FingerprintName)]
+    private string? Fingerprint { get; set; }
+
+    [SupplyParameterFromForm(FormName = EntryFormName, Name = NameName)]
+    private string? EntryName { get; set; }
+
+    [SupplyParameterFromForm(FormName = EntryFormName, Name = DescriptionName)]
+    private string? EntryDescription { get; set; }
+
+    /// <summary>The parent chosen; none at the top of the hierarchy.</summary>
+    [SupplyParameterFromForm(FormName = EntryFormName, Name = ParentName)]
+    private Guid? EntryParentId { get; set; }
+
+    /// <summary>The version of the universe changed, as its panel read it.</summary>
+    [SupplyParameterFromForm(FormName = EntryFormName, Name = VersionName)]
+    private uint? EntryVersion { get; set; }
+
+    private UniverseListQuery _query = new();
+    private RecordCounts? _counts;
+    private Page<UniverseAdminListItem>? _list;
+    private ApiProblem? _problem;
+    private UniverseAdminListItem? _dialogUniverse;
+    private UniverseForm? _universe;
+    private UniverseInHierarchy? _parent;
+    private DeletionImpact? _impact;
+    private ApiProblem? _deletionProblem;
+    private ApiProblem? _entryProblem;
+    private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
+
+    // The list with its criteria, without its dialogs nor its panel: where a link of the list, or their closing, leads.
+    private UniverseListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null, Edit = null, Adding = false };
+
+    private string NewHref => (ListOnly with { Adding = true }).Href();
+
+    // A form sent back, whose fields, even emptied, are those typed.
+    private bool IsPost => HttpContext is { } context && HttpMethods.IsPost(context.Request.Method);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = UniverseListQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            // The number of universes is the one of the menu, read once per request; without it, the list goes on.
+            _counts = await RecordCounts.TryGetAsync();
+            _list = await Api.GetAsync<Page<UniverseAdminListItem>>(_query.ApiPath());
+            // A page beyond the last one (the page of its only universe once deleted, an old address) is no empty list: its
+            // universes are on the pages before it, the last of which it leads to, with the same criteria.
+            if (_list is { Items.Count: 0, TotalCount: > 0 } && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (_list.TotalCount + _list.Size - 1) / _list.Size }).Href());
+                return;
+            }
+            // A dialog opens on a universe of the page, from its row: an address written by hand on another one opens none.
+            _dialogUniverse = _list.Items.FirstOrDefault(row => row.Id == (_query.Delete ?? _query.Merge));
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        // The panel opens over the list wherever the universe is in it, a universe deleted meanwhile opening none.
+        if (_query.Edit is { } edited)
+            _universe = await FindAsync(edited);
+        // Read once, from the universe; a form sent back keeps what was typed, the version always among it.
+        if (_universe is not null && EntryVersion is null)
+        {
+            EntryName = _universe.Name;
+            EntryDescription = _universe.Description;
+            EntryParentId = _universe.ParentId;
+        }
+        // A new universe opened on a search that finds none is the universe searched (« Créer l'univers « … » »), unless a name
+        // sent back, even emptied, is to be corrected.
+        if (_query is { Adding: true, Edit: null, Text: { } searched } && _list.Items.Count == 0 && !IsPost)
+            EntryName ??= searched;
+        _parent = EntryParentId is not { } parentId ? null
+            : parentId == _universe?.ParentId ? _universe.Parent
+            : await HierarchyAsync(parentId);
+        EntryVersion ??= _universe?.Version;
+
+        if (_dialogUniverse is not null && _query.Delete is { } deleted)
+            await LoadImpactAsync(deleted);
+        else if (_dialogUniverse is not null && _query.MergeText is { } text)
+            _candidates = await LoadCandidatesAsync(text);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // The universe, or none if it no longer exists: the list is then shown without its panel.
+    private async Task<UniverseForm?> FindAsync(Guid id)
+    {
+        try
+        {
+            return await Api.GetAsync<UniverseForm>($"/admin/universes/{id}");
+        }
+        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
+        {
+            return null;
+        }
+    }
+
+    // The parent sent with a form that was refused, with its ancestors; by its identifier alone if it no longer exists, the
+    // field then presenting none, and the saving the error.
+    private async Task<UniverseInHierarchy?> HierarchyAsync(Guid id)
+    {
+        try
+        {
+            return await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{id}/hierarchy");
+        }
+        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
+        {
+            return null;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        UniverseForm saved;
+        try
+        {
+            saved = _universe is not null && EntryVersion is { } version
+                ? await Api.PutAsync<UpdateUniverseRequest, UniverseForm>(
+                    $"/admin/universes/{_universe.Id}", new UpdateUniverseRequest(EntryName ?? "", EntryDescription, EntryParentId, version))
+                : await Api.PostAsync<CreateUniverseRequest, UniverseForm>(
+                    "/admin/universes", new CreateUniverseRequest(EntryName ?? "", EntryDescription, EntryParentId));
+        }
+        catch (ApiProblemException exception)
+        {
+            _entryProblem = exception.Problem;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(
+            _universe is null ? AudienceFunctions.AdminUniverseCreated : AudienceFunctions.AdminUniverseSaved, $"universe={saved.Id}",
+            HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own.
+    private string? FieldError(string field) =>
+        _entryProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field ? L[$"FieldError.{code}"].Value : null;
+
+    // Any other error, presented at the top of the panel: a universe changed or deleted meanwhile, a technical error.
+    private ApiProblem? OtherProblem =>
+        _entryProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) is not null ? null : _entryProblem;
+
+    private static string? FieldOf(string ruleCode) => ruleCode switch
+    {
+        "Universe.NameRequired" => "name",
+        "Universe.HierarchyCycle" => "parent",
+        _ => null,
+    };
+
+    private async Task LoadImpactAsync(Guid universeId)
+    {
+        try
+        {
+            _impact = await Api.GetAsync<DeletionImpact>($"/admin/universes/{universeId}/deletion-impact");
+        }
+        catch (ApiProblemException exception)
+        {
+            _deletionProblem = exception.Problem;
+        }
+    }
+
+    // The other universes found by the search of the dialog, the universe itself excepted.
+    private async Task<IReadOnlyList<MergeDialog.MergeCandidate>?> LoadCandidatesAsync(string text)
+    {
+        var found = await Api.GetAsync<Page<UniverseAdminListItem>>(_query.MergeCandidatesApiPath(text, CandidateCount));
+        return
+        [
+            .. found.Items
+                .Where(row => row.Id != _dialogUniverse!.Id)
+                .Take(CandidateCount)
+                .Select(row => new MergeDialog.MergeCandidate(row.Id, row.Name, CandidateDetail(row))),
+        ];
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (_dialogUniverse is null || Version is not { } version || Fingerprint is null)
+            return;
+
+        try
+        {
+            await Api.DeleteAsync($"/admin/universes/{_dialogUniverse.Id}?version={version}&fingerprint={Uri.EscapeDataString(Fingerprint)}");
+        }
+        catch (ApiProblemException exception)
+        {
+            // A deletion refused, or whose impact changed since its confirmation, announces the current impact, to confirm
+            // again or to resolve; any other error is presented as it is.
+            _deletionProblem = exception.Problem;
+            _impact = exception.Problem.Impact;
+            if (_impact is { BlockedBy.Count: > 0 })
+                _deletionProblem = null;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(
+            AudienceFunctions.AdminUniversesDeleted, $"universe={_dialogUniverse.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    private string CountText() => _list!.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+
+    // « Dans Univers Hugo Pratt · 18 albums »: what tells two universes of close names apart, their place in the hierarchy first.
+    private string CandidateDetail(UniverseAdminListItem candidate) => candidate.Ancestors.Count == 0
+        ? Plural("Albums", candidate.AlbumCount)
+        : $"{L["Candidate.In", string.Join(" › ", candidate.Ancestors.Select(a => a.Name))]} · {Plural("Albums", candidate.AlbumCount)}";
+
+    private string Plural(string name, int count) => count switch
+    {
+        0 => L[$"{name}.Zero"],
+        1 => L[$"{name}.One"],
+        _ => L[$"{name}.Other", Format.Number(count)],
+    };
+}

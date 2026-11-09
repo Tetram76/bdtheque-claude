@@ -1,0 +1,88 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the surface, border and shadow of what floats
+   over the page, as a dialog. */
+.side-panel {
+    --focus-gap: var(--color-surface-raised);
+    inline-size: min(28rem, 100vw);
+    max-inline-size: 100vw;
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    margin: 0 0 0 auto;
+    padding: var(--space-l) var(--space-l);
+    box-sizing: border-box;
+    border: none;
+    border-inline-start: var(--border-floating);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    box-shadow: var(--shadow-floating);
+    /* The panel scrolls as a whole, so that the suggestions of a field are never cut by a scrolling part of it. */
+    overflow-y: auto;
+}
+
+.side-panel[open] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+    animation: side-panel-in 0.2s ease-out;
+}
+
+.side-panel::backdrop {
+    background: rgb(0 0 0 / 0.35);
+}
+
+@keyframes side-panel-in {
+    from {
+        transform: translateX(100%);
+    }
+}
+
+/* In reduced motion, the panel is simply there. */
+@media (prefers-reduced-motion: reduce) {
+    .side-panel[open] {
+        animation: none;
+    }
+}
+
+.side-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+}
+
+.side-panel-title {
+    margin: 0;
+    font-size: var(--font-size-title);
+}
+
+.side-panel-close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+}
+
+.side-panel-close ::deep .icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.side-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+/* The actions at the bottom of the panel, whatever the length of its fields. */
+.side-panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-s);
+    margin-block-start: auto;
+    padding-block-start: var(--space-m);
+    border-block-start: 1px solid var(--color-rule);
+}

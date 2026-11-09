@@ -155,9 +155,35 @@ public static class AppPaths
     /// </summary>
     public const string AdminMergePublishers = NotYetImplemented;
 
-    public const string AdminGenres = NotYetImplemented;
+    /// <summary>
+    /// The list of the genres of the administration (visuel/listes/), where a genre is changed in its row and a new one added in
+    /// a frame above the list (visuel/listes/saisie-selon-l-entite.md).
+    /// </summary>
+    public const string AdminGenres = "/admin/genres";
 
-    public const string AdminUniverses = NotYetImplemented;
+    /// <summary>The list of the genres with the genre changed in its row: the list searched on its label, when it is not on its page.</summary>
+    public static string AdminEditGenre(Guid id) => $"{AdminGenres}?edit={id}";
+
+    /// <summary>
+    /// The next step of the merge of two genres, whose presentation awaits the terms of the merge
+    /// (fonctionnel/structure-de-l-application.md): it receives the genre and the other one, <c>genre</c> and <c>other</c>.
+    /// </summary>
+    public const string AdminMergeGenres = NotYetImplemented;
+
+    /// <summary>
+    /// The list of the universes of the administration (visuel/listes/), where a universe is entered in a side panel over the
+    /// list (visuel/listes/saisie-selon-l-entite.md).
+    /// </summary>
+    public const string AdminUniverses = "/admin/universes";
+
+    /// <summary>The list of the universes with the panel of the universe open over it.</summary>
+    public static string AdminEditUniverse(Guid id) => $"{AdminUniverses}?edit={id}";
+
+    /// <summary>
+    /// The next step of the merge of two universes, whose presentation awaits the terms of the merge
+    /// (fonctionnel/structure-de-l-application.md): it receives the universe and the other one, <c>universe</c> and <c>other</c>.
+    /// </summary>
+    public const string AdminMergeUniverses = NotYetImplemented;
 
     public const string AdminSettings = NotYetImplemented;
 
@@ -175,9 +201,11 @@ public static class AppPaths
 
     public const string AdminNewPublisher = NotYetImplemented;
 
-    public const string AdminNewGenre = NotYetImplemented;
+    /// <summary>The list of the genres with the frame of a new genre open.</summary>
+    public const string AdminNewGenre = $"{AdminGenres}?new=open";
 
-    public const string AdminNewUniverse = NotYetImplemented;
+    /// <summary>The list of the universes with the panel of a new universe open over it.</summary>
+    public const string AdminNewUniverse = $"{AdminUniverses}?new=open";
 
     /// <summary>The editions whose ISBN has a check digit that disagrees with it (visuel/administration/contenu.md, À vérifier).</summary>
     public const string AdminInvalidIsbns = NotYetImplemented;
@@ -187,6 +215,8 @@ public static class AppPaths
     {
         RecordType.ApplicationSettings => AdminSettings,
         RecordType.Album => AdminEditAlbum(id),
+        RecordType.Genre => AdminEditGenre(id),
+        RecordType.Universe => AdminEditUniverse(id),
         _ => NotYetImplemented,
     };
 }

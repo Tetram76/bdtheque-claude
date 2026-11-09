@@ -40,6 +40,22 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
+    public async Task Get_NamesTheParentWithItsAncestors_AndCarriesTheDatesOfTheRecord()
+    {
+        var top = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var parent = await CreateAsync($"Univers {Guid.NewGuid():N}", top.Id);
+        var universe = await CreateAsync($"Univers {Guid.NewGuid():N}", parent.Id);
+
+        var form = await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{universe.Id}");
+
+        Assert.Equal(parent.Id, form!.Parent!.Universe.Id);
+        Assert.Equal([top.Name], form.Parent.Ancestors.Select(a => a.Name));
+        Assert.NotEqual(default, form.CreatedAt);
+        Assert.Equal(form.CreatedAt, form.ModifiedAt);
+        Assert.Null((await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{top.Id}"))!.Parent);
+    }
+
+    [Fact]
     public async Task Hierarchy_OfAnUnknownUniverse_IsAFunctionalError()
     {
         var response = await _client.GetAsync($"/admin/universes/{Guid.NewGuid()}/hierarchy");
@@ -58,7 +74,8 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         var created = await response.Content.ReadFromJsonAsync<UniverseForm>();
         Assert.Equal(("Zorglub", null, parent.Id), (created!.Name, created.Description, created.ParentId));
         Assert.Equal($"/admin/universes/{created.Id}", response.Headers.Location?.OriginalString);
-        Assert.Equal(created, await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{created.Id}"));
+        // Its parent names its ancestors in a list, which a record compares by reference.
+        Assert.Equivalent(created, await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{created.Id}"), strict: true);
     }
 
     [Fact]

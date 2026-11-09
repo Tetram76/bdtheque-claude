@@ -18,13 +18,33 @@ internal sealed class UniverseTree
     private UniverseTree(List<UniverseListItem> universes)
     {
         _universes = universes.ToDictionary(u => u.Id);
+        // A lookup keeps the order of its source: the children of a universe are by name.
         _children = universes.ToLookup(u => u.ParentId, u => u.Id);
     }
 
+    // By name in the order of the base, French (choix-implementation/persistance/collation-des-colonnes-texte.md), then by
+    // identifier for a total order: the order of the siblings in the hierarchy.
     public static async Task<UniverseTree> LoadAsync(BdthequeDbContext context, CancellationToken cancellationToken) =>
         new(await context.Universes.AsNoTracking()
+            .OrderBy(u => u.Name)
+            .ThenBy(u => u.Id)
             .Select(CatalogExpressions.Expand((Universe u) => u.ToListItem()))
             .ToListAsync(cancellationToken));
+
+    /// <summary>
+    /// Every universe in the order of the hierarchy (visuel/listes/liste-par-liste.md): each followed by its sub-universes,
+    /// siblings by name.
+    /// </summary>
+    public IEnumerable<Guid> InHierarchyOrder()
+    {
+        var pending = new Stack<Guid>(_children[null].Reverse());
+        while (pending.TryPop(out var id))
+        {
+            yield return id;
+            foreach (var childId in _children[id].Reverse())
+                pending.Push(childId);
+        }
+    }
 
     /// <summary>
     /// The universes a record is attached to, each with its ancestors; the hierarchy is only read for a

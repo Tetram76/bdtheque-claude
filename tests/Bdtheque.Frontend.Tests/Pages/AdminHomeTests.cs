@@ -72,7 +72,8 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             ],
             cards);
         // The lists of the albums (#200), of the editions (#333), of the series (#301), of the purchase intents (#334), of the authors
-        // (#302) and of the publishers (#303), and the entry form of an album (#205), are implemented; the other pages are still to come.
+        // (#302), of the publishers (#303), of the genres and of the universes (#203), and the entry form of an album (#205), are
+        // implemented; the other pages are still to come.
         var links = BlockOf(page, "Les fiches").QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))).ToList();
         IEnumerable<(string, string?)> implemented =
         [
@@ -82,6 +83,8 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             ("Intentions d'achat", AppPaths.AdminPurchaseIntents), ("Gérer la liste", AppPaths.AdminPurchaseIntents),
             ("Auteurs", AppPaths.AdminAuthors), ("Gérer la liste", AppPaths.AdminAuthors),
             ("Éditeurs", AppPaths.AdminPublishers), ("Gérer la liste", AppPaths.AdminPublishers),
+            ("Genres", AppPaths.AdminGenres), ("Gérer la liste", AppPaths.AdminGenres), ("+ Nouveau genre", AppPaths.AdminNewGenre),
+            ("Univers", AppPaths.AdminUniverses), ("Gérer la liste", AppPaths.AdminUniverses), ("+ Nouvel univers", AppPaths.AdminNewUniverse),
         ];
         Assert.Equal(implemented, links.Where(link => link.Item2 != AppPaths.NotYetImplemented));
     }
@@ -107,12 +110,13 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     public void LatestChanges_TheRecordsWithTheirTypeTheirOperationAndTheirDate_EachToModify()
     {
         var album = Guid.CreateVersion7();
+        var genre = Guid.CreateVersion7();
         _api.Answers["/admin/change-log/latest-records"] = new[]
         {
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 6, 9, 42, 0, TimeSpan.Zero), RecordType.Album, album,
                 new AlbumLabel("L'Iris blanc", "Astérix", AlbumType.Regular, false, 40, null, null), ChangeLogOperation.Modification, []),
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 5, 20, 8, 0, TimeSpan.Zero), RecordType.Genre,
-                Guid.CreateVersion7(), new NameLabel("Western"), ChangeLogOperation.Creation, []),
+                genre, new NameLabel("Western"), ChangeLogOperation.Creation, []),
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 4, 8, 0, 0, TimeSpan.Zero), RecordType.ApplicationSettings,
                 Guid.CreateVersion7(), new ApplicationSettingsLabel(), ChangeLogOperation.Modification, []),
         };
@@ -123,7 +127,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("L'Iris blanc (Astérix - T. 40)", "Album modifié · 06/11/2026 10:42", AppPaths.AdminEditAlbum(album)),
-                ("Western", "Genre créé · 05/11/2026 21:08", AppPaths.NotYetImplemented),
+                ("Western", "Genre créé · 05/11/2026 21:08", AppPaths.AdminEditGenre(genre)),
                 ("Paramétrage de l'application", "Paramétrage modifié · 04/11/2026 09:00", AppPaths.AdminSettings),
             ],
             rows.Select(row => (

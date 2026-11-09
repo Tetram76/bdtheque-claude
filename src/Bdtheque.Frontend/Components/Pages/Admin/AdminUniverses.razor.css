@@ -1,0 +1,175 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the page
+   being that of every list of the administration (Components/Lists), and the panel of a universe that of every side panel
+   (Components/Controls/SidePanel.razor). */
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
+   row holds on two lines: the name and the actions, then its numbers, each preceded by the name of its column, lined up on its
+   name beyond its retreat. A list wide enough for its columns is a table; wider still, the table adds the number of
+   sub-universes and the last modification (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go
+   first). */
+.universe-rows {
+    container: universe-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own, so
+       that their columns line up. It holds « Modifier » and the « ⋯ » button. */
+    --universe-actions-width: 10rem;
+    /* The retreat of a universe under its parent, and the place of the mark of its branch. */
+    --universe-indent: 1.375rem;
+    --universe-branch-width: 1rem;
+}
+
+.universe-row {
+    --depth: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "main actions" "meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.universe-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.universe-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    padding-inline-start: calc(var(--depth) * var(--universe-indent));
+}
+
+.universe-entry {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
+.universe-branch {
+    flex: none;
+    inline-size: var(--universe-branch-width);
+    color: var(--color-text-muted);
+}
+
+.universe-name {
+    min-inline-size: 0;
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+/* Its ancestors, when the page does not show its parent, on a single line that an ellipsis ends when they do not fit. */
+.universe-path {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.universe-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The numbers of a sub-universe line up with its name, beyond its retreat and the mark of its branch. */
+.universe-row:not([data-depth="0"]) .universe-meta {
+    padding-inline-start: calc(var(--depth) * var(--universe-indent) + var(--universe-branch-width) + var(--space-xs));
+}
+
+.universe-albums {
+    grid-area: albums;
+}
+
+.universe-series {
+    grid-area: series;
+}
+
+.universe-subuniverses {
+    grid-area: subuniverses;
+}
+
+.universe-caption,
+.universe-meta [data-empty] {
+    color: var(--color-text-muted);
+}
+
+.universe-modified {
+    display: none;
+    grid-area: modified;
+}
+
+/* The date of a row, not the head of its column, which keeps the size of the other heads. */
+.universe-row:not(.universe-row-head) .universe-modified {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.universe-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container universe-rows (min-width: 36rem) {
+    .universe-row {
+        grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--universe-actions-width);
+        grid-template-areas: "main albums series actions";
+        align-items: center;
+    }
+
+    .universe-row-head {
+        display: grid;
+    }
+
+    .universe-meta {
+        display: contents;
+        font-size: inherit;
+    }
+
+    .universe-subuniverses {
+        display: none;
+    }
+
+    /* In a table, the head names the columns. */
+    .universe-caption {
+        display: none;
+    }
+}
+
+@container universe-rows (min-width: 54rem) {
+    .universe-row {
+        grid-template-columns: minmax(0, 1fr) 6rem 6rem 6.5rem 6.75rem var(--universe-actions-width);
+        grid-template-areas: "main albums series subuniverses modified actions";
+    }
+
+    .universe-subuniverses,
+    .universe-modified {
+        display: block;
+    }
+}
+
+/* The dates of the universe in its panel, under its fields. */
+.side-panel-form ::deep .side-panel-dates {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
