@@ -104,7 +104,17 @@ public static class AppPaths
     /// </summary>
     public const string AdminMergeSeries = NotYetImplemented;
 
-    public const string AdminEditions = NotYetImplemented;
+    /// <summary>The list of the editions of the administration (visuel/listes/).</summary>
+    public const string AdminEditions = "/admin/editions";
+
+    /// <summary>The entry form of an edition, addressed by its album (#209).</summary>
+    public static string AdminEditEdition(Guid albumId, Guid id) => NotYetImplemented;
+
+    /// <summary>
+    /// The next step of the merge of two editions, whose presentation awaits the terms of the merge
+    /// (fonctionnel/structure-de-l-application.md): it receives the edition and the other one, <c>edition</c> and <c>other</c>.
+    /// </summary>
+    public const string AdminMergeEditions = NotYetImplemented;
 
     public const string AdminPurchaseIntents = NotYetImplemented;
 

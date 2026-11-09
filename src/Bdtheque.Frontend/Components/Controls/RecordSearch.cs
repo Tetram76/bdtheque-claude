@@ -1,5 +1,6 @@
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Frontend.Api;
+using Bdtheque.Frontend.Formatting;
 
 namespace Bdtheque.Frontend.Components.Controls;
 
@@ -7,7 +8,7 @@ namespace Bdtheque.Frontend.Components.Controls;
 /// The suggestions of a <see cref="RecordPicker"/>: the first records of the list of the consultation of their kind that
 /// contain the text typed, as the search of the lists finds them (choix-implementation/api/recherche.md), in their order.
 /// </summary>
-public sealed class RecordSearch(ApiClient api)
+public sealed class RecordSearch(ApiClient api, RecordLabels labels)
 {
     /// <summary>The number of suggestions: enough to choose, few enough to read at a glance.</summary>
     public const int SuggestionCount = 10;
@@ -25,8 +26,18 @@ public sealed class RecordSearch(ApiClient api)
                 "publisher-collections", query, c => new(c.Id, c.Name, c.PublisherName), cancellationToken),
             RecordKind.Genre => await FindAsync<GenreListItem>("genres", query, g => new(g.Id, g.Label, null), cancellationToken),
             RecordKind.Universe => await FindAsync<UniverseListItem>("universes", query, u => new(u.Id, u.Name, u.ParentName), cancellationToken),
+            RecordKind.Album => await FindAlbumsAsync(query, cancellationToken),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
         };
+    }
+
+    // An album is named by its label in the format of the settings, its series beside it, as the lists name it
+    // (fonctionnel/presentation/libelle-d-un-album.md): the settings are read with each search, which a pause of the typing
+    // already spaces out, so that a format changed meanwhile applies.
+    private async Task<IReadOnlyList<RecordOption>> FindAlbumsAsync(string query, CancellationToken cancellationToken)
+    {
+        var format = (await api.GetAsync<ApplicationSettings>("/catalog/settings", cancellationToken)).AlbumLabelFormat;
+        return await FindAsync<AlbumSummary>("albums", query, a => new(a.Id, labels.Album(a, format), null), cancellationToken);
     }
 
     /// <summary>

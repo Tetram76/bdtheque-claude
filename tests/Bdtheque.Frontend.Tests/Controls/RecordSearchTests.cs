@@ -2,6 +2,8 @@ using System.Net;
 using System.Text;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
+using Bdtheque.Frontend.Formatting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Controls;
 
@@ -31,6 +33,15 @@ public sealed class RecordSearchTests
             RecordKind.Author, "/catalog/authors",
             $$"""{"id":"{{Id}}","lastName":"Van Hamme","firstName":"Jean","pseudonym":null}""", "Jean Van Hamme", null
         },
+        {
+            // Named by its label in the format of the settings, its series beside it (fonctionnel/presentation/libelle-d-un-album.md).
+            RecordKind.Album, "/catalog/albums",
+            $$"""
+              {"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
+               "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true}
+              """,
+            "T. 5 - Le Lotus bleu (Tintin)", null
+        },
     };
 
     [Theory]
@@ -40,15 +51,15 @@ public sealed class RecordSearchTests
         string? requested = null;
         var search = new RecordSearch(new ApiClient(new HttpClient(new StubHandler(request =>
         {
+            // The settings, in the format whose volume comes first, which a label in the default format would not follow.
+            if (request.RequestUri!.AbsolutePath == "/catalog/settings")
+                return Json("""{"albumLabelFormat":"VolumeTitleSeries","displayCulture":"FrenchFrance"}""");
             requested = request.RequestUri!.PathAndQuery;
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent($$"""{"items":[{{item}}],"number":1,"size":10,"totalCount":1}""", Encoding.UTF8, "application/json"),
-            };
+            return Json($$"""{"items":[{{item}}],"number":1,"size":10,"totalCount":1}""");
         }))
         {
             BaseAddress = new Uri("http://api"),
-        }));
+        }), Labels);
 
         var options = await search.FindAsync(kind, "  Dar & co ", CancellationToken.None);
 
@@ -63,6 +74,12 @@ public sealed class RecordSearchTests
     [InlineData(null, null, "Moebius", "Moebius")]
     public void AuthorName_IsItsMainIdentifier(string? lastName, string? firstName, string? pseudonym, string expected) =>
         Assert.Equal(expected, RecordSearch.AuthorName(lastName, firstName, pseudonym));
+
+    private static readonly RecordLabels Labels = new ServiceCollection().AddLogging().AddLocalization().AddSingleton<RecordLabels>()
+        .BuildServiceProvider().GetRequiredService<RecordLabels>();
+
+    private static HttpResponseMessage Json(string content) =>
+        new(HttpStatusCode.OK) { Content = new StringContent(content, Encoding.UTF8, "application/json") };
 
     private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> answer) : HttpMessageHandler
     {

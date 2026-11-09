@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Éditions</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouvelle édition</value>
+  </data>
+  <data name="Kicker" xml:space="preserve">
+    <value>Fiches</value>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Liste des éditions</value>
+  </data>
+  <data name="Search.Label" xml:space="preserve">
+    <value>Rechercher une édition</value>
+  </data>
+  <data name="Search.Placeholder" xml:space="preserve">
+    <value>ISBN, avec ou sans tirets…</value>
+  </data>
+  <data name="Filter.Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="Filter.Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="Filter.PublisherCollection" xml:space="preserve">
+    <value>Collection éditeur</value>
+  </data>
+  <data name="Filter.Any" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="Filters.Note" xml:space="preserve">
+    <value>Album, éditeur et collection se choisissent en tapant leur nom. Seules les éditions de la collection figurent ici : une édition visée figure parmi les intentions d&apos;achat.</value>
+  </data>
+  <data name="Count.None" xml:space="preserve">
+    <value>Aucune édition</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>1 édition</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} éditions</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Dans l&apos;ordre des albums, puis par année d&apos;édition</value>
+  </data>
+  <data name="Column.Cover" xml:space="preserve">
+    <value>Couverture</value>
+  </data>
+  <data name="Column.Edition" xml:space="preserve">
+    <value>Édition</value>
+  </data>
+  <data name="Column.Year" xml:space="preserve">
+    <value>Année</value>
+  </data>
+  <data name="Column.Category" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Column.Acquisition" xml:space="preserve">
+    <value>Acquisition</value>
+  </data>
+  <data name="Column.Modified" xml:space="preserve">
+    <value>Modifiée</value>
+  </data>
+  <data name="Column.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Acquisition.WithYear" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Edit.Label" xml:space="preserve">
+    <value>Modifier {0}</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>Autres actions sur {0}</value>
+  </data>
+  <data name="Menu.View" xml:space="preserve">
+    <value>Voir l&apos;album dans la consultation</value>
+  </data>
+  <data name="Menu.Merge" xml:space="preserve">
+    <value>Fusionner avec une autre édition…</value>
+  </data>
+  <data name="Menu.Delete" xml:space="preserve">
+    <value>Supprimer…</value>
+  </data>
+  <data name="Empty.Text" xml:space="preserve">
+    <value>Aucune édition ne correspond à « {0} ».</value>
+  </data>
+  <data name="Empty.Criteria" xml:space="preserve">
+    <value>Aucune édition ne correspond à ces critères.</value>
+  </data>
+  <data name="Empty.Hint" xml:space="preserve">
+    <value>La recherche porte sur l&apos;ISBN, avec ou sans tirets ni espaces.</value>
+  </data>
+  <data name="Empty.Clear" xml:space="preserve">
+    <value>Effacer la recherche</value>
+  </data>
+  <data name="Empty.ClearFilters" xml:space="preserve">
+    <value>Effacer les filtres</value>
+  </data>
+  <data name="Deletion.Title" xml:space="preserve">
+    <value>Supprimer cette édition ?</value>
+  </data>
+  <data name="Deletion.Lead" xml:space="preserve">
+    <value>La suppression est définitive et emporte avec l&apos;édition :</value>
+  </data>
+  <data name="Refusal.Lead" xml:space="preserve">
+    <value>L&apos;édition est encore liée à d&apos;autres fiches : la suppression est refusée tant que ces liens existent.</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
+    <value>Retirez d&apos;abord l&apos;édition des critères de ces recherches enregistrées, puis recommencez.</value>
+  </data>
+  <data name="Merge.Title" xml:space="preserve">
+    <value>Fusionner deux éditions</value>
+  </data>
+  <data name="Merge.Lead" xml:space="preserve">
+    <value>Avec quelle édition fusionner celle-ci ?</value>
+  </data>
+  <data name="Merge.Search" xml:space="preserve">
+    <value>Rechercher l&apos;autre édition</value>
+  </data>
+  <data name="Merge.Placeholder" xml:space="preserve">
+    <value>ISBN de l&apos;autre édition…</value>
+  </data>
+  <data name="Merge.Prompt" xml:space="preserve">
+    <value>Recherchez l&apos;autre édition par son ISBN.</value>
+  </data>
+  <data name="Merge.None" xml:space="preserve">
+    <value>Aucune autre édition ne correspond à « {0} ».</value>
+  </data>
+  <data name="Merge.Candidates" xml:space="preserve">
+    <value>Autre édition</value>
+  </data>
+  <data name="Merge.Note" xml:space="preserve">
+    <value>L&apos;étape suivante présentera les deux éditions côte à côte, avec ce que la fusion garde de chacune.</value>
+  </data>
+</root>
