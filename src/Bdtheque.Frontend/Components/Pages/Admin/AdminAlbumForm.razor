@@ -6,7 +6,6 @@
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<AdminAlbumForm> L
-@inject IStringLocalizer<RuleMessages> Rules
 @inject ApiClient Api
 @inject RecordLabels Labels
 @inject AudienceRecorder Recorder
@@ -243,19 +242,24 @@ else
     private async Task<SeriesDetail?> SeriesAsync(Guid? seriesId) =>
         seriesId is { } id ? await Api.GetAsync<SeriesDetail>($"/catalog/series/{id}") : null;
 
-    // What the album displays through its series follows the series chosen; a series that can no longer be read keeps
-    // the choice, its saving telling what became of it.
-    private async Task ChooseSeriesAsync(RecordOption? series)
+    // What the album displays through its series, once chosen or saved: a series that can no longer be read shows nothing
+    // through it, and fails neither the choice nor the saving, which tells what became of it.
+    private async Task<SeriesDetail?> SeriesOrNoneAsync(Guid? seriesId)
     {
-        Entry!.Series = series;
         try
         {
-            Entry.ShowSeries(await SeriesAsync(series?.Id));
+            return await SeriesAsync(seriesId);
         }
         catch (ApiProblemException)
         {
-            Entry.ShowSeries(null);
+            return null;
         }
+    }
+
+    private async Task ChooseSeriesAsync(RecordOption? series)
+    {
+        Entry!.Series = series;
+        Entry.ShowSeries(await SeriesOrNoneAsync(series?.Id));
     }
 
     private void AddGenre(RecordOption genre)
@@ -299,7 +303,7 @@ else
             if (Entry.Id is { } id)
             {
                 var saved = await Api.PutAsync<UpdateAlbumRequest, AlbumForm>($"/admin/albums/{id}", new UpdateAlbumRequest(content, Entry.Version));
-                Entry = AlbumEntry.Of(saved, await SeriesAsync(saved.Content.SeriesId));
+                Entry = AlbumEntry.Of(saved, await SeriesOrNoneAsync(saved.Content.SeriesId));
                 ReadEntry = Entry.Copy();
                 _savedFingerprint = Entry.Fingerprint();
                 if (content.Contributions.Count == 0 && saved.Content.Contributions.Count > 0)

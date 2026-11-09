@@ -57,6 +57,19 @@ public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTes
         CaptureStore.Verify(theme, $"{screen}.{viewport}", await CaptureAsync(page));
     }
 
+    /// <summary>
+    /// The capture of a page whose bar is fixed at the bottom of the screen (an entry form, visuel/saisie-album/contenu.md):
+    /// in a window as high as the page, where the bar lies at the bottom of the page, under the form, as at the end of its
+    /// scrolling. A capture of the whole page beyond the window would leave it at the bottom of the window, over the form.
+    /// </summary>
+    internal static async Task<byte[]> CaptureAtFullHeightAsync(IPage page)
+    {
+        var height = await page.EvaluateAsync<int>("() => document.documentElement.scrollHeight");
+        await page.SetViewportSizeAsync(page.ViewportSize!.Width, height);
+        await PageReadiness.WaitAsync(page);
+        return await CaptureAsync(page);
+    }
+
     /// <summary>The capture of the page once loaded, the way every screen is captured.</summary>
     internal static async Task<byte[]> CaptureAsync(IPage page)
     {

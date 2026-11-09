@@ -224,6 +224,12 @@ public sealed class ValidationDataLoader(HttpClient client)
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
         await data.IntentOnAlbumAsync(convoy);
 
+        // The cases of the entry form of an album (visuel/saisie-album/contenu.md): a sort key entered by hand, a universe
+        // two levels down, shown with its ancestors, and no author nor series yet, so that attaching it to a series with
+        // authors credits them and says so.
+        await data.AlbumAsync(new AlbumContent("Les Carnets de Port-Grisé", "Port-Grisé (carnets)", null, AlbumType.Regular, false, null, null, null,
+            2019, null, null, "À relier à sa série.", null, [humour], [greyPort], []));
+
         // The latest writes, which the home page of the administration presents: a record modified, under its new name,
         // and a record deleted, left out of the latest changes.
         await data.RenameGenreAsync(western, "Western spaghetti");

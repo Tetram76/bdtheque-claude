@@ -115,6 +115,7 @@
        read on its own fill, whatever the tint of the block. */
     --color-notice: var(--color-surface);
     --color-text-on-notice: var(--color-text);
+    --color-notice-border: var(--color-info);
     /* Secondary palette, to vary colors without hierarchy (genres, publishers, tags); one text color on all of them. */
     --color-palette-1: #BFD7F2;
     --color-palette-2: #F4C7B8;

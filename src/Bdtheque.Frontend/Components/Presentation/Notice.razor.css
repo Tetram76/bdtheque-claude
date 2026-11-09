@@ -5,7 +5,7 @@
     align-items: flex-start;
     gap: var(--space-s);
     padding: var(--space-s) var(--space-m);
-    border: 2px solid var(--color-info);
+    border: 2px solid var(--color-notice-border);
     border-radius: var(--radius-tile);
     background: var(--color-notice);
     color: var(--color-text-on-notice);

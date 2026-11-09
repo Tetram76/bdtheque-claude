@@ -1,10 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Frontend'
-description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
+description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
 ---
 
 # Frontend
@@ -40,7 +40,18 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
   - **Alternative écartée (menu interactif, ou `<details>` refermé par un script)** : une connexion ou un script pour ce que le navigateur offre.
 - **Dialogues `<dialog>` modaux**, ouverts par un script dès leur insertion (seul un script ouvre un dialogue en modal, au-dessus d'une page inerte), rendus quand l'adresse les demande ; la fermeture, choix sûr, a le focus.
   - **Alternative écartée (dialogue non modal rendu par le serveur)** : la page resterait accessible au clavier dessous, et Échap ne le fermerait pas.
-- **Barre d'enregistrement collée au bas de l'écran** (`sticky`), qui ne masque jamais ce qui suit le formulaire.
+- **Barre d'enregistrement collée au bas de l'écran** (`sticky`), qui ne masque jamais ce qui suit le formulaire ; sur toute la largeur de l'écran, comme l'en-tête, par une image peinte au-delà de sa boîte (`border-image-outset`), qui ne fait jamais défiler la page en largeur.
+  - **Alternative écartée (élément large de `100vw`)** : la barre de défilement verticale compte dans `100vw`, la page défilerait en largeur sur ordinateur.
+
+## Fiches de saisie
+
+- **Une fiche de saisie est une page interactive** ([Contenu](../../visuel/saisie-album/contenu.md)) : son libellé et la clé de tri suivent la frappe, les fiches qu'elle cite se choisissent en tapant leur nom, l'erreur d'un enregistrement s'affiche sans quitter la saisie. Elle est lue une fois, au prérendu, et son état passe au circuit par l'état persistant des composants, sans seconde lecture ; elle s'enregistre depuis le circuit. Ses composants (cadre de la fiche, étiquettes retirables avec ajout, clé de tri, date partielle, appréciation, création d'un auteur sur place) sont communs aux fiches de saisie.
+  - **Alternative écartée (formulaire statique, comme les listes)** : chaque frappe du titre devrait recharger la page pour en recalculer le libellé et la clé.
+- **Aucune règle de saisie dans le frontend** ([Erreurs métier, fonctionnelles et techniques](../ecritures/erreurs-metier-fonctionnelles-et-techniques.md)) : la clé de tri du mode Auto est demandée à l'API à chaque changement du titre, numérotée comme les suggestions du choix d'une fiche, et le formulaire envoie ce qui est saisi, l'enregistrement rapportant ce qui est à corriger. Une erreur métier désigne son champ par son code de règle ; la recopie des contributions de la série se constate sur la fiche enregistrée, qui en a alors que le formulaire n'en envoyait pas.
+  - **Alternative écartée (clé calculée par le frontend)** : la règle de calcul serait écrite deux fois, et la clé affichée pourrait différer de celle enregistrée.
+- **Fiche créée : la page de sa modification**, chargée de nouveau par la navigation, la fiche y étant lue telle qu'enregistrée ; l'adresse signale des contributions reprises de la série, pour que la page le dise. Une fiche modifiée reste affichée, à jour.
+- **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi.
+- **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme avant de créer ; les règles de l'auteur sont celles du domaine.
 
 ## En-têtes et navigation
 

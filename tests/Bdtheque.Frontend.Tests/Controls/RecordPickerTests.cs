@@ -123,6 +123,57 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
+    public void Creation_IsOfferedAfterTheSuggestions_WithTheTextTyped_ByTheMouse()
+    {
+        string? created = null;
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-author")
+            .Add(p => p.Kind, RecordKind.Series)
+            .Add(p => p.OnCreate, text => created = text)
+            .Add(p => p.CreateLabel, text => $"Créer « {text} »"));
+
+        Type(picker, " Jean Nouvel ");
+        picker.WaitForAssertion(() => Assert.Equal(3, picker.FindAll("[role=option]").Count));
+        var creation = picker.FindAll("[role=option]")[2];
+        Assert.Equal("Créer « Jean Nouvel »", creation.TextContent.Trim());
+
+        creation.Click();
+
+        Assert.Equal("Jean Nouvel", created);
+        Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
+    }
+
+    [Fact]
+    public void Creation_IsChosenByTheKeyboard_AfterTheLastSuggestion()
+    {
+        string? created = null;
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-author")
+            .Add(p => p.Kind, RecordKind.Series)
+            .Add(p => p.OnCreate, text => created = text)
+            .Add(p => p.CreateLabel, text => $"Créer « {text} »"));
+
+        Type(picker, "ti");
+        picker.WaitForAssertion(() => Assert.Equal(3, picker.FindAll("[role=option]").Count));
+        foreach (var _ in Enumerable.Range(0, 4))
+            picker.Find("input").KeyDown("ArrowDown");
+        picker.Find("input").KeyDown("Enter");
+
+        Assert.Equal("ti", created);
+    }
+
+    [Fact]
+    public void Creation_WithoutCaller_IsNeverOffered()
+    {
+        var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
+
+        Type(picker, "ti");
+
+        picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+        Assert.Empty(picker.FindAll(".record-picker-create"));
+    }
+
+    [Fact]
     public void SuggestionsOfAnEarlierText_AreNeitherShownNorChosen_WhileTheNewOnesAreAwaited()
     {
         RecordOption? chosen = null;

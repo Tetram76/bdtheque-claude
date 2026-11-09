@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
 ---
 
 # Organisation de l'API
@@ -28,6 +28,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
 - **Modification par `PUT` de l'état complet du formulaire** ; les champs interdépendants sont appliqués par des **méthodes atomiques du domaine**, plutôt que par des setters dont l'API devrait connaître l'ordre valide ([Valeur d'une édition : mise en œuvre](../domaine/valeur-d-une-edition-mise-en-oeuvre.md)).
   - **Alternative écartée (`PATCH`)** : les formulaires envoient toujours la fiche entière ; un correctif partiel multiplierait les combinaisons à valider, sans cas d'usage.
 - **Un même contenu pour la création et la modification** d'une fiche, associations et contributions comprises, remplacées en bloc, seule la différence étant écrite. Une référence à une fiche supprimée entre-temps est une erreur fonctionnelle.
+- **La lecture d'une fiche pour sa saisie nomme les fiches qu'elle cite** (série, genres, univers avec leurs ancêtres, auteurs) et porte ses dates : le formulaire les présente sans autre requête. Un univers ajouté se lit avec ses ancêtres (`/admin/universes/{id}/hierarchy`), la clé de tri d'un titre se demande au domaine (`/admin/sort-keys/title`).
 - **Recopie des contributions de la série** ([Initialisation des contributions depuis la série](../../fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)) au seul rattachement à une **autre** série, et si l'album n'a aucune contribution après le formulaire : rester dans la même série ne recopie rien, pour que des contributions retirées ne reviennent pas.
 - **Éditions et intentions d'achat adressées par leur album**, sous sa version : ce sont des enfants de son agrégat ([Intention d'achat : agrégat porté par l'album](../domaine/intention-d-achat-agregat-porte-par-l-album.md)).
   - **Une création d'édition est toujours une édition possédée** ; seule une intention crée une édition non possédée ([Appartenance à la collection](../../fonctionnel/regles-metier/appartenance-a-la-collection.md)).
