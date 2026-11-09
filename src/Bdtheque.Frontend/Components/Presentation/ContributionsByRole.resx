@@ -12,17 +12,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Total.Zero" xml:space="preserve">
+  <data name="None" xml:space="preserve">
     <value>Aucun auteur crédité</value>
-  </data>
-  <data name="Total.One" xml:space="preserve">
-    <value>1 auteur crédité</value>
-  </data>
-  <data name="Total.Other" xml:space="preserve">
-    <value>{0} auteurs crédités</value>
-  </data>
-  <data name="NotCredited" xml:space="preserve">
-    <value>Non crédité</value>
   </data>
   <data name="More.One" xml:space="preserve">
     <value>et {0} autre</value>

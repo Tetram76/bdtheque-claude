@@ -1,8 +1,37 @@
 /* Built on the contracts of the theme only (visuel/fiche-album/declinaison-par-theme.md, choix-implementation/socle/themes.md):
-   the identity of the album, then the blocks, one under the other. */
+   the head of the record on two columns on a wide screen, stacked on a smartphone; then the blocks, one under the other. */
 .album-record {
     display: grid;
     gap: var(--record-gap);
+}
+
+.album-head {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+}
+
+@media (min-width: 48rem) {
+    .album-head {
+        grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+        gap: var(--space-xl);
+    }
+}
+
+/* The cover of the album, put forward: its frame, its tilt and its shadow are the touch of the theme (--record-visual-…). */
+.album-cover {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-m);
+    --cover-width: var(--record-visual-width);
+}
+
+.album-cover ::deep .cover {
+    padding: var(--record-visual-padding);
+    border: var(--record-visual-border);
+    background: var(--record-visual-background);
+    box-shadow: var(--record-visual-shadow);
+    rotate: var(--record-visual-tilt);
 }
 
 .album-identity {
@@ -96,6 +125,37 @@
 .album-notes {
     max-inline-size: 70ch;
     white-space: pre-line;
+}
+
+/* Every edition of the collection, one under the other, apart by a rule: its label, its visuals, then its detail. */
+.editions {
+    display: grid;
+    gap: var(--space-l);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.edition {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
+}
+
+.edition + .edition {
+    padding-block-start: var(--space-l);
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.edition-label {
+    margin: 0;
+    font-size: var(--font-size-large);
+    overflow-wrap: anywhere;
+}
+
+.editions-none {
+    color: var(--color-text-muted);
+    font-style: italic;
 }
 
 .album-dates {

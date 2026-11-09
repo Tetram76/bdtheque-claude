@@ -21,6 +21,96 @@
   <data name="ContributionRole.Colorist" xml:space="preserve">
     <value>Couleurs</value>
   </data>
+  <data name="VisualType.Cover" xml:space="preserve">
+    <value>Couverture</value>
+  </data>
+  <data name="VisualType.Dedication" xml:space="preserve">
+    <value>Dédicace</value>
+  </data>
+  <data name="VisualType.Endpaper" xml:space="preserve">
+    <value>Page de garde</value>
+  </data>
+  <data name="VisualType.Plate" xml:space="preserve">
+    <value>Planche</value>
+  </data>
+  <data name="VisualType.BackCover" xml:space="preserve">
+    <value>4e de couverture</value>
+  </data>
+  <data name="AcquisitionMode.Purchase" xml:space="preserve">
+    <value>Achat</value>
+  </data>
+  <data name="AcquisitionMode.Gift" xml:space="preserve">
+    <value>Offerte</value>
+  </data>
+  <data name="AcquisitionMode.Trade" xml:space="preserve">
+    <value>Échange</value>
+  </data>
+  <data name="AcquisitionMode.Won" xml:space="preserve">
+    <value>Gagnée</value>
+  </data>
+  <data name="AcquisitionMode.Inherited" xml:space="preserve">
+    <value>Héritée</value>
+  </data>
+  <data name="EditionCondition.Excellent" xml:space="preserve">
+    <value>Excellent (état neuf)</value>
+  </data>
+  <data name="EditionCondition.VeryGood" xml:space="preserve">
+    <value>Très bon</value>
+  </data>
+  <data name="EditionCondition.Good" xml:space="preserve">
+    <value>Bon</value>
+  </data>
+  <data name="EditionCondition.Average" xml:space="preserve">
+    <value>Moyen</value>
+  </data>
+  <data name="EditionCondition.Poor" xml:space="preserve">
+    <value>Mauvais</value>
+  </data>
+  <data name="EditionCondition.VeryPoor" xml:space="preserve">
+    <value>Très mauvais</value>
+  </data>
+  <data name="EditionFormat.Pocket" xml:space="preserve">
+    <value>Poche</value>
+  </data>
+  <data name="EditionFormat.Medium" xml:space="preserve">
+    <value>Moyen (A5)</value>
+  </data>
+  <data name="EditionFormat.Standard" xml:space="preserve">
+    <value>Normal (A4)</value>
+  </data>
+  <data name="EditionFormat.Large" xml:space="preserve">
+    <value>Grand (&gt; A4)</value>
+  </data>
+  <data name="EditionFormat.Special" xml:space="preserve">
+    <value>Spécial</value>
+  </data>
+  <data name="EditionCategory.FirstEdition" xml:space="preserve">
+    <value>Édition originale</value>
+  </data>
+  <data name="EditionCategory.SpecialEdition" xml:space="preserve">
+    <value>Édition spéciale</value>
+  </data>
+  <data name="EditionCategory.LimitedEdition" xml:space="preserve">
+    <value>Tirage de tête</value>
+  </data>
+  <data name="BindingType.Paperback" xml:space="preserve">
+    <value>Brochée</value>
+  </data>
+  <data name="BindingType.Hardcover" xml:space="preserve">
+    <value>Cartonnée</value>
+  </data>
+  <data name="BookOrientation.Portrait" xml:space="preserve">
+    <value>Portrait</value>
+  </data>
+  <data name="BookOrientation.Landscape" xml:space="preserve">
+    <value>Italienne</value>
+  </data>
+  <data name="ReadingDirection.LeftToRight" xml:space="preserve">
+    <value>Gauche à droite</value>
+  </data>
+  <data name="ReadingDirection.RightToLeft" xml:space="preserve">
+    <value>Droite à gauche</value>
+  </data>
   <data name="AlbumRating.VeryPoor" xml:space="preserve">
     <value>Très mauvais</value>
   </data>

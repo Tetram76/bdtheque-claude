@@ -171,11 +171,12 @@ public sealed class ValidationDataLoader(HttpClient client)
         var lighthouse = await data.AlbumAsync(OneShot(MultiEditionOneShotTitle, 1989, 11, [fantasy], [greyPort],
             [Credit(quintin, ContributionRole.Scenarist), Credit(quintin, ContributionRole.Illustrator)]) with
         {
-            Rating = AlbumRating.VeryGood, PersonalNotes = "Exemplaire dédicacé lors d'un festival.",
+            Rating = AlbumRating.VeryGood, PersonalNotes = "Le préféré de la collection.",
         });
         var lighthouseFirst = await data.EditionAsync(lighthouse, Owned(blackPlate.Id, null, 1989, AcquisitionMode.Purchase, new DateOnly(1990, 2, 14)) with
         {
             Isbn = Isbn("978290512302"), Category = EditionCategory.FirstEdition, IsDedicated = true, PageCount = 62,
+            PersonalNotes = "Exemplaire dédicacé lors d'un festival.",
             AcquisitionAmount = 89m, AcquisitionCurrency = "FRF", InitialValueAmount = 79m, InitialValueCurrency = "FRF",
         });
         await data.VisualAsync(lighthouse, lighthouseFirst, VisualType.Cover, Images.Portrait(0.55));

@@ -38,3 +38,11 @@ h1:focus {
 html:has(#admin-menu:popover-open) {
     overflow: hidden;
 }
+
+/* No scroll anchoring: an enhanced navigation of Blazor gives each element, for a moment, the attributes of the page it
+   receives, without those a script set (the shape of a balloon of « La planche encrée », the folded names of a role), and
+   the browser, anchoring the scroll on that moment, moved the page under the visitor once the script set them again. A
+   page rendered on the server comes whole, its covers in a room of their own: nothing above the visitor grows later. */
+html {
+    overflow-anchor: none;
+}

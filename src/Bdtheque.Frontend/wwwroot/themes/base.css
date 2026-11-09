@@ -236,10 +236,17 @@
     --block-kicker-display: none;
 
     /* The records of the consultation (visuel/fiche-album/declinaison-par-theme.md): the gap between their blocks, which a
-       title straddling the top edge of its block needs wider; the size of their title. The genres and the universes, each
-       in colors of their own, which set them apart. */
+       title straddling the top edge of its block needs wider; the size of their title; the visual a record puts forward,
+       its width, its frame (padding, border, background), its shadow and its tilt, which a theme shown in volume leaves to
+       the book (.cover-volume). The genres and the universes, each in colors of their own, which set them apart. */
     --record-gap: var(--space-l);
     --record-title-size: clamp(1.5rem, 3.2vw, 2.375rem);
+    --record-visual-width: min(100%, 15rem);
+    --record-visual-padding: 0;
+    --record-visual-border: none;
+    --record-visual-background: transparent;
+    --record-visual-shadow: none;
+    --record-visual-tilt: 0deg;
     --color-genre: var(--color-palette-1);
     --color-text-on-genre: var(--color-text-on-palette);
     --color-universe: var(--color-palette-2);

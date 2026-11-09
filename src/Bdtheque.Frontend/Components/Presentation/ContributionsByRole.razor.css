@@ -4,15 +4,6 @@
     gap: var(--space-s);
 }
 
-.contributions-total {
-    margin: 0;
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-strong);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-}
-
 .contributions dl {
     display: grid;
     margin: 0;

@@ -1,0 +1,60 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<VisualDialog> L
+@inject ValueLabels Values
+
+@* The viewer of the visuals of an edition on the record of an album (visuel/fiche-album/contenu.md): a modal dialog above the
+   record, opened by a thumbnail of the edition, which the address carries (Navigation/AlbumRecordQuery.cs) and the element
+   that wraps it opens (wwwroot/modal-dialog.js). The visual shown, whole, its type (numbered for the plates) and its
+   position among those of the edition, in their order (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md), the
+   previous and the next one, round the edition, and the link to the original image, in a new tab. Closing leads to the
+   record alone, which Escape follows too: the page under the dialog never moves. *@
+<app-modal-dialog>
+    <dialog class="visual-dialog" aria-labelledby="visual-dialog-title">
+        <header class="visual-dialog-header">
+            <div>
+                <h2 id="visual-dialog-title" class="visual-dialog-title">@VisualLabels.TypeOf(Edition, Position - 1, Values, L)</h2>
+                <p class="visual-dialog-edition">@EditionLabel</p>
+            </div>
+            <a class="visual-dialog-close" href="@AppPaths.Album(AlbumId)" data-dialog-close aria-label="@L["Close"]"><Icon Name="IconName.Close" /></a>
+        </header>
+        <div class="visual-dialog-image">
+            <img src="@VisualMediaRoutes.Display(Current.Id)" alt="@L["Alt", VisualLabels.TypeOf(Edition, Position - 1, Values, L), EditionLabel]" />
+        </div>
+        <div class="visual-dialog-bar">
+            @if (Count > 1)
+            {
+                <a class="visual-step" href="@HrefOf(Position == 1 ? Count : Position - 1)" aria-label="@L["Previous"]"><Icon Name="IconName.ChevronStart" /></a>
+            }
+            <span class="visual-position">@L["Position", Position, Count]</span>
+            @if (Count > 1)
+            {
+                <a class="visual-step" href="@HrefOf(Position == Count ? 1 : Position + 1)" aria-label="@L["Next"]"><Icon Name="IconName.ChevronEnd" /></a>
+            }
+        </div>
+        <a class="visual-original" href="@VisualMediaRoutes.Original(Current.Id)" target="_blank" rel="noopener noreferrer">@L["Original"]</a>
+    </dialog>
+</app-modal-dialog>
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid AlbumId { get; set; }
+
+    /// <summary>The edition whose visual is shown, which has one at <see cref="Position"/>.</summary>
+    [Parameter, EditorRequired]
+    public EditionDetail Edition { get; set; } = null!;
+
+    /// <summary>The label of the edition, which the dialog and the alternative text of its visual name.</summary>
+    [Parameter, EditorRequired]
+    public string EditionLabel { get; set; } = "";
+
+    /// <summary>The position of the visual shown, from 1, within those of the edition.</summary>
+    [Parameter]
+    public int Position { get; set; } = 1;
+
+    private int Count => Edition.Visuals.Count;
+
+    private EditionVisualItem Current => Edition.Visuals[Position - 1];
+
+    private string HrefOf(int position) => AlbumRecordQuery.ForVisual(Edition.Edition.Id, position).Href(AlbumId);
+}

@@ -1,0 +1,95 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the surface, frame and shadow of any
+   dialog; the visual as large as the screen allows, whole, never cropped. */
+.visual-dialog {
+    --focus-gap: var(--color-surface-raised);
+    inline-size: min(56rem, calc(100vw - 2 * var(--page-gutter)));
+    max-block-size: calc(100dvh - 2 * var(--page-gutter));
+    padding: var(--space-m) var(--space-l);
+    border: var(--border-floating);
+    border-radius: var(--radius-block);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    box-shadow: var(--shadow-floating);
+}
+
+.visual-dialog[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-s);
+}
+
+.visual-dialog::backdrop {
+    background: rgb(0 0 0 / 0.6);
+}
+
+.visual-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-m);
+    align-self: stretch;
+}
+
+.visual-dialog-title {
+    margin: 0;
+    font-size: var(--font-size-title);
+}
+
+.visual-dialog-edition {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+/* The closing and the steps: round buttons of the size of a control. */
+.visual-dialog-close,
+.visual-step {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
+    border: var(--border-width-control) solid var(--color-control-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-control-background);
+    color: var(--color-text);
+}
+
+.visual-dialog-close ::deep .icon,
+.visual-step ::deep .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+.visual-dialog-image {
+    display: flex;
+    justify-content: center;
+    min-block-size: 0;
+}
+
+.visual-dialog-image img {
+    display: block;
+    max-inline-size: 100%;
+    max-block-size: calc(100dvh - 2 * var(--page-gutter) - 12rem);
+    border-radius: var(--radius-cover);
+    object-fit: contain;
+}
+
+.visual-dialog-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+}
+
+.visual-position {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    color: var(--color-text-muted);
+}
+
+.visual-original {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}

@@ -1,0 +1,109 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<EditionFacts> L
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+
+@* The detail of the edition chosen on the record of an album (visuel/fiche-album/contenu.md), in two groups: the edition and
+   the copy. A data not set has no row, which would only weigh the detail down. The labels of the date and of the amount of the acquisition
+   follow its mode (fonctionnel/presentation/libelles-contextuels-sur-l-edition.md). Each amount would be followed by its
+   value in euros of the day, and a missing acquisition amount replaced by the estimated value: both belong to the Phase 4
+   and are said not available yet, without any value made up. Its dates of creation and modification close it, in the time
+   zone of the browser. *@
+<div class="edition-detail">
+    <div class="edition-group">
+        <h3>@L["Edition"]</h3>
+        <dl>
+            <div>
+                <dt>@L["Publisher"]</dt>
+                <dd>
+                    @if (Edition.PublisherWebsite is { } website)
+                    {
+                        <a href="@website" target="_blank" rel="noopener noreferrer">@Edition.Edition.PublisherName</a>
+                    }
+                    else
+                    {
+                        @Edition.Edition.PublisherName
+                    }
+                </dd>
+            </div>
+            @Row(L["Collection"], Edition.Edition.PublisherCollectionName)
+            @Row(L["Year"], Edition.Edition.PublicationYear?.ToString(CultureInfo.InvariantCulture))
+            @Row(L["Isbn"], Edition.Edition.Isbn)
+            @Row(L["Category"], Label(Edition.Category))
+            @Row(L["Format"], Label(Edition.Format))
+            @Row(L["Binding"], Label(Edition.Binding))
+            @Row(L["Orientation"], Label(Edition.Orientation))
+            @Row(L["ReadingDirection"], Label(Edition.ReadingDirection))
+            @Row(L["Pages"], Edition.PageCount is { } pages ? Format.Number(pages) : null)
+            @Row(L["Color"], L[Edition.IsColor ? "Color.Yes" : "Color.No"])
+        </dl>
+    </div>
+    <div class="edition-group">
+        <h3>@L["Copy"]</h3>
+        <dl>
+            @Row(L["AcquisitionMode"], Label(Edition.AcquisitionMode))
+            @Row(L[Purchased ? "Date.Purchase" : "Date.Acquisition"], Edition.AcquisitionDate is { } date ? Format.Date(date) : null)
+            <div>
+                <dt>@L[Purchased ? "Amount.Purchase" : "Amount.Acquisition"]</dt>
+                <dd>
+                    @if (Edition.AcquisitionAmount is { } amount && Edition.AcquisitionCurrency is { } currency)
+                    {
+                        @AmountOf(amount, currency)
+                    }
+                    else if (Edition.IsFree)
+                    {
+                        @L["Free"]
+                    }
+                    else
+                    {
+                        <span class="edition-unavailable">@L["Estimated"]</span>
+                    }
+                </dd>
+            </div>
+            @if (Edition.InitialValueAmount is { } initial && Edition.InitialValueCurrency is { } initialCurrency)
+            {
+                <div>
+                    <dt>@L["InitialValue"]</dt>
+                    <dd>@AmountOf(initial, initialCurrency)</dd>
+                </div>
+            }
+            @Row(L["SecondHand"], L[Edition.IsSecondHand ? "SecondHand.Yes" : "SecondHand.No"])
+            @Row(L["Condition"], Label(Edition.Condition))
+            @Row(L["Dedicated"], L[Edition.IsDedicated ? "Yes" : "No"])
+            @Row(L["PersonalReference"], Edition.PersonalReference)
+            @Row(L["PersonalNotes"], Edition.PersonalNotes)
+        </dl>
+    </div>
+</div>
+<p class="edition-dates" data-local>@Dates</p>
+
+@code {
+    [Parameter, EditorRequired]
+    public EditionDetail Edition { get; set; } = null!;
+
+    private bool Purchased => Edition.AcquisitionMode == AcquisitionMode.Purchase;
+
+    private string? Label<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } known ? Values.Of(known) : null;
+
+    // A row of the detail, none for a data not set.
+    private static RenderFragment Row(string label, string? value) => __builder =>
+    {
+        if (value is null)
+            return;
+        <div>
+            <dt>@label</dt>
+            <dd>@value</dd>
+        </div>
+    };
+
+    private RenderFragment AmountOf(decimal amount, string currency) => __builder =>
+    {
+        <span>@Format.Amount(amount, currency)</span>
+        <span class="edition-unavailable">@L["EurosOfTheDay"]</span>
+    };
+
+    // The date of entry into the collection, which the application sets alone, is left out: beside the date of acquisition,
+    // it would read as another date of acquisition (visuel/fiche-album/contenu.md).
+    private string Dates => L["Dates", Format.LocalDate(Edition.CreatedAt), Format.LocalDate(Edition.ModifiedAt)];
+}

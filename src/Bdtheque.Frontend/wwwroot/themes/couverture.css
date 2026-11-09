@@ -132,7 +132,9 @@
     --book-turn: perspective(1100px) rotateY(22deg);
     --book-ground: 0 34px 44px -24px rgb(0 0 0 / 0.6);
 
-    /* The records: the genres of the deep colour, the universes of the accent (visuel/fiche-album/). */
+    /* The records: the visual is an album in volume, a little turned, with its shadow on the ground; the genres of the deep
+       colour, the universes of the accent (visuel/fiche-album/declinaison-par-theme.md). */
+    --record-visual-shadow: var(--book-ground);
     --color-genre: var(--day-deep);
     --color-text-on-genre: #FFFFFF;
     --color-universe: var(--day-accent);

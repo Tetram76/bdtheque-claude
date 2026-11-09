@@ -1,14 +1,20 @@
 @attribute [Route(AppPaths.AlbumRoute)]
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Records
 @inject IStringLocalizer<AlbumRecord> L
 @inject ApiClient Api
 @inject RecordLabels Labels
 @inject ValueLabels Values
 @inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
 
-@* The record of an album in the consultation (visuel/fiche-album/contenu.md): the identity of the album, its contributions,
-   genres and universes; its summary; its dates. Its styles read the contracts of the base theme only
+@* The record of an album in the consultation (visuel/fiche-album/contenu.md): the cover and the identity of the album, its
+   contributions, genres and universes; its summary; its editions in the collection, each with its visuals and its detail,
+   an edition targeted by a purchase intent being never presented as an edition
+   (fonctionnel/regles-metier/intention-d-achat.md); its dates; and the viewer of a visual, a dialog above the record that
+   its address opens (Navigation/AlbumRecordQuery.cs). Its styles read the contracts of the base theme only
    (visuel/fiche-album/declinaison-par-theme.md). *@
 <PageTitle>@(_album is null ? L["Title"] : Labels.Album(_album.Album, _format))</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AlbumRecord" Record="new PresentedRecord(RecordType.Album, Id)" />
@@ -23,46 +29,53 @@ else if (_album is { } album)
     <Breadcrumb Items="BreadcrumbItems" />
 
     <div class="album-record">
-        <div class="album-identity">
-            @* Not in the collection, at first glance: wished for, or catalogued only (visuel/fiche-album/contenu.md). *@
-            <CollectionStatus State="CollectionState" />
-            <div class="album-title">
-                @if (album.Album.SeriesId is { } seriesId)
-                {
-                    <a class="album-series" href="@AppPaths.SeriesRecord(seriesId)">@album.Album.SeriesTitle</a>
-                }
-                <h1>@Heading</h1>
+        <div class="album-head">
+            @* The cover of the album, put forward as a theme puts it (--record-visual-…, themes/base.css). *@
+            <div class="album-cover">
+                <Cover VisualId="CoverId" Alt="@L["Cover", Heading]" Volume="true" />
             </div>
 
-            <ul class="album-facts" aria-label="@L["Facts"]">
-                @if (Labels.Volume(album.Album) is { } volume)
-                {
-                    <li class="album-fact" data-fact="volume">@volume</li>
-                }
-                @if (album.FirstPublicationYear is { } year)
-                {
-                    <li class="album-fact">@L["Published", Format.PartialDate(year, album.FirstPublicationMonth)]</li>
-                }
-                <li class="album-membership">
-                    <Tag Text="@Membership" Variant="@(album.Album.IsInCollection ? TagVariant.Filled : TagVariant.Dashed)"
-                         Icon="@(!album.Album.IsInCollection && IsIntended ? IconName.PurchaseIntent : null)" />
-                </li>
-            </ul>
+            <div class="album-identity">
+                @* Not in the collection, at first glance: wished for, or catalogued only (visuel/fiche-album/contenu.md). *@
+                <CollectionStatus State="CollectionState" />
+                <div class="album-title">
+                    @if (album.Album.SeriesId is { } seriesId)
+                    {
+                        <a class="album-series" href="@AppPaths.SeriesRecord(seriesId)">@album.Album.SeriesTitle</a>
+                    }
+                    <h1>@Heading</h1>
+                </div>
 
-            <div class="album-rating">
-                @if (album.Rating is { } rating)
-                {
-                    <span role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
-                }
-                else
-                {
-                    <span aria-hidden="true">@Stars(0)</span>
-                    <span class="album-unrated">@L["NotRated"]</span>
-                }
+                <ul class="album-facts" aria-label="@L["Facts"]">
+                    @if (Labels.Volume(album.Album) is { } volume)
+                    {
+                        <li class="album-fact" data-fact="volume">@volume</li>
+                    }
+                    @if (album.FirstPublicationYear is { } year)
+                    {
+                        <li class="album-fact">@L["Published", Format.PartialDate(year, album.FirstPublicationMonth)]</li>
+                    }
+                    <li class="album-membership">
+                        <Tag Text="@Membership" Variant="@(album.Album.IsInCollection ? TagVariant.Filled : TagVariant.Dashed)"
+                             Icon="@(!album.Album.IsInCollection && IsIntended ? IconName.PurchaseIntent : null)" />
+                    </li>
+                </ul>
+
+                <div class="album-rating">
+                    @if (album.Rating is { } rating)
+                    {
+                        <span role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
+                    }
+                    else
+                    {
+                        <span aria-hidden="true">@Stars(0)</span>
+                        <span class="album-unrated">@L["NotRated"]</span>
+                    }
+                </div>
+
+                <ContributionsByRole Contributions="album.Contributions" />
+                <Classification Genres="album.Genres" Universes="album.Universes" />
             </div>
-
-            <ContributionsByRole Contributions="album.Contributions" />
-            <Classification Genres="album.Genres" Universes="album.Universes" />
         </div>
 
         <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
@@ -84,9 +97,36 @@ else if (_album is { } album)
                 <p><NotSet Gender="GrammaticalGender.Feminine" /></p>
             }
         </Block>
+
+        <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
+            @if (_owned.Count > 0)
+            {
+                @* Every edition of the collection at once, each with its visuals and its detail: an album has one, rarely more. *@
+                <ol class="editions">
+                    @foreach (var edition in _owned)
+                    {
+                        var label = Labels.Edition(edition.Edition);
+                        <li class="edition">
+                            <h3 class="edition-label">@label</h3>
+                            <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
+                            <EditionFacts Edition="edition" />
+                        </li>
+                    }
+                </ol>
+            }
+            else
+            {
+                <p class="editions-none">@L["Editions.None"]</p>
+            }
+        </Block>
     </div>
 
     <p class="album-dates" data-local>@L["Dates", Format.LocalDate(album.CreatedAt), Format.LocalDate(album.ModifiedAt)]</p>
+
+    @if (_open is { } open)
+    {
+        <VisualDialog AlbumId="Id" Edition="open" EditionLabel="@Labels.Edition(open.Edition)" Position="_position" />
+    }
 }
 
 @code {
@@ -96,9 +136,16 @@ else if (_album is { } album)
     private AlbumDetail? _album;
     private AlbumLabelFormat _format;
     private ApiProblem? _problem;
+    private List<EditionDetail> _owned = [];
+    private EditionDetail? _open;
+    private int _position;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        var query = AlbumRecordQuery.Parse(new Uri(Navigation.Uri).Query);
         try
         {
             _format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
@@ -107,8 +154,30 @@ else if (_album is { } album)
         catch (ApiProblemException exception)
         {
             _problem = exception.Problem;
+            return;
         }
+
+        // Only the editions of the collection are editions; an edition targeted by an intent is one of the intents
+        // (fonctionnel/regles-metier/intention-d-achat.md). A visual the collection does not have, which only an address
+        // written by hand names, opens no viewer.
+        _owned = [.. _album.Editions.Where(e => e.IsInCollection)];
+        if (_owned.Find(e => e.Edition.Id == query.Edition) is { } edition && query.Visual is { } visual && visual <= edition.Visuals.Count)
+            (_open, _position) = (edition, visual);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
+
+    // The cover of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among the editions of the collection: the
+    // first cover of the oldest edition by its year of edition that has one, those without year last; none, the generic
+    // visual.
+    private Guid? CoverId => _owned
+        .Where(e => e.Visuals.Any(v => v.Type == VisualType.Cover))
+        .OrderBy(e => e.Edition.PublicationYear is null)
+        .ThenBy(e => e.Edition.PublicationYear)
+        .Select(e => e.Visuals.First(v => v.Type == VisualType.Cover).Id)
+        .Cast<Guid?>()
+        .FirstOrDefault();
 
     private string Heading => _album!.Album.Title ?? Labels.Album(_album.Album, _format);
 
@@ -119,9 +188,7 @@ else if (_album is { } album)
         new(Heading),
     ];
 
-    // Only the editions of the collection are counted; an edition targeted by an intent is one of the intents
-    // (fonctionnel/regles-metier/intention-d-achat.md).
-    private int OwnedEditionCount => _album!.Editions.Count(e => e.IsInCollection);
+    private int OwnedEditionCount => _owned.Count;
 
     private Bdtheque.Contracts.Admin.AlbumCollectionState CollectionState => (_album!.Album.IsInCollection, IsIntended) switch
     {

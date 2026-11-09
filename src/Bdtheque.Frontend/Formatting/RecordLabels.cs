@@ -91,7 +91,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         if (publicationYear is { } year)
             label += string.Create(CultureInfo.InvariantCulture, $" [{year}]");
         if (isbn is not null)
-            label += $" - {texts["Isbn"]} {isbn}";
+            label += $" - {texts["Isbn"]}\u00A0{isbn}";
         return label;
     }
 

@@ -14,6 +14,14 @@ public sealed class ValueLabelsTests
     public static TheoryData<Enum> Values =>
     [
         .. Enum.GetValues<ContributionRole>().Cast<Enum>(),
+        .. Enum.GetValues<VisualType>().Cast<Enum>(),
+        .. Enum.GetValues<AcquisitionMode>().Cast<Enum>(),
+        .. Enum.GetValues<EditionCondition>().Cast<Enum>(),
+        .. Enum.GetValues<EditionFormat>().Cast<Enum>(),
+        .. Enum.GetValues<EditionCategory>().Cast<Enum>(),
+        .. Enum.GetValues<BindingType>().Cast<Enum>(),
+        .. Enum.GetValues<BookOrientation>().Cast<Enum>(),
+        .. Enum.GetValues<ReadingDirection>().Cast<Enum>(),
         .. Enum.GetValues<AlbumRating>().Cast<Enum>(),
     ];
 
@@ -27,5 +35,8 @@ public sealed class ValueLabelsTests
     {
         Assert.Equal("Scénario", _labels.Of(ContributionRole.Scenarist));
         Assert.Equal("Très bien", _labels.Of(AlbumRating.VeryGood));
+        Assert.Equal("Cartonnée", _labels.Of(BindingType.Hardcover));
+        Assert.Equal("Excellent (état neuf)", _labels.Of(EditionCondition.Excellent));
+        Assert.Equal("Grand (> A4)", _labels.Of(EditionFormat.Large));
     }
 }
