@@ -87,7 +87,7 @@
     private string? Label<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } known ? Values.Of(known) : null;
 
     // A row of the detail, none for a data not set.
-    private RenderFragment Row(string label, string? value) => __builder =>
+    private static RenderFragment Row(string label, string? value) => __builder =>
     {
         if (value is null)
             return;
