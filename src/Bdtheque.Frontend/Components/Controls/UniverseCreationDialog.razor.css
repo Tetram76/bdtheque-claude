@@ -1,0 +1,4 @@
+.record-creation-fields {
+    display: grid;
+    gap: var(--space-m);
+}

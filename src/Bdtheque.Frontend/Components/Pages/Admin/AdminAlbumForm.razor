@@ -31,7 +31,7 @@
 }
 else
 {
-    <EntryForm Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(Entry.Id is null ? L["New"] : Label)])"
+    <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(Entry.Id is null ? L["New"] : Label)])"
                Title="@(Entry.Id is null ? L["New"] : L["Edit"])" Subject="@Label" State="State" Saving="_saving"
                SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@AppPaths.AdminAlbums" OnSave="SaveAsync"
                Problem="@SaveProblem" Dates="@Dates" Status="@Status">
@@ -55,17 +55,14 @@ else
         <div class="album-pair">
             <Block Title="@L["Block.Volume"]" Kicker="@L["Kicker.Volume"]">
                 <div class="album-volume">
-                    <fieldset class="album-type">
-                        <legend>@L["Type"]</legend>
-                        <div class="album-type-choices">
-                            <Choice Label="@L["Type.Omnibus"]"><input type="checkbox" @bind="Entry.IsOmnibus" /></Choice>
-                            <Choice Label="@L["Type.SpecialIssue"]"><input type="checkbox" @bind="Entry.IsSpecialIssue" /></Choice>
-                        </div>
-                    </fieldset>
                     <Field Id="album-volume" Label="@(Entry.IsOmnibus ? L["Volume.Omnibus"] : L["Volume"])" Characters="4" Error="@FieldError("volume")" Context="control">
                         <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" aria-describedby="@control.DescribedBy"
                                aria-invalid="@control.Invalid" @bind="Entry.VolumeNumber" />
                     </Field>
+                    @* Next to the volumes covered it shows (visuel/saisie-album/contenu.md). *@
+                    <div class="album-flag">
+                        <Choice Label="@L["Type.Omnibus"]"><input type="checkbox" @bind="Entry.IsOmnibus" /></Choice>
+                    </div>
                     @if (Entry.IsOmnibus)
                     {
                         <fieldset class="album-range" aria-describedby="album-range-help">
@@ -86,6 +83,9 @@ else
                             <p id="album-range-help" class="album-help">@L["Range.Help"]</p>
                         </fieldset>
                     }
+                    <div class="album-flag">
+                        <Choice Label="@L["Type.SpecialIssue"]"><input type="checkbox" @bind="Entry.IsSpecialIssue" /></Choice>
+                    </div>
                 </div>
             </Block>
             <Block Title="@L["Block.Publication"]" Kicker="@L["Kicker.Publication"]">
@@ -122,13 +122,15 @@ else
                 <div class="album-tags">
                     <span class="album-tags-name">@L["Genres"]</span>
                     <RecordTags Id="album-add-genre" Kind="RecordKind.Genre" Items="Entry.Genres" None="@L["Genres.None"]" AddText="@L["Add"]"
-                                AddLabel="@L["Genres.Add"]" OnAdd="AddGenre" OnRemove="genre => Entry.Genres.Remove(genre)" />
+                                AddLabel="@L["Genres.Add"]" OnAdd="AddGenre" OnRemove="genre => Entry.Genres.Remove(genre)"
+                                OnCreate="text => _genreCreation = text" CreateLabel="@(text => L["Genres.Create", text].Value)" />
                     <InheritedTags Label="@L["BySeries"]" Items="Entry.SeriesGenres" />
                 </div>
                 <div class="album-tags">
                     <span class="album-tags-name">@L["Universes"]</span>
                     <RecordTags Id="album-add-universe" Kind="RecordKind.Universe" Items="Entry.Universes" None="@L["Universes.None"]" AddText="@L["Add"]"
-                                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => Entry.Universes.Remove(universe)" />
+                                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => Entry.Universes.Remove(universe)"
+                                OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)" />
                     <InheritedTags Label="@L["BySeries"]" Items="Entry.SeriesUniverses" />
                 </div>
                 <p class="album-help">@L["Classification.Help"]</p>
@@ -153,6 +155,15 @@ else
         <AuthorCreationDialog Id="album-author-creation" Name="@creation.Name" OnCreated="author => CreditCreatedAsync(creation.Role, author)"
                               OnCancel="() => _authorCreation = null" />
     }
+    @if (_genreCreation is { } genreLabel)
+    {
+        <GenreCreationDialog Id="album-genre-creation" Label="@genreLabel" OnCreated="GenreCreatedAsync" OnCancel="() => _genreCreation = null" />
+    }
+    @if (_universeCreation is { } universeName)
+    {
+        <UniverseCreationDialog Id="album-universe-creation" Name="@universeName" OnCreated="UniverseCreatedAsync"
+                                OnCancel="() => _universeCreation = null" />
+    }
     @if (_changesShown)
     {
         <Dialog Id="album-changes" Title="@L["Changes.Title"]" Subject="@Label" Tone="DialogTone.Information" CloseLabel="@L["Changes.Close"]"
@@ -172,10 +183,14 @@ else
 @code {
     private ApiProblem? _loadProblem;
     private ApiProblem? _saveProblem;
+    private EntryForm? _form;
+    private bool _revealProblem;
     private bool _saving;
     private string? _savedFingerprint;
     private string? _authorsCopiedFrom;
     private (ContributionRole Role, string Name)? _authorCreation;
+    private string? _genreCreation;
+    private string? _universeCreation;
     private bool _changesShown;
 
     /// <summary>The album to modify; none for a new album.</summary>
@@ -301,6 +316,20 @@ else
         await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumAuthorCreated, $"author={author.Id}");
     }
 
+    private async Task GenreCreatedAsync(RecordOption genre)
+    {
+        _genreCreation = null;
+        AddGenre(genre);
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumGenreCreated, $"genre={genre.Id}");
+    }
+
+    private async Task UniverseCreatedAsync(RecordOption universe)
+    {
+        _universeCreation = null;
+        await AddUniverseAsync(universe);
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumUniverseCreated, $"universe={universe.Id}");
+    }
+
     private async Task SaveAsync()
     {
         if (_saving)
@@ -329,10 +358,21 @@ else
         catch (ApiProblemException exception)
         {
             _saveProblem = exception.Problem;
+            _revealProblem = true;
         }
         finally
         {
             _saving = false;
+        }
+    }
+
+    // Once the error of a saving is rendered, what is to correct is brought into view.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
         }
     }
 

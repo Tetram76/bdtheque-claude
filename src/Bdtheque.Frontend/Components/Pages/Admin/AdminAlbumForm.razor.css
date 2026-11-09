@@ -27,7 +27,6 @@
     gap: var(--space-m) var(--space-xl);
 }
 
-.album-type,
 .album-range {
     display: flex;
     flex-direction: column;
@@ -38,17 +37,15 @@
     border: 0;
 }
 
-.album-type legend,
 .album-range legend {
     padding: 0 0 var(--space-xs);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
 }
 
-.album-type-choices {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--space-l);
+/* A box to check, level with the controls of the fields beside it, under their labels. */
+.album-flag {
+    padding-block-start: calc(var(--font-size-small) * var(--line-height-text) + var(--space-xs));
 }
 
 /* The volumes covered, on one line: « 1 à 5 ». */

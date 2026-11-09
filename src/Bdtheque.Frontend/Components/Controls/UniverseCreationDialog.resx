@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Create" xml:space="preserve">
+    <value>Créer l&apos;univers</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Parent" xml:space="preserve">
+    <value>Univers parent</value>
+  </data>
+  <data name="Parent.Help" xml:space="preserve">
+    <value>L&apos;univers qui le contient, s&apos;il en fait partie.</value>
+  </data>
+  <data name="Parent.Note" xml:space="preserve">
+    <value>facultatif</value>
+  </data>
+  <data name="Parent.Placeholder" xml:space="preserve">
+    <value>Aucun : univers de premier niveau</value>
+  </data>
+  <data name="Problem.Business" xml:space="preserve">
+    <value>À corriger</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Nouvel univers</value>
+  </data>
+</root>

@@ -85,6 +85,12 @@ public static class AudienceFunctions
     /// <summary>The creation of an author on the spot, from the form of an album, with the author created.</summary>
     public static readonly AudienceFunction AdminAlbumAuthorCreated = new("admin.album.author-created", AudienceFunctionKind.Action);
 
+    /// <summary>The creation of a genre on the spot, from the form of an album, with the genre created.</summary>
+    public static readonly AudienceFunction AdminAlbumGenreCreated = new("admin.album.genre-created", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a universe on the spot, from the form of an album, with the universe created.</summary>
+    public static readonly AudienceFunction AdminAlbumUniverseCreated = new("admin.album.universe-created", AudienceFunctionKind.Action);
+
     /// <summary>The changes of the user shown, the album having been modified in the meantime.</summary>
     public static readonly AudienceFunction AdminAlbumChanges = new("admin.album.changes", AudienceFunctionKind.Action);
 
@@ -155,7 +161,8 @@ public static class AudienceFunctions
         AlbumRecord,
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
-        AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumChanges,
+        AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated,
+        AdminAlbumChanges,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
         AdminSeriesMerge, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
         AdminAuthorsMerge, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,

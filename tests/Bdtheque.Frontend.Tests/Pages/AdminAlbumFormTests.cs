@@ -283,6 +283,20 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Error_OfASaving_IsBroughtIntoView()
+    {
+        // visuel/saisie-album/contenu.md: the first field to correct gets the focus, the page scrolling to it.
+        var page = OpenNew();
+        var reveal = JSInterop.SetupModule(module => module.Identifier == "import" && ((string)module.Arguments[0]!).EndsWith("entry-form.js"))
+            .SetupVoid("revealProblem", _ => true);
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Album.TitleRequiredWithoutSeries");
+
+        page.Find("form").Submit();
+
+        page.WaitForAssertion(() => Assert.Single(reveal.Invocations));
+    }
+
+    [Fact]
     public void FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
     {
         var page = OpenAlbum();
@@ -370,6 +384,42 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Genre_CreatedOnTheSpot_ClassifiesTheAlbumInIt()
+    {
+        var polar = Guid.NewGuid();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new GenreForm(polar, "Polar", 1), HttpStatusCode.Created);
+        var page = OpenAlbum();
+
+        await CreateOnTheSpotAsync(page, RecordKind.Genre, " Polar ");
+        Assert.Equal("Polar", page.Find("#album-genre-creation-label").GetAttribute("value"));
+        page.Find(".dialog-actions .button[data-variant=primary]").Click();
+
+        page.WaitForAssertion(() => Assert.Empty(page.FindAll("dialog")));
+        Assert.Equal((HttpMethod.Post, "/admin/genres", "Polar"),
+            (_api.Written.Single().Method, _api.Written.Single().Path, _api.Written.Single().Body.GetProperty("label").GetString()));
+        Assert.Contains("Polar", page.FindAll(".album-tags")[0].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
+        Assert.Contains("admin.album.genre-created", _audience.Functions);
+    }
+
+    [Fact]
+    public async Task Universe_CreatedOnTheSpot_AttachesTheAlbumToIt_WithItsAncestors()
+    {
+        var harbour = Guid.NewGuid();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new UniverseForm(harbour, "Le port", null, null, 1), HttpStatusCode.Created);
+        _api.Answers[$"/admin/universes/{harbour}/hierarchy"] = new UniverseInHierarchy(
+            new UniverseListItem(harbour, "Le port", null, null), []);
+        var page = OpenAlbum();
+
+        await CreateOnTheSpotAsync(page, RecordKind.Universe, "Le port");
+        page.Find(".dialog-actions .button[data-variant=primary]").Click();
+
+        page.WaitForAssertion(() => Assert.Empty(page.FindAll("dialog")));
+        Assert.Equal("/admin/universes", _api.Written.Single().Path);
+        Assert.Contains("Le port", page.FindAll(".album-tags")[1].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
+        Assert.Contains("admin.album.universe-created", _audience.Functions);
+    }
+
+    [Fact]
     public void LoadError_IsPresentedInsteadOfTheForm()
     {
         _api.Failures[$"/admin/albums/{AlbumId}"] = HttpStatusCode.InternalServerError;
@@ -401,6 +451,13 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminNewAlbum);
         return Render<AdminAlbumForm>(parameters => parameters.AddCascadingValue(_request.Context));
+    }
+
+    // As the choice of a record offers it for the text typed.
+    private static Task CreateOnTheSpotAsync(IRenderedComponent<AdminAlbumForm> page, RecordKind kind, string text)
+    {
+        var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == kind);
+        return tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync(text));
     }
 
     private static Task ChooseSeriesAsync(IRenderedComponent<AdminAlbumForm> page, RecordOption series)

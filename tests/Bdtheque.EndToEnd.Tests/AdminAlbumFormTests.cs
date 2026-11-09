@@ -82,16 +82,53 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Fact]
-    public async Task Save_WithoutTitleNorSeries_IsToCorrect_OnTheTitle()
+    public async Task UniverseAndGenre_CreatedOnTheSpot_ClassifyTheAlbum()
+    {
+        var parent = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Monde{_marker}", null, null));
+        var album = await CreateAlbumAsync(Content($"Album {_marker}"));
+        var page = await OpenAsync(AppPaths.AdminEditAlbum(album.Id));
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un genre" }).ClickAsync();
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Ajouter un genre" }).PressSequentiallyAsync($"Genre{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer le genre « Genre{_marker} »" }).ClickAsync();
+        var genreDialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" });
+        await genreDialog.GetByRole(AriaRole.Button, new() { Name = "Créer le genre" }).ClickAsync();
+        await Assertions.Expect(genreDialog).ToHaveCountAsync(0);
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un univers" }).ClickAsync();
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Ajouter un univers" }).PressSequentiallyAsync($"Quartier{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'univers « Quartier{_marker} »" }).ClickAsync();
+        var universeDialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
+        await universeDialog.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Monde{_marker}");
+        await universeDialog.GetByRole(AriaRole.Option, new() { Name = $"Monde{_marker}" }).ClickAsync();
+        await universeDialog.GetByRole(AriaRole.Button, new() { Name = "Créer l'univers" }).ClickAsync();
+        await Assertions.Expect(universeDialog).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator(".album-tags").Nth(1)).ToContainTextAsync($"Monde{_marker} › Quartier{_marker}");
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
+        var saved = (await GetAsync(album.Id)).References;
+        Assert.Equal($"Genre{_marker}", Assert.Single(saved.Genres).Label);
+        Assert.Equal(parent.Id, Assert.Single(Assert.Single(saved.Universes).Ancestors).Id);
+    }
+
+    [Fact]
+    public async Task Save_WithoutTitleNorSeries_IsToCorrect_OnTheTitle_WhichGetsTheFocus()
     {
         var page = await OpenAsync(AppPaths.AdminNewAlbum);
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
+        // From the bottom of the form, where the title is out of sight.
+        await page.Mouse.WheelAsync(0, 10_000);
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'album" }).ClickAsync();
 
         var error = page.GetByRole(AriaRole.Alert);
         await Assertions.Expect(error).ToContainTextAsync("À corriger");
         await Assertions.Expect(page.GetByLabel("Titre")).ToHaveAttributeAsync("aria-invalid", "true");
+        // The field to correct gets the focus, scrolled into view.
+        await Assertions.Expect(page.GetByLabel("Titre")).ToBeFocusedAsync();
+        await Assertions.Expect(page.GetByLabel("Titre")).ToBeInViewportAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewAlbum));
     }
 
