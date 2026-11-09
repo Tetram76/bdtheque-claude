@@ -63,8 +63,9 @@ public sealed class RecordLabelsTests
     [Theory]
     [InlineData(null, null, null, "Dargaud")]
     [InlineData("Lucky Luke", 1978, null, "Dargaud (Lucky Luke) [1978]")]
-    [InlineData("Lucky Luke", 1978, "978-2-205-01234-5", "Dargaud (Lucky Luke) [1978] - ISBN 978-2-205-01234-5")]
-    [InlineData(null, 1978, "978-2-205-01234-5", "Dargaud [1978] - ISBN 978-2-205-01234-5")]
+    [InlineData("Lucky Luke", 1978, "978-2-205-01234-5", "Dargaud (Lucky Luke) [1978] - ISBN\u00A0978-2-205-01234-5")]
+    [InlineData(null, 1978, "978-2-205-01234-5", "Dargaud [1978] - ISBN\u00A0978-2-205-01234-5")]
+    // The ISBN never apart from its number, which a no-break space keeps on its line.
     public void Edition_DropsWhatIsMissing(string? collection, int? year, string? isbn, string expected) =>
         Assert.Equal(expected, _labels.Edition(
             new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Dargaud", collection is null ? null : Guid.NewGuid(), collection, year, isbn)));

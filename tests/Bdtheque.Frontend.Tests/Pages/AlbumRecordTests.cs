@@ -260,7 +260,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         // The edition targeted by an intent (2023) is not one of them.
         var choices = BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition-choices a");
-        Assert.Equal(["Casterman [2001] - ISBN 2-203-34424-5", "Casterman (Univers d'auteurs) [2010]"], choices.Select(c => c.TextContent.Trim()));
+        Assert.Equal(["Casterman [2001] - ISBN\u00A02-203-34424-5", "Casterman (Univers d'auteurs) [2010]"], choices.Select(c => c.TextContent.Trim()));
         Assert.Equal("true", choices[0].GetAttribute("aria-current"));
         Assert.Equal(AlbumRecordQuery.ForEdition(SecondEditionId).Href(AlbumId), choices[1].GetAttribute("href"));
     }
