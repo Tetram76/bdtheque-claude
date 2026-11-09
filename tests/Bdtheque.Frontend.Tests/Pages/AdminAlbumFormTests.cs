@@ -372,6 +372,22 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task AuthorsTakenFromTheSeries_ThenChanged_NoLongerSaySo()
+    {
+        // Changed, they are personalized: the notice disappears.
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(true,
+            [new SeriesAlbumContribution(new AuthorListItem(Herge, "Remi", "Georges", "Hergé"), ContributionRole.Scenarist)]));
+        var page = OpenNew();
+        await ChooseSeriesAsync(page, new RecordOption(SeriesId, "Tintin", null));
+        Assert.Equal("Repris de la série Tintin. Ils sont à l'album désormais : les modifier ne touche pas la série.",
+            page.Find(".notice-text").TextContent.Trim());
+
+        page.Find(".album-role .tag-remove").Click();
+
+        Assert.Empty(page.FindAll(".notice"));
+    }
+
+    [Fact]
     public async Task Series_ChosenAgainAfterNone_ComparesTheAuthorsWithTheSeriesTheyWereTakenFrom()
     {
         // A new album: series A chosen, then none (the cross), then B. Its authors are still those of A, which B replaces.

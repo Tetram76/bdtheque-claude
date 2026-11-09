@@ -106,8 +106,8 @@ else
                         <div class="album-role">
                             <span class="album-role-name" id="@($"album-role-{role}")">@Values.Of(role)</span>
                             <RecordTags Id="@($"album-add-{role}")" Kind="RecordKind.Author" Items="@Entry.AuthorsOf(role)" None="@L["Authors.None"]"
-                                        AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => Entry.Credit(role, author)"
-                                        OnRemove="author => Entry.Credits.RemoveAll(c => c.Role == role && c.Author.Id == author.Id)"
+                                        AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => CreditAuthor(role, author)"
+                                        OnRemove="author => RemoveAuthor(role, author)"
                                         RemoveLabel="@(author => L["Authors.Remove", author.Label, Values.Of(role)].Value)"
                                         OnCreate="text => _authorCreation = (role, text)" CreateLabel="@(text => L["Authors.Create", text].Value)" />
                         </div>
@@ -315,12 +315,26 @@ else
         }
     }
 
+    // Authors changed are personalized: the notice of those taken from the series no longer applies
+    // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+    private void CreditAuthor(ContributionRole role, RecordOption author)
+    {
+        Entry!.Credit(role, author);
+        _authorsCopiedFrom = null;
+    }
+
+    private void RemoveAuthor(ContributionRole role, RecordOption author)
+    {
+        Entry!.Credits.RemoveAll(c => c.Role == role && c.Author.Id == author.Id);
+        _authorsCopiedFrom = null;
+    }
+
     // The records added on the spot are created with the album, when it is saved: cancelling creates none of them.
     private async Task CreditCreatedAsync(ContributionRole role, NewAuthor author)
     {
         _authorCreation = null;
         Entry!.NewAuthors.Add(author);
-        Entry.Credit(role, new RecordOption(author.Key, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null));
+        CreditAuthor(role, new RecordOption(author.Key, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null));
         await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumAuthorCreated);
     }
 
