@@ -189,9 +189,11 @@ internal static class AlbumEndpoints
     }
 
     // The editions, intents and contributions are always loaded with the album (AlbumConfiguration); its series and the
-    // authors of its contributions, for the form to name them.
+    // authors of its contributions, for the form to name them. One query per collection, as the context does by default, said
+    // where several collections are loaded together: a single one would multiply its rows by each of them.
     private static IQueryable<Album> WithAssociations(IQueryable<Album> query) =>
-        query.Include(a => a.Genres).Include(a => a.Universes).Include(a => a.Series).Include(a => a.Contributions).ThenInclude(c => c.Author);
+        query.Include(a => a.Genres).Include(a => a.Universes).Include(a => a.Series).Include(a => a.Contributions).ThenInclude(c => c.Author)
+            .AsSplitQuery();
 
     private static async Task<Series?> LoadSeriesAsync(Guid? seriesId, BdthequeDbContext context, CancellationToken cancellationToken) =>
         seriesId is { } id
