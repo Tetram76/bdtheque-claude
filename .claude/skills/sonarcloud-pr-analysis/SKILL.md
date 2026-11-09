@@ -91,27 +91,35 @@ variable, without ever sending its value in the conversation.
 ```powershell
 $base = 'https://sonarcloud.io/api'
 $auth = @{ Authorization = "Bearer $env:SONAR_TOKEN" }
-# per finding: the transition, with its status change comment shared with Sonar
+# per finding: the transition with its status change comment; $share decided
+# case by case (below)
 Invoke-RestMethod -Method Post "$base/issues/do_transition" -Headers $auth -Body @{
     issue = $key; transition = 'falsepositive'   # or 'accept'
-    comment = $reason; isFeedback = 'true' }
+    comment = $reason; isFeedback = $share }     # 'true' or 'false'
 # per security hotspot reviewed and judged safe (no sharing with Sonar in the API)
 Invoke-RestMethod -Method Post "$base/hotspots/change_status" -Headers $auth -Body @{
     hotspot = $key; status = 'REVIEWED'; resolution = 'SAFE'; comment = $reason }
 ```
 
 `$reason` (French) states the exact reason, detailed enough to stand on its
-own for a reader who knows neither the project nor the PR — Sonar's teams
-read it, with the file and the rule, to improve the analysis: what the flagged
+own for a reader who knows neither the project nor the PR: what the flagged
 code does; why the rule's premise is wrong there, or why the rule does not fit
 the case, or, for a deferred fix, what makes the finding valid and which
 ticket or plan note carries the fix. It ends with the link to the PR comment
 (« Justification dans la PR : <comment URL> »), a plus that never replaces
 the reason: a comment that only points to the PR is not enough.
 
-Shared with Sonar, the comment leaves the project, and the public SonarQube
-Cloud project already shows it to anyone: every marking comment, issue or
-hotspot, holds nothing the public repository does not already show. Never put in it a secret, token or
+`$share` is decided per finding: share (`'true'`) only when the comment
+teaches Sonar's teams something about the analysis itself, which they read
+with the file and the rule to improve it. As a rule: share a `falsepositive`
+(the rule fired wrongly), and an `accept` for a rule that ignores a legitimate,
+general use of the language or of a library; do not share (`'false'`) an
+`accept` whose fix is deferred (the rule was right), nor one for a project
+convention or trade-off that says nothing about the rule's accuracy.
+
+A shared comment leaves the project, and the public SonarQube Cloud project
+already shows the others to anyone: every marking comment, issue or hotspot,
+holds nothing the public repository does not already show. Never put in it a secret, token or
 credential (even partial), an address, host name, port or path of the
 workstation, the NAS or the internal network, personal data (email, name of a
 person other than an already public comic author), data of the user's
