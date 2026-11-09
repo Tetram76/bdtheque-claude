@@ -345,10 +345,12 @@
         if (!active())
             return;
         const blocks = [...document.querySelectorAll(".block")];
+        // The same page keeps what it was dealt, even once an enhanced navigation has taken it from its elements.
+        const kept = location.pathname === shownPath ? dealt : null;
         blocks.forEach((block, n) => {
             if (block.dataset.tint === undefined) {
-                block.dataset.tint = String(tintOf(n));
-                block.dataset.seed = String(newSeed());
+                block.dataset.tint = kept?.blocks[n]?.tint ?? String(tintOf(n));
+                block.dataset.seed = kept?.blocks[n]?.seed ?? String(newSeed());
                 block.style.setProperty("--block-fill", `var(--color-block-tint-${block.dataset.tint})`);
             }
         });
@@ -357,6 +359,11 @@
         const fresh = titles.filter((title) => title.dataset.shape === undefined);
         const kinds = !balloons.planned ? planBalloons(titles) : null;
         fresh.forEach((title) => {
+            const keptTitle = kept?.titles.get(title.textContent.trim());
+            if (keptTitle) {
+                Object.assign(title.dataset, keptTitle);
+                return;
+            }
             const index = titles.indexOf(title);
             title.dataset.shape = shapeFor(kinds ? kinds[index] : kindOf(title.textContent.trim()), kinds ? index : -1);
             title.dataset.seed = String(newSeed());
@@ -367,7 +374,19 @@
             resizes.observe(element);
             draw(element);
         }
+        if (location.pathname !== shownPath)
+            return;
+        dealt = {
+            blocks: blocks.map((block) => ({ tint: block.dataset.tint, seed: block.dataset.seed })),
+            titles: new Map(titles.map((title) => [title.textContent.trim(), {
+                shape: title.dataset.shape, seed: title.dataset.seed, tailAt: title.dataset.tailAt, tailFlip: title.dataset.tailFlip,
+            }])),
+        };
     }
+
+    // What the display has dealt, which the same page at another address of its own keeps (below), and its address.
+    let dealt;
+    let shownPath = location.pathname;
 
     newDisplay();
     apply();
@@ -386,11 +405,17 @@
     }).observe(document.body, { childList: true, subtree: true });
 
     // An enhanced navigation of Blazor displays a new page, which gets a new deal: its blocks may be those of the previous
-    // page, whose attributes it set again. The new page may also be in another theme (the theme of a visit drawn again at
+    // page, whose attributes it set again. The same page at another address of its own (the viewer of the visuals of a
+    // record, opened above it) is the same display, which keeps its deal: a balloon dealt anew could take another size,
+    // and move the page under the visitor. The new page may also be in another theme (the theme of a visit drawn again at
     // a new date): it is then left as its theme presents it, or drawn when it enters this theme.
     document.addEventListener("DOMContentLoaded", () =>
         window.Blazor?.addEventListener("enhancedload", () => {
-            newDisplay();
+            if (location.pathname !== shownPath) {
+                shownPath = location.pathname;
+                dealt = null;
+                newDisplay();
+            }
             for (const element of document.querySelectorAll(".block, .block-title")) {
                 for (const name of ["tint", "seed", "shape", "tailAt", "tailFlip", "drawn"])
                     delete element.dataset[name];

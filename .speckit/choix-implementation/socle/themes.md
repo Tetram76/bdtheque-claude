@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
 ---
 
 # Thèmes
@@ -21,7 +21,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
 - **Un script de thème** dessine ce qu'une feuille ne peut pas (ex. bords tracés à la main, tirés au hasard) :
   - chaque page charge les scripts de **tous** les thèmes proposés, chacun n'agissant que sur une page de son thème, vérifié à chaque navigation : la navigation améliorée de Blazor garde les scripts de la page et n'exécute jamais ceux qu'elle insère, alors que le thème peut changer d'une page à l'autre ;
   - il n'insère **aucun nœud**, la page appartenant au rendu de Blazor (un nœud inséré dans un composant interactif fausserait ses mises à jour) : un dessin est une image SVG posée en propriété personnalisée, que la feuille peint dans un pseudo-élément ;
-  - ses tirages restent ceux de la page tant qu'elle est affichée, et emploient le générateur du navigateur, que les captures remplacent par une suite fixe.
+  - ses tirages restent ceux de la page tant qu'elle est affichée, y compris à une autre adresse de la même page (la visionneuse d'une fiche, ouverte au-dessus d'elle), où une bulle tirée de nouveau changerait de taille et ferait bouger la page ; ils emploient le générateur du navigateur, que les captures remplacent par une suite fixe.
 - **Le bloc est positionné sans créer de contexte d'empilement**, pour qu'un thème dessine sur ses bords dans ses pseudo-éléments : un contexte d'empilement ferait passer sous le bloc suivant la liste d'un champ qu'il contient.
 - **Inclinaison réservée aux couvertures mises en avant** : une vignette, contenu d'une liste, reste droite.
 
