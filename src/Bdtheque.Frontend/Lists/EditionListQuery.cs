@@ -10,6 +10,7 @@ namespace Bdtheque.Frontend.Lists;
 /// </summary>
 public sealed record EditionListQuery(
     string? Text = null,
+    Guid? SeriesId = null,
     Guid? AlbumId = null,
     Guid? PublisherId = null,
     Guid? PublisherCollectionId = null,
@@ -19,6 +20,7 @@ public sealed record EditionListQuery(
     Guid? Merge = null,
     string? MergeText = null) : AdminListQuery(Text, Entry: null, Page, FiltersOpen, Delete, Merge, MergeText)
 {
+    internal const string SeriesName = "seriesId";
     internal const string AlbumName = "albumId";
     internal const string PublisherName = "publisherId";
     internal const string PublisherCollectionName = "publisherCollectionId";
@@ -34,7 +36,7 @@ public sealed record EditionListQuery(
     protected override ListFunctions Functions => EditionFunctions;
 
     protected override IEnumerable<(string Name, object? Value)> Filters =>
-        [(AlbumName, AlbumId), (PublisherName, PublisherId), (PublisherCollectionName, PublisherCollectionId)];
+        [(SeriesName, SeriesId), (AlbumName, AlbumId), (PublisherName, PublisherId), (PublisherCollectionName, PublisherCollectionId)];
 
     /// <summary>The list without its filters, back on its first page: « Tout effacer ».</summary>
     public EditionListQuery WithoutFilters() => new(Text);
@@ -45,6 +47,7 @@ public sealed record EditionListQuery(
         var address = new Address(query);
         return new EditionListQuery(
             address.Search,
+            address.Id(SeriesName),
             address.Id(AlbumName),
             address.Id(PublisherName),
             address.Id(PublisherCollectionName),

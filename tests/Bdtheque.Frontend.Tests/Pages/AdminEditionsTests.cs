@@ -40,7 +40,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         Longway, new EditionSummary(Guid.Parse("01900000-0000-7000-8000-000000000002"), PublisherId, "Dupuis", Guid.NewGuid(), "Repérages", null, null),
         null, EditionCategory.FirstEdition, AcquisitionMode.Trade, null, new DateTimeOffset(2026, 10, 9, 8, 0, 0, TimeSpan.Zero), 42);
 
-    private static readonly EditionListFilters NoFilters = new(null, null, null);
+    private static readonly EditionListFilters NoFilters = new(null, null, null, null);
 
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
@@ -147,9 +147,9 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         var form = Open($"filters=open&albumId={Lunes.Id}").Find("form.list-search");
 
         Assert.Equal("true", form.QuerySelector("button[aria-controls]")!.GetAttribute("aria-expanded"));
-        Assert.Equal(["Album", "Éditeur", "Collection éditeur"], form.QuerySelectorAll(".list-filters label").Select(Text));
+        Assert.Equal(["Série", "Album", "Éditeur", "Collection éditeur"], form.QuerySelectorAll(".list-filters label").Select(Text));
         Assert.Equal(
-            ["albumId", "publisherId", "publisherCollectionId"],
+            ["seriesId", "albumId", "publisherId", "publisherCollectionId"],
             form.QuerySelectorAll(".list-filters input[type='hidden']").Select(input => input.GetAttribute("name")));
         Assert.Equal(Lunes.Id.ToString(), form.QuerySelector(".list-filters input[name='albumId']")!.GetAttribute("value"));
         // The album chosen is named by its label, as in the rows.
@@ -159,15 +159,21 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
     [Fact]
     public void ActiveFilters_TagsThatLeadToTheListWithoutThem()
     {
+        var seriesId = Lunes.SeriesId!.Value;
         _api.Answers["/admin/editions"] = new EditionAdminList(
-            Page([Glenat], 1), NoFilters with { Album = Lunes, Publisher = new PublisherListItem(PublisherId, "Glénat", null) });
+            Page([Glenat], 1),
+            NoFilters with
+            {
+                Series = new SeriesListItem(seriesId, "Les Lunes de Saturne"), Album = Lunes, Publisher = new PublisherListItem(PublisherId, "Glénat", null),
+            });
 
-        var filters = Open($"q=978&albumId={Lunes.Id}&publisherId={PublisherId}").Find(".active-filters");
+        var filters = Open($"q=978&seriesId={seriesId}&albumId={Lunes.Id}&publisherId={PublisherId}").Find(".active-filters");
 
         Assert.Equal(
             [
-                ("Album : ...Et après (Les Lunes de Saturne - T. 1)", $"{AppPaths.AdminEditions}?q=978&publisherId={PublisherId}"),
-                ("Éditeur : Glénat", $"{AppPaths.AdminEditions}?q=978&albumId={Lunes.Id}"),
+                ("Série : Les Lunes de Saturne", $"{AppPaths.AdminEditions}?q=978&albumId={Lunes.Id}&publisherId={PublisherId}"),
+                ("Album : ...Et après (Les Lunes de Saturne - T. 1)", $"{AppPaths.AdminEditions}?q=978&seriesId={seriesId}&publisherId={PublisherId}"),
+                ("Éditeur : Glénat", $"{AppPaths.AdminEditions}?q=978&seriesId={seriesId}&albumId={Lunes.Id}"),
             ],
             filters.QuerySelectorAll(".tag").Select(tag => (Text(tag.QuerySelector("span")!), tag.QuerySelector("a")!.GetAttribute("href"))));
     }

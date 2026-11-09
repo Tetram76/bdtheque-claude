@@ -12,16 +12,17 @@ public sealed class EditionListQueryTests
 {
     private static readonly Guid Album = Guid.Parse("01900000-0000-7000-8000-000000000001");
     private static readonly Guid Collection = Guid.Parse("01900000-0000-7000-8000-000000000002");
+    private static readonly Guid Series = Guid.Parse("01900000-0000-7000-8000-000000000004");
 
     [Fact]
     public void Href_CarriesItsFiltersInAFixedOrder()
     {
-        var query = new EditionListQuery(Text: "978-2", AlbumId: Album, PublisherCollectionId: Collection, Page: 2);
+        var query = new EditionListQuery(Text: "978-2", SeriesId: Series, AlbumId: Album, PublisherCollectionId: Collection, Page: 2);
 
-        Assert.Equal($"{AppPaths.AdminEditions}?q=978-2&albumId={Album}&publisherCollectionId={Collection}&page=2", query.Href());
+        Assert.Equal($"{AppPaths.AdminEditions}?q=978-2&seriesId={Series}&albumId={Album}&publisherCollectionId={Collection}&page=2", query.Href());
         Assert.Equal(AppPaths.AdminEditions, new EditionListQuery().Href());
         // The filters chosen, not the search.
-        Assert.Equal(2, query.ActiveFilterCount);
+        Assert.Equal(3, query.ActiveFilterCount);
     }
 
     [Fact]
@@ -40,7 +41,7 @@ public sealed class EditionListQueryTests
 
         Assert.Equal(query, EditionListQuery.Parse(new Uri($"http://frontend{query.Href()}").Query));
         // The list has no navigation by initial: an entry is one of the criteria it cannot read.
-        Assert.Equal(new EditionListQuery(), EditionListQuery.Parse($"?albumId=nope&entry=B&page=0&seriesId={Album}"));
+        Assert.Equal(new EditionListQuery(), EditionListQuery.Parse($"?albumId=nope&entry=B&page=0&authorId={Album}"));
     }
 
     [Theory]

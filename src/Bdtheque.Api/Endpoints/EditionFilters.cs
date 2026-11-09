@@ -10,7 +10,7 @@ namespace Bdtheque.Api.Endpoints;
 /// consultation and that of the administration share, bound as a whole from the query of their request
 /// (<c>[AsParameters]</c>): the search is its parameter <c>q</c>, each other criterion that of its name.
 /// </summary>
-internal sealed record EditionFilters([FromQuery(Name = "q")] string? Text, Guid? AlbumId, Guid? PublisherId, Guid? PublisherCollectionId)
+internal sealed record EditionFilters([FromQuery(Name = "q")] string? Text, Guid? SeriesId, Guid? AlbumId, Guid? PublisherId, Guid? PublisherCollectionId)
 {
     /// <summary>
     /// Narrows <paramref name="editions"/>: an edition is found by its ISBN, separators ignored on both sides
@@ -19,6 +19,8 @@ internal sealed record EditionFilters([FromQuery(Name = "q")] string? Text, Guid
     public IQueryable<Edition> Apply(IQueryable<Edition> editions)
     {
         editions = editions.WhereContains(Text is null ? null : IsbnSearch.Normalize(Text), IsbnSearch.Normalized);
+        if (SeriesId is not null)
+            editions = editions.Where(e => e.Album.SeriesId == SeriesId);
         if (AlbumId is not null)
             editions = editions.Where(e => e.AlbumId == AlbumId);
         if (PublisherId is not null)
@@ -30,6 +32,7 @@ internal sealed record EditionFilters([FromQuery(Name = "q")] string? Text, Guid
 
     /// <summary>The records the list is filtered on, as the lists name them; none for a record that does not exist.</summary>
     public async Task<EditionListFilters> NameAsync(BdthequeDbContext context, CancellationToken cancellationToken) => new(
+        await FilteredRecords.SeriesAsync(context, SeriesId, cancellationToken),
         await FilteredRecords.AlbumAsync(context, AlbumId, cancellationToken),
         await FilteredRecords.PublisherAsync(context, PublisherId, cancellationToken),
         await FilteredRecords.PublisherCollectionAsync(context, PublisherCollectionId, cancellationToken));

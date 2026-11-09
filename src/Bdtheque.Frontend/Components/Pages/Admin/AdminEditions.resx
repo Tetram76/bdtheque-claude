@@ -30,6 +30,9 @@
   <data name="Search.Placeholder" xml:space="preserve">
     <value>ISBN, avec ou sans tirets…</value>
   </data>
+  <data name="Filter.Series" xml:space="preserve">
+    <value>Série</value>
+  </data>
   <data name="Filter.Album" xml:space="preserve">
     <value>Album</value>
   </data>
@@ -43,7 +46,7 @@
     <value>Tous</value>
   </data>
   <data name="Filters.Note" xml:space="preserve">
-    <value>Album, éditeur et collection se choisissent en tapant leur nom. Seules les éditions de la collection figurent ici : une édition visée figure parmi les intentions d&apos;achat.</value>
+    <value>Série, album, éditeur et collection se choisissent en tapant leur nom. Seules les éditions de la collection figurent ici : une édition visée figure parmi les intentions d&apos;achat.</value>
   </data>
   <data name="Count.None" xml:space="preserve">
     <value>Aucune édition</value>

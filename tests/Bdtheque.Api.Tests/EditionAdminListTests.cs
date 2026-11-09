@@ -120,17 +120,33 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
     }
 
     [Fact]
+    public async Task Filter_OnASeries_KeepsTheEditionsOfItsAlbums()
+    {
+        var publisher = await CreatePublisherAsync($"Dargaud {_marker}");
+        var series = await CreateSeriesAsync($"Blacksad {_marker}");
+        var first = await CreateOwnedEditionAsync((await CreateAlbumAsync(null, series.Id, 1)).Id, publisher.Id, Edition(publisher.Id));
+        var second = await CreateOwnedEditionAsync((await CreateAlbumAsync(null, series.Id, 2)).Id, publisher.Id, Edition(publisher.Id));
+        await CreateOwnedEditionAsync((await CreateAlbumAsync($"Sans série {_marker}")).Id, publisher.Id, Edition(publisher.Id));
+
+        Assert.Equal([first.Id, second.Id], await IdsAsync($"seriesId={series.Id}"));
+        Assert.Equal(await CatalogOwnedIdsAsync($"seriesId={series.Id}"), await IdsAsync($"seriesId={series.Id}"));
+    }
+
+    [Fact]
     public async Task Filters_NameTheRecordsTheListIsFilteredOn()
     {
         var publisher = await CreatePublisherAsync($"Éditeur {_marker}", "https://editeur.example");
         var collection = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest($"Collection {_marker}", publisher.Version));
+        var series = await CreateSeriesAsync($"Série {_marker}");
         var album = await CreateAlbumAsync($"Album {_marker}");
 
-        var filters = (await ListAsync($"albumId={album.Id}&publisherId={publisher.Id}&publisherCollectionId={collection.Id}")).Filters;
+        var filters = (await ListAsync(
+            $"seriesId={series.Id}&albumId={album.Id}&publisherId={publisher.Id}&publisherCollectionId={collection.Id}")).Filters;
 
         Assert.Equal(
             new EditionListFilters(
+                new SeriesListItem(series.Id, $"Série {_marker}"),
                 new AlbumSummary(album.Id, $"Album {_marker}", null, null, AlbumType.Regular, false, null, null, null, false),
                 new PublisherListItem(publisher.Id, $"Éditeur {_marker}", "https://editeur.example"),
                 new PublisherCollectionListItem(collection.Id, $"Collection {_marker}", publisher.Id, $"Éditeur {_marker}")),
@@ -143,7 +159,7 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
         var list = await ListAsync($"albumId={Guid.NewGuid()}");
 
         Assert.Empty(list.Editions.Items);
-        Assert.Equal(new EditionListFilters(null, null, null), list.Filters);
+        Assert.Equal(new EditionListFilters(null, null, null, null), list.Filters);
     }
 
     private async Task<EditionAdminList> ListAsync(string query) => await GetAsync<EditionAdminList>($"/admin/editions?{query}");
@@ -159,9 +175,14 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
 
-    private Task<AlbumForm> CreateAlbumAsync(string title) =>
+    private Task<AlbumForm> CreateAlbumAsync(string? title, Guid? seriesId = null, int? volume = null) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
-            title, null, null, AlbumType.Regular, false, null, null, null, null, null, null, null, null, [], [], []));
+            title, null, seriesId, AlbumType.Regular, false, volume, null, null, null, null, null, null, null, [], [], []));
+
+    private Task<SeriesForm> CreateSeriesAsync(string title) =>
+        PostAsync<SeriesForm>("/admin/series", new SeriesContent(
+            title, null, null, null, false, false, false, null, null, new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null),
+            [], [], []));
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
         PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));

@@ -286,6 +286,7 @@
         }
 
         var list = ListOnly;
+        Add("Series", filters.Series?.Title, list with { SeriesId = null });
         Add("Album", filters.Album is { } album ? AlbumLabel(album) : null, list with { AlbumId = null });
         Add("Publisher", filters.Publisher?.Name, list with { PublisherId = null });
         Add("PublisherCollection", filters.PublisherCollection?.Name, list with { PublisherCollectionId = null });
@@ -294,6 +295,10 @@
 
     // The fields of the filters: each record chosen by typing its name, interactive.
     private RenderFragment FiltersPanel => @<ListFilters Note="@L["Filters.Note"]">
+            <Field Id="filter-series" Label="@L["Filter.Series"]" Context="control">
+                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Series" Name="@EditionListQuery.SeriesName"
+                              Value="@Option(_list!.Filters.Series, s => new(s.Id, s.Title, null))" Placeholder="@L["Filter.Any"]" />
+            </Field>
             <Field Id="filter-album" Label="@L["Filter.Album"]" Context="control">
                 <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Album" Name="@EditionListQuery.AlbumName"
                               Value="@Option(_list!.Filters.Album, a => new(a.Id, AlbumLabel(a), null))" Placeholder="@L["Filter.Any"]" />

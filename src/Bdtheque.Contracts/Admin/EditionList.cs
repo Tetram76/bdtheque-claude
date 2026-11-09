@@ -31,6 +31,7 @@ public sealed record EditionAdminListItem(
 /// filtered on its type, or on a record that does not exist (choix-implementation/api/recherche.md).
 /// </summary>
 public sealed record EditionListFilters(
+    SeriesListItem? Series,
     AlbumSummary? Album,
     PublisherListItem? Publisher,
     PublisherCollectionListItem? PublisherCollection);
