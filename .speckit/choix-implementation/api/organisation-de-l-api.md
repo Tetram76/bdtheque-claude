@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T21:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T22:20:25Z }
 ---
 
 # Organisation de l'API
@@ -55,6 +55,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T21:30:00Z }
 - **Listes de l'administration** : recherche, navigation et filtres partagés avec la consultation ; l'**état dans la collection** est une expression unique que la projection et le filtre partagent ; la réponse **nomme les fiches de ses filtres**, pour que l'écran les présente sans autre requête.
   - **Conversion d'une intention d'achat proposée d'après la liste elle-même** : chaque intention de la liste de l'administration dit si elle se convertit vers l'autre cible, ce que l'API calcule par la même règle que le domaine ([Intention d'achat](../../fonctionnel/regles-metier/intention-d-achat.md) : toujours pour une intention sur l'album, pour une intention sur une édition seulement si c'est la seule de l'album). Le frontend n'offre ainsi que la conversion que le domaine acceptera, sans y écrire la règle ([Frontend](../socle/frontend.md), aucune règle de saisie).
     - **Alternative écartée (conversion toujours offerte, refusée à l'enregistrement)** : l'utilisateur ne l'apprendrait qu'après l'avoir demandée, pour un refus que la ligne savait déjà.
+- **Page des éditions et intentions d'achat d'un album en une lecture**, dans un même instantané ([`visuel/editions-album/`](../../visuel/editions-album/index.md)) : l'album en bref, tel que le présente la liste des albums, avec la version que renvoie toute suppression de ses éditions ou de ses intentions ; ses éditions possédées, dans l'ordre de sa fiche ; ses intentions, chacune disant si elle se convertit, par la règle de la liste des intentions.
+  - **Alternative écartée (page assemblée par le frontend depuis la fiche de consultation de l'album et les intentions de son agrégat)** : la fiche de consultation ne porte ni la version de l'album ni la conversion d'une intention, et la page demanderait plusieurs lectures sans instantané commun.
 
 ## Pagination et contrats
 

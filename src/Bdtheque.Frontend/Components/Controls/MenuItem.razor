@@ -1,4 +1,5 @@
-@* An item of an ActionsMenu: a link to another page, or a button, which closes the menu as it acts. *@
+@* An item of an ActionsMenu: a link to another page, or a button, which closes the menu as it acts; with a hint under its
+   label when the choice it makes needs saying (e.g. « Toute édition de l'album fera l'affaire. »). *@
 @if (Href is not null)
 {
     @* A site outside the application opens beside it, so that the page it was opened from stays as it was. *@
@@ -19,6 +20,10 @@ else
 
     [Parameter, EditorRequired]
     public string Label { get; set; } = null!;
+
+    /// <summary>What the choice of the item means, under its label.</summary>
+    [Parameter]
+    public string? Hint { get; set; }
 
     [Parameter]
     public IconName? Icon { get; set; }
@@ -45,6 +50,16 @@ else
         {
             <Icon Name="icon" />
         }
-        <span>@Label</span>
+        @if (Hint is null)
+        {
+            <span>@Label</span>
+        }
+        else
+        {
+            <span class="menu-item-text">
+                <span>@Label</span>
+                <span class="menu-item-hint">@Hint</span>
+            </span>
+        }
     </text>;
 }

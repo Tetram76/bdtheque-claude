@@ -38,6 +38,7 @@ internal static class AlbumEndpoints
         var albums = admin.MapGroup("/albums");
         albums.MapGet("/", ListForAdministrationAsync);
         albums.MapGet("/{id:guid}", GetAsync);
+        albums.MapGet("/{id:guid}/editions-and-purchase-intents", GetEditionsPageAsync);
         albums.MapPost("/", CreateAsync);
         albums.MapPut("/{id:guid}", UpdateAsync);
         albums.MapDeletion<Album>(DeletionLinks);
@@ -123,12 +124,72 @@ internal static class AlbumEndpoints
             albums = albums.Where(CatalogExpressions.Expand((Album a) => a.CollectionState() == kept));
 
         var rows = await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, AdminListItem, cancellationToken);
-        // An author credited with several roles is one of the authors once, at the place of their first role.
-        var items = rows.Items.Select(item => item with { Authors = [.. item.Authors.DistinctBy(a => a.Id)] }).ToList();
         return new AlbumAdminList(
-            new Page<AlbumAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount),
+            new Page<AlbumAdminListItem>([.. rows.Items.Select(WithEachAuthorOnce)], rows.Number, rows.Size, rows.TotalCount),
             await filters.NameAsync(context, cancellationToken));
     }
+
+    /// <summary>
+    /// The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md): the album in brief, as
+    /// the list of the albums presents it, its owned editions by year, as the record of the album orders them, and its
+    /// intents, each saying whether it turns into one on the other target, by the rule of the domain.
+    /// </summary>
+    private static async Task<AlbumEditionsPage> GetEditionsPageAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot for the reads below, which are assembled into one page.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var album = context.Albums.AsNoTracking().Where(a => a.Id == id);
+        var row = await album.Select(AdminListItem).SingleOrDefaultAsync(cancellationToken)
+                  ?? throw new EntityNotFoundException(typeof(Album), id);
+        var createdAt = await album.Select(a => a.CreatedAt).SingleAsync(cancellationToken);
+
+        var editions = await context.Editions.AsNoTracking()
+            .Where(e => e.AlbumId == id)
+            .Where(CollectionMembership.IsOwned)
+            .OrderBy(e => e.PublicationYear).ThenBy(e => e.Id)
+            .Select(CatalogExpressions.Expand((Edition e) => new
+            {
+                Edition = e.ToSummary(),
+                Cover = CatalogExpressions.ToCover(e.CoverVisualOf()),
+                e.Category,
+                e.Binding,
+                e.PageCount,
+                e.AcquisitionMode,
+                e.AcquisitionDate,
+                VisualCount = e.Visuals.Count,
+            }))
+            .ToListAsync(cancellationToken);
+
+        var intents = await context.PurchaseIntents.AsNoTracking()
+            .Where(p => p.AlbumId == id)
+            .OrderBy(p => p.Id)
+            .Select(CatalogExpressions.Expand((PurchaseIntent p) => new
+            {
+                p.Id,
+                Edition = p.Edition == null ? null : p.Edition.ToSummary(),
+                Category = p.Edition == null ? null : p.Edition.Category,
+                Binding = p.Edition == null ? null : p.Edition.Binding,
+                // fonctionnel/regles-metier/intention-d-achat.md: an intent on an edition turns into one on the album only when
+                // that edition is the only one of the album; one on the album, which has no edition, always into one on an edition.
+                IsConvertible = p.EditionId == null || p.Album.Editions.Count == 1,
+                p.CreatedAt,
+            }))
+            .ToListAsync(cancellationToken);
+
+        return new AlbumEditionsPage(
+            WithEachAuthorOnce(row),
+            createdAt,
+            [.. editions.Select(e => new AlbumEditionItem(
+                e.Edition, e.Cover, EnumMapping.Map<ContractEnums.EditionCategory>(e.Category), EnumMapping.Map<ContractEnums.BindingType>(e.Binding),
+                e.PageCount, EnumMapping.Map<ContractEnums.AcquisitionMode>(e.AcquisitionMode)!.Value, e.AcquisitionDate?.Year, e.VisualCount))],
+            [.. intents.Select(p => new AlbumPurchaseIntentItem(
+                p.Id, p.Edition, EnumMapping.Map<ContractEnums.EditionCategory>(p.Category), EnumMapping.Map<ContractEnums.BindingType>(p.Binding),
+                p.IsConvertible, p.CreatedAt))]);
+    }
+
+    // An author credited with several roles is one of the authors once, at the place of their first role.
+    private static AlbumAdminListItem WithEachAuthorOnce(AlbumAdminListItem item) =>
+        item with { Authors = [.. item.Authors.DistinctBy(a => a.Id)] };
 
     // Its authors in the order of its contributions, an author credited with several roles once per role: the list
     // tells them apart once read.

@@ -1,0 +1,414 @@
+@attribute [Route(AppPaths.AdminAlbumEditionsRoute)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Deletion
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<AdminAlbumEditions> L
+@inject ApiClient Api
+@inject RecordLabels Labels
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md), the only access to the
+   creation of an edition and of an intent: the album in brief, its editions of the collection and its intents, an edition
+   targeted by an intent being one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md).
+   Nothing is saved on it, so it has no save bar. Rendered statically, its dialogs — the deletion of an edition, the removal
+   of an intent, a new intent on the whole album — are carried by its address (Navigation/AlbumEditionsQuery.cs). Its styles
+   read the contracts of the base theme only (visuel/editions-album/declinaison-par-theme.md). *@
+<PageTitle>@(_page is null ? L["Title"] : $"{L["Title"]} · {AlbumLabel}")</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminAlbumEditions" Record="new PresentedRecord(RecordType.Album, Id)" />
+
+@if (_problem is not null)
+{
+    <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(L["Title"])])" />
+    <h1 class="visually-hidden">@L["Title"]</h1>
+    <ErrorMessage Problem="_problem" />
+}
+else if (_page is { } page)
+{
+    var album = page.Album;
+    <div class="album-editions">
+        <div class="album-editions-heading">
+            <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(AlbumLabel)])" />
+            <div class="album-editions-title">
+                <div>
+                    <h1>@L["Title"]</h1>
+                    <p class="album-editions-subject">@AlbumLabel</p>
+                </div>
+                <div class="album-editions-links">
+                    <Button Href="@AppPaths.AdminEditAlbum(Id)" Icon="IconName.Edit" Label="@L["EditAlbum"]" IconOnlyOnSmartphone="true" />
+                    <Button Href="@AppPaths.Album(Id)" Icon="IconName.Exit" Label="@L["View"]" IconOnlyOnSmartphone="true" />
+                </div>
+            </div>
+        </div>
+
+        <Block Title="@L["Block.Album"]" Kicker="@L["Kicker.Album"]">
+            <div class="album-brief">
+                <span class="album-brief-cover"><Cover VisualId="album.Cover?.VisualId" /></span>
+                <div class="album-brief-identity">
+                    <span class="album-brief-label">@AlbumLabel</span>
+                    @if (Authors is { Length: > 0 } authors)
+                    {
+                        <span class="album-brief-authors">@authors</span>
+                    }
+                    <span class="album-brief-facts">
+                        <span class="album-brief-date">
+                            @($"{L["FirstPublication"]} ")
+                            @if (album.FirstPublicationYear is { } year)
+                            {
+                                <strong>@Format.PartialDate(year, album.FirstPublicationMonth)</strong>
+                            }
+                            else
+                            {
+                                <NotSet Gender="GrammaticalGender.Feminine" />
+                            }
+                        </span>
+                        <CollectionStateTag State="album.State" />
+                    </span>
+                </div>
+            </div>
+            <p class="album-editions-help">@L["Album.Help"]</p>
+        </Block>
+
+        <Block Title="@L["Block.Editions"]" Kicker="@L["Kicker.Editions"]">
+            <div class="album-editions-toolbar">
+                <span class="album-editions-count">@EditionCount()</span>
+                @if (!IsAlbumTargeted)
+                {
+                    <Button Href="@AppPaths.AdminNewAlbumEdition(Id)" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["NewEdition"]" />
+                }
+            </div>
+            @if (page.Editions.Count == 0)
+            {
+                <p class="album-editions-none">@L["Editions.None"]</p>
+            }
+            else
+            {
+                <div class="edition-rows" role="table" aria-label="@L["Editions.Table"]">
+                    @foreach (var row in page.Editions)
+                    {
+                        var label = Labels.Edition(row.Edition);
+                        <div class="edition-row" role="row">
+                            <span class="edition-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
+                            <span class="edition-main" role="cell">
+                                <a class="edition-label" href="@AppPaths.AdminEditEdition(Id, row.Edition.Id)"><LabelText Text="@label" /></a>
+                                @if (Traits(row.Category, row.Binding, row.PageCount) is { Length: > 0 } traits)
+                                {
+                                    <span class="edition-sub">@traits</span>
+                                }
+                            </span>
+                            <span class="edition-detail" role="cell">@EditionDetail(row)</span>
+                            <span class="edition-actions" role="cell">
+                                <Button Href="@AppPaths.AdminEditEdition(Id, row.Edition.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
+                                        IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", label]" />
+                                <ActionsMenu Id="@($"edition-actions-{row.Edition.Id:N}")" Label="@L["More", label]">
+                                    <MenuItem Href="@AppPaths.Album(Id)" Icon="IconName.Exit" Label="@L["View"]" />
+                                    <MenuSeparator />
+                                    <MenuItem Href="@AlbumEditionsQuery.ForEditionDeletion(row.Edition.Id).Href(Id)" Icon="IconName.Delete"
+                                              Label="@L["Menu.DeleteEdition"]" Variant="ButtonVariant.Delete" />
+                                </ActionsMenu>
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+            <p class="album-editions-help">@(IsAlbumTargeted ? L["Editions.Help.Intended"] : L["Editions.Help"])</p>
+        </Block>
+
+        <Block Title="@L["Block.Intents"]" Kicker="@L["Kicker.Intents"]">
+            <div class="album-editions-toolbar">
+                <span class="album-editions-count">@IntentCount()</span>
+                @* fonctionnel/regles-metier/intention-d-achat.md: the album itself may be targeted only while it has no edition, owned
+                   or targeted; once one is known, a precise edition is; an album itself targeted, nothing more. *@
+                @if (page.Editions.Count == 0 && page.PurchaseIntents.Count == 0)
+                {
+                    <ActionsMenu Id="new-intent" Text="@L["NewIntent"]" TextIcon="IconName.Add">
+                        <MenuItem Href="@AlbumEditionsQuery.ForAlbumIntent.Href(Id)" Label="@L["NewIntent.Album"]" Hint="@L["NewIntent.Album.Hint"]" />
+                        <MenuItem Href="@AppPaths.AdminNewPurchaseIntent(Id)" Label="@L["NewIntent.Edition"]" Hint="@L["NewIntent.Edition.Hint"]" />
+                    </ActionsMenu>
+                }
+                else if (!IsAlbumTargeted)
+                {
+                    <Button Href="@AppPaths.AdminNewPurchaseIntent(Id)" Icon="IconName.Add" Label="@L["NewIntentOnEdition"]" />
+                }
+            </div>
+            @if (page.PurchaseIntents.Count == 0)
+            {
+                <p class="album-editions-none">@L["Intents.None"]</p>
+            }
+            else
+            {
+                <div class="intent-rows" role="table" aria-label="@L["Intents.Table"]">
+                    @foreach (var row in page.PurchaseIntents)
+                    {
+                        var target = row.Edition is { } targeted ? Labels.Edition(targeted) : L["Target.AnyEdition"].Value;
+                        <div class="intent-row" role="row">
+                            <span class="intent-main" role="cell">
+                                @* What the intent targets, told apart at first glance as in the list of the intents: the whole album, any
+                                   edition doing, or one edition, named beside it. *@
+                                <span class="intent-target">
+                                    @if (row.Edition is not null)
+                                    {
+                                        <Tag Text="@L["Target.Edition"]" Variant="TagVariant.Outlined" Icon="IconName.Edition" />
+                                        <span class="intent-target-detail intent-target-edition"><LabelText Text="@target" /></span>
+                                    }
+                                    else
+                                    {
+                                        <Tag Text="@L["Target.Album"]" Variant="TagVariant.Accent" Icon="IconName.Album" />
+                                        <span class="intent-target-detail">@target</span>
+                                    }
+                                </span>
+                                @if (row.Edition is not null && Traits(row.Category, row.Binding, null) is { Length: > 0 } traits)
+                                {
+                                    <span class="intent-sub">@traits</span>
+                                }
+                            </span>
+                            <span class="intent-created" role="cell">@($"{L["Intent.Created"]} ")<LocalDateTime Value="row.CreatedAt" DateOnly="true" /></span>
+                            <span class="intent-actions" role="cell">
+                                <Button Href="@AppPaths.AdminConfirmPurchase(Id, row.Id)" Icon="IconName.Check" Label="@L["Confirm"]"
+                                        IconOnlyOnSmartphone="true" aria-label="@L["Confirm.Label", target]" />
+                                <ActionsMenu Id="@($"intent-actions-{row.Id:N}")" Label="@L["More.Intent", target]">
+                                    @if (row.Edition is { } edition)
+                                    {
+                                        <MenuItem Href="@AppPaths.AdminEditEdition(Id, edition.Id)" Icon="IconName.Edit" Label="@L["Menu.EditIntent"]" />
+                                    }
+                                    @if (row.IsConvertible)
+                                    {
+                                        <MenuItem Href="@AppPaths.AdminConvertPurchaseIntent(Id, row.Id)" Icon="IconName.Swap"
+                                                  Label="@(row.Edition is null ? L["Menu.ToEdition"] : L["Menu.ToAlbum"])" />
+                                    }
+                                    <MenuSeparator />
+                                    <MenuItem Href="@AlbumEditionsQuery.ForIntentRemoval(row.Id).Href(Id)" Icon="IconName.Delete"
+                                              Label="@L["Menu.RemoveIntent"]" Variant="ButtonVariant.Delete" />
+                                </ActionsMenu>
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+            <p class="album-editions-help">@L["Intents.Help"]</p>
+        </Block>
+
+        <p class="album-editions-dates">@L["Dates.Created"] <LocalDateTime Value="page.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="album.ModifiedAt" />.</p>
+    </div>
+
+    @if (_dialogEdition is { } deleted)
+    {
+        <DeletionDialog Id="edition-deletion" FormName="@EditionDeletionFormName" Title="@L["Deletion.Title"]" Subject="@Labels.Edition(deleted.Edition)"
+                        CloseHref="@PageOnly" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Deletion.Refusal.Lead"]"
+                        RefusalHint="@(kind => L[$"Deletion.Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_dialogProblem"
+                        Version="album.Version" OnConfirm="DeleteEditionAsync" />
+    }
+    else if (_dialogIntent is { } removed)
+    {
+        <DeletionDialog Id="intent-removal" FormName="@IntentRemovalFormName" Title="@L["Removal.Title"]"
+                        Subject="@Labels.PurchaseIntent(album.Album, removed.Edition, _format)"
+                        CloseHref="@PageOnly" Lead="@L["Removal.Lead"]" RefusalLead="@L["Removal.Refusal.Lead"]"
+                        RefusalHint="@(kind => L[$"Removal.Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_dialogProblem"
+                        Version="album.Version" OnConfirm="RemoveIntentAsync" />
+    }
+    else if (_albumIntentDialog)
+    {
+        <Dialog Id="album-intent" Title="@L["AlbumIntent.Title"]" Subject="@AlbumLabel" Tone="DialogTone.Creation" CloseHref="@PageOnly">
+            <ChildContent>
+                <p>@L["AlbumIntent.Lead"]</p>
+                @if (_dialogProblem is not null)
+                {
+                    <ErrorMessage Problem="_dialogProblem" />
+                }
+            </ChildContent>
+            <Actions>
+                <form method="post" @formname="@AlbumIntentFormName" @onsubmit="SetAlbumIntentAsync">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="@DeletionDialog.VersionName" value="@album.Version" />
+                    <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["AlbumIntent.Confirm"]" />
+                </form>
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    private const string EditionDeletionFormName = "edition-deletion";
+    private const string IntentRemovalFormName = "intent-removal";
+    private const string AlbumIntentFormName = "album-intent";
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    // The version of the album and the fingerprint of the impact the administrator confirmed, by form: the editions and the
+    // intents belong to the aggregate of the album.
+    [SupplyParameterFromForm(FormName = EditionDeletionFormName, Name = DeletionDialog.VersionName)]
+    private uint? EditionVersion { get; set; }
+
+    [SupplyParameterFromForm(FormName = EditionDeletionFormName, Name = DeletionDialog.FingerprintName)]
+    private string? EditionFingerprint { get; set; }
+
+    [SupplyParameterFromForm(FormName = IntentRemovalFormName, Name = DeletionDialog.VersionName)]
+    private uint? IntentVersion { get; set; }
+
+    [SupplyParameterFromForm(FormName = IntentRemovalFormName, Name = DeletionDialog.FingerprintName)]
+    private string? IntentFingerprint { get; set; }
+
+    [SupplyParameterFromForm(FormName = AlbumIntentFormName, Name = DeletionDialog.VersionName)]
+    private uint? AlbumIntentVersion { get; set; }
+
+    private AlbumLabelFormat _format;
+    private AlbumEditionsPage? _page;
+    private ApiProblem? _problem;
+    private AlbumEditionItem? _dialogEdition;
+    private AlbumPurchaseIntentItem? _dialogIntent;
+    private bool _albumIntentDialog;
+    private DeletionImpact? _impact;
+    private ApiProblem? _dialogProblem;
+
+    // The page without its dialog: where the closing of a dialog, and a write done, lead.
+    private string PageOnly => AppPaths.AdminAlbumEditions(Id);
+
+    private string AlbumLabel => Labels.Album(_page!.Album.Album, _format);
+
+    private string Authors => string.Join(" · ", _page!.Album.Authors.Select(Labels.Author));
+
+    // An album targeted by an intent on itself, which has no edition (fonctionnel/regles-metier/intention-d-achat.md).
+    private bool IsAlbumTargeted => _page!.PurchaseIntents.Any(intent => intent.Edition is null);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = AlbumEditionsQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            _format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+            _page = await Api.GetAsync<AlbumEditionsPage>($"/admin/albums/{Id}/editions-and-purchase-intents");
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            return;
+        }
+
+        // A dialog opens on what the page offers, from its rows or its buttons: an address written by hand on another record,
+        // or a new intent on an album that can no longer be targeted as a whole, opens none.
+        _dialogEdition = _page.Editions.FirstOrDefault(row => row.Edition.Id == query.DeleteEdition);
+        _dialogIntent = _page.PurchaseIntents.FirstOrDefault(row => row.Id == query.RemoveIntent);
+        _albumIntentDialog = query.IntentOnAlbum && _page.Editions.Count == 0 && _page.PurchaseIntents.Count == 0;
+
+        if (_dialogEdition is not null)
+            await LoadImpactAsync($"{EditionPath(_dialogEdition.Edition.Id)}/deletion-impact");
+        else if (_dialogIntent is not null)
+            await LoadImpactAsync($"{IntentPath(_dialogIntent.Id)}/deletion-impact");
+
+        var opened = _dialogEdition is not null || _dialogIntent is not null || _albumIntentDialog;
+        if (opened && HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && query.Action(Id) is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // The editions and the intents are addressed by their album, the root of their aggregate.
+    private string EditionPath(Guid edition) => $"/admin/albums/{Id}/editions/{edition}";
+
+    private string IntentPath(Guid intent) => $"/admin/albums/{Id}/purchase-intents/{intent}";
+
+    private async Task LoadImpactAsync(string path)
+    {
+        try
+        {
+            _impact = await Api.GetAsync<DeletionImpact>(path);
+        }
+        catch (ApiProblemException exception)
+        {
+            _dialogProblem = exception.Problem;
+        }
+    }
+
+    private Task DeleteEditionAsync() =>
+        _dialogEdition is { } row && EditionVersion is { } version && EditionFingerprint is { } fingerprint
+            ? DeleteAsync(EditionPath(row.Edition.Id), version, fingerprint, AudienceFunctions.AdminAlbumEditionsEditionDeleted, $"edition={row.Edition.Id}")
+            : Task.CompletedTask;
+
+    private Task RemoveIntentAsync() =>
+        _dialogIntent is { } row && IntentVersion is { } version && IntentFingerprint is { } fingerprint
+            ? DeleteAsync(IntentPath(row.Id), version, fingerprint, AudienceFunctions.AdminAlbumEditionsIntentRemoved, $"intent={row.Id}")
+            : Task.CompletedTask;
+
+    private async Task DeleteAsync(string path, uint version, string fingerprint, AudienceFunction done, string parameters)
+    {
+        try
+        {
+            await Api.DeleteAsync($"{path}?version={version}&fingerprint={Uri.EscapeDataString(fingerprint)}");
+        }
+        catch (ApiProblemException exception)
+        {
+            // A deletion refused, or whose impact changed since its confirmation, announces the current impact, to confirm
+            // again or to resolve; any other error is presented as it is.
+            _dialogProblem = exception.Problem;
+            _impact = exception.Problem.Impact;
+            if (_impact is { BlockedBy.Count: > 0 })
+                _dialogProblem = null;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(done, parameters, HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(PageOnly);
+    }
+
+    private async Task SetAlbumIntentAsync()
+    {
+        if (!_albumIntentDialog || AlbumIntentVersion is not { } version)
+            return;
+
+        try
+        {
+            await Api.PostAsync($"/admin/albums/{Id}/purchase-intents", new CreatePurchaseIntentRequest(null, version));
+        }
+        catch (ApiProblemException exception)
+        {
+            // Refused (the album has an edition since, or was modified in the meantime): said in the dialog.
+            _dialogProblem = exception.Problem;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumEditionsAlbumIntentSet, $"album={Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(PageOnly);
+    }
+
+    // « Édition originale · Cartonnée · 62 pages »: what is known of what the edition is.
+    private string Traits(EditionCategory? category, BindingType? binding, int? pageCount) =>
+        string.Join(" · ", new[]
+        {
+            category is { } c ? Values.Of(c) : null,
+            binding is { } b ? Values.Of(b) : null,
+            pageCount is { } pages ? L["Pages", Format.Number(pages)].Value : null,
+        }.OfType<string>());
+
+    // « Achat, 1987 · 2 visuels »: its copy, then its visuals.
+    private string EditionDetail(AlbumEditionItem row)
+    {
+        var mode = Values.Of(row.AcquisitionMode);
+        var acquisition = row.AcquisitionYear is { } year ? L["Acquisition.WithYear", mode, year].Value : mode;
+        var visuals = row.VisualCount switch
+        {
+            0 => L["Visuals.None"].Value,
+            1 => L["Visuals.One"].Value,
+            var count => L["Visuals.Other", Format.Number(count)].Value,
+        };
+        return $"{acquisition} · {visuals}";
+    }
+
+    private string EditionCount() => _page!.Editions.Count switch
+    {
+        0 => L["Editions.Count.None"],
+        1 => L["Editions.Count.One"],
+        var count => L["Editions.Count.Other", Format.Number(count)],
+    };
+
+    private string IntentCount() => _page!.PurchaseIntents.Count switch
+    {
+        0 => L["Intents.Count.None"],
+        1 => L["Intents.Count.One"],
+        var count => L["Intents.Count.Other", Format.Number(count)],
+    };
+}

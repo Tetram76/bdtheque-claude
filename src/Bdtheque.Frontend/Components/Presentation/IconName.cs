@@ -15,6 +15,7 @@ public enum IconName
     Merge,
     ChevronStart,
     ChevronEnd,
+    ChevronDown,
     Menu,
     Exit,
     Logout,

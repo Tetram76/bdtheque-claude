@@ -1,9 +1,17 @@
-@* The « ⋯ » button of a row and the menu of its other actions (visuel/liste-albums/contenu.md, actions d'une ligne). The
+@* The « ⋯ » button of a row and the menu of its other actions (visuel/liste-albums/contenu.md, actions d'une ligne), or a
+   button named by its text that opens a choice (e.g. « Nouvelle intention d'achat », visuel/editions-album/contenu.md). The
    menu is a popover of the browser: a click outside it, or Escape, closes it, and it opens above the page, anchored to its
    button, without any interactivity nor script (choix-implementation/socle/frontend.md). Its items are links, or
    buttons that close it. *@
 <span class="actions-menu" style="anchor-name: @AnchorName">
-    <button type="button" class="actions-menu-toggle" popovertarget="@Id" aria-label="@Label"><Icon Name="IconName.More" /></button>
+    @if (Text is null)
+    {
+        <button type="button" class="actions-menu-toggle" popovertarget="@Id" aria-label="@Label"><Icon Name="IconName.More" /></button>
+    }
+    else
+    {
+        <Button Label="@Text" Icon="TextIcon" popovertarget="@Id"><Icon Name="IconName.ChevronDown" /></Button>
+    }
     <div id="@Id" class="actions-menu-panel" popover="auto" style="position-anchor: @AnchorName">
         <CascadingValue Value="this" IsFixed="true">
             @ChildContent
@@ -16,9 +24,17 @@
     [Parameter, EditorRequired]
     public string Id { get; set; } = null!;
 
-    /// <summary>The name of the button (e.g. « Autres actions sur Le Lotus bleu »), which shows only its icon.</summary>
-    [Parameter, EditorRequired]
-    public string Label { get; set; } = null!;
+    /// <summary>The name of the « ⋯ » button (e.g. « Autres actions sur Le Lotus bleu »), which shows only its icon.</summary>
+    [Parameter]
+    public string? Label { get; set; }
+
+    /// <summary>The text of a button that shows it, in place of the « ⋯ » button, followed by a chevron.</summary>
+    [Parameter]
+    public string? Text { get; set; }
+
+    /// <summary>The icon before <see cref="Text"/>.</summary>
+    [Parameter]
+    public IconName? TextIcon { get; set; }
 
     /// <summary>The <see cref="MenuItem"/> and <see cref="MenuSeparator"/> of the menu.</summary>
     [Parameter]

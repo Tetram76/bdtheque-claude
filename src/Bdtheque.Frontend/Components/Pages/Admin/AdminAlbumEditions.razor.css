@@ -1,0 +1,215 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the heading, then the blocks of the page
+   one under the other, at the gap of the blocks of the administration (--admin-gap), and the dates of the album. */
+.album-editions {
+    display: grid;
+    gap: var(--admin-gap);
+}
+
+/* The fil d'Ariane above the title and the label of the album; the two links at the other end, under them when the room
+   lacks. */
+.album-editions-heading {
+    display: grid;
+    gap: var(--space-xs);
+}
+
+.album-editions-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-m);
+}
+
+.album-editions-title > div:first-child {
+    min-inline-size: 0;
+}
+
+.album-editions-title h1 {
+    margin: 0;
+}
+
+.album-editions-subject {
+    margin: 0;
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.album-editions-links {
+    display: flex;
+    gap: var(--space-s);
+}
+
+.album-editions-help,
+.album-editions-dates {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.album-editions-help {
+    margin-block-start: var(--space-s);
+}
+
+/* The album in brief: its thumbnail, then its label, authors, date and membership of the collection. */
+.album-brief {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: start;
+}
+
+.album-brief-cover {
+    --cover-width: 4rem;
+}
+
+.album-brief-identity {
+    display: grid;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
+.album-brief-label {
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.album-brief-authors {
+    color: var(--color-text-muted);
+}
+
+.album-brief-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+}
+
+/* The count of a block, and the button that adds to it at the other end. */
+.album-editions-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-m);
+    margin-block-end: var(--space-s);
+}
+
+.album-editions-count {
+    font-weight: var(--font-weight-strong);
+}
+
+.album-editions-none {
+    margin: 0;
+    padding-block: var(--space-s);
+    color: var(--color-text-muted);
+}
+
+/* The layout of the rows follows the width of their block, not that of the screen: the room the rows have depends on the
+   margins of the page and of the block, which a theme sets. Mobile-first, each row holds on two lines, the thumbnail of an
+   edition on the left: its label and its actions, then its detail; an intent, what it targets and its actions, then its
+   date. A block wide enough is a table, each row on a single line, dense. */
+.edition-rows,
+.intent-rows {
+    container: album-rows / inline-size;
+}
+
+.edition-row,
+.intent-row {
+    display: grid;
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.edition-row {
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    grid-template-areas: "cover main actions" "cover detail detail";
+}
+
+.intent-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "main actions" "created created";
+}
+
+.edition-cover {
+    grid-area: cover;
+    --cover-width: 2.25rem;
+}
+
+.edition-main,
+.intent-main {
+    grid-area: main;
+    align-self: center;
+    display: grid;
+    gap: 2px;
+    min-inline-size: 0;
+}
+
+.edition-label {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.edition-sub,
+.intent-sub {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.edition-detail {
+    grid-area: detail;
+    font-size: var(--font-size-small);
+}
+
+/* The tag, then what it targets beside it, wrapping under it when the room lacks. */
+.intent-target {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    min-inline-size: 0;
+}
+
+.intent-target-detail {
+    min-inline-size: 0;
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.intent-target-edition {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+}
+
+.intent-created {
+    grid-area: created;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.edition-actions,
+.intent-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container album-rows (min-width: 42rem) {
+    .edition-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) minmax(0, 18rem) auto;
+        grid-template-areas: "cover main detail actions";
+        align-items: center;
+    }
+
+    .intent-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 18rem) auto;
+        grid-template-areas: "main created actions";
+        align-items: center;
+    }
+}
