@@ -50,7 +50,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         // Paris, an hour ahead: a modification at 23:30 universal time is of the next day.
         Services.AddScoped(_ => new BrowserTimeZone { Name = "Europe/Paris" });
         Services.AddScoped<DisplayFormatter>();
-        Services.AddSingleton<RecordLabels>();
+        Services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
         Services.AddSingleton<ValueLabels>();
     }
 

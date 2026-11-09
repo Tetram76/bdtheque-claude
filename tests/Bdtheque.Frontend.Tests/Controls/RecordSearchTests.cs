@@ -75,7 +75,7 @@ public sealed class RecordSearchTests
     public void AuthorName_IsItsMainIdentifier(string? lastName, string? firstName, string? pseudonym, string expected) =>
         Assert.Equal(expected, RecordSearch.AuthorName(lastName, firstName, pseudonym));
 
-    private static readonly RecordLabels Labels = new ServiceCollection().AddLogging().AddLocalization().AddSingleton<RecordLabels>()
+    private static readonly RecordLabels Labels = new ServiceCollection().AddLogging().AddLocalization().AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>()
         .BuildServiceProvider().GetRequiredService<RecordLabels>();
 
     private static HttpResponseMessage Json(string content) =>

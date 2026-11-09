@@ -13,7 +13,7 @@ namespace Bdtheque.Frontend.Tests.Formatting;
 public sealed class RecordLabelsTests
 {
     private readonly RecordLabels _labels =
-        new ServiceCollection().AddLogging().AddLocalization().AddSingleton<RecordLabels>()
+        new ServiceCollection().AddLogging().AddLocalization().AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>()
             .BuildServiceProvider().GetRequiredService<RecordLabels>();
 
     [Theory]
@@ -69,6 +69,17 @@ public sealed class RecordLabelsTests
     public void Edition_DropsWhatIsMissing(string? collection, int? year, string? isbn, string expected) =>
         Assert.Equal(expected, _labels.Edition(
             new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Dargaud", collection is null ? null : Guid.NewGuid(), collection, year, isbn)));
+
+    [Fact]
+    public void Edition_FormatsItsIsbn_ByTheRangesOfTheAgency()
+    {
+        var services = new ServiceCollection().AddLogging().AddLocalization().AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>()
+            .BuildServiceProvider();
+        services.GetRequiredService<IsbnFormatter>().Ranges = IsbnRangesTests.Ranges();
+
+        Assert.Equal("Glénat [2004] - ISBN 978-2-7234-4567-1", services.GetRequiredService<RecordLabels>().Edition(
+            new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Glénat", null, null, 2004, "9782723445671")));
+    }
 
     // An ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md): the label tells it apart, mention
     // included, for the presentation that keeps it on one line; the text of the label is left as it is.

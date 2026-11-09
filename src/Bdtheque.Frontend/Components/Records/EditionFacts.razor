@@ -3,6 +3,7 @@
 @inject IStringLocalizer<EditionFacts> L
 @inject ValueLabels Values
 @inject DisplayFormatter Format
+@inject IsbnFormatter Isbns
 
 @* The detail of the edition chosen on the record of an album (visuel/fiche-album/contenu.md), in two groups: the edition and
    the copy. A data not set has no row, which would only weigh the detail down. The labels of the date and of the amount of the acquisition
@@ -29,7 +30,7 @@
             </div>
             @Row(L["Collection"], Edition.Edition.PublisherCollectionName)
             @Row(L["Year"], Edition.Edition.PublicationYear?.ToString(CultureInfo.InvariantCulture))
-            @Row(L["Isbn"], Edition.Edition.Isbn, "edition-isbn")
+            @Row(L["Isbn"], Edition.Edition.Isbn is { } isbn ? Isbns.Format(isbn) : null, "edition-isbn")
             @Row(L["Category"], Label(Edition.Category))
             @Row(L["Format"], Label(Edition.Format))
             @Row(L["Binding"], Label(Edition.Binding))

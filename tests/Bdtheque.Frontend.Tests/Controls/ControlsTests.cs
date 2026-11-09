@@ -13,7 +13,7 @@ namespace Bdtheque.Frontend.Tests.Controls;
 /// </summary>
 public sealed class ControlsTests : BunitContext
 {
-    public ControlsTests() => Services.AddLogging().AddLocalization().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+    public ControlsTests() => Services.AddLogging().AddLocalization().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
 
     [Fact]
     public void Field_LabelsItsControl_AndDescribesItByItsHelp()

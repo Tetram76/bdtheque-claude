@@ -13,6 +13,7 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.EndToEnd.Tests.Captures;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Api;
+using frontend::Bdtheque.Frontend.Formatting;
 using frontend::Bdtheque.Frontend.Navigation;
 using frontend::Bdtheque.Frontend.Theming;
 using FrontendProgram = frontend::Program;
@@ -147,6 +148,9 @@ public class ApplicationHost : IAsyncLifetime
                 // What a page draws at each display (e.g. the greeting of the dashboard) is always the first choice: a page
                 // looks the same at each capture.
                 services.Replace(ServiceDescriptor.Singleton<Random>(new FirstChoice()));
+                // No download of the ranges of the ISBN agency, whose site the tests do not reach: every ISBN as entered, the
+                // same at each capture (their formatting is pinned by the tests of the frontend).
+                services.PostConfigure<IsbnRangesOptions>(options => options.Source = null);
             });
         }
 

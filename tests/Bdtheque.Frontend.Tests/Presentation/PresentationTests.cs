@@ -282,7 +282,7 @@ public sealed class PresentationTests : BunitContext
     [Fact]
     public void LabelText_KeepsTheIsbnOfALabelInABlockOfItsOwn_TheTextUnchanged()
     {
-        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
 
         var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978] - ISBN 978-2-205-01234-5"));
 
@@ -294,7 +294,7 @@ public sealed class PresentationTests : BunitContext
     [Fact]
     public void LabelText_WithoutIsbn_IsTheTextAlone()
     {
-        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
 
         var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978]"));
 

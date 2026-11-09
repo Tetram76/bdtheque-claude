@@ -40,7 +40,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             BaseAddress = new Uri("http://api"),
         }));
         Services.AddScoped<RecordSearch>();
-        Services.AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+        Services.AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 

@@ -12,7 +12,7 @@ namespace Bdtheque.Frontend.Formatting;
 /// gives them or the change log kept them from the time of a write (modele-metier/entree-du-journal-des-modifications.md).
 /// The words of the volume and the ISBN mention are texts of the display culture (<c>RecordLabels.resx</c>).
 /// </summary>
-public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
+public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnFormatter isbns)
 {
     /// <summary>
     /// The label of an album in the format of the settings. <paramref name="withSeries"/> leaves the series out where the
@@ -102,7 +102,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         if (publicationYear is { } year)
             label += string.Create(CultureInfo.InvariantCulture, $" [{year}]");
         if (isbn is not null)
-            label += $" - {texts["Isbn"]}\u00A0{isbn}";
+            label += $" - {texts["Isbn"]}\u00A0{isbns.Format(isbn)}";
         return label;
     }
 
