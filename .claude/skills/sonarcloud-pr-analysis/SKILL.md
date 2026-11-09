@@ -107,8 +107,17 @@ code does; why the rule's premise is wrong there, or why the rule does not fit
 the case, or, for a deferred fix, what makes the finding valid and which
 ticket or plan note carries the fix. It ends with the link to the PR comment
 (« Justification dans la PR : <comment URL> »), a plus that never replaces
-the reason: a comment that only points to the PR is not enough. Nothing in it
-that the public repository does not already show.
+the reason: a comment that only points to the PR is not enough.
+
+Shared with Sonar, the comment leaves the project, and the public SonarQube
+Cloud project already shows it to anyone: every marking comment, issue or
+hotspot, holds nothing the public repository does not already show. Never put in it a secret, token or
+credential (even partial), an address, host name, port or path of the
+workstation, the NAS or the internal network, personal data (email, name of a
+person other than an already public comic author), data of the user's
+collection, or content of a conversation with the user or of a non-public
+ticket. State the reason through the code, the rule and the expected behaviour.
+Re-read each `$reason` for such information before sending it.
 
 The same token serves the project settings that the analysis configuration
 does not carry (e.g. the new code definition, the quality gate of the project),
