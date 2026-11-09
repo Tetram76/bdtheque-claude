@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-10
+
+* **Règle** : tout problème (bug, test instable, échec du CI, retour de revue, ticket à ouvrir) se traite par l'analyse de sa cause de fond et la correction de cette cause, jamais par un correctif limité au symptôme ; un ticket porte cette analyse, jamais le seul symptôme (exigence de l'utilisateur, #339).
+
 ## 2026-11-09
 
 * **Visuel** : un nouveau genre se saisit dans le même dialogue que le genre créé sur place depuis la saisie d'un album, et non plus dans un cadre au-dessus de la liste (décision de l'utilisateur à la validation fonctionnelle). **Choix** : listes des genres et des univers de l'administration (`GET /admin/genres`, `GET /admin/universes`), leurs nombres d'albums et de séries comptés par les filtres des listes, sous-univers compris ; liste des univers dans l'ordre de la hiérarchie, ordonnée et paginée en mémoire, chaque ligne portant ses ancêtres ; saisie d'un genre dans sa ligne, d'un nouveau genre dans le dialogue de la saisie d'un album, d'un univers dans un panneau latéral, ouvertes par l'adresse et enregistrées par un formulaire de la liste statique, seul le choix du parent d'un univers étant interactif ; la lecture d'un univers pour sa saisie nomme son parent avec ses ancêtres et porte ses dates ; ouverture et enregistrement d'une saisie relevés par la mesure d'audience ; données de validation : un genre accentué sans album (#339).
