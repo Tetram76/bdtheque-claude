@@ -216,8 +216,9 @@ else
 
     private string PageTitle => Entry is null || Entry.Id is null ? L["New"] : L["PageTitle", Label];
 
-    private SaveBarState State => Entry!.Id is null ? SaveBarState.New
-        : Entry.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
+    private SaveBarState State => Entry!.Id is null ? SaveBarState.New : SavedState;
+
+    private SaveBarState SavedState => Entry!.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
 
     private string? RangeInvalid => FieldError("range") is null ? null : "true";
 
