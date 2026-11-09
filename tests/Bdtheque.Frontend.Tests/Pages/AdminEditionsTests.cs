@@ -80,6 +80,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
+    // A missing data is a dash, followed by the mention a screen reader reads in its place.
     public void Rows_TheEditionItsAlbumItsYearItsCategoryAndItsAcquisition()
     {
         var rows = Open("").FindAll(".edition-row:not(.edition-row-head)").Select(row => (
@@ -91,8 +92,8 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Glénat [2004] - ISBN 978-2-7234-4567-1", "...Et après (Les Lunes de Saturne - T. 1)", "Année 2004", "Non renseignée", "Achat, 2004"),
-                ("Dupuis (Repérages)", "Buddy Longway - T. 2", "Année Non renseignée", "Édition originale", "Échange"),
+                ("Glénat [2004] - ISBN 978-2-7234-4567-1", "...Et après (Les Lunes de Saturne - T. 1)", "Année 2004", "—Non renseignée", "Achat, 2004"),
+                ("Dupuis (Repérages)", "Buddy Longway - T. 2", "Année —Non renseignée", "Édition originale", "Échange"),
             ],
             rows);
     }
