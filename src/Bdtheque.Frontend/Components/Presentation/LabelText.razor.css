@@ -1,0 +1,4 @@
+/* An ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md). */
+.label-isbn {
+    white-space: nowrap;
+}

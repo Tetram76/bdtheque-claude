@@ -29,7 +29,7 @@
             </div>
             @Row(L["Collection"], Edition.Edition.PublisherCollectionName)
             @Row(L["Year"], Edition.Edition.PublicationYear?.ToString(CultureInfo.InvariantCulture))
-            @Row(L["Isbn"], Edition.Edition.Isbn)
+            @Row(L["Isbn"], Edition.Edition.Isbn, "edition-isbn")
             @Row(L["Category"], Label(Edition.Category))
             @Row(L["Format"], Label(Edition.Format))
             @Row(L["Binding"], Label(Edition.Binding))
@@ -87,13 +87,14 @@
     private string? Label<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } known ? Values.Of(known) : null;
 
     // A row of the detail, none for a data not set.
-    private static RenderFragment Row(string label, string? value) => __builder =>
+    // A value whose class keeps it whole: an ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md).
+    private static RenderFragment Row(string label, string? value, string? valueClass = null) => __builder =>
     {
         if (value is null)
             return;
         <div>
             <dt>@label</dt>
-            <dd>@value</dd>
+            <dd class="@valueClass">@value</dd>
         </div>
     };
 

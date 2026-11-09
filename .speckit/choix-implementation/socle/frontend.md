@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T19:30:00Z }
 ---
 
 # Frontend
@@ -38,6 +38,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
   - chaque changement du texte reçoit un **numéro**, avant toute attente, et seule la recherche du dernier écrit les suggestions : le circuit peut traiter la frappe suivante dès la première attente d'un gestionnaire, et une réponse antérieure, quel que soit son moment, est ignorée ;
   - la recherche attend une **pause de la frappe de 500 ms**, valeur courante d'un anti-rebond : un mot tapé d'un trait n'interroge le serveur qu'une fois ;
   - le texte tapé n'est jamais une valeur : quitter le champ sans choisir rend la fiche choisie. Un script retient l'action des touches de la liste ouverte, Blazor ne sachant retenir que toutes les touches ou aucune.
+  - un album est proposé sous son libellé, dans le format du paramétrage, sa série à côté ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md)), comme le nomment les listes : le paramétrage est relu à chaque recherche, que la pause de la frappe espace déjà, si bien qu'un format changé entre-temps s'applique.
+    - **Alternative écartée (paramétrage lu une fois par circuit)** : une requête de moins par recherche, mais un circuit dure aussi longtemps que la page reste ouverte, et garderait l'ancien format.
   - **Alternative écartée (chaque frappe annule la recherche précédente)** : pendant l'attente de l'annulation, le circuit traitait la frappe suivante, dont la réponse tardive remplaçait les suggestions du texte affiché (constaté : 7 saisies sur 180 ; aucune avec le numéro). Annuler n'épargne qu'une requête déjà partie, que la pause rend rare.
   - **Alternative écartée (aucune pause)** : une requête par lettre, pour des réponses presque toutes ignorées.
 - **Menus en *popover* du navigateur**, ancrés à leur bouton par le positionnement par ancre de CSS : fermeture sur un clic en dehors ou Échap, premier plan, sans interactivité ni script, dans une page statique (*Baseline* de web.dev : Safari 18.3, Firefox 147).
@@ -94,5 +96,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
 
 - **Valeurs des énumérations nommées en un seul lieu** (rôle d'une contribution, appréciation, type de visuel, reliure, format, état…), dans la culture d'affichage, pour toute page qui les présente ou les saisit.
 - **Libellés des albums et des éditions construits à la présentation**, d'après leurs composantes et le format du paramétrage ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md), [Libellé d'une édition](../../fonctionnel/presentation/libelle-d-une-edition.md)). L'ISBN y est tel qu'enregistré : sa mise en forme par tirets dépend de plages d'attribution que l'application ne tient pas.
+- **ISBN d'un seul bloc par la présentation, le texte inchangé** ([Libellé d'une édition](../../fonctionnel/presentation/libelle-d-une-edition.md)) : un composant affiche tout libellé de fiche, son ISBN, qui le termine toujours, dans un bloc qu'une ligne ne coupe pas ; le détail d'une édition garde de même son ISBN seul.
+  - **Alternative écartée (tirets insécables dans le texte du libellé)** : un ISBN copié depuis la page porterait d'autres caractères que les tirets, et la recherche, qui n'ignore que les tirets et les espaces ordinaires, ne le retrouverait plus.
 - **Tirages d'une page par le générateur aléatoire du conteneur de services**, que les tests de bout en bout remplacent par un tirage constant, pour qu'une page soit la même à chaque capture.
 - **Un composant unique présente toute erreur** ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)), avec sa catégorie, qui lui donne cadre, icône et couleur pour la distinguer au premier coup d'œil, à l'arrondi d'une tuile, jamais d'un contrôle, qu'un thème arrondit en pilule. Le texte d'une erreur métier est celui de son code de règle ; une erreur technique n'a qu'un texte générique. Le frontend ne référençant pas le domaine, un test confronte ses textes aux codes de règle.

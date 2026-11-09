@@ -69,7 +69,7 @@
                     <div class="edition-row" role="row">
                         <span class="edition-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
                         <span class="edition-main" role="cell">
-                            <a class="edition-label" href="@AppPaths.AdminEditEdition(row.Album.Id, row.Edition.Id)">@label</a>
+                            <a class="edition-label" href="@AppPaths.AdminEditEdition(row.Album.Id, row.Edition.Id)"><LabelText Text="@label" /></a>
                             <span class="edition-album">@AlbumLabel(row.Album)</span>
                         </span>
                         <span class="edition-meta">

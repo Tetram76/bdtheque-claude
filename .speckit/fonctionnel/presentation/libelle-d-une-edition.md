@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Libellé d''une édition'
 description: 'Libellé d''une édition : éditeur, collection, année, ISBN.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T20:00:00Z }
 ---
 
 # Libellé d'une édition
@@ -16,6 +16,7 @@ Le libellé d'une édition est construit dynamiquement selon le modèle suivant 
 - La collection n'apparaît que si elle est renseignée.
 - L'année n'apparaît que si elle est connue.
 - L'ISBN n'apparaît que s'il est connu, préfixé de `ISBN ` et séparé par ` - `.
+- Un ISBN est d'un seul bloc : où qu'il soit affiché, dans un libellé avec sa mention `ISBN ` comme seul (détail d'une édition), il n'est jamais coupé en fin de ligne, ni de sa mention, ni à l'un de ses tirets.
 
 **Exemples :**
 

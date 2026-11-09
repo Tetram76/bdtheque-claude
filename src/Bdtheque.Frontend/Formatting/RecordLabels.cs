@@ -28,6 +28,17 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
 
     /// <summary>
+    /// A label split before its ISBN, mention included, which always ends it: an ISBN is a single block, which the
+    /// presentation keeps on one line (fonctionnel/presentation/libelle-d-une-edition.md). <c>Isbn</c> is <c>null</c> for a
+    /// label without ISBN, whole in <c>Lead</c>.
+    /// </summary>
+    public (string Lead, string? Isbn) SplitIsbn(string label)
+    {
+        var start = label.LastIndexOf($" - {texts["Isbn"]} ", StringComparison.Ordinal);
+        return start < 0 ? (label, null) : (label[..(start + 3)], label[(start + 3)..]);
+    }
+
+    /// <summary>
     /// The volume of an album alone, as next to a title (fonctionnel/presentation/libelle-d-un-album.md); <c>null</c> for a
     /// regular album without number.
     /// </summary>

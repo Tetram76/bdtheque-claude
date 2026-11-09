@@ -278,4 +278,27 @@ public sealed class PresentationTests : BunitContext
         foreach (var name in Enum.GetValues<IconName>())
             Assert.NotEmpty(Render<Icon>(parameters => parameters.Add(p => p.Name, name)).FindAll("path"));
     }
+
+    [Fact]
+    public void LabelText_KeepsTheIsbnOfALabelInABlockOfItsOwn_TheTextUnchanged()
+    {
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+
+        var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978] - ISBN 978-2-205-01234-5"));
+
+        // A single block that a line never breaks (fonctionnel/presentation/libelle-d-une-edition.md), copied as it reads.
+        Assert.Equal("ISBN 978-2-205-01234-5", text.Find(".label-isbn").TextContent);
+        Assert.Equal("Dargaud [1978] - ISBN 978-2-205-01234-5", text.Nodes.Select(node => node.TextContent).Aggregate(string.Concat));
+    }
+
+    [Fact]
+    public void LabelText_WithoutIsbn_IsTheTextAlone()
+    {
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+
+        var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978]"));
+
+        Assert.Empty(text.FindAll(".label-isbn"));
+        Assert.Equal("Dargaud [1978]", text.Markup);
+    }
 }
