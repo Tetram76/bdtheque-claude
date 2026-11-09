@@ -5,26 +5,13 @@
     gap: var(--admin-gap);
 }
 
-/* The fil d'Ariane above the title and the label of the album; the two links at the other end, under them when the room
-   lacks. */
+/* The fil d'Ariane above the title, then the label of the album. */
 .album-editions-heading {
     display: grid;
     gap: var(--space-xs);
 }
 
-.album-editions-title {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-s) var(--space-m);
-}
-
-.album-editions-title > div:first-child {
-    min-inline-size: 0;
-}
-
-.album-editions-title h1 {
+.album-editions-heading h1 {
     margin: 0;
 }
 
@@ -32,11 +19,6 @@
     margin: 0;
     font-weight: var(--font-weight-strong);
     overflow-wrap: anywhere;
-}
-
-.album-editions-links {
-    display: flex;
-    gap: var(--space-s);
 }
 
 .album-editions-help,
@@ -50,10 +32,15 @@
     margin-block-start: var(--space-s);
 }
 
-/* The album in brief: its thumbnail, then its label, authors, date and membership of the collection. */
+.album-editions-help + .album-editions-dates {
+    margin-block-start: var(--space-xs);
+}
+
+/* The album in brief: its thumbnail, then its label, authors, date and membership of the collection, and the links to its
+   entry form and to its record at the other end. */
 .album-brief {
     display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr);
+    grid-template-columns: 4rem minmax(0, 1fr) auto;
     gap: var(--space-m);
     align-items: start;
 }
@@ -75,6 +62,11 @@
 
 .album-brief-authors {
     color: var(--color-text-muted);
+}
+
+.album-brief-links {
+    display: flex;
+    gap: var(--space-s);
 }
 
 .album-brief-facts {

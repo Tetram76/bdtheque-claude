@@ -75,7 +75,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Heading_TheFilDAriane_TheTitleAndTheLabelOfTheAlbum_AndItsTwoLinks()
+    public void Heading_TheFilDAriane_TheTitleAndTheLabelOfTheAlbum_WithoutLinks()
     {
         var page = Open("");
 
@@ -84,9 +84,18 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
             page.FindAll(".breadcrumb li").Select(item => (Text(item), item.QuerySelector("a")?.GetAttribute("href"))));
         Assert.Equal("Éditions et intentions d'achat", Text(page.Find("h1")));
         Assert.Equal("Les Bijoux de la Castafiore (Tintin - T. 21)", Text(page.Find(".album-editions-subject")));
+        Assert.Empty(page.Find(".album-editions-heading").QuerySelectorAll("a.button"));
+    }
+
+    [Fact]
+    // The album is modified, or seen in the consultation, from its block (decision of the user at the functional validation).
+    public void Album_ItsBlockLeadsToItsEntryForm_AndToItsRecord()
+    {
+        var links = Block(Open(""), "L'album").QuerySelectorAll(".album-brief-links a");
+
         Assert.Equal(
-            [("Modifier l'album", AppPaths.AdminEditAlbum(AlbumId)), ("Voir dans la consultation", AppPaths.Album(AlbumId))],
-            page.FindAll(".album-editions-links a").Select(link => (Text(link), link.GetAttribute("href"))));
+            [("Modifier", "Modifier l'album", AppPaths.AdminEditAlbum(AlbumId)), ("Voir dans la consultation", null, AppPaths.Album(AlbumId))],
+            links.Select(link => (Text(link), link.GetAttribute("aria-label"), link.GetAttribute("href"))));
     }
 
     [Fact]
@@ -264,9 +273,10 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Dates_OfTheAlbum_IntroducedByWhatTheyConcern()
+    public void Dates_OfTheAlbum_InItsBlock_IntroducedByWhatTheyConcern()
     {
-        Assert.Equal("Album créé le 04/03/2026 11:00, modifié le 08/11/2026 21:08.", Text(Open("").Find(".album-editions-dates")));
+        Assert.Equal(
+            "Album créé le 04/03/2026 11:00, modifié le 08/11/2026 21:08.", Text(Block(Open(""), "L'album").QuerySelector(".album-editions-dates")!));
     }
 
     [Fact]

@@ -22,6 +22,9 @@
     <value>Albums</value>
   </data>
   <data name="EditAlbum" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="EditAlbum.Label" xml:space="preserve">
     <value>Modifier l&apos;album</value>
   </data>
   <data name="View" xml:space="preserve">

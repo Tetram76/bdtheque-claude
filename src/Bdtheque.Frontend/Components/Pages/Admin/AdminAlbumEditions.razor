@@ -32,16 +32,8 @@ else if (_page is { } page)
     <div class="album-editions">
         <div class="album-editions-heading">
             <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(AlbumLabel)])" />
-            <div class="album-editions-title">
-                <div>
-                    <h1>@L["Title"]</h1>
-                    <p class="album-editions-subject">@AlbumLabel</p>
-                </div>
-                <div class="album-editions-links">
-                    <Button Href="@AppPaths.AdminEditAlbum(Id)" Icon="IconName.Edit" Label="@L["EditAlbum"]" IconOnlyOnSmartphone="true" />
-                    <Button Href="@AppPaths.Album(Id)" Icon="IconName.Exit" Label="@L["View"]" IconOnlyOnSmartphone="true" />
-                </div>
-            </div>
+            <h1>@L["Title"]</h1>
+            <p class="album-editions-subject">@AlbumLabel</p>
         </div>
 
         @if (_intentProblem is not null)
@@ -73,8 +65,15 @@ else if (_page is { } page)
                         <CollectionStateTag State="album.State" />
                     </span>
                 </div>
+                <div class="album-brief-links">
+                    <Button Href="@AppPaths.AdminEditAlbum(Id)" Icon="IconName.Edit" Label="@L["EditAlbum"]" IconOnlyOnSmartphone="true"
+                            aria-label="@L["EditAlbum.Label"]" />
+                    <Button Href="@AppPaths.Album(Id)" Icon="IconName.Exit" Label="@L["View"]" IconOnlyOnSmartphone="true" />
+                </div>
             </div>
             <p class="album-editions-help">@L["Album.Help"]</p>
+            <p class="album-editions-dates">@L["Dates.Created"] <LocalDateTime Value="page.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="album.ModifiedAt" />.</p>
+$(printf '%s' 
         </Block>
 
         <Block Title="@L["Block.Editions"]" Kicker="@L["Kicker.Editions"]">
@@ -201,7 +200,6 @@ else if (_page is { } page)
             <p class="album-editions-help">@L["Intents.Help"]</p>
         </Block>
 
-        <p class="album-editions-dates">@L["Dates.Created"] <LocalDateTime Value="page.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="album.ModifiedAt" />.</p>
     </div>
 
     @if (_dialogEdition is { } deleted)
