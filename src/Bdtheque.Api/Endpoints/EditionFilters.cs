@@ -13,12 +13,12 @@ namespace Bdtheque.Api.Endpoints;
 internal sealed record EditionFilters([FromQuery(Name = "q")] string? Text, Guid? AlbumId, Guid? PublisherId, Guid? PublisherCollectionId)
 {
     /// <summary>
-    /// Narrows <paramref name="editions"/>: an edition is found by its ISBN, separators ignored on both sides — an ISBN is
-    /// entered as printed, with or without them.
+    /// Narrows <paramref name="editions"/>: an edition is found by its ISBN, separators ignored on both sides
+    /// (<see cref="IsbnSearch"/>).
     /// </summary>
     public IQueryable<Edition> Apply(IQueryable<Edition> editions)
     {
-        editions = editions.WhereContains(Text is null ? null : WithoutIsbnSeparators(Text), e => e.Isbn!.Replace("-", "").Replace(" ", ""));
+        editions = editions.WhereContains(Text is null ? null : IsbnSearch.Normalize(Text), IsbnSearch.Normalized);
         if (AlbumId is not null)
             editions = editions.Where(e => e.AlbumId == AlbumId);
         if (PublisherId is not null)
@@ -33,7 +33,4 @@ internal sealed record EditionFilters([FromQuery(Name = "q")] string? Text, Guid
         await FilteredRecords.AlbumAsync(context, AlbumId, cancellationToken),
         await FilteredRecords.PublisherAsync(context, PublisherId, cancellationToken),
         await FilteredRecords.PublisherCollectionAsync(context, PublisherCollectionId, cancellationToken));
-
-    internal static string WithoutIsbnSeparators(string isbn) =>
-        isbn.Replace("-", "", StringComparison.Ordinal).Replace(" ", "", StringComparison.Ordinal);
 }

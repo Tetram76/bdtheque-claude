@@ -513,10 +513,18 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var publisher = await CreatePublisherAsync($"Éditeur {_marker}");
         var album = await CreateAlbumAsync($"Album {_marker}");
         var edition = await CreateEditionAsync(album.Id, publisher.Id, isbn: "978-2-205-01234-5");
+        // Entered by pasting it from an office application, with non-breaking spaces and hyphens.
+        var pasted = await CreateEditionAsync(album.Id, publisher.Id, isbn: "978 2‑203 00120–8");
 
         AssertIds(
             [edition.Id],
             await EditionIdsAsync(And(new SearchLink("publisher", Text("name", Contains, _marker)), Text("isbn", EqualTo, "978 2205 012345"))));
+        AssertIds(
+            [edition.Id],
+            await EditionIdsAsync(And(new SearchLink("publisher", Text("name", Contains, _marker)), Text("isbn", EqualTo, "978 2‑205 01234–5"))));
+        AssertIds(
+            [pasted.Id],
+            await EditionIdsAsync(And(new SearchLink("publisher", Text("name", Contains, _marker)), Text("isbn", EqualTo, "9782203001208"))));
     }
 
     [Fact]

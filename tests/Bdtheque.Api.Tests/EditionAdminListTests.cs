@@ -108,9 +108,11 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
         await CreateOwnedEditionAsync(album.Id, publisher.Id, Edition(publisher.Id));
         await CreateIntendedEditionAsync((await CreateAlbumAsync($"Trolls {_marker}")).Id, publisher.Id, collection.Id);
 
-        // An ISBN searched as printed, with or without its separators.
+        // An ISBN searched as printed, with or without its separators, non-breaking ones included (copied from an office
+        // application).
         Assert.Equal([found.Id], await IdsAsync($"q=978{digits}"));
         Assert.Equal([found.Id], await IdsAsync($"q={Uri.EscapeDataString($"978 {digits}")}"));
+        Assert.Equal([found.Id], await IdsAsync($"q={Uri.EscapeDataString($"978 {digits[..1]}‑{digits[1..5]} {digits[5..]}")}"));
         Assert.Equal([found.Id], await IdsAsync($"publisherCollectionId={collection.Id}"));
         // The editions of the list of the consultation, but those of the collection only.
         foreach (var query in new[] { $"publisherId={publisher.Id}", $"albumId={album.Id}", $"publisherCollectionId={collection.Id}" })

@@ -83,7 +83,7 @@ internal static class AdvancedSearchSchema
         new SearchEntityBuilder<Edition>(EntityKind.Edition)
             .PartialDate("publicationYear", e => e.PublicationYear)
             // An ISBN is entered as printed, with or without separators: ignored on both sides, as by the lists.
-            .Text("isbn", e => e.Isbn!.Replace("-", "").Replace(" ", ""), normalize: EditionFilters.WithoutIsbnSeparators)
+            .Text("isbn", IsbnSearch.Normalized, normalize: IsbnSearch.Normalize)
             .Enumeration<D.BindingType, C.BindingType>("binding", e => e.Binding)
             .Enumeration<D.BookOrientation, C.BookOrientation>("orientation", e => e.Orientation)
             .Enumeration<D.ReadingDirection, C.ReadingDirection>("readingDirection", e => e.ReadingDirection)
