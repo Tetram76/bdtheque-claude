@@ -4,6 +4,10 @@
     <RootNamespace>Bdtheque.Frontend</RootNamespace>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     <UserSecretsId>bdtheque-frontend</UserSecretsId>
+    <!-- The scripts of Blazor (_framework/blazor.web.js) come from a package the SDK restores only when it sees components
+         (.razor) at restore time: the image restores from the project files alone, before copying the sources, and would
+         publish a frontend without them, every link then reloading the whole page. -->
+    <RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
   </PropertyGroup>
 
   <ItemGroup>
