@@ -61,10 +61,13 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     }
 
     [Fact]
-    public async Task AnotherEdition_ShowsItsDetail_AndItsVisuals()
+    public async Task AnotherEdition_ShowsItsDetail_AndItsVisuals_ThePageStayingWhereItWas()
     {
         var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+        // The editions some way down the screen, the page scrolled.
+        await page.EvaluateAsync($"() => window.scrollBy(0, ({EditionsTop}) - 200)");
+        var top = await page.EvaluateAsync<double>($"() => {EditionsTop}");
 
         await page.GetByRole(AriaRole.List, new() { Name = "Éditions de l'album" })
             .GetByRole(AriaRole.Link, new() { Name = "Casterman (Univers d'auteurs) [2010]" }).ClickAsync();
@@ -72,7 +75,12 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         await Assertions.Expect(page).ToHaveURLAsync(EditionAddress());
         await Assertions.Expect(page.Locator(".edition-detail")).ToContainTextAsync("Offerte");
         await Assertions.Expect(page.Locator(".album-visuals svg.cover-generic")).ToBeVisibleAsync();
+        Assert.True(top > 0);
+        Assert.Equal(top, await page.EvaluateAsync<double>($"() => {EditionsTop}"), tolerance: 1.0);
     }
+
+    // The top of the block of the editions in the window.
+    private const string EditionsTop = "document.querySelector('[data-part=\"editions\"]').getBoundingClientRect().top";
 
     [Fact]
     public async Task AuthorsOfARole_OnANarrowScreen_HoldOnOneLine_TheOthersUnfoldAndFold()
@@ -113,7 +121,7 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     [GeneratedRegex(@"^et \d+ autres?$")]
     private static partial Regex FoldedCount();
 
-    [GeneratedRegex(@"[?&]visual=2#visuals$")]
+    [GeneratedRegex(@"[?&]visual=2$")]
     private static partial Regex SecondVisualAddress();
 
     [GeneratedRegex(@"Planche 1\s*2 sur 4")]
@@ -122,7 +130,7 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     [GeneratedRegex(@"4e de couverture\s*4 sur 4")]
     private static partial Regex BackCoverCaption();
 
-    [GeneratedRegex(@"[?&]edition=[0-9a-f-]+#editions$")]
+    [GeneratedRegex(@"[?&]edition=[0-9a-f-]+$")]
     private static partial Regex EditionAddress();
 
     // The names shown of a row, and the link that unfolds the others, all on the line of the first name.

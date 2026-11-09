@@ -6,7 +6,6 @@
     align-items: center;
     gap: var(--space-s);
     min-inline-size: 0;
-    scroll-margin-block-start: var(--record-anchor-offset);
 }
 
 .visual-current {

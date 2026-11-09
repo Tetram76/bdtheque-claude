@@ -7,10 +7,10 @@
    (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md): the visual shown, its type (numbered for the plates) and
    its position, the previous and the next one, then a strip of thumbnails that scrolls sideways, the current one framed by
    the accent, and the link to the original image. The visual shown is put forward, which a theme frames, tilts or shows in
-   volume (--record-visual-…, themes/base.css). Each link leads to the record with another visual, at the visuals
-   (Navigation/AlbumRecordQuery.cs). Without visual (an edition without any, an album without edition), the generic visual,
+   volume (--record-visual-…, themes/base.css). Each link leads to the record with another visual
+   (Navigation/AlbumRecordQuery.cs); the original image opens in a new tab, the record staying as it was. Without visual (an edition without any, an album without edition), the generic visual,
    without navigation (fonctionnel/regles-metier/visuel-par-defaut.md). *@
-<section class="album-visuals" id="@AlbumRecordQuery.VisualsAnchor" aria-label="@L["Label"]">
+<section class="album-visuals" aria-label="@L["Label"]">
     @if (Current is not { } visual)
     {
         <div class="visual-current">
@@ -55,7 +55,7 @@
                 </ScrollRow>
             </nav>
         }
-        <a class="visual-original" href="@VisualMediaRoutes.Original(visual.Id)">@L["Original"]</a>
+        <a class="visual-original" href="@VisualMediaRoutes.Original(visual.Id)" target="_blank" rel="noopener noreferrer">@L["Original"]</a>
     }
 </section>
 

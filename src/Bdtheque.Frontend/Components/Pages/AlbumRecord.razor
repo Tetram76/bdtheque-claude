@@ -102,17 +102,22 @@ else if (_album is { } album)
             }
         </Block>
 
-        <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" id="@AlbumRecordQuery.EditionsAnchor" data-part="editions">
+        <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
             @if (_chosen is not null)
             {
-                <ul class="edition-choices" aria-label="@L["Editions.Label"]">
-                    @foreach (var edition in _owned)
-                    {
-                        <li>
-                            <a href="@AlbumRecordQuery.ForEdition(edition.Edition.Id).Href(Id)" aria-current="@(edition == _chosen ? "true" : null)">@Labels.Edition(edition.Edition)</a>
-                        </li>
-                    }
-                </ul>
+                @* On one line, which scrolls sideways when it does not hold them all, as the other rows of the application. *@
+                <div class="edition-row">
+                    <ScrollRow>
+                        <ul class="edition-choices" aria-label="@L["Editions.Label"]">
+                            @foreach (var edition in _owned)
+                            {
+                                <li>
+                                    <a href="@AlbumRecordQuery.ForEdition(edition.Edition.Id).Href(Id)" aria-current="@(edition == _chosen ? "true" : null)">@Labels.Edition(edition.Edition)</a>
+                                </li>
+                            }
+                        </ul>
+                    </ScrollRow>
+                </div>
                 <EditionFacts Edition="_chosen" />
             }
             else

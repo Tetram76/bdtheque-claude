@@ -7,21 +7,16 @@ namespace Bdtheque.Frontend.Navigation;
 /// <summary>
 /// The state of the record of an album (visuel/fiche-album/contenu.md) its address carries, the page being rendered
 /// statically: the edition chosen, whose detail and visuals the record shows, and the visual shown. Each link that changes
-/// it leads to the record in its new state, back to the part of the page it was followed from. Nothing else is carried:
+/// it leads to the record in its new state, without anchor: the enhanced navigation of Blazor keeps the page where it was,
+/// whereas an anchor would scroll it to the part named. Nothing else is carried:
 /// unfolding the authors of a role is a disclosure of the page itself, like the panel of the filters of a list.
 /// </summary>
-/// <param name="Edition">The edition chosen; the first one of the grid when none, or when it is not one of the album's.</param>
+/// <param name="Edition">The edition chosen; the first one of the row when none, or when it is not one of the album's.</param>
 /// <param name="Visual">The position of the visual shown among those of the edition, from 1; the first one when none.</param>
 public sealed record AlbumRecordQuery(Guid? Edition = null, int? Visual = null)
 {
     internal const string EditionName = "edition";
     internal const string VisualName = "visual";
-
-    /// <summary>The visuals of the edition, at the head of the record, which a link to another visual returns to.</summary>
-    public const string VisualsAnchor = "visuals";
-
-    /// <summary>The editions of the album, which a link to another edition returns to.</summary>
-    public const string EditionsAnchor = "editions";
 
     /// <summary>The record with an edition chosen, from its first visual.</summary>
     public static AlbumRecordQuery ForEdition(Guid edition) => new(edition);
@@ -43,14 +38,13 @@ public sealed record AlbumRecordQuery(Guid? Edition = null, int? Visual = null)
         return new AlbumRecordQuery(edition, visual);
     }
 
-    /// <summary>The address of the record of the album in this state, at the part of the page the state concerns.</summary>
+    /// <summary>The address of the record of the album in this state.</summary>
     public string Href(Guid albumId)
     {
         var parameters = Parameters();
         if (parameters.Count == 0)
             return AppPaths.Album(albumId);
-        var anchor = Visual is null ? EditionsAnchor : VisualsAnchor;
-        return $"{AppPaths.Album(albumId)}?{string.Join('&', parameters.Select(p => $"{p.Name}={p.Value}"))}#{anchor}";
+        return $"{AppPaths.Album(albumId)}?{string.Join('&', parameters.Select(p => $"{p.Name}={p.Value}"))}";
     }
 
     /// <summary>

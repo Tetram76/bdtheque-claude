@@ -141,25 +141,23 @@
     white-space: pre-line;
 }
 
-/* A link returned to from another edition lands under the header, which stays at the top of the screen. */
-[data-part="editions"] {
-    scroll-margin-block-start: var(--record-anchor-offset);
+/* The editions of the collection on one line, which scrolls sideways when it does not hold them all; each of a bounded
+   width, its label wrapping inside it; the one chosen filled with the accent. */
+.edition-row {
+    margin-block-end: var(--space-l);
 }
 
-/* The editions of the collection in a grid: one per line on a smartphone, four on a wide screen; the one chosen filled
-   with the accent. */
 .edition-choices {
-    display: grid;
+    display: flex;
     gap: var(--space-s);
-    margin: 0 0 var(--space-l);
-    padding: 0;
+    margin: 0;
+    padding: var(--space-xs) 0;
     list-style: none;
 }
 
-@media (min-width: 48rem) {
-    .edition-choices {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+.edition-choices li {
+    flex: none;
+    inline-size: 14rem;
 }
 
 .edition-choices a {

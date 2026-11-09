@@ -26,11 +26,11 @@ public sealed class AlbumRecordQueryTests
 
     [Fact]
     public void Edition_LeadsToItsDetail_FromItsFirstVisual() =>
-        Assert.Equal($"/albums/{AlbumId}?edition={EditionId}#editions", AlbumRecordQuery.ForEdition(EditionId).Href(AlbumId));
+        Assert.Equal($"/albums/{AlbumId}?edition={EditionId}", AlbumRecordQuery.ForEdition(EditionId).Href(AlbumId));
 
     [Fact]
     public void Visual_LeadsToTheVisuals_OfItsEdition() =>
-        Assert.Equal($"/albums/{AlbumId}?edition={EditionId}&visual=4#visuals", AlbumRecordQuery.ForVisual(EditionId, 4).Href(AlbumId));
+        Assert.Equal($"/albums/{AlbumId}?edition={EditionId}&visual=4", AlbumRecordQuery.ForVisual(EditionId, 4).Href(AlbumId));
 
     [Fact]
     public void Record_WithoutState_IsItsPlainAddress() =>
