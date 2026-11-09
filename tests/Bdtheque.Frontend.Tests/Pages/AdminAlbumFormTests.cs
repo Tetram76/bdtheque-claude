@@ -175,7 +175,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
 
         Assert.Equal("Nouvel album", page.Find("h1").TextContent.Trim());
         Assert.Equal("<Sans titre>", page.Find(".entry-form-subject").TextContent.Trim());
-        Assert.Equal("Nouvel album", page.FindAll(".breadcrumb li").Last().TextContent.Trim());
+        Assert.Equal("Nouvel album", page.FindAll(".breadcrumb li")[^1].TextContent.Trim());
         Assert.Contains("(obligatoire sans série)", page.Find("label[for=album-title]").TextContent);
         Assert.Empty(page.FindAll(".entry-form-dates"));
         Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
@@ -455,7 +455,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         var page = OpenAlbum();
         await CreateOnTheSpotAsync(page, RecordKind.Genre, "Polar");
         page.Find(".dialog-actions .button[data-variant=primary]").Click();
-        page.FindAll(".album-tags")[0].QuerySelectorAll(".tag-remove").Last().Click();
+        page.FindAll(".album-tags")[0].QuerySelectorAll(".tag-remove")[^1].Click();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
 
         page.Find("form").Submit();
