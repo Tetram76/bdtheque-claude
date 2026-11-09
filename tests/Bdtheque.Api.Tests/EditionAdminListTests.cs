@@ -112,7 +112,7 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
         // application).
         Assert.Equal([found.Id], await IdsAsync($"q=978{digits}"));
         Assert.Equal([found.Id], await IdsAsync($"q={Uri.EscapeDataString($"978 {digits}")}"));
-        Assert.Equal([found.Id], await IdsAsync($"q={Uri.EscapeDataString($"978 {digits[..1]}‑{digits[1..5]} {digits[5..]}")}"));
+        Assert.Equal([found.Id], await IdsAsync($"q={Uri.EscapeDataString($"978\u00A0{digits[..1]}\u2011{digits[1..5]}\u202F{digits[5..]}")}"));
         Assert.Equal([found.Id], await IdsAsync($"publisherCollectionId={collection.Id}"));
         // The editions of the list of the consultation, but those of the collection only.
         foreach (var query in new[] { $"publisherId={publisher.Id}", $"albumId={album.Id}", $"publisherCollectionId={collection.Id}" })

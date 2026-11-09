@@ -34,7 +34,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
     /// </summary>
     public (string Lead, string? Isbn) SplitIsbn(string label)
     {
-        var start = label.LastIndexOf($" - {texts["Isbn"]} ", StringComparison.Ordinal);
+        var start = label.LastIndexOf($" - {texts["Isbn"]}\u00A0", StringComparison.Ordinal);
         return start < 0 ? (label, null) : (label[..(start + 3)], label[(start + 3)..]);
     }
 

@@ -77,15 +77,15 @@ public sealed class RecordLabelsTests
             .BuildServiceProvider();
         services.GetRequiredService<IsbnFormatter>().Ranges = IsbnRangesTests.Ranges();
 
-        Assert.Equal("Glénat [2004] - ISBN 978-2-7234-4567-1", services.GetRequiredService<RecordLabels>().Edition(
+        Assert.Equal("Glénat [2004] - ISBN\u00A0978-2-7234-4567-1", services.GetRequiredService<RecordLabels>().Edition(
             new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Glénat", null, null, 2004, "9782723445671")));
     }
 
     // An ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md): the label tells it apart, mention
     // included, for the presentation that keeps it on one line; the text of the label is left as it is.
     [Theory]
-    [InlineData("Dargaud (Lucky Luke) [1978] - ISBN 978-2-205-01234-5", "Dargaud (Lucky Luke) [1978] - ", "ISBN 978-2-205-01234-5")]
-    [InlineData("Blacksad - T. 7 · Dargaud - ISBN 978-2-205-01234-5", "Blacksad - T. 7 · Dargaud - ", "ISBN 978-2-205-01234-5")]
+    [InlineData("Dargaud (Lucky Luke) [1978] - ISBN\u00A0978-2-205-01234-5", "Dargaud (Lucky Luke) [1978] - ", "ISBN\u00A0978-2-205-01234-5")]
+    [InlineData("Blacksad - T. 7 · Dargaud - ISBN\u00A0978-2-205-01234-5", "Blacksad - T. 7 · Dargaud - ", "ISBN\u00A0978-2-205-01234-5")]
     [InlineData("Dargaud (Lucky Luke) [1978]", "Dargaud (Lucky Luke) [1978]", null)]
     [InlineData("ISBN Pratique (Tome 1)", "ISBN Pratique (Tome 1)", null)]
     public void SplitIsbn_SetsTheIsbnOfALabelApart(string label, string lead, string? isbn) =>

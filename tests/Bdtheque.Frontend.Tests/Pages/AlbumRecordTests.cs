@@ -273,7 +273,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var edition = BlockOf(Open(), "Dans quelles éditions ?").QuerySelectorAll(".edition")[0];
 
         // Never broken at the end of a line (fonctionnel/presentation/libelle-d-une-edition.md).
-        Assert.Equal("ISBN 2-203-34424-5", edition.QuerySelector(".edition-label .label-isbn")!.TextContent);
+        Assert.Equal("ISBN\u00A02-203-34424-5", edition.QuerySelector(".edition-label .label-isbn")!.TextContent);
         Assert.Equal("2-203-34424-5", edition.QuerySelector("dd.edition-isbn")!.TextContent.Trim());
     }
 

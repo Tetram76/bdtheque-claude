@@ -13,7 +13,7 @@ internal static class IsbnSearch
 {
     // Spaces (ordinary, non-breaking, narrow non-breaking, thin) and hyphens (hyphen-minus, hyphen, non-breaking hyphen,
     // figure dash, en dash).
-    private static readonly string[] Separators = [" ", " ", " ", " ", "-", "‐", "‑", "‒", "–"];
+    private static readonly string[] Separators = [" ", "\u00A0", "\u202F", "\u2009", "-", "\u2010", "\u2011", "\u2012", "\u2013"];
 
     private static readonly MethodInfo Replace = typeof(string).GetMethod(nameof(string.Replace), [typeof(string), typeof(string)])!;
 
@@ -24,7 +24,7 @@ internal static class IsbnSearch
     public static string Normalize(string isbn) =>
         Separators.Aggregate(isbn, (text, separator) => text.Replace(separator, "", StringComparison.Ordinal));
 
-    // e.Isbn.Replace(" ", "").Replace(" ", "")…, which EF Core translates into nested REPLACE.
+    // e.Isbn.Replace(" ", "").Replace("\u00A0", "")…, which EF Core translates into nested REPLACE.
     private static Expression<Func<Edition, string?>> BuildNormalized()
     {
         var edition = Expression.Parameter(typeof(Edition), "e");

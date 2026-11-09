@@ -295,11 +295,11 @@ public sealed class PresentationTests : BunitContext
     {
         Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
 
-        var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978] - ISBN 978-2-205-01234-5"));
+        var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978] - ISBN\u00A0978-2-205-01234-5"));
 
         // A single block that a line never breaks (fonctionnel/presentation/libelle-d-une-edition.md), copied as it reads.
-        Assert.Equal("ISBN 978-2-205-01234-5", text.Find(".label-isbn").TextContent);
-        Assert.Equal("Dargaud [1978] - ISBN 978-2-205-01234-5", text.Nodes.Select(node => node.TextContent).Aggregate(string.Concat));
+        Assert.Equal("ISBN\u00A0978-2-205-01234-5", text.Find(".label-isbn").TextContent);
+        Assert.Equal("Dargaud [1978] - ISBN\u00A0978-2-205-01234-5", text.Nodes.Select(node => node.TextContent).Aggregate(string.Concat));
     }
 
     [Fact]
