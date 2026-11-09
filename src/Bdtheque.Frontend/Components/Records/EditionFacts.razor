@@ -5,7 +5,7 @@
 @inject DisplayFormatter Format
 
 @* The detail of the edition chosen on the record of an album (visuel/fiche-album/contenu.md), in two groups: the edition and
-   the copy. A data not set stays shown, with « Non renseigné ». The labels of the date and of the amount of the acquisition
+   the copy. A data not set has no row, which would only weigh the detail down. The labels of the date and of the amount of the acquisition
    follow its mode (fonctionnel/presentation/libelles-contextuels-sur-l-edition.md). Each amount would be followed by its
    value in euros of the day, and a missing acquisition amount replaced by the estimated value: both belong to the Phase 4
    and are said not available yet, without any value made up. Its dates of creation and modification close it, in the time
@@ -27,23 +27,23 @@
                     }
                 </dd>
             </div>
-            @Row(L["Collection"], Edition.Edition.PublisherCollectionName, GrammaticalGender.Feminine)
-            @Row(L["Year"], Edition.Edition.PublicationYear?.ToString(CultureInfo.InvariantCulture), GrammaticalGender.Feminine)
-            @Row(L["Isbn"], Edition.Edition.Isbn, GrammaticalGender.Masculine)
-            @Row(L["Category"], Label(Edition.Category), GrammaticalGender.Feminine)
-            @Row(L["Format"], Label(Edition.Format), GrammaticalGender.Masculine)
-            @Row(L["Binding"], Label(Edition.Binding), GrammaticalGender.Feminine)
-            @Row(L["Orientation"], Label(Edition.Orientation), GrammaticalGender.Feminine)
-            @Row(L["ReadingDirection"], Label(Edition.ReadingDirection), GrammaticalGender.Masculine)
-            @Row(L["Pages"], Edition.PageCount is { } pages ? Format.Number(pages) : null, GrammaticalGender.Masculine)
-            @Row(L["Color"], L[Edition.IsColor ? "Color.Yes" : "Color.No"], GrammaticalGender.Feminine)
+            @Row(L["Collection"], Edition.Edition.PublisherCollectionName)
+            @Row(L["Year"], Edition.Edition.PublicationYear?.ToString(CultureInfo.InvariantCulture))
+            @Row(L["Isbn"], Edition.Edition.Isbn)
+            @Row(L["Category"], Label(Edition.Category))
+            @Row(L["Format"], Label(Edition.Format))
+            @Row(L["Binding"], Label(Edition.Binding))
+            @Row(L["Orientation"], Label(Edition.Orientation))
+            @Row(L["ReadingDirection"], Label(Edition.ReadingDirection))
+            @Row(L["Pages"], Edition.PageCount is { } pages ? Format.Number(pages) : null)
+            @Row(L["Color"], L[Edition.IsColor ? "Color.Yes" : "Color.No"])
         </dl>
     </div>
     <div class="edition-group">
         <h3>@L["Copy"]</h3>
         <dl>
-            @Row(L["AcquisitionMode"], Label(Edition.AcquisitionMode), GrammaticalGender.Masculine)
-            @Row(L[Purchased ? "Date.Purchase" : "Date.Acquisition"], Edition.AcquisitionDate is { } date ? Format.Date(date) : null, GrammaticalGender.Feminine)
+            @Row(L["AcquisitionMode"], Label(Edition.AcquisitionMode))
+            @Row(L[Purchased ? "Date.Purchase" : "Date.Acquisition"], Edition.AcquisitionDate is { } date ? Format.Date(date) : null)
             <div>
                 <dt>@L[Purchased ? "Amount.Purchase" : "Amount.Acquisition"]</dt>
                 <dd>
@@ -61,24 +61,18 @@
                     }
                 </dd>
             </div>
-            <div>
-                <dt>@L["InitialValue"]</dt>
-                <dd>
-                    @if (Edition.InitialValueAmount is { } initial && Edition.InitialValueCurrency is { } initialCurrency)
-                    {
-                        @AmountOf(initial, initialCurrency)
-                    }
-                    else
-                    {
-                        <NotSet Gender="GrammaticalGender.Feminine" />
-                    }
-                </dd>
-            </div>
-            @Row(L["SecondHand"], L[Edition.IsSecondHand ? "SecondHand.Yes" : "SecondHand.No"], GrammaticalGender.Feminine)
-            @Row(L["Condition"], Label(Edition.Condition), GrammaticalGender.Masculine)
-            @Row(L["Dedicated"], L[Edition.IsDedicated ? "Yes" : "No"], GrammaticalGender.Feminine)
-            @Row(L["PersonalReference"], Edition.PersonalReference, GrammaticalGender.Feminine)
-            @Row(L["PersonalNotes"], Edition.PersonalNotes, GrammaticalGender.Feminine)
+            @if (Edition.InitialValueAmount is { } initial && Edition.InitialValueCurrency is { } initialCurrency)
+            {
+                <div>
+                    <dt>@L["InitialValue"]</dt>
+                    <dd>@AmountOf(initial, initialCurrency)</dd>
+                </div>
+            }
+            @Row(L["SecondHand"], L[Edition.IsSecondHand ? "SecondHand.Yes" : "SecondHand.No"])
+            @Row(L["Condition"], Label(Edition.Condition))
+            @Row(L["Dedicated"], L[Edition.IsDedicated ? "Yes" : "No"])
+            @Row(L["PersonalReference"], Edition.PersonalReference)
+            @Row(L["PersonalNotes"], Edition.PersonalNotes)
         </dl>
     </div>
 </div>
@@ -92,20 +86,14 @@
 
     private string? Label<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } known ? Values.Of(known) : null;
 
-    private RenderFragment Row(string label, string? value, GrammaticalGender gender) => __builder =>
+    // A row of the detail, none for a data not set.
+    private RenderFragment Row(string label, string? value) => __builder =>
     {
+        if (value is null)
+            return;
         <div>
             <dt>@label</dt>
-            <dd>
-                @if (value is null)
-                {
-                    <NotSet Gender="gender" />
-                }
-                else
-                {
-                    @value
-                }
-            </dd>
+            <dd>@value</dd>
         </div>
     };
 

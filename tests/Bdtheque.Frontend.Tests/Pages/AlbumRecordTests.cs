@@ -285,7 +285,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void EditionDetail_PresentsTheEdition_ThePublisherLeadingToItsWebsite_AndWhatIsNotSet()
+    public void EditionDetail_PresentsTheEdition_ThePublisherLeadingToItsWebsite_WithoutWhatIsNotSet()
     {
         _catalog.Album = Album();
 
@@ -294,12 +294,18 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var publisher = RowElement(page, "Éditeur").QuerySelector("a")!;
         Assert.Equal(("Casterman", "https://www.casterman.com", "_blank", "noopener noreferrer"),
             (publisher.TextContent.Trim(), publisher.GetAttribute("href"), publisher.GetAttribute("target"), publisher.GetAttribute("rel")));
-        Assert.Equal("Non renseignée", Row(page, "Collection"));
         Assert.Equal("2001", Row(page, "Année d'édition"));
         Assert.Equal("Cartonnée", Row(page, "Reliure"));
         Assert.Equal("Normal (A4)", Row(page, "Format"));
         Assert.Equal("En couleur", Row(page, "Couleur"));
-        Assert.Equal("Non renseigné", Row(page, "Nombre de pages"));
+        // A data not set has no row, which would only weigh the detail down: no collection, no number of pages, no initial
+        // value; nothing says « Non renseigné ».
+        var labels = page.FindAll(".edition-detail")[0].QuerySelectorAll("dt").Select(dt => dt.TextContent.Trim()).ToList();
+        Assert.DoesNotContain("Collection", labels);
+        Assert.DoesNotContain("Nombre de pages", labels);
+        Assert.DoesNotContain("Valeur initiale", labels);
+        Assert.Empty(page.FindAll(".edition-detail .not-set"));
+        Assert.Equal("Univers d'auteurs", Row(page, "Collection", edition: 1));
     }
 
     [Fact]
