@@ -64,8 +64,11 @@
     color: var(--color-text-muted);
 }
 
+/* One under the other, « Modifier » under « Voir dans la consultation », both of the width of the wider. */
 .album-brief-links {
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
     gap: var(--space-s);
 }
 

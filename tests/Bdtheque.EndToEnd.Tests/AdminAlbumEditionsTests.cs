@@ -19,7 +19,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
     [Fact]
-    public async Task ListOfTheAlbums_LeadsToThePage_WhoseFilDAraneLeadsBack()
+    public async Task ListOfTheAlbums_LeadsToThePage_WhoseFilDAraneLeadsToTheListOfTheIntents()
     {
         await CreateAlbumAsync($"Le Château des étoiles {_marker}");
         var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
@@ -29,8 +29,8 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Éditions et intentions d'achat");
         await Assertions.Expect(page.Locator(".album-editions-subject")).ToHaveTextAsync($"Le Château des étoiles {_marker}");
-        await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Albums" }).ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Éditions et intentions d'achat" }).ClickAsync();
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
     }
 
     [Fact]
@@ -92,6 +92,33 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await Assertions.Expect(page.Locator(".album-editions-none").Last).ToHaveTextAsync("Aucune intention d'achat.");
         // Without any edition again, the album itself may be targeted: the choice of the two targets is back.
         await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" })).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task Removal_OfAnIntent_AfterTheDeletionOfTheOwnedEdition_LeavesTheAlbumWithoutEither()
+    {
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Lagune {_marker}", null));
+        var album = await CreateAlbumAsync($"Brouillard sur Ombrelune {_marker}");
+        var owned = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
+            new EditionContent(publisher.Id, null, 2008, null, null, null, null, null, null, null, false, true, null,
+                AcquisitionMode.Gift, false, null, null, null, true, null, null, null, null),
+            album.Version));
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+            new PurchaseIntentEditionContent(publisher.Id, null, 2023, null, null, null, null, null, null, null, true), owned.AlbumVersion));
+        var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Lagune {_marker} [2008]" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer l'édition…" }).ClickAsync();
+        await page.GetByRole(AriaRole.Alertdialog).GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
+        await Assertions.Expect(page.Locator(".edition-row")).ToHaveCountAsync(0);
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention : Lagune {_marker} [2023]" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Retirer l'intention…" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'achat ?" });
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
+        await Assertions.Expect(page.Locator(".album-editions-none")).ToHaveTextAsync(["Aucune édition dans la collection.", "Aucune intention d'achat."]);
     }
 
     [Theory]

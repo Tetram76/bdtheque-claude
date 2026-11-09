@@ -80,7 +80,10 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         var page = Open("");
 
         Assert.Equal(
-            [("Administration", AppPaths.AdminHome), ("Albums", AppPaths.AdminAlbums), ("Les Bijoux de la Castafiore (Tintin - T. 21)", null)],
+            [
+                ("Administration", AppPaths.AdminHome), ("Éditions et intentions d'achat", AppPaths.AdminPurchaseIntents),
+                ("Les Bijoux de la Castafiore (Tintin - T. 21)", null),
+            ],
             page.FindAll(".breadcrumb li").Select(item => (Text(item), item.QuerySelector("a")?.GetAttribute("href"))));
         Assert.Equal("Éditions et intentions d'achat", Text(page.Find("h1")));
         Assert.Equal("Les Bijoux de la Castafiore (Tintin - T. 21)", Text(page.Find(".album-editions-subject")));
@@ -94,7 +97,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         var links = Block(Open(""), "L'album").QuerySelectorAll(".album-brief-links a");
 
         Assert.Equal(
-            [("Modifier", "Modifier l'album", AppPaths.AdminEditAlbum(AlbumId)), ("Voir dans la consultation", null, AppPaths.Album(AlbumId))],
+            [("Voir dans la consultation", null, AppPaths.Album(AlbumId)), ("Modifier", "Modifier l'album", AppPaths.AdminEditAlbum(AlbumId))],
             links.Select(link => (Text(link), link.GetAttribute("aria-label"), link.GetAttribute("href"))));
     }
 
@@ -277,6 +280,8 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     {
         Assert.Equal(
             "Album créé le 04/03/2026 11:00, modifié le 08/11/2026 21:08.", Text(Block(Open(""), "L'album").QuerySelector(".album-editions-dates")!));
+        // The last of the block, nothing after them.
+        Assert.EndsWith("modifié le 08/11/2026 21:08.", Text(Block(Open(""), "L'album")), StringComparison.Ordinal);
     }
 
     [Fact]

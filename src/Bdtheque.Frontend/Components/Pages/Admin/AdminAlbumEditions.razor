@@ -22,7 +22,7 @@
 
 @if (_problem is not null)
 {
-    <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(L["Title"])])" />
+    <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Title"])])" />
     <h1 class="visually-hidden">@L["Title"]</h1>
     <ErrorMessage Problem="_problem" />
 }
@@ -31,7 +31,7 @@ else if (_page is { } page)
     var album = page.Album;
     <div class="album-editions">
         <div class="album-editions-heading">
-            <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(AlbumLabel)])" />
+            <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Title"], AppPaths.AdminPurchaseIntents), new(AlbumLabel)])" />
             <h1>@L["Title"]</h1>
             <p class="album-editions-subject">@AlbumLabel</p>
         </div>
@@ -66,14 +66,13 @@ else if (_page is { } page)
                     </span>
                 </div>
                 <div class="album-brief-links">
+                    <Button Href="@AppPaths.Album(Id)" Icon="IconName.Exit" Label="@L["View"]" IconOnlyOnSmartphone="true" />
                     <Button Href="@AppPaths.AdminEditAlbum(Id)" Icon="IconName.Edit" Label="@L["EditAlbum"]" IconOnlyOnSmartphone="true"
                             aria-label="@L["EditAlbum.Label"]" />
-                    <Button Href="@AppPaths.Album(Id)" Icon="IconName.Exit" Label="@L["View"]" IconOnlyOnSmartphone="true" />
                 </div>
             </div>
             <p class="album-editions-help">@L["Album.Help"]</p>
             <p class="album-editions-dates">@L["Dates.Created"] <LocalDateTime Value="page.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="album.ModifiedAt" />.</p>
-$(printf '%s' 
         </Block>
 
         <Block Title="@L["Block.Editions"]" Kicker="@L["Kicker.Editions"]">

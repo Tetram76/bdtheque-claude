@@ -18,9 +18,6 @@
   <data name="Administration" xml:space="preserve">
     <value>Administration</value>
   </data>
-  <data name="Albums" xml:space="preserve">
-    <value>Albums</value>
-  </data>
   <data name="EditAlbum" xml:space="preserve">
     <value>Modifier</value>
   </data>
