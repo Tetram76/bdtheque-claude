@@ -17,13 +17,14 @@
     @Problem
 
     <form class="entry-form-body" novalidate @onsubmit="OnSave">
-        <div class="entry-form-blocks">
+        @* Disabled while the record is saved: a field changed meanwhile would be overwritten by the record as saved. *@
+        <fieldset class="entry-form-blocks" disabled="@Saving">
             @ChildContent
             @if (Dates is not null)
             {
                 <p class="entry-form-dates">@Dates</p>
             }
-        </div>
+        </fieldset>
         <SaveBar State="State" SaveLabel="@SaveLabel" CancelHref="@CancelHref" Saving="Saving" />
     </form>
 </div>
@@ -68,6 +69,7 @@
     [Parameter, EditorRequired]
     public string CancelHref { get; set; } = null!;
 
+    /// <summary>Whether the record is being saved: the form is then disabled, and so is its saving.</summary>
     [Parameter]
     public bool Saving { get; set; }
 

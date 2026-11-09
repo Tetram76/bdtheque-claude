@@ -21,6 +21,11 @@
     flex-direction: column;
     gap: var(--admin-gap);
     max-inline-size: var(--entry-form-width);
+    /* A fieldset, which disables the form while it is saved, laid out as a block: none of its own margins, border or width. */
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
 .entry-form-dates {

@@ -252,6 +252,23 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Save_InProgress_DisablesTheForm_UntilItEnds()
+    {
+        // A field changed during the saving would be overwritten by the album as saved.
+        var saved = new TaskCompletionSource();
+        _api.Hold = (_, _) => saved.Task;
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
+        var page = OpenAlbum();
+        page.Find("#album-title").Input("Le Lotus bleu");
+
+        page.Find("form").Submit();
+
+        page.WaitForAssertion(() => Assert.True(page.Find(".entry-form-blocks").HasAttribute("disabled")));
+        saved.SetResult();
+        page.WaitForAssertion(() => Assert.False(page.Find(".entry-form-blocks").HasAttribute("disabled")));
+    }
+
+    [Fact]
     public void Create_LeadsToTheFormOfTheAlbumCreated()
     {
         var page = OpenNew();
