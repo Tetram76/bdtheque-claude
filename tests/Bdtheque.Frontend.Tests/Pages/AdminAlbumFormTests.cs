@@ -372,6 +372,23 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Series_ChosenAgainAfterNone_ComparesTheAuthorsWithTheSeriesTheyWereTakenFrom()
+    {
+        // A new album: series A chosen, then none (the cross), then B. Its authors are still those of A, which B replaces.
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(true,
+            [new SeriesAlbumContribution(new AuthorListItem(Herge, "Remi", "Georges", "Hergé"), ContributionRole.Scenarist)]));
+        var page = OpenNew();
+        await ChooseSeriesAsync(page, new RecordOption(SeriesId, "Tintin", null));
+        await ChooseSeriesAsync(page, null);
+
+        await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
+
+        var sent = _api.Written.Last().Body;
+        Assert.Equal((SeriesId.ToString(), 1),
+            (sent.GetProperty("previousSeriesId").GetString(), sent.GetProperty("contributions").GetArrayLength()));
+    }
+
+    [Fact]
     public async Task Series_Chosen_ThatGivesNothing_LeavesTheAuthorsOfTheAlbum()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(false, []));
@@ -472,7 +489,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         return tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync(text));
     }
 
-    private static Task ChooseSeriesAsync(IRenderedComponent<AdminAlbumForm> page, RecordOption series)
+    private static Task ChooseSeriesAsync(IRenderedComponent<AdminAlbumForm> page, RecordOption? series)
     {
         var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Series);
         return picker.InvokeAsync(() => picker.Instance.ValueChanged.InvokeAsync(series));

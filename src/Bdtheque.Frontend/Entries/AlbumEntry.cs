@@ -41,6 +41,12 @@ public sealed class AlbumEntry
 
     public RecordOption? Series { get; set; }
 
+    /// <summary>
+    /// The series whose contributions the album last received, whatever series was chosen since: those of the album as read,
+    /// then those of the form (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+    /// </summary>
+    public Guid? AuthorsSeriesId { get; set; }
+
     public bool IsOmnibus { get; set; }
 
     public bool IsSpecialIssue { get; set; }
@@ -106,6 +112,7 @@ public sealed class AlbumEntry
             Title = content.Title,
             ManualSortKey = content.ManualSortKey,
             Series = references.Series is { } named ? new RecordOption(named.Id, named.Title, null) : null,
+            AuthorsSeriesId = content.SeriesId,
             IsOmnibus = content.Type == AlbumType.Omnibus,
             IsSpecialIssue = content.IsSpecialIssue,
             VolumeNumber = content.VolumeNumber,

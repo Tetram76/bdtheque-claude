@@ -9,7 +9,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:00:00Z }
 
 Lors du rattachement d'un album à une série, si l'album n'a encore aucune contribution saisie, les contributions de la série sont recopiées sur l'album comme point de départ.
 
-À la **création** d'un album, tant que l'utilisateur n'a pas commencé à **personnaliser** ses auteurs, c'est-à-dire tant qu'ils sont encore exactement ceux de la série choisie précédemment, changer de série applique les contributions de la nouvelle série **en remplacement** des précédentes. Dès qu'il les a personnalisés (un auteur ajouté, retiré, ou changé de rôle), changer de série ne les touche plus.
+À la **création** d'un album, tant que l'utilisateur n'a pas commencé à **personnaliser** ses auteurs, c'est-à-dire tant qu'ils sont encore exactement ceux de la dernière série dont ils ont été recopiés, même si l'album a été détaché de toute série entre-temps, changer de série applique les contributions de la nouvelle série **en remplacement** des précédentes. Dès qu'il les a personnalisés (un auteur ajouté, retiré, ou changé de rôle), changer de série ne les touche plus.
 
 En **modification** d'un album déjà enregistré, ses auteurs sont toujours considérés comme personnalisés, même identiques à ceux de sa série : changer de série ne les recopie que s'il n'en a aucun.
 

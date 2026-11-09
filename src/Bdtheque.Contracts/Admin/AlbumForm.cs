@@ -70,8 +70,9 @@ public sealed record AlbumContent(
 public sealed record UpdateAlbumRequest(AlbumContent Content, uint Version);
 
 /// <summary>
-/// What the entry form of an album holds when a series is chosen: whether the album is being created, the series it was
-/// attached to until then and its contributions (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// What the entry form of an album holds when a series is chosen: whether the album is being created, the series whose
+/// contributions it last received (<paramref name="PreviousSeriesId"/>), whatever series was chosen since, and its
+/// contributions (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
 /// </summary>
 public sealed record SeriesAlbumContributionsRequest(bool NewAlbum, Guid? PreviousSeriesId, IReadOnlyList<ContributionContent> Contributions);
 

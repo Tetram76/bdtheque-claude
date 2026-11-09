@@ -265,13 +265,12 @@ else
     }
 
     // The authors of the series are taken as soon as it is chosen, as the domain decides: by an album without authors, or by
-    // a new album whose authors are still those of the series chosen before, which they replace
-    // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md). The user sees them before saving. A
-    // series that cannot be read gives none, and the saving tells what became of it.
+    // a new album whose authors are still those of the series it received them from, which they replace, even when no series
+    // was chosen in between (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md). The user sees them
+    // before saving. A series that cannot be read gives none, and the saving tells what became of it.
     private async Task ChooseSeriesAsync(RecordOption? series)
     {
-        var previous = Entry!.Series;
-        Entry.Series = series;
+        Entry!.Series = series;
         _authorsCopiedFrom = null;
         Entry.ShowSeries(await SeriesOrNoneAsync(series?.Id));
         if (series is null)
@@ -280,10 +279,11 @@ else
         {
             var given = await Api.PostAsync<SeriesAlbumContributionsRequest, SeriesAlbumContributions>(
                 $"/admin/series/{series.Id}/album-contributions",
-                new SeriesAlbumContributionsRequest(Entry.Id is null, previous?.Id, Entry.ToContent().Contributions));
+                new SeriesAlbumContributionsRequest(Entry.Id is null, Entry.AuthorsSeriesId, Entry.ToContent().Contributions));
             if (given.Applied)
             {
                 Entry.CreditOnly(given.Contributions);
+                Entry.AuthorsSeriesId = series.Id;
                 if (given.Contributions.Count > 0)
                     _authorsCopiedFrom = series.Label;
             }

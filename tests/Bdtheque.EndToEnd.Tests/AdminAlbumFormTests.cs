@@ -182,6 +182,31 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         Assert.Equal([new ContributionContent(author.Id, ContributionRole.Scenarist)], (await GetAsync(album.Id)).Content.Contributions);
     }
 
+    [Fact]
+    public async Task NewAlbum_SeriesChangedThroughNone_ReplacesTheAuthorsTakenFromTheFirst()
+    {
+        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: the authors are still those of the
+        // first series, even once the cross has detached the album from it.
+        var first = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest($"Premier{_marker}", null, null, null, null));
+        var second = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest($"Second{_marker}", null, null, null, null));
+        await PostAsync<SeriesForm>("/admin/series", Series($"Série A {_marker}", [new ContributionContent(first.Id, ContributionRole.Scenarist)]));
+        await PostAsync<SeriesForm>("/admin/series", Series($"Série B {_marker}", [new ContributionContent(second.Id, ContributionRole.Scenarist)]));
+        var page = await OpenAsync(AppPaths.AdminNewAlbum);
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+        var series = page.GetByRole(AriaRole.Combobox, new() { Name = "Série" });
+        var scenario = page.Locator(".album-role").First;
+
+        await series.PressSequentiallyAsync($"Série A {_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Série A {_marker}" }).ClickAsync();
+        await Assertions.Expect(scenario).ToContainTextAsync($"Premier{_marker}");
+        await page.Locator(".record-picker-clear").First.ClickAsync();
+        await series.PressSequentiallyAsync($"Série B {_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Série B {_marker}" }).ClickAsync();
+
+        await Assertions.Expect(scenario).ToContainTextAsync($"Second{_marker}");
+        await Assertions.Expect(scenario).Not.ToContainTextAsync($"Premier{_marker}");
+    }
+
     private async Task<IPage> OpenAsync(string path)
     {
         var page = await NewPageAsync();

@@ -2,7 +2,7 @@
 
 ## 2026-11-09
 
-* **Règle** : initialisation des contributions depuis la série étendue : à la création d'un album, tant que ses auteurs sont exactement ceux de la série choisie précédemment, changer de série les remplace par ceux de la nouvelle ; en modification, ils sont toujours considérés comme personnalisés ; la recopie a lieu dès que la série est choisie dans la fiche de saisie, et l'enregistrement ne recopie plus rien (décision de l'utilisateur à la validation fonctionnelle, #325).
+* **Règle** : initialisation des contributions depuis la série étendue : à la création d'un album, tant que ses auteurs sont exactement ceux de la dernière série dont ils ont été recopiés, même après l'avoir détaché de toute série, changer de série les remplace par ceux de la nouvelle ; en modification, ils sont toujours considérés comme personnalisés ; la recopie a lieu dès que la série est choisie dans la fiche de saisie, et l'enregistrement ne recopie plus rien (décision de l'utilisateur à la validation fonctionnelle, #325).
 * **Visuel** : saisie d'un album : tomaison dans l'ordre tome, Intégrale, tomes couverts, Hors-série ; genre ou univers créé sur place ; le champ à corriger reçoit le focus, la page défilant jusqu'à lui (#325).
 * **Choix** : un auteur, un genre ou un univers ajouté sur place dans une fiche de saisie n'est créé qu'à son enregistrement, dans la même transaction : une saisie annulée n'en laisse aucun (demande de l'utilisateur, #325).
 * **Choix** : recopie des auteurs de la série calculée par le domaine, demandée par le formulaire (`POST /admin/series/{id}/album-contributions`) ; genre ou univers créé sur place par un dialogue, comme un auteur (#325).
