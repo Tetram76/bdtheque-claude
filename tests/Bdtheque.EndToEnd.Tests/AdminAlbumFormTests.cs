@@ -200,6 +200,9 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Option, new() { Name = $"Série A {_marker}" }).ClickAsync();
         await Assertions.Expect(scenario).ToContainTextAsync($"Premier{_marker}");
         await page.Locator(".record-picker-clear").First.ClickAsync();
+        // The field emptied by the circuit before typing: otherwise the typing could reach it before the clearing.
+        await Assertions.Expect(series).ToHaveValueAsync("");
+        await Assertions.Expect(page.Locator(".record-picker-clear")).ToHaveCountAsync(0);
         await series.PressSequentiallyAsync($"Série B {_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Série B {_marker}" }).ClickAsync();
 
