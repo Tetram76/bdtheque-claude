@@ -18,6 +18,9 @@
   <data name="Administration" xml:space="preserve">
     <value>Administration</value>
   </data>
+  <data name="PurchaseIntents" xml:space="preserve">
+    <value>Intentions d&apos;achat</value>
+  </data>
   <data name="EditAlbum" xml:space="preserve">
     <value>Modifier</value>
   </data>

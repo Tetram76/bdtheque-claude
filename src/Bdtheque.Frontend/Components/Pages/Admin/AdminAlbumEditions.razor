@@ -22,7 +22,7 @@
 
 @if (_problem is not null)
 {
-    <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Title"])])" />
+    <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["PurchaseIntents"], AppPaths.AdminPurchaseIntents), new(L["Title"])])" />
     <h1 class="visually-hidden">@L["Title"]</h1>
     <ErrorMessage Problem="_problem" />
 }
@@ -31,7 +31,7 @@ else if (_page is { } page)
     var album = page.Album;
     <div class="album-editions">
         <div class="album-editions-heading">
-            <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Title"], AppPaths.AdminPurchaseIntents), new(AlbumLabel)])" />
+            <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["PurchaseIntents"], AppPaths.AdminPurchaseIntents), new(AlbumLabel)])" />
             <h1>@L["Title"]</h1>
             <p class="album-editions-subject">@AlbumLabel</p>
         </div>

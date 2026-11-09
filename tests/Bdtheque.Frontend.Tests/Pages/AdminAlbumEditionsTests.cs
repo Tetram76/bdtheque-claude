@@ -81,7 +81,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Administration", AppPaths.AdminHome), ("Éditions et intentions d'achat", AppPaths.AdminPurchaseIntents),
+                ("Administration", AppPaths.AdminHome), ("Intentions d'achat", AppPaths.AdminPurchaseIntents),
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", null),
             ],
             page.FindAll(".breadcrumb li").Select(item => (Text(item), item.QuerySelector("a")?.GetAttribute("href"))));

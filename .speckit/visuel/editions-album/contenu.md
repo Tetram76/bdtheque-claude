@@ -8,7 +8,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T23:06:13Z }
 # Contenu
 
 - **En-tête et menu** de l'administration, l'entrée « Albums » étant l'entrée courante du menu.
-- **Fil d'Ariane** : Administration, Éditions et intentions d'achat, qui mène à la liste des intentions d'achat ([`listes/`](../listes/index.md)), puis l'album : comme tout fil d'Ariane de l'administration, il ramène à une liste.
+- **Fil d'Ariane** : Administration, Intentions d'achat, qui mène à leur liste ([`listes/`](../listes/index.md)), puis l'album : comme tout fil d'Ariane de l'administration, il ramène à une liste.
 - **Titre** « Éditions et intentions d'achat », suivi du libellé de l'album ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md)).
 - **L'album**, en bref, pour savoir de quel album il s'agit sans quitter la page : sa vignette de couverture (visuel générique sans couverture), son libellé, ses auteurs, sa date de première publication et son appartenance à la collection (« Dans la collection », « Hors collection » ou « Intention d'achat », comme dans la liste des albums) ; à droite, l'un sous l'autre, **Voir dans la consultation** puis **Modifier**, qui ouvre la fiche de saisie de l'album (réduits à leur icône sur smartphone) ; l'aide rappelle que l'album lui-même se modifie sur sa fiche de saisie.
 - **Les éditions**, celles que possède la collection, une intention d'achat n'étant jamais présentée comme une édition ([Intention d'achat](../../fonctionnel/regles-metier/intention-d-achat.md)) :

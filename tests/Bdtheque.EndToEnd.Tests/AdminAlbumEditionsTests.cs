@@ -29,7 +29,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Éditions et intentions d'achat");
         await Assertions.Expect(page.Locator(".album-editions-subject")).ToHaveTextAsync($"Le Château des étoiles {_marker}");
-        await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Éditions et intentions d'achat" }).ClickAsync();
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Intentions d'achat" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
     }
 
