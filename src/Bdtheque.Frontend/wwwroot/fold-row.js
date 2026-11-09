@@ -1,9 +1,10 @@
 // The names of a role of a record on one line, at the width of the screen (the contributions of an album,
 // visuel/fiche-album/contenu.md): the names the line does not hold are marked as folded, the last ones first, until the
 // link that unfolds them, « et N autres », holds on the line too. Only the browser knows where the names fall, so the row
-// folds them again when its width changes, and once the first loading of fonts is laid out, which changes the width of the
-// names (as a scroll row, scroll-row.js). Unfolded, the row shows every name; folded again, it measures them anew. The
-// script marks the names and writes the number of the folded ones: it inserts no node into the page Blazor rendered.
+// folds them again when its width changes, once the first loading of fonts is laid out, which changes the width of the
+// names, and after an enhanced navigation (as a scroll row, scroll-row.js). Unfolded, the row shows every name; folded
+// again, it measures them anew. The script marks the names and writes the number of the folded ones: it inserts no node into
+// the page Blazor rendered.
 
 // On the first line: its top above the bottom of the first name, whatever the height of each.
 function onFirstLine(element, first) {
@@ -53,5 +54,10 @@ customElements.define("app-fold-row", class extends HTMLElement {
         });
     }
 });
+
+// An enhanced navigation of Blazor gives each element the attributes of the page it receives, which marks no name as
+// folded (the viewer of the visuals opened above the record): the rows it keeps are folded again.
+document.addEventListener("DOMContentLoaded", () =>
+    window.Blazor?.addEventListener("enhancedload", () => document.querySelectorAll("app-fold-row").forEach(fold)));
 
 document.fonts?.addEventListener("loadingdone", () => document.querySelectorAll("app-fold-row").forEach(fold), { once: true });

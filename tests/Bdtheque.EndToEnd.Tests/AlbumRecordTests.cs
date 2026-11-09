@@ -95,6 +95,26 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     }
 
     [Fact]
+    public async Task AuthorsOfARole_StayFolded_AcrossTheViewer()
+    {
+        var page = await NewPageAsync(new ViewportSize { Width = 414, Height = 896 });
+        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+        var drawing = page.Locator(".contributions app-fold-row").Nth(1);
+        var last = drawing.GetByRole(AriaRole.Link, new() { Name = "Inès Vasseur" });
+        await Assertions.Expect(last).ToBeHiddenAsync();
+
+        // The enhanced navigation of Blazor gives each element the attributes of the page it receives, which marks no name
+        // as folded: the row is folded again.
+        await page.GetByRole(AriaRole.Link, new() { Name = "Planche 1" }).ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToHaveCountAsync(0);
+
+        await Assertions.Expect(last).ToBeHiddenAsync();
+        Assert.True(await OnOneLineAsync(drawing));
+    }
+
+    [Fact]
     public async Task AuthorsOfARole_OnAWideScreen_AllHold_UntilTheScreenNarrows()
     {
         var page = await NewPageAsync(new ViewportSize { Width = 1440, Height = 900 });
