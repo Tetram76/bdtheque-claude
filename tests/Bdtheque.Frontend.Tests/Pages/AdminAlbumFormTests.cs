@@ -405,6 +405,29 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Series_ChosenAgain_BeforeTheAnswerForTheFirst_KeepsTheAuthorsOfTheLast()
+    {
+        // The circuit handles the next choice while the first one awaits: a late answer never overwrites a newer one.
+        var tintin = new TaskCompletionSource();
+        _api.Hold = (path, _) => path.Contains(SeriesId.ToString(), StringComparison.Ordinal) ? tintin.Task : Task.CompletedTask;
+        _api.Write = (_, path, _) => FakeAdminApi.Json(new SeriesAlbumContributions(true,
+        [
+            path.Contains(SeriesId.ToString(), StringComparison.Ordinal)
+                ? new SeriesAlbumContribution(new AuthorListItem(Herge, "Remi", "Georges", "Hergé"), ContributionRole.Scenarist)
+                : new SeriesAlbumContribution(new AuthorListItem(Guid.NewGuid(), "Guarnido", "Juanjo", null), ContributionRole.Scenarist),
+        ]));
+        var page = OpenNew();
+
+        var first = ChooseSeriesAsync(page, new RecordOption(SeriesId, "Tintin", null));
+        await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
+        tintin.SetResult();
+        await first;
+
+        Assert.Equal(["Juanjo Guarnido"], page.FindAll(".album-role")[0].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
+        Assert.Contains("Blacksad", page.Find(".notice").TextContent);
+    }
+
+    [Fact]
     public async Task Series_Chosen_ThatGivesNothing_LeavesTheAuthorsOfTheAlbum()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(false, []));

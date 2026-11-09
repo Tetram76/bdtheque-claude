@@ -185,6 +185,7 @@ else
     private ApiProblem? _saveProblem;
     private EntryForm? _form;
     private bool _revealProblem;
+    private int _seriesChoice;
     private bool _saving;
     private string? _savedFingerprint;
     private string? _authorsCopiedFrom;
@@ -269,19 +270,26 @@ else
     // a new album whose authors are still those of the series it received them from, which they replace, even when no series
     // was chosen in between (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md). The user sees them
     // before saving. A series that cannot be read gives none, and the saving tells what became of it.
+    // Each choice is numbered, as the suggestions of the choice of a record (choix-implementation/socle/frontend.md): the circuit
+    // handles the next choice while one awaits, and only the answers of the last one apply, to the authors it was asked about.
     private async Task ChooseSeriesAsync(RecordOption? series)
     {
+        var choice = ++_seriesChoice;
         Entry!.Series = series;
         _authorsCopiedFrom = null;
-        Entry.ShowSeries(await SeriesOrNoneAsync(series?.Id));
+        var shown = await SeriesOrNoneAsync(series?.Id);
+        if (choice != _seriesChoice)
+            return;
+        Entry.ShowSeries(shown);
         if (series is null)
             return;
         try
         {
+            var credits = Entry.ToContent().Contributions;
             var given = await Api.PostAsync<SeriesAlbumContributionsRequest, SeriesAlbumContributions>(
                 $"/admin/series/{series.Id}/album-contributions",
-                new SeriesAlbumContributionsRequest(Entry.Id is null, Entry.AuthorsSeriesId, Entry.ToContent().Contributions));
-            if (given.Applied)
+                new SeriesAlbumContributionsRequest(Entry.Id is null, Entry.AuthorsSeriesId, credits));
+            if (choice == _seriesChoice && given.Applied && Entry.ToContent().Contributions.SequenceEqual(credits))
             {
                 Entry.CreditOnly(given.Contributions);
                 Entry.AuthorsSeriesId = series.Id;
