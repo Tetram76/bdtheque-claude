@@ -118,11 +118,13 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
-    public async Task Collective_CreditsManyAuthors()
+    public async Task Collective_CreditsManyAuthors_MoreThanTheRecordShowsInARoleBeforeFoldingThem()
     {
         var album = await AlbumAsync(ValidationDataLoader.CollectiveTitle);
 
         Assert.True(album.Contributions.Select(contribution => contribution.Author.Id).Distinct().Count() >= 6);
+        // More names in a role than the line of a smartphone holds (visuel/fiche-album/contenu.md).
+        Assert.Contains(album.Contributions.GroupBy(contribution => contribution.Role), role => role.Count() > 6);
     }
 
     [Theory]

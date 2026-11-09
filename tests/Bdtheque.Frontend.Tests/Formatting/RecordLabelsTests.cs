@@ -94,6 +94,25 @@ public sealed class RecordLabelsTests
     public void Record_OfTheChangeLog_IsLabelledAsItsTypeWants(RecordLabel label, string expected) =>
         Assert.Equal(expected, _labels.Record(label, AlbumLabelFormat.TitleSeriesVolume));
 
+    [Theory]
+    [InlineData(AlbumType.Regular, false, 5, null, null, "T. 5")]
+    [InlineData(AlbumType.Regular, true, 2, null, null, "HS 2")]
+    [InlineData(AlbumType.Omnibus, false, null, 1, 6, "INT. [1 à 6]")]
+    public void Volume_Alone_IsTheOneNextToATitle(AlbumType type, bool special, int? volume, int? start, int? end, string expected) =>
+        Assert.Equal(expected, _labels.Volume(
+            new AlbumSummary(Guid.NewGuid(), "Titre", Guid.NewGuid(), "Série", type, special, volume, start, end, true)));
+
+    [Fact]
+    public void Volume_OfARegularAlbumWithoutNumber_IsNone() =>
+        Assert.Null(_labels.Volume(Regular("Titre", "Série", null)));
+
+    [Theory]
+    [InlineData("Gotlieb", "Marcel", "Gotlib", "Gotlib")]
+    [InlineData("Franquin", "André", null, "André Franquin")]
+    [InlineData("Franquin", null, null, "Franquin")]
+    public void Author_IsNamedByItsMainIdentifier(string? lastName, string? firstName, string? pseudonym, string expected) =>
+        Assert.Equal(expected, _labels.Author(new AuthorListItem(Guid.NewGuid(), lastName, firstName, pseudonym)));
+
     private static AlbumSummary Regular(string? title, string? series, int? volume) =>
         new(Guid.NewGuid(), title, series is null ? null : Guid.NewGuid(), series, AlbumType.Regular, false, volume, null, null, true);
 }

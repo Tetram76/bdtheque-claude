@@ -28,6 +28,17 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
 
     /// <summary>
+    /// The volume of an album alone, as next to a title (fonctionnel/presentation/libelle-d-un-album.md); <c>null</c> for a
+    /// regular album without number.
+    /// </summary>
+    public string? Volume(AlbumSummary album) =>
+        Volume(new AlbumLabel(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue, album.VolumeNumber,
+            album.StartVolumeNumber, album.EndVolumeNumber), abbreviated: true);
+
+    /// <summary>The name of an author: its main identifier.</summary>
+    public string Author(AuthorListItem author) => Author(new AuthorLabel(author.LastName, author.FirstName, author.Pseudonym));
+
+    /// <summary>
     /// The label of a record of the change log, with its series for an album, the log mixing every series: an edition is
     /// hardly told apart without its album, which comes first.
     /// </summary>

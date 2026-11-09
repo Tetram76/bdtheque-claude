@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
 ---
 
 # Thèmes
@@ -33,7 +33,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
   - **Alternative écartée (`color-mix()` dans la feuille)** : aucun test ne lirait les couleurs obtenues, et la lisibilité d'une couverture pâle ne serait vérifiée que par l'œil.
 - **En-tête et bouton d'aide portés par des contrats propres**, valant par défaut ceux de la surface et des contrôles : un thème leur donne une couleur sans redéfinir celles de la page dans l'en-tête, qui porte aussi le menu flottant de l'administration.
 - **Albums mis en avant marqués comme tels** (`.cover-volume`), avec la couleur profonde de leur couverture : un thème les présente en volume, leur dos de cette couleur ; leurs mouvements sont omis en mouvement réduit par la feuille qui les déclare.
-- **Couleurs du jour fixées dans les tests** par l'application qui porte ses propres données (accueil, administration) ; celle que partagent les autres tests garde les couleurs propres au thème, l'édition à la une de sa base dépendant de l'ordre des écritures de ces tests.
+- **Couleurs du jour fixées dans les tests** par l'application qui porte ses propres données (accueil, administration, fiches) ; celle que partagent les autres tests garde les couleurs propres au thème, l'édition à la une de sa base dépendant de l'ordre des écritures de ces tests.
 
 ## Thème de la visite
 

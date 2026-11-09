@@ -45,8 +45,23 @@ public static class AppPaths
 
     public const string AdvancedSearch = NotYetImplemented;
 
-    /// <summary>The record of an album (#210).</summary>
-    public static string Album(Guid id) => NotYetImplemented;
+    /// <summary>
+    /// The path of the list of the albums once implemented, under which the record of an album is: where the entry
+    /// « Albums » of the menu is current.
+    /// </summary>
+    public const string AlbumsSection = "/albums";
+
+    /// <summary>The route of the record of an album.</summary>
+    public const string AlbumRoute = AlbumsSection + "/{Id:guid}";
+
+    /// <summary>The record of an album (visuel/fiche-album/).</summary>
+    public static string Album(Guid id) => $"{AlbumsSection}/{id}";
+
+    /// <summary>The series and albums of a genre, presented as the bibliography of an author (fonctionnel/structure-de-l-application.md).</summary>
+    public static string GenreWorks(Guid id) => NotYetImplemented;
+
+    /// <summary>The series and albums of a universe, those of its sub-universes included.</summary>
+    public static string UniverseWorks(Guid id) => NotYetImplemented;
 
     /// <summary>The record of a series (#211).</summary>
     public static string SeriesRecord(Guid id) => NotYetImplemented;

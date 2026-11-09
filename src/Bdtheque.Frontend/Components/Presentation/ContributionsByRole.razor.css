@@ -1,0 +1,118 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). */
+.contributions {
+    display: grid;
+    gap: var(--space-s);
+}
+
+.contributions-total {
+    margin: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.contributions dl {
+    display: grid;
+    margin: 0;
+}
+
+.contributions dl > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs) var(--space-m);
+    padding-block: var(--space-s);
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.contributions dt {
+    flex: 0 0 6rem;
+    font-weight: var(--font-weight-strong);
+}
+
+.contributions-count {
+    margin-inline-start: 0.25em;
+    font-weight: normal;
+    color: var(--color-text-muted);
+}
+
+.contributions dd {
+    display: flex;
+    flex: 1 1 12rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+    margin: 0;
+}
+
+/* A name as a tag, which leads to the record of the author. */
+.contributor {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.625rem;
+    padding: 0 var(--space-s);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+}
+
+.contributor:hover {
+    text-decoration: underline;
+}
+
+/* The names of a role on one line, those it does not hold folded (wwwroot/fold-row.js); the link that unfolds them is shown
+   only once something is folded. */
+.contributions-names {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
+.contributions-toggle {
+    display: none;
+}
+
+.contributions-names[data-folding] > .contributions-toggle {
+    display: block;
+}
+
+.contributions-names[data-folding]:has(> .contributions-toggle:not([open])) > [data-folded] {
+    display: none;
+}
+
+.contributions-toggle summary {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.625rem;
+    padding: 0 var(--space-xs);
+    color: var(--color-accent-text);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    list-style: none;
+    cursor: pointer;
+}
+
+.contributions-toggle summary::-webkit-details-marker {
+    display: none;
+}
+
+.contributions-toggle[open] .contributions-more,
+.contributions-toggle:not([open]) .contributions-less {
+    display: none;
+}
+
+.contributions-none {
+    color: var(--color-text-muted);
+    font-style: italic;
+}

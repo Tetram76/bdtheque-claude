@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''une série : pile de couvertures, avancement, auteurs, albums dans l''ordre de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:30:00Z }
 ---
 
 # Contenu
@@ -15,7 +15,7 @@ De haut en bas :
   - le titre, puis des étiquettes : le **statut**, le **nombre de tomes prévus** (nombre de tomes théorique) et la mention **Complète** ou **À compléter** ;
   - l'**avancement de la collection** : « N albums sur M dans la collection », avec une barre de progression ;
   - l'**éditeur** et la **collection** de la série (éditeur et collection template) ; l'éditeur mène à son site web lorsqu'il est connu, signalé comme un lien externe, la collection n'est pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)) ;
-  - les **auteurs de la série** (contributions template), présentés comme les contributions d'un album ([Contenu](../fiche-album/contenu.md)) : nombre d'auteurs distincts, une ligne par rôle, rôle replié au-delà de six noms ;
+  - les **auteurs de la série** (contributions template), présentés comme les contributions d'un album ([Contenu](../fiche-album/contenu.md)) : nombre d'auteurs distincts, une ligne par rôle, repliée au-delà de ce que tient la ligne ;
   - les **genres** et les **univers**, chaque univers avec la chaîne de ses ancêtres, comme sur la fiche d'un album.
   - Une donnée non renseignée (statut, nombre de tomes prévus, éditeur, collection, résumé) reste affichée, avec la mention « Non renseigné » en texte atténué, jamais sous la forme d'un lien vide, comme sur la fiche d'un album. Une série sans album, sans auteur ou sans genre le dit de même (« Aucun album dans la série pour l'instant », sans barre de progression ; « Aucun auteur crédité sur la série » ; « Aucun genre »).
   - Les autres valeurs template et les indicateurs d'exclusion n'y figurent pas ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).

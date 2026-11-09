@@ -78,7 +78,8 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
 
         var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
         await spotlight.GetByRole(AriaRole.Link).ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.NotYetImplemented));
+        await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AlbumsSection)}/[0-9a-f-]+$"));
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Le Port des brumes");
     }
 
     // The day of the spotlight and the dates of the entries are those of the browser (fonctionnel/page-accueil.md): a

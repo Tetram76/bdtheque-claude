@@ -1,0 +1,37 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the universe attached in the colors of
+   the universes (--color-universe), the ancestors in muted text. */
+.universe-chain {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    max-inline-size: 100%;
+}
+
+.universe-ancestor {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.universe-separator {
+    color: var(--color-text-muted);
+}
+
+.universe-attached {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.625rem;
+    padding: 0 var(--space-s);
+    border: var(--border-width-control) solid var(--color-tag-border);
+    border-radius: var(--radius-control);
+    background: var(--color-universe);
+    color: var(--color-text-on-universe);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+}
+
+.universe-attached:hover {
+    text-decoration: underline;
+}

@@ -191,12 +191,14 @@ public sealed class ValidationDataLoader(HttpClient client)
         });
         await data.VisualAsync(lighthouse, lighthouseReissue, VisualType.Cover, Images.Portrait(0.60));
 
-        // A collective album, many authors credited, under `@`, won in a contest.
+        // A collective album, many authors credited, under `@`, won in a contest: more drawers than the line of a role
+        // of its record holds on a smartphone (visuel/fiche-album/contenu.md, Contributions).
         var collective = await data.AlbumAsync(OneShot(CollectiveTitle, 2019, null, [humour], [],
         [
             Credit(ganier, ContributionRole.Scenarist), Credit(keita, ContributionRole.Scenarist), Credit(rambert, ContributionRole.Illustrator),
             Credit(ferraz, ContributionRole.Illustrator), Credit(benali, ContributionRole.Illustrator), Credit(tanabe, ContributionRole.Illustrator),
-            Credit(lemaire, ContributionRole.Colorist),
+            Credit(vanSluys, ContributionRole.Illustrator), Credit(etienne, ContributionRole.Illustrator), Credit(pinceau, ContributionRole.Illustrator),
+            Credit(lund, ContributionRole.Illustrator), Credit(lemaire, ContributionRole.Colorist),
         ]));
         var collectiveEdition = await data.EditionAsync(collective, Owned(bubbles.Id, null, 2019, AcquisitionMode.Won, new DateOnly(2019, 10, 31)) with
         {

@@ -1,0 +1,64 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<ContributionsByRole> L
+@inject RecordLabels Labels
+@inject ValueLabels Values
+
+@* The contributions of a record by role (visuel/fiche-album/contenu.md, Contributions), shared by the records of the
+   consultation: the number of distinct authors credited, then a line per role, in the order of the roles, with the number
+   of its authors and their names, each leading to the record of the author. Beyond six names, a role is folded behind « et
+   N autres », which unfolds it, « Réduire » folding it back: a collective album does not push the rest of the record down.
+   The disclosure is that of the browser (details), which needs neither a script nor a request; the names it unfolds come
+   before it, so that « Réduire » follows the last name. *@
+<div class="contributions">
+    <p class="contributions-total">@Total</p>
+    <dl>
+        @foreach (var role in Enum.GetValues<ContributionRole>())
+        {
+            var authors = Contributions.Where(c => c.Role == role).Select(c => c.Author).ToList();
+            <div>
+                <dt>
+                    <span class="contributions-role">@Values.Of(role)</span>
+                    @if (authors.Count > 1)
+                    {
+                        <span class="contributions-count">(@authors.Count)</span>
+                    }
+                </dt>
+                <dd>
+                    @if (authors.Count == 0)
+                    {
+                        <span class="contributions-none">@L["NotCredited"]</span>
+                    }
+                    else
+                    {
+                        <app-fold-row class="contributions-names">
+                            @foreach (var author in authors)
+                            {
+                                <a class="contributor" href="@AppPaths.AuthorRecord(author.Id)">@Labels.Author(author)</a>
+                            }
+                            <details class="contributions-toggle">
+                                <summary>
+                                    <span class="contributions-more" data-one="@L["More.One"]" data-other="@L["More.Other"]"></span>
+                                    <span class="contributions-less">@L["Less"]</span>
+                                </summary>
+                            </details>
+                        </app-fold-row>
+                    }
+                </dd>
+            </div>
+        }
+    </dl>
+</div>
+
+@code {
+    /// <summary>The contributions, in the order the API gives them: by role, then by author.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ContributionItem> Contributions { get; set; } = [];
+
+    private string Total => Contributions.Select(c => c.Author.Id).Distinct().Count() switch
+    {
+        0 => L["Total.Zero"],
+        1 => L["Total.One"],
+        var count => L["Total.Other", count],
+    };
+}

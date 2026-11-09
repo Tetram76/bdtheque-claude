@@ -25,6 +25,9 @@ public static class AudienceFunctions
 {
     public static readonly AudienceFunction Home = new("home", AudienceFunctionKind.Screen);
 
+    /// <summary>The record of an album (visuel/fiche-album/), with the album it presents.</summary>
+    public static readonly AudienceFunction AlbumRecord = new("album", AudienceFunctionKind.Screen);
+
     public static readonly AudienceFunction AdminHome = new("admin.home", AudienceFunctionKind.Screen);
 
     /// <summary>The information of the visitor on the audience measurement, and their choice.</summary>
@@ -129,6 +132,7 @@ public static class AudienceFunctions
 
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
+        AlbumRecord,
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,

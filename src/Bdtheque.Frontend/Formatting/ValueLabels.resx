@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ContributionRole.Scenarist" xml:space="preserve">
+    <value>Scénario</value>
+  </data>
+  <data name="ContributionRole.Illustrator" xml:space="preserve">
+    <value>Dessin</value>
+  </data>
+  <data name="ContributionRole.Colorist" xml:space="preserve">
+    <value>Couleurs</value>
+  </data>
+  <data name="AlbumRating.VeryPoor" xml:space="preserve">
+    <value>Très mauvais</value>
+  </data>
+  <data name="AlbumRating.Poor" xml:space="preserve">
+    <value>Mauvais</value>
+  </data>
+  <data name="AlbumRating.Average" xml:space="preserve">
+    <value>Moyen</value>
+  </data>
+  <data name="AlbumRating.Good" xml:space="preserve">
+    <value>Bien</value>
+  </data>
+  <data name="AlbumRating.VeryGood" xml:space="preserve">
+    <value>Très bien</value>
+  </data>
+</root>
