@@ -123,10 +123,12 @@ else if (_album is { } album)
     // (fonctionnel/regles-metier/intention-d-achat.md).
     private int OwnedEditionCount => _album!.Editions.Count(e => e.IsInCollection);
 
-    private Bdtheque.Contracts.Admin.AlbumCollectionState CollectionState =>
-        _album!.Album.IsInCollection ? Bdtheque.Contracts.Admin.AlbumCollectionState.InCollection
-        : IsIntended ? Bdtheque.Contracts.Admin.AlbumCollectionState.PurchaseIntent
-        : Bdtheque.Contracts.Admin.AlbumCollectionState.OutsideCollection;
+    private Bdtheque.Contracts.Admin.AlbumCollectionState CollectionState => (_album!.Album.IsInCollection, IsIntended) switch
+    {
+        (true, _) => Bdtheque.Contracts.Admin.AlbumCollectionState.InCollection,
+        (false, true) => Bdtheque.Contracts.Admin.AlbumCollectionState.PurchaseIntent,
+        _ => Bdtheque.Contracts.Admin.AlbumCollectionState.OutsideCollection,
+    };
 
     private bool IsIntended => _album!.PurchaseIntent is not null || _album.Editions.Any(e => e.PurchaseIntent is not null);
 
