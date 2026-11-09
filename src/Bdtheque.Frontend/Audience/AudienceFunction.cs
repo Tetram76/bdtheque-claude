@@ -28,6 +28,14 @@ public static class AudienceFunctions
     /// <summary>The record of an album (visuel/fiche-album/), with the album it presents.</summary>
     public static readonly AudienceFunction AlbumRecord = new("album", AudienceFunctionKind.Screen);
 
+    // The actions of the record, each a request of the record whose parameters are its state (Navigation/AlbumRecordQuery.cs).
+
+    /// <summary>An edition chosen, whose detail and visuals the record shows.</summary>
+    public static readonly AudienceFunction AlbumRecordEdition = new("album.edition", AudienceFunctionKind.Action);
+
+    /// <summary>A visual of the edition shown: the previous, the next, or the one of a thumbnail.</summary>
+    public static readonly AudienceFunction AlbumRecordVisual = new("album.visual", AudienceFunctionKind.Action);
+
     public static readonly AudienceFunction AdminHome = new("admin.home", AudienceFunctionKind.Screen);
 
     /// <summary>The information of the visitor on the audience measurement, and their choice.</summary>
@@ -132,7 +140,7 @@ public static class AudienceFunctions
 
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
-        AlbumRecord,
+        AlbumRecord, AlbumRecordEdition, AlbumRecordVisual,
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,

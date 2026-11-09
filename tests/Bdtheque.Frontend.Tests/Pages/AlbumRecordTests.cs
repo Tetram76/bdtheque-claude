@@ -20,8 +20,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Frontend.Tests.Pages;
 
 /// <summary>
-/// The record of an album in the consultation (visuel/fiche-album/contenu.md): its identity, its contributions by role, its
-/// genres and universes, its summary and its dates, told apart by role, link and text, never by appearance.
+/// The record of an album in the consultation (visuel/fiche-album/contenu.md): its visuals, its identity, its contributions by
+/// role, its genres and universes, its summary, its editions in the collection and the detail of the one chosen, and its
+/// dates, told apart by role, link and text, never by appearance.
 /// </summary>
 public sealed class AlbumRecordTests : BunitContext, IDisposable
 {
@@ -218,6 +219,11 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("intent", "Intention d'achat"), (page.Find(".album-status").GetAttribute("data-status"), page.Find(".album-status strong").TextContent.Trim()));
+        // It has no edition: neither grid nor detail, and the generic visual, without navigation.
+        Assert.Contains("Aucune édition dans la collection", BlockOf(page, "Dans quelles éditions ?").TextContent);
+        Assert.Empty(page.FindAll(".edition-choices, .edition-detail"));
+        Assert.NotNull(page.Find(".album-visuals svg.cover-generic"));
+        Assert.Empty(page.FindAll(".album-visuals nav, .album-visuals .visual-original"));
     }
 
     [Fact]
@@ -229,6 +235,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("intent", "Intention d'achat"), (page.Find(".album-status").GetAttribute("data-status"), page.Find(".album-status strong").TextContent.Trim()));
+        // The edition targeted is an intent, never an edition of the collection.
+        Assert.Contains("Aucune édition dans la collection", BlockOf(page, "Dans quelles éditions ?").TextContent);
     }
 
     [Fact]
@@ -240,6 +248,148 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Hors collection", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("out", "Hors collection"), (page.Find(".album-status").GetAttribute("data-status"), page.Find(".album-status strong").TextContent.Trim()));
+    }
+
+    [Fact]
+    public void Editions_AreThoseOfTheCollection_TheFirstChosenByDefault()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        // The edition targeted by an intent (2023) is not one of them.
+        var choices = BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition-choices a");
+        Assert.Equal(["Casterman [2001] - ISBN 2-203-34424-5", "Casterman (Univers d'auteurs) [2010]"], choices.Select(c => c.TextContent.Trim()));
+        Assert.Equal("true", choices[0].GetAttribute("aria-current"));
+        Assert.Equal(AlbumRecordQuery.ForEdition(SecondEditionId).Href(AlbumId), choices[1].GetAttribute("href"));
+    }
+
+    [Fact]
+    public void EditionChosen_ByTheAddress_ShowsItsDetail_AndRecordsTheChoice()
+    {
+        _catalog.Album = Album();
+
+        var page = Open($"?edition={SecondEditionId}");
+
+        Assert.Equal("true", BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition-choices a")[1].GetAttribute("aria-current"));
+        Assert.Equal("Offerte", Row(page, "Mode d'acquisition"));
+        Assert.Equal(["album.edition", "album"], _audience.Functions);
+    }
+
+    [Fact]
+    public void EditionNamedByTheAddress_ThatIsNotOneOfTheCollection_GivesWayToTheFirst()
+    {
+        _catalog.Album = Album();
+
+        var page = Open($"?edition={IntendedEditionId}&visual=9");
+
+        Assert.Equal("true", BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition-choices a")[0].GetAttribute("aria-current"));
+        Assert.Equal("1 sur 4", page.Find(".album-visuals .visual-position").TextContent.Trim());
+    }
+
+    [Fact]
+    public void EditionDetail_PresentsTheEdition_ThePublisherLeadingToItsWebsite_AndWhatIsNotSet()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        var publisher = RowElement(page, "Éditeur").QuerySelector("a")!;
+        Assert.Equal(("Casterman", "https://www.casterman.com", "_blank", "noopener noreferrer"),
+            (publisher.TextContent.Trim(), publisher.GetAttribute("href"), publisher.GetAttribute("target"), publisher.GetAttribute("rel")));
+        Assert.Equal("Non renseignée", Row(page, "Collection"));
+        Assert.Equal("2001", Row(page, "Année d'édition"));
+        Assert.Equal("Cartonnée", Row(page, "Reliure"));
+        Assert.Equal("Normal (A4)", Row(page, "Format"));
+        Assert.Equal("En couleur", Row(page, "Couleur"));
+        Assert.Equal("Non renseigné", Row(page, "Nombre de pages"));
+    }
+
+    [Fact]
+    public void EditionDetail_PresentsTheCopy_WithTheLabelsOfItsMode_AndItsAmountsInEurosOfTheDayNotAvailableYet()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        Assert.Equal("Achat", Row(page, "Mode d'acquisition"));
+        Assert.Equal("09/09/2006", Row(page, "Date d'achat"));
+        var price = RowElement(page, "Prix d'achat");
+        Assert.Contains("16,95", price.TextContent);
+        Assert.Contains("en euros d'aujourd'hui : pas encore disponible", price.TextContent);
+        Assert.Equal("Neuve", Row(page, "Neuve ou d'occasion"));
+        Assert.Equal("Non", Row(page, "Dédicacée"));
+    }
+
+    [Fact]
+    public void EditionDetail_WithoutAmount_PresentsItsEstimatedValue_NotAvailableYet_UnlessFree()
+    {
+        _catalog.Album = Album();
+
+        var gift = Open($"?edition={SecondEditionId}");
+        Assert.Equal("25/12/2011", Row(gift, "Date d'acquisition"));
+        Assert.Equal("Valeur estimée : pas encore disponible", Row(gift, "Valeur d'acquisition"));
+
+        _catalog.Album = Album() with { Editions = [Owned(FirstEditionId, 2001) with { IsFree = true, AcquisitionMode = AcquisitionMode.Gift, AcquisitionAmount = null, AcquisitionCurrency = null }] };
+        Assert.Equal("Gratuite", Row(Open(), "Valeur d'acquisition"));
+    }
+
+    [Fact]
+    public void EditionDetail_IsDatedInTheTimeZoneOfTheBrowser()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        var dates = BlockOf(page, "Dans quelles éditions ?").QuerySelector(".edition-dates")!.TextContent;
+        Assert.Contains("Édition créée le 02/02/2026", dates);
+        Assert.Contains("entrée dans la collection le 03/02/2026", dates);
+        Assert.Contains("modifiée le 10/10/2026", dates);
+    }
+
+    [Fact]
+    public void Visuals_ShowTheFirstOne_WithItsTypeAndPosition_TheThumbnailsAndTheOriginal()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        var visuals = page.Find(".album-visuals");
+        Assert.Equal(VisualMediaRoutes.Display(Visuals[0]), visuals.QuerySelector(".visual-current img")!.GetAttribute("src"));
+        Assert.Equal("Couverture", visuals.QuerySelector(".visual-type")!.TextContent.Trim());
+        Assert.Equal("1 sur 4", visuals.QuerySelector(".visual-position")!.TextContent.Trim());
+        Assert.Equal(["Couv.", "1", "2", "4e"], visuals.QuerySelectorAll(".visual-thumbnails li").Select(t => t.TextContent.Trim()));
+        Assert.Equal("true", visuals.QuerySelector(".visual-thumbnails a")!.GetAttribute("aria-current"));
+        Assert.Equal(VisualMediaRoutes.Original(Visuals[0]), visuals.QuerySelector("a.visual-original")!.GetAttribute("href"));
+    }
+
+    [Fact]
+    public void Visuals_ChosenByTheAddress_NumberThePlates_AndLeadToTheirNeighbours_RoundTheEdition()
+    {
+        _catalog.Album = Album();
+
+        var page = Open($"?edition={FirstEditionId}&visual=3");
+
+        var visuals = page.Find(".album-visuals");
+        Assert.Equal("Planche 2", visuals.QuerySelector(".visual-type")!.TextContent.Trim());
+        Assert.Equal("3 sur 4", visuals.QuerySelector(".visual-position")!.TextContent.Trim());
+        Assert.Equal(AlbumRecordQuery.ForVisual(FirstEditionId, 2).Href(AlbumId), visuals.QuerySelector("a[aria-label='Visuel précédent']")!.GetAttribute("href"));
+        Assert.Equal(AlbumRecordQuery.ForVisual(FirstEditionId, 4).Href(AlbumId), visuals.QuerySelector("a[aria-label='Visuel suivant']")!.GetAttribute("href"));
+        Assert.Equal(["album.visual", "album"], _audience.Functions);
+
+        var last = Open($"?edition={FirstEditionId}&visual=4").Find(".album-visuals");
+        Assert.Equal(AlbumRecordQuery.ForVisual(FirstEditionId, 1).Href(AlbumId), last.QuerySelector("a[aria-label='Visuel suivant']")!.GetAttribute("href"));
+    }
+
+    [Fact]
+    public void Visuals_OfAnEditionWithoutAny_AreTheGenericVisual_WithoutNavigation()
+    {
+        _catalog.Album = Album();
+
+        var page = Open($"?edition={SecondEditionId}");
+
+        Assert.NotNull(page.Find(".album-visuals svg.cover-generic"));
+        Assert.Empty(page.FindAll(".album-visuals nav, .album-visuals .visual-original, .album-visuals .visual-position"));
     }
 
     [Fact]
@@ -286,14 +436,21 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal("functional", page.Find("[role='alert']").GetAttribute("data-error-category"));
     }
 
-    private IRenderedComponent<AlbumRecord> Open()
+    private IRenderedComponent<AlbumRecord> Open(string query = "")
     {
-        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.Album(AlbumId));
+        Services.GetRequiredService<NavigationManager>().NavigateTo($"{AppPaths.Album(AlbumId)}{query}");
         return Render<AlbumRecord>(parameters => parameters.Add(p => p.Id, AlbumId).AddCascadingValue(_request.Context));
     }
 
     private static IElement BlockOf(IRenderedComponent<AlbumRecord> page, string title) =>
         page.FindAll("section.block").Single(block => block.QuerySelector(".block-title")!.TextContent.Trim() == title);
+
+    private static IElement RowElement(IRenderedComponent<AlbumRecord> page, string label) =>
+        page.FindAll(".edition-detail dl > div").Single(row => row.QuerySelector("dt")!.TextContent.Trim() == label).QuerySelector("dd")!;
+
+    private static string Row(IRenderedComponent<AlbumRecord> page, string label) => RowElement(page, label).TextContent.Trim();
+
+    private static readonly Guid[] Visuals = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
 
     private static AlbumSummary Summary() =>
         new(AlbumId, "Lointaines îles du vent", SeriesId, "Corto Maltese", AlbumType.Regular, false, 5, null, null, true);
@@ -325,6 +482,25 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var ferrand = new AuthorListItem(Guid.NewGuid(), "Ferrand", "Léa", null);
         var root = new UniverseListItem(Guid.NewGuid(), "Univers Hugo Pratt", null, null);
         var corto = new UniverseListItem(Guid.NewGuid(), "Corto Maltese", root.Id, root.Name);
+        var first = Owned(FirstEditionId, 2001) with
+        {
+            Edition = new EditionSummary(FirstEditionId, Guid.NewGuid(), "Casterman", null, null, 2001, "2-203-34424-5"),
+            Visuals =
+            [
+                new EditionVisualItem(Visuals[0], VisualType.Cover, 1, Created, Created),
+                new EditionVisualItem(Visuals[1], VisualType.Plate, 1, Created, Created),
+                new EditionVisualItem(Visuals[2], VisualType.Plate, 2, Created, Created),
+                new EditionVisualItem(Visuals[3], VisualType.BackCover, 1, Created, Created),
+            ],
+        };
+        var second = Owned(SecondEditionId, 2010) with
+        {
+            Edition = new EditionSummary(SecondEditionId, Guid.NewGuid(), "Casterman", Guid.NewGuid(), "Univers d'auteurs", 2010, null),
+            AcquisitionMode = AcquisitionMode.Gift,
+            AcquisitionDate = new DateOnly(2011, 12, 25),
+            AcquisitionAmount = null,
+            AcquisitionCurrency = null,
+        };
         return new AlbumDetail(
             Summary(), 1970, 11, "Venezuela, vers 1913.", "Réunit les trois premiers récits.", null,
             [new GenreListItem(Guid.NewGuid(), "Aventure")],
@@ -335,7 +511,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
                 new ContributionItem(Guid.NewGuid(), pratt, ContributionRole.Illustrator, Created, Created),
             ],
             // Two editions in the collection, and one targeted by an intent, which is no edition of the collection.
-            [Owned(FirstEditionId, 2001), Owned(SecondEditionId, 2010), Intended()],
+            [first, second, Intended()],
             null,
             Created,
             Modified);

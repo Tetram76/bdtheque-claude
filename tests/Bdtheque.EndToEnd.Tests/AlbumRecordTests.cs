@@ -14,7 +14,8 @@ namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// The record of an album in the consultation (visuel/fiche-album/contenu.md), as its visitor goes through it: under the albums
-/// of the menu, the authors of a role unfolded and folded, on the application of the records (<see cref="RecordsApplication"/>).
+/// of the menu, the visuals of an edition, the original image, another edition, the authors of a role unfolded and folded, on
+/// the application of the records (<see cref="RecordsApplication"/>).
 /// </summary>
 [Collection(RecordsApplication.Name)]
 public sealed partial class AlbumRecordTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
@@ -28,6 +29,49 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Lointaines îles du vent");
         await Assertions.Expect(page.GetByRole(AriaRole.Navigation, new() { Name = "Menu de la consultation" })
             .GetByRole(AriaRole.Link, new() { Name = "Albums" })).ToHaveAttributeAsync("aria-current", "page");
+    }
+
+    [Fact]
+    public async Task Visuals_GoFromOneToTheNext_AndToAThumbnail()
+    {
+        var page = await NewPageAsync();
+        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+        var visuals = page.GetByRole(AriaRole.Region, new() { Name = "Visuels de l'édition" });
+
+        await visuals.GetByRole(AriaRole.Link, new() { Name = "Visuel suivant" }).ClickAsync();
+        await Assertions.Expect(page).ToHaveURLAsync(SecondVisualAddress());
+        await Assertions.Expect(visuals.Locator(".visual-caption")).ToHaveTextAsync(FirstPlateCaption());
+
+        await visuals.GetByRole(AriaRole.Link, new() { Name = "4e de couverture" }).ClickAsync();
+        await Assertions.Expect(visuals.Locator(".visual-caption")).ToHaveTextAsync(BackCoverCaption());
+        await Assertions.Expect(visuals.GetByRole(AriaRole.Link, new() { Name = "4e de couverture" })).ToHaveAttributeAsync("aria-current", "true");
+    }
+
+    [Fact]
+    public async Task OriginalImage_IsServed()
+    {
+        var page = await NewPageAsync();
+        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+
+        var href = await page.GetByRole(AriaRole.Link, new() { Name = "Voir l'image originale" }).GetAttributeAsync("href");
+        var response = await page.APIRequest.GetAsync(href!);
+
+        Assert.Equal(200, response.Status);
+        Assert.Equal("image/png", response.Headers["content-type"]);
+    }
+
+    [Fact]
+    public async Task AnotherEdition_ShowsItsDetail_AndItsVisuals()
+    {
+        var page = await NewPageAsync();
+        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+
+        await page.GetByRole(AriaRole.List, new() { Name = "Éditions de l'album" })
+            .GetByRole(AriaRole.Link, new() { Name = "Casterman (Univers d'auteurs) [2010]" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(EditionAddress());
+        await Assertions.Expect(page.Locator(".edition-detail")).ToContainTextAsync("Offerte");
+        await Assertions.Expect(page.Locator(".album-visuals svg.cover-generic")).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -69,6 +113,18 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     [GeneratedRegex(@"^et \d+ autres?$")]
     private static partial Regex FoldedCount();
 
+    [GeneratedRegex(@"[?&]visual=2#visuals$")]
+    private static partial Regex SecondVisualAddress();
+
+    [GeneratedRegex(@"Planche 1\s*2 sur 4")]
+    private static partial Regex FirstPlateCaption();
+
+    [GeneratedRegex(@"4e de couverture\s*4 sur 4")]
+    private static partial Regex BackCoverCaption();
+
+    [GeneratedRegex(@"[?&]edition=[0-9a-f-]+#editions$")]
+    private static partial Regex EditionAddress();
+
     // The names shown of a row, and the link that unfolds the others, all on the line of the first name.
     private static Task<bool> OnOneLineAsync(ILocator row) => row.EvaluateAsync<bool>("""
         row => {
@@ -82,9 +138,9 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
 
 /// <summary>
 /// An application whose albums present the cases of the record of an album, at fixed dates: an album of a series with two
-/// editions in the collection and a collective drawing, attached to a universe within two others; an album targeted by an
-/// intent on itself, and one catalogued only. Its cover is the only one,
-/// so that the edition in the spotlight, and the colours of the day, are the same at each capture.
+/// editions in the collection, one with four visuals and one gift without any, and a collective drawing, attached to a
+/// universe within two others; an album targeted by an intent on itself, and one catalogued only. Its visuals are the only
+/// ones, so that the edition in the spotlight, and the colours of the day, are the same at each capture.
 /// </summary>
 public sealed class RecordsApplication : ApplicationHost
 {
@@ -94,7 +150,7 @@ public sealed class RecordsApplication : ApplicationHost
 
     protected override bool PaintedByItsSpotlight => true;
 
-    /// <summary>The album of the series with editions and a collective drawing.</summary>
+    /// <summary>The album of the series with editions, visuals and a collective drawing.</summary>
     public Guid AlbumId { get; private set; }
 
     /// <summary>An album of the series targeted by a purchase intent on itself.</summary>
@@ -115,7 +171,7 @@ public sealed class RecordsApplication : ApplicationHost
         var cortoUniverse = await PostAsync<UniverseForm>(api, "/admin/universes", new CreateUniverseRequest("Corto Maltese", null, pratt.Id));
         var antilles = await PostAsync<UniverseForm>(api, "/admin/universes", new CreateUniverseRequest("Les Antilles", null, cortoUniverse.Id));
         var hugo = await AuthorAsync(api, "Pratt", "Hugo");
-        string[] drawers = ["Inès Vasseur", "Tom Arribas", "Clara Benmansour", "Yann Le Goff", "Sacha Morel", "Nina Okafor", "Paul Delorme", "Agathe Leroux"];
+        string[] drawers = ["Inès Vasseur", "Tom Arribas", "Clara Benmansour", "Yann Le Goff", "Nina Okafor"];
         List<ContributionContent> contributions = [new(hugo.Id, ContributionRole.Scenarist), new(hugo.Id, ContributionRole.Illustrator)];
         foreach (var drawer in drawers)
             contributions.Add(new((await AuthorAsync(api, drawer.Split(' ', 2)[1], drawer.Split(' ', 2)[0])).Id, ContributionRole.Illustrator));
@@ -128,7 +184,12 @@ public sealed class RecordsApplication : ApplicationHost
         AlbumId = album.Id;
         var first = await PostAsync<EditionForm>(api, $"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             Edition(casterman.Id, null, 2001, "2-203-34424-5", AcquisitionMode.Purchase, new DateOnly(2006, 9, 9), 16.95m), album.Version));
-        var version = await UploadCoverAsync(api, album.Id, first.Id, first.AlbumVersion);
+        var version = first.AlbumVersion;
+        foreach (var (type, color) in new[]
+        {
+            (VisualType.Cover, SKColors.SteelBlue), (VisualType.Plate, SKColors.Wheat), (VisualType.Plate, SKColors.Bisque), (VisualType.BackCover, SKColors.Tan),
+        })
+            version = await UploadAsync(api, album.Id, first.Id, type, color, version);
         await PostAsync<EditionForm>(api, $"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             Edition(casterman.Id, collection.Id, 2010, null, AcquisitionMode.Gift, new DateOnly(2011, 12, 25), null), version));
 
@@ -152,11 +213,11 @@ public sealed class RecordsApplication : ApplicationHost
         new(publisher, collection, year, isbn, BindingType.Hardcover, BookOrientation.Portrait, null, EditionFormat.Standard, null, null,
             false, true, EditionCondition.Excellent, mode, false, acquired, amount, amount is null ? null : "EUR", false, null, null, null, null);
 
-    private async Task<uint> UploadCoverAsync(HttpClient api, Guid album, Guid edition, uint albumVersion)
+    private async Task<uint> UploadAsync(HttpClient api, Guid album, Guid edition, VisualType type, SKColor color, uint albumVersion)
     {
         Tick();
         using var bitmap = new SKBitmap(300, 400);
-        bitmap.Erase(SKColors.SteelBlue);
+        bitmap.Erase(color);
         using var image = SKImage.FromBitmap(bitmap);
         using var png = image.Encode(SKEncodedImageFormat.Png, 100);
         var file = new ByteArrayContent(png.ToArray());
@@ -164,7 +225,7 @@ public sealed class RecordsApplication : ApplicationHost
         using var form = new MultipartFormDataContent
         {
             { file, UploadVisualFields.File, "visual.png" },
-            { new StringContent(nameof(VisualType.Cover)), UploadVisualFields.Type },
+            { new StringContent(type.ToString()), UploadVisualFields.Type },
             { new StringContent(albumVersion.ToString(CultureInfo.InvariantCulture)), UploadVisualFields.AlbumVersion },
         };
         using var response = await api.PostAsync($"/admin/albums/{album}/editions/{edition}/visuals", form);

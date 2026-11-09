@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
 ---
 
 # Frontend
@@ -63,6 +63,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
 
 ## Fiches de la consultation
 
+- **État d'une fiche porté par l'adresse** (l'édition choisie et le visuel montré de la fiche d'un album, [`visuel/fiche-album/`](../../visuel/fiche-album/index.md)), en rendu statique, comme les critères des listes : chaque lien mène à la fiche dans son nouvel état, ramené par une ancre à la partie de la page d'où il part. Une fiche se partage ou se recharge telle quelle, et l'action se relève d'après l'adresse ([Relevé par le frontend](../mesure-audience/releve-par-le-frontend.md)).
+  - **Alternative écartée (visionneuse et choix de l'édition interactifs)** : une connexion SignalR par visiteur pour une page de lecture, ce que le rendu statique par défaut évite.
+  - **Alternative écartée (images changées par un script, sans requête)** : un script ne modifie pas la page que Blazor a rendue, et l'action n'atteindrait pas la mesure d'audience.
 - **Repli des auteurs d'un rôle selon la largeur de sa ligne** ([`visuel/fiche-album/`](../../visuel/fiche-album/index.md)) : seul le navigateur connaît la place des noms, si bien qu'un script (élément personnalisé) marque ceux que la ligne ne tient pas, avec le lien « et N autres », de nouveau quand la ligne change de largeur et à la fin du premier chargement de polices, comme une ligne défilante. Le dépliage est une divulgation du navigateur (`<details>`), placée après les noms, qui ne se cachent que tant qu'elle est fermée (`:has()`) : « Réduire » suit le dernier nom. Ni requête pour montrer des noms déjà reçus, ni action suivie, comme le panneau des filtres d'une liste ; sans script, tous les noms sont montrés.
   - **Alternative écartée (nombre fixe de noms, rendu par le serveur)** : un rôle passe à la ligne sur un écran étroit, ou se replie sur un grand écran qui le tenait.
   - **Alternative écartée (ligne coupée par la seule feuille de style)** : elle ne sait pas compter les noms cachés, que le lien annonce.
@@ -70,7 +73,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
 
 ## Présentation
 
-- **Valeurs des énumérations nommées en un seul lieu** (rôle d'une contribution, appréciation…), dans la culture d'affichage, pour toute page qui les présente ou les saisit.
+- **Valeurs des énumérations nommées en un seul lieu** (rôle d'une contribution, appréciation, type de visuel, reliure, format, état…), dans la culture d'affichage, pour toute page qui les présente ou les saisit.
 - **Libellés des albums et des éditions construits à la présentation**, d'après leurs composantes et le format du paramétrage ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md), [Libellé d'une édition](../../fonctionnel/presentation/libelle-d-une-edition.md)). L'ISBN y est tel qu'enregistré : sa mise en forme par tirets dépend de plages d'attribution que l'application ne tient pas.
 - **Tirages d'une page par le générateur aléatoire du conteneur de services**, que les tests de bout en bout remplacent par un tirage constant, pour qu'une page soit la même à chaque capture.
 - **Un composant unique présente toute erreur** ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)), avec sa catégorie, qui lui donne cadre, icône et couleur pour la distinguer au premier coup d'œil, à l'arrondi d'une tuile, jamais d'un contrôle, qu'un thème arrondit en pilule. Le texte d'une erreur métier est celui de son code de règle ; une erreur technique n'a qu'un texte générique. Le frontend ne référençant pas le domaine, un test confronte ses textes aux codes de règle.

@@ -51,6 +51,18 @@
   <data name="Notes" xml:space="preserve">
     <value>Notes personnelles</value>
   </data>
+  <data name="Editions.Title" xml:space="preserve">
+    <value>Dans quelles éditions ?</value>
+  </data>
+  <data name="Editions.Kicker" xml:space="preserve">
+    <value>Les éditions</value>
+  </data>
+  <data name="Editions.Label" xml:space="preserve">
+    <value>Éditions de l&apos;album</value>
+  </data>
+  <data name="Editions.None" xml:space="preserve">
+    <value>Aucune édition dans la collection.</value>
+  </data>
   <data name="Dates" xml:space="preserve">
     <value>Album créé le {0}, modifié le {1}.</value>
   </data>

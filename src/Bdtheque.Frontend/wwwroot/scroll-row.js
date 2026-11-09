@@ -30,7 +30,7 @@ function observe(row) {
 function center(row) {
     observe(row);
     const items = itemsOf(row);
-    const current = items?.querySelector('[aria-current="page"]');
+    const current = items?.querySelector('[aria-current="page"], [aria-current="true"]');
     if (current) {
         const offset = current.getBoundingClientRect().left - items.getBoundingClientRect().left + items.scrollLeft;
         items.scrollLeft = offset - (items.clientWidth - current.offsetWidth) / 2;

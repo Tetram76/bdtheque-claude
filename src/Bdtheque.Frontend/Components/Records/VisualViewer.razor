@@ -1,0 +1,94 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<VisualViewer> L
+@inject ValueLabels Values
+
+@* The visuals of the edition chosen on the record of an album (visuel/fiche-album/contenu.md), in their order
+   (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md): the visual shown, its type (numbered for the plates) and
+   its position, the previous and the next one, then a strip of thumbnails that scrolls sideways, the current one framed by
+   the accent, and the link to the original image. The visual shown is put forward, which a theme frames, tilts or shows in
+   volume (--record-visual-…, themes/base.css). Each link leads to the record with another visual, at the visuals
+   (Navigation/AlbumRecordQuery.cs). Without visual (an edition without any, an album without edition), the generic visual,
+   without navigation (fonctionnel/regles-metier/visuel-par-defaut.md). *@
+<section class="album-visuals" id="@AlbumRecordQuery.VisualsAnchor" aria-label="@L["Label"]">
+    @if (Current is not { } visual)
+    {
+        <div class="visual-current">
+            <Cover Alt="@L["Generic"]" Volume="true" />
+        </div>
+    }
+    else
+    {
+        <div class="visual-current">
+            <Cover VisualId="visual.Id" Alt="@L["Alt", TypeOf(Position - 1), EditionLabel]" Volume="true" />
+        </div>
+        <div class="visual-bar">
+            @if (Count > 1)
+            {
+                <a class="visual-step" href="@HrefOf(Position == 1 ? Count : Position - 1)" aria-label="@L["Previous"]"><Icon Name="IconName.ChevronStart" /></a>
+            }
+            <p class="visual-caption" aria-live="polite">
+                <strong class="visual-type">@TypeOf(Position - 1)</strong>
+                <span class="visual-position">@L["Position", Position, Count]</span>
+            </p>
+            @if (Count > 1)
+            {
+                <a class="visual-step" href="@HrefOf(Position == Count ? 1 : Position + 1)" aria-label="@L["Next"]"><Icon Name="IconName.ChevronEnd" /></a>
+            }
+        </div>
+        @if (Count > 1)
+        {
+            <nav class="visual-strip" aria-label="@L["All"]">
+                <ScrollRow>
+                    <ul class="visual-thumbnails">
+                        @for (var index = 0; index < Count; index++)
+                        {
+                            var position = index + 1;
+                            <li>
+                                <a href="@HrefOf(position)" aria-label="@TypeOf(index)" aria-current="@(position == Position ? "true" : null)">
+                                    <Cover VisualId="Edition!.Visuals[index].Id" />
+                                    <span class="visual-short">@ShortOf(index)</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </ScrollRow>
+            </nav>
+        }
+        <a class="visual-original" href="@VisualMediaRoutes.Original(visual.Id)">@L["Original"]</a>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid AlbumId { get; set; }
+
+    /// <summary>The edition chosen, whose visuals are shown; <c>null</c> for an album without any edition in the collection.</summary>
+    [Parameter]
+    public EditionDetail? Edition { get; set; }
+
+    /// <summary>The label of the edition, which the alternative text of its visual names.</summary>
+    [Parameter]
+    public string EditionLabel { get; set; } = "";
+
+    /// <summary>The position of the visual shown, from 1, within those of the edition.</summary>
+    [Parameter]
+    public int Position { get; set; } = 1;
+
+    private int Count => Edition?.Visuals.Count ?? 0;
+
+    private EditionVisualItem? Current => Count == 0 ? null : Edition!.Visuals[Position - 1];
+
+    private string HrefOf(int position) => AlbumRecordQuery.ForVisual(Edition!.Edition.Id, position).Href(AlbumId);
+
+    // A plate is numbered by its rank among the plates of the edition.
+    private int PlateNumber(int index) => Edition!.Visuals.Take(index + 1).Count(v => v.Type == VisualType.Plate);
+
+    private string TypeOf(int index) => Edition!.Visuals[index].Type == VisualType.Plate
+        ? L["Plate", PlateNumber(index)]
+        : Values.Of(Edition.Visuals[index].Type);
+
+    private string ShortOf(int index) => Edition!.Visuals[index].Type == VisualType.Plate
+        ? PlateNumber(index).ToString(CultureInfo.CurrentCulture)
+        : L[$"Short.{Edition.Visuals[index].Type}"];
+}

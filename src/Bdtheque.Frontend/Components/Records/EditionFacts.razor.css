@@ -1,0 +1,53 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). Two groups side by side on a wide
+   screen, one under the other on a smartphone; each line its label, then its value. */
+.edition-detail {
+    display: grid;
+    gap: var(--space-l);
+}
+
+@media (min-width: 48rem) {
+    .edition-detail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.edition-group h3 {
+    margin-block-end: var(--space-s);
+    font-size: var(--font-size-large);
+}
+
+.edition-group dl {
+    margin: 0;
+}
+
+.edition-group dl > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-m);
+    padding-block: var(--space-xs);
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.edition-group dt {
+    flex: 0 0 clamp(7.5rem, 36%, 11rem);
+    font-weight: var(--font-weight-strong);
+}
+
+.edition-group dd {
+    display: grid;
+    flex: 1 1 10rem;
+    min-inline-size: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.edition-unavailable {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.edition-dates {
+    margin: var(--space-m) 0 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}

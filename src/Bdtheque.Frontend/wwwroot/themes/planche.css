@@ -136,8 +136,14 @@
     --home-caption-border: 3px solid #111111;
     --home-caption-background: #FFFFFF;
 
-    /* The records: cases apart enough for the balloons of their titles (visuel/fiche-album/declinaison-par-theme.md). */
+    /* The records: cases apart enough for the balloons of their titles; the visual in a white frame ringed with ink,
+       tilted, with its black shadow (visuel/fiche-album/declinaison-par-theme.md). */
     --record-gap: 2.25rem;
+    --record-visual-padding: 0.5rem;
+    --record-visual-border: 3px solid #111111;
+    --record-visual-background: #FFFFFF;
+    --record-visual-shadow: 6px 6px 0 #111111;
+    --record-visual-tilt: -2deg;
 
     /* The home page of the administration: the same gap as the cases of the dashboard, for the balloons of their titles;
        the tiles white, ringed with ink, in their case; round chips (visuel/administration/declinaison-par-theme.md). */
