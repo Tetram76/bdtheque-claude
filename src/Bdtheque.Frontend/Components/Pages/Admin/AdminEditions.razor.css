@@ -1,0 +1,146 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the
+   page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen: the room the rows have depends on
+   the margins of the page and of the block, which a theme sets. Mobile-first, each row holds on two lines, the thumbnail
+   on the left: the edition with its album and the actions, then the year and the acquisition, the year carrying the name
+   of its column. A list wide enough for those columns, the fixed ones and at least 12rem for the edition, is a table; wider
+   still, the table adds the category and the last modification (visuel/listes/principes-communs.md: on a narrower screen,
+   the secondary columns go first). */
+.edition-rows {
+    container: edition-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
+       so that their columns line up. It holds « Modifier » and the « ⋯ » button. */
+    --edition-actions-width: 10rem;
+}
+
+.edition-row {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    grid-template-areas: "cover main actions" "cover meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.edition-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.edition-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+}
+
+.edition-cover {
+    grid-area: cover;
+    --cover-width: 2.25rem;
+}
+
+.edition-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.edition-label {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.edition-album {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edition-year {
+    grid-area: year;
+}
+
+.edition-caption {
+    color: var(--color-text-muted);
+}
+
+.edition-category {
+    display: none;
+    grid-area: category;
+}
+
+.edition-acquisition {
+    grid-area: acquisition;
+}
+
+.edition-modified {
+    display: none;
+    grid-area: modified;
+}
+
+/* The figures of a row, not the heads of their columns, which keep the size of the other heads (#319). */
+.edition-row:not(.edition-row-head) .edition-year {
+    font-variant-numeric: tabular-nums;
+}
+
+.edition-row:not(.edition-row-head) .edition-modified {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.edition-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container edition-rows (min-width: 42rem) {
+    .edition-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 4.5rem 8.5rem var(--edition-actions-width);
+        grid-template-areas: "cover main year acquisition actions";
+        align-items: center;
+    }
+
+    .edition-row-head {
+        display: grid;
+    }
+
+    .edition-meta {
+        display: contents;
+        font-size: inherit;
+    }
+
+    .edition-caption {
+        display: none;
+    }
+}
+
+@container edition-rows (min-width: 60rem) {
+    .edition-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 4.5rem 9.5rem 8.5rem 6.75rem var(--edition-actions-width);
+        grid-template-areas: "cover main year category acquisition modified actions";
+    }
+
+    .edition-category,
+    .edition-modified {
+        display: block;
+    }
+}

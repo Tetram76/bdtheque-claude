@@ -47,7 +47,7 @@ public sealed class HomeTests : BunitContext, IDisposable
         // Paris, an hour ahead: the date of the browser is already the next day.
         Services.AddScoped(_ => new BrowserTimeZone { Name = "Europe/Paris" });
         Services.AddScoped<DisplayFormatter>();
-        Services.AddSingleton<RecordLabels>();
+        Services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
         Services.AddSingleton(new Random(7));
     }
 

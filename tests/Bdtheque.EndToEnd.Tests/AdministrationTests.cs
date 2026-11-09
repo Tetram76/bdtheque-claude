@@ -138,6 +138,9 @@ public sealed class AdministrationApplication : ApplicationHost
 {
     public const string Name = "Administration";
 
+    /// <summary>The ISBN of the only edition of « Le Nid des Marsupilamis », whose deletion takes the album out of the collection.</summary>
+    public const string FirstEditionIsbn = "978-2-8001-0012-8";
+
     protected override bool PaintedByItsSpotlight => true;
 
     private static readonly DateTimeOffset Start = new(2026, 11, 2, 8, 0, 0, TimeSpan.Zero);
@@ -172,7 +175,12 @@ public sealed class AdministrationApplication : ApplicationHost
         {
             Contributions = [new(franquin.Id, ContributionRole.Scenarist), new(franquin.Id, ContributionRole.Illustrator)],
         });
-        await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id, "978-2-8001-0012-8"), album.Version));
+        // The cases of the list of the editions: a category and an acquisition date known, and neither (the edition below).
+        await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id, FirstEditionIsbn) with
+        {
+            Category = EditionCategory.FirstEdition,
+            AcquisitionDate = new DateOnly(1961, 3, 4),
+        }, album.Version));
         var wanted = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Le Prisonnier du Bouddha", series.Id, 14));
         await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(api, $"/admin/albums/{wanted.Id}/purchase-intents", new(null, wanted.Version));
         await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Z comme Zorglub", series.Id, 15));

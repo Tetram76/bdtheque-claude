@@ -107,7 +107,7 @@ else if (_album is { } album)
                     {
                         var label = Labels.Edition(edition.Edition);
                         <li class="edition">
-                            <h3 class="edition-label">@label</h3>
+                            <h3 class="edition-label"><LabelText Text="@label" /></h3>
                             <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
                             <EditionFacts Edition="edition" />
                         </li>

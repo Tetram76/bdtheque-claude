@@ -14,6 +14,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     private readonly HttpClient _client = api.CreateApiClient();
 
     [Fact]
+    public async Task EditionList_PresentsEveryCategory_OnAtLeastHalfOfTheEditions()
+    {
+        var list = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.EditionAdminList>("/admin/editions?pageSize=100");
+
+        // The editions of the collection the list presents, each category among them, and editions without one, at least half
+        // of them having one (decision of the user at the functional validation of #333).
+        var rows = list!.Editions.Items;
+        Assert.Equal(list.Editions.TotalCount, rows.Count);
+        Assert.Superset(new HashSet<EditionCategory?>([null, .. Enum.GetValues<EditionCategory>().Cast<EditionCategory?>()]),
+            rows.Select(row => row.Category).ToHashSet());
+        Assert.True(rows.Count(row => row.Category is not null) * 2 >= rows.Count,
+            $"{rows.Count(row => row.Category is not null)} of the {rows.Count} owned editions have a category.");
+    }
+
+    [Fact]
     public async Task AlbumList_CountsMoreThanAPage_AndAnAlbumWhoseDeletionASavedSearchBlocks()
     {
         var list = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.AlbumAdminList>("/admin/albums");

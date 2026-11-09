@@ -220,6 +220,17 @@ public sealed class PresentationTests : BunitContext
         Assert.Equal(expected, mention.Find(".not-set").TextContent);
     }
 
+    // In a column of a list, which a mention would crowd: a dash, which a screen reader reads as the mention
+    // (visuel/listes/principes-communs.md).
+    [Fact]
+    public void NotSet_Brief_IsADash_ReadAsTheMention()
+    {
+        var mention = Render<NotSet>(parameters => parameters.Add(p => p.Gender, GrammaticalGender.Feminine).Add(p => p.Brief, true));
+
+        Assert.Equal("—", mention.Find(".not-set [aria-hidden=true]").TextContent);
+        Assert.Equal("Non renseignée", mention.Find(".not-set .visually-hidden").TextContent);
+    }
+
     [Theory]
     [InlineData("Gibelin", "Christophe", null, "CG")]
     [InlineData("Gibrat", "Jean-Pierre", null, "JG")]
@@ -277,5 +288,28 @@ public sealed class PresentationTests : BunitContext
     {
         foreach (var name in Enum.GetValues<IconName>())
             Assert.NotEmpty(Render<Icon>(parameters => parameters.Add(p => p.Name, name)).FindAll("path"));
+    }
+
+    [Fact]
+    public void LabelText_KeepsTheIsbnOfALabelInABlockOfItsOwn_TheTextUnchanged()
+    {
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+
+        var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978] - ISBN\u00A0978-2-205-01234-5"));
+
+        // A single block that a line never breaks (fonctionnel/presentation/libelle-d-une-edition.md), copied as it reads.
+        Assert.Equal("ISBN\u00A0978-2-205-01234-5", text.Find(".label-isbn").TextContent);
+        Assert.Equal("Dargaud [1978] - ISBN\u00A0978-2-205-01234-5", text.Nodes.Select(node => node.TextContent).Aggregate(string.Concat));
+    }
+
+    [Fact]
+    public void LabelText_WithoutIsbn_IsTheTextAlone()
+    {
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+
+        var text = Render<LabelText>(parameters => parameters.Add(p => p.Text, "Dargaud [1978]"));
+
+        Assert.Empty(text.FindAll(".label-isbn"));
+        Assert.Equal("Dargaud [1978]", text.Markup);
     }
 }

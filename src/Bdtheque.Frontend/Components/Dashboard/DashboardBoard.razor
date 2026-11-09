@@ -29,7 +29,7 @@
             <Cover VisualId="Content.Spotlight.Cover?.VisualId" Palette="Content.Spotlight.Cover?.Palette" Volume="true" />
             <div>
                 <p class="dashboard-spotlight-album"><a href="@AppPaths.Album(Content.Spotlight.Album.Id)">@Labels.Album(Content.Spotlight.Album, LabelFormat)</a></p>
-                <p class="dashboard-muted">@Labels.Edition(Content.Spotlight.Edition)</p>
+                <p class="dashboard-muted"><LabelText Text="@Labels.Edition(Content.Spotlight.Edition)" /></p>
                 @if (Content.Spotlight.Summary is { } summary)
                 {
                     <p class="dashboard-spotlight-summary">@summary</p>

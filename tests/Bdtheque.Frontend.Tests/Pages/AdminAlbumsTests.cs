@@ -96,7 +96,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
             [
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Hergé", "1963", "2 éditions · 1 intention", "Dans la collection"),
                 ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido", "octobre 2023", "Aucune édition · 1 intention", "Intention d'achat"),
-                ("Le Bleu est une couleur chaude", "", "Non renseignée", "Aucune édition", "Hors collection"),
+                ("Le Bleu est une couleur chaude", "", "—Non renseignée", "Aucune édition", "Hors collection"),
             ],
             rows);
     }

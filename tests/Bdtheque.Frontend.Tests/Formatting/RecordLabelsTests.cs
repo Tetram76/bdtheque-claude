@@ -13,7 +13,7 @@ namespace Bdtheque.Frontend.Tests.Formatting;
 public sealed class RecordLabelsTests
 {
     private readonly RecordLabels _labels =
-        new ServiceCollection().AddLogging().AddLocalization().AddSingleton<RecordLabels>()
+        new ServiceCollection().AddLogging().AddLocalization().AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>()
             .BuildServiceProvider().GetRequiredService<RecordLabels>();
 
     [Theory]
@@ -69,6 +69,27 @@ public sealed class RecordLabelsTests
     public void Edition_DropsWhatIsMissing(string? collection, int? year, string? isbn, string expected) =>
         Assert.Equal(expected, _labels.Edition(
             new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Dargaud", collection is null ? null : Guid.NewGuid(), collection, year, isbn)));
+
+    [Fact]
+    public void Edition_FormatsItsIsbn_ByTheRangesOfTheAgency()
+    {
+        var services = new ServiceCollection().AddLogging().AddLocalization().AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>()
+            .BuildServiceProvider();
+        services.GetRequiredService<IsbnFormatter>().Ranges = IsbnRangesTests.Ranges();
+
+        Assert.Equal("Glénat [2004] - ISBN\u00A0978-2-7234-4567-1", services.GetRequiredService<RecordLabels>().Edition(
+            new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Glénat", null, null, 2004, "9782723445671")));
+    }
+
+    // An ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md): the label tells it apart, mention
+    // included, for the presentation that keeps it on one line; the text of the label is left as it is.
+    [Theory]
+    [InlineData("Dargaud (Lucky Luke) [1978] - ISBN\u00A0978-2-205-01234-5", "Dargaud (Lucky Luke) [1978] - ", "ISBN\u00A0978-2-205-01234-5")]
+    [InlineData("Blacksad - T. 7 · Dargaud - ISBN\u00A0978-2-205-01234-5", "Blacksad - T. 7 · Dargaud - ", "ISBN\u00A0978-2-205-01234-5")]
+    [InlineData("Dargaud (Lucky Luke) [1978]", "Dargaud (Lucky Luke) [1978]", null)]
+    [InlineData("ISBN Pratique (Tome 1)", "ISBN Pratique (Tome 1)", null)]
+    public void SplitIsbn_SetsTheIsbnOfALabelApart(string label, string lead, string? isbn) =>
+        Assert.Equal((lead, isbn), _labels.SplitIsbn(label));
 
     // The label of a record of the change log, from what it was built from at the time of the write
     // (modele-metier/entree-du-journal-des-modifications.md): an album and an edition as above, an author by its main

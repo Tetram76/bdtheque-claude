@@ -51,3 +51,8 @@
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
 }
+
+/* An ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md). */
+.edition-isbn {
+    white-space: nowrap;
+}

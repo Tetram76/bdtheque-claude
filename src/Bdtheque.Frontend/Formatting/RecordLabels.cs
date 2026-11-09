@@ -12,7 +12,7 @@ namespace Bdtheque.Frontend.Formatting;
 /// gives them or the change log kept them from the time of a write (modele-metier/entree-du-journal-des-modifications.md).
 /// The words of the volume and the ISBN mention are texts of the display culture (<c>RecordLabels.resx</c>).
 /// </summary>
-public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
+public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnFormatter isbns)
 {
     /// <summary>
     /// The label of an album in the format of the settings. <paramref name="withSeries"/> leaves the series out where the
@@ -26,6 +26,17 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
     /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
     public string Edition(EditionSummary edition) =>
         Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
+
+    /// <summary>
+    /// A label split before its ISBN, mention included, which always ends it: an ISBN is a single block, which the
+    /// presentation keeps on one line (fonctionnel/presentation/libelle-d-une-edition.md). <c>Isbn</c> is <c>null</c> for a
+    /// label without ISBN, whole in <c>Lead</c>.
+    /// </summary>
+    public (string Lead, string? Isbn) SplitIsbn(string label)
+    {
+        var start = label.LastIndexOf($" - {texts["Isbn"]}\u00A0", StringComparison.Ordinal);
+        return start < 0 ? (label, null) : (label[..(start + 3)], label[(start + 3)..]);
+    }
 
     /// <summary>
     /// The volume of an album alone, as next to a title (fonctionnel/presentation/libelle-d-un-album.md); <c>null</c> for a
@@ -91,7 +102,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts)
         if (publicationYear is { } year)
             label += string.Create(CultureInfo.InvariantCulture, $" [{year}]");
         if (isbn is not null)
-            label += $" - {texts["Isbn"]}\u00A0{isbn}";
+            label += $" - {texts["Isbn"]}\u00A0{isbns.Format(isbn)}";
         return label;
     }
 

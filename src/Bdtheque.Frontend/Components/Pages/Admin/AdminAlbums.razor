@@ -81,7 +81,7 @@
                                 }
                                 else
                                 {
-                                    <NotSet Gender="GrammaticalGender.Feminine" />
+                                    <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
                                 }
                             </span>
                             <span class="album-editions" role="cell">
@@ -317,15 +317,13 @@
                               Value="@Option(_list!.Filters.Author, a => new(a.Id, RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym), null))"
                               Placeholder="@L["Filter.Any"]" />
             </Field>
-            <Field Id="filter-publisher" Label="@L["Filter.Publisher"]" Context="control">
-                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Publisher" Name="@AlbumListQuery.PublisherName"
-                              Value="@Option(_list!.Filters.Publisher, p => new(p.Id, p.Name, null))" Placeholder="@L["Filter.Any"]" />
-            </Field>
-            <Field Id="filter-collection" Label="@L["Filter.PublisherCollection"]" Context="control">
-                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.PublisherCollection"
-                              Name="@AlbumListQuery.PublisherCollectionName"
-                              Value="@Option(_list!.Filters.PublisherCollection, c => new(c.Id, c.Name, c.PublisherName))" Placeholder="@L["Filter.Any"]" />
-            </Field>
+            @* A collection belongs to its publisher: the pair linked. *@
+            <LinkedFilters @rendermode="InteractiveServer"
+                           ParentKind="RecordKind.Publisher" ParentId="filter-publisher" ParentName="@AlbumListQuery.PublisherName"
+                           ParentLabel="@L["Filter.Publisher"]" Parent="@Option(_list!.Filters.Publisher, p => new(p.Id, p.Name, null))"
+                           ChildKind="RecordKind.PublisherCollection" ChildId="filter-collection" ChildName="@AlbumListQuery.PublisherCollectionName"
+                           ChildLabel="@L["Filter.PublisherCollection"]" Child="@Option(_list!.Filters.PublisherCollection, RecordSearch.CollectionOption)"
+                           Placeholder="@L["Filter.Any"]" />
             <Field Id="filter-genre" Label="@L["Filter.Genre"]" Context="control">
                 <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Genre" Name="@AlbumListQuery.GenreName"
                               Value="@Option(_list!.Filters.Genre, g => new(g.Id, g.Label, null))" Placeholder="@L["Filter.Any"]" />

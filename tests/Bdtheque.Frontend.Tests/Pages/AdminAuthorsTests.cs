@@ -97,7 +97,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
             [
                 ("Christophe Gibelin", null, "Française", "14 albums", "Scénario"),
                 ("Jean-Pierre Gibrat", null, "Française", "1 album", "Scénario · Dessin · Couleurs"),
-                ("Alain Gomez", null, "Non renseignée", "Aucun album", "—"),
+                ("Alain Gomez", null, "—Non renseignée", "Aucun album", "—"),
                 // Under a pseudonym, the first name and the last name below it.
                 ("Gotlib", "Marcel Gotlieb", "Française", "22 albums", "Scénario · Dessin"),
             ],

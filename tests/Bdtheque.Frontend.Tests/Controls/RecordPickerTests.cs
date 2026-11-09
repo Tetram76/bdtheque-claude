@@ -41,6 +41,7 @@ public sealed class RecordPickerTests : BunitContext
             BaseAddress = new Uri("http://api"),
         }));
         Services.AddScoped<RecordSearch>();
+        Services.AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 

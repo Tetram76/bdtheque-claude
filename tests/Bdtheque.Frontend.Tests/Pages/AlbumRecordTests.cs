@@ -50,7 +50,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         // Paris, an hour ahead: a modification at 23:30 universal time is of the next day.
         Services.AddScoped(_ => new BrowserTimeZone { Name = "Europe/Paris" });
         Services.AddScoped<DisplayFormatter>();
-        Services.AddSingleton<RecordLabels>();
+        Services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
         Services.AddSingleton<ValueLabels>();
     }
 
@@ -263,6 +263,18 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
             editions.Select(e => e.QuerySelector(".edition-label")!.TextContent.Trim()));
         Assert.All(editions, e => Assert.NotNull(e.QuerySelector(".edition-detail")));
         Assert.Equal("Offerte", Row(page, "Mode d'acquisition", edition: 1));
+    }
+
+    [Fact]
+    public void Isbn_InTheLabelAndInTheDetailOfAnEdition_IsASingleBlock()
+    {
+        _catalog.Album = Album();
+
+        var edition = BlockOf(Open(), "Dans quelles éditions ?").QuerySelectorAll(".edition")[0];
+
+        // Never broken at the end of a line (fonctionnel/presentation/libelle-d-une-edition.md).
+        Assert.Equal("ISBN\u00A02-203-34424-5", edition.QuerySelector(".edition-label .label-isbn")!.TextContent);
+        Assert.Equal("2-203-34424-5", edition.QuerySelector("dd.edition-isbn")!.TextContent.Trim());
     }
 
     [Fact]

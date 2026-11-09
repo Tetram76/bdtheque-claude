@@ -3,6 +3,7 @@
 @inject IStringLocalizer<EditionFacts> L
 @inject ValueLabels Values
 @inject DisplayFormatter Format
+@inject IsbnFormatter Isbns
 
 @* The detail of the edition chosen on the record of an album (visuel/fiche-album/contenu.md), in two groups: the edition and
    the copy. A data not set has no row, which would only weigh the detail down. The labels of the date and of the amount of the acquisition
@@ -29,7 +30,7 @@
             </div>
             @Row(L["Collection"], Edition.Edition.PublisherCollectionName)
             @Row(L["Year"], Edition.Edition.PublicationYear?.ToString(CultureInfo.InvariantCulture))
-            @Row(L["Isbn"], Edition.Edition.Isbn)
+            @Row(L["Isbn"], Edition.Edition.Isbn is { } isbn ? Isbns.Format(isbn) : null, "edition-isbn")
             @Row(L["Category"], Label(Edition.Category))
             @Row(L["Format"], Label(Edition.Format))
             @Row(L["Binding"], Label(Edition.Binding))
@@ -87,13 +88,14 @@
     private string? Label<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } known ? Values.Of(known) : null;
 
     // A row of the detail, none for a data not set.
-    private static RenderFragment Row(string label, string? value) => __builder =>
+    // A value whose class keeps it whole: an ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md).
+    private static RenderFragment Row(string label, string? value, string? valueClass = null) => __builder =>
     {
         if (value is null)
             return;
         <div>
             <dt>@label</dt>
-            <dd>@value</dd>
+            <dd class="@valueClass">@value</dd>
         </div>
     };
 

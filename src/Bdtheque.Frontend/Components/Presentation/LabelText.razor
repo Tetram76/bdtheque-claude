@@ -1,0 +1,16 @@
+@inject RecordLabels Labels
+
+@* The label of a record as text, its ISBN in a block that a line never breaks, neither from its mention nor at one of its
+   hyphens (fonctionnel/presentation/libelle-d-une-edition.md). The text itself is left as it is: an ISBN copied from the page
+   is found again by the search, which ignores ordinary hyphens and spaces only. *@
+@_lead@if (_isbn is not null){<span class="label-isbn">@_isbn</span>}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = "";
+
+    private string _lead = "";
+    private string? _isbn;
+
+    protected override void OnParametersSet() => (_lead, _isbn) = Labels.SplitIsbn(Text);
+}

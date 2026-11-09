@@ -28,6 +28,11 @@ public sealed class AdministrationEndpointsTests(ApiWebApplicationFactory factor
         await PostAsync<CreateEditionRequest, EditionForm>($"/admin/albums/{owned.Id}/editions", new(Edition(publisher.Id, null), owned.Version));
         var wanted = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("Le Prisonnier du Bouddha"));
         await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>($"/admin/albums/{wanted.Id}/purchase-intents", new(null, wanted.Version));
+        // An edition targeted by an intent is one of the intents, never one of the editions
+        // (fonctionnel/regles-metier/intention-d-achat.md).
+        var targeted = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("Les Voleurs de Marsupilamis"));
+        await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>($"/admin/albums/{targeted.Id}/purchase-intents",
+            new(new PurchaseIntentEditionContent(publisher.Id, null, null, null, null, null, null, null, null, null, true), targeted.Version));
         await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("Z comme Zorglub"));
         await PostAsync<CreateAuthorRequest, AuthorForm>("/admin/authors", new("Franquin", "André", null, null, null));
         await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new("Humour"));
@@ -39,8 +44,8 @@ public sealed class AdministrationEndpointsTests(ApiWebApplicationFactory factor
         // What this test added to what the other tests of the class have written.
         Assert.Equal(
             new RecordCounts(
-                before.Albums + 3, before.AlbumsOutsideCollection + 2, before.Editions + 1, before.Series + 2,
-                before.SeriesWithoutStatus + 1, before.PurchaseIntents + 1, before.Authors + 1, before.Publishers + 2,
+                before.Albums + 4, before.AlbumsOutsideCollection + 3, before.Editions + 1, before.Series + 2,
+                before.SeriesWithoutStatus + 1, before.PurchaseIntents + 2, before.Authors + 1, before.Publishers + 2,
                 before.PublisherCollections + 1, before.Genres + 1, before.Universes + 2, before.SubUniverses + 1),
             counts);
     }

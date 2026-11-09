@@ -40,6 +40,11 @@ builder.Services.AddScoped(services => new BrowserTimeZone
 });
 builder.Services.AddScoped<DisplayFormatter>();
 builder.Services.AddSingleton<RecordLabels>();
+// The ranges of the International ISBN Agency, downloaded from its site at the start then every day (IsbnRangesRefresher).
+builder.Services.AddSingleton<IsbnFormatter>();
+builder.Services.AddOptions<IsbnRangesOptions>().Bind(builder.Configuration.GetSection(IsbnRangesOptions.SectionName));
+builder.Services.AddHttpClient(IsbnRangesRefresher.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(30));
+builder.Services.AddHostedService<IsbnRangesRefresher>();
 builder.Services.AddSingleton<ValueLabels>();
 // What the pages draw at random at each display (e.g. the greeting of the dashboard), which the tests fix.
 builder.Services.AddSingleton(Random.Shared);

@@ -9,4 +9,5 @@ public enum RecordKind
     PublisherCollection,
     Genre,
     Universe,
+    Album,
 }

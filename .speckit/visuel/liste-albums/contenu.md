@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la liste des albums : recherche, filtres, navigation, lignes, actions, suppression, fusion.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T22:00:00Z }
 ---
 
 # Contenu
@@ -14,7 +14,7 @@ De haut en bas :
 - **Titre** « Albums », suivi du nombre total d'albums, et le bouton **Nouvel album**, mis en relief (réduit à son icône sur smartphone).
 - **La liste**, dans un bloc unique :
   - un **champ de recherche** sur le titre de l'album et sur celui de sa série, et le bouton **Filtres**, qui porte le nombre de filtres actifs ;
-  - le **panneau des filtres**, replié par défaut : série, auteur, éditeur, collection éditeur, genre et univers, choisis en tapant leur nom, et l'appartenance à la collection, choisie dans une liste ; un univers retient aussi les albums de ses sous-univers, et genres et univers sont ceux qu'affiche l'album ([Genres et univers d'un album](../../fonctionnel/regles-metier/genres-et-univers-d-un-album.md), [Hiérarchie des univers](../../fonctionnel/regles-metier/hierarchie-des-univers.md)) ;
+  - le **panneau des filtres**, replié par défaut : série, auteur, éditeur, collection éditeur, genre et univers, choisis en tapant leur nom, et l'appartenance à la collection, choisie dans une liste ; un univers retient aussi les albums de ses sous-univers, et genres et univers sont ceux qu'affiche l'album ([Genres et univers d'un album](../../fonctionnel/regles-metier/genres-et-univers-d-un-album.md), [Hiérarchie des univers](../../fonctionnel/regles-metier/hierarchie-des-univers.md)). Dans toute liste qui les propose ensemble, une collection et son éditeur, un album et sa série sont des filtres liés : choisir la collection pose son éditeur, et choisir l'album pose sa série, ou retire la série pour un album sans série ; l'éditeur, ou la série, choisi, seules ses collections, ou ses albums, sont proposés, et en changer retire une collection, ou un album, qui n'en relève pas ;
   - les **filtres actifs**, en étiquettes retirables une à une, et « Tout effacer » ;
   - la **navigation par initiale** (« Toutes », A à Z, # et @, [Entrées de la navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale)), qui défile horizontalement sans passer à la ligne, comme le menu de la consultation, l'entrée courante en couleur d'accent ;
   - le **décompte** (« 143 albums sous la lettre B », « 38 albums sur 2 847 ») et l'ordre de la liste, rappelé en clair : par titre, la série tenant lieu de titre aux albums qui n'en ont pas ([Tri et navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md)) ;

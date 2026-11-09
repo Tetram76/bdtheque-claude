@@ -1,9 +1,21 @@
 @inject IStringLocalizer<NotSet> L
 
-@* A missing data is shown, never left blank (visuel/listes/principes-communs.md). *@
-<span class="not-set">@L[Gender.ToString()]</span>
+@* A missing data is shown, never left blank (visuel/listes/principes-communs.md): its mention, or, brief, a dash that a screen
+   reader reads as the mention, where a mention would crowd (a column of a list). *@
+@if (Brief)
+{
+    <span class="not-set"><span aria-hidden="true">—</span><span class="visually-hidden">@L[Gender.ToString()]</span></span>
+}
+else
+{
+    <span class="not-set">@L[Gender.ToString()]</span>
+}
 
 @code {
     [Parameter]
     public GrammaticalGender Gender { get; set; }
+
+    /// <summary>A dash rather than the mention.</summary>
+    [Parameter]
+    public bool Brief { get; set; }
 }
