@@ -17,7 +17,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// of the menu, the authors of a role unfolded and folded, on the application of the records (<see cref="RecordsApplication"/>).
 /// </summary>
 [Collection(RecordsApplication.Name)]
-public sealed class AlbumRecordTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
+public sealed partial class AlbumRecordTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
 {
     [Fact]
     public async Task Record_IsUnderTheAlbumsOfTheMenu_AndNamesTheAlbum()
@@ -40,7 +40,7 @@ public sealed class AlbumRecordTests(RecordsApplication application) : BrowserTe
         var last = drawing.GetByRole(AriaRole.Link, new() { Name = "Inès Vasseur" });
 
         await Assertions.Expect(last).ToBeHiddenAsync();
-        await Assertions.Expect(drawing.Locator(".contributions-more")).ToHaveTextAsync(new Regex(@"^et \d+ autres?$"));
+        await Assertions.Expect(drawing.Locator(".contributions-more")).ToHaveTextAsync(FoldedCount());
         Assert.True(await OnOneLineAsync(drawing));
 
         await drawing.Locator(".contributions-more").ClickAsync();
@@ -65,6 +65,9 @@ public sealed class AlbumRecordTests(RecordsApplication application) : BrowserTe
         await Assertions.Expect(last).ToBeHiddenAsync();
         Assert.True(await OnOneLineAsync(drawing));
     }
+
+    [GeneratedRegex(@"^et \d+ autres?$")]
+    private static partial Regex FoldedCount();
 
     // The names shown of a row, and the link that unfolds the others, all on the line of the first name.
     private static Task<bool> OnOneLineAsync(ILocator row) => row.EvaluateAsync<bool>("""
