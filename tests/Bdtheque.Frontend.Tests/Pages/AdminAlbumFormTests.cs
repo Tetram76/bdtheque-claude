@@ -256,7 +256,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     {
         // A field changed during the saving would be overwritten by the album as saved.
         var saved = new TaskCompletionSource();
-        _api.Hold = (_, _) => saved.Task;
+        _api.Hold = (_, body) => body.ValueKind == JsonValueKind.Undefined ? Task.CompletedTask : saved.Task;
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
         var page = OpenAlbum();
         page.Find("#album-title").Input("Le Lotus bleu");
@@ -266,6 +266,28 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         page.WaitForAssertion(() => Assert.True(page.Find(".entry-form-blocks").HasAttribute("disabled")));
         saved.SetResult();
         page.WaitForAssertion(() => Assert.False(page.Find(".entry-form-blocks").HasAttribute("disabled")));
+    }
+
+    [Fact]
+    public async Task Universe_Added_IsSaved_EvenBeforeItsHierarchyIsRead()
+    {
+        // Its ancestors only name it: a saving made while they are read keeps the universe.
+        var hierarchy = new TaskCompletionSource();
+        var harbour = Guid.NewGuid();
+        _api.Hold = (path, _) => path.EndsWith("/hierarchy", StringComparison.Ordinal) ? hierarchy.Task : Task.CompletedTask;
+        _api.Answers[$"/admin/universes/{harbour}/hierarchy"] = new UniverseInHierarchy(
+            new UniverseListItem(harbour, "Le port", Guid.Empty, "Univers Hergé"), [new UniverseListItem(Guid.Empty, "Univers Hergé", null, null)]);
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
+        var page = OpenAlbum();
+        var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == RecordKind.Universe);
+
+        var adding = tags.InvokeAsync(() => tags.Instance.OnAdd.InvokeAsync(new RecordOption(harbour, "Le port", "Univers Hergé")));
+        page.Find("form").Submit();
+
+        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Contains(harbour.ToString(), _api.Written.Single().Body.GetProperty("content").GetProperty("universeIds").EnumerateArray().Select(u => u.GetString()));
+        hierarchy.SetResult();
+        await adding;
     }
 
     [Fact]

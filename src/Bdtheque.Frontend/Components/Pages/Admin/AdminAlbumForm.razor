@@ -310,18 +310,28 @@ else
     }
 
     // A universe is presented with its ancestors, which its suggestion only gives the parent of.
+    // Added at once, then named with its ancestors once they are read: a saving made meanwhile keeps it.
     private async Task AddUniverseAsync(RecordOption universe)
     {
         if (Entry!.Universes.Any(u => u.Id == universe.Id))
             return;
+        Entry.Universes.Add(universe);
         try
         {
-            Entry.Universes.Add(AlbumEntry.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")));
+            Rename(AlbumEntry.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")));
         }
         catch (ApiProblemException)
         {
-            Entry.Universes.Add(universe);
+            // Named without its ancestors.
         }
+    }
+
+    // The universe named anew, if the album still has it: the entry may have been saved, or the universe removed, meanwhile.
+    private void Rename(RecordOption universe)
+    {
+        var index = Entry!.Universes.FindIndex(u => u.Id == universe.Id);
+        if (index >= 0)
+            Entry.Universes[index] = universe;
     }
 
     // Authors changed are personalized: the notice of those taken from the series no longer applies
@@ -361,8 +371,9 @@ else
         _universeCreation = null;
         var (universe, parent) = created;
         Entry!.NewUniverses.Add(universe);
-        var ancestors = parent is null ? null : await AncestryAsync(parent);
-        Entry.Universes.Add(new RecordOption(universe.Key, ancestors is null ? universe.Name : $"{ancestors} › {universe.Name}", null));
+        Entry.Universes.Add(new RecordOption(universe.Key, parent is null ? universe.Name : $"{parent.Label} › {universe.Name}", null));
+        if (parent is not null)
+            Rename(new RecordOption(universe.Key, $"{await AncestryAsync(parent)} › {universe.Name}", null));
         await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumUniverseCreated);
     }
 

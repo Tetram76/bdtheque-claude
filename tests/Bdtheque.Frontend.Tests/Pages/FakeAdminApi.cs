@@ -38,7 +38,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
     /// <summary>What a write (POST, PUT) answers, from its method, path and body; none, a not found.</summary>
     public Func<HttpMethod, string, JsonElement, HttpResponseMessage>? Write { get; set; }
 
-    /// <summary>What a write waits for before it answers, from its path and body: a response that arrives late.</summary>
+    /// <summary>What a request waits for before it answers, from its path and body (none for a read): a response that arrives late.</summary>
     public Func<string, JsonElement, Task>? Hold { get; set; }
 
     /// <summary>The writes sent, with their body.</summary>
@@ -87,6 +87,8 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         }
 
         Requested.Add(request.RequestUri.PathAndQuery);
+        if (Hold is not null)
+            await Hold(path, default);
         if (Failures.TryGetValue(path, out var status))
             return Problem(ProblemTypes.Technical, status);
 
