@@ -1,0 +1,230 @@
+@attribute [Route(AppPaths.AdminPurchaseIntents)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Deletion
+@inject IStringLocalizer<AdminPurchaseIntents> L
+@inject ApiClient Api
+@inject AdminRecordCounts RecordCounts
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The list of the purchase intents of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the
+   albums (visuel/listes/listes-de-l-administration.md). An intent has no record of its own (visuel/listes/saisie-selon-l-entite.md):
+   it is set from the page of the editions and intents of its album, which the heading says in place of a creation; its main
+   action confirms the purchase, and its menu converts it or removes it. Rendered statically, its search, its page and its
+   removal dialog are carried by its address (Lists/PurchaseIntentListQuery.cs). Its styles read the contracts of the base
+   theme only (visuel/listes/declinaison-par-theme.md). *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminPurchaseIntents" />
+
+<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_counts?.PurchaseIntents" Note="@L["NoCreation"]" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.AdminPurchaseIntents" FieldId="intent-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
+
+        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.PurchaseIntents" Order="@L["Order"]" />
+
+        @if (_list!.Items.Count == 0)
+        {
+            if (_query.Text is { } text)
+            {
+                <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
+                    <Actions>
+                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                    </Actions>
+                </EmptyList>
+            }
+            else
+            {
+                <EmptyList Message="@L["Empty.None"]" Hint="@L["NoCreation"]" />
+            }
+        }
+        else
+        {
+            <div class="intent-rows" role="table" aria-label="@L["Title"]">
+                <div class="intent-row intent-row-head" role="row">
+                    <span class="intent-cover" role="columnheader"><span class="visually-hidden">@L["Column.Cover"]</span></span>
+                    <span class="intent-main" role="columnheader">@L["Column.Album"]</span>
+                    <span class="intent-target" role="columnheader">@L["Column.Target"]</span>
+                    <span class="intent-collection" role="columnheader">@L["Column.Collection"]</span>
+                    <span class="intent-created" role="columnheader">@L["Column.Created"]</span>
+                    <span class="intent-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
+                </div>
+                @foreach (var row in _list.Items)
+                {
+                    var album = AlbumLabel(row.Album);
+                    <div class="intent-row" role="row">
+                        <span class="intent-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
+                        <span class="intent-main" role="cell">
+                            <a class="intent-label" href="@AppPaths.AdminAlbumEditions(row.Album.Id)">@album</a>
+                        </span>
+                        <span class="intent-meta">
+                            @* What the intent targets, told apart at first glance: the whole album, any edition doing, or one
+                               edition, named beside it. *@
+                            <span class="intent-target" role="cell">
+                                @if (row.Edition is { } edition)
+                                {
+                                    <Tag Text="@L["Target.Edition"]" Variant="TagVariant.Outlined" Icon="IconName.Edition" />
+                                    <span class="intent-target-detail intent-target-edition"><LabelText Text="@Labels.Edition(edition)" /></span>
+                                }
+                                else
+                                {
+                                    <Tag Text="@L["Target.Album"]" Variant="TagVariant.Accent" Icon="IconName.Album" />
+                                    <span class="intent-target-detail">@L["Target.AnyEdition"]</span>
+                                }
+                            </span>
+                            <span class="intent-collection" role="cell">
+                                <CollectionStateTag State="@(row.Album.IsInCollection ? AlbumCollectionState.InCollection : AlbumCollectionState.OutsideCollection)" />
+                            </span>
+                            <span class="intent-created" role="cell">
+                                <span class="intent-caption">@L["Column.Created"]</span> <LocalDateTime Value="row.CreatedAt" DateOnly="true" />
+                            </span>
+                        </span>
+                        <span class="intent-actions" role="cell">
+                            <Button Href="@AppPaths.AdminConfirmPurchase(row.Album.Id, row.Id)" Icon="IconName.Check" Label="@L["Confirm"]"
+                                    IconOnlyOnSmartphone="true" aria-label="@L["Confirm.Label", album]" />
+                            <ActionsMenu Id="@($"intent-actions-{row.Id:N}")" Label="@L["More", album]">
+                                <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Album" Label="@L["Menu.Editions"]" />
+                                @if (row.IsConvertible)
+                                {
+                                    <MenuItem Href="@AppPaths.AdminConvertPurchaseIntent(row.Album.Id, row.Id)" Icon="IconName.Swap"
+                                              Label="@(row.Edition is null ? L["Menu.ToEdition"] : L["Menu.ToAlbum"])" />
+                                }
+                                <MenuSeparator />
+                                <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Remove"]"
+                                          Variant="ButtonVariant.Delete" />
+                            </ActionsMenu>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <Pagination Number="_list.Number" Size="_list.Size" TotalCount="_list.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (ListOnly with { Page = page }).Href())" />
+        }
+    </ChildContent>
+    <Dialogs>
+        @if (_dialogIntent is not null)
+        {
+            <DeletionDialog Id="intent-removal" FormName="@RemovalFormName" Title="@L["Removal.Title"]"
+                            Subject="@Labels.PurchaseIntent(_dialogIntent.Album, _dialogIntent.Edition, _settings!.AlbumLabelFormat)"
+                            CloseHref="@ListOnly.Href()" Lead="@L["Removal.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                            RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_removalProblem"
+                            Version="_dialogIntent.AlbumVersion" OnConfirm="RemoveAsync" />
+        }
+    </Dialogs>
+</ListLayout>
+
+@code {
+    private const string RemovalFormName = "intent-removal";
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    /// <summary>The version of the album of the intent whose removal is confirmed: the intent belongs to its aggregate.</summary>
+    [SupplyParameterFromForm(FormName = RemovalFormName, Name = DeletionDialog.VersionName)]
+    private uint? Version { get; set; }
+
+    /// <summary>The fingerprint of the impact of the removal the administrator confirmed.</summary>
+    [SupplyParameterFromForm(FormName = RemovalFormName, Name = DeletionDialog.FingerprintName)]
+    private string? Fingerprint { get; set; }
+
+    private PurchaseIntentListQuery _query = new();
+    private RecordCounts? _counts;
+    private ApplicationSettings? _settings;
+    private Page<PurchaseIntentAdminListItem>? _list;
+    private ApiProblem? _problem;
+    private PurchaseIntentAdminListItem? _dialogIntent;
+    private DeletionImpact? _impact;
+    private ApiProblem? _removalProblem;
+
+    // The list with its criteria, without its dialog: where a link of the list, or the closing of the dialog, leads.
+    private PurchaseIntentListQuery ListOnly => _query with { Delete = null };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = PurchaseIntentListQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            // The number of intents is the one of the menu, read once per request; without it, the list goes on.
+            _counts = await RecordCounts.TryGetAsync();
+            _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
+            _list = await Api.GetAsync<Page<PurchaseIntentAdminListItem>>(_query.ApiPath());
+            // A page beyond the last one (the page of its only intent once removed, an old address) is no empty list: its
+            // intents are on the pages before it, the last of which it leads to, with the same criteria.
+            if (_list is { Items.Count: 0, TotalCount: > 0 } && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (_list.TotalCount + _list.Size - 1) / _list.Size }).Href());
+                return;
+            }
+            // The dialog opens on an intent of the page, from its row: an address written by hand on another one opens none.
+            _dialogIntent = _list.Items.FirstOrDefault(row => row.Id == _query.Delete);
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        if (_dialogIntent is not null)
+            await LoadImpactAsync(_dialogIntent);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // An intent is addressed by its album, the root of its aggregate.
+    private static string IntentPath(PurchaseIntentAdminListItem row) => $"/admin/albums/{row.Album.Id}/purchase-intents/{row.Id}";
+
+    private async Task LoadImpactAsync(PurchaseIntentAdminListItem row)
+    {
+        try
+        {
+            _impact = await Api.GetAsync<DeletionImpact>($"{IntentPath(row)}/deletion-impact");
+        }
+        catch (ApiProblemException exception)
+        {
+            _removalProblem = exception.Problem;
+        }
+    }
+
+    private async Task RemoveAsync()
+    {
+        if (_dialogIntent is null || Version is not { } version || Fingerprint is null)
+            return;
+
+        try
+        {
+            await Api.DeleteAsync($"{IntentPath(_dialogIntent)}?version={version}&fingerprint={Uri.EscapeDataString(Fingerprint)}");
+        }
+        catch (ApiProblemException exception)
+        {
+            // A removal refused, or whose impact changed since its confirmation, announces the current impact, to confirm
+            // again or to resolve; any other error is presented as it is.
+            _removalProblem = exception.Problem;
+            _impact = exception.Problem.Impact;
+            if (_impact is { BlockedBy.Count: > 0 })
+                _removalProblem = null;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(
+            AudienceFunctions.AdminPurchaseIntentsRemoved, $"intent={_dialogIntent.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    private string AlbumLabel(AlbumSummary album) => Labels.Album(album, _settings!.AlbumLabelFormat);
+
+    private string CountText() => _list!.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+}

@@ -46,6 +46,13 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         Volume(new AlbumLabel(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue, album.VolumeNumber,
             album.StartVolumeNumber, album.EndVolumeNumber), abbreviated: true);
 
+    /// <summary>
+    /// The label of a purchase intent: the album it targets, followed by the edition when it targets one, as the change log
+    /// names it (<see cref="Record"/>).
+    /// </summary>
+    public string PurchaseIntent(AlbumSummary album, EditionSummary? edition, AlbumLabelFormat format) =>
+        edition is null ? Album(album, format) : WithItsAlbum(Album(album, format), Edition(edition));
+
     /// <summary>The name of an author: its main identifier.</summary>
     public string Author(AuthorListItem author) => Author(new AuthorLabel(author.LastName, author.FirstName, author.Pseudonym));
 
@@ -106,8 +113,10 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         return label;
     }
 
-    private string EditionWithItsAlbum(EditionLabel edition, AlbumLabelFormat format) =>
-        $"{Album(edition.Album, format)} · {Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn)}";
+    private string EditionWithItsAlbum(EditionLabel edition, AlbumLabelFormat format) => WithItsAlbum(
+        Album(edition.Album, format), Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn));
+
+    private static string WithItsAlbum(string album, string edition) => $"{album} · {edition}";
 
     // Its main identifier: the pseudonym, else « First name Last name », or the last name alone
     // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).

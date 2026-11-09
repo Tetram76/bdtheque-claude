@@ -176,11 +176,15 @@ public sealed class AdministrationApplication : ApplicationHost
             Contributions = [new(franquin.Id, ContributionRole.Scenarist), new(franquin.Id, ContributionRole.Illustrator)],
         });
         // The cases of the list of the editions: a category and an acquisition date known, and neither (the edition below).
-        await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id, FirstEditionIsbn) with
+        var owned = await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id, FirstEditionIsbn) with
         {
             Category = EditionCategory.FirstEdition,
             AcquisitionDate = new DateOnly(1961, 3, 4),
         }, album.Version));
+        // The cases of the list of the intents: one on an edition of an album of the collection, and one on a whole album
+        // (below), outside it.
+        await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(api, $"/admin/albums/{album.Id}/purchase-intents", new(
+            new PurchaseIntentEditionContent(publisher.Id, null, 2018, null, null, null, null, null, null, null, true), owned.AlbumVersion));
         var wanted = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Le Prisonnier du Bouddha", series.Id, 14));
         await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(api, $"/admin/albums/{wanted.Id}/purchase-intents", new(null, wanted.Version));
         await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album("Z comme Zorglub", series.Id, 15));

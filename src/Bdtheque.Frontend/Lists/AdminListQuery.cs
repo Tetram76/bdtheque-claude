@@ -111,9 +111,13 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
             if (Delete is { } deleted)
                 return (Functions.Deletion, $"{Functions.Subject}={deleted}");
             if (Merge is { } merged)
-                return (Functions.Merge, string.IsNullOrWhiteSpace(MergeText)
+            {
+                // A list whose records do not merge never reads a merge from its address.
+                var merge = Functions.Merge ?? throw new UnreachableException("A merge in a list whose records do not merge.");
+                return (merge, string.IsNullOrWhiteSpace(MergeText)
                     ? $"{Functions.Subject}={merged}"
                     : $"{Functions.Subject}={merged}&{Join([(TextName, MergeText)])}");
+            }
 
             var criteria = Criteria(includePage: true);
             if (criteria.Count == 0)
@@ -191,6 +195,8 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
 /// <param name="Subject">The name of the record a dialog is opened on, in the parameters of its action (e.g. <c>album</c>).</param>
 /// <param name="Filter">None for a list without filters, so that no function the list cannot use is followed.</param>
 /// <param name="Initial">None for a list without navigation by initial.</param>
+/// <param name="Deletion">The dialog of the deletion of a record, or of its removal (a purchase intent).</param>
+/// <param name="Merge">None for a list whose records do not merge (the purchase intents).</param>
 public sealed record ListFunctions(
     string Subject,
     AudienceFunction Search,
@@ -198,4 +204,4 @@ public sealed record ListFunctions(
     AudienceFunction? Initial,
     AudienceFunction Page,
     AudienceFunction Deletion,
-    AudienceFunction Merge);
+    AudienceFunction? Merge);

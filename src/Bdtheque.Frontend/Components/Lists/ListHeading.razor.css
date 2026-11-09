@@ -17,6 +17,12 @@
     min-inline-size: 0;
 }
 
+.list-heading-note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
 .list-heading-count {
     margin-inline-start: var(--space-s);
     color: var(--color-text-muted);

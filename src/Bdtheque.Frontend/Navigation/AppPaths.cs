@@ -116,7 +116,20 @@ public static class AppPaths
     /// </summary>
     public const string AdminMergeEditions = NotYetImplemented;
 
-    public const string AdminPurchaseIntents = NotYetImplemented;
+    /// <summary>The list of the purchase intents of the administration (visuel/listes/).</summary>
+    public const string AdminPurchaseIntents = "/admin/purchase-intents";
+
+    /// <summary>
+    /// The confirmation of the purchase that realizes an intent, addressed by its album
+    /// (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention), which no mockup presents yet.
+    /// </summary>
+    public static string AdminConfirmPurchase(Guid albumId, Guid id) => NotYetImplemented;
+
+    /// <summary>
+    /// The conversion of an intent into one on the other target, an edition or the whole album, addressed by its album
+    /// (fonctionnel/regles-metier/intention-d-achat.md), which no mockup presents yet.
+    /// </summary>
+    public static string AdminConvertPurchaseIntent(Guid albumId, Guid id) => NotYetImplemented;
 
     /// <summary>The list of the authors of the administration (visuel/listes/).</summary>
     public const string AdminAuthors = "/admin/authors";
