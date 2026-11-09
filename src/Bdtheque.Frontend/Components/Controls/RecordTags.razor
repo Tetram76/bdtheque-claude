@@ -14,7 +14,7 @@
     {
         <span class="record-tags-picker">
             <RecordPicker Id="@Id" Kind="Kind" AutoFocus="true" ValueChanged="AddAsync" OnLeave="Close" OnCreate="CreateAsync"
-                          CreateLabel="CreateLabel" aria-label="@AddLabel" />
+                          CreateLabel="CreateLabel" Pending="Pending" aria-label="@AddLabel" />
         </span>
     }
     else
@@ -64,6 +64,10 @@
 
     [Parameter]
     public Func<string, string>? CreateLabel { get; set; }
+
+    /// <summary>The records added on the spot, not created yet, which the choice suggests too (see <see cref="RecordPicker.Pending"/>).</summary>
+    [Parameter]
+    public IReadOnlyList<RecordOption> Pending { get; set; } = [];
 
     private void Open() => _adding = true;
 

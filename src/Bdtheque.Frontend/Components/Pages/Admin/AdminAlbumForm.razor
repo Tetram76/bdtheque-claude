@@ -109,7 +109,8 @@ else
                                         AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => CreditAuthor(role, author)"
                                         OnRemove="author => RemoveAuthor(role, author)"
                                         RemoveLabel="@(author => L["Authors.Remove", author.Label, Values.Of(role)].Value)"
-                                        OnCreate="text => _authorCreation = (role, text)" CreateLabel="@(text => L["Authors.Create", text].Value)" />
+                                        OnCreate="text => _authorCreation = (role, text)" CreateLabel="@(text => L["Authors.Create", text].Value)"
+                                        Pending="PendingAuthors" />
                         </div>
                     }
                 </div>
@@ -337,6 +338,10 @@ else
         if (index >= 0)
             Entry.Universes[index] = universe;
     }
+
+    // The authors added on the spot, created with the album only: another role credits them under the same key.
+    private IReadOnlyList<RecordOption> PendingAuthors =>
+        [.. Entry!.NewAuthors.Select(a => new RecordOption(a.Key, RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym), L["Authors.Pending"]))];
 
     // Authors changed are personalized: the notice of those taken from the series no longer applies
     // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).

@@ -81,6 +81,27 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
+    public void Typing_SuggestsTheRecordsAddedOnTheSpotToo_UnderTheirKey()
+    {
+        // An author added on the spot for a role is created with the record only: the choice for another role finds it
+        // among the pending records, under the same key, rather than offering to create it twice.
+        var pending = new RecordOption(Guid.NewGuid(), "Jean Nouveau", "nouvel auteur");
+        RecordOption? chosen = null;
+        _answer = _ => Json("""{"items":[],"number":1,"size":10,"totalCount":0}""");
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-author")
+            .Add(p => p.Kind, RecordKind.Author)
+            .Add(p => p.Pending, [pending, new RecordOption(Guid.NewGuid(), "Moebius", "nouvel auteur")])
+            .Add(p => p.ValueChanged, value => chosen = value));
+
+        Type(picker, "nouveau");
+
+        picker.WaitForAssertion(() => Assert.Single(picker.FindAll("[role=option]")));
+        picker.FindAll("[role=option]")[0].Click();
+        Assert.Equal(pending, chosen);
+    }
+
+    [Fact]
     public void ChoosingASuggestion_MakesItTheValue()
     {
         RecordOption? chosen = null;
