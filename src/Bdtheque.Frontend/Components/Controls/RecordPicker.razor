@@ -120,6 +120,13 @@
     [Parameter]
     public bool AutoFocus { get; set; }
 
+    /// <summary>
+    /// The record the records suggested belong to (e.g. the publisher of the collections): only its own are suggested;
+    /// <c>null</c> for all of them.
+    /// </summary>
+    [Parameter]
+    public Guid? Within { get; set; }
+
     /// <summary>The field is left without a record chosen nor created (e.g. to close a field opened by « Ajouter »).</summary>
     [Parameter]
     public EventCallback OnLeave { get; set; }
@@ -201,7 +208,7 @@
             await Task.Delay(TypingPause, Clock, cancellation);
             if (number != _textNumber)
                 return;
-            var found = await Search.FindAsync(Kind, _text, cancellation);
+            var found = await Search.FindAsync(Kind, _text, cancellation, Within);
             if (number != _textNumber)
                 return;
             IReadOnlyList<RecordOption> options = [.. PendingMatching(_text), .. found];

@@ -63,8 +63,59 @@ public sealed class RecordSearchTests
 
         var options = await search.FindAsync(kind, "  Dar & co ", CancellationToken.None);
 
-        Assert.Equal(new RecordOption(Id, label, detail), Assert.Single(options));
+        Assert.Equal(new RecordOption(Id, label, detail), Assert.Single(options) with { Parent = null });
         Assert.Equal($"{path}?q=Dar%20%26%20co&pageSize={RecordSearch.SuggestionCount}", requested);
+    }
+
+    [Fact]
+    public async Task Find_CollectionsOfAPublisher_OnlyThose_EachWithItsPublisher()
+    {
+        string? requested = null;
+        var search = new RecordSearch(new ApiClient(new HttpClient(new StubHandler(request =>
+        {
+            requested = request.RequestUri!.PathAndQuery;
+            return Json($$"""{"items":[{"id":"{{Id}}","name":"Lucky Luke","publisherId":"{{ParentId}}","publisherName":"Dargaud"}],"number":1,"size":10,"totalCount":1}""");
+        }))
+        {
+            BaseAddress = new Uri("http://api"),
+        }), Labels);
+
+        var options = await search.FindAsync(RecordKind.PublisherCollection, "luc", CancellationToken.None, within: ParentId);
+
+        // Its publisher, which the choice of the collection sets (visuel/listes/principes-communs.md).
+        Assert.Equal(new RecordOption(Id, "Lucky Luke", "Dargaud", new RecordOption(ParentId, "Dargaud", null)), Assert.Single(options));
+        Assert.Equal($"/catalog/publisher-collections?q=luc&pageSize={RecordSearch.SuggestionCount}&publisherId={ParentId}", requested);
+    }
+
+    [Fact]
+    public async Task Find_AlbumsOfASeries_OnlyThose_EachWithItsSeries_NoneForAnAlbumWithout()
+    {
+        var alone = Guid.Parse("0199b6a4-0000-7000-8000-000000000003");
+        string? requested = null;
+        var search = new RecordSearch(new ApiClient(new HttpClient(new StubHandler(request =>
+        {
+            if (request.RequestUri!.AbsolutePath == "/catalog/settings")
+                return Json("""{"albumLabelFormat":"TitleSeriesVolume","displayCulture":"FrenchFrance"}""");
+            requested = request.RequestUri!.PathAndQuery;
+            return Json($$"""
+                {"items":[
+                  {"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
+                   "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true},
+                  {"id":"{{alone}}","title":"Silence","seriesId":null,"seriesTitle":null,"type":"Regular","isSpecialIssue":false,
+                   "volumeNumber":null,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true}],
+                 "number":1,"size":10,"totalCount":2}
+                """);
+        }))
+        {
+            BaseAddress = new Uri("http://api"),
+        }), Labels);
+
+        var options = await search.FindAsync(RecordKind.Album, "l", CancellationToken.None, within: ParentId);
+
+        Assert.Equal(
+            [new RecordOption(Id, "Le Lotus bleu (Tintin - T. 5)", null, new RecordOption(ParentId, "Tintin", null)), new RecordOption(alone, "Silence", null)],
+            options);
+        Assert.Equal($"/catalog/albums?q=l&pageSize={RecordSearch.SuggestionCount}&seriesId={ParentId}", requested);
     }
 
     [Theory]

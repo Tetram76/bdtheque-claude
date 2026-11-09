@@ -8,6 +8,7 @@
 @inject AdminRecordCounts RecordCounts
 @inject RecordLabels Labels
 @inject ValueLabels Values
+@inject RecordSearch Search
 @inject DisplayFormatter Format
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
@@ -295,23 +296,18 @@
 
     // The fields of the filters: each record chosen by typing its name, interactive.
     private RenderFragment FiltersPanel => @<ListFilters Note="@L["Filters.Note"]">
-            <Field Id="filter-series" Label="@L["Filter.Series"]" Context="control">
-                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Series" Name="@EditionListQuery.SeriesName"
-                              Value="@Option(_list!.Filters.Series, s => new(s.Id, s.Title, null))" Placeholder="@L["Filter.Any"]" />
-            </Field>
-            <Field Id="filter-album" Label="@L["Filter.Album"]" Context="control">
-                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Album" Name="@EditionListQuery.AlbumName"
-                              Value="@Option(_list!.Filters.Album, a => new(a.Id, AlbumLabel(a), null))" Placeholder="@L["Filter.Any"]" />
-            </Field>
-            <Field Id="filter-publisher" Label="@L["Filter.Publisher"]" Context="control">
-                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Publisher" Name="@EditionListQuery.PublisherName"
-                              Value="@Option(_list!.Filters.Publisher, p => new(p.Id, p.Name, null))" Placeholder="@L["Filter.Any"]" />
-            </Field>
-            <Field Id="filter-collection" Label="@L["Filter.PublisherCollection"]" Context="control">
-                <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.PublisherCollection"
-                              Name="@EditionListQuery.PublisherCollectionName"
-                              Value="@Option(_list!.Filters.PublisherCollection, c => new(c.Id, c.Name, c.PublisherName))" Placeholder="@L["Filter.Any"]" />
-            </Field>
+            @* An album belongs to a series, if any, a collection to its publisher: each pair linked. *@
+            <LinkedFilters @rendermode="InteractiveServer"
+                           ParentKind="RecordKind.Series" ParentId="filter-series" ParentName="@EditionListQuery.SeriesName" ParentLabel="@L["Filter.Series"]"
+                           Parent="@Option(_list!.Filters.Series, s => new(s.Id, s.Title, null))"
+                           ChildKind="RecordKind.Album" ChildId="filter-album" ChildName="@EditionListQuery.AlbumName" ChildLabel="@L["Filter.Album"]"
+                           Child="@Option(_list!.Filters.Album, a => Search.AlbumOption(a, _settings!.AlbumLabelFormat))" Placeholder="@L["Filter.Any"]" />
+            <LinkedFilters @rendermode="InteractiveServer"
+                           ParentKind="RecordKind.Publisher" ParentId="filter-publisher" ParentName="@EditionListQuery.PublisherName"
+                           ParentLabel="@L["Filter.Publisher"]" Parent="@Option(_list!.Filters.Publisher, p => new(p.Id, p.Name, null))"
+                           ChildKind="RecordKind.PublisherCollection" ChildId="filter-collection" ChildName="@EditionListQuery.PublisherCollectionName"
+                           ChildLabel="@L["Filter.PublisherCollection"]" Child="@Option(_list!.Filters.PublisherCollection, RecordSearch.CollectionOption)"
+                           Placeholder="@L["Filter.Any"]" />
         </ListFilters>;
 
     private static RecordOption? Option<T>(T? item, Func<T, RecordOption> option) where T : class => item is null ? null : option(item);

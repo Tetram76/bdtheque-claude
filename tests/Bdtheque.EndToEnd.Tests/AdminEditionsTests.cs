@@ -74,6 +74,32 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
     }
 
     [Fact]
+    public async Task Filter_OnACollection_SetsItsPublisher_ThePublisherChosenOfferingOnlyItsCollections()
+    {
+        var publisher = await CreatePublisherAsync($"Delcourt {_marker}");
+        await PostAsync<PublisherCollectionForm>(
+            $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest($"Encrages {_marker}", publisher.Version));
+        var other = await CreatePublisherAsync($"Soleil {_marker}");
+        await PostAsync<PublisherCollectionForm>(
+            $"/admin/publishers/{other.Id}/collections", new CreatePublisherCollectionRequest($"Encrages bis {_marker}", other.Version));
+        var page = await OpenAsync($"{AppPaths.AdminEditions}?filters=open");
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" }).PressSequentiallyAsync($"Encrages {_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Encrages {_marker}" }).ClickAsync();
+
+        // The publisher of the collection, set by its choice.
+        await Assertions.Expect(page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true })).ToHaveValueAsync($"Delcourt {_marker}");
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « Encrages {_marker} »" }).ClickAsync();
+        // The field emptied by the circuit before typing again, as the user sees it.
+        await Assertions.Expect(page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" })).ToHaveValueAsync("");
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" }).PressSequentiallyAsync("Encrages");
+        // Only the collections of the publisher chosen.
+        await Assertions.Expect(page.GetByRole(AriaRole.Option)).ToHaveCountAsync(1);
+        await Assertions.Expect(page.GetByRole(AriaRole.Option)).ToContainTextAsync($"Encrages {_marker}");
+    }
+
+    [Fact]
     public async Task Deletion_OfTheLastEditionOfAnAlbum_AnnouncesThatTheAlbumLeavesTheCollection_AndTakesTheEditionOutOfTheList()
     {
         var publisher = await CreatePublisherAsync($"Casterman {_marker}");

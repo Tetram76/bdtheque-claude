@@ -1,0 +1,72 @@
+@* Two filters of a list linked as a record and the one it belongs to — a collection and its publisher, an album and its
+   series (visuel/listes/principes-communs.md) —, each chosen by typing its name: the record chosen sets the one it belongs
+   to (an album without series removes the series), the one it belongs to chosen, only its records are offered, and another
+   one removes a record that is not its own. A single interactive component, the two fields of the form of the list, which
+   they send by their identifier; no element of its own around them, each a field of the panel of the filters. *@
+<Field Id="@ParentId" Label="@ParentLabel" Context="control">
+    <RecordPicker Id="@control.Id" Kind="ParentKind" Name="@ParentName" Value="_parent" ValueChanged="ParentChanged" Placeholder="@Placeholder" />
+</Field>
+<Field Id="@ChildId" Label="@ChildLabel" Context="control">
+    <RecordPicker Id="@control.Id" Kind="ChildKind" Name="@ChildName" Value="_child" ValueChanged="ChildChanged" Within="_parent?.Id"
+                  Placeholder="@Placeholder" />
+</Field>
+
+@code {
+    /// <summary>The kind of the record the other belongs to (e.g. a publisher).</summary>
+    [Parameter, EditorRequired]
+    public RecordKind ParentKind { get; set; }
+
+    [Parameter, EditorRequired]
+    public string ParentId { get; set; } = null!;
+
+    /// <summary>The name of its criterion in the form.</summary>
+    [Parameter, EditorRequired]
+    public string ParentName { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string ParentLabel { get; set; } = null!;
+
+    /// <summary>The one chosen when the list is read.</summary>
+    [Parameter]
+    public RecordOption? Parent { get; set; }
+
+    /// <summary>The kind of the record that belongs to the other (e.g. a collection).</summary>
+    [Parameter, EditorRequired]
+    public RecordKind ChildKind { get; set; }
+
+    [Parameter, EditorRequired]
+    public string ChildId { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string ChildName { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string ChildLabel { get; set; } = null!;
+
+    /// <summary>The one chosen when the list is read, with the record it belongs to (<see cref="RecordOption.Parent"/>).</summary>
+    [Parameter]
+    public RecordOption? Child { get; set; }
+
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    private RecordOption? _parent;
+    private RecordOption? _child;
+
+    protected override void OnInitialized() => (_parent, _child) = (Parent, Child);
+
+    private void ParentChanged(RecordOption? parent)
+    {
+        _parent = parent;
+        // Removing the one it belongs to keeps the record: it belongs to that one only, the list is the same.
+        if (parent is not null && _child?.Parent?.Id != parent.Id)
+            _child = null;
+    }
+
+    private void ChildChanged(RecordOption? child)
+    {
+        _child = child;
+        if (child is not null)
+            _parent = child.Parent;
+    }
+}

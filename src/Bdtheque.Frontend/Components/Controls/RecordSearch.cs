@@ -1,4 +1,5 @@
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Formatting;
 
@@ -13,9 +14,14 @@ public sealed class RecordSearch(ApiClient api, RecordLabels labels)
     /// <summary>The number of suggestions: enough to choose, few enough to read at a glance.</summary>
     public const int SuggestionCount = 10;
 
-    public async Task<IReadOnlyList<RecordOption>> FindAsync(RecordKind kind, string text, CancellationToken cancellationToken)
+    /// <param name="within">
+    /// The record the records searched belong to, when two filters are linked (<see cref="Lists.LinkedFilters"/>): the
+    /// publisher of the collections, the series of the albums; ignored for the other kinds.
+    /// </param>
+    public async Task<IReadOnlyList<RecordOption>> FindAsync(RecordKind kind, string text, CancellationToken cancellationToken, Guid? within = null)
     {
         var query = $"q={Uri.EscapeDataString(text.Trim())}&pageSize={SuggestionCount}";
+        string Within(string name) => within is { } id ? $"{query}&{name}={id}" : query;
         return kind switch
         {
             RecordKind.Series => await FindAsync<SeriesListItem>("series", query, s => new(s.Id, s.Title, null), cancellationToken),
@@ -23,21 +29,34 @@ public sealed class RecordSearch(ApiClient api, RecordLabels labels)
                 "authors", query, a => new(a.Id, AuthorName(a.LastName, a.FirstName, a.Pseudonym), null), cancellationToken),
             RecordKind.Publisher => await FindAsync<PublisherListItem>("publishers", query, p => new(p.Id, p.Name, null), cancellationToken),
             RecordKind.PublisherCollection => await FindAsync<PublisherCollectionListItem>(
-                "publisher-collections", query, c => new(c.Id, c.Name, c.PublisherName), cancellationToken),
+                "publisher-collections", Within("publisherId"),
+                CollectionOption, cancellationToken),
             RecordKind.Genre => await FindAsync<GenreListItem>("genres", query, g => new(g.Id, g.Label, null), cancellationToken),
             RecordKind.Universe => await FindAsync<UniverseListItem>("universes", query, u => new(u.Id, u.Name, u.ParentName), cancellationToken),
-            RecordKind.Album => await FindAlbumsAsync(query, cancellationToken),
+            RecordKind.Album => await FindAlbumsAsync(Within("seriesId"), cancellationToken),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
         };
     }
 
-    // An album is named by its label in the format of the settings, its series beside it, as the lists name it
-    // (fonctionnel/presentation/libelle-d-un-album.md): the settings are read with each search, which a pause of the typing
-    // already spaces out, so that a format changed meanwhile applies.
+    /// <summary>A collection as a record option: told apart by its publisher, the record it belongs to.</summary>
+    public static RecordOption CollectionOption(PublisherCollectionListItem collection) =>
+        new(collection.Id, collection.Name, collection.PublisherName, new RecordOption(collection.PublisherId, collection.PublisherName, null));
+
+    /// <summary>
+    /// An album as a record option: its label in the format of the settings, its series beside it, as the lists name it
+    /// (fonctionnel/presentation/libelle-d-un-album.md), and its series as the record it belongs to, none for an album
+    /// without series.
+    /// </summary>
+    public RecordOption AlbumOption(AlbumSummary album, AlbumLabelFormat format) =>
+        new(album.Id, labels.Album(album, format), null,
+            album is { SeriesId: { } seriesId, SeriesTitle: { } seriesTitle } ? new RecordOption(seriesId, seriesTitle, null) : null);
+
+    // The settings are read with each search, which a pause of the typing already spaces out, so that a format changed
+    // meanwhile applies.
     private async Task<IReadOnlyList<RecordOption>> FindAlbumsAsync(string query, CancellationToken cancellationToken)
     {
         var format = (await api.GetAsync<ApplicationSettings>("/catalog/settings", cancellationToken)).AlbumLabelFormat;
-        return await FindAsync<AlbumSummary>("albums", query, a => new(a.Id, labels.Album(a, format), null), cancellationToken);
+        return await FindAsync<AlbumSummary>("albums", query, a => AlbumOption(a, format), cancellationToken);
     }
 
     /// <summary>
