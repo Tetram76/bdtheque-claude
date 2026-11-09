@@ -24,6 +24,15 @@ else if (_album is { } album)
 
     <div class="album-record">
         <div class="album-identity">
+            @if (!album.Album.IsInCollection)
+            {
+                @* Not in the collection, at first glance: wished for, or catalogued only (visuel/fiche-album/contenu.md). *@
+                <p class="album-status" data-status="@(IsIntended ? "intent" : "out")">
+                    <Icon Name="@(IsIntended ? IconName.PurchaseIntent : IconName.Blocked)" />
+                    <strong>@L[IsIntended ? "Status.Intent" : "Status.Out"]</strong>
+                    <span>@L[IsIntended ? "Status.Intent.Detail" : "Status.Out.Detail"]</span>
+                </p>
+            }
             <div class="album-title">
                 @if (album.Album.SeriesId is { } seriesId)
                 {

@@ -92,6 +92,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal(AppPaths.SeriesRecord(SeriesId), page.Find(".album-identity a.album-series").GetAttribute("href"));
         Assert.Equal(["T. 5", "Paru en novembre 1970", "Dans la collection, en 2 éditions"],
             page.FindAll(".album-facts li").Select(f => f.TextContent.Trim()));
+        // An album of the collection has no banner: only those out of it are marked.
+        Assert.Empty(page.FindAll(".album-status"));
     }
 
     [Fact]
@@ -215,6 +217,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var page = Open();
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
+        Assert.Equal(("intent", "Intention d'achat"), (page.Find(".album-status").GetAttribute("data-status"), page.Find(".album-status strong").TextContent.Trim()));
     }
 
     [Fact]
@@ -225,6 +228,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var page = Open();
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
+        Assert.Equal(("intent", "Intention d'achat"), (page.Find(".album-status").GetAttribute("data-status"), page.Find(".album-status strong").TextContent.Trim()));
     }
 
     [Fact]
@@ -235,6 +239,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var page = Open();
 
         Assert.Equal("Hors collection", page.FindAll(".album-facts li")[^1].TextContent.Trim());
+        Assert.Equal(("out", "Hors collection"), (page.Find(".album-status").GetAttribute("data-status"), page.Find(".album-status strong").TextContent.Trim()));
     }
 
     [Fact]

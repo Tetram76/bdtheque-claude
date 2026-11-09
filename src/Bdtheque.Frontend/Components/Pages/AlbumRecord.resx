@@ -54,4 +54,16 @@
   <data name="Dates" xml:space="preserve">
     <value>Album créé le {0}, modifié le {1}.</value>
   </data>
+  <data name="Status.Intent" xml:space="preserve">
+    <value>Intention d&apos;achat</value>
+  </data>
+  <data name="Status.Intent.Detail" xml:space="preserve">
+    <value>Cet album est souhaité : aucune de ses éditions n&apos;est encore dans la collection.</value>
+  </data>
+  <data name="Status.Out" xml:space="preserve">
+    <value>Hors collection</value>
+  </data>
+  <data name="Status.Out.Detail" xml:space="preserve">
+    <value>Cet album est catalogué, sans édition dans la collection.</value>
+  </data>
 </root>

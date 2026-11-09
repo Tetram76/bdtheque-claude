@@ -79,7 +79,8 @@ public sealed class AlbumRecordTests(RecordsApplication application) : BrowserTe
 
 /// <summary>
 /// An application whose albums present the cases of the record of an album, at fixed dates: an album of a series with two
-/// editions in the collection and a collective drawing, attached to a universe within two others. Its cover is the only one,
+/// editions in the collection and a collective drawing, attached to a universe within two others; an album targeted by an
+/// intent on itself, and one catalogued only. Its cover is the only one,
 /// so that the edition in the spotlight, and the colours of the day, are the same at each capture.
 /// </summary>
 public sealed class RecordsApplication : ApplicationHost
@@ -92,6 +93,12 @@ public sealed class RecordsApplication : ApplicationHost
 
     /// <summary>The album of the series with editions and a collective drawing.</summary>
     public Guid AlbumId { get; private set; }
+
+    /// <summary>An album of the series targeted by a purchase intent on itself.</summary>
+    public Guid IntendedAlbumId { get; private set; }
+
+    /// <summary>An album of the series catalogued only, out of the collection.</summary>
+    public Guid CataloguedAlbumId { get; private set; }
 
     protected override async Task SeedAsync()
     {
@@ -121,6 +128,11 @@ public sealed class RecordsApplication : ApplicationHost
         var version = await UploadCoverAsync(api, album.Id, first.Id, first.AlbumVersion);
         await PostAsync<EditionForm>(api, $"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             Edition(casterman.Id, collection.Id, 2010, null, AcquisitionMode.Gift, new DateOnly(2011, 12, 25), null), version));
+
+        var intended = await AlbumAsync(api, series.Id, "Les Celtiques", 6, [new(hugo.Id, ContributionRole.Scenarist)]);
+        IntendedAlbumId = intended.Id;
+        await PostAsync<PurchaseIntentsForm>(api, $"/admin/albums/{intended.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, intended.Version));
+        CataloguedAlbumId = (await AlbumAsync(api, series.Id, "Les Éthiopiques", 7, [new(hugo.Id, ContributionRole.Scenarist)])).Id;
     }
 
     private async Task<AuthorForm> AuthorAsync(HttpClient api, string lastName, string firstName) =>
