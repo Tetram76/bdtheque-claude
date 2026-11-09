@@ -115,7 +115,7 @@ public sealed class ValidationDataLoader(HttpClient client)
         var redMoon = await data.AlbumAsync(Album("Lune rousse", moons, 1, 1985, rating: AlbumRating.Good));
         var redMoonEdition = await data.EditionAsync(redMoon, Owned(blackPlate.Id, null, 1985, AcquisitionMode.Purchase, new DateOnly(2005, 6, 18)) with
         {
-            Isbn = "2-905123-01-X", IsSecondHand = true, Condition = EditionCondition.Good, AcquisitionAmount = 7.50m, AcquisitionCurrency = "EUR",
+            Isbn = "2-905123-01-X", Category = EditionCategory.FirstEdition, IsSecondHand = true, Condition = EditionCondition.Good, AcquisitionAmount = 7.50m, AcquisitionCurrency = "EUR",
         });
         await data.VisualAsync(redMoon, redMoonEdition, VisualType.Cover, Images.Portrait(0.02));
         var inkMoon = await data.AlbumAsync(Album("Lune d'encre", moons, 2, 1987, month: 9));
@@ -138,7 +138,8 @@ public sealed class ValidationDataLoader(HttpClient client)
         // An old-franc value, before the new franc of 1960, and an inherited copy with no amount.
         var dunesEdition = await data.EditionAsync(dunes, Owned(bubbles.Id, bubbles.Collections[0], 1955, AcquisitionMode.Inherited, null) with
         {
-            Binding = BindingType.Paperback, Format = EditionFormat.Pocket, Condition = EditionCondition.Average, IsSecondHand = true,
+            Binding = BindingType.Paperback, Format = EditionFormat.Pocket, Category = EditionCategory.FirstEdition, Condition = EditionCondition.Average,
+            IsSecondHand = true,
             IsColor = false, InitialValueAmount = 350m, InitialValueCurrency = "QZF",
         });
         await data.VisualAsync(dunes, dunesEdition, VisualType.Cover, Images.Portrait(0.11));
@@ -203,7 +204,7 @@ public sealed class ValidationDataLoader(HttpClient client)
         ]));
         var collectiveEdition = await data.EditionAsync(collective, Owned(bubbles.Id, null, 2019, AcquisitionMode.Won, new DateOnly(2019, 10, 31)) with
         {
-            AcquisitionAmount = 15m, AcquisitionCurrency = "EUR",
+            Category = EditionCategory.SpecialEdition, AcquisitionAmount = 15m, AcquisitionCurrency = "EUR",
         });
         await data.VisualAsync(collective, collectiveEdition, VisualType.Cover, Images.Portrait(0.85));
 
@@ -285,7 +286,13 @@ public sealed class ValidationDataLoader(HttpClient client)
             new DateOnly(year, 1 + volume % 12, 1 + volume % 27)) with
         {
             Isbn = Isbn($"9791091234{volume:D2}"), PageCount = 48 + volume % 3 * 8, IsSecondHand = volume % 6 == 0,
-            Category = volume == 1 ? EditionCategory.FirstEdition : null,
+            // Most volumes with a category, every one of them, some without (at least half of the owned editions have one).
+            Category = (volume % 4) switch
+            {
+                1 or 3 => EditionCategory.FirstEdition,
+                2 => EditionCategory.SpecialEdition,
+                _ => volume % 8 == 0 ? EditionCategory.LimitedEdition : null,
+            },
             AcquisitionAmount = francs ? 59m + volume : 9.50m + volume / 2m, AcquisitionCurrency = francs ? "FRF" : "EUR",
         });
 
@@ -321,13 +328,13 @@ public sealed class ValidationDataLoader(HttpClient client)
         var sketchbook = await data.AlbumAsync(Album("Carnet de croquis", series, null, 2016) with { IsSpecialIssue = true });
         var sketchbookEdition = await data.EditionAsync(sketchbook, Owned(bubbles.Id, null, 2016, AcquisitionMode.Purchase, new DateOnly(2017, 1, 15)) with
         {
-            Format = EditionFormat.Special, IsColor = false, AcquisitionAmount = 22m, AcquisitionCurrency = "EUR",
+            Format = EditionFormat.Special, Category = EditionCategory.LimitedEdition, IsColor = false, AcquisitionAmount = 22m, AcquisitionCurrency = "EUR",
         });
         await data.VisualAsync(sketchbook, sketchbookEdition, VisualType.Cover, Images.Portrait(0.70));
         var tales = await data.AlbumAsync(Album("Les Contes de la Cité", series, null, 2020) with { Type = AlbumType.Omnibus, IsSpecialIssue = true });
         await data.EditionAsync(tales, Owned(lagoon.Id, lagoon.Collections[0], 2020, AcquisitionMode.Purchase, new DateOnly(2020, 12, 5)) with
         {
-            AcquisitionAmount = 35m, AcquisitionCurrency = "EUR",
+            Category = EditionCategory.SpecialEdition, AcquisitionAmount = 35m, AcquisitionCurrency = "EUR",
         });
     }
 
