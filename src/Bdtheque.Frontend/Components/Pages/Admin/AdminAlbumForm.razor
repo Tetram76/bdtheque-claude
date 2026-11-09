@@ -186,6 +186,7 @@ else
     private EntryForm? _form;
     private bool _revealProblem;
     private int _seriesChoice;
+    private Task _seriesChoiceInProgress = Task.CompletedTask;
     private bool _saving;
     private string? _savedFingerprint;
     private string? _authorsCopiedFrom;
@@ -272,7 +273,10 @@ else
     // before saving. A series that cannot be read gives none, and the saving tells what became of it.
     // Each choice is numbered, as the suggestions of the choice of a record (choix-implementation/socle/frontend.md): the circuit
     // handles the next choice while one awaits, and only the answers of the last one apply, to the authors it was asked about.
-    private async Task ChooseSeriesAsync(RecordOption? series)
+    // The choice in progress, which a saving waits for: it is part of the form saved.
+    private Task ChooseSeriesAsync(RecordOption? series) => _seriesChoiceInProgress = ApplySeriesAsync(series);
+
+    private async Task ApplySeriesAsync(RecordOption? series)
     {
         var choice = ++_seriesChoice;
         Entry!.Series = series;
@@ -395,6 +399,8 @@ else
             return;
         _saving = true;
         _saveProblem = null;
+        // The form disabled, what it was still doing is finished before it is taken: a series chosen gives its authors first.
+        await _seriesChoiceInProgress;
         _authorsCopiedFrom = null;
         var content = Entry!.ToContent();
         try

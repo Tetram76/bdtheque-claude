@@ -291,6 +291,29 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Save_DuringTheChoiceOfASeries_WaitsForItsAuthors()
+    {
+        // The saving takes the form once the series chosen has given its authors: never the series without them.
+        var given = new TaskCompletionSource();
+        var guarnido = Guid.NewGuid();
+        _api.Hold = (path, _) => path.EndsWith("/album-contributions", StringComparison.Ordinal) ? given.Task : Task.CompletedTask;
+        _api.Write = (_, path, _) => path.EndsWith("/album-contributions", StringComparison.Ordinal)
+            ? FakeAdminApi.Json(new SeriesAlbumContributions(true,
+                [new SeriesAlbumContribution(new AuthorListItem(guarnido, "Guarnido", "Juanjo", null), ContributionRole.Illustrator)]))
+            : FakeAdminApi.Json(Bijoux, HttpStatusCode.Created);
+        var page = OpenNew();
+
+        var choosing = ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
+        page.Find("form").Submit();
+        given.SetResult();
+        await choosing;
+
+        page.WaitForAssertion(() => Assert.Contains(_api.Written, w => w.Path == "/admin/albums"));
+        var saved = _api.Written.Single(w => w.Path == "/admin/albums").Body;
+        Assert.Equal(guarnido.ToString(), saved.GetProperty("contributions")[0].GetProperty("authorId").GetString());
+    }
+
+    [Fact]
     public void Create_LeadsToTheFormOfTheAlbumCreated()
     {
         var page = OpenNew();
