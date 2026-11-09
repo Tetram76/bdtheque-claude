@@ -16,14 +16,14 @@ function fold(row) {
     if (!toggle || !count || toggle.open)
         return;
     const names = [...row.querySelectorAll(":scope > .contributor")];
-    names.forEach(name => name.removeAttribute("data-folded"));
-    row.removeAttribute("data-folding");
+    names.forEach(name => delete name.dataset.folded);
+    delete row.dataset.folding;
     if (names.length < 2 || onFirstLine(names.at(-1), names[0]))
         return;
 
-    row.setAttribute("data-folding", "");
+    row.dataset.folding = "";
     for (let folded = 1; folded < names.length; folded++) {
-        names[names.length - folded].setAttribute("data-folded", "");
+        names[names.length - folded].dataset.folded = "";
         count.textContent = (folded === 1 ? count.dataset.one : count.dataset.other).replace("{0}", String(folded));
         if (onFirstLine(toggle, names[0]))
             return;
