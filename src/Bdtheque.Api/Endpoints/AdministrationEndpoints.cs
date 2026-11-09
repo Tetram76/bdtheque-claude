@@ -23,7 +23,7 @@ internal static class AdministrationEndpoints
         new(
             await context.Albums.CountAsync(cancellationToken),
             await context.Albums.CountAsync(CatalogExpressions.Expand((Album a) => !a.Editions.Any(e => e.IsOwned())), cancellationToken),
-            await context.Editions.CountAsync(cancellationToken),
+            await context.Editions.CountAsync(CollectionMembership.IsOwned, cancellationToken),
             await context.Series.CountAsync(cancellationToken),
             await context.Series.CountAsync(s => s.Status == null, cancellationToken),
             await context.PurchaseIntents.CountAsync(cancellationToken),

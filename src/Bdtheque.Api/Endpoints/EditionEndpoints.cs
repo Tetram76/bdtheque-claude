@@ -50,6 +50,7 @@ internal static class EditionEndpoints
         // The editions are always loaded with their album (AlbumConfiguration).
         editions.MapChildDeletion<Album, Edition>(query => query, album => album.Editions, DeletionLinks);
 
+        admin.MapGet("/editions", ListForAdministrationAsync);
         admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn)));
     }
 
@@ -123,32 +124,51 @@ internal static class EditionEndpoints
         CatalogExpressions.Expand((Edition e) => new EditionListItem(e.Album.ToSummary(), e.ToSummary(), e.IsOwned()));
 
     /// <summary>
-    /// The editions found by their ISBN, separators ignored on both sides — an ISBN is entered as
-    /// printed, with or without them —, narrowed by the cross filters
-    /// (choix-implementation/api/recherche.md), in the order of their albums, then by year.
+    /// The editions found by their ISBN, narrowed by the cross filters (choix-implementation/api/recherche.md), in the order
+    /// of their albums, then by year.
     /// </summary>
     private static Task<Page<EditionListItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, Guid? albumId = null, Guid? publisherId = null,
-        Guid? publisherCollectionId = null, int page = 1, int pageSize = Paging.DefaultSize)
-    {
-        var editions = context.Editions.AsNoTracking()
-            .WhereContains(q is null ? null : WithoutIsbnSeparators(q), e => e.Isbn!.Replace("-", "").Replace(" ", ""));
-        if (albumId is not null)
-            editions = editions.Where(e => e.AlbumId == albumId);
-        if (publisherId is not null)
-            editions = editions.Where(e => e.PublisherId == publisherId);
-        if (publisherCollectionId is not null)
-            editions = editions.Where(e => e.PublisherCollectionId == publisherCollectionId);
+        BdthequeDbContext context, [AsParameters] EditionFilters filters, CancellationToken cancellationToken, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        InListOrder(filters.Apply(context.Editions.AsNoTracking())).ToPageAsync(page, pageSize, ListItem, cancellationToken);
 
-        return editions
-            .OrderByAlbum(e => e.Album)
-            .ThenBy(e => e.PublicationYear)
-            .ThenBy(e => e.Id)
-            .ToPageAsync(page, pageSize, ListItem, cancellationToken);
+    /// <summary>
+    /// The list of the editions of the administration (visuel/listes/liste-par-liste.md): the search and cross filters of the
+    /// list of the consultation, in the same order, but the editions of the collection only, an edition targeted by a
+    /// purchase intent being one of the intents (fonctionnel/regles-metier/intention-d-achat.md). Each row carries the
+    /// edition and its album, its cover, its category, its acquisition, its modification and the version of its album,
+    /// which its deletion sends back.
+    /// </summary>
+    private static async Task<EditionAdminList> ListForAdministrationAsync(
+        BdthequeDbContext context, [AsParameters] EditionFilters filters, CancellationToken cancellationToken, int page = 1,
+        int pageSize = Paging.DefaultSize)
+    {
+        var rows = await InListOrder(filters.Apply(context.Editions.AsNoTracking().Where(CollectionMembership.IsOwned)))
+            .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Edition e) => new
+            {
+                Album = e.Album.ToSummary(),
+                Edition = e.ToSummary(),
+                Cover = CatalogExpressions.ToCover(e.CoverVisualOf()),
+                e.Category,
+                e.AcquisitionMode,
+                e.AcquisitionDate,
+                e.ModifiedAt,
+                AlbumVersion = EF.Property<uint>(e.Album, BdthequeDbContext.VersionProperty),
+            }), cancellationToken);
+
+        var items = rows.Items
+            .Select(r => new EditionAdminListItem(
+                r.Album, r.Edition, r.Cover, EnumMapping.Map<ContractEnums.EditionCategory>(r.Category),
+                EnumMapping.Map<ContractEnums.AcquisitionMode>(r.AcquisitionMode)!.Value, r.AcquisitionDate?.Year, r.ModifiedAt,
+                r.AlbumVersion))
+            .ToList();
+        return new EditionAdminList(
+            new Page<EditionAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount),
+            await filters.NameAsync(context, cancellationToken));
     }
 
-    internal static string WithoutIsbnSeparators(string isbn) =>
-        isbn.Replace("-", "", StringComparison.Ordinal).Replace(" ", "", StringComparison.Ordinal);
+    private static IOrderedQueryable<Edition> InListOrder(IQueryable<Edition> editions) =>
+        editions.OrderByAlbum(e => e.Album).ThenBy(e => e.PublicationYear).ThenBy(e => e.Id);
 
     internal static async Task<NewEditionForm> GetNewAsync(Guid rootId, BdthequeDbContext context, CancellationToken cancellationToken)
     {

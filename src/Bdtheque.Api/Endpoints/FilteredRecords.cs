@@ -12,6 +12,12 @@ namespace Bdtheque.Api.Endpoints;
 /// </summary>
 internal static class FilteredRecords
 {
+    public static async Task<AlbumSummary?> AlbumAsync(BdthequeDbContext context, Guid? id, CancellationToken cancellationToken) =>
+        id is { } albumId
+            ? await context.Albums.AsNoTracking().Where(a => a.Id == albumId)
+                .Select(CatalogExpressions.Expand((Album a) => a.ToSummary())).SingleOrDefaultAsync(cancellationToken)
+            : null;
+
     public static async Task<SeriesListItem?> SeriesAsync(BdthequeDbContext context, Guid? id, CancellationToken cancellationToken) =>
         id is { } seriesId
             ? await context.Series.AsNoTracking().Where(s => s.Id == seriesId)
