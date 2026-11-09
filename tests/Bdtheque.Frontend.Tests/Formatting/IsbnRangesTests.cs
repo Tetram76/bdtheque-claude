@@ -60,11 +60,12 @@ public sealed class IsbnRangesTests
         Assert.False(string.IsNullOrWhiteSpace(error.Message), change);
     }
 
-    private static string Without(string part, string replacement)
-    {
-        Assert.Contains(part, RangeMessage);
-        return RangeMessage.Replace(part, replacement);
-    }
+    // A case built from the range message of the tests: a part it does not hold is a case wrongly written, which would test
+    // the message unchanged; the data of the theory, built at the discovery of the tests, refuse it.
+    private static string Without(string part, string replacement) =>
+        RangeMessage.Contains(part, StringComparison.Ordinal)
+            ? RangeMessage.Replace(part, replacement, StringComparison.Ordinal)
+            : throw new InvalidOperationException($"The range message of the tests holds no « {part} ».");
 
     [Fact]
     public void Formatter_WithoutRanges_GivesTheIsbnAsEntered_WithThem_Hyphenated()
