@@ -69,7 +69,12 @@
 
     private string? Shown => IsManual ? ManualKey : _computed;
 
-    private string Help => IsManual ? L["Help.Manual"] : HasTitle ? L["Help.Auto"] : UntitledHelp;
+    private string Help => (IsManual, HasTitle) switch
+    {
+        (true, _) => L["Help.Manual"],
+        (false, true) => L["Help.Auto"],
+        _ => UntitledHelp,
+    };
 
     private string ErrorId => $"{Id}-error";
 
