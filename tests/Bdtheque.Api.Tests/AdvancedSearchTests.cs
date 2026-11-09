@@ -542,7 +542,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         var author = await CreateAuthorAsync($"Auteur {_marker}");
         var publisher = await CreatePublisherAsync($"Éditeur {_marker}", "https://editeur.example");
         var series = await CreateSeriesAsync($"Série {_marker}", contributions: [new(author.Id, ContributionRole.Scenarist)]);
-        var album = await CreateAlbumAsync(null, series.Id, volumeNumber: 1);
+        var album = await CreateAlbumAsync(null, series.Id, volumeNumber: 1, contributions: [new(author.Id, ContributionRole.Scenarist)]);
         var edition = await CreateEditionAsync(album.Id, publisher.Id);
         var visual = Assert.Single((await UploadCoverAsync(edition)).Visuals);
 
