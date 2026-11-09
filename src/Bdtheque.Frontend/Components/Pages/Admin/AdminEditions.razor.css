@@ -73,7 +73,6 @@
 
 .edition-year {
     grid-area: year;
-    font-variant-numeric: tabular-nums;
 }
 
 .edition-caption {
@@ -92,6 +91,14 @@
 .edition-modified {
     display: none;
     grid-area: modified;
+}
+
+/* The figures of a row, not the heads of their columns, which keep the size of the other heads (#319). */
+.edition-row:not(.edition-row-head) .edition-year {
+    font-variant-numeric: tabular-nums;
+}
+
+.edition-row:not(.edition-row-head) .edition-modified {
     color: var(--color-text-muted);
     font-size: var(--font-size-small);
     font-variant-numeric: tabular-nums;
