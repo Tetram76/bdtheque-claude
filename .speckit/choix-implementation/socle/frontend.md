@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T16:10:00Z }
 ---
 
 # Frontend
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
   - **Alternative écartée (Razor Pages / MVC)** : compatible, mais sans composants réutilisables ni interactivité ponctuelle sans JavaScript.
 - **Rendu statique par défaut**, l'interactivité réservée aux composants qui en ont besoin : la consultation, en lecture et sur smartphone ([Compatibilité multi-supports](../../contraintes-techniques/architecture-deploiement/compatibilite-multi-supports.md)), n'a pas besoin d'une connexion SignalR par visiteur, coûteuse en mémoire sur le NAS et coupée à chaque changement de réseau mobile ; et ASP.NET Core réserve au rendu statique les pages qui écrivent des cookies (connexion, [Authentification : mise en œuvre](transverse/authentification-mise-en-oeuvre.md)).
   - **Alternative écartée (interactivité globale)** : une connexion permanente par visiteur pour des pages surtout statiques, et une exclusion à gérer pour chaque page à cookie.
+- **JavaScript réservé à ce que seul le navigateur sait faire**, et que ni le rendu du serveur ni une feuille de style n'atteignent : une API du navigateur (dialogue modal, fuseau horaire, écran tactile, défilement vers un élément), une mesure de la mise en page (largeurs, fin du chargement des polices), l'action d'une touche que Blazor ne sait pas retenir seule, le dessin tiré au hasard d'un thème. Un script est court, écrit à la main, sans dépendance ni outil de construction, et ne porte ni règle métier ni donnée de l'application : ce que l'application sait et décide reste en C#. Chaque script a sa raison dans le concept de ce qu'il sert ; ce que le HTML et le CSS du navigateur offrent se passe de script (menus en *popover*, divulgation `<details>`).
+  - **Alternative écartée (aucun script, tout par l'interactivité de Blazor)** : Blazor n'offre pas ces API du navigateur et ne les atteint que par l'interopérabilité JavaScript, qui demande le même script ; l'interactivité y ajouterait le coût d'une connexion par visiteur, qu'écarte le rendu statique par défaut.
 - **Aucun framework CSS** : CSS natif, propriétés personnalisées qui portent les contrats du thème de base ([Thème de base](../../visuel/charte-graphique/theme-de-base.md)), isolation CSS par composant, mise en page *mobile-first*.
   - **Alternative écartée (Bootstrap)** : son apparence, que l'exigence de rendu exclut ([Design et charte graphique](../../fonctionnel/design-et-charte-graphique.md)), devrait être neutralisée règle par règle par chaque thème, devenu une surcharge de Bootstrap plutôt qu'une variante du thème de base.
   - **Alternative écartée (MudBlazor ou toute bibliothèque de composants)** : une apparence propre tout aussi présente, et des composants qui exigent l'interactivité.
