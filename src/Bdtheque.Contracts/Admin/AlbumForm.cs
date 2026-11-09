@@ -11,9 +11,10 @@ namespace Bdtheque.Contracts.Admin;
 /// </param>
 /// <param name="Version">Version of the album, sent back with any modification or deletion.</param>
 /// <param name="References">The records the content references by their identifier, named for the form to present them.</param>
+/// <param name="CollectionState">Where the album stands with regard to the collection, which the form tells at first glance.</param>
 public sealed record AlbumForm(
-    Guid Id, string? SortKey, AlbumContent Content, uint Version, AlbumFormReferences References, DateTimeOffset CreatedAt,
-    DateTimeOffset ModifiedAt);
+    Guid Id, string? SortKey, AlbumContent Content, uint Version, AlbumFormReferences References,
+    AlbumCollectionState CollectionState, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
 
 /// <summary>The records an <see cref="AlbumContent"/> references, named as the lists name them.</summary>
 /// <param name="Universes">Each with its ancestors, a universe being presented with them (visuel/saisie-album/contenu.md).</param>

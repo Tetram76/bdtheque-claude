@@ -109,6 +109,20 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
+    public async Task Get_TellsWhereTheAlbumStandsWithRegardToTheCollection()
+    {
+        var catalogued = await CreateAsync(Content(UniqueTitle()));
+        var wished = await CreateAsync(Content(UniqueTitle()));
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{wished.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, wished.Version));
+        var owned = await CreateAsync(Content(UniqueTitle()));
+        await SeedEditionsAsync(owned.Id);
+
+        Assert.Equal(AlbumCollectionState.OutsideCollection, catalogued.CollectionState);
+        Assert.Equal(AlbumCollectionState.PurchaseIntent, (await GetAsync(wished.Id)).CollectionState);
+        Assert.Equal(AlbumCollectionState.InCollection, (await GetAsync(owned.Id)).CollectionState);
+    }
+
+    [Fact]
     public async Task Get_WithoutSeries_NamesNoSeries()
     {
         var album = await CreateAsync(Content(UniqueTitle()));

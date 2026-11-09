@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''un album : erreurs, blocs du formulaire, barre d''enregistrement.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:00:00Z }
 ---
 
 # Contenu
@@ -10,6 +10,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 - **En-tête et menu** de l'administration ([En-tête et menu](../administration/en-tete-et-menu.md)), l'entrée « Albums » étant l'entrée courante du menu.
 - **Fil d'Ariane** : Administration, Albums, puis l'album (« Nouvel album » en création).
 - **Titre** « Modifier l'album » ou « Nouvel album », suivi du **libellé de l'album** ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md)), recalculé au fil de la saisie (« <Sans titre> » tant que rien n'est saisi). La fiche ne propose ni lien vers la consultation, qui ne présenterait pas les données en cours de modification, ni suppression, ni fusion : on y modifie l'album, et ces actions se font depuis la liste des albums.
+- **Appartenance à la collection** : sous le titre, un album qui n'est pas dans la collection est marqué au premier coup d'œil par le bandeau de sa fiche de consultation ([Contenu](../fiche-album/contenu.md)), ses deux cas bien distingués : une **intention d'achat**, bandeau plein, de la couleur de l'information ; un album **hors collection**, simplement catalogué, bandeau en tirets, atténué. Un album de la collection n'en a pas, ni un nouvel album, pas encore enregistré.
 - **Erreur d'enregistrement**, en tête de page, au-dessus du formulaire. Les trois catégories ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)) se distinguent au premier coup d'œil, chacune par sa mention, son icône, sa couleur et son cadre :
   - **À corriger** (erreur métier) : cadre plein de la couleur d'alerte, point d'exclamation ; le message dit quoi corriger, et le champ en cause est en outre bordé de la couleur d'alerte, avec son message sous lui ;
   - **Modifiée entre-temps** (erreur fonctionnelle) : cadre en tirets d'une couleur d'information, flèches de rechargement ; le message explique que rien n'a été écrasé, avec **Recharger la fiche** et **Voir mes changements** ;

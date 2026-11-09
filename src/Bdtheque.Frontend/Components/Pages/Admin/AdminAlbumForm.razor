@@ -33,7 +33,7 @@ else
     <EntryForm Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(Entry.Id is null ? L["New"] : Label)])"
                Title="@(Entry.Id is null ? L["New"] : L["Edit"])" Subject="@Label" State="State" Saving="_saving"
                SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@AppPaths.AdminAlbums" OnSave="SaveAsync"
-               Problem="@SaveProblem" Dates="@Dates">
+               Problem="@SaveProblem" Dates="@Dates" Status="@Status">
         <Block Title="@L["Block.Album"]" Kicker="@L["Kicker.Album"]">
             <div class="album-fields">
                 <Field Id="album-series" Label="@L["Series"]" Help="@(Entry.Series is null ? L["Series.Help.None"] : L["Series.Help"])" Context="control">
@@ -371,6 +371,9 @@ else
             </Actions>
         </ErrorMessage>,
     };
+
+    // An album not in the collection, at first glance; nothing for a new album, not saved yet.
+    private RenderFragment? Status => Entry!.CollectionState is { } state ? @<CollectionStatus State="state" /> : null;
 
     private RenderFragment? Dates => Entry is { CreatedAt: { } created, ModifiedAt: { } modified }
         ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>

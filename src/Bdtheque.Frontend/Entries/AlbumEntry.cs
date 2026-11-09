@@ -27,6 +27,9 @@ public sealed class AlbumEntry
     /// <summary>The sort key the album was read with, shown in the automatic mode until its title changes.</summary>
     public string? StoredSortKey { get; set; }
 
+    /// <summary>Where the album stands with regard to the collection; <c>null</c> for a new album, not saved yet.</summary>
+    public AlbumCollectionState? CollectionState { get; set; }
+
     public DateTimeOffset? CreatedAt { get; set; }
 
     public DateTimeOffset? ModifiedAt { get; set; }
@@ -85,6 +88,7 @@ public sealed class AlbumEntry
             Id = form.Id,
             Version = form.Version,
             StoredSortKey = form.SortKey,
+            CollectionState = form.CollectionState,
             CreatedAt = form.CreatedAt,
             ModifiedAt = form.ModifiedAt,
             Title = content.Title,

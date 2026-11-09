@@ -1,5 +1,5 @@
 @* The frame of an entry form of the administration (visuel/saisie-album/contenu.md, model of the other entry forms): its fil
-   d'Ariane, its title followed by the label of the record, the error of its saving above the form, the blocks of the form
+   d'Ariane, its title followed by the label of the record and what it tells of it at first glance, the error of its saving above the form, the blocks of the form
    in a single column, the dates of the record under it, and the bar that saves it, fixed at the bottom of the screen. The
    form keeps the width it has beside a side column on the form of an edition. Interactive: the page saves the record
    itself (OnSave). *@
@@ -8,6 +8,7 @@
         <Breadcrumb Items="Breadcrumb" />
         <h1 class="entry-form-title">@Title</h1>
         <p class="entry-form-subject">@Subject</p>
+        @Status
     </div>
 
     @Problem
@@ -35,6 +36,10 @@
     /// <summary>The label of the record, computed again as it is entered.</summary>
     [Parameter, EditorRequired]
     public string Subject { get; set; } = null!;
+
+    /// <summary>What the page tells of the record at first glance, under its title (e.g. an album not in the collection).</summary>
+    [Parameter]
+    public RenderFragment? Status { get; set; }
 
     /// <summary>The error of the last saving, if any (ErrorMessage).</summary>
     [Parameter]

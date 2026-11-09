@@ -250,8 +250,14 @@ internal static class AlbumEndpoints
                 await UniversesInHierarchyAsync(context, album, cancellationToken),
                 album.Contributions.Select(c => c.Author).DistinctBy(a => a.Id)
                     .Select(a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym)).ToList()),
+            await CollectionStateAsync(context, album.Id, cancellationToken),
             album.CreatedAt,
             album.ModifiedAt);
+
+    // Read by the expression the lists share, once the album is saved: never computed a second way.
+    private static Task<AlbumCollectionState> CollectionStateAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken) =>
+        context.Albums.AsNoTracking().Where(a => a.Id == id)
+            .Select(CatalogExpressions.Expand((Album a) => a.CollectionState())).SingleAsync(cancellationToken);
 
     // The hierarchy is only read for an album attached to a universe.
     private static async Task<IReadOnlyList<UniverseInHierarchy>> UniversesInHierarchyAsync(

@@ -42,6 +42,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
             [new UniverseInHierarchy(new UniverseListItem(Moulinsart, "Moulinsart", Guid.Empty, "Univers Hergé"),
                 [new UniverseListItem(Guid.Empty, "Univers Hergé", null, null)])],
             [new AuthorListItem(Herge, "Remi", "Georges", "Hergé")]),
+        AlbumCollectionState.InCollection,
         new DateTimeOffset(2026, 3, 4, 10, 0, 0, TimeSpan.Zero),
         new DateTimeOffset(2026, 11, 8, 20, 8, 0, TimeSpan.Zero));
 
@@ -144,6 +145,27 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal(["Univers Hergé"], groups[1].QuerySelectorAll(".inherited-tags .tag").Select(tag => tag.TextContent.Trim()));
         // Those of the series are modified on its form: they cannot be removed here.
         Assert.Empty(page.FindAll(".inherited-tags .tag-remove"));
+    }
+
+    [Theory]
+    [InlineData(AlbumCollectionState.PurchaseIntent, "intent", "Intention d'achat")]
+    [InlineData(AlbumCollectionState.OutsideCollection, "out", "Hors collection")]
+    public void Album_NotInTheCollection_IsMarkedByABanner(AlbumCollectionState state, string status, string name)
+    {
+        _api.Answers[$"/admin/albums/{AlbumId}"] = Bijoux with { CollectionState = state };
+
+        var page = OpenAlbum();
+
+        var banner = page.Find(".collection-status");
+        Assert.Equal(status, banner.GetAttribute("data-status"));
+        Assert.Equal(name, banner.QuerySelector("strong")!.TextContent);
+    }
+
+    [Fact]
+    public void Album_InTheCollection_OrNew_HasNoBanner()
+    {
+        Assert.Empty(OpenAlbum().FindAll(".collection-status"));
+        Assert.Empty(OpenNew().FindAll(".collection-status"));
     }
 
     [Fact]
