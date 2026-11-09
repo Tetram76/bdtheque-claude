@@ -132,9 +132,13 @@ else if (_album is { } album)
 
     private bool IsIntended => _album!.PurchaseIntent is not null || _album.Editions.Any(e => e.PurchaseIntent is not null);
 
-    private string Membership => _album!.Album.IsInCollection
-        ? L[OwnedEditionCount == 1 ? "Membership.InCollection.One" : "Membership.InCollection.Other", OwnedEditionCount]
-        : L[IsIntended ? "Membership.PurchaseIntent" : "Membership.OutOfCollection"];
+    private string Membership => (_album!.Album.IsInCollection, OwnedEditionCount, IsIntended) switch
+    {
+        (true, 1, _) => L["Membership.InCollection.One", 1],
+        (true, var count, _) => L["Membership.InCollection.Other", count],
+        (false, _, true) => L["Membership.PurchaseIntent"],
+        _ => L["Membership.OutOfCollection"],
+    };
 
     private static RenderFragment Stars(int rating) => __builder =>
     {
