@@ -10,11 +10,11 @@
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 
-@* The record of an album in the consultation (visuel/fiche-album/contenu.md): the visuals of the edition chosen and the
-   identity of the album, its contributions, genres and universes; its summary; its editions in the collection and the detail
-   of the one chosen, an edition targeted by a purchase intent being never presented as an edition
-   (fonctionnel/regles-metier/intention-d-achat.md); its dates. Rendered statically, the edition chosen and the visual shown
-   are carried by its address (Navigation/AlbumRecordQuery.cs). Its styles read the contracts of the base theme only
+@* The record of an album in the consultation (visuel/fiche-album/contenu.md): the cover and the identity of the album, its
+   contributions, genres and universes; its summary; its editions in the collection, each with its visuals and its detail,
+   an edition targeted by a purchase intent being never presented as an edition
+   (fonctionnel/regles-metier/intention-d-achat.md); its dates; and the viewer of a visual, a dialog above the record that
+   its address opens (Navigation/AlbumRecordQuery.cs). Its styles read the contracts of the base theme only
    (visuel/fiche-album/declinaison-par-theme.md). *@
 <PageTitle>@(_album is null ? L["Title"] : Labels.Album(_album.Album, _format))</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AlbumRecord" Record="new PresentedRecord(RecordType.Album, Id)" />
@@ -30,7 +30,10 @@ else if (_album is { } album)
 
     <div class="album-record">
         <div class="album-head">
-            <VisualViewer AlbumId="Id" Edition="_chosen" EditionLabel="@(_chosen is null ? "" : Labels.Edition(_chosen.Edition))" Position="_position" />
+            @* The cover of the album, put forward as a theme puts it (--record-visual-…, themes/base.css). *@
+            <div class="album-cover">
+                <Cover VisualId="CoverId" Alt="@L["Cover", Heading]" Volume="true" />
+            </div>
 
             <div class="album-identity">
                 @if (!album.Album.IsInCollection)
@@ -103,22 +106,20 @@ else if (_album is { } album)
         </Block>
 
         <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
-            @if (_chosen is not null)
+            @if (_owned.Count > 0)
             {
-                @* On one line, which scrolls sideways when it does not hold them all, as the other rows of the application. *@
-                <div class="edition-row">
-                    <ScrollRow>
-                        <ul class="edition-choices" aria-label="@L["Editions.Label"]">
-                            @foreach (var edition in _owned)
-                            {
-                                <li>
-                                    <a href="@AlbumRecordQuery.ForEdition(edition.Edition.Id).Href(Id)" aria-current="@(edition == _chosen ? "true" : null)">@Labels.Edition(edition.Edition)</a>
-                                </li>
-                            }
-                        </ul>
-                    </ScrollRow>
-                </div>
-                <EditionFacts Edition="_chosen" />
+                @* Every edition of the collection at once, each with its visuals and its detail: an album has one, rarely more. *@
+                <ol class="editions">
+                    @foreach (var edition in _owned)
+                    {
+                        var label = Labels.Edition(edition.Edition);
+                        <li class="edition">
+                            <h3 class="edition-label">@label</h3>
+                            <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
+                            <EditionFacts Edition="edition" />
+                        </li>
+                    }
+                </ol>
             }
             else
             {
@@ -128,6 +129,11 @@ else if (_album is { } album)
     </div>
 
     <p class="album-dates" data-local>@L["Dates", Format.LocalDate(album.CreatedAt), Format.LocalDate(album.ModifiedAt)]</p>
+
+    @if (_open is { } open)
+    {
+        <VisualDialog AlbumId="Id" Edition="open" EditionLabel="@Labels.Edition(open.Edition)" Position="_position" />
+    }
 }
 
 @code {
@@ -138,8 +144,8 @@ else if (_album is { } album)
     private AlbumLabelFormat _format;
     private ApiProblem? _problem;
     private List<EditionDetail> _owned = [];
-    private EditionDetail? _chosen;
-    private int _position = 1;
+    private EditionDetail? _open;
+    private int _position;
 
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
@@ -159,15 +165,26 @@ else if (_album is { } album)
         }
 
         // Only the editions of the collection are editions; an edition targeted by an intent is one of the intents
-        // (fonctionnel/regles-metier/intention-d-achat.md). An edition or a visual the album does not have, which only an
-        // address written by hand names, gives way to the first one.
+        // (fonctionnel/regles-metier/intention-d-achat.md). A visual the collection does not have, which only an address
+        // written by hand names, opens no viewer.
         _owned = [.. _album.Editions.Where(e => e.IsInCollection)];
-        _chosen = _owned.Find(e => e.Edition.Id == query.Edition) ?? _owned.FirstOrDefault();
-        _position = query.Visual is { } visual && visual <= (_chosen?.Visuals.Count ?? 0) ? visual : 1;
+        if (_owned.Find(e => e.Edition.Id == query.Edition) is { } edition && query.Visual is { } visual && visual <= edition.Visuals.Count)
+            (_open, _position) = (edition, visual);
 
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
+
+    // The cover of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among the editions of the collection: the
+    // first cover of the oldest edition by its year of edition that has one, those without year last; none, the generic
+    // visual.
+    private Guid? CoverId => _owned
+        .Where(e => e.Visuals.Any(v => v.Type == VisualType.Cover))
+        .OrderBy(e => e.Edition.PublicationYear is null)
+        .ThenBy(e => e.Edition.PublicationYear)
+        .Select(e => e.Visuals.First(v => v.Type == VisualType.Cover).Id)
+        .Cast<Guid?>()
+        .FirstOrDefault();
 
     private string Heading => _album!.Album.Title ?? Labels.Album(_album.Album, _format);
 

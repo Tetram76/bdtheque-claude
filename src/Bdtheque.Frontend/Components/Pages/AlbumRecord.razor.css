@@ -18,6 +18,22 @@
     }
 }
 
+/* The cover of the album, put forward: its frame, its tilt and its shadow are the touch of the theme (--record-visual-…). */
+.album-cover {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-m);
+    --cover-width: var(--record-visual-width);
+}
+
+.album-cover ::deep .cover {
+    padding: var(--record-visual-padding);
+    border: var(--record-visual-border);
+    background: var(--record-visual-background);
+    box-shadow: var(--record-visual-shadow);
+    rotate: var(--record-visual-tilt);
+}
+
 .album-identity {
     display: grid;
     gap: var(--space-m);
@@ -141,45 +157,30 @@
     white-space: pre-line;
 }
 
-/* The editions of the collection on one line, which scrolls sideways when it does not hold them all; each of a bounded
-   width, its label wrapping inside it; the one chosen filled with the accent. */
-.edition-row {
-    margin-block-end: var(--space-l);
-}
-
-.edition-choices {
-    display: flex;
-    gap: var(--space-s);
+/* Every edition of the collection, one under the other, apart by a rule: its label, its visuals, then its detail. */
+.editions {
+    display: grid;
+    gap: var(--space-l);
     margin: 0;
-    padding: var(--space-xs) 0;
+    padding: 0;
     list-style: none;
 }
 
-.edition-choices li {
-    flex: none;
-    inline-size: 14rem;
+.edition {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
 }
 
-.edition-choices a {
-    display: flex;
-    align-items: center;
-    block-size: 100%;
-    min-block-size: var(--control-height);
-    padding: var(--space-s) var(--space-m);
-    border: var(--border-width-control) solid var(--color-control-border);
-    border-radius: var(--radius-tile);
-    background: var(--color-control-background);
-    color: var(--color-text);
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-strong);
-    text-decoration: none;
+.edition + .edition {
+    padding-block-start: var(--space-l);
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.edition-label {
+    margin: 0;
+    font-size: var(--font-size-large);
     overflow-wrap: anywhere;
-}
-
-.edition-choices a[aria-current] {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
-    color: var(--color-text-on-accent);
 }
 
 .editions-none {

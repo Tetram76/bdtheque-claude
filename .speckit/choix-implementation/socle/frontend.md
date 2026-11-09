@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:30:00Z }
 ---
 
 # Frontend
@@ -38,7 +38,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
   - **Alternative écartée (aucune pause)** : une requête par lettre, pour des réponses presque toutes ignorées.
 - **Menus en *popover* du navigateur**, ancrés à leur bouton par le positionnement par ancre de CSS : fermeture sur un clic en dehors ou Échap, premier plan, sans interactivité ni script, dans une page statique (*Baseline* de web.dev : Safari 18.3, Firefox 147).
   - **Alternative écartée (menu interactif, ou `<details>` refermé par un script)** : une connexion ou un script pour ce que le navigateur offre.
-- **Dialogues `<dialog>` modaux**, ouverts par un script dès leur insertion (seul un script ouvre un dialogue en modal, au-dessus d'une page inerte), rendus quand l'adresse les demande ; la fermeture, choix sûr, a le focus.
+- **Dialogues `<dialog>` modaux**, ouverts par un script dès leur insertion (seul un script ouvre un dialogue en modal, au-dessus d'une page inerte), et de nouveau après une navigation améliorée qui garde le dialogue dans un autre état (la synchronisation des attributs par Blazor lui retire l'attribut qui le montre ouvert), rendus quand l'adresse les demande ; la fermeture, choix sûr, a le focus.
   - **Alternative écartée (dialogue non modal rendu par le serveur)** : la page resterait accessible au clavier dessous, et Échap ne le fermerait pas.
 - **Barre d'enregistrement collée au bas de l'écran** (`sticky`), qui ne masque jamais ce qui suit le formulaire.
 
@@ -63,8 +63,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
 
 ## Fiches de la consultation
 
-- **État d'une fiche porté par l'adresse** (l'édition choisie et le visuel montré de la fiche d'un album, [`visuel/fiche-album/`](../../visuel/fiche-album/index.md)), en rendu statique, comme les critères des listes : chaque lien mène à la fiche dans son nouvel état, sans ancre : la navigation améliorée de Blazor garde la page où elle était, alors qu'une ancre la ferait défiler jusqu'à la partie nommée, ce que l'utilisateur voit comme un saut. Une fiche se partage ou se recharge telle quelle, et l'action se relève d'après l'adresse ([Relevé par le frontend](../mesure-audience/releve-par-le-frontend.md)).
-  - **Alternative écartée (visionneuse et choix de l'édition interactifs)** : une connexion SignalR par visiteur pour une page de lecture, ce que le rendu statique par défaut évite.
+- **Visionneuse des visuels d'une fiche en dialogue modal porté par l'adresse** (le visuel ouvert de la fiche d'un album, désigné par son édition et sa position, [`visuel/fiche-album/`](../../visuel/fiche-album/index.md)), en rendu statique, comme les dialogues des listes : chaque lien mène à la fiche avec la visionneuse sur un autre visuel, sans ancre, et sa fermeture à la fiche seule. Le dialogue est au-dessus de la page, qui ne change pas : la navigation améliorée de Blazor la garde où elle était. Une fiche se partage ou se recharge telle quelle, et l'action se relève d'après l'adresse ([Relevé par le frontend](../mesure-audience/releve-par-le-frontend.md)).
+  - **Alternative écartée (édition choisie dont la fiche montre le détail et les visuels)** : selon le nombre de visuels de l'édition choisie, la hauteur de la fiche change au-dessus des éditions, qui ne peuvent rester à leur place à l'écran (constaté pendant la validation).
+  - **Alternative écartée (visionneuse interactive)** : une connexion SignalR par visiteur pour une page de lecture, ce que le rendu statique par défaut évite.
   - **Alternative écartée (images changées par un script, sans requête)** : un script ne modifie pas la page que Blazor a rendue, et l'action n'atteindrait pas la mesure d'audience.
 - **Repli des auteurs d'un rôle selon la largeur de sa ligne** ([`visuel/fiche-album/`](../../visuel/fiche-album/index.md)) : seul le navigateur connaît la place des noms, si bien qu'un script (élément personnalisé) marque ceux que la ligne ne tient pas, avec le lien « et N autres », de nouveau quand la ligne change de largeur et à la fin du premier chargement de polices, comme une ligne défilante. Le dépliage est une divulgation du navigateur (`<details>`), placée après les noms, qui ne se cachent que tant qu'elle est fermée (`:has()`) : « Réduire » suit le dernier nom. Ni requête pour montrer des noms déjà reçus, ni action suivie, comme le panneau des filtres d'une liste ; sans script, tous les noms sont montrés.
   - **Alternative écartée (nombre fixe de noms, rendu par le serveur)** : un rôle passe à la ligne sur un écran étroit, ou se replie sur un grand écran qui le tenait.

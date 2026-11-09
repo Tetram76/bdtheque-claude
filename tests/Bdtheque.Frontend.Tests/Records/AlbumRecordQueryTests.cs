@@ -4,8 +4,8 @@ using Bdtheque.Frontend.Navigation;
 namespace Bdtheque.Frontend.Tests.Records;
 
 /// <summary>
-/// The state of the record of an album its address carries (visuel/fiche-album/contenu.md): the edition chosen and the visual
-/// shown, each link of the record leading to the record in another state, and the action the address records.
+/// The state of the record of an album its address carries (visuel/fiche-album/contenu.md): the visual open in the viewer,
+/// named by its edition and its position, and the action the address records.
 /// </summary>
 public sealed class AlbumRecordQueryTests
 {
@@ -25,11 +25,7 @@ public sealed class AlbumRecordQueryTests
         Assert.Equal(new AlbumRecordQuery(), AlbumRecordQuery.Parse(query));
 
     [Fact]
-    public void Edition_LeadsToItsDetail_FromItsFirstVisual() =>
-        Assert.Equal($"/albums/{AlbumId}?edition={EditionId}", AlbumRecordQuery.ForEdition(EditionId).Href(AlbumId));
-
-    [Fact]
-    public void Visual_LeadsToTheVisuals_OfItsEdition() =>
+    public void Visual_OpensTheViewer_OnItsEditionAndPosition() =>
         Assert.Equal($"/albums/{AlbumId}?edition={EditionId}&visual=4", AlbumRecordQuery.ForVisual(EditionId, 4).Href(AlbumId));
 
     [Fact]
@@ -40,9 +36,16 @@ public sealed class AlbumRecordQueryTests
     public void Action_IsTheVisualShown_WithItsEdition() =>
         Assert.Equal((AudienceFunctions.AlbumRecordVisual, $"edition={EditionId}&visual=4"), AlbumRecordQuery.ForVisual(EditionId, 4).Action);
 
-    [Fact]
-    public void Action_IsTheEditionChosen_WithoutVisual() =>
-        Assert.Equal((AudienceFunctions.AlbumRecordEdition, $"edition={EditionId}"), AlbumRecordQuery.ForEdition(EditionId).Action);
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void Address_NamingHalfAVisual_IsTheRecordAlone_WithoutAction(bool withEdition, bool withVisual)
+    {
+        var query = new AlbumRecordQuery(withEdition ? EditionId : null, withVisual ? 2 : null);
+
+        Assert.Equal($"/albums/{AlbumId}", query.Href(AlbumId));
+        Assert.Null(query.Action);
+    }
 
     [Fact]
     public void Action_IsNone_ForTheRecordAsItOpens() =>

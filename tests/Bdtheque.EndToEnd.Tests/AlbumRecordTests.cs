@@ -14,7 +14,7 @@ namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// The record of an album in the consultation (visuel/fiche-album/contenu.md), as its visitor goes through it: under the albums
-/// of the menu, the visuals of an edition, the original image, another edition, the authors of a role unfolded and folded, on
+/// of the menu, the viewer of the visuals of an edition, the original image, the authors of a role unfolded and folded, on
 /// the application of the records (<see cref="RecordsApplication"/>).
 /// </summary>
 [Collection(RecordsApplication.Name)]
@@ -32,19 +32,29 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     }
 
     [Fact]
-    public async Task Visuals_GoFromOneToTheNext_AndToAThumbnail()
+    public async Task Viewer_OpensOnAThumbnail_GoesToTheNext_AndCloses_ThePageStayingWhereItWas()
     {
         var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
-        var visuals = page.GetByRole(AriaRole.Region, new() { Name = "Visuels de l'édition" });
+        // The editions some way down the screen, the page scrolled.
+        await page.EvaluateAsync($"() => window.scrollBy(0, ({EditionsTop}) - 200)");
+        var top = await page.EvaluateAsync<double>($"() => {EditionsTop}");
+        var viewer = page.GetByRole(AriaRole.Dialog);
 
-        await visuals.GetByRole(AriaRole.Link, new() { Name = "Visuel suivant" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Planche 1" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(SecondVisualAddress());
-        await Assertions.Expect(visuals.Locator(".visual-caption")).ToHaveTextAsync(FirstPlateCaption());
+        await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("Planche 1");
 
-        await visuals.GetByRole(AriaRole.Link, new() { Name = "4e de couverture" }).ClickAsync();
-        await Assertions.Expect(visuals.Locator(".visual-caption")).ToHaveTextAsync(BackCoverCaption());
-        await Assertions.Expect(visuals.GetByRole(AriaRole.Link, new() { Name = "4e de couverture" })).ToHaveAttributeAsync("aria-current", "true");
+        await viewer.GetByRole(AriaRole.Link, new() { Name = "Visuel suivant" }).ClickAsync();
+        await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("Planche 2");
+        await Assertions.Expect(viewer.Locator(".visual-position")).ToHaveTextAsync("3 sur 4");
+
+        // Escape follows the closing, back to the record alone.
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(viewer).ToHaveCountAsync(0);
+        await Assertions.Expect(page).ToHaveURLAsync(RecordAddress());
+        Assert.True(top > 0);
+        Assert.Equal(top, await page.EvaluateAsync<double>($"() => {EditionsTop}"), tolerance: 1.0);
     }
 
     [Fact]
@@ -52,31 +62,13 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     {
         var page = await NewPageAsync();
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+        await page.GetByRole(AriaRole.Link, new() { Name = "Couverture", Exact = true }).ClickAsync();
 
-        var href = await page.GetByRole(AriaRole.Link, new() { Name = "Voir l'image originale" }).GetAttributeAsync("href");
+        var href = await page.GetByRole(AriaRole.Dialog).GetByRole(AriaRole.Link, new() { Name = "Voir l'image originale" }).GetAttributeAsync("href");
         var response = await page.APIRequest.GetAsync(href!);
 
         Assert.Equal(200, response.Status);
         Assert.Equal("image/png", response.Headers["content-type"]);
-    }
-
-    [Fact]
-    public async Task AnotherEdition_ShowsItsDetail_AndItsVisuals_ThePageStayingWhereItWas()
-    {
-        var page = await NewPageAsync();
-        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
-        // The editions some way down the screen, the page scrolled.
-        await page.EvaluateAsync($"() => window.scrollBy(0, ({EditionsTop}) - 200)");
-        var top = await page.EvaluateAsync<double>($"() => {EditionsTop}");
-
-        await page.GetByRole(AriaRole.List, new() { Name = "Éditions de l'album" })
-            .GetByRole(AriaRole.Link, new() { Name = "Casterman (Univers d'auteurs) [2010]" }).ClickAsync();
-
-        await Assertions.Expect(page).ToHaveURLAsync(EditionAddress());
-        await Assertions.Expect(page.Locator(".edition-detail")).ToContainTextAsync("Offerte");
-        await Assertions.Expect(page.Locator(".album-visuals svg.cover-generic")).ToBeVisibleAsync();
-        Assert.True(top > 0);
-        Assert.Equal(top, await page.EvaluateAsync<double>($"() => {EditionsTop}"), tolerance: 1.0);
     }
 
     // The top of the block of the editions in the window.
@@ -124,14 +116,8 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     [GeneratedRegex(@"[?&]visual=2$")]
     private static partial Regex SecondVisualAddress();
 
-    [GeneratedRegex(@"Planche 1\s*2 sur 4")]
-    private static partial Regex FirstPlateCaption();
-
-    [GeneratedRegex(@"4e de couverture\s*4 sur 4")]
-    private static partial Regex BackCoverCaption();
-
-    [GeneratedRegex(@"[?&]edition=[0-9a-f-]+$")]
-    private static partial Regex EditionAddress();
+    [GeneratedRegex(@"/albums/[0-9a-f-]+$")]
+    private static partial Regex RecordAddress();
 
     // The names shown of a row, and the link that unfolds the others, all on the line of the first name.
     private static Task<bool> OnOneLineAsync(ILocator row) => row.EvaluateAsync<bool>("""
@@ -160,6 +146,9 @@ public sealed class RecordsApplication : ApplicationHost
 
     /// <summary>The album of the series with editions, visuals and a collective drawing.</summary>
     public Guid AlbumId { get; private set; }
+
+    /// <summary>The first edition of <see cref="AlbumId"/>, with its four visuals.</summary>
+    public Guid FirstEditionId { get; private set; }
 
     /// <summary>An album of the series targeted by a purchase intent on itself.</summary>
     public Guid IntendedAlbumId { get; private set; }
@@ -192,6 +181,7 @@ public sealed class RecordsApplication : ApplicationHost
         AlbumId = album.Id;
         var first = await PostAsync<EditionForm>(api, $"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             Edition(casterman.Id, null, 2001, "2-203-34424-5", AcquisitionMode.Purchase, new DateOnly(2006, 9, 9), 16.95m), album.Version));
+        FirstEditionId = first.Id;
         var version = first.AlbumVersion;
         foreach (var (type, color) in new[]
         {

@@ -12,11 +12,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Label" xml:space="preserve">
-    <value>Visuels de l&apos;édition</value>
-  </data>
-  <data name="Generic" xml:space="preserve">
-    <value>Visuel générique : aucun visuel</value>
+  <data name="Close" xml:space="preserve">
+    <value>Fermer la visionneuse</value>
   </data>
   <data name="Alt" xml:space="preserve">
     <value>{0} de l&apos;édition {1}</value>
@@ -30,25 +27,10 @@
   <data name="Position" xml:space="preserve">
     <value>{0} sur {1}</value>
   </data>
-  <data name="All" xml:space="preserve">
-    <value>Tous les visuels de l&apos;édition</value>
-  </data>
   <data name="Original" xml:space="preserve">
     <value>Voir l&apos;image originale</value>
   </data>
   <data name="Plate" xml:space="preserve">
     <value>Planche {0}</value>
-  </data>
-  <data name="Short.Cover" xml:space="preserve">
-    <value>Couv.</value>
-  </data>
-  <data name="Short.Dedication" xml:space="preserve">
-    <value>Déd.</value>
-  </data>
-  <data name="Short.Endpaper" xml:space="preserve">
-    <value>Garde</value>
-  </data>
-  <data name="Short.BackCover" xml:space="preserve">
-    <value>4e</value>
   </data>
 </root>

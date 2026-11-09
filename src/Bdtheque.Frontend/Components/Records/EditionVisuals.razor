@@ -1,0 +1,48 @@
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<EditionVisuals> L
+@inject ValueLabels Values
+
+@* The visuals of an edition on the record of an album (visuel/fiche-album/contenu.md): a strip of thumbnails, in their order
+   (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md), each under its short type, which scrolls sideways when
+   it does not hold them all; each opens the viewer on its visual (VisualDialog), the one open framed by the accent. An
+   edition without visual says so. *@
+@if (Edition.Visuals.Count == 0)
+{
+    <p class="edition-visuals-none">@L["None"]</p>
+}
+else
+{
+    <nav class="edition-visuals" aria-label="@L["Label", EditionLabel]">
+        <ScrollRow>
+            <ul class="visual-thumbnails">
+                @for (var index = 0; index < Edition.Visuals.Count; index++)
+                {
+                    var position = index + 1;
+                    <li>
+                        <a href="@AlbumRecordQuery.ForVisual(Edition.Edition.Id, position).Href(AlbumId)" aria-label="@VisualLabels.TypeOf(Edition, index, Values, L)"
+                           aria-current="@(position == Open ? "true" : null)">
+                            <Cover VisualId="Edition.Visuals[index].Id" />
+                            <span class="visual-short">@VisualLabels.ShortOf(Edition, index, L)</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </ScrollRow>
+    </nav>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid AlbumId { get; set; }
+
+    [Parameter, EditorRequired]
+    public EditionDetail Edition { get; set; } = null!;
+
+    /// <summary>The label of the edition, which names its visuals for whoever does not see them.</summary>
+    [Parameter, EditorRequired]
+    public string EditionLabel { get; set; } = "";
+
+    /// <summary>The position of the visual open in the viewer, from 1; <c>null</c> when none of this edition is.</summary>
+    [Parameter]
+    public int? Open { get; set; }
+}

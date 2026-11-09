@@ -57,8 +57,8 @@
   <data name="Editions.Kicker" xml:space="preserve">
     <value>Les éditions</value>
   </data>
-  <data name="Editions.Label" xml:space="preserve">
-    <value>Éditions de l&apos;album</value>
+  <data name="Cover" xml:space="preserve">
+    <value>Couverture de {0}</value>
   </data>
   <data name="Editions.None" xml:space="preserve">
     <value>Aucune édition dans la collection.</value>
