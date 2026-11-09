@@ -368,7 +368,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal((true, JsonValueKind.Null, 0), (request.Body.GetProperty("newAlbum").GetBoolean(),
             request.Body.GetProperty("previousSeriesId").ValueKind, request.Body.GetProperty("contributions").GetArrayLength()));
         Assert.Equal("Juanjo Guarnido", page.FindAll(".album-role")[1].QuerySelector(".tag")!.TextContent.Trim());
-        Assert.Contains("Repris de la série Blacksad", page.Find(".notice").TextContent);
+        Assert.Contains("Auteurs repris de la série Blacksad", page.Find(".notice").TextContent);
     }
 
     [Fact]
@@ -379,7 +379,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
             [new SeriesAlbumContribution(new AuthorListItem(Herge, "Remi", "Georges", "Hergé"), ContributionRole.Scenarist)]));
         var page = OpenNew();
         await ChooseSeriesAsync(page, new RecordOption(SeriesId, "Tintin", null));
-        Assert.Equal("Repris de la série Tintin. Ils sont à l'album désormais : les modifier ne touche pas la série.",
+        Assert.Equal("Auteurs repris de la série Tintin. Les modifier ici ne change pas ceux de la série.",
             page.Find(".notice-text").TextContent.Trim());
 
         page.Find(".album-role .tag-remove").Click();

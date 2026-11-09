@@ -22,7 +22,7 @@
     <value>Albums</value>
   </data>
   <data name="Authors.Copied" xml:space="preserve">
-    <value>Repris de la série {0}. Ils sont à l&apos;album désormais : les modifier ne touche pas la série.</value>
+    <value>Auteurs repris de la série {0}. Les modifier ici ne change pas ceux de la série.</value>
   </data>
   <data name="Authors.Create" xml:space="preserve">
     <value>Créer l&apos;auteur « {0} »</value>

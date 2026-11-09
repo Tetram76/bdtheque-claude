@@ -175,7 +175,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Option, new() { Name = $"Série {_marker}" }).ClickAsync();
 
         // As soon as the series is chosen, before any saving.
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Repris de la série" })).ToContainTextAsync($"Série {_marker}");
+        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Auteurs repris de la série" })).ToContainTextAsync($"Série {_marker}");
         await Assertions.Expect(page.Locator(".album-role").First).ToContainTextAsync($"Auteur{_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
         await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToHaveCountAsync(0);
