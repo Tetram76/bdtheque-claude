@@ -8,6 +8,7 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
+using frontend::Bdtheque.Frontend.Theming;
 using SkiaSharp;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -31,10 +32,14 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
             .GetByRole(AriaRole.Link, new() { Name = "Albums" })).ToHaveAttributeAsync("aria-current", "page");
     }
 
-    [Fact]
-    public async Task Viewer_OpensOnAThumbnail_GoesToTheNext_AndCloses_ThePageStayingWhereItWas()
+    // In each theme: a theme that draws at random (the balloons of « La planche encrée ») keeps its drawing on the same page.
+    public static TheoryData<string> Themes => [.. ThemeCatalog.Offered.Select(theme => theme.Key)];
+
+    [Theory]
+    [MemberData(nameof(Themes))]
+    public async Task Viewer_OpensOnAThumbnail_GoesToTheNext_AndCloses_ThePageStayingWhereItWas(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1280, Height = 720 });
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
         // The editions some way down the screen, the page scrolled.
         await page.EvaluateAsync($"() => window.scrollBy(0, ({EditionsTop}) - 200)");

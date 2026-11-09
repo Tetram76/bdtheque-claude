@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
 ---
 
 # Frontend
@@ -19,6 +19,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:30:00Z }
 - **Aucun framework CSS** : CSS natif, propriétés personnalisées qui portent les contrats du thème de base ([Thème de base](../../visuel/charte-graphique/theme-de-base.md)), isolation CSS par composant, mise en page *mobile-first*.
   - **Alternative écartée (Bootstrap)** : son apparence, que l'exigence de rendu exclut ([Design et charte graphique](../../fonctionnel/design-et-charte-graphique.md)), devrait être neutralisée règle par règle par chaque thème, devenu une surcharge de Bootstrap plutôt qu'une variante du thème de base.
   - **Alternative écartée (MudBlazor ou toute bibliothèque de composants)** : une apparence propre tout aussi présente, et des composants qui exigent l'interactivité.
+
+- **Ancrage du défilement désactivé** (`overflow-anchor`) : une navigation améliorée donne un instant à chaque élément les attributs de la page reçue, sans ceux qu'un script a posés (forme d'une bulle, noms repliés d'un rôle) ; le navigateur, ancrant le défilement sur cet instant, déplaçait la page sous le visiteur une fois les attributs reposés (constaté sur la visionneuse d'une fiche). Une page rendue par le serveur arrive entière, ses couvertures dans une place réservée : rien ne grandit ensuite au-dessus du visiteur, que l'ancrage compenserait.
 
 ## Structure
 
