@@ -36,7 +36,7 @@
         @for (var index = 0; index < _options.Count; index++)
         {
             var option = _options[index];
-            <li id="@OptionId(index)" class="record-picker-option" role="option" aria-selected="@(index == _active ? "true" : "false")"
+            <li id="@OptionId(index)" class="record-picker-option @(IsPending(option) ? "record-picker-pending" : null)" role="option" aria-selected="@(index == _active ? "true" : "false")"
                 @onmousedown:preventDefault @onclick="() => ChooseAsync(option)">
                 <span>@option.Label</span>
                 @if (option.Detail is not null)
@@ -220,6 +220,9 @@
             // The component is disposed.
         }
     }
+
+    // A record added on the spot: its detail says so, marked apart from the name.
+    private bool IsPending(RecordOption option) => Pending.Any(p => p.Id == option.Id);
 
     // Compared as the search of the lists compares, whatever the case and the accents.
     private IEnumerable<RecordOption> PendingMatching(string text) =>

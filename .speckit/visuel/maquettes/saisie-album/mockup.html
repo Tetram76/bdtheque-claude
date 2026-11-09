@@ -225,7 +225,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                     <sc-for list="{{r.people}}" as="p">
                       <span style="{{chip}}">{{p}}<button type="button" aria-label="Retirer {{p}} ({{r.label}})" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
                     </sc-for>
-                    <sc-if value="{{r.none}}"><span style="font-size: 13px; color: {{t.muted}}">Personne</span></sc-if>
                     <button type="button" style="{{addBtn}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter</button>
                   </div>
                 </div>
@@ -244,7 +243,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                   <sc-for list="{{g.own}}" as="p">
                     <span style="{{chip}}">{{p}}<button type="button" aria-label="Retirer {{p}}" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
                   </sc-for>
-                  <sc-if value="{{g.noneOwn}}"><span style="font-size: 13px; color: {{t.muted}}">Aucun</span></sc-if>
                   <button type="button" style="{{addBtn}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter</button>
                 </div>
                 <sc-if value="{{g.inherited.length}}">
@@ -609,10 +607,10 @@ class View extends Mockup {
       omnibus,
       tomeLabel: omnibus ? 'Numéro' : 'Tome',
       months: MONTHS.map((m, i) => ({ label: m, selected: i === x.month })),
-      roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people, none: people.length === 0 })),
+      roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people })),
       tagGroups: [
-        { label: 'Genres', own: x.genres, noneOwn: x.genres.length === 0, inherited: x.genresSeries },
-        { label: 'Univers', own: x.universes, noneOwn: x.universes.length === 0, inherited: x.universesSeries }
+        { label: 'Genres', own: x.genres, inherited: x.genresSeries },
+        { label: 'Univers', own: x.universes, inherited: x.universesSeries }
       ],
       stars: [1, 2, 3, 4, 5].map((n) => ({
         glyph: n <= rating ? '★' : '☆', fg: n <= rating ? t.acc : t.muted, label: n + ' sur 5 : ' + RATING_LABELS[n],

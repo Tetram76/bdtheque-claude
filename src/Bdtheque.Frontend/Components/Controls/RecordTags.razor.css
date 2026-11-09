@@ -8,11 +8,6 @@
     min-inline-size: 0;
 }
 
-.record-tags-none {
-    font-size: var(--font-size-small);
-    color: var(--color-text-muted);
-}
-
 /* The choice of a record keeps the width of a name, never stretched over the whole line. */
 .record-tags-picker {
     flex: 0 1 18rem;

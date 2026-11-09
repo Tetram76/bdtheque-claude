@@ -121,15 +121,15 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Authors_ALinePerRole_PersonneWithoutAny()
+    public void Authors_ALinePerRole_NothingWithoutAny()
     {
         var page = OpenAlbum();
 
         var roles = page.FindAll(".album-role").Select(role => (
             role.QuerySelector(".album-role-name")!.TextContent,
             string.Join(", ", role.QuerySelectorAll(".tag").Select(tag => tag.TextContent.Trim())),
-            role.QuerySelector(".record-tags-none")?.TextContent));
-        Assert.Equal([("Scénario", "Hergé", null), ("Dessin", "Hergé", null), ("Couleurs", "", "Personne")], roles);
+            role.QuerySelector(".record-tags")!.TextContent.Trim()));
+        Assert.Equal([("Scénario", "Hergé", "HergéAjouter"), ("Dessin", "Hergé", "HergéAjouter"), ("Couleurs", "", "Ajouter")], roles);
         Assert.Equal("Retirer Hergé (Scénario)", page.Find(".album-role .tag-remove").GetAttribute("aria-label"));
     }
 

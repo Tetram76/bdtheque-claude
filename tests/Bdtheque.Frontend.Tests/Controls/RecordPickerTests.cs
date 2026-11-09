@@ -97,6 +97,8 @@ public sealed class RecordPickerTests : BunitContext
         Type(picker, "nouveau");
 
         picker.WaitForAssertion(() => Assert.Single(picker.FindAll("[role=option]")));
+        // Marked apart: its mention is not read as the end of the name.
+        Assert.True(picker.Find("[role=option]").ClassList.Contains("record-picker-pending"));
         picker.FindAll("[role=option]")[0].Click();
         Assert.Equal(pending, chosen);
     }
@@ -112,6 +114,7 @@ public sealed class RecordPickerTests : BunitContext
 
         Type(picker, "ti");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+        Assert.Empty(picker.FindAll(".record-picker-pending"));
         picker.FindAll("[role=option]")[1].Click();
 
         Assert.Equal(new RecordOption(Titeuf, "Titeuf", null), chosen);

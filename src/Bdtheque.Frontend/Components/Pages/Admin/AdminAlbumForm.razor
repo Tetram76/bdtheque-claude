@@ -105,7 +105,7 @@ else
                     {
                         <div class="album-role">
                             <span class="album-role-name" id="@($"album-role-{role}")">@Values.Of(role)</span>
-                            <RecordTags Id="@($"album-add-{role}")" Kind="RecordKind.Author" Items="@Entry.AuthorsOf(role)" None="@L["Authors.None"]"
+                            <RecordTags Id="@($"album-add-{role}")" Kind="RecordKind.Author" Items="@Entry.AuthorsOf(role)"
                                         AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => CreditAuthor(role, author)"
                                         OnRemove="author => RemoveAuthor(role, author)"
                                         RemoveLabel="@(author => L["Authors.Remove", author.Label, Values.Of(role)].Value)"
@@ -122,14 +122,14 @@ else
             <div class="album-fields">
                 <div class="album-tags">
                     <span class="album-tags-name">@L["Genres"]</span>
-                    <RecordTags Id="album-add-genre" Kind="RecordKind.Genre" Items="Entry.Genres" None="@L["Genres.None"]" AddText="@L["Add"]"
+                    <RecordTags Id="album-add-genre" Kind="RecordKind.Genre" Items="Entry.Genres" AddText="@L["Add"]"
                                 AddLabel="@L["Genres.Add"]" OnAdd="AddGenre" OnRemove="genre => Entry.Genres.Remove(genre)"
                                 OnCreate="text => _genreCreation = text" CreateLabel="@(text => L["Genres.Create", text].Value)" />
                     <InheritedTags Label="@L["BySeries"]" Items="Entry.SeriesGenres" />
                 </div>
                 <div class="album-tags">
                     <span class="album-tags-name">@L["Universes"]</span>
-                    <RecordTags Id="album-add-universe" Kind="RecordKind.Universe" Items="Entry.Universes" None="@L["Universes.None"]" AddText="@L["Add"]"
+                    <RecordTags Id="album-add-universe" Kind="RecordKind.Universe" Items="Entry.Universes" AddText="@L["Add"]"
                                 AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => Entry.Universes.Remove(universe)"
                                 OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)" />
                     <InheritedTags Label="@L["BySeries"]" Items="Entry.SeriesUniverses" />

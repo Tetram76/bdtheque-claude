@@ -50,7 +50,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void RecordTags_EachRemovable_NoneWithoutAny_AndAddOpensTheChoice()
+    public void RecordTags_EachRemovable_AndAddOpensTheChoice()
     {
         RecordOption? removed = null;
         var hergé = new RecordOption(Guid.NewGuid(), "Hergé", null);
@@ -58,14 +58,12 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.Id, "add-scenarist")
             .Add(p => p.Kind, RecordKind.Author)
             .Add(p => p.Items, [hergé])
-            .Add(p => p.None, "Personne")
             .Add(p => p.AddText, "Ajouter")
             .Add(p => p.AddLabel, "Ajouter un auteur au scénario")
             .Add(p => p.OnRemove, option => removed = option)
             .Add(p => p.RemoveLabel, option => $"Retirer {option.Label} (Scénario)"));
 
         Assert.Equal("Hergé", tags.Find(".tag").TextContent.Trim());
-        Assert.Empty(tags.FindAll(".record-tags-none"));
         tags.Find("button[aria-label='Retirer Hergé (Scénario)']").Click();
         Assert.Equal(hergé, removed);
 
@@ -82,18 +80,17 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void RecordTags_WithoutAny_SaysNone()
+    public void RecordTags_WithoutAny_OnlyTheAddition()
     {
         var tags = Render<RecordTags>(parameters => parameters
             .Add(p => p.Id, "add-genre")
             .Add(p => p.Kind, RecordKind.Genre)
             .Add(p => p.Items, [])
-            .Add(p => p.None, "Aucun")
             .Add(p => p.AddText, "Ajouter")
             .Add(p => p.AddLabel, "Ajouter un genre"));
 
-        Assert.Equal("Aucun", tags.Find(".record-tags-none").TextContent);
         Assert.Empty(tags.FindAll(".tag"));
+        Assert.Equal("Ajouter", tags.Find(".record-tags").TextContent.Trim());
     }
 
     [Fact]

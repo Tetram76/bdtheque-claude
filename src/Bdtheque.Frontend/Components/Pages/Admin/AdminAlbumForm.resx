@@ -33,9 +33,6 @@
   <data name="Authors.Help" xml:space="preserve">
     <value>Un auteur se trouve en tapant son nom ; s&apos;il n&apos;existe pas encore, il se crée sur place.</value>
   </data>
-  <data name="Authors.None" xml:space="preserve">
-    <value>Personne</value>
-  </data>
   <data name="Authors.Remove" xml:space="preserve">
     <value>Retirer {0} ({1})</value>
   </data>
@@ -140,9 +137,6 @@
   </data>
   <data name="Genres.Create" xml:space="preserve">
     <value>Créer le genre « {0} »</value>
-  </data>
-  <data name="Genres.None" xml:space="preserve">
-    <value>Aucun</value>
   </data>
   <data name="Kicker.Album" xml:space="preserve">
     <value>Identification</value>
@@ -302,9 +296,6 @@
   </data>
   <data name="Universes.Create" xml:space="preserve">
     <value>Créer l&apos;univers « {0} »</value>
-  </data>
-  <data name="Universes.None" xml:space="preserve">
-    <value>Aucun</value>
   </data>
   <data name="Volume" xml:space="preserve">
     <value>Tome</value>

@@ -1,14 +1,10 @@
 @* The records an entry form associates with the one it enters (e.g. the authors of a role, the genres of an album,
-   visuel/saisie-album/contenu.md): each a removable tag, « Personne » or « Aucun » without any, and « Ajouter », which opens
-   the choice of a record by typing its name, and may offer to create it (RecordPicker). Interactive. *@
+   visuel/saisie-album/contenu.md): each a removable tag, then « Ajouter », which opens the choice of a record by typing
+   its name, and may offer to create it (RecordPicker); nothing stands for no record. Interactive. *@
 <div class="record-tags">
     @foreach (var item in Items)
     {
         <Tag Text="@item.Label" OnRemove="() => OnRemove.InvokeAsync(item)" RemoveLabel="@RemoveLabel?.Invoke(item)" />
-    }
-    @if (Items.Count == 0 && !_adding)
-    {
-        <span class="record-tags-none">@None</span>
     }
     @if (_adding)
     {
@@ -35,10 +31,6 @@
 
     [Parameter, EditorRequired]
     public IReadOnlyList<RecordOption> Items { get; set; } = [];
-
-    /// <summary>What stands for no record (« Personne », « Aucun »).</summary>
-    [Parameter, EditorRequired]
-    public string None { get; set; } = null!;
 
     /// <summary>The text of the action that adds a record (« Ajouter »).</summary>
     [Parameter, EditorRequired]
