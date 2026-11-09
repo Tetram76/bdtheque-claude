@@ -12,25 +12,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Average" xml:space="preserve">
-    <value>Moyen</value>
-  </data>
   <data name="Clear" xml:space="preserve">
     <value>Retirer</value>
   </data>
-  <data name="Good" xml:space="preserve">
-    <value>Bien</value>
-  </data>
   <data name="None" xml:space="preserve">
     <value>Pas encore noté</value>
-  </data>
-  <data name="Poor" xml:space="preserve">
-    <value>Mauvais</value>
-  </data>
-  <data name="VeryGood" xml:space="preserve">
-    <value>Très bien</value>
-  </data>
-  <data name="VeryPoor" xml:space="preserve">
-    <value>Très mauvais</value>
   </data>
 </root>

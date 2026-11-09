@@ -8,6 +8,7 @@ using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Presentation;
+using Bdtheque.Frontend.Formatting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Controls;
@@ -27,6 +28,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         Services.AddLocalization();
         Services.AddSingleton(TimeProvider.System);
+        Services.AddSingleton<ValueLabels>();
         Services.AddSingleton(new ApiClient(new HttpClient(new StubHandler(async request =>
         {
             JsonElement? body = request.Content is null ? null : await request.Content.ReadFromJsonAsync<JsonElement>();

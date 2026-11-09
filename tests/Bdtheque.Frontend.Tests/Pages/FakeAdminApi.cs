@@ -65,6 +65,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         services.AddScoped(_ => new BrowserTimeZone { Name = "Europe/Paris" });
         services.AddScoped<DisplayFormatter>();
         services.AddSingleton<RecordLabels>();
+        services.AddSingleton<ValueLabels>();
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
