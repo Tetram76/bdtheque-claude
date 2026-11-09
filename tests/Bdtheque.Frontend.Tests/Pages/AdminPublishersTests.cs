@@ -97,7 +97,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
             [
                 ("Casterman", "Écritures, Fac-similé, Univers d'auteurs", "casterman.com", "Collections 3", "Éditions 412"),
                 ("Dargaud", "Long courrier", "dargaud.com/bd", "Collections 1", "Éditions 1"),
-                ("Futuropolis", "Aucune collection", "Non renseigné", "Collections 0", "Éditions 0"),
+                ("Futuropolis", "Aucune collection", "—Non renseigné", "Collections 0", "Éditions 0"),
             ],
             rows);
     }

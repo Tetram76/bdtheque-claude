@@ -92,7 +92,7 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
             [
                 ("Barracuda", "Terminée", "6 albums · 6 dans la collection", "Complète"),
                 ("Bécassine", "En cours", "27 albums · 1 dans la collection", "À compléter"),
-                ("Bone", "Non renseigné", "9 albums · aucun dans la collection", "À compléter"),
+                ("Bone", "—Non renseigné", "9 albums · aucun dans la collection", "À compléter"),
                 ("Le Bureau des prolongations", "Abandonnée", "Aucun album", "À compléter"),
             ],
             rows);
