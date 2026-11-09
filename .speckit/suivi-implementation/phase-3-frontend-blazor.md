@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et ses chantiers, notes des parties suivantes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T20:35:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T22:05:37Z }
 ---
 
 # Phase 3 — Frontend Blazor
@@ -48,7 +48,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#303~~ | Liste des éditeurs de l'administration |
 | ~~#333~~ | Liste des éditions de l'administration |
 | ~~#334~~ | Liste des intentions d'achat de l'administration |
-| #203 | Genres et univers : listes et saisie de l'administration |
+| ~~#203~~ | Genres et univers : listes et saisie de l'administration |
 | #204 | Page des éditions et intentions d'achat d'un album |
 | ~~#205~~ | Saisie d'un album |
 | #206 | Saisie d'une série |
