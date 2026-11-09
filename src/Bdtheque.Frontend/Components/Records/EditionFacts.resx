@@ -111,9 +111,6 @@
   <data name="PersonalNotes" xml:space="preserve">
     <value>Notes personnelles</value>
   </data>
-  <data name="Dates.Owned" xml:space="preserve">
-    <value>Édition créée le {0}, entrée dans la collection le {1}, modifiée le {2}.</value>
-  </data>
   <data name="Dates" xml:space="preserve">
     <value>Édition créée le {0}, modifiée le {1}.</value>
   </data>

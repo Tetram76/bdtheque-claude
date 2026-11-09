@@ -342,10 +342,10 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        var dates = BlockOf(page, "Dans quelles éditions ?").QuerySelector(".edition-dates")!.TextContent;
-        Assert.Contains("Édition créée le 02/02/2026", dates);
-        Assert.Contains("entrée dans la collection le 03/02/2026", dates);
-        Assert.Contains("modifiée le 10/10/2026", dates);
+        // Its date of entry into the collection, which the application sets alone, is not one of them: only the date of
+        // acquisition, in the detail of the copy, tells when it was acquired.
+        Assert.Equal("Édition créée le 02/02/2026, modifiée le 10/10/2026.",
+            BlockOf(page, "Dans quelles éditions ?").QuerySelector(".edition-dates")!.TextContent.Trim());
     }
 
     [Fact]

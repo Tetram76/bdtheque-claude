@@ -8,7 +8,8 @@
    the copy. A data not set stays shown, with « Non renseigné ». The labels of the date and of the amount of the acquisition
    follow its mode (fonctionnel/presentation/libelles-contextuels-sur-l-edition.md). Each amount would be followed by its
    value in euros of the day, and a missing acquisition amount replaced by the estimated value: both belong to the Phase 4
-   and are said not available yet, without any value made up. Its dates close it, in the time zone of the browser. *@
+   and are said not available yet, without any value made up. Its dates of creation and modification close it, in the time
+   zone of the browser. *@
 <div class="edition-detail">
     <div class="edition-group">
         <h3>@L["Edition"]</h3>
@@ -114,7 +115,7 @@
         <span class="edition-unavailable">@L["EurosOfTheDay"]</span>
     };
 
-    private string Dates => Edition.EnteredCollectionAt is { } entered
-        ? L["Dates.Owned", Format.LocalDate(Edition.CreatedAt), Format.LocalDate(entered), Format.LocalDate(Edition.ModifiedAt)]
-        : L["Dates", Format.LocalDate(Edition.CreatedAt), Format.LocalDate(Edition.ModifiedAt)];
+    // The date of entry into the collection, which the application sets alone, is left out: beside the date of acquisition,
+    // it would read as another date of acquisition (visuel/fiche-album/contenu.md).
+    private string Dates => L["Dates", Format.LocalDate(Edition.CreatedAt), Format.LocalDate(Edition.ModifiedAt)];
 }
