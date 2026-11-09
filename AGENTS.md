@@ -31,7 +31,7 @@ Les règles et protocoles décrits dans le `.speckit/` ont une valeur **au moins
 
 | Moment | Commandes | Concepts à lire |
 | --- | --- | --- |
-| Créer un ticket | `gh issue create`, `create_issue` | [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md) |
+| Créer un ticket | `gh issue create`, `create_issue`, `issue_write` | [`gestion-projet/revue-tickets/issues.md`](.speckit/gestion-projet/revue-tickets/issues.md), [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md) |
 | Créer une Pull Request | `gh pr create`, `create_pull_request` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md) |
 | Pousser sur une Pull Request | `git push`, `push_files`, `create_or_update_file` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/revue-tickets/analyse-sonarqube-cloud.md`](.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md) |
 | Passer une Pull Request en revue | `gh pr ready`, `update_pull_request` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/revue-tickets/analyse-sonarqube-cloud.md`](.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md), [`gestion-projet/revue-tickets/validation-fonctionnelle.md`](.speckit/gestion-projet/revue-tickets/validation-fonctionnelle.md) |
