@@ -466,15 +466,13 @@ else
         ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>
         : null;
 
-    // Each field the user changed since the album was read, with what they entered, to enter it again once the album is reloaded.
-    private IEnumerable<(string Field, string Value)> Changes()
-    {
-        var read = ReadEntry!;
-        var entry = Entry!;
-        string Text(string? value) => string.IsNullOrWhiteSpace(value) ? L["Changes.Empty"] : value;
-        string Names(IEnumerable<RecordOption> records) => Text(string.Join(", ", records.Select(r => r.Label)));
-        bool Same(IEnumerable<RecordOption> a, IEnumerable<RecordOption> b) => a.Select(r => r.Id).Order().SequenceEqual(b.Select(r => r.Id).Order());
+    // Each field the user changed since the album was read, with what they entered, to enter it again once the album is reloaded:
+    // block by block of the form.
+    private IEnumerable<(string Field, string Value)> Changes() =>
+        [.. AlbumChanges(ReadEntry!, Entry!), .. CreditAndClassificationChanges(ReadEntry!, Entry!), .. ReadingChanges(ReadEntry!, Entry!)];
 
+    private IEnumerable<(string Field, string Value)> AlbumChanges(AlbumEntry read, AlbumEntry entry)
+    {
         if (read.Series?.Id != entry.Series?.Id)
             yield return (L["Series"], Text(entry.Series?.Label));
         if (read.Title != entry.Title)
@@ -482,26 +480,28 @@ else
         if (read.ManualSortKey != entry.ManualSortKey)
             yield return (L["Changes.SortKey"], entry.ManualSortKey ?? L["Changes.SortKey.Auto"]);
         if ((read.IsOmnibus, read.IsSpecialIssue) != (entry.IsOmnibus, entry.IsSpecialIssue))
-            yield return (L["Type"], string.Join(", ", new[] { entry.IsOmnibus ? L["Type.Omnibus"].Value : null, entry.IsSpecialIssue ? L["Type.SpecialIssue"].Value : null }
-                .OfType<string>().DefaultIfEmpty(L["Type.Regular"])));
+            yield return (L["Type"], TypeText(entry));
         if (read.VolumeNumber != entry.VolumeNumber)
             yield return (L["Volume"], Text(entry.VolumeNumber?.ToString(CultureInfo.CurrentCulture)));
         if (entry.IsOmnibus && (read.StartVolumeNumber, read.EndVolumeNumber) != (entry.StartVolumeNumber, entry.EndVolumeNumber))
             yield return (L["Range"], L["Changes.Range", Text(entry.StartVolumeNumber?.ToString(CultureInfo.CurrentCulture)),
                 Text(entry.EndVolumeNumber?.ToString(CultureInfo.CurrentCulture))]);
         if ((read.FirstPublicationYear, read.FirstPublicationMonth) != (entry.FirstPublicationYear, entry.FirstPublicationMonth))
-            yield return (L["Publication"], Text(string.Join(' ', new[]
-            {
-                entry.FirstPublicationMonth is { } month ? CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month) : null,
-                entry.FirstPublicationYear?.ToString(CultureInfo.InvariantCulture),
-            }.OfType<string>())));
-        foreach (var role in Enum.GetValues<ContributionRole>())
-            if (!Same(read.AuthorsOf(role), entry.AuthorsOf(role)))
-                yield return (Values.Of(role), Names(entry.AuthorsOf(role)));
+            yield return (L["Publication"], PublicationText(entry));
+    }
+
+    private IEnumerable<(string Field, string Value)> CreditAndClassificationChanges(AlbumEntry read, AlbumEntry entry)
+    {
+        foreach (var role in Enum.GetValues<ContributionRole>().Where(role => !Same(read.AuthorsOf(role), entry.AuthorsOf(role))))
+            yield return (Values.Of(role), Names(entry.AuthorsOf(role)));
         if (!Same(read.Genres, entry.Genres))
             yield return (L["Genres"], Names(entry.Genres));
         if (!Same(read.Universes, entry.Universes))
             yield return (L["Universes"], Names(entry.Universes));
+    }
+
+    private IEnumerable<(string Field, string Value)> ReadingChanges(AlbumEntry read, AlbumEntry entry)
+    {
         if (read.Summary != entry.Summary)
             yield return (L["Summary"], Text(entry.Summary));
         if (read.PersonalNotes != entry.PersonalNotes)
@@ -509,4 +509,21 @@ else
         if (read.Rating != entry.Rating)
             yield return (L["Rating"], entry.Rating is { } rating ? Values.Of(rating) : L["Rating.None"]);
     }
+
+    private string Text(string? value) => string.IsNullOrWhiteSpace(value) ? L["Changes.Empty"] : value;
+
+    private string Names(IEnumerable<RecordOption> records) => Text(string.Join(", ", records.Select(r => r.Label)));
+
+    private static bool Same(IEnumerable<RecordOption> a, IEnumerable<RecordOption> b) =>
+        a.Select(r => r.Id).Order().SequenceEqual(b.Select(r => r.Id).Order());
+
+    private string TypeText(AlbumEntry entry) =>
+        string.Join(", ", new[] { entry.IsOmnibus ? L["Type.Omnibus"].Value : null, entry.IsSpecialIssue ? L["Type.SpecialIssue"].Value : null }
+            .OfType<string>().DefaultIfEmpty(L["Type.Regular"]));
+
+    private string PublicationText(AlbumEntry entry) => Text(string.Join(' ', new[]
+    {
+        entry.FirstPublicationMonth is { } month ? CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month) : null,
+        entry.FirstPublicationYear?.ToString(CultureInfo.InvariantCulture),
+    }.OfType<string>()));
 }
