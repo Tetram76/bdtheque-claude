@@ -234,10 +234,13 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         Assert.Equal("Nouvelle intention d'achat", Text(intents.QuerySelector(".actions-menu button.button")!));
         Assert.Equal(
             [
-                ("Sur l'album… Toute édition de l'album fera l'affaire.", $"{AppPaths.AdminAlbumEditions(AlbumId)}?intent=album"),
+                ("Sur l'album… Toute édition de l'album fera l'affaire.", null),
                 ("Sur une nouvelle édition… Une édition précise, saisie sans exemplaire ni valeur.", AppPaths.AdminNewPurchaseIntent(AlbumId)),
             ],
             Items(intents));
+        // Nothing to enter for an intent on the whole album: the choice sets it at once, under the version of the album.
+        var form = intents.QuerySelector(".actions-menu-panel form[method='post']")!;
+        Assert.Equal(("submit", "42"), (form.QuerySelector(".menu-item")!.GetAttribute("type"), form.QuerySelector("input[name='Version']")!.GetAttribute("value")));
     }
 
     [Fact]
@@ -314,27 +317,11 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void IntentOnTheAlbum_ADialogThatConfirmsIt_WithTheVersionOfTheAlbum()
-    {
-        Answer(AlbumState.Outside, [], []);
-
-        var dialog = Open("intent=album").Find("dialog");
-
-        Assert.Equal(("Poser une intention d'achat sur l'album ?", "Les Bijoux de la Castafiore (Tintin - T. 21)"),
-            (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
-        var form = dialog.QuerySelector("form[method='post']")!;
-        Assert.Equal("42", form.QuerySelector("input[name='Version']")!.GetAttribute("value"));
-        Assert.Equal("Poser l'intention", Text(form.QuerySelector("button[type='submit']")!));
-    }
-
-    [Fact]
     // The dialogs open on what the page offers: an address written by hand opens none.
     public void Dialogs_OnWhatThePageDoesNotOffer_OpenNone()
     {
         Assert.Empty(Open($"delete-edition={Guid.NewGuid()}").FindAll("dialog"));
         Assert.Empty(Open($"remove-intent={Guid.NewGuid()}").FindAll("dialog"));
-        // The album has editions: it can no longer be targeted as a whole.
-        Assert.Empty(Open("intent=album").FindAll("dialog"));
     }
 
     [Fact]

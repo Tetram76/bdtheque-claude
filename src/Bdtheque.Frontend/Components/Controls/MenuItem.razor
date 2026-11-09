@@ -1,4 +1,5 @@
-@* An item of an ActionsMenu: a link to another page, or a button, which closes the menu as it acts; with a hint under its
+@* An item of an ActionsMenu: a link to another page, a button, which closes the menu as it acts, or the button that submits
+   the form around it (e.g. a write done at once, without anything to enter); with a hint under its
    label when the choice it makes needs saying (e.g. « Toute édition de l'album fera l'affaire. »). *@
 @if (Href is not null)
 {
@@ -8,8 +9,9 @@
 }
 else
 {
-    <button type="button" class="menu-item" data-variant="@VariantName" popovertarget="@Menu?.Id" popovertargetaction="hide"
-            @onclick="OnClick">
+    @* A submit button submits its form: the page it leads to closes the menu. *@
+    <button type="@Type" class="menu-item" data-variant="@VariantName" popovertarget="@(Type == "submit" ? null : Menu?.Id)"
+            popovertargetaction="@(Type == "submit" ? null : "hide")" @onclick="OnClick">
         @Content
     </button>
 }
@@ -39,6 +41,10 @@ else
     /// <summary>Whether <see cref="Href"/> is a site outside the application (e.g. the website of a publisher).</summary>
     [Parameter]
     public bool External { get; set; }
+
+    /// <summary>The type of a button: <c>button</c>, or <c>submit</c> in a form.</summary>
+    [Parameter]
+    public string Type { get; set; } = "button";
 
     [Parameter]
     public EventCallback OnClick { get; set; }

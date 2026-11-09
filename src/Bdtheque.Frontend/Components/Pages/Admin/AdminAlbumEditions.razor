@@ -44,6 +44,11 @@ else if (_page is { } page)
             </div>
         </div>
 
+        @if (_intentProblem is not null)
+        {
+            <ErrorMessage Problem="_intentProblem" />
+        }
+
         <Block Title="@L["Block.Album"]" Kicker="@L["Kicker.Album"]">
             <div class="album-brief">
                 <span class="album-brief-cover"><Cover VisualId="album.Cover?.VisualId" /></span>
@@ -125,7 +130,12 @@ else if (_page is { } page)
                 @if (page.Editions.Count == 0 && page.PurchaseIntents.Count == 0)
                 {
                     <ActionsMenu Id="new-intent" Text="@L["NewIntent"]" TextIcon="IconName.Add">
-                        <MenuItem Href="@AlbumEditionsQuery.ForAlbumIntent.Href(Id)" Label="@L["NewIntent.Album"]" Hint="@L["NewIntent.Album.Hint"]" />
+                        @* Set at once, nothing being entered for an intent on the whole album (visuel/editions-album/contenu.md). *@
+                        <form method="post" @formname="@AlbumIntentFormName" @onsubmit="SetAlbumIntentAsync">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="@DeletionDialog.VersionName" value="@album.Version" />
+                            <MenuItem Type="submit" Label="@L["NewIntent.Album"]" Hint="@L["NewIntent.Album.Hint"]" />
+                        </form>
                         <MenuItem Href="@AppPaths.AdminNewPurchaseIntent(Id)" Label="@L["NewIntent.Edition"]" Hint="@L["NewIntent.Edition.Hint"]" />
                     </ActionsMenu>
                 }
@@ -209,25 +219,6 @@ else if (_page is { } page)
                         RefusalHint="@(kind => L[$"Removal.Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_dialogProblem"
                         Version="album.Version" OnConfirm="RemoveIntentAsync" />
     }
-    else if (_albumIntentDialog)
-    {
-        <Dialog Id="album-intent" Title="@L["AlbumIntent.Title"]" Subject="@AlbumLabel" Tone="DialogTone.Creation" CloseHref="@PageOnly">
-            <ChildContent>
-                <p>@L["AlbumIntent.Lead"]</p>
-                @if (_dialogProblem is not null)
-                {
-                    <ErrorMessage Problem="_dialogProblem" />
-                }
-            </ChildContent>
-            <Actions>
-                <form method="post" @formname="@AlbumIntentFormName" @onsubmit="SetAlbumIntentAsync">
-                    <AntiforgeryToken />
-                    <input type="hidden" name="@DeletionDialog.VersionName" value="@album.Version" />
-                    <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["AlbumIntent.Confirm"]" />
-                </form>
-            </Actions>
-        </Dialog>
-    }
 }
 
 @code {
@@ -263,9 +254,9 @@ else if (_page is { } page)
     private ApiProblem? _problem;
     private AlbumEditionItem? _dialogEdition;
     private AlbumPurchaseIntentItem? _dialogIntent;
-    private bool _albumIntentDialog;
     private DeletionImpact? _impact;
     private ApiProblem? _dialogProblem;
+    private ApiProblem? _intentProblem;
 
     // The page without its dialog: where the closing of a dialog, and a write done, lead.
     private string PageOnly => AppPaths.AdminAlbumEditions(Id);
@@ -291,18 +282,16 @@ else if (_page is { } page)
             return;
         }
 
-        // A dialog opens on what the page offers, from its rows or its buttons: an address written by hand on another record,
-        // or a new intent on an album that can no longer be targeted as a whole, opens none.
+        // A dialog opens on what the page offers, from its rows: an address written by hand on another record opens none.
         _dialogEdition = _page.Editions.FirstOrDefault(row => row.Edition.Id == query.DeleteEdition);
         _dialogIntent = _page.PurchaseIntents.FirstOrDefault(row => row.Id == query.RemoveIntent);
-        _albumIntentDialog = query.IntentOnAlbum && _page.Editions.Count == 0 && _page.PurchaseIntents.Count == 0;
 
         if (_dialogEdition is not null)
             await LoadImpactAsync($"{EditionPath(_dialogEdition.Edition.Id)}/deletion-impact");
         else if (_dialogIntent is not null)
             await LoadImpactAsync($"{IntentPath(_dialogIntent.Id)}/deletion-impact");
 
-        var opened = _dialogEdition is not null || _dialogIntent is not null || _albumIntentDialog;
+        var opened = _dialogEdition is not null || _dialogIntent is not null;
         if (opened && HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && query.Action(Id) is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
@@ -357,7 +346,7 @@ else if (_page is { } page)
 
     private async Task SetAlbumIntentAsync()
     {
-        if (!_albumIntentDialog || AlbumIntentVersion is not { } version)
+        if (AlbumIntentVersion is not { } version)
             return;
 
         try
@@ -366,8 +355,9 @@ else if (_page is { } page)
         }
         catch (ApiProblemException exception)
         {
-            // Refused (the album has an edition since, or was modified in the meantime): said in the dialog.
-            _dialogProblem = exception.Problem;
+            // Refused (the album has an edition since, or was modified in the meantime): said above the blocks, the page
+            // presenting the album as it is now.
+            _intentProblem = exception.Problem;
             return;
         }
 

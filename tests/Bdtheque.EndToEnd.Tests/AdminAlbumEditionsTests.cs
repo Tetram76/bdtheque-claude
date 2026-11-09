@@ -34,15 +34,14 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     }
 
     [Fact]
-    public async Task IntentOnTheAlbum_ChosenAndConfirmed_IsSet_AndNoOtherIntentIsOffered()
+    // Nothing is entered for an intent on the whole album: choosing it sets it at once (visuel/editions-album/contenu.md).
+    public async Task IntentOnTheAlbum_Chosen_IsSetAtOnce_AndNoOtherIntentIsOffered()
     {
         var album = await CreateAlbumAsync($"Blacksad {_marker}");
         var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" }).ClickAsync();
-        await page.GetByRole(AriaRole.Link, new() { Name = "Sur l'album…" }).ClickAsync();
-        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Poser une intention d'achat sur l'album ?" });
-        await dialog.GetByRole(AriaRole.Button, new() { Name = "Poser l'intention" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Sur l'album…" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         await Assertions.Expect(page.Locator(".intent-row")).ToContainTextAsync("toute édition");

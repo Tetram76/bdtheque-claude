@@ -201,13 +201,4 @@
   <data name="Removal.Refusal.Hint.SavedSearch" xml:space="preserve">
     <value>Retirez d&apos;abord l&apos;intention des critères de ces recherches enregistrées, puis recommencez.</value>
   </data>
-  <data name="AlbumIntent.Title" xml:space="preserve">
-    <value>Poser une intention d&apos;achat sur l&apos;album ?</value>
-  </data>
-  <data name="AlbumIntent.Lead" xml:space="preserve">
-    <value>Toute édition de l&apos;album fera l&apos;affaire : l&apos;intention sera réalisée par l&apos;achat de n&apos;importe laquelle de ses éditions.</value>
-  </data>
-  <data name="AlbumIntent.Confirm" xml:space="preserve">
-    <value>Poser l&apos;intention</value>
-  </data>
 </root>

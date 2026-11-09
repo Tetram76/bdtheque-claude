@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la page des éditions et intentions d''achat d''un album.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T22:23:33Z }
 ---
 
 # Contenu
@@ -18,7 +18,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
   - l'aide rappelle que chaque édition, avec ses visuels, se saisit sur sa propre fiche.
 - **Les intentions d'achat** :
   - le décompte (« 1 intention d'achat », « Aucune intention d'achat »), et à droite le bouton qui en ajoute une ([Intention d'achat](../../fonctionnel/regles-metier/intention-d-achat.md)) :
-    - pour un album **sans édition ni intention**, **Nouvelle intention d'achat**, qui propose deux choix : **Sur l'album…**, toute édition de l'album faisant l'affaire, et **Sur une nouvelle édition…** ; un clic en dehors des choix ouverts les referme ;
+    - pour un album **sans édition ni intention**, **Nouvelle intention d'achat**, qui propose deux choix : **Sur l'album…**, toute édition de l'album faisant l'affaire, qui pose l'intention dès le clic, sans dialogue de confirmation, rien n'étant à saisir pour elle, la page se mettant à jour, et **Sur une nouvelle édition…** ; un clic en dehors des choix ouverts les referme ;
     - pour un album qui a une édition, possédée ou visée, seule une édition précise peut l'être : un bouton direct, **Nouvelle intention sur une édition…**, sans choix à faire ; plusieurs éditions d'un même album peuvent être visées, une intention chacune ;
     - dans les deux cas, viser une édition ouvre la fiche de saisie d'une nouvelle intention d'achat ([`saisie-edition/`](../saisie-edition/index.md)), sans exemplaire ni valeur ;
     - aucun bouton pour un album lui-même visé ;
