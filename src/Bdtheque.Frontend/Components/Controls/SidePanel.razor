@@ -2,19 +2,17 @@
 
 @* A side panel (visuel/listes/saisie-selon-l-entite.md): a modal dialog that slides over the page from the right, the page staying
    visible and greyed behind it, for an entry lighter than a page of its own (e.g. a universe). Rendered when the page asks for
-   it, it is opened as a modal by the element that wraps it (wwwroot/modal-dialog.js), like a Dialog; its closing, a link to the
-   page without it, comes first, the safe choice that Escape follows. The caller wraps it in its form, whose actions are its own. *@
+   it, it is opened as a modal by the element that wraps it (wwwroot/modal-dialog.js), like a Dialog; its cancelling, a link to the
+   page without it, comes first among its actions, the safe choice that Escape follows. The caller wraps it in its form, whose
+   actions are its own. *@
 <app-modal-dialog>
     <dialog class="side-panel" aria-labelledby="@TitleId">
-        <header class="side-panel-header">
-            <h2 id="@TitleId" class="side-panel-title">@Title</h2>
-            <a class="side-panel-close" href="@CloseHref" aria-label="@L["Close"]" data-dialog-close><Icon Name="IconName.Close" /></a>
-        </header>
+        <h2 id="@TitleId" class="side-panel-title">@Title</h2>
         <div class="side-panel-body">
             @ChildContent
         </div>
         <div class="side-panel-actions">
-            <Button Label="@L["Cancel"]" Href="@CloseHref" />
+            <Button Label="@L["Cancel"]" Href="@CloseHref" data-dialog-close="@true" />
             @Actions
         </div>
     </dialog>

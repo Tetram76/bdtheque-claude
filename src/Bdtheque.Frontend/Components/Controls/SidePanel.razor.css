@@ -42,32 +42,9 @@
     }
 }
 
-.side-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-m);
-}
-
 .side-panel-title {
     margin: 0;
     font-size: var(--font-size-title);
-}
-
-.side-panel-close {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    inline-size: var(--control-height);
-    block-size: var(--control-height);
-    border-radius: var(--radius-control);
-    color: var(--color-text);
-}
-
-.side-panel-close ::deep .icon {
-    inline-size: 1rem;
-    block-size: 1rem;
 }
 
 .side-panel-body {

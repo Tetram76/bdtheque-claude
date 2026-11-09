@@ -99,32 +99,6 @@
     gap: var(--space-xs);
 }
 
-/* The frame of a new genre, above the list, in dashes; in the alert color while its label is refused. */
-.genre-new {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-s);
-    padding: var(--space-s) var(--space-m);
-    border: 2px dashed var(--color-rule);
-    border-radius: var(--radius-tile);
-}
-
-.genre-new[data-invalid] {
-    border-color: var(--color-alert);
-}
-
-.genre-new-line {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-s);
-}
-
-.genre-new-line input {
-    inline-size: 16rem;
-    max-inline-size: 100%;
-}
-
 @container genre-rows (min-width: 34rem) {
     .genre-row {
         grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--genre-actions-width);

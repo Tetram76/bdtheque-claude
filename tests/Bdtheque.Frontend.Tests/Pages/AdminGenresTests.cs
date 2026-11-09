@@ -179,16 +179,19 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void New_TheFrameAboveTheList_HiddenByDefault()
+    public void New_TheDialogOfAGenreCreatedOnTheSpot_ClosedByDefault()
     {
         Assert.Empty(Open("").FindAll("form.genre-new"));
 
-        var form = Open("q=a&new=open").Find("form.genre-new");
+        var dialog = Open("q=a&new=open").Find("form.genre-new dialog");
 
+        // The dialog of a genre created on the spot from the entry form of an album (GenreCreationDialog).
         Assert.Equal(("Nouveau genre", "Libellé"),
-            (form.QuerySelector("label")!.TextContent.Trim(), form.QuerySelector("input[type='text']")!.GetAttribute("placeholder")));
-        Assert.Equal(["Ajouter"], form.QuerySelectorAll("button[type='submit']").Select(Text));
-        Assert.Equal($"{AppPaths.AdminGenres}?q=a", form.QuerySelector("a.button")!.GetAttribute("href"));
+            (Text(dialog.QuerySelector(".dialog-title")!), dialog.QuerySelector("label")!.TextContent.Trim()));
+        Assert.Equal(
+            [("Annuler", $"{AppPaths.AdminGenres}?q=a"), ("Ajouter le genre", null)],
+            dialog.QuerySelectorAll(".dialog-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
+        Assert.Equal("submit", dialog.QuerySelector(".dialog-actions button")!.GetAttribute("type"));
     }
 
     [Fact]
@@ -207,7 +210,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void New_ALabelAlreadyTaken_IsRefusedInTheFrame()
+    public void New_ALabelAlreadyTaken_IsRefusedInTheDialog()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Genre.LabelAlreadyUsed");
         var page = Open("new=open");
@@ -216,8 +219,8 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         page.Find("form.genre-new").Submit();
 
         var form = page.Find("form.genre-new");
-        Assert.True(form.HasAttribute("data-invalid"));
         Assert.Equal("AVENTURE", form.QuerySelector("input[type='text']")!.GetAttribute("value"));
+        Assert.Equal("true", form.QuerySelector("input[type='text']")!.GetAttribute("aria-invalid"));
         Assert.StartsWith("« AVENTURE » est déjà pris", Text(form.QuerySelector(".field-error")!));
     }
 
@@ -260,15 +263,13 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Empty_TheGenreSearched_IsTheOneTheFrameAdds()
+    public void Empty_TheGenreSearched_IsTheOneTheDialogAdds()
     {
         Answer([], totalCount: 0);
 
         var page = Open("q=Zorglub&new=open");
 
         Assert.Equal("Zorglub", page.Find("form.genre-new input[type='text']").GetAttribute("value"));
-        // What to do next being in the frame, the empty list only says it is empty.
-        Assert.Empty(page.Find(".empty-list").QuerySelectorAll("a"));
     }
 
     [Fact]

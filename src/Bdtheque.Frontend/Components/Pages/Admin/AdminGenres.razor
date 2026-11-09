@@ -3,6 +3,7 @@
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Deletion
 @inject IStringLocalizer<AdminGenres> L
+@inject IStringLocalizer<GenreCreationDialog> Creation
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
@@ -12,8 +13,8 @@
 @* The list of the genres of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the albums
    (visuel/listes/listes-de-l-administration.md): rendered statically, its search, its page and its dialogs are carried by its
    address (Lists/GenreListQuery.cs). A genre is entered in the list itself (visuel/listes/saisie-selon-l-entite.md): changed in
-   its row, added in a frame above the list, each a form the address opens, whose error is presented in place. Its styles
-   read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
+   its row, added in the dialog of a genre created on the spot, each a form the address opens, whose error is presented in
+   place. Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminGenres" />
 
@@ -27,34 +28,9 @@
 
         <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Genres" Order="@L["Order"]" />
 
-        @if (_query.Adding)
-        {
-            @* A frame above the list, hidden until « Nouveau genre » opens it. *@
-            <form class="genre-new" method="post" @formname="@NewFormName" @onsubmit="AddAsync" data-invalid="@(_newProblem is not null)">
-                <AntiforgeryToken />
-                <Field Id="genre-new-label" Label="@L["New"]" Error="@FieldError(_newProblem, NewLabel)" Context="control">
-                    <span class="genre-new-line">
-                        <input id="@control.Id" type="text" name="@LabelName" placeholder="@L["Label.Placeholder"]" autofocus
-                               aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="NewLabel" />
-                        <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Add"]" />
-                        <Button Href="@ListOnly.Href()" Label="@L["Cancel"]" />
-                    </span>
-                </Field>
-                @if (OtherProblem(_newProblem) is { } problem)
-                {
-                    <ErrorMessage Problem="problem" />
-                }
-            </form>
-        }
-
         @if (_list!.Items.Count == 0)
         {
-            if (_query.Text is { } text && _query.Adding)
-            {
-                @* The genre searched being added in the frame above: what to do next is there. *@
-                <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]" />
-            }
-            else if (_query.Text is { } searched)
+            if (_query.Text is { } searched)
             {
                 <EmptyList Message="@L["Empty.Text", searched]" Hint="@L["Empty.Hint"]">
                     <Actions>
@@ -63,7 +39,7 @@
                     </Actions>
                 </EmptyList>
             }
-            else if (!_query.Adding)
+            else
             {
                 <EmptyList Message="@L["Empty.None"]">
                     <Actions>
@@ -136,7 +112,30 @@
         }
     </ChildContent>
     <Dialogs>
-        @if (_dialogGenre is not null)
+        @if (_query.Adding)
+        {
+            @* The same dialog as a genre created on the spot from the entry form of an album (GenreCreationDialog), sent by a
+               form of the list. *@
+            <form class="genre-new" method="post" @formname="@NewFormName" @onsubmit="AddAsync">
+                <AntiforgeryToken />
+                <Dialog Id="genre-new" Title="@Creation["Title"]" Tone="DialogTone.Creation" CloseHref="@ListOnly.Href()">
+                    <ChildContent>
+                        <Field Id="genre-new-label" Label="@Creation["Label"]" Error="@FieldError(_newProblem, NewLabel)" Context="control">
+                            <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
+                                   aria-invalid="@control.Invalid" @bind="NewLabel" />
+                        </Field>
+                        @if (OtherProblem(_newProblem) is { } problem)
+                        {
+                            <ErrorMessage Problem="problem" />
+                        }
+                    </ChildContent>
+                    <Actions>
+                        <Button Type="submit" Variant="ButtonVariant.Primary" Label="@Creation["Create"]" />
+                    </Actions>
+                </Dialog>
+            </form>
+        }
+        else if (_dialogGenre is not null)
         {
             if (_query.Merge is not null)
             {
@@ -208,7 +207,7 @@
     // dialog or the cancelling of an entry leads.
     private GenreListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null, Edit = null, Adding = false };
 
-    // « Nouveau genre » opens the frame above the list, which keeps its search.
+    // « Nouveau genre » opens the dialog of a new genre over the list, which keeps its search.
     private string NewHref => (ListOnly with { Adding = true }).Href();
 
     // The numbers and the modification of a genre, which its row keeps while it is changed. On two lines, a number loses its

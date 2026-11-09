@@ -8,7 +8,8 @@ namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
 /// The list of the genres of the administration (visuel/listes/liste-par-liste.md), on the application shared by the tests:
-/// a genre changed in its row and a new one added in the frame above the list (visuel/listes/saisie-selon-l-entite.md), each
+/// a genre changed in its row and a new one added in the dialog of a genre created on the spot
+/// (visuel/listes/saisie-selon-l-entite.md), each
 /// test naming its genres with a marker of its own, and searching it. What the list shares with the other lists (dialogs,
 /// Escape, widths) is pinned by AdminAlbumsTests and AdminPublishersTests.
 /// </summary>
@@ -48,27 +49,29 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
     }
 
     [Fact]
-    public async Task New_InTheFrameAboveTheList_AddsTheGenre()
+    public async Task New_InTheDialogOfAGenreCreatedOnTheSpot_AddsTheGenre()
     {
         var page = await OpenAsync($"{AppPaths.AdminGenres}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouveau genre" }).ClickAsync();
-        await page.GetByRole(AriaRole.Textbox, new() { Name = "Nouveau genre" }).FillAsync($"Western {_marker}");
-        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" });
+        Assert.True(await dialog.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
+        await dialog.GetByRole(AriaRole.Textbox, new() { Name = "Libellé" }).FillAsync($"Western {_marker}");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter le genre" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres, $"?q={_marker}"));
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Western {_marker}"]);
     }
 
     [Fact]
-    public async Task New_ALabelTakenInAnotherCaseAndWithoutItsAccents_IsRefusedInTheFrame()
+    public async Task New_ALabelTakenInAnotherCaseAndWithoutItsAccents_IsRefusedInTheDialog()
     {
         await CreateGenreAsync($"Épopée {_marker}");
         var page = await OpenAsync($"{AppPaths.AdminNewGenre}&q={_marker}");
 
-        var label = page.GetByRole(AriaRole.Textbox, new() { Name = "Nouveau genre" });
+        var label = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" }).GetByRole(AriaRole.Textbox, new() { Name = "Libellé" });
         await label.FillAsync($"EPOPEE {_marker}");
-        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter le genre" }).ClickAsync();
 
         await Assertions.Expect(page.Locator("form.genre-new")).ToContainTextAsync(
             $"« EPOPEE {_marker} » est déjà pris : deux libellés qui ne diffèrent que par la casse ou les accents désignent le même genre.");

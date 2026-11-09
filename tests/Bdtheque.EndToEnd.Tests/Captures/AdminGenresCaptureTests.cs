@@ -11,7 +11,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// <summary>
 /// The list of the genres of the administration, captured in each offered theme on the application of the administration
 /// (<see cref="AdministrationApplication"/>), whose genres and dates are fixed: the list, a genre changed in its row, and the
-/// frame of a new genre above the list.
+/// dialog of a new genre over the list.
 /// </summary>
 [Collection(AdministrationApplication.Name)]
 public sealed class AdminGenresCaptureTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)

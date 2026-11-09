@@ -96,14 +96,8 @@
   <data name="Label.Of" xml:space="preserve">
     <value>Libellé de {0}</value>
   </data>
-  <data name="Label.Placeholder" xml:space="preserve">
-    <value>Libellé</value>
-  </data>
   <data name="Save" xml:space="preserve">
     <value>Enregistrer</value>
-  </data>
-  <data name="Add" xml:space="preserve">
-    <value>Ajouter</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Annuler</value>
