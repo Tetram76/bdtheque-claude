@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-09
+
+* **Plan** : #210 découpé en trois sous-tickets : structure de la fiche d'un album et éléments que réutilisent les fiches d'une série et d'un auteur (#321), visuels et éditions (#322), intentions d'achat et reste de la série (#323). **Choix** : fiche d'un album : auteurs d'un rôle repliés au-delà de six noms par une divulgation du navigateur, sans action suivie ; entrée du menu courante sur les pages de sa section avant que sa propre page existe ; valeurs des énumérations nommées en un seul lieu ; couleurs du jour fixées par l'application des fiches dans les tests ; données de validation : un rôle de plus de six auteurs (#PR).
+
 ## 2026-11-08
 
 * **Choix** : liste des auteurs de l'administration : `GET /admin/authors` (nationalité, albums crédités, chacun une fois, rôles tenus sur les albums et les séries), recherche et navigation partagées avec la consultation ; monogramme d'un auteur, ses sept teintes, contrats du thème de base (palette secondaire par défaut), tirées de l'auteur lui-même pour qu'il garde sa couleur quel que soit l'ordre de la liste, celles de « La couverture du jour » prises dans les couleurs du jour ; une liste sans filtres n'a pas de fonction de filtre suivie ; données de validation : auteur crédité sur rien (#316).

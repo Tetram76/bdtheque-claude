@@ -1,10 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Frontend'
-description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, libellés, tirages, erreurs ; à lire pour tout écran.'
+description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:45:00Z }
 ---
 
 # Frontend
@@ -49,6 +49,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
 - **Nombres de fiches du menu de l'administration lus une fois par requête** ; sans eux, le menu mène partout de même.
 - **Lignes défilantes** (menu de la consultation, navigation par initiale), sans retour à la ligne : un script ne montre un chevron que s'il reste des entrées hors de vue, d'après les largeurs qu'il observe, et centre la ligne sur son entrée courante, de nouveau à la **fin du premier chargement de polices**, qui change la largeur des entrées, jamais sur la promesse des polices, parfois déjà résolue avant que la police du texte soit demandée (CSS Font Loading). Les chevrons sont réservés à la souris, le clavier atteignant chaque entrée.
 - **Pagination de largeur à peu près constante** : toutes les pages jusqu'à sept, sinon les extrémités et le voisinage de la page courante.
+- **Entrée du menu courante sur les pages de sa section** avant que sa propre page existe (la fiche d'un album sous « Albums », dont la liste reste à réaliser) : l'entrée garde le lien « Pas encore implémenté » et connaît le chemin que sa page aura.
 
 ## Listes de l'administration
 
@@ -60,8 +61,14 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
 - **Site extérieur ouvert dans un nouvel onglet** (site web d'un éditeur, depuis sa ligne ou son menu), sans accès à la page d'origine ni adresse de provenance (`noopener noreferrer`) : la liste reste telle qu'elle était, avec ses critères.
   - **Alternative écartée (même onglet)** : l'administrateur quitterait l'application pour un site qui n'en fait pas partie, et n'y reviendrait que par l'historique du navigateur.
 
+## Fiches de la consultation
+
+- **Repli des auteurs d'un rôle par une divulgation du navigateur** (`<details>`, [`visuel/fiche-album/`](../../visuel/fiche-album/index.md)) : les noms repliés, placés avant elle, ne se montrent qu'une fois elle ouverte (`:has()`), si bien que « Réduire » suit le dernier nom. Ni script ni requête pour montrer des noms déjà reçus ; l'ouverture n'est pas une action suivie, comme celle du panneau des filtres d'une liste.
+  - **Alternative écartée (rôles dépliés portés par l'adresse, comme les critères d'une liste)** : une requête et un nouveau rendu de la fiche pour des noms déjà présents dans la page.
+
 ## Présentation
 
+- **Valeurs des énumérations nommées en un seul lieu** (rôle d'une contribution, appréciation…), dans la culture d'affichage, pour toute page qui les présente ou les saisit.
 - **Libellés des albums et des éditions construits à la présentation**, d'après leurs composantes et le format du paramétrage ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md), [Libellé d'une édition](../../fonctionnel/presentation/libelle-d-une-edition.md)). L'ISBN y est tel qu'enregistré : sa mise en forme par tirets dépend de plages d'attribution que l'application ne tient pas.
 - **Tirages d'une page par le générateur aléatoire du conteneur de services**, que les tests de bout en bout remplacent par un tirage constant, pour qu'une page soit la même à chaque capture.
 - **Un composant unique présente toute erreur** ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)), avec sa catégorie, qui lui donne cadre, icône et couleur pour la distinguer au premier coup d'œil, à l'arrondi d'une tuile, jamais d'un contrôle, qu'un thème arrondit en pilule. Le texte d'une erreur métier est celui de son code de règle ; une erreur technique n'a qu'un texte générique. Le frontend ne référençant pas le domaine, un test confronte ses textes aux codes de règle.

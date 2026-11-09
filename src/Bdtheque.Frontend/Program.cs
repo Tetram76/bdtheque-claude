@@ -38,6 +38,7 @@ builder.Services.AddScoped(services => new BrowserTimeZone
 });
 builder.Services.AddScoped<DisplayFormatter>();
 builder.Services.AddSingleton<RecordLabels>();
+builder.Services.AddSingleton<ValueLabels>();
 // What the pages draw at random at each display (e.g. the greeting of the dashboard), which the tests fix.
 builder.Services.AddSingleton(Random.Shared);
 builder.Services.AddScoped<RecordSearch>();

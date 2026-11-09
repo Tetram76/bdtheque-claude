@@ -22,4 +22,11 @@ public sealed class NavigationEntryTests
     [Fact]
     public void EntryOfAPageNotYetImplemented_IsNeverCurrent() =>
         Assert.False(new NavigationEntry("Albums", AppPaths.NotYetImplemented).IsCurrent(AppPaths.NotYetImplemented));
+
+    [Theory]
+    [InlineData("/albums/0197a0b2-0000-7000-8000-000000000001", true)]
+    [InlineData(AppPaths.NotYetImplemented, false)]
+    [InlineData("/series", false)]
+    public void EntryOfAListNotYetImplemented_IsCurrent_OnTheRecordsOfItsSection(string currentPath, bool expected) =>
+        Assert.Equal(expected, new NavigationEntry("Albums", AppPaths.NotYetImplemented, Section: "/albums").IsCurrent(currentPath));
 }

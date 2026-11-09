@@ -1,0 +1,19 @@
+@using Bdtheque.Contracts.Catalog
+
+@* A universe with the chain of its ancestors, from the top of the hierarchy down to it (visuel/fiche-album/contenu.md:
+   « Univers Hugo Pratt › Corto Maltese › Les Antilles »), shared by the records of the consultation: the ancestors as plain
+   links, the universe attached as a colored tag; each leads to its works, those of its sub-universes included
+   (fonctionnel/regles-metier/hierarchie-des-univers.md). The separators are drawn, not said. *@
+<span class="universe-chain">
+    @foreach (var ancestor in Universe.Ancestors)
+    {
+        <a class="universe-ancestor" href="@AppPaths.UniverseWorks(ancestor.Id)">@ancestor.Name</a>
+        <span class="universe-separator" aria-hidden="true">›</span>
+    }
+    <a class="universe-attached" href="@AppPaths.UniverseWorks(Universe.Universe.Id)">@Universe.Universe.Name</a>
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public UniverseInHierarchy Universe { get; set; } = null!;
+}

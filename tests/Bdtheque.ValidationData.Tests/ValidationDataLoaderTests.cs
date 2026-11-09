@@ -118,11 +118,13 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
-    public async Task Collective_CreditsManyAuthors()
+    public async Task Collective_CreditsManyAuthors_MoreThanTheRecordShowsInARoleBeforeFoldingThem()
     {
         var album = await AlbumAsync(ValidationDataLoader.CollectiveTitle);
 
         Assert.True(album.Contributions.Select(contribution => contribution.Author.Id).Distinct().Count() >= 6);
+        // visuel/fiche-album/contenu.md: a role beyond six names is folded.
+        Assert.Contains(album.Contributions.GroupBy(contribution => contribution.Role), role => role.Count() > 6);
     }
 
     [Theory]

@@ -61,6 +61,9 @@ public sealed partial class ThemeContrastTests
         ("text", "tile", Text),
         ("text-muted", "tile", Text),
         ("accent-text", "tile", Text),
+        // The genres and the universes of a record, each in colors of their own.
+        ("text-on-genre", "genre", Text),
+        ("text-on-universe", "universe", Text),
         // A block of its own tint holds what a surface holds: texts, links and the borders of its controls. The border of a
         // control in error is read against the inside of the control (alert on control-background, above), which suffices.
         .. Enumerable.Range(1, 14).SelectMany(index => new[]

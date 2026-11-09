@@ -132,6 +132,12 @@
     --book-turn: perspective(1100px) rotateY(22deg);
     --book-ground: 0 34px 44px -24px rgb(0 0 0 / 0.6);
 
+    /* The records: the genres of the deep colour, the universes of the accent (visuel/fiche-album/). */
+    --color-genre: var(--day-deep);
+    --color-text-on-genre: #FFFFFF;
+    --color-universe: var(--day-accent);
+    --color-text-on-universe: var(--day-text-on-accent);
+
     /* The home page of the administration: tiles of the paper of the fields, round chips. */
     --color-tile: var(--day-field);
     --admin-chip-radius: 999px;

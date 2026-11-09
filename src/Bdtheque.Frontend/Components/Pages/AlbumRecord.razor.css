@@ -1,0 +1,103 @@
+/* Built on the contracts of the theme only (visuel/fiche-album/declinaison-par-theme.md, choix-implementation/socle/themes.md):
+   the identity of the album, then the blocks, one under the other. */
+.album-record {
+    display: grid;
+    gap: var(--record-gap);
+}
+
+.album-identity {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
+}
+
+.album-title h1 {
+    margin: 0;
+    font-size: var(--record-title-size);
+    line-height: 1.05;
+}
+
+.album-series {
+    font-weight: var(--font-weight-strong);
+}
+
+/* The short facts of the album as pills: its volume filled with the accent, its publication outlined, its membership as
+   the tag of the lists. */
+.album-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.album-fact {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.625rem;
+    padding: 0 var(--space-m);
+    border: var(--border-width-control) solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.album-fact[data-fact="volume"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.album-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+}
+
+.album-rating [role="img"],
+.album-rating > [aria-hidden] {
+    display: inline-flex;
+    gap: 0.125rem;
+}
+
+.star {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+}
+
+.star[data-on] {
+    fill: currentColor;
+}
+
+.album-unrated {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.album-notes-title {
+    margin: var(--space-m) 0 var(--space-xs);
+    font-family: var(--font-text);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.album-summary,
+.album-notes {
+    max-inline-size: 70ch;
+    white-space: pre-line;
+}
+
+.album-dates {
+    margin: var(--space-xl) 0 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}

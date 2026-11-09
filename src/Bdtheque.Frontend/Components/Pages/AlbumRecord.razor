@@ -1,0 +1,139 @@
+@attribute [Route(AppPaths.AlbumRoute)]
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<AlbumRecord> L
+@inject ApiClient Api
+@inject RecordLabels Labels
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+
+@* The record of an album in the consultation (visuel/fiche-album/contenu.md): the identity of the album, its contributions,
+   genres and universes; its summary; its dates. Its styles read the contracts of the base theme only
+   (visuel/fiche-album/declinaison-par-theme.md). *@
+<PageTitle>@(_album is null ? L["Title"] : Labels.Album(_album.Album, _format))</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AlbumRecord" Record="new PresentedRecord(RecordType.Album, Id)" />
+
+@if (_problem is not null)
+{
+    <h1 class="visually-hidden">@L["Title"]</h1>
+    <ErrorMessage Problem="_problem" />
+}
+else if (_album is { } album)
+{
+    <Breadcrumb Items="BreadcrumbItems" />
+
+    <div class="album-record">
+        <div class="album-identity">
+            <div class="album-title">
+                @if (album.Album.SeriesId is { } seriesId)
+                {
+                    <a class="album-series" href="@AppPaths.SeriesRecord(seriesId)">@album.Album.SeriesTitle</a>
+                }
+                <h1>@Heading</h1>
+            </div>
+
+            <ul class="album-facts" aria-label="@L["Facts"]">
+                @if (Labels.Volume(album.Album) is { } volume)
+                {
+                    <li class="album-fact" data-fact="volume">@volume</li>
+                }
+                @if (album.FirstPublicationYear is { } year)
+                {
+                    <li class="album-fact">@L["Published", Format.PartialDate(year, album.FirstPublicationMonth)]</li>
+                }
+                <li class="album-membership">
+                    <Tag Text="@Membership" Variant="@(album.Album.IsInCollection ? TagVariant.Filled : TagVariant.Dashed)"
+                         Icon="@(!album.Album.IsInCollection && IsIntended ? IconName.PurchaseIntent : null)" />
+                </li>
+            </ul>
+
+            <div class="album-rating">
+                @if (album.Rating is { } rating)
+                {
+                    <span role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
+                }
+                else
+                {
+                    <span aria-hidden="true">@Stars(0)</span>
+                    <span class="album-unrated">@L["NotRated"]</span>
+                }
+            </div>
+
+            <ContributionsByRole Contributions="album.Contributions" />
+            <Classification Genres="album.Genres" Universes="album.Universes" />
+        </div>
+
+        <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
+            @if (album.Summary is { } summary)
+            {
+                <p class="album-summary">@summary</p>
+            }
+            else
+            {
+                <p><NotSet /></p>
+            }
+            <h3 class="album-notes-title">@L["Notes"]</h3>
+            @if (album.PersonalNotes is { } notes)
+            {
+                <p class="album-notes">@notes</p>
+            }
+            else
+            {
+                <p><NotSet Gender="GrammaticalGender.Feminine" /></p>
+            }
+        </Block>
+    </div>
+
+    <p class="album-dates" data-local>@L["Dates", Format.LocalDate(album.CreatedAt), Format.LocalDate(album.ModifiedAt)]</p>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private AlbumDetail? _album;
+    private AlbumLabelFormat _format;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+            _album = await Api.GetAsync<AlbumDetail>($"/catalog/albums/{Id}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+    }
+
+    private string Heading => _album!.Album.Title ?? Labels.Album(_album.Album, _format);
+
+    private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
+    [
+        new(L["Breadcrumb.Albums"], AppPaths.Albums),
+        .. _album!.Album.SeriesId is { } series ? [new BreadcrumbItem(_album.Album.SeriesTitle!, AppPaths.SeriesRecord(series))] : Array.Empty<BreadcrumbItem>(),
+        new(Heading),
+    ];
+
+    // Only the editions of the collection are counted; an edition targeted by an intent is one of the intents
+    // (fonctionnel/regles-metier/intention-d-achat.md).
+    private int OwnedEditionCount => _album!.Editions.Count(e => e.IsInCollection);
+
+    private bool IsIntended => _album!.PurchaseIntent is not null || _album.Editions.Any(e => e.PurchaseIntent is not null);
+
+    private string Membership => _album!.Album.IsInCollection
+        ? L[OwnedEditionCount == 1 ? "Membership.InCollection.One" : "Membership.InCollection.Other", OwnedEditionCount]
+        : L[IsIntended ? "Membership.PurchaseIntent" : "Membership.OutOfCollection"];
+
+    private static RenderFragment Stars(int rating) => __builder =>
+    {
+        @for (var star = 1; star <= 5; star++)
+        {
+            <svg class="star" data-on="@(star <= rating ? "" : null)" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5 6.5 20.4l1-6.3L3 9.7l6.2-.9z" />
+            </svg>
+        }
+    };
+}

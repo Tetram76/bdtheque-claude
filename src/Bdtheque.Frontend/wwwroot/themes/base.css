@@ -228,6 +228,16 @@
     --tilt-cover: 0deg;
     --block-kicker-display: none;
 
+    /* The records of the consultation (visuel/fiche-album/declinaison-par-theme.md): the gap between their blocks, which a
+       title straddling the top edge of its block needs wider; the size of their title. The genres and the universes, each
+       in colors of their own, which set them apart. */
+    --record-gap: var(--space-l);
+    --record-title-size: clamp(1.5rem, 3.2vw, 2.375rem);
+    --color-genre: var(--color-palette-1);
+    --color-text-on-genre: var(--color-text-on-palette);
+    --color-universe: var(--color-palette-2);
+    --color-text-on-universe: var(--color-text-on-palette);
+
     /* The home page, whose layout each theme presents its own way (visuel/dashboard/): on a wide screen, the grid of its
        blocks (columns and named areas: greeting, counters, spotlight, latest, value, statistics; for an empty
        collection: main, browse, start); the number of the issue, which only a newspaper prints; the latest entries, as
