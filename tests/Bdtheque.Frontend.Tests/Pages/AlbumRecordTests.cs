@@ -133,19 +133,19 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Contributions_CountTheDistinctAuthors_AndListEachRole_LeadingToTheAuthors()
+    public void Contributions_ListEachRoleThatHasAny_LeadingToTheAuthors_WithoutCount()
     {
         _catalog.Album = Album();
 
         var page = Open();
 
+        // Colouring has no author: its line does not appear; nor does a count of the authors credited.
         var contributions = page.Find(".contributions");
-        Assert.Equal("2 auteurs crédités", contributions.QuerySelector(".contributions-total")!.TextContent.Trim());
-        Assert.Equal(["Scénario", "Dessin", "Couleurs"], contributions.QuerySelectorAll("dt .contributions-role").Select(r => r.TextContent.Trim()));
+        Assert.Equal(["Scénario", "Dessin"], contributions.QuerySelectorAll("dt .contributions-role").Select(r => r.TextContent.Trim()));
         var scenario = contributions.QuerySelectorAll("dd")[0];
         Assert.Equal(["Hugo Pratt", "Léa Ferrand"], scenario.QuerySelectorAll("a").Select(a => a.TextContent.Trim()));
         Assert.All(scenario.QuerySelectorAll("a"), a => Assert.Equal(AppPaths.NotYetImplemented, a.GetAttribute("href")));
-        Assert.Equal("Non crédité", contributions.QuerySelectorAll("dd")[2].TextContent.Trim());
+        Assert.DoesNotContain("crédité", contributions.TextContent);
     }
 
     [Fact]
@@ -155,7 +155,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        Assert.Equal("Aucun auteur crédité", page.Find(".contributions-total").TextContent.Trim());
+        Assert.Equal("Aucun auteur crédité", page.Find(".contributions").TextContent.Trim());
+        Assert.Empty(page.FindAll(".contributions dt"));
     }
 
     [Fact]
@@ -170,13 +171,13 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var page = Open();
 
         // Which names the line holds, only the browser knows (wwwroot/fold-row.js): each is in the row, and the link is ready.
-        var row = page.FindAll(".contributions dd")[1].QuerySelector("app-fold-row")!;
+        var row = page.Find(".contributions dd").QuerySelector("app-fold-row")!;
         Assert.Equal(authors.Select(a => a.LastName), row.QuerySelectorAll(".contributor").Select(a => a.TextContent.Trim()));
         var toggle = row.QuerySelector("details summary")!;
         Assert.Equal(("et {0} autre", "et {0} autres"),
             (toggle.QuerySelector(".contributions-more")!.GetAttribute("data-one"), toggle.QuerySelector(".contributions-more")!.GetAttribute("data-other")));
         Assert.Equal("Réduire", toggle.QuerySelector(".contributions-less")!.TextContent.Trim());
-        Assert.Equal("(9)", page.FindAll(".contributions dt")[1].QuerySelector(".contributions-count")!.TextContent.Trim());
+        Assert.Equal("(9)", page.Find(".contributions dt").QuerySelector(".contributions-count")!.TextContent.Trim());
     }
 
     [Fact]
@@ -360,7 +361,10 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal("1 sur 4", visuals.QuerySelector(".visual-position")!.TextContent.Trim());
         Assert.Equal(["Couv.", "1", "2", "4e"], visuals.QuerySelectorAll(".visual-thumbnails li").Select(t => t.TextContent.Trim()));
         Assert.Equal("true", visuals.QuerySelector(".visual-thumbnails a")!.GetAttribute("aria-current"));
-        Assert.Equal(VisualMediaRoutes.Original(Visuals[0]), visuals.QuerySelector("a.visual-original")!.GetAttribute("href"));
+        // The original image in a new tab, the record staying as it was.
+        var original = visuals.QuerySelector("a.visual-original")!;
+        Assert.Equal((VisualMediaRoutes.Original(Visuals[0]), "_blank", "noopener noreferrer"),
+            (original.GetAttribute("href"), original.GetAttribute("target"), original.GetAttribute("rel")));
     }
 
     [Fact]

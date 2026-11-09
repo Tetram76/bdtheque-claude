@@ -5,32 +5,33 @@
 @inject ValueLabels Values
 
 @* The contributions of a record by role (visuel/fiche-album/contenu.md, Contributions), shared by the records of the
-   consultation: the number of distinct authors credited, then a line per role, in the order of the roles, with the number
-   of its authors and their names, each leading to the record of the author. Beyond six names, a role is folded behind « et
-   N autres », which unfolds it, « Réduire » folding it back: a collective album does not push the rest of the record down.
-   The disclosure is that of the browser (details), which needs neither a script nor a request; the names it unfolds come
-   before it, so that « Réduire » follows the last name. *@
+   consultation: a line per role that has authors, in the order of the roles, with the number of its authors and their
+   names, each leading to the record of the author; a role without any has no line, and a record without any author says
+   so. The names of a role hold on one line, at the width of the screen: those it does not hold are folded behind « et N
+   autres » (wwwroot/fold-row.js), which unfolds them, « Réduire » folding them back. The disclosure is that of the browser
+   (details); the names it unfolds come before it, so that « Réduire » follows the last name. *@
 <div class="contributions">
-    <p class="contributions-total">@Total</p>
-    <dl>
-        @foreach (var role in Enum.GetValues<ContributionRole>())
-        {
-            var authors = Contributions.Where(c => c.Role == role).Select(c => c.Author).ToList();
-            <div>
-                <dt>
-                    <span class="contributions-role">@Values.Of(role)</span>
-                    @if (authors.Count > 1)
-                    {
-                        <span class="contributions-count">(@authors.Count)</span>
-                    }
-                </dt>
-                <dd>
-                    @if (authors.Count == 0)
-                    {
-                        <span class="contributions-none">@L["NotCredited"]</span>
-                    }
-                    else
-                    {
+    @if (Contributions.Count == 0)
+    {
+        <p class="contributions-none">@L["None"]</p>
+    }
+    else
+    {
+        <dl>
+            @foreach (var role in Enum.GetValues<ContributionRole>())
+            {
+                var authors = Contributions.Where(c => c.Role == role).Select(c => c.Author).ToList();
+                if (authors.Count == 0)
+                    continue;
+                <div>
+                    <dt>
+                        <span class="contributions-role">@Values.Of(role)</span>
+                        @if (authors.Count > 1)
+                        {
+                            <span class="contributions-count">(@authors.Count)</span>
+                        }
+                    </dt>
+                    <dd>
                         <app-fold-row class="contributions-names">
                             @foreach (var author in authors)
                             {
@@ -43,22 +44,15 @@
                                 </summary>
                             </details>
                         </app-fold-row>
-                    }
-                </dd>
-            </div>
-        }
-    </dl>
+                    </dd>
+                </div>
+            }
+        </dl>
+    }
 </div>
 
 @code {
     /// <summary>The contributions, in the order the API gives them: by role, then by author.</summary>
     [Parameter, EditorRequired]
     public IReadOnlyList<ContributionItem> Contributions { get; set; } = [];
-
-    private string Total => Contributions.Select(c => c.Author.Id).Distinct().Count() switch
-    {
-        0 => L["Total.Zero"],
-        1 => L["Total.One"],
-        var count => L["Total.Other", count],
-    };
 }
