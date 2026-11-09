@@ -148,7 +148,7 @@ internal static class PurchaseIntentEndpoints
                 CatalogExpressions.ToCover(p.Album.CoverVisualOf()),
                 // fonctionnel/regles-metier/intention-d-achat.md: an intent on an edition turns into one on the album only when
                 // that edition is the only one of the album; one on the album, which has no edition, always into one on an edition.
-                p.EditionId == null || p.Album.Editions.Count() == 1,
+                p.EditionId == null || p.Album.Editions.Count == 1,
                 p.CreatedAt,
                 EF.Property<uint>(p.Album, BdthequeDbContext.VersionProperty))), cancellationToken);
 
