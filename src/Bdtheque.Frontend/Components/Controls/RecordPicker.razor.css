@@ -86,3 +86,41 @@
 .record-picker-option:is(:hover, [aria-selected="true"]) .record-picker-detail {
     color: inherit;
 }
+
+/* The mention of a record added on the spot (« nouvel auteur »), not created yet: a badge in the color of the links, in
+   bold, outlined, so it never reads as the end of the name, whatever the theme. */
+.record-picker-pending .record-picker-detail {
+    padding: 0 0.5em;
+    border: var(--border-width-control) solid currentColor;
+    border-radius: var(--radius-pill);
+    color: var(--color-accent-text);
+    font-weight: var(--font-weight-strong);
+}
+
+/* The creation of the record typed, after the suggestions, set apart from them by a straight rule across the list, drawn
+   outside the option: the rounded corners of its highlight never bend it. In the color of the links, in bold: an action,
+   not a record. */
+.record-picker-create {
+    position: relative;
+    align-items: center;
+    color: var(--color-accent-text);
+    font-weight: var(--font-weight-strong);
+}
+
+.record-picker-create:not(:first-child) {
+    margin-block-start: calc(2 * var(--space-xs) + 1px);
+}
+
+.record-picker-create:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    inset-inline: calc(-1 * var(--space-xs));
+    inset-block-start: calc(-1 * var(--space-xs) - 1px);
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.record-picker-create ::deep .icon {
+    flex: none;
+    inline-size: 1em;
+    block-size: 1em;
+}

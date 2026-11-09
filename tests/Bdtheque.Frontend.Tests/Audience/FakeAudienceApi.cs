@@ -43,6 +43,7 @@ internal sealed class FakeAudienceApi : HttpMessageHandler
         services.AddSingleton<ILogger<AudienceRecorder>>(NullLogger<AudienceRecorder>.Instance);
         services.AddScoped<VisitCookie>();
         services.AddScoped<AudienceOpposition>();
+        services.AddScoped<CircuitAudienceVisit>();
         services.AddScoped<AudienceRecorder>();
     }
 

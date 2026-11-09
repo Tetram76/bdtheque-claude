@@ -18,9 +18,11 @@
     color: var(--color-text-muted);
 }
 
-/* Its characters, its inner margins and its border: never wider than the field. */
+/* Its characters, its inner margins and its border: never wider than the field. Half a character more for the caret, drawn
+   after the last character, without which a field full of figures scrolls by a pixel, its text cut by the rounded ends of a
+   control that a theme rounds into a pill. */
 .field[style] ::deep :is(input, select) {
-    inline-size: calc(var(--field-characters) * 1ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
+    inline-size: calc((var(--field-characters) + 0.5) * 1ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
     max-inline-size: 100%;
 }
 

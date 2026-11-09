@@ -1,7 +1,8 @@
 @inject IStringLocalizer<Tag> L
 
-@* A short mark: the membership of the collection, an active filter… A removable tag leads to the page without it (e.g. the
-   list without this filter): a link, which needs no interactivity (choix-implementation/socle/frontend.md). *@
+@* A short mark: the membership of the collection, an active filter, an author of an album being entered… A removable tag
+   leads to the page without it (e.g. the list without this filter): a link, which needs no interactivity
+   (choix-implementation/socle/frontend.md); in an interactive form, a button removes it in place. *@
 <span class="tag" data-variant="@Variant.ToString().ToLowerInvariant()">
     @if (Icon is { } icon)
     {
@@ -11,6 +12,10 @@
     @if (RemoveHref is not null)
     {
         <a class="tag-remove" href="@RemoveHref" aria-label="@L["Remove", Text]"><Icon Name="IconName.Close" /></a>
+    }
+    else if (OnRemove.HasDelegate)
+    {
+        <button type="button" class="tag-remove" aria-label="@(RemoveLabel ?? L["Remove", Text])" @onclick="OnRemove"><Icon Name="IconName.Close" /></button>
     }
 </span>
 
@@ -27,4 +32,12 @@
     /// <summary>The page without this tag: set, the tag can be removed.</summary>
     [Parameter]
     public string? RemoveHref { get; set; }
+
+    /// <summary>Removes the tag in place, in an interactive form, rather than leading to the page without it.</summary>
+    [Parameter]
+    public EventCallback OnRemove { get; set; }
+
+    /// <summary>What the removal says to assistive technologies, when the text alone does not (e.g. the role of an author).</summary>
+    [Parameter]
+    public string? RemoveLabel { get; set; }
 }

@@ -422,4 +422,69 @@ public sealed class SeriesTests
         Assert.Throws<ArgumentOutOfRangeException>(
             () => series.SetTemplateContributions([(new Author("Hergé", null, null), (ContributionRole)42)]));
     }
+
+    [Fact]
+    public void ContributionsForAlbum_OfAnAlbumWithoutContributions_AreThoseOfTheSeries()
+    {
+        var (series, scenarist, illustrator) = SeriesWithTemplate();
+
+        var contributions = series.ContributionsForAlbum([], null, albumIsNew: false);
+
+        Assert.Equal(
+            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
+            contributions!.Select(c => (c.Author.Id, c.Role)).OrderBy(c => c.Role));
+    }
+
+    [Fact]
+    public void ContributionsForAlbum_StillThoseOfThePreviousSeries_AreReplacedByThoseOfTheSeries()
+    {
+        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: authors not personalized yet.
+        var (series, scenarist, _) = SeriesWithTemplate();
+        var previous = new Series("Spirou");
+        var franquin = new Author(null, null, "Franquin");
+        previous.SetTemplateContributions([(franquin, ContributionRole.Scenarist), (franquin, ContributionRole.Illustrator)]);
+
+        var contributions = series.ContributionsForAlbum(
+            [(franquin.Id, ContributionRole.Illustrator), (franquin.Id, ContributionRole.Scenarist)], previous, albumIsNew: true);
+
+        Assert.Contains(contributions!, c => c.Author.Id == scenarist.Id && c.Role == ContributionRole.Scenarist);
+        Assert.Equal(2, contributions!.Count);
+    }
+
+    [Fact]
+    public void ContributionsForAlbum_Personalized_AreKept()
+    {
+        var (series, _, _) = SeriesWithTemplate();
+        var previous = new Series("Spirou");
+        var franquin = new Author(null, null, "Franquin");
+        previous.SetTemplateContributions([(franquin, ContributionRole.Scenarist)]);
+
+        // An author added to those of the previous series: the album's authors are its own.
+        Assert.Null(series.ContributionsForAlbum(
+            [(franquin.Id, ContributionRole.Scenarist), (Guid.NewGuid(), ContributionRole.Colorist)], previous, albumIsNew: true));
+        // Without a previous series, authors of its own.
+        Assert.Null(series.ContributionsForAlbum([(franquin.Id, ContributionRole.Scenarist)], null, albumIsNew: true));
+    }
+
+    [Fact]
+    public void ContributionsForAlbum_OfAnAlbumAlreadySaved_ThoseOfItsSeries_AreConsideredPersonalized()
+    {
+        // Only at the creation of an album are the authors of the previous series replaced.
+        var (series, _, _) = SeriesWithTemplate();
+        var previous = new Series("Spirou");
+        var franquin = new Author(null, null, "Franquin");
+        previous.SetTemplateContributions([(franquin, ContributionRole.Scenarist)]);
+
+        Assert.Null(series.ContributionsForAlbum([(franquin.Id, ContributionRole.Scenarist)], previous, albumIsNew: false));
+        Assert.NotNull(series.ContributionsForAlbum([], previous, albumIsNew: false));
+    }
+
+    private static (Series Series, Author Scenarist, Author Illustrator) SeriesWithTemplate()
+    {
+        var series = new Series("Tintin");
+        var scenarist = new Author(null, null, "Hergé");
+        var illustrator = new Author(null, null, "Jacobs");
+        series.SetTemplateContributions([(scenarist, ContributionRole.Scenarist), (illustrator, ContributionRole.Illustrator)]);
+        return (series, scenarist, illustrator);
+    }
 }

@@ -1,0 +1,8 @@
+.inherited-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}

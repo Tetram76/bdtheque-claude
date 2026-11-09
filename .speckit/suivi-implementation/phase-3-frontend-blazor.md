@@ -49,7 +49,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | #202 | Listes des éditions et des intentions d'achat de l'administration |
 | #203 | Genres et univers : listes et saisie de l'administration |
 | #204 | Page des éditions et intentions d'achat d'un album |
-| #205 | Saisie d'un album |
+| ~~#205~~ | Saisie d'un album |
 | #206 | Saisie d'une série |
 | #207 | Saisie d'un auteur |
 | #208 | Saisie d'un éditeur et de ses collections |

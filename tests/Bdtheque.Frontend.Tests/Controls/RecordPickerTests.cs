@@ -81,6 +81,29 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
+    public void Typing_SuggestsTheRecordsAddedOnTheSpotToo_UnderTheirKey()
+    {
+        // An author added on the spot for a role is created with the record only: the choice for another role finds it
+        // among the pending records, under the same key, rather than offering to create it twice.
+        var pending = new RecordOption(Guid.NewGuid(), "Jean Nouveau", "nouvel auteur");
+        RecordOption? chosen = null;
+        _answer = _ => Json("""{"items":[],"number":1,"size":10,"totalCount":0}""");
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-author")
+            .Add(p => p.Kind, RecordKind.Author)
+            .Add(p => p.Pending, [pending, new RecordOption(Guid.NewGuid(), "Moebius", "nouvel auteur")])
+            .Add(p => p.ValueChanged, value => chosen = value));
+
+        Type(picker, "nouveau");
+
+        picker.WaitForAssertion(() => Assert.Single(picker.FindAll("[role=option]")));
+        // Marked apart: its mention is not read as the end of the name.
+        Assert.True(picker.Find("[role=option]").ClassList.Contains("record-picker-pending"));
+        picker.FindAll("[role=option]")[0].Click();
+        Assert.Equal(pending, chosen);
+    }
+
+    [Fact]
     public void ChoosingASuggestion_MakesItTheValue()
     {
         RecordOption? chosen = null;
@@ -91,6 +114,7 @@ public sealed class RecordPickerTests : BunitContext
 
         Type(picker, "ti");
         picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+        Assert.Empty(picker.FindAll(".record-picker-pending"));
         picker.FindAll("[role=option]")[1].Click();
 
         Assert.Equal(new RecordOption(Titeuf, "Titeuf", null), chosen);
@@ -120,6 +144,57 @@ public sealed class RecordPickerTests : BunitContext
         picker.Find("input").KeyDown("Enter");
 
         Assert.Equal(Tintin, chosen?.Id);
+    }
+
+    [Fact]
+    public void Creation_IsOfferedAfterTheSuggestions_WithTheTextTyped_ByTheMouse()
+    {
+        string? created = null;
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-author")
+            .Add(p => p.Kind, RecordKind.Series)
+            .Add(p => p.OnCreate, text => created = text)
+            .Add(p => p.CreateLabel, text => $"Créer « {text} »"));
+
+        Type(picker, " Jean Nouvel ");
+        picker.WaitForAssertion(() => Assert.Equal(3, picker.FindAll("[role=option]").Count));
+        var creation = picker.FindAll("[role=option]")[2];
+        Assert.Equal("Créer « Jean Nouvel »", creation.TextContent.Trim());
+
+        creation.Click();
+
+        Assert.Equal("Jean Nouvel", created);
+        Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
+    }
+
+    [Fact]
+    public void Creation_IsChosenByTheKeyboard_AfterTheLastSuggestion()
+    {
+        string? created = null;
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-author")
+            .Add(p => p.Kind, RecordKind.Series)
+            .Add(p => p.OnCreate, text => created = text)
+            .Add(p => p.CreateLabel, text => $"Créer « {text} »"));
+
+        Type(picker, "ti");
+        picker.WaitForAssertion(() => Assert.Equal(3, picker.FindAll("[role=option]").Count));
+        foreach (var _ in Enumerable.Range(0, 4))
+            picker.Find("input").KeyDown("ArrowDown");
+        picker.Find("input").KeyDown("Enter");
+
+        Assert.Equal("ti", created);
+    }
+
+    [Fact]
+    public void Creation_WithoutCaller_IsNeverOffered()
+    {
+        var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
+
+        Type(picker, "ti");
+
+        picker.WaitForAssertion(() => Assert.Equal(2, picker.FindAll("[role=option]").Count));
+        Assert.Empty(picker.FindAll(".record-picker-create"));
     }
 
     [Fact]

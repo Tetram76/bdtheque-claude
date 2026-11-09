@@ -7,7 +7,7 @@ applies_to:
   - 'docker/frontend/**'
   - 'src/Bdtheque.HealthProbe/**'
   - 'docker-compose.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
 ---
 
 # Images de base des conteneurs
@@ -21,5 +21,7 @@ Les conteneurs sont imposés ([Architecture des tiers](../../contraintes-techniq
   - **Alternative écartée (`aspnet` sur Ubuntu complet)** : plus lourde, avec un shell et un gestionnaire de paquets sans usage, et `curl` à installer pour le bilan de santé.
 - **Bilan de santé par une sonde .NET** ([Organisation du code](../organisation-du-code.md)), exécutée sur le runtime de l'image, faute de shell et de `curl` : l'équipe .NET n'a pas de recommandation officielle pour ces images, et propose cette approche (dépôt `dotnet/dotnet-docker`, demande n° 4300).
 - **Contenu publié réduit à l'exécution** : bibliothèques natives de la seule architecture de l'image, ni symboles de débogage (les traces gardent les noms des méthodes, sans numéros de ligne), ni fichiers de développement ou de documentation.
+- **Restauration avant les sources**, pour que la couche de la restauration ne change qu'avec les projets : `frontend` déclare donc qu'il exige les ressources web d'ASP.NET Core (le script de Blazor), que le SDK n'en déduit que des fichiers `.razor` présents à la restauration ; sans eux, l'image n'aurait aucun composant interactif (constaté sur l'environnement de validation, #325).
+  - **Alternative écartée (sources copiées avant la restauration)** : la restauration, la plus longue étape, serait refaite à chaque modification d'une source.
 - **Chiffrement GSS désactivé** dans la connexion à `db` : Npgsql le tente par défaut, sa bibliothèque est absente de l'image *chiseled*, et `db` n'est joignable que par le réseau Docker interne, par mot de passe.
 - **`db`** : image officielle `postgres` ([Version de PostgreSQL](version-de-postgresql.md)).

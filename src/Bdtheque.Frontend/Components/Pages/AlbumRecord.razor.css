@@ -13,36 +13,6 @@
 
 /* A banner for an album not in the collection: filled with the color of information for a purchase intent, dashed and muted
    for an album catalogued only, so that the two read apart at first glance. */
-.album-status {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-xs) var(--space-s);
-    margin: 0;
-    padding: var(--space-s) var(--space-m);
-    border-radius: var(--radius-tile);
-}
-
-.album-status[data-status="intent"] {
-    background: var(--color-info);
-    color: var(--color-text-on-info);
-}
-
-.album-status[data-status="out"] {
-    border: var(--border-width-control) dashed var(--color-control-border);
-    color: var(--color-text-muted);
-}
-
-.album-status ::deep .icon {
-    flex: none;
-    inline-size: 1.25rem;
-    block-size: 1.25rem;
-}
-
-.album-status strong {
-    font-size: var(--font-size-large);
-}
-
 .album-title h1 {
     margin: 0;
     font-size: var(--record-title-size);
