@@ -110,13 +110,14 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
         Assert.IsType<InvalidDataException>(warning.Exception);
     }
 
-    public static TheoryData<Exception> Failures => [new HttpRequestException("unreachable"), new InvalidOperationException("unexpected")];
-
-    // Whatever the failure, the application goes on, every ISBN as entered, and the failure is reported.
+    // Whatever the failure, the application goes on, every ISBN as entered, and the failure is reported. Named by the case,
+    // which the test explorer lists one by one, an exception not being serializable.
     [Theory]
-    [MemberData(nameof(Failures))]
-    public async Task Download_ThatFails_IsReportedAsAWarning_TheIsbnAsEntered(Exception failure)
+    [InlineData("network")]
+    [InlineData("unexpected")]
+    public async Task Download_ThatFails_IsReportedAsAWarning_TheIsbnAsEntered(string failureCase)
     {
+        Exception failure = failureCase == "network" ? new HttpRequestException("unreachable") : new InvalidOperationException("unexpected");
         _answers.Enqueue(() => throw failure);
 
         await _refresher.StartAsync(CancellationToken.None);
