@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Create" xml:space="preserve">
+    <value>Créer l&apos;auteur</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Lead" xml:space="preserve">
+    <value>Vérifiez le nom tapé avant de créer l&apos;auteur : un auteur connu sous un pseudonyme le porte en pseudonyme.</value>
+  </data>
+  <data name="Problem.Business" xml:space="preserve">
+    <value>À corriger</value>
+  </data>
+  <data name="Pseudonym" xml:space="preserve">
+    <value>Pseudonyme</value>
+  </data>
+  <data name="Pseudonym.Help" xml:space="preserve">
+    <value>Le nom sous lequel il signe, s&apos;il en a un : il passe avant le prénom et le nom.</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Nouvel auteur</value>
+  </data>
+</root>

@@ -72,6 +72,54 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
+    public async Task Get_NamesTheRecordsTheFormReferences()
+    {
+        var author = await CreateAuthorAsync();
+        var series = await CreateSeriesAsync();
+        var genre = await CreateGenreAsync();
+        var parent = await CreateUniverseAsync();
+        var universe = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Univers {Guid.NewGuid():N}", null, parent.Id));
+        var album = await CreateAsync(Content(UniqueTitle()) with
+        {
+            SeriesId = series.Id,
+            GenreIds = [genre.Id],
+            UniverseIds = [universe.Id],
+            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist), new ContributionContent(author.Id, ContributionRole.Colorist)],
+        });
+
+        var references = (await GetAsync(album.Id)).References;
+
+        Assert.Equal((series.Id, series.Content.Title), (references.Series!.Id, references.Series.Title));
+        Assert.Equal([(genre.Id, genre.Label)], references.Genres.Select(g => (g.Id, g.Label)));
+        var named = Assert.Single(references.Universes);
+        Assert.Equal((universe.Id, parent.Id), (named.Universe.Id, Assert.Single(named.Ancestors).Id));
+        Assert.Equal([(author.Id, author.LastName)], references.Authors.Select(a => (a.Id, a.LastName)));
+    }
+
+    [Fact]
+    public async Task Get_GivesTheDatesOfTheRecord()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+
+        var modified = await UpdateAsync(created, created.Content with { Summary = "Résumé" });
+
+        Assert.Equal(created.CreatedAt, modified.CreatedAt);
+        Assert.True(modified.ModifiedAt > created.ModifiedAt);
+        Assert.Equal((modified.CreatedAt, modified.ModifiedAt), ((await GetAsync(created.Id)).CreatedAt, (await GetAsync(created.Id)).ModifiedAt));
+    }
+
+    [Fact]
+    public async Task Get_WithoutSeries_NamesNoSeries()
+    {
+        var album = await CreateAsync(Content(UniqueTitle()));
+
+        var references = (await GetAsync(album.Id)).References;
+
+        Assert.Null(references.Series);
+        Assert.Empty(references.Authors);
+    }
+
+    [Fact]
     public async Task Create_InASeriesWithoutTitle_HasNoSortKeyOfItsOwn()
     {
         var series = await CreateSeriesAsync();

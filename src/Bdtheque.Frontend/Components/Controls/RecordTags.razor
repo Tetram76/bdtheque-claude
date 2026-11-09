@@ -1,0 +1,84 @@
+@* The records an entry form associates with the one it enters (e.g. the authors of a role, the genres of an album,
+   visuel/saisie-album/contenu.md): each a removable tag, « Personne » or « Aucun » without any, and « Ajouter », which opens
+   the choice of a record by typing its name, and may offer to create it (RecordPicker). Interactive. *@
+<div class="record-tags">
+    @foreach (var item in Items)
+    {
+        <Tag Text="@item.Label" OnRemove="() => OnRemove.InvokeAsync(item)" RemoveLabel="@RemoveLabel?.Invoke(item)" />
+    }
+    @if (Items.Count == 0 && !_adding)
+    {
+        <span class="record-tags-none">@None</span>
+    }
+    @if (_adding)
+    {
+        <span class="record-tags-picker">
+            <RecordPicker Id="@Id" Kind="Kind" AutoFocus="true" ValueChanged="AddAsync" OnLeave="Close" OnCreate="CreateAsync"
+                          CreateLabel="CreateLabel" aria-label="@AddLabel" />
+        </span>
+    }
+    else
+    {
+        <button type="button" class="record-tags-add" aria-label="@AddLabel" @onclick="Open"><Icon Name="IconName.Add" /><span>@AddText</span></button>
+    }
+</div>
+
+@code {
+    private bool _adding;
+
+    /// <summary>The identifier of the field of the choice, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public RecordKind Kind { get; set; }
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<RecordOption> Items { get; set; } = [];
+
+    /// <summary>What stands for no record (« Personne », « Aucun »).</summary>
+    [Parameter, EditorRequired]
+    public string None { get; set; } = null!;
+
+    /// <summary>The text of the action that adds a record (« Ajouter »).</summary>
+    [Parameter, EditorRequired]
+    public string AddText { get; set; } = null!;
+
+    /// <summary>What adding says to assistive technologies, and names the field of the choice (e.g. « Ajouter un scénariste »).</summary>
+    [Parameter, EditorRequired]
+    public string AddLabel { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<RecordOption> OnAdd { get; set; }
+
+    [Parameter]
+    public EventCallback<RecordOption> OnRemove { get; set; }
+
+    /// <summary>What the removal of a tag says to assistive technologies, when its label alone does not.</summary>
+    [Parameter]
+    public Func<RecordOption, string>? RemoveLabel { get; set; }
+
+    /// <summary>Creates the record typed (see <see cref="RecordPicker.OnCreate"/>); none, the choice offers no creation.</summary>
+    [Parameter]
+    public EventCallback<string> OnCreate { get; set; }
+
+    [Parameter]
+    public Func<string, string>? CreateLabel { get; set; }
+
+    private void Open() => _adding = true;
+
+    private void Close() => _adding = false;
+
+    private async Task AddAsync(RecordOption? option)
+    {
+        _adding = false;
+        if (option is not null)
+            await OnAdd.InvokeAsync(option);
+    }
+
+    private async Task CreateAsync(string text)
+    {
+        _adding = false;
+        await OnCreate.InvokeAsync(text);
+    }
+}

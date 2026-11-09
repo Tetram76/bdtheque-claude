@@ -31,6 +31,10 @@
 /* A hit area larger than its cross, without making the tag taller. */
 .tag-remove {
     display: inline-flex;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
     margin: -0.25rem calc(-1 * var(--space-xs)) -0.25rem 0;
     padding: 0.25rem;
     border-radius: var(--radius-pill);

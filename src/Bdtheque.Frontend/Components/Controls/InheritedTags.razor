@@ -1,0 +1,21 @@
+@* What a record displays through another one, which is modified on the form of that other one (e.g. the genres of an album
+   by its series, visuel/saisie-album/contenu.md): dashed tags, which cannot be removed here. Nothing without any. *@
+@if (Items.Count > 0)
+{
+    <div class="inherited-tags">
+        <span>@Label</span>
+        @foreach (var item in Items)
+        {
+            <Tag Text="@item" Variant="TagVariant.Dashed" />
+        }
+    </div>
+}
+
+@code {
+    /// <summary>What gives them (« Par la série : »).</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> Items { get; set; } = [];
+}

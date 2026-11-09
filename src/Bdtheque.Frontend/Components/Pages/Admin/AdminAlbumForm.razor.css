@@ -1,0 +1,139 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md; visuel/saisie-album/declinaison-par-theme.md). */
+.album-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+/* « Tomaison » and « Parution », two small blocks side by side under « L'album », stacked on a smartphone: « Parution » takes
+   the width of its content, « Tomaison » the rest (visuel/saisie-album/contenu.md). */
+.album-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--admin-gap);
+}
+
+@media (min-width: 48rem) {
+    .album-pair {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+}
+
+/* The fields of the volume on a line, which wraps when needed, each keeping its size. */
+.album-volume {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-m) var(--space-xl);
+}
+
+.album-type,
+.album-range {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.album-type legend,
+.album-range legend {
+    padding: 0 0 var(--space-xs);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.album-type-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-l);
+}
+
+/* The volumes covered, on one line: « 1 à 5 ». */
+.album-range-fields {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    color: var(--color-text-muted);
+}
+
+.album-range-fields input {
+    inline-size: calc(4ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
+    text-align: center;
+}
+
+.album-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.album-field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    margin: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.album-field-error ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    margin-block-start: 0.2em;
+    color: var(--color-alert);
+}
+
+/* A line per role, its authors beside it, separated by rules; on a smartphone, the role above its authors. */
+.album-roles {
+    display: flex;
+    flex-direction: column;
+}
+
+.album-role {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xs) var(--space-m);
+    align-items: center;
+    padding-block: var(--space-s);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+@media (min-width: 48rem) {
+    .album-role {
+        grid-template-columns: var(--entry-form-role-width) minmax(0, 1fr);
+    }
+}
+
+.album-role-name,
+.album-tags-name {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.album-tags {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+/* What the user changed, field by field. */
+.album-changes {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-xs) var(--space-m);
+    margin: 0;
+}
+
+.album-changes dt {
+    font-weight: var(--font-weight-strong);
+}
+
+.album-changes dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}

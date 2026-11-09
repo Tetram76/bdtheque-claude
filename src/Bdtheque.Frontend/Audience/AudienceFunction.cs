@@ -68,6 +68,26 @@ public static class AudienceFunctions
     /// <summary>The dialog of the merge of an album, opened from its row, with the search of the other album.</summary>
     public static readonly AudienceFunction AdminAlbumsMerge = new("admin.albums.merge", AudienceFunctionKind.Action);
 
+    /// <summary>The entry form of an album, with the album it presents (visuel/saisie-album/contenu.md).</summary>
+    public static readonly AudienceFunction AdminAlbum = new("admin.album", AudienceFunctionKind.Screen);
+
+    /// <summary>The entry form of a new album.</summary>
+    public static readonly AudienceFunction AdminNewAlbum = new("admin.album.new", AudienceFunctionKind.Screen);
+
+    // The actions of the form, interactive, each recorded in the visit of the prerendering of its page.
+
+    /// <summary>The creation of an album, with the album created.</summary>
+    public static readonly AudienceFunction AdminAlbumCreated = new("admin.album.created", AudienceFunctionKind.Action);
+
+    /// <summary>The saving of the modification of an album, with the album saved.</summary>
+    public static readonly AudienceFunction AdminAlbumSaved = new("admin.album.saved", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of an author on the spot, from the form of an album, with the author created.</summary>
+    public static readonly AudienceFunction AdminAlbumAuthorCreated = new("admin.album.author-created", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, the album having been modified in the meantime.</summary>
+    public static readonly AudienceFunction AdminAlbumChanges = new("admin.album.changes", AudienceFunctionKind.Action);
+
     /// <summary>The list of the series of the administration (visuel/listes/liste-par-liste.md).</summary>
     public static readonly AudienceFunction AdminSeries = new("admin.series", AudienceFunctionKind.Screen);
 
@@ -135,6 +155,7 @@ public static class AudienceFunctions
         AlbumRecord,
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
+        AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumChanges,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
         AdminSeriesMerge, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
         AdminAuthorsMerge, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,

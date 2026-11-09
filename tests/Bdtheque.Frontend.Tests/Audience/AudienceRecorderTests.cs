@@ -4,6 +4,7 @@ using Bdtheque.Contracts.Audience;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Audience;
 using Bdtheque.Frontend.Visits;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bdtheque.Frontend.Tests.Audience;
@@ -153,23 +154,68 @@ public sealed class AudienceRecorderTests
     }
 
     [Fact]
-    public async Task Usage_OnceTheResponseStarted_IsAnError()
+    public async Task Action_OfAnInteractiveCircuit_IsAddedToTheVisitOfItsPrerendering()
     {
-        // An interactive circuit, without a request of its own: its visit could not be kept.
+        // The circuit has no request of its own: the visit is the one its prerendering recorded the screen in, which the
+        // circuit keeps in its persistent state.
+        var api = new FakeAudienceApi();
+        var request = RequestOf(Visit);
+        var circuitVisit = new CircuitAudienceVisit();
+        await RecorderOf(request, api, circuitVisit).RecordScreenAsync(Screen);
+        await request.StartResponseAsync();
+
+        await RecorderOf(request, api, new CircuitAudienceVisit { VisitId = circuitVisit.VisitId }).RecordActionAsync(Action, "saved");
+
+        Assert.Equal(api.OpenedVisit, circuitVisit.VisitId);
+        var (path, use) = api.Sent[1];
+        Assert.Equal($"/audience/visits/{api.OpenedVisit}/usages", path);
+        Assert.Equal(new FunctionUse("action", null, "saved"), use.Deserialize<FunctionUse>(JsonSerializerOptions.Web));
+    }
+
+    [Fact]
+    public async Task Action_OfAnInteractiveCircuit_WithoutVisit_IsNotRecorded()
+    {
+        // Its prerendering recorded nothing: the visitor opposes the measurement, or the API did not record the screen.
+        var api = new FakeAudienceApi();
         var request = RequestOf(Visit);
         request.MarkStarted();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => RecorderOf(request, new FakeAudienceApi()).RecordScreenAsync(Screen));
+        await RecorderOf(request, api, new CircuitAudienceVisit()).RecordActionAsync(Action);
+
+        Assert.Empty(api.Sent);
+    }
+
+    [Fact]
+    public async Task Action_OfAnInteractiveCircuit_InAVisitNoLongerKnown_LeavesThePageAlone()
+    {
+        // No visit can be opened without a response to keep it.
+        var api = new FakeAudienceApi { UsagesAnswer = HttpStatusCode.NotFound };
+
+        await RecorderOf(null, api, new CircuitAudienceVisit { VisitId = Guid.CreateVersion7() }).RecordActionAsync(Action);
+
+        Assert.Single(api.Sent);
+    }
+
+    [Fact]
+    public async Task Screen_OfAnInteractiveCircuit_IsAnError()
+    {
+        // A screen is recorded by the request that renders it, never by the interactive rendering that follows.
+        var request = RequestOf(Visit);
+        request.MarkStarted();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => RecorderOf(request, new FakeAudienceApi(), new CircuitAudienceVisit()).RecordScreenAsync(Screen));
     }
 
     private static TestRequest RequestOf(BrowserVisit visit, string? userAgent = null, bool authenticated = false) =>
         new(new Dictionary<string, string> { [BrowserVisit.CookieName] = visit.Format() }, userAgent, authenticated);
 
-    private static AudienceRecorder RecorderOf(TestRequest request, FakeAudienceApi api)
+    private static AudienceRecorder RecorderOf(TestRequest? request, FakeAudienceApi api, CircuitAudienceVisit? circuitVisit = null)
     {
-        var visits = new VisitCookie(request.Accessor);
+        var accessor = request?.Accessor ?? new HttpContextAccessor();
+        var visits = new VisitCookie(accessor);
         return new AudienceRecorder(
-            request.Accessor, visits, new AudienceOpposition(request.Accessor, visits),
+            accessor, visits, new AudienceOpposition(accessor, visits), circuitVisit ?? new CircuitAudienceVisit(),
             api.Client(), NullLogger<AudienceRecorder>.Instance);
     }
 }

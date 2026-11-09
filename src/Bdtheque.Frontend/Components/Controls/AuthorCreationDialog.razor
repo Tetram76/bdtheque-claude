@@ -1,0 +1,82 @@
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@inject ApiClient Api
+@inject IStringLocalizer<AuthorCreationDialog> L
+
+@* The creation of an author on the spot, from a record being entered that credits them (visuel/saisie-album/contenu.md, Les
+   auteurs): the name typed in the choice of an author, split into first name and last name, which the user corrects or
+   turns into a pseudonym before creating. The author's rules are the domain's (at least a last name or a pseudonym): an
+   error is presented in the dialog, which stays open. Interactive. *@
+<Dialog Id="@Id" Title="@L["Title"]" Tone="DialogTone.Creation" OnClose="OnCancel">
+    <ChildContent>
+        <p class="author-creation-lead">@L["Lead"]</p>
+        @if (_problem is not null)
+        {
+            <ErrorMessage Problem="_problem" Label="@(_problem.Category == ProblemCategory.Business ? L["Problem.Business"].Value : null)" />
+        }
+        <div class="author-creation-fields">
+            <Field Id="@($"{Id}-first-name")" Label="@L["FirstName"]" Context="control">
+                <input id="@control.Id" type="text" @bind="_firstName" />
+            </Field>
+            <Field Id="@($"{Id}-last-name")" Label="@L["LastName"]" Context="control">
+                <input id="@control.Id" type="text" @bind="_lastName" />
+            </Field>
+            <Field Id="@($"{Id}-pseudonym")" Label="@L["Pseudonym"]" Help="@L["Pseudonym.Help"]" Context="control">
+                <input id="@control.Id" type="text" aria-describedby="@control.DescribedBy" @bind="_pseudonym" />
+            </Field>
+        </div>
+    </ChildContent>
+    <Actions>
+        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" Disabled="_creating" OnClick="CreateAsync" />
+    </Actions>
+</Dialog>
+
+@code {
+    private string? _firstName;
+    private string? _lastName;
+    private string? _pseudonym;
+    private ApiProblem? _problem;
+    private bool _creating;
+
+    /// <summary>The identifier of the dialog, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name typed in the choice of an author.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = null!;
+
+    /// <summary>The author created, to credit.</summary>
+    [Parameter]
+    public EventCallback<AuthorListItem> OnCreated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    // « Jean Van Hamme »: the first word the first name, the rest the last name; a single word, the last name.
+    protected override void OnInitialized()
+    {
+        var words = Name.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        (_firstName, _lastName) = words is [var first, var rest] ? (first, rest) : (null, Name.Trim());
+    }
+
+    private async Task CreateAsync()
+    {
+        _creating = true;
+        _problem = null;
+        try
+        {
+            var author = await Api.PostAsync<CreateAuthorRequest, AuthorForm>(
+                "/admin/authors", new CreateAuthorRequest(_lastName, _firstName, _pseudonym, null, null));
+            await OnCreated.InvokeAsync(new AuthorListItem(author.Id, author.LastName, author.FirstName, author.Pseudonym));
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+        finally
+        {
+            _creating = false;
+        }
+    }
+}

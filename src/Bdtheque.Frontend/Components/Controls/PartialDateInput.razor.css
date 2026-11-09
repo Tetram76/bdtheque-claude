@@ -1,0 +1,57 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md); laid out as a Field. */
+.partial-date {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.partial-date-legend {
+    padding: 0 0 var(--space-xs);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+/* On one line, each sized to its content: the name of a month, four figures. */
+.partial-date-fields {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-s);
+}
+
+.partial-date-month {
+    inline-size: calc(9ch + 2 * var(--control-padding-inline) + 1.25rem);
+}
+
+.partial-date-year {
+    inline-size: calc(4ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
+    text-align: center;
+}
+
+.partial-date-error,
+.partial-date-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+}
+
+.partial-date-help {
+    color: var(--color-text-muted);
+}
+
+.partial-date-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    font-weight: var(--font-weight-strong);
+}
+
+.partial-date-error ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    margin-block-start: 0.2em;
+    color: var(--color-alert);
+}

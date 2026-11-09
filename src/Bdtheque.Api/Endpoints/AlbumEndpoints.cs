@@ -153,7 +153,7 @@ internal static class AlbumEndpoints
         // for this request only.
         var album = await WithAssociations(context.Albums).SingleOrDefaultAsync(a => a.Id == id, cancellationToken)
                     ?? throw new EntityNotFoundException(typeof(Album), id);
-        return ToForm(context, album);
+        return await ToFormAsync(context, album, cancellationToken);
     }
 
     private static async Task<Created<AlbumForm>> CreateAsync(
@@ -165,7 +165,7 @@ internal static class AlbumEndpoints
         await ApplyAsync(album, request, context, cancellationToken);
         context.Albums.Add(album);
         await context.SaveChangesAsync(cancellationToken);
-        return TypedResults.Created($"/admin/albums/{album.Id}", ToForm(context, album));
+        return TypedResults.Created($"/admin/albums/{album.Id}", await ToFormAsync(context, album, cancellationToken));
     }
 
     private static async Task<AlbumForm> UpdateAsync(
@@ -181,12 +181,13 @@ internal static class AlbumEndpoints
         await ApplyAsync(album, content, context, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return ToForm(context, album);
+        return await ToFormAsync(context, album, cancellationToken);
     }
 
-    // The editions, intents and contributions are always loaded with the album (AlbumConfiguration).
+    // The editions, intents and contributions are always loaded with the album (AlbumConfiguration); its series and the
+    // authors of its contributions, for the form to name them.
     private static IQueryable<Album> WithAssociations(IQueryable<Album> query) =>
-        query.Include(a => a.Genres).Include(a => a.Universes);
+        query.Include(a => a.Genres).Include(a => a.Universes).Include(a => a.Series).Include(a => a.Contributions).ThenInclude(c => c.Author);
 
     // With its template contributions and their authors: attaching an album with no contribution to
     // the series credits them on the album.
@@ -223,7 +224,7 @@ internal static class AlbumEndpoints
         FormReferences.ReplaceAssociations(album.Universes, universes, album.AddUniverse, album.RemoveUniverse);
     }
 
-    private static AlbumForm ToForm(BdthequeDbContext context, Album album) =>
+    private static async Task<AlbumForm> ToFormAsync(BdthequeDbContext context, Album album, CancellationToken cancellationToken) =>
         new(album.Id, album.SortKey,
             new AlbumContent(
                 album.Title,
@@ -242,5 +243,23 @@ internal static class AlbumEndpoints
                 album.Genres.Select(g => g.Id).Order().ToList(),
                 album.Universes.Select(u => u.Id).Order().ToList(),
                 FormReferences.ToContents(album.Contributions)),
-            context.VersionOf(album));
+            context.VersionOf(album),
+            new AlbumFormReferences(
+                album.Series is { } series ? new SeriesListItem(series.Id, series.Title) : null,
+                album.Genres.OrderBy(g => g.Label).ThenBy(g => g.Id).Select(g => new GenreListItem(g.Id, g.Label)).ToList(),
+                await UniversesInHierarchyAsync(context, album, cancellationToken),
+                album.Contributions.Select(c => c.Author).DistinctBy(a => a.Id)
+                    .Select(a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym)).ToList()),
+            album.CreatedAt,
+            album.ModifiedAt);
+
+    // The hierarchy is only read for an album attached to a universe.
+    private static async Task<IReadOnlyList<UniverseInHierarchy>> UniversesInHierarchyAsync(
+        BdthequeDbContext context, Album album, CancellationToken cancellationToken)
+    {
+        if (album.Universes.Count == 0)
+            return [];
+        var tree = await UniverseTree.LoadAsync(context, cancellationToken);
+        return album.Universes.OrderBy(u => u.Name).ThenBy(u => u.Id).Select(u => tree.InHierarchy(u.Id)).ToList();
+    }
 }

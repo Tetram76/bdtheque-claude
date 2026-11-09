@@ -1,0 +1,48 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). Compact, as tags are
+   (visuel/charte-graphique/convivialite-et-efficacite.md). */
+.record-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    min-inline-size: 0;
+}
+
+.record-tags-none {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+/* The choice of a record keeps the width of a name, never stretched over the whole line. */
+.record-tags-picker {
+    flex: 0 1 18rem;
+    min-inline-size: 0;
+}
+
+/* An action as compact as a tag, dashed as what is still to come. Its dashed border is a control border: it alone tells
+   it from text, so it keeps its contrast. */
+.record-tags-add {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.0625rem var(--space-s);
+    border: var(--border-width-control) dashed var(--color-control-border);
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    line-height: var(--line-height-text);
+    cursor: pointer;
+}
+
+.record-tags-add:hover {
+    text-decoration: underline;
+}
+
+.record-tags-add ::deep .icon {
+    flex: none;
+    inline-size: 1em;
+    block-size: 1em;
+}

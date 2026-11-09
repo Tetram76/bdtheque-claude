@@ -3,7 +3,8 @@
 @* A modal dialog: a confirmation, a refusal or a choice (visuel/liste-albums/contenu.md). Rendered when the page asks for
    it (e.g. a page opened with the record to delete), it is opened as a modal by the element that wraps it
    (wwwroot/modal-dialog.js), which the browser then keeps above an inert page, focus included. Closing leads to the page
-   without it: a link, which Escape follows too. The closing comes first, the safe choice that the opening focuses. *@
+   without it: a link, which Escape follows too; in an interactive page, a button that closes it in place. The closing
+   comes first, the safe choice that the opening focuses. *@
 <app-modal-dialog>
     <dialog class="dialog" role="@Role" data-tone="@ToneName" aria-labelledby="@TitleId" aria-describedby="@BodyId">
         <header class="dialog-header">
@@ -20,7 +21,7 @@
             @ChildContent
         </div>
         <div class="dialog-actions">
-            <Button Label="@(CloseLabel ?? L["Cancel"])" Href="@CloseHref" data-dialog-close="@true" />
+            <Button Label="@(CloseLabel ?? L["Cancel"])" Href="@CloseHref" OnClick="OnClose" data-dialog-close="@true" />
             @Actions
         </div>
     </dialog>
@@ -41,9 +42,13 @@
     [Parameter]
     public DialogTone Tone { get; set; }
 
-    /// <summary>The page without the dialog, that closing leads to.</summary>
-    [Parameter, EditorRequired]
-    public string CloseHref { get; set; } = null!;
+    /// <summary>The page without the dialog, that closing leads to; none in an interactive page, which closes it by <see cref="OnClose"/>.</summary>
+    [Parameter]
+    public string? CloseHref { get; set; }
+
+    /// <summary>Closes the dialog in place, in an interactive page.</summary>
+    [Parameter]
+    public EventCallback OnClose { get; set; }
 
     /// <summary>The label of the closing: « Annuler » by default, « Fermer » for a refusal.</summary>
     [Parameter]
@@ -62,13 +67,15 @@
 
     private string ToneName => Tone.ToString().ToLowerInvariant();
 
-    // A confirmation or a refusal interrupts to warn; a choice does not.
-    private string Role => Tone == DialogTone.Choice ? "dialog" : "alertdialog";
+    // A confirmation or a refusal interrupts to warn; the others do not.
+    private string Role => Tone is DialogTone.Deletion or DialogTone.Refusal ? "alertdialog" : "dialog";
 
     private IconName ToneIcon => Tone switch
     {
         DialogTone.Deletion => IconName.Delete,
         DialogTone.Refusal => IconName.Blocked,
+        DialogTone.Creation => IconName.Add,
+        DialogTone.Information => IconName.Edit,
         _ => IconName.Search,
     };
 }

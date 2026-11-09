@@ -1,0 +1,74 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md); laid out as a Field. */
+.sort-key {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
+.sort-key-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+}
+
+.sort-key-label {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+/* The mode, a small mark: filled once the key is entered by hand, which the title no longer changes. */
+.sort-key-mode {
+    padding: 0 var(--space-s);
+    border: var(--border-width-control) solid var(--color-control-border);
+    border-radius: var(--radius-pill);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.sort-key-mode[data-mode="manual"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.sort-key-reset {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-accent-text);
+    font: inherit;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+}
+
+.sort-key-error,
+.sort-key-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+}
+
+.sort-key-help {
+    color: var(--color-text-muted);
+}
+
+.sort-key-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    font-weight: var(--font-weight-strong);
+}
+
+.sort-key-error ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    margin-block-start: 0.2em;
+    color: var(--color-alert);
+}

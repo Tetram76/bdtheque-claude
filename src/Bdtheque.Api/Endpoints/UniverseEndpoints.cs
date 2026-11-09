@@ -31,6 +31,7 @@ internal static class UniverseEndpoints
     {
         var universes = admin.MapGroup("/universes");
         universes.MapGet("/{id:guid}", GetAsync);
+        universes.MapGet("/{id:guid}/hierarchy", GetHierarchyAsync);
         universes.MapPost("/", CreateAsync);
         universes.MapPut("/{id:guid}", UpdateAsync);
         universes.MapDeletion<Universe>(DeletionLinks);
@@ -80,6 +81,12 @@ internal static class UniverseEndpoints
             .Select(u => new UniverseForm(u.Id, u.Name, u.Description, u.ParentId, EF.Property<uint>(u, BdthequeDbContext.VersionProperty)))
             .SingleOrDefaultAsync(cancellationToken)
         ?? throw new EntityNotFoundException(typeof(Universe), id);
+
+    /// <summary>
+    /// The universe with its ancestors, as an entry form presents a universe it adds (visuel/saisie-album/contenu.md).
+    /// </summary>
+    private static async Task<UniverseInHierarchy> GetHierarchyAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        (await UniverseTree.LoadAsync(context, cancellationToken)).InHierarchy(id);
 
     private static async Task<Created<UniverseForm>> CreateAsync(
         CreateUniverseRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
