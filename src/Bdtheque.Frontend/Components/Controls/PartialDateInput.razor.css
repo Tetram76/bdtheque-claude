@@ -27,7 +27,8 @@
 }
 
 .partial-date-year {
-    inline-size: calc(4ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
+    /* Half a character more for the caret, as a field sized to its characters (Field). */
+    inline-size: calc(4.5ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
     text-align: center;
 }
 

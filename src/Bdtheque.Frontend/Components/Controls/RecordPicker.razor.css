@@ -88,11 +88,13 @@
 }
 
 /* The creation of the record typed, after the suggestions, set apart from them by a straight rule across the list, drawn
-   outside the option: the rounded corners of its highlight never bend it. In the color of the links: an action, not a record. */
+   outside the option: the rounded corners of its highlight never bend it. In the color of the links, in bold: an action,
+   not a record. */
 .record-picker-create {
     position: relative;
     align-items: center;
     color: var(--color-accent-text);
+    font-weight: var(--font-weight-strong);
 }
 
 .record-picker-create:not(:first-child) {

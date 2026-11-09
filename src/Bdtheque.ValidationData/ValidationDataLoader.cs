@@ -431,9 +431,10 @@ public sealed class ValidationDataLoader(HttpClient client)
         {
             if (content.SeriesId is { } series)
             {
-                var roles = string.Concat(content.Contributions.Select(c => c.Role).Distinct().Select((r, i) => $"{(i == 0 ? '?' : '&')}creditedRoles={r}"));
-                var given = await GetAsync<List<SeriesAlbumContribution>>($"/admin/series/{series}/album-contributions{roles}");
-                content = content with { Contributions = [.. content.Contributions, .. given.Select(c => new ContributionContent(c.Author.Id, c.Role))] };
+                var given = await PostAsync<SeriesAlbumContributionsRequest, SeriesAlbumContributions>(
+                    $"/admin/series/{series}/album-contributions", new SeriesAlbumContributionsRequest(true, null, content.Contributions));
+                if (given.Applied)
+                    content = content with { Contributions = [.. given.Contributions.Select(c => new ContributionContent(c.Author.Id, c.Role))] };
             }
 
             var album = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", content);

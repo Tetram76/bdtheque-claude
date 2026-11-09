@@ -66,7 +66,16 @@ public sealed record AlbumContent(
 public sealed record UpdateAlbumRequest(AlbumContent Content, uint Version);
 
 /// <summary>
-/// An author a series gives an album attached to it, in a role
-/// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// What the entry form of an album holds when a series is chosen: whether the album is being created, the series it was
+/// attached to until then and its contributions (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
 /// </summary>
+public sealed record SeriesAlbumContributionsRequest(bool NewAlbum, Guid? PreviousSeriesId, IReadOnlyList<ContributionContent> Contributions);
+
+/// <summary>
+/// The contributions a series gives an album attached to it: <paramref name="Applied"/> when they replace those of the album
+/// (none yet, or, being created, still exactly those of the series chosen before); otherwise it keeps its own.
+/// </summary>
+public sealed record SeriesAlbumContributions(bool Applied, IReadOnlyList<SeriesAlbumContribution> Contributions);
+
+/// <summary>An author a series gives an album attached to it, in a role.</summary>
 public sealed record SeriesAlbumContribution(AuthorListItem Author, ContributionRole Role);

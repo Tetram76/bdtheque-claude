@@ -121,15 +121,24 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// whole. A contribution already credited is kept as it is; nothing is changed if any is refused.
     /// </summary>
     /// <summary>
-    /// The authors the series gives an album attached to it, role by role: those of its template for each role where the album
-    /// has no author yet (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md). The entry form asks for
-    /// them as soon as the series is chosen; saving the album copies nothing.
+    /// The contributions the series gives an album attached to it
+    /// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md): those of its template, for an album that
+    /// has none yet, or, being created, whose authors are still exactly those of the series chosen before, which they replace;
+    /// <c>null</c> for an album whose authors were personalized, which keeps them: always so for an album already saved. The entry form asks for them as soon as the series is chosen;
+    /// saving the album copies nothing.
     /// </summary>
-    /// <param name="creditedRoles">The roles where the album already has authors, which keep theirs.</param>
-    public IReadOnlyList<Contribution> ContributionsForAlbum(IReadOnlyCollection<ContributionRole> creditedRoles)
+    /// <param name="albumCredits">The contributions of the album, as the form holds them.</param>
+    /// <param name="previousSeries">The series the album was attached to until then, if any, its template loaded.</param>
+    /// <param name="albumIsNew">Whether the album is being created, not saved yet.</param>
+    public IReadOnlyList<Contribution>? ContributionsForAlbum(
+        IReadOnlyCollection<(Guid AuthorId, ContributionRole Role)> albumCredits, Series? previousSeries, bool albumIsNew)
     {
-        ArgumentNullException.ThrowIfNull(creditedRoles);
-        return [.. _templateContributions.Where(c => !creditedRoles.Contains(c.Role))];
+        ArgumentNullException.ThrowIfNull(albumCredits);
+        var personalized = albumCredits.Count > 0
+                           && (!albumIsNew
+                               || previousSeries is null
+                               || !albumCredits.ToHashSet().SetEquals(previousSeries.TemplateContributions.Select(c => (c.AuthorId, c.Role))));
+        return personalized ? null : [.. _templateContributions];
     }
 
     public void SetTemplateContributions(IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions) =>

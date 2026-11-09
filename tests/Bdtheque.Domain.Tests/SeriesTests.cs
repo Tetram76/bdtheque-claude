@@ -424,40 +424,59 @@ public sealed class SeriesTests
     }
 
     [Fact]
-    public void ContributionsForAlbum_WithoutCreditedRoles_GivesTheWholeTemplate()
+    public void ContributionsForAlbum_OfAnAlbumWithoutContributions_AreThoseOfTheSeries()
     {
         var (series, scenarist, illustrator) = SeriesWithTemplate();
 
-        var contributions = series.ContributionsForAlbum([]);
+        var contributions = series.ContributionsForAlbum([], null, albumIsNew: false);
 
         Assert.Equal(
             [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)],
-            contributions.Select(c => (c.Author.Id, c.Role)).OrderBy(c => c.Role));
+            contributions!.Select(c => (c.Author.Id, c.Role)).OrderBy(c => c.Role));
     }
 
     [Fact]
-    public void ContributionsForAlbum_RoleAlreadyCredited_KeepsItForTheAlbum()
+    public void ContributionsForAlbum_StillThoseOfThePreviousSeries_AreReplacedByThoseOfTheSeries()
     {
-        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: role by role, a role where
-        // the album already has authors keeps its own.
-        var (series, _, illustrator) = SeriesWithTemplate();
+        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: authors not personalized yet.
+        var (series, scenarist, _) = SeriesWithTemplate();
+        var previous = new Series("Spirou");
+        var franquin = new Author(null, null, "Franquin");
+        previous.SetTemplateContributions([(franquin, ContributionRole.Scenarist), (franquin, ContributionRole.Illustrator)]);
 
-        var contributions = series.ContributionsForAlbum([ContributionRole.Scenarist]);
+        var contributions = series.ContributionsForAlbum(
+            [(franquin.Id, ContributionRole.Illustrator), (franquin.Id, ContributionRole.Scenarist)], previous, albumIsNew: true);
 
-        Assert.Equal([(illustrator.Id, ContributionRole.Illustrator)], contributions.Select(c => (c.Author.Id, c.Role)));
+        Assert.Contains(contributions!, c => c.Author.Id == scenarist.Id && c.Role == ContributionRole.Scenarist);
+        Assert.Equal(2, contributions!.Count);
     }
 
     [Fact]
-    public void ContributionsForAlbum_SeveralAuthorsForARole_GivesThemAll()
+    public void ContributionsForAlbum_Personalized_AreKept()
     {
-        var series = new Series("Tintin");
-        var first = new Author(null, null, "Hergé");
-        var second = new Author(null, null, "Jacobs");
-        series.SetTemplateContributions([(first, ContributionRole.Illustrator), (second, ContributionRole.Illustrator)]);
+        var (series, _, _) = SeriesWithTemplate();
+        var previous = new Series("Spirou");
+        var franquin = new Author(null, null, "Franquin");
+        previous.SetTemplateContributions([(franquin, ContributionRole.Scenarist)]);
 
-        var contributions = series.ContributionsForAlbum([ContributionRole.Scenarist]);
+        // An author added to those of the previous series: the album's authors are its own.
+        Assert.Null(series.ContributionsForAlbum(
+            [(franquin.Id, ContributionRole.Scenarist), (Guid.NewGuid(), ContributionRole.Colorist)], previous, albumIsNew: true));
+        // Without a previous series, authors of its own.
+        Assert.Null(series.ContributionsForAlbum([(franquin.Id, ContributionRole.Scenarist)], null, albumIsNew: true));
+    }
 
-        Assert.Equal(new[] { first.Id, second.Id }.Order(), contributions.Select(c => c.Author.Id).Order());
+    [Fact]
+    public void ContributionsForAlbum_OfAnAlbumAlreadySaved_ThoseOfItsSeries_AreConsideredPersonalized()
+    {
+        // Only at the creation of an album are the authors of the previous series replaced.
+        var (series, _, _) = SeriesWithTemplate();
+        var previous = new Series("Spirou");
+        var franquin = new Author(null, null, "Franquin");
+        previous.SetTemplateContributions([(franquin, ContributionRole.Scenarist)]);
+
+        Assert.Null(series.ContributionsForAlbum([(franquin.Id, ContributionRole.Scenarist)], previous, albumIsNew: false));
+        Assert.NotNull(series.ContributionsForAlbum([], previous, albumIsNew: false));
     }
 
     private static (Series Series, Author Scenarist, Author Illustrator) SeriesWithTemplate()

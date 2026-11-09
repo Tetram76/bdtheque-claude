@@ -264,23 +264,29 @@ else
         }
     }
 
-    // The authors of the series are taken as soon as it is chosen, for the roles the album has no author for, as the domain
-    // computes them (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md): the user sees them
-    // before saving. A series that cannot be read gives none, and the saving tells what became of it.
+    // The authors of the series are taken as soon as it is chosen, as the domain decides: by an album without authors, or by
+    // a new album whose authors are still those of the series chosen before, which they replace
+    // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md). The user sees them before saving. A
+    // series that cannot be read gives none, and the saving tells what became of it.
     private async Task ChooseSeriesAsync(RecordOption? series)
     {
-        Entry!.Series = series;
+        var previous = Entry!.Series;
+        Entry.Series = series;
         _authorsCopiedFrom = null;
         Entry.ShowSeries(await SeriesOrNoneAsync(series?.Id));
         if (series is null)
             return;
         try
         {
-            var roles = string.Join("&", Entry.CreditedRoles().Select(r => $"creditedRoles={r}"));
-            var contributions = await Api.GetAsync<List<SeriesAlbumContribution>>(
-                $"/admin/series/{series.Id}/album-contributions{(roles.Length > 0 ? "?" + roles : "")}");
-            if (Entry.Credit(contributions) > 0)
-                _authorsCopiedFrom = series.Label;
+            var given = await Api.PostAsync<SeriesAlbumContributionsRequest, SeriesAlbumContributions>(
+                $"/admin/series/{series.Id}/album-contributions",
+                new SeriesAlbumContributionsRequest(Entry.Id is null, previous?.Id, Entry.ToContent().Contributions));
+            if (given.Applied)
+            {
+                Entry.CreditOnly(given.Contributions);
+                if (given.Contributions.Count > 0)
+                    _authorsCopiedFrom = series.Label;
+            }
         }
         catch (ApiProblemException)
         {

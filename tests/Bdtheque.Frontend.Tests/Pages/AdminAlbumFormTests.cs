@@ -353,33 +353,36 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public async Task Series_Chosen_TakesItsAuthorsAtOnce_AndSaysSo()
+    public async Task Series_Chosen_GivesItsAuthorsAtOnce_AsTheDomainDecides_AndSaysSo()
     {
         // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: as soon as the series is chosen.
         var guarnido = Guid.NewGuid();
-        _api.Answers[$"/admin/series/{OtherSeriesId}/album-contributions"] = new List<SeriesAlbumContribution>
-        {
-            new(new AuthorListItem(guarnido, "Guarnido", "Juanjo", null), ContributionRole.Illustrator),
-        };
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(true,
+            [new SeriesAlbumContribution(new AuthorListItem(guarnido, "Guarnido", "Juanjo", null), ContributionRole.Illustrator)]));
         var page = OpenNew();
 
         await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
 
-        Assert.Contains($"/admin/series/{OtherSeriesId}/album-contributions", _api.Requested);
+        var request = _api.Written.Single();
+        Assert.Equal((HttpMethod.Post, $"/admin/series/{OtherSeriesId}/album-contributions"), (request.Method, request.Path));
+        Assert.Equal((true, JsonValueKind.Null, 0), (request.Body.GetProperty("newAlbum").GetBoolean(),
+            request.Body.GetProperty("previousSeriesId").ValueKind, request.Body.GetProperty("contributions").GetArrayLength()));
         Assert.Equal("Juanjo Guarnido", page.FindAll(".album-role")[1].QuerySelector(".tag")!.TextContent.Trim());
         Assert.Contains("Repris de la série Blacksad", page.Find(".notice").TextContent);
-        Assert.Empty(_api.Written);
     }
 
     [Fact]
-    public async Task Series_Chosen_ForAnAlbumWithAuthors_KeepsThemForTheirRoles()
+    public async Task Series_Chosen_ThatGivesNothing_LeavesTheAuthorsOfTheAlbum()
     {
-        _api.Answers[$"/admin/series/{OtherSeriesId}/album-contributions"] = new List<SeriesAlbumContribution>();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(false, []));
         var page = OpenAlbum();
 
         await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
 
-        Assert.Contains($"/admin/series/{OtherSeriesId}/album-contributions?creditedRoles=Scenarist&creditedRoles=Illustrator", _api.Requested);
+        var sent = _api.Written.Single().Body;
+        Assert.Equal((false, SeriesId.ToString(), 2),
+            (sent.GetProperty("newAlbum").GetBoolean(), sent.GetProperty("previousSeriesId").GetString(), sent.GetProperty("contributions").GetArrayLength()));
+        Assert.Equal(2, page.FindAll(".album-role .tag").Count);
         Assert.Empty(page.FindAll(".notice"));
     }
 

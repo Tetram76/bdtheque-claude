@@ -384,44 +384,58 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     private static string UniqueTitle() => $"Série {Guid.NewGuid():N}";
 
     [Fact]
-    public async Task AlbumContributions_GiveTheAuthorsOfTheSeriesForTheRolesTheAlbumHasNoAuthorFor()
+    public async Task AlbumContributions_ForAnAlbumWithoutAny_AreThoseOfTheSeries_Named()
     {
-        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: role by role.
         var scenarist = await CreateAuthorAsync();
-        var illustrator = await CreateAuthorAsync();
         var series = await CreateAsync(Content(UniqueTitle()) with
         {
-            Contributions = [new ContributionContent(scenarist.Id, ContributionRole.Scenarist), new ContributionContent(illustrator.Id, ContributionRole.Illustrator)],
+            Contributions = [new ContributionContent(scenarist.Id, ContributionRole.Scenarist)],
         });
 
-        var contributions = await _client.GetFromJsonAsync<List<SeriesAlbumContribution>>(
-            $"/admin/series/{series.Id}/album-contributions?creditedRoles=Scenarist&creditedRoles=Colorist");
+        var given = await AlbumContributionsAsync(series.Id, new SeriesAlbumContributionsRequest(true, null, []));
 
+        Assert.True(given.Applied);
         Assert.Equal(
-            [new SeriesAlbumContribution(new AuthorListItem(illustrator.Id, illustrator.LastName, null, null), ContributionRole.Illustrator)],
-            contributions);
+            [new SeriesAlbumContribution(new AuthorListItem(scenarist.Id, scenarist.LastName, null, null), ContributionRole.Scenarist)],
+            given.Contributions);
     }
 
     [Fact]
-    public async Task AlbumContributions_WithoutCreditedRoles_GiveTheWholeTemplate()
+    public async Task AlbumContributions_OfANewAlbum_StillThoseOfThePreviousSeries_AreReplaced_PersonalizedOrSavedOnesKept()
     {
-        var author = await CreateAuthorAsync();
-        var series = await CreateAsync(Content(UniqueTitle()) with
-        {
-            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist), new ContributionContent(author.Id, ContributionRole.Illustrator)],
-        });
+        // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md.
+        var first = await CreateAuthorAsync();
+        var second = await CreateAuthorAsync();
+        var previous = await CreateAsync(Content(UniqueTitle()) with { Contributions = [new ContributionContent(first.Id, ContributionRole.Scenarist)] });
+        var series = await CreateAsync(Content(UniqueTitle()) with { Contributions = [new ContributionContent(second.Id, ContributionRole.Illustrator)] });
 
-        var contributions = await _client.GetFromJsonAsync<List<SeriesAlbumContribution>>($"/admin/series/{series.Id}/album-contributions");
+        var replaced = await AlbumContributionsAsync(series.Id, new SeriesAlbumContributionsRequest(
+            true, previous.Id, [new ContributionContent(first.Id, ContributionRole.Scenarist)]));
+        var kept = await AlbumContributionsAsync(series.Id, new SeriesAlbumContributionsRequest(
+            true, previous.Id, [new ContributionContent(first.Id, ContributionRole.Scenarist), new ContributionContent(second.Id, ContributionRole.Colorist)]));
+        var saved = await AlbumContributionsAsync(series.Id, new SeriesAlbumContributionsRequest(
+            false, previous.Id, [new ContributionContent(first.Id, ContributionRole.Scenarist)]));
 
-        Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], contributions!.Select(c => c.Role));
+        Assert.True(replaced.Applied);
+        Assert.Equal([second.Id], replaced.Contributions.Select(c => c.Author.Id));
+        Assert.Equal((false, 0), (kept.Applied, kept.Contributions.Count));
+        Assert.False(saved.Applied);
     }
 
     [Fact]
     public async Task AlbumContributions_OfAnUnknownSeries_IsAFunctionalError()
     {
-        var response = await _client.GetAsync($"/admin/series/{Guid.NewGuid()}/album-contributions");
+        var response = await _client.PostAsJsonAsync(
+            $"/admin/series/{Guid.NewGuid()}/album-contributions", new SeriesAlbumContributionsRequest(true, null, []));
 
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
+    }
+
+    private async Task<SeriesAlbumContributions> AlbumContributionsAsync(Guid seriesId, SeriesAlbumContributionsRequest request)
+    {
+        var response = await _client.PostAsJsonAsync($"/admin/series/{seriesId}/album-contributions", request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<SeriesAlbumContributions>())!;
     }
 
     private static string DeleteUri(SeriesForm series, string fingerprint) =>

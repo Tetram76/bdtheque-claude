@@ -3,7 +3,7 @@
 * [Appartenance à la collection](appartenance-a-la-collection.md) - Un album fait partie de la collection s'il a une édition possédée ; seules les éditions d'intention ne sont pas possédées.
 * [Périmètre de la consultation](perimetre-de-la-consultation.md) - Base documentaire et inventaire : tout est consultable, l'appartenance est signalée, les statistiques ne portent que sur la collection.
 * [Initialisation d'une nouvelle édition depuis la série](initialisation-d-une-nouvelle-edition-depuis-la-serie.md) - Pré-remplissage d'une nouvelle édition par le template de la série, ou les valeurs par défaut.
-* [Initialisation des contributions depuis la série](initialisation-des-contributions-depuis-la-serie.md) - Auteurs de la série repris sur un album qu'on y rattache, rôle par rôle, dès le choix de la série.
+* [Initialisation des contributions depuis la série](initialisation-des-contributions-depuis-la-serie.md) - Contributions de la série recopiées sur un album rattaché qui n'en a pas, ou, à sa création, qui n'a que celles de la série choisie précédemment.
 * [Genres et univers d'un album](genres-et-univers-d-un-album.md) - Genres et univers affichés d'un album : union avec ceux de sa série.
 * [Hiérarchie des univers](hierarchie-des-univers.md) - Un élément rattaché à un univers l'est à ses ancêtres.
 * [Ordre des albums dans une série](ordre-des-albums-dans-une-serie.md) - Hors-séries en dernier, tome puis date de première publication.
