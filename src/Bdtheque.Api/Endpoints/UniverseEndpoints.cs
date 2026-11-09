@@ -136,7 +136,7 @@ internal static class UniverseEndpoints
     /// recursively (choix-implementation/api/organisation-de-l-api.md). The caller holds the hierarchy
     /// lock, so that the check sees every change of parent committed before it.
     /// </summary>
-    private static async Task<Universe> LoadWithAncestorsAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
+    internal static async Task<Universe> LoadWithAncestorsAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
     {
         var universes = await context.Universes.ToListAsync(cancellationToken);
         return universes.SingleOrDefault(u => u.Id == id) ?? throw new EntityNotFoundException(typeof(Universe), id);

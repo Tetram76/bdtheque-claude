@@ -159,12 +159,15 @@ internal static class AlbumEndpoints
     private static async Task<Created<AlbumForm>> CreateAsync(
         AlbumContent request, BdthequeDbContext context, CancellationToken cancellationToken)
     {
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, request.NewRecords, cancellationToken);
         var series = await LoadSeriesAsync(request.SeriesId, context, cancellationToken);
-        var contributions = await FormReferences.LoadContributionsAsync(context, request.Contributions, cancellationToken);
+        var contributions = await FormReferences.LoadContributionsAsync(context, request.Contributions, cancellationToken, added.Authors);
         var album = new Album(request.Title, series, contributions);
-        await ApplyAsync(album, request, context, cancellationToken);
+        await ApplyAsync(album, request, added, context, cancellationToken);
         context.Albums.Add(album);
         await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return TypedResults.Created($"/admin/albums/{album.Id}", await ToFormAsync(context, album, cancellationToken));
     }
 
@@ -174,11 +177,12 @@ internal static class AlbumEndpoints
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(id, request.Version, WithAssociations, cancellationToken);
         var content = request.Content;
+        var added = await FormReferences.CreateAddedAsync(context, content.NewRecords, cancellationToken);
         var series = await LoadSeriesAsync(content.SeriesId, context, cancellationToken);
-        var contributions = await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken);
+        var contributions = await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken, added.Authors);
 
         album.SetTitleSeriesAndContributions(content.Title, series, contributions);
-        await ApplyAsync(album, content, context, cancellationToken);
+        await ApplyAsync(album, content, added, context, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return await ToFormAsync(context, album, cancellationToken);
@@ -189,21 +193,19 @@ internal static class AlbumEndpoints
     private static IQueryable<Album> WithAssociations(IQueryable<Album> query) =>
         query.Include(a => a.Genres).Include(a => a.Universes).Include(a => a.Series).Include(a => a.Contributions).ThenInclude(c => c.Author);
 
-    // With its template contributions and their authors: attaching an album with no contribution to
-    // the series credits them on the album.
     private static async Task<Series?> LoadSeriesAsync(Guid? seriesId, BdthequeDbContext context, CancellationToken cancellationToken) =>
         seriesId is { } id
-            ? await context.Series.Include(s => s.TemplateContributions).ThenInclude(c => c.Author)
-                  .SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
+            ? await context.Series.SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
               ?? throw new EntityNotFoundException(typeof(Series), id)
             : null;
 
     /// <summary>
     /// Applies the rest of the form to the album, its title, series and contributions being set
     /// together beforehand: the genres and universes it references must still exist (a record
-    /// deleted since the form was read is a functional error).
+    /// deleted since the form was read is a functional error), unless the form added them on the spot.
     /// </summary>
-    private static async Task ApplyAsync(Album album, AlbumContent content, BdthequeDbContext context, CancellationToken cancellationToken)
+    private static async Task ApplyAsync(
+        Album album, AlbumContent content, AddedRecords added, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         if (content.ManualSortKey is { } manualSortKey)
             album.SetSortKey(manualSortKey);
@@ -218,9 +220,9 @@ internal static class AlbumEndpoints
         album.SetPersonalNotes(content.PersonalNotes);
         album.SetRating(EnumMapping.Map<DomainEnums.AlbumRating>(content.Rating));
 
-        var genres = await FormReferences.LoadAsync(context.Genres, content.GenreIds, cancellationToken);
+        var genres = await FormReferences.LoadAsync(context.Genres, content.GenreIds, cancellationToken, added.Genres);
         FormReferences.ReplaceAssociations(album.Genres, genres, album.AddGenre, album.RemoveGenre);
-        var universes = await FormReferences.LoadAsync(context.Universes, content.UniverseIds, cancellationToken);
+        var universes = await FormReferences.LoadAsync(context.Universes, content.UniverseIds, cancellationToken, added.Universes);
         FormReferences.ReplaceAssociations(album.Universes, universes, album.AddUniverse, album.RemoveUniverse);
     }
 

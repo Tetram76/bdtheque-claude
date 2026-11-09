@@ -74,6 +74,18 @@ public sealed class AlbumEntry
     /// <summary>The universes the album displays through its series, each named with its ancestors.</summary>
     public List<string> SeriesUniverses { get; set; } = [];
 
+    /// <summary>
+    /// The authors added on the spot, created with the album when it is saved (choix-implementation/socle/frontend.md),
+    /// referenced by their key in the credits.
+    /// </summary>
+    public List<NewAuthor> NewAuthors { get; set; } = [];
+
+    /// <summary>The genres added on the spot, created with the album, referenced by their key.</summary>
+    public List<NewGenre> NewGenres { get; set; } = [];
+
+    /// <summary>The universes added on the spot, created with the album, referenced by their key.</summary>
+    public List<NewUniverse> NewUniverses { get; set; } = [];
+
     /// <summary>A new album, empty.</summary>
     public static AlbumEntry New() => new();
 
@@ -119,7 +131,10 @@ public sealed class AlbumEntry
         SeriesUniverses = series is null ? [] : [.. series.Universes.Select(u => Universe(u).Label)];
     }
 
-    /// <summary>The content to save: the whole form, the range of volumes only for an omnibus, whose fields alone show it.</summary>
+    /// <summary>
+    /// The content to save: the whole form, the range of volumes only for an omnibus, whose fields alone show it, and the
+    /// records added on the spot that it still cites, to create with the album.
+    /// </summary>
     public AlbumContent ToContent() => new(
         Title,
         ManualSortKey,
@@ -136,7 +151,17 @@ public sealed class AlbumEntry
         Rating,
         [.. Genres.Select(g => g.Id)],
         [.. Universes.Select(u => u.Id)],
-        [.. Credits.Select(c => new ContributionContent(c.Author.Id, c.Role))]);
+        [.. Credits.Select(c => new ContributionContent(c.Author.Id, c.Role))],
+        Added());
+
+    private NewRecords? Added()
+    {
+        var added = new NewRecords(
+            [.. NewAuthors.Where(a => Credits.Any(c => c.Author.Id == a.Key))],
+            [.. NewGenres.Where(g => Genres.Any(o => o.Id == g.Key))],
+            [.. NewUniverses.Where(u => Universes.Any(o => o.Id == u.Key))]);
+        return added.Authors.Count + added.Genres.Count + added.Universes.Count == 0 ? null : added;
+    }
 
     /// <summary>
     /// What tells two states of the form apart: the content it would save, the order of its associations aside, which the

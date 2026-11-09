@@ -51,8 +51,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:00:00Z }
   - **Alternative écartée (clé calculée par le frontend)** : la règle de calcul serait écrite deux fois, et la clé affichée pourrait différer de celle enregistrée.
 - **Fiche créée : la page de sa modification**, chargée de nouveau par la navigation, la fiche y étant lue telle qu'enregistrée. Une fiche modifiée reste affichée, à jour.
 - **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi.
-- **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme avant de créer ; les règles de l'auteur sont celles du domaine.
+- **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme.
 - **Genre ou univers créé sur place** de même, depuis leur choix : le dialogue reprend le texte tapé, et, pour un univers, propose de choisir l'univers qui le contient.
+- **Fiche créée sur place, créée à l'enregistrement de la fiche qui la cite**, dans la même transaction, jamais avant : une saisie annulée n'en laisse aucune. La fiche saisie la cite par une clé qu'elle lui donne, et l'envoie avec ce qu'elle enregistre, si elle la cite encore ; les règles de la fiche créée sont celles du domaine, et une erreur est présentée avec l'enregistrement.
+  - **Alternative écartée (fiche créée dès la confirmation du dialogue)** : une saisie annulée laisserait des auteurs, genres ou univers créés pour elle, et que rien ne cite.
 
 ## En-têtes et navigation
 

@@ -315,25 +315,44 @@ else
         }
     }
 
-    private async Task CreditCreatedAsync(ContributionRole role, AuthorListItem author)
+    // The records added on the spot are created with the album, when it is saved: cancelling creates none of them.
+    private async Task CreditCreatedAsync(ContributionRole role, NewAuthor author)
     {
         _authorCreation = null;
-        Entry!.Credit(role, AlbumEntry.Author(author));
-        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumAuthorCreated, $"author={author.Id}");
+        Entry!.NewAuthors.Add(author);
+        Entry.Credit(role, new RecordOption(author.Key, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null));
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumAuthorCreated);
     }
 
-    private async Task GenreCreatedAsync(RecordOption genre)
+    private async Task GenreCreatedAsync(NewGenre genre)
     {
         _genreCreation = null;
-        AddGenre(genre);
-        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumGenreCreated, $"genre={genre.Id}");
+        Entry!.NewGenres.Add(genre);
+        AddGenre(new RecordOption(genre.Key, genre.Label, null));
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumGenreCreated);
     }
 
-    private async Task UniverseCreatedAsync(RecordOption universe)
+    // Presented with its ancestors, those of the universe that contains it.
+    private async Task UniverseCreatedAsync((NewUniverse Universe, RecordOption? Parent) created)
     {
         _universeCreation = null;
-        await AddUniverseAsync(universe);
-        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumUniverseCreated, $"universe={universe.Id}");
+        var (universe, parent) = created;
+        Entry!.NewUniverses.Add(universe);
+        var ancestors = parent is null ? null : await AncestryAsync(parent);
+        Entry.Universes.Add(new RecordOption(universe.Key, ancestors is null ? universe.Name : $"{ancestors} › {universe.Name}", null));
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumUniverseCreated);
+    }
+
+    private async Task<string> AncestryAsync(RecordOption universe)
+    {
+        try
+        {
+            return AlbumEntry.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")).Label;
+        }
+        catch (ApiProblemException)
+        {
+            return universe.Label;
+        }
     }
 
     private async Task SaveAsync()

@@ -2,6 +2,7 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
@@ -61,7 +62,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Fact]
-    public async Task Author_CreatedOnTheSpot_IsCreditedOnTheAlbum()
+    public async Task Author_AddedOnTheSpot_IsCreatedAndCreditedWithTheAlbum()
     {
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
         var page = await OpenAsync(AppPaths.AdminEditAlbum(album.Id));
@@ -72,7 +73,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'auteur « Jean Nouveau{_marker} »" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel auteur" });
         await Assertions.Expect(dialog.GetByLabel("Nom", new() { Exact = true })).ToHaveValueAsync($"Nouveau{_marker}");
-        await dialog.GetByRole(AriaRole.Button, new() { Name = "Créer l'auteur" }).ClickAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter l'auteur" }).ClickAsync();
 
         await Assertions.Expect(dialog).ToHaveCountAsync(0);
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
@@ -82,7 +83,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Fact]
-    public async Task UniverseAndGenre_CreatedOnTheSpot_ClassifyTheAlbum()
+    public async Task UniverseAndGenre_AddedOnTheSpot_AreCreatedWithTheAlbum()
     {
         var parent = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Monde{_marker}", null, null));
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
@@ -93,7 +94,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Ajouter un genre" }).PressSequentiallyAsync($"Genre{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Créer le genre « Genre{_marker} »" }).ClickAsync();
         var genreDialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" });
-        await genreDialog.GetByRole(AriaRole.Button, new() { Name = "Créer le genre" }).ClickAsync();
+        await genreDialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter le genre" }).ClickAsync();
         await Assertions.Expect(genreDialog).ToHaveCountAsync(0);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un univers" }).ClickAsync();
@@ -102,9 +103,13 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         var universeDialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
         await universeDialog.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Monde{_marker}");
         await universeDialog.GetByRole(AriaRole.Option, new() { Name = $"Monde{_marker}" }).ClickAsync();
-        await universeDialog.GetByRole(AriaRole.Button, new() { Name = "Créer l'univers" }).ClickAsync();
+        await universeDialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter l'univers" }).ClickAsync();
         await Assertions.Expect(universeDialog).ToHaveCountAsync(0);
         await Assertions.Expect(page.Locator(".album-tags").Nth(1)).ToContainTextAsync($"Monde{_marker} › Quartier{_marker}");
+        // Created only with the album, when it is saved.
+        Assert.Empty((await GetAsync(album.Id)).References.Genres);
+        using (var api = Application.CreateApiClient())
+            Assert.Empty((await api.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q=Genre{_marker}"))!.Items);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();

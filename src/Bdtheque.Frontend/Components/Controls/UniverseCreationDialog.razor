@@ -1,17 +1,14 @@
 @using Bdtheque.Contracts.Admin
-@inject ApiClient Api
 @inject IStringLocalizer<UniverseCreationDialog> L
 
 @* The creation of a universe on the spot, from a record being entered that belongs to it (visuel/saisie-album/contenu.md,
    Genres et univers): the name typed in the choice of a universe, which the user checks, and the universe that contains it,
-   if any, chosen by typing its name. The universe's rules are the domain's: an error is presented in the dialog, which stays
-   open. Interactive. *@
+   if any, chosen by typing its name. The universe is created only with the record that cites it, when that record is saved
+   (choix-implementation/socle/frontend.md): the domain then applies its rules, and an error is presented with the saving.
+   Interactive. *@
 <Dialog Id="@Id" Title="@L["Title"]" Tone="DialogTone.Creation" OnClose="OnCancel">
     <ChildContent>
-        @if (_problem is not null)
-        {
-            <ErrorMessage Problem="_problem" Label="@(_problem.Category == ProblemCategory.Business ? L["Problem.Business"].Value : null)" />
-        }
+        <p class="record-creation-lead">@L["Lead"]</p>
         <div class="record-creation-fields">
             <Field Id="@($"{Id}-name")" Label="@L["Name"]" Context="control">
                 <input id="@control.Id" type="text" @bind="_name" />
@@ -23,15 +20,13 @@
         </div>
     </ChildContent>
     <Actions>
-        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" Disabled="_creating" OnClick="CreateAsync" />
+        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" OnClick="CreateAsync" />
     </Actions>
 </Dialog>
 
 @code {
     private string? _name;
     private RecordOption? _parent;
-    private ApiProblem? _problem;
-    private bool _creating;
 
     /// <summary>The identifier of the dialog, unique in the page.</summary>
     [Parameter, EditorRequired]
@@ -41,32 +36,14 @@
     [Parameter, EditorRequired]
     public string Name { get; set; } = null!;
 
-    /// <summary>The universe created, to attach the record to.</summary>
+    /// <summary>The universe to create with the record, to attach it to, and the universe that contains it, if any.</summary>
     [Parameter]
-    public EventCallback<RecordOption> OnCreated { get; set; }
+    public EventCallback<(NewUniverse Universe, RecordOption? Parent)> OnCreated { get; set; }
 
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
     protected override void OnInitialized() => _name = Name.Trim();
 
-    private async Task CreateAsync()
-    {
-        _creating = true;
-        _problem = null;
-        try
-        {
-            var universe = await Api.PostAsync<CreateUniverseRequest, UniverseForm>(
-                "/admin/universes", new CreateUniverseRequest(_name ?? "", null, _parent?.Id));
-            await OnCreated.InvokeAsync(new RecordOption(universe.Id, universe.Name, _parent?.Label));
-        }
-        catch (ApiProblemException exception)
-        {
-            _problem = exception.Problem;
-        }
-        finally
-        {
-            _creating = false;
-        }
-    }
+    private Task CreateAsync() => OnCreated.InvokeAsync((new NewUniverse(Guid.NewGuid(), _name?.Trim() ?? "", _parent?.Id), _parent));
 }

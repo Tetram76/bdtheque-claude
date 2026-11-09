@@ -13,7 +13,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Create" xml:space="preserve">
-    <value>Créer l&apos;auteur</value>
+    <value>Ajouter l&apos;auteur</value>
   </data>
   <data name="FirstName" xml:space="preserve">
     <value>Prénom</value>
@@ -22,10 +22,7 @@
     <value>Nom</value>
   </data>
   <data name="Lead" xml:space="preserve">
-    <value>Vérifiez le nom tapé avant de créer l&apos;auteur : un auteur connu sous un pseudonyme le porte en pseudonyme.</value>
-  </data>
-  <data name="Problem.Business" xml:space="preserve">
-    <value>À corriger</value>
+    <value>Vérifiez le nom tapé : un auteur connu sous un pseudonyme le porte en pseudonyme. L&apos;auteur ne sera créé qu&apos;à l&apos;enregistrement de la fiche.</value>
   </data>
   <data name="Pseudonym" xml:space="preserve">
     <value>Pseudonyme</value>

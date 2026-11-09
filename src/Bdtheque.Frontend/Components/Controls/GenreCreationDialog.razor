@@ -1,16 +1,13 @@
 @using Bdtheque.Contracts.Admin
-@inject ApiClient Api
 @inject IStringLocalizer<GenreCreationDialog> L
 
 @* The creation of a genre on the spot, from a record being entered that is classified in it (visuel/saisie-album/contenu.md,
-   Genres et univers): the label typed in the choice of a genre, which the user checks before creating. The genre's rules are
-   the domain's: an error is presented in the dialog, which stays open. Interactive. *@
+   Genres et univers): the label typed in the choice of a genre, which the user checks. The genre is created only with the
+   record that cites it, when that record is saved (choix-implementation/socle/frontend.md): the domain then applies its
+   rules, and an error is presented with the saving. Interactive. *@
 <Dialog Id="@Id" Title="@L["Title"]" Tone="DialogTone.Creation" OnClose="OnCancel">
     <ChildContent>
-        @if (_problem is not null)
-        {
-            <ErrorMessage Problem="_problem" Label="@(_problem.Category == ProblemCategory.Business ? L["Problem.Business"].Value : null)" />
-        }
+        <p class="record-creation-lead">@L["Lead"]</p>
         <div class="record-creation-fields">
             <Field Id="@($"{Id}-label")" Label="@L["Label"]" Context="control">
                 <input id="@control.Id" type="text" @bind="_label" />
@@ -18,14 +15,12 @@
         </div>
     </ChildContent>
     <Actions>
-        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" Disabled="_creating" OnClick="CreateAsync" />
+        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" OnClick="CreateAsync" />
     </Actions>
 </Dialog>
 
 @code {
     private string? _label;
-    private ApiProblem? _problem;
-    private bool _creating;
 
     /// <summary>The identifier of the dialog, unique in the page.</summary>
     [Parameter, EditorRequired]
@@ -35,31 +30,14 @@
     [Parameter, EditorRequired]
     public string Label { get; set; } = null!;
 
-    /// <summary>The genre created, to classify the record in.</summary>
+    /// <summary>The genre to create with the record, to classify it in.</summary>
     [Parameter]
-    public EventCallback<RecordOption> OnCreated { get; set; }
+    public EventCallback<NewGenre> OnCreated { get; set; }
 
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
     protected override void OnInitialized() => _label = Label.Trim();
 
-    private async Task CreateAsync()
-    {
-        _creating = true;
-        _problem = null;
-        try
-        {
-            var genre = await Api.PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new CreateGenreRequest(_label ?? ""));
-            await OnCreated.InvokeAsync(new RecordOption(genre.Id, genre.Label, null));
-        }
-        catch (ApiProblemException exception)
-        {
-            _problem = exception.Problem;
-        }
-        finally
-        {
-            _creating = false;
-        }
-    }
+    private Task CreateAsync() => OnCreated.InvokeAsync(new NewGenre(Guid.NewGuid(), _label?.Trim() ?? ""));
 }

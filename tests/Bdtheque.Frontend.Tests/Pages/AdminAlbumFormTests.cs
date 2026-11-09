@@ -387,39 +387,48 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public async Task Genre_CreatedOnTheSpot_ClassifiesTheAlbumInIt()
+    public async Task RecordsAddedOnTheSpot_AreCreatedWithTheAlbum_WhenItIsSaved()
     {
-        var polar = Guid.NewGuid();
-        _api.Write = (_, _, _) => FakeAdminApi.Json(new GenreForm(polar, "Polar", 1), HttpStatusCode.Created);
+        // Nothing is written before the album is saved: cancelling creates none of them.
         var page = OpenAlbum();
-
         await CreateOnTheSpotAsync(page, RecordKind.Genre, " Polar ");
         Assert.Equal("Polar", page.Find("#album-genre-creation-label").GetAttribute("value"));
         page.Find(".dialog-actions .button[data-variant=primary]").Click();
+        await CreateOnTheSpotAsync(page, RecordKind.Universe, "Le port");
+        page.Find(".dialog-actions .button[data-variant=primary]").Click();
+        var tags = page.FindComponents<RecordTags>().First(t => t.Instance.Kind == RecordKind.Author);
+        await tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync("Jean Nouveau"));
+        page.Find(".dialog-actions .button[data-variant=primary]").Click();
 
-        page.WaitForAssertion(() => Assert.Empty(page.FindAll("dialog")));
-        Assert.Equal((HttpMethod.Post, "/admin/genres", "Polar"),
-            (_api.Written.Single().Method, _api.Written.Single().Path, _api.Written.Single().Body.GetProperty("label").GetString()));
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.Empty(_api.Written);
         Assert.Contains("Polar", page.FindAll(".album-tags")[0].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
-        Assert.Contains("admin.album.genre-created", _audience.Functions);
+        Assert.Contains("Le port", page.FindAll(".album-tags")[1].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
+        Assert.Equal(["admin.album.genre-created", "admin.album.universe-created", "admin.album.author-created"],
+            _audience.Functions.Where(f => f.EndsWith("-created", StringComparison.Ordinal)));
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
+        page.Find("form").Submit();
+
+        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        var added = _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords");
+        Assert.Equal(("Polar", "Le port", "Nouveau"), (added.GetProperty("genres")[0].GetProperty("label").GetString(),
+            added.GetProperty("universes")[0].GetProperty("name").GetString(), added.GetProperty("authors")[0].GetProperty("lastName").GetString()));
     }
 
     [Fact]
-    public async Task Universe_CreatedOnTheSpot_AttachesTheAlbumToIt_WithItsAncestors()
+    public async Task RecordAddedOnTheSpot_ThenRemoved_IsNotCreated()
     {
-        var harbour = Guid.NewGuid();
-        _api.Write = (_, _, _) => FakeAdminApi.Json(new UniverseForm(harbour, "Le port", null, null, 1), HttpStatusCode.Created);
-        _api.Answers[$"/admin/universes/{harbour}/hierarchy"] = new UniverseInHierarchy(
-            new UniverseListItem(harbour, "Le port", null, null), []);
         var page = OpenAlbum();
-
-        await CreateOnTheSpotAsync(page, RecordKind.Universe, "Le port");
+        await CreateOnTheSpotAsync(page, RecordKind.Genre, "Polar");
         page.Find(".dialog-actions .button[data-variant=primary]").Click();
+        page.FindAll(".album-tags")[0].QuerySelectorAll(".tag-remove").Last().Click();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
 
-        page.WaitForAssertion(() => Assert.Empty(page.FindAll("dialog")));
-        Assert.Equal("/admin/universes", _api.Written.Single().Path);
-        Assert.Contains("Le port", page.FindAll(".album-tags")[1].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
-        Assert.Contains("admin.album.universe-created", _audience.Functions);
+        page.Find("form").Submit();
+
+        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Equal(JsonValueKind.Null, _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords").ValueKind);
     }
 
     [Fact]

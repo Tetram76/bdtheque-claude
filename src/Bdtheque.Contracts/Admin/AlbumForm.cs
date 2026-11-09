@@ -41,8 +41,11 @@ public sealed record AlbumFormReferences(
 /// <param name="GenreIds">Genres of the album itself, without those of its series.</param>
 /// <param name="UniverseIds">Universes of the album itself, without those of its series.</param>
 /// <param name="Contributions">
-/// Contributions of the album. Left empty while attaching the album to a series, they are copied
-/// from the template of that series (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// Contributions of the album, as the form holds them: saving copies nothing from the series, the form having taken its
+/// authors when it was chosen (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+/// </param>
+/// <param name="NewRecords">
+/// The authors, genres and universes the form added on the spot, created with the album; none when the album is read.
 /// </param>
 public sealed record AlbumContent(
     string? Title,
@@ -60,7 +63,8 @@ public sealed record AlbumContent(
     AlbumRating? Rating,
     IReadOnlyList<Guid> GenreIds,
     IReadOnlyList<Guid> UniverseIds,
-    IReadOnlyList<ContributionContent> Contributions);
+    IReadOnlyList<ContributionContent> Contributions,
+    NewRecords? NewRecords = null);
 
 /// <param name="Version">Version of the album the form was read at.</param>
 public sealed record UpdateAlbumRequest(AlbumContent Content, uint Version);

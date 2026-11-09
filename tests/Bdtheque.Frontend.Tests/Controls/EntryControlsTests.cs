@@ -232,14 +232,10 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void AuthorCreationDialog_SplitsTheNameTyped_AndCreatesTheAuthorCorrected()
+    public void AuthorCreationDialog_SplitsTheNameTyped_AndGivesTheAuthorCorrected_WithoutCreatingIt()
     {
-        var created = Guid.NewGuid();
-        _answer = _ => new HttpResponseMessage(HttpStatusCode.Created)
-        {
-            Content = JsonContent.Create(new AuthorForm(created, "Van Hamme", "Jean", null, null, null, 1)),
-        };
-        AuthorListItem? author = null;
+        // The author is created with the record that cites it, when that record is saved (choix-implementation/socle/frontend.md).
+        NewAuthor? author = null;
         var dialog = Render<AuthorCreationDialog>(parameters => parameters
             .Add(p => p.Id, "author-creation")
             .Add(p => p.Name, " Jean  Van Hamme ")
@@ -250,32 +246,33 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         dialog.Find("#author-creation-pseudonym").Change("JVH");
         dialog.Find(".dialog-actions .button[data-variant=primary]").Click();
 
-        dialog.WaitForAssertion(() => Assert.Equal(new AuthorListItem(created, "Van Hamme", "Jean", null), author));
-        var request = Assert.Single(_sent);
-        Assert.Equal((HttpMethod.Post, "/admin/authors"), (request.Method, request.Path));
-        Assert.Equal(new CreateAuthorRequest("Van Hamme", "Jean", "JVH", null, null),
-            request.Body!.Value.Deserialize<CreateAuthorRequest>(JsonSerializerOptions.Web));
+        Assert.Equal(("Van Hamme", "Jean", "JVH"), (author!.LastName, author.FirstName, author.Pseudonym));
+        Assert.NotEqual(Guid.Empty, author.Key);
+        Assert.Empty(_sent);
     }
 
     [Fact]
-    public void AuthorCreationDialog_OneWord_IsTheLastName_AndAnErrorKeepsItOpen()
+    public void AuthorCreationDialog_OneWord_IsTheLastName()
     {
-        _answer = _ => new HttpResponseMessage(HttpStatusCode.UnprocessableEntity)
-        {
-            Content = JsonContent.Create(
-                new Dictionary<string, object> { ["type"] = Contracts.Errors.ProblemTypes.Business, ["status"] = 422, ["ruleCode"] = "Author.LastNameOrPseudonymRequired" },
-                mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
-        };
         var dialog = Render<AuthorCreationDialog>(parameters => parameters.Add(p => p.Id, "author-creation").Add(p => p.Name, "Moebius"));
 
         Assert.Null(dialog.Find("#author-creation-first-name").GetAttribute("value"));
         Assert.Equal("Moebius", dialog.Find("#author-creation-last-name").GetAttribute("value"));
-        dialog.Find("#author-creation-last-name").Change("");
+    }
+
+    [Fact]
+    public void UniverseCreationDialog_GivesTheUniverseInItsParent_WithoutCreatingIt()
+    {
+        (NewUniverse Universe, RecordOption? Parent)? created = null;
+        var dialog = Render<UniverseCreationDialog>(parameters => parameters
+            .Add(p => p.Id, "universe-creation")
+            .Add(p => p.Name, " Le port ")
+            .Add(p => p.OnCreated, value => created = value));
+
         dialog.Find(".dialog-actions .button[data-variant=primary]").Click();
 
-        var error = dialog.WaitForElement("[role=alert]");
-        Assert.Equal("business", error.GetAttribute("data-error-category"));
-        Assert.Single(dialog.FindAll("dialog"));
+        Assert.Equal(("Le port", (Guid?)null, (RecordOption?)null), (created!.Value.Universe.Name, created.Value.Universe.ParentId, created.Value.Parent));
+        Assert.Empty(_sent);
     }
 
     [Fact]

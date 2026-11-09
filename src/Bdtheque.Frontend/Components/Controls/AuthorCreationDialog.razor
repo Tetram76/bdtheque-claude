@@ -1,19 +1,14 @@
 @using Bdtheque.Contracts.Admin
-@using Bdtheque.Contracts.Catalog
-@inject ApiClient Api
 @inject IStringLocalizer<AuthorCreationDialog> L
 
 @* The creation of an author on the spot, from a record being entered that credits them (visuel/saisie-album/contenu.md, Les
    auteurs): the name typed in the choice of an author, split into first name and last name, which the user corrects or
-   turns into a pseudonym before creating. The author's rules are the domain's (at least a last name or a pseudonym): an
-   error is presented in the dialog, which stays open. Interactive. *@
+   turns into a pseudonym. The author is created only with the record that cites it, when that record is saved
+   (choix-implementation/socle/frontend.md): the domain then applies its rules (at least a last name or a pseudonym), and an
+   error is presented with the saving. Interactive. *@
 <Dialog Id="@Id" Title="@L["Title"]" Tone="DialogTone.Creation" OnClose="OnCancel">
     <ChildContent>
         <p class="author-creation-lead">@L["Lead"]</p>
-        @if (_problem is not null)
-        {
-            <ErrorMessage Problem="_problem" Label="@(_problem.Category == ProblemCategory.Business ? L["Problem.Business"].Value : null)" />
-        }
         <div class="author-creation-fields">
             <Field Id="@($"{Id}-first-name")" Label="@L["FirstName"]" Context="control">
                 <input id="@control.Id" type="text" @bind="_firstName" />
@@ -27,7 +22,7 @@
         </div>
     </ChildContent>
     <Actions>
-        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" Disabled="_creating" OnClick="CreateAsync" />
+        <Button Label="@L["Create"]" Variant="ButtonVariant.Primary" OnClick="CreateAsync" />
     </Actions>
 </Dialog>
 
@@ -35,8 +30,6 @@
     private string? _firstName;
     private string? _lastName;
     private string? _pseudonym;
-    private ApiProblem? _problem;
-    private bool _creating;
 
     /// <summary>The identifier of the dialog, unique in the page.</summary>
     [Parameter, EditorRequired]
@@ -46,9 +39,9 @@
     [Parameter, EditorRequired]
     public string Name { get; set; } = null!;
 
-    /// <summary>The author created, to credit.</summary>
+    /// <summary>The author to create with the record, to credit.</summary>
     [Parameter]
-    public EventCallback<AuthorListItem> OnCreated { get; set; }
+    public EventCallback<NewAuthor> OnCreated { get; set; }
 
     [Parameter]
     public EventCallback OnCancel { get; set; }
@@ -60,23 +53,5 @@
         (_firstName, _lastName) = words is [var first, var rest] ? (first, rest) : (null, Name.Trim());
     }
 
-    private async Task CreateAsync()
-    {
-        _creating = true;
-        _problem = null;
-        try
-        {
-            var author = await Api.PostAsync<CreateAuthorRequest, AuthorForm>(
-                "/admin/authors", new CreateAuthorRequest(_lastName, _firstName, _pseudonym, null, null));
-            await OnCreated.InvokeAsync(new AuthorListItem(author.Id, author.LastName, author.FirstName, author.Pseudonym));
-        }
-        catch (ApiProblemException exception)
-        {
-            _problem = exception.Problem;
-        }
-        finally
-        {
-            _creating = false;
-        }
-    }
+    private Task CreateAsync() => OnCreated.InvokeAsync(new NewAuthor(Guid.NewGuid(), _lastName, _firstName, _pseudonym));
 }
