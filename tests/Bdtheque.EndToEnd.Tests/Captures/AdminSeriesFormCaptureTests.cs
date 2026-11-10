@@ -13,7 +13,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// (<see cref="AdministrationApplication"/>), whose series and dates are fixed, without writing anything: a series with its
 /// publisher, collection, authors and new editions, and a new series whose saving is to correct, its new editions pre-filled and its collection unavailable
 /// until a publisher is chosen. In a window as high as the page, the bar of the form at its bottom
-/// (<see cref="ScreenCaptureTests.CaptureAtFullHeightAsync"/>).
+/// (<see cref="ScreenCaptureTests.CaptureAsync"/>).
 /// </summary>
 [Collection(AdministrationApplication.Name)]
 public sealed class AdminSeriesFormCaptureTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)
@@ -54,7 +54,7 @@ public sealed class AdminSeriesFormCaptureTests(AdministrationApplication applic
             await title.BlurAsync();
         }
 
-        CaptureStore.Verify(theme, $"admin-series-{state}.{viewport}", await ScreenCaptureTests.CaptureAtFullHeightAsync(page));
+        CaptureStore.Verify(theme, $"admin-series-{state}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }
 
     private async Task<Guid> SeriesIdAsync(string title)
