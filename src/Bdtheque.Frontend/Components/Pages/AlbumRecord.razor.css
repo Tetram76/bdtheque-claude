@@ -153,11 +153,6 @@
     overflow-wrap: anywhere;
 }
 
-.editions-none {
-    color: var(--color-text-muted);
-    font-style: italic;
-}
-
 .album-dates {
     margin: var(--space-xl) 0 0;
     font-size: var(--font-size-small);

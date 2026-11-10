@@ -98,28 +98,29 @@ else if (_album is { } album)
             }
         </Block>
 
-        <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
-            @if (_owned.Count > 0)
-            {
-                @* Every edition of the collection at once, each with its visuals and its detail: an album has one, rarely more. *@
-                <ol class="editions">
-                    @foreach (var edition in _owned)
-                    {
-                        var label = Labels.Edition(edition.Edition);
-                        <li class="edition">
-                            <h3 class="edition-label"><LabelText Text="@label" /></h3>
-                            <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
-                            <EditionFacts Edition="edition" />
-                        </li>
-                    }
-                </ol>
-            }
-            else
-            {
-                <p class="editions-none">@L["Editions.None"]</p>
-            }
-            <AlbumIntents AlbumIntent="album.PurchaseIntent" Editions="album.Editions" />
-        </Block>
+        @* Without edition in the collection, nothing says so in their place: the banner and the membership of the album already
+           do; and an album with neither edition nor intent has no block that would hold nothing (visuel/fiche-album/contenu.md). *@
+        @if (_owned.Count > 0 || IsIntended)
+        {
+            <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
+                @if (_owned.Count > 0)
+                {
+                    @* Every edition of the collection at once, each with its visuals and its detail: an album has one, rarely more. *@
+                    <ol class="editions">
+                        @foreach (var edition in _owned)
+                        {
+                            var label = Labels.Edition(edition.Edition);
+                            <li class="edition">
+                                <h3 class="edition-label"><LabelText Text="@label" /></h3>
+                                <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
+                                <EditionFacts Edition="edition" />
+                            </li>
+                        }
+                    </ol>
+                }
+                <AlbumIntents AlbumIntent="album.PurchaseIntent" Editions="album.Editions" />
+            </Block>
+        }
 
         @if (album.Album.SeriesId is { } series)
         {

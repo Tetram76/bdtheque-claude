@@ -220,9 +220,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("intent", "Intention d'achat"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
-        // It has no edition: no edition nor visual, and the generic visual as its cover.
-        Assert.Contains("Aucune édition dans la collection", BlockOf(page, "Dans quelles éditions ?").TextContent);
-        Assert.Empty(page.FindAll(".edition, .edition-visuals"));
+        // It has no edition: no edition nor visual, nor any mention in their place, and the generic visual as its cover.
+        Assert.Empty(page.FindAll(".edition, .edition-visuals, .editions-none"));
         Assert.NotNull(page.Find(".album-cover svg.cover-generic"));
     }
 
@@ -235,8 +234,9 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("intent", "Intention d'achat"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
-        // The edition targeted is an intent, never an edition of the collection.
-        Assert.Contains("Aucune édition dans la collection", BlockOf(page, "Dans quelles éditions ?").TextContent);
+        // The edition targeted is an intent, never an edition of the collection, which has none, without any mention.
+        Assert.Empty(BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition, .editions-none"));
+        Assert.Single(page.FindAll(".album-intents li"));
     }
 
     [Fact]
@@ -248,6 +248,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Hors collection", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("out", "Hors collection"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
+        // Neither edition nor intent: no block of the editions, which would hold nothing.
+        Assert.DoesNotContain(page.FindAll("section.block .block-title"), t => t.TextContent.Trim() == "Dans quelles éditions ?");
     }
 
     [Fact]
@@ -517,7 +519,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        Assert.Equal("Aucune édition dans la collection.", page.Find(".editions-none").TextContent.Trim());
+        Assert.Empty(page.FindAll(".editions-none"));
         var intent = Assert.Single(page.FindAll(".album-intents li"));
         Assert.Equal("Toute édition de l'album", intent.QuerySelector(".intent-label")!.TextContent.Trim());
         Assert.Equal("Posée le 02/02/2026", intent.QuerySelector(".intent-date")!.TextContent.Trim());
