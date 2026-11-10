@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''une série : avancement, calculs, auteurs, éditeur, valeurs des nouvelles éditions.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:43:10Z }
 ---
 
 # Contenu
@@ -21,6 +21,6 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
   - **Genres et univers** : ceux de la série, en étiquettes retirables, avec **Ajouter** ; l'aide rappelle que chaque album de la série les affiche en plus des siens ([Genres et univers d'un album](../../fonctionnel/regles-metier/genres-et-univers-d-un-album.md)).
   - **Résumé et notes** : deux zones de texte.
   - **Nouvelles éditions** : les valeurs proposées aux nouvelles éditions des albums de la série ([Initialisation d'une nouvelle édition depuis la série](../../fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)) : catégorie, état, reliure, format, orientation, sens de lecture et couleur, chacune une liste dimensionnée à son plus long choix, à la suite sur autant de lignes qu'il faut. « — » ne propose rien. La couleur, qui peut aussi ne rien proposer, est une liste à trois choix (« — », En couleur, Noir et blanc), non une case à cocher. L'aide rappelle que ces valeurs ne décrivent pas la série et n'apparaissent pas dans la consultation. En création, elles sont pré-remplies avec les valeurs proposées pour toute nouvelle édition ([Série](../../modele-metier/serie.md)), ce qu'un encadré dit.
-- **Pas de colonne latérale** : la fiche ne présente pas les albums de la série, ni pour les modifier ni pour mémoire. Un album se rattache à une série et se modifie sur sa propre fiche, et une série peut en compter beaucoup. Le formulaire garde la largeur qu'il a sur la fiche d'un album ; sous lui, en modification, les dates de création et de modification de la fiche.
+- **Pas de colonne latérale** : la fiche ne présente pas les albums de la série, ni pour les modifier ni pour mémoire. Un album se rattache à une série et se modifie sur sa propre fiche, et une série peut en compter beaucoup. Le formulaire garde la largeur qu'il a sur la fiche d'un album ; en modification, les dates de création et de modification de la fiche sont juste au-dessus de son premier bloc, comme pour un album.
 - **La barre d'enregistrement** : celle de la saisie d'un album (« Créer la série » en création).
 - **Smartphone** : les blocs s'empilent sur une colonne ; « Avancement » et « Calculs » aussi, comme l'éditeur et la collection ; les listes des nouvelles éditions passent à la ligne en gardant leur taille.

@@ -2,6 +2,7 @@
 
 ## 2026-11-10
 
+* **Visuel** : sur les fiches de saisie d'un album, d'une série, d'un auteur et d'un éditeur, les dates de création et de modification de la fiche sont juste au-dessus de son premier bloc, et non plus sous le formulaire ; maquettes alignées (décision de l'utilisateur à la validation fonctionnelle, #206).
 * **Choix** : saisie d'une série ; les auteurs par rôle, les genres et univers, l'erreur d'enregistrement et « Voir mes changements » sont des composants communs aux fiches de saisie, avec l'état de ce qu'une fiche cite ; choix d'une fiche qui dépend d'une autre (collection d'un éditeur) désactivé en tirets tant que l'autre n'est pas choisie, vidé quand elle change ; la lecture d'une série pour sa saisie nomme son éditeur et sa collection, ses genres, univers et auteurs, et porte ses dates ; auteurs, genres et univers ajoutés sur place créés avec la série ; valeurs de départ d'une nouvelle série demandées au domaine (`GET /admin/series/new`) ; données de validation : une série sans rien de proposé à ses nouvelles éditions, exclue des calculs, et une série en noir et blanc (#206).
 * **Règle** : tout problème (bug, test instable, échec du CI, retour de revue, ticket à ouvrir) se traite par l'analyse de sa cause de fond et la correction de cette cause, jamais par un correctif limité au symptôme ; un ticket porte cette analyse, jamais le seul symptôme (exigence de l'utilisateur, #339).
 

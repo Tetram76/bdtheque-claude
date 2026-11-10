@@ -218,6 +218,16 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Dates_JustAboveTheFirstBlock()
+    {
+        // Decision of the user at the functional validation (visuel/saisie-serie/contenu.md).
+        var blocks = OpenSeries().Find(".entry-form-blocks").Children;
+
+        Assert.Equal("entry-form-dates", blocks[0].ClassName);
+        Assert.Contains("block", blocks[1].ClassList);
+    }
+
+    [Fact]
     public void Save_SendsTheWholeFormAtItsVersion_AndRecordsTheSaving()
     {
         var page = OpenSeries();

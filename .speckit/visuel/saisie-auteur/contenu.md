@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''un auteur : identité, nom affiché et clé calculés, biographie.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:43:10Z }
 ---
 
 # Contenu
@@ -17,5 +17,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
     - sous eux, dans un cadre en tirets, ce qui en découle, calculé et non saisi : le nom **affiché**, la clé où l'auteur est **classé** et son **initiale** ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)) ; l'aide rappelle que le pseudonyme tient lieu de nom, et que sans lui l'auteur est classé à son nom, puis son prénom. Contrairement au titre d'une série, cette clé n'a pas de mode manuel : le modèle ne la stocke pas ;
     - la **nationalité**, un champ dimensionné à son contenu.
   - **Biographie** : une zone de texte.
-- **Pas de colonne latérale** : la fiche ne présente pas la bibliographie de l'auteur, qui peut compter beaucoup de séries et d'albums ; un auteur se crédite sur la fiche de l'album ou de la série. Le formulaire garde la largeur de celui de la saisie d'une série ; sous lui, en modification, les dates de création et de modification de la fiche.
+- **Pas de colonne latérale** : la fiche ne présente pas la bibliographie de l'auteur, qui peut compter beaucoup de séries et d'albums ; un auteur se crédite sur la fiche de l'album ou de la série. Le formulaire garde la largeur de celui de la saisie d'une série ; en modification, les dates de création et de modification de la fiche sont juste au-dessus de son premier bloc, comme pour un album.
 - **La barre d'enregistrement** : celle de la saisie d'un album (« Créer l'auteur » en création).

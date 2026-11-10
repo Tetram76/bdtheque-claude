@@ -124,6 +124,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
       <div class="sa-layout">
         <form style="min-width: 0; display: flex; flex-direction: column; gap: 22px" onSubmit="{{noSubmit}}">
 
+          <sc-if value="{{x.existing}}"><p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p></sc-if>
           <section aria-labelledby="s-ident" style="{{block}}">
             <span style="{{kickStyle}}">{{k.ident}}</span>
             <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>L'éditeur</h2>
@@ -175,7 +176,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <sc-if value="{{noImprint}}"><span style="font-size: 13px; color: {{t.muted}}">Aucune collection.</span></sc-if>
             <span><button type="button" style="{{addBtn}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter une collection</button></span>
           </section>
-          <sc-if value="{{x.existing}}"><p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p></sc-if>
         </form>
 
       </div>
