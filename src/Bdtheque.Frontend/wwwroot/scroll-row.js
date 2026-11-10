@@ -40,38 +40,39 @@ function center(row) {
 
 customElements.define("app-scroll-row", class extends HTMLElement {
     connectedCallback() {
-        // Once the renderer that inserted the element has also inserted its content.
+        // Wired at once, its content aside: an enhanced navigation that inserts the row centers it on its « enhancedload »,
+        // before the microtask below has run, and the row must then already observe its sizes.
+        if (!this.wired) {
+            this.wired = true;
+            // On the row rather than on its items, which an enhanced navigation may replace: a scroll, which does not
+            // bubble, reaches it while capturing.
+            this.addEventListener("scroll", () => update(this), { capture: true, passive: true });
+            this.addEventListener("wheel", event => {
+                const items = itemsOf(this);
+                const max = items.scrollWidth - items.clientWidth;
+                if (max <= 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY))
+                    return;
+                const next = Math.min(max, Math.max(0, items.scrollLeft + event.deltaY));
+                if (next === items.scrollLeft)
+                    return;
+                // The page does not scroll while the row does.
+                event.preventDefault();
+                items.scrollLeft = next;
+            }, { passive: false });
+            this.addEventListener("click", event => {
+                const chevron = event.target.closest(".scroll-row-chevron");
+                if (!chevron)
+                    return;
+                const items = itemsOf(this);
+                const direction = chevron.dataset.direction === "start" ? -1 : 1;
+                items.scrollBy({ left: direction * items.clientWidth, behavior: reducedMotion.matches ? "instant" : "smooth" });
+            });
+            this.sizes = new ResizeObserver(() => update(this));
+        }
+        // Centered once the renderer that inserted the element has also inserted its content.
         queueMicrotask(() => {
-            if (!this.isConnected)
-                return;
-            if (!this.wired) {
-                this.wired = true;
-                // On the row rather than on its items, which an enhanced navigation may replace: a scroll, which does not
-                // bubble, reaches it while capturing.
-                this.addEventListener("scroll", () => update(this), { capture: true, passive: true });
-                this.addEventListener("wheel", event => {
-                    const items = itemsOf(this);
-                    const max = items.scrollWidth - items.clientWidth;
-                    if (max <= 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY))
-                        return;
-                    const next = Math.min(max, Math.max(0, items.scrollLeft + event.deltaY));
-                    if (next === items.scrollLeft)
-                        return;
-                    // The page does not scroll while the row does.
-                    event.preventDefault();
-                    items.scrollLeft = next;
-                }, { passive: false });
-                this.addEventListener("click", event => {
-                    const chevron = event.target.closest(".scroll-row-chevron");
-                    if (!chevron)
-                        return;
-                    const items = itemsOf(this);
-                    const direction = chevron.dataset.direction === "start" ? -1 : 1;
-                    items.scrollBy({ left: direction * items.clientWidth, behavior: reducedMotion.matches ? "instant" : "smooth" });
-                });
-                this.sizes = new ResizeObserver(() => update(this));
-            }
-            center(this);
+            if (this.isConnected)
+                center(this);
         });
     }
 });

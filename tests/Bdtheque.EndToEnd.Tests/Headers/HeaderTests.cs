@@ -1,6 +1,7 @@
 extern alias frontend;
 
 using System.Text.RegularExpressions;
+using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
 using frontend::Bdtheque.Frontend.Theming;
 
@@ -112,6 +113,27 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
                 return Math.abs((current.left + current.width / 2) - (box.left + box.width / 2)) <= 1;
             }
             """, null, new() { Timeout = 5000 });
+    }
+
+    [Fact]
+    public async Task InitialNavigation_ReachedByAnEnhancedNavigationFromAPageWithoutRow_WorksWithoutScriptError()
+    {
+        // The row inserted by the enhanced navigation is centered on the « enhancedload » of Blazor, which comes before the
+        // row has run its own code: it had no observer of its sizes yet, and its script failed (#341, from the form of a
+        // series back to its list).
+        var page = await NewPageAsync(Smartphone);
+        var errors = new List<string>();
+        page.PageError += (_, error) => errors.Add(error);
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminNewSeries);
+        await PageReadiness.WaitAsync(page);
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Annuler" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
+        await PageReadiness.WaitAsync(page);
+        await Assertions.Expect(page.Locator("app-scroll-row:has(.initial-navigation) .scroll-row-chevron[data-direction='end']")).ToBeVisibleAsync();
+        Assert.Empty(errors);
     }
 
     [Fact]
