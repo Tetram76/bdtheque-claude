@@ -104,7 +104,7 @@ public sealed class AdminHomeTests(AdministrationApplication application) : Brow
         var page = await NewPageAsync();
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
-        var albums = page.Locator(".admin-record", new() { Has = page.GetByRole(AriaRole.Link, new() { Name = "Albums", Exact = true }) });
+        var albums = page.Locator(".admin-record", new() { Has = page.Locator(".admin-record-name").GetByText("Albums", new() { Exact = true }) });
         await Assertions.Expect(albums.Locator(".admin-record-count")).ToHaveTextAsync("4");
         await Assertions.Expect(albums.Locator(".admin-record-detail")).ToHaveTextAsync("dont 2 hors de la collection");
         var check = page.GetByRole(AriaRole.Link, new() { Name = "ISBN au chiffre de contrôle incohérent" });

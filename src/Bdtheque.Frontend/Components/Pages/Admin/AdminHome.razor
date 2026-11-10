@@ -54,11 +54,11 @@
                 {
                     <li class="admin-record">
                         <span class="admin-record-chip"><Icon Name="record.Icon" /></span>
-                        <a class="admin-record-name" href="@record.List">@L[$"Records.{record.Name}"]</a>
+                        <span class="admin-record-name">@L[$"Records.{record.Name}"]</span>
                         <strong class="admin-record-count">@Format.Number(record.Count(_counts))</strong>
                         <span class="admin-record-detail">@Detail(record)</span>
                         <span class="admin-record-links">
-                            <a href="@record.List">@L["Records.List"]</a>
+                            <a href="@record.List">@L[$"Records.{record.Name}.List"]</a>
                             @if (record.New is { } create)
                             {
                                 <a href="@create">+ @L[$"Records.New.{record.Name}"]</a>
@@ -69,6 +69,18 @@
             </ul>
         </Block>
 
+        @* Apart from the records: a purchase intent has no record of its own, it is set from its album, and its list serves to
+           confirm the purchases (visuel/listes/saisie-selon-l-entite.md). The block names its single card, which has no title. *@
+        <Block Title="@L["Intents.Title"]" Kicker="@L["Intents.Kicker"]">
+            <ul class="admin-records admin-intents">
+                <li class="admin-record">
+                    <span class="admin-record-chip"><Icon Name="IconName.PurchaseIntent" /></span>
+                    <strong class="admin-record-count">@Format.Number(_counts.PurchaseIntents)</strong>
+                    <span class="admin-record-detail">@L["Intents.Detail"]</span>
+                    <span class="admin-record-links"><a href="@AppPaths.AdminPurchaseIntents">@L["Intents.Confirm"]</a></span>
+                </li>
+            </ul>
+        </Block>
         <div class="admin-home-pair">
             <Block Title="@L["Checks.Title"]" Kicker="@L["Checks.Kicker"]">
                 <ul class="admin-rows">
@@ -140,13 +152,12 @@
         ("Publisher", AppPaths.AdminNewPublisher),
     ];
 
-    // A card per type of record; the editions and the purchase intents are entered from their album, never created here.
+    // A card per type of record; the editions are entered from their album, never created here. The purchase intents, which
     private static readonly IReadOnlyList<RecordCard> Records =
     [
         new("Albums", IconName.Album, AppPaths.AdminAlbums, AppPaths.AdminNewAlbum, c => c.Albums, c => c.AlbumsOutsideCollection),
         new("Editions", IconName.Edition, AppPaths.AdminEditions, null, c => c.Editions, null),
         new("Series", IconName.Series, AppPaths.AdminSeries, AppPaths.AdminNewSeries, c => c.Series, c => c.SeriesWithoutStatus),
-        new("PurchaseIntents", IconName.PurchaseIntent, AppPaths.AdminPurchaseIntents, null, c => c.PurchaseIntents, null),
         new("Authors", IconName.Author, AppPaths.AdminAuthors, AppPaths.AdminNewAuthor, c => c.Authors, null),
         new("Publishers", IconName.Publisher, AppPaths.AdminPublishers, AppPaths.AdminNewPublisher, c => c.Publishers, c => c.PublisherCollections),
         new("Genres", IconName.Genre, AppPaths.AdminGenres, AppPaths.AdminNewGenre, c => c.Genres, null),

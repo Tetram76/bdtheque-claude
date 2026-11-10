@@ -49,7 +49,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Records_ACardPerType_WithItsNumberItsDetailAndItsLinks()
+    public void Records_ACardPerType_TitledByItsName_WithItsNumberItsDetailAndItsLinks()
     {
         var page = Render<AdminHome>();
 
@@ -59,36 +59,52 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             Text(card.QuerySelector(".admin-record-detail")!),
             string.Join(" | ", card.QuerySelectorAll(".admin-record-links a").Select(link => link.TextContent.Trim()))));
 
+        // The purchase intents stand apart (#358); the name of a card is a plain title, a single link leads to its list (#320).
         Assert.Equal(
             [
-                ("Albums", "2 847", "dont 214 hors de la collection", "Gérer la liste | + Nouvel album"),
-                ("Éditions", "2 913", "saisies depuis leur album, avec leurs visuels", "Gérer la liste"),
-                ("Séries", "412", "dont 28 sans statut", "Gérer la liste | + Nouvelle série"),
-                ("Intentions d'achat", "18", "posées depuis leur album", "Gérer la liste"),
-                ("Auteurs", "1 106", "scénaristes, dessinateurs, coloristes…", "Gérer la liste | + Nouvel auteur"),
-                ("Éditeurs", "96", "collections éditeur : 214", "Gérer la liste | + Nouvel éditeur"),
-                ("Genres", "24", "référentiel", "Gérer la liste | + Nouveau genre"),
-                ("Univers", "37", "dont 9 sous-univers", "Gérer la liste | + Nouvel univers"),
+                ("Albums", "2 847", "dont 214 hors de la collection", "Voir les albums | + Nouvel album"),
+                ("Éditions", "2 913", "saisies depuis leur album, avec leurs visuels", "Voir les éditions"),
+                ("Séries", "412", "dont 28 sans statut", "Voir les séries | + Nouvelle série"),
+                ("Auteurs", "1 106", "scénaristes, dessinateurs, coloristes…", "Voir les auteurs | + Nouvel auteur"),
+                ("Éditeurs", "96", "collections éditeur : 214", "Voir les éditeurs | + Nouvel éditeur"),
+                ("Genres", "24", "référentiel", "Voir les genres | + Nouveau genre"),
+                ("Univers", "37", "dont 9 sous-univers", "Voir les univers | + Nouvel univers"),
             ],
             cards);
-        // The lists of the albums (#200), of the editions (#333), of the series (#301), of the purchase intents (#334), of the authors
-        // (#302), of the publishers (#303), of the genres and of the universes (#203), and the entry forms of an album (#205), of
-        // a series (#206) and of an author (#207), are implemented; the other pages are still to come.
+        Assert.Equal("Les éditions et leurs visuels se saisissent depuis leur album.", BlockOf(page, "Les fiches").QuerySelector(".admin-home-note")!.TextContent.Trim());
+        Assert.Empty(BlockOf(page, "Les fiches").QuerySelectorAll(".admin-record-name a, a.admin-record-name"));
+        // The lists of the albums (#200), of the editions (#333), of the series (#301), of the authors (#302), of the publishers
+        // (#303), of the genres and of the universes (#203), and the entry forms of an album (#205), of a series (#206) and of an
+        // author (#207), are implemented; the other pages are still to come.
         var links = BlockOf(page, "Les fiches").QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))).ToList();
         IEnumerable<(string, string?)> implemented =
         [
-            ("Albums", AppPaths.AdminAlbums), ("Gérer la liste", AppPaths.AdminAlbums), ("+ Nouvel album", AppPaths.AdminNewAlbum),
-            ("Éditions", AppPaths.AdminEditions), ("Gérer la liste", AppPaths.AdminEditions),
-            ("Séries", AppPaths.AdminSeries), ("Gérer la liste", AppPaths.AdminSeries), ("+ Nouvelle série", AppPaths.AdminNewSeries),
-            ("Intentions d'achat", AppPaths.AdminPurchaseIntents), ("Gérer la liste", AppPaths.AdminPurchaseIntents),
-            ("Auteurs", AppPaths.AdminAuthors), ("Gérer la liste", AppPaths.AdminAuthors), ("+ Nouvel auteur", AppPaths.AdminNewAuthor),
-            ("Éditeurs", AppPaths.AdminPublishers), ("Gérer la liste", AppPaths.AdminPublishers),
-            ("Genres", AppPaths.AdminGenres), ("Gérer la liste", AppPaths.AdminGenres), ("+ Nouveau genre", AppPaths.AdminNewGenre),
-            ("Univers", AppPaths.AdminUniverses), ("Gérer la liste", AppPaths.AdminUniverses), ("+ Nouvel univers", AppPaths.AdminNewUniverse),
+            ("Voir les albums", AppPaths.AdminAlbums), ("+ Nouvel album", AppPaths.AdminNewAlbum),
+            ("Voir les éditions", AppPaths.AdminEditions),
+            ("Voir les séries", AppPaths.AdminSeries), ("+ Nouvelle série", AppPaths.AdminNewSeries),
+            ("Voir les auteurs", AppPaths.AdminAuthors), ("+ Nouvel auteur", AppPaths.AdminNewAuthor),
+            ("Voir les éditeurs", AppPaths.AdminPublishers),
+            ("Voir les genres", AppPaths.AdminGenres), ("+ Nouveau genre", AppPaths.AdminNewGenre),
+            ("Voir les univers", AppPaths.AdminUniverses), ("+ Nouvel univers", AppPaths.AdminNewUniverse),
         ];
         Assert.Equal(implemented, links.Where(link => link.Item2 != AppPaths.NotYetImplemented));
     }
 
+    [Fact]
+    public void PurchaseIntents_ABlockOfTheirOwn_RightAfterTheRecords_ToConfirmThePurchases()
+    {
+        var page = Render<AdminHome>();
+
+        var blocks = page.FindAll("section.block").Select(block => block.QuerySelector(".block-title")!.TextContent.Trim()).ToList();
+        Assert.Equal(blocks.IndexOf("Les fiches") + 1, blocks.IndexOf("Intentions d'achat"));
+        var intents = BlockOf(page, "Intentions d'achat");
+        Assert.Equal("Achats", intents.QuerySelector(".block-kicker")!.TextContent.Trim());
+        // A single card, without a title of its own: the block already names it; no creation, an intent is set from its album.
+        var card = Assert.Single(intents.QuerySelectorAll("li"));
+        Assert.Null(card.QuerySelector(".admin-record-name"));
+        Assert.Equal(("18", "achats à confirmer, posés depuis leur album"), (Text(card.QuerySelector(".admin-record-count")!), Text(card.QuerySelector(".admin-record-detail")!)));
+        Assert.Equal([("Confirmer les achats", AppPaths.AdminPurchaseIntents)], card.QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))));
+    }
     [Theory]
     [InlineData(7, true)]
     [InlineData(0, false)]
