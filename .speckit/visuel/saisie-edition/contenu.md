@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''une édition : pré-remplissage, blocs, exemplaire et valeur, visuels, intention.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:49:00Z }
 ---
 
 # Contenu
@@ -13,7 +13,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 - **Erreur d'enregistrement**, en tête de page, présentée comme sur la fiche de saisie d'un album ; l'erreur métier pointe en outre le champ en cause (ex. un prix sans date de référence).
 - **Pré-remplissage** : en création, un encadré indique que la fiche est pré-remplie d'après la série de l'album, et quels champs, ces valeurs n'étant que des propositions ([Initialisation d'une nouvelle édition depuis la série](../../fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)).
 - **Le formulaire**, en blocs :
-  - **L'édition** : l'**éditeur**, obligatoire, et la **collection**, parmi celles de l'éditeur, chacun choisi en tapant son nom ; puis l'**année d'édition**, l'**ISBN** et la **catégorie**. Le chiffre de contrôle de l'ISBN est vérifié pendant la saisie : correct, une coche ; incohérent, un cadre et un message d'avertissement, qui rappellent que l'ISBN peut être enregistré tel quel ([Validation de l'ISBN](../../fonctionnel/regles-metier/validation-de-l-isbn.md)).
+  - **L'édition** : l'**éditeur**, obligatoire, choisi en tapant son nom, et la **collection**, choisie dans la liste de celles de l'éditeur, comme pour une série ([Contenu](../saisie-serie/contenu.md)) ; puis l'**année d'édition**, l'**ISBN** et la **catégorie**. Le chiffre de contrôle de l'ISBN est vérifié pendant la saisie : correct, une coche ; incohérent, un cadre et un message d'avertissement, qui rappellent que l'ISBN peut être enregistré tel quel ([Validation de l'ISBN](../../fonctionnel/regles-metier/validation-de-l-isbn.md)).
   - **Fabrication** : format, reliure, orientation et sens de lecture, en listes courtes où « — » laisse la donnée vide, puis le nombre de **pages** et la case **En couleur**.
   - **L'exemplaire**, pour une édition possédée : le **mode d'acquisition**, obligatoire ; la **date**, dont le libellé suit le mode (« Date d'achat », « Date d'acquisition », [Libellés contextuels sur l'édition](../../fonctionnel/presentation/libelles-contextuels-sur-l-edition.md)) ; l'**état** ; les cases **D'occasion** et **Dédicacée** ; la **numérotation personnelle** ; les **notes personnelles**.
   - **Valeur**, pour une édition possédée : le **montant d'acquisition**, dont le libellé suit le mode (« Prix d'achat », « Valeur d'acquisition »), et la **valeur initiale**, chacun en montant et devise côte à côte (devise d'origine, ancien franc compris), avec ce qui le date ; puis la case **Gratuite**, qui vide et désactive les deux montants, et que le mode « Achat » désactive (une édition achetée n'est jamais gratuite).

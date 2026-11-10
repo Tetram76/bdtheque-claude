@@ -222,10 +222,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               </div>
               <div style="min-width: 0; display: flex; flex-direction: column; gap: 4px">
                 <label for="f-imprint" style="{{lbl}}">Collection éditeur</label>
-                <div style="position: relative">
-                  <input id="f-imprint" type="text" value="{{x.imprint}}" placeholder="{{imprintPh}}" disabled="{{noPublisher}}" autocomplete="off" style="{{inp}} padding-right: 44px; {{imprintStyle}}">
-                  <span aria-hidden="true" style="position: absolute; right: 8px; top: 7px; {{iconBtn}} color: {{t.muted}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="{{icons.search}}"></path></svg></span>
-                </div>
+                <span style="position: relative; display: block"><select id="f-imprint" disabled="{{noPublisher}}" style="{{sel}} width: 100%; {{imprintStyle}}"><sc-for list="{{imprints}}" as="o"><option selected="{{o.selected}}">{{o.label}}</option></sc-for></select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 11px; top: 13px; pointer-events: none"><path d="M6 9l6 6 6-6"></path></svg></span>
               </div>
             </div>
             <span style="{{help}}">Ils décrivent la série et pré-remplissent les nouvelles éditions de ses albums. La collection est l'une de celles de l'éditeur : changer d'éditeur la retire.</span>
@@ -594,9 +591,11 @@ class View extends Mockup {
         { label: 'Exclure des estimations de sortie', checked: noRelease, toggle: () => this.setState({ noRelease: !noRelease }) }
       ],
       roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people })),
-      // The imprint is one of the publisher's: it waits for the publisher.
+      // The imprint is one of the publisher's, chosen in the list of them all: it waits for the publisher.
       noPublisher: !x.publisher,
-      imprintPh: x.publisher ? 'Aucune collection' : 'Choisissez d\'abord l\'éditeur',
+      imprints: x.publisher
+        ? ['— Aucune collection', 'Grand angle', 'Ligne noire', 'Long courrier', 'Poisson Pilote'].map((label, i) => ({ label, selected: x.imprint ? label === x.imprint : i === 0 }))
+        : [{ label: 'Choisissez d\'abord l\'éditeur', selected: true }],
       imprintStyle: x.publisher ? '' : 'border-style: dashed; background: transparent; cursor: not-allowed;',
       tagGroups: [
         { label: 'Genres', own: x.genres },

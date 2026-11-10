@@ -147,10 +147,10 @@
   <data name="Collection" xml:space="preserve">
     <value>Collection éditeur</value>
   </data>
-  <data name="Collection.Placeholder" xml:space="preserve">
-    <value>Aucune collection</value>
+  <data name="Collection.None" xml:space="preserve">
+    <value>— Aucune collection</value>
   </data>
-  <data name="Collection.Placeholder.NoPublisher" xml:space="preserve">
+  <data name="Collection.NoPublisher" xml:space="preserve">
     <value>Choisissez d&apos;abord l&apos;éditeur</value>
   </data>
   <data name="Classification.Help" xml:space="preserve">
@@ -248,5 +248,8 @@
   </data>
   <data name="Changes.Unchecked" xml:space="preserve">
     <value>Décochée</value>
+  </data>
+  <data name="Collection.Unread" xml:space="preserve">
+    <value>Les collections de l&apos;éditeur n&apos;ont pas pu être lues : choisissez-le de nouveau.</value>
   </data>
 </root>

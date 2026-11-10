@@ -35,7 +35,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     }
 
     [Fact]
-    public async Task Create_WithItsPublisherAndCollectionChosenByTypingTheirName_LeadsToItsForm()
+    public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsToItsForm()
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur{_marker}", null));
         var collection = await PostAsync<PublisherCollectionForm>(
@@ -50,10 +50,8 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
         var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
-        // Available once the circuit has rendered the publisher chosen: typing never reaches a field still disabled.
         await Assertions.Expect(collectionField).ToBeEnabledAsync();
-        await collectionField.PressSequentiallyAsync($"Collection{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Collection{_marker}" }).ClickAsync();
+        await collectionField.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
         await page.GetByLabel("Couleur", new() { Exact = true }).SelectOptionAsync("Noir et blanc");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
 
@@ -69,7 +67,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     public async Task Collection_UnavailableWithoutPublisher_RemovedWhenThePublisherChanges()
     {
         var first = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Premier{_marker}", null));
-        await PostAsync<PublisherCollectionForm>(
+        var created = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{first.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", first.Version));
         await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Second{_marker}", null));
         var page = await OpenAsync(AppPaths.AdminNewSeries);
@@ -80,11 +78,9 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
 
         await publisher.PressSequentiallyAsync($"Premier{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Premier{_marker}" }).ClickAsync();
-        // Available once the circuit has rendered the publisher chosen: typing never reaches a field still disabled.
         await Assertions.Expect(collection).ToBeEnabledAsync();
-        await collection.PressSequentiallyAsync($"Collection{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Collection{_marker}" }).ClickAsync();
-        await Assertions.Expect(collection).ToHaveValueAsync($"Collection{_marker}");
+        await collection.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
+        await Assertions.Expect(collection).ToHaveValueAsync(created.Id.ToString());
         await page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « Premier{_marker} »" }).ClickAsync();
         await Assertions.Expect(publisher).ToHaveValueAsync("");
         await publisher.PressSequentiallyAsync($"Second{_marker}");

@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:16:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:52:24Z }
 ---
 
 # Frontend
@@ -56,7 +56,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:16:43Z }
   - **Alternative écartée (formulaire statique, comme les listes)** : chaque frappe du titre devrait recharger la page pour en recalculer le libellé et la clé.
 - **Aucune règle de saisie dans le frontend** ([Erreurs métier, fonctionnelles et techniques](../ecritures/erreurs-metier-fonctionnelles-et-techniques.md)) : la clé de tri du mode Auto est demandée à l'API à chaque changement du titre, numérotée comme les suggestions du choix d'une fiche, et le formulaire envoie ce qui est saisi, l'enregistrement rapportant ce qui est à corriger. Une erreur métier désigne son champ par son code de règle ; les auteurs repris d'une série choisie sont demandés à l'API, qui les calcule par le domaine.
   - **Alternative écartée (clé calculée par le frontend)** : la règle de calcul serait écrite deux fois, et la clé affichée pourrait différer de celle enregistrée.
-- **Choix d'une fiche qui dépend d'une autre** (la collection d'une série, l'une de celles de son éditeur, [Contenu](../../visuel/saisie-serie/contenu.md)) : le champ est désactivé tant que l'autre n'est pas choisie, ses propositions restreintes à lui, et changer l'autre le vide. Désactivé par son propre attribut, il est en tirets, son texte indicatif lisible ; un formulaire désactivé pendant son enregistrement garde l'apparence d'un contrôle désactivé.
+- **Collection d'un éditeur choisie dans une liste** ([Contenu](../../visuel/saisie-serie/contenu.md)) : une liste du navigateur de toutes les collections de l'éditeur choisi, lues avec la fiche, puis à chaque choix d'un autre éditeur, numéroté comme le choix d'une fiche, pour que seules les collections du dernier soient présentées ; changer d'éditeur retire la collection. Désactivée par son propre attribut tant qu'aucun éditeur n'est choisi, elle est en tirets, son texte lisible ; un formulaire désactivé pendant son enregistrement garde l'apparence d'un contrôle désactivé. Des collections qui ne peuvent être lues sont signalées par le champ, qui ne les présente pas comme absentes.
+  - **Alternative écartée (choix en tapant son nom, comme l'éditeur)** : le nom d'une collection, choisi et parfois changé par son éditeur, se retient mal, et une recherche sans résultat laisserait croire qu'elle n'existe pas (décision de l'utilisateur).
 - **Fiche créée : la page de sa modification**, chargée de nouveau par la navigation, la fiche y étant lue telle qu'enregistrée. Une fiche modifiée reste affichée, à jour.
 - **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi.
 - **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme.

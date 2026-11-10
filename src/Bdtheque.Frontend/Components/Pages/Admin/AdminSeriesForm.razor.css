@@ -52,3 +52,11 @@
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
 }
+
+/* Unavailable until a publisher is chosen (visuel/saisie-serie/contenu.md): in dashes, on the surface around it, its text still
+   read. Only the list disabled by its own attribute: the form disabled while it is saved keeps the look of a disabled control. */
+.series-collection[disabled] {
+    border-style: dashed;
+    background-color: transparent;
+    opacity: 1;
+}

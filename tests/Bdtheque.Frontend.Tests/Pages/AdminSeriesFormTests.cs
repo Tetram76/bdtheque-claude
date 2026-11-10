@@ -28,6 +28,9 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     private static readonly Guid Polar = Guid.Parse("01900000-0000-7000-8000-0000000000c1");
     private static readonly Guid Dargaud = Guid.Parse("01900000-0000-7000-8000-0000000000e1");
     private static readonly Guid Ligne = Guid.Parse("01900000-0000-7000-8000-0000000000e2");
+    private static readonly Guid Angle = Guid.Parse("01900000-0000-7000-8000-0000000000e3");
+    private static readonly Guid Casterman = Guid.Parse("01900000-0000-7000-8000-0000000000e4");
+    private static readonly Guid Ecritures = Guid.Parse("01900000-0000-7000-8000-0000000000e5");
 
     private static readonly SeriesForm Blacksad = new(
         SeriesId, "Blacksad",
@@ -75,6 +78,11 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         _api.Answers[$"/admin/series/{SeriesId}"] = Blacksad;
         _api.Answers["/admin/series/new"] = Proposed;
         _api.Answers["/admin/sort-keys/title"] = new TitleSortKey("Blacksad");
+        _api.Answers[$"/admin/publishers/{Dargaud}/collections"] = new List<PublisherCollectionForm>
+        {
+            new(Angle, Dargaud, "Grand angle", 3), new(Ligne, Dargaud, "Ligne noire", 3),
+        };
+        _api.Answers[$"/admin/publishers/{Casterman}/collections"] = new List<PublisherCollectionForm> { new(Ecritures, Casterman, "Écritures", 1) };
     }
 
     void IDisposable.Dispose()
@@ -119,7 +127,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("8", page.Find("#series-volumes").GetAttribute("value"));
         Assert.Equal([false, false, true], page.FindAll("input[type=checkbox]").Select(box => box.HasAttribute("checked")));
         Assert.Equal("Dargaud", page.Find("#series-publisher").GetAttribute("value"));
-        Assert.Equal("Ligne noire", page.Find("#series-collection").GetAttribute("value"));
+        Assert.Equal(Ligne.ToString(), page.Find("#series-collection").GetAttribute("value"));
         Assert.Equal("Juan Díaz Canales", page.Find(".role-credits-line .tag").TextContent.Trim());
         Assert.Equal(["Polar"], page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag").Select(tag => tag.TextContent.Trim()));
         Assert.Equal("John Blacksad, détective privé.", page.Find("#series-summary").GetAttribute("value") ?? page.Find("#series-summary").TextContent);
@@ -150,29 +158,47 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Collection_WithoutPublisher_IsDisabled_AndTheChangeOfPublisherRemovesIt()
+    public void Collection_IsChosenInTheListOfThoseOfThePublisher()
+    {
+        // visuel/saisie-serie/contenu.md: the name of a collection, chosen and sometimes changed by its publisher, is ill
+        // remembered: the list shows them all.
+        var page = OpenSeries();
+
+        Assert.Equal(["— Aucune collection", "Grand angle", "Ligne noire"],
+            page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
+        page.Find("#series-collection").Change(Angle.ToString());
+        Assert.Equal(Angle.ToString(), page.Find("#series-collection").GetAttribute("value"));
+        page.Find("#series-collection").Change("");
+
+        Assert.Equal("", page.Find("#series-collection").GetAttribute("value"));
+    }
+
+    [Fact]
+    public void Collection_WithoutPublisher_IsUnavailable_AndTheChangeOfPublisherRemovesIt_AndListsItsOwn()
     {
         var page = OpenSeries();
-        Assert.False(page.Find("#series-collection").HasAttribute("disabled"));
 
-        ChoosePublisher(page, new RecordOption(Guid.NewGuid(), "Casterman", null));
+        ChoosePublisher(page, new RecordOption(Casterman, "Casterman", null));
 
         Assert.Equal("", page.Find("#series-collection").GetAttribute("value"));
         Assert.False(page.Find("#series-collection").HasAttribute("disabled"));
+        Assert.Equal(["— Aucune collection", "Écritures"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
 
         ChoosePublisher(page, null);
 
         Assert.True(page.Find("#series-collection").HasAttribute("disabled"));
-        Assert.Equal("Choisissez d'abord l'éditeur", page.Find("#series-collection").GetAttribute("placeholder"));
+        Assert.Equal(["Choisissez d'abord l'éditeur"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
     }
 
     [Fact]
-    public void Collection_IsChosenAmongThoseOfThePublisher()
+    public void Collections_ThatCannotBeRead_SaySo()
     {
+        _api.Failures[$"/admin/publishers/{Casterman}/collections"] = HttpStatusCode.InternalServerError;
         var page = OpenSeries();
 
-        var collection = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.PublisherCollection);
-        Assert.Equal(Dargaud, collection.Instance.Within);
+        ChoosePublisher(page, new RecordOption(Casterman, "Casterman", null));
+
+        Assert.Contains("n'ont pas pu être lues", page.Find("#series-collection-help").TextContent);
     }
 
     [Fact]

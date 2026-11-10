@@ -93,16 +93,22 @@ else
             <div class="series-fields">
                 <div class="series-publisher">
                     <Field Id="series-publisher" Label="@L["Publisher"]" Context="control">
-                        <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="Entry.ChoosePublisher"
+                        <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="ChoosePublisherAsync"
                                       Placeholder="@L["Publisher.Placeholder"]" aria-describedby="series-publisher-help" />
                     </Field>
-                    @* One of the collections of the publisher: unavailable until one is chosen, and removed when it changes. *@
-                    <Field Id="series-collection" Label="@L["Collection"]" Error="@FieldError("collection")" Context="control">
-                        <RecordPicker Id="@control.Id" Kind="RecordKind.PublisherCollection" Value="Entry.PublisherCollection"
-                                      ValueChanged="collection => Entry.PublisherCollection = collection" Within="Entry.Publisher?.Id"
-                                      Placeholder="@(Entry.Publisher is null ? L["Collection.Placeholder.NoPublisher"] : L["Collection.Placeholder"])"
-                                      disabled="@(Entry.Publisher is null)" aria-describedby="@(control.DescribedBy ?? "series-publisher-help")"
-                                      aria-invalid="@control.Invalid" />
+                    @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and removed
+                       when it changes. *@
+                    <Field Id="series-collection" Label="@L["Collection"]" Error="@FieldError("collection")"
+                           Help="@(_collectionsUnread ? L["Collection.Unread"].Value : null)" Context="control">
+                        <select id="@control.Id" class="series-collection" disabled="@(Entry.Publisher is null)"
+                                aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
+                                aria-invalid="@control.Invalid" value="@(Entry.PublisherCollection?.Id.ToString() ?? "")" @onchange="ChooseCollection">
+                            <option value="">@(Entry.Publisher is null ? L["Collection.NoPublisher"] : L["Collection.None"])</option>
+                            @foreach (var collection in PublisherCollections ?? [])
+                            {
+                                <option value="@collection.Id">@collection.Label</option>
+                            }
+                        </select>
                     </Field>
                 </div>
                 <p id="series-publisher-help" class="series-help">@L["Publisher.Help"]</p>
@@ -173,6 +179,8 @@ else
     private bool _saving;
     private string? _savedFingerprint;
     private bool _changesShown;
+    private int _publisherChoice;
+    private bool _collectionsUnread;
 
     /// <summary>The series to modify; none for a new series.</summary>
     [Parameter]
@@ -185,6 +193,10 @@ else
     /// <summary>The series as it was read or last saved: what the user changed since.</summary>
     [PersistentState]
     public SeriesEntry? ReadEntry { get; set; }
+
+    /// <summary>The collections of the publisher chosen, by name, which its collection is chosen among; none without publisher.</summary>
+    [PersistentState]
+    public List<RecordOption>? PublisherCollections { get; set; }
 
     // The title of the series, as typed; « <Sans titre> » while nothing is.
     private string Subject => string.IsNullOrWhiteSpace(Entry!.Title) ? L["Untitled"] : Entry.Title.Trim();
@@ -205,6 +217,8 @@ else
                     ? SeriesEntry.Of(await Api.GetAsync<SeriesForm>($"/admin/series/{id}"))
                     : SeriesEntry.New(await Api.GetAsync<SeriesContent>("/admin/series/new"));
                 ReadEntry = Entry.Copy();
+                if (Entry.Publisher is { } publisher)
+                    PublisherCollections = await CollectionsOfAsync(publisher.Id);
             }
             catch (ApiProblemException exception)
             {
@@ -228,6 +242,43 @@ else
                 }
             </select>
         </Field>;
+
+    // The collection is removed when the publisher changes, and is chosen among those of the new one. Each choice is numbered,
+    // as the choice of a series on the form of an album: only the collections of the last publisher chosen are listed.
+    private async Task ChoosePublisherAsync(RecordOption? publisher)
+    {
+        var choice = ++_publisherChoice;
+        var changed = publisher?.Id != Entry!.Publisher?.Id;
+        Entry.ChoosePublisher(publisher);
+        if (!changed)
+            return;
+        PublisherCollections = [];
+        _collectionsUnread = false;
+        if (publisher is null)
+            return;
+        var collections = await CollectionsOfAsync(publisher.Id);
+        if (choice == _publisherChoice)
+            PublisherCollections = collections;
+    }
+
+    // The collections of a publisher, by name; none if they cannot be read, which the field then says.
+    private async Task<List<RecordOption>> CollectionsOfAsync(Guid publisherId)
+    {
+        try
+        {
+            var collections = await Api.GetAsync<List<PublisherCollectionForm>>($"/admin/publishers/{publisherId}/collections");
+            _collectionsUnread = false;
+            return [.. collections.Select(c => new RecordOption(c.Id, c.Name, null))];
+        }
+        catch (ApiProblemException)
+        {
+            _collectionsUnread = true;
+            return [];
+        }
+    }
+
+    private void ChooseCollection(ChangeEventArgs args) =>
+        Entry!.PublisherCollection = Guid.TryParse(args.Value as string, out var id) ? PublisherCollections?.Find(c => c.Id == id) : null;
 
     private async Task SaveAsync()
     {
