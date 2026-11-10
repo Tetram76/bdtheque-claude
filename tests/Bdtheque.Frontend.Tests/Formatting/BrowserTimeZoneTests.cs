@@ -21,18 +21,8 @@ public sealed class BrowserTimeZoneTests : IDisposable
     [InlineData("")]
     [InlineData("Nowhere/Atlantis")]
     [InlineData("Romance Standard Time")]
-    public void Zone_WithoutAKnownIanaName_IsUniversalTime(string? name)
-    {
-        var timeZone = new BrowserTimeZone { Name = name };
-
-        Assert.Same(TimeZoneInfo.Utc, timeZone.Zone);
-        Assert.False(timeZone.IsKnown);
-    }
-
-    [Theory]
-    [InlineData("Europe/Paris")]
-    [InlineData("Etc/UTC")]
-    public void Zone_WithAKnownIanaName_IsKnown(string name) => Assert.True(new BrowserTimeZone { Name = name }.IsKnown);
+    public void Zone_WithoutAKnownIanaName_IsUniversalTime(string? name) =>
+        Assert.Same(TimeZoneInfo.Utc, new BrowserTimeZone { Name = name }.Zone);
 
     [Fact]
     public void Today_IsTheDateOfTheBrowser_NotThatOfTheServer()
@@ -41,7 +31,18 @@ public sealed class BrowserTimeZoneTests : IDisposable
 
         Assert.Equal(new DateOnly(2026, 1, 1), new BrowserTimeZone { Name = "Europe/Paris" }.Today(clock));
         Assert.Equal(new DateOnly(2025, 12, 31), new BrowserTimeZone { Name = "America/Montreal" }.Today(clock));
+        Assert.Equal(new DateOnly(2025, 12, 31), new BrowserTimeZone { Name = "Etc/UTC" }.Today(clock));
     }
+
+    // Never guessed: around midnight, the date in universal time is not the date of the browser, and what depends on it
+    // (e.g. the edition in the spotlight, which is drawn and recorded) would be decided for a day the visitor does not live.
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("Nowhere/Atlantis")]
+    [InlineData("Romance Standard Time")]
+    public void Today_WithoutAKnownIanaName_IsUnknown(string? name) =>
+        Assert.Null(new BrowserTimeZone { Name = name }.Today(new FixedClock(new DateTimeOffset(2025, 12, 31, 23, 30, 0, TimeSpan.Zero))));
 
     [Fact]
     public void DateTime_IsPresentedInTheTimeZoneOfTheBrowser()

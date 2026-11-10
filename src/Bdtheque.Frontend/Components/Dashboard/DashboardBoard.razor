@@ -25,17 +25,26 @@
     </Block>
 
     <Block Title="@L["Spotlight.Title"]" Raised="true" data-area="spotlight" data-scene>
-        <div class="dashboard-spotlight">
-            <Cover VisualId="Content.Spotlight.Cover?.VisualId" Palette="Content.Spotlight.Cover?.Palette" Volume="true" />
-            <div>
-                <p class="dashboard-spotlight-album"><a href="@AppPaths.Album(Content.Spotlight.Album.Id)">@Labels.Album(Content.Spotlight.Album, LabelFormat)</a></p>
-                <p class="dashboard-muted"><LabelText Text="@Labels.Edition(Content.Spotlight.Edition)" /></p>
-                @if (Content.Spotlight.Summary is { } summary)
-                {
-                    <p class="dashboard-spotlight-summary">@summary</p>
-                }
+        @if (Content.Spotlight is { } spotlight)
+        {
+            <div class="dashboard-spotlight">
+                <Cover VisualId="spotlight.Cover?.VisualId" Palette="spotlight.Cover?.Palette" Volume="true" />
+                <div>
+                    <p class="dashboard-spotlight-album"><a href="@AppPaths.Album(spotlight.Album.Id)">@Labels.Album(spotlight.Album, LabelFormat)</a></p>
+                    <p class="dashboard-muted"><LabelText Text="@Labels.Edition(spotlight.Edition)" /></p>
+                    @if (spotlight.Summary is { } summary)
+                    {
+                        <p class="dashboard-spotlight-summary">@summary</p>
+                    }
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            @* The date of the browser is not known yet (a first page): no edition is guessed for it, until the page is
+               rendered again once the browser gave its time zone (Bloc sans donnée). *@
+            <p class="dashboard-muted">@L["Spotlight.WithoutDay"]</p>
+        }
     </Block>
 
     <Block Title="@L["Latest.Title"]" data-area="latest" data-scene>

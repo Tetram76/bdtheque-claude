@@ -37,25 +37,34 @@ internal static class DashboardEndpoints
 
     /// <param name="day">
     /// The date of the visitor, in the time zone of the browser, which the frontend sends: that of the edition in the
-    /// spotlight, the same for every time zone.
+    /// spotlight, the same for every time zone. <c>null</c> as long as the browser has not given its time zone (a first
+    /// page): no edition is then in the spotlight, none being drawn for a day the visitor does not live
+    /// (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md).
     /// </param>
     /// <param name="latestCount">How many latest entries the theme presents.</param>
     /// <exception cref="ArgumentOutOfRangeException">
     /// A count outside 1 to <see cref="MaxLatestCount"/>: a technical error, the frontend asking for it, never the user.
     /// </exception>
     private static async Task<Dashboard> GetAsync(
-        DateOnly day, BdthequeDbContext context, CancellationToken cancellationToken, int latestCount = DefaultLatestCount)
+        DateOnly? day, BdthequeDbContext context, CancellationToken cancellationToken, int latestCount = DefaultLatestCount)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(latestCount, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(latestCount, MaxLatestCount);
 
+        var owned = context.Editions.AsNoTracking().Where(CollectionMembership.IsOwned);
+
         // The spotlight first, which finds out an empty collection: nothing is then drawn nor computed
         // (contraintes-techniques/architecture-deploiement/statistiques-du-dashboard.md).
-        var spotlight = await SpotlightOfTheDayAsync(context, day, SpotlightOf, cancellationToken);
-        if (spotlight is null)
+        SpotlightEdition? spotlight = null;
+        if (day is { } visitorDay)
+        {
+            spotlight = await SpotlightOfTheDayAsync(context, visitorDay, SpotlightOf, cancellationToken);
+            if (spotlight is null)
+                return new Dashboard(null);
+        }
+        else if (!await owned.AnyAsync(cancellationToken))
             return new Dashboard(null);
 
-        var owned = context.Editions.AsNoTracking().Where(CollectionMembership.IsOwned);
         var albums = context.Albums.AsNoTracking().Where(CatalogExpressions.Expand((Album a) => a.Editions.Any(e => e.IsOwned())));
         var counters = new DashboardCounters(
             await albums.CountAsync(cancellationToken),

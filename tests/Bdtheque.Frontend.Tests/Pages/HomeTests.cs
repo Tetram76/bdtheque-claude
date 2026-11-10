@@ -105,6 +105,36 @@ public sealed class HomeTests : BunitContext, IDisposable
         Assert.Contains("/catalog/dashboard?day=2026-11-06&latestCount=6", _catalog.Requested);
     }
 
+    // A first page, whose request does not bring the time zone of the browser yet: no day is guessed, so nothing is drawn for
+    // a day the visitor does not live (choix-implementation/socle/transverse/internationalisation.md).
+    [Fact]
+    public void Dashboard_WithoutTheTimeZoneOfTheBrowser_AsksForNoDay()
+    {
+        Services.AddScoped(_ => new BrowserTimeZone());
+        _catalog.Dashboard = Collection() with { Content = Collection().Content! with { Spotlight = null } };
+
+        Render<Home>();
+
+        Assert.Contains("/catalog/dashboard?latestCount=6", _catalog.Requested);
+    }
+
+    // The block stays, without any edition (fonctionnel/page-accueil.md, Bloc sans donnée), until the page is rendered again
+    // in the time zone of the browser.
+    [Fact]
+    public void Spotlight_WithoutTheDayOfTheBrowser_PresentsNoEdition()
+    {
+        Services.AddScoped(_ => new BrowserTimeZone());
+        _catalog.Dashboard = Collection() with { Content = Collection().Content! with { Spotlight = null } };
+
+        var page = Render<Home>();
+
+        var spotlight = BlockOf(page, "À la une aujourd'hui !");
+        Assert.Null(spotlight.QuerySelector("a"));
+        Assert.Null(spotlight.QuerySelector("img"));
+        Assert.Contains("L'édition du jour attend la date de votre navigateur.", spotlight.TextContent);
+        Assert.Equal(3, page.FindAll("[data-counter]").Count);
+    }
+
     [Fact]
     public void Spotlight_PresentsTheEdition_ItsAlbumLeadingToItsRecord()
     {
