@@ -164,7 +164,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         // remembered: the list shows them all.
         var page = OpenSeries();
 
-        Assert.Equal(["— Aucune collection", "Grand angle", "Ligne noire"],
+        Assert.Equal(["—", "Grand angle", "Ligne noire"],
             page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
         page.Find("#series-collection").Change(Angle.ToString());
         Assert.Equal(Angle.ToString(), page.Find("#series-collection").GetAttribute("value"));
@@ -182,7 +182,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
 
         Assert.Equal("", page.Find("#series-collection").GetAttribute("value"));
         Assert.False(page.Find("#series-collection").HasAttribute("disabled"));
-        Assert.Equal(["— Aucune collection", "Écritures"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
+        Assert.Equal(["—", "Écritures"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
 
         ChoosePublisher(page, null);
 

@@ -594,7 +594,7 @@ class View extends Mockup {
       // The imprint is one of the publisher's, chosen in the list of them all: it waits for the publisher.
       noPublisher: !x.publisher,
       imprints: x.publisher
-        ? ['— Aucune collection', 'Grand angle', 'Ligne noire', 'Long courrier', 'Poisson Pilote'].map((label, i) => ({ label, selected: x.imprint ? label === x.imprint : i === 0 }))
+        ? ['—', 'Grand angle', 'Ligne noire', 'Long courrier', 'Poisson Pilote'].map((label, i) => ({ label, selected: x.imprint ? label === x.imprint : i === 0 }))
         : [{ label: 'Choisissez d\'abord l\'éditeur', selected: true }],
       imprintStyle: x.publisher ? '' : 'border-style: dashed; background: transparent; cursor: not-allowed;',
       tagGroups: [

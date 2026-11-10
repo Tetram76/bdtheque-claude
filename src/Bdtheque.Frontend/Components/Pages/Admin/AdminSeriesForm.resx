@@ -148,7 +148,7 @@
     <value>Collection éditeur</value>
   </data>
   <data name="Collection.None" xml:space="preserve">
-    <value>— Aucune collection</value>
+    <value>—</value>
   </data>
   <data name="Collection.NoPublisher" xml:space="preserve">
     <value>Choisissez d&apos;abord l&apos;éditeur</value>

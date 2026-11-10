@@ -657,7 +657,7 @@ class View extends Mockup {
       t, label,
       icons: ICONS,
       // The collection is one of the publisher's, chosen in the list of them all.
-      collections: ['— Aucune collection', 'Fac-similé', 'Pastiches', 'Univers d\'auteurs'].map((o, i) => ({ label: o, selected: x.collection ? o === x.collection : i === 0 })),
+      collections: ['—', 'Fac-similé', 'Pastiches', 'Univers d\'auteurs'].map((o, i) => ({ label: o, selected: x.collection ? o === x.collection : i === 0 })),
       hdrBg, hdrMuted: t.hMuted ?? t.muted,
       menuOpen, menuExpanded: menuOpen ? 'true' : 'false',
       panelBg, panelB, panelSh,
