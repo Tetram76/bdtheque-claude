@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T17:33:23Z }
 ---
 
 # Outillage de développement
@@ -29,6 +29,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 - **Persistance et API testées sur PostgreSQL réel** (Testcontainers), de la **même image** que la production ([Version de PostgreSQL](deploiement/version-de-postgresql.md)), schéma produit par les **migrations** ; chaque test a sa base, clonée d'une base modèle migrée une fois, dont il libère les connexions (un pool par base les épuiserait). Les tests de l'API démarrent sur une base vide, comme un premier déploiement. Docker est donc requis pour les tests.
   - **Alternative écartée (SQLite en mémoire)** : un autre moteur ne vérifie ni les migrations appliquées, ni la collation, ni la précision des `decimal`, ni les contraintes de PostgreSQL, précisément ce que ces tests doivent garantir.
 - **Composants du frontend testés par bUnit** (MIT, .NET Foundation), en mémoire, sans navigateur ; un composant qui attend un délai le fait sur l'horloge de l'application, que ses tests remplacent par une horloge factice avancée par le test : aucune attente réelle.
+  - **Évènement d'un composant interactif déclenché sur le répartiteur du rendu, son traitement attendu jusqu'à sa fin** : le test trouve l'élément et déclenche l'évènement sur le répartiteur, où le composant le traite aussitôt jusqu'à sa première attente (ex. la pause de la frappe, posée sur l'horloge factice) ; il avance ensuite l'horloge une fois, puis attend la tâche du traitement, que bUnit termine une fois fait le rendu qu'il cause. Tout autre évènement d'un tel test (clic, touche, sortie du champ) est déclenché et attendu de même. Toute attente est bornée, et échoue explicitement en nommant ce qui n'a pas abouti.
+    - **Alternative écartée (boucle qui avance l'horloge et relit le rendu jusqu'à l'état attendu)** : la suite du traitement reprend sur le répartiteur, hors du fil du test ; la boucle, active, dispute les processeurs au travail qu'elle attend, et ne le voit aboutir qu'à travers une borne de temps réel (constaté, #344 : un échec du CI à la première recherche d'une exécution, la plus lente).
+    - **Alternative écartée (`WaitForAssertion` de bUnit)** : vérifiée à chaque rendu, sans boucle, mais bornée par défaut à une seconde de temps réel, et sans savoir si le traitement est fini ; sa tâche le dit exactement.
+    - **Alternative écartée (méthodes synchrones de bUnit, `Click()`, `KeyDown()`…)** : elles n'exécutent l'évènement sur-le-champ que sur un répartiteur libre, et le mettent sinon en file, sans que rien l'attende ; après la fin d'un traitement que le répartiteur achève encore, le test lit le rendu d'avant l'évènement (constaté, #344).
 - **Tests de bout en bout par Playwright pour .NET** (Apache 2.0), qui pilote Chromium sur l'**application complète** : `frontend` sur un vrai port (un navigateur ne joint pas un serveur en mémoire), en environnement `Production`, appelant `api` sur sa base. Ils vérifient ce que seul un navigateur exerce, dont chaque comportement des scripts du frontend.
   - **Alternative écartée (Selenium)** : attentes à écrire à la main, cause usuelle de tests instables.
   - **Alternative écartée (application en conteneurs `docker compose`)** : une construction des images à chaque exécution, et des tests qui ne pourraient plus régler l'horloge ni les données de l'application.
