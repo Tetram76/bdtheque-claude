@@ -48,6 +48,19 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         "La Veille ultime", "L'Aube des veilleurs",
     ];
 
+    /// <summary>The only argument of the program, passed by scripts/Start-Validation.ps1 on demand.</summary>
+    public const string PaleCoverSpotlightArgument = "--pale-cover-spotlight";
+
+    /// <summary>Whether the arguments of the program ask for the pale cover in the spotlight.</summary>
+    /// <exception cref="ArgumentException">Any other argument: the load stops rather than load data other than those asked for.</exception>
+    public static bool PaleCoverInTheSpotlight(string[] arguments) => arguments switch
+    {
+        [] => false,
+        [PaleCoverSpotlightArgument] => true,
+        _ => throw new ArgumentException(
+            $"Unexpected arguments '{string.Join(' ', arguments)}': the only one accepted is {PaleCoverSpotlightArgument}.", nameof(arguments)),
+    };
+
     /// <param name="paleCoverInTheSpotlight">
     /// Puts the pale cover in the spotlight of the days around the load, on demand, to judge a screen in « La couverture du
     /// jour » on its most demanding case. Otherwise the load draws nothing: the application draws the edition of the day among
