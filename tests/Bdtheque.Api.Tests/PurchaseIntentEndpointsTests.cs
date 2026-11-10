@@ -454,7 +454,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
     private async Task<AlbumForm> GetAlbumAsync(Guid id) => (await _client.GetFromJsonAsync<AlbumForm>($"/admin/albums/{id}"))!;
 
     private Task<PublisherForm> CreatePublisherAsync() =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur {Guid.NewGuid():N}", null));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {Guid.NewGuid():N}", null, []));
 
     private Task<PublisherCollectionForm> CreateCollectionAsync(PublisherForm publisher) =>
         PostAsync<PublisherCollectionForm>(
@@ -492,7 +492,7 @@ public sealed class PurchaseIntentCatalogTests : IClassFixture<ApiWebApplication
     [Fact]
     public async Task List_PaginatesTheIntentsInTheOrderOfTheAlbumsWithWhatTheirLabelsNeed()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest("Casterman", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent("Casterman", null, []));
         var collection = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest("Petit format", publisher.Version));
         var series = await PostAsync<SeriesForm>("/admin/series", new SeriesContent(

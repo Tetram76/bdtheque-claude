@@ -518,7 +518,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
     private async Task<AlbumForm> GetAlbumAsync(Guid id) => (await _client.GetFromJsonAsync<AlbumForm>($"/admin/albums/{id}"))!;
 
     private Task<PublisherForm> CreatePublisherAsync() =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur {Guid.NewGuid():N}", null));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {Guid.NewGuid():N}", null, []));
 
     private Task<PublisherCollectionForm> CreateCollectionAsync(PublisherForm publisher) =>
         PostAsync<PublisherCollectionForm>(

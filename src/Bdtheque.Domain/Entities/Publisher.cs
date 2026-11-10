@@ -35,6 +35,17 @@ public sealed class Publisher : EntityBase, IAggregateRoot
         return collection;
     }
 
+    /// <summary>
+    /// Removes one of its collections, deleted with the publisher's next save. Whether anything still references it
+    /// (editions, series templates) is checked by whoever saves, which alone sees the other records.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The collection is not one of this publisher's.</exception>
+    public void RemoveCollection(PublisherCollection collection)
+    {
+        if (!_collections.Remove(collection))
+            throw new InvalidOperationException($"Collection {collection.Id} does not belong to publisher {Id}.");
+    }
+
     public void SetWebsite(string? website)
     {
         var trimmed = DomainText.NullIfBlank(website);

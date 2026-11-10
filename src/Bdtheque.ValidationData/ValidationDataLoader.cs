@@ -455,7 +455,7 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
         public async Task<Publisher> PublisherAsync(string name, string? website, params string[] collections)
         {
-            var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>("/admin/publishers", new(name, website));
+            var publisher = await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new(name, website, []));
             var version = publisher.Version;
             var ids = new List<Guid>();
             foreach (var collection in collections)

@@ -54,7 +54,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     [Fact]
     public async Task Deletion_OfTheOnlyOwnedEdition_AnnouncesTheAlbumLeavingTheCollection_AndLeavesNoEdition()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Casterman {_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Casterman {_marker}", null, []));
         var album = await CreateAlbumAsync($"Les Bijoux de la Castafiore {_marker}");
         await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
@@ -76,7 +76,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     [Fact]
     public async Task Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt_AndOffersBothTargetsAgain()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Dupuis {_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Buddy Longway {_marker}");
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, 1974, null, null, null, null, null, null, null, true), album.Version));
@@ -97,7 +97,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     [Fact]
     public async Task Removal_OfAnIntent_AfterTheDeletionOfTheOwnedEdition_LeavesTheAlbumWithoutEither()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Lagune {_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Lagune {_marker}", null, []));
         var album = await CreateAlbumAsync($"Brouillard sur Ombrelune {_marker}");
         var owned = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             new EditionContent(publisher.Id, null, 2008, null, null, null, null, null, null, null, false, true, null,
@@ -129,7 +129,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutThePageOverflowing(int width)
     {
         var publisher = await PostAsync<PublisherForm>(
-            "/admin/publishers", new CreatePublisherRequest($"Les Éditions du Grand Large et des Archipels réunis {_marker}", null));
+            "/admin/publishers", new PublisherContent($"Les Éditions du Grand Large et des Archipels réunis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Les Voyages extraordinaires du capitaine Archibald au-delà des mers {_marker}");
         var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             new EditionContent(publisher.Id, null, 2014, "978-2-7234-4567-1", BindingType.Hardcover, null, null, null, 62,

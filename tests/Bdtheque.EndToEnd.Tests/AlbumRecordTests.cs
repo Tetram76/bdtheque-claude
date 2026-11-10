@@ -205,7 +205,7 @@ public sealed class RecordsApplication : ApplicationHost
     {
         using var api = CreateApiClient();
         Clock.UtcNow = Start;
-        var casterman = await PostAsync<PublisherForm>(api, "/admin/publishers", new CreatePublisherRequest("Casterman", "https://www.casterman.com/"));
+        var casterman = await PostAsync<PublisherForm>(api, "/admin/publishers", new PublisherContent("Casterman", "https://www.casterman.com/", []));
         var collection = await PostAsync<PublisherCollectionForm>(api,
             $"/admin/publishers/{casterman.Id}/collections", new CreatePublisherCollectionRequest("Univers d'auteurs", casterman.Version));
         var aventure = await PostAsync<GenreForm>(api, "/admin/genres", new CreateGenreRequest("Aventure"));

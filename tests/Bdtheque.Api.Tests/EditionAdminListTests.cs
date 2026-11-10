@@ -185,7 +185,7 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
             [], [], []));
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));
 
     private static EditionContent Edition(Guid publisherId) =>
         new(publisherId, null, null, null, null, null, null, null, null, null, false, true, null,

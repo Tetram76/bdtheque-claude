@@ -52,8 +52,8 @@ public sealed class VisualMediaRelayTests(ApplicationHost application)
     private async Task<Guid> UploadVisualAsync()
     {
         using var api = application.CreateApiClient();
-        var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers",
-            new($"Éditeur {Guid.NewGuid():N}", null));
+        var publisher = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers",
+            new($"Éditeur {Guid.NewGuid():N}", null, []));
         var album = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums",
             new("Album relayé", null, null, AlbumType.Regular, false, null, null, null, 2020, null, null, null, null, [], [], []));
         var edition = await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(

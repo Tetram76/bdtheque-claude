@@ -523,7 +523,7 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     private async Task<EditionForm> CreateEditionAsync(Guid? albumId = null)
     {
         var album = albumId is { } id ? await GetAlbumAsync(id) : await CreateAlbumAsync();
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur {Guid.NewGuid():N}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {Guid.NewGuid():N}", null, []));
         var content = new EditionContent(
             publisher.Id, null, null, null, null, null, null, null, null, null, false, true, null,
             AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null);

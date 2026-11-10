@@ -216,7 +216,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
     private static string VisualsUri(Guid albumId, Guid editionId) => $"/admin/albums/{albumId}/editions/{editionId}/visuals";
 
     private Task<PublisherForm> CreatePublisherAsync(string name) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"{name} {Guid.NewGuid():N}", null));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"{name} {Guid.NewGuid():N}", null, []));
 
     private Task<SeriesForm> CreateSeriesAsync(string title, ContributionContent[]? contributions = null) =>
         PostAsync<SeriesForm>("/admin/series", new SeriesContent(

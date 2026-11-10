@@ -18,10 +18,10 @@ public sealed class AdministrationEndpointsTests(ApiWebApplicationFactory factor
     public async Task RecordCounts_CountEachTypeOfRecord_WithItsDetail()
     {
         var before = (await _client.GetFromJsonAsync<RecordCounts>("/admin/record-counts"))!;
-        var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>("/admin/publishers", new("Dupuis", null));
+        var publisher = await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new("Dupuis", null, []));
         await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new("Repérages", publisher.Version));
-        await PostAsync<CreatePublisherRequest, PublisherForm>("/admin/publishers", new("Casterman", null));
+        await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new("Casterman", null, []));
         await PostAsync<SeriesContent, SeriesForm>("/admin/series", Series("Spirou", SeriesStatus.InProgress));
         await PostAsync<SeriesContent, SeriesForm>("/admin/series", Series("Gaston", null));
         var owned = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("Le Nid des Marsupilamis"));
@@ -54,7 +54,7 @@ public sealed class AdministrationEndpointsTests(ApiWebApplicationFactory factor
     public async Task Checks_CountTheIsbnWhoseCheckDigitDisagrees()
     {
         var before = (await _client.GetFromJsonAsync<AdminChecks>("/admin/checks"))!.InvalidIsbnCount;
-        var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>("/admin/publishers", new("Glénat", null));
+        var publisher = await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new("Glénat", null, []));
         foreach (var isbn in new[] { "978-2-7234-4934-2", "978-2-7234-4934-1", "2723449343", null })
         {
             var album = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album($"Album {isbn}"));

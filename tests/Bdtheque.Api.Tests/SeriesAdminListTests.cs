@@ -151,7 +151,7 @@ public sealed class SeriesAdminListTests : IClassFixture<ApiWebApplicationFactor
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(null, null, pseudonym, null, null));
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));
 
     private async Task<EditionForm> CreateOwnedEditionAsync(Guid albumId, Guid publisherId) =>
         await PostAsync<EditionForm>(

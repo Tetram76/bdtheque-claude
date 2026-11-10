@@ -37,7 +37,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     [Fact]
     public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsToItsForm()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur{_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur{_marker}", null, []));
         var collection = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", publisher.Version));
         var page = await OpenAsync(AppPaths.AdminNewSeries);
@@ -66,10 +66,10 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     [Fact]
     public async Task Collection_UnavailableWithoutPublisher_RemovedWhenThePublisherChanges()
     {
-        var first = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Premier{_marker}", null));
+        var first = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Premier{_marker}", null, []));
         var created = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{first.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", first.Version));
-        await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Second{_marker}", null));
+        await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Second{_marker}", null, []));
         var page = await OpenAsync(AppPaths.AdminNewSeries);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         var publisher = page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true });

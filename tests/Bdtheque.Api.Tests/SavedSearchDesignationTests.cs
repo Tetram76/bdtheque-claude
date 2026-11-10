@@ -84,7 +84,7 @@ public sealed class SavedSearchDesignationTests : IClassFixture<ApiWebApplicatio
     {
         // A record deleted with the album, the edition, is designated: the album cannot be deleted either.
         var album = await PostAsync<AlbumForm>("/admin/albums", AlbumContent([]));
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur {_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {_marker}", null, []));
         var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(OwnedEdition(publisher.Id), album.Version));
         await CreateSearchAsync(EntityKind.Edition, new SearchCriterion("record", IsOneOf, [edition.Id.ToString()]));
 

@@ -75,7 +75,7 @@ public sealed class PublisherAdminListTests : IClassFixture<ApiWebApplicationFac
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));
 
     private async Task AddCollectionAsync(Guid publisherId, string name)
     {

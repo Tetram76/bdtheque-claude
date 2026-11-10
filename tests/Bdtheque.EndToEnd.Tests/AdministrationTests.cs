@@ -149,16 +149,16 @@ public sealed class AdministrationApplication : ApplicationHost
     {
         using var api = CreateApiClient();
         Clock.UtcNow = Start;
-        var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Dupuis", null));
+        var publisher = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Dupuis", null, []));
         var reperages = await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(api,
             $"/admin/publishers/{publisher.Id}/collections", new("Repérages", publisher.Version));
         // The cases of the list of the publishers: a website and collections without edition, and nothing but a name.
-        var dargaud = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Dargaud", "https://www.dargaud.com/"));
+        var dargaud = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Dargaud", "https://www.dargaud.com/", []));
         var dargaudVersion = (await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(api,
             $"/admin/publishers/{dargaud.Id}/collections", new("Poisson Pilote", dargaud.Version))).PublisherVersion;
         await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(api,
             $"/admin/publishers/{dargaud.Id}/collections", new("Long courrier", dargaudVersion));
-        await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Futuropolis", null));
+        await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Futuropolis", null, []));
         var series = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Spirou et Fantasio", SeriesStatus.InProgress, false));
         // The cases of the list of the authors: a pseudonym over a name, credited on a series only; one credited with several
         // roles on an album; one credited on nothing, without nationality.
