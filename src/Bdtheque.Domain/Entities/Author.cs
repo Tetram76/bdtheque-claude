@@ -16,8 +16,10 @@ public sealed class Author : EntityBase, IAggregateRoot
     public string? Nationality { get; private set; }
 
     // Stored rather than computed at read time, so that the database can sort and paginate
-    // authors (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes). Derived from the
-    // identity only: never set manually.
+    // authors (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), and keep two of
+    // them from sharing a display name (modele-metier/auteur-artiste.md). Derived from the identity
+    // only: never set manually.
+    public string DisplayName { get; private set; } = string.Empty;
     public string SortKey { get; private set; } = string.Empty;
     public string NavigationEntry { get; private set; } = string.Empty;
 
@@ -39,8 +41,18 @@ public sealed class Author : EntityBase, IAggregateRoot
         FirstName = DomainText.NullIfBlank(firstName);
         Pseudonym = DomainText.NullIfBlank(pseudonym);
 
+        DisplayName = ComputeDisplayName();
         SortKey = ComputeSortKey();
         NavigationEntry = NavigationEntryCalculator.Compute(SortKey);
+    }
+
+    /// <summary>The main identifier: the pseudonym, otherwise "First Last" (or "Last" alone).</summary>
+    private string ComputeDisplayName()
+    {
+        if (Pseudonym is not null)
+            return Pseudonym;
+        // LastName is set whenever Pseudonym is not (UpdateIdentity guard).
+        return FirstName is null ? LastName! : $"{FirstName} {LastName}";
     }
 
     /// <summary>

@@ -134,7 +134,8 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal("Univers Hugo Pratt", panel.QuerySelector(".record-picker input[role='combobox']")!.GetAttribute("value"));
         Assert.Equal(PrattItem.Id.ToString(), panel.QuerySelector("input[type='hidden'][name='parentId']")!.GetAttribute("value"));
         Assert.Equal("Ses albums et séries sont aussi ceux de Univers Hugo Pratt.", Text(panel.QuerySelector(".field-help")!));
-        Assert.Equal("Univers créé le 12/01/2026 10:30, modifié le 12/01/2026 10:30.", Text(panel.QuerySelector(".side-panel-dates")!));
+        // The dates at the top of the panel, above its first field.
+        Assert.Equal("Univers créé le 12/01/2026 10:30, modifié le 12/01/2026 10:30.", Text(panel.QuerySelector(".side-panel-body > :first-child")!));
         Assert.Equal(
             [("Annuler", $"{AppPaths.AdminUniverses}?q=c"), ("Enregistrer", null)],
             panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));

@@ -114,8 +114,8 @@ internal static class ChangeLogMappings
                 Text(ChangeLogAttribute.Biography, nameof(Author.Biography)),
                 Text(ChangeLogAttribute.Nationality, nameof(Author.Nationality)),
             ],
-            // Derived from the identity, never entered.
-            [nameof(Author.SortKey), nameof(Author.NavigationEntry)]),
+            // Derived from the identity, never entered: its parts are recorded.
+            [nameof(Author.DisplayName), nameof(Author.SortKey), nameof(Author.NavigationEntry)]),
 
         [typeof(Publisher)] = new(
             RecordType.Publisher,

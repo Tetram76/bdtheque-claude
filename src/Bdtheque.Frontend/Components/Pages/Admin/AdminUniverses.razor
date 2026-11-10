@@ -127,6 +127,12 @@
                         {
                             <ErrorMessage Problem="problem" />
                         }
+                        @if (_universe is not null)
+                        {
+                            <p class="side-panel-dates">
+                                @L["Dates.Created"] <LocalDateTime Value="_universe.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_universe.ModifiedAt" />.
+                            </p>
+                        }
                         <Field Id="universe-name" Label="@L["Name"]" Note="@L["Required"]" Error="@FieldError("name")" Context="control">
                             <input id="@control.Id" type="text" name="@NameName" autofocus aria-describedby="@control.DescribedBy"
                                    aria-invalid="@control.Invalid" @bind="EntryName" />
@@ -137,12 +143,6 @@
                             <textarea id="@control.Id" name="@DescriptionName" rows="5" placeholder="@L["Description.Placeholder"]"
                                       aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid">@EntryDescription</textarea>
                         </Field>
-                        @if (_universe is not null)
-                        {
-                            <p class="side-panel-dates">
-                                @L["Dates.Created"] <LocalDateTime Value="_universe.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_universe.ModifiedAt" />.
-                            </p>
-                        }
                     </ChildContent>
                     <Actions>
                         <Button Type="submit" Variant="ButtonVariant.Primary" Label="@(_universe is null ? L["Create"] : L["Save"])" />

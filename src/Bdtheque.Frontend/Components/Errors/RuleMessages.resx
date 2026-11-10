@@ -135,6 +135,9 @@
   <data name="PublisherCollection.NameRequired" xml:space="preserve">
     <value>Le nom de la collection est obligatoire.</value>
   </data>
+  <data name="Author.DisplayNameAlreadyUsed" xml:space="preserve">
+    <value>Ce nom est déjà celui d&apos;un autre auteur.</value>
+  </data>
   <data name="Genre.LabelAlreadyUsed" xml:space="preserve">
     <value>Ce libellé est déjà celui d&apos;un autre genre.</value>
   </data>

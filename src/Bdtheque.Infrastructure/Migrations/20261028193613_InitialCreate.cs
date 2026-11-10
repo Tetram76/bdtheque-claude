@@ -83,6 +83,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     Pseudonym = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true, collation: "fr-FR-x-icu"),
                     Biography = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     Nationality = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true, collation: "fr-FR-x-icu"),
+                    DisplayName = table.Column<string>(type: "character varying(401)", maxLength: 401, nullable: false, collation: "fr_case_accent_insensitive"),
                     SortKey = table.Column<string>(type: "character varying(401)", maxLength: 401, nullable: false, collation: "fr-FR-x-icu"),
                     NavigationEntry = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, collation: "fr-FR-x-icu"),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
@@ -777,6 +778,12 @@ namespace Bdtheque.Infrastructure.Migrations
                 name: "IX_AudienceVisits_CreatedAt_Id",
                 table: "AudienceVisits",
                 columns: new[] { "CreatedAt", "Id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Authors_DisplayName",
+                table: "Authors",
+                column: "DisplayName",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Authors_NavigationEntry_SortKey",

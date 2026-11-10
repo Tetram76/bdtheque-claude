@@ -140,11 +140,14 @@ public static class AppPaths
     /// </summary>
     public static string AdminConvertPurchaseIntent(Guid albumId, Guid id) => NotYetImplemented;
 
-    /// <summary>The list of the authors of the administration (visuel/listes/).</summary>
+    /// <summary>
+    /// The list of the authors of the administration (visuel/listes/), where an author is entered in a side panel over the list
+    /// (visuel/listes/saisie-selon-l-entite.md).
+    /// </summary>
     public const string AdminAuthors = "/admin/authors";
 
-    /// <summary>The entry form of an author (#207).</summary>
-    public static string AdminEditAuthor(Guid id) => NotYetImplemented;
+    /// <summary>The list of the authors with the panel of the author open over it.</summary>
+    public static string AdminEditAuthor(Guid id) => $"{AdminAuthors}?edit={id}";
 
     /// <summary>
     /// The next step of the merge of two authors, whose presentation awaits the terms of the merge
@@ -207,7 +210,8 @@ public static class AppPaths
     /// <summary>The entry form of a new series (visuel/saisie-serie/).</summary>
     public const string AdminNewSeries = $"{AdminSeries}/new";
 
-    public const string AdminNewAuthor = NotYetImplemented;
+    /// <summary>The list of the authors with the panel of a new author open over it.</summary>
+    public const string AdminNewAuthor = $"{AdminAuthors}?new=open";
 
     public const string AdminNewPublisher = NotYetImplemented;
 
@@ -225,6 +229,7 @@ public static class AppPaths
     {
         RecordType.ApplicationSettings => AdminSettings,
         RecordType.Album => AdminEditAlbum(id),
+        RecordType.Author => AdminEditAuthor(id),
         RecordType.Genre => AdminEditGenre(id),
         RecordType.Universe => AdminEditUniverse(id),
         _ => NotYetImplemented,

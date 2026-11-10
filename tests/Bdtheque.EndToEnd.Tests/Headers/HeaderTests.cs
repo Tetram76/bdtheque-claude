@@ -188,7 +188,11 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
     [Fact]
     public async Task AdminMenu_ClosesByItsCross_AndByItsButton_AndLeadsToItsEntries()
     {
-        var page = await OpenAsync(AdminFramePage.Path);
+        // Signed in first: an entry of the menu leads to a page of the administration, which otherwise sends the page to the
+        // login, the address of the entry being only passed through on the way.
+        var page = await NewPageAsync(new ViewportSize { Width = 1440, Height = 900 });
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
+        await PageReadiness.GotoAsync(page, AdminFramePage.Path);
         var toggle = page.GetByRole(AriaRole.Button, new() { Name = "Menu", Exact = true });
         var menu = page.Locator("#admin-menu");
 

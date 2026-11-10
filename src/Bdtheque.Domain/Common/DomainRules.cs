@@ -89,6 +89,7 @@ public static class DomainRules
     // Uniqueness rules: enforced by unique indexes, since the domain cannot see the other rows. The
     // API translates the violation of each index into its code (see Bdtheque.Api's UniqueIndexRules).
     public const string GenreLabelAlreadyUsed = "Genre.LabelAlreadyUsed";
+    public const string AuthorDisplayNameAlreadyUsed = "Author.DisplayNameAlreadyUsed";
     public const string PublisherNameAlreadyUsed = "Publisher.NameAlreadyUsed";
     public const string PublisherCollectionNameAlreadyUsed = "PublisherCollection.NameAlreadyUsed";
 

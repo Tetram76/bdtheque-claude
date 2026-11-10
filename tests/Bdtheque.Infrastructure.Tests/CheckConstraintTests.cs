@@ -45,7 +45,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), NULL, NULL, 'Dupont', 'D')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), NULL, NULL, 'Auteur', 'Dupont', 'D')",
                 id));
     }
 
@@ -54,7 +54,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Dupont', NULL, 'Dupont', 'D')",
+            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Dupont', NULL, 'Auteur', 'Dupont', 'D')",
             id);
 
         var count = await _fixture.Context.Authors.CountAsync(a => a.Id == id);
@@ -66,7 +66,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var id = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), NULL, 'Moebius', 'Dupont', 'D')",
+            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), NULL, 'Moebius', 'Auteur', 'Dupont', 'D')",
             id);
 
         var count = await _fixture.Context.Authors.CountAsync(a => a.Id == id);
@@ -81,7 +81,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), '', NULL, 'Dupont', 'D')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), '', NULL, 'Auteur', 'Dupont', 'D')",
                 id));
     }
 
@@ -91,7 +91,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_Authors_LastNameOrPseudonym", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), '   ', '', 'Dupont', 'D')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"LastName\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), '   ', '', 'Auteur', 'Dupont', 'D')",
                 id));
     }
 
@@ -335,7 +335,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
                         "VALUES ({0}, now(), now(), 'Épervier', 'Épervier', false, false, false, false, 'é')",
             "Albums" => "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
                         $"VALUES ({{0}}, now(), now(), 'Épervier', 'Épervier', 'é', false, {(int)AlbumType.Regular}, false)",
-            _ => "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Émile', 'Émile', 'é')",
+            _ => "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Émile', 'Auteur', 'Émile', 'é')",
         };
 
         await AssertViolatesAsync(constraint, () =>
@@ -369,7 +369,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         await AssertViolatesAsync("CK_Authors_SortKeyNotBlank", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Hergé', '   ', 'H')",
+                "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Hergé', 'Auteur', '   ', 'H')",
                 Guid.CreateVersion7()));
     }
 
@@ -395,7 +395,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var authorId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Hergé', 'Hergé', 'H')", authorId);
+            "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Hergé', 'Hergé ' || {0}::text, 'Hergé', 'H')", authorId);
         return authorId;
     }
 

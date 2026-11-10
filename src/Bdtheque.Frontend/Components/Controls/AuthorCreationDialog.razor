@@ -46,12 +46,7 @@
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
-    // « Jean Van Hamme »: the first word the first name, the rest the last name; a single word, the last name.
-    protected override void OnInitialized()
-    {
-        var words = Name.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        (_firstName, _lastName) = words is [var first, var rest] ? (first, rest) : (null, Name.Trim());
-    }
+    protected override void OnInitialized() => (_firstName, _lastName) = AuthorNames.Split(Name);
 
     private Task CreateAsync() => OnCreated.InvokeAsync(new NewAuthor(Guid.NewGuid(), _lastName, _firstName, _pseudonym));
 }

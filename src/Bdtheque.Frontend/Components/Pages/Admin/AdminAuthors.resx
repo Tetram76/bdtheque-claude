@@ -165,4 +165,49 @@
   <data name="Merge.Note" xml:space="preserve">
     <value>L'étape suivante présentera les deux auteurs côte à côte, avec ce que la fusion garde de chacun.</value>
   </data>
+  <data name="Panel.Edit" xml:space="preserve">
+    <value>Modifier l'auteur</value>
+  </data>
+  <data name="Panel.New" xml:space="preserve">
+    <value>Nouvel auteur</value>
+  </data>
+  <data name="Nationality" xml:space="preserve">
+    <value>Nationalité</value>
+  </data>
+  <data name="Biography" xml:space="preserve">
+    <value>Biographie</value>
+  </data>
+  <data name="Biography.Placeholder" xml:space="preserve">
+    <value>Son parcours, ses œuvres marquantes…</value>
+  </data>
+  <data name="Dates.Created" xml:space="preserve">
+    <value>Auteur créé le</value>
+  </data>
+  <data name="Dates.Modified" xml:space="preserve">
+    <value>, modifié le</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Créer l'auteur</value>
+  </data>
+  <data name="FieldError.Author.LastNameOrPseudonymRequired" xml:space="preserve">
+    <value>Un auteur a au moins un nom ou un pseudonyme : renseignez l'un ou l'autre.</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Pseudonym" xml:space="preserve">
+    <value>Pseudonyme</value>
+  </data>
+  <data name="Pseudonym.Help" xml:space="preserve">
+    <value>Il faut au moins le nom ou le pseudonyme ; un duo ou un collectif crédité sous un nom commun est un auteur, sous ce nom. Le pseudonyme tient lieu de nom : sans lui, l'auteur est classé à son nom, puis son prénom.</value>
+  </data>
+  <data name="FieldError.Author.DisplayNameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà le nom d'un autre auteur : deux auteurs ne peuvent porter le même nom affiché, sans tenir compte des majuscules ni des accents.</value>
+  </data>
 </root>

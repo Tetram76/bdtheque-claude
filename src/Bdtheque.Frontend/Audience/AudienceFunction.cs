@@ -168,6 +168,18 @@ public static class AudienceFunctions
     /// <summary>The dialog of the merge of an author, opened from its row, with the search of the other author.</summary>
     public static readonly AudienceFunction AdminAuthorsMerge = new("admin.authors.merge", AudienceFunctionKind.Action);
 
+    /// <summary>The panel of an author opened on it (visuel/listes/saisie-selon-l-entite.md), from its « Modifier ».</summary>
+    public static readonly AudienceFunction AdminAuthorsEdit = new("admin.authors.edit", AudienceFunctionKind.Action);
+
+    /// <summary>The panel of a new author opened, from « Nouvel auteur ».</summary>
+    public static readonly AudienceFunction AdminAuthorsNew = new("admin.authors.new", AudienceFunctionKind.Action);
+
+    /// <summary>The change of an author, once saved.</summary>
+    public static readonly AudienceFunction AdminAuthorSaved = new("admin.author.saved", AudienceFunctionKind.Action);
+
+    /// <summary>A new author, once created.</summary>
+    public static readonly AudienceFunction AdminAuthorCreated = new("admin.author.created", AudienceFunctionKind.Action);
+
     /// <summary>The list of the publishers of the administration (visuel/listes/liste-par-liste.md).</summary>
     public static readonly AudienceFunction AdminPublishers = new("admin.publishers", AudienceFunctionKind.Screen);
 
@@ -316,7 +328,7 @@ public static class AudienceFunctions
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
         AdminSeriesMerge, AdminSeriesForm, AdminNewSeriesForm, AdminSeriesCreated, AdminSeriesSaved, AdminSeriesAuthorCreated,
         AdminSeriesGenreCreated, AdminSeriesUniverseCreated, AdminSeriesChanges, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
-        AdminAuthorsMerge, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
+        AdminAuthorsMerge, AdminAuthorsEdit, AdminAuthorsNew, AdminAuthorSaved, AdminAuthorCreated, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
         AdminPublishersMerge, AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
         AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsPage,
         AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresPage, AdminGenresDeletion,
