@@ -68,13 +68,13 @@ internal static class CatalogFilters
     public static IQueryable<Album> WhereGenre(this IQueryable<Album> albums, Guid genreId) =>
         albums.Where(CatalogExpressions.Expand((Album a) => a.IsOfGenre(genreId)));
 
-    /// <summary>Keeps the albums of one of the universes, theirs or one of their series.</summary>
-    public static IQueryable<Album> WhereUniverse(this IQueryable<Album> albums, IReadOnlyCollection<Guid> universeIds) =>
-        albums.Where(a => a.Universes.Any(u => universeIds.Contains(u.Id)) || a.Series!.Universes.Any(u => universeIds.Contains(u.Id)));
-
     /// <summary>Keeps the series of the genre.</summary>
     public static IQueryable<Series> WhereGenre(this IQueryable<Series> series, Guid genreId) =>
         series.Where(CatalogExpressions.Expand((Series s) => s.IsOfGenre(genreId)));
+
+    /// <summary>Keeps the albums of one of the universes, theirs or one of their series.</summary>
+    public static IQueryable<Album> WhereUniverse(this IQueryable<Album> albums, IReadOnlyCollection<Guid> universeIds) =>
+        albums.Where(a => a.Universes.Any(u => universeIds.Contains(u.Id)) || a.Series!.Universes.Any(u => universeIds.Contains(u.Id)));
 
     /// <summary>Keeps the series of one of the universes.</summary>
     public static IQueryable<Series> WhereUniverse(this IQueryable<Series> series, IReadOnlyCollection<Guid> universeIds) =>
