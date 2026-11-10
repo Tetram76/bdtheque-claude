@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:16:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T18:10:00Z }
 ---
 
 # Organisation de l'API
@@ -51,7 +51,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:16:43Z }
 - **Cartes d'album et aperçu des séries** (pile des couvertures des trois premiers tomes réguliers, nombre d'albums) calculés par l'API seule, en une requête sur les albums des séries présentées : une série compte au plus quelques dizaines d'albums.
 - **Couverture d'un album par une expression unique** ([Couverture d'un album](../../fonctionnel/regles-metier/couverture-d-un-album.md)), deux éditions de même année départagées par leur identifiant, ordonné dans le temps : la première créée. Toute couverture est présentée avec ses couleurs ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)).
 - **Ordre des albums dans une série** ([Ordre des albums dans une série](../../fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md)) complété par la clé de tri et l'identifiant pour un ordre total ; un tome et une date ne se comparent pas, si bien qu'un album sans tome ne s'intercale pas entre deux tomes.
-- **Dashboard sans contenu pour une collection vide**, constaté avant tout calcul ([Statistiques du dashboard](../../contraintes-techniques/architecture-deploiement/statistiques-du-dashboard.md)) ; il reçoit la date du navigateur ([Internationalisation](../socle/transverse/internationalisation.md)) et le nombre de dernières entrées que présente le thème. Les blocs encore non calculables (Phase 4) sont signalés comme tels, sans donnée.
+- **Dashboard sans contenu pour une collection vide**, constaté avant tout calcul ([Statistiques du dashboard](../../contraintes-techniques/architecture-deploiement/statistiques-du-dashboard.md)) ; il reçoit la date du navigateur ([Internationalisation](../socle/transverse/internationalisation.md)), sans laquelle il ne présente aucune édition à la une et n'en tire aucune ([Édition « À la une » : mise en œuvre](../domaine/edition-a-la-une-mise-en-oeuvre.md)), et le nombre de dernières entrées que présente le thème. Les blocs encore non calculables (Phase 4) sont signalés comme tels, sans donnée.
 - **Couleurs du jour en dehors du dashboard**, celles de la couverture de l'édition à la une, que toute page du thème « La couverture du jour » demande ; le tirage du jour est commun aux deux ([Édition « À la une » : mise en œuvre](../domaine/edition-a-la-une-mise-en-oeuvre.md)).
 - **Contrôles de l'accueil de l'administration** : ceux seuls que définit la spécification, l'ISBN étant vérifié en mémoire par le validateur du domaine, qu'aucun SQL ne traduit ([Validation de l'ISBN](../domaine/validation-de-l-isbn.md)).
 - **Listes de l'administration** : recherche, navigation et filtres partagés avec la consultation ; l'**état dans la collection** est une expression unique que la projection et le filtre partagent ; la réponse **nomme les fiches de ses filtres**, pour que l'écran les présente sans autre requête.
