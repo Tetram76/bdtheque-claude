@@ -1,0 +1,54 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): a dashed frame, as anything only expected
+   (visuel/liste-albums/contenu.md), the intents one under the other, apart by a rule; what each targets, then its date,
+   which goes under it on a narrow screen. */
+.album-intents {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-s) var(--space-m);
+    border: 2px dashed var(--color-control-border);
+    border-radius: var(--radius-tile);
+}
+
+.album-intents-title {
+    margin: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.album-intents ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.album-intents li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.125rem var(--space-l);
+    padding-block: var(--space-xs);
+}
+
+.album-intents li + li {
+    border-block-start: 1px solid var(--color-rule);
+}
+
+.intent-target {
+    display: grid;
+    min-inline-size: 0;
+}
+
+.intent-label {
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.intent-facts,
+.intent-date {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}

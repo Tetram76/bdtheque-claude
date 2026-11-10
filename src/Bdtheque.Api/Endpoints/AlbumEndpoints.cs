@@ -55,8 +55,8 @@ internal static class AlbumEndpoints
     /// <summary>
     /// An album with what it is linked with: the genres and universes displayed — those of the album and
     /// of its series, without duplicates (fonctionnel/regles-metier/genres-et-univers-d-un-album.md) —, each universe
-    /// with its ancestors, its contributions, and every edition, whole, which has no record of its own
-    /// (fonctionnel/structure-de-l-application.md).
+    /// with its ancestors, its contributions, every edition, whole, which has no record of its own
+    /// (fonctionnel/structure-de-l-application.md), and every album of its series, in a number bounded by the series.
     /// </summary>
     private static async Task<AlbumDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
@@ -90,11 +90,14 @@ internal static class AlbumEndpoints
 
         var editions = await EditionEndpoints.ReadDetailsAsync(id, context, cancellationToken);
         var universes = await UniverseTree.InHierarchyAsync(context, album.Universes, cancellationToken);
+        var seriesAlbums = album.Album.SeriesId is { } seriesId
+            ? await SeriesEndpoints.ReadAlbumsAsync(seriesId, context, cancellationToken)
+            : [];
 
         return new AlbumDetail(
             album.Album, album.FirstPublicationYear, album.FirstPublicationMonth, album.Summary, album.PersonalNotes,
             EnumMapping.Map<ContractEnums.AlbumRating>(album.Rating), album.Genres, universes, album.Contributions, editions,
-            album.PurchaseIntent, album.CreatedAt, album.ModifiedAt);
+            album.PurchaseIntent, seriesAlbums, album.CreatedAt, album.ModifiedAt);
     }
 
     /// <summary>

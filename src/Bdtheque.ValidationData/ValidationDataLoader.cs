@@ -318,11 +318,13 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         if (volume is not (10 or 11 or 12))
             await data.VisualAsync(album, edition, VisualType.Cover, Images.Portrait(volume / 24d));
 
-        // Owned, and wished for again in its limited edition.
+        // Owned, and wished for again in two other editions: its limited edition, every fact of it known, and a reissue of
+        // which only the year is (visuel/fiche-album/contenu.md, Intentions d'achat).
         if (volume == 23)
         {
             await data.IntentOnEditionAsync(album, new PurchaseIntentEditionContent(lagoon.Id, lagoon.Collections[0], 2022, Isbn("979109123450"),
                 BindingType.Hardcover, BookOrientation.Portrait, ReadingDirection.LeftToRight, EditionFormat.Large, 96, EditionCategory.LimitedEdition, IsColor: true));
+            await data.IntentOnEditionAsync(album, new PurchaseIntentEditionContent(lagoon.Id, null, 2025, null, null, null, null, null, null, null, true));
         }
     }
 

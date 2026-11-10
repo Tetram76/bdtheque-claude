@@ -1,0 +1,78 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the albums in columns as wide as the
+   block allows, one on a smartphone, each line its volume, its title, then its membership; the album shown filled with the
+   accent. */
+.series-record {
+    justify-self: start;
+    font-weight: var(--font-weight-strong);
+}
+
+.series-albums {
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-tile);
+}
+
+.series-albums summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem var(--space-m);
+    min-block-size: var(--control-height);
+    padding-inline: var(--space-m);
+    cursor: pointer;
+}
+
+.series-albums-title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    font-size: var(--font-size-large);
+}
+
+.series-albums-count {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.series-albums ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(17.5rem, 100%), 1fr));
+    gap: 0 var(--space-xl);
+    margin: 0;
+    padding: 0 var(--space-m) var(--space-s);
+    list-style: none;
+}
+
+.series-albums li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    min-block-size: 2rem;
+    padding-block: var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.series-album-volume {
+    flex: none;
+    min-inline-size: 2.75rem;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.series-album-title {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+}
+
+.series-albums li[data-current] .series-album-title {
+    padding: 0.125rem var(--space-s);
+    border-radius: var(--radius-control);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+    font-weight: var(--font-weight-strong);
+}
+
+.series-albums li ::deep .tag {
+    flex: none;
+}
