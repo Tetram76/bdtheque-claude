@@ -14,8 +14,8 @@ namespace Bdtheque.ValidationData;
 /// every rule of the application applies to it, and the change log records it. The data covers the cases the
 /// screens present — a long series with omnibuses, special issues and missing volumes, purchase intents on a
 /// whole album and on an edition, many authors, nested universes, editions without cover or with every type of
-/// visual, amounts in several currencies, navigation entries outside the letters, a pale cover in the spotlight of the day — and
-/// evolves with the screens.
+/// visual, amounts in several currencies, navigation entries outside the letters, a pale cover that can be put in the spotlight
+/// on demand — and evolves with the screens.
 /// </summary>
 public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 {
@@ -48,9 +48,15 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         "La Veille ultime", "L'Aube des veilleurs",
     ];
 
-    public async Task LoadAsync(CancellationToken cancellationToken)
+    /// <param name="paleCoverInTheSpotlight">
+    /// Puts the pale cover in the spotlight of the days around the load, on demand, to judge a screen in « La couverture du
+    /// jour » on its most demanding case. Otherwise the load draws nothing: the application draws the edition of the day among
+    /// all the owned editions at the first display of the day, as in production.
+    /// </param>
+    /// <param name="cancellationToken">Stops the load.</param>
+    public async Task LoadAsync(bool paleCoverInTheSpotlight, CancellationToken cancellationToken)
     {
-        // The day of the load, read once: the data around it (the spotlight of the days around it, a volume to be published
+        // The day of the load, read once: the data around it (the spotlight of the days around it on demand, a volume to be published
         // the year after) is consistent even when the load runs over midnight.
         var data = new Loading(client, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime), cancellationToken);
 
@@ -98,13 +104,14 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         // An author credited on nothing yet, without nationality: the list of the authors says so, and its deletion is accepted.
         await data.AuthorAsync(UncreditedAuthorLastName, "Sacha");
 
-        // The edition in the spotlight of the days around the load, drawn while it is the only one with a cover: a pale cover
-        // with an accent of middle tone, the most demanding one for « La couverture du jour », which takes its colours on
-        // every page (visuel/dashboard/la-couverture-du-jour.md, Lisibilité). Acquired lately, it is among the latest arrivals.
+        // A pale cover with an accent of middle tone, the most demanding one for « La couverture du jour », which takes its
+        // colours on every page (visuel/dashboard/la-couverture-du-jour.md, Lisibilité). On demand, it is drawn for the days
+        // around the load while it is the only edition with a cover. Acquired lately, it is among the latest arrivals.
         var paleSun = await data.AlbumAsync(OneShot(PaleCoverTitle, 2026, 9, [humour], [], [Credit(quintin, ContributionRole.Illustrator)]));
         var paleSunEdition = await data.EditionAsync(paleSun, Owned(bubbles.Id, null, 2026, AcquisitionMode.Purchase, new DateOnly(2026, 10, 25)));
         await data.VisualAsync(paleSun, paleSunEdition, VisualType.Cover, Images.Banded("#F7E98E", "#B85AA2"));
-        await data.SpotlightAroundTodayAsync();
+        if (paleCoverInTheSpotlight)
+            await data.SpotlightAroundTodayAsync();
 
         await LoadLongSeriesAsync(data, lagoon, bubbles, [adventure, fantasy], watchersCity, archipelago,
             [Credit(arnaud, ContributionRole.Scenarist), Credit(vanSluys, ContributionRole.Illustrator), Credit(ostrova, ContributionRole.Colorist)]);

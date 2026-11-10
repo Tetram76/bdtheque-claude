@@ -146,6 +146,7 @@ Le thème, tiré au hasard à chaque visite en production, se choisit ici par l'
 | --- | --- |
 | `-Empty` | Sans les données de validation : écran d'accueil d'une collection vide. |
 | `-KeepData` | Conserve les données du lancement précédent (arrêté lui aussi avec `-KeepData`), au lieu de repartir d'une base vide. |
+| `-PaleCoverSpotlight` | Met à la une la couverture pâle des données de validation, cas le plus exigeant du thème `couverture`, au lieu de l'édition que tire l'application au premier affichage de la journée parmi toutes les éditions possédées. Incompatible avec `-Empty` et `-KeepData`, qui ne chargent pas les données. |
 | `-Ref <commit>` | Au lieu d'une Pull Request, n'importe quel commit du dépôt : branche, tag, empreinte. Sans `-PullRequest` ni `-Ref`, le commit courant (`HEAD`), sans les modifications non commitées. |
 
 ### Remise à zéro et arrêt
