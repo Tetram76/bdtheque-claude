@@ -66,6 +66,8 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Services.AddSingleton(TimeProvider.System);
         // The choice of a record imports its script once rendered, which these tests do not exercise.
         JSInterop.Mode = JSRuntimeMode.Loose;
+        // An entry form is rendered by its circuit (InteractiveServer), which its frame marks.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         _api.Answers[$"/admin/albums/{AlbumId}"] = Bijoux;
         _api.Answers[$"/catalog/series/{SeriesId}"] = Series(SeriesId, "Tintin", ["Aventure"], ["Univers Hergé"]);
         _api.Answers[$"/catalog/series/{OtherSeriesId}"] = Series(OtherSeriesId, "Blacksad", ["Polar"], []);

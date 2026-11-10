@@ -58,6 +58,8 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         _api.AddServices(Services, _request);
         Services.AddSingleton(TimeProvider.System);
         JSInterop.Mode = JSRuntimeMode.Loose;
+        // An entry form is rendered by its circuit (InteractiveServer), which its frame marks.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         _api.Answers[$"/admin/publishers/{PublisherId}"] = Casterman;
     }
 
@@ -177,6 +179,12 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
         Assert.Empty(page.FindAll(".publisher-collection"));
         Assert.Equal("Aucune collection.", page.Find(".publisher-collections-none").TextContent.Trim());
+    }
+
+    [Fact]
+    public void Frame_IsMarkedInteractive_OnceRenderedByItsCircuit()
+    {
+        Assert.Equal("true", OpenPublisher().Find(".entry-form").GetAttribute("data-interactive"));
     }
 
     [Fact]

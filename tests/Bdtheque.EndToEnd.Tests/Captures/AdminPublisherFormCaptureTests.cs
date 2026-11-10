@@ -3,7 +3,6 @@ extern alias frontend;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
 using frontend::Bdtheque.Frontend.Theming;
 
@@ -50,16 +49,17 @@ public sealed class AdminPublisherFormCaptureTests(AdministrationApplication app
 
         if (state == "edit-changed")
         {
-            await ControlsPage.WaitUntilInteractiveAsync(page);
+            await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
             await page.GetByRole(AriaRole.Button, new() { Name = "Retirer Long courrier" }).ClickAsync();
-            await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter une collection" }).ClickAsync();
-            await page.GetByLabel("Nom de la collection").Last.FillAsync("Grand Angle");
+            await Assertions.Expect(page.GetByText("Retirée à l'enregistrement")).ToBeVisibleAsync();
+            await AdminPublisherFormTests.AddCollectionAsync(page, "Grand Angle");
             await page.GetByLabel("Nom de la collection").Last.BlurAsync();
-            await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToBeVisibleAsync();
+            // Attached rather than visible: the long state is hidden on a smartphone, which shows the short one.
+            await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToBeAttachedAsync();
         }
         else if (state == "new-error")
         {
-            await ControlsPage.WaitUntilInteractiveAsync(page);
+            await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
             await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'éditeur" }).ClickAsync();
             await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToBeVisibleAsync();
             // The name to correct gets the focus once the error is rendered (EntryForm.RevealProblemAsync): left only once it

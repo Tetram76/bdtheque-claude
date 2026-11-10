@@ -75,6 +75,8 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Services.AddSingleton(TimeProvider.System);
         // The choice of a record imports its script once rendered, which these tests do not exercise.
         JSInterop.Mode = JSRuntimeMode.Loose;
+        // An entry form is rendered by its circuit (InteractiveServer), which its frame marks.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         _api.Answers[$"/admin/series/{SeriesId}"] = Blacksad;
         _api.Answers["/admin/series/new"] = Proposed;
         _api.Answers["/admin/sort-keys/title"] = new TitleSortKey("Blacksad");

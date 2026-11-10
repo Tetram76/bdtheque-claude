@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T19:52:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:12:29Z }
 ---
 
 # Organisation de l'API
@@ -38,6 +38,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T19:52:50Z }
   - **Une création d'édition est toujours une édition possédée** ; seule une intention crée une édition non possédée ([Appartenance à la collection](../../fonctionnel/regles-metier/appartenance-a-la-collection.md)).
   - **La confirmation d'achat reçoit le formulaire entier de l'édition** : les caractéristiques de l'exemplaire, absentes de la saisie d'une intention, se saisissent à l'achat ([Réalisation d'une intention](../../fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)).
   - **La conversion d'une intention vers l'album passe par le mécanisme de suppression**, avec l'empreinte de l'impact de suppression de l'intention : elle supprime l'édition visée et ses visuels, effet identique ([Suppression des entités : mise en œuvre](../ecritures/suppression-des-entites-mise-en-oeuvre.md)).
+- **Collections d'un éditeur enregistrées avec lui** ([`visuel/saisie-editeur/`](../../visuel/saisie-editeur/index.md)), sous sa version : le contenu de l'éditeur porte ses collections, remplacées en bloc, une collection nommée par son identifiant étant renommée, une sans identifiant créée, une absente retirée. Sa lecture pour la saisie dit, pour chaque collection, ce qui la désigne (éditions, séries), comptée comme sa suppression.
+  - **Collection retirée comme elle serait supprimée** : sa ligne est verrouillée après celle de l'éditeur, puis l'impact de sa suppression, recherches enregistrées comprises, est recalculé ; une référence la refuse (erreur métier `PublisherCollection.InUse`). Le verrou de la ligne fait attendre une édition ou une série qui la désignerait entre-temps, si bien qu'aucune référence ne se glisse entre le calcul et l'enregistrement.
+  - **Alternative écartée (collections enregistrées une à une par leurs propres routes)** : l'utilisateur les saisit avec l'éditeur, et un enregistrement en plusieurs requêtes laisserait la fiche à moitié écrite au premier refus. Les routes propres à une collection restent des opérations de l'agrégat, sous la même version ; la saisie d'une série lit par elles les collections de l'éditeur choisi.
 - **Toute modification du parent d'un univers charge le référentiel des univers en entier**, table de petite taille : la chaîne d'ancêtres est complète en mémoire, sans requête récursive.
 
 ## Consultation
