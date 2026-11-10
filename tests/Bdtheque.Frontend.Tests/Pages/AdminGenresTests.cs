@@ -168,14 +168,34 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Edit_OfAGenreOutsideThePage_LeadsToTheListSearchedOnItsLabel()
+    public void Edit_OfAGenreOutsideThePage_LeadsToThePageOfTheListSearchedOnItsLabelThatShowsIt()
     {
         var id = Guid.Parse("01900000-0000-7000-8000-000000000009");
-        _api.Answers[$"/admin/genres/{id}"] = new GenreForm(id, "Science-fiction", 7);
+        _api.Answers[$"/admin/genres/{id}"] = new GenreForm(id, "Fantasy", 7);
+        // Labels that contain it sort before it, and fill the first page of its search.
+        var searched = new GenreListQuery(Text: "Fantasy");
+        _api.Answers[searched.ApiPath()] = new Page<GenreAdminListItem>([Adventure, Biography], 1, AdminListQuery.PageSize, 52);
+        _api.Answers[(searched with { Page = 2 }).ApiPath()] = new Page<GenreAdminListItem>(
+            [Western, Western with { Id = id, Label = "Fantasy" }], 2, AdminListQuery.PageSize, 52);
 
-        Open($"edit={id}");
+        Open($"q=a&page=3&edit={id}");
 
-        Assert.EndsWith($"{AppPaths.AdminGenres}?q=Science-fiction&edit={id}", Services.GetRequiredService<NavigationManager>().Uri);
+        Assert.EndsWith($"{AppPaths.AdminGenres}?q=Fantasy&page=2&edit={id}", Services.GetRequiredService<NavigationManager>().Uri);
+    }
+
+    [Fact]
+    public void Edit_OfAGenreThatNoPageOfItsSearchShows_LeadsNowhere_TheListShownWithoutTheChange()
+    {
+        // Renamed or deleted meanwhile: never a redirection to a page that does not show it, which would repeat itself.
+        var id = Guid.Parse("01900000-0000-7000-8000-000000000009");
+        _api.Answers[$"/admin/genres/{id}"] = new GenreForm(id, "Fantasy", 7);
+        _api.Answers[new GenreListQuery(Text: "Fantasy").ApiPath()] = new Page<GenreAdminListItem>([Adventure], 1, AdminListQuery.PageSize, 1);
+
+        var page = Open($"q=a&edit={id}");
+
+        Assert.EndsWith($"{AppPaths.AdminGenres}?q=a&edit={id}", Services.GetRequiredService<NavigationManager>().Uri);
+        Assert.Empty(page.FindAll("form.genre-row"));
+        Assert.Equal(3, page.FindAll("div.genre-row:not(.genre-row-head)").Count);
     }
 
     [Fact]

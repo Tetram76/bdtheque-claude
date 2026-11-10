@@ -254,10 +254,11 @@
             return;
         }
 
-        // A genre changed from elsewhere than its row (the change log of the home of the administration) is found by its label.
-        if (_query.Edit is { } edited && _editedGenre is null && await FindAsync(edited) is { } genre)
+        // A genre changed from elsewhere than its row (the change log of the home of the administration) is changed on the page of
+        // the list searched on its label that shows it.
+        if (_query.Edit is { } edited && _editedGenre is null && await LocateAsync(edited) is { } located)
         {
-            Navigation.NavigateTo((ListOnly with { Text = genre.Label, Edit = edited }).Href());
+            Navigation.NavigateTo(located.Href());
             return;
         }
 
@@ -279,6 +280,26 @@
 
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // The page of the list searched on the label of the genre that shows it, read page after page: labels that contain it may
+    // sort before it and fill the first pages. None if no page shows it (deleted or renamed meanwhile): the list is then shown
+    // without the change, never led to a page that does not show the genre, which would lead there again.
+    private async Task<GenreListQuery?> LocateAsync(Guid id)
+    {
+        if (await FindAsync(id) is not { } genre)
+            return null;
+
+        var query = ListOnly with { Text = genre.Label, Page = 1, Edit = id };
+        while (true)
+        {
+            var page = await Api.GetAsync<Page<GenreAdminListItem>>(query.ApiPath());
+            if (page.Items.Any(row => row.Id == id))
+                return query;
+            if (query.Page * page.Size >= page.TotalCount)
+                return null;
+            query = query with { Page = query.Page + 1 };
+        }
     }
 
     // The genre, or none if it no longer exists: the list is then shown without it.
