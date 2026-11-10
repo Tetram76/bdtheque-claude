@@ -360,10 +360,15 @@
 
     // An author without last name nor pseudonym, refused at both fields; a display name already taken, at the field it comes
     // from (visuel/saisie-auteur/contenu.md).
-    private string? LastNameError =>
-        IsProblem(RequiredRule) ? L[$"FieldError.{RequiredRule}"].Value
-        : IsProblem(DuplicateRule) && !UnderPseudonym ? DuplicateText
-        : null;
+    private string? LastNameError
+    {
+        get
+        {
+            if (IsProblem(RequiredRule))
+                return L[$"FieldError.{RequiredRule}"].Value;
+            return IsProblem(DuplicateRule) && !UnderPseudonym ? DuplicateText : null;
+        }
+    }
 
     private string? PseudonymError => IsProblem(DuplicateRule) && UnderPseudonym ? DuplicateText : null;
 
