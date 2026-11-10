@@ -87,6 +87,28 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(Names(page)).ToHaveTextAsync([universe.Name]);
     }
 
+    [Fact]
+    public async Task Deletion_RefusedWhileTheUniverseHasASubUniverse_ThenConfirmedForTheSubUniverse()
+    {
+        var parent = await CreateUniverseAsync($"Parent {_marker}");
+        await CreateUniverseAsync($"Enfant {_marker}", parent.Id);
+        var page = await OpenAsync($"{AppPaths.AdminUniverses}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Parent {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
+        var refusal = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Suppression impossible" });
+        await Assertions.Expect(refusal).ToContainTextAsync("Rangez d'abord ses sous-univers sous un autre univers");
+        await refusal.GetByRole(AriaRole.Link, new() { Name = "Fermer" }).ClickAsync();
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Enfant {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
+        await page.GetByRole(AriaRole.Alertdialog, new() { Name = "Supprimer cet univers ?" })
+            .GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminUniverses, $"?q={_marker}"));
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Parent {_marker}"]);
+    }
+
     private async Task<IPage> OpenAsync(string path)
     {
         var page = await NewPageAsync();

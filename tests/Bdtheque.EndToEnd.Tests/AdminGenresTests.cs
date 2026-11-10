@@ -94,6 +94,21 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Humour {_marker}"]);
     }
 
+    [Fact]
+    public async Task Deletion_ConfirmedInAModalDialog_TakesTheGenreOutOfTheList()
+    {
+        await CreateGenreAsync($"À supprimer {_marker}");
+        var page = await OpenAsync($"{AppPaths.AdminGenres}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur À supprimer {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
+        await page.GetByRole(AriaRole.Alertdialog, new() { Name = "Supprimer ce genre ?" })
+            .GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres, $"?q={_marker}"));
+        await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucun genre ne correspond à « {_marker} ».");
+    }
+
     private async Task<IPage> OpenAsync(string path)
     {
         var page = await NewPageAsync();

@@ -273,6 +273,50 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Deletion_RefusedWhileASavedSearchDesignatesTheGenre_SaysWhatToDo()
+    {
+        var id = Western.Id;
+        _api.Answers[$"/admin/genres/{id}/deletion-impact"] = new DeletionImpact([new ImpactCount(EntityKind.SavedSearch, 1)], [], [], [], "f3");
+
+        var dialog = Open($"delete={id}").Find("dialog");
+
+        Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
+        Assert.Equal(
+            ["Retirez d'abord le genre des critères de ces recherches enregistrées, puis recommencez."],
+            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+    }
+
+    [Fact]
+    public void Error_OfTheApi_IsPresentedInsteadOfTheList()
+    {
+        _api.Failures["/admin/genres"] = HttpStatusCode.InternalServerError;
+
+        var page = Open("");
+
+        Assert.Equal("technical", page.Find("[data-error-category]").GetAttribute("data-error-category"));
+        Assert.Empty(page.FindAll(".genre-row"));
+    }
+
+    [Fact]
+    public void APageBeyondTheLast_LeadsToTheLastOne()
+    {
+        _api.Answers["/admin/genres"] = new Page<GenreAdminListItem>([], 3, AdminListQuery.PageSize, 60);
+
+        Open("q=e&page=3");
+
+        Assert.EndsWith($"{AppPaths.AdminGenres}?q=e&page=2", Services.GetRequiredService<NavigationManager>().Uri);
+    }
+
+    [Fact]
+    public void Edit_OfAGenreDeletedMeanwhile_ShowsTheListWithoutIt()
+    {
+        var page = Open($"edit={Guid.NewGuid()}");
+
+        Assert.Empty(page.FindAll("form.genre-row"));
+        Assert.Equal(3, page.FindAll("div.genre-row:not(.genre-row-head)").Count);
+    }
+
+    [Fact]
     public void Audience_TheActionOfItsAddress_ThenTheScreen()
     {
         Open($"q=a&edit={Adventure.Id}", recorded: true);

@@ -3,6 +3,8 @@ using System.Net;
 using AngleSharp.Dom;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Contracts.Deletion;
+using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Pages.Admin;
@@ -226,6 +228,75 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal(("Créer l'univers « Mu »", $"{AppPaths.AdminUniverses}?q=Mu&new=open"), (Text(link), link.GetAttribute("href")));
 
         Assert.Equal("Mu", Open("q=Mu&new=open").Find("input[name='name']").GetAttribute("value"));
+    }
+
+    [Fact]
+    public void Deletion_RefusedWhileTheUniverseHasSubUniverses_SaysWhatToDo()
+    {
+        var id = Pratt.Id;
+        _api.Answers[$"/admin/universes/{id}/deletion-impact"] = new DeletionImpact([new ImpactCount(EntityKind.Universe, 3)], [], [], [], "f1");
+
+        var dialog = Open($"delete={id}").Find("dialog");
+
+        Assert.Equal(("Suppression impossible", "Univers Hugo Pratt"),
+            (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Contains("3 univers", Text(dialog.QuerySelector(".deletion-impact")!));
+        Assert.Equal(
+            ["Rangez d'abord ses sous-univers sous un autre univers, ou supprimez-les, puis recommencez."],
+            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+    }
+
+    [Fact]
+    public void Deletion_OfAUniverseWithoutSubUniverse_AnnouncesTheAlbumsAndSeriesItLeaves_AndConfirmsWithItsVersion()
+    {
+        var id = Antilles.Id;
+        _api.Answers[$"/admin/universes/{id}/deletion-impact"] = new DeletionImpact([], [new ImpactCount(EntityKind.Album, 4)], [], [], "f2");
+
+        var dialog = Open($"delete={id}").Find("dialog");
+
+        Assert.Equal("Supprimer cet univers ?", Text(dialog.QuerySelector(".dialog-title")!));
+        Assert.Contains("4 albums", Text(dialog.QuerySelector(".deletion-impact")!));
+        Assert.Equal(
+            [("Version", "43"), ("Fingerprint", "f2")],
+            dialog.QuerySelectorAll("form[method='post'] input[type='hidden']").Where(input => input.GetAttribute("name") is "Version" or "Fingerprint")
+                .Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
+    }
+
+    [Fact]
+    public void Merge_ADialogThatSearchesTheOtherUniverse_EachCandidateWithItsPlaceInTheHierarchy()
+    {
+        var dialog = Open($"merge={Cities.Id}&mergeQ=o").Find("dialog");
+
+        Assert.Equal("Fusionner deux univers", Text(dialog.QuerySelector(".dialog-title")!));
+        Assert.Equal(
+            [
+                ("Univers Hugo Pratt", "31 albums"),
+                ("Corto Maltese", "Dans Univers Hugo Pratt · 18 albums"),
+                ("Les Antilles", "Dans Univers Hugo Pratt › Corto Maltese · 4 albums"),
+            ],
+            dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
+        Assert.Equal(AppPaths.AdminMergeUniverses, dialog.QuerySelector("#universe-merge-continue")!.GetAttribute("action"));
+    }
+
+    [Fact]
+    public void Error_OfTheApi_IsPresentedInsteadOfTheList()
+    {
+        _api.Failures["/admin/universes"] = HttpStatusCode.InternalServerError;
+
+        var page = Open("");
+
+        Assert.Equal("technical", page.Find("[data-error-category]").GetAttribute("data-error-category"));
+        Assert.Empty(page.FindAll(".universe-row"));
+    }
+
+    [Fact]
+    public void APageBeyondTheLast_LeadsToTheLastOne()
+    {
+        _api.Answers["/admin/universes"] = new Page<UniverseAdminListItem>([], 3, AdminListQuery.PageSize, 60);
+
+        Open("q=o&page=3");
+
+        Assert.EndsWith($"{AppPaths.AdminUniverses}?q=o&page=2", Services.GetRequiredService<NavigationManager>().Uri);
     }
 
     [Fact]
