@@ -1,10 +1,10 @@
 ---
 type: Référence visuelle
 title: 'Déclinaison par thème'
-description: 'Déclinaison par thème de la saisie d''un auteur.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+description: 'Déclinaison par thème du panneau d''un auteur, celle des listes.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T15:00:31Z }
 ---
 
 # Déclinaison par thème
 
-Celle de la saisie d'un album ([Déclinaison par thème](../saisie-album/declinaison-par-theme.md)). Les mentions au-dessus des titres de bloc sont : Identification (L'auteur), Présentation (Biographie).
+Celle du panneau d'un univers, c'est-à-dire des listes de l'administration ([Déclinaison par thème](../listes/declinaison-par-theme.md)) : le panneau n'a pas de blocs, ni de mention au-dessus de leur titre.

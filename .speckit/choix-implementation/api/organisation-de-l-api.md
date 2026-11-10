@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:16:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T15:00:50Z }
 ---
 
 # Organisation de l'API
@@ -29,7 +29,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:16:43Z }
   - **Alternative écartée (`PATCH`)** : les formulaires envoient toujours la fiche entière ; un correctif partiel multiplierait les combinaisons à valider, sans cas d'usage.
 - **Un même contenu pour la création et la modification** d'une fiche, associations et contributions comprises, remplacées en bloc, seule la différence étant écrite. Une référence à une fiche supprimée entre-temps est une erreur fonctionnelle.
 - **Fiches ajoutées sur place créées avec la fiche saisie** : le contenu décrit les auteurs, genres et univers que le formulaire a ajoutés, chacun sous une clé qu'il cite à la place d'un identifiant ; ils sont créés par le domaine dans la transaction de l'enregistrement, avec lui ou pas du tout.
-- **La lecture d'une fiche pour sa saisie nomme les fiches qu'elle cite** (série, éditeur et collection, genres, univers avec leurs ancêtres, auteurs) et porte ses dates : le formulaire les présente sans autre requête. Un univers ajouté se lit avec ses ancêtres (`/admin/universes/{id}/hierarchy`), la clé de tri d'un titre se demande au domaine (`/admin/sort-keys/title`).
+- **La lecture d'une fiche pour sa saisie nomme les fiches qu'elle cite** (série, éditeur et collection, genres, univers avec leurs ancêtres, auteurs) et porte ses dates : le formulaire les présente sans autre requête. Un univers ajouté se lit avec ses ancêtres (`/admin/universes/{id}/hierarchy`), la clé de tri d'un titre se demande au domaine (`/admin/sort-keys/title`), comme celle d'un auteur, avec le nom affiché et l'initiale qu'il tire de ses noms (`/admin/sort-keys/author`).
 - **Valeurs de départ d'une nouvelle série demandées au domaine** (`GET /admin/series/new`) : ses nouvelles éditions proposent ce que toute nouvelle édition se voit proposer ([Série](../../modele-metier/serie.md)), valeurs que tient le domaine, comme le pré-remplissage d'une nouvelle édition. Rien n'est écrit : la série enregistre ce que le formulaire envoie.
   - **Alternative écartée (valeurs écrites dans le frontend)** : une seconde source des valeurs proposées, qui divergerait de celle de la nouvelle édition.
 - **Reprise des auteurs de la série calculée par le domaine, à la demande du formulaire** ([Initialisation des contributions depuis la série](../../fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)) : `POST /admin/series/{id}/album-contributions` reçoit les contributions de l'album, s'il est en création, et la série choisie précédemment, et dit si la série les remplace, avec, nommées, celles qu'elle lui donne. L'enregistrement de l'album ne recopie rien.

@@ -1,7 +1,7 @@
 # Saisie d'un auteur
 
-* [Saisie d'un auteur](saisie-d-un-auteur.md) - Fiche de saisie d'un auteur.
+* [Saisie d'un auteur](saisie-d-un-auteur.md) - Saisie d'un auteur dans un panneau latéral, par-dessus la liste des auteurs.
 * [Maquettes](maquettes.md) - Maquettes de la saisie d'un auteur.
-* [Contenu](contenu.md) - Contenu de la saisie d'un auteur : identité, nom affiché et clé calculés, biographie.
+* [Contenu](contenu.md) - Contenu du panneau d'un auteur : ouverture, erreurs, identité, nom affiché et clé calculés, nationalité, biographie, actions.
 * [Contrôles](controles.md) - Contrôles de la saisie d'un auteur.
-* [Déclinaison par thème](declinaison-par-theme.md) - Déclinaison par thème de la saisie d'un auteur.
+* [Déclinaison par thème](declinaison-par-theme.md) - Déclinaison par thème du panneau d'un auteur, celle des listes.

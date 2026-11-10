@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes de la saisie d''un auteur.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T15:00:31Z }
 ---
 
 # Maquettes
@@ -18,3 +18,5 @@ Réglages de la source commune :
 | `menuOpen` | menu de l'administration ouvert |
 
 Les données sont fictives ; les couvertures sont des illustrations de substitution.
+
+Ces maquettes présentent encore la saisie sur une page dédiée, en blocs : elles restent la référence de ses champs et du cadre en tirets de ce qui découle des noms, le panneau qui les porte étant celui d'un univers ([Maquettes](../listes/maquettes.md) des listes, réglage `panneau`).
