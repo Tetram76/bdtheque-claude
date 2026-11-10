@@ -203,9 +203,10 @@ else
 
     private string PageTitle => Entry is null || Entry.Id is null ? L["New"] : L["PageTitle", Subject];
 
-    private SaveBarState State => Entry!.Id is null
-        ? SaveBarState.New
-        : Entry.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
+    private SaveBarState State => Entry!.Id is null ? SaveBarState.New : SavedState;
+
+    // The state of a series already saved: whether its form still holds what was last read or saved.
+    private SaveBarState SavedState => Entry!.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
 
     protected override async Task OnInitializedAsync()
     {
