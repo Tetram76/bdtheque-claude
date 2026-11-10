@@ -117,7 +117,7 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         return page;
     }
 
-    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Genres" }).Locator(".genre-label");
+    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Genres" }).Locator(".row-entry");
 
     private async Task CreateGenreAsync(string label)
     {

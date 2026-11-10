@@ -56,12 +56,6 @@
     min-inline-size: 0;
 }
 
-.album-label {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 .album-authors {
     overflow: hidden;
     color: var(--color-text-muted);

@@ -89,7 +89,7 @@
 
                     <div class="genre-row" role="row">
                         <span class="genre-main" role="cell">
-                            <a class="genre-label" href="@((ListOnly with { Edit = row.Id }).Href())">@row.Label</a>
+                            <RowEntry>@row.Label</RowEntry>
                         </span>
                         @Numbers(row)
                         <span class="genre-actions" role="cell">

@@ -1,0 +1,8 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the entry stands out in its row, and a long
+   name breaks rather than widening its column. */
+.row-entry {
+    min-inline-size: 0;
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}

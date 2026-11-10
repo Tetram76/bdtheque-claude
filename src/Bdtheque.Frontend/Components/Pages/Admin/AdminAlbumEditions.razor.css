@@ -142,12 +142,6 @@
     min-inline-size: 0;
 }
 
-.edition-label {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 .edition-sub,
 .intent-sub {
     color: var(--color-text-muted);
