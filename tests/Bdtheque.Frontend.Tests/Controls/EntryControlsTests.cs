@@ -9,6 +9,7 @@ using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Presentation;
 using Bdtheque.Frontend.Formatting;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Controls;
@@ -42,6 +43,8 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Services.AddScoped<RecordSearch>();
         Services.AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
         JSInterop.Mode = JSRuntimeMode.Loose;
+        // The identity of an author marks itself interactive, as its parts that follow the typing are.
+        SetRendererInfo(new RendererInfo("Server", true));
     }
 
     void IDisposable.Dispose()
@@ -269,6 +272,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Assert.Equal(
             [("Affiché", "Jean Van Hamme"), ("Classé à", "Van Hamme Jean"), ("Initiale", "V")],
             fields.FindAll(".author-identity-value").Select(value => (value.QuerySelector("dt")!.TextContent, value.QuerySelector("dd")!.TextContent)));
+        Assert.True(fields.Find(".author-identity").HasAttribute("data-interactive"));
         Assert.Empty(_sent);
     }
 

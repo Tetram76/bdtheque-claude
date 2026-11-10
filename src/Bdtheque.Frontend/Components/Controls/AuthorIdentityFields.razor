@@ -10,24 +10,22 @@
    never computed here (choix-implementation/socle/frontend.md, no rule of entry in the frontend). It needs interactivity to
    follow the typing: the caller renders it in the InteractiveServer mode, and passes it only what serializes. An author without
    last name nor pseudonym, refused, has both fields bordered with the alert color until one of them changes. *@
-<div class="author-identity">
+@* Marked once interactive, from when it follows the typing: before, in the prerendering, what is typed is not yet followed. *@
+<div class="author-identity" data-interactive="@RendererInfo.IsInteractive">
     <div class="author-identity-names">
         <Field Id="@FirstNameId" Label="@L["FirstName"]" Context="control">
-            <input id="@control.Id" type="text" name="@FirstNameName" value="@_firstName" autocomplete="off"
-                   @oninput="@(args => ChangeAsync(args, (names, value) => names with { FirstName = value }))" />
+            <input id="@control.Id" type="text" name="@FirstNameName" autocomplete="off"
+                   @bind="_firstName" @bind:event="oninput" @bind:after="ChangeAsync" />
         </Field>
         <Field Id="@LastNameId" Label="@L["LastName"]" Error="@_error" Context="control">
-            <input id="@control.Id" type="text" name="@LastNameName" value="@_lastName" autocomplete="off"
-                   aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
-                   @oninput="@(args => ChangeAsync(args, (names, value) => names with { LastName = value }))" />
+            <input id="@control.Id" type="text" name="@LastNameName" autocomplete="off" aria-describedby="@control.DescribedBy"
+                   aria-invalid="@control.Invalid" @bind="_lastName" @bind:event="oninput" @bind:after="ChangeAsync" />
         </Field>
     </div>
     <Field Id="@PseudonymId" Label="@L["Pseudonym"]" Help="@L["Pseudonym.Help"]" Context="control">
         @* The error, said once under the last name, concerns the pseudonym as much: it is bordered and described by it too. *@
-        <input id="@control.Id" type="text" name="@PseudonymName" value="@_pseudonym" autocomplete="off"
-               aria-describedby="@PseudonymDescribedBy(control.DescribedBy)"
-               aria-invalid="@(_error is null ? null : "true")"
-               @oninput="@(args => ChangeAsync(args, (names, value) => names with { Pseudonym = value }))" />
+        <input id="@control.Id" type="text" name="@PseudonymName" autocomplete="off" aria-describedby="@PseudonymDescribedBy(control.DescribedBy)"
+               aria-invalid="@(_error is null ? null : "true")" @bind="_pseudonym" @bind:event="oninput" @bind:after="ChangeAsync" />
     </Field>
     <div class="author-identity-derived" role="group" aria-labelledby="@DerivedTitleId">
         <p class="author-identity-derived-title" id="@DerivedTitleId">@L["Derived"]</p>
@@ -53,7 +51,6 @@
     // The number of the names whose identity is shown: each change of a name gets the next one, before anything is awaited, and
     // only the answer for the last names is shown (as the sort key of a title, Controls/TitleSortKeyField.razor).
     private int _namesNumber;
-    private Names _names = new(null, null, null);
     private string? _lastName;
     private string? _firstName;
     private string? _pseudonym;
@@ -109,18 +106,14 @@
         if (received == _received)
             return;
         _received = received;
-        _names = received.Names;
         (_lastName, _firstName, _pseudonym, _derived, _error) = (LastName, FirstName, Pseudonym, Derived, Error);
     }
 
-    private async Task ChangeAsync(ChangeEventArgs args, Func<Names, string?, Names> change)
+    private async Task ChangeAsync()
     {
-        var value = args.Value as string;
-        _names = change(_names, value);
-        (_lastName, _firstName, _pseudonym) = (_names.LastName, _names.FirstName, _names.Pseudonym);
         _error = null;
         var number = ++_namesNumber;
-        var names = _names;
+        var names = new Names(_lastName, _firstName, _pseudonym);
         try
         {
             var derived = await Api.GetAsync<AuthorSortKey>(

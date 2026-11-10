@@ -59,6 +59,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         _api.AddServices(Services, _request);
         Services.AddSingleton(TimeProvider.System);
         Answer([Gibelin, Gibrat, Gomez, Gotlib], totalCount: 38);
+        // The identity of the panel of an author marks itself interactive, as it is in the application.
+        SetRendererInfo(new RendererInfo("Server", true));
         _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(
             Gotlib.Id, "Gotlieb", "Marcel", "Gotlib", "Créateur de Gai-Luron.", "Française", January, March, 44);
         _api.Answers["/admin/sort-keys/author"] = new AuthorSortKey(null, null, null);

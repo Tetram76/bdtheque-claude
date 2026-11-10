@@ -8,9 +8,11 @@ using frontend::Bdtheque.Frontend.Navigation;
 namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
-/// The list of the authors of the administration (visuel/listes/liste-par-liste.md), on the application shared by the tests:
+/// The list of the authors of the administration (visuel/listes/liste-par-liste.md), on the application shared by the tests,
+/// and the side panel of an author over the list (visuel/listes/saisie-selon-l-entite.md), whose identity follows the typing:
 /// each test names its authors with a marker of its own, and searches it. What the list shares with that of the albums (the
-/// modal dialog, Escape) is pinned by AdminAlbumsTests.
+/// modal dialog, Escape) is pinned by AdminAlbumsTests, and what the panel shares with that of a universe, by
+/// AdminUniversesTests.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
 public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
@@ -49,6 +51,58 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" }).GetByRole(AriaRole.Link, new() { Name = "G", Exact = true }).ClickAsync();
         await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Jean-Pierre Gibrat {_marker}", $"Gotlib {_marker}"]);
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors, $"?q={_marker}&entry=G"));
+    }
+
+    [Fact]
+    public async Task New_InThePanel_PresentsWhatDerivesFromItsNamesWhileTheyAreTyped_ThenTakesItsPlaceInTheList()
+    {
+        var page = await OpenAsync($"{AppPaths.AdminAuthors}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Nouvel auteur" }).ClickAsync();
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel auteur" });
+        Assert.True(await panel.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
+        await WaitUntilInteractiveAsync(page);
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Prénom" }).PressSequentiallyAsync("Jean");
+        // The search that finds no author proposes it as the name of the new one, which is replaced.
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true })).ToHaveValueAsync(_marker);
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true }).FillAsync($"Van Hamme {_marker}");
+        var derived = panel.GetByRole(AriaRole.Group, new() { Name = "Calculé, non saisi" });
+        await Assertions.Expect(derived.Locator("dd")).ToHaveTextAsync([$"Jean Van Hamme {_marker}", $"Van Hamme {_marker} Jean", "V"]);
+        // A pseudonym stands for the name.
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Pseudonyme" }).PressSequentiallyAsync($"JVH {_marker}");
+        await Assertions.Expect(derived.Locator("dd")).ToHaveTextAsync([$"JVH {_marker}", $"JVH {_marker}", "J"]);
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" }).FillAsync("Belge");
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Créer l'auteur" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors, $"?q={_marker}"));
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"JVH {_marker}"]);
+        await Assertions.Expect(page.Locator(".author-identity")).ToHaveTextAsync($"Jean Van Hamme {_marker}");
+        await Assertions.Expect(page.Locator(".author-row:not(.author-row-head) .author-nationality")).ToHaveTextAsync("Belge");
+    }
+
+    [Fact]
+    public async Task Edit_WithoutLastNameNorPseudonym_IsRefusedInPlace_ThenSavedOnceCorrected()
+    {
+        var author = await CreateAuthorAsync($"Hugo {_marker}", "Victor", null);
+        var page = await OpenAsync($"{AppPaths.AdminAuthors}?q={_marker}");
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Victor Hugo {_marker}" }).ClickAsync();
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        await WaitUntilInteractiveAsync(page);
+
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true }).FillAsync("");
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        await Assertions.Expect(panel).ToContainTextAsync("Un auteur a au moins un nom ou un pseudonyme : renseignez l'un ou l'autre.");
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Pseudonyme" })).ToHaveAttributeAsync("aria-invalid", "true");
+        await WaitUntilInteractiveAsync(page);
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Pseudonyme" }).PressSequentiallyAsync($"VH {_marker}");
+        await Assertions.Expect(panel.Locator("[aria-invalid]")).ToHaveCountAsync(0);
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors, $"?q={_marker}"));
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"VH {_marker}"]);
+        Assert.Equal(author.Id, (await GetAsync<AuthorForm>($"/admin/authors/{author.Id}")).Id);
     }
 
     [Fact]
@@ -140,10 +194,20 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         return page;
     }
 
+    // The identity of the panel follows the typing once interactive, which it marks itself.
+    private static Task WaitUntilInteractiveAsync(IPage page) =>
+        page.WaitForFunctionAsync("() => document.querySelector('.author-identity[data-interactive]') !== null");
+
     private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Auteurs" }).Locator(".author-name");
 
     private Task<AuthorForm> CreateAuthorAsync(string lastName, string? firstName, string? pseudonym) =>
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(lastName, firstName, pseudonym, null, null));
+
+    private async Task<TForm> GetAsync<TForm>(string path)
+    {
+        using var api = Application.CreateApiClient();
+        return (await api.GetFromJsonAsync<TForm>(path))!;
+    }
 
     private async Task<TForm> PostAsync<TForm>(string path, object request)
     {
