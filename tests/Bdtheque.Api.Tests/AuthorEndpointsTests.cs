@@ -40,6 +40,21 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
     }
 
     [Fact]
+    public async Task Get_CarriesTheDatesOfTheRecord_WhichTheEntryFormPresents()
+    {
+        var author = await CreateAsync(UniqueName());
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/authors/{author.Id}", new UpdateAuthorRequest("Changé", null, null, null, null, author.Version));
+        var updated = (await response.Content.ReadFromJsonAsync<AuthorForm>())!;
+
+        Assert.NotEqual(default, author.CreatedAt);
+        Assert.Equal(author.CreatedAt, author.ModifiedAt);
+        Assert.Equal(author.CreatedAt, updated.CreatedAt);
+        Assert.True(updated.ModifiedAt > author.ModifiedAt);
+    }
+
+    [Fact]
     public async Task Create_WithPseudonymOnly_IsAccepted()
     {
         var response = await _client.PostAsJsonAsync("/admin/authors", new CreateAuthorRequest(null, null, "Moebius", null, null));

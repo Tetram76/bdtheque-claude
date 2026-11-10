@@ -109,7 +109,7 @@ admin.MapPublishers();
 admin.MapAuthors();
 admin.MapSeries();
 admin.MapAlbums();
-admin.MapTitleSortKeys();
+admin.MapSortKeys();
 admin.MapEditions();
 admin.MapEditionVisuals();
 admin.MapPurchaseIntents();

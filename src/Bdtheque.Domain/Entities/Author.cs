@@ -31,29 +31,16 @@ public sealed class Author : EntityBase, IAggregateRoot
 
     public void UpdateIdentity(string? lastName, string? firstName, string? pseudonym)
     {
-        if (string.IsNullOrWhiteSpace(lastName) && string.IsNullOrWhiteSpace(pseudonym))
-            throw new DomainRuleViolationException(
-                DomainRules.AuthorLastNameOrPseudonymRequired, "An author must have at least a last name or a pseudonym.");
+        var identity = AuthorIdentity.Of(lastName, firstName, pseudonym)
+                       ?? throw new DomainRuleViolationException(
+                           DomainRules.AuthorLastNameOrPseudonymRequired, "An author must have at least a last name or a pseudonym.");
 
         LastName = DomainText.NullIfBlank(lastName);
         FirstName = DomainText.NullIfBlank(firstName);
         Pseudonym = DomainText.NullIfBlank(pseudonym);
 
-        SortKey = ComputeSortKey();
-        NavigationEntry = NavigationEntryCalculator.Compute(SortKey);
-    }
-
-    /// <summary>
-    /// The main identifier (pseudonym, otherwise "First Last"), except that a "First Last"
-    /// identifier sorts as "Last First", to file authors by family name
-    /// (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
-    /// </summary>
-    private string ComputeSortKey()
-    {
-        if (Pseudonym is not null)
-            return Pseudonym;
-        // LastName is set whenever Pseudonym is not (UpdateIdentity guard).
-        return FirstName is null ? LastName! : $"{LastName} {FirstName}";
+        SortKey = identity.SortKey;
+        NavigationEntry = identity.NavigationEntry;
     }
 
     public void UpdateBiography(string? biography) => Biography = DomainText.NullIfBlank(biography);

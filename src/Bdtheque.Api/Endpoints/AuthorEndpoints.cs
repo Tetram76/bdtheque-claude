@@ -160,7 +160,7 @@ internal static class AuthorEndpoints
         await context.Authors
             .Where(a => a.Id == id)
             .Select(a => new AuthorForm(
-                a.Id, a.LastName, a.FirstName, a.Pseudonym, a.Biography, a.Nationality,
+                a.Id, a.LastName, a.FirstName, a.Pseudonym, a.Biography, a.Nationality, a.CreatedAt, a.ModifiedAt,
                 EF.Property<uint>(a, BdthequeDbContext.VersionProperty)))
             .SingleOrDefaultAsync(cancellationToken)
         ?? throw new EntityNotFoundException(typeof(Author), id);
@@ -190,6 +190,6 @@ internal static class AuthorEndpoints
     }
 
     private static AuthorForm ToForm(BdthequeDbContext context, Author author) =>
-        new(author.Id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality,
-            context.VersionOf(author));
+        new(author.Id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality, author.CreatedAt,
+            author.ModifiedAt, context.VersionOf(author));
 }
