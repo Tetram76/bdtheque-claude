@@ -202,6 +202,20 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Collections_ThatCouldNotBeRead_AreSoInTheStateHandedToTheInteractiveForm()
+    {
+        // The form is read once, by the prerendering, which hands the interactive form its persisted state ([PersistentState])
+        // and nothing else: the collections not read must be so in that state, or the interactive form would present an
+        // empty list of them without saying so.
+        _api.Failures[$"/admin/publishers/{Dargaud}/collections"] = HttpStatusCode.InternalServerError;
+
+        var prerendered = OpenSeries().Instance;
+
+        Assert.NotNull(prerendered.Entry!.Publisher);
+        Assert.Null(prerendered.PublisherCollections);
+    }
+
+    [Fact]
     public void NewSeries_EmptyWithoutDates_ItsNewEditionsPreFilled_AndSaySo()
     {
         var page = OpenNew();

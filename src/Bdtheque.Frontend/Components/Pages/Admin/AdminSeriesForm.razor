@@ -99,7 +99,7 @@ else
                     @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and removed
                        when it changes. *@
                     <Field Id="series-collection" Label="@L["Collection"]" Error="@FieldError("collection")"
-                           Help="@(_collectionsUnread ? L["Collection.Unread"].Value : null)" Context="control">
+                           Help="@(CollectionsUnread ? L["Collection.Unread"].Value : null)" Context="control">
                         <select id="@control.Id" class="series-collection" disabled="@(Entry.Publisher is null)"
                                 aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
                                 aria-invalid="@control.Invalid" value="@(Entry.PublisherCollection?.Id.ToString() ?? "")" @onchange="ChooseCollection">
@@ -180,7 +180,6 @@ else
     private string? _savedFingerprint;
     private bool _changesShown;
     private int _publisherChoice;
-    private bool _collectionsUnread;
 
     /// <summary>The series to modify; none for a new series.</summary>
     [Parameter]
@@ -194,9 +193,16 @@ else
     [PersistentState]
     public SeriesEntry? ReadEntry { get; set; }
 
-    /// <summary>The collections of the publisher chosen, by name, which its collection is chosen among; none without publisher.</summary>
+    /// <summary>
+    /// The collections of the publisher chosen, by name, which its collection is chosen among; none without publisher, and
+    /// none either if they could not be read, which the field then says. Persisted with the form, so that collections not read
+    /// by the prerendering stay so once interactive.
+    /// </summary>
     [PersistentState]
     public List<RecordOption>? PublisherCollections { get; set; }
+
+    // A publisher chosen, whose collections could not be read.
+    private bool CollectionsUnread => Entry!.Publisher is not null && PublisherCollections is null;
 
     // The title of the series, as typed; « <Sans titre> » while nothing is.
     private string Subject => string.IsNullOrWhiteSpace(Entry!.Title) ? L["Untitled"] : Entry.Title.Trim();
@@ -253,8 +259,8 @@ else
         Entry.ChoosePublisher(publisher);
         if (!changed)
             return;
+        // None while those of the new one are read.
         PublisherCollections = [];
-        _collectionsUnread = false;
         if (publisher is null)
             return;
         var collections = await CollectionsOfAsync(publisher.Id);
@@ -262,19 +268,17 @@ else
             PublisherCollections = collections;
     }
 
-    // The collections of a publisher, by name; none if they cannot be read, which the field then says.
-    private async Task<List<RecordOption>> CollectionsOfAsync(Guid publisherId)
+    // The collections of a publisher, by name; null if they cannot be read.
+    private async Task<List<RecordOption>?> CollectionsOfAsync(Guid publisherId)
     {
         try
         {
             var collections = await Api.GetAsync<List<PublisherCollectionForm>>($"/admin/publishers/{publisherId}/collections");
-            _collectionsUnread = false;
             return [.. collections.Select(c => new RecordOption(c.Id, c.Name, null))];
         }
         catch (ApiProblemException)
         {
-            _collectionsUnread = true;
-            return [];
+            return null;
         }
     }
 
