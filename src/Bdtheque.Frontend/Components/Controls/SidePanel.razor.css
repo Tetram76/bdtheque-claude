@@ -47,10 +47,19 @@
     font-size: var(--font-size-title);
 }
 
+/* A container, whose fields lay out after the width of the panel, not of the screen. */
 .side-panel-body {
+    container: side-panel / inline-size;
     display: flex;
     flex-direction: column;
     gap: var(--space-m);
+}
+
+/* The dates of the record in its panel, under its fields. */
+.side-panel-body ::deep .side-panel-dates {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
 }
 
 /* The actions at the bottom of the panel, whatever the length of its fields. */

@@ -166,10 +166,3 @@
         display: block;
     }
 }
-
-/* The dates of the universe in its panel, under its fields. */
-.side-panel-form ::deep .side-panel-dates {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-small);
-}

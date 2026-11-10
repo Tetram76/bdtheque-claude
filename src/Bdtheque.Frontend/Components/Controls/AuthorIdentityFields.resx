@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FirstName" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Pseudonym" xml:space="preserve">
+    <value>Pseudonyme</value>
+  </data>
+  <data name="Pseudonym.Help" xml:space="preserve">
+    <value>Il faut au moins le nom ou le pseudonyme. Un duo ou un collectif crédité sous un nom commun est un auteur, sous ce nom.</value>
+  </data>
+  <data name="Derived" xml:space="preserve">
+    <value>Calculé, non saisi</value>
+  </data>
+  <data name="Derived.Displayed" xml:space="preserve">
+    <value>Affiché</value>
+  </data>
+  <data name="Derived.SortKey" xml:space="preserve">
+    <value>Classé à</value>
+  </data>
+  <data name="Derived.Entry" xml:space="preserve">
+    <value>Initiale</value>
+  </data>
+  <data name="Derived.Help" xml:space="preserve">
+    <value>Le pseudonyme tient lieu de nom ; sans lui, l'auteur est classé à son nom, puis à son prénom.</value>
+  </data>
+</root>

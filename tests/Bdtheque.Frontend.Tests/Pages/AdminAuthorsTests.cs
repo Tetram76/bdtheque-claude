@@ -5,6 +5,7 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
@@ -17,8 +18,10 @@ namespace Bdtheque.Frontend.Tests.Pages;
 
 /// <summary>
 /// The list of the authors of the administration (visuel/listes/liste-par-liste.md): its rows, its count, its search without
-/// filters, its dialogs and its errors, told apart by role, link and text, never by appearance. What it shares with the list
-/// of the albums (active filters, navigation, page beyond the last) is pinned by AdminAlbumsTests.
+/// filters, its dialogs, the side panel of an author over the list (visuel/listes/saisie-selon-l-entite.md) and its errors,
+/// told apart by role, link and text, never by appearance. What it shares with the list of the albums (active filters,
+/// navigation, page beyond the last) is pinned by AdminAlbumsTests; what the identity of the panel does while the names are
+/// typed, by EntryControlsTests.
 /// </summary>
 public sealed class AdminAuthorsTests : BunitContext, IDisposable
 {
@@ -38,6 +41,9 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Guid.Parse("01900000-0000-7000-8000-000000000004"), "Gotlieb", "Marcel", "Gotlib", "Française", 22,
         [ContributionRole.Scenarist, ContributionRole.Illustrator], new DateTimeOffset(2026, 3, 30, 8, 0, 0, TimeSpan.Zero), 44);
 
+    private static readonly DateTimeOffset January = new(2026, 1, 12, 9, 30, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset March = new(2026, 3, 30, 8, 0, 0, TimeSpan.Zero);
+
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
     private readonly FakeAdminApi _api;
@@ -53,6 +59,10 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         _api.AddServices(Services, _request);
         Services.AddSingleton(TimeProvider.System);
         Answer([Gibelin, Gibrat, Gomez, Gotlib], totalCount: 38);
+        _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(
+            Gotlib.Id, "Gotlieb", "Marcel", "Gotlib", "Créateur de Gai-Luron.", "Française", January, March, 44);
+        _api.Answers["/admin/sort-keys/author"] = new AuthorSortKey(null, null, null);
+        _api.Answers["/admin/sort-keys/author?lastName=Gotlieb&firstName=Marcel&pseudonym=Gotlib"] = new AuthorSortKey("Gotlib", "Gotlib", "G");
     }
 
     void IDisposable.Dispose()
@@ -132,12 +142,13 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_LeadToTheEntryFormAndTheConsultation_AndOpenTheirDialogsInTheList()
+    public void Rows_LeadToTheConsultation_AndOpenTheirPanelAndTheirDialogsInTheList()
     {
         var row = Open("q=gib").FindAll(".author-row:not(.author-row-head)")[3];
         var id = Gotlib.Id;
 
-        Assert.Equal(AppPaths.AdminEditAuthor(id), row.QuerySelector(".author-name")!.GetAttribute("href"));
+        Assert.Equal($"{AppPaths.AdminAuthors}?q=gib&edit={id}", row.QuerySelector(".author-name")!.GetAttribute("href"));
+        Assert.Equal($"{AppPaths.AdminAuthors}?q=gib&edit={id}", row.QuerySelector(".author-actions a.button")!.GetAttribute("href"));
         Assert.Equal("Modifier Gotlib", row.QuerySelector(".author-actions a.button")!.GetAttribute("aria-label"));
         Assert.Equal(
             [
@@ -169,8 +180,21 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
 
         Assert.Equal("Aucun auteur ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
         Assert.Equal(
-            [("Effacer la recherche", $"{AppPaths.AdminAuthors}?entry=Z"), ("Créer l'auteur « Zorglub »", AppPaths.AdminNewAuthor)],
+            [("Effacer la recherche", $"{AppPaths.AdminAuthors}?entry=Z"), ("Créer l'auteur « Zorglub »", $"{AppPaths.AdminAuthors}?q=Zorglub&entry=Z&new=open")],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Theory]
+    [InlineData("Zorglub", "", "Zorglub")]
+    [InlineData("Jean Van Hamme", "Jean", "Van Hamme")]
+    public void Empty_TheAuthorSearched_IsTheNewAuthorOfThePanel_ItsNameSplitAsWhenCreatedOnTheSpot(string searched, string firstName, string lastName)
+    {
+        Answer([], totalCount: 0);
+
+        var panel = Open($"q={Uri.EscapeDataString(searched)}&new=open").Find("dialog.side-panel");
+
+        Assert.Equal((firstName, lastName),
+            (panel.QuerySelector("input[name='firstName']")!.GetAttribute("value") ?? "", panel.QuerySelector("input[name='lastName']")!.GetAttribute("value")));
     }
 
     [Fact]
@@ -250,6 +274,112 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal(AppPaths.AdminMergeAuthors, next.GetAttribute("action"));
         Assert.Equal(Gotlib.Id.ToString(), next.QuerySelector("input[name='author']")!.GetAttribute("value"));
         Assert.Contains(_api.Requested, path => path == "/admin/authors?q=g&pageSize=11");
+    }
+
+    [Fact]
+    public void Panel_OfAnAuthor_ItsIdentityWhatDerivesFromItItsOtherFieldsAndItsDates()
+    {
+        var panel = Open($"q=gib&edit={Gotlib.Id}").Find("dialog.side-panel");
+
+        Assert.Equal("Modifier l'auteur", Text(panel.QuerySelector("h2")!));
+        Assert.Equal(
+            [("firstName", "Marcel"), ("lastName", "Gotlieb"), ("pseudonym", "Gotlib"), ("nationality", "Française")],
+            panel.QuerySelectorAll("input[type='text']").Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
+        Assert.Equal(["Gotlib", "Gotlib", "G"], panel.QuerySelectorAll(".author-identity-value dd").Select(Text));
+        Assert.Equal("Créateur de Gai-Luron.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='biography']")!).Value);
+        Assert.Equal("Auteur créé le 12/01/2026 10:30, modifié le 30/03/2026 10:00.", Text(panel.QuerySelector(".side-panel-dates")!));
+        Assert.Equal(
+            [("Annuler", $"{AppPaths.AdminAuthors}?q=gib"), ("Enregistrer", null)],
+            panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Panel_OfANewAuthor_EmptyWithoutDates()
+    {
+        var panel = Open("entry=G&new=open").Find("dialog.side-panel");
+
+        Assert.Equal("Nouvel auteur", Text(panel.QuerySelector("h2")!));
+        Assert.All(panel.QuerySelectorAll("input[type='text']"), input => Assert.Null(input.GetAttribute("value")));
+        Assert.Null(panel.QuerySelector(".side-panel-dates"));
+        Assert.Equal(
+            [("Annuler", $"{AppPaths.AdminAuthors}?entry=G"), ("Créer l'auteur", null)],
+            panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Panel_SavesTheAuthorWithItsVersion_ThenLeadsBackToTheList()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"]);
+        var page = Open($"q=gib&edit={Gotlib.Id}", recorded: true);
+
+        page.Find("input[name='nationality']").Change("Belge");
+        page.Find("form.side-panel-form").Submit();
+
+        var written = Assert.Single(_api.Written);
+        Assert.Equal((HttpMethod.Put, $"/admin/authors/{Gotlib.Id}", "Gotlieb", "Marcel", "Gotlib", "Belge", "Créateur de Gai-Luron.", 44u),
+            (written.Method, written.Path, written.Body.GetProperty("lastName").GetString(), written.Body.GetProperty("firstName").GetString(),
+                written.Body.GetProperty("pseudonym").GetString(), written.Body.GetProperty("nationality").GetString(),
+                written.Body.GetProperty("biography").GetString(), written.Body.GetProperty("version").GetUInt32()));
+        Assert.EndsWith($"{AppPaths.AdminAuthors}?q=gib", Services.GetRequiredService<NavigationManager>().Uri);
+        Assert.Contains("admin.author.saved", _audience.Functions);
+    }
+
+    [Fact]
+    public void Panel_CreatesTheAuthor_ThenLeadsBackToTheList()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"], HttpStatusCode.Created);
+        var page = Open("new=open", recorded: true);
+
+        page.Find("form.side-panel-form").Submit();
+
+        var written = Assert.Single(_api.Written);
+        Assert.Equal((HttpMethod.Post, "/admin/authors"), (written.Method, written.Path));
+        Assert.EndsWith(AppPaths.AdminAuthors, Services.GetRequiredService<NavigationManager>().Uri);
+        Assert.Contains("admin.author.created", _audience.Functions);
+    }
+
+    [Fact]
+    public void Panel_AnAuthorWithoutLastNameNorPseudonym_IsRefusedAtBothFields()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.LastNameOrPseudonymRequired");
+        var page = Open("new=open");
+
+        page.Find("form.side-panel-form").Submit();
+
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal(("true", "true"), (panel.QuerySelector("input[name='lastName']")!.GetAttribute("aria-invalid"),
+            panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-invalid")));
+        Assert.Equal("Un auteur a au moins un nom ou un pseudonyme : renseignez l'un ou l'autre.", Text(panel.QuerySelector(".field-error")!));
+        Assert.Empty(panel.QuerySelectorAll("[data-error-category]"));
+    }
+
+    [Fact]
+    public void Panel_AnAuthorChangedMeanwhile_IsPresentedAtTheTopOfThePanel()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        var page = Open($"edit={Gotlib.Id}");
+
+        page.Find("form.side-panel-form").Submit();
+
+        Assert.Equal("functional", page.Find("dialog.side-panel [data-error-category]").GetAttribute("data-error-category"));
+        Assert.Empty(page.FindAll("dialog.side-panel [aria-invalid]"));
+    }
+
+    [Fact]
+    public void Panel_OfAnAuthorDeletedMeanwhile_IsNotOpened()
+    {
+        var page = Open($"edit={Guid.NewGuid()}");
+
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.Equal(4, page.FindAll(".author-row:not(.author-row-head)").Count);
+    }
+
+    [Fact]
+    public void Audience_ThePanelOpened_ThenTheScreen()
+    {
+        Open($"edit={Gotlib.Id}", recorded: true);
+
+        Assert.Equal(["admin.authors.edit", "admin.authors"], _audience.Functions);
     }
 
     [Fact]

@@ -6,7 +6,8 @@ namespace Bdtheque.Frontend.Tests.Lists;
 
 /// <summary>
 /// The criteria of the list of the authors of the administration, carried by its address: what differs from the list of the
-/// albums (AlbumListQueryTests), a list without filters, its paths and the functions of its actions.
+/// albums (AlbumListQueryTests), a list without filters, the panel of an author it opens, its paths and the functions of its
+/// actions.
 /// </summary>
 public sealed class AuthorListQueryTests
 {
@@ -20,6 +21,21 @@ public sealed class AuthorListQueryTests
         Assert.Equal($"{AppPaths.AdminAuthors}?q=gib&entry=G&page=2", query.Href());
         Assert.Equal(AppPaths.AdminAuthors, new AuthorListQuery().Href());
         Assert.Equal(0, query.ActiveFilterCount);
+    }
+
+    [Fact]
+    public void Href_CarriesThePanelOpen_WithTheCriteriaOfTheList()
+    {
+        Assert.Equal($"{AppPaths.AdminAuthors}?q=gib&entry=G&edit={Author}", new AuthorListQuery(Text: "gib", Entry: "G", Edit: Author).Href());
+        Assert.Equal($"{AppPaths.AdminAuthors}?entry=G&new=open", new AuthorListQuery(Entry: "G", Adding: true).Href());
+    }
+
+    [Fact]
+    public void Paths_OfTheChangeAndOfTheCreation_OpenThePanelOverTheList()
+    {
+        Assert.Equal(AppPaths.AdminNewAuthor, new AuthorListQuery(Adding: true).Href());
+        Assert.Equal(new AuthorListQuery(Edit: Author).Href(), AppPaths.AdminEditAuthor(Author));
+        Assert.Equal(AppPaths.AdminEditAuthor(Author), AppPaths.AdminEdit(Contracts.Enums.RecordType.Author, Author));
     }
 
     [Fact]
@@ -37,6 +53,8 @@ public sealed class AuthorListQueryTests
         var query = new AuthorListQuery(Text: "gib", Entry: "@", Page: 3);
 
         Assert.Equal(query, AuthorListQuery.Parse(new Uri($"http://frontend{query.Href()}").Query));
+        Assert.Equal(new AuthorListQuery(Entry: "G", Edit: Author), AuthorListQuery.Parse($"?entry=G&edit={Author}"));
+        Assert.Equal(new AuthorListQuery(Adding: true), AuthorListQuery.Parse("?new=open"));
         // A list without filters has no panel to open, nor filter to read.
         Assert.Equal(new AuthorListQuery(), AuthorListQuery.Parse($"?filters=open&genreId={Author}&entry=AB&page=0"));
     }
@@ -47,7 +65,9 @@ public sealed class AuthorListQueryTests
     [InlineData("entry=G&page=2", "admin.authors.page", "entry=G&page=2")]
     [InlineData("delete=01900000-0000-7000-8000-000000000003", "admin.authors.deletion", "author=01900000-0000-7000-8000-000000000003")]
     [InlineData("merge=01900000-0000-7000-8000-000000000003&mergeQ=gi", "admin.authors.merge", "author=01900000-0000-7000-8000-000000000003&q=gi")]
-    public void Action_IsThatOfTheListOfTheAuthors(string address, string function, string parameters)
+    [InlineData("q=gib&edit=01900000-0000-7000-8000-000000000003", "admin.authors.edit", "author=01900000-0000-7000-8000-000000000003")]
+    [InlineData("entry=G&new=open", "admin.authors.new", null)]
+    public void Action_IsThatOfTheListOfTheAuthors(string address, string function, string? parameters)
     {
         var action = AuthorListQuery.Parse(address).Action!.Value;
 

@@ -1,0 +1,66 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md); laid out as the fields of the panel. */
+.author-identity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+/* The first name and the last name side by side, one under the other on a narrow panel (visuel/saisie-auteur/contenu.md). */
+.author-identity-names {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m);
+}
+
+@container side-panel (min-width: 25rem) {
+    .author-identity-names {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* What derives from the names, computed and never entered: in a dashed frame, which tells it from a field. Its dashed border is
+   a control border: it alone tells the frame from the panel, so it keeps its contrast. */
+.author-identity-derived {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-s) var(--space-m);
+    border: var(--border-width-control) dashed var(--color-control-border);
+    border-radius: var(--radius-tile);
+}
+
+.author-identity-derived-title {
+    margin: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.author-identity-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
+    margin: 0;
+}
+
+.author-identity-value {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.author-identity-value dt {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+.author-identity-value dd {
+    margin: 0;
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+.author-identity-help {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
