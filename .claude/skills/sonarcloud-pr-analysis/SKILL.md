@@ -101,13 +101,16 @@ Invoke-RestMethod -Method Post "$base/hotspots/change_status" -Headers $auth -Bo
     hotspot = $key; status = 'REVIEWED'; resolution = 'SAFE'; comment = $reason }
 ```
 
-`$reason` (French) states the exact reason, detailed enough to stand on its
-own for a reader who knows neither the project nor the PR: what the flagged
-code does; why the rule's premise is wrong there, or why the rule does not fit
-the case, or, for a deferred fix, what makes the finding valid and which
-ticket or plan note carries the fix. It ends with the link to the PR comment
-(« Justification dans la PR : <comment URL> »), a plus that never replaces
-the reason: a comment that only points to the PR is not enough.
+`$reason` is written in English, like every comment posted in SonarQube Cloud
+(issue or hotspot): its readers, on the public project or in Sonar's teams
+when shared, do not know the project and may not read French. It states the exact reason,
+detailed enough to stand on its own for a reader who knows neither the project
+nor the PR: what the flagged code does; why the rule's premise is wrong there,
+or why the rule does not fit the case, or, for a deferred fix, what makes the
+finding valid and which ticket or plan note carries the fix. It ends with the
+link to the PR comment (`Justification in the PR: <comment URL>`), a plus that
+never replaces the reason: a comment that only points to the PR is not enough.
+The PR comment of step 4, on GitHub, stays in French.
 
 `$share` is decided per finding: share (`'true'`) only when the comment
 teaches Sonar's teams something about the analysis itself, which they read
