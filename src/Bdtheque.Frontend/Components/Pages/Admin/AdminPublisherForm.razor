@@ -208,15 +208,15 @@ else
             {
                 await Api.PutAsync<UpdatePublisherRequest, PublisherForm>($"/admin/publishers/{id}", new UpdatePublisherRequest(content, Entry.Version));
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherSaved, $"publisher={id}");
-                // A modification saved leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
-                Navigation.NavigateTo(AppPaths.AdminPublishers);
             }
             else
             {
                 var created = await Api.PostAsync<PublisherContent, PublisherForm>("/admin/publishers", content);
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherCreated, $"publisher={created.Id}");
-                Navigation.NavigateTo(AppPaths.AdminEditPublisher(created.Id));
             }
+
+            // A record saved, created or modified, leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
+            Navigation.NavigateTo(AppPaths.AdminPublishers);
         }
         catch (ApiProblemException exception)
         {

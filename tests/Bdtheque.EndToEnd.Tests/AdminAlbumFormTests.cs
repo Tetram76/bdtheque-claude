@@ -35,7 +35,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Fact]
-    public async Task Create_WithItsSeriesAndAnAuthorFoundByTypingItsName_LeadsToItsForm()
+    public async Task Create_WithItsSeriesAndAnAuthorFoundByTypingItsName_LeadsBackToTheList()
     {
         var series = await PostAsync<SeriesForm>("/admin/series", Series($"Série {_marker}", []));
         var author = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest($"Auteur{_marker}", "Jean", null, null, null));
@@ -53,10 +53,11 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page.Locator(".entry-form-subject")).ToHaveTextAsync($"Le Lotus bleu {_marker} (Série {_marker} - T. 5)");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'album" }).ClickAsync();
 
-        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Modifier l'album");
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
-        var id = Guid.Parse(new Uri(page.Url).Segments[^1]);
-        var saved = await GetAsync(id);
+        // A record created leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
+        using var api = Application.CreateApiClient();
+        var created = Assert.Single((await api.GetFromJsonAsync<AlbumAdminList>($"/admin/albums?q={_marker}"))!.Albums.Items);
+        var saved = await GetAsync(created.Album.Id);
         Assert.Equal(($"Le Lotus bleu {_marker}", series.Id, 5), (saved.Content.Title, saved.Content.SeriesId, saved.Content.VolumeNumber));
         Assert.Equal([new ContributionContent(author.Id, ContributionRole.Scenarist)], saved.Content.Contributions);
     }

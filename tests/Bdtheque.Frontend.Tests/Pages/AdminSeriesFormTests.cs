@@ -292,7 +292,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Create_LeadsToTheFormOfTheSeriesCreated()
+    public void Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad, HttpStatusCode.Created);
@@ -301,7 +301,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         page.Find("form").Submit();
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminEditSeries(SeriesId), new Uri(navigation.Uri).AbsolutePath));
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminSeries, new Uri(navigation.Uri).AbsolutePath));
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, "/admin/series"), (method, path));
         Assert.Equal(Proposed.EditionTemplate, body.Deserialize<SeriesContent>(JsonSerializerOptions.Web)!.EditionTemplate);

@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:47:16Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T21:16:36Z }
 ---
 
 # Frontend
@@ -58,7 +58,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:47:16Z }
   - **Alternative écartée (clé calculée par le frontend)** : la règle de calcul serait écrite deux fois, et la clé affichée pourrait différer de celle enregistrée.
 - **Collection d'un éditeur choisie dans une liste** ([Contenu](../../visuel/saisie-serie/contenu.md)) : une liste du navigateur de toutes les collections de l'éditeur choisi, lues avec la fiche, puis à chaque choix d'un autre éditeur, numéroté comme le choix d'une fiche, pour que seules les collections du dernier soient présentées ; changer d'éditeur retire la collection. Désactivée par son propre attribut tant qu'aucun éditeur n'est choisi, elle est en tirets, son texte lisible ; un formulaire désactivé pendant son enregistrement garde l'apparence d'un contrôle désactivé. Des collections qui ne peuvent être lues sont signalées par le champ, qui ne les présente pas comme absentes.
   - **Alternative écartée (choix en tapant son nom, comme l'éditeur)** : le nom d'une collection, choisi et parfois changé par son éditeur, se retient mal, et une recherche sans résultat laisserait croire qu'elle n'existe pas (décision de l'utilisateur).
-- **Fiche créée : la page de sa modification**, chargée de nouveau par la navigation, la fiche y étant lue telle qu'enregistrée. Une fiche modifiée ramène à sa liste, sans ses critères, comme « Annuler » ([Contenu](../../visuel/saisie-album/contenu.md), décision de l'utilisateur).
+- **Fiche enregistrée, créée ou modifiée : retour à sa liste**, sans ses critères, comme « Annuler » ([Contenu](../../visuel/saisie-album/contenu.md), décision de l'utilisateur).
 - **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi.
 - **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme.
 - **Genre ou univers créé sur place** de même, depuis leur choix : le dialogue reprend le texte tapé, et, pour un univers, propose de choisir l'univers qui le contient.

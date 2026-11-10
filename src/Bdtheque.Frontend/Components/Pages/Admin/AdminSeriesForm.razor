@@ -298,15 +298,15 @@ else
             {
                 await Api.PutAsync<UpdateSeriesRequest, SeriesForm>($"/admin/series/{id}", new UpdateSeriesRequest(content, Entry.Version));
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesSaved, $"series={id}");
-                // A modification saved leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
-                Navigation.NavigateTo(AppPaths.AdminSeries);
             }
             else
             {
                 var created = await Api.PostAsync<SeriesContent, SeriesForm>("/admin/series", content);
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesCreated, $"series={created.Id}");
-                Navigation.NavigateTo(AppPaths.AdminEditSeries(created.Id));
             }
+
+            // A record saved, created or modified, leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
+            Navigation.NavigateTo(AppPaths.AdminSeries);
         }
         catch (ApiProblemException exception)
         {

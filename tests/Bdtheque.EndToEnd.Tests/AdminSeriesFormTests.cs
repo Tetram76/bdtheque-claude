@@ -35,7 +35,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     }
 
     [Fact]
-    public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsToItsForm()
+    public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsBackToTheList()
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur{_marker}", null, []));
         var collection = await PostAsync<PublisherCollectionForm>(
@@ -55,10 +55,11 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await page.GetByLabel("Couleur", new() { Exact = true }).SelectOptionAsync("Noir et blanc");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
 
-        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Modifier la série");
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
-        var id = Guid.Parse(new Uri(page.Url).Segments[^1]);
-        var template = (await GetAsync(id)).Content.EditionTemplate;
+        // A record created leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
+        using var api = Application.CreateApiClient();
+        var created = Assert.Single((await api.GetFromJsonAsync<SeriesAdminList>($"/admin/series?q={_marker}"))!.Series.Items);
+        var template = (await GetAsync(created.Id)).Content.EditionTemplate;
         Assert.Equal((publisher.Id, collection.Id, EditionCondition.Excellent, false),
             (template.PublisherId, template.PublisherCollectionId, template.Condition, template.IsColor));
     }

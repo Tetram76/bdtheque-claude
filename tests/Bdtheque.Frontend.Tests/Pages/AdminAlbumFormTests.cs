@@ -341,7 +341,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Create_LeadsToTheFormOfTheAlbumCreated()
+    public void Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux, HttpStatusCode.Created);
@@ -350,7 +350,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         page.Find("form").Submit();
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminEditAlbum(AlbumId), new Uri(navigation.Uri).AbsolutePath));
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbums, new Uri(navigation.Uri).AbsolutePath));
         Assert.Equal((HttpMethod.Post, "/admin/albums"), (_api.Written.Single().Method, _api.Written.Single().Path));
         Assert.Contains("admin.album.created", _audience.Functions);
     }

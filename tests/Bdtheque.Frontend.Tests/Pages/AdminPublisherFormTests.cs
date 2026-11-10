@@ -222,7 +222,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Create_LeadsToTheFormOfThePublisherCreated()
+    public void Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Casterman, HttpStatusCode.Created);
@@ -234,7 +234,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         page.Find("form").Submit();
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminEditPublisher(PublisherId), new Uri(navigation.Uri).AbsolutePath));
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminPublishers, new Uri(navigation.Uri).AbsolutePath));
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, "/admin/publishers"), (method, path));
         Assert.Equal("Casterman", body.Deserialize<PublisherContent>(JsonSerializerOptions.Web)!.Name);

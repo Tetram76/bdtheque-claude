@@ -2,6 +2,7 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using frontend::Bdtheque.Frontend.Navigation;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -32,7 +33,7 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
     }
 
     [Fact]
-    public async Task Create_WithItsCollections_LeadsToItsForm()
+    public async Task Create_WithItsCollections_LeadsBackToTheList()
     {
         var page = await OpenAsync(AppPaths.AdminNewPublisher);
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
@@ -43,13 +44,13 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await AddCollectionAsync(page, "Encrages");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'éditeur" }).ClickAsync();
 
-        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Modifier l'éditeur");
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
-        // Its collections now in the order of their names.
-        await Assertions.Expect(page.GetByLabel("Nom de la collection").First).ToHaveValueAsync("Encrages");
-        await Assertions.Expect(page.GetByLabel("Nom de la collection").Last).ToHaveValueAsync("Shampooing");
-        var saved = await GetAsync(Guid.Parse(new Uri(page.Url).Segments[^1]));
+        // A record created leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers));
+        using var api = Application.CreateApiClient();
+        var created = Assert.Single((await api.GetFromJsonAsync<Page<PublisherAdminListItem>>($"/admin/publishers?q={_marker}"))!.Items);
+        var saved = await GetAsync(created.Id);
         Assert.Equal("https://www.editions-delcourt.fr", saved.Website);
+        // Its collections in the order of their names.
         Assert.Equal(["Encrages", "Shampooing"], saved.Collections.Select(c => c.Name));
     }
 
