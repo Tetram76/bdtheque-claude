@@ -300,7 +300,7 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
 
     private async Task<PublisherForm> CreatePublisherAsync(string name)
     {
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest(name, null));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent(name, null, []));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
     }

@@ -34,4 +34,5 @@ public enum IconName
     Copy,
     Check,
     Swap,
+    Lock,
 }

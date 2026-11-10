@@ -161,7 +161,7 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
     private static ILocator Albums(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Éditions" }).Locator(".edition-album");
 
     private Task<PublisherForm> CreatePublisherAsync(string name) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, null));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, null, []));
 
     private Task<AlbumForm> CreateAlbumAsync(string title) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(

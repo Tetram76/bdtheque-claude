@@ -702,7 +702,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(null, null, pseudonym, null, null));
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));
 
     private Task<UniverseForm> CreateUniverseAsync(string name, Guid? parentId) =>
         PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest(name, null, parentId));

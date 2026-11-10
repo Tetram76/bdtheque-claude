@@ -35,9 +35,9 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     }
 
     [Fact]
-    public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsToItsForm()
+    public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsBackToTheList()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur{_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur{_marker}", null, []));
         var collection = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", publisher.Version));
         var page = await OpenAsync(AppPaths.AdminNewSeries);
@@ -55,10 +55,11 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await page.GetByLabel("Couleur", new() { Exact = true }).SelectOptionAsync("Noir et blanc");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
 
-        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Modifier la série");
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
-        var id = Guid.Parse(new Uri(page.Url).Segments[^1]);
-        var template = (await GetAsync(id)).Content.EditionTemplate;
+        // A record created leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
+        using var api = Application.CreateApiClient();
+        var created = Assert.Single((await api.GetFromJsonAsync<SeriesAdminList>($"/admin/series?q={_marker}"))!.Series.Items);
+        var template = (await GetAsync(created.Id)).Content.EditionTemplate;
         Assert.Equal((publisher.Id, collection.Id, EditionCondition.Excellent, false),
             (template.PublisherId, template.PublisherCollectionId, template.Condition, template.IsColor));
     }
@@ -66,10 +67,10 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     [Fact]
     public async Task Collection_UnavailableWithoutPublisher_RemovedWhenThePublisherChanges()
     {
-        var first = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Premier{_marker}", null));
+        var first = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Premier{_marker}", null, []));
         var created = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{first.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", first.Version));
-        await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Second{_marker}", null));
+        await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Second{_marker}", null, []));
         var page = await OpenAsync(AppPaths.AdminNewSeries);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         var publisher = page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true });
@@ -105,7 +106,8 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToBeVisibleAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
         var saved = (await GetAsync(series.Id)).Content;
         Assert.Equal((SeriesStatus.Completed, 6, true, false, true, BindingType.Paperback),
             (saved.Status, saved.TheoreticalVolumeCount, saved.IsComplete, saved.ExcludeFromMissingVolumes, saved.ExcludeFromReleaseEstimates,

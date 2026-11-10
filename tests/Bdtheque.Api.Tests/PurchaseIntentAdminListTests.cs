@@ -117,7 +117,7 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
             title, null, null, null, false, false, false, null, null, new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null),
             [], [], []));
 
-    private Task<PublisherForm> CreatePublisherAsync(string name) => PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, null));
+    private Task<PublisherForm> CreatePublisherAsync(string name) => PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, null, []));
 
     private async Task<EditionForm> CreateOwnedEditionAsync(Guid albumId, Guid publisherId) =>
         await PostAsync<EditionForm>(

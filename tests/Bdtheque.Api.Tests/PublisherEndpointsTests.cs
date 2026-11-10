@@ -27,19 +27,19 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     [Fact]
     public async Task Create_ReturnsThePublisherAsStored()
     {
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest(" Dargaud ", " https://www.dargaud.com "));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent(" Dargaud ", " https://www.dargaud.com ", []));
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var created = await response.Content.ReadFromJsonAsync<PublisherForm>();
         Assert.Equal(("Dargaud", "https://www.dargaud.com"), (created!.Name, created.Website));
         Assert.Equal($"/admin/publishers/{created.Id}", response.Headers.Location?.OriginalString);
-        Assert.Equal(created, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{created.Id}"));
+        SameForm(created, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{created.Id}"));
     }
 
     [Fact]
     public async Task Create_WithBlankName_IsABusinessError()
     {
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest(" ", null));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent(" ", null, []));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameRequired);
     }
@@ -47,7 +47,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     [Fact]
     public async Task Create_WithANameLongerThanTheColumn_IsABusinessError()
     {
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest(new string('A', 301), null));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent(new string('A', 301), null, []));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
     }
@@ -56,7 +56,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     public async Task Create_WithAWebsiteLongerThanTheColumn_IsABusinessError()
     {
         var response = await _client.PostAsJsonAsync(
-            "/admin/publishers", new CreatePublisherRequest("Éditeur au site interminable", "https://example.com/" + new string('a', 2040)));
+            "/admin/publishers", new PublisherContent("Éditeur au site interminable", "https://example.com/" + new string('a', 2040), []));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
     }
@@ -67,7 +67,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var publisher = await CreateAsync("Éditeur à rallonger");
 
         var response = await _client.PutAsJsonAsync(
-            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new string('B', 301), null, publisher.Version));
+            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent(new string('B', 301), null, []), publisher.Version));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
     }
@@ -75,7 +75,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     [Fact]
     public async Task Create_WithAnInvalidWebsite_IsABusinessError()
     {
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest("Glénat", "pas une url"));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent("Glénat", "pas une url", []));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherWebsiteInvalid);
     }
@@ -85,7 +85,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     {
         await CreateAsync("Casterman");
 
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest("Casterman", null));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent("Casterman", null, []));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed);
     }
@@ -96,7 +96,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         // modele-metier/editeur.md: unique as typed, 'Dargaud' and 'dargaud' remain distinct.
         await CreateAsync("Delcourt");
 
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest("delcourt", null));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent("delcourt", null, []));
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
@@ -115,13 +115,13 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var publisher = await CreateAsync("Dupuis");
 
         var response = await _client.PutAsJsonAsync(
-            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest("Dupuis BD", "https://www.dupuis.com", publisher.Version));
+            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent("Dupuis BD", "https://www.dupuis.com", []), publisher.Version));
 
         response.EnsureSuccessStatusCode();
         var updated = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
         Assert.Equal(("Dupuis BD", "https://www.dupuis.com"), (updated.Name, updated.Website));
         Assert.NotEqual(publisher.Version, updated.Version);
-        Assert.Equal(updated, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
+        SameForm(updated, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var publisher = await CreateAsync("Le Lombard");
 
         var response = await _client.PutAsJsonAsync(
-            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest("Lombard", null, publisher.Version));
+            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent("Lombard", null, []), publisher.Version));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed);
     }
@@ -143,7 +143,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         await UpdateAsync(publisher, "Soleil Productions");
 
         var response = await _client.PutAsJsonAsync(
-            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest("Soleil", null, publisher.Version));
+            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent("Soleil", null, []), publisher.Version));
 
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.Conflict, ProblemTypes.Functional);
     }
@@ -156,7 +156,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         await CreateCollectionAsync(publisher, "Grand Angle");
 
         var response = await _client.PutAsJsonAsync(
-            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest("Bamboo Édition", null, publisher.Version));
+            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent("Bamboo Édition", null, []), publisher.Version));
 
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.Conflict, ProblemTypes.Functional);
     }
@@ -173,7 +173,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         Assert.Equal([new ImpactCount(EntityKind.Series, 1), new ImpactCount(EntityKind.Edition, 1)], impact.BlockedBy);
         var problem = await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.DeletionBlockedByReferences);
         ProblemAssert.SameImpact(impact, ProblemAssert.ImpactOf(problem));
-        Assert.Equal(publisher, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
+        SameForm(publisher, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
     }
 
     [Fact]
@@ -210,12 +210,140 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         Assert.Equal(HttpStatusCode.OK, (await _client.GetAsync($"/admin/publishers/{publisher.Id}")).StatusCode);
     }
 
+    [Fact]
+    public async Task Create_WithCollections_ReturnsThemByName_NothingReferencingThem()
+    {
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent(
+            "Casterman Jeunesse", "https://www.casterman.com", [new(null, " Écritures "), new(null, "Âge d'or")]));
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var created = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
+        Assert.Equal([("Âge d'or", 0, 0), ("Écritures", 0, 0)], created.Collections.Select(c => (c.Name, c.EditionCount, c.SeriesCount)));
+        Assert.NotEqual(default, created.CreatedAt);
+        Assert.Equal(created.CreatedAt, created.ModifiedAt);
+        SameForm(created, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{created.Id}"));
+    }
+
+    [Fact]
+    public async Task Get_CountsWhatReferencesEachCollection()
+    {
+        // visuel/saisie-editeur/contenu.md: « 58 éditions · 3 séries », an edition targeted by an intent included.
+        var publisher = await CreateAsync("Glénat", "Treize étrange", "Vécu");
+        var thirteen = publisher.Collections.Single(c => c.Name == "Treize étrange");
+        await SeedReferencesAsync(publisher.Id, thirteen.Id, editions: 2, series: 1);
+
+        var form = await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}");
+
+        Assert.Equal([("Treize étrange", 2, 1), ("Vécu", 0, 0)], form!.Collections.Select(c => (c.Name, c.EditionCount, c.SeriesCount)));
+    }
+
+    [Fact]
+    public async Task Update_RenamesAddsAndRemovesItsCollections_UnderTheVersionOfThePublisher()
+    {
+        var publisher = await CreateAsync("Delcourt Jeunesse", "Encrages", "Machination", "Contrebande");
+        var encrages = publisher.Collections.Single(c => c.Name == "Encrages");
+        var contrebande = publisher.Collections.Single(c => c.Name == "Contrebande");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent("Delcourt Jeunesse", null, [new(encrages.Id, "Encrages (poche)"), new(contrebande.Id, "Contrebande"), new(null, "Shampooing")]),
+            publisher.Version));
+
+        response.EnsureSuccessStatusCode();
+        var updated = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
+        Assert.Equal(
+            [(contrebande.Id, "Contrebande"), (encrages.Id, "Encrages (poche)")],
+            updated.Collections.Where(c => c.Name != "Shampooing").Select(c => (c.Id, c.Name)));
+        Assert.Equal(3, updated.Collections.Count);
+        Assert.NotEqual(publisher.Version, updated.Version);
+        SameForm(updated, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
+    }
+
+    [Fact]
+    public async Task Update_RemovingACollectionAnEditionOrASeriesReferences_IsABusinessError_AndChangesNothing()
+    {
+        // fonctionnel/regles-metier/suppression-des-entites.md: a collection referenced cannot be removed.
+        foreach (var (editions, series) in new[] { (1, 0), (0, 1) })
+        {
+            var publisher = await CreateAsync($"Dupuis {editions}{series}", "Repérages", "Aire libre");
+            var used = publisher.Collections.Single(c => c.Name == "Repérages");
+            var free = publisher.Collections.Single(c => c.Name == "Aire libre");
+            await SeedReferencesAsync(publisher.Id, used.Id, editions, series);
+
+            var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+                new PublisherContent(publisher.Name, null, [new(free.Id, free.Name)]), publisher.Version));
+
+            await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionInUse);
+            var form = await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}");
+            Assert.Equal([free.Id, used.Id], form!.Collections.Select(c => c.Id));
+            Assert.Equal(publisher.Version, form.Version);
+        }
+    }
+
+    [Fact]
+    public async Task Update_RenamingACollectionToTheNameOfOneRemoved_OrAddingOneNamedSo_Saves()
+    {
+        var publisher = await CreateAsync("Paquet", "Cairn", "Calamar", "Discover");
+        var cairn = publisher.Collections.Single(c => c.Name == "Cairn");
+        var calamar = publisher.Collections.Single(c => c.Name == "Calamar");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(cairn.Id, "Calamar"), new(null, "Discover")]), publisher.Version));
+
+        response.EnsureSuccessStatusCode();
+        var updated = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
+        Assert.Equal(["Calamar", "Discover"], updated.Collections.Select(c => c.Name));
+        Assert.Equal(cairn.Id, updated.Collections[0].Id);
+        Assert.DoesNotContain(calamar.Id, updated.Collections.Select(c => c.Id));
+    }
+
+    [Fact]
+    public async Task Update_WithANewCollectionNamedAsAnother_IsABusinessError()
+    {
+        var publisher = await CreateAsync("Kana", "Big Kana");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent("Kana", null, [new(publisher.Collections[0].Id, "Big Kana"), new(null, "Big Kana")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+    }
+
+    [Fact]
+    public async Task Update_WithABlankCollectionName_IsABusinessError()
+    {
+        var publisher = await CreateAsync("Pika");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent("Pika", null, [new(null, " ")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired);
+    }
+
+    [Fact]
+    public async Task Update_WithACollectionOfAnotherPublisher_IsAFunctionalError()
+    {
+        var other = await CreateAsync("Ankama", "Label 619");
+        var publisher = await CreateAsync("Ki-oon");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent("Ki-oon", null, [new(other.Collections[0].Id, "Label 619")]), publisher.Version));
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.NotFound, ProblemTypes.Functional);
+    }
+
+    private static void SameForm(PublisherForm expected, PublisherForm? actual)
+    {
+        Assert.NotNull(actual);
+        Assert.Equal(expected with { Collections = [] }, actual with { Collections = [] });
+        Assert.Equal(expected.Collections, actual.Collections);
+    }
+
     private static string DeleteUri(PublisherForm publisher, string fingerprint) =>
         $"/admin/publishers/{publisher.Id}?version={publisher.Version}&fingerprint={Uri.EscapeDataString(fingerprint)}";
 
-    private async Task<PublisherForm> CreateAsync(string name)
+    private async Task<PublisherForm> CreateAsync(string name, params string[] collections)
     {
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new CreatePublisherRequest(name, null));
+        var response = await _client.PostAsJsonAsync(
+            "/admin/publishers", new PublisherContent(name, null, [.. collections.Select(c => new PublisherCollectionContent(null, c))]));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
     }
@@ -223,7 +351,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     private async Task UpdateAsync(PublisherForm publisher, string name)
     {
         var response = await _client.PutAsJsonAsync(
-            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(name, null, publisher.Version));
+            $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent(name, null, []), publisher.Version));
         response.EnsureSuccessStatusCode();
     }
 
@@ -233,6 +361,31 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest(name, publisher.Version));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<PublisherCollectionForm>())!;
+    }
+
+    // Editions of albums of their own, and series whose new editions are proposed the collection.
+    private async Task SeedReferencesAsync(Guid publisherId, Guid collectionId, int editions, int series)
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
+        var publisher = await context.Publishers.Include(p => p.Collections).SingleAsync(p => p.Id == publisherId);
+        var collection = publisher.Collections.Single(c => c.Id == collectionId);
+        for (var i = 0; i < editions; i++)
+        {
+            var album = new Album($"Album {Guid.NewGuid():N}", null);
+            var edition = new Edition(album, publisher);
+            edition.SetPublisher(publisher, collection);
+            context.AddRange(album, edition);
+        }
+
+        for (var i = 0; i < series; i++)
+        {
+            var template = new Series($"Série {Guid.NewGuid():N}");
+            template.SetTemplate(publisher, collection);
+            context.Add(template);
+        }
+
+        await context.SaveChangesAsync();
     }
 
     private async Task SeedEditionAndSeriesTemplateOfAsync(Guid publisherId)

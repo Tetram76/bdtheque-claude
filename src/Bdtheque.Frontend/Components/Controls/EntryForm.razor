@@ -6,7 +6,9 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div class="entry-form" @ref="_root">
+@* Marked once rendered by its circuit (RendererInfo.IsInteractive, documentation of ASP.NET Core, « Render modes »): until then,
+   the prerendered form answers nothing, which nothing else in the page tells. *@
+<div class="entry-form" @ref="_root" data-interactive="@(RendererInfo.IsInteractive ? "true" : null)">
     <div class="entry-form-heading">
         <Breadcrumb Items="Breadcrumb" />
         <h1 class="entry-form-title">@Title</h1>

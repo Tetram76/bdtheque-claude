@@ -37,6 +37,27 @@ public sealed class PublisherCollectionTests
     }
 
     [Fact]
+    public void RemoveCollection_LeavesTheOtherCollections()
+    {
+        var publisher = new Publisher("Dargaud");
+        var removed = publisher.AddCollection("Lucky Comics");
+        var kept = publisher.AddCollection("Long courrier");
+
+        publisher.RemoveCollection(removed);
+
+        Assert.Equal([kept], publisher.Collections);
+    }
+
+    [Fact]
+    public void RemoveCollection_OfAnotherPublisher_Throws()
+    {
+        var publisher = new Publisher("Dargaud");
+        var other = new Publisher("Dupuis").AddCollection("Repérages");
+
+        Assert.Throws<InvalidOperationException>(() => publisher.RemoveCollection(other));
+    }
+
+    [Fact]
     public void SetName_TrimsValue()
     {
         var publisher = new Publisher("Dargaud");

@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T17:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:26:32Z }
 ---
 
 # Outillage de développement
@@ -44,6 +44,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T17:40:00Z }
   - **seules les attentes que le pilote vérifie en un seul appel** sont permises (adresse atteinte, condition dans la page, navigation) : le client .NET vérifie un état puis s'abonne aux suivants, et perd celui qui arrive entre les deux ([`microsoft/playwright-dotnet` #3364](https://github.com/microsoft/playwright-dotnet/issues/3364), [#3399](https://github.com/microsoft/playwright-dotnet/issues/3399), constaté #298). Ses attentes en deux temps sont refusées par le compilateur (analyseur des API interdites), jusqu'à une version qui corrige le défaut.
     - **Alternative écartée (attente répétée par tranches courtes)** : elle retrouve l'état perdu, mais garde sous une relance une attente qui en perd.
     - **Alternative écartée (test du dépôt qui cherche ces noms dans les sources)** : il confondrait un appel avec sa mention dans un commentaire.
+  - **Fiche de saisie interactive attendue sur sa propre marque** : rendue d'abord par le prérendu, une fiche ne répond à la frappe ni aux clics qu'une fois rendue par son circuit, ce que le cadre des fiches marque (`data-interactive`, d'après `RendererInfo.IsInteractive`) ; une interaction qui change la fiche est suivie de l'attente de son effet avant la suivante, le circuit la traitant après l'aller-retour.
+    - **Alternative écartée (attendre le script du choix d'une fiche)** : il ne signale le circuit que pour une fiche qui cite d'autres fiches par leur nom, ce que ne fait pas la saisie d'un éditeur.
 - **Tests indépendants du moment où ils s'exécutent** : une application de bout en bout vit à une heure fixe, la même pour `frontend` et `api`, qui avance d'une milliseconde à chaque lecture, jamais avec le temps réel ; son navigateur a un fuseau fixé (`Europe/Paris`), et non celui de la machine. Cette heure est en pleine nuit, quand la date du navigateur est déjà le lendemain de celle du temps universel : tout ce qui deviendrait la date du jour en temps universel s'y voit à chaque exécution (#340). Un test lit l'heure de l'application, jamais celle de la machine ; les scripts du frontend ne lisant aucune date, l'horloge du navigateur n'est pas fixée. Les données de validation, chargées dans leur test à une heure fixe, le sont de même.
   - **Alternative écartée (heure du système, comme en production)** : le rendu d'une capture et le résultat d'un test changeaient selon l'heure de l'exécution (échecs chaque soir entre 23 h et minuit en temps universel, #318, #327, #340).
   - **Alternative écartée (horloge figée)** : des écritures successives auraient la même date, leur ordre retombant sur des identifiants que `Guid.CreateVersion7` n'ordonne qu'à la milliseconde du temps réel.

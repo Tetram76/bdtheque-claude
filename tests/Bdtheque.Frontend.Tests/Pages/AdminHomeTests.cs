@@ -74,8 +74,8 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         Assert.Equal("Les éditions et leurs visuels se saisissent depuis leur album.", BlockOf(page, "Les fiches").QuerySelector(".admin-home-note")!.TextContent.Trim());
         Assert.Empty(BlockOf(page, "Les fiches").QuerySelectorAll(".admin-record-name a, a.admin-record-name"));
         // The lists of the albums (#200), of the editions (#333), of the series (#301), of the authors (#302), of the publishers
-        // (#303), of the genres and of the universes (#203), and the entry forms of an album (#205), of a series (#206) and of an
-        // author (#207), are implemented; the other pages are still to come.
+        // (#303), of the genres and of the universes (#203), and the entry forms of an album (#205), of a series (#206), of an
+        // author (#207) and of a publisher (#208), are implemented; the other pages are still to come.
         var links = BlockOf(page, "Les fiches").QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))).ToList();
         IEnumerable<(string, string?)> implemented =
         [
@@ -83,7 +83,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             ("Voir les éditions", AppPaths.AdminEditions),
             ("Voir les séries", AppPaths.AdminSeries), ("+ Nouvelle série", AppPaths.AdminNewSeries),
             ("Voir les auteurs", AppPaths.AdminAuthors), ("+ Nouvel auteur", AppPaths.AdminNewAuthor),
-            ("Voir les éditeurs", AppPaths.AdminPublishers),
+            ("Voir les éditeurs", AppPaths.AdminPublishers), ("+ Nouvel éditeur", AppPaths.AdminNewPublisher),
             ("Voir les genres", AppPaths.AdminGenres), ("+ Nouveau genre", AppPaths.AdminNewGenre),
             ("Voir les univers", AppPaths.AdminUniverses), ("+ Nouvel univers", AppPaths.AdminNewUniverse),
         ];

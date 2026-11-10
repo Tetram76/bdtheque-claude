@@ -53,7 +53,7 @@ public sealed class AlbumEditionsPageTests : IClassFixture<ApiWebApplicationFact
     [Fact]
     public async Task Editions_AreTheOwnedOnesByYear_AndTheTargetedOneIsAnIntent()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Casterman {Guid.NewGuid():N}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Casterman {Guid.NewGuid():N}", null, []));
         var album = await CreateAlbumAsync("Les Bijoux de la Castafiore");
         var recent = await CreateOwnedEditionAsync(album.Id, publisher.Id, 2007, AcquisitionMode.Gift, null, null, null, null);
         var original = await CreateOwnedEditionAsync(
@@ -101,7 +101,7 @@ public sealed class AlbumEditionsPageTests : IClassFixture<ApiWebApplicationFact
     [Fact]
     public async Task Intent_OnTheOnlyEditionOfItsAlbum_CanTargetTheAlbum()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Dupuis {Guid.NewGuid():N}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {Guid.NewGuid():N}", null, []));
         var album = await CreateAlbumAsync("Buddy Longway");
         await CreateIntendedEditionAsync(album.Id, publisher.Id, null, null, null);
 

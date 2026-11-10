@@ -86,6 +86,12 @@ public static class DomainRules
     public const string PublisherCollectionNotOfPublisher = "PublisherCollection.NotOfPublisher";
     public const string PublisherCollectionNameRequired = "PublisherCollection.NameRequired";
 
+    /// <summary>
+    /// A collection removed from the form of its publisher while editions, series templates or saved searches reference it
+    /// (fonctionnel/regles-metier/suppression-des-entites.md): checked by the API, which alone sees the other records.
+    /// </summary>
+    public const string PublisherCollectionInUse = "PublisherCollection.InUse";
+
     // Uniqueness rules: enforced by unique indexes, since the domain cannot see the other rows. The
     // API translates the violation of each index into its code (see Bdtheque.Api's UniqueIndexRules).
     public const string GenreLabelAlreadyUsed = "Genre.LabelAlreadyUsed";

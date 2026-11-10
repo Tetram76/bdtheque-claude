@@ -165,7 +165,7 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
     private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Éditeurs" }).Locator(".row-entry");
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));
 
     private async Task<TForm> PostAsync<TForm>(string path, object request)
     {

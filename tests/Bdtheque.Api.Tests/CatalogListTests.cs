@@ -328,7 +328,7 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(lastName, firstName, pseudonym, null, null));
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, website));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));
 
     private Task<PublisherCollectionForm> CreateCollectionAsync(PublisherForm publisher, string name) =>
         PostAsync<PublisherCollectionForm>(

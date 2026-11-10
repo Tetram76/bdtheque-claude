@@ -53,7 +53,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
     [Fact]
     public async Task Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt_AndTakesTheIntentOutOfTheList()
     {
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Dupuis {_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Buddy Longway {_marker}");
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, 1974, null, null, null, null, null, null, null, true), await AlbumVersionAsync(album.Id)));
@@ -78,7 +78,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
     public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(int width)
     {
         var publisher = await PostAsync<PublisherForm>(
-            "/admin/publishers", new CreatePublisherRequest($"Les Éditions du Grand Large et des Archipels réunis {_marker}", null));
+            "/admin/publishers", new PublisherContent($"Les Éditions du Grand Large et des Archipels réunis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Les Voyages extraordinaires du capitaine Archibald au-delà des mers {_marker}");
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, 2014, "978-2-7234-4567-1", null, null, null, null, null, null, true),

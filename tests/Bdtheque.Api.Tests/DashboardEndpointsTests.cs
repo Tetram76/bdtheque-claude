@@ -313,7 +313,7 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
     private static string VisualsUri(Guid albumId, Guid editionId) => $"/admin/albums/{albumId}/editions/{editionId}/visuals";
 
     private Task<PublisherForm> CreatePublisherAsync(string name) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest(name, null));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, null, []));
 
     private Task<SeriesForm> CreateSeriesAsync(string title) =>
         PostAsync<SeriesForm>("/admin/series", new SeriesContent(title, null, null, null, false, false, false, null, null, NoTemplate, [], [], []));

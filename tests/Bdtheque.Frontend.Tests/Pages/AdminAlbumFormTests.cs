@@ -66,6 +66,8 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Services.AddSingleton(TimeProvider.System);
         // The choice of a record imports its script once rendered, which these tests do not exercise.
         JSInterop.Mode = JSRuntimeMode.Loose;
+        // An entry form is rendered by its circuit (InteractiveServer), which its frame marks.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         _api.Answers[$"/admin/albums/{AlbumId}"] = Bijoux;
         _api.Answers[$"/catalog/series/{SeriesId}"] = Series(SeriesId, "Tintin", ["Aventure"], ["Univers Hergé"]);
         _api.Answers[$"/catalog/series/{OtherSeriesId}"] = Series(OtherSeriesId, "Blacksad", ["Polar"], []);
@@ -257,7 +259,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_AndRecordsTheSaving()
+    public void Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
     {
         var page = OpenAlbum();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux with { Version = 42, Content = Bijoux.Content with { Summary = "Autre" } });
@@ -265,7 +267,8 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         page.Find("#album-summary").Change("Autre");
         page.Find("form").Submit();
 
-        page.WaitForAssertion(() => Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent));
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbums, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/albums/{AlbumId}"), (method, path));
         var request = body.Deserialize<UpdateAlbumRequest>(JsonSerializerOptions.Web)!;
@@ -338,7 +341,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Create_LeadsToTheFormOfTheAlbumCreated()
+    public void Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux, HttpStatusCode.Created);
@@ -347,7 +350,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         page.Find("form").Submit();
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminEditAlbum(AlbumId), new Uri(navigation.Uri).AbsolutePath));
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbums, new Uri(navigation.Uri).AbsolutePath));
         Assert.Equal((HttpMethod.Post, "/admin/albums"), (_api.Written.Single().Method, _api.Written.Single().Path));
         Assert.Contains("admin.album.created", _audience.Functions);
     }

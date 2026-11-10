@@ -177,7 +177,7 @@ public sealed class CollectionApplication : ApplicationHost
     protected override async Task SeedAsync()
     {
         using var api = CreateApiClient();
-        var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Casterman", null));
+        var publisher = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Casterman", null, []));
         var series = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", new SeriesContent(
             "Nestor Burma", null, null, null, false, false, false, null, null,
             new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));

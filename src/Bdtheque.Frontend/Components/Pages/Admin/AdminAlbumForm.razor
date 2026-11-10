@@ -274,18 +274,17 @@ else
         {
             if (Entry.Id is { } id)
             {
-                var saved = await Api.PutAsync<UpdateAlbumRequest, AlbumForm>($"/admin/albums/{id}", new UpdateAlbumRequest(content, Entry.Version));
-                Entry = AlbumEntry.Of(saved, await SeriesOrNoneAsync(saved.Content.SeriesId));
-                ReadEntry = Entry.Copy();
-                _savedFingerprint = Entry.Fingerprint();
+                await Api.PutAsync<UpdateAlbumRequest, AlbumForm>($"/admin/albums/{id}", new UpdateAlbumRequest(content, Entry.Version));
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumSaved, $"album={id}");
             }
             else
             {
                 var created = await Api.PostAsync<AlbumContent, AlbumForm>("/admin/albums", content);
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumCreated, $"album={created.Id}");
-                Navigation.NavigateTo(AppPaths.AdminEditAlbum(created.Id));
             }
+
+            // A record saved, created or modified, leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
+            Navigation.NavigateTo(AppPaths.AdminAlbums);
         }
         catch (ApiProblemException exception)
         {

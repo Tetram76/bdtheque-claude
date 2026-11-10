@@ -75,6 +75,8 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Services.AddSingleton(TimeProvider.System);
         // The choice of a record imports its script once rendered, which these tests do not exercise.
         JSInterop.Mode = JSRuntimeMode.Loose;
+        // An entry form is rendered by its circuit (InteractiveServer), which its frame marks.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         _api.Answers[$"/admin/series/{SeriesId}"] = Blacksad;
         _api.Answers["/admin/series/new"] = Proposed;
         _api.Answers["/admin/sort-keys/title"] = new TitleSortKey("Blacksad");
@@ -268,7 +270,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_AndRecordsTheSaving()
+    public void Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
     {
         var page = OpenSeries();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad with { Version = 13, Content = Blacksad.Content with { IsComplete = true } });
@@ -277,7 +279,8 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         page.Find("#series-color").Change("false");
         page.Find("form").Submit();
 
-        page.WaitForAssertion(() => Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent));
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminSeries, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/series/{SeriesId}"), (method, path));
         var request = body.Deserialize<UpdateSeriesRequest>(JsonSerializerOptions.Web)!;
@@ -289,7 +292,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Create_LeadsToTheFormOfTheSeriesCreated()
+    public void Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad, HttpStatusCode.Created);
@@ -298,7 +301,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         page.Find("form").Submit();
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminEditSeries(SeriesId), new Uri(navigation.Uri).AbsolutePath));
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminSeries, new Uri(navigation.Uri).AbsolutePath));
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, "/admin/series"), (method, path));
         Assert.Equal(Proposed.EditionTemplate, body.Deserialize<SeriesContent>(JsonSerializerOptions.Web)!.EditionTemplate);

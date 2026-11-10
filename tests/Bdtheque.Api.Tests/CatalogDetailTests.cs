@@ -333,7 +333,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(lastName, firstName, null, null, null));
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"{name} {Guid.NewGuid():N}", website));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"{name} {Guid.NewGuid():N}", website, []));
 
     private Task<UniverseForm> CreateUniverseAsync(string name, Guid? parentId) =>
         PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest(name, null, parentId));

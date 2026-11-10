@@ -608,7 +608,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Univers {Guid.NewGuid():N}", null, null));
 
     private Task<PublisherForm> CreatePublisherAsync() =>
-        PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur {Guid.NewGuid():N}", null));
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {Guid.NewGuid():N}", null, []));
 
     private Task<PublisherCollectionForm> CreateCollectionAsync(PublisherForm publisher) =>
         PostAsync<PublisherCollectionForm>(

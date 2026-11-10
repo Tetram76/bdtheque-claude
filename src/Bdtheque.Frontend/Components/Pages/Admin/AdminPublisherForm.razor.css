@@ -1,0 +1,162 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md; visuel/saisie-editeur/declinaison-par-theme.md). */
+.publisher-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+.publisher-help,
+.publisher-collections-none {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+/* The website and, once entered, the link that opens it, beside it. */
+.publisher-website {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+}
+
+.publisher-website input {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.publisher-website-open,
+.publisher-collection-remove,
+.publisher-collection-locked {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-text);
+}
+
+.publisher-website-open ::deep .icon,
+.publisher-collection-remove ::deep .icon,
+.publisher-collection-locked ::deep .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+/* A collection per row: its name, what references it, and its removal or the lock that forbids it (visuel/saisie-editeur/contenu.md). */
+.publisher-collections {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.publisher-collection {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--control-height);
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+    padding-block: var(--space-s);
+    border-block-end: var(--border-width-control) solid var(--color-rule);
+}
+
+/* On a smartphone, what references it passes under its name, the removal staying on the right. */
+.publisher-collection-name {
+    grid-column: 1;
+    grid-row: 1;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+}
+
+.publisher-collection-name input {
+    inline-size: 100%;
+}
+
+.publisher-collection-use {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.publisher-collection-action {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (min-width: 40rem) {
+    .publisher-collection {
+        grid-template-columns: minmax(0, 1fr) 12.5rem var(--control-height);
+    }
+
+    .publisher-collection-use {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .publisher-collection-action {
+        grid-column: 3;
+    }
+}
+
+/* Removed at the saving: struck, in the muted text, until then. */
+.publisher-collection[data-removed] .publisher-collection-name {
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+}
+
+.publisher-collection-remove {
+    color: var(--color-delete);
+    cursor: pointer;
+}
+
+.publisher-collection-locked {
+    color: var(--color-text-muted);
+}
+
+.publisher-collection-restore {
+    padding: 0 var(--space-xs);
+    border: 0;
+    background: transparent;
+    color: var(--color-accent-text);
+    font: inherit;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    cursor: pointer;
+}
+
+/* An action as compact as a tag, dashed as what is still to come, as the addition of a record to a form (RecordTags). */
+.publisher-collections-add {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.0625rem var(--space-s);
+    border: var(--border-width-control) dashed var(--color-control-border);
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    line-height: var(--line-height-text);
+    cursor: pointer;
+}
+
+.publisher-collections-add:hover {
+    text-decoration: underline;
+}
+
+.publisher-collections-add ::deep .icon {
+    flex: none;
+    inline-size: 1em;
+    block-size: 1em;
+}

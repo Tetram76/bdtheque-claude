@@ -127,7 +127,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
     {
         // Narrower than the slot of a cover (3:4): the white frame of « La planche encrée » once showed in the gap.
         var album = await CreateAlbumAsync($"Couverture étroite {_marker}");
-        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new CreatePublisherRequest($"Éditeur {_marker}", null));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {_marker}", null, []));
         var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             new EditionContent(publisher.Id, null, null, null, null, null, null, null, null, null, false, true, null,
                 AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null),

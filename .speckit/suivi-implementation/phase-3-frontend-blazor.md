@@ -53,7 +53,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#205~~ | Saisie d'un album |
 | ~~#206~~ | Saisie d'une série |
 | ~~#207~~ | Saisie d'un auteur |
-| #208 | Saisie d'un éditeur et de ses collections |
+| ~~#208~~ | Saisie d'un éditeur et de ses collections |
 | #209 | Saisie d'une édition, de ses visuels et d'une intention d'achat |
 | ~~#321~~ | Fiche d'un album : structure, identité, contributions, genres et univers, résumé |
 | ~~#322~~ | Fiche d'un album : visuels de l'édition, éditions de la collection et détail de l'édition choisie |
