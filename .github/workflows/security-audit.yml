@@ -32,7 +32,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          dotnet-version: "10.0.403"
+          dotnet-version: "10.0.404"
 
       # Every package, transitive ones included. The builds only warn about a vulnerable package
       # (Directory.Build.props), so that one no version fixes yet does not block the development.
