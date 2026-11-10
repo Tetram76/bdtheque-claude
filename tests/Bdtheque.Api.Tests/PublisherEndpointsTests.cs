@@ -280,6 +280,23 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
+    public async Task Update_RenamingACollectionToTheNameOfOneRemoved_OrAddingOneNamedSo_Saves()
+    {
+        var publisher = await CreateAsync("Paquet", "Cairn", "Calamar", "Discover");
+        var cairn = publisher.Collections.Single(c => c.Name == "Cairn");
+        var calamar = publisher.Collections.Single(c => c.Name == "Calamar");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(cairn.Id, "Calamar"), new(null, "Discover")]), publisher.Version));
+
+        response.EnsureSuccessStatusCode();
+        var updated = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
+        Assert.Equal(["Calamar", "Discover"], updated.Collections.Select(c => c.Name));
+        Assert.Equal(cairn.Id, updated.Collections[0].Id);
+        Assert.DoesNotContain(calamar.Id, updated.Collections.Select(c => c.Id));
+    }
+
+    [Fact]
     public async Task Update_WithANewCollectionNamedAsAnother_IsABusinessError()
     {
         var publisher = await CreateAsync("Kana", "Big Kana");
