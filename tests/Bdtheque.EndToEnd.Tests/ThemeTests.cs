@@ -72,7 +72,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
 
         // The date of the browser, without a new draw: the theme does not change in the middle of the first date.
         var visit = VisitOf(await VisitCookieAsync(page));
-        Assert.Equal((ThemeCatalog.Base.Key, TodayIn("Pacific/Kiritimati")), (visit.ThemeKey, visit.ThemeDate));
+        Assert.Equal((ThemeCatalog.Base.Key, Application.TodayIn("Pacific/Kiritimati")), (visit.ThemeKey, visit.ThemeDate));
     }
 
     [Fact]
@@ -85,14 +85,14 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", "Pacific/Kiritimati");
 
         var visit = VisitOf(await VisitCookieAsync(page));
-        Assert.Equal((ThemeCatalog.Couverture.Key, TodayIn("Pacific/Kiritimati")), (visit.ThemeKey, visit.ThemeDate));
+        Assert.Equal((ThemeCatalog.Couverture.Key, Application.TodayIn("Pacific/Kiritimati")), (visit.ThemeKey, visit.ThemeDate));
     }
 
     [Fact]
     public async Task Visit_ThatGoesOnAtANewDate_DrawsItsThemeAgain_AndGoesOn()
     {
         var page = await PageInAsync("Europe/Paris");
-        var today = TodayIn("Europe/Paris");
+        var today = Application.TodayIn("Europe/Paris");
         var start = today.AddDays(-3);
         await page.Context.AddCookiesAsync([
             Cookie(BrowserTimeZone.CookieName, "Europe/Paris"),
@@ -112,7 +112,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
     public async Task Visit_WhoseThemeIsNoLongerOffered_IsPresentedInAnOfferedTheme()
     {
         var page = await PageInAsync("Europe/Paris");
-        var today = TodayIn("Europe/Paris");
+        var today = Application.TodayIn("Europe/Paris");
         await page.Context.AddCookiesAsync([
             Cookie(BrowserTimeZone.CookieName, "Europe/Paris"),
             Cookie(BrowserVisit.CookieName, new BrowserVisit(today, "withdrawn", today).Format()),
@@ -157,7 +157,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
     private async Task<IPage> PageOfAVisitStartedInAsync(Theme theme, string timeZone)
     {
         var page = await PageInAsync(timeZone);
-        var start = DateOnly.FromDateTime(DateTime.UtcNow);
+        var start = DateOnly.FromDateTime(Application.Clock.GetUtcNow().UtcDateTime);
         await page.Context.AddCookiesAsync([Cookie(BrowserVisit.CookieName, new BrowserVisit(start, theme.Key, ThemeDate: null).Format())]);
         return page;
     }
@@ -169,7 +169,4 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
 
     private static BrowserVisit VisitOf(BrowserContextCookiesResult cookie) =>
         BrowserVisit.Parse(Uri.UnescapeDataString(cookie.Value)) ?? throw new InvalidOperationException($"Not a visit: {cookie.Value}");
-
-    private static DateOnly TodayIn(string timeZone) =>
-        DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, TimeZoneInfo.FindSystemTimeZoneById(timeZone)).DateTime);
 }

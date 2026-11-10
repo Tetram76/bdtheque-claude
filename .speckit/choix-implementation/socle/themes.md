@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T17:40:00Z }
 ---
 
 # Thèmes
@@ -27,7 +27,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:30:00Z }
 
 ## Couleurs du jour
 
-- **Couleurs d'un thème peint par la couverture du jour posées sur la racine de la page**, à chaque requête, en propriétés personnalisées (`--day-…`) que lit sa feuille ([La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) : connues seulement avec l'édition à la une, elles sont un contrat du thème de base sans valeur, que seul ce thème lit. Le frontend les lit au point d'accès des couleurs du jour ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)) ; sans elles (collection vide, édition du jour sans couverture, API qui ne répond pas), le thème garde ses propres couleurs : elles ne font jamais échouer une page. Une navigation améliorée les reçoit avec le thème, Blazor synchronisant les attributs de `<html>`.
+- **Couleurs d'un thème peint par la couverture du jour posées sur la racine de la page**, à chaque requête, en propriétés personnalisées (`--day-…`) que lit sa feuille ([La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) : connues seulement avec l'édition à la une, elles sont un contrat du thème de base sans valeur, que seul ce thème lit. Le frontend les lit au point d'accès des couleurs du jour ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)) ; sans elles (collection vide, édition du jour sans couverture, date du navigateur pas encore connue, API qui ne répond pas), le thème garde ses propres couleurs : elles ne font jamais échouer une page. Une navigation améliorée les reçoit avec le thème, Blazor synchronisant les attributs de `<html>`.
   - **Alternative écartée (couleurs calculées dans le navigateur)** : la page arriverait dans d'autres couleurs, puis changerait, comme le tirage du thème écarté pour la même raison.
 - **Toute couleur lue avec une autre dérivée par le frontend**, en notation hexadécimale, plutôt que mélangée par la feuille : fonds teintés de la dominante, liens et textes assombris jusqu'au contraste attendu, accent dont le texte est blanc ou presque noir (un accent de ton moyen étant assombri jusqu'à ce que le blanc l'atteigne), champ et reflet sur la couleur profonde. Le test des contrastes vérifie ainsi le thème sur des couvertures de toute sorte (pâle, de ton moyen, sombre, grise, couleur profonde trop claire), et non sur une seule palette.
   - **Alternative écartée (`color-mix()` dans la feuille)** : aucun test ne lirait les couleurs obtenues, et la lisibilité d'une couverture pâle ne serait vérifiée que par l'œil.

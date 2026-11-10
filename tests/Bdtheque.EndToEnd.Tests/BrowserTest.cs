@@ -35,7 +35,7 @@ public abstract class BrowserTest<TApplication>(TApplication application) : IAsy
         ViewportSize = viewport,
         DeviceScaleFactor = 1,
         Locale = "fr-FR",
-        TimezoneId = "Europe/Paris",
+        TimezoneId = ApplicationHost.BrowserTimeZoneId,
         ReducedMotion = ReducedMotion.Reduce,
         ExtraHTTPHeaders = new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = themeKey },
     });

@@ -54,6 +54,9 @@
   <data name="Spotlight.Title" xml:space="preserve">
     <value>À la une aujourd'hui !</value>
   </data>
+  <data name="Spotlight.WithoutDay" xml:space="preserve">
+    <value>L'édition du jour attend la date de votre navigateur.</value>
+  </data>
   <data name="Latest.Title" xml:space="preserve">
     <value>Tout juste arrivés !</value>
   </data>

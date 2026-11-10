@@ -22,19 +22,23 @@ public sealed class BrowserTimeZone
     public string? Name { get; set; }
 
     /// <summary>
-    /// The time zone of the browser; universal time as long as the browser has not given one this application knows by
-    /// its IANA name (a first page, a cookie refused or altered).
+    /// The time zone in which the dates and times are presented: that of the browser, or universal time as long as the
+    /// browser has not given one this application knows by its IANA name (a first page, a cookie refused or altered). Only
+    /// for a presentation, which a page marked as such presents again once the time zone is known: a decision or a write
+    /// takes <see cref="Today"/>, which is never guessed.
     /// </summary>
     public TimeZoneInfo Zone => Known ?? TimeZoneInfo.Utc;
-
-    /// <summary>Whether the browser gave a time zone this application knows, without which <see cref="Today"/> is the date in universal time.</summary>
-    public bool IsKnown => Known is not null;
 
     private TimeZoneInfo? Known =>
         !string.IsNullOrEmpty(Name) && TimeZoneInfo.TryFindSystemTimeZoneById(Name, out var zone) && zone.HasIanaId ? zone : null;
 
     public DateTimeOffset ToLocal(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant, Zone);
 
-    /// <summary>The date of the browser, which can differ from that of the server around midnight.</summary>
-    public DateOnly Today(TimeProvider clock) => DateOnly.FromDateTime(ToLocal(clock.GetUtcNow()).DateTime);
+    /// <summary>
+    /// The date of the browser, which can differ from that of the server around midnight; <c>null</c> as long as the browser
+    /// has not given its time zone. Never guessed: each caller decides what it does without it, rather than deciding, or
+    /// recording, for a day the visitor does not live (e.g. the edition in the spotlight).
+    /// </summary>
+    public DateOnly? Today(TimeProvider clock) =>
+        Known is { } zone ? DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(clock.GetUtcNow(), zone).DateTime) : null;
 }

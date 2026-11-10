@@ -17,7 +17,7 @@ namespace Bdtheque.ValidationData;
 /// visual, amounts in several currencies, navigation entries outside the letters, a pale cover in the spotlight of the day — and
 /// evolves with the screens.
 /// </summary>
-public sealed class ValidationDataLoader(HttpClient client)
+public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 {
     /// <summary>Header of the secret shared by `api` and its internal clients (choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md).</summary>
     public const string InternalApiKeyHeader = "X-Internal-Api-Key";
@@ -50,7 +50,9 @@ public sealed class ValidationDataLoader(HttpClient client)
 
     public async Task LoadAsync(CancellationToken cancellationToken)
     {
-        var data = new Loading(client, cancellationToken);
+        // The day of the load, read once: the data around it (the spotlight of the days around it, a volume to be published
+        // the year after) is consistent even when the load runs over midnight.
+        var data = new Loading(client, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime), cancellationToken);
 
         var adventure = await data.GenreAsync("Aventure");
         var scienceFiction = await data.GenreAsync("Science-fiction");
@@ -281,7 +283,7 @@ public sealed class ValidationDataLoader(HttpClient client)
     private static async Task LoadLongSeriesVolumeAsync(Loading data, Publisher lagoon, Guid series, int volume)
     {
         // The last volume is announced, to be published.
-        var year = volume == LongSeriesVolumeTitles.Length ? DateTime.UtcNow.Year + 1 : 1998 + volume;
+        var year = volume == LongSeriesVolumeTitles.Length ? data.Today.Year + 1 : 1998 + volume;
         var title = LongSeriesVolumeTitles[volume - 1];
         var album = await data.AlbumAsync(Album(title.Length > 0 ? title : null, series, volume, year,
             month: volume % 3 == 0 ? 1 + volume % 12 : null, rating: volume % 4 == 0 ? null : (AlbumRating)(1 + volume % 5)));
@@ -400,8 +402,11 @@ public sealed class ValidationDataLoader(HttpClient client)
     }
 
     /// <summary>The calls to the administration API, which stop the load at the first refusal, with its reason.</summary>
-    private sealed class Loading(HttpClient client, CancellationToken cancellationToken)
+    private sealed class Loading(HttpClient client, DateOnly today, CancellationToken cancellationToken)
     {
+        /// <summary>The day of the load, in universal time.</summary>
+        public DateOnly Today => today;
+
         public async Task<Guid> GenreAsync(string label) =>
             (await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new(label))).Id;
 
@@ -483,7 +488,6 @@ public sealed class ValidationDataLoader(HttpClient client)
         /// </summary>
         public async Task SpotlightAroundTodayAsync()
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
             foreach (var day in new[] { today.AddDays(-1), today, today.AddDays(1) })
                 await GetAsync<Contracts.Catalog.SpotlightColors>($"/catalog/spotlight/colors?day={day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
         }

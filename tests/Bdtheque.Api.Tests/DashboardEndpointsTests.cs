@@ -53,6 +53,37 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task EmptyCollection_WithoutTheDayOfTheVisitor_IsSignalled_WithoutAnyDraw()
+    {
+        var publisher = await CreatePublisherAsync("Dargaud");
+        var intended = await CreateAlbumAsync("Mister Blueberry", null);
+        await CreateIntendedEditionAsync(intended.Id, publisher.Id);
+
+        var dashboard = await GetDashboardWithoutDayAsync();
+
+        Assert.Null(dashboard.Content);
+        Assert.Equal(0, await SpotlightCountAsync());
+    }
+
+    // The day of the spotlight is that of the visitor, which the API only knows once the browser gave it: without it, the
+    // dashboard is presented without any edition in the spotlight, and nothing is drawn for a day the visitor does not live
+    // (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md).
+    [Fact]
+    public async Task Spotlight_WithoutTheDayOfTheVisitor_IsNeitherDrawnNorPresented()
+    {
+        var publisher = await CreatePublisherAsync("Casterman");
+        var album = await CreateAlbumAsync("Le Lotus bleu", null);
+        await CreateOwnedEditionAsync(album.Id, publisher.Id);
+
+        var content = (await GetDashboardWithoutDayAsync()).Content!;
+
+        Assert.Null(content.Spotlight);
+        Assert.Equal(new DashboardCounters(1, 0, 1), content.Counters);
+        Assert.Single(content.LatestEntries);
+        Assert.Equal(0, await SpotlightCountAsync());
+    }
+
+    [Fact]
     public async Task Counters_CountTheAlbumsTheirSeriesAndTheOwnedEditions_OfTheCollectionOnly()
     {
         var publisher = await CreatePublisherAsync("Dupuis");
@@ -91,7 +122,7 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         var intended = await CreateAlbumAsync("Tintin au Tibet", tintin.Id, volume: 20);
         await UploadAsync(intended.Id, await CreateIntendedEditionAsync(intended.Id, publisher.Id), VisualType.Cover);
 
-        var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight;
+        var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight!;
 
         Assert.Equal(
             (album.Id, "Le Lotus bleu", "Tintin", 5, owned, publisher.Name, 1946, cover, "Tintin en Chine."),
@@ -106,12 +137,12 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         var album = await CreateAlbumAsync("Thorgal", null);
         await CreateOwnedEditionAsync(album.Id, publisher.Id);
         await CreateOwnedEditionAsync(album.Id, publisher.Id);
-        var first = (await GetDashboardAsync(Day)).Content!.Spotlight.Edition.Id;
+        var first = (await GetDashboardAsync(Day)).Content!.Spotlight!.Edition.Id;
 
         await CreateOwnedEditionAsync(album.Id, publisher.Id);
         var displays = new List<Guid>();
         for (var i = 0; i < 5; i++)
-            displays.Add((await GetDashboardAsync(Day)).Content!.Spotlight.Edition.Id);
+            displays.Add((await GetDashboardAsync(Day)).Content!.Spotlight!.Edition.Id);
 
         Assert.All(displays, edition => Assert.Equal(first, edition));
         Assert.Equal(1, await SpotlightCountAsync());
@@ -125,10 +156,10 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         await CreateOwnedEditionAsync(album.Id, publisher.Id);
         await CreateOwnedEditionAsync(album.Id, publisher.Id);
 
-        var first = (await GetDashboardAsync(Day)).Content!.Spotlight.Edition.Id;
-        var next = (await GetDashboardAsync(Day.AddDays(1))).Content!.Spotlight.Edition.Id;
+        var first = (await GetDashboardAsync(Day)).Content!.Spotlight!.Edition.Id;
+        var next = (await GetDashboardAsync(Day.AddDays(1))).Content!.Spotlight!.Edition.Id;
         // The second, in the spotlight the day after, is still recent; the first no longer.
-        var tenDaysLater = (await GetDashboardAsync(Day.AddDays(10))).Content!.Spotlight.Edition.Id;
+        var tenDaysLater = (await GetDashboardAsync(Day.AddDays(10))).Content!.Spotlight!.Edition.Id;
 
         Assert.NotEqual(first, next);
         Assert.Equal(first, tenDaysLater);
@@ -146,7 +177,7 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         // Days far enough apart for the repetitions not to leave it out.
         var spotlights = new List<Guid>();
         foreach (var day in new[] { Day, Day.AddDays(20), Day.AddDays(40) })
-            spotlights.Add((await GetDashboardAsync(day)).Content!.Spotlight.Edition.Id);
+            spotlights.Add((await GetDashboardAsync(day)).Content!.Spotlight!.Edition.Id);
 
         Assert.All(spotlights, edition => Assert.Equal(withCover, edition));
     }
@@ -158,11 +189,11 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         var album = await CreateAlbumAsync("Donjon", null);
         var first = await CreateOwnedEditionAsync(album.Id, publisher.Id);
         var second = await CreateOwnedEditionAsync(album.Id, publisher.Id);
-        var deleted = (await GetDashboardAsync(Day)).Content!.Spotlight.Edition.Id;
+        var deleted = (await GetDashboardAsync(Day)).Content!.Spotlight!.Edition.Id;
 
         await using (var scope = _factory.Services.CreateAsyncScope())
             await scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Editions.Where(e => e.Id == deleted).ExecuteDeleteAsync();
-        var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight.Edition.Id;
+        var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight!.Edition.Id;
 
         Assert.Equal(deleted == first ? second : first, spotlight);
     }
@@ -219,7 +250,7 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
 
         // Any page of the theme may be the first of the day, before the dashboard.
         var colors = await GetSpotlightColorsAsync(Day);
-        var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight;
+        var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight!;
 
         Assert.Equal(edition, spotlight.Edition.Id);
         Assert.Equal(cover.Palette, colors.Palette);
@@ -265,6 +296,10 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
     private async Task<Dashboard> GetDashboardAsync(DateOnly day, int? latestCount = null) =>
         (await _client.GetFromJsonAsync<Dashboard>(
             $"/catalog/dashboard?day={day:yyyy-MM-dd}{(latestCount is null ? "" : $"&latestCount={latestCount}")}"))!;
+
+    // As the frontend asks before the browser gave its time zone (a first page): without any day.
+    private async Task<Dashboard> GetDashboardWithoutDayAsync() =>
+        (await _client.GetFromJsonAsync<Dashboard>("/catalog/dashboard?latestCount=6"))!;
 
     private async Task<SpotlightColors> GetSpotlightColorsAsync(DateOnly day) =>
         (await _client.GetFromJsonAsync<SpotlightColors>($"/catalog/spotlight/colors?day={day:yyyy-MM-dd}"))!;

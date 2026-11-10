@@ -9,7 +9,7 @@ var internalApiKey = Required("InternalApiKey__Key");
 using var client = new HttpClient { BaseAddress = new Uri(baseUrl), Timeout = TimeSpan.FromMinutes(5) };
 client.DefaultRequestHeaders.Add(ValidationDataLoader.InternalApiKeyHeader, internalApiKey);
 
-await new ValidationDataLoader(client).LoadAsync(CancellationToken.None);
+await new ValidationDataLoader(client, TimeProvider.System).LoadAsync(CancellationToken.None);
 Console.WriteLine("Validation data loaded.");
 
 static string Required(string variable) =>

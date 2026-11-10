@@ -22,7 +22,12 @@ public sealed class SpotlightDayColors(ApiClient api, BrowserTimeZone timeZone, 
 {
     public async Task<CoverPalette?> GetAsync(CancellationToken cancellationToken = default)
     {
-        var day = timeZone.Today(clock).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        // Without the date of the browser (a first page), the page is rendered again once it is known (App.razor,
+        // data-local): asking for another day would draw and record an edition for a day the visitor does not live.
+        if (timeZone.Today(clock) is not { } today)
+            return null;
+
+        var day = today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         try
         {
             return (await api.GetAsync<SpotlightColors>($"/catalog/spotlight/colors?day={day}", cancellationToken)).Palette;

@@ -208,7 +208,7 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     [Fact]
     public async Task SpotlightOfTheDay_IsAPaleCover_WithAnAccentOfMiddleTone()
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(LoadedApi.Origin.UtcDateTime);
 
         foreach (var day in new[] { today.AddDays(-1), today, today.AddDays(1) })
         {
@@ -250,12 +250,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     /// <summary>An API on an empty database, into which the validation data is loaded once for the whole class.</summary>
-    public sealed class LoadedApi : ApiHostFactory, IAsyncLifetime
+    /// <summary>
+    /// The API, loaded at a time of its own, so that what the data holds around the day of the load does not depend on
+    /// when the tests run (a load and a test on both sides of midnight would not look at the same days).
+    /// </summary>
+    public sealed class LoadedApi() : ApiHostFactory(TestClock.StartingAt(Origin)), IAsyncLifetime
     {
+        public static readonly DateTimeOffset Origin = new(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+
         async Task IAsyncLifetime.InitializeAsync()
         {
             await InitializeAsync();
-            await new ValidationDataLoader(CreateApiClient()).LoadAsync(CancellationToken.None);
+            await new ValidationDataLoader(CreateApiClient(), Clock).LoadAsync(CancellationToken.None);
         }
 
         Task IAsyncLifetime.DisposeAsync() => DisposeAsync().AsTask();

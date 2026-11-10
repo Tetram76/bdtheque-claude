@@ -24,9 +24,8 @@ public sealed class VisitThemeSelector(VisitCookie visitCookie, BrowserTimeZone 
 
     private Theme Select()
     {
-        var browserToday = timeZone.IsKnown ? timeZone.Today(clock) : (DateOnly?)null;
         var continued = VisitTheme.Continue(
-            visitCookie.Current, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime), browserToday, ThemeCatalog.Offered, Random.Shared.Next);
+            visitCookie.Current, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime), timeZone.Today(clock), ThemeCatalog.Offered, Random.Shared.Next);
         visitCookie.Set(continued);
         return VisitTheme.Of(continued, ThemeCatalog.Offered);
     }

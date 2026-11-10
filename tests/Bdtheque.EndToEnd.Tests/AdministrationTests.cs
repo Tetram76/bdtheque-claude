@@ -148,7 +148,7 @@ public sealed class AdministrationApplication : ApplicationHost
     protected override async Task SeedAsync()
     {
         using var api = CreateApiClient();
-        ApiClock.UtcNow = Start;
+        Clock.UtcNow = Start;
         var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Dupuis", null));
         var reperages = await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(api,
             $"/admin/publishers/{publisher.Id}/collections", new("Repérages", publisher.Version));
@@ -221,7 +221,7 @@ public sealed class AdministrationApplication : ApplicationHost
         return (await response.Content.ReadFromJsonAsync<TResponse>())!;
     }
 
-    private void Tick() => ApiClock.UtcNow += TimeSpan.FromMinutes(15);
+    private void Tick() => Clock.UtcNow += TimeSpan.FromMinutes(15);
 
     private static SeriesContent Series(string title, SeriesStatus? status, bool isComplete) =>
         new(title, null, status, null, isComplete, false, false, null, null, new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null),

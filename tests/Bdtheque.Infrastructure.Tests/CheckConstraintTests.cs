@@ -700,7 +700,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
 
         await AssertViolatesAsync("CK_Editions_EnteredCollectionIffOwned", () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(
-                InsertEditionWithEntryDateSql, Guid.CreateVersion7(), albumId, publisherId, null!, DateTimeOffset.UtcNow));
+                InsertEditionWithEntryDateSql, Guid.CreateVersion7(), albumId, publisherId, null!, new DateTimeOffset(2026, 3, 31, 18, 0, 0, TimeSpan.Zero)));
     }
 
     private async Task<Guid> InsertEditionAsync() =>

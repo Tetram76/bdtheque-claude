@@ -7,6 +7,9 @@ public sealed class AudienceTests
 {
     private static readonly PresentedRecord Album = new(RecordType.Album, Guid.CreateVersion7());
 
+    // Any instant: the rules of a counter do not depend on when it was last used.
+    private static readonly DateTimeOffset LastUsage = new(2026, 3, 31, 18, 0, 0, TimeSpan.Zero);
+
     [Fact]
     public void Open_StartsTheVisitWithItsFirstUsage()
     {
@@ -127,7 +130,7 @@ public sealed class AudienceTests
     {
         Assert.Throws<ArgumentException>(() => new AudienceCounter(
             "dashboard", new DateOnly(2026, 3, 2), false, DeviceType.Computer, RenderingEngine.Blink, null, 1, 1, 0,
-            DateTimeOffset.UtcNow, []));
+            LastUsage, []));
     }
 
     [Theory]
@@ -139,7 +142,7 @@ public sealed class AudienceTests
     {
         Assert.Throws<ArgumentException>(() => new AudienceCounter(
             "dashboard", new DateOnly(2026, 3, 1), false, DeviceType.Computer, RenderingEngine.Blink, null, usages, visits, repeated,
-            DateTimeOffset.UtcNow, []));
+            LastUsage, []));
     }
 
     [Fact]

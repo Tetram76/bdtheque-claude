@@ -16,8 +16,14 @@ namespace Bdtheque.Testing;
 /// deployment (see <see cref="PostgreSqlTestServer"/>). Shared by the API tests and the end-to-end tests,
 /// which drive its lifetime from their own test framework.
 /// </summary>
-public class ApiHostFactory : WebApplicationFactory<Program>
+public class ApiHostFactory(TestClock clock) : WebApplicationFactory<Program>
 {
+    /// <summary>An API on the system time, until a test sets its clock.</summary>
+    public ApiHostFactory()
+        : this(new TestClock())
+    {
+    }
+
     public const string InternalApiKey = "test-internal-api-key";
 
     /// <summary>Heaviest visual accepted by the API under test, kept small so that a test can exceed it cheaply.</summary>
@@ -29,7 +35,7 @@ public class ApiHostFactory : WebApplicationFactory<Program>
     public string VisualsRoot { get; } = Path.Combine(Path.GetTempPath(), $"bdtheque-visuals-{Guid.NewGuid():N}");
 
     /// <summary>The application clock of this API instance: it dates the writes and drives the background tasks.</summary>
-    public TestClock Clock { get; } = new();
+    public TestClock Clock { get; } = clock;
 
     /// <summary>Creates the database of this API instance, before the API starts on it.</summary>
     public async Task InitializeAsync() =>
