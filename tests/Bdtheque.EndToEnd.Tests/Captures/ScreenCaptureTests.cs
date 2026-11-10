@@ -57,22 +57,34 @@ public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTes
         CaptureStore.Verify(theme, $"{screen}.{viewport}", await CaptureAsync(page));
     }
 
-    /// <summary>
-    /// The capture of a page whose bar is fixed at the bottom of the screen (an entry form, visuel/saisie-album/contenu.md):
-    /// in a window as high as the page, where the bar lies at the bottom of the page, under the form, as at the end of its
-    /// scrolling. A capture of the whole page beyond the window would leave it at the bottom of the window, over the form.
-    /// </summary>
-    internal static async Task<byte[]> CaptureAtFullHeightAsync(IPage page)
-    {
-        var height = await page.EvaluateAsync<int>("() => document.documentElement.scrollHeight");
-        await page.SetViewportSizeAsync(page.ViewportSize!.Width, height);
-        await PageReadiness.WaitAsync(page);
-        return await CaptureAsync(page);
-    }
+    // An element stuck to the bottom of the screen, such as the bar of an entry form (visuel/saisie-album/contenu.md).
+    private const string HasABarStuckToTheBottom = """
+        () => [...document.querySelectorAll("*")].some(element => {
+            const style = getComputedStyle(element);
+            return style.position === "sticky" && style.bottom !== "auto";
+        })
+        """;
 
-    /// <summary>The capture of the page once loaded, the way every screen is captured.</summary>
+    /// <summary>
+    /// The capture of the page once loaded, the way every screen is captured. A page with a bar stuck to the bottom of the
+    /// screen is captured in a window as high as itself (choix-implementation/socle/themes.md, captures de référence):
+    /// the bar lies at the bottom of the page, under the form, as at the end of its scrolling, and the capture does not
+    /// change the window. A capture of the whole page beyond the window would leave the bar at the bottom of the window,
+    /// over the form; and, enlarging the window while it is taken, it would change how the browser composites the bar, at
+    /// a fraction of a pixel after the content above it: two renderings, depending on when it was taken (#343).
+    /// </summary>
     internal static async Task<byte[]> CaptureAsync(IPage page)
     {
+        if (await page.EvaluateAsync<bool>(HasABarStuckToTheBottom))
+        {
+            var height = await page.EvaluateAsync<int>("() => document.documentElement.scrollHeight");
+            if (height != page.ViewportSize!.Height)
+            {
+                await page.SetViewportSizeAsync(page.ViewportSize.Width, height);
+                await PageReadiness.WaitAsync(page);
+            }
+        }
+
         await page.EvaluateAsync("() => document.fonts.ready");
         return await page.ScreenshotAsync(new PageScreenshotOptions
         {

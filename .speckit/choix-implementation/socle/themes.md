@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T17:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T19:05:00Z }
 ---
 
 # Thèmes
@@ -62,7 +62,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T17:40:00Z }
 
 - **Chaque écran réalisé est capturé dans chaque thème, aux largeurs des maquettes** ([Maquettes](../../visuel/charte-graphique/maquettes.md)), une fois la page prête, jugée sur son propre état ([Outillage de développement .NET](../outillage.md)), et **comparé pixel par pixel** à sa référence, conservée dans le dépôt. Un écran réalisé s'ajoute aux captures, un thème ajouté reçoit celles de tous les écrans.
   - **Alternative écartée (comparaison tolérante, seuil de pixels)** : elle laisserait passer un changement réel de même ampleur (une couleur, un pixel de décalage), et aucun seuil n'est juste pour toutes les pages.
-- **Fiche de saisie capturée dans une fenêtre aussi haute que la page** : sa barre d'enregistrement, collée au bas de l'écran, s'y trouve sous le formulaire, comme à la fin de son défilement ; une capture de la page entière au-delà de la fenêtre la laisserait au bas de la fenêtre, par-dessus le formulaire.
+- **Page qui a une barre collée au bas de l'écran capturée dans une fenêtre aussi haute qu'elle** (barre d'enregistrement d'une fiche de saisie, page des contrôles des tests), ce que décide la capture elle-même, pour toute page : la barre s'y trouve sous le formulaire, comme à la fin de son défilement, et la capture ne change pas la fenêtre.
+  - **Alternative écartée (capture de la page entière au-delà de la fenêtre)** : elle laisserait la barre au bas de la fenêtre, par-dessus le formulaire ; et, agrandissant la fenêtre pendant la capture, la page cessant d'y défiler, elle change la façon dont le navigateur compose la barre, placée à une fraction de pixel après le contenu qui la précède. La capture montrait l'une ou l'autre composition selon son moment : le point de l'état de la barre, à moins d'un dixième de pixel d'une limite d'arrondi, se dessinait parfois un pixel plus haut (constaté #343 : 3 captures sur 50 au-delà de la fenêtre, aucune sur 50 dans une fenêtre aussi haute que la page).
+  - **Alternative écartée (toute page capturée dans une fenêtre aussi haute qu'elle)** : un panneau latéral ou un dialogue, dimensionnés sur la hauteur de l'écran, s'étendraient à toute la page. L'en-tête, seul autre élément collé à l'écran, l'est en haut de la page, à son origine, qu'aucun contenu ne place à une fraction de pixel.
 - **Références mises à jour seulement après la validation de l'utilisateur** : la validation fonctionnelle est le seul juge du rendu ([Validation fonctionnelle](../../gestion-projet/revue-tickets/validation-fonctionnelle.md)), et chaque correction lui est soumise sans attendre de captures. Jusque-là, les captures d'une PR en brouillon diffèrent de leurs références, sans que ce soit à corriger ; les références mises à jour fixent ensuite le rendu validé.
 - **Captures comparées sous Linux seulement**, dans le CI et, ailleurs, dans le conteneur officiel de Playwright pour .NET : le rendu des polices diffère d'un système à l'autre.
   - **Alternative écartée (références propres à chaque système)** : chaque changement de rendu les demanderait toutes, sans garantie qu'elles montrent le même rendu.

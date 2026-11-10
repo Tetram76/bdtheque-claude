@@ -12,7 +12,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// The entry form of an album, captured in each offered theme on the application of the administration
 /// (<see cref="AdministrationApplication"/>), whose albums and dates are fixed, without writing anything: an album of a
 /// series, a new album whose saving is to correct, and an omnibus with the volumes it covers. In a window as high as the
-/// page, the bar of the form at its bottom (<see cref="ScreenCaptureTests.CaptureAtFullHeightAsync"/>).
+/// page, the bar of the form at its bottom (<see cref="ScreenCaptureTests.CaptureAsync"/>).
 /// </summary>
 [Collection(AdministrationApplication.Name)]
 public sealed class AdminAlbumFormCaptureTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)
@@ -60,7 +60,7 @@ public sealed class AdminAlbumFormCaptureTests(AdministrationApplication applica
             await Assertions.Expect(page.Locator(".entry-form-subject")).ToContainTextAsync("[1 à 12]");
         }
 
-        CaptureStore.Verify(theme, $"admin-album-{state}.{viewport}", await ScreenCaptureTests.CaptureAtFullHeightAsync(page));
+        CaptureStore.Verify(theme, $"admin-album-{state}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }
 
     private async Task<Guid> AlbumIdAsync(string title)

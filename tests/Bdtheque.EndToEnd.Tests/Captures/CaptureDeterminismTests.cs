@@ -35,6 +35,26 @@ public sealed class CaptureDeterminismTests(ApplicationHost application) : Brows
         Assert.True(comparison.Identical, $"The page painted before it changed differs in {comparison.DifferentPixels} pixels.");
     }
 
+    /// <summary>
+    /// A capture of a whole page taller than the window enlarges the window while it is taken: the page no longer scrolls,
+    /// and the browser composites a bar stuck to the bottom of the screen (an entry form, visuel/saisie-album/contenu.md)
+    /// otherwise. Placed after the content above it, the bar lies at a fraction of a pixel, and which of the two
+    /// compositions the capture shows depended on when it was taken: the dot of its state was a pixel higher in some of
+    /// them (#343). Such a page is captured in a window already as high as itself, which the capture leaves unchanged.
+    /// </summary>
+    [Fact]
+    public async Task APageWithABarStuckToTheBottom_IsCapturedInAWindowAsHighAsItself()
+    {
+        var page = await NewCapturePageAsync("base", ScreenCaptureTests.Viewports["smartphone"]);
+        await PageReadiness.GotoAsync(page, ControlsPage.Path);
+        var height = await page.EvaluateAsync<int>("() => document.documentElement.scrollHeight");
+        Assert.True(height > page.ViewportSize!.Height, "The page of the controls is expected taller than the window of a smartphone.");
+
+        await ScreenCaptureTests.CaptureAsync(page);
+
+        Assert.Equal(height, page.ViewportSize!.Height);
+    }
+
     // Both pages in the same state: the choice of a record rendered by its circuit, then whatever this rendering changed
     // in the page laid out (the chevron of the menu row).
     private static async Task SettleAsync(IPage page)
