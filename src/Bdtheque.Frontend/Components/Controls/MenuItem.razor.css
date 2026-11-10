@@ -32,3 +32,26 @@
     inline-size: 1.125em;
     block-size: 1.125em;
 }
+
+/* A label and its hint, one under the other, the hint in muted text: the hovering of the item underlines its label only. */
+.menu-item-text {
+    display: grid;
+    gap: 2px;
+    padding-block: var(--space-xs);
+}
+
+.menu-item-hint {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-weight: normal;
+}
+
+.menu-item:has(.menu-item-text):hover {
+    text-decoration: none;
+}
+
+.menu-item:hover .menu-item-text > :first-child {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+}

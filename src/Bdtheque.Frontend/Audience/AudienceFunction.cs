@@ -220,7 +220,7 @@ public static class AudienceFunctions
     /// <summary>A genre changed in its row (visuel/listes/saisie-selon-l-entite.md), from its « Modifier ».</summary>
     public static readonly AudienceFunction AdminGenresEdit = new("admin.genres.edit", AudienceFunctionKind.Action);
 
-    /// <summary>The frame of a new genre opened, from « Nouveau genre ».</summary>
+    /// <summary>The dialog of a new genre opened, from « Nouveau genre ».</summary>
     public static readonly AudienceFunction AdminGenresNew = new("admin.genres.new", AudienceFunctionKind.Action);
 
     /// <summary>The change of a genre, once saved.</summary>
@@ -260,6 +260,26 @@ public static class AudienceFunctions
     /// <summary>A new universe, once created.</summary>
     public static readonly AudienceFunction AdminUniverseCreated = new("admin.universe.created", AudienceFunctionKind.Action);
 
+    /// <summary>The page of the editions and purchase intents of an album, with the album it presents (visuel/editions-album/contenu.md).</summary>
+    public static readonly AudienceFunction AdminAlbumEditions = new("admin.album-editions", AudienceFunctionKind.Screen);
+
+    // The actions of the page: a dialog opened, a request of the page whose parameters are the dialog
+    // (Navigation/AlbumEditionsQuery.cs), or a write done.
+    /// <summary>The dialog of the deletion of an edition, opened from its row.</summary>
+    public static readonly AudienceFunction AdminAlbumEditionsEditionDeletion = new("admin.album-editions.edition-deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of an edition, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminAlbumEditionsEditionDeleted = new("admin.album-editions.edition-deleted", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the removal of an intent, opened from its row.</summary>
+    public static readonly AudienceFunction AdminAlbumEditionsIntentRemoval = new("admin.album-editions.intent-removal", AudienceFunctionKind.Action);
+
+    /// <summary>The removal of an intent, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminAlbumEditionsIntentRemoved = new("admin.album-editions.intent-removed", AudienceFunctionKind.Action);
+
+    /// <summary>A new intent on the whole album, set at once from the choice of the new intents.</summary>
+    public static readonly AudienceFunction AdminAlbumEditionsAlbumIntentSet = new("admin.album-editions.album-intent-set", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -275,6 +295,8 @@ public static class AudienceFunctions
         AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresPage, AdminGenresDeletion,
         AdminGenresDeleted, AdminGenresMerge, AdminGenresEdit, AdminGenresNew, AdminGenreSaved, AdminGenreCreated, AdminUniverses,
         AdminUniversesSearch, AdminUniversesPage, AdminUniversesDeletion, AdminUniversesDeleted, AdminUniversesMerge, AdminUniversesEdit,
-        AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated,
+        AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
+        AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved,
+        AdminAlbumEditionsAlbumIntentSet,
     ];
 }
