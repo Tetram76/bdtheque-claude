@@ -37,7 +37,9 @@ browser of the agent, no reference captures shown as a validation.
    - **every command**, complete and ready to copy, each in its own block, in
      the order the user runs them: `git pull` (scripts of `main`),
      `pwsh ./scripts/Start-Validation.ps1 -PullRequest <number>` (with
-     `-Empty` when the screen needs it), `pwsh ./scripts/Stop-Validation.ps1`.
+     `-Empty` when the screen needs it, `-PaleCoverSpotlight` when it is to be
+     judged on the pale cover of the day in « La couverture du jour »),
+     `pwsh ./scripts/Stop-Validation.ps1`.
      Never refer to an earlier message nor to the documentation.
    Then wait: nothing else on the chantier until the user answers.
 4. **Each feedback** → fixed in the draft PR (code, tests), pushed at once,

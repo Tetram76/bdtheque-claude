@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Search;
 
 namespace Bdtheque.ValidationData.Tests;
 
@@ -206,38 +207,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.DoesNotContain(latest, entry => entry.Label == new Contracts.Admin.NameLabel(ValidationDataLoader.DeletedGenre));
     }
 
-    // « La couverture du jour » (visuel/dashboard/la-couverture-du-jour.md, Lisibilité): the cover of the day, which colours
-    // every page of the theme, is pale, with an accent of middle tone, which neither a white nor a nearly black text reaches.
+    // Without the demand of the pale cover, the edition in the spotlight is the one the application draws among all the owned
+    // editions, at the first display of a day (fonctionnel/page-accueil.md, À la une): the load draws none itself.
     [Fact]
-    public async Task SpotlightOfTheDay_IsAPaleCover_WithAnAccentOfMiddleTone()
+    public async Task Spotlight_IsLeftToTheDrawOfTheApplication()
     {
-        var today = DateOnly.FromDateTime(LoadedApi.Origin.UtcDateTime);
+        var response = await _client.PostAsJsonAsync(
+            "/catalog/search/editions",
+            new AdvancedSearchRequest(new SearchCriterion("spotlightCount", SearchComparison.GreaterThan, ["0"])));
+        response.EnsureSuccessStatusCode();
+        var found = await response.Content.ReadFromJsonAsync<Page<EditionListItem>>();
 
-        foreach (var day in new[] { today.AddDays(-1), today, today.AddDays(1) })
-        {
-            var palette = (await _client.GetFromJsonAsync<SpotlightColors>($"/catalog/spotlight/colors?day={day:yyyy-MM-dd}"))!.Palette!;
-
-            Assert.True(Luminance(palette.Dominant) > 0.6, $"The cover of {day} is not pale: {palette.Dominant}.");
-            Assert.True(ContrastRatio(palette.Accent, "#FFFFFF") < 4.5 && ContrastRatio(palette.Accent, "#15151A") < 4.5,
-                $"The accent of {day} is not of middle tone: {palette.Accent}.");
-        }
-    }
-
-    private static double ContrastRatio(string first, string second)
-    {
-        var (lighter, darker) = (Luminance(first), Luminance(second)) is var (a, b) && a > b ? (a, b) : (b, a);
-        return (lighter + 0.05) / (darker + 0.05);
-    }
-
-    private static double Luminance(string hex)
-    {
-        double Channel(int start)
-        {
-            var value = int.Parse(hex.AsSpan(start, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture) / 255d;
-            return value <= 0.04045 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4);
-        }
-
-        return 0.2126 * Channel(1) + 0.7152 * Channel(3) + 0.0722 * Channel(5);
+        Assert.Empty(found!.Items);
     }
 
     private async Task<SeriesDetail> SeriesAsync(string title)
@@ -252,21 +233,6 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         return (await _client.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{Assert.Single(found!.Items).Id}"))!;
     }
 
-    /// <summary>An API on an empty database, into which the validation data is loaded once for the whole class.</summary>
-    /// <summary>
-    /// The API, loaded at a time of its own, so that what the data holds around the day of the load does not depend on
-    /// when the tests run (a load and a test on both sides of midnight would not look at the same days).
-    /// </summary>
-    public sealed class LoadedApi() : ApiHostFactory(TestClock.StartingAt(Origin)), IAsyncLifetime
-    {
-        public static readonly DateTimeOffset Origin = new(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
-
-        async Task IAsyncLifetime.InitializeAsync()
-        {
-            await InitializeAsync();
-            await new ValidationDataLoader(CreateApiClient(), Clock).LoadAsync(CancellationToken.None);
-        }
-
-        Task IAsyncLifetime.DisposeAsync() => DisposeAsync().AsTask();
-    }
+    /// <summary>The validation data as a start of the validation environment loads it, without the pale cover in the spotlight.</summary>
+    public sealed class LoadedApi() : LoadedApiFixture(paleCoverInTheSpotlight: false);
 }

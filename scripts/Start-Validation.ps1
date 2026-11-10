@@ -18,6 +18,10 @@
 .EXAMPLE
     ./scripts/Start-Validation.ps1 -PullRequest 245 -Empty
     Without the validation data: the home screen of an empty collection.
+
+.EXAMPLE
+    ./scripts/Start-Validation.ps1 -PullRequest 245 -PaleCoverSpotlight
+    With the pale cover of the validation data in the spotlight, rather than the edition the application draws.
 #>
 [CmdletBinding(DefaultParameterSetName = 'Ref')]
 param(
@@ -33,11 +37,19 @@ param(
     [switch] $Empty,
 
     # Keeps the data of the environment already started, rather than starting again from an empty database.
-    [switch] $KeepData
+    [switch] $KeepData,
+
+    # Loads the validation data with their pale cover in the spotlight of the days around the start, the most demanding
+    # case of the theme « La couverture du jour », rather than leaving the draw to the application.
+    [switch] $PaleCoverSpotlight
 )
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
+# The spotlight is set by the load of the data, which neither -Empty nor -KeepData runs.
+if ($PaleCoverSpotlight -and ($Empty -or $KeepData)) {
+    throw '-PaleCoverSpotlight loads the validation data: it cannot go with -Empty nor -KeepData.'
+}
 $repository = Split-Path $PSScriptRoot -Parent
 $sources = Join-Path ([IO.Path]::GetTempPath()) 'bdtheque-validation'
 
@@ -69,7 +81,8 @@ if (-not $KeepData) {
 }
 docker @compose up --detach --build --wait
 if (-not $KeepData -and -not $Empty) {
-    docker @compose run --rm --build validation-data
+    $load = @(if ($PaleCoverSpotlight) { '--pale-cover-spotlight' })
+    docker @compose run --rm --build validation-data @load
 }
 
 $settings = Get-Content (Join-Path $sources 'docker/validation/validation.env') |
