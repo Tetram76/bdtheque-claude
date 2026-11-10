@@ -220,9 +220,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("intent", "Intention d'achat"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
-        // It has no edition: no edition nor visual, and the generic visual as its cover.
-        Assert.Contains("Aucune édition dans la collection", BlockOf(page, "Dans quelles éditions ?").TextContent);
-        Assert.Empty(page.FindAll(".edition, .edition-visuals"));
+        // It has no edition: no edition nor visual, nor any mention in their place, and the generic visual as its cover.
+        Assert.Empty(page.FindAll(".edition, .edition-visuals, .editions-none"));
         Assert.NotNull(page.Find(".album-cover svg.cover-generic"));
     }
 
@@ -235,8 +234,9 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Intention d'achat", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("intent", "Intention d'achat"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
-        // The edition targeted is an intent, never an edition of the collection.
-        Assert.Contains("Aucune édition dans la collection", BlockOf(page, "Dans quelles éditions ?").TextContent);
+        // The edition targeted is an intent, never an edition of the collection, which has none, without any mention.
+        Assert.Empty(BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition, .editions-none"));
+        Assert.Single(page.FindAll(".album-intents li"));
     }
 
     [Fact]
@@ -248,6 +248,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Hors collection", page.FindAll(".album-facts li")[^1].TextContent.Trim());
         Assert.Equal(("out", "Hors collection"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
+        // Neither edition nor intent: no block of the editions, which would hold nothing.
+        Assert.DoesNotContain(page.FindAll("section.block .block-title"), t => t.TextContent.Trim() == "Dans quelles éditions ?");
     }
 
     [Fact]
@@ -467,6 +469,109 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Intent_OnAnEdition_IsFramedUnderTheEditions_ByItsLabel_ItsFacts_AndTheDateItWasPosed()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        var intents = BlockOf(page, "Dans quelles éditions ?").QuerySelector(".album-intents")!;
+        Assert.Equal("Intention d'achat", intents.QuerySelector(".album-intents-title")!.TextContent.Trim());
+        var intent = Assert.Single(intents.QuerySelectorAll("li"));
+        Assert.Equal("Casterman [2023]", intent.QuerySelector(".intent-label")!.TextContent.Trim());
+        Assert.Equal("Édition spéciale · Normal (A4) · Cartonnée · 112 pages", intent.QuerySelector(".intent-facts")!.TextContent.Trim());
+        // Posed at 23:30 universal time on 9 October: the 10th in Paris, the time zone of the browser.
+        Assert.Equal("Posée le 10/10/2026", intent.QuerySelector(".intent-date")!.TextContent.Trim());
+        // An intent is never one of the editions, which has its own detail.
+        Assert.Equal(2, page.FindAll(".edition").Count);
+    }
+
+    [Fact]
+    public void Intents_OnSeveralEditions_AreAllFramed_UnderAPluralMention_TheirFactsLeavingOutWhatIsNotSet()
+    {
+        var other = Intended() with
+        {
+            Edition = new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Casterman", null, "Corto Maltese en couleur", 2016, null),
+            Category = null,
+            Format = null,
+            Binding = null,
+            PageCount = null,
+        };
+        _catalog.Album = Album() with { Editions = [.. Album().Editions, other] };
+
+        var page = Open();
+
+        Assert.Equal("Intentions d'achat", page.Find(".album-intents-title").TextContent.Trim());
+        Assert.Equal(["Casterman [2023]", "Casterman (Corto Maltese en couleur) [2016]"],
+            page.FindAll(".album-intents li .intent-label").Select(l => l.TextContent.Trim()));
+        Assert.Empty(page.FindAll(".album-intents li")[1].QuerySelectorAll(".intent-facts"));
+    }
+
+    [Fact]
+    public void Intent_OnTheWholeAlbum_TargetsAnyEditionOfIt_WhichHasNone()
+    {
+        _catalog.Album = Album() with
+        {
+            Album = Summary() with { IsInCollection = false },
+            Editions = [],
+            PurchaseIntent = new PurchaseIntentItem(Guid.NewGuid(), Created, Created),
+        };
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".editions-none"));
+        var intent = Assert.Single(page.FindAll(".album-intents li"));
+        Assert.Equal("Toute édition de l'album", intent.QuerySelector(".intent-label")!.TextContent.Trim());
+        Assert.Equal("Posée le 02/02/2026", intent.QuerySelector(".intent-date")!.TextContent.Trim());
+    }
+
+    [Fact]
+    public void Intents_OfAnAlbumWithoutAny_AreNotFramed()
+    {
+        _catalog.Album = Album() with { Editions = [.. Album().Editions.Where(e => e.IsInCollection)] };
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".album-intents"));
+    }
+
+    [Fact]
+    public void RestOfTheSeries_ListsItsAlbumsInTheirOrder_EachWithItsVolumeAndMembership_TheAlbumShownPutForward()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        var series = BlockOf(page, "Et le reste de la série ?");
+        Assert.Equal(AppPaths.SeriesRecord(SeriesId), series.QuerySelector("a.series-record")!.GetAttribute("href"));
+        Assert.Equal("Voir la fiche de la série", series.QuerySelector("a.series-record")!.TextContent.Trim());
+        Assert.NotNull(series.QuerySelector("details[open] > summary"));
+        Assert.Equal("Corto Maltese 4 albums, dont 2 dans la collection",
+            string.Join(' ', series.QuerySelectorAll("summary > span").Select(s => s.TextContent.Trim())));
+        var albums = series.QuerySelectorAll("details ol > li");
+        Assert.Equal(["T. 1", "T. 5", "T. 6", "HS 1"], albums.Select(a => a.QuerySelector(".series-album-volume")!.TextContent.Trim()));
+        Assert.Equal(["La Jeunesse", "Lointaines îles du vent", "Les Celtiques", "Corto Maltese - HS 1"],
+            albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));
+        Assert.Equal(["Dans la collection", "Dans la collection", "Intention d'achat", "Hors collection"],
+            albums.Select(a => a.QuerySelector(".tag")!.TextContent.Trim()));
+        // The album shown is no link to itself; the others lead to their records.
+        Assert.Equal("page", albums[1].QuerySelector(".series-album-title")!.GetAttribute("aria-current"));
+        Assert.Null(albums[1].QuerySelector("a"));
+        Assert.Equal([AppPaths.Album(SeriesAlbumIds[0]), AppPaths.Album(SeriesAlbumIds[2]), AppPaths.Album(SeriesAlbumIds[3])],
+            series.QuerySelectorAll("details ol a").Select(a => a.GetAttribute("href")));
+    }
+
+    [Fact]
+    public void RestOfTheSeries_OfAnAlbumWithoutSeries_IsNotPresented()
+    {
+        _catalog.Album = Album() with { Album = Summary() with { SeriesId = null, SeriesTitle = null }, SeriesAlbums = [] };
+
+        var page = Open();
+
+        Assert.DoesNotContain(page.FindAll("section.block .block-title"), t => t.TextContent.Trim() == "Et le reste de la série ?");
+    }
+
+    [Fact]
     public void UnknownAlbum_PresentsTheFunctionalError()
     {
         _catalog.AlbumStatus = HttpStatusCode.NotFound;
@@ -506,8 +611,21 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         EnteredCollectionAt: new DateTimeOffset(2026, 2, 2, 23, 0, 0, TimeSpan.Zero), PurchaseIntent: null, Visuals: [], CreatedAt: Created,
         ModifiedAt: Modified);
 
+    // The albums of the series, the one shown second: owned, shown, wished for, catalogued only.
+    private static readonly Guid[] SeriesAlbumIds = [Guid.NewGuid(), AlbumId, Guid.NewGuid(), Guid.NewGuid()];
+
+    private static List<AlbumCard> SeriesAlbums() =>
+    [
+        new(Summary() with { Id = SeriesAlbumIds[0], Title = "La Jeunesse", VolumeNumber = 1 }, null, null, false),
+        new(Summary(), null, null, false),
+        new(Summary() with { Id = SeriesAlbumIds[2], Title = "Les Celtiques", VolumeNumber = 6, IsInCollection = false }, null, null, true),
+        new(Summary() with { Id = SeriesAlbumIds[3], Title = null, IsSpecialIssue = true, VolumeNumber = 1, IsInCollection = false }, null, null, false),
+    ];
+
     private static EditionDetail Intended() => Owned(IntendedEditionId, 2023) with
     {
+        Category = EditionCategory.SpecialEdition,
+        PageCount = 112,
         AcquisitionMode = null,
         AcquisitionDate = null,
         AcquisitionAmount = null,
@@ -554,6 +672,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
             // Two editions in the collection, and one targeted by an intent, which is no edition of the collection.
             [first, second, Intended()],
             null,
+            SeriesAlbums(),
             Created,
             Modified);
     }

@@ -12,9 +12,9 @@
 
 @* The record of an album in the consultation (visuel/fiche-album/contenu.md): the cover and the identity of the album, its
    contributions, genres and universes; its summary; its editions in the collection, each with its visuals and its detail,
-   an edition targeted by a purchase intent being never presented as an edition
-   (fonctionnel/regles-metier/intention-d-achat.md); its dates; and the viewer of a visual, a dialog above the record that
-   its address opens (Navigation/AlbumRecordQuery.cs). Its styles read the contracts of the base theme only
+   an edition targeted by a purchase intent being never presented as an edition, but under them with the other intents
+   (fonctionnel/regles-metier/intention-d-achat.md); the rest of its series; its dates; and the viewer of a visual, a dialog
+   above the record that its address opens (Navigation/AlbumRecordQuery.cs). Its styles read the contracts of the base theme only
    (visuel/fiche-album/declinaison-par-theme.md). *@
 <PageTitle>@(_album is null ? L["Title"] : Labels.Album(_album.Album, _format))</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AlbumRecord" Record="new PresentedRecord(RecordType.Album, Id)" />
@@ -98,27 +98,34 @@ else if (_album is { } album)
             }
         </Block>
 
-        <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
-            @if (_owned.Count > 0)
-            {
-                @* Every edition of the collection at once, each with its visuals and its detail: an album has one, rarely more. *@
-                <ol class="editions">
-                    @foreach (var edition in _owned)
-                    {
-                        var label = Labels.Edition(edition.Edition);
-                        <li class="edition">
-                            <h3 class="edition-label"><LabelText Text="@label" /></h3>
-                            <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
-                            <EditionFacts Edition="edition" />
-                        </li>
-                    }
-                </ol>
-            }
-            else
-            {
-                <p class="editions-none">@L["Editions.None"]</p>
-            }
-        </Block>
+        @* Without edition in the collection, nothing says so in their place: the banner and the membership of the album already
+           do; and an album with neither edition nor intent has no block that would hold nothing (visuel/fiche-album/contenu.md). *@
+        @if (_owned.Count > 0 || IsIntended)
+        {
+            <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
+                @if (_owned.Count > 0)
+                {
+                    @* Every edition of the collection at once, each with its visuals and its detail: an album has one, rarely more. *@
+                    <ol class="editions">
+                        @foreach (var edition in _owned)
+                        {
+                            var label = Labels.Edition(edition.Edition);
+                            <li class="edition">
+                                <h3 class="edition-label"><LabelText Text="@label" /></h3>
+                                <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
+                                <EditionFacts Edition="edition" />
+                            </li>
+                        }
+                    </ol>
+                }
+                <AlbumIntents AlbumIntent="album.PurchaseIntent" Editions="album.Editions" />
+            </Block>
+        }
+
+        @if (album.Album.SeriesId is { } series)
+        {
+            <RestOfSeries AlbumId="Id" SeriesId="series" SeriesTitle="@(album.Album.SeriesTitle!)" Albums="album.SeriesAlbums" LabelFormat="_format" />
+        }
     </div>
 
     <p class="album-dates" data-local>@L["Dates", Format.LocalDate(album.CreatedAt), Format.LocalDate(album.ModifiedAt)]</p>

@@ -7,9 +7,10 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 
 /// <summary>
 /// The record of an album, captured in each offered theme on the application of the records (<see cref="RecordsApplication"/>),
-/// whose albums and dates are fixed: an album with its editions, its visuals and a collective drawing, as it opens, then with the
-/// viewer open on a plate, then, on a smartphone, whose line does not hold every drawer, the authors of a role unfolded; an album targeted
-/// by a purchase intent, and one out of the collection, each marked as such, without edition.
+/// whose albums and dates are fixed: an album with its editions, its visuals, an intent on another edition, a collective drawing
+/// and the rest of its series, as it opens, then with the viewer open on a plate, then, on a smartphone, whose line does not hold
+/// every drawer, the authors of a role unfolded; an album targeted by a purchase intent, and one out of the collection, each
+/// marked as such, without edition.
 /// </summary>
 [Collection(RecordsApplication.Name)]
 public sealed class AlbumRecordCaptureTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)

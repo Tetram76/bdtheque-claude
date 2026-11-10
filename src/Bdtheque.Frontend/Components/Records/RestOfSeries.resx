@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Et le reste de la série ?</value>
+  </data>
+  <data name="Kicker" xml:space="preserve">
+    <value>La série</value>
+  </data>
+  <data name="Record" xml:space="preserve">
+    <value>Voir la fiche de la série</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>{0} album</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Owned" xml:space="preserve">
+    <value>{0}, dont {1} dans la collection</value>
+  </data>
+  <data name="Owned.None" xml:space="preserve">
+    <value>{0}, aucun dans la collection</value>
+  </data>
+</root>

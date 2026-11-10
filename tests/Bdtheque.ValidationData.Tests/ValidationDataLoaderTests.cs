@@ -132,6 +132,9 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Contains(intents, intent => intent is { Edition: not null, Album.IsInCollection: false, IsConvertible: true });
         Assert.Contains(intents, intent => intent.Cover is not null);
         Assert.Contains(intents, intent => intent.Cover is null);
+        // Several intents on editions of one album, which its record presents under a plural mention
+        // (visuel/fiche-album/contenu.md).
+        Assert.Contains(intents.Where(intent => intent.Edition is not null).GroupBy(intent => intent.Album.Id), album => album.Count() > 1);
     }
 
     [Fact]

@@ -1,0 +1,61 @@
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<AlbumIntents> L
+@inject RecordLabels Labels
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+
+@* The purchase intents of an album, under the detail of its editions (visuel/fiche-album/contenu.md): never presented as
+   editions (fonctionnel/regles-metier/intention-d-achat.md), each is told by what it targets, without a tag, the block being
+   that of the editions — the label of the edition targeted, with its category, format, binding and pages, or any edition of
+   the album for an intent on the album itself —, then the date it was posed, in the time zone of the browser. An intent is
+   not chosen like an edition and has no visual to present. *@
+@if (_intents.Count > 0)
+{
+    <div class="album-intents" data-local>
+        <p class="album-intents-title">@L[_intents.Count > 1 ? "Title.Other" : "Title.One"]</p>
+        <ul>
+            @foreach (var intent in _intents)
+            {
+                <li>
+                    <span class="intent-target">
+                        <span class="intent-label"><LabelText Text="@intent.Label" /></span>
+                        @if (intent.Facts is { } facts)
+                        {
+                            <span class="intent-facts">@facts</span>
+                        }
+                    </span>
+                    <span class="intent-date">@L["Posed", Format.LocalDate(intent.PosedAt)]</span>
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    /// <summary>The intent on the whole album, which then has no edition at all.</summary>
+    [Parameter]
+    public PurchaseIntentItem? AlbumIntent { get; set; }
+
+    /// <summary>The editions of the album, in their order; only those targeted by an intent are presented.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<EditionDetail> Editions { get; set; } = [];
+
+    private List<(string Label, string? Facts, DateTimeOffset PosedAt)> _intents = [];
+
+    protected override void OnParametersSet() => _intents = AlbumIntent is { } whole
+        ? [(L["WholeAlbum"], null, whole.CreatedAt)]
+        : [.. Editions.Where(e => e.PurchaseIntent is not null).Select(e => (Labels.Edition(e.Edition), Facts(e), e.PurchaseIntent!.CreatedAt))];
+
+    // What tells an edition apart beyond its label, as far as it is known; nothing when none is.
+    private string? Facts(EditionDetail edition)
+    {
+        string?[] facts =
+        [
+            edition.Category is { } category ? Values.Of(category) : null,
+            edition.Format is { } format ? Values.Of(format) : null,
+            edition.Binding is { } binding ? Values.Of(binding) : null,
+            edition.PageCount is { } pages ? L["Pages", Format.Number(pages)].Value : null,
+        ];
+        return facts.Any(f => f is not null) ? string.Join(" · ", facts.OfType<string>()) : null;
+    }
+}

@@ -14,6 +14,11 @@ namespace Bdtheque.Contracts.Catalog;
 /// <param name="Universes">Those of the album and of its series, without duplicates, by name.</param>
 /// <param name="Editions">Every edition, owned or targeted by a purchase intent, whole, by year.</param>
 /// <param name="PurchaseIntent">The purchase intent targeting the whole album, if any.</param>
+/// <param name="SeriesAlbums">
+/// Every album of its series, itself included, as a card, in the order of the series
+/// (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md); none without series. A series counts a few dozen albums at
+/// most: the record carries them whole (choix-implementation/api/organisation-de-l-api.md, consultation).
+/// </param>
 public sealed record AlbumDetail(
     AlbumSummary Album,
     int? FirstPublicationYear,
@@ -26,6 +31,7 @@ public sealed record AlbumDetail(
     IReadOnlyList<ContributionItem> Contributions,
     IReadOnlyList<EditionDetail> Editions,
     PurchaseIntentItem? PurchaseIntent,
+    IReadOnlyList<AlbumCard> SeriesAlbums,
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);
 

@@ -60,9 +60,6 @@
   <data name="Cover" xml:space="preserve">
     <value>Couverture de {0}</value>
   </data>
-  <data name="Editions.None" xml:space="preserve">
-    <value>Aucune édition dans la collection.</value>
-  </data>
   <data name="Dates" xml:space="preserve">
     <value>Album créé le {0}, modifié le {1}.</value>
   </data>

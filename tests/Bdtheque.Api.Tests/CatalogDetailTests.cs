@@ -134,6 +134,39 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     }
 
     [Fact]
+    public async Task Album_PresentsEveryAlbumOfItsSeries_ItselfIncluded_InTheOrderOfTheSeries_EachWithItsMembership()
+    {
+        var publisher = await CreatePublisherAsync("Casterman");
+        var series = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Corto Maltese"));
+        // fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md: the special issues last, each by volume.
+        var special = await CreateAlbumAsync("Les Helvétiques", series.Id, volume: 1, specialIssue: true);
+        var third = await CreateAlbumAsync("Sous le signe du Capricorne", series.Id, volume: 3);
+        var shown = await CreateAlbumAsync("La Ballade de la mer salée", series.Id, volume: 2);
+        var first = await CreateAlbumAsync("La Jeunesse", series.Id, volume: 1);
+        await CreateOwnedEditionAsync(first.Id, publisher.Id, 1985);
+        await CreateIntendedEditionAsync(third.Id, publisher.Id, 2023);
+        await CreateAlbumAsync("Une autre série", (await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Autre"))).Id, volume: 1);
+
+        var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{shown.Id}");
+
+        Assert.Equal(
+            [(first.Id, true, false), (shown.Id, false, false), (third.Id, false, true), (special.Id, false, false)],
+            detail.SeriesAlbums.Select(a => (a.Album.Id, a.Album.IsInCollection, a.HasPurchaseIntent)));
+        Assert.Equal(new AlbumSummary(special.Id, "Les Helvétiques", series.Id, "Corto Maltese", AlbumType.Regular, true, 1, null, null, false),
+            detail.SeriesAlbums[^1].Album);
+    }
+
+    [Fact]
+    public async Task Album_WithoutSeries_HasNoOtherAlbumToPresent()
+    {
+        var album = await CreateAlbumAsync("Un one-shot", null);
+
+        var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}");
+
+        Assert.Empty(detail.SeriesAlbums);
+    }
+
+    [Fact]
     public async Task Series_PresentsItsAlbumsInTheOrderOfTheSeriesAndItsAuthorsPublisherAndCollection()
     {
         var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Western {Guid.NewGuid():N}"));

@@ -16,7 +16,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// <summary>
 /// The record of an album in the consultation (visuel/fiche-album/contenu.md), as its visitor goes through it: under the albums
 /// of the menu, the viewer of the visuals of an edition, the original image, the authors of a role unfolded and folded, on
-/// the application of the records (<see cref="RecordsApplication"/>).
+/// the application of the records (<see cref="RecordsApplication"/>), and the rest of its series.
 /// </summary>
 [Collection(RecordsApplication.Name)]
 public sealed partial class AlbumRecordTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
@@ -135,6 +135,26 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         Assert.True(await OnOneLineAsync(drawing));
     }
 
+    [Fact]
+    public async Task RestOfTheSeries_Folds_AndLeadsToAnotherAlbumOfTheSeries_PutForwardOnItsRecord()
+    {
+        var page = await NewPageAsync();
+        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+        var series = page.Locator("[data-part='series']");
+        var other = series.GetByRole(AriaRole.Link, new() { Name = "Les Celtiques" });
+        await Assertions.Expect(other).ToBeVisibleAsync();
+
+        await series.Locator("summary").ClickAsync();
+        await Assertions.Expect(other).ToBeHiddenAsync();
+        await series.Locator("summary").ClickAsync();
+        await other.ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(new Regex($"/albums/{Application.IntendedAlbumId}$"));
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Les Celtiques");
+        await Assertions.Expect(series.Locator("[aria-current='page']")).ToHaveTextAsync("Les Celtiques");
+        await Assertions.Expect(series.GetByRole(AriaRole.Link, new() { Name = "Lointaines îles du vent" })).ToBeVisibleAsync();
+    }
+
     [GeneratedRegex(@"^et \d+ autres?$")]
     private static partial Regex FoldedCount();
 
@@ -157,9 +177,9 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
 
 /// <summary>
 /// An application whose albums present the cases of the record of an album, at fixed dates: an album of a series with two
-/// editions in the collection, one with four visuals and one gift without any, and a collective drawing, attached to a
-/// universe within two others; an album targeted by an intent on itself, and one catalogued only. Its visuals are the only
-/// ones, so that the edition in the spotlight, and the colours of the day, are the same at each capture.
+/// editions in the collection, one with four visuals and one gift without any, wished for again in a third, and a collective
+/// drawing, attached to a universe within two others; an album targeted by an intent on itself, and one catalogued only.
+/// Its visuals are the only ones, so that the edition in the spotlight, and the colours of the day, are the same at each capture.
 /// </summary>
 public sealed class RecordsApplication : ApplicationHost
 {
@@ -213,13 +233,19 @@ public sealed class RecordsApplication : ApplicationHost
             (VisualType.Cover, SKColors.SteelBlue), (VisualType.Plate, SKColors.Wheat), (VisualType.Plate, SKColors.Bisque), (VisualType.BackCover, SKColors.Tan),
         })
             version = await UploadAsync(api, album.Id, first.Id, type, color, version);
-        await PostAsync<EditionForm>(api, $"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
+        var gift = await PostAsync<EditionForm>(api, $"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
             Edition(casterman.Id, collection.Id, 2010, null, AcquisitionMode.Gift, new DateOnly(2011, 12, 25), null), version));
 
         var intended = await AlbumAsync(api, series.Id, "Les Celtiques", 6, [new(hugo.Id, ContributionRole.Scenarist)]);
         IntendedAlbumId = intended.Id;
         await PostAsync<PurchaseIntentsForm>(api, $"/admin/albums/{intended.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, intended.Version));
         CataloguedAlbumId = (await AlbumAsync(api, series.Id, "Les Éthiopiques", 7, [new(hugo.Id, ContributionRole.Scenarist)])).Id;
+
+        // Owned, and wished for again in a special edition, presented under its editions.
+        await PostAsync<PurchaseIntentsForm>(api, $"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+            new PurchaseIntentEditionContent(casterman.Id, null, 2023, null, BindingType.Hardcover, null, null, EditionFormat.Large, 112,
+                EditionCategory.SpecialEdition, true),
+            gift.AlbumVersion));
     }
 
     private async Task<AuthorForm> AuthorAsync(HttpClient api, string lastName, string firstName) =>

@@ -81,11 +81,7 @@ internal static class SeriesEndpoints
                          .SingleOrDefaultAsync(cancellationToken)
                      ?? throw new EntityNotFoundException(typeof(Series), id);
 
-        var albums = await context.Albums.AsNoTracking()
-            .Where(a => a.SeriesId == id)
-            .OrderInSeries()
-            .Select(CatalogExpressions.Expand((Album a) => a.ToCard()))
-            .ToListAsync(cancellationToken);
+        var albums = await ReadAlbumsAsync(id, context, cancellationToken);
         var overview = (await CatalogWorks.OverviewsAsync(context, [id], cancellationToken))[id];
         var universes = await UniverseTree.InHierarchyAsync(context, series.Universes, cancellationToken);
 
@@ -94,6 +90,17 @@ internal static class SeriesEndpoints
             series.Summary, series.PersonalNotes, series.Publisher, series.PublisherCollection, series.Genres, universes,
             series.Contributions, overview, albums, series.CreatedAt, series.ModifiedAt);
     }
+
+    /// <summary>
+    /// Every album of a series, as a card, in its order (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md): those
+    /// of the record of the series, and of the rest of the series on the record of one of its albums.
+    /// </summary>
+    internal static Task<List<AlbumCard>> ReadAlbumsAsync(Guid seriesId, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        context.Albums.AsNoTracking()
+            .Where(a => a.SeriesId == seriesId)
+            .OrderInSeries()
+            .Select(CatalogExpressions.Expand((Album a) => a.ToCard()))
+            .ToListAsync(cancellationToken);
 
     /// <summary>
     /// The contributions the series gives an album attached to it, computed by the domain: the entry form of the album asks for

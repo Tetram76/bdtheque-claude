@@ -1,0 +1,78 @@
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Lists
+@inject IStringLocalizer<RestOfSeries> L
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+
+@* The rest of the series of an album (visuel/fiche-album/contenu.md): the link to the record of the series, and the
+   disclosure of its albums, in the order of the series (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), each
+   with its volume and where it stands with regard to the collection, as the lists tell it; the album shown is put forward,
+   and leads nowhere. A disclosure of the browser, open at first: no request, nor action followed, to fold what is already
+   on the page (choix-implementation/socle/frontend.md). *@
+<Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="series">
+    <a class="series-record" href="@AppPaths.SeriesRecord(SeriesId)">@L["Record"]</a>
+    <details class="series-albums" open>
+        <summary>
+            <span class="series-albums-title">@SeriesTitle</span>
+            <span class="series-albums-count">@Count</span>
+        </summary>
+        <ol>
+            @foreach (var card in Albums)
+            {
+                var album = card.Album;
+                <li data-current="@(album.Id == AlbumId ? "" : null)">
+                    <span class="series-album-volume">@if (Labels.Volume(album) is { } volume){@volume}else{<NotSet Brief="true" />}</span>
+                    @if (album.Id == AlbumId)
+                    {
+                        <span class="series-album-title" aria-current="page">@Title(album)</span>
+                    }
+                    else
+                    {
+                        <a class="series-album-title" href="@AppPaths.Album(album.Id)">@Title(album)</a>
+                    }
+                    <CollectionStateTag State="StateOf(card)" />
+                </li>
+            }
+        </ol>
+    </details>
+</Block>
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid AlbumId { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SeriesId { get; set; }
+
+    [Parameter, EditorRequired]
+    public string SeriesTitle { get; set; } = "";
+
+    /// <summary>Every album of the series, the one shown included, in the order of the series.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public AlbumLabelFormat LabelFormat { get; set; }
+
+    private string Count
+    {
+        get
+        {
+            var total = L[Albums.Count > 1 ? "Count.Other" : "Count.One", Format.Number(Albums.Count)];
+            var owned = Albums.Count(a => a.Album.IsInCollection);
+            return owned == 0 ? L["Owned.None", total] : L["Owned", total, Format.Number(owned)];
+        }
+    }
+
+    // Its own title, as on its record; failing that, its label.
+    private string Title(AlbumSummary album) => album.Title ?? Labels.Album(album, LabelFormat);
+
+    private static AlbumCollectionState StateOf(AlbumCard card) => card switch
+    {
+        { Album.IsInCollection: true } => AlbumCollectionState.InCollection,
+        { HasPurchaseIntent: true } => AlbumCollectionState.PurchaseIntent,
+        _ => AlbumCollectionState.OutsideCollection,
+    };
+}
