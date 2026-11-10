@@ -83,8 +83,17 @@ public static class AppPaths
     /// <summary>The entry form of an album (visuel/saisie-album/).</summary>
     public static string AdminEditAlbum(Guid id) => $"{AdminAlbums}/{id}";
 
-    /// <summary>The page of the editions and purchase intents of an album (#204).</summary>
-    public static string AdminAlbumEditions(Guid albumId) => NotYetImplemented;
+    /// <summary>The route of the page of the editions and purchase intents of an album.</summary>
+    public const string AdminAlbumEditionsRoute = AdminAlbums + "/{Id:guid}/editions";
+
+    /// <summary>The page of the editions and purchase intents of an album (visuel/editions-album/).</summary>
+    public static string AdminAlbumEditions(Guid albumId) => $"{AdminAlbums}/{albumId}/editions";
+
+    /// <summary>The entry form of a new owned edition of an album (#209).</summary>
+    public static string AdminNewAlbumEdition(Guid albumId) => NotYetImplemented;
+
+    /// <summary>The entry form of a new purchase intent of an album, on the new edition it targets (#209).</summary>
+    public static string AdminNewPurchaseIntent(Guid albumId) => NotYetImplemented;
 
     /// <summary>
     /// The next step of the merge of two albums, whose presentation awaits the terms of the merge
