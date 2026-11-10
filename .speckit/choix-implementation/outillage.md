@@ -1,7 +1,7 @@
 ---
 type: Choix d'implémentation
 title: 'Outillage de développement'
-description: 'Outillage .NET : packages centralisés, xunit, Testcontainers, bUnit, Playwright, couverture, commentaires XML, CI ; à lire pour tout test ou build.'
+description: 'Outillage .NET : packages centralisés, xunit, Testcontainers, bUnit, Playwright, heure fixe des tests, couverture, commentaires XML, CI ; à lire pour tout test ou build.'
 applies_to:
   - 'Directory.Packages.props'
   - 'Directory.Build.props'
@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T17:40:00Z }
 ---
 
 # Outillage de développement
@@ -40,6 +40,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
   - **seules les attentes que le pilote vérifie en un seul appel** sont permises (adresse atteinte, condition dans la page, navigation) : le client .NET vérifie un état puis s'abonne aux suivants, et perd celui qui arrive entre les deux ([`microsoft/playwright-dotnet` #3364](https://github.com/microsoft/playwright-dotnet/issues/3364), [#3399](https://github.com/microsoft/playwright-dotnet/issues/3399), constaté #298). Ses attentes en deux temps sont refusées par le compilateur (analyseur des API interdites), jusqu'à une version qui corrige le défaut.
     - **Alternative écartée (attente répétée par tranches courtes)** : elle retrouve l'état perdu, mais garde sous une relance une attente qui en perd.
     - **Alternative écartée (test du dépôt qui cherche ces noms dans les sources)** : il confondrait un appel avec sa mention dans un commentaire.
+- **Tests indépendants du moment où ils s'exécutent** : une application de bout en bout vit à une heure fixe, la même pour `frontend` et `api`, qui avance d'une milliseconde à chaque lecture, jamais avec le temps réel ; son navigateur a un fuseau fixé (`Europe/Paris`), et non celui de la machine. Cette heure est en pleine nuit, quand la date du navigateur est déjà le lendemain de celle du temps universel : tout ce qui deviendrait la date du jour en temps universel s'y voit à chaque exécution (#340). Un test lit l'heure de l'application, jamais celle de la machine ; les scripts du frontend ne lisant aucune date, l'horloge du navigateur n'est pas fixée. Les données de validation, chargées dans leur test à une heure fixe, le sont de même.
+  - **Alternative écartée (heure du système, comme en production)** : le rendu d'une capture et le résultat d'un test changeaient selon l'heure de l'exécution (échecs chaque soir entre 23 h et minuit en temps universel, #318, #327, #340).
+  - **Alternative écartée (horloge figée)** : des écritures successives auraient la même date, leur ordre retombant sur des identifiants que `Guid.CreateVersion7` n'ordonne qu'à la milliseconde du temps réel.
+  - **Alternative écartée (heure fixe qui suit ensuite le temps réel)** : un test plus long que prévu, ou interrompu au débogueur, franchirait minuit et changerait de date.
 - **Composants partagés testés sur des pages propres aux tests**, avant qu'un écran les emploie, et fixés dans chaque thème par les captures ([Thèmes](socle/themes.md)) ; l'application ne route ces pages que dans les tests.
 - **Règle d'un chantier d'écran** : chaque comportement de l'écran est fixé par un test dans sa PR, avant sa validation fonctionnelle : un test de composant pour ce qu'il présente et chacun de ses états, au moins un test de bout en bout par parcours de l'utilisateur. Un retour de validation qui change un comportement change son test. Les tests désignent les éléments par ce qui ne dépend pas du thème (rôle, lien, structure), jamais par l'apparence.
 - **Un écran qui dépend de toute la collection** (ex. l'accueil) a sa propre application de test par état présenté : la base partagée reçoit les données des autres tests, qui changeraient son rendu selon l'ordre d'exécution.

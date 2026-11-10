@@ -9,7 +9,7 @@
 * [Organisation du code](organisation-du-code.md) - Projets de la solution et leur rôle, projets de tests ; à lire pour ajouter un projet ou placer du code.
 * [Versions et bibliothèques](versions-et-bibliotheques.md) - .NET et EF Core 10 LTS, montée suivante vers .NET 12, Npgsql, ML.NET pour l'estimation.
 * [Mesure d'audience](mesure-audience/index.md) - Mise en œuvre de la mesure d'audience de l'interface web : enregistrement des visites et des utilisations, compteurs mensuels, conservation et lecture des indicateurs, relevé par le frontend (visite, écrans et actions, appareil, information et opposition).
-* [Outillage de développement](outillage.md) - Outillage .NET : packages centralisés, xunit, Testcontainers, bUnit, Playwright, couverture, commentaires XML, CI ; à lire pour tout test ou build.
+* [Outillage de développement](outillage.md) - Outillage .NET : packages centralisés, xunit, Testcontainers, bUnit, Playwright, heure fixe des tests, couverture, commentaires XML, CI ; à lire pour tout test ou build.
 * [Persistance](persistance/index.md) - Conventions EF Core, identifiants, cohérence entre tables, collation, migrations, concurrence d'accès, dates renseignées automatiquement et collections de navigation du domaine.
 * [Recherche avancée](recherche-avancee/index.md) - Mise en œuvre de la recherche avancée et des recherches enregistrées.
 * [Reprise des données](reprise-donnees/index.md) - Accès à la base existante (Firebird) et reprise des prix antérieurs à l'euro.
