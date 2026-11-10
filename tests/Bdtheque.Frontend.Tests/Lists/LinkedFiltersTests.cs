@@ -3,6 +3,8 @@ using System.Text;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Lists;
+using Bdtheque.Frontend.Tests.Controls;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
@@ -52,32 +54,32 @@ public sealed class LinkedFiltersTests : BunitContext
     }
 
     [Fact]
-    public void ChoosingTheRecord_SetsTheOneItBelongsTo()
+    public async Task ChoosingTheRecord_SetsTheOneItBelongsTo()
     {
         var filters = Open(null, null);
 
-        Choose(filters, "#filter-collection", "luc");
+        await ChooseAsync(filters, "#filter-collection", "luc");
 
         Assert.Equal((Dargaud.Id.ToString(), LuckyLuke.Id.ToString()), Sent(filters));
         Assert.Equal("Dargaud", filters.Find("#filter-publisher").GetAttribute("value"));
     }
 
     [Fact]
-    public void OneItBelongsToChosen_OnlyItsRecordsAreOffered()
+    public async Task OneItBelongsToChosen_OnlyItsRecordsAreOffered()
     {
         var filters = Open(Dargaud, null);
 
-        Choose(filters, "#filter-collection", "luc");
+        await ChooseAsync(filters, "#filter-collection", "luc");
 
         Assert.Contains($"/catalog/publisher-collections?q=luc&pageSize={RecordSearch.SuggestionCount}&publisherId={Dargaud.Id}", _requests);
     }
 
     [Fact]
-    public void AnotherOneItBelongsTo_RemovesARecordThatIsNotItsOwn()
+    public async Task AnotherOneItBelongsTo_RemovesARecordThatIsNotItsOwn()
     {
         var filters = Open(Dargaud, LuckyLuke);
 
-        Choose(filters, "#filter-publisher", "dup");
+        await ChooseAsync(filters, "#filter-publisher", "dup");
 
         Assert.Equal((Dupuis.Id.ToString(), ""), Sent(filters));
     }
@@ -105,16 +107,12 @@ public sealed class LinkedFiltersTests : BunitContext
         (filters.Find("input[type=hidden][name=publisherId]").GetAttribute("value"),
             filters.Find("input[type=hidden][name=publisherCollectionId]").GetAttribute("value"));
 
-    // Types in the field, lets the typing pause until the suggestion comes, and chooses it.
-    private void Choose(IRenderedComponent<LinkedFilters> filters, string field, string text)
+    // Types in the field, lets the typing pause until its suggestions are rendered, and chooses the first one.
+    private async Task ChooseAsync(IRenderedComponent<LinkedFilters> filters, string field, string text)
     {
-        filters.InvokeAsync(() => filters.Find(field).Input(text)).Wait(TimeSpan.FromSeconds(5));
-        Assert.True(SpinWait.SpinUntil(() =>
-        {
-            _clock.Advance(RecordPicker.TypingPause);
-            return filters.FindAll("[role=option]").Count > 0;
-        }, TimeSpan.FromSeconds(5)), "No suggestion came once the typing paused.");
-        filters.InvokeAsync(() => filters.Find("[role=option]").Click()).Wait(TimeSpan.FromSeconds(5));
+        await (await filters.TypeAsync(field, text, _clock)).EndAsync("The search of the text typed");
+        Assert.NotEmpty(filters.FindAll("[role=option]"));
+        await (await filters.RaiseAsync("[role=option]", option => option.ClickAsync(new MouseEventArgs()))).EndAsync("The choice of the suggestion");
     }
 
     private static HttpResponseMessage Json(string content) =>
