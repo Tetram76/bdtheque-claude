@@ -2,6 +2,7 @@
 
 ## 2026-11-10
 
+* **Règle** : tout commentaire posé dans SonarQube Cloud (marquage d'un problème, revue d'un point sensible de sécurité) est rédigé en anglais ; le commentaire de la PR qui en garde la trace n'est pas concerné (exigence de l'utilisateur, #342).
 * **Règle** : tout problème (bug, test instable, échec du CI, retour de revue, ticket à ouvrir) se traite par l'analyse de sa cause de fond et la correction de cette cause, jamais par un correctif limité au symptôme ; un ticket porte cette analyse, jamais le seul symptôme (exigence de l'utilisateur, #339).
 
 ## 2026-11-09
