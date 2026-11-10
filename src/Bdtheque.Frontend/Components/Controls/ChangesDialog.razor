@@ -1,0 +1,31 @@
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<ChangesDialog> L
+
+@* « Voir mes changements », once a saving is refused because the record was modified in the meantime
+   (visuel/saisie-album/contenu.md; choix-implementation/socle/frontend.md): field by field, what the user changed since the
+   record was read, with what they entered, to enter it again once the record is reloaded. Nothing is merged. *@
+<Dialog Id="@Id" Title="@L["Title"]" Subject="@Subject" Tone="DialogTone.Information" CloseLabel="@L["Close"]" OnClose="OnClose">
+    <p>@L["Lead"]</p>
+    <dl class="changes-dialog-list">
+        @foreach (var change in Changes)
+        {
+            <dt>@change.Field</dt>
+            <dd>@(string.IsNullOrWhiteSpace(change.Value) ? L["Empty"] : change.Value)</dd>
+        }
+    </dl>
+</Dialog>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The label of the record.</summary>
+    [Parameter, EditorRequired]
+    public string Subject { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<EntryChange> Changes { get; set; } = [];
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+}

@@ -47,6 +47,8 @@ public sealed class AdminAlbumFormCaptureTests(AdministrationApplication applica
         {
             await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'album" }).ClickAsync();
             await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToBeVisibleAsync();
+            // The title to correct, captured with its focus, gets it once the error is rendered (EntryForm.RevealProblemAsync).
+            await Assertions.Expect(page.Locator("#album-title")).ToBeFocusedAsync();
         }
         else if (state == "omnibus")
         {

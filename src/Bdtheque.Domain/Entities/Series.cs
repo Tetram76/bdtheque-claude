@@ -115,12 +115,6 @@ public sealed class Series : EntityBase, IAggregateRoot
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
 
     /// <summary>
-    /// Replaces the contributions of the series — its authors, and the starting point of the credits
-    /// of an album attached to it (modele-metier/relations-et-cardinalites.md#série--relations) —
-    /// as the form sends them
-    /// whole. A contribution already credited is kept as it is; nothing is changed if any is refused.
-    /// </summary>
-    /// <summary>
     /// The contributions the series gives an album attached to it
     /// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md): those of its template, for an album that
     /// has none yet, or, being created, whose authors are still exactly those of the series chosen before, which they replace;
@@ -141,6 +135,11 @@ public sealed class Series : EntityBase, IAggregateRoot
         return personalized ? null : [.. _templateContributions];
     }
 
+    /// <summary>
+    /// Replaces the contributions of the series — its authors, and the starting point of the credits
+    /// of an album attached to it (modele-metier/relations-et-cardinalites.md#série--relations) —
+    /// as the form sends them whole. A contribution already credited is kept as it is; nothing is changed if any is refused.
+    /// </summary>
     public void SetTemplateContributions(IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions) =>
         Contribution.Replace(_templateContributions, contributions, (author, role) => Contribution.ForSeriesTemplate(this, author, role));
 

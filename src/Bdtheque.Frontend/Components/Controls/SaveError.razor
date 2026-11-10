@@ -1,0 +1,59 @@
+@inject IStringLocalizer<SaveError> L
+
+@* The error of the saving of an entry form, above it (visuel/saisie-album/contenu.md): its three categories told apart at
+   first glance (fonctionnel/presentation-des-erreurs.md), each with what the user can do about it. A business error says
+   what to correct, by the text of its rule; the page points to its field. *@
+@switch (Problem.Category)
+{
+    case ProblemCategory.Business:
+        <ErrorMessage Problem="Problem" Label="@L["Business"]" />
+        break;
+    case ProblemCategory.Functional:
+        <ErrorMessage Problem="Problem" Label="@L["Functional"]" Message="@(Problem.Status == 404 ? NotFound : Conflict)">
+            <Actions>
+                @if (CanReload)
+                {
+                    <Button Label="@L["Reload"]" Icon="IconName.Reload" OnClick="OnReload" />
+                    <Button Label="@L["ShowChanges"]" OnClick="OnShowChanges" />
+                }
+            </Actions>
+        </ErrorMessage>
+        break;
+    default:
+        <ErrorMessage Problem="Problem" Label="@L["Technical"]" Message="@Technical">
+            <Actions>
+                <Button Label="@L["Retry"]" Icon="IconName.Reload" OnClick="OnRetry" />
+            </Actions>
+        </ErrorMessage>
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public ApiProblem Problem { get; set; } = null!;
+
+    /// <summary>The record modified in the meantime: nothing was overwritten.</summary>
+    [Parameter, EditorRequired]
+    public string Conflict { get; set; } = null!;
+
+    /// <summary>A record the form cites deleted in the meantime: nothing was saved.</summary>
+    [Parameter, EditorRequired]
+    public string NotFound { get; set; } = null!;
+
+    /// <summary>The record could not be saved: the changes are still in the form.</summary>
+    [Parameter, EditorRequired]
+    public string Technical { get; set; } = null!;
+
+    /// <summary>Whether the record is already saved, which a reload reads anew: a new record has nothing to reload.</summary>
+    [Parameter]
+    public bool CanReload { get; set; }
+
+    [Parameter]
+    public EventCallback OnReload { get; set; }
+
+    [Parameter]
+    public EventCallback OnShowChanges { get; set; }
+
+    [Parameter]
+    public EventCallback OnRetry { get; set; }
+}

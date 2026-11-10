@@ -105,7 +105,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await universeDialog.GetByRole(AriaRole.Option, new() { Name = $"Monde{_marker}" }).ClickAsync();
         await universeDialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter l'univers" }).ClickAsync();
         await Assertions.Expect(universeDialog).ToHaveCountAsync(0);
-        await Assertions.Expect(page.Locator(".album-tags").Nth(1)).ToContainTextAsync($"Monde{_marker} › Quartier{_marker}");
+        await Assertions.Expect(page.Locator(".classification-tags").Nth(1)).ToContainTextAsync($"Monde{_marker} › Quartier{_marker}");
         // Created only with the album, when it is saved.
         Assert.Empty((await GetAsync(album.Id)).References.Genres);
         using (var api = Application.CreateApiClient())
@@ -176,7 +176,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
 
         // As soon as the series is chosen, before any saving.
         await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Auteurs repris de la série" })).ToContainTextAsync($"Série {_marker}");
-        await Assertions.Expect(page.Locator(".album-role").First).ToContainTextAsync($"Auteur{_marker}");
+        await Assertions.Expect(page.Locator(".role-credits-line").First).ToContainTextAsync($"Auteur{_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
         await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToHaveCountAsync(0);
         Assert.Equal([new ContributionContent(author.Id, ContributionRole.Scenarist)], (await GetAsync(album.Id)).Content.Contributions);
@@ -194,7 +194,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         var page = await OpenAsync(AppPaths.AdminNewAlbum);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         var series = page.GetByRole(AriaRole.Combobox, new() { Name = "Série" });
-        var scenario = page.Locator(".album-role").First;
+        var scenario = page.Locator(".role-credits-line").First;
 
         await series.PressSequentiallyAsync($"Série A {_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Série A {_marker}" }).ClickAsync();

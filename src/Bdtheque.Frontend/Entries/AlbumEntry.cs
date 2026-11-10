@@ -6,9 +6,6 @@ using Bdtheque.Frontend.Components.Controls;
 
 namespace Bdtheque.Frontend.Entries;
 
-/// <summary>An author credited with a role on an album being entered.</summary>
-public sealed record Credit(ContributionRole Role, RecordOption Author);
-
 /// <summary>
 /// An album as its entry form holds it while it is entered (visuel/saisie-album/contenu.md): the fields of its content, the
 /// records it references named for the form to present them, and what it displays through its series. Persisted from the
@@ -67,30 +64,14 @@ public sealed class AlbumEntry
 
     public AlbumRating? Rating { get; set; }
 
-    public List<RecordOption> Genres { get; set; } = [];
-
-    /// <summary>Each named with its ancestors (« Univers Hergé › Moulinsart »).</summary>
-    public List<RecordOption> Universes { get; set; } = [];
-
-    public List<Credit> Credits { get; set; } = [];
+    /// <summary>Its authors, genres and universes, those added on the spot included.</summary>
+    public CitedRecords Cited { get; set; } = new();
 
     /// <summary>The genres the album displays through its series, which are modified on the form of the series.</summary>
     public List<string> SeriesGenres { get; set; } = [];
 
     /// <summary>The universes the album displays through its series, each named with its ancestors.</summary>
     public List<string> SeriesUniverses { get; set; } = [];
-
-    /// <summary>
-    /// The authors added on the spot, created with the album when it is saved (choix-implementation/socle/frontend.md),
-    /// referenced by their key in the credits.
-    /// </summary>
-    public List<NewAuthor> NewAuthors { get; set; } = [];
-
-    /// <summary>The genres added on the spot, created with the album, referenced by their key.</summary>
-    public List<NewGenre> NewGenres { get; set; } = [];
-
-    /// <summary>The universes added on the spot, created with the album, referenced by their key.</summary>
-    public List<NewUniverse> NewUniverses { get; set; } = [];
 
     /// <summary>A new album, empty.</summary>
     public static AlbumEntry New() => new();
@@ -100,7 +81,6 @@ public sealed class AlbumEntry
     {
         var content = form.Content;
         var references = form.References;
-        var authors = references.Authors.ToDictionary(a => a.Id);
         var entry = new AlbumEntry
         {
             Id = form.Id,
@@ -123,9 +103,7 @@ public sealed class AlbumEntry
             Summary = content.Summary,
             PersonalNotes = content.PersonalNotes,
             Rating = content.Rating,
-            Genres = [.. references.Genres.Select(g => new RecordOption(g.Id, g.Label, null))],
-            Universes = [.. references.Universes.Select(Universe)],
-            Credits = [.. content.Contributions.Select(c => new Credit(c.Role, Author(authors[c.AuthorId])))],
+            Cited = CitedRecords.Of(content.Contributions, references.Authors, references.Genres, references.Universes),
         };
         entry.ShowSeries(series);
         return entry;
@@ -135,7 +113,7 @@ public sealed class AlbumEntry
     public void ShowSeries(SeriesDetail? series)
     {
         SeriesGenres = series is null ? [] : [.. series.Genres.Select(g => g.Label)];
-        SeriesUniverses = series is null ? [] : [.. series.Universes.Select(u => Universe(u).Label)];
+        SeriesUniverses = series is null ? [] : [.. series.Universes.Select(u => CitedRecords.Universe(u).Label)];
     }
 
     /// <summary>
@@ -156,19 +134,10 @@ public sealed class AlbumEntry
         Summary,
         PersonalNotes,
         Rating,
-        [.. Genres.Select(g => g.Id)],
-        [.. Universes.Select(u => u.Id)],
-        [.. Credits.Select(c => new ContributionContent(c.Author.Id, c.Role))],
-        Added());
-
-    private NewRecords? Added()
-    {
-        var added = new NewRecords(
-            [.. NewAuthors.Where(a => Credits.Any(c => c.Author.Id == a.Key))],
-            [.. NewGenres.Where(g => Genres.Any(o => o.Id == g.Key))],
-            [.. NewUniverses.Where(u => Universes.Any(o => o.Id == u.Key))]);
-        return added.Authors.Count + added.Genres.Count + added.Universes.Count == 0 ? null : added;
-    }
+        Cited.GenreIds(),
+        Cited.UniverseIds(),
+        Cited.Contributions(),
+        Cited.Added());
 
     /// <summary>
     /// What tells two states of the form apart: the content it would save, the order of its associations aside, which the
@@ -186,24 +155,4 @@ public sealed class AlbumEntry
     }
 
     public AlbumEntry Copy() => JsonSerializer.Deserialize<AlbumEntry>(JsonSerializer.Serialize(this))!;
-
-    public IReadOnlyList<RecordOption> AuthorsOf(ContributionRole role) => [.. Credits.Where(c => c.Role == role).Select(c => c.Author)];
-
-    /// <summary>Credits the author with the role, once.</summary>
-    public void Credit(ContributionRole role, RecordOption author)
-    {
-        if (!Credits.Any(c => c.Role == role && c.Author.Id == author.Id))
-            Credits.Add(new Credit(role, author));
-    }
-
-    /// <summary>Credits the album with the authors a series gives it, in place of its own.</summary>
-    public void CreditOnly(IEnumerable<SeriesAlbumContribution> contributions) =>
-        Credits = [.. contributions.Select(c => new Credit(c.Role, Author(c.Author)))];
-
-    public static RecordOption Author(AuthorListItem author) =>
-        new(author.Id, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null);
-
-    /// <summary>A universe named with its ancestors, from the top of the hierarchy (visuel/saisie-album/contenu.md).</summary>
-    public static RecordOption Universe(UniverseInHierarchy universe) =>
-        new(universe.Universe.Id, string.Join(" › ", universe.Ancestors.Append(universe.Universe).Select(u => u.Name)), null);
 }

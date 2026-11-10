@@ -7,6 +7,7 @@
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
+@inject ValueLabels Values
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 
@@ -73,7 +74,7 @@
                             <span class="series-status" role="cell">
                                 @if (row.Status is { } status)
                                 {
-                                    @L[$"Status.{status}"]
+                                    @Values.Of(status)
                                 }
                                 else
                                 {
@@ -267,7 +268,7 @@
 
     private string CandidateDetail(SeriesAdminListItem candidate) => string.Join(" · ", new[]
     {
-        candidate.Status is { } status ? L[$"Status.{status}"].Value : null,
+        candidate.Status is { } status ? Values.Of(status) : null,
         AlbumsText(candidate),
     }.Where(part => part is not null));
 

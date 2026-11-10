@@ -1,0 +1,32 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). A line per role, its authors beside it,
+   separated by rules; on a smartphone, the role above its authors (visuel/saisie-album/contenu.md). */
+.role-credits {
+    display: flex;
+    flex-direction: column;
+}
+
+.role-credits-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xs) var(--space-m);
+    align-items: center;
+    padding-block: var(--space-s);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+@media (min-width: 48rem) {
+    .role-credits-line {
+        grid-template-columns: var(--entry-form-role-width) minmax(0, 1fr);
+    }
+}
+
+.role-credits-name {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.role-credits-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}

@@ -1,4 +1,5 @@
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Infrastructure;
@@ -101,6 +102,28 @@ internal static class FormReferences
         context.Genres.AddRange(genres.Values);
         context.Universes.AddRange(universes.Values);
         return new AddedRecords(authors, genres, universes);
+    }
+
+    /// <summary>The authors of the contributions, each once, named as the lists name them.</summary>
+    public static List<AuthorListItem> Authors(IEnumerable<Contribution> contributions) =>
+        contributions.Select(c => c.Author).DistinctBy(a => a.Id)
+            .Select(a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym)).ToList();
+
+    /// <summary>The genres, named as the lists name them, in their order.</summary>
+    public static List<GenreListItem> Genres(IEnumerable<Genre> genres) =>
+        genres.OrderBy(g => g.Label).ThenBy(g => g.Id).Select(g => new GenreListItem(g.Id, g.Label)).ToList();
+
+    /// <summary>
+    /// The universes, each with its ancestors, a universe being presented with them: the hierarchy is only read for a record
+    /// attached to a universe.
+    /// </summary>
+    public static async Task<IReadOnlyList<UniverseInHierarchy>> UniversesInHierarchyAsync(
+        BdthequeDbContext context, IReadOnlyCollection<Universe> universes, CancellationToken cancellationToken)
+    {
+        if (universes.Count == 0)
+            return [];
+        var tree = await UniverseTree.LoadAsync(context, cancellationToken);
+        return universes.OrderBy(u => u.Name).ThenBy(u => u.Id).Select(u => tree.InHierarchy(u.Id)).ToList();
     }
 
     /// <summary>The contributions as a form lists them, in a stable order.</summary>

@@ -72,6 +72,137 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     }
 
     [Fact]
+    public async Task New_IsEmpty_ItsNewEditionsProposingTheValuesOfAnyNewEdition()
+    {
+        // modele-metier/serie.md: the form of a new series pre-fills its template with the values proposed to a new edition.
+        var proposed = await _client.GetFromJsonAsync<SeriesContent>("/admin/series/new");
+
+        Assert.Equal(
+            Content("") with
+            {
+                EditionTemplate = new SeriesEditionTemplate(
+                    null, null, null, EditionCondition.Excellent, BindingType.Hardcover, BookOrientation.Portrait, ReadingDirection.LeftToRight,
+                    EditionFormat.Standard, true),
+            },
+            proposed!, SeriesContentComparer.Instance);
+    }
+
+    [Fact]
+    public async Task Get_NamesTheRecordsTheFormReferences()
+    {
+        var author = await CreateAuthorAsync();
+        var genre = await CreateGenreAsync();
+        var parent = await CreateUniverseAsync();
+        var universe = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Univers {Guid.NewGuid():N}", null, parent.Id));
+        var publisher = await CreatePublisherAsync();
+        var collection = await CreateCollectionAsync(publisher);
+        var series = await CreateAsync(WithTemplate(Content(UniqueTitle()), publisher.Id, collection.Id) with
+        {
+            GenreIds = [genre.Id],
+            UniverseIds = [universe.Id],
+            Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist), new ContributionContent(author.Id, ContributionRole.Colorist)],
+        });
+
+        var references = (await GetAsync(series.Id)).References;
+
+        Assert.Equal((publisher.Id, publisher.Name), (references.Publisher!.Id, references.Publisher.Name));
+        Assert.Equal((collection.Id, collection.Name, publisher.Id), (references.PublisherCollection!.Id, references.PublisherCollection.Name,
+            references.PublisherCollection.PublisherId));
+        Assert.Equal([(genre.Id, genre.Label)], references.Genres.Select(g => (g.Id, g.Label)));
+        var named = Assert.Single(references.Universes);
+        Assert.Equal((universe.Id, parent.Id), (named.Universe.Id, Assert.Single(named.Ancestors).Id));
+        Assert.Equal([(author.Id, author.LastName)], references.Authors.Select(a => (a.Id, a.LastName)));
+    }
+
+    [Fact]
+    public async Task Get_WithoutTemplate_NamesNoPublisher()
+    {
+        var references = (await CreateAsync(Content(UniqueTitle()))).References;
+
+        Assert.Equal((null, null), (references.Publisher, references.PublisherCollection));
+        Assert.Empty(references.Authors);
+    }
+
+    [Fact]
+    public async Task Get_GivesTheDatesOfTheRecord()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+
+        var modified = await UpdateAsync(created, created.Content with { Summary = "Résumé" });
+
+        Assert.Equal(created.CreatedAt, modified.CreatedAt);
+        Assert.True(modified.ModifiedAt > created.ModifiedAt);
+        var read = await GetAsync(created.Id);
+        Assert.Equal((modified.CreatedAt, modified.ModifiedAt), (read.CreatedAt, read.ModifiedAt));
+    }
+
+    [Fact]
+    public async Task Create_WithRecordsAddedOnTheSpot_CreatesThemWithTheSeries()
+    {
+        // The authors, genres and universes the form added are created when the series is saved, not before.
+        var parent = await CreateUniverseAsync();
+        var (author, genre, universe) = (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+        var marker = Guid.NewGuid().ToString("N");
+        var content = Content(UniqueTitle()) with
+        {
+            Contributions = [new ContributionContent(author, ContributionRole.Scenarist), new ContributionContent(author, ContributionRole.Illustrator)],
+            GenreIds = [genre],
+            UniverseIds = [universe],
+            NewRecords = new NewRecords(
+                [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
+                [new NewGenre(genre, $"Genre{marker}")],
+                [new NewUniverse(universe, $"Univers{marker}", parent.Id)]),
+        };
+
+        var created = await CreateAsync(content);
+
+        var references = created.References;
+        Assert.Equal($"Nouveau{marker}", Assert.Single(references.Authors).LastName);
+        Assert.Equal(2, created.Content.Contributions.Count(c => c.AuthorId == references.Authors[0].Id));
+        Assert.Equal($"Genre{marker}", Assert.Single(references.Genres).Label);
+        var inHierarchy = Assert.Single(references.Universes);
+        Assert.Equal(($"Univers{marker}", parent.Id), (inHierarchy.Universe.Name, Assert.Single(inHierarchy.Ancestors).Id));
+        Assert.Null(created.Content.NewRecords);
+    }
+
+    [Fact]
+    public async Task Update_WithRecordsAddedOnTheSpot_CreatesThemWithTheSeries()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+        var author = Guid.NewGuid();
+        var marker = Guid.NewGuid().ToString("N");
+
+        var updated = await UpdateAsync(created, created.Content with
+        {
+            Contributions = [new ContributionContent(author, ContributionRole.Colorist)],
+            NewRecords = new NewRecords([new NewAuthor(author, null, null, $"Pseudo{marker}")], [], []),
+        });
+
+        Assert.Equal($"Pseudo{marker}", Assert.Single(updated.References.Authors).Pseudonym);
+    }
+
+    [Fact]
+    public async Task Create_WithARecordAddedOnTheSpotRefused_CreatesNothing()
+    {
+        // An author without a last name nor a pseudonym: neither the series nor the genre added with it is created.
+        var (author, genre) = (Guid.NewGuid(), Guid.NewGuid());
+        var label = $"Genre{Guid.NewGuid():N}";
+        var title = UniqueTitle();
+        var content = Content(title) with
+        {
+            Contributions = [new ContributionContent(author, ContributionRole.Scenarist)],
+            GenreIds = [genre],
+            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], []),
+        };
+
+        var response = await _client.PostAsJsonAsync("/admin/series", content);
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired);
+        Assert.Empty((await _client.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q={label}"))!.Items);
+        Assert.Empty((await _client.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q={Uri.EscapeDataString(title)}"))!.Items);
+    }
+
+    [Fact]
     public async Task Create_WithAManualSortKey_KeepsItWhateverTheTitle()
     {
         var created = await CreateAsync(Content("Tintin") with { ManualSortKey = "Aventures de Tintin" });

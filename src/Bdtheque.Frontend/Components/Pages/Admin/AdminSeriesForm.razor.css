@@ -1,0 +1,62 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md; visuel/saisie-serie/declinaison-par-theme.md). */
+.series-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+/* « Avancement » and « Calculs », two blocks of the same width side by side, stacked on a smartphone; so are the publisher and
+   the collection (visuel/saisie-serie/contenu.md). */
+.series-pair,
+.series-publisher {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--admin-gap);
+}
+
+.series-publisher {
+    gap: var(--space-m);
+}
+
+@media (min-width: 48rem) {
+    .series-pair,
+    .series-publisher {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* A list sized to its longest choice, never stretched over the width of its field. */
+.series-list {
+    inline-size: auto;
+    max-inline-size: 100%;
+    align-self: flex-start;
+}
+
+/* The values proposed to the new editions, one after the other on as many lines as needed, each list keeping its size. */
+.series-template {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-m) var(--space-l);
+}
+
+.series-choice {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+}
+
+.series-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+/* Unavailable until a publisher is chosen (visuel/saisie-serie/contenu.md): in dashes, on the surface around it, its text still
+   read. Only the list disabled by its own attribute: the form disabled while it is saved keeps the look of a disabled control. */
+.series-collection[disabled] {
+    border-style: dashed;
+    background-color: transparent;
+    opacity: 1;
+}

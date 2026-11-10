@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''un éditeur : nom, site web, collections.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:43:10Z }
 ---
 
 # Contenu
@@ -20,5 +20,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
     - une collection **retirée** reste dans la liste jusqu'à l'enregistrement, barrée, « Retirée à l'enregistrement », avec **Rétablir** ; une collection **ajoutée** porte l'étiquette « Nouvelle » ;
     - **Ajouter une collection**, en tirets, sous la liste ; « Aucune collection » à défaut.
   - Sur smartphone, ce qui désigne une collection passe sous son nom, la corbeille ou le cadenas restant à droite.
-- **Pas de colonne latérale** : comme pour une série ou un auteur, la fiche ne présente pas ce qui désigne l'éditeur, au-delà de ce qui désigne chacune de ses collections ; une suppression refusée le dit dans son dialogue. Le formulaire garde la largeur de celui de la saisie d'une série ; sous lui, en modification, les dates de création et de modification de la fiche.
+- **Pas de colonne latérale** : comme pour une série ou un auteur, la fiche ne présente pas ce qui désigne l'éditeur, au-delà de ce qui désigne chacune de ses collections ; une suppression refusée le dit dans son dialogue. Le formulaire garde la largeur de celui de la saisie d'une série ; en modification, les dates de création et de modification de la fiche sont juste au-dessus de son premier bloc, comme pour un album.
 - **La barre d'enregistrement** : celle de la saisie d'un album (« Créer l'éditeur » en création).

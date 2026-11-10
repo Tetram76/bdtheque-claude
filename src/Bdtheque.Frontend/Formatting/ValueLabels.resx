@@ -126,4 +126,13 @@
   <data name="AlbumRating.VeryGood" xml:space="preserve">
     <value>Très bien</value>
   </data>
+  <data name="SeriesStatus.InProgress" xml:space="preserve">
+    <value>En cours</value>
+  </data>
+  <data name="SeriesStatus.Completed" xml:space="preserve">
+    <value>Terminée</value>
+  </data>
+  <data name="SeriesStatus.Abandoned" xml:space="preserve">
+    <value>Abandonnée</value>
+  </data>
 </root>

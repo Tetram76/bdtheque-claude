@@ -1,0 +1,17 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). What the user changed, field by field. */
+.changes-dialog-list {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-xs) var(--space-m);
+    margin: 0;
+}
+
+.changes-dialog-list dt {
+    font-weight: var(--font-weight-strong);
+}
+
+.changes-dialog-list dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}

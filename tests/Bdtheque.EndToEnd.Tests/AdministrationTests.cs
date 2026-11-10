@@ -150,7 +150,7 @@ public sealed class AdministrationApplication : ApplicationHost
         using var api = CreateApiClient();
         ApiClock.UtcNow = Start;
         var publisher = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Dupuis", null));
-        await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(api,
+        var reperages = await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(api,
             $"/admin/publishers/{publisher.Id}/collections", new("Repérages", publisher.Version));
         // The cases of the list of the publishers: a website and collections without edition, and nothing but a name.
         var dargaud = await PostAsync<CreatePublisherRequest, PublisherForm>(api, "/admin/publishers", new("Dargaud", "https://www.dargaud.com/"));
@@ -165,9 +165,16 @@ public sealed class AdministrationApplication : ApplicationHost
         var franquin = await PostAsync<CreateAuthorRequest, AuthorForm>(api, "/admin/authors", new("Franquin", "André", null, null, "Belge"));
         var gotlib = await PostAsync<CreateAuthorRequest, AuthorForm>(api, "/admin/authors", new("Gotlieb", "Marcel", "Gotlib", null, "Française"));
         await PostAsync<CreateAuthorRequest, AuthorForm>(api, "/admin/authors", new("Gomez", "Alain", null, null, null));
-        // The cases of the list of the series: a complete one, and one without status nor album.
+        // The cases of the list of the series: a complete one, and one without status nor album. The complete one is the series
+        // of the captures of its entry form, with its publisher, collection, authors and new editions.
         await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Barracuda", SeriesStatus.Completed, true) with
         {
+            TheoreticalVolumeCount = 6,
+            ExcludeFromReleaseEstimates = true,
+            Summary = "Pirates et esclaves sur la mer des Caraïbes, au XVIIe siècle.",
+            // Dupuis, whose deletion no capture shows: that of Dargaud, accepted, would be refused.
+            EditionTemplate = new SeriesEditionTemplate(publisher.Id, reperages.Id, null, EditionCondition.VeryGood, BindingType.Hardcover,
+                BookOrientation.Portrait, ReadingDirection.LeftToRight, EditionFormat.Large, true),
             Contributions = [new(gotlib.Id, ContributionRole.Scenarist), new(gotlib.Id, ContributionRole.Illustrator)],
         });
         await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Bone", null, false));

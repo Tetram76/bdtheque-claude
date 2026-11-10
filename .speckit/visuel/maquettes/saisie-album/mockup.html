@@ -123,6 +123,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
       <div class="sa-layout">
         <form style="min-width: 0; display: flex; flex-direction: column; gap: 22px" onSubmit="{{noSubmit}}">
 
+          <sc-if value="{{x.existing}}"><p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p></sc-if>
           <section aria-labelledby="s-ident" style="{{block}}">
             <span style="{{kickStyle}}">{{k.ident}}</span>
             <h2 id="s-ident" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>L'album</h2>
@@ -280,7 +281,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               </div>
             </div>
           </section>
-          <sc-if value="{{x.existing}}"><p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p></sc-if>
         </form>
 
       </div>

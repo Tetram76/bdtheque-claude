@@ -23,6 +23,7 @@ public sealed class ValueLabelsTests
         .. Enum.GetValues<BookOrientation>().Cast<Enum>(),
         .. Enum.GetValues<ReadingDirection>().Cast<Enum>(),
         .. Enum.GetValues<AlbumRating>().Cast<Enum>(),
+        .. Enum.GetValues<SeriesStatus>().Cast<Enum>(),
     ];
 
     [Theory]

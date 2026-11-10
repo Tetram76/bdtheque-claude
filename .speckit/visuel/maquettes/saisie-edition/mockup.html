@@ -151,11 +151,8 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               </div>
               <div style="{{col}} flex: 1 1 200px">
                 <label for="f-coll" style="{{lbl}}">Collection</label>
-                <div style="position: relative">
-                  <input id="f-coll" type="text" value="{{x.collection}}" placeholder="Aucune" style="{{inp}} padding-right: 40px">
-                  <span aria-hidden="true" style="position: absolute; right: 12px; top: 13px; color: {{t.muted}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="{{icons.search}}"></path></svg></span>
-                </div>
-                <span style="{{help}}">Parmi celles de l'éditeur.</span>
+                <span style="position: relative; display: block"><select id="f-coll" style="{{sel}} width: 100%"><sc-for list="{{collections}}" as="o"><option selected="{{o.selected}}">{{o.label}}</option></sc-for></select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{chev}}"><path d="M6 9l6 6 6-6"></path></svg></span>
+                <span style="{{help}}">Toutes celles de l'éditeur.</span>
               </div>
             </div>
             <div style="{{row}}">
@@ -659,6 +656,8 @@ class View extends Mockup {
     return {
       t, label,
       icons: ICONS,
+      // The collection is one of the publisher's, chosen in the list of them all.
+      collections: ['—', 'Fac-similé', 'Pastiches', 'Univers d\'auteurs'].map((o, i) => ({ label: o, selected: x.collection ? o === x.collection : i === 0 })),
       hdrBg, hdrMuted: t.hMuted ?? t.muted,
       menuOpen, menuExpanded: menuOpen ? 'true' : 'false',
       panelBg, panelB, panelSh,
