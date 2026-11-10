@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Configuration du repository GitHub'
 description: 'Réglages du dépôt GitHub, Ruleset de main, sécurité du dépôt, merge réservé à l''utilisateur ; à lire pour toute modification de la configuration GitHub.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T13:32:45Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T13:34:08Z }
 ---
 
 # Configuration du repository GitHub
@@ -19,7 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T13:32:45Z }
   - Suppression de `main` interdite
   - Squash merge uniquement
   - **Commits signés obligatoires** (`required_signatures`)
-  - **Checks de la CI requis** (`required_status_checks`) : chaque job du workflow CI est un check requis (cf. [Intégration continue (CI)](integration-continue-ci.md)). Le Ruleset n'exige pas que la branche soit à jour avec `main` avant le merge : les PR sont fusionnées en squash une à une, et cette exigence imposerait d'intégrer `main` de nouveau, puis d'attendre CI et revue, après chaque fusion d'une autre PR. L'agent tient néanmoins la branche de chaque PR à jour de sa branche de destination ([Intégration continue (CI)](integration-continue-ci.md)).
+  - **Checks de la CI requis** (`required_status_checks`) : chaque job du workflow CI est un check requis (cf. [Intégration continue (CI)](integration-continue-ci.md)). Le Ruleset n'exige pas que la branche soit à jour avec `main` avant le merge : les PR sont fusionnées en squash une à une, et cette exigence imposerait d'intégrer `main` de nouveau, puis d'attendre CI et revue, après chaque fusion d'une autre PR. L'agent tient néanmoins chaque branche de travail à jour de sa branche de destination ([Stratégie de branches](strategie-de-branches.md)).
   - **Porte de qualité de SonarQube Cloud requise** : le check `SonarCloud Code Analysis`, que l'application GitHub de SonarQube Cloud (`integration_id` `12526`) publie sur chaque commit analysé, en échec si la porte de qualité échoue (cf. [Analyse de la qualité du code](analyse-de-la-qualite-du-code.md)).
 - **Sécurité du dépôt** (`security_and_analysis`, disponible gratuitement car dépôt public) :
   - **Secret scanning** : activé
