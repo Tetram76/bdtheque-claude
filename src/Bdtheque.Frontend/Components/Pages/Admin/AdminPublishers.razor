@@ -62,7 +62,7 @@
                 {
                     <div class="publisher-row" role="row">
                         <span class="publisher-main" role="cell">
-                            <a class="publisher-name" href="@AppPaths.AdminEditPublisher(row.Id)">@row.Name</a>
+                            <RowEntry>@row.Name</RowEntry>
                             <span class="publisher-collection-names" data-empty="@(row.Collections.Count == 0)">
                                 @(row.Collections.Count == 0 ? L["Collections.Zero"] : string.Join(", ", row.Collections))
                             </span>

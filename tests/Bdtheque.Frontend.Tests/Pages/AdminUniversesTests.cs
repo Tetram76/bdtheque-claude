@@ -79,7 +79,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     public void Rows_InRetreatUnderTheirParent_WithTheirNumbers()
     {
         var rows = Open("").FindAll(".universe-row:not(.universe-row-head)").Select(row => (
-            Text(row.QuerySelector(".universe-name")!),
+            Text(row.QuerySelector(".row-entry")!),
             row.GetAttribute("data-depth"),
             Text(row.QuerySelector(".universe-albums")!),
             Text(row.QuerySelector(".universe-series")!),
@@ -114,6 +114,8 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         var id = Corto.Id;
 
         Assert.Equal($"{AppPaths.AdminUniverses}?q=c&edit={id}", row.QuerySelector(".universe-actions a.button")!.GetAttribute("href"));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Corto Maltese"], row.QuerySelectorAll($"a[href='{AppPaths.AdminUniverses}?q=c&edit={id}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal(
             [
                 ("Voir ses œuvres dans la consultation", AppPaths.UniverseWorks(id)),

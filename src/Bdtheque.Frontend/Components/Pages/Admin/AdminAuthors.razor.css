@@ -55,12 +55,6 @@
     min-inline-size: 0;
 }
 
-.author-name {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 /* The first name and the last name under a pseudonym, in small. */
 .author-identity {
     color: var(--color-text-muted);

@@ -96,7 +96,7 @@ else if (_page is { } page)
                         <div class="edition-row" role="row">
                             <span class="edition-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
                             <span class="edition-main" role="cell">
-                                <a class="edition-label" href="@AppPaths.AdminEditEdition(Id, row.Edition.Id)"><LabelText Text="@label" /></a>
+                                <RowEntry><LabelText Text="@label" /></RowEntry>
                                 @if (Traits(row.Category, row.Binding, row.PageCount) is { Length: > 0 } traits)
                                 {
                                     <span class="edition-sub">@traits</span>

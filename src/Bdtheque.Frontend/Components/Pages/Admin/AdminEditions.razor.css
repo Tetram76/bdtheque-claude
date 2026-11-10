@@ -57,12 +57,6 @@
     min-inline-size: 0;
 }
 
-.edition-label {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 .edition-album {
     overflow: hidden;
     color: var(--color-text-muted);

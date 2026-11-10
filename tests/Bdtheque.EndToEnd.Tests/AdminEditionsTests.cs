@@ -133,7 +133,7 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
             await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
             await PageReadiness.WaitAsync(page);
 
-            var label = await page.Locator(".edition-label").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+            var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
             var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
             Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
@@ -156,7 +156,7 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         return page;
     }
 
-    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Éditions" }).Locator(".edition-label");
+    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Éditions" }).Locator(".row-entry");
 
     private static ILocator Albums(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Éditions" }).Locator(".edition-album");
 

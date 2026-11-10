@@ -137,7 +137,7 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
             await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminSeries}?q={_marker}");
             await PageReadiness.WaitAsync(page);
 
-            var title = await page.Locator(".series-title").EvaluateAsync<double>("title => title.getBoundingClientRect().width");
+            var title = await page.Locator(".row-entry").EvaluateAsync<double>("title => title.getBoundingClientRect().width");
             var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
             Assert.True(title >= 120, $"{theme} at {width}px: the title is {title}px wide.");
@@ -156,7 +156,7 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
         return page;
     }
 
-    private static ILocator Titles(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Séries" }).Locator(".series-title");
+    private static ILocator Titles(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Séries" }).Locator(".row-entry");
 
     private Task<SeriesForm> CreateSeriesAsync(string title, Guid[]? genreIds = null, bool isComplete = false) =>
         PostAsync<SeriesForm>("/admin/series", new SeriesContent(

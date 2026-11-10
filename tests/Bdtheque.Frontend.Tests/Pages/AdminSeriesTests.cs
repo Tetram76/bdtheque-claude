@@ -83,7 +83,7 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
     public void Rows_TheSeriesItsStatusItsAlbumsAndWhetherItIsComplete()
     {
         var rows = Open("").FindAll(".series-row:not(.series-row-head)").Select(row => (
-            Text(row.QuerySelector(".series-title")!),
+            Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".series-status")!),
             Text(row.QuerySelector(".series-albums")!),
             Text(row.QuerySelector(".series-complete")!)));
@@ -126,7 +126,8 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
         var row = Open("q=barra").FindAll(".series-row:not(.series-row-head)")[0];
         var id = Barracuda.Id;
 
-        Assert.Equal(AppPaths.AdminEditSeries(id), row.QuerySelector(".series-title")!.GetAttribute("href"));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Barracuda"], row.QuerySelectorAll($"a[href='{AppPaths.AdminEditSeries(id)}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal("Modifier Barracuda", row.QuerySelector(".series-actions a.button")!.GetAttribute("aria-label"));
         Assert.Equal(
             [

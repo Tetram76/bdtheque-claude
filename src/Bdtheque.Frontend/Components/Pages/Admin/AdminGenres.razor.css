@@ -52,12 +52,6 @@
     min-inline-size: 0;
 }
 
-.genre-label {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 /* The label being changed: as wide as a label usually is, never wider than its column; the numbers of the genre stay beside it. */
 .genre-main input {
     inline-size: 16rem;

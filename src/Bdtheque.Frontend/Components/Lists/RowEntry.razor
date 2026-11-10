@@ -1,0 +1,10 @@
+@* The entry of a row of a list of the administration, its name or its label (visuel/listes/principes-communs.md, Ligne). It is
+   no link: « Modifier » alone opens the record (visuel/liste-albums/contenu.md, Actions d'une ligne), a second way to the
+   same record being one too many. *@
+<span class="row-entry">@ChildContent</span>
+
+@code {
+    /// <summary>The name or the label of the record.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = null!;
+}

@@ -52,12 +52,6 @@
     min-inline-size: 0;
 }
 
-.publisher-name {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 /* Its collections, on a single line that an ellipsis ends when they do not fit. */
 .publisher-collection-names {
     overflow: hidden;

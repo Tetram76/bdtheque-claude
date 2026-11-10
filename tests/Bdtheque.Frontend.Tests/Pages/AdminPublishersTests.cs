@@ -85,7 +85,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
     public void Rows_TheNameItsCollectionsItsWebsiteAndItsNumbers()
     {
         var rows = Open("").FindAll(".publisher-row:not(.publisher-row-head)").Select(row => (
-            Text(row.QuerySelector(".publisher-name")!),
+            Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".publisher-collection-names")!),
             Text(row.QuerySelector(".publisher-website")!),
             Text(row.QuerySelector(".publisher-collections")!),
@@ -120,7 +120,8 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         var rows = Open("q=c").FindAll(".publisher-row:not(.publisher-row-head)");
         var id = Casterman.Id;
 
-        Assert.Equal(AppPaths.AdminEditPublisher(id), rows[0].QuerySelector(".publisher-name")!.GetAttribute("href"));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Casterman"], rows[0].QuerySelectorAll($"a[href='{AppPaths.AdminEditPublisher(id)}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal("Modifier Casterman", rows[0].QuerySelector(".publisher-actions a.button")!.GetAttribute("aria-label"));
         // The website, outside the application, opens beside it.
         var website = rows[0].QuerySelector(".publisher-website a")!;

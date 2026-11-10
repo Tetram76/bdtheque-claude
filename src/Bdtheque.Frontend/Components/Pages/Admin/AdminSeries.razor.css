@@ -57,12 +57,6 @@
     min-inline-size: 0;
 }
 
-.series-title {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 .series-status {
     grid-area: status;
 }

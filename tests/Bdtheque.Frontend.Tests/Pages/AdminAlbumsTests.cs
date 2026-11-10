@@ -86,7 +86,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
     public void Rows_TheAlbumItsAuthorsItsPublicationItsEditionsAndWhereItStands()
     {
         var rows = Open("").FindAll(".album-row:not(.album-row-head)").Select(row => (
-            Text(row.QuerySelector(".album-label")!),
+            Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".album-authors")!),
             Text(row.QuerySelector(".album-date")!),
             Text(row.QuerySelector(".album-editions")!),
@@ -116,7 +116,8 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         var row = Open("q=bijoux").FindAll(".album-row:not(.album-row-head)")[0];
         var id = Bijoux.Album.Id;
 
-        Assert.Equal(AppPaths.AdminEditAlbum(id), row.QuerySelector(".album-label")!.GetAttribute("href"));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Les Bijoux de la Castafiore (Tintin - T. 21)"], row.QuerySelectorAll($"a[href='{AppPaths.AdminEditAlbum(id)}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal(AppPaths.AdminAlbumEditions(id), row.QuerySelector(".album-editions a")!.GetAttribute("href"));
         Assert.Equal("Modifier Les Bijoux de la Castafiore (Tintin - T. 21)", row.QuerySelector(".album-actions a.button")!.GetAttribute("aria-label"));
         Assert.Equal(

@@ -163,7 +163,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
             await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAlbums}?q={_marker}");
             await PageReadiness.WaitAsync(page);
 
-            var label = await page.Locator(".album-label").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+            var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
             var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
             Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
@@ -201,7 +201,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         return page;
     }
 
-    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Albums" }).Locator(".album-label");
+    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Albums" }).Locator(".row-entry");
 
     private Task<AlbumForm> CreateAlbumAsync(string title, Guid[]? genreIds = null) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(

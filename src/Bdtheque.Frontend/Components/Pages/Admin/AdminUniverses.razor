@@ -73,7 +73,7 @@
                                 {
                                     <span class="universe-branch" aria-hidden="true">└</span>
                                 }
-                                <a class="universe-name" href="@((ListOnly with { Edit = row.Id }).Href())">@row.Name</a>
+                                <RowEntry>@row.Name</RowEntry>
                             </span>
                             @if (!parentShown)
                             {

@@ -139,7 +139,7 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
             await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPublishers}?q={_marker}");
             await PageReadiness.WaitAsync(page);
 
-            var name = await page.Locator(".publisher-name").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
+            var name = await page.Locator(".row-entry").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
             var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
             Assert.True(name >= 120, $"{theme} at {width}px: the name is {name}px wide.");
@@ -162,7 +162,7 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         return page;
     }
 
-    private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Éditeurs" }).Locator(".publisher-name");
+    private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Éditeurs" }).Locator(".row-entry");
 
     private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
         PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));

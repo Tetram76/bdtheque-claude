@@ -94,7 +94,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     public void Rows_TheAuthorItsNationalityItsAlbumsAndItsRoles()
     {
         var rows = Open("").FindAll(".author-row:not(.author-row-head)").Select(row => (
-            Text(row.QuerySelector(".author-name")!),
+            Text(row.QuerySelector(".row-entry")!),
             row.QuerySelector(".author-identity") is { } identity ? Text(identity) : null,
             Text(row.QuerySelector(".author-nationality")!),
             Text(row.QuerySelector(".author-albums")!),
@@ -145,7 +145,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         var row = Open("q=gib").FindAll(".author-row:not(.author-row-head)")[3];
         var id = Gotlib.Id;
 
-        Assert.Equal($"{AppPaths.AdminAuthors}?q=gib&edit={id}", row.QuerySelector(".author-name")!.GetAttribute("href"));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Gotlib"], row.QuerySelectorAll($"a[href='{AppPaths.AdminAuthors}?q=gib&edit={id}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal($"{AppPaths.AdminAuthors}?q=gib&edit={id}", row.QuerySelector(".author-actions a.button")!.GetAttribute("href"));
         Assert.Equal("Modifier Gotlib", row.QuerySelector(".author-actions a.button")!.GetAttribute("aria-label"));
         Assert.Equal(
