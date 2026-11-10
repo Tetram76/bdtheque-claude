@@ -65,7 +65,7 @@ jobs:
         id: dotnet
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          dotnet-version: "10.0.403"
+          dotnet-version: "10.0.404"
 
       # Keyed on everything that decides the restored packages, the SDK included, which brings
       # implicit ones. No fallback key: a partial cache, saved again under the new key, would keep
@@ -216,7 +216,7 @@ jobs:
         id: dotnet
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          dotnet-version: "10.0.403"
+          dotnet-version: "10.0.404"
 
       # The scanner runs its analysis on Java.
       - name: Setup Java
