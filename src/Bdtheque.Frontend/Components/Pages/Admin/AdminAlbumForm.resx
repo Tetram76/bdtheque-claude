@@ -12,9 +12,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Add" xml:space="preserve">
-    <value>Ajouter</value>
-  </data>
   <data name="Administration" xml:space="preserve">
     <value>Administration</value>
   </data>
@@ -24,17 +21,8 @@
   <data name="Authors.Copied" xml:space="preserve">
     <value>Auteurs repris de la série {0}. Les modifier ici ne change pas ceux de la série.</value>
   </data>
-  <data name="Authors.Create" xml:space="preserve">
-    <value>Créer l&apos;auteur « {0} »</value>
-  </data>
-  <data name="Authors.Pending" xml:space="preserve">
-    <value>nouvel auteur</value>
-  </data>
   <data name="Authors.Help" xml:space="preserve">
     <value>Un auteur se trouve en tapant son nom ; s&apos;il n&apos;existe pas encore, il se crée sur place.</value>
-  </data>
-  <data name="Authors.Remove" xml:space="preserve">
-    <value>Retirer {0} ({1})</value>
   </data>
   <data name="Block.Album" xml:space="preserve">
     <value>L&apos;album</value>
@@ -60,14 +48,8 @@
   <data name="BySeries" xml:space="preserve">
     <value>Par la série :</value>
   </data>
-  <data name="Changes.Close" xml:space="preserve">
-    <value>Fermer</value>
-  </data>
   <data name="Changes.Empty" xml:space="preserve">
     <value>—</value>
-  </data>
-  <data name="Changes.Lead" xml:space="preserve">
-    <value>Ce que vous avez changé depuis l&apos;ouverture de la fiche, à saisir de nouveau une fois la fiche rechargée.</value>
   </data>
   <data name="Changes.Range" xml:space="preserve">
     <value>{0} à {1}</value>
@@ -77,9 +59,6 @@
   </data>
   <data name="Changes.SortKey.Auto" xml:space="preserve">
     <value>Auto, calculée à partir du titre</value>
-  </data>
-  <data name="Changes.Title" xml:space="preserve">
-    <value>Mes changements</value>
   </data>
   <data name="Classification.Help" xml:space="preserve">
     <value>L&apos;album affiche les siens et ceux de sa série ; ceux de la série se modifient sur sa fiche. Un univers est présenté avec ses ancêtres.</value>
@@ -132,12 +111,6 @@
   <data name="Genres" xml:space="preserve">
     <value>Genres</value>
   </data>
-  <data name="Genres.Add" xml:space="preserve">
-    <value>Ajouter un genre</value>
-  </data>
-  <data name="Genres.Create" xml:space="preserve">
-    <value>Créer le genre « {0} »</value>
-  </data>
   <data name="Kicker.Album" xml:space="preserve">
     <value>Identification</value>
   </data>
@@ -168,20 +141,11 @@
   <data name="PageTitle" xml:space="preserve">
     <value>Modifier l&apos;album {0}</value>
   </data>
-  <data name="Problem.Business" xml:space="preserve">
-    <value>À corriger</value>
-  </data>
-  <data name="Problem.Functional" xml:space="preserve">
-    <value>Modifiée entre-temps</value>
-  </data>
   <data name="Problem.Functional.Conflict" xml:space="preserve">
     <value>L&apos;album a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
   </data>
   <data name="Problem.Functional.NotFound" xml:space="preserve">
     <value>Une fiche que cite le formulaire (l&apos;album, sa série, un auteur, un genre ou un univers) a été supprimée entre-temps : rien n&apos;a été enregistré.</value>
-  </data>
-  <data name="Problem.Technical" xml:space="preserve">
-    <value>Problème technique</value>
   </data>
   <data name="Problem.Technical.Text" xml:space="preserve">
     <value>L&apos;application n&apos;a pas pu enregistrer l&apos;album. Vos changements sont toujours là, dans le formulaire : réessayez dans quelques instants.</value>
@@ -210,21 +174,6 @@
   <data name="Rating.None" xml:space="preserve">
     <value>Pas encore noté</value>
   </data>
-  <data name="Reload" xml:space="preserve">
-    <value>Recharger la fiche</value>
-  </data>
-  <data name="Retry" xml:space="preserve">
-    <value>Réessayer</value>
-  </data>
-  <data name="Role.Colorist.Add" xml:space="preserve">
-    <value>Ajouter un auteur aux couleurs</value>
-  </data>
-  <data name="Role.Illustrator.Add" xml:space="preserve">
-    <value>Ajouter un auteur au dessin</value>
-  </data>
-  <data name="Role.Scenarist.Add" xml:space="preserve">
-    <value>Ajouter un auteur au scénario</value>
-  </data>
   <data name="Save" xml:space="preserve">
     <value>Enregistrer</value>
   </data>
@@ -239,9 +188,6 @@
   </data>
   <data name="Series.Placeholder" xml:space="preserve">
     <value>Aucune série : album isolé</value>
-  </data>
-  <data name="ShowChanges" xml:space="preserve">
-    <value>Voir mes changements</value>
   </data>
   <data name="SortKey.Help.None" xml:space="preserve">
     <value>Calculée à partir du titre, article reporté à la fin ; la modifier la fige.</value>
@@ -290,12 +236,6 @@
   </data>
   <data name="Universes" xml:space="preserve">
     <value>Univers</value>
-  </data>
-  <data name="Universes.Add" xml:space="preserve">
-    <value>Ajouter un univers</value>
-  </data>
-  <data name="Universes.Create" xml:space="preserve">
-    <value>Créer l&apos;univers « {0} »</value>
   </data>
   <data name="Volume" xml:space="preserve">
     <value>Tome</value>

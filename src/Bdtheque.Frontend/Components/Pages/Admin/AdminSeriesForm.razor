@@ -1,0 +1,373 @@
+@attribute [Route(AppPaths.AdminNewSeries)]
+@attribute [Route("/admin/series/{Id:guid}")]
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<AdminSeriesForm> L
+@inject ApiClient Api
+@inject ValueLabels Values
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The entry form of a series (visuel/saisie-serie/contenu.md), on the model of the entry form of an album, whose frame, errors,
+   authors, genres and universes it shares: interactive, its title and sort key follow the typing, and the records it references
+   are chosen by typing their name. No side column: the albums of a series are entered on their own form. It applies no rule of
+   the series, which the domain alone holds (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md): the
+   error of its saving says what to correct, and points to the field concerned. Its styles read the contracts of the base theme
+   only (visuel/saisie-serie/declinaison-par-theme.md). *@
+<PageTitle>@PageTitle</PageTitle>
+<AudienceScreen Function="@(Id is null ? AudienceFunctions.AdminNewSeriesForm : AudienceFunctions.AdminSeriesForm)"
+                Record="@(Id is { } id ? new PresentedRecord(RecordType.Series, id) : null)" />
+
+@if (Entry is null)
+{
+    @if (_loadProblem is not null)
+    {
+        <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Series"], AppPaths.AdminSeries), new(L["Breadcrumb.Unknown"])])" />
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Series"], AppPaths.AdminSeries), new(Entry.Id is null ? L["New"] : Subject)])"
+               Title="@(Entry.Id is null ? L["New"] : L["Edit"])" Subject="@Subject" State="State" Saving="_saving"
+               SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@AppPaths.AdminSeries" OnSave="SaveAsync"
+               Problem="@SaveProblem" Dates="@Dates">
+        <Block Title="@L["Block.Series"]" Kicker="@L["Kicker.Series"]">
+            <div class="series-fields">
+                <Field Id="series-title" Label="@L["Title"]" Note="@L["Title.Note"]" Error="@FieldError("title")" Context="control">
+                    <input id="@control.Id" type="text" placeholder="@L["Title.Placeholder"]" aria-describedby="@control.DescribedBy"
+                           aria-invalid="@control.Invalid" @bind="Entry.Title" @bind:event="oninput" />
+                </Field>
+                <TitleSortKeyField Id="series-sort-key" Title="@Entry.Title" StoredKey="@Entry.StoredSortKey" @bind-ManualKey="Entry.ManualSortKey"
+                                   UntitledPlaceholder="@L["SortKey.Placeholder"]" UntitledHelp="@L["SortKey.Help"]" Error="@FieldError("sortKey")" />
+                <Field Id="series-status" Label="@L["Status"]" Help="@L["Status.Help"]" Context="control">
+                    <select id="@control.Id" class="series-list" aria-describedby="@control.DescribedBy" @bind="Entry.Status">
+                        <option value="">@L["Status.None"]</option>
+                        @foreach (var status in Enum.GetValues<SeriesStatus>())
+                        {
+                            <option value="@status">@Values.Of(status)</option>
+                        }
+                    </select>
+                </Field>
+            </div>
+        </Block>
+
+        <div class="series-pair">
+            <Block Title="@L["Block.Progress"]" Kicker="@L["Kicker.Progress"]">
+                <div class="series-fields">
+                    <Field Id="series-volumes" Label="@L["Volumes"]" Help="@L["Volumes.Help"]" Characters="4" Error="@FieldError("volumes")" Context="control">
+                        <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" aria-describedby="@control.DescribedBy"
+                               aria-invalid="@control.Invalid" @bind="Entry.TheoreticalVolumeCount" />
+                    </Field>
+                    <div class="series-choice">
+                        <Choice Label="@L["Complete"]"><input type="checkbox" aria-describedby="series-complete-help" @bind="Entry.IsComplete" /></Choice>
+                        <p id="series-complete-help" class="series-help">@L["Complete.Help"]</p>
+                    </div>
+                </div>
+            </Block>
+            <Block Title="@L["Block.Computations"]" Kicker="@L["Kicker.Computations"]">
+                <div class="series-fields">
+                    <div class="series-choice">
+                        <Choice Label="@L["ExcludeFromMissingVolumes"]">
+                            <input type="checkbox" aria-describedby="series-computations-help" @bind="Entry.ExcludeFromMissingVolumes" />
+                        </Choice>
+                        <Choice Label="@L["ExcludeFromReleaseEstimates"]">
+                            <input type="checkbox" aria-describedby="series-computations-help" @bind="Entry.ExcludeFromReleaseEstimates" />
+                        </Choice>
+                        <p id="series-computations-help" class="series-help">@L["Computations.Help"]</p>
+                    </div>
+                </div>
+            </Block>
+        </div>
+
+        <Block Title="@L["Block.Authors"]" Kicker="@L["Kicker.Authors"]">
+            <div class="series-fields">
+                <RoleCredits Id="series" Records="Entry.Cited" Help="@L["Authors.Help"]" AuthorCreated="AudienceFunctions.AdminSeriesAuthorCreated"
+                             OnChange="StateHasChanged" />
+            </div>
+        </Block>
+
+        <Block Title="@L["Block.Publisher"]" Kicker="@L["Kicker.Publisher"]">
+            <div class="series-fields">
+                <div class="series-publisher">
+                    <Field Id="series-publisher" Label="@L["Publisher"]" Context="control">
+                        <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="Entry.ChoosePublisher"
+                                      Placeholder="@L["Publisher.Placeholder"]" aria-describedby="series-publisher-help" />
+                    </Field>
+                    @* One of the collections of the publisher: unavailable until one is chosen, and removed when it changes. *@
+                    <Field Id="series-collection" Label="@L["Collection"]" Error="@FieldError("collection")" Context="control">
+                        <RecordPicker Id="@control.Id" Kind="RecordKind.PublisherCollection" Value="Entry.PublisherCollection"
+                                      ValueChanged="collection => Entry.PublisherCollection = collection" Within="Entry.Publisher?.Id"
+                                      Placeholder="@(Entry.Publisher is null ? L["Collection.Placeholder.NoPublisher"] : L["Collection.Placeholder"])"
+                                      disabled="@(Entry.Publisher is null)" aria-describedby="@(control.DescribedBy ?? "series-publisher-help")"
+                                      aria-invalid="@control.Invalid" />
+                    </Field>
+                </div>
+                <p id="series-publisher-help" class="series-help">@L["Publisher.Help"]</p>
+            </div>
+        </Block>
+
+        <Block Title="@L["Block.Classification"]" Kicker="@L["Kicker.Classification"]">
+            <div class="series-fields">
+                <ClassificationTags Id="series" Records="Entry.Cited" Help="@L["Classification.Help"]" OnChange="StateHasChanged"
+                                    GenreCreated="AudienceFunctions.AdminSeriesGenreCreated" UniverseCreated="AudienceFunctions.AdminSeriesUniverseCreated" />
+            </div>
+        </Block>
+
+        <Block Title="@L["Block.Reading"]" Kicker="@L["Kicker.Reading"]">
+            <div class="series-fields">
+                <Field Id="series-summary" Label="@L["Summary"]" Context="control">
+                    <textarea id="@control.Id" rows="4" placeholder="@L["Summary.Placeholder"]" @bind="Entry.Summary"></textarea>
+                </Field>
+                <Field Id="series-notes" Label="@L["Notes"]" Context="control">
+                    <textarea id="@control.Id" rows="3" placeholder="@L["Notes.Placeholder"]" @bind="Entry.PersonalNotes"></textarea>
+                </Field>
+            </div>
+        </Block>
+
+        @* What the new editions of the albums of the series are proposed (fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md):
+           each value a list sized to its longest choice, « — » proposing nothing; the color too, of three choices. *@
+        <Block Title="@L["Block.Template"]" Kicker="@L["Kicker.Template"]">
+            <div class="series-fields">
+                @if (Entry.Id is null)
+                {
+                    <div class="series-template-notice">
+                        <Notice Icon="IconName.Copy">@L["Template.Proposed"]</Notice>
+                    </div>
+                }
+                <div class="series-template">
+                    @TemplateList("series-category", L["Category"], () => Entry.Category, value => Entry.Category = value)
+                    @TemplateList("series-condition", L["Condition"], () => Entry.Condition, value => Entry.Condition = value)
+                    @TemplateList("series-binding", L["Binding"], () => Entry.Binding, value => Entry.Binding = value)
+                    @TemplateList("series-format", L["Format"], () => Entry.Format, value => Entry.Format = value)
+                    @TemplateList("series-orientation", L["Orientation"], () => Entry.Orientation, value => Entry.Orientation = value)
+                    @TemplateList("series-direction", L["ReadingDirection"], () => Entry.ReadingDirection, value => Entry.ReadingDirection = value)
+                    <Field Id="series-color" Label="@L["Color"]" Context="control">
+                        @* Blazor binds no nullable boolean to a list: its value is written and read as its options name it. *@
+                        <select id="@control.Id" class="series-list" value="@(Entry.IsColor switch { true => "true", false => "false", null => "" })"
+                                @onchange="args => Entry.IsColor = bool.TryParse(args.Value as string, out var isColor) ? isColor : null">
+                            <option value="">@L["Template.None"]</option>
+                            <option value="true">@L["Color.Color"]</option>
+                            <option value="false">@L["Color.BlackAndWhite"]</option>
+                        </select>
+                    </Field>
+                </div>
+                <p class="series-help">@L["Template.Help"]</p>
+            </div>
+        </Block>
+    </EntryForm>
+
+    @if (_changesShown)
+    {
+        <ChangesDialog Id="series-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
+    }
+}
+
+@code {
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _saveProblem;
+    private EntryForm? _form;
+    private bool _revealProblem;
+    private bool _saving;
+    private string? _savedFingerprint;
+    private bool _changesShown;
+
+    /// <summary>The series to modify; none for a new series.</summary>
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>The series as the form holds it, read once, by the prerendering.</summary>
+    [PersistentState]
+    public SeriesEntry? Entry { get; set; }
+
+    /// <summary>The series as it was read or last saved: what the user changed since.</summary>
+    [PersistentState]
+    public SeriesEntry? ReadEntry { get; set; }
+
+    // The title of the series, as typed; « <Sans titre> » while nothing is.
+    private string Subject => string.IsNullOrWhiteSpace(Entry!.Title) ? L["Untitled"] : Entry.Title.Trim();
+
+    private string PageTitle => Entry is null || Entry.Id is null ? L["New"] : L["PageTitle", Subject];
+
+    private SaveBarState State => Entry!.Id is null
+        ? SaveBarState.New
+        : Entry.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Entry is null)
+        {
+            try
+            {
+                Entry = Id is { } id
+                    ? SeriesEntry.Of(await Api.GetAsync<SeriesForm>($"/admin/series/{id}"))
+                    : SeriesEntry.New(await Api.GetAsync<SeriesContent>("/admin/series/new"));
+                ReadEntry = Entry.Copy();
+            }
+            catch (ApiProblemException exception)
+            {
+                _loadProblem = exception.Problem;
+                return;
+            }
+        }
+
+        _savedFingerprint = ReadEntry!.Fingerprint();
+    }
+
+    // A value proposed to the new editions, a list of its values, « — » proposing nothing.
+    private RenderFragment TemplateList<TEnum>(string id, string label, Func<TEnum?> get, Action<TEnum?> set) where TEnum : struct, Enum =>
+        @<Field Id="@id" Label="@label" Context="control">
+            <select id="@control.Id" class="series-list" value="@(get()?.ToString() ?? "")"
+                    @onchange="args => set(Enum.TryParse<TEnum>(args.Value as string, out var value) ? value : null)">
+                <option value="">@L["Template.None"]</option>
+                @foreach (var value in Enum.GetValues<TEnum>())
+                {
+                    <option value="@value">@Values.Of(value)</option>
+                }
+            </select>
+        </Field>;
+
+    private async Task SaveAsync()
+    {
+        if (_saving)
+            return;
+        _saving = true;
+        _saveProblem = null;
+        var content = Entry!.ToContent();
+        try
+        {
+            if (Entry.Id is { } id)
+            {
+                var saved = await Api.PutAsync<UpdateSeriesRequest, SeriesForm>($"/admin/series/{id}", new UpdateSeriesRequest(content, Entry.Version));
+                Entry = SeriesEntry.Of(saved);
+                ReadEntry = Entry.Copy();
+                _savedFingerprint = Entry.Fingerprint();
+                await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesSaved, $"series={id}");
+            }
+            else
+            {
+                var created = await Api.PostAsync<SeriesContent, SeriesForm>("/admin/series", content);
+                await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesCreated, $"series={created.Id}");
+                Navigation.NavigateTo(AppPaths.AdminEditSeries(created.Id));
+            }
+        }
+        catch (ApiProblemException exception)
+        {
+            _saveProblem = exception.Problem;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // Once the error of a saving is rendered, what is to correct is brought into view.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    private async Task ShowChangesAsync()
+    {
+        _changesShown = true;
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesChanges, $"series={Entry!.Id}");
+    }
+
+    // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(AppPaths.AdminEditSeries(Entry!.Id!.Value), forceLoad: true);
+
+    // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own.
+    private string? FieldError(string field) =>
+        _saveProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field ? L[$"FieldError.{code}"].Value : null;
+
+    private static string? FieldOf(string ruleCode) => ruleCode switch
+    {
+        "Series.TitleRequired" => "title",
+        "Series.SortKeyRequired" => "sortKey",
+        "Series.TheoreticalVolumeCountPositive" => "volumes",
+        "PublisherCollection.NotOfPublisher" => "collection",
+        _ => null,
+    };
+
+    // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-serie/contenu.md).
+    private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      OnRetry="SaveAsync" />;
+
+    private RenderFragment? Dates => Entry is { CreatedAt: { } created, ModifiedAt: { } modified }
+        ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>
+        : null;
+
+    // Each field the user changed since the series was read, with what they entered, to enter it again once the series is
+    // reloaded: block by block of the form.
+    private List<EntryChange> Changes() => [.. SeriesChanges(ReadEntry!, Entry!), .. CitedChanges(ReadEntry!, Entry!), .. TemplateChanges(ReadEntry!, Entry!)];
+
+    // La série, Avancement and Calculs.
+    private IEnumerable<EntryChange> SeriesChanges(SeriesEntry read, SeriesEntry entry)
+    {
+        if (read.Title != entry.Title)
+            yield return new(L["Title"], entry.Title);
+        if (read.ManualSortKey != entry.ManualSortKey)
+            yield return new(L["Changes.SortKey"], entry.ManualSortKey ?? L["Changes.SortKey.Auto"]);
+        if (read.Status != entry.Status)
+            yield return new(L["Status"], Named(entry.Status));
+        if (read.TheoreticalVolumeCount != entry.TheoreticalVolumeCount)
+            yield return new(L["Volumes"], entry.TheoreticalVolumeCount?.ToString(CultureInfo.CurrentCulture));
+        if (read.IsComplete != entry.IsComplete)
+            yield return new(L["Complete"], Checked(entry.IsComplete));
+        if (read.ExcludeFromMissingVolumes != entry.ExcludeFromMissingVolumes)
+            yield return new(L["ExcludeFromMissingVolumes"], Checked(entry.ExcludeFromMissingVolumes));
+        if (read.ExcludeFromReleaseEstimates != entry.ExcludeFromReleaseEstimates)
+            yield return new(L["ExcludeFromReleaseEstimates"], Checked(entry.ExcludeFromReleaseEstimates));
+    }
+
+    // Les auteurs, Éditeur et collection, Genres et univers.
+    private IEnumerable<EntryChange> CitedChanges(SeriesEntry read, SeriesEntry entry)
+    {
+        foreach (var role in entry.Cited.RolesChangedSince(read.Cited))
+            yield return new(Values.Of(role), EntryChange.Names(entry.Cited.AuthorsOf(role)));
+        if (read.Publisher?.Id != entry.Publisher?.Id)
+            yield return new(L["Publisher"], entry.Publisher?.Label);
+        if (read.PublisherCollection?.Id != entry.PublisherCollection?.Id)
+            yield return new(L["Collection"], entry.PublisherCollection?.Label);
+        if (entry.Cited.GenresChangedSince(read.Cited))
+            yield return new(L["Genres"], EntryChange.Names(entry.Cited.Genres));
+        if (entry.Cited.UniversesChangedSince(read.Cited))
+            yield return new(L["Universes"], EntryChange.Names(entry.Cited.Universes));
+    }
+
+    // Résumé et notes, Nouvelles éditions.
+    private IEnumerable<EntryChange> TemplateChanges(SeriesEntry read, SeriesEntry entry)
+    {
+        if (read.Summary != entry.Summary)
+            yield return new(L["Summary"], entry.Summary);
+        if (read.PersonalNotes != entry.PersonalNotes)
+            yield return new(L["Notes"], entry.PersonalNotes);
+        if (read.Category != entry.Category)
+            yield return new(L["Category"], Named(entry.Category));
+        if (read.Condition != entry.Condition)
+            yield return new(L["Condition"], Named(entry.Condition));
+        if (read.Binding != entry.Binding)
+            yield return new(L["Binding"], Named(entry.Binding));
+        if (read.Format != entry.Format)
+            yield return new(L["Format"], Named(entry.Format));
+        if (read.Orientation != entry.Orientation)
+            yield return new(L["Orientation"], Named(entry.Orientation));
+        if (read.ReadingDirection != entry.ReadingDirection)
+            yield return new(L["ReadingDirection"], Named(entry.ReadingDirection));
+        if (read.IsColor != entry.IsColor)
+            yield return new(L["Color"], entry.IsColor switch { true => L["Color.Color"].Value, false => L["Color.BlackAndWhite"].Value, null => null });
+    }
+
+    private string? Named<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } named ? Values.Of(named) : null;
+
+    private string Checked(bool value) => value ? L["Changes.Checked"] : L["Changes.Unchecked"];
+}

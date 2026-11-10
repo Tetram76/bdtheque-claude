@@ -131,9 +131,10 @@ public sealed class ValidationDataLoader(HttpClient client)
         await data.VisualAsync(lastMoon, lastMoonEdition, VisualType.Cover, Images.Portrait(0.75));
 
         // An abandoned series, sorted under its article; its colourist is credited on the series alone, the
-        // albums carrying contributions of their own. Two volumes only: the pile of covers is incomplete.
+        // albums carrying contributions of their own. Two volumes only: the pile of covers is incomplete. In black and
+        // white, as its new editions are proposed.
         var sparrowhawk = await data.SeriesAsync(Series("L'Épervier des sables", SeriesStatus.Abandoned,
-            Template(bubbles.Id, bubbles.Collections[0], EditionFormat.Pocket, BindingType.Paperback), [adventure, history], [],
+            Template(bubbles.Id, bubbles.Collections[0], EditionFormat.Pocket, BindingType.Paperback) with { IsColor = false }, [adventure, history], [],
             [Credit(kador, ContributionRole.Scenarist), Credit(etienne, ContributionRole.Illustrator), Credit(ostrova, ContributionRole.Colorist)]));
         ContributionContent[] sparrowhawkCredits = [Credit(kador, ContributionRole.Scenarist), Credit(etienne, ContributionRole.Illustrator)];
         var dunes = await data.AlbumAsync(Album("Le Désert des dunes", sparrowhawk, 1, 1955) with { Contributions = sparrowhawkCredits });
@@ -165,9 +166,14 @@ public sealed class ValidationDataLoader(HttpClient client)
         for (var volume = 1; volume <= ChroniclesVolumeCount; volume++)
             await data.AlbumAsync(Album(null, chronicles, volume, 1999 + volume));
 
-        // A series announced, without any album yet: the list of the series says so, and its deletion is accepted.
-        await data.SeriesAsync(Series(SeriesWithoutAlbumTitle, SeriesStatus.InProgress, Template(null, null, null), [fantasy], [],
-            [Credit(rambert, ContributionRole.Scenarist)]));
+        // A series announced, without any album yet: the list of the series says so, and its deletion is accepted. Its entry
+        // form proposes nothing to its new editions, and leaves it out of the computations.
+        await data.SeriesAsync(Series(SeriesWithoutAlbumTitle, SeriesStatus.InProgress,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [fantasy], [],
+            [Credit(rambert, ContributionRole.Scenarist)]) with
+        {
+            ExcludeFromMissingVolumes = true, ExcludeFromReleaseEstimates = true,
+        });
 
         // A one-shot in two editions: the first one with every type of visual, two covers among them; the
         // second one with an ISBN whose check digit is wrong, as printed by some publishers.

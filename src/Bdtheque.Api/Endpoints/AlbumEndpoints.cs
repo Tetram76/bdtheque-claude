@@ -309,10 +309,9 @@ internal static class AlbumEndpoints
             context.VersionOf(album),
             new AlbumFormReferences(
                 album.Series is { } series ? new SeriesListItem(series.Id, series.Title) : null,
-                album.Genres.OrderBy(g => g.Label).ThenBy(g => g.Id).Select(g => new GenreListItem(g.Id, g.Label)).ToList(),
-                await UniversesInHierarchyAsync(context, album, cancellationToken),
-                album.Contributions.Select(c => c.Author).DistinctBy(a => a.Id)
-                    .Select(a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym)).ToList()),
+                FormReferences.Genres(album.Genres),
+                await FormReferences.UniversesInHierarchyAsync(context, album.Universes, cancellationToken),
+                FormReferences.Authors(album.Contributions)),
             await CollectionStateAsync(context, album.Id, cancellationToken),
             album.CreatedAt,
             album.ModifiedAt);
@@ -321,14 +320,4 @@ internal static class AlbumEndpoints
     private static Task<AlbumCollectionState> CollectionStateAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken) =>
         context.Albums.AsNoTracking().Where(a => a.Id == id)
             .Select(CatalogExpressions.Expand((Album a) => a.CollectionState())).SingleAsync(cancellationToken);
-
-    // The hierarchy is only read for an album attached to a universe.
-    private static async Task<IReadOnlyList<UniverseInHierarchy>> UniversesInHierarchyAsync(
-        BdthequeDbContext context, Album album, CancellationToken cancellationToken)
-    {
-        if (album.Universes.Count == 0)
-            return [];
-        var tree = await UniverseTree.LoadAsync(context, cancellationToken);
-        return album.Universes.OrderBy(u => u.Name).ThenBy(u => u.Id).Select(u => tree.InHierarchy(u.Id)).ToList();
-    }
 }

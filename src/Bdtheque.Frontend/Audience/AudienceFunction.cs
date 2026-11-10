@@ -121,6 +121,32 @@ public static class AudienceFunctions
     /// <summary>The dialog of the merge of a series, opened from its row, with the search of the other series.</summary>
     public static readonly AudienceFunction AdminSeriesMerge = new("admin.series.merge", AudienceFunctionKind.Action);
 
+    /// <summary>The entry form of a series, with the series it presents (visuel/saisie-serie/contenu.md).</summary>
+    public static readonly AudienceFunction AdminSeriesForm = new("admin.series-form", AudienceFunctionKind.Screen);
+
+    /// <summary>The entry form of a new series.</summary>
+    public static readonly AudienceFunction AdminNewSeriesForm = new("admin.series-form.new", AudienceFunctionKind.Screen);
+
+    // The actions of the form, interactive, each recorded in the visit of the prerendering of its page.
+
+    /// <summary>The creation of a series, with the series created.</summary>
+    public static readonly AudienceFunction AdminSeriesCreated = new("admin.series-form.created", AudienceFunctionKind.Action);
+
+    /// <summary>The saving of the modification of a series, with the series saved.</summary>
+    public static readonly AudienceFunction AdminSeriesSaved = new("admin.series-form.saved", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of an author on the spot, from the form of a series.</summary>
+    public static readonly AudienceFunction AdminSeriesAuthorCreated = new("admin.series-form.author-created", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a genre on the spot, from the form of a series.</summary>
+    public static readonly AudienceFunction AdminSeriesGenreCreated = new("admin.series-form.genre-created", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a universe on the spot, from the form of a series.</summary>
+    public static readonly AudienceFunction AdminSeriesUniverseCreated = new("admin.series-form.universe-created", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, the series having been modified in the meantime.</summary>
+    public static readonly AudienceFunction AdminSeriesChanges = new("admin.series-form.changes", AudienceFunctionKind.Action);
+
     /// <summary>The list of the authors of the administration (visuel/listes/liste-par-liste.md).</summary>
     public static readonly AudienceFunction AdminAuthors = new("admin.authors", AudienceFunctionKind.Screen);
 
@@ -288,7 +314,8 @@ public static class AudienceFunctions
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated,
         AdminAlbumChanges,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
-        AdminSeriesMerge, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
+        AdminSeriesMerge, AdminSeriesForm, AdminNewSeriesForm, AdminSeriesCreated, AdminSeriesSaved, AdminSeriesAuthorCreated,
+        AdminSeriesGenreCreated, AdminSeriesUniverseCreated, AdminSeriesChanges, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
         AdminAuthorsMerge, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
         AdminPublishersMerge, AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
         AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsPage,

@@ -104,8 +104,8 @@ public static class AppPaths
     /// <summary>The list of the series of the administration (visuel/listes/).</summary>
     public const string AdminSeries = "/admin/series";
 
-    /// <summary>The entry form of a series (#206).</summary>
-    public static string AdminEditSeries(Guid id) => NotYetImplemented;
+    /// <summary>The entry form of a series (visuel/saisie-serie/).</summary>
+    public static string AdminEditSeries(Guid id) => $"{AdminSeries}/{id}";
 
     /// <summary>
     /// The next step of the merge of two series, whose presentation awaits the terms of the merge
@@ -204,7 +204,8 @@ public static class AppPaths
     /// <summary>The entry form of a new album (visuel/saisie-album/).</summary>
     public const string AdminNewAlbum = $"{AdminAlbums}/new";
 
-    public const string AdminNewSeries = NotYetImplemented;
+    /// <summary>The entry form of a new series (visuel/saisie-serie/).</summary>
+    public const string AdminNewSeries = $"{AdminSeries}/new";
 
     public const string AdminNewAuthor = NotYetImplemented;
 

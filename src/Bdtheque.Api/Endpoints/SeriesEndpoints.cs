@@ -31,6 +31,7 @@ internal static class SeriesEndpoints
     {
         var series = admin.MapGroup("/series");
         series.MapGet("/", ListForAdministrationAsync);
+        series.MapGet("/new", GetNew);
         series.MapGet("/{id:guid}", GetAsync);
         series.MapPost("/{id:guid}/album-contributions", GetAlbumContributionsAsync);
         series.MapPost("/", CreateAsync);
@@ -173,23 +174,49 @@ internal static class SeriesEndpoints
             await filters.NameAsync(context, cancellationToken));
     }
 
+    /// <summary>
+    /// What the form of a new series starts from: nothing, but the values proposed to any new edition, which pre-fill those
+    /// the series proposes to the new editions of its albums (modele-metier/serie.md). Only a starting point: nothing is
+    /// written, and the series saves what the form sends.
+    /// </summary>
+    private static SeriesContent GetNew()
+    {
+        var proposed = EditionPreset.Defaults;
+        return new SeriesContent(
+            "", null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(
+                proposed.PublisherId,
+                proposed.PublisherCollectionId,
+                EnumMapping.Map<ContractEnums.EditionCategory>(proposed.Category),
+                EnumMapping.Map<ContractEnums.EditionCondition>(proposed.Condition),
+                EnumMapping.Map<ContractEnums.BindingType>(proposed.Binding),
+                EnumMapping.Map<ContractEnums.BookOrientation>(proposed.Orientation),
+                EnumMapping.Map<ContractEnums.ReadingDirection>(proposed.ReadingDirection),
+                EnumMapping.Map<ContractEnums.EditionFormat>(proposed.Format),
+                proposed.IsColor),
+            [], [], []);
+    }
+
     private static async Task<SeriesForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         // Tracked, for the version of the aggregate (BdthequeDbContext.VersionOf): the context lives
         // for this request only.
         var series = await WithChildren(context.Series).SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
                      ?? throw new EntityNotFoundException(typeof(Series), id);
-        return ToForm(context, series);
+        return await ToFormAsync(context, series, cancellationToken);
     }
 
     private static async Task<Created<SeriesForm>> CreateAsync(
         SeriesContent request, BdthequeDbContext context, CancellationToken cancellationToken)
     {
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, request.NewRecords, cancellationToken);
         var series = new Series(request.Title);
-        await ApplyAsync(series, request, context, cancellationToken);
+        await ApplyAsync(series, request, added, context, cancellationToken);
         context.Series.Add(series);
         await context.SaveChangesAsync(cancellationToken);
-        return TypedResults.Created($"/admin/series/{series.Id}", ToForm(context, series));
+        await transaction.CommitAsync(cancellationToken);
+        return TypedResults.Created($"/admin/series/{series.Id}", await ToFormAsync(context, series, cancellationToken));
     }
 
     private static async Task<SeriesForm> UpdateAsync(
@@ -197,21 +224,25 @@ internal static class SeriesEndpoints
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var series = await context.LoadAggregateForWriteAsync<Series>(id, request.Version, WithChildren, cancellationToken);
-        await ApplyAsync(series, request.Content, context, cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, request.Content.NewRecords, cancellationToken);
+        await ApplyAsync(series, request.Content, added, context, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return ToForm(context, series);
+        return await ToFormAsync(context, series, cancellationToken);
     }
 
+    // Its template publisher and collection, and the authors of its contributions, for the form to name them.
     private static IQueryable<Series> WithChildren(IQueryable<Series> query) =>
-        query.Include(s => s.Genres).Include(s => s.Universes).Include(s => s.TemplateContributions);
+        query.Include(s => s.Genres).Include(s => s.Universes).Include(s => s.TemplatePublisher).Include(s => s.TemplatePublisherCollection)
+            .Include(s => s.TemplateContributions).ThenInclude(c => c.Author);
 
     /// <summary>
     /// Applies the whole form to the series: scalar fields, then the records it references, each of
     /// which must still exist (a genre, universe, author, publisher or collection deleted since the
-    /// form was read is a functional error).
+    /// form was read is a functional error), unless the form added them on the spot.
     /// </summary>
-    private static async Task ApplyAsync(Series series, SeriesContent content, BdthequeDbContext context, CancellationToken cancellationToken)
+    private static async Task ApplyAsync(
+        Series series, SeriesContent content, AddedRecords added, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         series.SetTitle(content.Title);
         if (content.ManualSortKey is { } manualSortKey)
@@ -238,15 +269,15 @@ internal static class SeriesEndpoints
             context, template.PublisherId, template.PublisherCollectionId, cancellationToken);
         series.SetTemplate(publisher, collection);
 
-        var genres = await FormReferences.LoadAsync(context.Genres, content.GenreIds, cancellationToken);
+        var genres = await FormReferences.LoadAsync(context.Genres, content.GenreIds, cancellationToken, added.Genres);
         FormReferences.ReplaceAssociations(series.Genres, genres, series.AddGenre, series.RemoveGenre);
-        var universes = await FormReferences.LoadAsync(context.Universes, content.UniverseIds, cancellationToken);
+        var universes = await FormReferences.LoadAsync(context.Universes, content.UniverseIds, cancellationToken, added.Universes);
         FormReferences.ReplaceAssociations(series.Universes, universes, series.AddUniverse, series.RemoveUniverse);
 
-        series.SetTemplateContributions(await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken));
+        series.SetTemplateContributions(await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken, added.Authors));
     }
 
-    private static SeriesForm ToForm(BdthequeDbContext context, Series series) =>
+    private static async Task<SeriesForm> ToFormAsync(BdthequeDbContext context, Series series, CancellationToken cancellationToken) =>
         new(series.Id, series.SortKey,
             new SeriesContent(
                 series.Title,
@@ -271,5 +302,16 @@ internal static class SeriesEndpoints
                 series.Genres.Select(g => g.Id).Order().ToList(),
                 series.Universes.Select(u => u.Id).Order().ToList(),
                 FormReferences.ToContents(series.TemplateContributions)),
-            context.VersionOf(series));
+            context.VersionOf(series),
+            new SeriesFormReferences(
+                series.TemplatePublisher is { } publisher ? new PublisherListItem(publisher.Id, publisher.Name, publisher.Website) : null,
+                // The collection of the template belongs to its publisher (Series.SetTemplate).
+                series.TemplatePublisherCollection is { } collection
+                    ? new PublisherCollectionListItem(collection.Id, collection.Name, collection.PublisherId, series.TemplatePublisher!.Name)
+                    : null,
+                FormReferences.Genres(series.Genres),
+                await FormReferences.UniversesInHierarchyAsync(context, series.Universes, cancellationToken),
+                FormReferences.Authors(series.TemplateContributions)),
+            series.CreatedAt,
+            series.ModifiedAt);
 }

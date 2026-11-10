@@ -100,41 +100,16 @@ else
                 {
                     <Notice Icon="IconName.Copy">@L["Authors.Copied", series]</Notice>
                 }
-                <div class="album-roles">
-                    @foreach (var role in Enum.GetValues<ContributionRole>())
-                    {
-                        <div class="album-role">
-                            <span class="album-role-name" id="@($"album-role-{role}")">@Values.Of(role)</span>
-                            <RecordTags Id="@($"album-add-{role}")" Kind="RecordKind.Author" Items="@Entry.AuthorsOf(role)"
-                                        AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => CreditAuthor(role, author)"
-                                        OnRemove="author => RemoveAuthor(role, author)"
-                                        RemoveLabel="@(author => L["Authors.Remove", author.Label, Values.Of(role)].Value)"
-                                        OnCreate="text => _authorCreation = (role, text)" CreateLabel="@(text => L["Authors.Create", text].Value)"
-                                        Pending="PendingAuthors" />
-                        </div>
-                    }
-                </div>
-                <p class="album-help">@L["Authors.Help"]</p>
+                <RoleCredits Id="album" Records="Entry.Cited" Help="@L["Authors.Help"]" AuthorCreated="AudienceFunctions.AdminAlbumAuthorCreated"
+                             OnChange="AuthorsChanged" />
             </div>
         </Block>
 
         <Block Title="@L["Block.Classification"]" Kicker="@L["Kicker.Classification"]">
             <div class="album-fields">
-                <div class="album-tags">
-                    <span class="album-tags-name">@L["Genres"]</span>
-                    <RecordTags Id="album-add-genre" Kind="RecordKind.Genre" Items="Entry.Genres" AddText="@L["Add"]"
-                                AddLabel="@L["Genres.Add"]" OnAdd="AddGenre" OnRemove="genre => Entry.Genres.Remove(genre)"
-                                OnCreate="text => _genreCreation = text" CreateLabel="@(text => L["Genres.Create", text].Value)" />
-                    <InheritedTags Label="@L["BySeries"]" Items="Entry.SeriesGenres" />
-                </div>
-                <div class="album-tags">
-                    <span class="album-tags-name">@L["Universes"]</span>
-                    <RecordTags Id="album-add-universe" Kind="RecordKind.Universe" Items="Entry.Universes" AddText="@L["Add"]"
-                                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => Entry.Universes.Remove(universe)"
-                                OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)" />
-                    <InheritedTags Label="@L["BySeries"]" Items="Entry.SeriesUniverses" />
-                </div>
-                <p class="album-help">@L["Classification.Help"]</p>
+                <ClassificationTags Id="album" Records="Entry.Cited" Help="@L["Classification.Help"]" OnChange="StateHasChanged" InheritedLabel="@L["BySeries"]"
+                                    InheritedGenres="Entry.SeriesGenres" InheritedUniverses="Entry.SeriesUniverses"
+                                    GenreCreated="AudienceFunctions.AdminAlbumGenreCreated" UniverseCreated="AudienceFunctions.AdminAlbumUniverseCreated" />
             </div>
         </Block>
 
@@ -151,33 +126,9 @@ else
         </Block>
     </EntryForm>
 
-    @if (_authorCreation is { } creation)
-    {
-        <AuthorCreationDialog Id="album-author-creation" Name="@creation.Name" OnCreated="author => CreditCreatedAsync(creation.Role, author)"
-                              OnCancel="() => _authorCreation = null" />
-    }
-    @if (_genreCreation is { } genreLabel)
-    {
-        <GenreCreationDialog Id="album-genre-creation" Label="@genreLabel" OnCreated="GenreCreatedAsync" OnCancel="() => _genreCreation = null" />
-    }
-    @if (_universeCreation is { } universeName)
-    {
-        <UniverseCreationDialog Id="album-universe-creation" Name="@universeName" OnCreated="UniverseCreatedAsync"
-                                OnCancel="() => _universeCreation = null" />
-    }
     @if (_changesShown)
     {
-        <Dialog Id="album-changes" Title="@L["Changes.Title"]" Subject="@Label" Tone="DialogTone.Information" CloseLabel="@L["Changes.Close"]"
-                OnClose="() => _changesShown = false">
-            <p>@L["Changes.Lead"]</p>
-            <dl class="album-changes">
-                @foreach (var (field, value) in Changes())
-                {
-                    <dt>@field</dt>
-                    <dd>@value</dd>
-                }
-            </dl>
-        </Dialog>
+        <ChangesDialog Id="album-changes" Subject="@Label" Changes="Changes()" OnClose="() => _changesShown = false" />
     }
 }
 
@@ -191,9 +142,6 @@ else
     private bool _saving;
     private string? _savedFingerprint;
     private string? _authorsCopiedFrom;
-    private (ContributionRole Role, string Name)? _authorCreation;
-    private string? _genreCreation;
-    private string? _universeCreation;
     private bool _changesShown;
 
     /// <summary>The album to modify; none for a new album.</summary>
@@ -296,7 +244,7 @@ else
                 new SeriesAlbumContributionsRequest(Entry.Id is null, Entry.AuthorsSeriesId, credits));
             if (choice == _seriesChoice && given.Applied && Entry.ToContent().Contributions.SequenceEqual(credits))
             {
-                Entry.CreditOnly(given.Contributions);
+                Entry.Cited.CreditOnly(given.Contributions);
                 Entry.AuthorsSeriesId = series.Id;
                 if (given.Contributions.Count > 0)
                     _authorsCopiedFrom = series.Label;
@@ -308,95 +256,9 @@ else
         }
     }
 
-    private void AddGenre(RecordOption genre)
-    {
-        if (Entry!.Genres.All(g => g.Id != genre.Id))
-            Entry.Genres.Add(genre);
-    }
-
-    // A universe is presented with its ancestors, which its suggestion only gives the parent of.
-    // Added at once, then named with its ancestors once they are read: a saving made meanwhile keeps it.
-    private async Task AddUniverseAsync(RecordOption universe)
-    {
-        if (Entry!.Universes.Any(u => u.Id == universe.Id))
-            return;
-        Entry.Universes.Add(universe);
-        try
-        {
-            Rename(AlbumEntry.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")));
-        }
-        catch (ApiProblemException)
-        {
-            // Named without its ancestors.
-        }
-    }
-
-    // The universe named anew, if the album still has it: the entry may have been saved, or the universe removed, meanwhile.
-    private void Rename(RecordOption universe)
-    {
-        var index = Entry!.Universes.FindIndex(u => u.Id == universe.Id);
-        if (index >= 0)
-            Entry.Universes[index] = universe;
-    }
-
-    // The authors added on the spot, created with the album only: another role credits them under the same key.
-    private IReadOnlyList<RecordOption> PendingAuthors =>
-        [.. Entry!.NewAuthors.Select(a => new RecordOption(a.Key, RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym), L["Authors.Pending"]))];
-
     // Authors changed are personalized: the notice of those taken from the series no longer applies
     // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
-    private void CreditAuthor(ContributionRole role, RecordOption author)
-    {
-        Entry!.Credit(role, author);
-        _authorsCopiedFrom = null;
-    }
-
-    private void RemoveAuthor(ContributionRole role, RecordOption author)
-    {
-        Entry!.Credits.RemoveAll(c => c.Role == role && c.Author.Id == author.Id);
-        _authorsCopiedFrom = null;
-    }
-
-    // The records added on the spot are created with the album, when it is saved: cancelling creates none of them.
-    private async Task CreditCreatedAsync(ContributionRole role, NewAuthor author)
-    {
-        _authorCreation = null;
-        Entry!.NewAuthors.Add(author);
-        CreditAuthor(role, new RecordOption(author.Key, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null));
-        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumAuthorCreated);
-    }
-
-    private async Task GenreCreatedAsync(NewGenre genre)
-    {
-        _genreCreation = null;
-        Entry!.NewGenres.Add(genre);
-        AddGenre(new RecordOption(genre.Key, genre.Label, null));
-        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumGenreCreated);
-    }
-
-    // Presented with its ancestors, those of the universe that contains it.
-    private async Task UniverseCreatedAsync((NewUniverse Universe, RecordOption? Parent) created)
-    {
-        _universeCreation = null;
-        var (universe, parent) = created;
-        Entry!.NewUniverses.Add(universe);
-        Entry.Universes.Add(new RecordOption(universe.Key, parent is null ? universe.Name : $"{parent.Label} › {universe.Name}", null));
-        if (parent is not null)
-            Rename(new RecordOption(universe.Key, $"{await AncestryAsync(parent)} › {universe.Name}", null));
-        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumUniverseCreated);
-    }
-
-    private async Task<string> AncestryAsync(RecordOption universe)
-    {
-        try
-        {
-            return AlbumEntry.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")).Label;
-        }
-        catch (ApiProblemException)
-        {
-            return universe.Label;
-        }
-    }
+    private void AuthorsChanged() => _authorsCopiedFrom = null;
 
     private async Task SaveAsync()
     {
@@ -470,25 +332,10 @@ else
     };
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-album/contenu.md).
-    private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null : problem.Category switch
-    {
-        ProblemCategory.Business => @<ErrorMessage Problem="problem" Label="@L["Problem.Business"]" />,
-        ProblemCategory.Functional => @<ErrorMessage Problem="problem" Label="@L["Problem.Functional"]"
-                                                     Message="@(problem.Status == 404 ? L["Problem.Functional.NotFound"] : L["Problem.Functional.Conflict"])">
-            <Actions>
-                @if (Entry!.Id is not null)
-                {
-                    <Button Label="@L["Reload"]" Icon="IconName.Reload" OnClick="Reload" />
-                    <Button Label="@L["ShowChanges"]" OnClick="ShowChangesAsync" />
-                }
-            </Actions>
-        </ErrorMessage>,
-        _ => @<ErrorMessage Problem="problem" Label="@L["Problem.Technical"]" Message="@L["Problem.Technical.Text"]">
-            <Actions>
-                <Button Label="@L["Retry"]" Icon="IconName.Reload" OnClick="SaveAsync" />
-            </Actions>
-        </ErrorMessage>,
-    };
+    private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      OnRetry="SaveAsync" />;
 
     // An album not in the collection, at first glance; nothing for a new album, not saved yet.
     private RenderFragment? Status => Entry!.CollectionState is { } state ? @<CollectionStatus State="state" /> : null;
@@ -499,62 +346,57 @@ else
 
     // Each field the user changed since the album was read, with what they entered, to enter it again once the album is reloaded:
     // block by block of the form.
-    private IEnumerable<(string Field, string Value)> Changes() =>
-        [.. AlbumChanges(ReadEntry!, Entry!), .. CreditAndClassificationChanges(ReadEntry!, Entry!), .. ReadingChanges(ReadEntry!, Entry!)];
+    private List<EntryChange> Changes() =>
+        [.. AlbumChanges(ReadEntry!, Entry!), .. CreditAndClassificationChanges(ReadEntry!.Cited, Entry!.Cited), .. ReadingChanges(ReadEntry!, Entry!)];
 
-    private IEnumerable<(string Field, string Value)> AlbumChanges(AlbumEntry read, AlbumEntry entry)
+    private IEnumerable<EntryChange> AlbumChanges(AlbumEntry read, AlbumEntry entry)
     {
         if (read.Series?.Id != entry.Series?.Id)
-            yield return (L["Series"], Text(entry.Series?.Label));
+            yield return new(L["Series"], entry.Series?.Label);
         if (read.Title != entry.Title)
-            yield return (L["Title"], Text(entry.Title));
+            yield return new(L["Title"], entry.Title);
         if (read.ManualSortKey != entry.ManualSortKey)
-            yield return (L["Changes.SortKey"], entry.ManualSortKey ?? L["Changes.SortKey.Auto"]);
+            yield return new(L["Changes.SortKey"], entry.ManualSortKey ?? L["Changes.SortKey.Auto"]);
         if ((read.IsOmnibus, read.IsSpecialIssue) != (entry.IsOmnibus, entry.IsSpecialIssue))
-            yield return (L["Type"], TypeText(entry));
+            yield return new(L["Type"], TypeText(entry));
         if (read.VolumeNumber != entry.VolumeNumber)
-            yield return (L["Volume"], Text(entry.VolumeNumber?.ToString(CultureInfo.CurrentCulture)));
+            yield return new(L["Volume"], entry.VolumeNumber?.ToString(CultureInfo.CurrentCulture));
         if (entry.IsOmnibus && (read.StartVolumeNumber, read.EndVolumeNumber) != (entry.StartVolumeNumber, entry.EndVolumeNumber))
-            yield return (L["Range"], L["Changes.Range", Text(entry.StartVolumeNumber?.ToString(CultureInfo.CurrentCulture)),
-                Text(entry.EndVolumeNumber?.ToString(CultureInfo.CurrentCulture))]);
+            yield return new(L["Range"], L["Changes.Range", Bound(entry.StartVolumeNumber), Bound(entry.EndVolumeNumber)]);
         if ((read.FirstPublicationYear, read.FirstPublicationMonth) != (entry.FirstPublicationYear, entry.FirstPublicationMonth))
-            yield return (L["Publication"], PublicationText(entry));
+            yield return new(L["Publication"], PublicationText(entry));
     }
 
-    private IEnumerable<(string Field, string Value)> CreditAndClassificationChanges(AlbumEntry read, AlbumEntry entry)
+    private IEnumerable<EntryChange> CreditAndClassificationChanges(CitedRecords read, CitedRecords cited)
     {
-        foreach (var role in Enum.GetValues<ContributionRole>().Where(role => !Same(read.AuthorsOf(role), entry.AuthorsOf(role))))
-            yield return (Values.Of(role), Names(entry.AuthorsOf(role)));
-        if (!Same(read.Genres, entry.Genres))
-            yield return (L["Genres"], Names(entry.Genres));
-        if (!Same(read.Universes, entry.Universes))
-            yield return (L["Universes"], Names(entry.Universes));
+        foreach (var role in cited.RolesChangedSince(read))
+            yield return new(Values.Of(role), EntryChange.Names(cited.AuthorsOf(role)));
+        if (cited.GenresChangedSince(read))
+            yield return new(L["Genres"], EntryChange.Names(cited.Genres));
+        if (cited.UniversesChangedSince(read))
+            yield return new(L["Universes"], EntryChange.Names(cited.Universes));
     }
 
-    private IEnumerable<(string Field, string Value)> ReadingChanges(AlbumEntry read, AlbumEntry entry)
+    private IEnumerable<EntryChange> ReadingChanges(AlbumEntry read, AlbumEntry entry)
     {
         if (read.Summary != entry.Summary)
-            yield return (L["Summary"], Text(entry.Summary));
+            yield return new(L["Summary"], entry.Summary);
         if (read.PersonalNotes != entry.PersonalNotes)
-            yield return (L["Notes"], Text(entry.PersonalNotes));
+            yield return new(L["Notes"], entry.PersonalNotes);
         if (read.Rating != entry.Rating)
-            yield return (L["Rating"], entry.Rating is { } rating ? Values.Of(rating) : L["Rating.None"]);
+            yield return new(L["Rating"], entry.Rating is { } rating ? Values.Of(rating) : L["Rating.None"]);
     }
 
-    private string Text(string? value) => string.IsNullOrWhiteSpace(value) ? L["Changes.Empty"] : value;
-
-    private string Names(IEnumerable<RecordOption> records) => Text(string.Join(", ", records.Select(r => r.Label)));
-
-    private static bool Same(IEnumerable<RecordOption> a, IEnumerable<RecordOption> b) =>
-        a.Select(r => r.Id).Order().SequenceEqual(b.Select(r => r.Id).Order());
+    // A bound of the range, « — » when empty, inside the text of the range.
+    private string Bound(int? volume) => volume?.ToString(CultureInfo.CurrentCulture) ?? L["Changes.Empty"];
 
     private string TypeText(AlbumEntry entry) =>
         string.Join(", ", new[] { entry.IsOmnibus ? L["Type.Omnibus"].Value : null, entry.IsSpecialIssue ? L["Type.SpecialIssue"].Value : null }
             .OfType<string>().DefaultIfEmpty(L["Type.Regular"]));
 
-    private string PublicationText(AlbumEntry entry) => Text(string.Join(' ', new[]
+    private static string PublicationText(AlbumEntry entry) => string.Join(' ', new[]
     {
         entry.FirstPublicationMonth is { } month ? CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month) : null,
         entry.FirstPublicationYear?.ToString(CultureInfo.InvariantCulture),
-    }.OfType<string>()));
+    }.OfType<string>());
 }

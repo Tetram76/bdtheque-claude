@@ -18,8 +18,11 @@ public sealed record EditionPreset(
     EditionFormat? Format,
     bool IsColor)
 {
-    // modele-metier/edition.md: the values proposed on entry, which the database never carries.
-    private static readonly EditionPreset Defaults = new(
+    /// <summary>
+    /// The values proposed to any new edition (modele-metier/edition.md), which the database never carries: those of an album
+    /// without series, and the starting point of the template of a new series (modele-metier/serie.md).
+    /// </summary>
+    public static readonly EditionPreset Defaults = new(
         null, null, null, EditionCondition.Excellent, BindingType.Hardcover, BookOrientation.Portrait,
         Enums.ReadingDirection.LeftToRight, EditionFormat.Standard, IsColor: true);
 

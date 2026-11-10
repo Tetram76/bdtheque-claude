@@ -1,0 +1,17 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). */
+.classification-tags {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.classification-tags-name {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.classification-tags-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}

@@ -1,3 +1,4 @@
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Admin;
@@ -8,7 +9,21 @@ namespace Bdtheque.Contracts.Admin;
 /// <see cref="SeriesContent.ManualSortKey"/>): always shown by the form.
 /// </param>
 /// <param name="Version">Version of the series, sent back with any modification or deletion.</param>
-public sealed record SeriesForm(Guid Id, string SortKey, SeriesContent Content, uint Version);
+/// <param name="References">The records the content references by their identifier, named for the form to present them.</param>
+public sealed record SeriesForm(
+    Guid Id, string SortKey, SeriesContent Content, uint Version, SeriesFormReferences References, DateTimeOffset CreatedAt,
+    DateTimeOffset ModifiedAt);
+
+/// <summary>The records a <see cref="SeriesContent"/> references, named as the lists name them.</summary>
+/// <param name="PublisherCollection">With its publisher, the one it belongs to.</param>
+/// <param name="Universes">Each with its ancestors, a universe being presented with them (visuel/saisie-serie/contenu.md).</param>
+/// <param name="Authors">The authors of its contributions, each once.</param>
+public sealed record SeriesFormReferences(
+    PublisherListItem? Publisher,
+    PublisherCollectionListItem? PublisherCollection,
+    IReadOnlyList<GenreListItem> Genres,
+    IReadOnlyList<UniverseInHierarchy> Universes,
+    IReadOnlyList<AuthorListItem> Authors);
 
 /// <summary>
 /// Everything the user edits on a series, sent to create it, and sent whole to modify it (the
@@ -22,6 +37,9 @@ public sealed record SeriesForm(Guid Id, string SortKey, SeriesContent Content, 
 /// <param name="GenreIds">Genres of the series.</param>
 /// <param name="UniverseIds">Universes of the series.</param>
 /// <param name="Contributions">Template contributions, copied onto an album attached to the series.</param>
+/// <param name="NewRecords">
+/// The authors, genres and universes the form added on the spot, created with the series; none when the series is read.
+/// </param>
 public sealed record SeriesContent(
     string Title,
     string? ManualSortKey,
@@ -35,7 +53,8 @@ public sealed record SeriesContent(
     SeriesEditionTemplate EditionTemplate,
     IReadOnlyList<Guid> GenreIds,
     IReadOnlyList<Guid> UniverseIds,
-    IReadOnlyList<ContributionContent> Contributions);
+    IReadOnlyList<ContributionContent> Contributions,
+    NewRecords? NewRecords = null);
 
 /// <summary>
 /// Default values of a new edition of an album of the series

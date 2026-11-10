@@ -1,0 +1,141 @@
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<ClassificationTags> L
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+
+@* The genres and universes of a record being entered (visuel/saisie-album/contenu.md, Genres et univers;
+   visuel/saisie-serie/contenu.md): removable tags, then « Ajouter », which finds one by typing its name or adds a new one,
+   created only with the record (choix-implementation/socle/frontend.md); under them, those the record displays through
+   another (an album through its series), which are not modified here. A universe is presented with its ancestors.
+   Interactive: it changes the cited records of the page, which it tells of each change (OnChange). *@
+<div class="classification-tags">
+    <span class="classification-tags-name">@L["Genres"]</span>
+    <RecordTags Id="@($"{Id}-add-genre")" Kind="RecordKind.Genre" Items="Records.Genres" AddText="@L["Add"]"
+                AddLabel="@L["Genres.Add"]" OnAdd="AddGenreAsync" OnRemove="genre => RemoveAsync(Records.Genres, genre)"
+                OnCreate="text => _genreCreation = text" CreateLabel="@(text => L["Genres.Create", text].Value)" />
+    <InheritedTags Label="@InheritedLabel" Items="InheritedGenres" />
+</div>
+<div class="classification-tags">
+    <span class="classification-tags-name">@L["Universes"]</span>
+    <RecordTags Id="@($"{Id}-add-universe")" Kind="RecordKind.Universe" Items="Records.Universes" AddText="@L["Add"]"
+                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => RemoveAsync(Records.Universes, universe)"
+                OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)" />
+    <InheritedTags Label="@InheritedLabel" Items="InheritedUniverses" />
+</div>
+<p class="classification-tags-help">@Help</p>
+
+@if (_genreCreation is { } genreLabel)
+{
+    <GenreCreationDialog Id="@($"{Id}-genre-creation")" Label="@genreLabel" OnCreated="GenreCreatedAsync" OnCancel="() => _genreCreation = null" />
+}
+@if (_universeCreation is { } universeName)
+{
+    <UniverseCreationDialog Id="@($"{Id}-universe-creation")" Name="@universeName" OnCreated="UniverseCreatedAsync"
+                            OnCancel="() => _universeCreation = null" />
+}
+
+@code {
+    private string? _genreCreation;
+    private string? _universeCreation;
+
+    /// <summary>The prefix of the identifiers of its fields, unique in the page (e.g. « album »).</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public CitedRecords Records { get; set; } = null!;
+
+    /// <summary>What the genres and universes of the record are, under them.</summary>
+    [Parameter, EditorRequired]
+    public string Help { get; set; } = null!;
+
+    /// <summary>The genres the record displays through another, modified on the form of that one: none by default.</summary>
+    [Parameter]
+    public IReadOnlyList<string> InheritedGenres { get; set; } = [];
+
+    /// <summary>The universes the record displays through another, each named with its ancestors.</summary>
+    [Parameter]
+    public IReadOnlyList<string> InheritedUniverses { get; set; } = [];
+
+    /// <summary>What the inherited ones come through (e.g. « Par la série : »); required with them.</summary>
+    [Parameter]
+    public string InheritedLabel { get; set; } = "";
+
+    /// <summary>The creation of a genre on the spot, followed by the audience measurement under the function of the form.</summary>
+    [Parameter, EditorRequired]
+    public AudienceFunction GenreCreated { get; set; } = null!;
+
+    /// <summary>The creation of a universe on the spot, followed under the function of the form.</summary>
+    [Parameter, EditorRequired]
+    public AudienceFunction UniverseCreated { get; set; } = null!;
+
+    /// <summary>The genres or the universes changed: added, removed or created on the spot; the page renders anew, its save bar telling the record changed.</summary>
+    [Parameter, EditorRequired]
+    public EventCallback OnChange { get; set; }
+
+    private async Task AddGenreAsync(RecordOption genre)
+    {
+        Records.AddGenre(genre);
+        await OnChange.InvokeAsync();
+    }
+
+    private async Task RemoveAsync(List<RecordOption> records, RecordOption record)
+    {
+        records.Remove(record);
+        await OnChange.InvokeAsync();
+    }
+
+    // A universe is presented with its ancestors, which its suggestion only gives the parent of. Added at once, then named
+    // with its ancestors once they are read: a saving made meanwhile keeps it. The cited records may have been replaced
+    // meanwhile (the record saved), or the universe removed: it is named anew only if the record still cites it.
+    private async Task AddUniverseAsync(RecordOption universe)
+    {
+        if (!Records.AddUniverse(universe))
+            return;
+        await OnChange.InvokeAsync();
+        try
+        {
+            Records.Rename(CitedRecords.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")));
+        }
+        catch (ApiProblemException)
+        {
+            // Named without its ancestors.
+        }
+    }
+
+    // The records added on the spot are created with the record, when it is saved: cancelling creates none of them.
+    private async Task GenreCreatedAsync(NewGenre genre)
+    {
+        _genreCreation = null;
+        Records.NewGenres.Add(genre);
+        await AddGenreAsync(new RecordOption(genre.Key, genre.Label, null));
+        await Recorder.RecordActionAsync(GenreCreated);
+    }
+
+    // Presented with its ancestors, those of the universe that contains it.
+    private async Task UniverseCreatedAsync((NewUniverse Universe, RecordOption? Parent) created)
+    {
+        _universeCreation = null;
+        var (universe, parent) = created;
+        Records.NewUniverses.Add(universe);
+        Records.Universes.Add(new RecordOption(universe.Key, parent is null ? universe.Name : $"{parent.Label} › {universe.Name}", null));
+        await OnChange.InvokeAsync();
+        if (parent is not null)
+            Records.Rename(new RecordOption(universe.Key, $"{await AncestryAsync(parent)} › {universe.Name}", null));
+        await Recorder.RecordActionAsync(UniverseCreated);
+    }
+
+    private async Task<string> AncestryAsync(RecordOption universe)
+    {
+        try
+        {
+            return CitedRecords.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")).Label;
+        }
+        catch (ApiProblemException)
+        {
+            return universe.Label;
+        }
+    }
+}

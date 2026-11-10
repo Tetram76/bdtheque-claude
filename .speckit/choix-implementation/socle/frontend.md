@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T22:34:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:16:43Z }
 ---
 
 # Frontend
@@ -51,10 +51,12 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T22:34:49Z }
 
 ## Fiches de saisie
 
-- **Une fiche de saisie est une page interactive** ([Contenu](../../visuel/saisie-album/contenu.md)) : son libellé et la clé de tri suivent la frappe, les fiches qu'elle cite se choisissent en tapant leur nom, l'erreur d'un enregistrement s'affiche sans quitter la saisie. Elle est lue une fois, au prérendu, et son état passe au circuit par l'état persistant des composants, sans seconde lecture ; elle s'enregistre depuis le circuit. Ses composants (cadre de la fiche, étiquettes retirables avec ajout, clé de tri, date partielle, appréciation, création d'un auteur, d'un genre ou d'un univers sur place) sont communs aux fiches de saisie.
+- **Une fiche de saisie est une page interactive** ([Contenu](../../visuel/saisie-album/contenu.md)) : son libellé et la clé de tri suivent la frappe, les fiches qu'elle cite se choisissent en tapant leur nom, l'erreur d'un enregistrement s'affiche sans quitter la saisie. Elle est lue une fois, au prérendu, et son état passe au circuit par l'état persistant des composants, sans seconde lecture ; elle s'enregistre depuis le circuit. Ses composants (cadre de la fiche, étiquettes retirables avec ajout, clé de tri, date partielle, appréciation, auteurs par rôle, genres et univers, création d'un auteur, d'un genre ou d'un univers sur place, erreur d'enregistrement, « Voir mes changements ») sont communs aux fiches de saisie, avec l'état de ce qu'une fiche cite (auteurs, genres, univers, fiches ajoutées sur place). Un composant qui modifie cet état le signale à sa page, ce que le compilateur exige (paramètre obligatoire) : la page se redessine, sa barre d'enregistrement disant la fiche modifiée.
+  - **Alternative écartée (auteurs, genres et univers écrits dans chaque page)** : la saisie d'une série reprend ceux de l'album à l'identique ; deux copies divergeraient au premier correctif.
   - **Alternative écartée (formulaire statique, comme les listes)** : chaque frappe du titre devrait recharger la page pour en recalculer le libellé et la clé.
 - **Aucune règle de saisie dans le frontend** ([Erreurs métier, fonctionnelles et techniques](../ecritures/erreurs-metier-fonctionnelles-et-techniques.md)) : la clé de tri du mode Auto est demandée à l'API à chaque changement du titre, numérotée comme les suggestions du choix d'une fiche, et le formulaire envoie ce qui est saisi, l'enregistrement rapportant ce qui est à corriger. Une erreur métier désigne son champ par son code de règle ; les auteurs repris d'une série choisie sont demandés à l'API, qui les calcule par le domaine.
   - **Alternative écartée (clé calculée par le frontend)** : la règle de calcul serait écrite deux fois, et la clé affichée pourrait différer de celle enregistrée.
+- **Choix d'une fiche qui dépend d'une autre** (la collection d'une série, l'une de celles de son éditeur, [Contenu](../../visuel/saisie-serie/contenu.md)) : le champ est désactivé tant que l'autre n'est pas choisie, ses propositions restreintes à lui, et changer l'autre le vide. Désactivé par son propre attribut, il est en tirets, son texte indicatif lisible ; un formulaire désactivé pendant son enregistrement garde l'apparence d'un contrôle désactivé.
 - **Fiche créée : la page de sa modification**, chargée de nouveau par la navigation, la fiche y étant lue telle qu'enregistrée. Une fiche modifiée reste affichée, à jour.
 - **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi.
 - **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme.

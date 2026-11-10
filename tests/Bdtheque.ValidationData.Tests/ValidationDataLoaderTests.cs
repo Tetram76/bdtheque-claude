@@ -83,6 +83,23 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task Series_TheCasesOfTheirEntryForm()
+    {
+        // visuel/saisie-serie/contenu.md: a publisher and its collection, nothing proposed to the new editions, left out of the
+        // computations, and in black and white.
+        var list = (await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.SeriesAdminList>("/admin/series?pageSize=100"))!.Series.Items;
+        var forms = new List<Bdtheque.Contracts.Admin.SeriesForm>();
+        foreach (var series in list)
+            forms.Add((await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.SeriesForm>($"/admin/series/{series.Id}"))!);
+
+        Assert.Contains(forms, form => form.References.PublisherCollection is not null && form.References.Universes.Count > 0);
+        Assert.Contains(forms, form => form.References.Publisher is null);
+        Assert.Contains(forms, form => form.Content.EditionTemplate == new Bdtheque.Contracts.Admin.SeriesEditionTemplate(null, null, null, null, null, null, null, null, null)
+                                       && form.Content is { ExcludeFromMissingVolumes: true, ExcludeFromReleaseEstimates: true });
+        Assert.Contains(forms, form => form.Content.EditionTemplate.IsColor == false);
+    }
+
+    [Fact]
     public async Task Publishers_WithAndWithoutWebsiteCollectionsOrEditions_TheDeletionOfAnUnusedOneAccepted()
     {
         var list = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.PublisherAdminListItem>>("/admin/publishers?pageSize=100"))!.Items;

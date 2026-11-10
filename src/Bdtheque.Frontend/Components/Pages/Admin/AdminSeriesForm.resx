@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Series" xml:space="preserve">
+    <value>Séries</value>
+  </data>
+  <data name="Breadcrumb.Unknown" xml:space="preserve">
+    <value>Série</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouvelle série</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier la série</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Créer la série</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Modifier la série {0}</value>
+  </data>
+  <data name="Untitled" xml:space="preserve">
+    <value>&lt;Sans titre&gt;</value>
+  </data>
+  <data name="Block.Series" xml:space="preserve">
+    <value>La série</value>
+  </data>
+  <data name="Block.Progress" xml:space="preserve">
+    <value>Avancement</value>
+  </data>
+  <data name="Block.Computations" xml:space="preserve">
+    <value>Calculs</value>
+  </data>
+  <data name="Block.Authors" xml:space="preserve">
+    <value>Les auteurs</value>
+  </data>
+  <data name="Block.Publisher" xml:space="preserve">
+    <value>Éditeur et collection</value>
+  </data>
+  <data name="Block.Classification" xml:space="preserve">
+    <value>Genres et univers</value>
+  </data>
+  <data name="Block.Reading" xml:space="preserve">
+    <value>Résumé et notes</value>
+  </data>
+  <data name="Block.Template" xml:space="preserve">
+    <value>Nouvelles éditions</value>
+  </data>
+  <data name="Kicker.Series" xml:space="preserve">
+    <value>Identification</value>
+  </data>
+  <data name="Kicker.Progress" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Kicker.Computations" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="Kicker.Authors" xml:space="preserve">
+    <value>Contributions</value>
+  </data>
+  <data name="Kicker.Publisher" xml:space="preserve">
+    <value>Publication</value>
+  </data>
+  <data name="Kicker.Classification" xml:space="preserve">
+    <value>Classement</value>
+  </data>
+  <data name="Kicker.Reading" xml:space="preserve">
+    <value>Lecture</value>
+  </data>
+  <data name="Kicker.Template" xml:space="preserve">
+    <value>Pré-remplissage</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Title.Note" xml:space="preserve">
+    <value>(obligatoire)</value>
+  </data>
+  <data name="Title.Placeholder" xml:space="preserve">
+    <value>Titre de la série</value>
+  </data>
+  <data name="SortKey.Placeholder" xml:space="preserve">
+    <value>Calculée à partir du titre</value>
+  </data>
+  <data name="SortKey.Help" xml:space="preserve">
+    <value>Calculée à partir du titre, article reporté à la fin ; la modifier la fige.</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="Status.None" xml:space="preserve">
+    <value>— Non renseigné</value>
+  </data>
+  <data name="Status.Help" xml:space="preserve">
+    <value>Terminée : tous les albums prévus par les auteurs sont parus.</value>
+  </data>
+  <data name="Volumes" xml:space="preserve">
+    <value>Tomes numérotés prévus</value>
+  </data>
+  <data name="Volumes.Help" xml:space="preserve">
+    <value>Sans les hors-série ; sert à identifier les albums manquants.</value>
+  </data>
+  <data name="Complete" xml:space="preserve">
+    <value>Complète dans la collection</value>
+  </data>
+  <data name="Complete.Help" xml:space="preserve">
+    <value>À votre jugement, quel que soit le nombre d&apos;albums possédés.</value>
+  </data>
+  <data name="ExcludeFromMissingVolumes" xml:space="preserve">
+    <value>Exclure des albums manquants</value>
+  </data>
+  <data name="ExcludeFromReleaseEstimates" xml:space="preserve">
+    <value>Exclure des estimations de sortie</value>
+  </data>
+  <data name="Computations.Help" xml:space="preserve">
+    <value>Absents de la fiche de la consultation. Seule une série en cours reçoit une estimation de sortie.</value>
+  </data>
+  <data name="Authors.Help" xml:space="preserve">
+    <value>Les auteurs de la série, recopiés sur un album qu&apos;on y rattache s&apos;il n&apos;en a encore aucun. Un auteur se trouve en tapant son nom ; s&apos;il n&apos;existe pas encore, il se crée sur place.</value>
+  </data>
+  <data name="Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="Publisher.Placeholder" xml:space="preserve">
+    <value>Aucun éditeur</value>
+  </data>
+  <data name="Publisher.Help" xml:space="preserve">
+    <value>Ils décrivent la série et pré-remplissent les nouvelles éditions de ses albums. La collection est l&apos;une de celles de l&apos;éditeur : changer d&apos;éditeur la retire.</value>
+  </data>
+  <data name="Collection" xml:space="preserve">
+    <value>Collection éditeur</value>
+  </data>
+  <data name="Collection.Placeholder" xml:space="preserve">
+    <value>Aucune collection</value>
+  </data>
+  <data name="Collection.Placeholder.NoPublisher" xml:space="preserve">
+    <value>Choisissez d&apos;abord l&apos;éditeur</value>
+  </data>
+  <data name="Classification.Help" xml:space="preserve">
+    <value>Chaque album de la série les affiche, en plus des siens. Un univers est présenté avec ses ancêtres.</value>
+  </data>
+  <data name="Genres" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="Universes" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Résumé</value>
+  </data>
+  <data name="Summary.Placeholder" xml:space="preserve">
+    <value>Ce que raconte la série…</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes personnelles</value>
+  </data>
+  <data name="Notes.Placeholder" xml:space="preserve">
+    <value>Vos annotations, visibles dans la consultation…</value>
+  </data>
+  <data name="Template.Proposed" xml:space="preserve">
+    <value>Pré-remplies avec les valeurs proposées pour toute nouvelle édition : modifiez-les selon la série.</value>
+  </data>
+  <data name="Template.None" xml:space="preserve">
+    <value>—</value>
+  </data>
+  <data name="Template.Help" xml:space="preserve">
+    <value>Valeurs proposées à la création d&apos;une édition d&apos;un album de la série, qui reste modifiable ; « — » : rien n&apos;est proposé. Elles ne décrivent pas la série et n&apos;apparaissent pas dans la consultation.</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Condition" xml:space="preserve">
+    <value>État</value>
+  </data>
+  <data name="Binding" xml:space="preserve">
+    <value>Reliure</value>
+  </data>
+  <data name="Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Orientation" xml:space="preserve">
+    <value>Orientation</value>
+  </data>
+  <data name="ReadingDirection" xml:space="preserve">
+    <value>Sens de lecture</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="Color.Color" xml:space="preserve">
+    <value>En couleur</value>
+  </data>
+  <data name="Color.BlackAndWhite" xml:space="preserve">
+    <value>Noir et blanc</value>
+  </data>
+  <data name="Dates.Created" xml:space="preserve">
+    <value>Série créée le</value>
+  </data>
+  <data name="Dates.Modified" xml:space="preserve">
+    <value>, modifiée le</value>
+  </data>
+  <data name="FieldError.Series.TitleRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="FieldError.Series.SortKeyRequired" xml:space="preserve">
+    <value>Saisissez une clé, ou réinitialisez-la.</value>
+  </data>
+  <data name="FieldError.Series.TheoreticalVolumeCountPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="FieldError.PublisherCollection.NotOfPublisher" xml:space="preserve">
+    <value>Une collection de l&apos;éditeur choisi.</value>
+  </data>
+  <data name="Problem.Functional.Conflict" xml:space="preserve">
+    <value>La série a été modifiée entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
+  </data>
+  <data name="Problem.Functional.NotFound" xml:space="preserve">
+    <value>Une fiche que cite le formulaire (la série, son éditeur ou sa collection, un auteur, un genre ou un univers) a été supprimée entre-temps : rien n&apos;a été enregistré.</value>
+  </data>
+  <data name="Problem.Technical.Text" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas pu enregistrer la série. Vos changements sont toujours là, dans le formulaire : réessayez dans quelques instants.</value>
+  </data>
+  <data name="Changes.SortKey" xml:space="preserve">
+    <value>Clé de tri</value>
+  </data>
+  <data name="Changes.SortKey.Auto" xml:space="preserve">
+    <value>Auto, calculée à partir du titre</value>
+  </data>
+  <data name="Changes.Checked" xml:space="preserve">
+    <value>Cochée</value>
+  </data>
+  <data name="Changes.Unchecked" xml:space="preserve">
+    <value>Décochée</value>
+  </data>
+</root>

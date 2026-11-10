@@ -125,12 +125,12 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     {
         var page = OpenAlbum();
 
-        var roles = page.FindAll(".album-role").Select(role => (
-            role.QuerySelector(".album-role-name")!.TextContent,
+        var roles = page.FindAll(".role-credits-line").Select(role => (
+            role.QuerySelector(".role-credits-name")!.TextContent,
             string.Join(", ", role.QuerySelectorAll(".tag").Select(tag => tag.TextContent.Trim())),
             role.QuerySelector(".record-tags")!.TextContent.Trim()));
         Assert.Equal([("Scénario", "Hergé", "HergéAjouter"), ("Dessin", "Hergé", "HergéAjouter"), ("Couleurs", "", "Ajouter")], roles);
-        Assert.Equal("Retirer Hergé (Scénario)", page.Find(".album-role .tag-remove").GetAttribute("aria-label"));
+        Assert.Equal("Retirer Hergé (Scénario)", page.Find(".role-credits-line .tag-remove").GetAttribute("aria-label"));
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     {
         var page = OpenAlbum();
 
-        var groups = page.FindAll(".album-tags");
+        var groups = page.FindAll(".classification-tags");
         Assert.Equal(["Humour"], groups[0].QuerySelectorAll(".record-tags .tag").Select(tag => tag.TextContent.Trim()));
         Assert.Equal(["Aventure"], groups[0].QuerySelectorAll(".inherited-tags .tag").Select(tag => tag.TextContent.Trim()));
         Assert.Equal(["Univers Hergé › Moulinsart"], groups[1].QuerySelectorAll(".record-tags .tag").Select(tag => tag.TextContent.Trim()));
@@ -230,6 +230,20 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         page.Find("#album-range-start").Change("1");
         page.Find("#album-range-end").Change("5");
         Assert.Equal("Les Bijoux de la Castafiore (Tintin - INT. - 21 [1 à 5])", page.Find(".entry-form-subject").TextContent.Trim());
+    }
+
+    [Theory]
+    [InlineData(RecordKind.Genre)]
+    [InlineData(RecordKind.Universe)]
+    [InlineData(RecordKind.Author)]
+    public async Task Record_Added_TellsTheAlbumChanged(RecordKind kind)
+    {
+        var page = OpenAlbum();
+        var tags = page.FindComponents<RecordTags>().First(t => t.Instance.Kind == kind);
+
+        await tags.InvokeAsync(() => tags.Instance.OnAdd.InvokeAsync(new RecordOption(Guid.NewGuid(), "Ajouté", null)));
+
+        Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
     }
 
     [Fact]
@@ -375,7 +389,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
 
         error.QuerySelectorAll("button")[1].Click();
 
-        var changes = page.Find("dialog .album-changes");
+        var changes = page.Find("dialog .changes-dialog-list");
         Assert.Equal(["Titre"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
         Assert.Equal(["Le Lotus rouge"], changes.QuerySelectorAll("dd").Select(dd => dd.TextContent));
         Assert.Contains("admin.album.changes", _audience.Functions);
@@ -429,7 +443,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal((HttpMethod.Post, $"/admin/series/{OtherSeriesId}/album-contributions"), (request.Method, request.Path));
         Assert.Equal((true, JsonValueKind.Null, 0), (request.Body.GetProperty("newAlbum").GetBoolean(),
             request.Body.GetProperty("previousSeriesId").ValueKind, request.Body.GetProperty("contributions").GetArrayLength()));
-        Assert.Equal("Juanjo Guarnido", page.FindAll(".album-role")[1].QuerySelector(".tag")!.TextContent.Trim());
+        Assert.Equal("Juanjo Guarnido", page.FindAll(".role-credits-line")[1].QuerySelector(".tag")!.TextContent.Trim());
         Assert.Contains("Auteurs repris de la série Blacksad", page.Find(".notice").TextContent);
     }
 
@@ -444,7 +458,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal("Auteurs repris de la série Tintin. Les modifier ici ne change pas ceux de la série.",
             page.Find(".notice-text").TextContent.Trim());
 
-        page.Find(".album-role .tag-remove").Click();
+        page.Find(".role-credits-line .tag-remove").Click();
 
         Assert.Empty(page.FindAll(".notice"));
     }
@@ -485,7 +499,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         tintin.SetResult();
         await first;
 
-        Assert.Equal(["Juanjo Guarnido"], page.FindAll(".album-role")[0].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
+        Assert.Equal(["Juanjo Guarnido"], page.FindAll(".role-credits-line")[0].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
         Assert.Contains("Blacksad", page.Find(".notice").TextContent);
     }
 
@@ -500,7 +514,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         var sent = _api.Written.Single().Body;
         Assert.Equal((false, SeriesId.ToString(), 2),
             (sent.GetProperty("newAlbum").GetBoolean(), sent.GetProperty("previousSeriesId").GetString(), sent.GetProperty("contributions").GetArrayLength()));
-        Assert.Equal(2, page.FindAll(".album-role .tag").Count);
+        Assert.Equal(2, page.FindAll(".role-credits-line .tag").Count);
         Assert.Empty(page.FindAll(".notice"));
     }
 
@@ -520,8 +534,8 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
 
         Assert.Empty(page.FindAll("dialog"));
         Assert.Empty(_api.Written);
-        Assert.Contains("Polar", page.FindAll(".album-tags")[0].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
-        Assert.Contains("Le port", page.FindAll(".album-tags")[1].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
+        Assert.Contains("Polar", page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
+        Assert.Contains("Le port", page.FindAll(".classification-tags")[1].QuerySelectorAll(".tag").Select(t => t.TextContent.Trim()));
         Assert.Equal(["admin.album.genre-created", "admin.album.universe-created", "admin.album.author-created"],
             _audience.Functions.Where(f => f.EndsWith("-created", StringComparison.Ordinal)));
 
@@ -540,7 +554,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         var page = OpenAlbum();
         await CreateOnTheSpotAsync(page, RecordKind.Genre, "Polar");
         page.Find(".dialog-actions .button[data-variant=primary]").Click();
-        page.FindAll(".album-tags")[0].QuerySelectorAll(".tag-remove")[^1].Click();
+        page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag-remove")[^1].Click();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
 
         page.Find("form").Submit();

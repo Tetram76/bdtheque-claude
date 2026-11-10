@@ -1,0 +1,80 @@
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<RoleCredits> L
+@inject ValueLabels Values
+@inject AudienceRecorder Recorder
+
+@* The authors of a record being entered, a line per role (visuel/saisie-album/contenu.md, Les auteurs; visuel/saisie-serie/contenu.md):
+   each author a removable tag, then « Ajouter », which finds an author by typing their name or adds a new one, created only with
+   the record (choix-implementation/socle/frontend.md), and offered for another role without being created twice. Interactive:
+   it changes the cited records of the page, which it tells of each change (OnChange). *@
+<div class="role-credits">
+    @foreach (var role in Enum.GetValues<ContributionRole>())
+    {
+        <div class="role-credits-line">
+            <span class="role-credits-name" id="@($"{Id}-role-{role}")">@Values.Of(role)</span>
+            <RecordTags Id="@($"{Id}-add-{role}")" Kind="RecordKind.Author" Items="@Records.AuthorsOf(role)"
+                        AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => CreditAsync(role, author)"
+                        OnRemove="author => UncreditAsync(role, author)"
+                        RemoveLabel="@(author => L["Remove", author.Label, Values.Of(role)].Value)"
+                        OnCreate="text => _creation = (role, text)" CreateLabel="@(text => L["Create", text].Value)"
+                        Pending="Pending" />
+        </div>
+    }
+</div>
+<p class="role-credits-help">@Help</p>
+
+@if (_creation is { } creation)
+{
+    <AuthorCreationDialog Id="@($"{Id}-author-creation")" Name="@creation.Name" OnCreated="author => CreatedAsync(creation.Role, author)"
+                          OnCancel="() => _creation = null" />
+}
+
+@code {
+    private (ContributionRole Role, string Name)? _creation;
+
+    /// <summary>The prefix of the identifiers of its fields, unique in the page (e.g. « album »).</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public CitedRecords Records { get; set; } = null!;
+
+    /// <summary>What the authors of the record are, under the lines of the roles.</summary>
+    [Parameter, EditorRequired]
+    public string Help { get; set; } = null!;
+
+    /// <summary>The creation of an author on the spot, followed by the audience measurement under the function of the form.</summary>
+    [Parameter, EditorRequired]
+    public AudienceFunction AuthorCreated { get; set; } = null!;
+
+    /// <summary>The authors changed: added, removed or created on the spot; the page renders anew, its save bar telling the record changed.</summary>
+    [Parameter, EditorRequired]
+    public EventCallback OnChange { get; set; }
+
+    // The authors added on the spot, created with the record only: another role credits them under the same key.
+    private IReadOnlyList<RecordOption> Pending =>
+        [.. Records.NewAuthors.Select(a => new RecordOption(a.Key, RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym), L["Pending"]))];
+
+    private async Task CreditAsync(ContributionRole role, RecordOption author)
+    {
+        Records.Credit(role, author);
+        await OnChange.InvokeAsync();
+    }
+
+    private async Task UncreditAsync(ContributionRole role, RecordOption author)
+    {
+        Records.Uncredit(role, author);
+        await OnChange.InvokeAsync();
+    }
+
+    // The records added on the spot are created with the record, when it is saved: cancelling creates none of them.
+    private async Task CreatedAsync(ContributionRole role, NewAuthor author)
+    {
+        _creation = null;
+        Records.NewAuthors.Add(author);
+        await CreditAsync(role, new RecordOption(author.Key, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null));
+        await Recorder.RecordActionAsync(AuthorCreated);
+    }
+}

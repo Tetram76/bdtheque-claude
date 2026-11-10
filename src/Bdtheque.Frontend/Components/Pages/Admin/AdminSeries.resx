@@ -84,15 +84,6 @@
   <data name="Column.Actions" xml:space="preserve">
     <value>Actions</value>
   </data>
-  <data name="Status.InProgress" xml:space="preserve">
-    <value>En cours</value>
-  </data>
-  <data name="Status.Completed" xml:space="preserve">
-    <value>Terminée</value>
-  </data>
-  <data name="Status.Abandoned" xml:space="preserve">
-    <value>Abandonnée</value>
-  </data>
   <data name="Albums.None" xml:space="preserve">
     <value>Aucun album</value>
   </data>
