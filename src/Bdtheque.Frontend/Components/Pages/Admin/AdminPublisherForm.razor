@@ -187,10 +187,18 @@ else
             return L["Collection.Unused"];
         string?[] parts =
         [
-            collection.EditionCount > 0 ? L[collection.EditionCount > 1 ? "Collection.Editions" : "Collection.Edition", collection.EditionCount].Value : null,
-            collection.SeriesCount > 0 ? L[collection.SeriesCount > 1 ? "Collection.Series.Plural" : "Collection.Series", collection.SeriesCount].Value : null,
+            Counted(collection.EditionCount, "Collection.Edition", "Collection.Editions"),
+            Counted(collection.SeriesCount, "Collection.Series", "Collection.Series.Plural"),
         ];
         return string.Join(" · ", parts.OfType<string>());
+    }
+
+    // A number of records, in the singular or the plural; none for no record, which the use leaves unsaid.
+    private string? Counted(int count, string singular, string plural)
+    {
+        if (count == 0)
+            return null;
+        return L[count > 1 ? plural : singular, count];
     }
 
     private void AddCollection() => Entry!.AddCollection();
