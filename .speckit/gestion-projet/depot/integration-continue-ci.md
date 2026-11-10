@@ -1,11 +1,11 @@
 ---
 type: Gouvernance
 title: 'Intégration continue (CI)'
-description: 'Workflows CI, tests selon ce que modifie la Pull Request, checks requis tenus alignés sur le Ruleset, secrets, quotas de Docker Hub et de l''API GitHub consommés par chaque push.'
+description: 'Workflows CI, tests selon ce que modifie la Pull Request, aucun check sur une Pull Request en conflit avec main, checks requis tenus alignés sur le Ruleset, secrets, quotas de Docker Hub et de l''API GitHub consommés par chaque push.'
 tags: [socle]
 applies_to:
   - '.github/workflows/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T13:28:14Z }
 ---
 
 # Intégration continue (CI)
@@ -19,6 +19,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T14:00:00Z }
   - **Sûr par défaut** : un fichier qu'aucune de ces règles n'écarte compte comme source, et comme source du rendu ; un fichier déplacé compte à son ancien chemin comme au nouveau.
   - **Checks requis** : le workflow et chacun de ses jobs s'exécutent toujours, seules des étapes sont omises : la liste des jobs, donc le Ruleset, n'en dépend pas.
     - **Alternative écartée (filtre `paths` du déclencheur, ou job sauté par une condition)** : un workflow qui ne se déclenche pas laisse ses checks requis en attente, ce qui bloque la fusion (documentation GitHub, *Troubleshooting required status checks*) ; un job sauté passe pour réussi, mais celui des tests a toujours à exécuter les tests du dépôt.
+- **Pull Request en conflit avec `main` : aucun check**. GitHub ne déclenche pas les workflows d'une Pull Request en conflit avec sa branche de base (documentation GitHub, *Events that trigger workflows*, `pull_request`). Ni le CI, ni l'analyse SonarQube Cloud qu'il porte, ne s'exécutent sur son commit de tête, et rien ne le signale : ses checks ne sont ni en échec ni en attente, ils manquent. Sans eux, la PR ne peut être ni passée en « prête pour la revue » ni fusionnée.
+  - **Vérification** : après chaque push sur une PR, et dès qu'un check attendu ne s'est pas présenté, l'agent vérifie que la PR n'est pas en conflit (`mergeable_state` `dirty`). En conflit, il intègre `main` à la branche, résout le conflit et pousse : ce push déclenche les checks.
+  - **Intégration par fusion de `main` dans la branche** : les commits déjà publiés de la branche restent tels quels, sans push forcé. Le squash merge ([Configuration du repository GitHub](configuration-du-repository-github.md)) efface cette fusion de l'historique de `main`.
+    - **Alternative écartée (rebase de la branche sur `main`)** : il réécrit les commits déjà publiés, que désignent les revues et commentaires de la PR, et exige un push forcé, sans gain sur l'historique de `main`, que le squash merge rend identique.
 - Le workflow CI (`ci.yml`) constitue le **check de statut requis** de la règle de merge ci-dessous : ses jobs sont imposés par le Ruleset GitHub (cf. [Configuration du repository GitHub](configuration-du-repository-github.md)). Le Ruleset les désigne par leur nom : toute modification de la liste des jobs du workflow est reportée dans le Ruleset dans le même mouvement. Sans cela, un job ajouté n'est pas requis — son échec n'empêche pas la fusion —, et un job renommé ou retiré reste attendu sous son ancien nom sans jamais se présenter, ce qui bloque toute fusion.
 - **Publication des images Docker** sur Docker Hub ([Déploiement](../../contraintes-techniques/architecture-deploiement/deploiement.md)) : workflow distinct, `.github/workflows/docker-publish.yml` (cf. [Publication des images Docker](../../choix-implementation/deploiement/publication-des-images-docker.md)). Il s'authentifie auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès (*Personal Access Token* Docker Hub, droits *Read, Write & Delete*, la suppression de l'image `nightly` remplacée l'exigeant) stocké dans le secret de dépôt GitHub `DOCKERHUB_TOKEN`.
 - **Analyse des vulnérabilités dans le CI** ([Analyse des vulnérabilités des images Docker](../revue-tickets/analyse-des-vulnerabilites-des-images-docker.md)) : le CI lit les images publiées sur Docker Hub avec le même jeton (`DOCKERHUB_TOKEN`). Le code de la branche et de ses dépendances ne s'exécute que dans les conteneurs de construction des images, qui ne reçoivent pas les identifiants du registre, et seuls l'utilisateur et l'agent agissant en son nom ouvrent des Pull Requests qui accèdent aux secrets. Une PR venant d'un **fork** n'y a pas accès : elle échoue à ce contrôle et ne peut pas être fusionnée en l'état. C'est assumé : il revient à son auteur de s'en accommoder, et aucun chemin de contrôle sans secret n'est prévu pour elle.
