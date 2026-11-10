@@ -74,7 +74,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     public void Rows_TheLabelAndItsNumbers()
     {
         var rows = Open("").FindAll(".genre-row:not(.genre-row-head)").Select(row => (
-            Text(row.QuerySelector(".genre-label")!),
+            Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".genre-albums")!),
             Text(row.QuerySelector(".genre-series")!),
             row.QuerySelector(".genre-series")!.HasAttribute("data-empty")));
@@ -91,6 +91,8 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
 
         var edit = row.QuerySelector(".genre-actions a.button")!;
         Assert.Equal(($"{AppPaths.AdminGenres}?q=a&edit={id}", "Modifier Aventure"), (edit.GetAttribute("href"), edit.GetAttribute("aria-label")));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Aventure"], row.QuerySelectorAll($"a[href='{AppPaths.AdminGenres}?q=a&edit={id}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal(
             [
                 ("Voir ses œuvres dans la consultation", AppPaths.GenreWorks(id)),

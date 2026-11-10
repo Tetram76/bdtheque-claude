@@ -162,7 +162,7 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
             await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAuthors}?q={_marker}");
             await PageReadiness.WaitAsync(page);
 
-            var name = await page.Locator(".author-name").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
+            var name = await page.Locator(".row-entry").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
             var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
             Assert.True(name >= 120, $"{theme} at {width}px: the name is {name}px wide.");
@@ -184,7 +184,7 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         return page;
     }
 
-    private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Auteurs" }).Locator(".author-name");
+    private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Auteurs" }).Locator(".row-entry");
 
     private Task<AuthorForm> CreateAuthorAsync(string lastName, string? firstName, string? pseudonym) =>
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(lastName, firstName, pseudonym, null, null));

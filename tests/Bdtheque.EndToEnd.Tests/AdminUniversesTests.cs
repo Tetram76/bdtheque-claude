@@ -117,7 +117,7 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         return page;
     }
 
-    private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Univers" }).Locator(".universe-name");
+    private static ILocator Names(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Univers" }).Locator(".row-entry");
 
     private async Task<UniverseForm> CreateUniverseAsync(string name, Guid? parentId = null)
     {

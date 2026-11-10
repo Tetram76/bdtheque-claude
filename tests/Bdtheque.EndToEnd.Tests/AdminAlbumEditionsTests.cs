@@ -146,7 +146,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
             await ApplicationHost.SignInAsync(page, AppPaths.AdminAlbumEditions(album.Id));
             await PageReadiness.WaitAsync(page);
 
-            var label = await page.Locator(".edition-label").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+            var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
             var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
             Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");

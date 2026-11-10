@@ -84,7 +84,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
     public void Rows_TheEditionItsAlbumItsYearItsCategoryAndItsAcquisition()
     {
         var rows = Open("").FindAll(".edition-row:not(.edition-row-head)").Select(row => (
-            Text(row.QuerySelector(".edition-label")!),
+            Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".edition-album")!),
             Text(row.QuerySelector(".edition-year")!),
             Text(row.QuerySelector(".edition-category")!),
@@ -112,7 +112,8 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         var row = Open("q=978").FindAll(".edition-row:not(.edition-row-head)")[0];
         var id = Glenat.Edition.Id;
 
-        Assert.Equal(AppPaths.AdminEditEdition(Lunes.Id, id), row.QuerySelector(".edition-label")!.GetAttribute("href"));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Glénat [2004] - ISBN 978-2-7234-4567-1"], row.QuerySelectorAll($"a[href='{AppPaths.AdminEditEdition(Lunes.Id, id)}']").Select(link => Normalized(link.GetAttribute("aria-label")!)));
         Assert.Equal("Modifier Glénat [2004] - ISBN 978-2-7234-4567-1", Normalized(row.QuerySelector(".edition-actions a.button")!.GetAttribute("aria-label")!));
         Assert.Equal(
             [

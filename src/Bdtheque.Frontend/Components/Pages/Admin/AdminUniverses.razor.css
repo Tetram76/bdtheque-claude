@@ -61,13 +61,6 @@
     color: var(--color-text-muted);
 }
 
-.universe-name {
-    min-inline-size: 0;
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 /* Its ancestors, when the page does not show its parent, on a single line that an ellipsis ends when they do not fit. */
 .universe-path {
     overflow: hidden;

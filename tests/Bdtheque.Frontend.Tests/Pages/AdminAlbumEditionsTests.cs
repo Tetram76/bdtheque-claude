@@ -130,7 +130,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
                 ("Casterman [2007] - ISBN 978-2-203-00120-8", "Cartonnée · 62 pages", "Offerte · Aucun visuel"),
             ],
             editions.QuerySelectorAll(".edition-row").Select(row => (
-                Text(row.QuerySelector(".edition-label")!), Text(row.QuerySelector(".edition-sub")!), Text(row.QuerySelector(".edition-detail")!))));
+                Text(row.QuerySelector(".row-entry")!), Text(row.QuerySelector(".edition-sub")!), Text(row.QuerySelector(".edition-detail")!))));
         Assert.Equal("Chaque édition, avec ses visuels, se saisit sur sa propre fiche.", Text(editions.QuerySelector(".album-editions-help")!));
     }
 
@@ -144,7 +144,8 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         Assert.Equal(
             ("Modifier", "Modifier Casterman [1963]", AppPaths.AdminEditEdition(AlbumId, id)),
             (Text(edit), edit.GetAttribute("aria-label"), edit.GetAttribute("href")));
-        Assert.Equal(AppPaths.AdminEditEdition(AlbumId, id), row.QuerySelector(".edition-label")!.GetAttribute("href"));
+        // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        Assert.Equal(["Modifier Casterman [1963]"], row.QuerySelectorAll($"a[href='{AppPaths.AdminEditEdition(AlbumId, id)}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal(
             [
                 ("Voir dans la consultation", AppPaths.Album(AlbumId)),
