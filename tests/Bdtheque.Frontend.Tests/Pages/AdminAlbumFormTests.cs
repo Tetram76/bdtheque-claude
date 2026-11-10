@@ -259,7 +259,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_AndRecordsTheSaving()
+    public void Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
     {
         var page = OpenAlbum();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux with { Version = 42, Content = Bijoux.Content with { Summary = "Autre" } });
@@ -267,7 +267,8 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         page.Find("#album-summary").Change("Autre");
         page.Find("form").Submit();
 
-        page.WaitForAssertion(() => Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent));
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbums, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/albums/{AlbumId}"), (method, path));
         var request = body.Deserialize<UpdateAlbumRequest>(JsonSerializerOptions.Web)!;

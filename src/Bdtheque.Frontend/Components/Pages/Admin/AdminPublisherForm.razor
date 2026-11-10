@@ -206,11 +206,10 @@ else
         {
             if (Entry.Id is { } id)
             {
-                var saved = await Api.PutAsync<UpdatePublisherRequest, PublisherForm>($"/admin/publishers/{id}", new UpdatePublisherRequest(content, Entry.Version));
-                Entry = PublisherEntry.Of(saved);
-                ReadEntry = Entry.Copy();
-                _savedFingerprint = Entry.Fingerprint();
+                await Api.PutAsync<UpdatePublisherRequest, PublisherForm>($"/admin/publishers/{id}", new UpdatePublisherRequest(content, Entry.Version));
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherSaved, $"publisher={id}");
+                // A modification saved leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
+                Navigation.NavigateTo(AppPaths.AdminPublishers);
             }
             else
             {

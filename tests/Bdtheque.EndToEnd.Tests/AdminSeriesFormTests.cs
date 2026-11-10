@@ -105,7 +105,8 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToBeVisibleAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
         var saved = (await GetAsync(series.Id)).Content;
         Assert.Equal((SeriesStatus.Completed, 6, true, false, true, BindingType.Paperback),
             (saved.Status, saved.TheoreticalVolumeCount, saved.IsComplete, saved.ExcludeFromMissingVolumes, saved.ExcludeFromReleaseEstimates,

@@ -71,8 +71,8 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToBeVisibleAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
-        await Assertions.Expect(page.GetByText("Retirée à l'enregistrement")).ToHaveCountAsync(0);
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers));
         var saved = await GetAsync(publisher.Id);
         Assert.Equal(["Écritures (poche)", "Les Romans (À suivre)", "Sakka"], saved.Collections.Select(c => c.Name));
     }

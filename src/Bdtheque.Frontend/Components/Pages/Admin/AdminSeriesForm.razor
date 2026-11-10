@@ -296,11 +296,10 @@ else
         {
             if (Entry.Id is { } id)
             {
-                var saved = await Api.PutAsync<UpdateSeriesRequest, SeriesForm>($"/admin/series/{id}", new UpdateSeriesRequest(content, Entry.Version));
-                Entry = SeriesEntry.Of(saved);
-                ReadEntry = Entry.Copy();
-                _savedFingerprint = Entry.Fingerprint();
+                await Api.PutAsync<UpdateSeriesRequest, SeriesForm>($"/admin/series/{id}", new UpdateSeriesRequest(content, Entry.Version));
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesSaved, $"series={id}");
+                // A modification saved leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
+                Navigation.NavigateTo(AppPaths.AdminSeries);
             }
             else
             {

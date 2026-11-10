@@ -77,7 +77,8 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
 
         await Assertions.Expect(dialog).ToHaveCountAsync(0);
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
         var credited = Assert.Single((await GetAsync(album.Id)).Content.Contributions);
         Assert.Equal(ContributionRole.Illustrator, credited.Role);
     }
@@ -112,7 +113,8 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
             Assert.Empty((await api.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q=Genre{_marker}"))!.Items);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Aucune modification" })).ToBeVisibleAsync();
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
         var saved = (await GetAsync(album.Id)).References;
         Assert.Equal($"Genre{_marker}", Assert.Single(saved.Genres).Label);
         Assert.Equal(parent.Id, Assert.Single(Assert.Single(saved.Universes).Ancestors).Id);
@@ -178,7 +180,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Auteurs repris de la série" })).ToContainTextAsync($"Série {_marker}");
         await Assertions.Expect(page.Locator(".role-credits-line").First).ToContainTextAsync($"Auteur{_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
-        await Assertions.Expect(page.GetByText("Modifications non enregistrées")).ToHaveCountAsync(0);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
         Assert.Equal([new ContributionContent(author.Id, ContributionRole.Scenarist)], (await GetAsync(album.Id)).Content.Contributions);
     }
 

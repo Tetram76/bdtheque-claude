@@ -270,7 +270,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_AndRecordsTheSaving()
+    public void Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
     {
         var page = OpenSeries();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad with { Version = 13, Content = Blacksad.Content with { IsComplete = true } });
@@ -279,7 +279,8 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         page.Find("#series-color").Change("false");
         page.Find("form").Submit();
 
-        page.WaitForAssertion(() => Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent));
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminSeries, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/series/{SeriesId}"), (method, path));
         var request = body.Deserialize<UpdateSeriesRequest>(JsonSerializerOptions.Web)!;

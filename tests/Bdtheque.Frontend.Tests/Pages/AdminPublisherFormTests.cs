@@ -197,7 +197,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_TheRemovedCollectionsLeftOut_AndRecordsTheSaving()
+    public void Save_SendsTheWholeFormAtItsVersion_TheRemovedCollectionsLeftOut_AndLeadsBackToTheList()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Casterman with { Version = 13 });
@@ -208,7 +208,8 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         page.FindAll(".publisher-collection")[4].QuerySelector("input")!.Input("Sakka");
         page.Find("form").Submit();
 
-        page.WaitForAssertion(() => Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent));
+        // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
+        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminPublishers, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/publishers/{PublisherId}"), (method, path));
         var request = body.Deserialize<UpdatePublisherRequest>(JsonSerializerOptions.Web)!;
