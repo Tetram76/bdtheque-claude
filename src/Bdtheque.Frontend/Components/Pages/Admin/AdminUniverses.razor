@@ -254,6 +254,20 @@
             return;
         }
 
+        await LoadEntryAsync();
+
+        if (_dialogUniverse is not null && _query.Delete is { } deleted)
+            await LoadImpactAsync(deleted);
+        else if (_dialogUniverse is not null && _query.MergeText is { } text)
+            _candidates = await LoadCandidatesAsync(text);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // The entry of the panel, if the address opens it: the universe changed, read once, or what a form sent back holds.
+    private async Task LoadEntryAsync()
+    {
         // The panel opens over the list wherever the universe is in it, a universe deleted meanwhile opening none.
         if (_query.Edit is { } edited)
             _universe = await FindAsync(edited);
@@ -263,23 +277,19 @@
             EntryName = _universe.Name;
             EntryDescription = _universe.Description;
             EntryParentId = _universe.ParentId;
+            EntryVersion = _universe.Version;
         }
         // A new universe opened on a search that finds none is the universe searched (« Créer l'univers « … » »), unless a name
         // sent back, even emptied, is to be corrected.
-        if (_query is { Adding: true, Edit: null, Text: { } searched } && _list.Items.Count == 0 && !IsPost)
+        if (_query is { Adding: true, Edit: null, Text: { } searched } && _list!.Items.Count == 0 && !IsPost)
             EntryName ??= searched;
-        _parent = EntryParentId is not { } parentId ? null
-            : parentId == _universe?.ParentId ? _universe.Parent
-            : await HierarchyAsync(parentId);
-        EntryVersion ??= _universe?.Version;
-
-        if (_dialogUniverse is not null && _query.Delete is { } deleted)
-            await LoadImpactAsync(deleted);
-        else if (_dialogUniverse is not null && _query.MergeText is { } text)
-            _candidates = await LoadCandidatesAsync(text);
-
-        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
-            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+        // The parent with its ancestors: that of the universe as read, or the one a form sent back chose.
+        if (EntryParentId is not { } parentId)
+            _parent = null;
+        else if (parentId == _universe?.ParentId)
+            _parent = _universe.Parent;
+        else
+            _parent = await HierarchyAsync(parentId);
     }
 
     // The universe, or none if it no longer exists: the list is then shown without its panel.
