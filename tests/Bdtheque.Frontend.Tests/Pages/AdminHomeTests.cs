@@ -99,11 +99,11 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         Assert.Equal(blocks.IndexOf("Les fiches") + 1, blocks.IndexOf("Intentions d'achat"));
         var intents = BlockOf(page, "Intentions d'achat");
         Assert.Equal("Achats", intents.QuerySelector(".block-kicker")!.TextContent.Trim());
-        // A single card, without a title of its own: the block already names it; no creation, an intent is set from its album.
-        var card = Assert.Single(intents.QuerySelectorAll("li"));
-        Assert.Null(card.QuerySelector(".admin-record-name"));
-        Assert.Equal(("18", "achats à confirmer, posés depuis leur album"), (Text(card.QuerySelector(".admin-record-count")!), Text(card.QuerySelector(".admin-record-detail")!)));
-        Assert.Equal([("Confirmer les achats", AppPaths.AdminPurchaseIntents)], card.QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))));
+        // The block is the card itself, no card in it: its number, its sentence and its single link; no creation, an intent
+        // is set from its album.
+        Assert.Empty(intents.QuerySelectorAll("li, .admin-record"));
+        Assert.Equal(("18", "achats à confirmer, posés depuis leur album"), (Text(intents.QuerySelector(".admin-intents-count")!), Text(intents.QuerySelector(".admin-intents-detail")!)));
+        Assert.Equal([("Confirmer les achats", AppPaths.AdminPurchaseIntents)], intents.QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))));
     }
     [Theory]
     [InlineData(7, true)]

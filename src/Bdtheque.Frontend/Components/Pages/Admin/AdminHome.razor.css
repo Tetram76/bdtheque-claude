@@ -157,14 +157,26 @@
     font-weight: var(--font-weight-strong);
 }
 
-/* Intentions d'achat: the card has no title, its number at the end of the line as on the other cards, its chip in the
-   color the card had among the records. */
-.admin-intents .admin-record-count {
-    grid-column: 3;
+/* Intentions d'achat: the block is their card, on a line: the chip, in the color the card had among the records, the
+   number, the sentence, and the link at its end; on a narrow screen, the link goes under them. */
+.admin-intents {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
 }
 
 .admin-intents .admin-record-chip {
     background: var(--color-palette-4);
+}
+
+.admin-intents-detail {
+    flex: 1 1 12rem;
+    color: var(--color-text-muted);
+}
+
+.admin-intents a {
+    font-weight: var(--font-weight-strong);
 }
 
 /* The rows of the checks, of the latest changes and of the settings: separated by a rule, at the height of a control. */

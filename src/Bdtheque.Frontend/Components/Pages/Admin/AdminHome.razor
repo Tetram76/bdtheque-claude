@@ -70,16 +70,14 @@
         </Block>
 
         @* Apart from the records: a purchase intent has no record of its own, it is set from its album, and its list serves to
-           confirm the purchases (visuel/listes/saisie-selon-l-entite.md). The block names its single card, which has no title. *@
+           confirm the purchases (visuel/listes/saisie-selon-l-entite.md). The block is their card itself, with no card in it. *@
         <Block Title="@L["Intents.Title"]" Kicker="@L["Intents.Kicker"]">
-            <ul class="admin-records admin-intents">
-                <li class="admin-record">
-                    <span class="admin-record-chip"><Icon Name="IconName.PurchaseIntent" /></span>
-                    <strong class="admin-record-count">@Format.Number(_counts.PurchaseIntents)</strong>
-                    <span class="admin-record-detail">@L["Intents.Detail"]</span>
-                    <span class="admin-record-links"><a href="@AppPaths.AdminPurchaseIntents">@L["Intents.Confirm"]</a></span>
-                </li>
-            </ul>
+            <div class="admin-intents">
+                <span class="admin-record-chip"><Icon Name="IconName.PurchaseIntent" /></span>
+                <strong class="admin-record-count admin-intents-count">@Format.Number(_counts.PurchaseIntents)</strong>
+                <span class="admin-intents-detail">@L["Intents.Detail"]</span>
+                <a href="@AppPaths.AdminPurchaseIntents">@L["Intents.Confirm"]</a>
+            </div>
         </Block>
         <div class="admin-home-pair">
             <Block Title="@L["Checks.Title"]" Kicker="@L["Checks.Kicker"]">
