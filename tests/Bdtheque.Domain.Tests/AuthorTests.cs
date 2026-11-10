@@ -88,13 +88,27 @@ public sealed class AuthorTests
         Assert.Equal(expectedEntry, author.NavigationEntry);
     }
 
+    // The main identifier (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), stored for its uniqueness
+    // regardless of case and accents (modele-metier/auteur-artiste.md).
+    [Theory]
+    [InlineData(" Van Hamme ", " Jean ", null, "Jean Van Hamme")]
+    [InlineData(null, null, " Moebius ", "Moebius")]
+    [InlineData("Remi", "Georges", "Hergé", "Hergé")]
+    [InlineData("Hugo", "  ", null, "Hugo")]
+    public void Constructor_ComputesTheDisplayName(string? lastName, string? firstName, string? pseudonym, string expected)
+    {
+        Assert.Equal(expected, new Author(lastName, firstName, pseudonym).DisplayName);
+    }
+
     [Fact]
     public void UpdateIdentity_RecomputesSortKeyAndNavigationEntry()
+
     {
         var author = new Author(null, null, "Moebius");
 
         author.UpdateIdentity("Giraud", "Jean", null);
 
+        Assert.Equal("Jean Giraud", author.DisplayName);
         Assert.Equal("Giraud Jean", author.SortKey);
         Assert.Equal("G", author.NavigationEntry);
     }

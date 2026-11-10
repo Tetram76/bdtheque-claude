@@ -5,9 +5,8 @@ description: 'Entrée de navigation calculée par le domaine selon la collation 
 applies_to:
   - 'src/Bdtheque.Domain/Common/NavigationEntryCalculator.cs'
   - 'src/Bdtheque.Domain/Common/TitleSortKeyCalculator.cs'
-  - 'src/Bdtheque.Domain/Common/AuthorIdentity.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/NavigationEntryColumn.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T15:00:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 ---
 
 # Navigation par initiale : mise en œuvre
@@ -19,4 +18,4 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T15:00:50Z }
   - La navigation **filtre toujours sur l'entrée stockée**, jamais sur une plage du tri : l'entrée `@` n'y est pas contiguë (la ponctuation se classe avant les chiffres, les autres alphabets après `Z`).
 - Un album **sans titre** n'a ni clé de tri ni entrée stockées : la substitution par sa série ([Album](../../modele-metier/album.md), clé de tri) est résolue **à la lecture**.
   - **Alternative écartée (valeur de la série recopiée sur l'album)** : la copie deviendrait fausse à chaque modification du titre ou de la clé de tri de la série.
-- Les **auteurs** reçoivent la même clé de tri stockée que les titres ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)), calculée par le domaine : sans elle, la base ne pourrait ni trier ni paginer les artistes. Le domaine en tire aussi le nom affiché et l'entrée, en un calcul unique que partagent l'enregistrement de l'auteur et sa saisie, qui les présente au fil de la frappe.
+- Les **auteurs** reçoivent la même clé de tri stockée que les titres ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)), calculée par le domaine : sans elle, la base ne pourrait ni trier ni paginer les artistes.

@@ -16,6 +16,7 @@ internal static class UniqueIndexRules
 {
     public static readonly IReadOnlyDictionary<string, string> ByIndexName = new Dictionary<string, string>(StringComparer.Ordinal)
     {
+        ["IX_Authors_DisplayName"] = DomainRules.AuthorDisplayNameAlreadyUsed,
         ["IX_Genres_Label"] = DomainRules.GenreLabelAlreadyUsed,
         ["IX_Publishers_Name"] = DomainRules.PublisherNameAlreadyUsed,
         ["IX_PublisherCollections_PublisherId_Name"] = DomainRules.PublisherCollectionNameAlreadyUsed,

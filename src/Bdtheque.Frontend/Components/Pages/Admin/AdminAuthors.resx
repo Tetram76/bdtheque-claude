@@ -195,4 +195,19 @@
   <data name="FieldError.Author.LastNameOrPseudonymRequired" xml:space="preserve">
     <value>Un auteur a au moins un nom ou un pseudonyme : renseignez l'un ou l'autre.</value>
   </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Pseudonym" xml:space="preserve">
+    <value>Pseudonyme</value>
+  </data>
+  <data name="Pseudonym.Help" xml:space="preserve">
+    <value>Il faut au moins le nom ou le pseudonyme ; un duo ou un collectif crédité sous un nom commun est un auteur, sous ce nom. Le pseudonyme tient lieu de nom : sans lui, l'auteur est classé à son nom, puis son prénom.</value>
+  </data>
+  <data name="FieldError.Author.DisplayNameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà le nom d'un autre auteur : deux auteurs ne peuvent porter le même nom affiché, sans tenir compte des majuscules ni des accents.</value>
+  </data>
 </root>

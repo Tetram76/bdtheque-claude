@@ -20,8 +20,7 @@ namespace Bdtheque.Frontend.Tests.Pages;
 /// The list of the authors of the administration (visuel/listes/liste-par-liste.md): its rows, its count, its search without
 /// filters, its dialogs, the side panel of an author over the list (visuel/listes/saisie-selon-l-entite.md) and its errors,
 /// told apart by role, link and text, never by appearance. What it shares with the list of the albums (active filters,
-/// navigation, page beyond the last) is pinned by AdminAlbumsTests; what the identity of the panel does while the names are
-/// typed, by EntryControlsTests.
+/// navigation, page beyond the last) is pinned by AdminAlbumsTests.
 /// </summary>
 public sealed class AdminAuthorsTests : BunitContext, IDisposable
 {
@@ -59,12 +58,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         _api.AddServices(Services, _request);
         Services.AddSingleton(TimeProvider.System);
         Answer([Gibelin, Gibrat, Gomez, Gotlib], totalCount: 38);
-        // The identity of the panel of an author marks itself interactive, as it is in the application.
-        SetRendererInfo(new RendererInfo("Server", true));
         _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(
             Gotlib.Id, "Gotlieb", "Marcel", "Gotlib", "Créateur de Gai-Luron.", "Française", January, March, 44);
-        _api.Answers["/admin/sort-keys/author"] = new AuthorSortKey(null, null, null);
-        _api.Answers["/admin/sort-keys/author?lastName=Gotlieb&firstName=Marcel&pseudonym=Gotlib"] = new AuthorSortKey("Gotlib", "Gotlib", "G");
     }
 
     void IDisposable.Dispose()
@@ -109,7 +104,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
             [
                 ("Christophe Gibelin", null, "Française", "14 albums", "Scénario"),
                 ("Jean-Pierre Gibrat", null, "Française", "1 album", "Scénario · Dessin · Couleurs"),
-                ("Alain Gomez", null, "—Non renseignée", "Aucun album", "—"),
+                // No album credited: a dash, said in full to a screen reader.
+                ("Alain Gomez", null, "—Non renseignée", "—Aucun album", "—"),
                 // Under a pseudonym, the first name and the last name below it.
                 ("Gotlib", "Marcel Gotlieb", "Française", "22 albums", "Scénario · Dessin"),
             ],
@@ -279,7 +275,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_OfAnAuthor_ItsIdentityWhatDerivesFromItItsOtherFieldsAndItsDates()
+    public void Panel_OfAnAuthor_ItsDatesAtTheTopThenItsFields()
     {
         var panel = Open($"q=gib&edit={Gotlib.Id}").Find("dialog.side-panel");
 
@@ -287,9 +283,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal(
             [("firstName", "Marcel"), ("lastName", "Gotlieb"), ("pseudonym", "Gotlib"), ("nationality", "Française")],
             panel.QuerySelectorAll("input[type='text']").Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
-        Assert.Equal(["Gotlib", "Gotlib", "G"], panel.QuerySelectorAll(".author-identity-value dd").Select(Text));
         Assert.Equal("Créateur de Gai-Luron.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='biography']")!).Value);
-        Assert.Equal("Auteur créé le 12/01/2026 10:30, modifié le 30/03/2026 10:00.", Text(panel.QuerySelector(".side-panel-dates")!));
+        Assert.Equal("Auteur créé le 12/01/2026 10:30, modifié le 30/03/2026 10:00.", Text(panel.QuerySelector(".side-panel-body > :first-child")!));
         Assert.Equal(
             [("Annuler", $"{AppPaths.AdminAuthors}?q=gib"), ("Enregistrer", null)],
             panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
@@ -352,6 +347,27 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal(("true", "true"), (panel.QuerySelector("input[name='lastName']")!.GetAttribute("aria-invalid"),
             panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-invalid")));
         Assert.Equal("Un auteur a au moins un nom ou un pseudonyme : renseignez l'un ou l'autre.", Text(panel.QuerySelector(".field-error")!));
+        Assert.StartsWith("author-last-name-error", panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-describedby"));
+        Assert.Empty(panel.QuerySelectorAll("[data-error-category]"));
+    }
+
+    [Theory]
+    [InlineData("", "Gotlib", "pseudonym", "« Gotlib » est déjà le nom d'un autre auteur")]
+    [InlineData("Marcel", "", "lastName", "« Marcel Gotlieb » est déjà le nom d'un autre auteur")]
+    public void Panel_ADisplayNameAlreadyTaken_IsRefusedAtTheFieldItComesFrom(string firstName, string pseudonym, string field, string message)
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.DisplayNameAlreadyUsed");
+        var page = Open("new=open");
+        page.Find("input[name='firstName']").Change(firstName);
+        page.Find("input[name='lastName']").Change("Gotlieb");
+        page.Find("input[name='pseudonym']").Change(pseudonym);
+
+        page.Find("form.side-panel-form").Submit();
+
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal(["true"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.GetAttribute("aria-invalid")));
+        Assert.Equal(field, panel.QuerySelector("[aria-invalid]")!.GetAttribute("name"));
+        Assert.StartsWith(message, Text(panel.QuerySelector(".field-error")!));
         Assert.Empty(panel.QuerySelectorAll("[data-error-category]"));
     }
 

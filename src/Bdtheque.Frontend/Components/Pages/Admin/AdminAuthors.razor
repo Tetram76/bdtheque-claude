@@ -14,8 +14,7 @@
    (visuel/listes/listes-de-l-administration.md): rendered statically, every criterion and the dialogs are carried by its
    address (Lists/AuthorListQuery.cs); the list has no filters. An author is entered in a side panel over the list
    (visuel/listes/saisie-selon-l-entite.md, visuel/saisie-auteur/), which the address opens, its form sent to the list, whose
-   error is presented in place; only its identity, which follows the typing, is interactive. Its styles read the contracts of
-   the base theme only (visuel/listes/declinaison-par-theme.md). *@
+   error is presented in place. Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminAuthors" />
 
@@ -94,7 +93,18 @@
                                     <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
                                 }
                             </span>
-                            <span class="author-albums" role="cell" data-empty="@(row.CreditedAlbumCount == 0)">@AlbumsText(row)</span>
+                            <span class="author-albums" role="cell" data-empty="@(row.CreditedAlbumCount == 0)">
+                                @if (row.CreditedAlbumCount == 0)
+                                {
+                                    @* A count of none is a datum missing from the row: a dash, as in any list
+                                       (visuel/charte-graphique/convivialite-et-efficacite.md), said in full to a screen reader. *@
+                                    <span class="not-set"><span aria-hidden="true">—</span><span class="visually-hidden">@L["Albums.None"]</span></span>
+                                }
+                                else
+                                {
+                                    @AlbumsText(row)
+                                }
+                            </span>
                             <span class="author-roles" role="cell" data-empty="@(row.Roles.Count == 0)">@RolesText(row)</span>
                         </span>
                         <span class="author-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
@@ -132,22 +142,33 @@
                         {
                             <ErrorMessage Problem="problem" />
                         }
-                        <AuthorIdentityFields @rendermode="InteractiveServer" Id="author" LastNameName="@LastNameName"
-                                              FirstNameName="@FirstNameName" PseudonymName="@PseudonymName" LastName="@EntryLastName"
-                                              FirstName="@EntryFirstName" Pseudonym="@EntryPseudonym" Derived="_derived"
-                                              Error="@IdentityError" />
-                        <Field Id="author-nationality" Label="@L["Nationality"]" Characters="18" Context="control">
-                            <input id="@control.Id" type="text" name="@NationalityName" @bind="EntryNationality" />
-                        </Field>
-                        <Field Id="author-biography" Label="@L["Biography"]" Context="control">
-                            <textarea id="@control.Id" name="@BiographyName" rows="6" placeholder="@L["Biography.Placeholder"]">@EntryBiography</textarea>
-                        </Field>
                         @if (_author is not null)
                         {
                             <p class="side-panel-dates">
                                 @L["Dates.Created"] <LocalDateTime Value="_author.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_author.ModifiedAt" />.
                             </p>
                         }
+                        <div class="author-panel-names">
+                            <Field Id="author-first-name" Label="@L["FirstName"]" Context="control">
+                                <input id="@control.Id" type="text" name="@FirstNameName" autofocus @bind="EntryFirstName" />
+                            </Field>
+                            <Field Id="author-last-name" Label="@L["LastName"]" Error="@LastNameError" Context="control">
+                                <input id="@control.Id" type="text" name="@LastNameName" aria-describedby="@control.DescribedBy"
+                                       aria-invalid="@control.Invalid" @bind="EntryLastName" />
+                            </Field>
+                        </div>
+                        <Field Id="author-pseudonym" Label="@L["Pseudonym"]" Help="@L["Pseudonym.Help"]" Error="@PseudonymError" Context="control">
+                            @* An author without last name nor pseudonym, said once under the last name, concerns the pseudonym as much:
+                               bordered, and described by it too. *@
+                            <input id="@control.Id" type="text" name="@PseudonymName" aria-describedby="@PseudonymDescribedBy(control.DescribedBy)"
+                                   aria-invalid="@(PseudonymError is not null || IsProblem(RequiredRule) ? "true" : null)" @bind="EntryPseudonym" />
+                        </Field>
+                        <Field Id="author-nationality" Label="@L["Nationality"]" Characters="18" Context="control">
+                            <input id="@control.Id" type="text" name="@NationalityName" @bind="EntryNationality" />
+                        </Field>
+                        <Field Id="author-biography" Label="@L["Biography"]" Context="control">
+                            <textarea id="@control.Id" name="@BiographyName" rows="6" placeholder="@L["Biography.Placeholder"]">@EntryBiography</textarea>
+                        </Field>
                     </ChildContent>
                     <Actions>
                         <Button Type="submit" Variant="ButtonVariant.Primary" Label="@(_author is null ? L["Create"] : L["Save"])" />
@@ -229,7 +250,6 @@
     private ApiProblem? _deletionProblem;
     private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
     private AuthorForm? _author;
-    private AuthorSortKey? _derived;
     private ApiProblem? _entryProblem;
 
     // The list with its criteria, without its dialogs nor its panel: where a link of the list, or their closing, leads.
@@ -292,9 +312,6 @@
         // when created on the spot, unless names sent back, even emptied, are to be corrected.
         if (_query is { Adding: true, Edit: null, Text: { } searched } && _list!.Items.Count == 0 && !IsPost)
             (EntryFirstName, EntryLastName) = AuthorNames.Split(searched);
-
-        if (_author is not null || _query is { Edit: null, Adding: true })
-            _derived = await DeriveAsync();
     }
 
     // The author, or none if it no longer exists: the list is then shown without its panel.
@@ -309,22 +326,6 @@
             return null;
         }
     }
-
-    // What derives from the names presented, as the domain computes it; unknown if the API does not say, the panel staying usable.
-    private async Task<AuthorSortKey?> DeriveAsync()
-    {
-        try
-        {
-            return await Api.GetAsync<AuthorSortKey>(
-                $"/admin/sort-keys/author?lastName={Escape(EntryLastName)}&firstName={Escape(EntryFirstName)}&pseudonym={Escape(EntryPseudonym)}");
-        }
-        catch (ApiProblemException)
-        {
-            return null;
-        }
-    }
-
-    private static string Escape(string? value) => Uri.EscapeDataString(value ?? "");
 
     private async Task SaveAsync()
     {
@@ -341,7 +342,6 @@
         catch (ApiProblemException exception)
         {
             _entryProblem = exception.Problem;
-            _derived = await DeriveAsync();
             return;
         }
 
@@ -351,14 +351,32 @@
         Navigation.NavigateTo(ListOnly.Href());
     }
 
-    // An author without last name nor pseudonym, refused at both fields (visuel/saisie-auteur/contenu.md).
-    private string? IdentityError => IsIdentityProblem ? L[$"FieldError.{_entryProblem!.RuleCode}"].Value : null;
+    private const string RequiredRule = "Author.LastNameOrPseudonymRequired";
+    private const string DuplicateRule = "Author.DisplayNameAlreadyUsed";
+
+    // The name the author is displayed under, which two authors never share: the pseudonym if any, otherwise the names
+    // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
+    private bool UnderPseudonym => !string.IsNullOrWhiteSpace(EntryPseudonym);
+
+    // An author without last name nor pseudonym, refused at both fields; a display name already taken, at the field it comes
+    // from (visuel/saisie-auteur/contenu.md).
+    private string? LastNameError =>
+        IsProblem(RequiredRule) ? L[$"FieldError.{RequiredRule}"].Value
+        : IsProblem(DuplicateRule) && !UnderPseudonym ? DuplicateText
+        : null;
+
+    private string? PseudonymError => IsProblem(DuplicateRule) && UnderPseudonym ? DuplicateText : null;
+
+    private string DuplicateText =>
+        L[$"FieldError.{DuplicateRule}", RecordSearch.AuthorName(EntryLastName?.Trim(), EntryFirstName?.Trim(), EntryPseudonym?.Trim())].Value;
 
     // Any other error, presented at the top of the panel: an author changed or deleted meanwhile, a text too long, a technical error.
-    private ApiProblem? OtherProblem => IsIdentityProblem ? null : _entryProblem;
+    private ApiProblem? OtherProblem => IsProblem(RequiredRule) || IsProblem(DuplicateRule) ? null : _entryProblem;
 
-    private bool IsIdentityProblem =>
-        _entryProblem is { Category: ProblemCategory.Business, RuleCode: "Author.LastNameOrPseudonymRequired" };
+    private string? PseudonymDescribedBy(string? own) =>
+        IsProblem(RequiredRule) ? string.Join(' ', new[] { "author-last-name-error", own }.OfType<string>()) : own;
+
+    private bool IsProblem(string ruleCode) => _entryProblem is { Category: ProblemCategory.Business } problem && problem.RuleCode == ruleCode;
 
     private async Task LoadImpactAsync(Guid authorId)
     {

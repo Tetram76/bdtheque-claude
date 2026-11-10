@@ -9,7 +9,6 @@ using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Presentation;
 using Bdtheque.Frontend.Formatting;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Controls;
@@ -43,8 +42,6 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Services.AddScoped<RecordSearch>();
         Services.AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
         JSInterop.Mode = JSRuntimeMode.Loose;
-        // The identity of an author marks itself interactive, as its parts that follow the typing are.
-        SetRendererInfo(new RendererInfo("Server", true));
     }
 
     void IDisposable.Dispose()
@@ -260,70 +257,6 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Assert.Null(dialog.Find("#author-creation-first-name").GetAttribute("value"));
         Assert.Equal("Moebius", dialog.Find("#author-creation-last-name").GetAttribute("value"));
     }
-
-    [Fact]
-    public void AuthorIdentityFields_PresentsTheNamesSentWithTheFormAndWhatDerivesFromThem_WithoutAskingTheDomain()
-    {
-        var fields = RenderIdentity(new AuthorSortKey("Jean Van Hamme", "Van Hamme Jean", "V"), lastName: "Van Hamme", firstName: "Jean");
-
-        Assert.Equal(
-            [("firstName", "Jean"), ("lastName", "Van Hamme"), ("pseudonym", null)],
-            fields.FindAll("input").Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
-        Assert.Equal(
-            [("Affiché", "Jean Van Hamme"), ("Classé à", "Van Hamme Jean"), ("Initiale", "V")],
-            fields.FindAll(".author-identity-value").Select(value => (value.QuerySelector("dt")!.TextContent, value.QuerySelector("dd")!.TextContent)));
-        Assert.True(fields.Find(".author-identity").HasAttribute("data-interactive"));
-        Assert.Empty(_sent);
-    }
-
-    [Fact]
-    public void AuthorIdentityFields_FollowTheNamesTyped_ByAskingTheDomain()
-    {
-        _answer = _ => new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(new AuthorSortKey("Hergé", "Hergé", "H")) };
-        var fields = RenderIdentity(new AuthorSortKey("Georges Remi", "Remi Georges", "R"), lastName: "Remi", firstName: "Georges");
-
-        fields.Find("#author-pseudonym").Input("Hergé");
-
-        fields.WaitForAssertion(() => Assert.Equal(
-            ["Hergé", "Hergé", "H"], fields.FindAll(".author-identity-value dd").Select(value => value.TextContent)));
-        Assert.Equal("/admin/sort-keys/author?lastName=Remi&firstName=Georges&pseudonym=Herg%C3%A9", Assert.Single(_sent).Path);
-    }
-
-    [Fact]
-    public void AuthorIdentityFields_WithoutANameToIdentifyTheAuthor_DeriveNothing()
-    {
-        var fields = RenderIdentity(null);
-
-        Assert.All(fields.FindAll(".author-identity-value dd"), value => Assert.Equal("—", value.QuerySelector("[aria-hidden]")!.TextContent));
-    }
-
-    [Fact]
-    public void AuthorIdentityFields_Refused_BorderTheLastNameAndThePseudonym_UntilANameChanges()
-    {
-        _answer = _ => new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(new AuthorSortKey("Moebius", "Moebius", "M")) };
-        var fields = RenderIdentity(null, firstName: "Jean", error: "Un auteur a au moins un nom ou un pseudonyme.");
-
-        Assert.Equal(("true", "true", null), (fields.Find("#author-last-name").GetAttribute("aria-invalid"),
-            fields.Find("#author-pseudonym").GetAttribute("aria-invalid"), fields.Find("#author-first-name").GetAttribute("aria-invalid")));
-        Assert.Equal("Un auteur a au moins un nom ou un pseudonyme.", fields.Find("#author-last-name-error").TextContent);
-        Assert.StartsWith("author-last-name-error", fields.Find("#author-pseudonym").GetAttribute("aria-describedby"));
-
-        fields.Find("#author-pseudonym").Input("Moebius");
-
-        fields.WaitForAssertion(() => Assert.Empty(fields.FindAll("[aria-invalid]")));
-    }
-
-    private IRenderedComponent<AuthorIdentityFields> RenderIdentity(
-        AuthorSortKey? derived, string? lastName = null, string? firstName = null, string? error = null) =>
-        Render<AuthorIdentityFields>(parameters => parameters
-            .Add(p => p.Id, "author")
-            .Add(p => p.LastNameName, "lastName")
-            .Add(p => p.FirstNameName, "firstName")
-            .Add(p => p.PseudonymName, "pseudonym")
-            .Add(p => p.LastName, lastName)
-            .Add(p => p.FirstName, firstName)
-            .Add(p => p.Derived, derived)
-            .Add(p => p.Error, error));
 
     [Fact]
     public void UniverseCreationDialog_GivesTheUniverseInItsParent_WithoutCreatingIt()

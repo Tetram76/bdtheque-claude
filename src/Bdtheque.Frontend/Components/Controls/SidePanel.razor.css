@@ -55,7 +55,7 @@
     gap: var(--space-m);
 }
 
-/* The dates of the record in its panel, under its fields. */
+/* The dates of the record at the top of its panel, above its fields (visuel/listes/saisie-selon-l-entite.md). */
 .side-panel-body ::deep .side-panel-dates {
     margin: 0;
     color: var(--color-text-muted);

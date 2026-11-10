@@ -16,8 +16,10 @@ public sealed class Author : EntityBase, IAggregateRoot
     public string? Nationality { get; private set; }
 
     // Stored rather than computed at read time, so that the database can sort and paginate
-    // authors (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes). Derived from the
-    // identity only: never set manually.
+    // authors (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), and keep two of
+    // them from sharing a display name (modele-metier/auteur-artiste.md). Derived from the identity
+    // only: never set manually.
+    public string DisplayName { get; private set; } = string.Empty;
     public string SortKey { get; private set; } = string.Empty;
     public string NavigationEntry { get; private set; } = string.Empty;
 
@@ -31,16 +33,39 @@ public sealed class Author : EntityBase, IAggregateRoot
 
     public void UpdateIdentity(string? lastName, string? firstName, string? pseudonym)
     {
-        var identity = AuthorIdentity.Of(lastName, firstName, pseudonym)
-                       ?? throw new DomainRuleViolationException(
-                           DomainRules.AuthorLastNameOrPseudonymRequired, "An author must have at least a last name or a pseudonym.");
+        if (string.IsNullOrWhiteSpace(lastName) && string.IsNullOrWhiteSpace(pseudonym))
+            throw new DomainRuleViolationException(
+                DomainRules.AuthorLastNameOrPseudonymRequired, "An author must have at least a last name or a pseudonym.");
 
         LastName = DomainText.NullIfBlank(lastName);
         FirstName = DomainText.NullIfBlank(firstName);
         Pseudonym = DomainText.NullIfBlank(pseudonym);
 
-        SortKey = identity.SortKey;
-        NavigationEntry = identity.NavigationEntry;
+        DisplayName = ComputeDisplayName();
+        SortKey = ComputeSortKey();
+        NavigationEntry = NavigationEntryCalculator.Compute(SortKey);
+    }
+
+    /// <summary>The main identifier: the pseudonym, otherwise "First Last" (or "Last" alone).</summary>
+    private string ComputeDisplayName()
+    {
+        if (Pseudonym is not null)
+            return Pseudonym;
+        // LastName is set whenever Pseudonym is not (UpdateIdentity guard).
+        return FirstName is null ? LastName! : $"{FirstName} {LastName}";
+    }
+
+    /// <summary>
+    /// The main identifier (pseudonym, otherwise "First Last"), except that a "First Last"
+    /// identifier sorts as "Last First", to file authors by family name
+    /// (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
+    /// </summary>
+    private string ComputeSortKey()
+    {
+        if (Pseudonym is not null)
+            return Pseudonym;
+        // LastName is set whenever Pseudonym is not (UpdateIdentity guard).
+        return FirstName is null ? LastName! : $"{LastName} {FirstName}";
     }
 
     public void UpdateBiography(string? biography) => Biography = DomainText.NullIfBlank(biography);

@@ -348,6 +348,12 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(401)
+                        .HasColumnType("character varying(401)")
+                        .UseCollation("fr_case_accent_insensitive");
+
                     b.Property<string>("FirstName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -390,6 +396,9 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnName("xmin");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DisplayName")
+                        .IsUnique();
 
                     b.HasIndex("SortKey");
 

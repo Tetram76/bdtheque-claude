@@ -1,4 +1,4 @@
-/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list and the names of the panel of an author, the rest of the
    page being that of every list of the administration (Components/Lists). */
 /* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
    row holds on two lines, the monogram on the left: the name and the actions, then the albums and the roles. A list wide
@@ -131,5 +131,19 @@
     .author-nationality,
     .author-modified {
         display: block;
+    }
+}
+
+/* In the panel of an author, its first name and last name side by side, one under the other on a narrow panel
+   (visuel/saisie-auteur/contenu.md): after the width of the panel, not of the screen. */
+.author-panel-names {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m);
+}
+
+@container side-panel (min-width: 25rem) {
+    .author-panel-names {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }

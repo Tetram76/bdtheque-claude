@@ -22,6 +22,13 @@ internal sealed class AuthorConfiguration : IEntityTypeConfiguration<Author>
         builder.Property(a => a.Nationality).HasMaxLength(100);
         builder.Property(a => a.Biography);
 
+        // Two authors never share a display name, regardless of case and accents (modele-metier/auteur-artiste.md): the
+        // unique index below compares through this column's case- and accent-insensitive collation, as for a genre label.
+        // Its worst case is that of the sort key, "First Last".
+        builder.Property(a => a.DisplayName).IsRequired().HasMaxLength(SortKeyMaxLength)
+            .UseCollation(BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation);
+        builder.HasIndex(a => a.DisplayName).IsUnique();
+
         builder.Property(a => a.SortKey).IsRequired().HasMaxLength(SortKeyMaxLength);
         builder.Property(a => a.NavigationEntry).IsRequired().HasMaxLength(NavigationEntryColumn.MaxLength);
 
