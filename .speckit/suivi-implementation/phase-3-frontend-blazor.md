@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et ses chantiers, notes des parties suivantes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T09:49:57Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T14:45:41Z }
 ---
 
 # Phase 3 — Frontend Blazor
@@ -52,7 +52,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#204~~ | Page des éditions et intentions d'achat d'un album |
 | ~~#205~~ | Saisie d'un album |
 | ~~#206~~ | Saisie d'une série |
-| #207 | Saisie d'un auteur |
+| ~~#207~~ | Saisie d'un auteur |
 | #208 | Saisie d'un éditeur et de ses collections |
 | #209 | Saisie d'une édition, de ses visuels et d'une intention d'achat |
 | ~~#321~~ | Fiche d'un album : structure, identité, contributions, genres et univers, résumé |
