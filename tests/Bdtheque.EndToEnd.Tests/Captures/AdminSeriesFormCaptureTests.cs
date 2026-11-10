@@ -47,8 +47,11 @@ public sealed class AdminSeriesFormCaptureTests(AdministrationApplication applic
             await ControlsPage.WaitUntilInteractiveAsync(page);
             await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
             await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToBeVisibleAsync();
-            // The title to correct has the focus, which is not captured.
-            await page.GetByLabel("Titre").BlurAsync();
+            // The title to correct gets the focus once the error is rendered (EntryForm.RevealProblemAsync): left only once it
+            // has it, it would otherwise get it after the field is left, and be captured.
+            var title = page.Locator("#series-title");
+            await Assertions.Expect(title).ToBeFocusedAsync();
+            await title.BlurAsync();
         }
 
         CaptureStore.Verify(theme, $"admin-series-{state}.{viewport}", await ScreenCaptureTests.CaptureAtFullHeightAsync(page));
