@@ -129,13 +129,7 @@
 }
 
 .admin-record-name {
-    color: var(--color-text);
     font-weight: var(--font-weight-strong);
-    text-decoration: none;
-}
-
-.admin-record-name:hover {
-    text-decoration: underline;
 }
 
 .admin-record-count {
@@ -160,6 +154,28 @@
     flex-wrap: wrap;
     gap: var(--space-xs) var(--space-m);
     font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+/* Intentions d'achat: the block is their card, on a line: the chip, in the color the card had among the records, the
+   number, the sentence, and the link at its end; on a narrow screen, the link goes under them. */
+.admin-intents {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+}
+
+.admin-intents .admin-record-chip {
+    background: var(--color-palette-4);
+}
+
+.admin-intents-detail {
+    flex: 1 1 12rem;
+    color: var(--color-text-muted);
+}
+
+.admin-intents a {
     font-weight: var(--font-weight-strong);
 }
 

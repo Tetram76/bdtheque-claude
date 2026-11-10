@@ -58,13 +58,13 @@
     <value>Fiches</value>
   </data>
   <data name="Records.Note" xml:space="preserve">
-    <value>Les éditions, leurs visuels et les intentions d&apos;achat se saisissent depuis leur album.</value>
-  </data>
-  <data name="Records.List" xml:space="preserve">
-    <value>Gérer la liste</value>
+    <value>Les éditions et leurs visuels se saisissent depuis leur album.</value>
   </data>
   <data name="Records.Albums" xml:space="preserve">
     <value>Albums</value>
+  </data>
+  <data name="Records.Albums.List" xml:space="preserve">
+    <value>Voir les albums</value>
   </data>
   <data name="Records.Albums.Detail" xml:space="preserve">
     <value>dont {0} hors de la collection</value>
@@ -75,11 +75,17 @@
   <data name="Records.Editions" xml:space="preserve">
     <value>Éditions</value>
   </data>
+  <data name="Records.Editions.List" xml:space="preserve">
+    <value>Voir les éditions</value>
+  </data>
   <data name="Records.Editions.Detail" xml:space="preserve">
     <value>saisies depuis leur album, avec leurs visuels</value>
   </data>
   <data name="Records.Series" xml:space="preserve">
     <value>Séries</value>
+  </data>
+  <data name="Records.Series.List" xml:space="preserve">
+    <value>Voir les séries</value>
   </data>
   <data name="Records.Series.Detail" xml:space="preserve">
     <value>dont {0} sans statut</value>
@@ -87,14 +93,11 @@
   <data name="Records.New.Series" xml:space="preserve">
     <value>Nouvelle série</value>
   </data>
-  <data name="Records.PurchaseIntents" xml:space="preserve">
-    <value>Intentions d&apos;achat</value>
-  </data>
-  <data name="Records.PurchaseIntents.Detail" xml:space="preserve">
-    <value>posées depuis leur album</value>
-  </data>
   <data name="Records.Authors" xml:space="preserve">
     <value>Auteurs</value>
+  </data>
+  <data name="Records.Authors.List" xml:space="preserve">
+    <value>Voir les auteurs</value>
   </data>
   <data name="Records.Authors.Detail" xml:space="preserve">
     <value>scénaristes, dessinateurs, coloristes…</value>
@@ -105,6 +108,9 @@
   <data name="Records.Publishers" xml:space="preserve">
     <value>Éditeurs</value>
   </data>
+  <data name="Records.Publishers.List" xml:space="preserve">
+    <value>Voir les éditeurs</value>
+  </data>
   <data name="Records.Publishers.Detail" xml:space="preserve">
     <value>collections éditeur : {0}</value>
   </data>
@@ -113,6 +119,9 @@
   </data>
   <data name="Records.Genres" xml:space="preserve">
     <value>Genres</value>
+  </data>
+  <data name="Records.Genres.List" xml:space="preserve">
+    <value>Voir les genres</value>
   </data>
   <data name="Records.Genres.Detail" xml:space="preserve">
     <value>référentiel</value>
@@ -123,11 +132,26 @@
   <data name="Records.Universes" xml:space="preserve">
     <value>Univers</value>
   </data>
+  <data name="Records.Universes.List" xml:space="preserve">
+    <value>Voir les univers</value>
+  </data>
   <data name="Records.Universes.Detail" xml:space="preserve">
     <value>dont {0} sous-univers</value>
   </data>
   <data name="Records.New.Universes" xml:space="preserve">
     <value>Nouvel univers</value>
+  </data>
+  <data name="Intents.Title" xml:space="preserve">
+    <value>Intentions d&apos;achat</value>
+  </data>
+  <data name="Intents.Kicker" xml:space="preserve">
+    <value>Achats</value>
+  </data>
+  <data name="Intents.Detail" xml:space="preserve">
+    <value>achats à confirmer, posés depuis leur album</value>
+  </data>
+  <data name="Intents.Confirm" xml:space="preserve">
+    <value>Confirmer les achats</value>
   </data>
   <data name="Checks.Title" xml:space="preserve">
     <value>À vérifier</value>
