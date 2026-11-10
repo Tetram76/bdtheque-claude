@@ -1,0 +1,133 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list and the entry of a genre,
+   the rest of the page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
+   row holds on two lines: the label and the actions, then its numbers of albums and of series, each preceded by the name of
+   its column. A list wide enough for its columns is a table; wider still, the table adds the last modification
+   (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
+.genre-rows {
+    container: genre-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own, so
+       that their columns line up. It holds « Modifier » and the « ⋯ » button, or « Enregistrer » and « Annuler ». */
+    --genre-actions-width: 14rem;
+}
+
+.genre-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "main actions" "meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.genre-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.genre-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.genre-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
+.genre-label {
+    color: var(--color-text);
+    font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
+}
+
+/* The label being changed: as wide as a label usually is, never wider than its column; the numbers of the genre stay beside it. */
+.genre-main input {
+    inline-size: 16rem;
+    max-inline-size: 100%;
+    font-weight: var(--font-weight-strong);
+}
+
+.genre-albums {
+    grid-area: albums;
+}
+
+.genre-series {
+    grid-area: series;
+}
+
+.genre-caption,
+.genre-albums[data-empty],
+.genre-series[data-empty] {
+    color: var(--color-text-muted);
+}
+
+.genre-modified {
+    display: none;
+    grid-area: modified;
+}
+
+/* The date of a row, not the head of its column, which keeps the size of the other heads. */
+.genre-row:not(.genre-row-head) .genre-modified {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.genre-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+@container genre-rows (min-width: 34rem) {
+    .genre-row {
+        grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--genre-actions-width);
+        grid-template-areas: "main albums series actions";
+        align-items: center;
+    }
+
+    .genre-row-head {
+        display: grid;
+    }
+
+    .genre-meta {
+        display: contents;
+        font-size: inherit;
+    }
+
+    /* In a table, the head names the columns. */
+    .genre-caption {
+        display: none;
+    }
+}
+
+@container genre-rows (min-width: 48rem) {
+    .genre-row {
+        grid-template-columns: minmax(0, 1fr) 6rem 6rem 6.75rem var(--genre-actions-width);
+        grid-template-areas: "main albums series modified actions";
+    }
+
+    .genre-modified {
+        display: block;
+    }
+}

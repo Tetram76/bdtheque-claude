@@ -13,8 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Frontend.Tests.Pages;
 
 /// <summary>
-/// The endpoints the pages of the administration read, each answering what a test sets for its path (without its query),
-/// or the error status it sets; the audience ones, relayed to the audience measurement.
+/// The endpoints the pages of the administration read, each answering what a test sets for its path with its query, or else
+/// for its path alone, or the error status it sets; the audience ones, relayed to the audience measurement.
 /// </summary>
 internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandler
 {
@@ -92,7 +92,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         if (Failures.TryGetValue(path, out var status))
             return Problem(ProblemTypes.Technical, status);
 
-        return Answers.TryGetValue(path, out var answer)
+        return Answers.TryGetValue(request.RequestUri.PathAndQuery, out var answer) || Answers.TryGetValue(path, out answer)
             ? new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(answer, answer.GetType()) }
             : new HttpResponseMessage(HttpStatusCode.NotFound);
     }

@@ -20,12 +20,24 @@ internal static class Paging
         this IOrderedQueryable<TSource> ordered, int number, int size, Expression<Func<TSource, TItem>> projection,
         CancellationToken cancellationToken)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(number, 1);
-        ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, MaxSize);
-
+        EnsureBounds(number, size);
         var totalCount = await ordered.CountAsync(cancellationToken);
         var items = await ordered.Skip(checked((number - 1) * size)).Take(size).Select(projection).ToListAsync(cancellationToken);
         return new Page<TItem>(items, number, size, totalCount);
+    }
+
+    /// <summary>One page of a list ordered in memory, under the same bounds as <see cref="ToPageAsync"/>.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">As <see cref="ToPageAsync"/>.</exception>
+    public static IReadOnlyList<T> Slice<T>(IReadOnlyList<T> ordered, int number, int size)
+    {
+        EnsureBounds(number, size);
+        return [.. ordered.Skip(checked((number - 1) * size)).Take(size)];
+    }
+
+    private static void EnsureBounds(int number, int size)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(number, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, MaxSize);
     }
 }

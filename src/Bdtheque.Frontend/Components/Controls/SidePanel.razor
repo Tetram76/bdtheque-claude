@@ -1,0 +1,42 @@
+@inject IStringLocalizer<SidePanel> L
+
+@* A side panel (visuel/listes/saisie-selon-l-entite.md): a modal dialog that slides over the page from the right, the page staying
+   visible and greyed behind it, for an entry lighter than a page of its own (e.g. a universe). Rendered when the page asks for
+   it, it is opened as a modal by the element that wraps it (wwwroot/modal-dialog.js), like a Dialog; its cancelling, a link to the
+   page without it, comes first among its actions, the safe choice that Escape follows. The caller wraps it in its form, whose
+   actions are its own. *@
+<app-modal-dialog>
+    <dialog class="side-panel" aria-labelledby="@TitleId">
+        <h2 id="@TitleId" class="side-panel-title">@Title</h2>
+        <div class="side-panel-body">
+            @ChildContent
+        </div>
+        <div class="side-panel-actions">
+            <Button Label="@L["Cancel"]" Href="@CloseHref" data-dialog-close="@true" />
+            @Actions
+        </div>
+    </dialog>
+</app-modal-dialog>
+
+@code {
+    /// <summary>The identifier of the panel, unique in the page, from which that of its title derives.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = null!;
+
+    /// <summary>The page without the panel, that closing and cancelling lead to.</summary>
+    [Parameter, EditorRequired]
+    public string CloseHref { get; set; } = null!;
+
+    /// <summary>The fields of the entry.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>The actions after the cancelling (e.g. the saving).</summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+
+    private string TitleId => $"{Id}-title";
+}

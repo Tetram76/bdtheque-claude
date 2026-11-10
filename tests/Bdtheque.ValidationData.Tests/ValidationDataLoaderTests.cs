@@ -118,12 +118,24 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
-    public async Task Universes_NestOnSeveralLevels()
+    public async Task Universes_NestOnSeveralLevels_OneWithSubUniversesAndOneWithout()
     {
-        var universes = (await _client.GetFromJsonAsync<Page<UniverseListItem>>("/catalog/universes?pageSize=100"))!.Items;
+        var universes = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.UniverseAdminListItem>>("/admin/universes?pageSize=100"))!.Items;
 
-        Assert.Contains(universes, universe =>
-            universes.Any(parent => parent.Id == universe.ParentId && parent.ParentId is not null));
+        // A universe three levels down, in retreat under its ancestors; one whose deletion its sub-universes refuse, and one at
+        // the top whose deletion is accepted.
+        Assert.Contains(universes, universe => universe.Ancestors.Count == 2);
+        Assert.Contains(universes, universe => universe.SubUniverseCount > 0);
+        Assert.Contains(universes, universe => universe is { ParentId: null, SubUniverseCount: 0 });
+    }
+
+    [Fact]
+    public async Task Genres_OneAccentedWithoutAlbum_ThatTheSearchFindsWithoutItsAccents()
+    {
+        var genres = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.GenreAdminListItem>>("/admin/genres?q=epopee"))!.Items;
+
+        var accented = Assert.Single(genres);
+        Assert.Equal((ValidationDataLoader.AccentedGenre, 0), (accented.Label, accented.AlbumCount));
     }
 
     [Fact]

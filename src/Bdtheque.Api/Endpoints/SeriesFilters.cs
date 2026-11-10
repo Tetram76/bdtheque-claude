@@ -39,11 +39,11 @@ internal sealed record SeriesFilters(
                 s.TemplatePublisherCollectionId == PublisherCollectionId
                 || context.Albums.Any(a => a.SeriesId == s.Id && a.Editions.Any(e => e.PublisherCollectionId == PublisherCollectionId)));
         if (GenreId is not null)
-            series = series.Where(s => s.Genres.Any(g => g.Id == GenreId));
+            series = series.WhereGenre(GenreId.Value);
         if (UniverseId is not null)
         {
             var universeIds = await CatalogFilters.UniverseAndDescendantsAsync(context, UniverseId.Value, cancellationToken);
-            series = series.Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)));
+            series = series.WhereUniverse(universeIds);
         }
 
         return series;

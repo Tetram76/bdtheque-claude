@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Liste des genres</value>
+  </data>
+  <data name="Kicker" xml:space="preserve">
+    <value>Référentiel</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouveau genre</value>
+  </data>
+  <data name="Search.Label" xml:space="preserve">
+    <value>Rechercher un genre</value>
+  </data>
+  <data name="Search.Placeholder" xml:space="preserve">
+    <value>Libellé…</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Triés par libellé</value>
+  </data>
+  <data name="Count.None" xml:space="preserve">
+    <value>Aucun genre</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>1 genre</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} genres</value>
+  </data>
+  <data name="Column.Genre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="Column.Albums" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="Column.Series" xml:space="preserve">
+    <value>Séries</value>
+  </data>
+  <data name="Column.Modified" xml:space="preserve">
+    <value>Modifié</value>
+  </data>
+  <data name="Column.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Albums.Zero" xml:space="preserve">
+    <value>aucun album</value>
+  </data>
+  <data name="Albums.One" xml:space="preserve">
+    <value>1 album</value>
+  </data>
+  <data name="Albums.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Series.Zero" xml:space="preserve">
+    <value>aucune série</value>
+  </data>
+  <data name="Series.One" xml:space="preserve">
+    <value>1 série</value>
+  </data>
+  <data name="Series.Other" xml:space="preserve">
+    <value>{0} séries</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Edit.Label" xml:space="preserve">
+    <value>Modifier {0}</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>Autres actions sur {0}</value>
+  </data>
+  <data name="Menu.Works" xml:space="preserve">
+    <value>Voir ses œuvres dans la consultation</value>
+  </data>
+  <data name="Menu.Merge" xml:space="preserve">
+    <value>Fusionner avec un autre genre…</value>
+  </data>
+  <data name="Menu.Delete" xml:space="preserve">
+    <value>Supprimer…</value>
+  </data>
+  <data name="Label.Of" xml:space="preserve">
+    <value>Libellé de {0}</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="FieldError.Genre.LabelRequired" xml:space="preserve">
+    <value>Le libellé du genre est obligatoire.</value>
+  </data>
+  <data name="FieldError.Genre.LabelAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà pris : deux libellés qui ne diffèrent que par la casse ou les accents désignent le même genre.</value>
+  </data>
+  <data name="Empty.Text" xml:space="preserve">
+    <value>Aucun genre ne correspond à « {0} ».</value>
+  </data>
+  <data name="Empty.Hint" xml:space="preserve">
+    <value>La recherche porte sur le libellé du genre, sans tenir compte des majuscules ni des accents.</value>
+  </data>
+  <data name="Empty.Create" xml:space="preserve">
+    <value>Créer le genre « {0} »</value>
+  </data>
+  <data name="Empty.Clear" xml:space="preserve">
+    <value>Effacer la recherche</value>
+  </data>
+  <data name="Empty.None" xml:space="preserve">
+    <value>Aucun genre n'est encore enregistré.</value>
+  </data>
+  <data name="Deletion.Title" xml:space="preserve">
+    <value>Supprimer ce genre ?</value>
+  </data>
+  <data name="Deletion.Lead" xml:space="preserve">
+    <value>La suppression du genre est définitive ; les fiches qui le portent restent enregistrées.</value>
+  </data>
+  <data name="Refusal.Lead" xml:space="preserve">
+    <value>Le genre est encore désigné par d'autres fiches : la suppression est refusée tant que ces liens existent.</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
+    <value>Retirez d'abord le genre des critères de ces recherches enregistrées, puis recommencez.</value>
+  </data>
+  <data name="Merge.Title" xml:space="preserve">
+    <value>Fusionner deux genres</value>
+  </data>
+  <data name="Merge.Lead" xml:space="preserve">
+    <value>Avec quel genre fusionner celui-ci ?</value>
+  </data>
+  <data name="Merge.Search" xml:space="preserve">
+    <value>Rechercher l'autre genre</value>
+  </data>
+  <data name="Merge.Placeholder" xml:space="preserve">
+    <value>Libellé de l'autre genre…</value>
+  </data>
+  <data name="Merge.Prompt" xml:space="preserve">
+    <value>Recherchez l'autre genre par son libellé.</value>
+  </data>
+  <data name="Merge.None" xml:space="preserve">
+    <value>Aucun autre genre ne correspond à « {0} ».</value>
+  </data>
+  <data name="Merge.Candidates" xml:space="preserve">
+    <value>Autre genre</value>
+  </data>
+  <data name="Merge.Note" xml:space="preserve">
+    <value>L'étape suivante présentera les deux genres côte à côte, avec ce que la fusion garde de chacun.</value>
+  </data>
+</root>

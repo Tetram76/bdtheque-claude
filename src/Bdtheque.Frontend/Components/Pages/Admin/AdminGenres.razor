@@ -1,0 +1,432 @@
+@attribute [Route(AppPaths.AdminGenres)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Deletion
+@inject IStringLocalizer<AdminGenres> L
+@inject IStringLocalizer<GenreCreationDialog> Creation
+@inject ApiClient Api
+@inject AdminRecordCounts RecordCounts
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The list of the genres of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the albums
+   (visuel/listes/listes-de-l-administration.md): rendered statically, its search, its page and its dialogs are carried by its
+   address (Lists/GenreListQuery.cs). A genre is entered in the list itself (visuel/listes/saisie-selon-l-entite.md): changed in
+   its row, added in the dialog of a genre created on the spot, each a form the address opens, whose error is presented in
+   place. Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminGenres" />
+
+<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_counts?.Genres" NewHref="@NewHref" NewLabel="@L["New"]" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.AdminGenres" FieldId="genre-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
+
+        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Genres" Order="@L["Order"]" />
+
+        @if (_list!.Items.Count == 0)
+        {
+            if (_query.Text is { } searched)
+            {
+                <EmptyList Message="@L["Empty.Text", searched]" Hint="@L["Empty.Hint"]">
+                    <Actions>
+                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                        <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", searched]" />
+                    </Actions>
+                </EmptyList>
+            }
+            else
+            {
+                <EmptyList Message="@L["Empty.None"]">
+                    <Actions>
+                        <Button Href="@NewHref" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                    </Actions>
+                </EmptyList>
+            }
+        }
+        else
+        {
+            <div class="genre-rows" role="table" aria-label="@L["Title"]">
+                <div class="genre-row genre-row-head" role="row">
+                    <span class="genre-main" role="columnheader">@L["Column.Genre"]</span>
+                    <span class="genre-albums" role="columnheader">@L["Column.Albums"]</span>
+                    <span class="genre-series" role="columnheader">@L["Column.Series"]</span>
+                    <span class="genre-modified" role="columnheader">@L["Column.Modified"]</span>
+                    <span class="genre-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
+                </div>
+                @foreach (var row in _list.Items)
+                {
+                    if (row.Id == _editedGenre?.Id)
+                    {
+                        @* The genre changed in its row: its label becomes a field, saved or cancelled in place. *@
+                        <form class="genre-row" role="row" method="post" @formname="@EditFormName" @onsubmit="SaveAsync"
+                              data-invalid="@(_editProblem is not null)">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="@VersionName" value="@EditVersion" />
+                            <span class="genre-main" role="cell">
+                                <Field Id="genre-edit-label" Label="@L["Label.Of", row.Label]" LabelHidden="true"
+                                       Error="@FieldError(_editProblem, EditLabel)" Context="control">
+                                    <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
+                                           aria-invalid="@control.Invalid" @bind="EditLabel" />
+                                </Field>
+                                @if (OtherProblem(_editProblem) is { } problem)
+                                {
+                                    <ErrorMessage Problem="problem" />
+                                }
+                            </span>
+                            @Numbers(row)
+                            <span class="genre-actions" role="cell">
+                                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Save"]" />
+                                <Button Href="@ListOnly.Href()" Label="@L["Cancel"]" />
+                            </span>
+                        </form>
+                        continue;
+                    }
+
+                    <div class="genre-row" role="row">
+                        <span class="genre-main" role="cell">
+                            <a class="genre-label" href="@((ListOnly with { Edit = row.Id }).Href())">@row.Label</a>
+                        </span>
+                        @Numbers(row)
+                        <span class="genre-actions" role="cell">
+                            <Button Href="@((ListOnly with { Edit = row.Id }).Href())" Icon="IconName.Edit" Label="@L["Edit"]"
+                                    IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", row.Label]" />
+                            <ActionsMenu Id="@($"genre-actions-{row.Id:N}")" Label="@L["More", row.Label]">
+                                <MenuItem Href="@AppPaths.GenreWorks(row.Id)" Icon="IconName.Exit" Label="@L["Menu.Works"]" />
+                                <MenuItem Href="@((ListOnly with { Merge = row.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
+                                <MenuSeparator />
+                                <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"
+                                          Variant="ButtonVariant.Delete" />
+                            </ActionsMenu>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <Pagination Number="_list.Number" Size="_list.Size" TotalCount="_list.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (ListOnly with { Page = page }).Href())" />
+        }
+    </ChildContent>
+    <Dialogs>
+        @if (_query.Adding)
+        {
+            @* The same dialog as a genre created on the spot from the entry form of an album (GenreCreationDialog), sent by a
+               form of the list. *@
+            <form class="genre-new" method="post" @formname="@NewFormName" @onsubmit="AddAsync">
+                <AntiforgeryToken />
+                <Dialog Id="genre-new" Title="@Creation["Title"]" Tone="DialogTone.Creation" CloseHref="@ListOnly.Href()">
+                    <ChildContent>
+                        <Field Id="genre-new-label" Label="@Creation["Label"]" Error="@FieldError(_newProblem, NewLabel)" Context="control">
+                            <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
+                                   aria-invalid="@control.Invalid" @bind="NewLabel" />
+                        </Field>
+                        @if (OtherProblem(_newProblem) is { } problem)
+                        {
+                            <ErrorMessage Problem="problem" />
+                        }
+                    </ChildContent>
+                    <Actions>
+                        <Button Type="submit" Variant="ButtonVariant.Primary" Label="@Creation["Create"]" />
+                    </Actions>
+                </Dialog>
+            </form>
+        }
+        else if (_dialogGenre is not null)
+        {
+            if (_query.Merge is not null)
+            {
+                <MergeDialog Id="genre-merge" Title="@L["Merge.Title"]" Subject="@_dialogGenre.Label" Lead="@L["Merge.Lead"]"
+                             CloseHref="@ListOnly.Href()" Action="@AppPaths.AdminGenres"
+                             Criteria="@((ListOnly with { Merge = _dialogGenre.Id }).Parameters())" Text="@_query.MergeText"
+                             SearchLabel="@L["Merge.Search"]" Placeholder="@L["Merge.Placeholder"]" Candidates="_candidates"
+                             Prompt="@L["Merge.Prompt"]" None="@L["Merge.None", _query.MergeText ?? ""]" CandidatesLabel="@L["Merge.Candidates"]"
+                             Note="@L["Merge.Note"]" ContinueAction="@AppPaths.AdminMergeGenres" SubjectName="genre"
+                             SubjectId="_dialogGenre.Id" />
+            }
+            else
+            {
+                <DeletionDialog Id="genre-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@_dialogGenre.Label"
+                                CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                                RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_deletionProblem"
+                                Version="_dialogGenre.Version" OnConfirm="DeleteAsync" />
+            }
+        }
+    </Dialogs>
+</ListLayout>
+
+@code {
+    private const string DeletionFormName = "genre-deletion";
+    private const string EditFormName = "genre-edit";
+    private const string NewFormName = "genre-new";
+    private const string LabelName = "label";
+    private const string VersionName = "version";
+
+    /// <summary>How many other genres the merge dialog proposes: enough to choose, few enough to read at a glance.</summary>
+    internal const int CandidateCount = 10;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    /// <summary>The version of the genre whose deletion is confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.VersionName)]
+    private uint? Version { get; set; }
+
+    /// <summary>The fingerprint of the impact of the deletion the administrator confirmed.</summary>
+    [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.FingerprintName)]
+    private string? Fingerprint { get; set; }
+
+    /// <summary>The label of the genre changed in its row, as typed.</summary>
+    [SupplyParameterFromForm(FormName = EditFormName, Name = LabelName)]
+    private string? EditLabel { get; set; }
+
+    /// <summary>The version of the genre changed in its row, as its row was read.</summary>
+    [SupplyParameterFromForm(FormName = EditFormName, Name = VersionName)]
+    private uint? EditVersion { get; set; }
+
+    /// <summary>The label of the new genre, as typed.</summary>
+    [SupplyParameterFromForm(FormName = NewFormName, Name = LabelName)]
+    private string? NewLabel { get; set; }
+
+    private GenreListQuery _query = new();
+    private RecordCounts? _counts;
+    private Page<GenreAdminListItem>? _list;
+    private ApiProblem? _problem;
+    private GenreAdminListItem? _dialogGenre;
+    private GenreAdminListItem? _editedGenre;
+    private DeletionImpact? _impact;
+    private ApiProblem? _deletionProblem;
+    private ApiProblem? _editProblem;
+    private ApiProblem? _newProblem;
+    private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
+
+    // The list with its criteria, without its dialogs nor the entry of a genre: where a link of the list, the closing of a
+    // dialog or the cancelling of an entry leads.
+    private GenreListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null, Edit = null, Adding = false };
+
+    // « Nouveau genre » opens the dialog of a new genre over the list, which keeps its search.
+    private string NewHref => (ListOnly with { Adding = true }).Href();
+
+    // The numbers and the modification of a genre, which its row keeps while it is changed. On two lines, a number loses its
+    // column header: it carries the name of its column.
+    private RenderFragment Numbers(GenreAdminListItem row) =>
+        @<text>
+            <span class="genre-meta">
+                <span class="genre-albums" role="cell" data-empty="@(row.AlbumCount == 0)">
+                    <span class="genre-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)
+                </span>
+                <span class="genre-series" role="cell" data-empty="@(row.SeriesCount == 0)">
+                    <span class="genre-caption">@L["Column.Series"]</span> @Format.Number(row.SeriesCount)
+                </span>
+            </span>
+            <span class="genre-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
+        </text>;
+
+    // A form sent back, whose fields, even emptied, are those typed.
+    private bool IsPost => HttpContext is { } context && HttpMethods.IsPost(context.Request.Method);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = GenreListQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            // The number of genres is the one of the menu, read once per request; without it, the list goes on.
+            _counts = await RecordCounts.TryGetAsync();
+            _list = await Api.GetAsync<Page<GenreAdminListItem>>(_query.ApiPath());
+            // A page beyond the last one (the page of its only genre once deleted, an old address) is no empty list: its genres
+            // are on the pages before it, the last of which it leads to, with the same criteria.
+            if (_list is { Items.Count: 0, TotalCount: > 0 } && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (_list.TotalCount + _list.Size - 1) / _list.Size }).Href());
+                return;
+            }
+            // A dialog opens on a genre of the page, from its row: an address written by hand on another one opens none.
+            _dialogGenre = _list.Items.FirstOrDefault(row => row.Id == (_query.Delete ?? _query.Merge));
+            _editedGenre = _list.Items.FirstOrDefault(row => row.Id == _query.Edit);
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        // A genre changed from elsewhere than its row (the change log of the home of the administration) is changed on the page of
+        // the list searched on its label that shows it.
+        if (_query.Edit is { } edited && _editedGenre is null && await LocateAsync(edited) is { } located)
+        {
+            Navigation.NavigateTo(located.Href());
+            return;
+        }
+
+        // Read once, with its row; a form sent back keeps what was typed, the version always among it.
+        if (_editedGenre is not null && EditVersion is null)
+        {
+            EditLabel = _editedGenre.Label;
+            EditVersion = _editedGenre.Version;
+        }
+        // A new genre opened on a search that finds none is the genre searched (« Créer le genre « … » »), unless a label sent
+        // back, even emptied, is to be corrected.
+        if (_query is { Adding: true, Text: { } searched } && _list.Items.Count == 0 && !IsPost)
+            NewLabel ??= searched;
+
+        if (_dialogGenre is not null && _query.Delete is { } deleted)
+            await LoadImpactAsync(deleted);
+        else if (_dialogGenre is not null && _query.MergeText is { } text)
+            _candidates = await LoadCandidatesAsync(text);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // The page of the list searched on the label of the genre that shows it, read page after page: labels that contain it may
+    // sort before it and fill the first pages. None if no page shows it (deleted or renamed meanwhile): the list is then shown
+    // without the change, never led to a page that does not show the genre, which would lead there again.
+    private async Task<GenreListQuery?> LocateAsync(Guid id)
+    {
+        if (await FindAsync(id) is not { } genre)
+            return null;
+
+        var query = ListOnly with { Text = genre.Label, Page = 1, Edit = id };
+        while (true)
+        {
+            var page = await Api.GetAsync<Page<GenreAdminListItem>>(query.ApiPath());
+            if (page.Items.Any(row => row.Id == id))
+                return query;
+            if (query.Page * page.Size >= page.TotalCount)
+                return null;
+            query = query with { Page = query.Page + 1 };
+        }
+    }
+
+    // The genre, or none if it no longer exists: the list is then shown without it.
+    private async Task<GenreForm?> FindAsync(Guid id)
+    {
+        try
+        {
+            return await Api.GetAsync<GenreForm>($"/admin/genres/{id}");
+        }
+        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
+        {
+            return null;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_editedGenre is null || EditVersion is not { } version)
+            return;
+
+        try
+        {
+            await Api.PutAsync<UpdateGenreRequest, GenreForm>($"/admin/genres/{_editedGenre.Id}", new UpdateGenreRequest(EditLabel ?? "", version));
+        }
+        catch (ApiProblemException exception)
+        {
+            _editProblem = exception.Problem;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminGenreSaved, $"genre={_editedGenre.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    private async Task AddAsync()
+    {
+        GenreForm created;
+        try
+        {
+            created = await Api.PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new CreateGenreRequest(NewLabel ?? ""));
+        }
+        catch (ApiProblemException exception)
+        {
+            _newProblem = exception.Problem;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminGenreCreated, $"genre={created.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    // The error of a label, presented at its field (a label required, or already taken, which the case and the accents do not
+    // tell apart from another: modele-metier/genre.md).
+    private string? FieldError(ApiProblem? problem, string? label) => problem is { Category: ProblemCategory.Business, RuleCode: { } code } && IsOfLabel(code)
+        ? L[$"FieldError.{code}", label?.Trim() ?? ""].Value
+        : null;
+
+    // Any other error, presented with the entry: a genre changed or deleted meanwhile, a technical error.
+    private static ApiProblem? OtherProblem(ApiProblem? problem) =>
+        problem is { Category: ProblemCategory.Business, RuleCode: { } code } && IsOfLabel(code) ? null : problem;
+
+    private static bool IsOfLabel(string ruleCode) => ruleCode is "Genre.LabelRequired" or "Genre.LabelAlreadyUsed";
+
+    private async Task LoadImpactAsync(Guid genreId)
+    {
+        try
+        {
+            _impact = await Api.GetAsync<DeletionImpact>($"/admin/genres/{genreId}/deletion-impact");
+        }
+        catch (ApiProblemException exception)
+        {
+            _deletionProblem = exception.Problem;
+        }
+    }
+
+    // The other genres found by the search of the dialog, the genre itself excepted.
+    private async Task<IReadOnlyList<MergeDialog.MergeCandidate>?> LoadCandidatesAsync(string text)
+    {
+        var found = await Api.GetAsync<Page<GenreAdminListItem>>(_query.MergeCandidatesApiPath(text, CandidateCount));
+        return
+        [
+            .. found.Items
+                .Where(row => row.Id != _dialogGenre!.Id)
+                .Take(CandidateCount)
+                .Select(row => new MergeDialog.MergeCandidate(row.Id, row.Label, CandidateDetail(row))),
+        ];
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (_dialogGenre is null || Version is not { } version || Fingerprint is null)
+            return;
+
+        try
+        {
+            await Api.DeleteAsync($"/admin/genres/{_dialogGenre.Id}?version={version}&fingerprint={Uri.EscapeDataString(Fingerprint)}");
+        }
+        catch (ApiProblemException exception)
+        {
+            // A deletion whose impact changed since its confirmation announces the current impact, to confirm again; any other
+            // error is presented as it is.
+            _deletionProblem = exception.Problem;
+            _impact = exception.Problem.Impact;
+            if (_impact is { BlockedBy.Count: > 0 })
+                _deletionProblem = null;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminGenresDeleted, $"genre={_dialogGenre.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    private string CountText() => _list!.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+
+    // « 37 albums · aucune série »: what tells two genres of close labels apart.
+    private string CandidateDetail(GenreAdminListItem candidate) =>
+        $"{Plural("Albums", candidate.AlbumCount)} · {Plural("Series", candidate.SeriesCount)}";
+
+    private string Plural(string name, int count) => count switch
+    {
+        0 => L[$"{name}.Zero"],
+        1 => L[$"{name}.One"],
+        _ => L[$"{name}.Other", Format.Number(count)],
+    };
+}

@@ -1,0 +1,80 @@
+@using Bdtheque.Contracts.Catalog
+@inject ApiClient Api
+@inject IStringLocalizer<ParentUniverseField> L
+
+@* The parent of a universe, in the side panel of the list of the universes (visuel/listes/saisie-selon-l-entite.md): chosen by
+   typing its name, presented with its ancestors (« Univers Hugo Pratt › Corto Maltese »), and sent by its identifier (Name) with
+   the static form of the panel. It needs interactivity for its choice: the caller renders it in the InteractiveServer mode, and
+   passes it only what serializes. A parent refused (a cycle) is presented in place, with its reason, until another one is
+   chosen. *@
+<Field Id="@Id" Label="@L["Label"]" Error="@_error" Help="@(_error is null ? HelpText : null)" Context="control">
+    <RecordPicker Id="@control.Id" Kind="RecordKind.Universe" Name="@Name" Value="_value" ValueChanged="ChooseAsync"
+                  Placeholder="@L["Placeholder"]" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
+</Field>
+
+@code {
+    private RecordOption? _value;
+    private string? _error;
+
+    /// <summary>The identifier of the field, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name under which the form sends the identifier of the parent; empty for none.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = null!;
+
+    /// <summary>The parent chosen, with its ancestors; <c>null</c> at the top of the hierarchy.</summary>
+    [Parameter]
+    public UniverseInHierarchy? Parent { get; set; }
+
+    /// <summary>Why the parent sent was refused.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    private UniverseInHierarchy? _parentReceived;
+    private string? _errorReceived;
+
+    // What the page sends (the parent read, or sent back with a refused form, and its error) replaces the choice in place;
+    // the same values sent again leave it as it is.
+    protected override void OnParametersSet()
+    {
+        if (!Equals(Parent?.Universe, _parentReceived?.Universe))
+        {
+            _parentReceived = Parent;
+            _value = Parent is null ? null : Option(Parent);
+        }
+        if (Error != _errorReceived)
+        {
+            _errorReceived = Error;
+            _error = Error;
+        }
+    }
+
+    private string HelpText => _value is null ? L["Help.None"] : L["Help.Parent", _value.Label];
+
+    // The parent chosen by its name, then presented with its ancestors once read.
+    private async Task ChooseAsync(RecordOption? option)
+    {
+        _value = option;
+        _error = null;
+        if (option is null)
+            return;
+
+        try
+        {
+            var parent = await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{option.Id}/hierarchy");
+            // A choice made meanwhile wins over the reading of an earlier one.
+            if (_value?.Id == option.Id)
+                _value = Option(parent);
+        }
+        catch (ApiProblemException)
+        {
+            // Its ancestors unread (deleted meanwhile, the API unavailable), the parent keeps its name alone: the saving
+            // presents the error, if any.
+        }
+    }
+
+    private static RecordOption Option(UniverseInHierarchy universe) =>
+        new(universe.Universe.Id, string.Join(" › ", universe.Ancestors.Select(a => a.Name).Append(universe.Universe.Name)), null);
+}

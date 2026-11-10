@@ -3,7 +3,7 @@
    (themes/base.css). A field sized to its content (a volume, a year) is as wide as its characters, never stretched over
    the whole width (visuel/saisie-album/contenu.md). *@
 <div class="field" style="@WidthStyle">
-    <label class="field-label" for="@Id">
+    <label class="@(LabelHidden ? "visually-hidden" : "field-label")" for="@Id">
         @Label
         @if (Note is not null)
         {
@@ -28,6 +28,13 @@
 
     [Parameter, EditorRequired]
     public string Label { get; set; } = null!;
+
+    /// <summary>
+    /// A label only screen readers read, where the place of the field already says what it is (e.g. the label of a genre changed
+    /// in its row, under the head of its column).
+    /// </summary>
+    [Parameter]
+    public bool LabelHidden { get; set; }
 
     /// <summary>A short mention after the label (e.g. « facultatif dans une série »).</summary>
     [Parameter]

@@ -26,6 +26,7 @@ internal static class GenreEndpoints
     public static void MapGenres(this RouteGroupBuilder admin)
     {
         var genres = admin.MapGroup("/genres");
+        genres.MapGet("/", ListForAdministrationAsync);
         genres.MapGet("/{id:guid}", GetAsync);
         genres.MapPost("/", CreateAsync);
         genres.MapPut("/{id:guid}", UpdateAsync);
@@ -66,6 +67,25 @@ internal static class GenreEndpoints
             .OrderBy(g => g.Label)
             .ThenBy(g => g.Id)
             .ToPageAsync(page, pageSize, g => new GenreListItem(g.Id, g.Label), cancellationToken);
+
+    /// <summary>
+    /// The list of the genres of the administration (visuel/listes/liste-par-liste.md): the search on the label and the order
+    /// of the list of the consultation. Each row counts the albums and series of the genre as the lists filtered on it find
+    /// them, and carries its modification and its version, which its modification and its deletion send back.
+    /// </summary>
+    private static Task<Page<GenreAdminListItem>> ListForAdministrationAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
+        context.Genres.AsNoTracking()
+            .WhereContains(q, g => g.Label)
+            .OrderBy(g => g.Label)
+            .ThenBy(g => g.Id)
+            .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Genre g) => new GenreAdminListItem(
+                g.Id,
+                g.Label,
+                context.Albums.Count(a => a.IsOfGenre(g.Id)),
+                context.Series.Count(s => s.IsOfGenre(g.Id)),
+                g.ModifiedAt,
+                EF.Property<uint>(g, BdthequeDbContext.VersionProperty))), cancellationToken);
 
     private static async Task<GenreForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
         await context.Genres

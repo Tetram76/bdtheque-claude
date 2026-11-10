@@ -198,6 +198,68 @@ public static class AudienceFunctions
     /// <summary>The removal of an intent, once confirmed and done.</summary>
     public static readonly AudienceFunction AdminPurchaseIntentsRemoved = new("admin.purchase-intents.removed", AudienceFunctionKind.Action);
 
+    /// <summary>The list of the genres of the administration (visuel/listes/liste-par-liste.md).</summary>
+    public static readonly AudienceFunction AdminGenres = new("admin.genres", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/GenreListQuery.cs);
+    // without filters nor navigation by initial.
+
+    public static readonly AudienceFunction AdminGenresSearch = new("admin.genres.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminGenresPage = new("admin.genres.page", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the deletion of a genre, opened from its row.</summary>
+    public static readonly AudienceFunction AdminGenresDeletion = new("admin.genres.deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a genre, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminGenresDeleted = new("admin.genres.deleted", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the merge of a genre, opened from its row, with the search of the other genre.</summary>
+    public static readonly AudienceFunction AdminGenresMerge = new("admin.genres.merge", AudienceFunctionKind.Action);
+
+    /// <summary>A genre changed in its row (visuel/listes/saisie-selon-l-entite.md), from its « Modifier ».</summary>
+    public static readonly AudienceFunction AdminGenresEdit = new("admin.genres.edit", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of a new genre opened, from « Nouveau genre ».</summary>
+    public static readonly AudienceFunction AdminGenresNew = new("admin.genres.new", AudienceFunctionKind.Action);
+
+    /// <summary>The change of a genre, once saved.</summary>
+    public static readonly AudienceFunction AdminGenreSaved = new("admin.genre.saved", AudienceFunctionKind.Action);
+
+    /// <summary>A new genre, once added.</summary>
+    public static readonly AudienceFunction AdminGenreCreated = new("admin.genre.created", AudienceFunctionKind.Action);
+
+    /// <summary>The list of the universes of the administration (visuel/listes/liste-par-liste.md).</summary>
+    public static readonly AudienceFunction AdminUniverses = new("admin.universes", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/UniverseListQuery.cs);
+    // without filters nor navigation by initial.
+
+    public static readonly AudienceFunction AdminUniversesSearch = new("admin.universes.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminUniversesPage = new("admin.universes.page", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the deletion of a universe, opened from its row.</summary>
+    public static readonly AudienceFunction AdminUniversesDeletion = new("admin.universes.deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a universe, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminUniversesDeleted = new("admin.universes.deleted", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the merge of a universe, opened from its row, with the search of the other universe.</summary>
+    public static readonly AudienceFunction AdminUniversesMerge = new("admin.universes.merge", AudienceFunctionKind.Action);
+
+    /// <summary>The panel of a universe opened on it (visuel/listes/saisie-selon-l-entite.md), from its « Modifier ».</summary>
+    public static readonly AudienceFunction AdminUniversesEdit = new("admin.universes.edit", AudienceFunctionKind.Action);
+
+    /// <summary>The panel of a new universe opened, from « Nouvel univers ».</summary>
+    public static readonly AudienceFunction AdminUniversesNew = new("admin.universes.new", AudienceFunctionKind.Action);
+
+    /// <summary>The change of a universe, once saved.</summary>
+    public static readonly AudienceFunction AdminUniverseSaved = new("admin.universe.saved", AudienceFunctionKind.Action);
+
+    /// <summary>A new universe, once created.</summary>
+    public static readonly AudienceFunction AdminUniverseCreated = new("admin.universe.created", AudienceFunctionKind.Action);
+
     /// <summary>The page of the editions and purchase intents of an album, with the album it presents (visuel/editions-album/contenu.md).</summary>
     public static readonly AudienceFunction AdminAlbumEditions = new("admin.album-editions", AudienceFunctionKind.Screen);
 
@@ -230,7 +292,10 @@ public static class AudienceFunctions
         AdminAuthorsMerge, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
         AdminPublishersMerge, AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
         AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsPage,
-        AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
+        AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresPage, AdminGenresDeletion,
+        AdminGenresDeleted, AdminGenresMerge, AdminGenresEdit, AdminGenresNew, AdminGenreSaved, AdminGenreCreated, AdminUniverses,
+        AdminUniversesSearch, AdminUniversesPage, AdminUniversesDeletion, AdminUniversesDeleted, AdminUniversesMerge, AdminUniversesEdit,
+        AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
         AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved,
         AdminAlbumEditionsAlbumIntentSet,
     ];

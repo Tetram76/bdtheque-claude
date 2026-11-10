@@ -30,6 +30,7 @@ internal static class UniverseEndpoints
     public static void MapUniverses(this RouteGroupBuilder admin)
     {
         var universes = admin.MapGroup("/universes");
+        universes.MapGet("/", ListForAdministrationAsync);
         universes.MapGet("/{id:guid}", GetAsync);
         universes.MapGet("/{id:guid}/hierarchy", GetHierarchyAsync);
         universes.MapPost("/", CreateAsync);
@@ -75,12 +76,80 @@ internal static class UniverseEndpoints
         return new UniverseWorks(universe, await CatalogWorks.ReadPageAsync(context, series, albums, page, pageSize, cancellationToken));
     }
 
-    private static async Task<UniverseForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
-        await context.Universes
-            .Where(u => u.Id == id)
-            .Select(u => new UniverseForm(u.Id, u.Name, u.Description, u.ParentId, EF.Property<uint>(u, BdthequeDbContext.VersionProperty)))
-            .SingleOrDefaultAsync(cancellationToken)
-        ?? throw new EntityNotFoundException(typeof(Universe), id);
+    /// <summary>
+    /// The list of the universes of the administration (visuel/listes/liste-par-liste.md): in the order of the hierarchy, each
+    /// universe followed by its sub-universes, siblings by name; the search on the name keeps the universes found in that
+    /// order. Each row carries its ancestors, what it counts, its sub-universes included, its modification and its version.
+    /// </summary>
+    /// <remarks>
+    /// The order of a tree is no order of the base: the hierarchy, a small reference table read whole
+    /// (choix-implementation/api/organisation-de-l-api.md), is ordered in memory and paged there; only the rows of the page
+    /// are then counted.
+    /// </remarks>
+    private static async Task<Page<UniverseAdminListItem>> ListForAdministrationAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize)
+    {
+        // A single snapshot: the rows counted are those of the hierarchy read.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var tree = await UniverseTree.LoadAsync(context, cancellationToken);
+        var found = string.IsNullOrWhiteSpace(q)
+            ? null
+            : (await context.Universes.AsNoTracking().WhereContains(q, u => u.Name).Select(u => u.Id).ToListAsync(cancellationToken)).ToHashSet();
+        var ordered = tree.InHierarchyOrder().Where(id => found is null || found.Contains(id)).ToList();
+        var ids = Paging.Slice(ordered, page, pageSize);
+
+        var rows = await context.Universes.AsNoTracking()
+            .Where(u => ids.Contains(u.Id))
+            .Select(u => new { u.Id, u.ModifiedAt, Version = EF.Property<uint>(u, BdthequeDbContext.VersionProperty) })
+            .ToDictionaryAsync(u => u.Id, cancellationToken);
+        var counts = await CountAsync(context, tree, ids, cancellationToken);
+        var items = ids.Select(id =>
+        {
+            var (universe, ancestors) = tree.InHierarchy(id);
+            var (albums, series) = counts[id];
+            return new UniverseAdminListItem(
+                id, universe.Name, universe.ParentId, ancestors, albums, series, tree.WithDescendants(id).Count - 1, rows[id].ModifiedAt,
+                rows[id].Version);
+        }).ToList();
+        return new Page<UniverseAdminListItem>(items, page, pageSize, ordered.Count);
+    }
+
+    /// <summary>
+    /// The albums and series of each universe, those of its sub-universes included, as the lists filtered on it find them
+    /// (<see cref="AlbumFilters"/>, <see cref="SeriesFilters"/>), in a single query: one count per universe,
+    /// joined by <c>UNION ALL</c>.
+    /// </summary>
+    private static async Task<Dictionary<Guid, (int Albums, int Series)>> CountAsync(
+        BdthequeDbContext context, UniverseTree tree, IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
+    {
+        if (ids.Count == 0)
+            return [];
+        var counts = ids.Select(id =>
+            {
+                var scope = tree.WithDescendants(id);
+                var albums = context.Albums.WhereUniverse(scope);
+                var series = context.Series.WhereUniverse(scope);
+                return context.Universes.Where(u => u.Id == id).Select(u => new { u.Id, Albums = albums.Count(), Series = series.Count() });
+            })
+            .Aggregate(Queryable.Concat);
+        return await counts.ToDictionaryAsync(c => c.Id, c => (c.Albums, c.Series), cancellationToken);
+    }
+
+    private static async Task<UniverseForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        var universe = await context.Universes.AsNoTracking()
+                           .Where(u => u.Id == id)
+                           .Select(u => new
+                           {
+                               u.Id, u.Name, u.Description, u.ParentId, u.CreatedAt, u.ModifiedAt,
+                               Version = EF.Property<uint>(u, BdthequeDbContext.VersionProperty),
+                           })
+                           .SingleOrDefaultAsync(cancellationToken)
+                       ?? throw new EntityNotFoundException(typeof(Universe), id);
+        var parent = universe.ParentId is { } parentId ? (await UniverseTree.LoadAsync(context, cancellationToken)).InHierarchy(parentId) : null;
+        return new UniverseForm(
+            universe.Id, universe.Name, universe.Description, universe.ParentId, parent, universe.CreatedAt, universe.ModifiedAt, universe.Version);
+    }
 
     /// <summary>
     /// The universe with its ancestors, as an entry form presents a universe it adds (visuel/saisie-album/contenu.md).
@@ -103,7 +172,7 @@ internal static class UniverseEndpoints
         context.Universes.Add(universe);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return TypedResults.Created($"/admin/universes/{universe.Id}", ToForm(context, universe));
+        return TypedResults.Created($"/admin/universes/{universe.Id}", await GetAsync(universe.Id, context, cancellationToken));
     }
 
     private static async Task<UniverseForm> UpdateAsync(
@@ -127,7 +196,7 @@ internal static class UniverseEndpoints
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return ToForm(context, universe);
+        return await GetAsync(universe.Id, context, cancellationToken);
     }
 
     /// <summary>
@@ -141,7 +210,4 @@ internal static class UniverseEndpoints
         var universes = await context.Universes.ToListAsync(cancellationToken);
         return universes.SingleOrDefault(u => u.Id == id) ?? throw new EntityNotFoundException(typeof(Universe), id);
     }
-
-    private static UniverseForm ToForm(BdthequeDbContext context, Universe universe) =>
-        new(universe.Id, universe.Name, universe.Description, universe.ParentId, context.VersionOf(universe));
 }
