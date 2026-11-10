@@ -103,7 +103,7 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
     {
         using var api = Application.CreateApiClient();
         // The day of the browser of the tests (Europe/Paris), that of the spotlight; a single edition has a cover.
-        var day = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Paris")).DateTime);
+        var day = Application.TodayIn(ApplicationHost.BrowserTimeZoneId);
         var colors = await api.GetFromJsonAsync<SpotlightColors>($"/catalog/spotlight/colors?day={day:yyyy-MM-dd}");
         return colors!.Palette!;
     }

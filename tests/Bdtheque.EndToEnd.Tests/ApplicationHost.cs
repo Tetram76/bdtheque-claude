@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Infrastructure;
 using Bdtheque.EndToEnd.Tests.Captures;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Api;
@@ -27,7 +29,17 @@ namespace Bdtheque.EndToEnd.Tests;
 /// </summary>
 public class ApplicationHost : IAsyncLifetime
 {
-    private readonly ApiHostFactory _api = new();
+    /// <summary>
+    /// When the application starts, whenever its tests run (choix-implementation/outillage.md): a time of the night when the
+    /// date of the browser of the tests (<see cref="BrowserTimeZoneId"/>) is already the next day while it is still the day
+    /// before in universal time, so that every test runs where a date guessed in universal time would show (#340).
+    /// </summary>
+    public static readonly DateTimeOffset Origin = new(2026, 1, 15, 23, 20, 0, TimeSpan.Zero);
+
+    /// <summary>The time zone of a browser of the tests, unless a test sets another one: not that of the machine.</summary>
+    public const string BrowserTimeZoneId = "Europe/Paris";
+
+    private readonly ApiHostFactory _api = new(TestClock.StartingAt(Origin));
     private FrontendFactory? _frontend;
     private IPlaywright? _playwright;
 
@@ -47,8 +59,22 @@ public class ApplicationHost : IAsyncLifetime
     /// <summary>A client of <c>api</c> itself, as <c>frontend</c> calls it: for a test to write its own data.</summary>
     public HttpClient CreateApiClient() => _api.CreateApiClient();
 
-    /// <summary>The clock of <c>api</c>, which dates its writes: fixed by an application whose captures show their dates.</summary>
-    protected TestClock ApiClock => _api.Clock;
+    /// <summary>
+    /// The clock of the whole application, <c>frontend</c> as <c>api</c>, from <see cref="Origin"/>: a test sets it when its
+    /// captures show the dates it writes.
+    /// </summary>
+    public TestClock Clock => _api.Clock;
+
+    /// <summary>The date of a browser in <paramref name="timeZone"/>, at the time of the application.</summary>
+    public DateOnly TodayIn(string timeZone) =>
+        DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(Clock.GetUtcNow(), TimeZoneInfo.FindSystemTimeZoneById(timeZone)).DateTime);
+
+    /// <summary>The days the history of the editions in the spotlight holds a line for.</summary>
+    public async Task<IReadOnlyList<DateOnly>> SpotlightDaysAsync()
+    {
+        await using var scope = _api.Services.CreateAsyncScope();
+        return await scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().EditionSpotlights.Select(s => s.Day).ToListAsync();
+    }
 
     /// <summary>Signs the administrator in, by the login page, as a user does: the page then goes to <paramref name="path"/>.</summary>
     public static async Task SignInAsync(IPage page, string path)
@@ -107,6 +133,7 @@ public class ApplicationHost : IAsyncLifetime
     public Task<IBrowserContext> NewContextAsync(BrowserNewContextOptions options)
     {
         options.BaseURL = BaseAddress.ToString();
+        options.TimezoneId ??= BrowserTimeZoneId;
         return Browser.NewContextAsync(options);
     }
 
@@ -141,6 +168,8 @@ public class ApplicationHost : IAsyncLifetime
             builder.ConfigureTestServices(services =>
             {
                 services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler());
+                // One time for the whole application, as one machine gives it to its containers.
+                services.Replace(ServiceDescriptor.Singleton<TimeProvider>(api.Clock));
                 FixTheThemeByRequest(services);
                 if (!paintedByItsSpotlight)
                     services.Replace(ServiceDescriptor.Scoped<IDayColorsSource, OwnDayColors>());

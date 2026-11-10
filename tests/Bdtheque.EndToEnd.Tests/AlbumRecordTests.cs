@@ -184,7 +184,7 @@ public sealed class RecordsApplication : ApplicationHost
     protected override async Task SeedAsync()
     {
         using var api = CreateApiClient();
-        ApiClock.UtcNow = Start;
+        Clock.UtcNow = Start;
         var casterman = await PostAsync<PublisherForm>(api, "/admin/publishers", new CreatePublisherRequest("Casterman", "https://www.casterman.com/"));
         var collection = await PostAsync<PublisherCollectionForm>(api,
             $"/admin/publishers/{casterman.Id}/collections", new CreatePublisherCollectionRequest("Univers d'auteurs", casterman.Version));
@@ -265,7 +265,7 @@ public sealed class RecordsApplication : ApplicationHost
         return (await response.Content.ReadFromJsonAsync<TResponse>())!;
     }
 
-    private void Tick() => ApiClock.UtcNow += TimeSpan.FromMinutes(15);
+    private void Tick() => Clock.UtcNow += TimeSpan.FromMinutes(15);
 }
 
 [CollectionDefinition(RecordsApplication.Name)]

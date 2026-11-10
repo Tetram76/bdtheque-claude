@@ -147,6 +147,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
 
         var opposition = (await page.Context.CookiesAsync()).Single(c => c.Name == AudienceOpposition.CookieName);
 
+        // A lifetime (Max-Age), which the browser dates by its own clock, the real time, not by that of the application.
         Assert.True(opposition.Expires > DateTimeOffset.UtcNow.AddDays(364).ToUnixTimeSeconds());
         Assert.True(opposition.Expires <= DateTimeOffset.UtcNow.AddDays(366).ToUnixTimeSeconds());
     }

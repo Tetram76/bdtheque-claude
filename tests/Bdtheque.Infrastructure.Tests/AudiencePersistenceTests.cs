@@ -79,5 +79,5 @@ public sealed class AudiencePersistenceTests : IAsyncLifetime
 
     private static AudienceCounter Counter(string function, string? engineVersion, AudienceCounterObject[] objects) =>
         new(function, new DateOnly(2026, 3, 1), false, DeviceType.Computer, RenderingEngine.Blink, engineVersion, 2, 1, 1,
-            DateTimeOffset.UtcNow, objects);
+            new DateTimeOffset(2026, 3, 31, 18, 0, 0, TimeSpan.Zero), objects);
 }

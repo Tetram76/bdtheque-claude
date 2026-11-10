@@ -99,6 +99,26 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Entrez donc, il y a de quoi lire !");
     }
 
+    // At the time of the application of the tests, the date of the browser is already the next day while it is still the day
+    // before in universal time (ApplicationHost.Origin). The first page, whose request does not bring the time zone yet,
+    // draws nothing: the edition in the spotlight is drawn, and recorded, for the date of the browser only (#340). Had the
+    // first page drawn the day in universal time, the only edition with a cover would have been recent the next day, and
+    // the page rendered again would have presented the other one.
+    [Fact]
+    public async Task Spotlight_IsDrawnForTheDateOfTheBrowserOnly_WhenItIsNotTheDateInUniversalTime()
+    {
+        var universalDay = DateOnly.FromDateTime(Application.Clock.GetUtcNow().UtcDateTime);
+        Assert.NotEqual(universalDay, Application.TodayIn(ApplicationHost.BrowserTimeZoneId));
+        var page = await NewPageAsync();
+
+        await page.GotoAsync(AppPaths.Home);
+
+        await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", ApplicationHost.BrowserTimeZoneId);
+        var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
+        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link)).ToContainTextAsync("Le Port des brumes");
+        Assert.DoesNotContain(universalDay, await Application.SpotlightDaysAsync());
+    }
+
     [Fact]
     public async Task Foot_LeadsToTheAdministration()
     {
