@@ -4,7 +4,6 @@ using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Lists;
 using Bdtheque.Frontend.Tests.Controls;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
@@ -89,7 +88,7 @@ public sealed class LinkedFiltersTests : BunitContext
     {
         var filters = Open(Dargaud, LuckyLuke);
 
-        await filters.InvokeAsync(() => filters.Find("#filter-publisher + .record-picker-clear").Click());
+        await filters.ClickAsync("#filter-publisher + .record-picker-clear");
 
         // A collection belongs to a single publisher: the list filtered on it is the same, with or without its publisher.
         Assert.Equal(("", LuckyLuke.Id.ToString()), Sent(filters));
@@ -112,7 +111,7 @@ public sealed class LinkedFiltersTests : BunitContext
     {
         await (await filters.TypeAsync(field, text, _clock)).EndAsync("The search of the text typed");
         Assert.NotEmpty(filters.FindAll("[role=option]"));
-        await (await filters.RaiseAsync("[role=option]", option => option.ClickAsync(new MouseEventArgs()))).EndAsync("The choice of the suggestion");
+        await filters.ClickAsync("[role=option]");
     }
 
     private static HttpResponseMessage Json(string content) =>

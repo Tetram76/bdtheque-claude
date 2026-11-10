@@ -104,7 +104,7 @@ public sealed class RecordPickerTests : BunitContext
         Assert.Single(picker.FindAll("[role=option]"));
         // Marked apart: its mention is not read as the end of the name.
         Assert.True(picker.Find("[role=option]").ClassList.Contains("record-picker-pending"));
-        picker.FindAll("[role=option]")[0].Click();
+        await picker.ClickAsync("#f-author-suggestion-0");
         Assert.Equal(pending, chosen);
     }
 
@@ -120,7 +120,7 @@ public sealed class RecordPickerTests : BunitContext
         await TypeAsync(picker, "ti");
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
         Assert.Empty(picker.FindAll(".record-picker-pending"));
-        picker.FindAll("[role=option]")[1].Click();
+        await picker.ClickAsync("#f-series-suggestion-1");
 
         Assert.Equal(new RecordOption(Titeuf, "Titeuf", null), chosen);
         Assert.Equal("Titeuf", picker.Find("input").GetAttribute("value"));
@@ -138,15 +138,15 @@ public sealed class RecordPickerTests : BunitContext
 
         await TypeAsync(picker, "ti");
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
-        picker.Find("input").KeyDown("ArrowDown");
-        picker.Find("input").KeyDown("ArrowDown");
+        await picker.KeyDownAsync("input", "ArrowDown");
+        await picker.KeyDownAsync("input", "ArrowDown");
 
         var active = picker.Find("input").GetAttribute("aria-activedescendant");
         Assert.Equal("true", picker.Find($"#{active}").GetAttribute("aria-selected"));
         Assert.Equal("Titeuf", picker.Find($"#{active}").TextContent.Trim());
 
-        picker.Find("input").KeyDown("ArrowUp");
-        picker.Find("input").KeyDown("Enter");
+        await picker.KeyDownAsync("input", "ArrowUp");
+        await picker.KeyDownAsync("input", "Enter");
 
         Assert.Equal(Tintin, chosen?.Id);
     }
@@ -166,7 +166,7 @@ public sealed class RecordPickerTests : BunitContext
         var creation = picker.FindAll("[role=option]")[2];
         Assert.Equal("Créer « Jean Nouvel »", creation.TextContent.Trim());
 
-        creation.Click();
+        await picker.ClickAsync(".record-picker-create");
 
         Assert.Equal("Jean Nouvel", created);
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
@@ -185,8 +185,8 @@ public sealed class RecordPickerTests : BunitContext
         await TypeAsync(picker, "ti");
         Assert.Equal(3, picker.FindAll("[role=option]").Count);
         foreach (var _ in Enumerable.Range(0, 4))
-            picker.Find("input").KeyDown("ArrowDown");
-        picker.Find("input").KeyDown("Enter");
+            await picker.KeyDownAsync("input", "ArrowDown");
+        await picker.KeyDownAsync("input", "Enter");
 
         Assert.Equal("ti", created);
     }
@@ -212,8 +212,8 @@ public sealed class RecordPickerTests : BunitContext
             .Add(p => p.ValueChanged, value => chosen = value));
         await TypeAsync(picker, "ti");
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
-        picker.Find("input").KeyDown("ArrowDown");
-        picker.Find("input").KeyDown("ArrowDown");
+        await picker.KeyDownAsync("input", "ArrowDown");
+        await picker.KeyDownAsync("input", "ArrowDown");
 
         var answer = new TaskCompletionSource<HttpResponseMessage>();
         _pending = answer.Task;
@@ -221,18 +221,18 @@ public sealed class RecordPickerTests : BunitContext
 
         Assert.Empty(picker.FindAll("[role=option]"));
         Assert.Null(picker.Find("input").GetAttribute("aria-activedescendant"));
-        picker.Find("input").KeyDown("ArrowDown");
+        await picker.KeyDownAsync("input", "ArrowDown");
 
         answer.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
         await search.EndAsync("The search of the text typed");
         Assert.Single(picker.FindAll("[role=option]"));
         Assert.Null(picker.Find("input").GetAttribute("aria-activedescendant"));
-        picker.Find("input").KeyDown("Enter");
+        await picker.KeyDownAsync("input", "Enter");
 
         Assert.Null(chosen);
-        picker.Find("input").KeyDown("ArrowDown");
+        await picker.KeyDownAsync("input", "ArrowDown");
         Assert.Equal("f-series-suggestion-0", picker.Find("input").GetAttribute("aria-activedescendant"));
-        picker.Find("input").KeyDown("Enter");
+        await picker.KeyDownAsync("input", "Enter");
         Assert.Equal(Tintin, chosen?.Id);
     }
 
@@ -305,8 +305,8 @@ public sealed class RecordPickerTests : BunitContext
         await TypeAsync(picker, "tit");
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
 
-        picker.Find("input").Blur();
-        picker.Find("input").KeyDown("ArrowDown");
+        await picker.BlurAsync("input");
+        await picker.KeyDownAsync("input", "ArrowDown");
 
         Assert.Equal("Tintin", picker.Find("input").GetAttribute("value"));
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
@@ -321,10 +321,10 @@ public sealed class RecordPickerTests : BunitContext
         _pending = answer.Task;
         var search = await TypeUntilSentAsync(picker, "ti");
 
-        picker.Find("input").Blur();
+        await picker.BlurAsync("input");
         answer.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
         await search.EndAsync("The search of the text left");
-        picker.Find("input").KeyDown("ArrowDown");
+        await picker.KeyDownAsync("input", "ArrowDown");
 
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
         Assert.Empty(picker.FindAll("[role=option]"));
@@ -337,8 +337,8 @@ public sealed class RecordPickerTests : BunitContext
         await TypeAsync(picker, "ti");
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
 
-        picker.FindAll("[role=option]")[1].Click();
-        picker.Find("input").KeyDown("ArrowDown");
+        await picker.ClickAsync("#f-series-suggestion-1");
+        await picker.KeyDownAsync("input", "ArrowDown");
 
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
         Assert.Empty(picker.FindAll("[role=option]"));
@@ -354,15 +354,15 @@ public sealed class RecordPickerTests : BunitContext
 
         await TypeAsync(picker, "tit");
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
-        picker.Find("input").KeyDown("Escape");
+        await picker.KeyDownAsync("input", "Escape");
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
 
-        picker.Find("input").Blur();
+        await picker.BlurAsync("input");
         Assert.Equal("Tintin", picker.Find("input").GetAttribute("value"));
     }
 
     [Fact]
-    public void Clearing_LeavesNoRecordChosen()
+    public async Task Clearing_LeavesNoRecordChosen()
     {
         RecordOption? chosen = new(Tintin, "Tintin", null);
         var picker = Render<RecordPicker>(parameters => parameters
@@ -372,7 +372,7 @@ public sealed class RecordPickerTests : BunitContext
             .Add(p => p.Value, chosen)
             .Add(p => p.ValueChanged, value => chosen = value));
 
-        picker.Find("button.record-picker-clear").Click();
+        await picker.ClickAsync("button.record-picker-clear");
 
         Assert.Null(chosen);
         Assert.Equal("", picker.Find("input#f-series").GetAttribute("value"));
@@ -404,11 +404,11 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
-    public void ErasingTheText_ClosesTheSuggestions_WithoutSearching()
+    public async Task ErasingTheText_ClosesTheSuggestions_WithoutSearching()
     {
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
 
-        picker.Find("input").Input("   ");
+        await (await picker.RaiseAsync("input", field => field.InputAsync(new ChangeEventArgs { Value = "   " }))).EndAsync("Erasing the text");
 
         Assert.Empty(_requests);
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
