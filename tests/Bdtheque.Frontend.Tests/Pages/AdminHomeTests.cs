@@ -73,7 +73,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             cards);
         // The lists of the albums (#200), of the editions (#333), of the series (#301), of the purchase intents (#334), of the authors
         // (#302), of the publishers (#303), of the genres and of the universes (#203), and the entry forms of an album (#205), of
-        // a series (#206) and of an author (#207), are implemented; the other pages are still to come.
+        // a series (#206), of an author (#207) and of a publisher (#208), are implemented; the other pages are still to come.
         var links = BlockOf(page, "Les fiches").QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))).ToList();
         IEnumerable<(string, string?)> implemented =
         [
@@ -82,7 +82,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             ("Séries", AppPaths.AdminSeries), ("Gérer la liste", AppPaths.AdminSeries), ("+ Nouvelle série", AppPaths.AdminNewSeries),
             ("Intentions d'achat", AppPaths.AdminPurchaseIntents), ("Gérer la liste", AppPaths.AdminPurchaseIntents),
             ("Auteurs", AppPaths.AdminAuthors), ("Gérer la liste", AppPaths.AdminAuthors), ("+ Nouvel auteur", AppPaths.AdminNewAuthor),
-            ("Éditeurs", AppPaths.AdminPublishers), ("Gérer la liste", AppPaths.AdminPublishers),
+            ("Éditeurs", AppPaths.AdminPublishers), ("Gérer la liste", AppPaths.AdminPublishers), ("+ Nouvel éditeur", AppPaths.AdminNewPublisher),
             ("Genres", AppPaths.AdminGenres), ("Gérer la liste", AppPaths.AdminGenres), ("+ Nouveau genre", AppPaths.AdminNewGenre),
             ("Univers", AppPaths.AdminUniverses), ("Gérer la liste", AppPaths.AdminUniverses), ("+ Nouvel univers", AppPaths.AdminNewUniverse),
         ];

@@ -199,6 +199,23 @@ public static class AudienceFunctions
     /// <summary>The dialog of the merge of a publisher, opened from its row, with the search of the other publisher.</summary>
     public static readonly AudienceFunction AdminPublishersMerge = new("admin.publishers.merge", AudienceFunctionKind.Action);
 
+    /// <summary>The entry form of a publisher and of its collections, with the publisher it presents (visuel/saisie-editeur/contenu.md).</summary>
+    public static readonly AudienceFunction AdminPublisherForm = new("admin.publisher-form", AudienceFunctionKind.Screen);
+
+    /// <summary>The entry form of a new publisher.</summary>
+    public static readonly AudienceFunction AdminNewPublisherForm = new("admin.publisher-form.new", AudienceFunctionKind.Screen);
+
+    // The actions of the form, interactive, each recorded in the visit of the prerendering of its page.
+
+    /// <summary>The creation of a publisher, with the publisher created.</summary>
+    public static readonly AudienceFunction AdminPublisherCreated = new("admin.publisher-form.created", AudienceFunctionKind.Action);
+
+    /// <summary>The saving of the modification of a publisher, with the publisher saved.</summary>
+    public static readonly AudienceFunction AdminPublisherSaved = new("admin.publisher-form.saved", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, the publisher having been modified in the meantime.</summary>
+    public static readonly AudienceFunction AdminPublisherChanges = new("admin.publisher-form.changes", AudienceFunctionKind.Action);
+
     /// <summary>The list of the editions of the administration (visuel/listes/liste-par-liste.md).</summary>
     public static readonly AudienceFunction AdminEditions = new("admin.editions", AudienceFunctionKind.Screen);
 
@@ -329,7 +346,8 @@ public static class AudienceFunctions
         AdminSeriesMerge, AdminSeriesForm, AdminNewSeriesForm, AdminSeriesCreated, AdminSeriesSaved, AdminSeriesAuthorCreated,
         AdminSeriesGenreCreated, AdminSeriesUniverseCreated, AdminSeriesChanges, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
         AdminAuthorsMerge, AdminAuthorsEdit, AdminAuthorsNew, AdminAuthorSaved, AdminAuthorCreated, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
-        AdminPublishersMerge, AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
+        AdminPublishersMerge, AdminPublisherForm, AdminNewPublisherForm, AdminPublisherCreated, AdminPublisherSaved, AdminPublisherChanges,
+        AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
         AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsPage,
         AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresPage, AdminGenresDeletion,
         AdminGenresDeleted, AdminGenresMerge, AdminGenresEdit, AdminGenresNew, AdminGenreSaved, AdminGenreCreated, AdminUniverses,

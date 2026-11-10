@@ -158,8 +158,8 @@ public static class AppPaths
     /// <summary>The list of the publishers of the administration (visuel/listes/).</summary>
     public const string AdminPublishers = "/admin/publishers";
 
-    /// <summary>The entry form of a publisher and of its collections (#208).</summary>
-    public static string AdminEditPublisher(Guid id) => NotYetImplemented;
+    /// <summary>The entry form of a publisher and of its collections (visuel/saisie-editeur/).</summary>
+    public static string AdminEditPublisher(Guid id) => $"{AdminPublishers}/{id}";
 
     /// <summary>
     /// The next step of the merge of two publishers, whose presentation awaits the terms of the merge
@@ -213,7 +213,8 @@ public static class AppPaths
     /// <summary>The list of the authors with the panel of a new author open over it.</summary>
     public const string AdminNewAuthor = $"{AdminAuthors}?new=open";
 
-    public const string AdminNewPublisher = NotYetImplemented;
+    /// <summary>The entry form of a new publisher (visuel/saisie-editeur/).</summary>
+    public const string AdminNewPublisher = $"{AdminPublishers}/new";
 
     /// <summary>The list of the genres with the frame of a new genre open.</summary>
     public const string AdminNewGenre = $"{AdminGenres}?new=open";

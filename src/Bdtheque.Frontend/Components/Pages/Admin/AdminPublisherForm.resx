@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Publishers" xml:space="preserve">
+    <value>Éditeurs</value>
+  </data>
+  <data name="Breadcrumb.Unknown" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouvel éditeur</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier l&apos;éditeur</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Créer l&apos;éditeur</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Modifier l&apos;éditeur {0}</value>
+  </data>
+  <data name="Unnamed" xml:space="preserve">
+    <value>&lt;Sans nom&gt;</value>
+  </data>
+  <data name="Block.Publisher" xml:space="preserve">
+    <value>L&apos;éditeur</value>
+  </data>
+  <data name="Block.Collections" xml:space="preserve">
+    <value>Les collections</value>
+  </data>
+  <data name="Kicker.Publisher" xml:space="preserve">
+    <value>Identification</value>
+  </data>
+  <data name="Kicker.Collections" xml:space="preserve">
+    <value>Catalogue</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Name.Note" xml:space="preserve">
+    <value>(obligatoire)</value>
+  </data>
+  <data name="Name.Placeholder" xml:space="preserve">
+    <value>Nom de l&apos;éditeur</value>
+  </data>
+  <data name="Website" xml:space="preserve">
+    <value>Site web</value>
+  </data>
+  <data name="Website.Help" xml:space="preserve">
+    <value>Dans la consultation, le nom de l&apos;éditeur mène à son site web ; sans site, il n&apos;est pas un lien.</value>
+  </data>
+  <data name="Website.Open" xml:space="preserve">
+    <value>Ouvrir le site web</value>
+  </data>
+  <data name="Collections.Help" xml:space="preserve">
+    <value>Elles s&apos;enregistrent avec l&apos;éditeur. Une collection que désigne une édition ou une série ne peut pas être retirée.</value>
+  </data>
+  <data name="Collections.None" xml:space="preserve">
+    <value>Aucune collection.</value>
+  </data>
+  <data name="Collections.Add" xml:space="preserve">
+    <value>Ajouter une collection</value>
+  </data>
+  <data name="Collection.Name" xml:space="preserve">
+    <value>Nom de la collection</value>
+  </data>
+  <data name="Collection.New" xml:space="preserve">
+    <value>Nouvelle</value>
+  </data>
+  <data name="Collection.Unused" xml:space="preserve">
+    <value>Aucune édition ni série</value>
+  </data>
+  <data name="Collection.Removed" xml:space="preserve">
+    <value>Retirée à l&apos;enregistrement</value>
+  </data>
+  <data name="Collection.Edition" xml:space="preserve">
+    <value>{0:N0} édition</value>
+  </data>
+  <data name="Collection.Editions" xml:space="preserve">
+    <value>{0:N0} éditions</value>
+  </data>
+  <data name="Collection.Series" xml:space="preserve">
+    <value>{0:N0} série</value>
+  </data>
+  <data name="Collection.Series.Plural" xml:space="preserve">
+    <value>{0:N0} séries</value>
+  </data>
+  <data name="Collection.Remove" xml:space="preserve">
+    <value>Retirer {0}</value>
+  </data>
+  <data name="Collection.Remove.Title" xml:space="preserve">
+    <value>Retirer la collection</value>
+  </data>
+  <data name="Collection.Restore" xml:space="preserve">
+    <value>Rétablir</value>
+  </data>
+  <data name="Collection.Locked" xml:space="preserve">
+    <value>Utilisée : ne peut pas être retirée</value>
+  </data>
+  <data name="Dates.Created" xml:space="preserve">
+    <value>Éditeur créé le</value>
+  </data>
+  <data name="Dates.Modified" xml:space="preserve">
+    <value>, modifié le</value>
+  </data>
+  <data name="FieldError.Publisher.NameRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="FieldError.Publisher.NameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà le nom d&apos;un autre éditeur.</value>
+  </data>
+  <data name="FieldError.Publisher.WebsiteInvalid" xml:space="preserve">
+    <value>Une adresse web complète, commençant par https:// ou http://.</value>
+  </data>
+  <data name="Problem.Functional.Conflict" xml:space="preserve">
+    <value>L&apos;éditeur a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
+  </data>
+  <data name="Problem.Functional.NotFound" xml:space="preserve">
+    <value>L&apos;éditeur, ou l&apos;une de ses collections, a été supprimé entre-temps : rien n&apos;a été enregistré.</value>
+  </data>
+  <data name="Problem.Technical.Text" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas pu enregistrer l&apos;éditeur. Vos changements sont toujours là, dans le formulaire : réessayez dans quelques instants.</value>
+  </data>
+  <data name="Changes.Collections" xml:space="preserve">
+    <value>Collections</value>
+  </data>
+</root>

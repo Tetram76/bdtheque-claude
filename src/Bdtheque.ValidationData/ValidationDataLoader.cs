@@ -455,18 +455,10 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
         public async Task<Publisher> PublisherAsync(string name, string? website, params string[] collections)
         {
-            var publisher = await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new(name, website, []));
-            var version = publisher.Version;
-            var ids = new List<Guid>();
-            foreach (var collection in collections)
-            {
-                var created = await PostAsync<CreatePublisherCollectionRequest, PublisherCollectionForm>(
-                    $"/admin/publishers/{publisher.Id}/collections", new(collection, version));
-                version = created.PublisherVersion;
-                ids.Add(created.Id);
-            }
-
-            return new Publisher(publisher.Id, [.. ids]);
+            // Its collections created with it, as its entry form saves them; named back in the order given.
+            var publisher = await PostAsync<PublisherContent, PublisherForm>(
+                "/admin/publishers", new(name, website, [.. collections.Select(c => new PublisherCollectionContent(null, c))]));
+            return new Publisher(publisher.Id, [.. collections.Select(c => publisher.Collections.Single(created => created.Name == c).Id)]);
         }
 
         public async Task<Guid> AuthorAsync(

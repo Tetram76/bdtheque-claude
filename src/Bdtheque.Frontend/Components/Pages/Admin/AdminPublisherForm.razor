@@ -1,0 +1,290 @@
+@attribute [Route(AppPaths.AdminNewPublisher)]
+@attribute [Route("/admin/publishers/{Id:guid}")]
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<AdminPublisherForm> L
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The entry form of a publisher and of its collections (visuel/saisie-editeur/contenu.md), on the model of the entry form of a
+   series, whose frame and errors it shares. The collections have neither list nor page of their own: they are entered here and
+   saved with the publisher, a collection removed staying in the list, struck, until the saving. No side column. It applies no
+   rule of the publisher, which the domain alone holds (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md):
+   the error of its saving says what to correct. Its styles read the contracts of the base theme only
+   (visuel/saisie-editeur/declinaison-par-theme.md). *@
+<PageTitle>@PageTitle</PageTitle>
+<AudienceScreen Function="@(Id is null ? AudienceFunctions.AdminNewPublisherForm : AudienceFunctions.AdminPublisherForm)"
+                Record="@(Id is { } id ? new PresentedRecord(RecordType.Publisher, id) : null)" />
+
+@if (Entry is null)
+{
+    @if (_loadProblem is not null)
+    {
+        <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Publishers"], AppPaths.AdminPublishers), new(L["Breadcrumb.Unknown"])])" />
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Publishers"], AppPaths.AdminPublishers), new(Entry.Id is null ? L["New"] : Subject)])"
+               Title="@(Entry.Id is null ? L["New"] : L["Edit"])" Subject="@Subject" State="State" Saving="_saving"
+               SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@AppPaths.AdminPublishers" OnSave="SaveAsync"
+               Problem="@SaveProblem" Dates="@Dates">
+        <Block Title="@L["Block.Publisher"]" Kicker="@L["Kicker.Publisher"]">
+            <div class="publisher-fields">
+                <Field Id="publisher-name" Label="@L["Name"]" Note="@L["Name.Note"]" Error="@FieldError("name")" Context="control">
+                    <input id="@control.Id" type="text" placeholder="@L["Name.Placeholder"]" aria-describedby="@control.DescribedBy"
+                           aria-invalid="@control.Invalid" @bind="Entry.Name" @bind:event="oninput" />
+                </Field>
+                <Field Id="publisher-website" Label="@L["Website"]" Help="@L["Website.Help"]" Error="@FieldError("website")" Context="control">
+                    <span class="publisher-website">
+                        <input id="@control.Id" type="url" placeholder="https://…" aria-describedby="@control.DescribedBy"
+                               aria-invalid="@control.Invalid" @bind="Entry.Website" @bind:event="oninput" />
+                        @* An external site opened in a new tab, without access to the form nor referrer
+                           (choix-implementation/socle/frontend.md, site extérieur). *@
+                        @if (!string.IsNullOrWhiteSpace(Entry.Website))
+                        {
+                            <a class="publisher-website-open" href="@Entry.Website.Trim()" target="_blank" rel="noopener noreferrer"
+                               aria-label="@L["Website.Open"]" title="@L["Website.Open"]"><Icon Name="IconName.Exit" /></a>
+                        }
+                    </span>
+                </Field>
+            </div>
+        </Block>
+
+        <Block Title="@L["Block.Collections"]" Kicker="@L["Kicker.Collections"]">
+            <div class="publisher-fields">
+                <p class="publisher-help">@L["Collections.Help"]</p>
+                @if (Entry.Collections.Count == 0)
+                {
+                    <p class="publisher-collections-none">@L["Collections.None"]</p>
+                }
+                else
+                {
+                    <ul class="publisher-collections">
+                        @foreach (var collection in Entry.Collections)
+                        {
+                            <li @key="collection.Key" class="publisher-collection" data-removed="@(collection.Removed ? "true" : null)">
+                                @if (collection.Removed)
+                                {
+                                    <span class="publisher-collection-name">@collection.Name</span>
+                                }
+                                else
+                                {
+                                    <span class="publisher-collection-name">
+                                        <label class="visually-hidden" for="@CollectionId(collection)">@L["Collection.Name"]</label>
+                                        <input id="@CollectionId(collection)" type="text" placeholder="@L["Collection.Name"]"
+                                               @bind="collection.Name" @bind:event="oninput" />
+                                    </span>
+                                }
+                                <span class="publisher-collection-use">
+                                    @if (collection.Id is null)
+                                    {
+                                        <Tag Text="@L["Collection.New"]" />
+                                    }
+                                    <span class="publisher-collection-count">@Use(collection)</span>
+                                </span>
+                                <span class="publisher-collection-action">
+                                    @if (collection.Removed)
+                                    {
+                                        <button type="button" class="publisher-collection-restore" @onclick="() => collection.Removed = false">@L["Collection.Restore"]</button>
+                                    }
+                                    else if (collection.InUse)
+                                    {
+                                        <span class="publisher-collection-locked" role="img" aria-label="@L["Collection.Locked"]" title="@L["Collection.Locked"]">
+                                            <Icon Name="IconName.Lock" />
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="publisher-collection-remove" aria-label="@L["Collection.Remove", Label(collection)]"
+                                                title="@L["Collection.Remove.Title"]" @onclick="() => Entry.Remove(collection)">
+                                            <Icon Name="IconName.Delete" />
+                                        </button>
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+                <span>
+                    <button type="button" class="publisher-collections-add" @onclick="AddCollection"><Icon Name="IconName.Add" /><span>@L["Collections.Add"]</span></button>
+                </span>
+            </div>
+        </Block>
+    </EntryForm>
+
+    @if (_changesShown)
+    {
+        <ChangesDialog Id="publisher-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
+    }
+}
+
+@code {
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _saveProblem;
+    private EntryForm? _form;
+    private bool _revealProblem;
+    private bool _saving;
+    private string? _savedFingerprint;
+    private bool _changesShown;
+
+    /// <summary>The publisher to modify; none for a new publisher.</summary>
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>The publisher as the form holds it, read once, by the prerendering.</summary>
+    [PersistentState]
+    public PublisherEntry? Entry { get; set; }
+
+    /// <summary>The publisher as it was read or last saved: what the user changed since.</summary>
+    [PersistentState]
+    public PublisherEntry? ReadEntry { get; set; }
+
+    // The name of the publisher, as typed; « <Sans nom> » while nothing is.
+    private string Subject => string.IsNullOrWhiteSpace(Entry!.Name) ? L["Unnamed"] : Entry.Name.Trim();
+
+    private string PageTitle => Entry is null || Entry.Id is null ? L["New"] : L["PageTitle", Subject];
+
+    private SaveBarState State => Entry!.Id is null ? SaveBarState.New : SavedState;
+
+    // The state of a publisher already saved: whether its form still holds what was last read or saved.
+    private SaveBarState SavedState => Entry!.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Entry is null)
+        {
+            try
+            {
+                Entry = Id is { } id ? PublisherEntry.Of(await Api.GetAsync<PublisherForm>($"/admin/publishers/{id}")) : new PublisherEntry();
+                ReadEntry = Entry.Copy();
+            }
+            catch (ApiProblemException exception)
+            {
+                _loadProblem = exception.Problem;
+                return;
+            }
+        }
+
+        _savedFingerprint = ReadEntry!.Fingerprint();
+    }
+
+    private static string CollectionId(CollectionEntry collection) => $"publisher-collection-{collection.Key}";
+
+    // The name of a collection, as typed, which its removal names; « <Sans nom> » while nothing is.
+    private string Label(CollectionEntry collection) => string.IsNullOrWhiteSpace(collection.Name) ? L["Unnamed"] : collection.Name.Trim();
+
+    // What references a collection (« 58 éditions · 3 séries »); what becomes of a collection removed at the saving.
+    private string Use(CollectionEntry collection)
+    {
+        if (collection.Removed)
+            return L["Collection.Removed"];
+        if (!collection.InUse)
+            return L["Collection.Unused"];
+        string?[] parts =
+        [
+            collection.EditionCount > 0 ? L[collection.EditionCount > 1 ? "Collection.Editions" : "Collection.Edition", collection.EditionCount].Value : null,
+            collection.SeriesCount > 0 ? L[collection.SeriesCount > 1 ? "Collection.Series.Plural" : "Collection.Series", collection.SeriesCount].Value : null,
+        ];
+        return string.Join(" · ", parts.OfType<string>());
+    }
+
+    private void AddCollection() => Entry!.AddCollection();
+
+    private async Task SaveAsync()
+    {
+        if (_saving)
+            return;
+        _saving = true;
+        _saveProblem = null;
+        var content = Entry!.ToContent();
+        try
+        {
+            if (Entry.Id is { } id)
+            {
+                var saved = await Api.PutAsync<UpdatePublisherRequest, PublisherForm>($"/admin/publishers/{id}", new UpdatePublisherRequest(content, Entry.Version));
+                Entry = PublisherEntry.Of(saved);
+                ReadEntry = Entry.Copy();
+                _savedFingerprint = Entry.Fingerprint();
+                await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherSaved, $"publisher={id}");
+            }
+            else
+            {
+                var created = await Api.PostAsync<PublisherContent, PublisherForm>("/admin/publishers", content);
+                await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherCreated, $"publisher={created.Id}");
+                Navigation.NavigateTo(AppPaths.AdminEditPublisher(created.Id));
+            }
+        }
+        catch (ApiProblemException exception)
+        {
+            _saveProblem = exception.Problem;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // Once the error of a saving is rendered, what is to correct is brought into view.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    private async Task ShowChangesAsync()
+    {
+        _changesShown = true;
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherChanges, $"publisher={Entry!.Id}");
+    }
+
+    // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(AppPaths.AdminEditPublisher(Entry!.Id!.Value), forceLoad: true);
+
+    // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own (a
+    // collection: the error does not say which one).
+    private string? FieldError(string field) =>
+        _saveProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field
+            ? L[$"FieldError.{code}", Subject].Value
+            : null;
+
+    private static string? FieldOf(string ruleCode) => ruleCode switch
+    {
+        "Publisher.NameRequired" or "Publisher.NameAlreadyUsed" => "name",
+        "Publisher.WebsiteInvalid" => "website",
+        _ => null,
+    };
+
+    // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-editeur/contenu.md).
+    private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      OnRetry="SaveAsync" />;
+
+    private RenderFragment? Dates => Entry is { CreatedAt: { } created, ModifiedAt: { } modified }
+        ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>
+        : null;
+
+    // Each field the user changed since the publisher was read, with what they entered, to enter it again once it is reloaded.
+    private List<EntryChange> Changes() => [.. ChangedFields()];
+
+    private IEnumerable<EntryChange> ChangedFields()
+    {
+        var (read, entry) = (ReadEntry!, Entry!);
+        if (read.Name != entry.Name)
+            yield return new(L["Name"], entry.Name);
+        if (read.Website != entry.Website)
+            yield return new(L["Website"], entry.Website);
+        var kept = entry.Kept.Select(c => c.Name ?? "").ToList();
+        if (!read.Kept.Select(c => c.Name ?? "").SequenceEqual(kept))
+            yield return new(L["Changes.Collections"], string.Join(", ", kept));
+    }
+}
