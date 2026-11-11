@@ -75,8 +75,17 @@ public static class AppPaths
     /// <summary>The record of a series (visuel/fiche-serie/).</summary>
     public static string SeriesRecord(Guid id) => $"{SeriesSection}/{id}";
 
-    /// <summary>The record of an author (#212).</summary>
-    public static string AuthorRecord(Guid id) => NotYetImplemented;
+    /// <summary>
+    /// The path of the list of the authors once implemented, under which the record of an author is: where the entry
+    /// « Auteurs » of the menu is current.
+    /// </summary>
+    public const string AuthorsSection = "/authors";
+
+    /// <summary>The route of the record of an author.</summary>
+    public const string AuthorRoute = AuthorsSection + "/{Id:guid}";
+
+    /// <summary>The record of an author (visuel/fiche-auteur/).</summary>
+    public static string AuthorRecord(Guid id) => $"{AuthorsSection}/{id}";
 
     // Administration (#200 to #209; the settings and the private statistics, a later part of the Phase 3).
 

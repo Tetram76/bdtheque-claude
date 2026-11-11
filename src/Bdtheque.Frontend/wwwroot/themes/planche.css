@@ -152,6 +152,15 @@
     --record-progress-fill: #63C36A;
     --record-progress-track: #FFFFFF;
     --record-progress-border: 2px solid #111111;
+    /* The record of an author: the roles in yellow, blue and pink of the cases, ringed with ink as the tags; the albums of an
+       unfolded series in a white inset, as the captions of the cases (visuel/fiche-auteur/). */
+    --color-role-scenarist: #FFC93C;
+    --color-text-on-role-scenarist: #111111;
+    --color-role-illustrator: #4FB0E6;
+    --color-text-on-role-illustrator: #111111;
+    --color-role-colorist: #F483AE;
+    --color-text-on-role-colorist: #111111;
+    --color-nest: #FFFFFF;
 
     /* The home page of the administration: the same gap as the cases of the dashboard, for the balloons of their titles;
        the tiles white, ringed with ink, in their case; round chips (visuel/administration/declinaison-par-theme.md). */

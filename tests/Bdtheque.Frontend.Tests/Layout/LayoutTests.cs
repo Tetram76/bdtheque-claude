@@ -63,6 +63,18 @@ public sealed class LayoutTests : BunitContext, IDisposable
         Assert.Equal(["Accueil"], layout.FindAll("nav a[aria-current='page']").Select(link => link.TextContent.Trim()));
     }
 
+    [Theory]
+    [InlineData("/albums/0197a0b2-0000-7000-8000-000000000001", "Albums")]
+    [InlineData("/authors/0197a0b2-0000-7000-8000-000000000001", "Auteurs")]
+    public void ConsultationMenu_MarksTheEntryOfTheSection_OnTheRecordsUnderIt(string path, string entry)
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(path);
+
+        var layout = Render<PublicLayout>(parameters => parameters.Add(p => p.Body, Body));
+
+        Assert.Equal([entry], layout.FindAll("nav a[aria-current='page']").Select(link => link.TextContent.Trim()));
+    }
+
     [Fact]
     public void ConsultationHeader_SearchesFromAnyPage()
     {

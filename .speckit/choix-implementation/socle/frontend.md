@@ -106,6 +106,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:00:00Z }
   - **Alternative écartée (nombre fixe de noms, rendu par le serveur)** : un rôle passe à la ligne sur un écran étroit, ou se replie sur un grand écran qui le tenait.
   - **Alternative écartée (ligne coupée par la seule feuille de style)** : elle ne sait pas compter les noms cachés, que le lien annonce.
   - **Alternative écartée (rôles dépliés portés par l'adresse, comme les critères d'une liste)** : une requête et un nouveau rendu de la fiche pour des noms déjà présents dans la page.
+- **Séries d'une bibliographie dépliées par une divulgation du navigateur** (`<details>`, [`visuel/fiche-auteur/`](../../visuel/fiche-auteur/index.md)), ouverte à l'arrivée jusqu'à six albums crédités : comme le repli des auteurs d'un rôle, ni requête pour montrer des albums déjà reçus, ni action suivie. « Tout déplier » et « Tout replier » ouvrent ou ferment toutes les divulgations de la liste par un script (élément personnalisé), aucune fonction du HTML n'agissant sur plusieurs divulgations à la fois ; leurs boutons n'apparaissent qu'une fois l'élément défini (`:defined`), si bien que sans script, chaque série se déplie encore seule.
+  - **Alternative écartée (séries dépliées portées par l'adresse, comme les critères d'une liste)** : une requête et un nouveau rendu de la fiche pour des albums déjà présents dans la page, et une adresse qui nommerait chaque série dépliée.
+  - **Alternative écartée (chevron de chaque série tenu par un script)** : un script pour ce que la divulgation du navigateur offre, et une fiche qui ne se déplierait plus sans lui.
 
 ## Présentation
 

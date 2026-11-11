@@ -155,5 +155,9 @@ public sealed record BibliographyEntry(SeriesBibliographyItem? Series, AlbumBibl
 public sealed record SeriesBibliographyItem(
     SeriesListItem Series, SeriesOverview Overview, IReadOnlyList<ContributionRole> Roles, IReadOnlyList<AlbumBibliographyItem> Albums);
 
-/// <summary>An album of a bibliography, with every role the author is credited with on it.</summary>
-public sealed record AlbumBibliographyItem(AlbumCard Album, IReadOnlyList<ContributionRole> Roles);
+/// <summary>
+/// An album of a bibliography, with every role the author is credited with on it, and its date of first publication,
+/// <c>null</c> when not set.
+/// </summary>
+public sealed record AlbumBibliographyItem(
+    AlbumCard Album, IReadOnlyList<ContributionRole> Roles, int? FirstPublicationYear = null, int? FirstPublicationMonth = null);
