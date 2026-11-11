@@ -146,6 +146,12 @@
     --record-visual-background: #FFFFFF;
     --record-visual-shadow: 6px 6px 0 #111111;
     --record-visual-tilt: -2deg;
+    /* The pile of a series: a step beyond the white frame ringed with ink and the black shadow of each card. */
+    --record-pile-step: 1.875rem;
+    /* The progress of a series in the green of the collection, on a white track ringed with ink. */
+    --record-progress-fill: #63C36A;
+    --record-progress-track: #FFFFFF;
+    --record-progress-border: 2px solid #111111;
 
     /* The home page of the administration: the same gap as the cases of the dashboard, for the balloons of their titles;
        the tiles white, ringed with ink, in their case; round chips (visuel/administration/declinaison-par-theme.md). */

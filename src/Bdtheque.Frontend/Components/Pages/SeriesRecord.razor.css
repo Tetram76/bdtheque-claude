@@ -1,0 +1,175 @@
+/* Built on the contracts of the theme only (visuel/fiche-serie/declinaison-par-theme.md, choix-implementation/socle/themes.md):
+   the head of the record on two columns on a wide screen, stacked on a smartphone; then the blocks, one under the other. */
+.series-record {
+    display: grid;
+    gap: var(--record-gap);
+}
+
+.series-head {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+}
+
+@media (min-width: 48rem) {
+    .series-head {
+        grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+        gap: var(--space-xl);
+    }
+}
+
+/* The pile of the covers of the first volumes, larger than that of a row of a list, each card framed as the visual an album
+   record puts forward: the frame, the tilt and the shadow are the touch of the theme (--record-visual-…), the step that of
+   a pile so framed (--record-pile-step). No room on the sides, which the widest step needs within its column. */
+.series-pile {
+    display: flex;
+    justify-content: center;
+    padding-block: var(--space-m);
+    --cover-width: 7.75rem;
+    --cover-pile-step: var(--record-pile-step);
+}
+
+.series-pile ::deep .cover {
+    padding: var(--record-visual-padding);
+    border: var(--record-visual-border);
+    background: var(--record-visual-background);
+    box-shadow: var(--record-visual-shadow);
+    rotate: var(--record-visual-tilt);
+}
+
+.series-identity {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
+}
+
+.series-identity h1 {
+    margin: 0;
+    font-size: var(--record-title-size);
+    line-height: 1.05;
+}
+
+/* The short facts of the series as pills: its status filled with the accent, its planned volumes outlined, its completeness
+   filled as the tag of the collection when complete. */
+.series-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.series-fact {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.625rem;
+    padding: 0 var(--space-m);
+    border: var(--border-width-control) solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.series-fact[data-fact="status"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.series-fact[data-fact="complete"] {
+    border-color: var(--color-tag-border);
+    background: var(--color-tag);
+    color: var(--color-text-on-tag);
+}
+
+/* The progress of the collection: its text, then a bar whose fill is the share of the albums of the collection. */
+.series-progress {
+    display: grid;
+    gap: var(--space-s);
+    max-inline-size: 35rem;
+    font-weight: var(--font-weight-strong);
+}
+
+.series-progress-track {
+    display: block;
+    block-size: 0.625rem;
+    overflow: hidden;
+    border: var(--record-progress-border);
+    border-radius: var(--radius-control);
+    background: var(--record-progress-track);
+}
+
+.series-progress-bar {
+    display: block;
+    block-size: 100%;
+    inline-size: var(--progress);
+    background: var(--record-progress-fill);
+}
+
+.series-publishing {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-xl);
+    margin: 0;
+}
+
+.series-publishing > div {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+}
+
+.series-publishing dt {
+    font-weight: var(--font-weight-strong);
+}
+
+.series-publishing dd {
+    margin: 0;
+}
+
+.series-publisher,
+.external {
+    font-weight: var(--font-weight-strong);
+}
+
+/* A link out of the application, marked as such by its arrow. */
+.external {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.external ::deep .icon {
+    inline-size: 0.875em;
+    block-size: 0.875em;
+}
+
+.series-notes-title {
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-text);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+/* The notes set apart from a summary above them. */
+.series-summary + .series-notes-title {
+    margin-block-start: var(--space-m);
+}
+
+.series-summary,
+.series-notes {
+    max-inline-size: 70ch;
+    margin: 0;
+    white-space: pre-line;
+}
+
+.series-dates {
+    margin: var(--space-xl) 0 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}

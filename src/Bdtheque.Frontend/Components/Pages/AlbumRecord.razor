@@ -5,7 +5,6 @@
 @inject IStringLocalizer<AlbumRecord> L
 @inject ApiClient Api
 @inject RecordLabels Labels
-@inject ValueLabels Values
 @inject DisplayFormatter Format
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
@@ -61,42 +60,34 @@ else if (_album is { } album)
                     </li>
                 </ul>
 
-                <div class="album-rating">
-                    @if (album.Rating is { } rating)
-                    {
-                        <span role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
-                    }
-                    else
-                    {
-                        <span aria-hidden="true">@Stars(0)</span>
-                        <span class="album-unrated">@L["NotRated"]</span>
-                    }
-                </div>
+                @* Nothing not set is shown in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md): no rating
+                   without one, no summary, notes nor block of the story without them. *@
+                @if (album.Rating is not null)
+                {
+                    <div class="album-rating">
+                        <RatingStars Rating="album.Rating" />
+                    </div>
+                }
 
                 <ContributionsByRole Contributions="album.Contributions" />
                 <Classification Genres="album.Genres" Universes="album.Universes" />
             </div>
         </div>
 
-        <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
-            @if (album.Summary is { } summary)
-            {
-                <p class="album-summary">@summary</p>
-            }
-            else
-            {
-                <p><NotSet /></p>
-            }
-            <h3 class="album-notes-title">@L["Notes"]</h3>
-            @if (album.PersonalNotes is { } notes)
-            {
-                <p class="album-notes">@notes</p>
-            }
-            else
-            {
-                <p><NotSet Gender="GrammaticalGender.Feminine" /></p>
-            }
-        </Block>
+        @if (album.Summary is not null || album.PersonalNotes is not null)
+        {
+            <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
+                @if (album.Summary is { } summary)
+                {
+                    <p class="album-summary">@summary</p>
+                }
+                @if (album.PersonalNotes is { } notes)
+                {
+                    <h3 class="album-notes-title">@L["Notes"]</h3>
+                    <p class="album-notes">@notes</p>
+                }
+            </Block>
+        }
 
         @* Without edition in the collection, nothing says so in their place: the banner and the membership of the album already
            do; and an album with neither edition nor intent has no block that would hold nothing (visuel/fiche-album/contenu.md). *@
@@ -212,15 +203,5 @@ else if (_album is { } album)
         (true, var count, _) => L["Membership.InCollection.Other", count],
         (false, _, true) => L["Membership.PurchaseIntent"],
         _ => L["Membership.OutOfCollection"],
-    };
-
-    private static RenderFragment Stars(int rating) => __builder =>
-    {
-        @for (var star = 1; star <= 5; star++)
-        {
-            <svg class="star" data-on="@(star <= rating ? "" : null)" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5 6.5 20.4l1-6.3L3 9.7l6.2-.9z" />
-            </svg>
-        }
     };
 }
