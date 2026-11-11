@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Domain/Entities/Edition.cs'
   - 'src/Bdtheque.Domain/Entities/EditionAcquisition.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/EditionConfiguration.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:00:00Z }
 ---
 
 # Édition
@@ -32,7 +32,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 | Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**, cf. [Représentation de la devise](../choix-implementation/domaine/representation-de-la-devise.md), ou **ancien franc**, cf. [Gestion des devises](../fonctionnel/valorisation/gestion-des-devises.md)) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour une édition achetée, c'est le prix payé au moment de l'acquisition. Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. [Gestion des devises](../fonctionnel/valorisation/gestion-des-devises.md)). |
 | Gratuite | booléen | oui | `false` par défaut. Indique que l'édition **n'a pas de valeur** : aucun montant n'est enregistré (ni prix payé, ni valeur marchande, ni valeur initiale) et aucune valeur n'est estimée. Interdit pour une édition achetée. Si `true`, le prix d'acquisition et la valeur initiale doivent être `null` (contrainte d'intégrité) ; ces champs sont désactivés et vidés en interface. |
 | Valeur initiale | montant + devise (même représentation que le prix d'acquisition, ancien franc compris) | non | Prix de vente de l'édition à sa parution. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. [Gestion des devises](../fonctionnel/valorisation/gestion-des-devises.md)). |
-| Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. cote, numéro de rangement). |
+| Numérotation personnelle | texte | non | Référence libre saisie par l'utilisateur (ex. numéro de rangement). |
 | Valeur estimée | calculée | — | Estimation du prix d'acquisition d'une édition possédée, non gratuite, dont le prix d'acquisition n'est pas renseigné (voir [Estimation de la valeur des éditions](../fonctionnel/valorisation/estimation-de-la-valeur-des-editions.md)). Calculée dynamiquement, non stockée. |
 | Notes personnelles | texte long | non | Annotations libres saisies par l'utilisateur. |
 
