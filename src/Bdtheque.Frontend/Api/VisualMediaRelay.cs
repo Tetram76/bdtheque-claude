@@ -33,12 +33,16 @@ public static class VisualMediaRelay
 
     public static void MapVisualMediaRelay(this IEndpointRouteBuilder app)
     {
-        // Only these routes are relayed, those of VisualMediaRoutes and that of a pending visual: frontend is no open proxy to api.
+        // Only these routes are relayed, those of VisualMediaRoutes and of PendingVisualMediaRoutes: frontend is no open proxy
+        // to api.
         var visual = app.MapGroup("/catalog/visuals/{id:guid}");
         visual.MapGet("/display", RelayAsync);
         visual.MapGet("/original", RelayAsync);
-        // The display of a visual waiting for the saving of its edition, which only the administrator entering it sees.
-        app.MapGet("/admin/visuals/pending/{id:guid}/display", RelayAsync).RequireAuthorization();
+        // The media of a visual waiting for the saving of its edition (PendingVisualMediaRoutes), which only the administrator
+        // entering it sees.
+        var pending = app.MapGroup("/admin/visuals/pending/{id:guid}").RequireAuthorization();
+        pending.MapGet("/display", RelayAsync);
+        pending.MapGet("/original", RelayAsync);
     }
 
     private static async Task RelayAsync(

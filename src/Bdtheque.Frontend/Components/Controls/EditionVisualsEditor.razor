@@ -100,10 +100,7 @@
                                           OnClick="() => ChangeTypeAsync(visual, type)" />
                             }
                             <MenuSeparator />
-                            @if (visual.Id is { } saved)
-                            {
-                                <MenuItem Href="@VisualMediaRoutes.Original(saved)" External="true" Label="@L["Menu.Original"]" />
-                            }
+                            <MenuItem Href="@OriginalOf(visual)" External="true" Label="@L["Menu.Original"]" />
                             <MenuItem Label="@L["Menu.Delete"]" Variant="ButtonVariant.Delete" OnClick="() => AskRemovalAsync(visual)" />
                         </ActionsMenu>
                     </span>
@@ -396,7 +393,11 @@
 
     // A visual added, waiting for the saving of the form, is shown from the waiting area; the others as any cover.
     private static string? PendingDisplayOf(VisualItem visual) =>
-        visual.PendingId is { } pending ? $"/admin/visuals/pending/{pending}/display" : null;
+        visual.PendingId is { } pending ? PendingVisualMediaRoutes.Display(pending) : null;
+
+    // Its original, as uploaded: from the waiting area too for a visual added, before the form is saved.
+    private static string OriginalOf(VisualItem visual) =>
+        visual.PendingId is { } pending ? PendingVisualMediaRoutes.Original(pending) : VisualMediaRoutes.Original(visual.Id!.Value);
 
     // « Planche 3 », the rank of a plate counted among the plates: what each visual is, in full.
     private string LabelOf(VisualItem visual) =>

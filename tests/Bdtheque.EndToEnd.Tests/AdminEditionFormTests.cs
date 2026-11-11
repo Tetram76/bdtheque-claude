@@ -236,6 +236,10 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Offerte" });
         await page.GetByLabel("Choisir des images à ajouter").SetInputFilesAsync(Png("couverture.png", SKColors.SteelBlue));
         await Assertions.Expect(page.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
+        // Its original, as uploaded, relayed to the administrator before the edition is saved.
+        var original = await page.Locator(".edition-visual a.menu-item", new() { HasText = "Ouvrir l'original" }).GetAttributeAsync("href");
+        var response = await page.APIRequest.GetAsync(new Uri(new Uri(page.Url), original).ToString());
+        Assert.Equal((200, "image/png"), (response.Status, response.Headers["content-type"]));
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'édition" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));

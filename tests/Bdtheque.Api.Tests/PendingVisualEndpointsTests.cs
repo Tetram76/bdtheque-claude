@@ -79,6 +79,22 @@ public sealed class PendingVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     }
 
     [Fact]
+    public async Task Original_OfAPendingVisual_IsServedAsUploaded_WhileItIsKept()
+    {
+        _factory.Clock.UtcNow = new DateTimeOffset(2026, 11, 11, 9, 0, 0, TimeSpan.Zero);
+        var pending = await UploadPendingAsync(SKColors.SteelBlue);
+
+        using var original = await _client.GetAsync($"/admin/visuals/pending/{pending.Id}/original");
+        original.EnsureSuccessStatusCode();
+        Assert.Equal("image/jpeg", original.Content.Headers.ContentType!.MediaType);
+        Assert.Equal((true, TimeSpan.FromDays(1)), (original.Headers.CacheControl!.Private, original.Headers.CacheControl.MaxAge));
+
+        _factory.Clock.UtcNow = pending.ExpiresAt;
+        using var expired = await _client.GetAsync($"/admin/visuals/pending/{pending.Id}/original");
+        await ProblemAssert.IsProblemAsync(expired, HttpStatusCode.NotFound, ProblemTypes.Functional);
+    }
+
+    [Fact]
     public async Task CreateEdition_WithPendingVisuals_MakesThemItsVisuals_InTheOrderOfItsEntry()
     {
         var plate = await UploadPendingAsync(SKColors.Wheat);

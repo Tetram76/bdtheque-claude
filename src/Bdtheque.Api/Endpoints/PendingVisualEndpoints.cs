@@ -22,7 +22,12 @@ internal static class PendingVisualEndpoints
             new VisualLimits(options.Value.MaxFileSizeBytes, PendingVisual.Lifetime));
         // The form is read as a stream by the handler (VisualUploadReader), never bound by the framework.
         visuals.MapPost("/pending", UploadAsync).Accepts<IFormFile>("multipart/form-data");
-        visuals.MapGet("/pending/{id:guid}/display", DisplayAsync);
+        // The media of a pending visual, under the addresses of PendingVisualMediaRoutes.
+        var pending = visuals.MapGroup("/pending/{id:guid}");
+        pending.MapGet("/display", (Guid id, BdthequeDbContext context, VisualStorage storage, TimeProvider clock, HttpResponse response, CancellationToken cancellationToken) =>
+            ServeAsync(id, storage.DisplayFile, context, clock, response, cancellationToken));
+        pending.MapGet("/original", (Guid id, BdthequeDbContext context, VisualStorage storage, TimeProvider clock, HttpResponse response, CancellationToken cancellationToken) =>
+            ServeAsync(id, storage.OriginalFile, context, clock, response, cancellationToken));
     }
 
     /// <summary>
@@ -55,16 +60,16 @@ internal static class PendingVisualEndpoints
         return TypedResults.Created($"/admin/visuals/pending/{pending.Id}", new PendingVisualForm(pending.Id, pending.ExpiresAt));
     }
 
-    // The display version of a pending visual, which the entry presents as the others: for the administration only, and kept
-    // in a private cache, the visual being no one else's yet.
-    private static async Task<PhysicalFileHttpResult> DisplayAsync(
-        Guid id, BdthequeDbContext context, VisualStorage storage, TimeProvider clock, HttpResponse response,
+    // A media of a pending visual, which the entry presents as the others (its display version, or its original opened from
+    // its menu): for the administration only, while it is kept, and in a private cache, the visual being no one else's yet.
+    private static async Task<PhysicalFileHttpResult> ServeAsync(
+        Guid id, Func<string, VisualFile> fileOf, BdthequeDbContext context, TimeProvider clock, HttpResponse response,
         CancellationToken cancellationToken)
     {
         var pending = await context.PendingVisuals.AsNoTracking().SingleOrDefaultAsync(v => v.Id == id, cancellationToken);
         if (pending is null || pending.IsExpiredAt(clock.GetUtcNow()))
             throw new EntityNotFoundException(typeof(PendingVisual), id);
-        var file = storage.DisplayFile(pending.MediaReference);
+        var file = fileOf(pending.MediaReference);
         response.Headers.CacheControl = "private, max-age=86400, immutable";
         return TypedResults.PhysicalFile(file.Path, file.ContentType);
     }
