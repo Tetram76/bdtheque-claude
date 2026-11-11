@@ -12,7 +12,8 @@ internal sealed class PublisherCollectionConfiguration : IEntityTypeConfiguratio
 
         builder.Property(c => c.Name).IsRequired().HasMaxLength(300);
 
-        builder.HasIndex(c => new { c.PublisherId, c.Name }).IsUnique();
+        // Checked at commit: one save of the publisher can swap the names of two of its collections (#360).
+        builder.HasIndex(c => new { c.PublisherId, c.Name }).IsUniqueAtCommit();
 
         // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
         // IsRequired() only enforces NOT NULL, so a raw-SQL write could still persist ''.

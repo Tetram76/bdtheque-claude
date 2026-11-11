@@ -77,6 +77,18 @@ public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
+    public async Task MappedUniqueViolationReportedByTheCommit_IsABusinessProblemCarryingTheIndexRuleCode()
+    {
+        // A deferrable unique constraint is checked at commit, which reports the violation unwrapped.
+        var problem = await HandleAsync(
+            new PostgresException("violation", "ERROR", "ERROR", PostgresErrorCodes.UniqueViolation,
+                constraintName: "IX_PublisherCollections_PublisherId_Name"),
+            HttpStatusCode.UnprocessableContent, ProblemTypes.Business);
+
+        Assert.Equal(DomainRules.PublisherCollectionNameAlreadyUsed, problem.GetProperty(ProblemTypes.RuleCodeExtension).GetString());
+    }
+
+    [Fact]
     public async Task UnmappedUniqueViolation_IsATechnicalProblem() =>
         // Reveals a missing check rather than an input to correct.
         await HandleAsync(DatabaseError(PostgresErrorCodes.UniqueViolation, "PK_Albums"), HttpStatusCode.InternalServerError, ProblemTypes.Technical);

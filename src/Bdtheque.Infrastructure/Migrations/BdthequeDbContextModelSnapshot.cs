@@ -838,7 +838,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PublisherId", "Name")
-                        .IsUnique();
+                        .HasAnnotation("Bdtheque:UniqueAtCommit", true);
 
                     b.ToTable("PublisherCollections", t =>
                         {
