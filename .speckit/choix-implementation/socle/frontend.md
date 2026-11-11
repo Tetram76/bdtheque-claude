@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T21:16:36Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T08:08:27Z }
 ---
 
 # Frontend
@@ -58,7 +58,13 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T21:16:36Z }
   - **Alternative écartée (clé calculée par le frontend)** : la règle de calcul serait écrite deux fois, et la clé affichée pourrait différer de celle enregistrée.
 - **Collection d'un éditeur choisie dans une liste** ([Contenu](../../visuel/saisie-serie/contenu.md)) : une liste du navigateur de toutes les collections de l'éditeur choisi, lues avec la fiche, puis à chaque choix d'un autre éditeur, numéroté comme le choix d'une fiche, pour que seules les collections du dernier soient présentées ; changer d'éditeur retire la collection. Désactivée par son propre attribut tant qu'aucun éditeur n'est choisi, elle est en tirets, son texte lisible ; un formulaire désactivé pendant son enregistrement garde l'apparence d'un contrôle désactivé. Des collections qui ne peuvent être lues sont signalées par le champ, qui ne les présente pas comme absentes.
   - **Alternative écartée (choix en tapant son nom, comme l'éditeur)** : le nom d'une collection, choisi et parfois changé par son éditeur, se retient mal, et une recherche sans résultat laisserait croire qu'elle n'existe pas (décision de l'utilisateur).
-- **Fiche enregistrée, créée ou modifiée : retour à sa liste**, sans ses critères, comme « Annuler » ([Contenu](../../visuel/saisie-album/contenu.md), décision de l'utilisateur).
+- **Fiche enregistrée, créée ou modifiée : retour à sa liste**, sans ses critères, comme « Annuler » ([Contenu](../../visuel/saisie-album/contenu.md), décision de l'utilisateur). Pour une édition, possédée ou visée, c'est la page des éditions et intentions d'achat de son album, à laquelle mène son fil d'Ariane.
+- **Une page pour une édition et pour l'édition que vise une intention d'achat** ([Contenu](../../visuel/saisie-edition/contenu.md)), adressée par son album : la lecture dit si l'édition est visée, la page n'en présente alors ni l'exemplaire ni la valeur ; une nouvelle intention se distingue d'une nouvelle édition par son adresse. Une édition visée s'enregistre comme toute édition, sans mode d'acquisition, le formulaire renvoyant tel qu'il l'a lu ce qu'il ne présente pas.
+  - **Alternative écartée (une page par cas)** : quatre pages pour une seule fiche, dont deux ne diffèrent que de deux blocs.
+- **ISBN vérifié à chaque frappe** par le point de contrôle de l'API ([Validation de l'ISBN](../domaine/validation-de-l-isbn.md)), numéroté comme le choix d'une fiche : seule la réponse du dernier ISBN tapé s'affiche.
+- **Montant et devise côte à côte** ([Contenu](../../visuel/saisie-edition/contenu.md)) : une liste nomme les devises qu'une collection de bandes dessinées rencontre, l'ancien franc compris, l'euro, devise de la culture, en tête et proposé à tout montant saisi sans devise ; « Autre devise… » fait saisir n'importe quel code ([Gestion des devises](../../fonctionnel/valorisation/gestion-des-devises.md)), que le domaine valide. Le montant se saisit dans la culture d'affichage ; un texte qui n'est pas un montant laisse le montant tel qu'il était, comme un champ lié de Blazor.
+  - **Alternative écartée (liste fermée)** : elle contredirait « n'importe quelle devise ».
+  - **Alternative écartée (code seul, avec suggestions)** : l'ancien franc n'a pas de code ISO 4217 qui parle à l'utilisateur ([Représentation de la devise](../domaine/representation-de-la-devise.md)).
 - **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi.
 - **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme.
 - **Genre ou univers créé sur place** de même, depuis leur choix : le dialogue reprend le texte tapé, et, pour un univers, propose de choisir l'univers qui le contient.

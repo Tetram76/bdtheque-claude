@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''une édition : pré-remplissage, blocs, exemplaire et valeur, visuels, intention.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:49:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T08:07:33Z }
 ---
 
 # Contenu
@@ -23,7 +23,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T10:49:00Z }
   - les **envois en cours**, traités un à la fois : progression de l'envoi, « En attente » pour les suivants ; un fichier refusé (format, taille) l'est avec sa raison, en couleur d'alerte, et se retire de la liste ;
   - le **nombre de visuels**, puis tous les visuels en **une seule grille**, dans l'ordre des types ([Ordre des visuels d'une édition](../../fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md)), chaque vignette marquée de son type (« Couv. », « Garde », « Pl. 3 », « 4e »), pour qu'un type d'un seul visuel n'occupe pas une ligne à lui seul ;
   - sur chaque vignette, un bouton « ⋯ » qui ouvre son menu : **Changer le type**, **Ouvrir l'original** et **Supprimer le visuel…** ; une vignette se glisse pour la réordonner parmi celles de son type ;
-  - en création, le bloc indique que les visuels s'ajoutent une fois l'édition enregistrée ;
-  - sous le bloc, les dates de création, d'entrée dans la collection et de modification de l'édition ; pour une édition visée, la date où l'intention d'achat a été posée et celle de sa dernière modification.
+  - en création, le bloc indique que les visuels s'ajoutent une fois l'édition enregistrée.
+- **Les dates de la fiche**, en modification, juste au-dessus de son premier bloc, comme sur les autres fiches de saisie : les dates de création, d'entrée dans la collection et de modification de l'édition ; pour une édition visée, la date où l'intention d'achat a été posée et celle de sa dernière modification.
 - **La barre d'enregistrement**, comme sur la fiche de saisie d'un album (« Créer l'édition » en création, « Créer l'intention d'achat » pour une nouvelle édition visée).
 - **Smartphone** : les blocs s'empilent ; les champs passent à la ligne en gardant leur taille, et les cases à cocher s'alignent sur le bas des champs voisins.

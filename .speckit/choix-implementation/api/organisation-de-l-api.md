@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:12:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T08:08:27Z }
 ---
 
 # Organisation de l'API
@@ -36,6 +36,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:12:29Z }
   - **Alternative écartée (reprise à l'enregistrement)** : l'utilisateur ne verrait les auteurs recopiés qu'après avoir enregistré, et des auteurs retirés ensuite reviendraient au prochain rattachement.
 - **Éditions et intentions d'achat adressées par leur album**, sous sa version : ce sont des enfants de son agrégat ([Intention d'achat : agrégat porté par l'album](../domaine/intention-d-achat-agregat-porte-par-l-album.md)).
   - **Une création d'édition est toujours une édition possédée** ; seule une intention crée une édition non possédée ([Appartenance à la collection](../../fonctionnel/regles-metier/appartenance-a-la-collection.md)).
+  - **La lecture d'une édition pour sa saisie porte son album et l'intention qui la vise**, et celle d'une nouvelle édition ou intention, le modèle de la série de l'album : le formulaire dit, sans autre requête, de quel album il s'agit, si l'édition est visée, et quels champs la série a pré-remplis ([Initialisation d'une nouvelle édition depuis la série](../../fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)). Une écriture renvoie l'édition relue telle que sa saisie la lit.
   - **La confirmation d'achat reçoit le formulaire entier de l'édition** : les caractéristiques de l'exemplaire, absentes de la saisie d'une intention, se saisissent à l'achat ([Réalisation d'une intention](../../fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)).
   - **La conversion d'une intention vers l'album passe par le mécanisme de suppression**, avec l'empreinte de l'impact de suppression de l'intention : elle supprime l'édition visée et ses visuels, effet identique ([Suppression des entités : mise en œuvre](../ecritures/suppression-des-entites-mise-en-oeuvre.md)).
 - **Collections d'un éditeur enregistrées avec lui** ([`visuel/saisie-editeur/`](../../visuel/saisie-editeur/index.md)), sous sa version : le contenu de l'éditeur porte ses collections, remplacées en bloc, une collection nommée par son identifiant étant renommée, une sans identifiant créée, une absente retirée. Sa lecture pour la saisie dit, pour chaque collection, ce qui la désigne (éditions, séries), comptée comme sa suppression.
