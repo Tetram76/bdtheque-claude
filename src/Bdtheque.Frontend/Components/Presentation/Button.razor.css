@@ -64,3 +64,18 @@
         white-space: nowrap;
     }
 }
+
+/* Reduced to its icon at every width: the same square, its label kept for assistive technologies and as its tooltip. */
+.button[data-icon-only] {
+    inline-size: var(--control-height);
+    padding: 0;
+}
+
+.button[data-icon-only] .button-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}

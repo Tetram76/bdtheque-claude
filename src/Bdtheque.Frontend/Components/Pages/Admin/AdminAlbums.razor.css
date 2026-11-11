@@ -8,8 +8,8 @@
 .album-rows {
     container: album-rows / inline-size;
     /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
-       so that their columns line up. It holds « Modifier » and the « ⋯ » button. */
-    --album-actions-width: 10rem;
+       so that their columns line up. It holds the « Éditions » button, reduced to its icon, « Modifier » and the « ⋯ » button. */
+    --album-actions-width: 12.75rem;
 }
 
 .album-row {
@@ -103,7 +103,7 @@
     gap: var(--space-xs);
 }
 
-@container album-rows (min-width: 59rem) {
+@container album-rows (min-width: 61.75rem) {
     .album-row {
         grid-template-columns: 2.25rem minmax(0, 1fr) 7.5rem 11.875rem 10.625rem var(--album-actions-width);
         grid-template-areas: "cover main date editions state actions";
@@ -120,7 +120,7 @@
     }
 }
 
-@container album-rows (min-width: 66rem) {
+@container album-rows (min-width: 68.25rem) {
     .album-row {
         grid-template-columns: 2.25rem minmax(0, 1fr) 7.5rem 11.875rem 10.625rem 6.75rem var(--album-actions-width);
         grid-template-areas: "cover main date editions state modified actions";
