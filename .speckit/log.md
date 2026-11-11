@@ -2,6 +2,7 @@
 
 ## 2026-11-11
 
+* **Règle** : un test qui a un facteur temps (rendu, traitement asynchrone, délai, horloge, navigateur, conteneur, réseau), ajouté, modifié ou dont le code exercé change, n'est tenu pour bon qu'après avoir réussi sur plusieurs exécutions successives, dont certaines sous une charge comparable à celle du CI ; un seul échec est un problème de synchronisation traité à sa cause, jamais par une attente allongée (exigence de l'utilisateur) (#378).
 * **Règle** : merge fait par l'agent au nom de l'utilisateur : une Pull Request dont les conditions de la règle de merge sont réunies est fusionnée par l'agent lui-même, acte de gestion du projet, sans attendre ni demander l'accord de l'utilisateur ; aucun collaborateur ne fusionne (exigence de l'utilisateur) (#377).
 * **Règle** : rendu vérifié par l'agent ; toute création ou modification visuelle est vérifiée par l'agent lui-même sur son rendu (grand écran, smartphone, deux thèmes au moins) avant d'être soumise à l'utilisateur : une part de son travail, jamais une étape de la validation fonctionnelle (exigence de l'utilisateur) (#369).
 * **Règle** : le code de l'application est écrit avant tout pour l'application ; il peut être légèrement aménagé pour aider les tests, mais les tests ne dictent jamais comment il est écrit : un test qui ne sait pas exercer la forme juste du code s'adapte à elle (outil selon sa documentation, doublure) (exigence de l'utilisateur) (#369).
