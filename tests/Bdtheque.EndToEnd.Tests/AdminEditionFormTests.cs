@@ -150,6 +150,28 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewAlbumEdition(album.Id)));
     }
 
+    [Fact]
+    public async Task Amount_ATextThatIsNoAmount_ShowsAgainTheAmountThatWillBeSaved()
+    {
+        // The field shows what will be saved: a text that is no amount is not kept on screen while the previous amount is sent.
+        await CreatePublisherAsync();
+        var album = await CreateAlbumAsync();
+        var page = await OpenAsync(AppPaths.AdminNewAlbumEdition(album.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var price = page.Locator("#edition-price");
+        await price.FillAsync("douze");
+        await price.PressAsync("Tab");
+        await Assertions.Expect(price).ToHaveValueAsync("");
+
+        await price.FillAsync("12,5");
+        await price.PressAsync("Tab");
+        await Assertions.Expect(price).ToHaveValueAsync("12,5");
+        await price.FillAsync("douze");
+        await price.PressAsync("Tab");
+
+        await Assertions.Expect(price).ToHaveValueAsync("12,5");
+    }
+
     private async Task<IPage> OpenAsync(string path)
     {
         var page = await NewPageAsync();

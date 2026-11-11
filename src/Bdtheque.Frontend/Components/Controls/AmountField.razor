@@ -3,13 +3,13 @@
 @* An amount and its currency, side by side, under one legend (visuel/saisie-edition/contenu.md): the currency of origin, chosen
    in the list of those a collection of comics meets, the old franc included, or any other entered by its code, an amount being
    entered in any currency (fonctionnel/valorisation/gestion-des-devises.md). The amount is entered in the display culture; a
-   text that is no amount leaves the amount as it was, as a bound field of Blazor does. *@
+   text that is no amount leaves the amount as it was, and the field shows it again, so that it always shows what will be saved. *@
 <fieldset class="amount-field">
     <legend id="@($"{Id}-legend")">@Label</legend>
     <span class="amount-field-controls">
         <label class="visually-hidden" for="@Id">@L["Amount"]</label>
-        <input id="@Id" type="text" inputmode="decimal" class="amount-field-amount" value="@AmountText" disabled="@Disabled"
-               aria-invalid="@(Error is null ? null : "true")" aria-describedby="@DescribedBy" @onchange="EnterAmountAsync" />
+        <input id="@Id" type="text" inputmode="decimal" class="amount-field-amount" disabled="@Disabled"
+               aria-invalid="@(Error is null ? null : "true")" aria-describedby="@DescribedBy" @bind:get="AmountText" @bind:set="EnterAmountAsync" />
         <label class="visually-hidden" for="@CurrencyId">@L["Currency"]</label>
         <select id="@CurrencyId" class="amount-field-currency" value="@SelectedCurrency" disabled="@Disabled" @onchange="ChooseCurrencyAsync">
             @foreach (var named in Named)
@@ -84,6 +84,9 @@
 
     private string CurrencyId => $"{Id}-currency";
 
+    // Bound by @bind:get/@bind:set, and not by a value and a handler: only a binding makes Blazor set the field again to the
+    // amount when a text that is no amount leaves it unchanged (data-binding of the documentation of Blazor); a handler would leave
+    // that text on screen, while the previous amount, or none, is saved.
     private string? AmountText => Amount?.ToString(CultureInfo.CurrentCulture);
 
     private string SelectedCurrency => _otherChosen || (Currency is { } code && !Named.Contains(code)) ? Other : Currency ?? DefaultCurrency;
@@ -98,9 +101,9 @@
         }
     }
 
-    private async Task EnterAmountAsync(ChangeEventArgs args)
+    private async Task EnterAmountAsync(string? value)
     {
-        var text = (args.Value as string)?.Trim();
+        var text = value?.Trim();
         if (string.IsNullOrEmpty(text))
             await AmountChanged.InvokeAsync(null);
         else if (decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var amount))
