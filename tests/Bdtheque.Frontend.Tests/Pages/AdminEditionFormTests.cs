@@ -292,7 +292,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         // In the order of their likely use for the purchase of a new edition today, the old franc among them.
         Assert.Equal(
             ["EUR · euro", "USD · dollar des États-Unis", "CHF · franc suisse", "CAD · dollar canadien", "GBP · livre sterling",
-                "FRF · franc français", "BEF · franc belge", "QZF · ancien franc français", "LUF · franc luxembourgeois", "Autre devise…"],
+                "FRF · franc français", "BEF · franc belge", "LUF · franc luxembourgeois", "QZF · ancien franc français", "Autre devise…"],
             currencies);
 
         page.Find("#edition-price-currency").Change("other");
