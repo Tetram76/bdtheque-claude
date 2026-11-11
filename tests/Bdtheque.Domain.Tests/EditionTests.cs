@@ -120,6 +120,17 @@ public sealed class EditionTests
     }
 
     [Fact]
+    public void SetIsbn_WritesTheCheckCharacterInCapitals()
+    {
+        // An ISBN-10 whose check character is 10 ends with X, which is saved in capitals whatever the case entered.
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+
+        edition.SetIsbn("2-905123-01-x");
+
+        Assert.Equal("2-905123-01-X", edition.Isbn);
+    }
+
+    [Fact]
     public void SetIsbn_Blank_SetsNull()
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());

@@ -5,7 +5,8 @@
 
 @* The ISBN of an edition, whose check digit is checked as it is entered, without blocking (fonctionnel/regles-metier/
    validation-de-l-isbn.md): correct, a tick; inconsistent, a warning that says it may be saved as it is. The check is the
-   domain's, asked of the API (choix-implementation/domaine/validation-de-l-isbn.md): the frontend applies no rule of its own. *@
+   domain's, asked of the API (choix-implementation/domaine/validation-de-l-isbn.md), which also gives the ISBN as it will be
+   saved, its check character in capitals, taken up as soon as it is typed: the frontend applies no rule of its own. *@
 <div class="@(_checked == false ? "isbn-field isbn-field-warning" : "isbn-field")">
     <Field Id="@Id" Label="@L["Label"]" Help="@Help" Context="control">
         <span class="isbn-field-control">
@@ -59,7 +60,13 @@
         {
             var check = await Api.GetAsync<IsbnCheck>($"/admin/editions/isbn-check?isbn={Uri.EscapeDataString(isbn)}", _disposal.Token);
             if (number == _number)
+            {
                 _checked = check.IsChecksumValid;
+                // The check character in capitals as soon as it is typed, as it will be saved; the spaces around the ISBN,
+                // which the saving also removes, are left while typing, where one may be the next separator.
+                if (check.Isbn is { } saved && saved != isbn && string.Equals(saved, isbn, StringComparison.OrdinalIgnoreCase))
+                    await ValueChanged.InvokeAsync(saved);
+            }
         }
         catch (ApiProblemException) when (number == _number)
         {

@@ -134,11 +134,11 @@ public sealed class Edition : EntityBase
     }
 
     /// <summary>
-    /// Stores the ISBN as entered, without rejecting an incorrect check digit: validation is
+    /// Stores the ISBN as entered, its check character in capitals (<see cref="IsbnText"/>), without rejecting an incorrect check digit: validation is
     /// advisory only (fonctionnel/regles-metier/validation-de-l-isbn.md) — see <see cref="IsbnChecksumValidator"/>
     /// for the non-blocking check a caller should run to warn the user.
     /// </summary>
-    public void SetIsbn(string? isbn) => Isbn = DomainText.NullIfBlank(isbn);
+    public void SetIsbn(string? isbn) => Isbn = IsbnText.Normalize(isbn);
 
     public void SetPageCount(int? count)
     {

@@ -110,4 +110,5 @@ public sealed record AcquireEditionRequest(EditionContent Content, uint AlbumVer
 
 /// <summary>Result of the check of an ISBN during entry (fonctionnel/regles-metier/validation-de-l-isbn.md).</summary>
 /// <param name="IsChecksumValid">Whether the check digit is consistent: a warning only, never a refusal.</param>
-public sealed record IsbnCheck(bool IsChecksumValid);
+/// <param name="Isbn">The ISBN as it would be saved, its check character in capitals, which the entry takes up.</param>
+public sealed record IsbnCheck(bool IsChecksumValid, string? Isbn);

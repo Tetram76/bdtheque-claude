@@ -417,6 +417,14 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
     }
 
     [Fact]
+    public async Task IsbnCheck_GivesTheIsbnAsItIsSaved()
+    {
+        var check = await _client.GetFromJsonAsync<IsbnCheck>("/admin/editions/isbn-check?isbn=2-905123-01-x");
+
+        Assert.Equal("2-905123-01-X", check!.Isbn);
+    }
+
+    [Fact]
     public async Task DeletionImpact_OfTheLastOwnedEdition_AnnouncesThatTheAlbumLeavesTheCollection()
     {
         var album = await CreateAlbumAsync();

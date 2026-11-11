@@ -51,7 +51,7 @@ internal static class EditionEndpoints
         editions.MapChildDeletion<Album, Edition>(query => query, album => album.Editions, DeletionLinks);
 
         admin.MapGet("/editions", ListForAdministrationAsync);
-        admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn)));
+        admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn), IsbnText.Normalize(isbn)));
     }
 
     public static void MapEditionCatalog(this RouteGroupBuilder catalog) => catalog.MapGet("/editions", ListAsync);

@@ -236,13 +236,24 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         // fonctionnel/regles-metier/validation-de-l-isbn.md
         var page = OpenOwned();
         Assert.Contains("Chiffre de contrôle correct.", page.Find("#edition-isbn-help").TextContent);
-        _api.Answers["/admin/editions/isbn-check?isbn=978-2-203-00120-7"] = new IsbnCheck(false);
+        _api.Answers["/admin/editions/isbn-check?isbn=978-2-203-00120-7"] = new IsbnCheck(false, "978-2-203-00120-7");
 
         page.Find("#edition-isbn").Input("978-2-203-00120-7");
 
         page.WaitForAssertion(() => Assert.Contains("Chiffre de contrôle incohérent", page.Find("#edition-isbn-help").TextContent));
         Assert.Contains("peut être enregistré tel quel", page.Find("#edition-isbn-help").TextContent);
         Assert.Equal("true", page.Find("#edition-isbn").GetAttribute("data-warning"));
+    }
+
+    [Fact]
+    public void Isbn_TheCheckCharacterIsWrittenInCapitalsAsItIsEntered()
+    {
+        var page = OpenOwned();
+        _api.Answers["/admin/editions/isbn-check?isbn=2-905123-01-x"] = new IsbnCheck(false, "2-905123-01-X");
+
+        page.Find("#edition-isbn").Input("2-905123-01-x");
+
+        page.WaitForAssertion(() => Assert.Equal("2-905123-01-X", page.Find("#edition-isbn").GetAttribute("value")));
     }
 
     [Fact]
