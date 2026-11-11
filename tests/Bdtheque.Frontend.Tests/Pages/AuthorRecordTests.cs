@@ -108,6 +108,17 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Identity_UnderAPseudonymAlone_IsFollowedByNothing()
+    {
+        _catalog.Author = Author() with { LastName = null, FirstName = null, Pseudonym = "Kador" };
+
+        var page = Open();
+
+        Assert.Equal("Kador", page.Find("h1").TextContent.Trim());
+        Assert.Empty(page.FindAll(".author-real-name"));
+    }
+
+    [Fact]
     public void Facts_TellTheAlbumsCredited_ThenTheirNumberByRole()
     {
         _catalog.Author = Author();

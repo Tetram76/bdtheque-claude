@@ -109,12 +109,17 @@ else if (_author is { } author)
     private string Name => Labels.Author(new AuthorListItem(Id, _author!.LastName, _author.FirstName, _author.Pseudonym));
 
     // Under a pseudonym, the first name and the last name it is known by otherwise, when known.
-    private string? RealName =>
-        string.IsNullOrWhiteSpace(_author!.Pseudonym)
-            ? null
-            : string.Join(' ', new[] { _author.FirstName, _author.LastName }.Where(part => !string.IsNullOrWhiteSpace(part))) is { Length: > 0 } name
-                ? name
-                : null;
+    private string? RealName
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_author!.Pseudonym))
+                return null;
+
+            var name = string.Join(' ', new[] { _author.FirstName, _author.LastName }.Where(part => !string.IsNullOrWhiteSpace(part)));
+            return name.Length > 0 ? name : null;
+        }
+    }
 
     private string Credited => _albums.Count switch
     {
