@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Contrôle de cohérence fonctionnelle'
 description: 'Contrôle hebdomadaire de la cohérence de toute l''application, au sein des familles d''écrans et de points d''entrée de même nature et pour chaque règle transversale : sources confrontées, classement des écarts, suites, trace ; à lire quand le contrôle est dû ou demandé.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:40:23Z }
 ---
 
 # Contrôle de cohérence fonctionnelle
@@ -23,9 +23,11 @@ Pour chaque famille et chaque axe transversal, trois sources sont confrontées :
 
 ## Classement des écarts
 
-- **A — le code s'écarte du `.speckit/`** : un défaut, que l'agent traite ([Issues](issues.md), cause de fond) ; sa Pull Request est soumise à la validation fonctionnelle s'il change ce que l'utilisateur voit ([Validation fonctionnelle](validation-fonctionnelle.md)).
-- **B — des éléments de même nature divergent sans que le `.speckit/` dise pourquoi** : un point fonctionnel, soumis à la décision de l'utilisateur, **un point à la fois** ([Prise de décision](../gouvernance/prise-de-decision.md)). La décision est aussitôt écrite dans le concept concerné, puis réalisée.
+- **A — le code s'écarte du `.speckit/`** : un défaut, dont la correction est un ticket ([Issues](issues.md), cause de fond) ; sa Pull Request est soumise à la validation fonctionnelle s'il change ce que l'utilisateur voit ([Validation fonctionnelle](validation-fonctionnelle.md)).
+- **B — des éléments de même nature divergent sans que le `.speckit/` dise pourquoi** : un point fonctionnel, soumis à la décision de l'utilisateur, **un point à la fois** ([Prise de décision](../gouvernance/prise-de-decision.md)). La décision est aussitôt consignée, dans ses termes, dans un ticket dont la Pull Request l'écrit d'abord dans le concept concerné, puis la réalise.
 - **C — l'écart est justifié** : le `.speckit/` en donne la raison. Rien n'est fait.
+
+Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request. Il se termine quand sa conclusion est écrite dans la description de son ticket (§ Trace), ce qui libère sa place dans un lot de chantiers en parallèle ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md)).
 
 Une raison qui manque ou qui faillit fait d'un écart un B, jamais un C : une question de trop coûte une réponse à l'utilisateur, un écart réel classé C reste dans l'application sans que personne le voie.
 
@@ -50,6 +52,6 @@ Une règle commune confirmée (A corrigé, B tranché) est mise en œuvre **une 
 Le ticket « Cohérence fonctionnelle » (étiquettes `functional-consistency` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description** l'état du contrôle, que l'agent réécrit :
 
 - « Contrôle en cours », avec sa date, écrit **avant** le contrôle : une autre session qui reprend le travail la même semaine le voit, et ne le refait pas ;
-- à sa fin, le **dernier contrôle** : sa date et le commit de `main` sur lequel il porte, puis chaque écart relevé avec sa classe, les éléments en cause, et sa suite (ticket ou Pull Request d'un A, question posée et décision d'un B, passage cité et raison d'un C), ou l'absence d'écart, constatée explicitement.
+- à sa fin, le **dernier contrôle** : sa date et le commit de `main` sur lequel il porte, puis chaque écart relevé avec sa classe, les éléments en cause, et sa suite (ticket d'un A, question posée, décision et ticket d'un B, passage cité et raison d'un C), ou l'absence d'écart, constatée explicitement.
 
 Un écart B en attente de la décision de l'utilisateur reste dans la description jusqu'à elle. Le ticket reste ouvert.
