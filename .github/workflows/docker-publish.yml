@@ -6,7 +6,7 @@ on:
   # Nightly images. Scheduled runs use the head of `main`.
   schedule:
     - cron: "17 3 * * *"
-  # On-demand build of the branch chosen when the workflow is run.
+  # On-demand build of the branch, or of the version tag, chosen when the workflow is run.
   workflow_dispatch:
 
 permissions:
@@ -43,22 +43,48 @@ jobs:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # `sha-<commit>` is immutable: a new on-demand run on an already published commit (e.g. to
-      # pick up base image updates) only moves the branch tag. A registry error, or a commit
-      # published for one image only, fails the job rather than letting a tag be overwritten.
-      - name: Check whether this commit is already published
-        id: commit
+      # Immutable tags of an on-demand run: `sha-<commit>` and, when run on the tag of a version
+      # (gestion-projet/depot/versions-et-releases.md), the version number without its `v`. Each is only
+      # pushed if neither image has it yet: a new run on an already published commit or version (e.g.
+      # to pick up base image updates) only moves the branch tag, if any. A registry error, or a tag
+      # present for one image only, fails the job rather than letting a tag be overwritten.
+      # Only a `v<major>.<minor>.<patch>` tag names a version, and 0.0.x versions have no images.
+      - name: Check which immutable tags are already published
+        id: immutable
         if: github.event_name == 'workflow_dispatch'
         run: |
-          tag="sha-$GITHUB_SHA"
-          api=$(.github/scripts/registry-digest.sh "$API_REPOSITORY" "$tag")
-          frontend=$(.github/scripts/registry-digest.sh "$FRONTEND_REPOSITORY" "$tag")
-          if [ -n "$api" ] && [ -n "$frontend" ]; then
-            echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::$tag already exists: kept as is."
-          elif [ -n "$api$frontend" ]; then
-            echo "::error::$tag exists for only one image: delete it on Docker Hub, then run again."
-            exit 1
+          tags=("sha:sha-$GITHUB_SHA")
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            if ! [[ "$GITHUB_REF_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+              echo "::error::$GITHUB_REF_NAME is not the tag of a version (v<major>.<minor>.<patch>): run on a branch or on a version tag."
+              exit 1
+            fi
+            if [ "${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" = 0.0 ]; then
+              echo "::error::Version ${GITHUB_REF_NAME#v} has no images: 0.0.x versions ship no usable application."
+              exit 1
+            fi
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+            tags+=("version:${GITHUB_REF_NAME#v}")
+          fi
+          for entry in "${tags[@]}"; do
+            name=${entry%%:*} tag=${entry#*:}
+            api=$(.github/scripts/registry-digest.sh "$API_REPOSITORY" "$tag")
+            frontend=$(.github/scripts/registry-digest.sh "$FRONTEND_REPOSITORY" "$tag")
+            if [ -n "$api" ] && [ -n "$frontend" ]; then
+              echo "$name-published=true" >> "$GITHUB_OUTPUT"
+              echo "::notice::$tag already exists: kept as is."
+            elif [ -n "$api$frontend" ]; then
+              echo "::error::$tag exists for only one image: delete it on Docker Hub, then run again."
+              exit 1
+            else
+              new=true
+            fi
+          done
+          # Run on a version tag, there is no branch tag: with every immutable tag already there,
+          # nothing would be pushed.
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ -z "${new:-}" ]; then
+            echo "nothing-new=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Version ${GITHUB_REF_NAME#v} is already published: nothing to publish."
           fi
 
       # Only one `nightly` image may exist per repository (contraintes-techniques/architecture-deploiement/deploiement.md): the images
@@ -67,8 +93,10 @@ jobs:
       # image could not be deleted without its digest. When both nightly images are already built
       # from the head of `main` (revision label set by metadata-action), nothing is published.
       # On-demand runs record them too: they are the reference of the vulnerability check below.
+      # Every later step runs only when this one sets `publish`, which a skipped step never does.
       - name: Record the current nightly images
         id: previous
+        if: steps.immutable.outputs.nothing-new != 'true'
         run: |
           up_to_date=$([ "$GITHUB_EVENT_NAME" = schedule ] && echo true || echo false)
           for image in api frontend; do
@@ -86,15 +114,17 @@ jobs:
             [ "$revision" = "$GITHUB_SHA" ] || up_to_date=false
           done
           if [ "$up_to_date" = true ]; then
-            echo "up-to-date=true" >> "$GITHUB_OUTPUT"
             echo "::notice::The nightly images are already built from $GITHUB_SHA: nothing to publish."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # A nightly build only gets `nightly`. An on-demand build gets the name of its branch and,
-      # unless already published, the `sha-<commit>` tag, with the full commit hash (as probed above).
+      # A nightly build only gets `nightly`. An on-demand build gets the name of its branch, if run
+      # on a branch, and those of the immutable tags probed above that are not published yet:
+      # `sha-<commit>`, with the full commit hash, and the version number.
       - name: Compute tags and labels
         id: meta
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: |
@@ -105,11 +135,12 @@ jobs:
           tags: |
             type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
             type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' }}
-            type=sha,format=long,enable=${{ github.event_name == 'workflow_dispatch' && steps.commit.outputs.published != 'true' }}
+            type=sha,format=long,enable=${{ github.event_name == 'workflow_dispatch' && steps.immutable.outputs.sha-published != 'true' }}
+            type=raw,value=${{ steps.immutable.outputs.version }},enable=${{ steps.immutable.outputs.version != '' && steps.immutable.outputs.version-published != 'true' }}
 
       - name: Split tags by image
         id: tags
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
         run: |
@@ -121,7 +152,7 @@ jobs:
       # Build and check both images before pushing either: the push steps below rebuild from the
       # builder's cache, so they only upload. Loaded into the local image store for Docker Scout.
       - name: Build api image
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -133,7 +164,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=api
 
       - name: Build frontend image
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -148,7 +179,7 @@ jobs:
       # the other image of the pair (same check as the CI, see ci.yml). Without a published image,
       # no fixable vulnerability is accepted at all.
       - name: Check vulnerabilities of the api image
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         uses: docker/scout-action@a4119c5a8c5076236a54e4ce99531f7e4dd2ef84 # v1.27.0
         with:
           command: ${{ steps.previous.outputs.api-digest && 'compare' || 'cves' }}
@@ -160,7 +191,7 @@ jobs:
           write-comment: false
 
       - name: Check vulnerabilities of the frontend image
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         uses: docker/scout-action@a4119c5a8c5076236a54e4ce99531f7e4dd2ef84 # v1.27.0
         with:
           command: ${{ steps.previous.outputs.frontend-digest && 'compare' || 'cves' }}
@@ -175,7 +206,7 @@ jobs:
       # would leave its child manifests behind, untagged.
       - name: Push api image
         id: push-api
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -189,7 +220,7 @@ jobs:
 
       - name: Push frontend image
         id: push-frontend
-        if: steps.previous.outputs.up-to-date != 'true'
+        if: steps.previous.outputs.publish == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -204,7 +235,7 @@ jobs:
       # Docker Hub registry API: only an untagged manifest can be deleted, by digest, with a token
       # holding the `delete` scope (hence a Read, Write & Delete access token).
       - name: Delete the replaced nightly images
-        if: github.event_name == 'schedule' && steps.previous.outputs.up-to-date != 'true'
+        if: github.event_name == 'schedule' && steps.previous.outputs.publish == 'true'
         env:
           API_PREVIOUS: ${{ steps.previous.outputs.api-digest }}
           API_CURRENT: ${{ steps.push-api.outputs.digest }}

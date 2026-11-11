@@ -71,11 +71,11 @@ Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/do
 | `nightly` | Publication quotidienne, depuis la tête de `main` |
 | `<branche>` (ex. `main`) | Dernière publication à la demande de cette branche |
 | `sha-<commit>` | Première publication à la demande d'un commit précis, immuable (une nouvelle publication du même commit ne déplace que le tag de branche) |
-| `<version>` (ex. `0.1.0`) | Version publiée, immuable |
+| `<version>` (ex. `0.1.0`) | Version publiée, depuis son tag (ex. `v0.1.0`), immuable |
 
 Leur publication est décrite dans [`README.dev.md`](README.dev.md#publication-des-images).
 
-Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut).
+Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut). Pour déployer une version publiée, `BDTHEQUE_TAG` est son numéro (ex. `0.1.0`), et `docker-compose.yml` et `.env.example` sont pris dans le dépôt à son tag (ex. `v0.1.0`), car ils peuvent différer d'une version à l'autre.
 
 ### Procédure (Synology Container Manager)
 
