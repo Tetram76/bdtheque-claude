@@ -94,10 +94,12 @@ public sealed record EditionContent(
     string? PersonalNotes);
 
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>
-public sealed record CreateEditionRequest(EditionContent Content, uint AlbumVersion);
+/// <param name="Visuals">The visuals of the new edition, all pending (<see cref="EditionVisualEntry"/>); none, without visuals.</param>
+public sealed record CreateEditionRequest(EditionContent Content, uint AlbumVersion, IReadOnlyList<EditionVisualEntry>? Visuals = null);
 
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>
-public sealed record UpdateEditionRequest(EditionContent Content, uint AlbumVersion);
+/// <param name="Visuals">The visuals of the edition as entered (<see cref="EditionVisualEntry"/>); none, its visuals left as they are.</param>
+public sealed record UpdateEditionRequest(EditionContent Content, uint AlbumVersion, IReadOnlyList<EditionVisualEntry>? Visuals = null);
 
 /// <summary>
 /// Confirms the purchase of an edition targeted by an intent

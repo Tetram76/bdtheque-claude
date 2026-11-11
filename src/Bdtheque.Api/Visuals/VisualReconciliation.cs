@@ -1,13 +1,14 @@
+using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Api.Visuals;
 
 /// <summary>
-/// Removes the files of the visuals volume that no visual references any more
-/// (choix-implementation/domaine/visuels-stockage-et-traitement.md): those an immediate compensation could not
-/// cover — process
-/// stopped between the file and the row, file that could not be deleted. Run at startup, then daily:
+/// Removes the visuals waiting for the saving of their edition that are no longer kept, then the files of the visuals volume
+/// that no visual, saved or pending, references any more (choix-implementation/domaine/visuels-stockage-et-traitement.md):
+/// those of the pending visuals abandoned, and those an immediate compensation could not cover — process stopped between the
+/// file and the row, file that could not be deleted. Run at startup, then daily:
 /// an orphan only costs disk space.
 /// </summary>
 internal sealed class VisualReconciliation(
@@ -22,18 +23,28 @@ internal sealed class VisualReconciliation(
     /// </summary>
     public static readonly TimeSpan GracePeriod = TimeSpan.FromHours(1);
 
-    /// <summary>Deletes every file older than <see cref="GracePeriod"/> that no visual references.</summary>
+    /// <summary>
+    /// Deletes the pending visuals older than <see cref="PendingVisual.Lifetime"/>, then every file older than
+    /// <see cref="GracePeriod"/> that no visual, saved or pending, references.
+    /// </summary>
     public async Task ReconcileAsync(CancellationToken cancellationToken)
     {
         // The threshold is taken before the references are read: a file older than it was written
         // before the read, so its visual, if committed, is among the references.
-        var threshold = timeProvider.GetUtcNow() - GracePeriod;
+        var now = timeProvider.GetUtcNow();
+        var threshold = now - GracePeriod;
 
         HashSet<string> referenced;
         await using (var scope = scopeFactory.CreateAsyncScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
-            var references = await context.EditionVisuals.Select(v => v.MediaReference).ToListAsync(cancellationToken);
+            // A pending visual no longer kept can no longer become a visual (PendingVisual.IsExpiredAt).
+            var expired = now - PendingVisual.Lifetime;
+            await context.PendingVisuals.Where(v => v.CreatedAt <= expired).ExecuteDeleteAsync(cancellationToken);
+            // Both tables in a single query: a pending visual that becomes a visual meanwhile is seen in one or the other.
+            var references = await context.EditionVisuals.Select(v => v.MediaReference)
+                .Concat(context.PendingVisuals.Select(v => v.MediaReference))
+                .ToListAsync(cancellationToken);
             referenced = references.Select(VisualStorage.StemOf).ToHashSet(StringComparer.Ordinal);
         }
 

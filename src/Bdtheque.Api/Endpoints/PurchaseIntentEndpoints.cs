@@ -82,14 +82,24 @@ internal static class PurchaseIntentEndpoints
     }
 
     private static async Task<Created<PurchaseIntentsForm>> CreateAsync(
-        Guid rootId, CreatePurchaseIntentRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, CreatePurchaseIntentRequest request, BdthequeDbContext context, TimeProvider clock, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
 
-        var intent = request.Edition is { } edition
-            ? album.AddPurchaseIntent(await AddEditionAsync(context, album, edition, cancellationToken))
-            : album.AddPurchaseIntent();
+        PurchaseIntent intent;
+        if (request.Edition is { } content)
+        {
+            var edition = await AddEditionAsync(context, album, content, cancellationToken);
+            intent = album.AddPurchaseIntent(edition);
+            // A new edition has no visual to remove: its pending visuals become its own.
+            await EditionVisualEntries.ApplyAsync(context, edition, request.Visuals, clock, cancellationToken);
+        }
+        else
+        {
+            intent = album.AddPurchaseIntent();
+        }
+
         context.PurchaseIntents.Add(intent);
 
         await context.SaveChangesAsync(cancellationToken);

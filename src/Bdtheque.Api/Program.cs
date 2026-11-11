@@ -112,6 +112,7 @@ admin.MapAlbums();
 admin.MapTitleSortKeys();
 admin.MapEditions();
 admin.MapEditionVisuals();
+admin.MapPendingVisuals();
 admin.MapPurchaseIntents();
 admin.MapSavedSearches();
 admin.MapApplicationSettings();

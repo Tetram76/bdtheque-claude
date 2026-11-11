@@ -52,7 +52,9 @@ public sealed record PurchaseIntentEditionContent(
 
 /// <param name="Edition">The new edition targeted; <c>null</c> for an intent on the whole album.</param>
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>
-public sealed record CreatePurchaseIntentRequest(PurchaseIntentEditionContent? Edition, uint AlbumVersion);
+/// <param name="Visuals">The visuals of the new edition targeted, all pending (<see cref="EditionVisualEntry"/>); none, without visuals.</param>
+public sealed record CreatePurchaseIntentRequest(
+    PurchaseIntentEditionContent? Edition, uint AlbumVersion, IReadOnlyList<EditionVisualEntry>? Visuals = null);
 
 /// <summary>Converts the intent on the whole album into an intent on a new edition.</summary>
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>

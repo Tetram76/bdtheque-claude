@@ -9,10 +9,7 @@ namespace Bdtheque.Contracts.Admin;
 /// upload, rearrangement or deletion is the album's.
 /// </summary>
 /// <param name="AlbumVersion">Version of the album, sent back with any write on the visuals.</param>
-/// <param name="MaxFileSizeBytes">
-/// Heaviest file accepted for a visual, which <c>api</c> alone checks: given for the entry to announce it.
-/// </param>
-public sealed record EditionVisualsForm(Guid EditionId, IReadOnlyList<EditionVisualForm> Visuals, uint AlbumVersion, long MaxFileSizeBytes);
+public sealed record EditionVisualsForm(Guid EditionId, IReadOnlyList<EditionVisualForm> Visuals, uint AlbumVersion);
 
 /// <summary>A visual of an edition; <c>api</c> serves its media (<see cref="Catalog.VisualMediaRoutes"/>).</summary>
 /// <param name="DisplayOrder">Rank among the visuals of the same type.</param>
@@ -43,3 +40,23 @@ public sealed record ArrangeVisualsRequest(IReadOnlyList<VisualArrangement> Visu
 
 /// <summary>The place of one visual in an arrangement.</summary>
 public sealed record VisualArrangement(Guid Id, VisualType Type);
+
+/// <summary>
+/// A visual of an edition as its entry gives it, saved with the edition
+/// (choix-implementation/domaine/visuels-stockage-et-traitement.md, Zone d'attente): a visual of the edition, kept, or a pending
+/// visual, which becomes one; its place in the list is its rank among the visuals of its type.
+/// </summary>
+/// <param name="Id">A visual of the edition, kept; <c>null</c> for a pending visual.</param>
+/// <param name="PendingId">A pending visual (<see cref="PendingVisualForm"/>), which becomes a visual of the edition.</param>
+public sealed record EditionVisualEntry(Guid? Id, Guid? PendingId, VisualType Type);
+
+/// <summary>
+/// A file uploaded for a visual while an edition is entered (<c>POST /admin/visuals/pending</c>, form field
+/// <see cref="UploadVisualFields.File"/>), kept until <paramref name="ExpiresAt"/> for the saving of the edition.
+/// </summary>
+public sealed record PendingVisualForm(Guid Id, DateTimeOffset ExpiresAt);
+
+/// <summary>What the entry of the visuals announces, which api alone checks (<c>GET /admin/visuals/limits</c>).</summary>
+/// <param name="MaxFileSizeBytes">Heaviest file accepted for a visual.</param>
+/// <param name="PendingLifetime">How long a pending visual is kept for the saving of its edition.</param>
+public sealed record VisualLimits(long MaxFileSizeBytes, TimeSpan PendingLifetime);
