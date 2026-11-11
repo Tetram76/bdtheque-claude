@@ -194,8 +194,8 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
 
         Assert.Equal("mars 2019", Entries(page)[0].QuerySelector(".entry-meta")!.TextContent.Trim());
         var albums = Entries(page)[1].QuerySelectorAll("details.entry-albums ol > li");
-        Assert.Equal("Sangre · T. 1", albums[0].QuerySelector(".entry-meta")!.TextContent.Trim());
-        Assert.Equal("Sangre · T. 2 · 2004", albums[1].QuerySelector(".entry-meta")!.TextContent.Trim());
+        Assert.Null(albums[0].QuerySelector(".entry-meta"));
+        Assert.Equal("T. 2 · 2004", albums[1].QuerySelector(".entry-meta")!.TextContent.Trim());
     }
 
     [Fact]
@@ -250,7 +250,9 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         var albums = Entries(page)[2].QuerySelectorAll("details.entry-albums ol > li");
         Assert.Equal(["Tome 1", "Le Sang du dragon", "Tome 3", "Tome 4", "Tome 5", "Tome 6"],
             albums.Select(a => a.QuerySelector(".entry-title")!.TextContent.Trim()));
-        Assert.Equal("Sangre · T. 2", albums[1].QuerySelector(".entry-meta")!.TextContent.Trim());
+        // Under its series, an album does not repeat it; its volume, only when its title does not already say it.
+        Assert.Equal("T. 2", albums[1].QuerySelector(".entry-meta")!.TextContent.Trim());
+        Assert.Null(albums[0].QuerySelector(".entry-meta"));
         Assert.Equal(AppPaths.Album(SangreAlbumId(2)), albums[1].QuerySelector("a.entry-title")!.GetAttribute("href"));
         Assert.Equal(["Dessin", "Couleurs"], albums[0].QuerySelectorAll(".role").Select(r => r.TextContent.Trim()));
         Assert.Equal("Dans la collection", albums[0].QuerySelector(".tag")!.TextContent.Trim());

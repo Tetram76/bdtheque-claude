@@ -390,7 +390,7 @@ class View extends Mockup {
       const owned = e.albums.filter((a) => a[3] === 'own').length;
       // An album without its own title is named by its volume alone (« Tome 3 »).
       const albums = e.albums.map(([tome, title, roles, state, n], k) => ({
-        title: title || tome.replace(/^T\. /, 'Tome '), meta: e.title + ' · ' + tome, cover: cover(i, volumeOf(tome)),
+        title: title || tome.replace(/^T\. /, 'Tome '), meta: title ? tome : '', cover: cover(i, volumeOf(tome)),
         rowB: k === 0 ? '0' : t.rowB,
         roles: roleChips(roles), ...rating(n), ...badge(state)
       }));

@@ -124,12 +124,12 @@
         return owned == 0 ? L["Owned.None", credited] : L["Owned", credited, Format.Number(owned)];
     }
 
-    // What places an album of a series: the series, and its volume when it has one.
-    private string InSeries(AlbumSummary album) =>
-        Labels.Volume(album) is { } volume ? L["AlbumInSeries", album.SeriesTitle!, volume] : album.SeriesTitle!;
+    // What places an album in its series, listed under it, which it does not repeat: its volume, unless its title is already
+    // that volume (« Tome 3 »).
+    private string? InSeries(AlbumSummary album) => album.Title is not null ? Labels.Volume(album) : null;
 
-    // What places an album: its series and volume for an album of a series, then its date of first publication when set;
-    // an album without series and without date has none, « Album sans série » saying nothing useful.
+    // What places an album: its volume in its series (InSeries), then its date of first publication when set; nothing
+    // without either, « Album sans série » saying nothing useful.
     private RenderFragment Album(AlbumBibliographyItem item, string? inSeries) => __builder =>
     {
         var album = item.Album.Album;

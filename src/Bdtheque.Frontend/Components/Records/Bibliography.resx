@@ -51,9 +51,6 @@
   <data name="SeriesRoles" xml:space="preserve">
     <value>Sur la série :</value>
   </data>
-  <data name="AlbumInSeries" xml:space="preserve">
-    <value>{0} · {1}</value>
-  </data>
   <data name="Credited.One" xml:space="preserve">
     <value>Crédité sur {0} album sur {1}</value>
   </data>
