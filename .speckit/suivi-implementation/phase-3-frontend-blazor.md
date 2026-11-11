@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et ses chantiers, notes des parties suivantes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T14:45:41Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T07:41:07Z }
 ---
 
 # Phase 3 — Frontend Blazor
@@ -19,7 +19,7 @@ La phase est réalisée en plusieurs parties, découpées l'une après l'autre ;
 
 **Version** : `v0.1.0`, avec les ajustements des phases 0 à 2 qui suivent la consolidation de la Phase 2.
 
-Socle du frontend, environnement de validation fonctionnelle, thème de base et trois thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240 ; le thème de base neutre, les contrats des thèmes et le thème de la visite (ticket parent #194), par cinq sous-tickets, #254 à #258 ; les listes des séries, des auteurs et des éditeurs de l'administration (ticket parent #201), par trois sous-tickets, #301 à #303 ; le thème « La couverture du jour » (ticket parent #309), par deux sous-tickets, les couleurs des couvertures (#311) puis le thème lui-même (#312) ; la fiche d'un album dans la consultation (ticket parent #210), par trois sous-tickets, la structure de la fiche et les éléments que réutilisent les fiches d'une série et d'un auteur (#321), puis les visuels et les éditions (#322), enfin les intentions d'achat et le reste de la série (#323) ; les listes des éditions et des intentions d'achat de l'administration (ticket parent #202), par deux sous-tickets, la liste des éditions (#333) puis celle des intentions d'achat (#334).
+Socle du frontend, environnement de validation fonctionnelle, thème de base et trois thèmes, et les écrans qui ont une maquette : dashboard (collection vide comprise), accès à l'administration, listes de l'administration, fiches de saisie et fiches de consultation. Le chantier #161 (accès du frontend au volume des visuels) est tranché avant tout écran qui affiche un visuel ; #185 et #186 précèdent les écrans qui en dépendent. Le socle du frontend (ticket parent #191) est réalisé par trois sous-tickets, #238 à #240 ; le thème de base neutre, les contrats des thèmes et le thème de la visite (ticket parent #194), par cinq sous-tickets, #254 à #258 ; les listes des séries, des auteurs et des éditeurs de l'administration (ticket parent #201), par trois sous-tickets, #301 à #303 ; le thème « La couverture du jour » (ticket parent #309), par deux sous-tickets, les couleurs des couvertures (#311) puis le thème lui-même (#312) ; la fiche d'un album dans la consultation (ticket parent #210), par trois sous-tickets, la structure de la fiche et les éléments que réutilisent les fiches d'une série et d'un auteur (#321), puis les visuels et les éditions (#322), enfin les intentions d'achat et le reste de la série (#323) ; les listes des éditions et des intentions d'achat de l'administration (ticket parent #202), par deux sous-tickets, la liste des éditions (#333) puis celle des intentions d'achat (#334) ; la saisie d'une édition, de ses visuels et d'une intention d'achat (ticket parent #209), par deux sous-tickets, la fiche de saisie d'une édition et d'une intention d'achat (#361) puis ses visuels (#362).
 
 | Ticket | Titre |
 | --- | --- |
@@ -54,7 +54,8 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#206~~ | Saisie d'une série |
 | ~~#207~~ | Saisie d'un auteur |
 | ~~#208~~ | Saisie d'un éditeur et de ses collections |
-| #209 | Saisie d'une édition, de ses visuels et d'une intention d'achat |
+| ~~#361~~ | Saisie d'une édition et d'une intention d'achat |
+| #362 | Visuels d'une édition sur sa fiche de saisie |
 | ~~#321~~ | Fiche d'un album : structure, identité, contributions, genres et univers, résumé |
 | ~~#322~~ | Fiche d'un album : visuels de l'édition, éditions de la collection et détail de l'édition choisie |
 | ~~#323~~ | Fiche d'un album : intentions d'achat et reste de la série |
