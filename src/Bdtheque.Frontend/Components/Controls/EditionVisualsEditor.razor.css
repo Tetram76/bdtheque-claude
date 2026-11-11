@@ -161,7 +161,7 @@
 /* A single grid, in the order of the types: a type of a single visual does not take a line of its own. */
 .edition-visuals-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
     gap: var(--space-s);
     margin: 0;
     padding: 0;

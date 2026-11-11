@@ -19,7 +19,6 @@ Réglages de la source commune :
 | `isbn` | `valide` (par défaut) ou `incoherent` : chiffre de contrôle incohérent |
 | `televersement` | `aucun` (par défaut), `encours` (un envoi en cours, un autre en attente) ou `refus` (deux fichiers refusés) |
 | `visuelMenu` | menu des actions d'un visuel ouvert |
-| `visuelsOuverts` | sur un écran étroit, panneau des visuels ouvert par-dessus la page |
 | `erreur` | `aucune` (par défaut), `metier`, `fonctionnelle` ou `technique` |
 | `menuOpen` | menu de l'administration ouvert |
 

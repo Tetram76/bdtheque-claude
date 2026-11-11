@@ -15,22 +15,14 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
    control, coloured or not, and from the surface around it. */
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px var(--focus-gap)}
 .adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
-/* The form on the left, the album's editions on the right; one column on a narrower screen. */
-.sa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;align-items:start}
-.sa-side{position:sticky;top:84px}
-/* The visuals in a panel over the page on a narrower screen, opened by a button at the head of the form (decision of the user). */
-.sa-vis-open,.sa-vis-close,.sa-vis-backdrop{display:none}
+/* The form in a single column, the visuals its last block (decision of the user). */
+.sa-layout{display:grid;grid-template-columns:minmax(0,880px);gap:22px;align-items:start}
 .sa-role{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 14px;align-items:start}
 .sa-status-sm{display:none}
 /* Volume numbering and publication date: two unrelated settings, in two blocks side by side. */
 .sa-duo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:22px;align-items:stretch}
 @media (max-width: 1080px){
   .sa-layout{grid-template-columns:minmax(0,1fr)}
-  .sa-side{display:none !important;position:fixed;top:0;right:0;bottom:0;z-index:40;width:min(448px,100vw);overflow-y:auto;padding:24px;box-sizing:border-box;background:var(--panel-bg);border-left:var(--panel-b);box-shadow:var(--panel-sh)}
-  .sa-side[data-open="true"]{display:flex !important}
-  .sa-vis-open{display:inline-flex}
-  .sa-vis-close{display:flex}
-  .sa-vis-backdrop{display:block}
 }
 @media (max-width: 640px){
   .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
@@ -141,8 +133,6 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         </div>
       </sc-if>
 
-      <button type="button" class="sa-vis-open" onClick="{{openVisuals}}" style="align-self: flex-start; align-items: center; gap: 8px; height: 40px; padding: 0 16px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{icons.upload}}"></path></svg>{{visualsButton}}</button>
-      <sc-if value="{{visualsShown}}"><span class="sa-vis-backdrop" aria-hidden="true" onClick="{{closeVisuals}}" style="position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,.35)"></span></sc-if>
 
       <div class="sa-layout">
         <form style="min-width: 0; display: flex; flex-direction: column; gap: 22px" onSubmit="{{noSubmit}}">
@@ -264,15 +254,10 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             </section>
           </sc-if>
 
-        </form>
-
-        <aside class="sa-side" aria-label="{{visualsButton}}" data-open="{{visualsOpen}}" style="--panel-bg: {{panelBg}}; --panel-b: {{panelB}}; --panel-sh: {{panelSh}}; min-width: 0; display: flex; flex-direction: column; gap: 22px">
-          <span class="sa-vis-close" style="justify-content: flex-end"><button type="button" aria-label="Fermer les visuels" onClick="{{closeVisuals}}" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: {{t.text}}; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
           <section aria-labelledby="s-vis" style="{{block}}">
             <span style="{{kickStyle}}">{{k.vis}}</span>
             <h2 id="s-vis" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les visuels</h2>
-            <sc-if value="{{x.existing}}">
-              <span style="{{help}}">Chaque visuel s'enregistre dès son ajout, et son ordre ou son type dès qu'on les change : rien à valider avec la fiche.</span>
+              <span style="{{help}}">Les visuels s'enregistrent avec la fiche. Chaque fichier ajouté est vérifié aussitôt, puis conservé 24 heures en attente de son enregistrement.</span>
               <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; text-align: center">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: {{t.muted}}"><path d="{{icons.upload}}"></path></svg>
                 <span style="font-size: 13px">Déposez des images ici, ou <button type="button" style="padding: 0; border: 0; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; text-decoration: underline; cursor: pointer">choisissez des fichiers</button></span>
@@ -298,7 +283,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                 </ul>
               </sc-if>
                   <span style="{{lbl}}">{{visualCount}}</span>
-                  <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+                  <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px">
                     <sc-for list="{{visuals}}" as="v">
                       <li style="position: relative">
                         <span role="img" aria-label="{{v.alt}}" style="display: flex; align-items: flex-end; justify-content: flex-start; aspect-ratio: 3 / 4; padding: 4px; box-sizing: border-box; border-radius: {{t.thR}}; background: {{v.bg}}; color: #FFFFFF; font-weight: 800; font-size: 11px; cursor: grab">{{v.mark}}</span>
@@ -319,12 +304,9 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                     </sc-for>
                   </ul>
               <span style="{{help}}">Glissez un visuel pour le réordonner parmi ceux de son type ; les types se suivent toujours dans le même ordre.</span>
-            </sc-if>
-            <sc-if value="{{x.creating}}">
-              <span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Les visuels s'ajoutent une fois l'édition enregistrée.</span>
-            </sc-if>
           </section>
-        </aside>
+        </form>
+
       </div>
     </main>
   </div>
@@ -644,9 +626,7 @@ class View extends Mockup {
           };
         });
     });
-    const visualCount = visuals.length + (visuals.length > 1 ? ' visuels' : ' visuel');
-    const visualsOpen = this.state?.visualsOpen ?? Boolean(this.props.visuelsOuverts);
-    const visualsButton = x.existing ? 'Les visuels (' + visuals.length + ')' : 'Les visuels';
+    const visualCount = visuals.length === 0 ? 'Aucun visuel' : visuals.length + (visuals.length > 1 ? ' visuels' : ' visuel');
     const uploads = (UPLOADS[this.props.televersement] ?? []).map((u) => ({
       ...u,
       bd: u.failed ? '2px solid ' + t.del : (t.tB === '0' ? '2px solid ' + t.line : t.tB),
@@ -720,9 +700,7 @@ class View extends Mockup {
       isPurchase,
       freeLock: isPurchase ? '.55' : '1',
       freeHelp: isPurchase ? 'Une édition achetée n\'est jamais gratuite.' : (free ? 'Sans valeur : les montants sont vidés.' : 'Sans aucune valeur, ni montant ni estimation.'),
-      visuals, visualCount, visualsButton, visualsOpen: visualsOpen ? 'true' : 'false', visualsShown: visualsOpen,
-      openVisuals: () => this.setState({ visualsOpen: true }),
-      closeVisuals: () => this.setState({ visualsOpen: false }),
+      visuals, visualCount,
       uploads,
       barBg,
       barB: t.cBT !== '0' ? t.cBT : '2px solid ' + t.line,
@@ -745,7 +723,6 @@ Mockup.mount(View, {
   isbn: { label: 'ISBN', editor: 'enum', options: ['valide', 'incoherent'], default: 'valide' },
   televersement: { label: 'Téléversement', editor: 'enum', options: ['aucun', 'encours', 'refus'], default: 'aucun' },
   visuelMenu: { label: 'Menu d\'un visuel', editor: 'boolean', default: false },
-  visuelsOuverts: { label: 'Visuels ouverts (écran étroit)', editor: 'boolean', default: false },
   erreur: { label: 'Erreur', editor: 'enum', options: ['aucune', 'metier', 'fonctionnelle', 'technique'], default: 'aucune' },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
 });
