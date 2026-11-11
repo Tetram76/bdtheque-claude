@@ -9,4 +9,12 @@
 @code {
     [Parameter, EditorRequired]
     public AlbumCollectionState State { get; set; }
+
+    /// <summary>Where the album of a card stands: in the collection, wished for, or catalogued only.</summary>
+    public static AlbumCollectionState Of(Bdtheque.Contracts.Catalog.AlbumCard card) => card switch
+    {
+        { Album.IsInCollection: true } => AlbumCollectionState.InCollection,
+        { HasPurchaseIntent: true } => AlbumCollectionState.PurchaseIntent,
+        _ => AlbumCollectionState.OutsideCollection,
+    };
 }

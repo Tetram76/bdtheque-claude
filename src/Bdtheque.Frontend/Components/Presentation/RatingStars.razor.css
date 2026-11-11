@@ -1,0 +1,19 @@
+/* Five stars in the color of the text, those of the rating filled. */
+.rating-stars {
+    display: inline-flex;
+    gap: 0.125rem;
+    vertical-align: middle;
+}
+
+.star {
+    inline-size: var(--star-size, 1.125rem);
+    block-size: var(--star-size, 1.125rem);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+}
+
+.star[data-on] {
+    fill: currentColor;
+}

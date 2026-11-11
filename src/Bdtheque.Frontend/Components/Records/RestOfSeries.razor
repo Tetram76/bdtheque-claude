@@ -1,4 +1,3 @@
-@using Bdtheque.Contracts.Admin
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Components.Lists
@@ -32,7 +31,7 @@
                     {
                         <a class="series-album-title" href="@AppPaths.Album(album.Id)">@Title(album)</a>
                     }
-                    <CollectionStateTag State="StateOf(card)" />
+                    <CollectionStateTag State="CollectionStateTag.Of(card)" />
                 </li>
             }
         </ol>
@@ -68,11 +67,4 @@
 
     // Its own title, as on its record; failing that, its label.
     private string Title(AlbumSummary album) => album.Title ?? Labels.Album(album, LabelFormat);
-
-    private static AlbumCollectionState StateOf(AlbumCard card) => card switch
-    {
-        { Album.IsInCollection: true } => AlbumCollectionState.InCollection,
-        { HasPurchaseIntent: true } => AlbumCollectionState.PurchaseIntent,
-        _ => AlbumCollectionState.OutsideCollection,
-    };
 }

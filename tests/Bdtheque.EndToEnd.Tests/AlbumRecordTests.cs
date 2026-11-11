@@ -176,10 +176,11 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
 }
 
 /// <summary>
-/// An application whose albums present the cases of the record of an album, at fixed dates: an album of a series with two
-/// editions in the collection, one with four visuals and one gift without any, wished for again in a third, and a collective
-/// drawing, attached to a universe within two others; an album targeted by an intent on itself, and one catalogued only.
-/// Its visuals are the only ones, so that the edition in the spotlight, and the colours of the day, are the same at each capture.
+/// An application whose albums present the cases of the records of an album and of an author, at fixed dates: an album of a
+/// series with two editions in the collection, one with four visuals and one gift without any, wished for again in a third,
+/// and a collective drawing, attached to a universe within two others; an album targeted by an intent on itself, and one
+/// catalogued only; the whole bibliography of the author of the series, and an author credited on nothing. Its visuals are
+/// the only ones, so that the edition in the spotlight, and the colours of the day, are the same at each capture.
 /// </summary>
 public sealed class RecordsApplication : ApplicationHost
 {
@@ -200,6 +201,12 @@ public sealed class RecordsApplication : ApplicationHost
 
     /// <summary>An album of the series catalogued only, out of the collection.</summary>
     public Guid CataloguedAlbumId { get; private set; }
+
+    /// <summary>Hugo Pratt, the author of the albums of the series, with a whole bibliography.</summary>
+    public Guid AuthorId { get; private set; }
+
+    /// <summary>An author known under a pseudonym, credited on nothing yet.</summary>
+    public Guid UncreditedAuthorId { get; private set; }
 
     protected override async Task SeedAsync()
     {
@@ -246,6 +253,35 @@ public sealed class RecordsApplication : ApplicationHost
             new PurchaseIntentEditionContent(casterman.Id, null, 2023, null, BindingType.Hardcover, null, null, EditionFormat.Large, 112,
                 EditionCategory.SpecialEdition, true),
             gift.AlbumVersion));
+
+        // The bibliography of Hugo Pratt (visuel/fiche-auteur/), written after the album, whose dates it leaves as they were:
+        // an album without series, rated; « Corto Maltese », of three albums; a series credited on itself only, without album;
+        // a series of seven albums credited, folded on arrival, one of them coloured by him. None has an edition, so that the
+        // edition in the spotlight stays the only one with a cover.
+        AuthorId = hugo.Id;
+        await PostAsync<AlbumForm>(api, "/admin/albums", new AlbumContent(
+            "Carnet de croquis", null, null, AlbumType.Regular, false, null, null, null, 1990, null, null, null, AlbumRating.Good, [], [],
+            [new(hugo.Id, ContributionRole.Scenarist), new(hugo.Id, ContributionRole.Illustrator)]));
+        await PostAsync<SeriesForm>(api, "/admin/series", new SeriesContent(
+            "Les Scorpions du désert", null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], [new(hugo.Id, ContributionRole.Scenarist)]));
+        var kirk = await PostAsync<SeriesForm>(api, "/admin/series", new SeriesContent(
+            "Sergent Kirk", null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));
+        for (var volume = 1; volume <= 7; volume++)
+        {
+            List<ContributionContent> credits = [new(hugo.Id, ContributionRole.Illustrator)];
+            if (volume == 1)
+                credits.Add(new(hugo.Id, ContributionRole.Colorist));
+            await PostAsync<AlbumForm>(api, "/admin/albums", new AlbumContent(
+                volume == 2 ? "Le Fort de l'Ouest" : null, null, kirk.Id, AlbumType.Regular, false, volume, null, null, 1953 + volume, null, null,
+                null, volume == 2 ? AlbumRating.VeryGood : null, [], [], credits));
+        }
+
+        // Known under a pseudonym, with a nationality and a biography, credited on nothing yet.
+        UncreditedAuthorId = (await PostAsync<AuthorForm>(api, "/admin/authors", new CreateAuthorRequest(
+            "Giraud", "Jean", "Moebius", "Né à Nogent-sur-Marne en 1938, il signe Gir ses westerns et Moebius le reste de son œuvre.",
+            "Française"))).Id;
     }
 
     private async Task<AuthorForm> AuthorAsync(HttpClient api, string lastName, string firstName) =>

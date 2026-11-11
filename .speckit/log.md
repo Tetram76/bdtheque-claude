@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-11
+
+* **Choix** : fiche d'un auteur ; chaque série de sa bibliographie se déplie par une divulgation du navigateur, ouverte à l'arrivée jusqu'à six albums crédités, sans requête ni action suivie ; « Tout déplier » et « Tout replier » agissent sur toutes les séries par un script, leurs boutons n'apparaissant qu'avec lui (#212).
+
 ## 2026-11-10
 
 * **Visuel** : sur les fiches de saisie d'un album, d'une série et d'un éditeur, l'enregistrement d'une fiche, créée ou modifiée, ramène à sa liste, et non plus à la fiche à jour ou, en création, à sa page de modification (décision de l'utilisateur à la validation fonctionnelle, #354).

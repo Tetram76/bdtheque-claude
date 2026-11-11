@@ -1,0 +1,128 @@
+@attribute [Route(AppPaths.AuthorRoute)]
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Records
+@inject IStringLocalizer<AuthorRecord> L
+@inject ApiClient Api
+@inject RecordLabels Labels
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+
+@* The record of an author in the consultation (visuel/fiche-auteur/contenu.md): its monogram and its identity, the number of
+   the albums it is credited on, by role; its biography; its whole bibliography in a single list (Records/Bibliography.razor);
+   its dates. Its styles read the contracts of the base theme only (visuel/fiche-auteur/declinaison-par-theme.md). *@
+<PageTitle>@(_author is null ? L["Title"] : Name)</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AuthorRecord" Record="new PresentedRecord(RecordType.Author, Id)" />
+
+@if (_problem is not null)
+{
+    <h1 class="visually-hidden">@L["Title"]</h1>
+    <ErrorMessage Problem="_problem" />
+}
+else if (_author is { } author)
+{
+    <Breadcrumb Items="BreadcrumbItems" />
+
+    <div class="author-record">
+        <div class="author-head">
+            @* Decorative, as in the lists, but put forward as a theme puts forward the visual of a record (--record-visual-…). *@
+            <span class="author-monogram">
+                <Monogram LastName="@author.LastName" FirstName="@author.FirstName" Pseudonym="@author.Pseudonym" />
+            </span>
+
+            <div class="author-identity">
+                <div class="author-name">
+                    <p class="author-kind">@L["Kind"]</p>
+                    <h1>@Name</h1>
+                    @if (RealName is { } realName)
+                    {
+                        <p class="author-real-name">@realName</p>
+                    }
+                </div>
+
+                <dl class="author-nationality">
+                    <div>
+                        <dt>@L["Nationality"]</dt>
+                        <dd>@if (author.Nationality is { } nationality){@nationality}else{<NotSet Gender="GrammaticalGender.Feminine" />}</dd>
+                    </div>
+                </dl>
+
+                <ul class="author-facts" aria-label="@L["Facts"]">
+                    <li class="author-fact" data-fact="credited">@Credited</li>
+                    @foreach (var role in Enum.GetValues<ContributionRole>())
+                    {
+                        var count = _albums.Count(a => a.Roles.Contains(role));
+                        if (count > 0)
+                        {
+                            <li class="author-fact">@L["RoleCount", Values.Of(role), Format.Number(count)]</li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <Block Title="@L["Biography.Title"]" Kicker="@L["Biography.Kicker"]" data-part="biography">
+            @if (author.Biography is { } biography)
+            {
+                <p class="author-biography">@biography</p>
+            }
+            else
+            {
+                <p class="author-biography" data-none>@L["Biography.None"]</p>
+            }
+        </Block>
+
+        <Bibliography Entries="author.Bibliography" />
+    </div>
+
+    <p class="author-dates" data-local>@L["Dates", Format.LocalDate(author.CreatedAt), Format.LocalDate(author.ModifiedAt)]</p>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private AuthorDetail? _author;
+    private ApiProblem? _problem;
+    // Every album credited, in a series or not: a series credited on itself only has none.
+    private List<AlbumBibliographyItem> _albums = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _author = await Api.GetAsync<AuthorDetail>($"/catalog/authors/{Id}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            return;
+        }
+
+        _albums = [.. _author.Bibliography.SelectMany(e => e.Series is { } series ? series.Albums : [e.Album!])];
+    }
+
+    // Its main identifier (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
+    private string Name => Labels.Author(new AuthorListItem(Id, _author!.LastName, _author.FirstName, _author.Pseudonym));
+
+    // Under a pseudonym, the first name and the last name it is known by otherwise, when known.
+    private string? RealName =>
+        string.IsNullOrWhiteSpace(_author!.Pseudonym)
+            ? null
+            : string.Join(' ', new[] { _author.FirstName, _author.LastName }.Where(part => !string.IsNullOrWhiteSpace(part))) is { Length: > 0 } name
+                ? name
+                : null;
+
+    private string Credited => _albums.Count switch
+    {
+        0 => L["Credited.None"],
+        1 => L["Credited.One", Format.Number(1)],
+        var count => L["Credited.Other", Format.Number(count)],
+    };
+
+    private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
+    [
+        new(L["Breadcrumb.Authors"], AppPaths.Authors),
+        new(Name),
+    ];
+}

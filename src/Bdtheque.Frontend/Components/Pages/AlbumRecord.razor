@@ -5,7 +5,6 @@
 @inject IStringLocalizer<AlbumRecord> L
 @inject ApiClient Api
 @inject RecordLabels Labels
-@inject ValueLabels Values
 @inject DisplayFormatter Format
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
@@ -62,13 +61,9 @@ else if (_album is { } album)
                 </ul>
 
                 <div class="album-rating">
-                    @if (album.Rating is { } rating)
+                    <RatingStars Rating="album.Rating" />
+                    @if (album.Rating is null)
                     {
-                        <span role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
-                    }
-                    else
-                    {
-                        <span aria-hidden="true">@Stars(0)</span>
                         <span class="album-unrated">@L["NotRated"]</span>
                     }
                 </div>
@@ -212,15 +207,5 @@ else if (_album is { } album)
         (true, var count, _) => L["Membership.InCollection.Other", count],
         (false, _, true) => L["Membership.PurchaseIntent"],
         _ => L["Membership.OutOfCollection"],
-    };
-
-    private static RenderFragment Stars(int rating) => __builder =>
-    {
-        @for (var star = 1; star <= 5; star++)
-        {
-            <svg class="star" data-on="@(star <= rating ? "" : null)" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5 6.5 20.4l1-6.3L3 9.7l6.2-.9z" />
-            </svg>
-        }
     };
 }

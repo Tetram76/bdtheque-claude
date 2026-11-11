@@ -1,0 +1,126 @@
+/* Built on the contracts of the theme only (visuel/fiche-auteur/declinaison-par-theme.md, choix-implementation/socle/themes.md):
+   the head of the record, the small monogram on the left of the name, on a smartphone too; then the blocks, one under the
+   other. */
+.author-record {
+    display: grid;
+    gap: var(--record-gap);
+}
+
+.author-head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-l);
+}
+
+/* The monogram, put forward as the visual of a record: its border, its shadow and its tilt are the touch of the theme
+   (--record-visual-…), its corners those the theme gives that visual (--record-monogram-radius). */
+.author-monogram {
+    flex: none;
+    margin-block-start: var(--space-xs);
+    --monogram-size: 3.25rem;
+}
+
+.author-monogram ::deep .monogram {
+    border: var(--record-visual-border);
+    border-radius: var(--record-monogram-radius);
+    box-shadow: var(--record-visual-shadow);
+    rotate: var(--record-visual-tilt);
+    font-size: var(--font-size-large);
+}
+
+.author-identity {
+    display: grid;
+    flex: 1 1 0;
+    gap: var(--space-m);
+    min-inline-size: 0;
+}
+
+.author-name {
+    display: grid;
+    gap: var(--space-xs);
+}
+
+.author-kind {
+    margin: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.author-name h1 {
+    margin: 0;
+    font-size: var(--record-title-size);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+}
+
+.author-real-name {
+    margin: 0;
+    font-size: var(--font-size-large);
+    color: var(--color-text-muted);
+}
+
+.author-nationality {
+    margin: 0;
+}
+
+.author-nationality div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-s);
+}
+
+.author-nationality dt {
+    font-weight: var(--font-weight-strong);
+}
+
+.author-nationality dd {
+    margin: 0;
+}
+
+/* The albums credited, filled with the accent, then their number by role, outlined. */
+.author-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.author-fact {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.625rem;
+    padding: 0 var(--space-m);
+    border: var(--border-width-control) solid var(--color-control-border);
+    border-radius: var(--radius-control);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.author-fact[data-fact="credited"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.author-biography {
+    max-inline-size: 80ch;
+    margin: 0;
+    white-space: pre-line;
+}
+
+.author-biography[data-none] {
+    color: var(--color-text-muted);
+}
+
+.author-dates {
+    margin: var(--space-xl) 0 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
