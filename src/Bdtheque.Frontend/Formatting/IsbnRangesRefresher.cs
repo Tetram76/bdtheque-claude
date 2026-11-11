@@ -21,17 +21,6 @@ public sealed partial class IsbnRangesRefresher(
     /// <summary>A site that does not answer is tried again soon, without loading it.</summary>
     public static readonly TimeSpan RetryDelay = TimeSpan.FromHours(1);
 
-    // In UTC ticks, 0 before the first attempt: a long is read and written whole, and in order with the arming of the wait,
-    // by volatile accesses, where a DateTimeOffset? read by another thread could mix two values.
-    private long _nextAttemptTicks;
-
-    /// <summary>
-    /// When the next download is due, once its wait is armed on the clock; <c>null</c> before. Whoever reads it may move the
-    /// clock on: the wait wakes up at this time.
-    /// </summary>
-    public DateTimeOffset? NextAttempt =>
-        Volatile.Read(ref _nextAttemptTicks) is var ticks and not 0 ? new DateTimeOffset(ticks, TimeSpan.Zero) : null;
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (options.Value.Source is not { } source)
@@ -39,16 +28,10 @@ public sealed partial class IsbnRangesRefresher(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var due = clock.GetUtcNow() + (await TryDownloadAsync(source, stoppingToken) ? RefreshDelay : RetryDelay);
-            // From the time due rather than a delay: the wait is the same whenever the clock is read.
-            var wait = due - clock.GetUtcNow();
-            // Armed before it is announced: a clock moved on in between would arm the wait from the new time, to wake up a
-            // whole delay later (#375).
-            var delay = Task.Delay(wait > TimeSpan.Zero ? wait : TimeSpan.Zero, clock, stoppingToken);
-            Volatile.Write(ref _nextAttemptTicks, due.UtcTicks);
+            var delay = await TryDownloadAsync(source, stoppingToken) ? RefreshDelay : RetryDelay;
             try
             {
-                await delay;
+                await Task.Delay(delay, clock, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
