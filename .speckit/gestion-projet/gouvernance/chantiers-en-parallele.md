@@ -1,7 +1,7 @@
 ---
 type: Gouvernance
 title: 'Chantiers en parallèle'
-description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, autant à la fois que les ressources le permettent, choix parmi les tickets existants et ordre de priorité, indépendance, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
+description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants et ordre de priorité, indépendance, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:42:55Z }
 ---
 
@@ -11,8 +11,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:42:55Z }
 
 ## Le lot
 
-- **Toujours en parallèle** : les chantiers du lot sont toujours menés en parallèle, jamais l'un après l'autre par choix. Seul varie le nombre de chantiers menés en même temps : il est celui que permettent les ressources du poste (§ Ressources) et les dépendances entre chantiers (§ Choix des chantiers), sans nombre fixé à l'avance, ni du lot ni de chantiers simultanés.
-- **Durée du lot** : le lot se poursuit tant qu'il reste des chantiers à choisir (§ Choix des chantiers), ou jusqu'à ce que l'utilisateur l'arrête.
+- **Toujours en parallèle** : les chantiers du lot sont toujours menés en parallèle, jamais l'un après l'autre par choix ; seules les dépendances entre chantiers (§ Choix des chantiers) en font attendre un.
+- **Nombre de chantiers en même temps** : **3 au plus** (exigence de l'utilisateur), dans la limite de ce que permettent les ressources du poste (§ Ressources).
+- **Nombre de chantiers du lot** : l'utilisateur le fixe. Il n'est pas figé : l'utilisateur peut le changer à tout moment, et un nombre qu'il n'a pas donné n'est pas inventé par l'agent, qui le lui demande.
 - **Place libre** : un chantier occupe sa place jusqu'à la fusion de sa Pull Request. Une session qui attend l'utilisateur (validation fonctionnelle, décision) occupe toujours la sienne. À chaque fusion, l'agent évalue de nouveau les ressources et lance, sans attendre de demande, autant de chantiers du lot qu'elles le permettent.
 - **Sous-tickets** : un ticket découpé par une session ([Suivi par tickets](../revue-tickets/suivi-par-tickets.md), découpage au démarrage d'un chantier) donne autant de chantiers du lot que de sous-tickets, choisis et lancés comme les autres (dépendances comprises). Un sous-ticket est confié à la session qui a découpé le ticket si son contexte s'y prête : ce qu'elle sait sert le sous-ticket, et sa conversation n'est pas trop chargée pour le mener de bout en bout. Sinon, il l'est à une nouvelle session.
 
@@ -32,5 +33,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:42:55Z }
 ## Ressources
 
 - **Évaluées à chaque lancement** : avant de lancer un chantier, l'agent évalue les ressources du poste à cet instant ([Règles de travail de l'agent](regles-de-travail-de-l-agent.md), ressources d'une commande) : processeurs et mémoire libres, espace disque, service Docker et ressources de sa machine virtuelle, exécutions lourdes déjà en cours (tests de bout en bout, captures, environnement de validation fonctionnelle). Une évaluation faite pour un lancement ne vaut pas pour le suivant.
-- **Parallélisme effectif** : le nombre de chantiers menés en même temps est celui que les ressources permettent. Une ressource qui ne suffit pas à un chantier de plus retarde son lancement, ce que l'agent signale à l'utilisateur avec la ressource en cause.
+- **Parallélisme effectif** : le nombre de chantiers menés en même temps est le plus petit entre le maximum de 3 (§ Le lot) et celui que les ressources permettent. Une ressource qui ne suffit pas à un chantier de plus retarde son lancement, ce que l'agent signale à l'utilisateur avec la ressource en cause.
 - **Exécutions lourdes** : les sessions du lot se partagent le poste. Chacune vérifie, avant une commande qui démarre des conteneurs ou des navigateurs, qu'aucune autre session n'a d'exécution lourde en cours, et dimensionne la sienne d'après les ressources réelles ; l'environnement de validation fonctionnelle n'est lancé que pour une session à la fois.
