@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
@@ -48,6 +49,11 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
                 AcquisitionMode = null,
             },
             form.Content);
+        // Nothing comes from a series, and nothing is named: the form presents the default values as such.
+        Assert.Null(form.SeriesTemplate);
+        Assert.Equal(new EditionFormReferences(null, null), form.References);
+        Assert.Equal(album.Id, form.Album.Id);
+        Assert.Equal(album.Content.Title, form.Album.Title);
     }
 
     [Fact]
@@ -75,6 +81,51 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
                 AcquisitionMode = null,
             },
             form!.Content);
+        // The template says which fields the series pre-filled, and the form names the records it cites.
+        Assert.Equal(template, form.SeriesTemplate);
+        Assert.Equal(
+            new EditionFormReferences(
+                new PublisherListItem(publisher.Id, publisher.Name, null),
+                new PublisherCollectionListItem(collection.Id, collection.Name, publisher.Id, publisher.Name)),
+            form.References);
+        Assert.Equal(series.Content.Title, form.Album.SeriesTitle);
+    }
+
+    [Fact]
+    public async Task Get_NamesItsRecordsAndCarriesItsAlbumAndItsDates()
+    {
+        var album = await CreateAlbumAsync();
+        var publisher = await CreatePublisherAsync();
+        var collection = await CreateCollectionAsync(publisher);
+        var created = await CreateAsync(await GetAlbumAsync(album.Id), Content(publisher.Id) with { PublisherCollectionId = collection.Id });
+
+        var form = await GetAsync(created);
+
+        Assert.Equal(
+            new EditionFormReferences(
+                new PublisherListItem(publisher.Id, publisher.Name, null),
+                new PublisherCollectionListItem(collection.Id, collection.Name, publisher.Id, publisher.Name)),
+            form.References);
+        Assert.Equal(album.Id, form.Album.Id);
+        Assert.True(form.Album.IsInCollection);
+        // An owned edition: no intent, and its entry in the collection is known.
+        Assert.Null(form.PurchaseIntent);
+        Assert.NotNull(form.EnteredCollectionAt);
+        Assert.True(form.ModifiedAt >= form.CreatedAt);
+    }
+
+    [Fact]
+    public async Task Get_AWishedEdition_CarriesItsIntentAndNoEntryInTheCollection()
+    {
+        var album = await CreateAlbumAsync();
+        var editionId = await SeedWishedEditionAsync(album.Id);
+
+        var form = (await _client.GetFromJsonAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{editionId}"))!;
+
+        Assert.NotNull(form.PurchaseIntent);
+        Assert.Null(form.EnteredCollectionAt);
+        Assert.Null(form.Content.AcquisitionMode);
+        Assert.False(form.Album.IsInCollection);
     }
 
     [Fact]
@@ -363,6 +414,14 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var check = await _client.GetFromJsonAsync<IsbnCheck>($"/admin/editions/isbn-check?isbn={Uri.EscapeDataString(isbn)}");
 
         Assert.Equal(expected, check!.IsChecksumValid);
+    }
+
+    [Fact]
+    public async Task IsbnCheck_GivesTheIsbnAsItIsSaved()
+    {
+        var check = await _client.GetFromJsonAsync<IsbnCheck>("/admin/editions/isbn-check?isbn=2-905123-01-x");
+
+        Assert.Equal("2-905123-01-X", check!.Isbn);
     }
 
     [Fact]

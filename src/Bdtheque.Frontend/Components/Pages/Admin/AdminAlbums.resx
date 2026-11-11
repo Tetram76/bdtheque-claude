@@ -126,8 +126,11 @@
   <data name="More" xml:space="preserve">
     <value>Autres actions sur {0}</value>
   </data>
-  <data name="Menu.Editions" xml:space="preserve">
-    <value>Éditions et intentions d'achat</value>
+  <data name="Editions.Label" xml:space="preserve">
+    <value>Éditions et intentions d&apos;achat de {0}</value>
+  </data>
+  <data name="Editions.Title" xml:space="preserve">
+    <value>Éditions et intentions d&apos;achat</value>
   </data>
   <data name="Menu.View" xml:space="preserve">
     <value>Voir dans la consultation</value>

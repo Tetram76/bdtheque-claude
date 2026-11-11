@@ -87,6 +87,21 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Fact]
+    public void Button_ReducedToItsIcon_KeepsItsLabelAsItsNameAndItsTooltip()
+    {
+        var button = Render<Button>(parameters => parameters
+            .Add(p => p.Label, "Éditions")
+            .Add(p => p.Icon, IconName.Edition)
+            .Add(p => p.IconOnly, true)
+            .Add(p => p.Href, "/admin/albums/1/editions"));
+
+        var link = button.Find("a");
+        Assert.NotNull(link.GetAttribute("data-icon-only"));
+        Assert.Equal("Éditions", link.GetAttribute("title"));
+        Assert.Equal("Éditions", link.QuerySelector(".button-label")?.TextContent);
+    }
+
+    [Fact]
     public void Button_SecondaryByDefault_CanBeDisabled()
     {
         var button = Render<Button>(parameters => parameters

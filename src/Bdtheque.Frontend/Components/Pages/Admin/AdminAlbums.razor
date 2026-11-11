@@ -85,7 +85,7 @@
                                 }
                             </span>
                             <span class="album-editions" role="cell">
-                                <a href="@AppPaths.AdminAlbumEditions(row.Album.Id)" title="@L["Menu.Editions"]"
+                                <a href="@AppPaths.AdminAlbumEditions(row.Album.Id)" title="@L["Editions.Title"]"
                                    data-empty="@(row.EditionCount + row.PurchaseIntentCount == 0)">@EditionsText(row)</a>
                             </span>
                             <span class="album-state" role="cell"><CollectionStateTag State="row.State" /></span>
@@ -94,8 +94,9 @@
                         <span class="album-actions" role="cell">
                             <Button Href="@AppPaths.AdminEditAlbum(row.Album.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
                                     IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", label]" />
+                            <Button Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["Editions.Title"]"
+                                    IconOnly="true" aria-label="@L["Editions.Label", label]" />
                             <ActionsMenu Id="@($"album-actions-{row.Album.Id:N}")" Label="@L["More", label]">
-                                <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["Menu.Editions"]" />
                                 <MenuItem Href="@AppPaths.Album(row.Album.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
                                 <MenuItem Href="@((ListOnly with { Merge = row.Album.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
                                 <MenuSeparator />

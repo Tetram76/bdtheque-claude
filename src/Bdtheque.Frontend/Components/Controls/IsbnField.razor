@@ -1,0 +1,91 @@
+@using Bdtheque.Contracts.Admin
+@implements IDisposable
+@inject IStringLocalizer<IsbnField> L
+@inject ApiClient Api
+
+@* The ISBN of an edition, whose check digit is checked as it is entered, without blocking (fonctionnel/regles-metier/
+   validation-de-l-isbn.md): correct, a tick; inconsistent, a warning that says it may be saved as it is. The check is the
+   domain's, asked of the API (choix-implementation/domaine/validation-de-l-isbn.md), which also gives the ISBN as it will be
+   saved, its check character in capitals, taken up as soon as it is typed: the frontend applies no rule of its own. *@
+<div class="@(_checked == false ? "isbn-field isbn-field-warning" : "isbn-field")">
+    <Field Id="@Id" Label="@L["Label"]" Help="@Help" Context="control">
+        <span class="isbn-field-control">
+            <input id="@control.Id" type="text" inputmode="numeric" autocomplete="off" placeholder="@L["Placeholder"]" value="@Value"
+                   aria-describedby="@control.DescribedBy" data-warning="@(_checked == false ? "true" : null)" @oninput="EnterAsync" />
+            @if (_checked is { } valid)
+            {
+                <Icon Name="@(valid ? IconName.Check : IconName.Alert)" />
+            }
+        </span>
+    </Field>
+</div>
+
+@code {
+    // The number of the ISBN whose check is shown: each change gets the next one, before anything is awaited, and only the
+    // answer for the last ISBN is shown (as the sort key of a title, TitleSortKeyField).
+    private int _number;
+    private bool? _checked;
+    private readonly CancellationTokenSource _disposal = new();
+
+    /// <summary>The identifier of the field, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>The result of the check of the ISBN the edition was read with; <c>null</c> without ISBN.</summary>
+    [Parameter]
+    public bool? ReadCheck { get; set; }
+
+    private string? Help => _checked switch { true => L["Valid"].Value, false => L["Inconsistent"].Value, null => null };
+
+    protected override void OnInitialized() => _checked = ReadCheck;
+
+    private async Task EnterAsync(ChangeEventArgs args)
+    {
+        var isbn = args.Value as string;
+        var number = ++_number;
+        await ValueChanged.InvokeAsync(isbn);
+        if (string.IsNullOrWhiteSpace(isbn))
+        {
+            _checked = null;
+            return;
+        }
+
+        try
+        {
+            var check = await Api.GetAsync<IsbnCheck>($"/admin/editions/isbn-check?isbn={Uri.EscapeDataString(isbn)}", _disposal.Token);
+            if (number == _number)
+            {
+                _checked = check.IsChecksumValid;
+                // The check character in capitals as soon as it is typed, as it will be saved; the spaces around the ISBN,
+                // which the saving also removes, are left while typing, where one may be the next separator.
+                if (check.Isbn is { } saved && saved != isbn && string.Equals(saved, isbn, StringComparison.OrdinalIgnoreCase))
+                    await ValueChanged.InvokeAsync(saved);
+            }
+        }
+        catch (ApiProblemException) when (number == _number)
+        {
+            // Checked again at the next change: the check never blocks the saving anyway.
+            _checked = null;
+        }
+        catch (ApiProblemException)
+        {
+            // The check of an earlier ISBN no longer matters.
+        }
+        catch (OperationCanceledException) when (_disposal.IsCancellationRequested)
+        {
+            // The form is gone.
+        }
+    }
+
+    public void Dispose()
+    {
+        _disposal.Cancel();
+        _disposal.Dispose();
+    }
+}

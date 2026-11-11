@@ -1,3 +1,4 @@
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Admin;
@@ -11,7 +12,26 @@ namespace Bdtheque.Contracts.Admin;
 /// inconsistent ISBN being stored as entered (fonctionnel/regles-metier/validation-de-l-isbn.md).
 /// </param>
 /// <param name="AlbumVersion">Version of the album, sent back with any modification or deletion of the edition.</param>
-public sealed record EditionForm(Guid Id, Guid AlbumId, EditionContent Content, bool? IsbnChecksumValid, uint AlbumVersion);
+/// <param name="Album">The album of the edition, which the form names and leads to.</param>
+/// <param name="References">The records the content references by their identifier, named for the form to present them.</param>
+/// <param name="PurchaseIntent">The intent that targets the edition, not owned; <c>null</c> for an owned edition.</param>
+/// <param name="EnteredCollectionAt">When the edition became owned; <c>null</c> for an edition targeted by an intent.</param>
+public sealed record EditionForm(
+    Guid Id,
+    Guid AlbumId,
+    EditionContent Content,
+    bool? IsbnChecksumValid,
+    uint AlbumVersion,
+    AlbumSummary Album,
+    EditionFormReferences References,
+    PurchaseIntentItem? PurchaseIntent,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset ModifiedAt,
+    DateTimeOffset? EnteredCollectionAt);
+
+/// <summary>The records an <see cref="EditionContent"/> references, named as the lists name them.</summary>
+/// <param name="PublisherCollection">With its publisher, the one it belongs to.</param>
+public sealed record EditionFormReferences(PublisherListItem? Publisher, PublisherCollectionListItem? PublisherCollection);
 
 /// <summary>
 /// The form of a new edition of an album, pre-filled from the template of the album's series, or
@@ -19,7 +39,15 @@ public sealed record EditionForm(Guid Id, Guid AlbumId, EditionContent Content, 
 /// (fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md).
 /// </summary>
 /// <param name="AlbumVersion">Version of the album, sent back with the creation of the edition.</param>
-public sealed record NewEditionForm(Guid AlbumId, EditionContent Content, uint AlbumVersion);
+/// <param name="Album">The album of the edition, which the form names and leads to.</param>
+/// <param name="References">The records the pre-filled content references, named for the form to present them.</param>
+/// <param name="SeriesTemplate">
+/// The template of the album's series, whose fields with a value are those the series pre-filled; <c>null</c> for an album
+/// without series, whose form starts from the default values.
+/// </param>
+public sealed record NewEditionForm(
+    Guid AlbumId, EditionContent Content, uint AlbumVersion, AlbumSummary Album, EditionFormReferences References,
+    SeriesEditionTemplate? SeriesTemplate);
 
 /// <summary>
 /// Everything the user edits on an edition, sent to create it, and sent whole to modify it (the form
@@ -82,4 +110,5 @@ public sealed record AcquireEditionRequest(EditionContent Content, uint AlbumVer
 
 /// <summary>Result of the check of an ISBN during entry (fonctionnel/regles-metier/validation-de-l-isbn.md).</summary>
 /// <param name="IsChecksumValid">Whether the check digit is consistent: a warning only, never a refusal.</param>
-public sealed record IsbnCheck(bool IsChecksumValid);
+/// <param name="Isbn">The ISBN as it would be saved, its check character in capitals, which the entry takes up.</param>
+public sealed record IsbnCheck(bool IsChecksumValid, string? Isbn);

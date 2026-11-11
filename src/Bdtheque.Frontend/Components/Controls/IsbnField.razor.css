@@ -1,0 +1,41 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). */
+
+/* Thirteen digits and four hyphens, the mark of the check beside them. */
+.isbn-field-control {
+    position: relative;
+    display: block;
+    inline-size: calc(18ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control) + 1.5rem);
+    max-inline-size: 100%;
+}
+
+.isbn-field-control input {
+    padding-inline-end: calc(var(--control-padding-inline) + 1.5rem);
+}
+
+.isbn-field-control ::deep .icon {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: var(--control-padding-inline);
+    inline-size: 1rem;
+    block-size: 1rem;
+    translate: 0 -50%;
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+/* An inconsistent check digit is a warning, never an error: the border in dashes of the alert color, which a field in error
+   draws whole, and its message in the color of the text (fonctionnel/regles-metier/validation-de-l-isbn.md). */
+.isbn-field-control input[data-warning] {
+    border-color: var(--color-alert);
+    border-style: dashed;
+}
+
+.isbn-field-warning .isbn-field-control ::deep .icon {
+    color: var(--color-alert);
+}
+
+.isbn-field-warning ::deep .field-help {
+    max-inline-size: calc(18ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control) + 1.5rem);
+    font-weight: var(--font-weight-strong);
+    color: var(--color-text);
+}

@@ -1,0 +1,68 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). A fieldset laid out as a field: none of its own
+   margins, border or width. */
+.amount-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+    max-inline-size: 22rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* The amount and its currency side by side, the code of another currency after them. */
+.amount-field-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.amount-field-amount {
+    inline-size: calc(9.5ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+}
+
+.amount-field-currency {
+    inline-size: auto;
+    max-inline-size: 100%;
+}
+
+.amount-field-code {
+    inline-size: calc(3.5ch + 2 * var(--control-padding-inline) + 2 * var(--border-width-control));
+    text-transform: uppercase;
+}
+
+.amount-field legend {
+    padding: 0 0 var(--space-xs);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.amount-field-error,
+.amount-field-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+}
+
+.amount-field-help {
+    color: var(--color-text-muted);
+}
+
+/* As the error of a field (Field): in the color of the text, the border of the control and the icon pointing to it. */
+.amount-field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    font-weight: var(--font-weight-strong);
+}
+
+.amount-field-error ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    margin-block-start: 0.2em;
+    color: var(--color-alert);
+}

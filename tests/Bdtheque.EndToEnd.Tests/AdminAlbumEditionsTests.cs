@@ -24,8 +24,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await CreateAlbumAsync($"Le Château des étoiles {_marker}");
         var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
 
-        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Le Château des étoiles {_marker}" }).ClickAsync();
-        await page.Locator(".actions-menu-panel:popover-open").GetByRole(AriaRole.Link, new() { Name = "Éditions et intentions d'achat" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Éditions et intentions d'achat de Le Château des étoiles {_marker}" }).ClickAsync();
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Éditions et intentions d'achat");
         await Assertions.Expect(page.Locator(".album-editions-subject")).ToHaveTextAsync($"Le Château des étoiles {_marker}");

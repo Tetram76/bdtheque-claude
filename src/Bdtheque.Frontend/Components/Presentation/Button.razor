@@ -2,13 +2,13 @@
    (--control-height), the same on every page for a given width of screen (visuel/charte-graphique/convivialite-et-efficacite.md). Reduced to its icon on a smartphone, it keeps its label for assistive technologies. *@
 @if (Href is not null)
 {
-    <a class="button" href="@Href" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnly" @attributes="AdditionalAttributes">
+    <a class="button" href="@Href" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnlyOnSmall" data-icon-only="@IconOnlyAlways" title="@Tooltip" @attributes="AdditionalAttributes">
         @Content
     </a>
 }
 else
 {
-    <button class="button" type="@Type" disabled="@Disabled" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnly"
+    <button class="button" type="@Type" disabled="@Disabled" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnlyOnSmall" data-icon-only="@IconOnlyAlways" title="@Tooltip"
             @onclick="OnClick" @attributes="AdditionalAttributes">
         @Content
     </button>
@@ -23,6 +23,13 @@ else
 
     [Parameter]
     public IconName? Icon { get; set; }
+
+    /// <summary>
+    /// Shows only the icon, at every width, its label being its name for assistive technologies and its tooltip (e.g. Éditions
+    /// in a row of the list of the albums, beside Modifier, where a second label would take the room of the columns).
+    /// </summary>
+    [Parameter]
+    public bool IconOnly { get; set; }
 
     /// <summary>Shows only the icon on a smartphone (e.g. Nouvel album, Modifier in a row of a list).</summary>
     [Parameter]
@@ -51,8 +58,13 @@ else
 
     private string VariantName => Variant.ToString().ToLowerInvariant();
 
-    // Rendered as a bare attribute when set, absent otherwise.
-    private bool? IconOnly => IconOnlyOnSmartphone && Icon is not null ? true : null;
+    // Rendered as bare attributes when set, absent otherwise.
+    private bool? IconOnlyOnSmall => IconOnlyOnSmartphone && Icon is not null ? true : null;
+
+    private bool? IconOnlyAlways => IconOnly && Icon is not null ? true : null;
+
+    // The label, which an icon alone no longer shows.
+    private string? Tooltip => IconOnlyAlways is true ? Label : null;
 
     private RenderFragment Content => @<text>
         @if (Icon is { } icon)

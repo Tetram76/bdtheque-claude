@@ -51,7 +51,7 @@ internal static class EditionEndpoints
         editions.MapChildDeletion<Album, Edition>(query => query, album => album.Editions, DeletionLinks);
 
         admin.MapGet("/editions", ListForAdministrationAsync);
-        admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn)));
+        admin.MapGet("/editions/isbn-check", (string isbn) => new IsbnCheck(IsbnChecksumValidator.IsValid(isbn), IsbnText.Normalize(isbn)));
     }
 
     public static void MapEditionCatalog(this RouteGroupBuilder catalog) => catalog.MapGet("/editions", ListAsync);
@@ -177,17 +177,63 @@ internal static class EditionEndpoints
         var album = await context.Albums.IgnoreAutoIncludes().Include(a => a.Series)
                         .SingleOrDefaultAsync(a => a.Id == rootId, cancellationToken)
                     ?? throw new EntityNotFoundException(typeof(Album), rootId);
-        return new NewEditionForm(album.Id, ToContent(EditionPreset.For(album)), context.VersionOf(album));
+        var preset = EditionPreset.For(album);
+        return new NewEditionForm(
+            album.Id,
+            ToContent(preset),
+            context.VersionOf(album),
+            await SummaryAsync(context, rootId, cancellationToken),
+            await NameAsync(context, preset.PublisherId, preset.PublisherCollectionId, cancellationToken),
+            album.Series is { } series ? SeriesEndpoints.TemplateOf(series) : null);
     }
 
+    /// <summary>
+    /// The form of an edition, which names what it cites, its album and, for an edition not owned, the intent that targets
+    /// it, with its dates (choix-implementation/api/organisation-de-l-api.md, Écritures).
+    /// </summary>
     private static async Task<EditionForm> GetAsync(Guid rootId, Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         var read = await context.Editions.AsNoTracking()
                        .Where(e => e.Id == id && e.AlbumId == rootId)
-                       .Select(e => new { Edition = e, AlbumVersion = EF.Property<uint>(e.Album, BdthequeDbContext.VersionProperty) })
+                       .Select(CatalogExpressions.Expand((Edition e) => new
+                       {
+                           Edition = e,
+                           Album = e.Album.ToSummary(),
+                           PurchaseIntent = e.PurchaseIntentOf(),
+                           AlbumVersion = EF.Property<uint>(e.Album, BdthequeDbContext.VersionProperty),
+                       }))
                        .SingleOrDefaultAsync(cancellationToken)
                    ?? throw new EntityNotFoundException(typeof(Edition), id);
-        return ToForm(read.Edition, read.AlbumVersion);
+        var edition = read.Edition;
+        return ToForm(
+            edition, read.AlbumVersion, read.Album,
+            await NameAsync(context, edition.PublisherId, edition.PublisherCollectionId, cancellationToken), read.PurchaseIntent);
+    }
+
+    // The summary of an album, as the lists build it.
+    private static async Task<AlbumSummary> SummaryAsync(BdthequeDbContext context, Guid albumId, CancellationToken cancellationToken) =>
+        await context.Albums.AsNoTracking()
+            .Where(a => a.Id == albumId)
+            .Select(CatalogExpressions.Expand((Album a) => a.ToSummary()))
+            .SingleAsync(cancellationToken);
+
+    /// <summary>The publisher and the collection a form cites, named as the lists name them.</summary>
+    internal static async Task<EditionFormReferences> NameAsync(
+        BdthequeDbContext context, Guid? publisherId, Guid? collectionId, CancellationToken cancellationToken)
+    {
+        var publisher = publisherId is { } pid
+            ? await context.Publishers.AsNoTracking()
+                .Where(p => p.Id == pid)
+                .Select(p => new PublisherListItem(p.Id, p.Name, p.Website))
+                .SingleOrDefaultAsync(cancellationToken)
+            : null;
+        var collection = collectionId is { } cid
+            ? await context.PublisherCollections.AsNoTracking()
+                .Where(c => c.Id == cid)
+                .Select(c => new PublisherCollectionListItem(c.Id, c.Name, c.PublisherId, c.Publisher.Name))
+                .SingleOrDefaultAsync(cancellationToken)
+            : null;
+        return new EditionFormReferences(publisher, collection);
     }
 
     private static async Task<Created<EditionForm>> CreateAsync(
@@ -202,7 +248,8 @@ internal static class EditionEndpoints
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return TypedResults.Created($"/admin/albums/{rootId}/editions/{edition.Id}", ToForm(edition, context.VersionOf(album)));
+        return TypedResults.Created(
+            $"/admin/albums/{rootId}/editions/{edition.Id}", await GetAsync(rootId, edition.Id, context, cancellationToken));
     }
 
     /// <summary>
@@ -227,7 +274,7 @@ internal static class EditionEndpoints
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return ToForm(edition, context.VersionOf(album));
+        return await GetAsync(rootId, id, context, cancellationToken);
     }
 
     /// <summary>
@@ -263,7 +310,7 @@ internal static class EditionEndpoints
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return ToForm(edition, context.VersionOf(album));
+        return await GetAsync(rootId, id, context, cancellationToken);
     }
 
     /// <summary>
@@ -322,7 +369,8 @@ internal static class EditionEndpoints
             null,
             null);
 
-    private static EditionForm ToForm(Edition edition, uint albumVersion) =>
+    private static EditionForm ToForm(
+        Edition edition, uint albumVersion, AlbumSummary album, EditionFormReferences references, PurchaseIntentItem? purchaseIntent) =>
         new(edition.Id,
             edition.AlbumId,
             new EditionContent(
@@ -350,5 +398,11 @@ internal static class EditionEndpoints
                 edition.PersonalReference,
                 edition.PersonalNotes),
             edition.Isbn is null ? null : IsbnChecksumValidator.IsValid(edition.Isbn),
-            albumVersion);
+            albumVersion,
+            album,
+            references,
+            purchaseIntent,
+            edition.CreatedAt,
+            edition.ModifiedAt,
+            edition.EnteredCollectionAt);
 }

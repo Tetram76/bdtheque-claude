@@ -46,6 +46,10 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
             new PurchaseIntentEditionContent(
                 publisher.Id, null, null, null, BindingType.Paperback, null, null, null, null, EditionCategory.LimitedEdition, false),
             form.Edition);
+        // As for a new owned edition: the fields the series pre-filled, the records named, and the album.
+        Assert.Equal(template, form.SeriesTemplate);
+        Assert.Equal(new EditionFormReferences(new PublisherListItem(publisher.Id, publisher.Name, null), null), form.References);
+        Assert.Equal(series.Content.Title, form.Album.SeriesTitle);
     }
 
     [Fact]

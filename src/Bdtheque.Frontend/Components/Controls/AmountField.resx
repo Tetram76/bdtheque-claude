@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Amount" xml:space="preserve">
+    <value>Montant</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Devise</value>
+  </data>
+  <data name="Currency.Code" xml:space="preserve">
+    <value>Code de la devise</value>
+  </data>
+  <data name="Currency.Code.Placeholder" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Currency.Other" xml:space="preserve">
+    <value>Autre devise…</value>
+  </data>
+  <data name="Currency.EUR" xml:space="preserve">
+    <value>EUR · euro</value>
+  </data>
+  <data name="Currency.QZF" xml:space="preserve">
+    <value>QZF · ancien franc français</value>
+  </data>
+  <data name="Currency.FRF" xml:space="preserve">
+    <value>FRF · franc français</value>
+  </data>
+  <data name="Currency.BEF" xml:space="preserve">
+    <value>BEF · franc belge</value>
+  </data>
+  <data name="Currency.LUF" xml:space="preserve">
+    <value>LUF · franc luxembourgeois</value>
+  </data>
+  <data name="Currency.CHF" xml:space="preserve">
+    <value>CHF · franc suisse</value>
+  </data>
+  <data name="Currency.CAD" xml:space="preserve">
+    <value>CAD · dollar canadien</value>
+  </data>
+  <data name="Currency.USD" xml:space="preserve">
+    <value>USD · dollar des États-Unis</value>
+  </data>
+  <data name="Currency.GBP" xml:space="preserve">
+    <value>GBP · livre sterling</value>
+  </data>
+</root>

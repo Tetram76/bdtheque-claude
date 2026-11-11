@@ -284,6 +284,21 @@ internal static class SeriesEndpoints
         series.SetTemplateContributions(await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken, added.Authors));
     }
 
+    /// <summary>
+    /// The values a series proposes to the new editions of its albums, which its form edits and the form of a new edition
+    /// presents as what the series pre-filled (fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md).
+    /// </summary>
+    internal static SeriesEditionTemplate TemplateOf(Series series) =>
+        new(series.TemplatePublisherId,
+            series.TemplatePublisherCollectionId,
+            EnumMapping.Map<ContractEnums.EditionCategory>(series.TemplateEditionCategory),
+            EnumMapping.Map<ContractEnums.EditionCondition>(series.TemplateCondition),
+            EnumMapping.Map<ContractEnums.BindingType>(series.TemplateBinding),
+            EnumMapping.Map<ContractEnums.BookOrientation>(series.TemplateOrientation),
+            EnumMapping.Map<ContractEnums.ReadingDirection>(series.TemplateReadingDirection),
+            EnumMapping.Map<ContractEnums.EditionFormat>(series.TemplateFormat),
+            series.TemplateIsColor);
+
     private static async Task<SeriesForm> ToFormAsync(BdthequeDbContext context, Series series, CancellationToken cancellationToken) =>
         new(series.Id, series.SortKey,
             new SeriesContent(
@@ -296,16 +311,7 @@ internal static class SeriesEndpoints
                 series.ExcludeFromReleaseEstimates,
                 series.Summary,
                 series.PersonalNotes,
-                new SeriesEditionTemplate(
-                    series.TemplatePublisherId,
-                    series.TemplatePublisherCollectionId,
-                    EnumMapping.Map<ContractEnums.EditionCategory>(series.TemplateEditionCategory),
-                    EnumMapping.Map<ContractEnums.EditionCondition>(series.TemplateCondition),
-                    EnumMapping.Map<ContractEnums.BindingType>(series.TemplateBinding),
-                    EnumMapping.Map<ContractEnums.BookOrientation>(series.TemplateOrientation),
-                    EnumMapping.Map<ContractEnums.ReadingDirection>(series.TemplateReadingDirection),
-                    EnumMapping.Map<ContractEnums.EditionFormat>(series.TemplateFormat),
-                    series.TemplateIsColor),
+                TemplateOf(series),
                 series.Genres.Select(g => g.Id).Order().ToList(),
                 series.Universes.Select(u => u.Id).Order().ToList(),
                 FormReferences.ToContents(series.TemplateContributions)),

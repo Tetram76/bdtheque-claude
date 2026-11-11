@@ -12,7 +12,8 @@
     <div class="entry-form-heading">
         <Breadcrumb Items="Breadcrumb" />
         <h1 class="entry-form-title">@Title</h1>
-        <p class="entry-form-subject">@Subject</p>
+        @* An ISBN, which ends the label of an edition, kept on one line (fonctionnel/presentation/libelle-d-une-edition.md). *@
+        <p class="entry-form-subject"><LabelText Text="@Subject" /></p>
         @Status
     </div>
 

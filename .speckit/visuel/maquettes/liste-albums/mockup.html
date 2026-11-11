@@ -19,15 +19,15 @@ input::placeholder{color:var(--placeholder);opacity:1}
 .adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
 /* A row of the list is a line of a table on a wide screen; on a phone, the album and its actions on
    one line, then what situates it, below. */
-.al-row{display:grid;grid-template-columns:36px minmax(0,1fr) 108px 190px 170px 108px 150px;grid-template-areas:"cover main date eds col mod act";align-items:center;column-gap:14px}
+.al-row{display:grid;grid-template-columns:36px minmax(0,1fr) 108px 190px 170px 108px 190px;grid-template-areas:"cover main date eds col mod act";align-items:center;column-gap:14px}
 .al-meta{display:contents}
 .al-date{grid-area:date}.al-eds{grid-area:eds}.al-col{grid-area:col}.al-mod{grid-area:mod}
 .al-act-label{display:inline}
-@media (max-width: 1080px){
-  .al-row{grid-template-columns:36px minmax(0,1fr) 108px 190px 170px 150px;grid-template-areas:"cover main date eds col act"}
+@media (max-width: 1120px){
+  .al-row{grid-template-columns:36px minmax(0,1fr) 108px 190px 170px 190px;grid-template-areas:"cover main date eds col act"}
   .al-mod{display:none}
 }
-@media (max-width: 760px){
+@media (max-width: 800px){
   .al-head{display:none !important}
   .al-row{grid-template-columns:36px minmax(0,1fr) auto;grid-template-areas:"cover main act" "cover meta meta";row-gap:4px;align-items:start}
   .al-meta{grid-area:meta;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
@@ -190,11 +190,11 @@ input::placeholder{color:var(--placeholder);opacity:1}
                 <span role="cell" class="al-mod" style="font-size: 13px; color: {{t.muted}}; font-variant-numeric: tabular-nums">{{r.modified}}</span>
                 <span role="cell" style="grid-area: act; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
                   <a href="#" class="al-edit" aria-label="Modifier {{r.label}}" style="display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg><span class="al-act-label">Modifier</span></a>
+                  <a href="#" class="al-eds-btn" aria-label="Éditions et intentions d'achat de {{r.label}}" title="Éditions et intentions d'achat" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h12v13H4z M8 4h12v13"></path></svg></a>
                   <button type="button" aria-label="Autres actions sur {{r.label}}" aria-haspopup="menu" aria-expanded="{{r.menuExpanded}}" onClick="{{r.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{r.moreBg}}; color: {{r.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
                   <sc-if value="{{r.menuOpen}}">
                     <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
                     <div role="menu" aria-label="Actions sur {{r.label}}" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 250px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
-                      <a href="#" role="menuitem" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border-radius: {{t.btnR}}; color: {{t.text}}; font-weight: 700; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h12v13H4z M8 4h12v13"></path></svg>Éditions et intentions d'achat</a>
                       <a href="#" role="menuitem" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border-radius: {{t.btnR}}; color: {{t.text}}; font-weight: 700; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg>Voir dans la consultation</a>
                       <button type="button" role="menuitem" onClick="{{r.merge}}" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{mergeIcon}}"></path></svg>Fusionner avec un autre album…</button>
                       <span aria-hidden="true" style="margin: 4px 0; border-top: {{t.rowB}}"></span>
