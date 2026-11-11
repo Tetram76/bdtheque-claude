@@ -26,8 +26,13 @@ carries out a chantier itself.
   batch nor of chantiers at once: never ask the user for one.
 - The batch goes on while chantiers remain to choose, or until the user
   stops it.
-- Count the places taken (a chantier whose pull request is not merged yet;
-  a session that splits its ticket keeps its place for the sub-tickets).
+- Count the places taken (a chantier whose pull request is not merged yet).
+- A sub-ticket is a chantier like the others. When it is launched, give it to
+  the session that split its ticket only if that session's context suits it
+  (what it knows serves the sub-ticket, and its conversation is not too
+  loaded to carry it end to end — read it with `get_session` /
+  `list_events`): then send it the brief with `SendMessage`. Otherwise start a
+  new session (step 3).
 
 ## 2. Before each launch — every time, never reused
 
@@ -78,8 +83,8 @@ brief (`prompt`) says:
 - what the ticket requires in particular (functional validation or not,
   associated or duplicate tickets, a split expected, decisions of the user to
   ask one at a time);
-- that its sub-tickets, if it splits the ticket, are carried out by the same
-  session, one after the other.
+- that, if it splits the ticket, it carries out the first sub-ticket only and
+  reports the others, which are launched as chantiers of the batch.
 
 The `background` says: the batch and the other chantiers in progress (by
 ticket and pull request) with the files they may share; the resources measured
