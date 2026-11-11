@@ -131,7 +131,14 @@ chosen before the others.
   ```
 
   Then archive the session (`archive_session`, reason « PR #<pr> merged »),
-  which stops it and removes its worktree; `git worktree prune` after it.
+  unless the app already did. Archiving does not always remove its worktree,
+  and the app reuses worktree folders for new sessions (a folder's name says
+  nothing of its chantier): after it, a worktree of `git worktree list` that
+  is the `cwd` of no running session (`list_sessions`) and has nothing
+  uncommitted is removed (`git worktree remove`, then `git worktree prune`);
+  a local branch with no commit missing from `origin/main`
+  (`git rev-list --count origin/main..<branch>` is 0, or its pull request is
+  squash-merged) is deleted with `git branch -D`.
   Report to the user in one line what was cleaned.
 - A note that reports a split or a new ticket: tell the user which tickets
   join the candidates; they are planned at the next pass of step 2 (now, if a
