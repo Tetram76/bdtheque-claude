@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Chantiers en parallèle'
 description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants et ordre de priorité, indépendance, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:42:55Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:24:49Z }
 ---
 
 # Chantiers en parallèle
