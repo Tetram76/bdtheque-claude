@@ -460,13 +460,21 @@ else
     private async Task ShowChangesAsync()
     {
         _changesShown = true;
-        await (Entry!.PurchaseIntentId is { } intent
-            ? Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentChanges, $"purchase-intent={intent}")
-            : Recorder.RecordActionAsync(AudienceFunctions.AdminEditionChanges, $"edition={Entry.Id}"));
+        // A new edition or intent has no identifier yet: its album designates it.
+        var entry = Entry!;
+        await (entry switch
+        {
+            { IsPurchaseIntent: true, PurchaseIntentId: { } intent } =>
+                Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentChanges, $"purchase-intent={intent}"),
+            { IsPurchaseIntent: true } => Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentChanges, $"album={entry.AlbumId}"),
+            { Id: { } edition } => Recorder.RecordActionAsync(AudienceFunctions.AdminEditionChanges, $"edition={edition}"),
+            _ => Recorder.RecordActionAsync(AudienceFunctions.AdminEditionChanges, $"album={entry.AlbumId}"),
+        });
     }
 
-    // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
-    private void Reload() => Navigation.NavigateTo(AppPaths.AdminEditEdition(Entry!.AlbumId, Entry.Id!.Value), forceLoad: true);
+    // The record as it is now, the changes of the form left behind: a navigation that loads the page anew, the same page, which
+    // reads anew the edition or, for a new one, the album and what the series pre-fills.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
 
     // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own.
     private string? FieldError(string field) =>
@@ -487,9 +495,11 @@ else
     };
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-edition/contenu.md).
+    // A conflict can always be reloaded: a new edition or intent is written, as a modified one, under the version of its album,
+    // which the form read and which only a reload reads anew.
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
         : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
-                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="true" OnReload="Reload" OnShowChanges="ShowChangesAsync"
                       OnRetry="SaveAsync" />;
 
     // Just above the first block, as on the other entry forms (decision of the user, #209): those of the edition, or, for an

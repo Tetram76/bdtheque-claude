@@ -467,6 +467,36 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Contains("admin.edition-form.changes", _audience.Functions);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FunctionalError_ModifiedMeanwhileOnCreation_OffersToReloadTheNewRecordAndToSeeTheChanges(bool intent)
+    {
+        // A new edition, or intent, is written under the version of its album, as a modified one: the album modified meanwhile,
+        // the creation is to start again from its current state, which only a reload reads.
+        var page = intent ? OpenNewIntent() : OpenNewOwned();
+        var path = intent ? AppPaths.AdminNewPurchaseIntent(AlbumId) : AppPaths.AdminNewAlbumEdition(AlbumId);
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
+        page.Find("#edition-year").Change("2011");
+        if (!intent)
+            page.Find("#edition-mode").Change("Gift");
+        page.Find("form").Submit();
+
+        var error = page.WaitForElement("[role=alert]");
+        Assert.Equal("functional", error.GetAttribute("data-error-category"));
+        var buttons = error.QuerySelectorAll("button");
+        Assert.Equal(["Recharger la fiche", "Voir mes changements"], buttons.Select(button => button.TextContent.Trim()));
+        buttons[1].Click();
+        Assert.Contains("Année d'édition", page.Find("dialog .changes-dialog-list").TextContent);
+        Assert.Contains(intent ? "admin.purchase-intent-form.changes" : "admin.edition-form.changes", _audience.Functions);
+
+        page.Find("[role=alert]").QuerySelectorAll("button")[0].Click();
+
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        Assert.Equal(path, new Uri(navigation.Uri).AbsolutePath);
+    }
+
     [Fact]
     public void TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
     {
