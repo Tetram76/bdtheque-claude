@@ -129,9 +129,6 @@
   <data name="Color" xml:space="preserve">
     <value>En couleur</value>
   </data>
-  <data name="Making.Help" xml:space="preserve">
-    <value>Choisir « — » laisse la donnée non renseignée.</value>
-  </data>
   <data name="Mode" xml:space="preserve">
     <value>Mode d'acquisition</value>
   </data>
