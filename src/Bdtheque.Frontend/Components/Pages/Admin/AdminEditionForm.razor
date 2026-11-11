@@ -242,7 +242,12 @@ else
         _ => L["Edit.Edition"],
     };
 
-    private string PageTitle => Entry is null ? L["Breadcrumb.Unknown"] : Entry.Id is null ? Title : L["PageTitle", Title, Subject];
+    private string PageTitle => Entry switch
+    {
+        null => L["Breadcrumb.Unknown"],
+        { Id: null } => Title,
+        _ => L["PageTitle", Title, Subject],
+    };
 
     private string SaveLabel => (Entry!.Id, Entry.IsPurchaseIntent) switch
     {
