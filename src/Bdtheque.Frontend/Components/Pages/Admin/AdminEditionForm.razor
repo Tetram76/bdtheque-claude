@@ -277,7 +277,12 @@ else
 
     private string AmountLabel => IsPurchase ? L["Price.Purchase"] : L["Price.Other"];
 
-    private string FreeHelp => IsPurchase ? L["Free.Help.Purchase"] : Entry!.IsFree ? L["Free.Help.Free"] : L["Free.Help"];
+    private string FreeHelp => (IsPurchase, Entry!.IsFree) switch
+    {
+        (true, _) => L["Free.Help.Purchase"],
+        (_, true) => L["Free.Help.Free"],
+        _ => L["Free.Help"],
+    };
 
     protected override async Task OnInitializedAsync()
     {
