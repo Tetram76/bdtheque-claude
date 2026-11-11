@@ -48,10 +48,21 @@ forwards to that session a question of the user about the chantier
    gh pr list --state open --json number,title,isDraft,headRefName
    ```
 
-   and the sub-tickets of every chantier of the batch:
-   `gh api repos/Tetram76/bdtheque-claude/issues/<n>/sub_issues --jq '.[] | "#\(.number) \(.state) \(.title)"'`.
+   **Tickets created by the sessions of the batch** — the orchestrator never
+   relies on a note alone to know them; it reads them on GitHub:
+   - the sub-tickets of every ticket of the batch, launched or not:
+     `gh api repos/Tetram76/bdtheque-claude/issues/<n>/sub_issues --jq '.[] | "#\(.number) \(.state) \(.title)"'`;
+   - the tickets opened since the batch started (a problem a session
+     reported, a review point deferred to a ticket):
+     `gh issue list --state open --search "created:>=<start date of the batch>" --json number,title,milestone`.
+
+   Each of them is a candidate of step 2 like any other ticket, and each
+   sub-ticket counts in the number of chantiers of the batch.
 2. **Candidates**: open tickets only, none invented; drop those already in
-   progress (a pull request, a session of the batch). Order them:
+   progress (a pull request, a session of the batch). A sub-ticket ranks as
+   its parent ticket would (a sub-ticket of a plan ticket is a plan
+   chantier) and depends on the sub-tickets its parent orders before it.
+   Order them:
    CI stabilization (a flaky test, an intermittent failure — not an
    optimization) → plan of `.speckit/suivi-implementation/` → milestone of the
    next version → the rest. Then drop each one that would touch the same
@@ -108,6 +119,9 @@ chosen before the others.
 
 - Each note of a session of the batch: report it to the user in a line or two,
   with the links of its pull request; never fabricate its result.
+- A note that reports a split or a new ticket: tell the user which tickets
+  join the candidates; they are planned at the next pass of step 2 (now, if a
+  place is free), after checking them on GitHub (step 2.1).
 - A merge (a note, or `main` that moved) frees a place: back to step 2 —
   tickets, candidates **and resources** read again — then step 3, unasked,
   until the number of chantiers of the batch is reached (sub-tickets count).
