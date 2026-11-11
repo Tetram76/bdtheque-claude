@@ -119,17 +119,18 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rating_IsFiveStars_OrNotRatedYet()
+    public void Rating_IsFiveStars_AndLeftOutWithout()
     {
         _catalog.Album = Album() with { Rating = AlbumRating.Good };
         var rated = Open();
         Assert.Equal("Appréciation : Bien, 4 sur 5", rated.Find(".album-rating [role='img']").GetAttribute("aria-label"));
         Assert.Equal(4, rated.FindAll(".album-rating .star[data-on]").Count);
 
+        // Data not set is not shown in the consultation: neither stars nor « Pas encore noté ».
         _catalog.Album = Album() with { Rating = null };
         var unrated = Open();
-        Assert.Contains("Pas encore noté", unrated.Find(".album-rating").TextContent);
-        Assert.Empty(unrated.FindAll(".album-rating .star[data-on]"));
+        Assert.Empty(unrated.FindAll(".album-rating"));
+        Assert.DoesNotContain("Pas encore noté", unrated.Markup);
     }
 
     [Fact]

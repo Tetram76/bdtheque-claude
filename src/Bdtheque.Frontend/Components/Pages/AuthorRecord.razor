@@ -72,7 +72,10 @@ else if (_author is { } author)
             </Block>
         }
 
-        <Bibliography Entries="author.Bibliography" />
+        @if (author.Bibliography.Count > 0)
+        {
+            <Bibliography Entries="author.Bibliography" />
+        }
     </div>
 
     <p class="author-dates" data-local>@L["Dates", Format.LocalDate(author.CreatedAt), Format.LocalDate(author.ModifiedAt)]</p>

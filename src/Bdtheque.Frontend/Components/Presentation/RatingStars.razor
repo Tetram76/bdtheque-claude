@@ -3,15 +3,11 @@
 @inject ValueLabels Values
 
 @* The rating of an album in five stars, the stars of the rating filled (visuel/fiche-album/contenu.md), shared by the records
-   of the consultation: an image named by the rating for assistive technologies; without rating, five empty stars, decorative,
-   that the page names itself (« Pas encore noté »), or leaves out. *@
+   of the consultation: an image named by the rating for assistive technologies; nothing without rating, data not set being
+   not shown in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md). *@
 @if (Rating is { } rating)
 {
     <span class="rating-stars" role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
-}
-else
-{
-    <span class="rating-stars" aria-hidden="true">@Stars(0)</span>
 }
 
 @code {

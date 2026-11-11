@@ -20,8 +20,7 @@ app-bibliography-folds:not(:defined) .bibliography-actions {
     gap: var(--space-s) var(--space-l);
 }
 
-.bibliography-summary,
-.bibliography-none {
+.bibliography-summary {
     margin: 0;
     font-size: var(--font-size-small);
     color: var(--color-text-muted);

@@ -276,17 +276,16 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void AuthorWithoutAnyCredit_SaysSo_InPlaceOfTheList()
+    public void AuthorWithoutAnyCredit_SaysSoInItsFacts_WithoutABibliography()
     {
         _catalog.Author = Author() with { Bibliography = [] };
 
         var page = Open();
 
+        // A number of albums of zero is a value, said in the facts; an empty bibliography is not shown: no block « Sur quels albums ? ».
         Assert.Equal(["Crédité sur aucun album"], page.FindAll(".author-facts li").Select(f => f.TextContent.Trim()));
-        Assert.Equal("Aucune série ni aucun album crédité pour l'instant.", page.Find(".bibliography-none").TextContent.Trim());
-        Assert.Empty(page.FindAll(".bibliography-entries"));
-        Assert.Empty(page.FindAll(".bibliography-summary"));
-        Assert.Empty(page.FindAll("[data-fold-all]"));
+        Assert.Empty(page.FindAll("[data-part='bibliography']"));
+        Assert.DoesNotContain(page.FindAll("section.block .block-title"), title => title.TextContent.Trim() == "Sur quels albums ?");
     }
 
     [Fact]

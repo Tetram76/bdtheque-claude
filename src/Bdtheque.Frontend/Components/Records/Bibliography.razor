@@ -14,75 +14,69 @@
    credited, in the order of the series, framed under it, by a disclosure of the browser (details), open on arrival up to
    six albums: no request, nor action followed, to show what the page already holds (choix-implementation/socle/frontend.md).
    « Tout déplier » and « Tout replier » act on the whole list (wwwroot/bibliography-folds.js), and are shown only once the
-   script is there to act. *@
+   script is there to act. Never empty: the record leaves it out for an author credited on nothing, data not set being not
+   shown in the consultation. *@
 <Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="bibliography">
     <div class="bibliography">
-        @if (Entries.Count == 0)
-        {
-            <p class="bibliography-none">@L["None"]</p>
-        }
-        else
-        {
-            <app-bibliography-folds>
-                <div class="bibliography-head">
-                    <p class="bibliography-summary">@Summary</p>
-                    @if (Entries.Any(e => e.Series is { Albums.Count: > 0 }))
+        <app-bibliography-folds>
+            <div class="bibliography-head">
+                <p class="bibliography-summary">@Summary</p>
+                @if (Entries.Any(e => e.Series is { Albums.Count: > 0 }))
+                {
+                    <div class="bibliography-actions">
+                        <Button Label="@L["UnfoldAll"]" data-fold-all="unfold" />
+                        <Button Label="@L["FoldAll"]" data-fold-all="fold" />
+                    </div>
+                }
+            </div>
+            <ul class="bibliography-entries">
+                @foreach (var entry in Entries)
+                {
+                    if (entry.Series is { } series)
                     {
-                        <div class="bibliography-actions">
-                            <Button Label="@L["UnfoldAll"]" data-fold-all="unfold" />
-                            <Button Label="@L["FoldAll"]" data-fold-all="fold" />
-                        </div>
-                    }
-                </div>
-                <ul class="bibliography-entries">
-                    @foreach (var entry in Entries)
-                    {
-                        if (entry.Series is { } series)
-                        {
-                            <li class="bibliography-entry" data-kind="series">
-                                <div class="entry-row">
-                                    <CoverPile Covers="series.Overview.FirstVolumeCovers" />
-                                    <span class="entry-text">
-                                        <a class="entry-title" href="@AppPaths.SeriesRecord(series.Series.Id)">@series.Series.Title</a>
-                                        <span class="entry-meta">@SeriesMeta(series)</span>
-                                    </span>
-                                    @if (series.Roles.Count > 0)
-                                    {
-                                        <span class="entry-tags entry-series-roles">
-                                            <span class="entry-series-roles-label">@L["SeriesRoles"]</span>
-                                            @Roles(series.Roles)
-                                        </span>
-                                    }
-                                </div>
-                                @if (series.Albums.Count > 0)
+                        <li class="bibliography-entry" data-kind="series">
+                            <div class="entry-row">
+                                <CoverPile Covers="series.Overview.FirstVolumeCovers" />
+                                <span class="entry-text">
+                                    <a class="entry-title" href="@AppPaths.SeriesRecord(series.Series.Id)">@series.Series.Title</a>
+                                    <span class="entry-meta">@SeriesMeta(series)</span>
+                                </span>
+                                @if (series.Roles.Count > 0)
                                 {
-                                    <details class="entry-albums" open="@(series.Albums.Count <= UnfoldedUpTo)">
-                                        <summary>
-                                            <span class="entry-toggle" aria-hidden="true">
-                                                <svg viewBox="0 0 24 24" focusable="false"><path d="M9 6l6 6-6 6" /></svg>
-                                            </span>
-                                            <span class="visually-hidden">@L["SeriesAlbums", series.Series.Title]</span>
-                                        </summary>
-                                        <ol>
-                                            @foreach (var album in series.Albums)
-                                            {
-                                                <li class="entry-row">@Album(album, InSeries(album.Album.Album))</li>
-                                            }
-                                        </ol>
-                                    </details>
+                                    <span class="entry-tags entry-series-roles">
+                                        <span class="entry-series-roles-label">@L["SeriesRoles"]</span>
+                                        @Roles(series.Roles)
+                                    </span>
                                 }
-                            </li>
-                        }
-                        else if (entry.Album is { } album)
-                        {
-                            <li class="bibliography-entry" data-kind="album">
-                                <div class="entry-row">@Album(album, L["AlbumWithoutSeries"])</div>
-                            </li>
-                        }
+                            </div>
+                            @if (series.Albums.Count > 0)
+                            {
+                                <details class="entry-albums" open="@(series.Albums.Count <= UnfoldedUpTo)">
+                                    <summary>
+                                        <span class="entry-toggle" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" focusable="false"><path d="M9 6l6 6-6 6" /></svg>
+                                        </span>
+                                        <span class="visually-hidden">@L["SeriesAlbums", series.Series.Title]</span>
+                                    </summary>
+                                    <ol>
+                                        @foreach (var album in series.Albums)
+                                        {
+                                            <li class="entry-row">@Album(album, InSeries(album.Album.Album))</li>
+                                        }
+                                    </ol>
+                                </details>
+                            }
+                        </li>
                     }
-                </ul>
-            </app-bibliography-folds>
-        }
+                    else if (entry.Album is { } album)
+                    {
+                        <li class="bibliography-entry" data-kind="album">
+                            <div class="entry-row">@Album(album, L["AlbumWithoutSeries"])</div>
+                        </li>
+                    }
+                }
+            </ul>
+        </app-bibliography-folds>
     </div>
 </Block>
 

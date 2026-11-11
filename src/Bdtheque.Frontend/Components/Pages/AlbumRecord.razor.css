@@ -87,11 +87,6 @@
     gap: var(--space-s);
 }
 
-.album-unrated {
-    font-size: var(--font-size-small);
-    color: var(--color-text-muted);
-}
-
 .album-notes-title {
     margin: var(--space-m) 0 var(--space-xs);
     font-family: var(--font-text);

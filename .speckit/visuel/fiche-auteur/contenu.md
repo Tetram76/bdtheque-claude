@@ -19,6 +19,6 @@ Une donnée non renseignée de l'auteur n'est pas affichée, sans mention « Non
   - une série indique le nombre d'albums sur lesquels l'auteur est crédité, rapporté au nombre d'albums de la série, et combien sont dans la collection ; les rôles tenus sur la série elle-même suivent la mention « Sur la série : ». Elle se déplie sur ses albums crédités, dans l'ordre de la série ;
   - le titre d'une série ou d'un album, qui mène à sa fiche, est souligné en permanence, et non au survol seulement : un écran tactile n'a pas de survol ;
   - chaque rôle garde sa couleur sur toute la page ;
-  - un auteur sans aucun crédit le dit : « Crédité sur aucun album », et « Aucune série ni aucun album crédité pour l'instant. » à la place de la liste ;
+  - un auteur sans aucun crédit le dit dans ses étiquettes, « Crédité sur aucun album », un nombre nul restant une valeur ; il n'a pas de bloc « Sur quels albums ? » ;
   - une série se déplie par un **chevron** placé devant elle, sur une pastille ronde de la teinte de l'encadré de ses albums, sans cadre : visible sur smartphone sans dominer la ligne ; une série de plus de six albums crédités est repliée à l'arrivée ; « Tout déplier » et « Tout replier » agissent sur toute la liste.
 - **Pied de page** : les dates de création et de modification de l'auteur, introduites par ce qu'elles concernent (« Auteur créé le …, modifié le … »), jamais par « Fiche ».

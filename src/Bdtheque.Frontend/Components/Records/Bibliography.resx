@@ -18,9 +18,6 @@
   <data name="Kicker" xml:space="preserve">
     <value>Bibliographie</value>
   </data>
-  <data name="None" xml:space="preserve">
-    <value>Aucune série ni aucun album crédité pour l&apos;instant.</value>
-  </data>
   <data name="Summary" xml:space="preserve">
     <value>{0} et {1}, rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.</value>
   </data>
