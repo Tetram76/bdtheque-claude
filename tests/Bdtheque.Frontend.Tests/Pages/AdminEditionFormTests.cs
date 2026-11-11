@@ -105,6 +105,12 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         12, Castafiore, CastermanOnly, TintinTemplate);
 
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
+
+    // The sending of the files runs apart from the choice that starts it, unawaited, as Blazor documents it: no task tells its
+    // end, which only its rendering shows. Awaited within the limit of an event's handling (CircuitEvents), rather than within
+    // bUnit's default second, which a busy runner exceeds as the form renders the visuals sent (choix-implementation/outillage.md).
+    private static readonly TimeSpan Sending = TimeSpan.FromSeconds(5);
+
     private readonly FakeAudienceApi _audience = new();
     private readonly FakeAdminApi _api;
     // A request of a visit of the browser, whose audience visit the actions of the form are recorded in.
@@ -623,7 +629,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         page.Find("#edition-visuals-type").Change("Dedication");
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[2048], "dedicace.png"));
 
-        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent));
+        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent), Sending);
         var (_, _, form) = _api.Written.Single();
         Assert.Equal("dedicace.png", form.GetProperty(UploadVisualFields.File).GetProperty("name").GetString());
         Assert.Equal(2048, form.GetProperty(UploadVisualFields.File).GetProperty("length").GetInt64());
@@ -659,7 +665,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
             page.Find("#edition-mode").Change("Gift");
 
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "couverture.png"));
-        page.WaitForAssertion(() => Assert.Equal("1 visuel", page.Find(".edition-visuals-count").TextContent));
+        page.WaitForAssertion(() => Assert.Equal("1 visuel", page.Find(".edition-visuals-count").TextContent), Sending);
         page.Find("form").Submit();
 
         page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
@@ -674,7 +680,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromText("pas une image", "scan-dos.tif"));
 
-        var refused = page.WaitForElement(".edition-visuals-upload[data-refused]");
+        var refused = page.WaitForElement(".edition-visuals-upload[data-refused]", Sending);
         Assert.Equal("scan-dos.tif", refused.QuerySelector(".edition-visuals-upload-name")!.TextContent);
         Assert.Equal("Refusé", refused.QuerySelector(".edition-visuals-upload-status")!.TextContent);
         Assert.Contains("n'est pas une image lisible", refused.QuerySelector(".edition-visuals-upload-reason")!.TextContent);
@@ -694,7 +700,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[1024 * 1024 + 1], "scan-600dpi.png"));
 
-        var refused = page.WaitForElement(".edition-visuals-upload[data-refused]");
+        var refused = page.WaitForElement(".edition-visuals-upload[data-refused]", Sending);
         Assert.Equal("Ce fichier dépasse le poids maximal de 1 Mio.", refused.QuerySelector(".edition-visuals-upload-reason")!.TextContent);
         Assert.Empty(_api.Written);
     }
@@ -728,16 +734,16 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
             ? FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created)
             : FakeAdminApi.Json(Owned);
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "dedicace.png"));
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        page.WaitForAssertion(() => Assert.Single(_api.Written), Sending);
 
         // The bar is drawn again by the renderer, apart from the request sent meanwhile: what it shows is waited for.
-        page.WaitForAssertion(() => Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent));
+        page.WaitForAssertion(() => Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent), Sending);
         Assert.True(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
         page.Find("form").Submit();
         Assert.Single(_api.Written);
 
         sent.SetResult();
-        page.WaitForAssertion(() => Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent));
+        page.WaitForAssertion(() => Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent), Sending);
         Assert.False(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
         page.Find("form").Submit();
         page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
@@ -752,11 +758,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created);
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[1024 * 1024 + 1], "scan-600dpi.png"));
-        page.WaitForElement(".edition-visuals-upload[data-refused]");
+        page.WaitForElement(".edition-visuals-upload[data-refused]", Sending);
 
         page.FindComponents<InputFile>()[^1].UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "dedicace.png"));
 
-        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent));
+        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent), Sending);
         Assert.Single(_api.Written);
     }
 
@@ -828,7 +834,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "planche-oubliee.png"));
 
-        var dialog = page.WaitForElement("dialog");
+        var dialog = page.WaitForElement("dialog", Sending);
         Assert.Equal("Visuels retirés de la fiche", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal(["planche-oubliee.png"], dialog.QuerySelectorAll(".edition-visuals-expired li").Select(item => item.TextContent));
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
