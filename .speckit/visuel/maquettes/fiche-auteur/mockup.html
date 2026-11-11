@@ -382,7 +382,7 @@ class View extends Mockup {
       if (e.album) {
         return {
           ...base, isAlbum: true, isSeries: false, canOpen: false, noOpen: false, open: false, cover: cover(i, 1),
-          meta: 'Album sans série', roles: roleChips(e.roles), hasSeriesRoles: false, albums: [], ...rating(e.rating), ...badge(e.state)
+          meta: '', roles: roleChips(e.roles), hasSeriesRoles: false, albums: [], ...rating(e.rating), ...badge(e.state)
         };
       }
       const hasAlbums = e.albums.length > 0;

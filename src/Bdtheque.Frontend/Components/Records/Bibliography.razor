@@ -71,7 +71,7 @@
                     else if (entry.Album is { } album)
                     {
                         <li class="bibliography-entry" data-kind="album">
-                            <div class="entry-row">@Album(album, L["AlbumWithoutSeries"])</div>
+                            <div class="entry-row">@Album(album, null)</div>
                         </li>
                     }
                 }
@@ -128,14 +128,18 @@
     private string InSeries(AlbumSummary album) =>
         Labels.Volume(album) is { } volume ? L["AlbumInSeries", album.SeriesTitle!, volume] : album.SeriesTitle!;
 
-    private RenderFragment Album(AlbumBibliographyItem item, string meta) => __builder =>
+    // An album without series has no mention: « Album sans série » would say nothing useful.
+    private RenderFragment Album(AlbumBibliographyItem item, string? meta) => __builder =>
     {
         var album = item.Album.Album;
         <Cover VisualId="item.Album.Cover?.VisualId" />
         <span class="entry-text">
             @* Its own title; without one, its volume alone (« Tome 3 »), the series being said under it. *@
             <a class="entry-title" href="@AppPaths.Album(album.Id)">@(album.Title ?? Labels.Album(album, AlbumLabelFormat.TitleSeriesVolume, withSeries: false))</a>
-            <span class="entry-meta">@meta</span>
+            @if (meta is not null)
+            {
+                <span class="entry-meta">@meta</span>
+            }
         </span>
         <span class="entry-tags">
             @Roles(item.Roles)

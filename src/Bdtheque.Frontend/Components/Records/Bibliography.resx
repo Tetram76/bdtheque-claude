@@ -51,9 +51,6 @@
   <data name="SeriesRoles" xml:space="preserve">
     <value>Sur la série :</value>
   </data>
-  <data name="AlbumWithoutSeries" xml:space="preserve">
-    <value>Album sans série</value>
-  </data>
   <data name="AlbumInSeries" xml:space="preserve">
     <value>{0} · {1}</value>
   </data>

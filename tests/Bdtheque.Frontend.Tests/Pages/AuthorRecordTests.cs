@@ -167,7 +167,8 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.NotNull(album.QuerySelector(".entry-row .cover-slot"));
         Assert.Empty(album.QuerySelectorAll(".cover-pile"));
         Assert.Equal(AppPaths.Album(SketchbookId), album.QuerySelector("a.entry-title")!.GetAttribute("href"));
-        Assert.Equal("Album sans série", album.QuerySelector(".entry-meta")!.TextContent.Trim());
+        // Without series, nothing places it: no mention « Album sans série », which says nothing useful.
+        Assert.Null(album.QuerySelector(".entry-meta"));
         Assert.Equal(["Scénario", "Dessin"], album.QuerySelectorAll(".role").Select(r => r.TextContent.Trim()));
         Assert.Equal(["scenarist", "illustrator"], album.QuerySelectorAll(".role").Select(r => r.GetAttribute("data-role")));
         Assert.Equal("Appréciation : Bien, 4 sur 5", album.QuerySelector(".rating-stars[role='img']")!.GetAttribute("aria-label"));
