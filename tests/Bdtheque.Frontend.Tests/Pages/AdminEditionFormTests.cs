@@ -30,6 +30,9 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     // The two amounts of the block of the value.
     private static readonly string[] Amounts = ["price", "initial"];
 
+    // The controls of the two amounts, each with its currency.
+    private static readonly string[] AmountControls = ["price", "price-currency", "initial", "initial-currency"];
+
     private static readonly Guid AlbumId = Guid.Parse("01900000-0000-7000-8000-0000000000a1");
     private static readonly Guid EditionId = Guid.Parse("01900000-0000-7000-8000-0000000000a2");
     private static readonly Guid WishedId = Guid.Parse("01900000-0000-7000-8000-0000000000a3");
@@ -227,7 +230,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Free(page).Change(true);
 
         Assert.All(Amounts, id => Assert.True(string.IsNullOrEmpty(page.Find($"#edition-{id}").GetAttribute("value"))));
-        Assert.All(new[] { "price", "price-currency", "initial", "initial-currency" }, id => Assert.True(page.Find($"#edition-{id}").HasAttribute("disabled")));
+        Assert.All(AmountControls, id => Assert.True(page.Find($"#edition-{id}").HasAttribute("disabled")));
 
         // A purchase is never free: choosing it unchecks the box, which it disables.
         page.Find("#edition-mode").Change("Purchase");
