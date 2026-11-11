@@ -38,7 +38,7 @@ else
 {
     <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@Title" Subject="@Subject" State="State" Saving="_saving"
                SaveLabel="@SaveLabel" CancelHref="@AppPaths.AdminAlbumEditions(Entry.AlbumId)" OnSave="SaveAsync" Problem="@SaveProblem"
-               Dates="@Dates">
+               Dates="@Dates" AsideLabel="@VisualsLabel" CloseLabel="@L["Visuals.Close"]">
         <Status>
             <p class="edition-album">@L["OfTheAlbum"] <a href="@AppPaths.AdminEditAlbum(Entry.AlbumId)">@AlbumLabel</a></p>
         </Status>
@@ -483,6 +483,9 @@ else
             _ => Recorder.RecordActionAsync(AudienceFunctions.AdminEditionChanges, $"album={entry.AlbumId}"),
         });
     }
+
+    // The button that opens the visuals over the page on a narrow screen, with their number once the edition is saved.
+    private string VisualsLabel => Visuals is { } visuals ? L["Visuals.Count", visuals.Visuals.Count] : L["Visuals"];
 
     // A visual written: the version of the album changed, which the next saving of the form sends, its content left untouched.
     private void WriteVisuals(EditionVisualsForm visuals)

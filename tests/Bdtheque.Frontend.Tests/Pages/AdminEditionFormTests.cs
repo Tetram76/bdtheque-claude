@@ -594,6 +594,24 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Supprimer le visuel…", menu.QuerySelectorAll("button").Last().TextContent.Trim());
     }
 
+    [Fact]
+    public void Visuals_OnANarrowScreen_InAPanelOverThePage_OpenedByAButtonAtTheHeadOfTheForm()
+    {
+        // Beside the form on a wide screen, the styles say; the panel and its buttons are in the page however it is shown.
+        var page = OpenOwned();
+        var aside = page.Find("aside.entry-form-aside");
+
+        Assert.Equal("manual", aside.GetAttribute("popover"));
+        var open = page.Find(".entry-form-heading .entry-form-aside-open .button");
+        Assert.Equal("Les visuels (3)", open.TextContent.Trim());
+        Assert.Equal((aside.Id, "show"), (open.GetAttribute("popovertarget"), open.GetAttribute("popovertargetaction")));
+        var close = aside.QuerySelector(".entry-form-aside-close-button")!;
+        Assert.Equal(("Fermer les visuels", aside.Id, "hide"),
+            (close.GetAttribute("aria-label"), close.GetAttribute("popovertarget"), close.GetAttribute("popovertargetaction")));
+        Assert.NotNull(aside.QuerySelector(".edition-visuals"));
+        Assert.Null(page.Find("form").QuerySelector(".edition-visuals"));
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

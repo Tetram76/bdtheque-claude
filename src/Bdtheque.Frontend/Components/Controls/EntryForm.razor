@@ -2,7 +2,8 @@
    d'Ariane, its title followed by the label of the record and what it tells of it at first glance, the error of its saving above the form, the dates of the record and the blocks of the form
    in a single column, and the bar that saves it, fixed at the bottom of the screen. The
    form keeps the width it has beside a side column on the form of an edition, whose visuals are written on their own, outside
-   the form (Aside): beside it on a wide screen, after it on a smartphone (visuel/saisie-edition/contenu.md). Interactive: the page saves the record
+   the form (Aside): beside it on a wide screen; on a narrower one, in a panel over the page that a button at the head of the form
+   opens (visuel/saisie-edition/contenu.md). Interactive: the page saves the record
    itself (OnSave), and has it reveal what is to correct once a saving is refused (RevealProblemAsync). *@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
@@ -16,6 +17,13 @@
         @* An ISBN, which ends the label of an edition, kept on one line (fonctionnel/presentation/libelle-d-une-edition.md). *@
         <p class="entry-form-subject"><LabelText Text="@Subject" /></p>
         @Status
+        @if (Aside is not null)
+        {
+            @* Only on a screen too narrow for the side column, which then waits in its panel. *@
+            <span class="entry-form-aside-open">
+                <Button Label="@AsideLabel" Icon="IconName.Upload" popovertarget="@AsideId" popovertargetaction="show" />
+            </span>
+        }
     </div>
 
     @Problem
@@ -35,7 +43,18 @@
         </form>
         @if (Aside is not null)
         {
-            <aside class="entry-form-aside">@Aside</aside>
+            @* A popover of the browser, kept in the page however it is shown: always shown beside the form on a wide screen, it opens
+               over the page on a narrower one, without discarding what it holds (e.g. the uploads under way). Manual: neither a click
+               outside it nor a dialog opened from it closes it, which would hide that dialog with it. *@
+            <aside id="@AsideId" class="entry-form-aside" popover="manual" aria-label="@AsideLabel">
+                <span class="entry-form-aside-close">
+                    <button type="button" class="entry-form-aside-close-button" popovertarget="@AsideId" popovertargetaction="hide"
+                            aria-label="@CloseLabel">
+                        <Icon Name="IconName.Close" />
+                    </button>
+                </span>
+                @Aside
+            </aside>
         }
     </div>
 </div>
@@ -73,6 +92,16 @@
     /// </summary>
     [Parameter]
     public RenderFragment? Aside { get; set; }
+
+    /// <summary>What the side column holds, which names the button that opens it on a narrow screen (e.g. « Les visuels (7) »).</summary>
+    [Parameter]
+    public string AsideLabel { get; set; } = string.Empty;
+
+    /// <summary>The label of the button that closes the side column opened over the page.</summary>
+    [Parameter]
+    public string CloseLabel { get; set; } = string.Empty;
+
+    private const string AsideId = "entry-form-aside";
 
     /// <summary>The dates of the creation and modification of a record already saved.</summary>
     [Parameter]

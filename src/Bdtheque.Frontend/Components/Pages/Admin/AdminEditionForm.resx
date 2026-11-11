@@ -282,6 +282,15 @@
   <data name="FieldError.Edition.InitialValueReferenceDateRequired" xml:space="preserve">
     <value>Sans date de référence, cette valeur ne peut pas être enregistrée.</value>
   </data>
+  <data name="Visuals" xml:space="preserve">
+    <value>Les visuels</value>
+  </data>
+  <data name="Visuals.Count" xml:space="preserve">
+    <value>Les visuels ({0})</value>
+  </data>
+  <data name="Visuals.Close" xml:space="preserve">
+    <value>Fermer les visuels</value>
+  </data>
   <data name="Problem.Functional.Conflict" xml:space="preserve">
     <value>L'album de cette édition a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
   </data>

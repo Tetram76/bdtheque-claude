@@ -34,8 +34,10 @@
     color: var(--color-text-muted);
 }
 
-/* The form, then what is written on its own beside it on a wide screen (the visuals of an edition), after it on a smartphone;
-   the form keeps its width, the side column taking the rest (visuel/saisie-edition/contenu.md). */
+/* What is written on its own (the visuals of an edition, visuel/saisie-edition/contenu.md): on a screen too narrow to set it beside
+   the form, a panel that slides over the page from the right, as the side panel of an entry (SidePanel), opened by the button at
+   the head of the form; beside the form on a wide screen, which keeps its width, the column taking the rest. A popover of the
+   browser, whose styles are replaced here: those of the side panel over the page, then none beside the form. */
 .entry-form-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -43,12 +45,90 @@
     align-items: start;
 }
 
+.entry-form-aside-open {
+    justify-self: start;
+}
+
 .entry-form-aside {
-    min-inline-size: 0;
+    --focus-gap: var(--color-surface-raised);
+    position: fixed;
+    inset: 0 0 0 auto;
+    inline-size: min(28rem, 100vw);
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    margin: 0;
+    padding: var(--space-l);
+    box-sizing: border-box;
+    border: none;
+    border-inline-start: var(--border-floating);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    box-shadow: var(--shadow-floating);
+    overflow-y: auto;
+}
+
+.entry-form-aside:popover-open {
+    animation: entry-form-aside-in 0.2s ease-out;
+}
+
+.entry-form-aside::backdrop {
+    background: rgb(0 0 0 / 0.35);
+}
+
+@keyframes entry-form-aside-in {
+    from {
+        transform: translateX(100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .entry-form-aside:popover-open {
+        animation: none;
+    }
+}
+
+.entry-form-aside-close {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.entry-form-aside-close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--control-height);
+    block-size: var(--control-height);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
 }
 
 @media (min-width: 67.5rem) {
     .entry-form-layout[data-aside] {
         grid-template-columns: minmax(0, var(--entry-form-width)) minmax(18rem, 1fr);
+    }
+
+    .entry-form-aside-open,
+    .entry-form-aside-close {
+        display: none;
+    }
+
+    /* Always shown, in the flow of the page, beside the form. */
+    .entry-form-aside,
+    .entry-form-aside:popover-open {
+        display: block;
+        position: static;
+        inset: auto;
+        inline-size: auto;
+        block-size: auto;
+        max-block-size: none;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        overflow: visible;
+        animation: none;
     }
 }

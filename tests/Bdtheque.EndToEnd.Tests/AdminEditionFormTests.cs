@@ -227,6 +227,35 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         Assert.Equal(1964, (await GetEditionAsync(album.Id, edition.Id)).Content.PublicationYear);
     }
 
+    [Fact]
+    public async Task Visuals_OnASmartphone_OpenInAPanelOverThePage_AndCloseWithoutLosingAnything()
+    {
+        var publisher = await CreatePublisherAsync();
+        var album = await CreateAlbumAsync();
+        var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
+            new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
+                AcquisitionMode.Gift, false, null, null, null, false, null, null, null, null),
+            album.Version));
+        var page = await NewPageAsync(new ViewportSize { Width = 414, Height = 900 });
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminEditEdition(album.Id, edition.Id));
+        await PageReadiness.WaitAsync(page);
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var panel = page.Locator("aside.entry-form-aside");
+
+        // Not after the form: waiting in its panel, which the button at the head of the form opens over the page.
+        await Assertions.Expect(panel).ToBeHiddenAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Les visuels (0)" }).ClickAsync();
+        await Assertions.Expect(panel).ToBeVisibleAsync();
+        await Assertions.Expect(panel).ToHaveJSPropertyAsync("offsetTop", 0);
+        await panel.GetByLabel("Choisir des images à ajouter").SetInputFilesAsync(Png("couverture.png", SKColors.SteelBlue));
+        await Assertions.Expect(panel.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
+
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Fermer les visuels" }).ClickAsync();
+        await Assertions.Expect(panel).ToBeHiddenAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Les visuels (1)" }).ClickAsync();
+        await Assertions.Expect(panel.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
+    }
+
     // A small image of one color, a scan as far as api is concerned.
     private static FilePayload Png(string name, SKColor color)
     {
