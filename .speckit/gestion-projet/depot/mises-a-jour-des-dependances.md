@@ -10,7 +10,7 @@ applies_to:
   - 'docker-compose.yml'
   - '.github/workflows/**'
   - 'scripts/Get-DependencyUpdates.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:30:02Z }
 ---
 
 # Mises à jour des dépendances
@@ -34,7 +34,7 @@ Les montées de version relèvent de l'agent (point technique, [Prise de décisi
     - images de l'application publiées (système, runtime .NET) et image de `db` (PostgreSQL) : Docker Scout, toutes vulnérabilités connues, corrigées ou non ;
     - actions GitHub : *GitHub Advisory Database*, interrogée pour chaque version en usage (API `advisories`, `affects=<action>@<version>`), celle du commentaire de son empreinte.
 
-    Le contrôle tient la liste des vulnérabilités connues dans un ticket (« Vulnérabilités connues », étiquette `security-audit`, et `harness` des tickets de suivi des harnais, [Issues](../revue-tickets/issues.md#tickets-de-suivi-des-harnais)), ouvert tant que la liste n'est pas vide, et que le relevé affiche. Il n'échoue que lorsqu'il trouve une vulnérabilité absente de cette liste : GitHub notifie alors l'échec à l'utilisateur qui a créé le workflow, une seule fois par vulnérabilité, et non chaque jour tant qu'elle reste sans correction.
+    Le contrôle tient la liste des vulnérabilités connues dans le ticket de suivi de son harnais (étiquettes `security-audit` et `harness`, par lesquelles il le retrouve, [Issues](../revue-tickets/issues.md#tickets-de-suivi-des-harnais)), ouvert tant que la liste n'est pas vide, et que le relevé affiche. Il n'échoue que lorsqu'il trouve une vulnérabilité absente de cette liste : GitHub notifie alors l'échec à l'utilisateur qui a créé le workflow, une seule fois par vulnérabilité, et non chaque jour tant qu'elle reste sans correction.
   - **Correction dès qu'elle est disponible** : à chaque relevé, l'agent cherche, pour chaque vulnérabilité, une correction applicable (version corrigée d'un package, tag plus récent ou reconstruit d'une image) ; il l'applique en tête, sans attendre la montée mensuelle ni le délai de 7 jours. Une vulnérabilité sans correction disponible reste suivie par le contrôle jusqu'à la parution de sa correction.
   - **Aucun blocage par une vulnérabilité qu'on ne peut pas encore corriger** : le contrôle quotidien n'est pas un check requis, et l'audit NuGet n'est qu'un avertissement dans les constructions (`WarningsNotAsErrors`, `Directory.Build.props`) malgré `TreatWarningsAsErrors` ; ni le développement ni la fusion d'une PR n'attendent donc une correction qui n'existe pas.
   - **Autres versions** : une montée par mois au plus, au premier relevé d'un mois qui n'en a pas encore connu : les versions mineures et correctives disponibles y sont réunies en une seule Pull Request, pour limiter les revues Codex et les exécutions du CI (quotas, [Intégration continue (CI)](integration-continue-ci.md)).

@@ -65,9 +65,9 @@ forwards to that session a question of the user about the chantier
    chantier) and depends on the sub-tickets its parent orders before it.
    Order them:
    CI stabilization (a flaky test, an intermittent failure — not an
-   optimization) → the functional consistency check, when due (the
-   "Cohérence fonctionnelle" ticket, label `functional-consistency`, bears no
-   check of the current calendar week, done or in progress; checked by the
+   optimization) → the functional consistency check, when due (its tracking
+   ticket, labels `ergonomy-audit` and `harness`, bears no check of the
+   current calendar week, done or in progress; checked by the
    orchestrator alone, once for the batch,
    `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
    `.speckit/suivi-implementation/` → milestone of the next version → the rest. Then drop each one that would touch the same
@@ -128,8 +128,8 @@ chosen before the others.
 - Each note of a session of the batch: report it to the user in a line or two,
   with the links of its pull request; never fabricate its result.
 - A note from the functional consistency check session (it has no pull
-  request): its place is freed once its conclusion is in the body of the
-  "Cohérence fonctionnelle" ticket — check it there
+  request): its place is freed once its conclusion is in the body of its
+  tracking ticket (labels `ergonomy-audit` and `harness`) — check it there
   (`gh issue view <n> --json body`), with a ticket for each of its follow-ups;
   then archive the session, leave the ticket open, and launch the next
   chantier as after a merge.

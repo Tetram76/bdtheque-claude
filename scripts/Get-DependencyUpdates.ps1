@@ -172,15 +172,15 @@ else {
 }
 
 # Daily security audit (security-audit.yml): every known vulnerability of the NuGet packages, of the
-# images and of the actions, kept in its "Vulnérabilités connues" issue whether or not the repository is
-# being worked on.
+# images and of the actions, kept in its tracking issue whether or not the repository is being worked on.
+# The tracking issue bears both security-audit, which also groups the chantiers of the harness, and harness.
 $audit = gh run list --workflow security-audit.yml --branch main --limit 1 --json conclusion,createdAt,url 2>$null | ConvertFrom-Json
 if (-not $audit) {
     Write-Output 'Daily security audit: no run yet'
 }
 else {
     Write-Output "Daily security audit: $($audit[0].conclusion) ($($audit[0].createdAt.ToString('yyyy-MM-dd'))) $($audit[0].url)"
-    $issue = gh issue list --label security-audit --state all --limit 1 --json number,state,body,url | ConvertFrom-Json
+    $issue = gh issue list --label security-audit --label harness --state all --limit 1 --json number,state,body,url | ConvertFrom-Json
     if ($issue) {
         $known = [regex]::Match($issue[0].body, '(?s)```text\r?\n(.*?)```').Groups[1].Value.Trim()
         Write-Output "Known vulnerabilities ($($issue[0].state), $($issue[0].url)):"
