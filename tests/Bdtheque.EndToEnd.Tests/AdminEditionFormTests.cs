@@ -2,8 +2,10 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
+using SkiaSharp;
 
 namespace Bdtheque.EndToEnd.Tests;
 
@@ -170,6 +172,74 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await price.PressAsync("Tab");
 
         await Assertions.Expect(price).ToHaveValueAsync("12,5");
+    }
+
+    [Fact]
+    public async Task Visuals_Added_Refused_Retyped_Reordered_AndDeleted_EachWrittenAtOnce()
+    {
+        // visuel/saisie-edition/contenu.md, Les visuels: every write on its own, at once, the form left as it was.
+        var publisher = await CreatePublisherAsync();
+        var album = await CreateAlbumAsync();
+        var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
+            new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
+                AcquisitionMode.Gift, false, null, null, null, false, null, null, null, null),
+            album.Version));
+        var page = await OpenAsync(AppPaths.AdminEditEdition(album.Id, edition.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var visuals = page.Locator(".edition-visuals");
+        var marks = visuals.Locator(".edition-visual-mark");
+
+        // Three plates, sent one at a time; a file that is no image, refused with its reason.
+        await page.GetByLabel("Ajoutés comme").SelectOptionAsync(new SelectOptionValue { Label = "Planche" });
+        await visuals.GetByLabel("Choisir des images à ajouter").SetInputFilesAsync(
+        [
+            Png("planche-01.png", SKColors.SteelBlue), Png("planche-02.png", SKColors.IndianRed), Png("planche-03.png", SKColors.Goldenrod),
+            new FilePayload { Name = "notes.txt", MimeType = "text/plain", Buffer = "pas une image"u8.ToArray() },
+        ]);
+        await Assertions.Expect(visuals.Locator(".edition-visuals-count")).ToHaveTextAsync("3 visuels");
+        await Assertions.Expect(visuals.Locator(".edition-visuals-upload[data-refused] .edition-visuals-upload-reason"))
+            .ToContainTextAsync("n'est pas une image lisible");
+        await Assertions.Expect(marks).ToHaveTextAsync(["Pl. 1", "Pl. 2", "Pl. 3"]);
+        var plates = (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Id).ToList();
+
+        // The first plate becomes the cover, which comes first.
+        await visuals.GetByRole(AriaRole.Button, new() { Name = "Actions sur Planche 1" }).ClickAsync();
+        await page.Locator(".actions-menu-panel:popover-open").GetByRole(AriaRole.Button, new() { Name = "Couverture", Exact = true }).ClickAsync();
+        await Assertions.Expect(marks).ToHaveTextAsync(["Couv.", "Pl. 1", "Pl. 2"]);
+
+        // The last plate dragged onto the first takes its place.
+        await visuals.Locator(".edition-visual").Nth(2).DragToAsync(visuals.Locator(".edition-visual").Nth(1));
+        await Assertions.Expect(visuals.Locator(".edition-visual img").Nth(1)).ToHaveAttributeAsync("src", VisualMediaRoutes.Display(plates[2]));
+        Assert.Equal([plates[0], plates[2], plates[1]], (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Id));
+
+        // A plate deleted once confirmed.
+        await visuals.GetByRole(AriaRole.Button, new() { Name = "Actions sur Planche 2" }).ClickAsync();
+        await page.Locator(".actions-menu-panel:popover-open").GetByRole(AriaRole.Button, new() { Name = "Supprimer le visuel…" }).ClickAsync();
+        await page.Locator("dialog[open]").GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
+        await Assertions.Expect(visuals.Locator(".edition-visuals-count")).ToHaveTextAsync("2 visuels");
+        Assert.Equal([plates[0], plates[2]], (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Id));
+
+        // The form, untouched, saves under the version the visuals left.
+        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Aucune modification");
+        await page.GetByLabel("Année d'édition").FillAsync("1964");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
+        Assert.Equal(1964, (await GetEditionAsync(album.Id, edition.Id)).Content.PublicationYear);
+    }
+
+    // A small image of one color, a scan as far as api is concerned.
+    private static FilePayload Png(string name, SKColor color)
+    {
+        using var bitmap = new SKBitmap(60, 80);
+        bitmap.Erase(color);
+        using var data = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Png, 100);
+        return new FilePayload { Name = name, MimeType = "image/png", Buffer = data.ToArray() };
+    }
+
+    private async Task<EditionVisualsForm> GetVisualsAsync(Guid albumId, Guid editionId)
+    {
+        using var api = Application.CreateApiClient();
+        return (await api.GetFromJsonAsync<EditionVisualsForm>($"/admin/albums/{albumId}/editions/{editionId}/visuals"))!;
     }
 
     private async Task<IPage> OpenAsync(string path)

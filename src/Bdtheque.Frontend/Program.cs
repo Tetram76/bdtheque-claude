@@ -113,15 +113,15 @@ builder.Services.AddHttpClient<ApiClient>(ApiClient.HttpClientName, (services, c
         client.BaseAddress = new Uri(services.GetRequiredService<IOptions<ApiOptions>>().Value.BaseUrl))
     .ConfigurePrimaryHttpMessageHandler(VisualMediaRelay.CreateHandler)
     .AddHttpMessageHandler<InternalApiKeyHandler>();
-// The uploads of visuals, on the same connection, without the fixed timeout of the client: a heavy scan sent over a slow
-// connection would exceed it, the upload being cancelled with the form that sends it instead.
-builder.Services.AddHttpClient<ApiUploadClient>(ApiUploadClient.HttpClientName, (services, client) =>
-    {
-        client.BaseAddress = new Uri(services.GetRequiredService<IOptions<ApiOptions>>().Value.BaseUrl);
-        client.Timeout = Timeout.InfiniteTimeSpan;
-    })
-    .ConfigurePrimaryHttpMessageHandler(VisualMediaRelay.CreateHandler)
-    .AddHttpMessageHandler<InternalApiKeyHandler>();
+// The uploads of visuals, through the client of the API itself, whose connection, secret and address they share, without its
+// fixed timeout: a heavy scan sent over a slow connection would exceed it, the upload being cancelled with the form that sends it
+// instead.
+builder.Services.AddTransient(services =>
+{
+    var http = services.GetRequiredService<IHttpClientFactory>().CreateClient(ApiClient.HttpClientName);
+    http.Timeout = Timeout.InfiniteTimeSpan;
+    return new ApiUploadClient(http);
+});
 builder.Services.AddHttpForwarder();
 
 builder.Services.AddHealthChecks();
