@@ -1,0 +1,35 @@
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<RatingStars> L
+@inject ValueLabels Values
+
+@* The rating of an album in five stars, shared by the records of the consultation (visuel/fiche-album/contenu.md,
+   visuel/fiche-serie/contenu.md): an image whose text tells the rating; without rating, nothing, or, where the record
+   says so, empty stars and « Pas encore noté ». *@
+@if (Rating is { } rating)
+{
+    <span class="rating-stars" role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
+}
+else if (ShowUnrated)
+{
+    <span class="rating-stars" aria-hidden="true">@Stars(0)</span>
+    <span class="rating-none">@L["NotRated"]</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public AlbumRating? Rating { get; set; }
+
+    /// <summary>An album without rating says so, rather than showing nothing.</summary>
+    [Parameter]
+    public bool ShowUnrated { get; set; }
+
+    private static RenderFragment Stars(int rating) => __builder =>
+    {
+        @for (var star = 1; star <= 5; star++)
+        {
+            <svg class="star" data-on="@(star <= rating ? "" : null)" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5 6.5 20.4l1-6.3L3 9.7l6.2-.9z" />
+            </svg>
+        }
+    };
+}

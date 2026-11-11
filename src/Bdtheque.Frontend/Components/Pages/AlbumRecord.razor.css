@@ -87,30 +87,6 @@
     gap: var(--space-s);
 }
 
-.album-rating [role="img"],
-.album-rating > [aria-hidden] {
-    display: inline-flex;
-    gap: 0.125rem;
-}
-
-.star {
-    inline-size: 1.125rem;
-    block-size: 1.125rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linejoin: round;
-}
-
-.star[data-on] {
-    fill: currentColor;
-}
-
-.album-unrated {
-    font-size: var(--font-size-small);
-    color: var(--color-text-muted);
-}
-
 .album-notes-title {
     margin: var(--space-m) 0 var(--space-xs);
     font-family: var(--font-text);

@@ -36,12 +36,6 @@
   <data name="Membership.OutOfCollection" xml:space="preserve">
     <value>Hors collection</value>
   </data>
-  <data name="Rating" xml:space="preserve">
-    <value>Appréciation : {0}, {1} sur 5</value>
-  </data>
-  <data name="NotRated" xml:space="preserve">
-    <value>Pas encore noté</value>
-  </data>
   <data name="Story.Title" xml:space="preserve">
     <value>Ça raconte quoi ?</value>
   </data>
