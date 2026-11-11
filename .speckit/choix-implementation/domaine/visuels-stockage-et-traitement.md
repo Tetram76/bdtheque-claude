@@ -7,7 +7,9 @@ applies_to:
   - 'src/Bdtheque.Api/Endpoints/EditionVisualEndpoints.cs'
   - 'src/Bdtheque.Api/Endpoints/VisualMediaEndpoints.cs'
   - 'src/Bdtheque.Frontend/Api/VisualMediaRelay.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:00:00Z }
+  - 'src/Bdtheque.Frontend/Api/ApiUploadClient.cs'
+  - 'src/Bdtheque.Frontend/Components/Controls/EditionVisualsEditor.razor'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:00:00Z }
 ---
 
 # Visuels : stockage et traitement
@@ -30,6 +32,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:00:00Z }
   - La limite de transport du serveur est ramenée à la taille d'un formulaire valide : elle borne un envoi sans longueur annoncée sans jamais devancer le refus métier, alors qu'atteinte la première, elle répondrait `413`, erreur technique.
 - **Un téléversement à la fois**, les autres attendant leur tour sans être refusés : chacun mobilise quelque 400 Mo, et plusieurs scans déposés d'un coup épuiseraient la mémoire du NAS. Le tour est pris avant la lecture du corps : une requête en attente ne mobilise rien, et Kestrel ne contrôle le débit d'un corps que pendant sa lecture (code source de Kestrel, `TimeoutControl`), si bien qu'elle n'est jamais coupée pour son attente.
 - **Réarrangement en une écriture** : la liste complète des visuels de l'édition, dans l'ordre voulu, sous la version de l'album ([Concurrence d'accès](../persistance/concurrence-d-acces.md)) : un glisser-déposer réordonne plusieurs visuels d'un coup.
+- **Poids maximal donné avec les visuels** : la limite est la configuration d'`api`, seule à la contrôler ; la lecture des visuels d'une édition la porte, pour que la saisie l'annonce sans la connaître elle-même.
+- **Relais du téléversement par `frontend`, en flux, par le circuit de la fiche** : le fichier, choisi ou déposé sur le champ de fichier du navigateur, est lu par le circuit à mesure qu'il est envoyé à `api`, en formulaire *multipart*, par le client de l'API ([Frontend](../socle/frontend.md), Fiches de saisie). Rien n'est gardé entier en mémoire, et la progression de l'envoi se lit sur ce flux.
+  - **Alternative écartée (envoi par le navigateur à une route de `frontend` relayée par YARP, comme les médias)** : un script pour envoyer et suivre la progression, une route d'écriture de plus exposée au navigateur, que protégerait un jeton anti-falsification ; le circuit de la fiche, authentifié, y suffit.
 
 ## Cohérence entre fichiers et base
 

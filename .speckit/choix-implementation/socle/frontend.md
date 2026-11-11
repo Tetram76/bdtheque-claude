@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:00:00Z }
 ---
 
 # Frontend
@@ -67,6 +67,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:00:00Z }
   - **Alternative écartée (liste fermée)** : elle contredirait « n'importe quelle devise ».
   - **Alternative écartée (code seul, avec suggestions)** : l'ancien franc n'a pas de code ISO 4217 qui parle à l'utilisateur ([Représentation de la devise](../domaine/representation-de-la-devise.md)).
 - **Modifiée entre-temps** : « Recharger la fiche » charge de nouveau la page ; « Voir mes changements » présente, champ par champ, ce que l'utilisateur a changé depuis la lecture de la fiche, avec ce qu'il a saisi, pour le saisir de nouveau une fois la fiche rechargée. Rien n'est fusionné automatiquement : la fiche de l'autre modification fait foi. Une nouvelle édition ou intention d'achat, écrite sous la version de son album comme une édition modifiée, offre de même ces deux actions, le rechargement relisant l'album et ce que la série pré-remplit ; une autre fiche nouvelle n'a pas de version, donc pas de conflit.
+- **Colonne latérale d'une fiche de saisie** pour ce qui s'enregistre à part (les visuels d'une édition, [Contenu](../../visuel/saisie-edition/contenu.md)) : hors du formulaire, que ses écritures n'enregistrent pas et dont l'enregistrement ne la désactive pas ; à côté du formulaire sur grand écran, après lui sur smartphone.
+  - **Alternative écartée (colonne collée en haut de l'écran, comme la maquette)** : plus haute que l'écran avec ses visuels, le bas de sa grille ne s'atteindrait qu'en fin de page.
+- **Visuels d'une édition** : chaque fichier choisi ou déposé attend son tour, envoyé un à la fois en flux ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)) par le client de l'API sans son délai fixe, qu'un gros scan sur une connexion lente dépasserait ; l'envoi est annulé avec la fiche. Un champ de fichier par choix, le dernier recevant le suivant : un nouveau choix dans le même champ rendrait illisibles les fichiers encore en attente. Le réarrangement suit les évènements de glisser-déposer du navigateur, que Blazor traite, sans script ; un visuel changé de type passe après ceux de son nouveau type ; une suppression renvoie l'empreinte de l'impact lu. Chaque écriture change la version de l'album, que la fiche partage : son enregistrement l'envoie, son contenu restant tel qu'il est.
+  - **Alternative écartée (glisser-déposer par un script ou une bibliothèque)** : un script pour ce que les évènements du navigateur, traités par Blazor, offrent déjà.
 - **Auteur créé sur place** depuis le choix d'un auteur : un dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme.
 - **Genre ou univers créé sur place** de même, depuis leur choix : le dialogue reprend le texte tapé, et, pour un univers, propose de choisir l'univers qui le contient.
 - **Fiche créée sur place, créée à l'enregistrement de la fiche qui la cite**, dans la même transaction, jamais avant : une saisie annulée n'en laisse aucune. La fiche saisie la cite par une clé qu'elle lui donne, et l'envoie avec ce qu'elle enregistre, si elle la cite encore ; les règles de la fiche créée sont celles du domaine, et une erreur est présentée avec l'enregistrement.
