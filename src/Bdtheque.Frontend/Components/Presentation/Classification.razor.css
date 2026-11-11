@@ -45,8 +45,3 @@
 .genre:hover {
     text-decoration: underline;
 }
-
-.classification-none {
-    color: var(--color-text-muted);
-    font-style: italic;
-}

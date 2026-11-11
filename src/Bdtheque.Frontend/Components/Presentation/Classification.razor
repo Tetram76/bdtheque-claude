@@ -3,35 +3,37 @@
 
 @* The genres and universes of a record (fonctionnel/regles-metier/genres-et-univers-d-un-album.md for an album), shared by
    the records of the consultation: each genre as a colored tag, each universe with its ancestors; each leads to the list of
-   its works (fonctionnel/structure-de-l-application.md). *@
-<dl class="classification">
-    <div>
-        <dt>@L["Genres"]</dt>
-        <dd class="classification-genres">
-            @foreach (var genre in Genres)
-            {
-                <a class="genre" href="@AppPaths.GenreWorks(genre.Id)">@genre.Label</a>
-            }
-            @if (Genres.Count == 0)
-            {
-                <span class="classification-none">@L["None"]</span>
-            }
-        </dd>
-    </div>
-    <div>
-        <dt>@L["Universes"]</dt>
-        <dd>
-            @foreach (var universe in Universes)
-            {
-                <UniverseChain Universe="universe" />
-            }
-            @if (Universes.Count == 0)
-            {
-                <span class="classification-none">@L["None"]</span>
-            }
-        </dd>
-    </div>
-</dl>
+   its works (fonctionnel/structure-de-l-application.md). What a record has not is not shown, neither its row nor the list
+   without any row (visuel/charte-graphique/convivialite-et-efficacite.md). *@
+@if (Genres.Count > 0 || Universes.Count > 0)
+{
+    <dl class="classification">
+        @if (Genres.Count > 0)
+        {
+            <div>
+                <dt>@L["Genres"]</dt>
+                <dd class="classification-genres">
+                    @foreach (var genre in Genres)
+                    {
+                        <a class="genre" href="@AppPaths.GenreWorks(genre.Id)">@genre.Label</a>
+                    }
+                </dd>
+            </div>
+        }
+        @if (Universes.Count > 0)
+        {
+            <div>
+                <dt>@L["Universes"]</dt>
+                <dd>
+                    @foreach (var universe in Universes)
+                    {
+                        <UniverseChain Universe="universe" />
+                    }
+                </dd>
+            </div>
+        }
+    </dl>
+}
 
 @code {
     [Parameter, EditorRequired]

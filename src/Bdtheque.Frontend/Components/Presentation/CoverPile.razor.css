@@ -1,8 +1,9 @@
 /* The three covers on top of one another, each further one a step up and to the right, the first volume in front. Their
    width is that of a cover of a row of a list (--cover-width, which the screen sets); the steps leave room for the pile
-   within the place of its row. */
+   within the place of its row, wider in a larger pile (--cover-pile-step, which its screen sets, e.g. the record of a
+   series). */
 .cover-pile {
-    --pile-step: 0.25rem;
+    --pile-step: var(--cover-pile-step, 0.25rem);
     display: inline-grid;
     grid-template: 1fr / 1fr;
     padding-block-start: calc(2 * var(--pile-step));
