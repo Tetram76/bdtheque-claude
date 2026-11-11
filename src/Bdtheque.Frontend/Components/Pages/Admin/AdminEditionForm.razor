@@ -266,8 +266,12 @@ else
         new(Entry.Id is null ? Title : EditionLabel(withIsbn: false)),
     ];
 
-    private SaveBarState State => Entry!.Id is null ? SaveBarState.New
-        : Entry.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
+    private SaveBarState State => Entry!.Id switch
+    {
+        null => SaveBarState.New,
+        _ when Entry.Fingerprint() == _savedFingerprint => SaveBarState.Unchanged,
+        _ => SaveBarState.Unsaved,
+    };
 
     private string DateLabel => IsPurchase ? L["Date.Purchase"] : L["Date.Other"];
 
