@@ -279,7 +279,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var page = OpenOwned();
         var currencies = page.FindAll("#edition-price-currency option").Select(option => option.TextContent.Trim()).ToList();
         Assert.Equal("EUR · euro", currencies[0]);
-        Assert.Contains("Ancien franc", currencies);
+        Assert.Contains("Ancien franc français", currencies);
         Assert.Equal("Autre devise…", currencies[^1]);
 
         page.Find("#edition-price-currency").Change("other");
