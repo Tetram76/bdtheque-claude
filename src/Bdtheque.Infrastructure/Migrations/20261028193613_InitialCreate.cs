@@ -134,6 +134,27 @@ namespace Bdtheque.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PendingVisuals",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MediaReference = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false, collation: "fr-FR-x-icu"),
+                    Palette_Accent = table.Column<int>(type: "integer", nullable: false),
+                    Palette_Deep = table.Column<int>(type: "integer", nullable: false),
+                    Palette_Dominant = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PendingVisuals", x => x.Id);
+                    table.CheckConstraint("CK_PendingVisuals_MediaReferenceNotBlank", "COALESCE(LENGTH(TRIM(\"MediaReference\")), 0) > 0");
+                    table.CheckConstraint("CK_PendingVisuals_Palette_AccentIsRgb", "\"Palette_Accent\" BETWEEN 0 AND 16777215");
+                    table.CheckConstraint("CK_PendingVisuals_Palette_DeepIsRgb", "\"Palette_Deep\" BETWEEN 0 AND 16777215");
+                    table.CheckConstraint("CK_PendingVisuals_Palette_DominantIsRgb", "\"Palette_Dominant\" BETWEEN 0 AND 16777215");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Publishers",
                 columns: table => new
                 {
@@ -851,6 +872,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PendingVisuals_CreatedAt",
+                table: "PendingVisuals",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PublisherCollections_PublisherId_Name",
                 table: "PublisherCollections",
                 columns: new[] { "PublisherId", "Name" },
@@ -1000,6 +1026,9 @@ namespace Bdtheque.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "EditionSpotlights");
+
+            migrationBuilder.DropTable(
+                name: "PendingVisuals");
 
             migrationBuilder.DropTable(
                 name: "PurchaseIntents");
