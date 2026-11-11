@@ -102,8 +102,3 @@
 .contributions-toggle:not([open]) .contributions-less {
     display: none;
 }
-
-.contributions-none {
-    color: var(--color-text-muted);
-    font-style: italic;
-}

@@ -176,11 +176,12 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
 }
 
 /// <summary>
-/// An application whose albums present the cases of the records of an album and of an author, at fixed dates: an album of a
-/// series with two editions in the collection, one with four visuals and one gift without any, wished for again in a third,
-/// and a collective drawing, attached to a universe within two others; an album targeted by an intent on itself, and one
-/// catalogued only; the whole bibliography of the author of the series, and an author credited on nothing. Its visuals are
-/// the only ones, so that the edition in the spotlight, and the colours of the day, are the same at each capture.
+/// An application whose albums present the cases of the records of an album, of a series and of an author, at fixed dates:
+/// an album of a series with two editions in the collection, one with four visuals and one gift without any, wished for
+/// again in a third, and a collective drawing, attached to a universe within two others; an album targeted by an intent on
+/// itself, and one catalogued only; their series, and a series without any album; the whole bibliography of the author of
+/// the series, and an author credited on nothing. Its visuals are the only ones, so that the edition in the spotlight, and
+/// the colours of the day, are the same at each capture.
 /// </summary>
 public sealed class RecordsApplication : ApplicationHost
 {
@@ -201,6 +202,12 @@ public sealed class RecordsApplication : ApplicationHost
 
     /// <summary>An album of the series catalogued only, out of the collection.</summary>
     public Guid CataloguedAlbumId { get; private set; }
+
+    /// <summary>The series of the albums above, with its publisher, collection, authors and summary.</summary>
+    public Guid SeriesId { get; private set; }
+
+    /// <summary>A series just created: no album, author, genre nor status.</summary>
+    public Guid EmptySeriesId { get; private set; }
 
     /// <summary>Hugo Pratt, the author of the albums of the series, with a whole bibliography.</summary>
     public Guid AuthorId { get; private set; }
@@ -224,9 +231,14 @@ public sealed class RecordsApplication : ApplicationHost
         List<ContributionContent> contributions = [new(hugo.Id, ContributionRole.Scenarist), new(hugo.Id, ContributionRole.Illustrator)];
         foreach (var drawer in drawers)
             contributions.Add(new((await AuthorAsync(api, drawer.Split(' ', 2)[1], drawer.Split(' ', 2)[0])).Id, ContributionRole.Illustrator));
+        // Its publisher, collection, authors and summary, which only its own record presents; no universe, which the records
+        // of its albums would present as theirs too (fonctionnel/regles-metier/genres-et-univers-d-un-album.md).
         var series = await PostAsync<SeriesForm>(api, "/admin/series", new SeriesContent(
-            "Corto Maltese", null, SeriesStatus.Completed, 12, false, false, false, null, null,
-            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [aventure.Id], [], []));
+            "Corto Maltese", null, SeriesStatus.Completed, 12, false, false, false,
+            "Les errances d'un marin de fortune, des Caraïbes à la Sibérie, au début du XXe siècle.", null,
+            new SeriesEditionTemplate(casterman.Id, collection.Id, null, null, null, null, null, null, null), [aventure.Id], [],
+            [new(hugo.Id, ContributionRole.Scenarist), new(hugo.Id, ContributionRole.Illustrator)]));
+        SeriesId = series.Id;
 
         var album = await AlbumAsync(api, series.Id, "Lointaines îles du vent", 5, contributions, [antilles.Id],
             "Venezuela, vers 1913. Amnésique, Corto Maltese est recueilli par son vieil ami Steiner.");
@@ -253,6 +265,11 @@ public sealed class RecordsApplication : ApplicationHost
             new PurchaseIntentEditionContent(casterman.Id, null, 2023, null, BindingType.Hardcover, null, null, EditionFormat.Large, 112,
                 EditionCategory.SpecialEdition, true),
             gift.AlbumVersion));
+
+        // Last, so that no date of the albums above changes.
+        EmptySeriesId = (await PostAsync<SeriesForm>(api, "/admin/series", new SeriesContent(
+            "Les Récits du phare", null, null, 6, false, false, false, null, null,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []))).Id;
 
         // The bibliography of Hugo Pratt (visuel/fiche-auteur/), written after the album, whose dates it leaves as they were:
         // an album without series, rated; « Corto Maltese », of three albums; a series credited on itself only, without album;

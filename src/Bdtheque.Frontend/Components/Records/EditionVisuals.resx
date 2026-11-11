@@ -15,9 +15,6 @@
   <data name="Label" xml:space="preserve">
     <value>Visuels de l&apos;édition {0}</value>
   </data>
-  <data name="None" xml:space="preserve">
-    <value>Aucun visuel pour cette édition.</value>
-  </data>
   <data name="Plate" xml:space="preserve">
     <value>Planche {0}</value>
   </data>

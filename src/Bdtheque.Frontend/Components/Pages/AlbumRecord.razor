@@ -60,7 +60,8 @@ else if (_album is { } album)
                     </li>
                 </ul>
 
-                @* Data not set is not shown in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md). *@
+                @* Nothing not set is shown in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md): no rating
+                   without one, no summary, notes nor block of the story without them. *@
                 @if (album.Rating is not null)
                 {
                     <div class="album-rating">
@@ -73,25 +74,20 @@ else if (_album is { } album)
             </div>
         </div>
 
-        <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
-            @if (album.Summary is { } summary)
-            {
-                <p class="album-summary">@summary</p>
-            }
-            else
-            {
-                <p><NotSet /></p>
-            }
-            <h3 class="album-notes-title">@L["Notes"]</h3>
-            @if (album.PersonalNotes is { } notes)
-            {
-                <p class="album-notes">@notes</p>
-            }
-            else
-            {
-                <p><NotSet Gender="GrammaticalGender.Feminine" /></p>
-            }
-        </Block>
+        @if (album.Summary is not null || album.PersonalNotes is not null)
+        {
+            <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
+                @if (album.Summary is { } summary)
+                {
+                    <p class="album-summary">@summary</p>
+                }
+                @if (album.PersonalNotes is { } notes)
+                {
+                    <h3 class="album-notes-title">@L["Notes"]</h3>
+                    <p class="album-notes">@notes</p>
+                }
+            </Block>
+        }
 
         @* Without edition in the collection, nothing says so in their place: the banner and the membership of the album already
            do; and an album with neither edition nor intent has no block that would hold nothing (visuel/fiche-album/contenu.md). *@

@@ -1,0 +1,147 @@
+@attribute [Route(AppPaths.SeriesRoute)]
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Records
+@inject IStringLocalizer<SeriesRecord> L
+@inject ApiClient Api
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+
+@* The record of a series in the consultation (visuel/fiche-serie/contenu.md): its pile of covers, its title, status, planned
+   volumes and completeness, the progress of the collection, its publisher and collection, its authors, genres and universes,
+   all of its template that describes it (fonctionnel/structure-de-l-application.md); its summary and notes; its albums in the
+   order of the series; its dates. Its styles read the contracts of the base theme only (visuel/fiche-serie/declinaison-par-theme.md). *@
+<PageTitle>@(_series?.Title ?? L["Title"])</PageTitle>
+<AudienceScreen Function="AudienceFunctions.SeriesRecord" Record="new PresentedRecord(RecordType.Series, Id)" />
+
+@if (_problem is not null)
+{
+    <h1 class="visually-hidden">@L["Title"]</h1>
+    <ErrorMessage Problem="_problem" />
+}
+else if (_series is { } series)
+{
+    <Breadcrumb Items="BreadcrumbItems" />
+
+    <div class="series-record">
+        <div class="series-head">
+            @* Decorative: the covers of its first volumes, so that a series never passes for a single album; each framed as the
+               visual of an album, a theme putting it forward (--record-visual-…, themes/base.css). *@
+            <div class="series-pile">
+                <CoverPile Covers="series.Overview.FirstVolumeCovers" />
+            </div>
+
+            <div class="series-identity">
+                <h1>@series.Title</h1>
+
+                @* Nothing not set is shown in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md): no status,
+                   planned count, publisher, collection, authors, genres, universes, summary nor notes without them. *@
+                <ul class="series-facts" aria-label="@L["Facts"]">
+                    @if (series.Status is { } status)
+                    {
+                        <li class="series-fact" data-fact="status">@Values.Of(status)</li>
+                    }
+                    @if (series.TheoreticalVolumeCount is { } planned)
+                    {
+                        <li class="series-fact">@L[planned > 1 ? "Planned.Other" : "Planned.One", Format.Number(planned)]</li>
+                    }
+                    <li class="series-fact" data-fact="@(series.IsComplete ? "complete" : null)">@L[series.IsComplete ? "Complete" : "ToComplete"]</li>
+                </ul>
+
+                @* A series without any album has nothing to measure: no progress; the block of its albums says so. *@
+                @if (series.Albums.Count > 0)
+                {
+                    <div class="series-progress">
+                        <span class="series-progress-label">@ProgressLabel</span>
+                        <span class="series-progress-track" aria-hidden="true">
+                            <span class="series-progress-bar" style="--progress: @(OwnedCount * 100 / series.Albums.Count)%"></span>
+                        </span>
+                    </div>
+                }
+
+                @* Its template publisher and collection; only a publisher with a known website is a link, to that site, which opens
+                   apart from the record (fonctionnel/structure-de-l-application.md). *@
+                @if (series.Publisher is not null || series.PublisherCollection is not null)
+                {
+                    <dl class="series-publishing">
+                        @if (series.Publisher is { } publisher)
+                        {
+                            <div>
+                                <dt>@L["Publisher"]</dt>
+                                <dd>
+                                    @if (publisher.Website is { } website)
+                                    {
+                                        <a class="external" href="@website" target="_blank" rel="noopener noreferrer">@publisher.Name<Icon Name="IconName.Exit" /><span class="visually-hidden">@L["External"]</span></a>
+                                    }
+                                    else
+                                    {
+                                        <span class="series-publisher">@publisher.Name</span>
+                                    }
+                                </dd>
+                            </div>
+                        }
+                        @if (series.PublisherCollection is { } collection)
+                        {
+                            <div>
+                                <dt>@L["Collection"]</dt>
+                                <dd><span class="series-publisher">@collection.Name</span></dd>
+                            </div>
+                        }
+                    </dl>
+                }
+
+                <ContributionsByRole Contributions="series.Contributions" />
+                <Classification Genres="series.Genres" Universes="series.Universes" />
+            </div>
+        </div>
+
+        @* The summary and the notes, each only when set, and the block only when one is. Their text keeps its line breaks:
+           nothing else in their paragraph. *@
+        @if (series.Summary is not null || series.PersonalNotes is not null)
+        {
+            <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
+                @if (series.Summary is { } summary)
+                {
+                    <p class="series-summary">@summary</p>
+                }
+                @if (series.PersonalNotes is { } notes)
+                {
+                    <h3 class="series-notes-title">@L["Notes"]</h3>
+                    <p class="series-notes">@notes</p>
+                }
+            </Block>
+        }
+
+        <SeriesAlbums Albums="series.Albums" LabelFormat="_format" />
+    </div>
+
+    <p class="series-dates" data-local>@L["Dates", Format.LocalDate(series.CreatedAt), Format.LocalDate(series.ModifiedAt)]</p>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private SeriesDetail? _series;
+    private AlbumLabelFormat _format;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+            _series = await Api.GetAsync<SeriesDetail>($"/catalog/series/{Id}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+    }
+
+    private IReadOnlyList<BreadcrumbItem> BreadcrumbItems => [new(L["Breadcrumb.Series"], AppPaths.Series), new(_series!.Title)];
+
+    private int OwnedCount => _series!.Albums.Count(a => a.Album.IsInCollection);
+
+    private string ProgressLabel => L[OwnedCount > 1 ? "Progress.Other" : "Progress.One", Format.Number(OwnedCount), Format.Number(_series!.Albums.Count)];
+}

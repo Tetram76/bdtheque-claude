@@ -119,18 +119,17 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rating_IsFiveStars_AndLeftOutWithout()
+    public void Rating_IsFiveStars_AndNothingWhenNotRated()
     {
         _catalog.Album = Album() with { Rating = AlbumRating.Good };
         var rated = Open();
         Assert.Equal("Appréciation : Bien, 4 sur 5", rated.Find(".album-rating [role='img']").GetAttribute("aria-label"));
         Assert.Equal(4, rated.FindAll(".album-rating .star[data-on]").Count);
 
-        // Data not set is not shown in the consultation: neither stars nor « Pas encore noté ».
         _catalog.Album = Album() with { Rating = null };
         var unrated = Open();
         Assert.Empty(unrated.FindAll(".album-rating"));
-        Assert.DoesNotContain("Pas encore noté", unrated.Markup);
+        Assert.Empty(unrated.FindAll(".star"));
     }
 
     [Fact]
@@ -152,14 +151,14 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Contributions_OfAnAlbumWithoutAny_SaySo()
+    public void Contributions_GenresAndUniverses_OfAnAlbumWithoutAny_AreNotShown()
     {
-        _catalog.Album = Album() with { Contributions = [] };
+        _catalog.Album = Album() with { Contributions = [], Genres = [], Universes = [] };
 
         var page = Open();
 
-        Assert.Equal("Aucun auteur crédité", page.Find(".contributions").TextContent.Trim());
-        Assert.Empty(page.FindAll(".contributions dt"));
+        Assert.Empty(page.FindAll(".contributions"));
+        Assert.Empty(page.FindAll(".classification"));
     }
 
     [Fact]
@@ -199,14 +198,27 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Summary_AndPersonalNotes_AreShown_OrSaidNotSet()
+    public void SummaryAndPersonalNotes_AreShown_EachOnlyWhenSet_AndTheBlockOnlyWhenOneIs()
     {
         _catalog.Album = Album();
-        Assert.Contains("Venezuela, vers 1913.", BlockOf(Open(), "Ça raconte quoi ?").TextContent);
+        var block = BlockOf(Open(), "Ça raconte quoi ?");
+        Assert.Equal("Venezuela, vers 1913.", block.QuerySelector(".album-summary")!.TextContent.Trim());
+        Assert.Equal("Réunit les trois premiers récits.", block.QuerySelector(".album-notes")!.TextContent.Trim());
+
+        _catalog.Album = Album() with { Summary = null };
+        block = BlockOf(Open(), "Ça raconte quoi ?");
+        Assert.Null(block.QuerySelector(".album-summary"));
+        Assert.NotNull(block.QuerySelector(".album-notes"));
+
+        _catalog.Album = Album() with { PersonalNotes = null };
+        block = BlockOf(Open(), "Ça raconte quoi ?");
+        Assert.Null(block.QuerySelector(".album-notes-title"));
+        Assert.Null(block.QuerySelector(".album-notes"));
 
         _catalog.Album = Album() with { Summary = null, PersonalNotes = null };
-        var block = BlockOf(Open(), "Ça raconte quoi ?");
-        Assert.Equal(2, block.QuerySelectorAll(".not-set").Length);
+        var page = Open();
+        Assert.DoesNotContain(page.FindAll("section.block .block-title"), title => title.TextContent.Trim() == "Ça raconte quoi ?");
+        Assert.Empty(page.FindAll(".not-set"));
     }
 
     [Fact]
@@ -383,13 +395,15 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_OfAnEditionWithoutAny_SaySo()
+    public void Visuals_OfAnEditionWithoutAny_AreNotShown()
     {
         _catalog.Album = Album();
 
         var page = Open();
 
-        Assert.Equal("Aucun visuel pour cette édition.", page.FindAll(".edition")[1].QuerySelector(".edition-visuals-none")!.TextContent.Trim());
+        var edition = page.FindAll(".edition")[1];
+        Assert.Null(edition.QuerySelector(".edition-visuals"));
+        Assert.DoesNotContain("visuel", edition.TextContent);
     }
 
     [Fact]

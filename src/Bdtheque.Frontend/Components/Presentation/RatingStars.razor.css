@@ -1,8 +1,7 @@
-/* Five stars in the color of the text, those of the rating filled. */
+/* Five stars in the color of the text, those of the rating filled; their size follows the text around them. */
 .rating-stars {
     display: inline-flex;
     gap: 0.125rem;
-    vertical-align: middle;
 }
 
 .star {

@@ -2,17 +2,16 @@
 @inject IStringLocalizer<RatingStars> L
 @inject ValueLabels Values
 
-@* The rating of an album in five stars, the stars of the rating filled (visuel/fiche-album/contenu.md), shared by the records
-   of the consultation: an image named by the rating for assistive technologies; nothing without rating, data not set being
-   not shown in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md). *@
+@* The rating of an album in five stars, shared by the records of the consultation (visuel/fiche-album/contenu.md,
+   visuel/fiche-serie/contenu.md): an image whose text tells the rating; without rating, nothing, as anything not set
+   in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md). *@
 @if (Rating is { } rating)
 {
     <span class="rating-stars" role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
 }
 
 @code {
-    /// <summary>The rating; <c>null</c> for an album not rated yet.</summary>
-    [Parameter]
+    [Parameter, EditorRequired]
     public AlbumRating? Rating { get; set; }
 
     private static RenderFragment Stars(int rating) => __builder =>

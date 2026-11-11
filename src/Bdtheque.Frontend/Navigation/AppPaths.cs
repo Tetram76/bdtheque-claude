@@ -63,8 +63,17 @@ public static class AppPaths
     /// <summary>The series and albums of a universe, those of its sub-universes included.</summary>
     public static string UniverseWorks(Guid id) => NotYetImplemented;
 
-    /// <summary>The record of a series (#211).</summary>
-    public static string SeriesRecord(Guid id) => NotYetImplemented;
+    /// <summary>
+    /// The path of the list of the series once implemented, under which the record of a series is: where the entry « Séries »
+    /// of the menu is current.
+    /// </summary>
+    public const string SeriesSection = "/series";
+
+    /// <summary>The route of the record of a series.</summary>
+    public const string SeriesRoute = SeriesSection + "/{Id:guid}";
+
+    /// <summary>The record of a series (visuel/fiche-serie/).</summary>
+    public static string SeriesRecord(Guid id) => $"{SeriesSection}/{id}";
 
     /// <summary>
     /// The path of the list of the authors once implemented, under which the record of an author is: where the entry
