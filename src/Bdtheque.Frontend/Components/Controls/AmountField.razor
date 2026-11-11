@@ -39,11 +39,10 @@
     // The value of the choice of a currency entered by its code.
     private const string Other = "other";
 
-    // The currencies a collection of comics meets, named in the display culture, in the order of their likely use in a
-    // French-language collection: the euro, then the dollar of the imports of today, then the francs of the countries of
-    // French-language comics, then the old franc of the albums before 1960, then the other currencies of imports, the
-    // Luxembourg franc last.
-    private static readonly string[] Named = ["EUR", "USD", "FRF", "BEF", "CHF", "QZF", "CAD", "GBP", "LUF"];
+    // The currencies a collection of comics meets, named in the display culture, in the order of their likely use for the
+    // purchase of a new edition today: the euro, then the currencies still in use (dollar, Swiss franc, Canadian dollar,
+    // pound), then those the euro replaced, for the editions bought before it, the old franc after the franc.
+    private static readonly string[] Named = ["EUR", "USD", "CHF", "CAD", "GBP", "FRF", "BEF", "QZF", "LUF"];
 
     // Whether the user chose to enter the currency by its code, before entering it.
     private bool _otherChosen;
