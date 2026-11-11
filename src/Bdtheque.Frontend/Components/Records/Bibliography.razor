@@ -1,0 +1,165 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Lists
+@inject IStringLocalizer<Bibliography> L
+@inject RecordLabels Labels
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+
+@* The whole bibliography of an author (visuel/fiche-auteur/contenu.md), a single list: the series and the albums without
+   series at its first level, in the order the API gives them (by sort key, choix-implementation/api/organisation-de-l-api.md).
+   Every album has the same representation, in a series or not: its cover, its title, what places it, the roles held on it,
+   its rating and where it stands with regard to the collection. A series is told apart by its pile of three covers, with
+   the albums credited and those of the collection, and the roles held on the series itself; it unfolds on its albums
+   credited, in the order of the series, framed under it, by a disclosure of the browser (details), open on arrival up to
+   six albums: no request, nor action followed, to show what the page already holds (choix-implementation/socle/frontend.md).
+   « Tout déplier » and « Tout replier » act on the whole list (wwwroot/bibliography-folds.js), and are shown only once the
+   script is there to act. Never empty: the record leaves it out for an author credited on nothing, data not set being not
+   shown in the consultation. *@
+<Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="bibliography">
+    <div class="bibliography">
+        <app-bibliography-folds>
+            <div class="bibliography-head">
+                <p class="bibliography-summary">@Summary</p>
+                @if (Entries.Any(e => e.Series is { Albums.Count: > 0 }))
+                {
+                    <div class="bibliography-actions">
+                        <Button Label="@L["UnfoldAll"]" data-fold-all="unfold" />
+                        <Button Label="@L["FoldAll"]" data-fold-all="fold" />
+                    </div>
+                }
+            </div>
+            <ul class="bibliography-entries">
+                @foreach (var entry in Entries)
+                {
+                    if (entry.Series is { } series)
+                    {
+                        <li class="bibliography-entry" data-kind="series">
+                            <div class="entry-row">
+                                <CoverPile Covers="series.Overview.FirstVolumeCovers" />
+                                <span class="entry-text">
+                                    <a class="entry-title" href="@AppPaths.SeriesRecord(series.Series.Id)">@series.Series.Title</a>
+                                    <span class="entry-meta">@SeriesMeta(series)</span>
+                                </span>
+                                @if (series.Roles.Count > 0)
+                                {
+                                    <span class="entry-tags entry-series-roles">
+                                        <span class="entry-series-roles-label">@L["SeriesRoles"]</span>
+                                        @Roles(series.Roles)
+                                    </span>
+                                }
+                            </div>
+                            @if (series.Albums.Count > 0)
+                            {
+                                <details class="entry-albums" open="@(series.Albums.Count <= UnfoldedUpTo)">
+                                    <summary>
+                                        <span class="entry-toggle" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" focusable="false"><path d="M9 6l6 6-6 6" /></svg>
+                                        </span>
+                                        <span class="visually-hidden">@L["SeriesAlbums", series.Series.Title]</span>
+                                    </summary>
+                                    <ol>
+                                        @foreach (var album in series.Albums)
+                                        {
+                                            <li class="entry-row">@Album(album, InSeries(album.Album.Album))</li>
+                                        }
+                                    </ol>
+                                </details>
+                            }
+                        </li>
+                    }
+                    else if (entry.Album is { } album)
+                    {
+                        <li class="bibliography-entry" data-kind="album">
+                            <div class="entry-row">@Album(album, null)</div>
+                        </li>
+                    }
+                }
+            </ul>
+        </app-bibliography-folds>
+    </div>
+</Block>
+
+@code {
+    // A series of more albums credited than that is folded on arrival, so that a prolific series does not hide the rest of
+    // the bibliography (visuel/fiche-auteur/contenu.md).
+    private const int UnfoldedUpTo = 6;
+
+    /// <summary>The bibliography, in the order the API gives it.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<BibliographyEntry> Entries { get; set; } = [];
+
+    private string Summary
+    {
+        get
+        {
+            var series = Entries.Count(e => e.Series is not null);
+            var albums = Entries.Count - series;
+            return L["Summary", Counted("Series", series), Counted("WithoutSeries", albums)];
+        }
+    }
+
+    private string Counted(string key, int count) => count switch
+    {
+        0 => L[$"{key}.None"],
+        1 => L[$"{key}.One", Format.Number(1)],
+        _ => L[$"{key}.Other", Format.Number(count)],
+    };
+
+    // The albums credited out of those of the series, and those of the collection among them; credited on the series itself
+    // only, the albums it has none of the author's.
+    private string SeriesMeta(SeriesBibliographyItem series)
+    {
+        var total = series.Overview.AlbumCount;
+        if (series.Albums.Count == 0)
+            return total switch
+            {
+                0 => L["SeriesOnly.None"],
+                1 => L["SeriesOnly.One"],
+                _ => L["SeriesOnly.Other", Format.Number(total)],
+            };
+
+        var credited = L[series.Albums.Count == 1 ? "Credited.One" : "Credited.Other", Format.Number(series.Albums.Count), Format.Number(total)];
+        var owned = series.Albums.Count(a => a.Album.Album.IsInCollection);
+        return owned == 0 ? L["Owned.None", credited] : L["Owned", credited, Format.Number(owned)];
+    }
+
+    // What places an album in its series, listed under it, which it does not repeat: its volume, unless its title is already
+    // that volume (« Tome 3 »).
+    private string? InSeries(AlbumSummary album) => album.Title is not null ? Labels.Volume(album) : null;
+
+    // What places an album: its volume in its series (InSeries), then its date of first publication when set; nothing
+    // without either, « Album sans série » saying nothing useful.
+    private RenderFragment Album(AlbumBibliographyItem item, string? inSeries) => __builder =>
+    {
+        var album = item.Album.Album;
+        var published = item.FirstPublicationYear is { } year ? Format.PartialDate(year, item.FirstPublicationMonth) : null;
+        var meta = string.Join(" · ", new[] { inSeries, published }.OfType<string>()) is { Length: > 0 } joined ? joined : null;
+        <Cover VisualId="item.Album.Cover?.VisualId" />
+        <span class="entry-text">
+            @* Its own title; without one, its volume alone (« Tome 3 »), the series being said under it. *@
+            <a class="entry-title" href="@AppPaths.Album(album.Id)">@(album.Title ?? Labels.Album(album, AlbumLabelFormat.TitleSeriesVolume, withSeries: false))</a>
+            @if (meta is not null)
+            {
+                <span class="entry-meta">@meta</span>
+            }
+        </span>
+        <span class="entry-tags">
+            @Roles(item.Roles)
+            @if (item.Album.Rating is not null)
+            {
+                <RatingStars Rating="item.Album.Rating" />
+            }
+            <CollectionStateTag State="AlbumCardStates.Of(item.Album)" />
+        </span>
+    };
+
+    // Each role in its own colour, the same all over the page, so that a role reads at a glance in a long list.
+    private RenderFragment Roles(IReadOnlyList<ContributionRole> roles) => __builder =>
+    {
+        foreach (var role in roles)
+        {
+            <span class="role" data-role="@role.ToString().ToLowerInvariant()">@Values.Of(role)</span>
+        }
+    };
+}

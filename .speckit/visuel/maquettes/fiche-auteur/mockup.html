@@ -64,12 +64,12 @@ summary{cursor:pointer}
             <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">{{a.name}}</h1>
             <sc-if value="{{a.hasRealName}}" hint-placeholder-val="{{false}}"><span style="font-size: 16px; color: {{t.muted}}">{{a.realName}}</span></sc-if>
           </div>
-          <dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px 32px">
+          <sc-if value="{{a.hasNationality}}" hint-placeholder-val="{{false}}"><dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px 32px">
             <div style="display: flex; gap: 10px; align-items: baseline">
               <dt style="font-weight: 700">Nationalité</dt>
-              <dd style="margin: 0; color: {{a.nationalityColor}}">{{a.nationality}}</dd>
+              <dd style="margin: 0">{{a.nationality}}</dd>
             </div>
-          </dl>
+          </dl></sc-if>
           <ul aria-label="En bref" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
             <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
               <li style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; box-sizing: border-box; border: {{f.bd}}; border-radius: {{t.btnR}}; background: {{f.bg}}; color: {{f.fg}}; font-weight: 700; font-size: 13px">{{f.label}}</li>
@@ -78,11 +78,11 @@ summary{cursor:pointer}
         </div>
       </div>
 
-      <section aria-labelledby="a-bio" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+      <sc-if value="{{a.hasBio}}" hint-placeholder-val="{{false}}"><section aria-labelledby="a-bio" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.bio}}</span>
         <h2 id="a-bio" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Qui est-ce ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
-        <p style="margin: 0; max-width: 80ch; font-size: 15px; color: {{a.bioColor}}">{{a.bio}}</p>
-      </section>
+        <p style="margin: 0; max-width: 80ch; font-size: 15px">{{a.bio}}</p>
+      </section></sc-if>
 
       <section aria-labelledby="a-biblio" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 10px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.biblio}}</span>
@@ -382,7 +382,7 @@ class View extends Mockup {
       if (e.album) {
         return {
           ...base, isAlbum: true, isSeries: false, canOpen: false, noOpen: false, open: false, cover: cover(i, 1),
-          meta: 'Album sans série', roles: roleChips(e.roles), hasSeriesRoles: false, albums: [], ...rating(e.rating), ...badge(e.state)
+          meta: '', roles: roleChips(e.roles), hasSeriesRoles: false, albums: [], ...rating(e.rating), ...badge(e.state)
         };
       }
       const hasAlbums = e.albums.length > 0;
@@ -390,13 +390,13 @@ class View extends Mockup {
       const owned = e.albums.filter((a) => a[3] === 'own').length;
       // An album without its own title is named by its volume alone (« Tome 3 »).
       const albums = e.albums.map(([tome, title, roles, state, n], k) => ({
-        title: title || tome.replace(/^T\. /, 'Tome '), meta: e.title + ' · ' + tome, cover: cover(i, volumeOf(tome)),
+        title: title || tome.replace(/^T\. /, 'Tome '), meta: title ? tome : '', cover: cover(i, volumeOf(tome)),
         rowB: k === 0 ? '0' : t.rowB,
         roles: roleChips(roles), ...rating(n), ...badge(state)
       }));
       const credited = hasAlbums
-        ? 'crédité sur ' + e.albums.length + (e.albums.length > 1 ? ' albums' : ' album') + ' sur ' + e.seriesSize + ' · ' + owned + ' dans la collection'
-        : 'crédité sur la série seulement, sur aucun de ses ' + e.seriesSize + ' albums';
+        ? 'Crédité sur ' + e.albums.length + (e.albums.length > 1 ? ' albums' : ' album') + ' sur ' + e.seriesSize + ' · ' + owned + ' dans la collection'
+        : 'Série · crédité sur la série seulement, sur aucun de ses ' + e.seriesSize + ' albums';
       return {
         ...base, isAlbum: false, isSeries: true, canOpen: hasAlbums, noOpen: !hasAlbums, open: isOpen, rated: false,
         listLabel: 'Albums de la série ' + e.title,
@@ -412,7 +412,8 @@ class View extends Mockup {
         chevron: isOpen ? '90deg' : '0deg',
         toggleLabel: (isOpen ? 'Replier ' : 'Déplier ') + e.title,
         toggle: () => this.setState({ open: { ...open, [i]: !isOpen } }),
-        meta: 'Série · ' + credited,
+        // « Série » is said only of a series credited on itself alone, that nothing else tells from an album.
+        meta: credited,
         roles: roleChips(e.seriesRoles),
         hasSeriesRoles: e.seriesRoles.length > 0,
         albums
@@ -425,8 +426,8 @@ class View extends Mockup {
       hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
       a: {
         name: 'Adrien Floch', initials: 'AF', hasRealName: false, realName: '',
-        nationality: 'Non renseignée', nationalityColor: t.muted,
-        bio: "Aucune biographie pour l'instant.", bioColor: t.muted
+        // Without nationality nor biography: neither is shown (charte-graphique/convivialite-et-efficacite.md).
+        hasNationality: false, nationality: '', hasBio: false, bio: ''
       },
       mono: { bg: t.pal[0][0], fg: t.pal[0][1], r: t.cvR === '0' ? '50%' : t.cvR },
       // The albums of an unfolded series sit in a tinted box, so that the next entry, outside it, cannot pass for one of them.
@@ -443,7 +444,7 @@ class View extends Mockup {
       biblioSummary: BIBLIOGRAPHY.length === 0
         ? 'Aucune série ni aucun album crédité pour l\'instant.'
         : count(seriesCount, 'série', 'séries', 'Aucune série') + ' et ' + count(loneCount, 'album sans série', 'albums sans série', 'aucun album sans série')
-          + ', rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.',
+          + ', rangés par ordre alphabétique.',
       entries,
       openAll: () => this.setState({ open: Object.fromEntries(BIBLIOGRAPHY.map((e, i) => [i, !e.album && e.albums.length > 0])) }),
       closeAll: () => this.setState({ open: {} })

@@ -234,7 +234,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var other = await CreateAuthorAsync("Mangin", "Valérie");
         // Credited on the series itself and on one of its albums.
         var babel = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Babel", contributions: [new(author.Id, ContributionRole.Scenarist)]));
-        var babel1 = await CreateAlbumAsync("Le chemin des étoiles", babel.Id, volume: 1, contributions: [new(author.Id, ContributionRole.Illustrator)]);
+        var babel1 = await CreateAlbumAsync("Le chemin des étoiles", babel.Id, volume: 1, year: 1975, contributions: [new(author.Id, ContributionRole.Illustrator)]);
         // Credited on some albums of the series only, in the order of the series.
         var nemesis = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Nemesis"));
         var nemesis2 = await CreateAlbumAsync("Babalon working", nemesis.Id, volume: 2, contributions: [new(author.Id, ContributionRole.Illustrator)]);
@@ -265,6 +265,9 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
 
         var oneShotEntry = detail.Bibliography[1].Album!;
         Assert.Equal([ContributionRole.Scenarist, ContributionRole.Illustrator], oneShotEntry.Roles);
+        // Its date of first publication, when set.
+        Assert.Null(oneShotEntry.FirstPublicationYear);
+        Assert.Equal(1975, babelEntry.Albums[0].FirstPublicationYear);
 
         var nemesisEntry = detail.Bibliography[2].Series!;
         Assert.Empty(nemesisEntry.Roles);

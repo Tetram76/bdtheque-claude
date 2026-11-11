@@ -139,6 +139,17 @@
     --color-text-on-genre: #FFFFFF;
     --color-universe: var(--day-accent);
     --color-text-on-universe: var(--day-text-on-accent);
+    /* The record of an author: its monogram of the corners of the visual of a record; the roles of the deep colour, of the
+       accent and of a tint of the day, as the first monograms; the albums of an unfolded series on the paper of the fields
+       (visuel/fiche-auteur/). */
+    --record-monogram-radius: 0.5rem;
+    --color-role-scenarist: var(--day-deep);
+    --color-text-on-role-scenarist: #FFFFFF;
+    --color-role-illustrator: var(--day-accent);
+    --color-text-on-role-illustrator: var(--day-text-on-accent);
+    --color-role-colorist: var(--day-tint);
+    --color-text-on-role-colorist: var(--day-deep-text);
+    --color-nest: var(--day-field);
 
     /* The home page of the administration: tiles of the paper of the fields, round chips. */
     --color-tile: var(--day-field);

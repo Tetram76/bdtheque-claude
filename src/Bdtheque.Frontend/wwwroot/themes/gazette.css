@@ -105,6 +105,15 @@
     --color-text-on-genre: var(--color-text-on-inverse);
     --color-universe: var(--color-accent);
     --color-text-on-universe: var(--color-text-on-accent);
+    /* The record of an author: the roles in ink, amber and rust; the albums of an unfolded series on a paper a shade darker
+       (visuel/fiche-auteur/). */
+    --color-role-scenarist: var(--color-surface-inverse);
+    --color-text-on-role-scenarist: var(--color-text-on-inverse);
+    --color-role-illustrator: var(--color-accent);
+    --color-text-on-role-illustrator: var(--color-text-on-accent);
+    --color-role-colorist: #9A3D12;
+    --color-text-on-role-colorist: #FBF3EA;
+    --color-nest: #F1E6DC;
 
     /* The home page of the administration: square tiles, framed by a pale rule of the paper, and square chips. */
     --radius-tile: 0;
