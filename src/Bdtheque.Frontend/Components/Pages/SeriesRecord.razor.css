@@ -19,13 +19,14 @@
 }
 
 /* The pile of the covers of the first volumes, larger than that of a row of a list, each card framed as the visual an album
-   record puts forward: the frame, the tilt and the shadow are the touch of the theme (--record-visual-…). */
+   record puts forward: the frame, the tilt and the shadow are the touch of the theme (--record-visual-…), the step that of
+   a pile so framed (--record-pile-step). No room on the sides, which the widest step needs within its column. */
 .series-pile {
     display: flex;
     justify-content: center;
-    padding: var(--space-m);
+    padding-block: var(--space-m);
     --cover-width: 7.75rem;
-    --cover-pile-step: 0.875rem;
+    --cover-pile-step: var(--record-pile-step);
 }
 
 .series-pile ::deep .cover {
@@ -49,7 +50,7 @@
 }
 
 /* The short facts of the series as pills: its status filled with the accent, its planned volumes outlined, its completeness
-   filled as the tag of the collection when complete; a fact not set in muted text. */
+   filled as the tag of the collection when complete. */
 .series-facts {
     display: flex;
     flex-wrap: wrap;

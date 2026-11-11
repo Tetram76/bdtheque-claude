@@ -240,7 +240,9 @@
        its width, its frame (padding, border, background), its shadow and its tilt, which a theme shown in volume leaves to
        the book (.cover-volume). The genres and the universes, each in colors of their own, which set them apart. The
        progress of the collection on the record of a series (visuel/fiche-serie/contenu.md): the fill of its bar, its track
-       and the border of the track. */
+       and the border of the track. The step of the pile of covers on the record of a series, each card framed as the
+       visual: a theme that frames it widens the step beyond its frame and its shadow, which each card casts on the one
+       behind, so that a band of every cover stays in sight. */
     --record-gap: var(--space-l);
     --record-title-size: clamp(1.5rem, 3.2vw, 2.375rem);
     --record-visual-width: min(100%, 15rem);
@@ -249,6 +251,7 @@
     --record-visual-background: transparent;
     --record-visual-shadow: none;
     --record-visual-tilt: 0deg;
+    --record-pile-step: 0.875rem;
     --record-progress-fill: var(--color-accent);
     --record-progress-track: var(--color-rule);
     --record-progress-border: none;
