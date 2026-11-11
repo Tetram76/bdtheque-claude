@@ -21,17 +21,11 @@
   <data name="Facts" xml:space="preserve">
     <value>En bref</value>
   </data>
-  <data name="Status.NotSet" xml:space="preserve">
-    <value>Statut non renseigné</value>
-  </data>
   <data name="Planned.One" xml:space="preserve">
     <value>{0} tome prévu</value>
   </data>
   <data name="Planned.Other" xml:space="preserve">
     <value>{0} tomes prévus</value>
-  </data>
-  <data name="Planned.NotSet" xml:space="preserve">
-    <value>Nombre de tomes prévus non renseigné</value>
   </data>
   <data name="Complete" xml:space="preserve">
     <value>Complète</value>
@@ -57,9 +51,6 @@
   <data name="External" xml:space="preserve">
     <value>, site externe</value>
   </data>
-  <data name="NoAuthor" xml:space="preserve">
-    <value>Aucun auteur crédité sur la série</value>
-  </data>
   <data name="Story.Title" xml:space="preserve">
     <value>De quoi ça parle ?</value>
   </data>
@@ -68,9 +59,6 @@
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes personnelles</value>
-  </data>
-  <data name="Notes.None" xml:space="preserve">
-    <value>Aucune note</value>
   </data>
   <data name="Dates" xml:space="preserve">
     <value>Série créée le {0}, modifiée le {1}.</value>

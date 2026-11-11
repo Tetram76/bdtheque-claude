@@ -84,11 +84,6 @@
     color: var(--color-text-on-tag);
 }
 
-.series-fact[data-not-set] {
-    font-weight: normal;
-    color: var(--color-text-muted);
-}
-
 /* The progress of the collection: its text, then a bar whose fill is the share of the albums of the collection. */
 .series-progress {
     display: grid;
@@ -152,7 +147,7 @@
 }
 
 .series-notes-title {
-    margin: var(--space-m) 0 var(--space-xs);
+    margin: 0 0 var(--space-xs);
     font-family: var(--font-text);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
@@ -161,15 +156,16 @@
     color: var(--color-text-muted);
 }
 
+/* The notes set apart from a summary above them. */
+.series-summary + .series-notes-title {
+    margin-block-start: var(--space-m);
+}
+
 .series-summary,
 .series-notes {
     max-inline-size: 70ch;
     margin: 0;
     white-space: pre-line;
-}
-
-.series-notes[data-none] {
-    color: var(--color-text-muted);
 }
 
 .series-dates {

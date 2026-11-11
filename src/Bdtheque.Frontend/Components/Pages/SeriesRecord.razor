@@ -34,22 +34,16 @@ else if (_series is { } series)
             <div class="series-identity">
                 <h1>@series.Title</h1>
 
+                @* Nothing not set is shown in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md): no status,
+                   planned count, publisher, collection, authors, genres, universes, summary nor notes without them. *@
                 <ul class="series-facts" aria-label="@L["Facts"]">
                     @if (series.Status is { } status)
                     {
                         <li class="series-fact" data-fact="status">@Values.Of(status)</li>
                     }
-                    else
-                    {
-                        <li class="series-fact" data-not-set>@L["Status.NotSet"]</li>
-                    }
                     @if (series.TheoreticalVolumeCount is { } planned)
                     {
                         <li class="series-fact">@L[planned > 1 ? "Planned.Other" : "Planned.One", Format.Number(planned)]</li>
-                    }
-                    else
-                    {
-                        <li class="series-fact" data-not-set>@L["Planned.NotSet"]</li>
                     }
                     <li class="series-fact" data-fact="@(series.IsComplete ? "complete" : null)">@L[series.IsComplete ? "Complete" : "ToComplete"]</li>
                 </ul>
@@ -67,64 +61,56 @@ else if (_series is { } series)
 
                 @* Its template publisher and collection; only a publisher with a known website is a link, to that site, which opens
                    apart from the record (fonctionnel/structure-de-l-application.md). *@
-                <dl class="series-publishing">
-                    <div>
-                        <dt>@L["Publisher"]</dt>
-                        <dd>
-                            @if (series.Publisher is { Website: { } website } publisher)
-                            {
-                                <a class="external" href="@website" target="_blank" rel="noopener noreferrer">@publisher.Name<Icon Name="IconName.Exit" /><span class="visually-hidden">@L["External"]</span></a>
-                            }
-                            else if (series.Publisher is { } known)
-                            {
-                                <span class="series-publisher">@known.Name</span>
-                            }
-                            else
-                            {
-                                <NotSet />
-                            }
-                        </dd>
-                    </div>
-                    <div>
-                        <dt>@L["Collection"]</dt>
-                        <dd>
-                            @if (series.PublisherCollection is { } collection)
-                            {
-                                <span class="series-publisher">@collection.Name</span>
-                            }
-                            else
-                            {
-                                <NotSet Gender="GrammaticalGender.Feminine" />
-                            }
-                        </dd>
-                    </div>
-                </dl>
+                @if (series.Publisher is not null || series.PublisherCollection is not null)
+                {
+                    <dl class="series-publishing">
+                        @if (series.Publisher is { } publisher)
+                        {
+                            <div>
+                                <dt>@L["Publisher"]</dt>
+                                <dd>
+                                    @if (publisher.Website is { } website)
+                                    {
+                                        <a class="external" href="@website" target="_blank" rel="noopener noreferrer">@publisher.Name<Icon Name="IconName.Exit" /><span class="visually-hidden">@L["External"]</span></a>
+                                    }
+                                    else
+                                    {
+                                        <span class="series-publisher">@publisher.Name</span>
+                                    }
+                                </dd>
+                            </div>
+                        }
+                        @if (series.PublisherCollection is { } collection)
+                        {
+                            <div>
+                                <dt>@L["Collection"]</dt>
+                                <dd><span class="series-publisher">@collection.Name</span></dd>
+                            </div>
+                        }
+                    </dl>
+                }
 
-                <ContributionsByRole Contributions="series.Contributions" None="@L["NoAuthor"]" />
+                <ContributionsByRole Contributions="series.Contributions" />
                 <Classification Genres="series.Genres" Universes="series.Universes" />
             </div>
         </div>
 
-        <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
-            @* The text of the summary and of the notes keeps its line breaks: nothing else in their paragraph. *@
-            @if (series.Summary is { } summary)
-            {
-                <p class="series-summary">@summary</p>
-            }
-            else
-            {
-                <p class="series-summary"><NotSet /></p>
-            }
-            <h3 class="series-notes-title">@L["Notes"]</h3>
-            @if (series.PersonalNotes is { } notes)
-            {
-                <p class="series-notes">@notes</p>
-            }
-            else
-            {
-                <p class="series-notes" data-none>@L["Notes.None"]</p>
-            }
-        </Block>
+        @* The summary and the notes, each only when set, and the block only when one is. Their text keeps its line breaks:
+           nothing else in their paragraph. *@
+        @if (series.Summary is not null || series.PersonalNotes is not null)
+        {
+            <Block Title="@L["Story.Title"]" Kicker="@L["Story.Kicker"]">
+                @if (series.Summary is { } summary)
+                {
+                    <p class="series-summary">@summary</p>
+                }
+                @if (series.PersonalNotes is { } notes)
+                {
+                    <h3 class="series-notes-title">@L["Notes"]</h3>
+                    <p class="series-notes">@notes</p>
+                }
+            </Block>
+        }
 
         <SeriesAlbums Albums="series.Albums" LabelFormat="_format" />
     </div>

@@ -88,13 +88,18 @@
 }
 
 .album-notes-title {
-    margin: var(--space-m) 0 var(--space-xs);
+    margin: 0 0 var(--space-xs);
     font-family: var(--font-text);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-text-muted);
+}
+
+/* The notes set apart from a summary above them. */
+.album-summary + .album-notes-title {
+    margin-block-start: var(--space-m);
 }
 
 .album-summary,

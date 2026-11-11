@@ -3,25 +3,16 @@
 @inject ValueLabels Values
 
 @* The rating of an album in five stars, shared by the records of the consultation (visuel/fiche-album/contenu.md,
-   visuel/fiche-serie/contenu.md): an image whose text tells the rating; without rating, nothing, or, where the record
-   says so, empty stars and « Pas encore noté ». *@
+   visuel/fiche-serie/contenu.md): an image whose text tells the rating; without rating, nothing, as anything not set
+   in the consultation (visuel/charte-graphique/convivialite-et-efficacite.md). *@
 @if (Rating is { } rating)
 {
     <span class="rating-stars" role="img" aria-label="@L["Rating", Values.Of(rating), (int)rating]">@Stars((int)rating)</span>
-}
-else if (ShowUnrated)
-{
-    <span class="rating-stars" aria-hidden="true">@Stars(0)</span>
-    <span class="rating-none">@L["NotRated"]</span>
 }
 
 @code {
     [Parameter, EditorRequired]
     public AlbumRating? Rating { get; set; }
-
-    /// <summary>An album without rating says so, rather than showing nothing.</summary>
-    [Parameter]
-    public bool ShowUnrated { get; set; }
 
     private static RenderFragment Stars(int rating) => __builder =>
     {

@@ -16,8 +16,3 @@
 .star[data-on] {
     fill: currentColor;
 }
-
-.rating-none {
-    font-size: var(--font-size-small);
-    color: var(--color-text-muted);
-}

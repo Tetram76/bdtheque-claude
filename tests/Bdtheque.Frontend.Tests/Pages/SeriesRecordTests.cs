@@ -91,15 +91,13 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Identity_OfACompleteSeries_SaysSo_AndAMissingStatusOrPlannedCountIsSaidNotSet()
+    public void Identity_OfACompleteSeries_SaysSo_AndAMissingStatusOrPlannedCountIsNotShown()
     {
         _catalog.Series = Series() with { Status = null, TheoreticalVolumeCount = null, IsComplete = true };
 
         var page = Open();
 
-        Assert.Equal(["Statut non renseigné", "Nombre de tomes prévus non renseigné", "Complète"],
-            page.FindAll(".series-facts li").Select(f => f.TextContent.Trim()));
-        Assert.Equal(2, page.FindAll(".series-facts li[data-not-set]").Count);
+        Assert.Equal(["Complète"], page.FindAll(".series-facts li").Select(f => f.TextContent.Trim()));
     }
 
     [Fact]
@@ -144,15 +142,18 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Publisher_WithoutWebsite_IsNoLink_AndMissingOnesAreSaidNotSet()
+    public void Publisher_WithoutWebsite_IsNoLink_AndAMissingPublisherOrCollectionIsNotShown()
     {
         _catalog.Series = Series() with { Publisher = new PublisherListItem(Guid.NewGuid(), "Casterman", null) };
         Assert.Empty(Open().FindAll(".series-publishing a"));
 
+        _catalog.Series = Series() with { PublisherCollection = null };
+        Assert.Equal(["Éditeur"], Open().FindAll(".series-publishing dt").Select(d => d.TextContent.Trim()));
+
         _catalog.Series = Series() with { Publisher = null, PublisherCollection = null };
         var page = Open();
-        Assert.Equal(["Non renseigné", "Non renseignée"], page.FindAll(".series-publishing dd").Select(d => d.TextContent.Trim()));
-        Assert.Empty(page.FindAll(".series-publishing a"));
+        Assert.Empty(page.FindAll(".series-publishing"));
+        Assert.Empty(page.FindAll(".not-set"));
     }
 
     [Fact]
@@ -167,11 +168,11 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Authors_OfASeriesWithoutAny_SaySo()
+    public void Authors_OfASeriesWithoutAny_AreNotShown()
     {
         _catalog.Series = Series() with { Contributions = [] };
 
-        Assert.Equal("Aucun auteur crédité sur la série", Open().Find(".contributions-none").TextContent.Trim());
+        Assert.Empty(Open().FindAll(".contributions"));
     }
 
     [Fact]
@@ -186,17 +187,38 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Summary_IsShown_OrSaidNotSet_AndTheNotes_OrNone()
+    public void GenresOrUniverses_OfASeriesWithoutAny_AreNotShown()
+    {
+        _catalog.Series = Series() with { Universes = [] };
+        Assert.Equal(["Genres"], Open().FindAll(".classification dt").Select(d => d.TextContent.Trim()));
+
+        _catalog.Series = Series() with { Genres = [] };
+        Assert.Equal(["Univers"], Open().FindAll(".classification dt").Select(d => d.TextContent.Trim()));
+
+        _catalog.Series = Series() with { Genres = [], Universes = [] };
+        Assert.Empty(Open().FindAll(".classification"));
+    }
+
+    [Fact]
+    public void SummaryAndNotes_AreShown_EachOnlyWhenSet_AndTheBlockOnlyWhenOneIs()
     {
         _catalog.Series = Series();
         var block = BlockOf(Open(), "De quoi ça parle ?");
-        Assert.Contains("Les aventures d'un marin.", block.TextContent);
-        Assert.Contains("Lue en intégrales.", block.TextContent);
+        Assert.Equal("Les aventures d'un marin.", block.QuerySelector(".series-summary")!.TextContent.Trim());
+        Assert.Equal("Lue en intégrales.", block.QuerySelector(".series-notes")!.TextContent.Trim());
+
+        _catalog.Series = Series() with { Summary = null };
+        block = BlockOf(Open(), "De quoi ça parle ?");
+        Assert.Null(block.QuerySelector(".series-summary"));
+        Assert.NotNull(block.QuerySelector(".series-notes"));
+
+        _catalog.Series = Series() with { PersonalNotes = null };
+        block = BlockOf(Open(), "De quoi ça parle ?");
+        Assert.Null(block.QuerySelector(".series-notes-title"));
+        Assert.Null(block.QuerySelector(".series-notes"));
 
         _catalog.Series = Series() with { Summary = null, PersonalNotes = null };
-        block = BlockOf(Open(), "De quoi ça parle ?");
-        Assert.Equal("Non renseigné", block.QuerySelector(".series-summary")!.TextContent.Trim());
-        Assert.Equal("Aucune note", block.QuerySelector(".series-notes")!.TextContent.Trim());
+        Assert.DoesNotContain(Open().FindAll("section.block .block-title"), title => title.TextContent.Trim() == "De quoi ça parle ?");
     }
 
     [Fact]
@@ -262,7 +284,7 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void SeriesWithoutAlbum_SaysSo_WithoutBarNorGroups()
+    public void SeriesWithoutAlbum_SaysSo_WithoutBarNorBlockOfTheAlbums()
     {
         _catalog.Series = Series() with { Albums = [], Overview = new SeriesOverview(0, []) };
 
@@ -270,10 +292,7 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Aucun album dans la série pour l'instant", page.Find(".series-progress-label").TextContent.Trim());
         Assert.Empty(page.FindAll(".series-progress-bar"));
-        var block = BlockOf(page, "Combien d'albums ?");
-        Assert.Equal("Aucun album dans cette série pour l'instant.", block.QuerySelector(".series-albums-none")!.TextContent.Trim());
-        Assert.Empty(block.QuerySelectorAll(".series-group"));
-        Assert.Empty(block.QuerySelectorAll(".series-albums-count"));
+        Assert.Empty(page.FindAll("[data-part='albums']"));
         Assert.Equal(3, page.FindAll(".series-pile svg.cover-blank").Count);
     }
 

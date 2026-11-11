@@ -1,13 +1,9 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md): compact cards, as in any grid of covers,
    three at least on a row of a smartphone (visuel/charte-graphique/convivialite-et-efficacite.md). */
-.series-albums-count,
-.series-albums-none {
-    margin: 0;
-    color: var(--color-text-muted);
-}
-
 .series-albums-count {
+    margin: 0;
     font-size: var(--font-size-small);
+    color: var(--color-text-muted);
 }
 
 .series-group {

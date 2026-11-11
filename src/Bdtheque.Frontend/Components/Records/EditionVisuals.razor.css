@@ -37,9 +37,3 @@
     font-weight: var(--font-weight-strong);
     line-height: 1.2;
 }
-
-.edition-visuals-none {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-style: italic;
-}

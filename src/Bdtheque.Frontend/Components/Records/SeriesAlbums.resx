@@ -18,9 +18,6 @@
   <data name="Kicker" xml:space="preserve">
     <value>Les albums</value>
   </data>
-  <data name="None" xml:space="preserve">
-    <value>Aucun album dans cette série pour l&apos;instant.</value>
-  </data>
   <data name="Count.One" xml:space="preserve">
     <value>{0} album : {1}</value>
   </data>

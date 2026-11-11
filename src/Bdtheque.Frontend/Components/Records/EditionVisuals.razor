@@ -5,12 +5,8 @@
 @* The visuals of an edition on the record of an album (visuel/fiche-album/contenu.md): a strip of thumbnails, in their order
    (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md), each under its short type, which scrolls sideways when
    it does not hold them all; each opens the viewer on its visual (VisualDialog), the one open framed by the accent. An
-   edition without visual says so. *@
-@if (Edition.Visuals.Count == 0)
-{
-    <p class="edition-visuals-none">@L["None"]</p>
-}
-else
+   edition without visual shows nothing (visuel/charte-graphique/convivialite-et-efficacite.md). *@
+@if (Edition.Visuals.Count > 0)
 {
     <nav class="edition-visuals" aria-label="@L["Label", EditionLabel]">
         <ScrollRow>

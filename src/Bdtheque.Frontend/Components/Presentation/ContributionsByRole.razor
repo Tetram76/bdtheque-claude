@@ -6,17 +6,13 @@
 
 @* The contributions of a record by role (visuel/fiche-album/contenu.md, Contributions), shared by the records of the
    consultation: a line per role that has authors, in the order of the roles, with the number of its authors and their
-   names, each leading to the record of the author; a role without any has no line, and a record without any author says
-   so. The names of a role hold on one line, at the width of the screen: those it does not hold are folded behind « et N
+   names, each leading to the record of the author; a role without any has no line, and a record without any author shows
+   nothing (visuel/charte-graphique/convivialite-et-efficacite.md). The names of a role hold on one line, at the width of the screen: those it does not hold are folded behind « et N
    autres » (wwwroot/fold-row.js), which unfolds them, « Réduire » folding them back. The disclosure is that of the browser
    (details); the names it unfolds come before it, so that « Réduire » follows the last name. *@
-<div class="contributions">
-    @if (Contributions.Count == 0)
-    {
-        <p class="contributions-none">@(None ?? L["None"])</p>
-    }
-    else
-    {
+@if (Contributions.Count > 0)
+{
+    <div class="contributions">
         <dl>
             @foreach (var role in Enum.GetValues<ContributionRole>())
             {
@@ -48,15 +44,11 @@
                 </div>
             }
         </dl>
-    }
-</div>
+    </div>
+}
 
 @code {
     /// <summary>The contributions, in the order the API gives them: by role, then by author.</summary>
     [Parameter, EditorRequired]
     public IReadOnlyList<ContributionItem> Contributions { get; set; } = [];
-
-    /// <summary>What a record without any author says, when its own words differ (e.g. those of a series).</summary>
-    [Parameter]
-    public string? None { get; set; }
 }

@@ -178,13 +178,6 @@ summary{cursor:pointer}
             </sc-for>
           </ul>
 
-          <div style="display: flex; align-items: center; gap: 10px">
-            <span style="display: inline-flex; gap: 2px; color: {{t.muted}}" role="img" aria-label="Appréciation : pas encore notée">
-              <sc-for list="{{stars}}" as="s" hint-placeholder-count="5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5 6.5 20.4l1-6.3L3 9.7l6.2-.9z"></path></svg></sc-for>
-            </span>
-            <span style="font-size: 13px; color: {{t.muted}}">Pas encore noté</span>
-          </div>
-
           <div style="display: flex; flex-direction: column; gap: 2px; padding: 4px 14px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
             <span style="padding-top: 6px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: {{t.muted}}">{{creditsTotal}}</span>
             <dl style="margin: 0">
@@ -624,15 +617,15 @@ class View extends Mockup {
       fg: current && !t.navUnderline ? navOnAcc : t.hText,
       deco: current && t.navUnderline ? 'underline' : 'none'
     });
-    // An empty value stays visible: the reader sees what is not known rather than a missing line.
+    // A value not set is not shown: only the rows that have one (visuel/charte-graphique/convivialite-et-efficacite.md).
     const row = ([k, v, kind, sub]) => ({
       k,
-      v: v || 'Non renseigné',
+      v,
       // Only a publisher with a known website is a link, to that site (fonctionnel/index.md § Structure de l'application).
-      isLink: Boolean(v) && kind.startsWith('http'),
+      isLink: kind.startsWith('http'),
       href: kind,
-      isText: !v || !kind.startsWith('http'),
-      color: v ? t.text : t.muted,
+      isText: !kind.startsWith('http'),
+      color: t.text,
       sub: sub ?? '',
       hasSub: Boolean(sub)
     });
@@ -660,7 +653,6 @@ class View extends Mockup {
           ? { label: 'Dans la collection, en 3 éditions', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
           : { label: 'Intention d\'achat', bg: 'transparent', fg: t.text, bd: '2px dashed ' + t.line }
       ],
-      stars: [1, 2, 3, 4, 5],
       creditsTotal: distinct > 1 ? distinct + ' auteurs crédités' : 'Auteur',
       credits: ROLES.map(([role, label], r) => {
         const all = people[role];
@@ -709,8 +701,8 @@ class View extends Mockup {
         pick: () => this.setState({ edition: i, visual: 0 })
       })),
       groups: [
-        { title: "L'édition", rows: ed.objet.map(row) },
-        { title: "L'exemplaire", rows: ed.exemplaire.map(row) }
+        { title: "L'édition", rows: ed.objet.filter(([, v]) => v).map(row) },
+        { title: "L'exemplaire", rows: ed.exemplaire.filter(([, v]) => v).map(row) }
       ],
       cur: { meta: ed.meta },
       seriesAlbums: SERIES.map((title, i) => {
