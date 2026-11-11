@@ -84,7 +84,7 @@ internal static class AuthorEndpoints
         var overviews = await CatalogWorks.OverviewsAsync(context, series.Keys, cancellationToken);
         var albums = (await credited
                 .OrderInSeries()
-                .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToCard(), a.Contributions.RolesOf(id))))
+                .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToCard(), a.Contributions.RolesOf(id), a.FirstPublicationYear, a.FirstPublicationMonth)))
                 .ToListAsync(cancellationToken))
             .ToLookup(a => a.Album.Album.SeriesId);
 

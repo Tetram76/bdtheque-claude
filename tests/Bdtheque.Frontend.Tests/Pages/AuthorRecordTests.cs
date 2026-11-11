@@ -178,6 +178,27 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Album_TellsItsDateOfFirstPublication_OnlyWhenSet()
+    {
+        _catalog.Author = Author() with
+        {
+            Bibliography =
+            [
+                new BibliographyEntry(null, Sketchbook() with { FirstPublicationYear = 2019, FirstPublicationMonth = 3 }),
+                new BibliographyEntry(Series(SangreId, "Sangre", 6, [],
+                    [SangreAlbum(1), SangreAlbum(2) with { FirstPublicationYear = 2004 }]), null),
+            ],
+        };
+
+        var page = Open();
+
+        Assert.Equal("mars 2019", Entries(page)[0].QuerySelector(".entry-meta")!.TextContent.Trim());
+        var albums = Entries(page)[1].QuerySelectorAll("details.entry-albums ol > li");
+        Assert.Equal("Sangre · T. 1", albums[0].QuerySelector(".entry-meta")!.TextContent.Trim());
+        Assert.Equal("Sangre · T. 2 · 2004", albums[1].QuerySelector(".entry-meta")!.TextContent.Trim());
+    }
+
+    [Fact]
     public void Series_HasItsPileOfCovers_LeadsToItsRecord_AndTellsItsAlbumsCredited_ThoseOfTheCollection_AndItsOwnRoles()
     {
         _catalog.Author = Author();

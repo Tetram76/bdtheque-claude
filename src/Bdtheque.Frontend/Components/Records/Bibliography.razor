@@ -128,10 +128,13 @@
     private string InSeries(AlbumSummary album) =>
         Labels.Volume(album) is { } volume ? L["AlbumInSeries", album.SeriesTitle!, volume] : album.SeriesTitle!;
 
-    // An album without series has no mention: « Album sans série » would say nothing useful.
-    private RenderFragment Album(AlbumBibliographyItem item, string? meta) => __builder =>
+    // What places an album: its series and volume for an album of a series, then its date of first publication when set;
+    // an album without series and without date has none, « Album sans série » saying nothing useful.
+    private RenderFragment Album(AlbumBibliographyItem item, string? inSeries) => __builder =>
     {
         var album = item.Album.Album;
+        var published = item.FirstPublicationYear is { } year ? Format.PartialDate(year, item.FirstPublicationMonth) : null;
+        var meta = string.Join(" · ", new[] { inSeries, published }.OfType<string>()) is { Length: > 0 } joined ? joined : null;
         <Cover VisualId="item.Album.Cover?.VisualId" />
         <span class="entry-text">
             @* Its own title; without one, its volume alone (« Tome 3 »), the series being said under it. *@
