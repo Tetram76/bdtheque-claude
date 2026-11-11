@@ -158,6 +158,10 @@ else
                 </Block>
             }
         </ChildContent>
+        <Aside>
+            <EditionVisualsEditor Id="edition-visuals" AlbumId="Entry.AlbumId" Visuals="Visuals" VisualsChanged="WriteVisuals"
+                                  AlbumVersion="Entry.AlbumVersion" Functions="VisualFunctions" />
+        </Aside>
     </EntryForm>
 
     @if (_changesShown)
@@ -203,6 +207,10 @@ else
     /// </summary>
     [PersistentState]
     public List<RecordOption>? PublisherCollections { get; set; }
+
+    /// <summary>The visuals of a saved edition, written on their own; none for a new one, which has none yet.</summary>
+    [PersistentState]
+    public EditionVisualsForm? Visuals { get; set; }
 
     // Whether the page creates a purchase intent on a new edition, which it tells by its address.
     private bool IsNewPurchaseIntent => Id is null && AppPaths.IsNewPurchaseIntent(new Uri(Navigation.Uri).AbsolutePath);
@@ -298,6 +306,10 @@ else
                         await Api.GetAsync<NewPurchaseIntentForm>($"/admin/albums/{AlbumId}/purchase-intents/new")),
                     _ => EditionEntry.New(await Api.GetAsync<NewEditionForm>($"/admin/albums/{AlbumId}/editions/new")),
                 };
+                // Read after the edition: a write between both readings leaves the form the older version of the album, which the next
+                // write sends, refused as a conflict rather than writing over what it did not read.
+                if (Entry.Id is { } edition)
+                    Visuals = await Api.GetAsync<EditionVisualsForm>($"/admin/albums/{AlbumId}/editions/{edition}/visuals");
                 ReadEntry = Entry.Copy();
                 if (Entry.Publisher is { } publisher)
                     PublisherCollections = await CollectionsOfAsync(publisher.Id);
@@ -471,6 +483,21 @@ else
             _ => Recorder.RecordActionAsync(AudienceFunctions.AdminEditionChanges, $"album={entry.AlbumId}"),
         });
     }
+
+    // A visual written: the version of the album changed, which the next saving of the form sends, its content left untouched.
+    private void WriteVisuals(EditionVisualsForm visuals)
+    {
+        Visuals = visuals;
+        Entry!.AlbumVersion = visuals.AlbumVersion;
+    }
+
+    private EditionVisualsEditor.VisualFunctions VisualFunctions => Entry!.IsPurchaseIntent
+        ? new(AudienceFunctions.AdminPurchaseIntentVisualAdded, AudienceFunctions.AdminPurchaseIntentVisualsArranged,
+            AudienceFunctions.AdminPurchaseIntentVisualTypeChanged, AudienceFunctions.AdminPurchaseIntentVisualDeletion,
+            AudienceFunctions.AdminPurchaseIntentVisualDeleted)
+        : new(AudienceFunctions.AdminEditionVisualAdded, AudienceFunctions.AdminEditionVisualsArranged,
+            AudienceFunctions.AdminEditionVisualTypeChanged, AudienceFunctions.AdminEditionVisualDeletion,
+            AudienceFunctions.AdminEditionVisualDeleted);
 
     // The record as it is now, the changes of the form left behind: a navigation that loads the page anew, the same page, which
     // reads anew the edition or, for a new one, the album and what the series pre-fills.

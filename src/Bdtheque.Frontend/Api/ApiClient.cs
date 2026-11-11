@@ -21,6 +21,10 @@ public sealed class ApiClient(HttpClient http)
     public Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest content, CancellationToken cancellationToken = default) =>
         ReadAsync<TResponse>(new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(content) }, cancellationToken);
 
+    /// <summary>Sends a content of its own (e.g. a multipart form, streamed) and reads the contract answered.</summary>
+    public Task<TResponse> PostAsync<TResponse>(string path, HttpContent content, CancellationToken cancellationToken = default) =>
+        ReadAsync<TResponse>(new HttpRequestMessage(HttpMethod.Post, path) { Content = content }, cancellationToken);
+
     /// <summary>Sends a contract to an endpoint that answers nothing to read.</summary>
     public async Task PostAsync<TRequest>(string path, TRequest content, CancellationToken cancellationToken = default) =>
         (await SendAsync(new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(content) }, cancellationToken)).Dispose();

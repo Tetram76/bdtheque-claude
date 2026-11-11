@@ -33,3 +33,22 @@
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
 }
+
+/* The form, then what is written on its own beside it on a wide screen (the visuals of an edition), after it on a smartphone;
+   the form keeps its width, the side column taking the rest (visuel/saisie-edition/contenu.md). */
+.entry-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--admin-gap);
+    align-items: start;
+}
+
+.entry-form-aside {
+    min-inline-size: 0;
+}
+
+@media (min-width: 67.5rem) {
+    .entry-form-layout[data-aside] {
+        grid-template-columns: minmax(0, var(--entry-form-width)) minmax(18rem, 1fr);
+    }
+}

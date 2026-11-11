@@ -35,4 +35,5 @@ public enum IconName
     Check,
     Swap,
     Lock,
+    Upload,
 }

@@ -1,0 +1,417 @@
+@using System.Globalization
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Deletion
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Errors
+@implements IDisposable
+@inject IStringLocalizer<EditionVisualsEditor> L
+@inject IStringLocalizer<RuleMessages> Rules
+@inject ApiClient Api
+@inject ApiUploadClient Uploads
+@inject ValueLabels Values
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The visuals of an edition, beside its entry form (visuel/saisie-edition/contenu.md, Les visuels): written on their own, each as
+   soon as it is added, its order and its type as soon as they change, under the version of the album, which the form shares
+   (VersionChanged). Files are chosen or dropped on a file input of the browser, read by the circuit and streamed to api one at
+   a time, which validates them (choix-implementation/domaine/visuels-stockage-et-traitement.md): the form applies no rule of
+   its own, and says why api refused a file. A visual is ordered among those of its type by dragging it, with the drag events of
+   the browser that Blazor handles, without any script. *@
+<Block Title="@L["Block"]" Kicker="@L["Kicker"]" class="edition-visuals">
+    @if (Visuals is null)
+    {
+        <p class="edition-visuals-later">@L["Later"]</p>
+    }
+    else
+    {
+        <p class="edition-visuals-help">@L["Help"]</p>
+
+        @if (_problem is { } problem)
+        {
+            <ErrorMessage Problem="problem" Message="@ProblemMessage(problem)">
+                <Actions>
+                    @if (problem.Category == ProblemCategory.Functional)
+                    {
+                        <Button Label="@L["Reload"]" Icon="IconName.Reload" OnClick="Reload" />
+                    }
+                </Actions>
+            </ErrorMessage>
+        }
+
+        <div class="edition-visuals-drop">
+            @* The file inputs cover the zone, which a file is dropped on as it is chosen: the last one takes the next choice, the
+               others keeping the files still waiting their turn, which a new choice in the same input would discard. *@
+            <div class="edition-visuals-target">
+                <Icon Name="IconName.Upload" />
+                <span>@L["Drop"] <span class="edition-visuals-choose">@L["Choose"]</span></span>
+                @foreach (var input in _inputs)
+                {
+                    <InputFile @key="input" class="edition-visuals-input" multiple accept="image/jpeg,image/png,image/webp,image/gif"
+                               aria-label="@L["Choose.Label"]" hidden="@(input != _inputs[^1])" OnChange="Choose" />
+                }
+            </div>
+            <span class="edition-visuals-type">
+                <label for="@($"{Id}-type")">@L["AddedAs"]</label>
+                <select id="@($"{Id}-type")" @bind="_newType">
+                    @foreach (var type in Enum.GetValues<VisualType>())
+                    {
+                        <option value="@type">@Values.Of(type)</option>
+                    }
+                </select>
+            </span>
+            <span class="edition-visuals-formats">@L["Formats", MaxSize(Visuals.MaxFileSizeBytes)]</span>
+        </div>
+
+        @if (_uploads.Count > 0)
+        {
+            <ul class="edition-visuals-uploads" aria-label="@L["Uploads"]">
+                @foreach (var upload in _uploads)
+                {
+                    <li class="edition-visuals-upload" data-refused="@(upload.State == UploadState.Refused)">
+                        <span class="edition-visuals-upload-head">
+                            <span class="edition-visuals-upload-name">@upload.Name</span>
+                            <span class="edition-visuals-upload-status">@StatusOf(upload)</span>
+                            @if (upload.State == UploadState.Refused)
+                            {
+                                <button type="button" class="edition-visuals-upload-remove" aria-label="@L["Upload.Remove", upload.Name]"
+                                        @onclick="() => _uploads.Remove(upload)">
+                                    <Icon Name="IconName.Close" />
+                                </button>
+                            }
+                        </span>
+                        @if (upload.State == UploadState.Sending)
+                        {
+                            <span class="edition-visuals-upload-bar" aria-hidden="true"><span style="inline-size: @(upload.Percent)%"></span></span>
+                        }
+                        @if (upload.Reason is not null)
+                        {
+                            <span class="edition-visuals-upload-reason">@upload.Reason</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+
+        <p class="edition-visuals-count">@Count()</p>
+        @if (Visuals.Visuals.Count > 0)
+        {
+            <ul class="edition-visuals-grid">
+                @foreach (var visual in Visuals.Visuals)
+                {
+                    var label = LabelOf(visual);
+                    <li class="edition-visual" draggable="true" data-dragged="@(_dragged?.Id == visual.Id)"
+                        @ondragstart="() => _dragged = visual" @ondragend="() => _dragged = null"
+                        @ondragover:preventDefault="true" @ondrop="() => DropAsync(visual)">
+                        <img src="@VisualMediaRoutes.Display(visual.Id)" alt="@label" loading="lazy" draggable="false" />
+                        <span class="edition-visual-mark" aria-hidden="true">@ShortOf(visual)</span>
+                        <span class="edition-visual-actions">
+                            <ActionsMenu Id="@($"{Id}-visual-{visual.Id:N}")" Label="@L["Actions", label]">
+                                <span class="edition-visual-menu-heading">@L["Menu.Type"]</span>
+                                @foreach (var type in Enum.GetValues<VisualType>())
+                                {
+                                    var current = type == visual.Type;
+                                    <MenuItem Label="@Values.Of(type)" Icon="@(current ? IconName.Check : null)" Pressed="current"
+                                              OnClick="() => ChangeTypeAsync(visual, type)" />
+                                }
+                                <MenuSeparator />
+                                <MenuItem Href="@VisualMediaRoutes.Original(visual.Id)" External="true" Label="@L["Menu.Original"]" />
+                                <MenuItem Label="@L["Menu.Delete"]" Variant="ButtonVariant.Delete" OnClick="() => AskDeletionAsync(visual)" />
+                            </ActionsMenu>
+                        </span>
+                    </li>
+                }
+            </ul>
+            <p class="edition-visuals-help">@L["Drag"]</p>
+        }
+    }
+</Block>
+
+@if (_deleting is { } deleting)
+{
+    <Dialog Id="@($"{Id}-deletion")" Title="@L["Deletion.Title"]" Subject="@LabelOf(deleting.Visual)" Tone="DialogTone.Deletion"
+            OnClose="() => _deleting = null">
+        <ChildContent>
+            <p>@L["Deletion.Text"]</p>
+        </ChildContent>
+        <Actions>
+            <Button Label="@L["Deletion.Confirm"]" Variant="ButtonVariant.Delete" Icon="IconName.Delete" OnClick="() => DeleteAsync(deleting)" />
+        </Actions>
+    </Dialog>
+}
+
+@code {
+    // How much an upload has to progress before it is drawn again: a scan is read in many small pieces.
+    private const int ProgressStep = 2;
+
+    private readonly CancellationTokenSource _disposal = new();
+    private readonly List<Upload> _uploads = [];
+    private readonly List<int> _inputs = [0];
+    private VisualType _newType = VisualType.Cover;
+    private Task? _queue;
+    private EditionVisualForm? _dragged;
+    private Deletion? _deleting;
+    private ApiProblem? _problem;
+
+    /// <summary>The identifier of the block, unique in the page, on which those of its controls are built.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public Guid AlbumId { get; set; }
+
+    /// <summary>The visuals of the edition, in their presentation order; none for an edition not saved yet.</summary>
+    [Parameter]
+    public EditionVisualsForm? Visuals { get; set; }
+
+    /// <summary>The visuals once written, with the version of the album that every write changes, which the form shares.</summary>
+    [Parameter]
+    public EventCallback<EditionVisualsForm> VisualsChanged { get; set; }
+
+    /// <summary>The version of the album, shared with the form: the one each write on the visuals sends.</summary>
+    [Parameter, EditorRequired]
+    public uint AlbumVersion { get; set; }
+
+    /// <summary>The functions of the audience measurement its actions are recorded under, those of the page.</summary>
+    [Parameter, EditorRequired]
+    public VisualFunctions Functions { get; set; } = null!;
+
+    private string Path => $"/admin/albums/{AlbumId}/editions/{Visuals!.EditionId}/visuals";
+
+    private void Choose(InputFileChangeEventArgs args)
+    {
+        foreach (var file in args.GetMultipleFiles(int.MaxValue))
+            _uploads.Add(new Upload(file, _newType));
+        // A new input for the next choice: the files of this one stay valid until they are sent.
+        _inputs.Add(_inputs[^1] + 1);
+        _queue ??= SendAllAsync();
+    }
+
+    // One at a time, as api takes them (choix-implementation/domaine/visuels-stockage-et-traitement.md), in the order chosen.
+    private async Task SendAllAsync()
+    {
+        try
+        {
+            while (_uploads.Find(u => u.State == UploadState.Waiting) is { } upload)
+                await SendAsync(upload);
+        }
+        catch (OperationCanceledException) when (_disposal.IsCancellationRequested)
+        {
+            // The form is gone, and the uploads with it.
+            return;
+        }
+        finally
+        {
+            _queue = null;
+        }
+
+        // Every file sent: only the input of the next choice is still needed.
+        _inputs.RemoveRange(0, _inputs.Count - 1);
+        StateHasChanged();
+    }
+
+    private async Task SendAsync(Upload upload)
+    {
+        upload.State = UploadState.Sending;
+        StateHasChanged();
+        try
+        {
+            var stream = new ProgressStream(upload.File.OpenReadStream(long.MaxValue, _disposal.Token), read => Progress(upload, read));
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(stream), UploadVisualFields.File, upload.Name);
+            content.Add(new StringContent(upload.Type.ToString()), UploadVisualFields.Type);
+            content.Add(new StringContent(AlbumVersion.ToString(CultureInfo.InvariantCulture)), UploadVisualFields.AlbumVersion);
+            var before = Visuals!.Visuals.Select(v => v.Id).ToHashSet();
+            var visuals = await Uploads.PostAsync<EditionVisualsForm>(Path, content, _disposal.Token);
+
+            _uploads.Remove(upload);
+            await VisualsChanged.InvokeAsync(visuals);
+            if (visuals.Visuals.FirstOrDefault(v => !before.Contains(v.Id)) is { } added)
+                await Recorder.RecordActionAsync(Functions.Added, $"visual={added.Id}", _disposal.Token);
+        }
+        catch (ApiProblemException exception)
+        {
+            Refuse(upload, ReasonOf(exception.Problem));
+        }
+        catch (IOException)
+        {
+            // The browser no longer gives the file (e.g. deleted from its folder meanwhile).
+            Refuse(upload, L["Refused.Technical"]);
+        }
+    }
+
+    private void Refuse(Upload upload, string reason)
+    {
+        upload.State = UploadState.Refused;
+        upload.Reason = reason;
+        StateHasChanged();
+    }
+
+    // Read by the HTTP client as it sends the form, outside the renderer: drawn again through it, every few percents.
+    private void Progress(Upload upload, long read)
+    {
+        var percent = upload.File.Size == 0 ? 100 : (int)Math.Min(100, read * 100 / upload.File.Size);
+        if (percent < upload.Percent + ProgressStep && percent < 100)
+            return;
+        upload.Percent = percent;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private string ReasonOf(ApiProblem problem) => problem switch
+    {
+        { Category: ProblemCategory.Business, RuleCode: { } code } => Rules[code],
+        { Category: ProblemCategory.Functional, Status: 404 } => L["Refused.NotFound"],
+        { Category: ProblemCategory.Functional } => L["Refused.Conflict"],
+        _ => L["Refused.Technical"],
+    };
+
+    private string StatusOf(Upload upload) => upload.State switch
+    {
+        UploadState.Waiting => L["Upload.Waiting"],
+        UploadState.Sending => L["Upload.Progress", upload.Percent],
+        _ => L["Upload.Refused"],
+    };
+
+    // A visual dropped on another of its type takes its place: before it when it came from after it, after it otherwise.
+    private async Task DropAsync(EditionVisualForm target)
+    {
+        var dragged = _dragged;
+        _dragged = null;
+        if (dragged is null || dragged.Id == target.Id || dragged.Type != target.Type)
+            return;
+
+        var order = Visuals!.Visuals.ToList();
+        var to = order.IndexOf(target);
+        order.Remove(dragged);
+        order.Insert(to, dragged);
+        await ArrangeAsync(order, Functions.Arranged, $"edition={Visuals.EditionId}");
+    }
+
+    // A visual given another type goes after the visuals of that type.
+    private async Task ChangeTypeAsync(EditionVisualForm visual, VisualType type)
+    {
+        if (type == visual.Type)
+            return;
+
+        List<EditionVisualForm> order = [.. Visuals!.Visuals.Where(v => v.Id != visual.Id), visual with { Type = type }];
+        await ArrangeAsync(order, Functions.TypeChanged, $"visual={visual.Id}");
+    }
+
+    private async Task ArrangeAsync(IEnumerable<EditionVisualForm> order, AudienceFunction function, string detail)
+    {
+        _problem = null;
+        try
+        {
+            var visuals = await Api.PutAsync<ArrangeVisualsRequest, EditionVisualsForm>(
+                Path, new ArrangeVisualsRequest([.. order.Select(v => new VisualArrangement(v.Id, v.Type))], AlbumVersion), _disposal.Token);
+            await VisualsChanged.InvokeAsync(visuals);
+            await Recorder.RecordActionAsync(function, detail, _disposal.Token);
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+    }
+
+    // The fingerprint of the impact read is sent back with the deletion, which is refused if the impact changed meanwhile.
+    private async Task AskDeletionAsync(EditionVisualForm visual)
+    {
+        _problem = null;
+        try
+        {
+            var impact = await Api.GetAsync<DeletionImpact>($"{Path}/{visual.Id}/deletion-impact", _disposal.Token);
+            _deleting = new Deletion(visual, impact);
+            await Recorder.RecordActionAsync(Functions.Deletion, $"visual={visual.Id}", _disposal.Token);
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+    }
+
+    private async Task DeleteAsync(Deletion deletion)
+    {
+        _deleting = null;
+        try
+        {
+            await Api.DeleteAsync(
+                $"{Path}/{deletion.Visual.Id}?version={AlbumVersion}&fingerprint={Uri.EscapeDataString(deletion.Impact.Fingerprint)}",
+                _disposal.Token);
+            // The deletion answers nothing: the visuals are read anew, with the version of the album it changed.
+            await VisualsChanged.InvokeAsync(await Api.GetAsync<EditionVisualsForm>(Path, _disposal.Token));
+            await Recorder.RecordActionAsync(Functions.Deleted, $"visual={deletion.Visual.Id}", _disposal.Token);
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+    }
+
+    private string ProblemMessage(ApiProblem problem) => problem switch
+    {
+        { Category: ProblemCategory.Functional, Status: 404 } => L["Problem.NotFound"],
+        { Category: ProblemCategory.Functional } => L["Problem.Conflict"],
+        { Category: ProblemCategory.Business, RuleCode: { } code } => Rules[code],
+        _ => L["Problem.Technical"],
+    };
+
+    // The record as it is now, with the visuals of the other write: the page loaded anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private string Count() => Visuals!.Visuals.Count switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", count],
+    };
+
+    // « Planche 3 », the rank of a plate counted among the plates: what each visual is, in full.
+    private string LabelOf(EditionVisualForm visual) =>
+        visual.Type == VisualType.Plate ? L["Full.Plate", PlateNumber(visual)] : Values.Of(visual.Type);
+
+    // « Pl. 3 », « Couv. »: the type marked on the thumbnail.
+    private string ShortOf(EditionVisualForm visual) =>
+        visual.Type == VisualType.Plate ? L["Short.Plate", PlateNumber(visual)] : L[$"Short.{visual.Type}"];
+
+    private int PlateNumber(EditionVisualForm visual) =>
+        Visuals!.Visuals.TakeWhile(v => v.Id != visual.Id).Count(v => v.Type == VisualType.Plate) + 1;
+
+    // In mebibytes, as the operating systems give the size of a file (« 30 Mio »).
+    private static string MaxSize(long bytes) => (bytes / (1024d * 1024)).ToString("0.#", CultureInfo.CurrentCulture);
+
+    public void Dispose()
+    {
+        _disposal.Cancel();
+        _disposal.Dispose();
+    }
+
+    private enum UploadState
+    {
+        Waiting,
+        Sending,
+        Refused,
+    }
+
+    // A file chosen, with the type it is added as, until api accepts it, or why it refused it until it is removed.
+    private sealed class Upload(IBrowserFile file, VisualType type)
+    {
+        public IBrowserFile File { get; } = file;
+
+        public VisualType Type { get; } = type;
+
+        public string Name => File.Name;
+
+        public UploadState State { get; set; } = UploadState.Waiting;
+
+        public int Percent { get; set; }
+
+        public string? Reason { get; set; }
+    }
+
+    private sealed record Deletion(EditionVisualForm Visual, DeletionImpact Impact);
+
+    /// <summary>The functions of the audience measurement the actions on the visuals are recorded under.</summary>
+    public sealed record VisualFunctions(
+        AudienceFunction Added, AudienceFunction Arranged, AudienceFunction TypeChanged, AudienceFunction Deletion, AudienceFunction Deleted);
+}

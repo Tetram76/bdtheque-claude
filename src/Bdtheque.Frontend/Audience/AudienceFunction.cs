@@ -376,6 +376,43 @@ public static class AudienceFunctions
     /// <summary>The changes of the user shown, the edition a purchase intent targets modified meanwhile, with the intent.</summary>
     public static readonly AudienceFunction AdminPurchaseIntentChanges = new("admin.purchase-intent-form.changes", AudienceFunctionKind.Action);
 
+    // The visuals of the edition, written as soon as they are added, ordered, retyped or deleted (visuel/saisie-edition/contenu.md),
+    // each with the visual concerned, or the edition for an arrangement.
+
+    /// <summary>A visual added to an owned edition, with the visual.</summary>
+    public static readonly AudienceFunction AdminEditionVisualAdded = new("admin.edition-form.visual-added", AudienceFunctionKind.Action);
+
+    /// <summary>The visuals of an owned edition ordered anew, with the edition.</summary>
+    public static readonly AudienceFunction AdminEditionVisualsArranged = new("admin.edition-form.visuals-arranged", AudienceFunctionKind.Action);
+
+    /// <summary>The type of a visual of an owned edition changed, with the visual.</summary>
+    public static readonly AudienceFunction AdminEditionVisualTypeChanged = new("admin.edition-form.visual-type-changed", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of an owned edition asked, its confirmation shown, with the visual.</summary>
+    public static readonly AudienceFunction AdminEditionVisualDeletion = new("admin.edition-form.visual-deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of an owned edition, once confirmed and done, with the visual.</summary>
+    public static readonly AudienceFunction AdminEditionVisualDeleted = new("admin.edition-form.visual-deleted", AudienceFunctionKind.Action);
+
+    /// <summary>A visual added to the edition a purchase intent targets, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentVisualAdded = new("admin.purchase-intent-form.visual-added", AudienceFunctionKind.Action);
+
+    /// <summary>The visuals of the edition a purchase intent targets ordered anew, with the edition.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentVisualsArranged =
+        new("admin.purchase-intent-form.visuals-arranged", AudienceFunctionKind.Action);
+
+    /// <summary>The type of a visual of the edition a purchase intent targets changed, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentVisualTypeChanged =
+        new("admin.purchase-intent-form.visual-type-changed", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of the edition a purchase intent targets asked, its confirmation shown, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentVisualDeletion =
+        new("admin.purchase-intent-form.visual-deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of the edition a purchase intent targets, once confirmed and done, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentVisualDeleted =
+        new("admin.purchase-intent-form.visual-deleted", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -398,5 +435,8 @@ public static class AudienceFunctions
         AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved,
         AdminAlbumEditionsAlbumIntentSet, AdminEditionForm, AdminNewEditionForm, AdminEditionCreated, AdminEditionSaved, AdminEditionChanges,
         AdminPurchaseIntentForm, AdminNewPurchaseIntentForm, AdminPurchaseIntentCreated, AdminPurchaseIntentSaved, AdminPurchaseIntentChanges,
+        AdminEditionVisualAdded, AdminEditionVisualsArranged, AdminEditionVisualTypeChanged, AdminEditionVisualDeletion, AdminEditionVisualDeleted,
+        AdminPurchaseIntentVisualAdded, AdminPurchaseIntentVisualsArranged, AdminPurchaseIntentVisualTypeChanged, AdminPurchaseIntentVisualDeletion,
+        AdminPurchaseIntentVisualDeleted,
     ];
 }

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Block" xml:space="preserve">
+    <value>Les visuels</value>
+  </data>
+  <data name="Kicker" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Chaque visuel s&apos;enregistre dès son ajout, et son ordre ou son type dès qu&apos;on les change : rien à valider avec la fiche.</value>
+  </data>
+  <data name="Later" xml:space="preserve">
+    <value>Les visuels s&apos;ajoutent une fois l&apos;édition enregistrée.</value>
+  </data>
+  <data name="Drop" xml:space="preserve">
+    <value>Déposez des images ici, ou</value>
+  </data>
+  <data name="Choose" xml:space="preserve">
+    <value>choisissez des fichiers</value>
+  </data>
+  <data name="Choose.Label" xml:space="preserve">
+    <value>Choisir des images à ajouter</value>
+  </data>
+  <data name="AddedAs" xml:space="preserve">
+    <value>Ajoutés comme</value>
+  </data>
+  <data name="Formats" xml:space="preserve">
+    <value>JPEG, PNG, WebP ou GIF, {0} Mio au plus.</value>
+  </data>
+  <data name="Uploads" xml:space="preserve">
+    <value>Envois</value>
+  </data>
+  <data name="Upload.Waiting" xml:space="preserve">
+    <value>En attente</value>
+  </data>
+  <data name="Upload.Progress" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="Upload.Refused" xml:space="preserve">
+    <value>Refusé</value>
+  </data>
+  <data name="Upload.Remove" xml:space="preserve">
+    <value>Retirer {0}</value>
+  </data>
+  <data name="Refused.Conflict" xml:space="preserve">
+    <value>L&apos;album de cette édition a été modifié entre-temps : rechargez la fiche, puis ajoutez de nouveau ce visuel.</value>
+  </data>
+  <data name="Refused.NotFound" xml:space="preserve">
+    <value>Cette édition n&apos;existe plus.</value>
+  </data>
+  <data name="Refused.Technical" xml:space="preserve">
+    <value>L&apos;envoi n&apos;a pas pu aboutir : réessayez dans un instant.</value>
+  </data>
+  <data name="Count.None" xml:space="preserve">
+    <value>Aucun visuel</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>1 visuel</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} visuels</value>
+  </data>
+  <data name="Short.Cover" xml:space="preserve">
+    <value>Couv.</value>
+  </data>
+  <data name="Short.Dedication" xml:space="preserve">
+    <value>Déd.</value>
+  </data>
+  <data name="Short.Endpaper" xml:space="preserve">
+    <value>Garde</value>
+  </data>
+  <data name="Short.Plate" xml:space="preserve">
+    <value>Pl. {0}</value>
+  </data>
+  <data name="Short.BackCover" xml:space="preserve">
+    <value>4e</value>
+  </data>
+  <data name="Full.Plate" xml:space="preserve">
+    <value>Planche {0}</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions sur {0}</value>
+  </data>
+  <data name="Menu.Type" xml:space="preserve">
+    <value>Changer le type</value>
+  </data>
+  <data name="Menu.Original" xml:space="preserve">
+    <value>Ouvrir l&apos;original</value>
+  </data>
+  <data name="Menu.Delete" xml:space="preserve">
+    <value>Supprimer le visuel…</value>
+  </data>
+  <data name="Drag" xml:space="preserve">
+    <value>Glissez un visuel pour le réordonner parmi ceux de son type ; les types se suivent toujours dans le même ordre.</value>
+  </data>
+  <data name="Deletion.Title" xml:space="preserve">
+    <value>Supprimer ce visuel ?</value>
+  </data>
+  <data name="Deletion.Text" xml:space="preserve">
+    <value>La suppression est définitive : le visuel et ses fichiers sont supprimés.</value>
+  </data>
+  <data name="Deletion.Confirm" xml:space="preserve">
+    <value>Supprimer définitivement</value>
+  </data>
+  <data name="Problem.Conflict" xml:space="preserve">
+    <value>L&apos;album de cette édition a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel.</value>
+  </data>
+  <data name="Problem.NotFound" xml:space="preserve">
+    <value>Ce visuel n&apos;existe plus : rechargez la fiche.</value>
+  </data>
+  <data name="Problem.Technical" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas répondu : réessayez dans un instant.</value>
+  </data>
+  <data name="Reload" xml:space="preserve">
+    <value>Recharger la fiche</value>
+  </data>
+</root>
