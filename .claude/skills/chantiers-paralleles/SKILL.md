@@ -123,8 +123,9 @@ chosen before the others.
   cleanup** and finish it if needed, before launching the next chantier:
 
   ```bash
-  gh issue view <n> --json state,locked,comments --jq '"\(.state) locked=\(.locked) comments=\(.comments|length)"'
-  gh pr view <pr> --json state,locked --jq '"\(.state) locked=\(.locked)"'
+  # gh issue/pr view do not expose the lock: the REST API does (a PR is an issue there)
+  gh api repos/Tetram76/bdtheque-claude/issues/<n> --jq '"#\(.number) \(.state) locked=\(.locked) reason=\(.active_lock_reason) comments=\(.comments)"'
+  gh api repos/Tetram76/bdtheque-claude/issues/<pr> --jq '"#\(.number) \(.state) locked=\(.locked) reason=\(.active_lock_reason)"'
   git ls-remote --heads origin <branch>   # empty: remote branch deleted
   git branch --list <branch>              # empty: local branch deleted
   git worktree list                       # the session's worktree, until archived
