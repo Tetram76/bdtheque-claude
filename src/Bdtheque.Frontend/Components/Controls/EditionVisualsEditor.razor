@@ -24,16 +24,12 @@
     <p class="edition-visuals-help">@L["Help", Lifetime]</p>
 
     <div class="edition-visuals-drop">
-        @* The file inputs cover the zone, which a file is dropped on as it is chosen: the last one takes the next choice, the
-           others keeping the files still waiting their turn, which a new choice in the same input would discard. *@
+        @* The file inputs cover the whole zone, which a file is dropped on anywhere as it is chosen, the choice of the type
+           alone above them: the last one takes the next choice, the others keeping the files still waiting their turn, which
+           a new choice in the same input would discard. *@
         <div class="edition-visuals-target">
             <Icon Name="IconName.Upload" />
             <span>@L["Drop"] <span class="edition-visuals-choose">@L["Choose"]</span></span>
-            @foreach (var input in _inputs)
-            {
-                <InputFile @key="input" class="edition-visuals-input" multiple accept="image/jpeg,image/png,image/webp,image/gif"
-                           aria-label="@L["Choose.Label"]" hidden="@(input != _inputs[^1])" OnChange="Choose" />
-            }
         </div>
         <span class="edition-visuals-type">
             <label for="@($"{Id}-type")">@L["AddedAs"]</label>
@@ -45,6 +41,11 @@
             </select>
         </span>
         <span class="edition-visuals-formats">@L["Formats", MaxSize(Limits.MaxFileSizeBytes)]</span>
+        @foreach (var input in _inputs)
+        {
+            <InputFile @key="input" class="edition-visuals-input" multiple accept="image/jpeg,image/png,image/webp,image/gif"
+                       aria-label="@L["Choose.Label"]" hidden="@(input != _inputs[^1])" OnChange="Choose" />
+        }
     </div>
 
     @if (_uploads.Count > 0)

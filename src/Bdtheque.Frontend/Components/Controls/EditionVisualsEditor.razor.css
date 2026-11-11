@@ -21,8 +21,10 @@
     text-align: center;
 }
 
-/* The zone a file is dropped on, or chosen from: its file input, transparent, covers it. */
+/* The zone a file is dropped on, anywhere, or chosen from: its file input, transparent, covers it whole, under the choice of
+   the type alone, which stays usable. */
 .edition-visuals-drop {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,7 +37,6 @@
 }
 
 .edition-visuals-target {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -48,7 +49,8 @@
     block-size: 1.375rem;
 }
 
-.edition-visuals-target:focus-within {
+/* The input focused, not the choice of the type. */
+.edition-visuals-drop:focus-within:not(:has(select:focus)) {
     outline: 2px solid var(--color-text);
     outline-offset: var(--space-xs);
 }
@@ -59,16 +61,20 @@
     text-decoration: underline;
 }
 
-.edition-visuals-target ::deep .edition-visuals-input {
+.edition-visuals-drop ::deep .edition-visuals-input {
     position: absolute;
     inset: 0;
     inline-size: 100%;
     block-size: 100%;
     opacity: 0;
     cursor: pointer;
+    /* The rounded corners of a control, which a drop would miss: those of the zone instead. */
+    border-radius: inherit;
 }
 
 .edition-visuals-type {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: var(--space-s);

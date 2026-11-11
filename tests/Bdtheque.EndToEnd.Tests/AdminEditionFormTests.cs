@@ -243,6 +243,53 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         Assert.Equal([VisualType.Cover], (await GetVisualsAsync(album.Id, created.Id)).Visuals.Select(v => v.Type));
     }
 
+    [Fact]
+    public async Task Visuals_DroppedAnywhereOnTheirZone_AreAdded()
+    {
+        // visuel/saisie-edition/contenu.md, Les visuels: the dashed zone takes the files dropped on it, wherever they are dropped.
+        var publisher = await CreatePublisherAsync();
+        var album = await CreateAlbumAsync();
+        var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
+            new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
+                AcquisitionMode.Gift, false, null, null, null, false, null, null, null, null),
+            album.Version));
+        var page = await OpenAsync(AppPaths.AdminEditEdition(album.Id, edition.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var drop = page.Locator(".edition-visuals-drop");
+        await drop.ScrollIntoViewIfNeededAsync();
+        var zone = await drop.BoundingBoxAsync();
+        var file = Path.Combine(Path.GetTempPath(), $"couverture-{_marker}.png");
+        await File.WriteAllBytesAsync(file, Png("couverture.png", SKColors.SteelBlue).Buffer);
+        try
+        {
+            // A drop of the operating system, as the browser receives it: near a corner of the zone, away from its text.
+            await DropFileAsync(page, file, zone!.X + 12, zone.Y + zone.Height - 12);
+
+            await Assertions.Expect(page.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
+            await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditEdition(album.Id, edition.Id)));
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    // Playwright drops no file of the system; the protocol of Chromium does, as a user would (Input.dispatchDragEvent).
+    private static async Task DropFileAsync(IPage page, string file, float x, float y)
+    {
+        var session = await page.Context.NewCDPSessionAsync(page);
+        try
+        {
+            var data = new Dictionary<string, object> { ["items"] = Array.Empty<object>(), ["files"] = new[] { file }, ["dragOperationsMask"] = 1 };
+            foreach (var type in new[] { "dragEnter", "dragOver", "drop" })
+                await session.SendAsync("Input.dispatchDragEvent", new Dictionary<string, object> { ["type"] = type, ["x"] = x, ["y"] = y, ["data"] = data });
+        }
+        finally
+        {
+            await session.DetachAsync();
+        }
+    }
+
     // A small image of one color, a scan as far as api is concerned.
     private static FilePayload Png(string name, SKColor color)
     {
