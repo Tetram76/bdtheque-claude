@@ -727,7 +727,8 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "dedicace.png"));
         page.WaitForAssertion(() => Assert.Single(_api.Written));
 
-        Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent);
+        // The bar is drawn again by the renderer, apart from the request sent meanwhile: what it shows is waited for.
+        page.WaitForAssertion(() => Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent));
         Assert.True(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
         page.Find("form").Submit();
         Assert.Single(_api.Written);
