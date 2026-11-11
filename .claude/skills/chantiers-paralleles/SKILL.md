@@ -20,11 +20,14 @@ carries out a chantier itself.
 
 ## 1. The batch
 
-- The user gives the **number of chantiers** of the batch and the **maximum
-  run at once**. Neither is fixed: take the latest the user gave in this
-  conversation; ask for one never given, never assume it.
-- Count the chantiers already launched (sub-tickets of a split ticket count,
-  each one) and the places taken (a pull request not merged yet).
+- A batch is **always run in parallel**: as many chantiers at once as the
+  resources (step 2.3) and the dependencies between chantiers allow, never one
+  after the other by choice. No number is fixed in advance, neither of the
+  batch nor of chantiers at once: never ask the user for one.
+- The batch goes on while chantiers remain to choose, or until the user
+  stops it.
+- Count the places taken (a chantier whose pull request is not merged yet;
+  a session that splits its ticket keeps its place for the sub-tickets).
 
 ## 2. Before each launch — every time, never reused
 
@@ -55,10 +58,11 @@ carries out a chantier itself.
    if (Wait-Job $j -Timeout 20) { Receive-Job $j } else { 'docker: no answer in 20 s'; Stop-Job $j }; Remove-Job $j -Force
    ```
 
-   Decide from these figures whether one chantier more fits, beside the
+   Decide from these figures how many chantiers more fit, beside the
    heavy runs in progress (end-to-end tests, captures, `bdtheque-validation-*`
-   containers of the functional validation). If not, do not launch: tell the
-   user which resource holds it back.
+   containers of the functional validation), and launch that many of the
+   candidates (step 3) — every free place filled. If none fits, do not
+   launch: tell the user which resource holds it back.
 
 ## 3. Launch
 
@@ -95,6 +99,4 @@ chosen before the others.
   with the links of its pull request; never fabricate its result.
 - A merge (a note, or `main` that moved) frees a place: back to step 2 —
   tickets, candidates **and resources** read again — then step 3, unasked,
-  until the batch count is reached.
-- A session that splits its ticket keeps its place for the sub-tickets; the
-  batch count includes them.
+  while chantiers remain to choose.
