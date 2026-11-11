@@ -9,6 +9,7 @@ using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Navigation;
+using Bdtheque.Frontend.Tests.Controls;
 using Bdtheque.Frontend.Tests.Audience;
 using Bdtheque.Frontend.Visits;
 using Microsoft.AspNetCore.Components.Forms;
@@ -105,11 +106,6 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         12, Castafiore, CastermanOnly, TintinTemplate);
 
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
-
-    // The sending of the files runs apart from the choice that starts it, unawaited, as Blazor documents it: no task tells its
-    // end, which only its rendering shows. Awaited within the limit of an event's handling (CircuitEvents), rather than within
-    // bUnit's default second, which a busy runner exceeds as the form renders the visuals sent (choix-implementation/outillage.md).
-    private static readonly TimeSpan Sending = TimeSpan.FromSeconds(5);
 
     private readonly FakeAudienceApi _audience = new();
     private readonly FakeAdminApi _api;
@@ -619,7 +615,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_Added_WaitInTheForm_WhichSavesThemInTheOrderOfTheTypes()
+    public async Task Visuals_Added_WaitInTheForm_WhichSavesThemInTheOrderOfTheTypes()
     {
         var page = OpenOwned();
         _api.Write = (method, path, _) => path == "/admin/visuals/pending"
@@ -627,9 +623,9 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
             : FakeAdminApi.Json(Owned);
 
         page.Find("#edition-visuals-type").Change("Dedication");
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[2048], "dedicace.png"));
+        await SendAsync(page, new TestBrowserFile("dedicace.png", new byte[2048]));
 
-        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent), Sending);
+        Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent);
         var (_, _, form) = _api.Written.Single();
         Assert.Equal("dedicace.png", form.GetProperty(UploadVisualFields.File).GetProperty("name").GetString());
         Assert.Equal(2048, form.GetProperty(UploadVisualFields.File).GetProperty("length").GetInt64());
@@ -654,7 +650,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Visuals_OfANewEdition_AreSavedWithIt(bool intent)
+    public async Task Visuals_OfANewEdition_AreSavedWithIt(bool intent)
     {
         var page = intent ? OpenNewIntent() : OpenNewOwned();
         _api.Write = (_, path, _) => path == "/admin/visuals/pending"
@@ -664,8 +660,8 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         if (!intent)
             page.Find("#edition-mode").Change("Gift");
 
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "couverture.png"));
-        page.WaitForAssertion(() => Assert.Equal("1 visuel", page.Find(".edition-visuals-count").TextContent), Sending);
+        await SendAsync(page, new TestBrowserFile("couverture.png", new byte[16]));
+        Assert.Equal("1 visuel", page.Find(".edition-visuals-count").TextContent);
         page.Find("form").Submit();
 
         page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
@@ -673,14 +669,14 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_ARefusedFile_SaysWhy_UntilItIsRemoved()
+    public async Task Visuals_ARefusedFile_SaysWhy_UntilItIsRemoved()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.BadRequest, "EditionVisual.FileNotSupportedImage");
 
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromText("pas une image", "scan-dos.tif"));
+        await SendAsync(page, new TestBrowserFile("scan-dos.tif", "pas une image"u8.ToArray()));
 
-        var refused = page.WaitForElement(".edition-visuals-upload[data-refused]", Sending);
+        var refused = page.Find(".edition-visuals-upload[data-refused]");
         Assert.Equal("scan-dos.tif", refused.QuerySelector(".edition-visuals-upload-name")!.TextContent);
         Assert.Equal("Refusé", refused.QuerySelector(".edition-visuals-upload-status")!.TextContent);
         Assert.Contains("n'est pas une image lisible", refused.QuerySelector(".edition-visuals-upload-reason")!.TextContent);
@@ -693,14 +689,14 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_AFileHeavierThanTheLimit_IsRefused_WithoutBeingSent()
+    public async Task Visuals_AFileHeavierThanTheLimit_IsRefused_WithoutBeingSent()
     {
         _api.Answers["/admin/visuals/limits"] = new VisualLimits(1024 * 1024, TimeSpan.FromHours(24));
         var page = OpenOwned();
 
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[1024 * 1024 + 1], "scan-600dpi.png"));
+        await SendAsync(page, new TestBrowserFile("scan-600dpi.png", new byte[1024 * 1024 + 1]));
 
-        var refused = page.WaitForElement(".edition-visuals-upload[data-refused]", Sending);
+        var refused = page.Find(".edition-visuals-upload[data-refused]");
         Assert.Equal("Ce fichier dépasse le poids maximal de 1 Mio.", refused.QuerySelector(".edition-visuals-upload-reason")!.TextContent);
         Assert.Empty(_api.Written);
     }
@@ -724,7 +720,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_BeingSent_HoldTheSaving_UntilTheyAreInTheForm()
+    public async Task Visuals_BeingSent_HoldTheSaving_UntilTheyAreInTheForm()
     {
         // Saved with the form: saving while a file is on its way would leave it out, then cancel its sending.
         var page = OpenOwned();
@@ -733,17 +729,17 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         _api.Write = (_, path, _) => path == "/admin/visuals/pending"
             ? FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created)
             : FakeAdminApi.Json(Owned);
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "dedicace.png"));
-        page.WaitForAssertion(() => Assert.Single(_api.Written), Sending);
+        var sending = await ChooseAsync(page, new TestBrowserFile("dedicace.png", new byte[16]));
+        Assert.Single(_api.Written);
 
-        // The bar is drawn again by the renderer, apart from the request sent meanwhile: what it shows is waited for.
-        page.WaitForAssertion(() => Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent), Sending);
+        Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent);
         Assert.True(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
         page.Find("form").Submit();
         Assert.Single(_api.Written);
 
         sent.SetResult();
-        page.WaitForAssertion(() => Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent), Sending);
+        await sending.EndAsync("Sending dedicace.png");
+        Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
         Assert.False(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
         page.Find("form").Submit();
         page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
@@ -751,18 +747,18 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_ChosenAfterFilesAllRefusedWithoutBeingSent_AreSent()
+    public async Task Visuals_ChosenAfterFilesAllRefusedWithoutBeingSent_AreSent()
     {
         // Refused at once, these files ended the sending before any wait: the next choice is sent all the same.
         _api.Answers["/admin/visuals/limits"] = new VisualLimits(1024 * 1024, TimeSpan.FromHours(24));
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created);
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[1024 * 1024 + 1], "scan-600dpi.png"));
-        page.WaitForElement(".edition-visuals-upload[data-refused]", Sending);
+        await SendAsync(page, new TestBrowserFile("scan-600dpi.png", new byte[1024 * 1024 + 1]));
+        Assert.NotNull(page.Find(".edition-visuals-upload[data-refused]"));
 
-        page.FindComponents<InputFile>()[^1].UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "dedicace.png"));
+        await SendAsync(page, new TestBrowserFile("dedicace.png", new byte[16]));
 
-        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent), Sending);
+        Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent);
         Assert.Single(_api.Written);
     }
 
@@ -826,15 +822,15 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_AddedLongAgo_AreRemovedFromTheForm_WhichADialogTells()
+    public async Task Visuals_AddedLongAgo_AreRemovedFromTheForm_WhichADialogTells()
     {
         // A form left open past the time a visual added is kept: removed from it, as a saving would refuse it.
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddSeconds(30)), HttpStatusCode.Created);
 
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "planche-oubliee.png"));
+        await SendAsync(page, new TestBrowserFile("planche-oubliee.png", new byte[16]));
 
-        var dialog = page.WaitForElement("dialog", Sending);
+        var dialog = page.WaitForElement("dialog");
         Assert.Equal("Visuels retirés de la fiche", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal(["planche-oubliee.png"], dialog.QuerySelectorAll(".edition-visuals-expired li").Select(item => item.TextContent));
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
@@ -871,6 +867,20 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         _audience.Sent.Single(sent => sent.Path == "/audience/visits").Content.Deserialize<OpenVisitRequest>(JsonSerializerOptions.Web)!.FirstUse;
 
     private static AngleSharp.Dom.IElement Free(IRenderedComponent<AdminEditionForm> page) => page.Find("#edition-free");
+
+    // A choice of files on the input of the next choice, raised on the renderer's dispatcher as the circuit receives it
+    // (CircuitEvents): returns the task of its handling, which sends them and ends once the rendering it causes is done.
+    private static async Task<Task> ChooseAsync(IRenderedComponent<AdminEditionForm> page, params IBrowserFile[] files)
+    {
+        var input = page.FindComponents<InputFile>()[^1];
+        Task handling = null!;
+        await page.InvokeAsync(() => { handling = input.Instance.OnChange.InvokeAsync(new InputFileChangeEventArgs(files)); })
+            .EndAsync("Choosing " + string.Join(", ", files.Select(file => file.Name)));
+        return handling;
+    }
+
+    private static async Task SendAsync(IRenderedComponent<AdminEditionForm> page, params IBrowserFile[] files) =>
+        await (await ChooseAsync(page, files)).EndAsync("Sending " + string.Join(", ", files.Select(file => file.Name)));
 
     private IRenderedComponent<AdminEditionForm> OpenOwned() => Open(AppPaths.AdminEditEdition(AlbumId, EditionId), EditionId);
 
