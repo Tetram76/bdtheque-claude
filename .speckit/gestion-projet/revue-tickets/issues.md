@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, tickets de suivi des harnais et leur étiquette commune ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, tickets de suivi des harnais, leur titre et leurs étiquettes (celle du harnais, `harness`) ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:22:47Z }
 ---
 
 # Issues
@@ -16,9 +16,17 @@ Les Issues GitHub (« tickets ») servent à :
 
 ## Tickets de suivi des harnais
 
-Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose à suivre, que ne réalise aucune Pull Request et qui n'a pas de jalon ([Versions et releases](../depot/versions-et-releases.md)) : « Vulnérabilités connues » (harnais sécurité et mises à jour, [Mises à jour des dépendances](../depot/mises-a-jour-des-dependances.md)), « Dette qualité » (harnais qualité), « Cohérence fonctionnelle » ([Contrôle de cohérence fonctionnelle](controle-de-coherence-fonctionnelle.md)).
+Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose à suivre, que ne réalise aucune Pull Request et qui n'a pas de jalon ([Versions et releases](../depot/versions-et-releases.md)). Son titre nomme le harnais, puis ce qu'il suit (« Harnais `<harnais>` : `<objet>` ») :
 
-- **Étiquettes** : celle de son harnais, par laquelle le harnais le retrouve (`security-audit`, `functional-consistency`…), et l'étiquette commune **`harness`**, que portent tous les tickets de suivi et eux seuls (exigence de l'utilisateur) : elle les réunit en une liste, à part des chantiers. Qui crée un tel ticket, harnais ou agent, lui pose les deux.
+| Harnais | Ticket de suivi | Étiquette du harnais |
+| --- | --- | --- |
+| Sécurité et mises à jour ([Mises à jour des dépendances](../depot/mises-a-jour-des-dependances.md)) | « Harnais sécurité : Vulnérabilités connues » | `security-audit` |
+| Fonctionnel ([Contrôle de cohérence fonctionnelle](controle-de-coherence-fonctionnelle.md)) | « Harnais fonctionnel : Cohérence ergonomique et fonctionnelle » | `ergonomy-audit` |
+| Qualité | « Harnais qualité : Dette qualité » | `quality-audit` |
+
+- **Étiquette du harnais** : elle réunit **tous** les tickets d'un harnais, son ticket de suivi comme les chantiers qui le créent ou le font évoluer (exigence de l'utilisateur).
+- **Étiquette `harness`** : commune aux tickets de suivi, elle n'est portée **que** par eux (exigence de l'utilisateur), jamais par un chantier, fût-il celui d'un harnais : elle les réunit en une liste, à part des chantiers.
+- **Ticket de suivi retrouvé par ses deux étiquettes** : un harnais, comme l'agent, le retrouve par l'étiquette du harnais **et** `harness`, jamais par la première seule, qui désigne aussi ses chantiers, ni par son titre, que l'utilisateur peut changer. Qui crée un ticket de suivi, harnais ou agent, lui pose les deux.
 
 ## Avant de créer un ticket
 
