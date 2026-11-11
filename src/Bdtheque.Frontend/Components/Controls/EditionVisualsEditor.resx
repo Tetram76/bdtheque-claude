@@ -19,10 +19,7 @@
     <value>Images</value>
   </data>
   <data name="Help" xml:space="preserve">
-    <value>Chaque visuel s&apos;enregistre dès son ajout, et son ordre ou son type dès qu&apos;on les change : rien à valider avec la fiche.</value>
-  </data>
-  <data name="Later" xml:space="preserve">
-    <value>Les visuels s&apos;ajoutent une fois l&apos;édition enregistrée.</value>
+    <value>Les visuels s&apos;enregistrent avec la fiche. Chaque fichier ajouté est vérifié aussitôt, puis conservé {0} heures en attente de son enregistrement.</value>
   </data>
   <data name="Drop" xml:space="preserve">
     <value>Déposez des images ici, ou</value>
@@ -53,12 +50,6 @@
   </data>
   <data name="Upload.Remove" xml:space="preserve">
     <value>Retirer {0}</value>
-  </data>
-  <data name="Refused.Conflict" xml:space="preserve">
-    <value>L&apos;album de cette édition a été modifié entre-temps : rechargez la fiche, puis ajoutez de nouveau ce visuel.</value>
-  </data>
-  <data name="Refused.NotFound" xml:space="preserve">
-    <value>Cette édition n&apos;existe plus.</value>
   </data>
   <data name="Refused.Technical" xml:space="preserve">
     <value>L&apos;envoi n&apos;a pas pu aboutir : réessayez dans un instant.</value>
@@ -105,25 +96,22 @@
   <data name="Drag" xml:space="preserve">
     <value>Glissez un visuel pour le réordonner parmi ceux de son type ; les types se suivent toujours dans le même ordre.</value>
   </data>
-  <data name="Deletion.Title" xml:space="preserve">
+  <data name="Removal.Title" xml:space="preserve">
     <value>Supprimer ce visuel ?</value>
   </data>
-  <data name="Deletion.Text" xml:space="preserve">
-    <value>La suppression est définitive : le visuel et ses fichiers sont supprimés.</value>
+  <data name="Removal.Text" xml:space="preserve">
+    <value>Il sera supprimé, avec ses fichiers, à l&apos;enregistrement de la fiche ; « Annuler » le garde.</value>
   </data>
-  <data name="Deletion.Confirm" xml:space="preserve">
-    <value>Supprimer définitivement</value>
+  <data name="Removal.Confirm" xml:space="preserve">
+    <value>Supprimer</value>
   </data>
-  <data name="Problem.Conflict" xml:space="preserve">
-    <value>L&apos;album de cette édition a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel.</value>
+  <data name="Expired.Title" xml:space="preserve">
+    <value>Visuels retirés de la fiche</value>
   </data>
-  <data name="Problem.NotFound" xml:space="preserve">
-    <value>Ce visuel n&apos;existe plus : rechargez la fiche.</value>
+  <data name="Expired.Text" xml:space="preserve">
+    <value>La fiche est restée ouverte trop longtemps : ces visuels, ajoutés il y a plus de {0} heures et pas encore enregistrés, ne sont plus conservés et ont été retirés. Ajoutez-les de nouveau :</value>
   </data>
-  <data name="Problem.Technical" xml:space="preserve">
-    <value>L&apos;application n&apos;a pas répondu : réessayez dans un instant.</value>
-  </data>
-  <data name="Reload" xml:space="preserve">
-    <value>Recharger la fiche</value>
+  <data name="Expired.Close" xml:space="preserve">
+    <value>J&apos;ai compris</value>
   </data>
 </root>

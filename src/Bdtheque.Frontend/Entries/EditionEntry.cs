@@ -91,6 +91,12 @@ public sealed class EditionEntry
 
     public string? PersonalNotes { get; set; }
 
+    /// <summary>
+    /// The visuals of the edition, in their presentation order, saved with it (visuel/saisie-edition/contenu.md): those it has and
+    /// those added, waiting for its saving.
+    /// </summary>
+    public List<VisualItem> Visuals { get; set; } = [];
+
     public decimal? AcquisitionAmount { get; set; }
 
     public string? AcquisitionCurrency { get; set; }
@@ -255,8 +261,25 @@ public sealed class EditionEntry
         Publisher?.Id, PublisherCollection?.Id, PublicationYear, Isbn, Binding, Orientation, ReadingDirection, Format, PageCount, Category,
         IsColor);
 
-    /// <summary>What tells two states of the form apart: the content it would save.</summary>
-    public string Fingerprint() => JsonSerializer.Serialize(ToContent());
+    /// <summary>The visuals as the saving sends them: each kept or pending, with its type, in their order.</summary>
+    public List<EditionVisualEntry> VisualEntries() => [.. Visuals.Select(v => new EditionVisualEntry(v.Id, v.PendingId, v.Type))];
+
+    /// <summary>What tells two states of the form apart: the content it would save, its visuals included.</summary>
+    public string Fingerprint() => JsonSerializer.Serialize(new { Content = ToContent(), Visuals = VisualEntries() });
 
     public EditionEntry Copy() => JsonSerializer.Deserialize<EditionEntry>(JsonSerializer.Serialize(this))!;
+}
+
+/// <summary>
+/// A visual of an edition as it is entered: one it has (<see cref="Id"/>), or one added, waiting for its saving
+/// (<see cref="PendingId"/>), named by its file and kept until <see cref="ExpiresAt"/>.
+/// </summary>
+public sealed record VisualItem(Guid? Id, Guid? PendingId, VisualType Type, string? Name = null, DateTimeOffset? ExpiresAt = null)
+{
+    public static VisualItem Of(EditionVisualForm visual) => new(visual.Id, null, visual.Type);
+
+    public static VisualItem Pending(PendingVisualForm pending, VisualType type, string name) => new(null, pending.Id, type, name, pending.ExpiresAt);
+
+    /// <summary>What the visual is, for its thumbnail and its menu.</summary>
+    public Guid Key => Id ?? PendingId!.Value;
 }

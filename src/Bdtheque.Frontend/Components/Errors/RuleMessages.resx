@@ -120,6 +120,9 @@
   <data name="EditionVisual.ImageDimensionsTooLarge" xml:space="preserve">
     <value>Les dimensions de cette image sont trop grandes pour être acceptées.</value>
   </data>
+  <data name="EditionVisual.PendingExpired" xml:space="preserve">
+    <value>Un visuel ajouté il y a plus de 24 heures n&apos;est plus conservé : retirez-le, puis ajoutez-le de nouveau.</value>
+  </data>
   <data name="Genre.LabelRequired" xml:space="preserve">
     <value>Le libellé du genre est obligatoire.</value>
   </data>

@@ -52,8 +52,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
     // The visuals of the owned edition, in their presentation order, read under the version of the album of the edition.
     private static readonly EditionVisualsForm OwnedVisuals = new(
-        EditionId, [new(CoverId, VisualType.Cover, 0), new(FirstPlateId, VisualType.Plate, 0), new(SecondPlateId, VisualType.Plate, 1)], 12,
-        30 * 1024 * 1024);
+        EditionId, [new(CoverId, VisualType.Cover, 0), new(FirstPlateId, VisualType.Plate, 0), new(SecondPlateId, VisualType.Plate, 1)], 12);
 
     private static readonly AlbumSummary Castafiore = new(
         AlbumId, "Les Bijoux de la Castafiore", SeriesId, "Tintin", AlbumType.Regular, false, 21, null, null, true);
@@ -130,7 +129,8 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned;
         _api.Answers[$"/admin/albums/{AlbumId}/editions/{WishedId}"] = Wished;
         _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}/visuals"] = OwnedVisuals;
-        _api.Answers[$"/admin/albums/{AlbumId}/editions/{WishedId}/visuals"] = new EditionVisualsForm(WishedId, [], Wished.AlbumVersion, 30 * 1024 * 1024);
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{WishedId}/visuals"] = new EditionVisualsForm(WishedId, [], Wished.AlbumVersion);
+        _api.Answers["/admin/visuals/limits"] = new VisualLimits(30 * 1024 * 1024, TimeSpan.FromHours(24));
         _api.Answers[$"/admin/albums/{AlbumId}/editions/new"] = NewOwned;
         _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents/new"] = NewIntent;
         _api.Answers[$"/admin/publishers/{Casterman}/collections"] = new List<PublisherCollectionForm>
@@ -156,11 +156,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Modifier l'édition", page.Find("h1").TextContent.Trim());
         Assert.Equal("Casterman [2007] - ISBN 978-2-203-00120-8", page.Find(".entry-form-subject").TextContent.Trim());
         // The album leads to the page of its editions from the breadcrumb, and to its own form from the heading; neither link
-        // to the consultation, nor deletion, nor confirmation of a purchase: those are the page of the editions'. The visuals beside
-        // the form lead to their originals, as their own tests show.
+        // to the consultation, nor deletion, nor confirmation of a purchase: those are the page of the editions'. The menus of the visuals
+        // lead to their originals, as their own tests show.
         Assert.Equal(
             [AppPaths.AdminHome, AppPaths.AdminAlbums, AppPaths.AdminAlbumEditions(AlbumId), AppPaths.AdminEditAlbum(AlbumId)],
-            page.FindAll(".entry-form-heading a, .entry-form-body a").Select(link => link.GetAttribute("href")).Distinct());
+            page.FindAll(".entry-form-heading a, .entry-form-body a:not(.menu-item)").Select(link => link.GetAttribute("href")).Distinct());
     }
 
     [Fact]
@@ -571,14 +571,15 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_InASingleGrid_InTheOrderOfTheTypes_EachMarkedWithItsType()
+    public void Visuals_ABlockOfTheForm_InASingleGrid_InTheOrderOfTheTypes_EachMarkedWithItsType()
     {
-        // visuel/saisie-edition/contenu.md, Les visuels: each written on its own, which the block says, then the drop zone, the
-        // number of visuals and their grid, a plate counted among the plates.
+        // visuel/saisie-edition/contenu.md, Les visuels: the last block of the form, saved with it, which the block says, then the
+        // drop zone, the number of visuals and their grid, a plate counted among the plates.
         var page = OpenOwned();
-        var block = page.Find(".edition-visuals");
+        var block = page.Find("form .edition-visuals");
 
-        Assert.Contains("Chaque visuel s'enregistre dès son ajout", block.TextContent);
+        Assert.Contains("Les visuels s'enregistrent avec la fiche", block.TextContent);
+        Assert.Contains("conservé 24 heures", block.TextContent);
         Assert.Equal("JPEG, PNG, WebP ou GIF, 30 Mio au plus.", block.QuerySelector(".edition-visuals-formats")!.TextContent);
         Assert.Equal("3 visuels", block.QuerySelector(".edition-visuals-count")!.TextContent);
         var visuals = block.QuerySelectorAll(".edition-visual");
@@ -595,61 +596,54 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_OnANarrowScreen_InAPanelOverThePage_OpenedByAButtonAtTheHeadOfTheForm()
+    public void Visuals_Added_WaitInTheForm_WhichSavesThemInTheOrderOfTheTypes()
     {
-        // Beside the form on a wide screen, the styles say; the panel and its buttons are in the page however it is shown.
         var page = OpenOwned();
-        var aside = page.Find("aside.entry-form-aside");
+        _api.Write = (method, path, _) => path == "/admin/visuals/pending"
+            ? FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created)
+            : FakeAdminApi.Json(Owned);
 
-        Assert.Equal("manual", aside.GetAttribute("popover"));
-        var open = page.Find(".entry-form-heading .entry-form-aside-open .button");
-        Assert.Equal("Les visuels (3)", open.TextContent.Trim());
-        Assert.Equal((aside.Id, "show"), (open.GetAttribute("popovertarget"), open.GetAttribute("popovertargetaction")));
-        var close = aside.QuerySelector(".entry-form-aside-close-button")!;
-        Assert.Equal(("Fermer les visuels", aside.Id, "hide"),
-            (close.GetAttribute("aria-label"), close.GetAttribute("popovertarget"), close.GetAttribute("popovertargetaction")));
-        Assert.NotNull(aside.QuerySelector(".edition-visuals"));
-        Assert.Null(page.Find("form").QuerySelector(".edition-visuals"));
+        page.Find("#edition-visuals-type").Change("Dedication");
+        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[2048], "dedicace.png"));
+
+        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent));
+        var (_, _, form) = _api.Written.Single();
+        Assert.Equal("dedicace.png", form.GetProperty(UploadVisualFields.File).GetProperty("name").GetString());
+        Assert.Equal(2048, form.GetProperty(UploadVisualFields.File).GetProperty("length").GetInt64());
+        // After the cover, before the plates; shown from the waiting area; an unsaved change of the form.
+        var added = page.FindAll(".edition-visual")[1];
+        Assert.Equal(("Déd.", "/admin/visuals/pending/" + AddedId + "/display"),
+            (added.QuerySelector(".edition-visual-mark")!.TextContent, added.QuerySelector("img")!.GetAttribute("src")));
+        Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
+        Assert.Contains("admin.edition-form.visual-added", _audience.Functions);
+
+        page.Find("form").Submit();
+
+        page.WaitForAssertion(() => Assert.Equal(HttpMethod.Put, _api.Written.Last().Method));
+        Assert.Equal(
+            [(CoverId, (Guid?)null, "Cover"), (null, AddedId, "Dedication"), (FirstPlateId, null, "Plate"), (SecondPlateId, null, "Plate")],
+            VisualsSent());
     }
 
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Visuals_OfANewEdition_AreAddedOnceItIsSaved(bool intent)
+    public void Visuals_OfANewEdition_AreSavedWithIt(bool intent)
     {
         var page = intent ? OpenNewIntent() : OpenNewOwned();
+        _api.Write = (_, path, _) => path == "/admin/visuals/pending"
+            ? FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created)
+            : intent ? FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [], 13), HttpStatusCode.Created) : FakeAdminApi.Json(Owned, HttpStatusCode.Created);
+        ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
+        if (!intent)
+            page.Find("#edition-mode").Change("Gift");
 
-        Assert.Equal("Les visuels s'ajoutent une fois l'édition enregistrée.", page.Find(".edition-visuals-later").TextContent);
-        Assert.Empty(page.FindAll("input[type=file]"));
-    }
-
-    [Fact]
-    public void Visuals_Added_SentWithTheirTypeAndTheVersionOfTheAlbum_WhichTheFormThenSends()
-    {
-        var page = OpenOwned();
-        var added = OwnedVisuals with { Visuals = [.. OwnedVisuals.Visuals, new(AddedId, VisualType.Plate, 2)], AlbumVersion = 13 };
-        _api.Write = (method, path, _) => method == HttpMethod.Post && path.EndsWith("/visuals", StringComparison.Ordinal)
-            ? FakeAdminApi.Json(added, HttpStatusCode.Created)
-            : FakeAdminApi.Json(Owned);
-
-        page.Find("#edition-visuals-type").Change("Plate");
-        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[2048], "planche-03.png"));
-
-        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent));
-        var (_, uploadPath, form) = _api.Written.Single(write => write.Method == HttpMethod.Post);
-        Assert.Equal($"/admin/albums/{AlbumId}/editions/{EditionId}/visuals", uploadPath);
-        Assert.Equal("Plate", form.GetProperty(UploadVisualFields.Type).GetString());
-        Assert.Equal("12", form.GetProperty(UploadVisualFields.AlbumVersion).GetString());
-        Assert.Equal("planche-03.png", form.GetProperty(UploadVisualFields.File).GetProperty("name").GetString());
-        Assert.Equal(2048, form.GetProperty(UploadVisualFields.File).GetProperty("length").GetInt64());
-        Assert.Empty(page.FindAll(".edition-visuals-upload"));
-        Assert.Contains("admin.edition-form.visual-added", _audience.Functions);
-
-        // The visual changed the version of the album, which the saving of the form sends, the form still unchanged.
-        Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
-        page.Find("#edition-year").Change("2011");
+        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "couverture.png"));
+        page.WaitForAssertion(() => Assert.Equal("1 visuel", page.Find(".edition-visuals-count").TextContent));
         page.Find("form").Submit();
-        page.WaitForAssertion(() => Assert.Equal(13u, _api.Written.Last().Body.GetProperty("albumVersion").GetUInt32()));
+
+        page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
+        Assert.Equal([((Guid?)null, (Guid?)AddedId, "Cover")], VisualsSent());
     }
 
     [Fact]
@@ -665,6 +659,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Refusé", refused.QuerySelector(".edition-visuals-upload-status")!.TextContent);
         Assert.Contains("n'est pas une image lisible", refused.QuerySelector(".edition-visuals-upload-reason")!.TextContent);
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
+        Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
 
         page.Find(".edition-visuals-upload-remove").Click();
 
@@ -672,89 +667,105 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_AnotherType_PlacesTheVisualAfterThoseOfItsNewType()
+    public void Visuals_AnotherType_PlacesTheVisualAfterThoseOfItsNewType_SavedWithTheForm()
     {
         var page = OpenOwned();
-        _api.Write = (_, _, _) => FakeAdminApi.Json(OwnedVisuals with { AlbumVersion = 13 });
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
         page.FindAll(".edition-visual")[0].QuerySelectorAll(".actions-menu-panel button").First(item => item.TextContent.Trim() == "Planche").Click();
 
-        var (method, path, body) = _api.Written.Single();
-        Assert.Equal(HttpMethod.Put, method);
-        Assert.Equal($"/admin/albums/{AlbumId}/editions/{EditionId}/visuals", path);
-        Assert.Equal(12u, body.GetProperty("albumVersion").GetUInt32());
-        Assert.Equal(
-            [(FirstPlateId, "Plate"), (SecondPlateId, "Plate"), (CoverId, "Plate")],
-            body.GetProperty("visuals").EnumerateArray().Select(v => (v.GetProperty("id").GetGuid(), v.GetProperty("type").GetString())));
+        Assert.Empty(_api.Written);
+        Assert.Equal(["Pl. 1", "Pl. 2", "Pl. 3"], page.FindAll(".edition-visual-mark").Select(mark => mark.TextContent));
         Assert.Contains("admin.edition-form.visual-type-changed", _audience.Functions);
+        page.Find("form").Submit();
+        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Equal([(FirstPlateId, (Guid?)null, "Plate"), (SecondPlateId, null, "Plate"), (CoverId, null, "Plate")], VisualsSent());
     }
 
     [Fact]
     public void Visuals_Dragged_TakesThePlaceOfAnotherOfItsType_ButNotOfAnotherType()
     {
         var page = OpenOwned();
-        _api.Write = (_, _, _) => FakeAdminApi.Json(OwnedVisuals with { AlbumVersion = 13 });
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
         page.FindAll(".edition-visual")[2].TriggerEvent("ondragstart", new DragEventArgs());
         page.FindAll(".edition-visual")[0].TriggerEvent("ondrop", new DragEventArgs());
-        Assert.Empty(_api.Written);
+        Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
 
         page.FindAll(".edition-visual")[2].TriggerEvent("ondragstart", new DragEventArgs());
         page.FindAll(".edition-visual")[1].TriggerEvent("ondrop", new DragEventArgs());
 
-        Assert.Equal(
-            [CoverId, SecondPlateId, FirstPlateId],
-            _api.Written.Single().Body.GetProperty("visuals").EnumerateArray().Select(v => v.GetProperty("id").GetGuid()));
+        Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
         Assert.Contains("admin.edition-form.visuals-arranged", _audience.Functions);
+        page.Find("form").Submit();
+        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Equal([CoverId, SecondPlateId, FirstPlateId], VisualsSent().Select(v => v.Id!.Value));
     }
 
     [Fact]
-    public void Visuals_Deleted_OnceConfirmed_WithTheVersionAndTheImpactRead()
+    public void Visuals_Deleted_OnceConfirmed_LeaveTheFormWhichSavesWithoutThem()
     {
         var page = OpenOwned();
-        var path = $"/admin/albums/{AlbumId}/editions/{EditionId}/visuals";
-        _api.Answers[$"{path}/{FirstPlateId}/deletion-impact"] = new Contracts.Deletion.DeletionImpact([], [], [], [], "empreinte");
-        _api.Write = (_, _, _) =>
-        {
-            _api.Answers[path] = OwnedVisuals with
-            {
-                Visuals = [OwnedVisuals.Visuals[0], OwnedVisuals.Visuals[2] with { DisplayOrder = 0 }], AlbumVersion = 13,
-            };
-            return new HttpResponseMessage(HttpStatusCode.NoContent);
-        };
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
         page.FindAll(".edition-visual")[1].QuerySelectorAll(".actions-menu-panel button").Last().Click();
         var dialog = page.Find("dialog");
         Assert.Equal("Supprimer ce visuel ?", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal("Planche 1", dialog.QuerySelector(".dialog-subject")!.TextContent.Trim());
-        Assert.Empty(_api.Written);
+        Assert.Contains("à l'enregistrement de la fiche", dialog.TextContent);
 
         dialog.QuerySelectorAll(".dialog-actions .button").Last().Click();
 
-        var (method, deleted, body) = _api.Written.Single();
-        Assert.Equal(HttpMethod.Delete, method);
-        Assert.Equal($"{path}/{FirstPlateId}", deleted);
-        Assert.Equal("?version=12&fingerprint=empreinte", body.GetProperty("query").GetString());
-        page.WaitForAssertion(() => Assert.Equal("2 visuels", page.Find(".edition-visuals-count").TextContent));
         Assert.Empty(page.FindAll("dialog"));
+        Assert.Equal("2 visuels", page.Find(".edition-visuals-count").TextContent);
         Assert.Equal(["admin.edition-form.visual-deletion", "admin.edition-form.visual-deleted"],
             _audience.Functions.Where(function => function.Contains("visual", StringComparison.Ordinal)));
+        page.Find("form").Submit();
+        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Equal([CoverId, SecondPlateId], VisualsSent().Select(v => v.Id!.Value));
     }
 
     [Fact]
-    public void Visuals_ModifiedMeanwhile_OfferToReloadTheForm()
+    public void Visuals_AddedLongAgo_AreRemovedFromTheForm_WhichADialogTells()
+    {
+        // A form left open past the time a visual added is kept: removed from it, as a saving would refuse it.
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddSeconds(30)), HttpStatusCode.Created);
+
+        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "planche-oubliee.png"));
+
+        var dialog = page.WaitForElement("dialog");
+        Assert.Equal("Visuels retirés de la fiche", dialog.QuerySelector(".dialog-title")!.TextContent);
+        Assert.Equal(["planche-oubliee.png"], dialog.QuerySelectorAll(".edition-visuals-expired li").Select(item => item.TextContent));
+        Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
+        dialog.QuerySelector(".dialog-actions .button")!.Click();
+        Assert.Empty(page.FindAll("dialog"));
+    }
+
+    [Fact]
+    public void Visuals_Changed_AreShownAmongTheChanges_OfAnEditionModifiedMeanwhile()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        page.FindAll(".edition-visual")[2].TriggerEvent("ondragstart", new DragEventArgs());
+        page.FindAll(".edition-visual")[1].TriggerEvent("ondrop", new DragEventArgs());
 
-        page.FindAll(".edition-visual")[0].QuerySelectorAll(".actions-menu-panel button").First(item => item.TextContent.Trim() == "Planche").Click();
+        page.Find("form").Submit();
+        page.WaitForElement("[role=alert]").QuerySelectorAll("button")[1].Click();
 
-        var error = page.Find(".edition-visuals [role=alert]");
-        Assert.Equal("functional", error.GetAttribute("data-error-category"));
-        Assert.Contains("L'album de cette édition a été modifié entre-temps", error.TextContent);
-        Assert.Equal("Recharger la fiche", error.QuerySelector("button")!.TextContent.Trim());
-        Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
+        var changes = page.Find("dialog .changes-dialog-list");
+        Assert.Equal(["Visuels"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
+        Assert.Equal(["3 visuels"], changes.QuerySelectorAll("dd").Select(dd => dd.TextContent));
     }
+
+    // The visuals the last saving sent, in their order.
+    private List<(Guid? Id, Guid? PendingId, string? Type)> VisualsSent() =>
+    [
+        .. _api.Written.Last().Body.GetProperty("visuals").EnumerateArray().Select(v => (
+            v.GetProperty("id").ValueKind == JsonValueKind.Null ? (Guid?)null : v.GetProperty("id").GetGuid(),
+            v.GetProperty("pendingId").ValueKind == JsonValueKind.Null ? (Guid?)null : v.GetProperty("pendingId").GetGuid(),
+            v.GetProperty("type").GetString())),
+    ];
 
     private FunctionUse FirstUse() =>
         _audience.Sent.Single(sent => sent.Path == "/audience/visits").Content.Deserialize<OpenVisitRequest>(JsonSerializerOptions.Web)!.FirstUse;

@@ -283,13 +283,16 @@
     <value>Sans date de référence, cette valeur ne peut pas être enregistrée.</value>
   </data>
   <data name="Visuals" xml:space="preserve">
-    <value>Les visuels</value>
+    <value>Visuels</value>
   </data>
-  <data name="Visuals.Count" xml:space="preserve">
-    <value>Les visuels ({0})</value>
+  <data name="Visuals.None" xml:space="preserve">
+    <value>Aucun visuel</value>
   </data>
-  <data name="Visuals.Close" xml:space="preserve">
-    <value>Fermer les visuels</value>
+  <data name="Visuals.One" xml:space="preserve">
+    <value>1 visuel</value>
+  </data>
+  <data name="Visuals.Other" xml:space="preserve">
+    <value>{0} visuels</value>
   </data>
   <data name="Problem.Functional.Conflict" xml:space="preserve">
     <value>L'album de cette édition a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
