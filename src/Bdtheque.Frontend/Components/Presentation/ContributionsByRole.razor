@@ -13,7 +13,7 @@
 <div class="contributions">
     @if (Contributions.Count == 0)
     {
-        <p class="contributions-none">@L["None"]</p>
+        <p class="contributions-none">@(None ?? L["None"])</p>
     }
     else
     {
@@ -55,4 +55,8 @@
     /// <summary>The contributions, in the order the API gives them: by role, then by author.</summary>
     [Parameter, EditorRequired]
     public IReadOnlyList<ContributionItem> Contributions { get; set; } = [];
+
+    /// <summary>What a record without any author says, when its own words differ (e.g. those of a series).</summary>
+    [Parameter]
+    public string? None { get; set; }
 }

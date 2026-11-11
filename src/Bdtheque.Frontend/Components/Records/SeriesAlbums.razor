@@ -1,0 +1,86 @@
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Lists
+@inject IStringLocalizer<SeriesAlbums> L
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+
+@* The albums of a series on its record (visuel/fiche-serie/contenu.md): their count by kind, then the albums in the order of
+   the series (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), which puts the special issues last, in two
+   groups: the volumes and omnibuses, then the special issues. Each album is a card of a grid leading to its record: its cover
+   (fonctionnel/regles-metier/couverture-d-un-album.md), its volume and its title, its rating when set, and where it stands with
+   regard to the collection, as the lists tell it. *@
+<Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="albums">
+    @if (Albums.Count == 0)
+    {
+        <p class="series-albums-none">@L["None"]</p>
+    }
+    else
+    {
+        <p class="series-albums-count">@Count</p>
+        @foreach (var (title, albums) in Groups)
+        {
+            <div class="series-group">
+                <h3>@title <span class="series-group-count">(@Format.Number(albums.Count))</span></h3>
+                <ol class="album-cards">
+                    @foreach (var card in albums)
+                    {
+                        var album = card.Album;
+                        <li class="album-card">
+                            <a href="@AppPaths.Album(album.Id)">
+                                <Cover VisualId="card.Cover?.VisualId" />
+                                @if (album.Title is { } own)
+                                {
+                                    @if (Labels.Volume(album) is { } volume)
+                                    {
+                                        <span class="album-card-volume">@volume</span>
+                                    }
+                                    <span class="album-card-title">@own</span>
+                                }
+                                else
+                                {
+                                    @* Without its own title, an album is named by its volume alone (« Tome 3 »). *@
+                                    <span class="album-card-title">@Labels.Album(album, LabelFormat, withSeries: false)</span>
+                                }
+                            </a>
+                            <RatingStars Rating="card.Rating" />
+                            <CollectionStateTag State="AlbumCardStates.Of(card)" />
+                        </li>
+                    }
+                </ol>
+            </div>
+        }
+    }
+</Block>
+
+@code {
+    /// <summary>Every album of the series, in its order.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public AlbumLabelFormat LabelFormat { get; set; }
+
+    // The order of the series puts the special issues last: each group keeps it.
+    private IEnumerable<(string Title, List<AlbumCard> Albums)> Groups =>
+        new (string Title, List<AlbumCard> Albums)[]
+        {
+            (L["Group.Volumes"], [.. Albums.Where(a => !a.Album.IsSpecialIssue)]),
+            (L["Group.SpecialIssues"], [.. Albums.Where(a => a.Album.IsSpecialIssue)]),
+        }.Where(group => group.Albums.Count > 0);
+
+    // « 32 albums : 28 tomes, 2 intégrales, 2 hors-séries », each kind only when the series has any.
+    private string Count
+    {
+        get
+        {
+            var regular = Albums.Count(a => a.Album is { IsSpecialIssue: false, Type: AlbumType.Regular });
+            var omnibus = Albums.Count(a => a.Album is { IsSpecialIssue: false, Type: AlbumType.Omnibus });
+            var special = Albums.Count(a => a.Album.IsSpecialIssue);
+            var kinds = new[] { ("Regular", regular), ("Omnibus", omnibus), ("Special", special) }
+                .Where(kind => kind.Item2 > 0)
+                .Select(kind => L[$"Count.{kind.Item1}.{(kind.Item2 > 1 ? "Other" : "One")}", Format.Number(kind.Item2)].Value);
+            return L[Albums.Count > 1 ? "Count.Other" : "Count.One", Format.Number(Albums.Count), string.Join(", ", kinds)];
+        }
+    }
+}

@@ -33,6 +33,9 @@ public static class AudienceFunctions
     /// <summary>A visual shown in the viewer: the one of a thumbnail, the previous or the next.</summary>
     public static readonly AudienceFunction AlbumRecordVisual = new("album.visual", AudienceFunctionKind.Action);
 
+    /// <summary>The record of a series (visuel/fiche-serie/), with the series it presents.</summary>
+    public static readonly AudienceFunction SeriesRecord = new("series", AudienceFunctionKind.Screen);
+
     public static readonly AudienceFunction AdminHome = new("admin.home", AudienceFunctionKind.Screen);
 
     /// <summary>The information of the visitor on the audience measurement, and their choice.</summary>
@@ -338,6 +341,7 @@ public static class AudienceFunctions
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
+        SeriesRecord,
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated,

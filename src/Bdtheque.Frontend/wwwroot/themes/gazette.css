@@ -97,6 +97,8 @@
     --record-visual-background: #FFFFFF;
     --record-visual-shadow: 6px 6px 0 #D9C6CF;
     --record-visual-tilt: -1.5deg;
+    /* The progress of a series in amber, as the tag of the collection. */
+    --record-progress-fill: var(--color-tag);
     --color-genre: var(--color-surface-inverse);
     --color-text-on-genre: var(--color-text-on-inverse);
     --color-universe: var(--color-accent);
