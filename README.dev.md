@@ -161,7 +161,7 @@ Les images construites restent sur le poste, pour accélérer la validation suiv
 
 ## Publication des images
 
-Les images de l'application sont publiées sur Docker Hub par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml) de deux façons : chaque nuit, sous le tag `nightly`, si `main` a changé depuis la publication précédente ; ou à la demande, sous les tags décrits dans le [`README.md`](README.md#images-publiées). Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire ; lancée sur le tag d'une version, elle pose en outre le numéro de cette version.
+Les images de l'application sont publiées sur Docker Hub par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml) de deux façons : chaque nuit, sous le tag `nightly`, si `main` a changé depuis la publication précédente ; ou à la demande, sous les tags décrits dans le [`README.md`](README.md#images-publiées). Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire, ou le tag d'une version (`v<version>`, ex. `v0.1.0`) pour publier cette version : les images reçoivent alors son numéro (`0.1.0`) au lieu d'un tag de branche. Comme `sha-<commit>`, ce numéro est immuable : une nouvelle publication de la même version le laisse tel quel. Le workflow refuse tout autre tag, de même que le tag d'une version `0.0.x`, qui n'a pas d'images.
 
 ## Plusieurs versions sur le NAS
 
