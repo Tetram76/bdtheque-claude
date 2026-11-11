@@ -40,9 +40,10 @@
     private const string Other = "other";
 
     // The currencies a collection of comics meets, named in the display culture, in the order of their likely use in a
-    // French-language collection: the euro, then the francs of the countries of French-language comics, then the old franc of
-    // the albums before 1960, then the currencies of imports, the Luxembourg franc last.
-    private static readonly string[] Named = ["EUR", "FRF", "BEF", "CHF", "QZF", "USD", "CAD", "GBP", "LUF"];
+    // French-language collection: the euro, then the dollar of the imports of today, then the francs of the countries of
+    // French-language comics, then the old franc of the albums before 1960, then the other currencies of imports, the
+    // Luxembourg franc last.
+    private static readonly string[] Named = ["EUR", "USD", "FRF", "BEF", "CHF", "QZF", "CAD", "GBP", "LUF"];
 
     // Whether the user chose to enter the currency by its code, before entering it.
     private bool _otherChosen;

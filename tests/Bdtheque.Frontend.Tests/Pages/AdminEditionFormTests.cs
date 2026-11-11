@@ -291,8 +291,8 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var currencies = page.FindAll("#edition-price-currency option").Select(option => option.TextContent.Trim()).ToList();
         // In the order of their likely use in a French-language collection of comics, the old franc among them.
         Assert.Equal(
-            ["EUR · euro", "FRF · franc français", "BEF · franc belge", "CHF · franc suisse", "QZF · ancien franc français",
-                "USD · dollar des États-Unis", "CAD · dollar canadien", "GBP · livre sterling", "LUF · franc luxembourgeois", "Autre devise…"],
+            ["EUR · euro", "USD · dollar des États-Unis", "FRF · franc français", "BEF · franc belge", "CHF · franc suisse",
+                "QZF · ancien franc français", "CAD · dollar canadien", "GBP · livre sterling", "LUF · franc luxembourgeois", "Autre devise…"],
             currencies);
 
         page.Find("#edition-price-currency").Change("other");
