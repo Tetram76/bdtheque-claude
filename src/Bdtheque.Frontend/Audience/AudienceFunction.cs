@@ -36,6 +36,12 @@ public static class AudienceFunctions
     /// <summary>The record of a series (visuel/fiche-serie/), with the series it presents.</summary>
     public static readonly AudienceFunction SeriesRecord = new("series", AudienceFunctionKind.Screen);
 
+    /// <summary>
+    /// The record of an author (visuel/fiche-auteur/), with the author it presents. Unfolding its series, one or all, is no
+    /// action: a disclosure of the page itself, showing what it already holds.
+    /// </summary>
+    public static readonly AudienceFunction AuthorRecord = new("author", AudienceFunctionKind.Screen);
+
     public static readonly AudienceFunction AdminHome = new("admin.home", AudienceFunctionKind.Screen);
 
     /// <summary>The information of the visitor on the audience measurement, and their choice.</summary>
@@ -341,7 +347,7 @@ public static class AudienceFunctions
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
-        SeriesRecord,
+        SeriesRecord, AuthorRecord,
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated,

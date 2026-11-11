@@ -259,6 +259,19 @@
     --color-text-on-genre: var(--color-text-on-palette);
     --color-universe: var(--color-palette-2);
     --color-text-on-universe: var(--color-text-on-palette);
+    /* The record of an author (visuel/fiche-auteur/): its monogram, put forward as the visual of a record (its border, shadow
+       and tilt), round, or of the corners a theme gives that visual; each role in a colour of its own, the same all over the
+       page; the box of the albums of an unfolded series, tinted, and the round of its chevron, of the same tint, so that no
+       entry after it passes for one of them. */
+    --record-monogram-radius: 50%;
+    --color-role-scenarist: var(--color-palette-1);
+    --color-text-on-role-scenarist: var(--color-text-on-palette);
+    --color-role-illustrator: var(--color-palette-2);
+    --color-text-on-role-illustrator: var(--color-text-on-palette);
+    --color-role-colorist: var(--color-palette-3);
+    --color-text-on-role-colorist: var(--color-text-on-palette);
+    --color-nest: #F2F1ED;
+    --radius-nest: var(--radius-tile);
 
     /* The home page, whose layout each theme presents its own way (visuel/dashboard/): on a wide screen, the grid of its
        blocks (columns and named areas: greeting, counters, spotlight, latest, value, statistics; for an empty

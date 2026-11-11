@@ -68,6 +68,14 @@ public sealed partial class ThemeContrastTests
         // The genres and the universes of a record, each in colors of their own.
         ("text-on-genre", "genre", Text),
         ("text-on-universe", "universe", Text),
+        // The record of an author: each role in a colour of its own; the box of the albums of an unfolded series, which holds
+        // their titles, what places them and the links to their records.
+        ("text-on-role-scenarist", "role-scenarist", Text),
+        ("text-on-role-illustrator", "role-illustrator", Text),
+        ("text-on-role-colorist", "role-colorist", Text),
+        ("text", "nest", Text),
+        ("text-muted", "nest", Text),
+        ("accent-text", "nest", Text),
         // A block of its own tint holds what a surface holds: texts, links and the borders of its controls. The border of a
         // control in error is read against the inside of the control (alert on control-background, above), which suffices.
         .. Enumerable.Range(1, 14).SelectMany(index => new[]

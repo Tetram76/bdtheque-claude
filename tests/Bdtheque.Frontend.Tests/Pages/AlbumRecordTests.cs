@@ -144,7 +144,9 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal(["Scénario", "Dessin"], contributions.QuerySelectorAll("dt .contributions-role").Select(r => r.TextContent.Trim()));
         var scenario = contributions.QuerySelectorAll("dd")[0];
         Assert.Equal(["Hugo Pratt", "Léa Ferrand"], scenario.QuerySelectorAll("a").Select(a => a.TextContent.Trim()));
-        Assert.All(scenario.QuerySelectorAll("a"), a => Assert.Equal(AppPaths.NotYetImplemented, a.GetAttribute("href")));
+        Assert.Equal(
+            _catalog.Album.Contributions.Where(c => c.Role == ContributionRole.Scenarist).Select(c => AppPaths.AuthorRecord(c.Author.Id)),
+            scenario.QuerySelectorAll("a").Select(a => a.GetAttribute("href")));
         Assert.DoesNotContain("crédité", contributions.TextContent);
     }
 
