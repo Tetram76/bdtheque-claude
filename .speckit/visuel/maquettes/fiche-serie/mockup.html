@@ -81,12 +81,12 @@ summary{cursor:pointer}
             </sc-for>
           </ul>
 
-          <div style="display: flex; flex-direction: column; gap: 8px; max-width: 560px">
+          <sc-if value="{{owned.hasProgress}}" hint-placeholder-val="{{true}}"><div style="display: flex; flex-direction: column; gap: 8px; max-width: 560px">
             <span style="font-weight: 700">{{owned.label}}</span>
-            <sc-if value="{{owned.hasBar}}" hint-placeholder-val="{{true}}"><span role="img" aria-label="{{owned.label}}" style="display: block; height: 10px; border-radius: {{t.btnR}}; background: {{owned.track}}; overflow: hidden">
+            <span role="img" aria-label="{{owned.label}}" style="display: block; height: 10px; border-radius: {{t.btnR}}; background: {{owned.track}}; overflow: hidden">
               <span style="display: block; height: 100%; width: {{owned.pct}}; background: {{t.colBg}}"></span>
-            </span></sc-if>
-          </div>
+            </span>
+          </div></sc-if>
 
           <dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 4px 32px">
             <sc-if value="{{s.hasPublisher}}" hint-placeholder-val="{{true}}"><div style="display: flex; gap: 10px; align-items: baseline">
@@ -150,12 +150,13 @@ summary{cursor:pointer}
         </div></sc-if>
       </section></sc-if>
 
-      <sc-if value="{{hasAlbums}}" hint-placeholder-val="{{true}}"><section aria-labelledby="s-albums" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 14px">
+      <section aria-labelledby="s-albums" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 14px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.albums}}</span>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: {{t.rowAlign}}; gap: 12px 16px">
           <h2 id="s-albums" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Combien d'albums ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
           <sc-if value="{{hasAlbums}}" hint-placeholder-val="{{true}}"><span style="font-size: 13px; color: {{t.muted}}">{{albumsSummary}}</span></sc-if>
         </div>
+        <sc-if value="{{noAlbums}}" hint-placeholder-val="{{false}}"><p style="margin: 0; color: {{t.muted}}">{{albumsSummary}}</p></sc-if>
         <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
           <div style="display: flex; flex-direction: column; gap: 8px">
             <h3 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">{{g.title}} <span style="font-family: {{t.fb}}; font-weight: 400; font-size: 14px; color: {{t.muted}}; text-transform: none">{{g.count}}</span></h3>
@@ -176,7 +177,7 @@ summary{cursor:pointer}
             </ol>
           </div>
         </sc-for>
-      </section></sc-if>
+      </section>
     </main>
   </div>
 
@@ -523,12 +524,10 @@ class View extends Mockup {
           ? { label: 'Complète', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
           : { label: 'À compléter', ...chip(false) }
       ],
-      // A series without any album yet has nothing to measure: it says so, without a bar.
+      // A series without any album yet has nothing to measure: no progress; the block of its albums says so.
       owned: {
-        hasBar: s.albums.length > 0,
-        label: s.albums.length === 0
-          ? 'Aucun album dans la série pour l\'instant'
-          : ownedCount + (ownedCount > 1 ? ' albums' : ' album') + ' sur ' + s.albums.length + ' dans la collection',
+        hasProgress: s.albums.length > 0,
+        label: ownedCount + (ownedCount > 1 ? ' albums' : ' album') + ' sur ' + s.albums.length + ' dans la collection',
         pct: s.albums.length === 0 ? '0%' : Math.round((ownedCount * 100) / s.albums.length) + '%',
         track: t.tB === '0' ? t.line : t.tBg === 'transparent' ? t.line : t.tBg
       },
@@ -560,8 +559,9 @@ class View extends Mockup {
       // The count of the albums stands beside the title; a series without album says so under it, as the
       // text of the block, rather than in the place of a count.
       hasAlbums: s.albums.length > 0,
+      noAlbums: s.albums.length === 0,
       albumsSummary: s.albums.length === 0
-        ? 'Aucun album dans cette série pour l\'instant.'
+        ? 'Aucun album dans la série pour l\'instant.'
         : s.albums.length + (s.albums.length > 1 ? ' albums : ' : ' album : ') + parts.join(', '),
       groups
     };

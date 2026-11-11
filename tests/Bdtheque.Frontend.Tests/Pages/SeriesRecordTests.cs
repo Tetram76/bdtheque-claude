@@ -284,15 +284,17 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void SeriesWithoutAlbum_SaysSo_WithoutBarNorBlockOfTheAlbums()
+    public void SeriesWithoutAlbum_SaysSo_InTheBlockOfTheAlbums_WithoutProgress()
     {
         _catalog.Series = Series() with { Albums = [], Overview = new SeriesOverview(0, []) };
 
         var page = Open();
 
-        Assert.Equal("Aucun album dans la série pour l'instant", page.Find(".series-progress-label").TextContent.Trim());
-        Assert.Empty(page.FindAll(".series-progress-bar"));
-        Assert.Empty(page.FindAll("[data-part='albums']"));
+        Assert.Empty(page.FindAll(".series-progress"));
+        var block = BlockOf(page, "Combien d'albums ?");
+        Assert.Equal("Aucun album dans la série pour l'instant.", block.QuerySelector(".series-albums-none")!.TextContent.Trim());
+        Assert.Empty(block.QuerySelectorAll(".series-albums-count"));
+        Assert.Empty(block.QuerySelectorAll(".series-group"));
         Assert.Equal(3, page.FindAll(".series-pile svg.cover-blank").Count);
     }
 

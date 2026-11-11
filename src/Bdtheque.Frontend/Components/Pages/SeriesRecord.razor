@@ -48,16 +48,16 @@ else if (_series is { } series)
                     <li class="series-fact" data-fact="@(series.IsComplete ? "complete" : null)">@L[series.IsComplete ? "Complete" : "ToComplete"]</li>
                 </ul>
 
-                @* A series without any album has nothing to measure: it says so, without a bar. *@
-                <div class="series-progress">
-                    <span class="series-progress-label">@ProgressLabel</span>
-                    @if (series.Albums.Count > 0)
-                    {
+                @* A series without any album has nothing to measure: no progress; the block of its albums says so. *@
+                @if (series.Albums.Count > 0)
+                {
+                    <div class="series-progress">
+                        <span class="series-progress-label">@ProgressLabel</span>
                         <span class="series-progress-track" aria-hidden="true">
                             <span class="series-progress-bar" style="--progress: @(OwnedCount * 100 / series.Albums.Count)%"></span>
                         </span>
-                    }
-                </div>
+                    </div>
+                }
 
                 @* Its template publisher and collection; only a publisher with a known website is a link, to that site, which opens
                    apart from the record (fonctionnel/structure-de-l-application.md). *@
@@ -143,7 +143,5 @@ else if (_series is { } series)
 
     private int OwnedCount => _series!.Albums.Count(a => a.Album.IsInCollection);
 
-    private string ProgressLabel => _series!.Albums.Count == 0
-        ? L["Progress.None"]
-        : L[OwnedCount > 1 ? "Progress.Other" : "Progress.One", Format.Number(OwnedCount), Format.Number(_series.Albums.Count)];
+    private string ProgressLabel => L[OwnedCount > 1 ? "Progress.Other" : "Progress.One", Format.Number(OwnedCount), Format.Number(_series!.Albums.Count)];
 }

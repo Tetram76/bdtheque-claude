@@ -9,11 +9,15 @@
    the series (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), which puts the special issues last, in two
    groups: the volumes and omnibuses, then the special issues. Each album is a card of a grid leading to its record: its cover
    (fonctionnel/regles-metier/couverture-d-un-album.md), its volume and its title, its rating when set, and where it stands with
-   regard to the collection, as the lists tell it. A series without any album has no such block: nothing to present, its
-   progress already says so (visuel/charte-graphique/convivialite-et-efficacite.md). *@
-@if (Albums.Count > 0)
-{
-    <Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="albums">
+   regard to the collection, as the lists tell it. A series without any album says so here, the one block a record keeps
+   without anything to present, as a series without album makes little sense (visuel/fiche-serie/contenu.md). *@
+<Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="albums">
+    @if (Albums.Count == 0)
+    {
+        <p class="series-albums-none">@L["None"]</p>
+    }
+    else
+    {
         <p class="series-albums-count">@Count</p>
         @foreach (var (title, albums) in Groups)
         {
@@ -47,8 +51,8 @@
                 </ol>
             </div>
         }
-    </Block>
-}
+    }
+</Block>
 
 @code {
     /// <summary>Every album of the series, in its order.</summary>

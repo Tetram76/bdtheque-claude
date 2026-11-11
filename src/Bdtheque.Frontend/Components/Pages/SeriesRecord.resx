@@ -33,9 +33,6 @@
   <data name="ToComplete" xml:space="preserve">
     <value>À compléter</value>
   </data>
-  <data name="Progress.None" xml:space="preserve">
-    <value>Aucun album dans la série pour l&apos;instant</value>
-  </data>
   <data name="Progress.One" xml:space="preserve">
     <value>{0} album sur {1} dans la collection</value>
   </data>
