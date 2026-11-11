@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Threading.Channels;
 using Bdtheque.Frontend.Formatting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,6 +23,7 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
     private readonly List<Uri> _requested = [];
     private readonly CapturingLogger _logger = new();
     private readonly StubHandler _handler;
+    private readonly Channel<DateTimeOffset> _armedWaits = Channel.CreateUnbounded<DateTimeOffset>();
     private readonly IsbnRangesRefresher _refresher;
 
     public IsbnRangesRefresherTests()
@@ -33,8 +35,8 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
             return _answers.Dequeue()();
         });
         _refresher = new IsbnRangesRefresher(
-            new StubClients(_handler), _formatter, Options.Create(new IsbnRangesOptions { Source = Source }), _clock,
-            _logger);
+            new StubClients(_handler), _formatter, Options.Create(new IsbnRangesOptions { Source = Source }),
+            new ObservedClock(_clock, wakeUp => _armedWaits.Writer.TryWrite(wakeUp)), _logger);
     }
 
     public async ValueTask DisposeAsync()
@@ -128,13 +130,21 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
         Assert.Equal("9782723445671", _formatter.Format("9782723445671"));
     }
 
-    // A bounded wait on the background loop, until it awaits its next attempt at the time given: the fake clock alone moves
-    // it on.
+    // A bounded wait on the background loop, until it awaits its next attempt, the wait for which must wake up at the time
+    // given: the fake clock alone moves it on.
     private async Task NextAttemptAsync(DateTimeOffset expected)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        while (_refresher.NextAttempt != expected)
-            await Task.Delay(10, timeout.Token);
+        DateTimeOffset wakeUp;
+        try
+        {
+            wakeUp = await _armedWaits.Reader.ReadAsync(timeout.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException($"The refresher armed no wait on the clock within 10 s; expected one waking up at {expected:O}.");
+        }
+        Assert.Equal(expected, wakeUp);
     }
 
     private static HttpResponseMessage RangeMessage() =>
@@ -150,6 +160,22 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
             Task.FromResult(answer(request));
+    }
+
+    // The fake clock, which tells the time each wait armed on it is to wake up, once armed and never before: the fake clock
+    // arms a wait from its current time, so that a test moving it on before the wait existed would arm it a whole delay
+    // later, and the loop would never wake up (#375).
+    private sealed class ObservedClock(FakeTimeProvider clock, Action<DateTimeOffset> armed) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => clock.GetUtcNow();
+
+        public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
+        {
+            var wakeUp = clock.GetUtcNow() + dueTime;
+            var timer = clock.CreateTimer(callback, state, dueTime, period);
+            armed(wakeUp);
+            return timer;
+        }
     }
 
     // What the refresher writes to the journal, with its level and its exception.

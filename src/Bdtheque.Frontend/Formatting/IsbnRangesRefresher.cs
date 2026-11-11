@@ -21,9 +21,6 @@ public sealed partial class IsbnRangesRefresher(
     /// <summary>A site that does not answer is tried again soon, without loading it.</summary>
     public static readonly TimeSpan RetryDelay = TimeSpan.FromHours(1);
 
-    /// <summary>When the next download is due, once the current one is done; <c>null</c> before.</summary>
-    public DateTimeOffset? NextAttempt { get; private set; }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (options.Value.Source is not { } source)
@@ -31,13 +28,10 @@ public sealed partial class IsbnRangesRefresher(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var due = clock.GetUtcNow() + (await TryDownloadAsync(source, stoppingToken) ? RefreshDelay : RetryDelay);
-            NextAttempt = due;
-            // From the time due rather than a delay: the wait is the same whenever the clock is read.
-            var wait = due - clock.GetUtcNow();
+            var delay = await TryDownloadAsync(source, stoppingToken) ? RefreshDelay : RetryDelay;
             try
             {
-                await Task.Delay(wait > TimeSpan.Zero ? wait : TimeSpan.Zero, clock, stoppingToken);
+                await Task.Delay(delay, clock, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
