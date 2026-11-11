@@ -11,4 +11,7 @@ public enum SaveBarState
 
     /// <summary>An existing record whose form is as saved.</summary>
     Unchanged,
+
+    /// <summary>A record whose form waits for files still being sent, which it is not saved without.</summary>
+    Sending,
 }

@@ -44,7 +44,7 @@
         @foreach (var input in _inputs)
         {
             <InputFile @key="input" class="edition-visuals-input" multiple accept="image/jpeg,image/png,image/webp,image/gif"
-                       aria-label="@L["Choose.Label"]" hidden="@(input != _inputs[^1])" OnChange="ChooseAsync" />
+                       aria-label="@L["Choose.Label"]" hidden="@(input != _inputs[^1])" OnChange="Choose" />
         }
     </div>
 
@@ -171,6 +171,12 @@
     [Parameter]
     public EventCallback VisualsChanged { get; set; }
 
+    /// <summary>
+    /// Raised when files start or stop being sent: the visuals they will add are not yet in the form, which is not saved meanwhile.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> SendingChanged { get; set; }
+
     /// <summary>What api accepts and keeps, which the block announces.</summary>
     [Parameter, EditorRequired]
     public VisualLimits Limits { get; set; } = null!;
@@ -184,30 +190,37 @@
 
     protected override void OnParametersSet() => ScheduleExpiry();
 
-    private async Task ChooseAsync(InputFileChangeEventArgs args)
+    private void Choose(InputFileChangeEventArgs args)
     {
         foreach (var file in args.GetMultipleFiles(int.MaxValue))
             _uploads.Add(new Upload(file, _newType));
         // A new input for the next choice: the files of this one stay valid until they are sent.
         _inputs.Add(_inputs[^1] + 1);
-        // The files join the sending under way, if any; otherwise they start it, and its failure is that of this choice.
+        // The files join the sending under way, if any; otherwise they start it, which runs beyond this choice.
         if (!_sending)
-            await SendAllAsync();
+            _ = SendAllAsync();
     }
 
     // One at a time, as api takes them (choix-implementation/domaine/visuels-stockage-et-traitement.md), in the order chosen.
-    // The sending says itself that it is under way, from its start to its end, even when no file of it waits for api.
+    // The sending says itself that it is under way, from its start to its end, even when no file of it waits for api; run
+    // without being awaited, it hands its failures to the component, as Blazor documents it.
     private async Task SendAllAsync()
     {
         _sending = true;
         try
         {
+            await SendingChanged.InvokeAsync(true);
             while (_uploads.Find(u => u.State == UploadState.Waiting) is { } upload)
                 await SendAsync(upload);
         }
         catch (OperationCanceledException) when (_disposal.IsCancellationRequested)
         {
             // The form is gone, and the uploads with it.
+            return;
+        }
+        catch (Exception exception)
+        {
+            await DispatchExceptionAsync(exception);
             return;
         }
         finally
@@ -217,6 +230,7 @@
 
         // Every file sent: only the input of the next choice is still needed.
         _inputs.RemoveRange(0, _inputs.Count - 1);
+        await SendingChanged.InvokeAsync(false);
         StateHasChanged();
     }
 

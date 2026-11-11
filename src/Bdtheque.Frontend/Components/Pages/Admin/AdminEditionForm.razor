@@ -159,7 +159,7 @@ else
             }
 
             <EditionVisualsEditor Id="edition-visuals" Visuals="Entry.Visuals" VisualsChanged="StateHasChanged" Limits="Limits!"
-                                  Functions="VisualFunctions" />
+                                  SendingChanged="sending => _sendingVisuals = sending" Functions="VisualFunctions" />
         </ChildContent>
     </EntryForm>
 
@@ -175,6 +175,8 @@ else
     private EntryForm? _form;
     private bool _revealProblem;
     private bool _saving;
+    // Files on their way to api: the visuals they add are not yet in the form, which is not saved before them.
+    private bool _sendingVisuals;
     private string? _savedFingerprint;
     private bool _changesShown;
     private int _publisherChoice;
@@ -275,6 +277,7 @@ else
 
     private SaveBarState State => Entry!.Id switch
     {
+        _ when _sendingVisuals => SaveBarState.Sending,
         null => SaveBarState.New,
         _ when Entry.Fingerprint() == _savedFingerprint => SaveBarState.Unchanged,
         _ => SaveBarState.Unsaved,
@@ -415,7 +418,7 @@ else
 
     private async Task SaveAsync()
     {
-        if (_saving)
+        if (_saving || _sendingVisuals)
             return;
         _saving = true;
         _saveProblem = null;

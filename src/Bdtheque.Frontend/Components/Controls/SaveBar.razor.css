@@ -32,8 +32,9 @@
     color: var(--color-text-muted);
 }
 
-/* Unsaved changes are marked by a dot of the accent color. */
-.save-bar-state[data-state="unsaved"]::before {
+/* Unsaved changes, and files still being sent for the form, are marked by a dot of the accent color. */
+.save-bar-state[data-state="unsaved"]::before,
+.save-bar-state[data-state="sending"]::before {
     content: "";
     flex: none;
     inline-size: 0.5625rem;

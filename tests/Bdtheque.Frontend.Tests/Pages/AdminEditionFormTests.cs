@@ -697,6 +697,32 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Visuals_BeingSent_HoldTheSaving_UntilTheyAreInTheForm()
+    {
+        // Saved with the form: saving while a file is on its way would leave it out, then cancel its sending.
+        var page = OpenOwned();
+        var sent = new TaskCompletionSource();
+        _api.Hold = (path, _) => path == "/admin/visuals/pending" ? sent.Task : Task.CompletedTask;
+        _api.Write = (_, path, _) => path == "/admin/visuals/pending"
+            ? FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created)
+            : FakeAdminApi.Json(Owned);
+        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "dedicace.png"));
+        page.WaitForAssertion(() => Assert.Single(_api.Written));
+
+        Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent);
+        Assert.True(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
+        page.Find("form").Submit();
+        Assert.Single(_api.Written);
+
+        sent.SetResult();
+        page.WaitForAssertion(() => Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent));
+        Assert.False(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
+        page.Find("form").Submit();
+        page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
+        Assert.Contains(((Guid?)null, (Guid?)AddedId, "Cover"), VisualsSent());
+    }
+
+    [Fact]
     public void Visuals_ChosenAfterFilesAllRefusedWithoutBeingSent_AreSent()
     {
         // Refused at once, these files ended the sending before any wait: the next choice is sent all the same.
