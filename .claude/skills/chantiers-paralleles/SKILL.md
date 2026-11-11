@@ -119,6 +119,20 @@ chosen before the others.
 
 - Each note of a session of the batch: report it to the user in a line or two,
   with the links of its pull request; never fabricate its result.
+- A note that reports a merged (or abandoned) pull request: **check the
+  cleanup** and finish it if needed, before launching the next chantier:
+
+  ```bash
+  gh issue view <n> --json state,locked,comments --jq '"\(.state) locked=\(.locked) comments=\(.comments|length)"'
+  gh pr view <pr> --json state,locked --jq '"\(.state) locked=\(.locked)"'
+  git ls-remote --heads origin <branch>   # empty: remote branch deleted
+  git branch --list <branch>              # empty: local branch deleted
+  git worktree list                       # the session's worktree, until archived
+  ```
+
+  Then archive the session (`archive_session`, reason « PR #<pr> merged »),
+  which stops it and removes its worktree; `git worktree prune` after it.
+  Report to the user in one line what was cleaned.
 - A note that reports a split or a new ticket: tell the user which tickets
   join the candidates; they are planned at the next pass of step 2 (now, if a
   place is free), after checking them on GitHub (step 2.1).
