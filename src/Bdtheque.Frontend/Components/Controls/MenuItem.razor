@@ -11,7 +11,7 @@ else
 {
     @* A submit button submits its form: the page it leads to closes the menu. *@
     <button type="@Type" class="menu-item" data-variant="@VariantName" popovertarget="@(Type == "submit" ? null : Menu?.Id)"
-            popovertargetaction="@(Type == "submit" ? null : "hide")" @onclick="OnClick">
+            popovertargetaction="@(Type == "submit" ? null : "hide")" aria-pressed="@PressedValue" @onclick="OnClick">
         @Content
     </button>
 }
@@ -48,6 +48,15 @@ else
 
     [Parameter]
     public EventCallback OnClick { get; set; }
+
+    /// <summary>
+    /// Whether a button choosing one of several values is that of the current one (e.g. the type of a visual): a toggle that is
+    /// pressed, which a mark shows; none for any other item.
+    /// </summary>
+    [Parameter]
+    public bool? Pressed { get; set; }
+
+    private string? PressedValue => Pressed switch { true => "true", false => "false", null => null };
 
     private string VariantName => Variant.ToString().ToLowerInvariant();
 

@@ -77,6 +77,12 @@ public static class DomainRules
     /// </summary>
     public const string EditionVisualImageDimensionsTooLarge = "EditionVisual.ImageDimensionsTooLarge";
 
+    /// <summary>
+    /// A visual waiting for the saving of its edition, kept no longer (choix-implementation/domaine/visuels-stockage-et-traitement.md,
+    /// Zone d'attente): its file is to be added again.
+    /// </summary>
+    public const string EditionVisualPendingExpired = "EditionVisual.PendingExpired";
+
     public const string GenreLabelRequired = "Genre.LabelRequired";
 
     public const string PublisherNameRequired = "Publisher.NameRequired";

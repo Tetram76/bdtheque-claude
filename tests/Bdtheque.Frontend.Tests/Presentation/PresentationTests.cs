@@ -28,6 +28,24 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Fact]
+    public void Block_AndButton_AClassOfTheirCaller_IsAddedToTheirOwn()
+    {
+        // Their own class carries the styles of the theme: a class of the caller (e.g. to place the block) adds to it, never
+        // replaces it.
+        var block = Render<Block>(parameters => parameters
+            .Add(p => p.Title, "Les visuels")
+            .Add(p => p.Raised, true)
+            .AddUnmatched("class", "edition-visuals")
+            .AddUnmatched("id", "visuals"));
+        var button = Render<Button>(parameters => parameters
+            .Add(p => p.Label, "Enregistrer")
+            .AddUnmatched("class", "save-bar-save"));
+
+        Assert.Equal(("block block-raised edition-visuals", "visuals"), (block.Find("section").ClassName, block.Find("section").Id));
+        Assert.Equal("button save-bar-save", button.Find("button").ClassName);
+    }
+
+    [Fact]
     public void Block_CarriesItsKicker_AboveItsTitle_AndCanBeRaised()
     {
         var block = Render<Block>(parameters => parameters

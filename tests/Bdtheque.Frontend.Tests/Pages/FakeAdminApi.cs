@@ -35,7 +35,10 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
 
     public List<string> Requested { get; } = [];
 
-    /// <summary>What a write (POST, PUT) answers, from its method, path and body; none, a not found.</summary>
+    /// <summary>
+    /// What a write (POST, PUT, DELETE) answers, from its method, path and body; none, a not found. A multipart form is given as an
+    /// object of its fields, a file as its name and length; a deletion, as the query of its address.
+    /// </summary>
     public Func<HttpMethod, string, JsonElement, HttpResponseMessage>? Write { get; set; }
 
     /// <summary>What a request waits for before it answers, from its path and body (none for a read): a response that arrives late.</summary>
@@ -62,6 +65,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
     public void AddServices(IServiceCollection services, TestRequest request)
     {
         audience.AddServices(services, request, new ApiClient(new HttpClient(this) { BaseAddress = new Uri("http://api") }));
+        services.AddSingleton(new ApiUploadClient(new HttpClient(this) { BaseAddress = new Uri("http://api") }));
         services.AddLocalization();
         services.AddLogging();
         services.AddScoped<AdminRecordCounts>();
@@ -71,15 +75,48 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         services.AddSingleton<ValueLabels>();
     }
 
+    private static async Task<JsonElement> BodyOfAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        switch (request.Content)
+        {
+            case null:
+                return JsonSerializer.SerializeToElement(new Dictionary<string, string> { ["query"] = request.RequestUri!.Query });
+            case MultipartFormDataContent form:
+                var fields = new Dictionary<string, object>();
+                foreach (var part in form)
+                {
+                    var name = part.Headers.ContentDisposition!.Name!.Trim('"');
+                    if (part.Headers.ContentDisposition.FileName is { } fileName)
+                    {
+                        await using var file = await part.ReadAsStreamAsync(cancellationToken);
+                        var length = 0L;
+                        var buffer = new byte[81920];
+                        int read;
+                        while ((read = await file.ReadAsync(buffer, cancellationToken)) > 0)
+                            length += read;
+                        fields[name] = new Dictionary<string, object> { ["name"] = fileName.Trim('"'), ["length"] = length };
+                    }
+                    else
+                    {
+                        fields[name] = await part.ReadAsStringAsync(cancellationToken);
+                    }
+                }
+
+                return JsonSerializer.SerializeToElement(fields);
+            default:
+                return await request.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
+        }
+    }
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var path = request.RequestUri!.AbsolutePath;
         if (path.StartsWith("/audience/", StringComparison.Ordinal))
             return await _audience.SendAsync(request, cancellationToken);
 
-        if (request.Method == HttpMethod.Post || request.Method == HttpMethod.Put)
+        if (request.Method == HttpMethod.Post || request.Method == HttpMethod.Put || request.Method == HttpMethod.Delete)
         {
-            var body = await request.Content!.ReadFromJsonAsync<JsonElement>(cancellationToken);
+            var body = await BodyOfAsync(request, cancellationToken);
             Written.Add((request.Method, path, body));
             if (Hold is not null)
                 await Hold(path, body);

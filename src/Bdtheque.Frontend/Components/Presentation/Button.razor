@@ -2,14 +2,14 @@
    (--control-height), the same on every page for a given width of screen (visuel/charte-graphique/convivialite-et-efficacite.md). Reduced to its icon on a smartphone, it keeps its label for assistive technologies. *@
 @if (Href is not null)
 {
-    <a class="button" href="@Href" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnlyOnSmall" data-icon-only="@IconOnlyAlways" title="@Tooltip" @attributes="AdditionalAttributes">
+    <a class="@ClassName" href="@Href" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnlyOnSmall" data-icon-only="@IconOnlyAlways" title="@Tooltip" @attributes="OtherAttributes">
         @Content
     </a>
 }
 else
 {
-    <button class="button" type="@Type" disabled="@Disabled" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnlyOnSmall" data-icon-only="@IconOnlyAlways" title="@Tooltip"
-            @onclick="OnClick" @attributes="AdditionalAttributes">
+    <button class="@ClassName" type="@Type" disabled="@Disabled" data-variant="@VariantName" data-icon-only-on-smartphone="@IconOnlyOnSmall" data-icon-only="@IconOnlyAlways" title="@Tooltip"
+            @onclick="OnClick" @attributes="OtherAttributes">
         @Content
     </button>
 }
@@ -55,6 +55,11 @@ else
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    // Its own class, which carries the styles of the theme, then that of the caller, which adds to it.
+    private string ClassName => CallerClasses.Merge("button", AdditionalAttributes);
+
+    private IEnumerable<KeyValuePair<string, object>>? OtherAttributes => CallerClasses.Others(AdditionalAttributes);
 
     private string VariantName => Variant.ToString().ToLowerInvariant();
 

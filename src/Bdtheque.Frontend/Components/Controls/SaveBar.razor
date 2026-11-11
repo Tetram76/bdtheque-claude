@@ -10,7 +10,7 @@
         </p>
         <div class="save-bar-actions">
             <Button Label="@L["Cancel"]" Href="@CancelHref" />
-            <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" Disabled="Saving" />
+            <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" Disabled="@(Saving || State == SaveBarState.Sending)" />
         </div>
     </div>
 </div>

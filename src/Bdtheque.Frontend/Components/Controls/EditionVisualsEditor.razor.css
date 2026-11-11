@@ -1,0 +1,237 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md; visuel/saisie-edition/declinaison-par-theme.md):
+   the drop zone in dashes, the uploads in tiles, a refused one in the color of deletion, and the visuals in a single grid of
+   thumbnails in the proportions of a cover, each marked with its type (visuel/saisie-edition/contenu.md, Les visuels). */
+.edition-visuals-help,
+.edition-visuals-later,
+.edition-visuals-count {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.edition-visuals-count {
+    font-weight: var(--font-weight-strong);
+    color: var(--color-text);
+}
+
+.edition-visuals-later {
+    padding: var(--space-m);
+    border: 2px dashed var(--color-rule);
+    border-radius: var(--radius-tile);
+    text-align: center;
+}
+
+/* The zone a file is dropped on, anywhere, or chosen from: its file input, transparent, covers it whole, under the choice of
+   the type alone, which stays usable. */
+.edition-visuals-drop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    border: 2px dashed var(--color-rule);
+    border-radius: var(--radius-tile);
+    text-align: center;
+    font-size: var(--font-size-small);
+}
+
+.edition-visuals-target {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-text-muted);
+}
+
+.edition-visuals-target ::deep .icon {
+    inline-size: 1.375rem;
+    block-size: 1.375rem;
+}
+
+/* The input focused, not the choice of the type. */
+.edition-visuals-drop:focus-within:not(:has(select:focus)) {
+    outline: 2px solid var(--color-text);
+    outline-offset: var(--space-xs);
+}
+
+.edition-visuals-choose {
+    font-weight: var(--font-weight-strong);
+    color: var(--color-text);
+    text-decoration: underline;
+}
+
+.edition-visuals-drop ::deep .edition-visuals-input {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    opacity: 0;
+    cursor: pointer;
+    /* The rounded corners of a control, which a drop would miss: those of the zone instead. */
+    border-radius: inherit;
+}
+
+.edition-visuals-type {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+}
+
+.edition-visuals-type select {
+    inline-size: auto;
+}
+
+.edition-visuals-formats {
+    color: var(--color-text-muted);
+}
+
+.edition-visuals-uploads {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* On the surface of the controls, whatever the color of the block: a refusal in the color of deletion stays readable. */
+.edition-visuals-upload {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-s) var(--space-m);
+    border: 2px solid var(--color-rule);
+    border-radius: var(--radius-tile);
+    background: var(--color-control-background);
+    color: var(--color-text);
+    font-size: var(--font-size-small);
+}
+
+.edition-visuals-upload[data-refused] {
+    border-color: var(--color-delete);
+}
+
+.edition-visuals-upload-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+}
+
+.edition-visuals-upload-name {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: var(--font-weight-strong);
+}
+
+.edition-visuals-upload-status {
+    flex: none;
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-strong);
+}
+
+.edition-visuals-upload[data-refused] .edition-visuals-upload-status,
+.edition-visuals-upload-reason {
+    color: var(--color-delete);
+}
+
+.edition-visuals-upload-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.edition-visuals-upload-bar {
+    display: block;
+    block-size: 0.375rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-rule);
+    overflow: hidden;
+}
+
+.edition-visuals-upload-bar > span {
+    display: block;
+    block-size: 100%;
+    background: var(--color-accent);
+}
+
+/* A single grid, in the order of the types: a type of a single visual does not take a line of its own. */
+.edition-visuals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* A thumbnail as any cover (Cover): the whole image at its own proportions in the room of a cover, never cropped; its type and its
+   menu over it. */
+.edition-visual {
+    position: relative;
+    display: grid;
+    --cover-width: 100%;
+    cursor: grab;
+}
+
+.edition-visual[data-dragged] {
+    opacity: 0.5;
+}
+
+/* Dragged by its thumbnail, the image itself never dragged out of the page. */
+.edition-visual ::deep img {
+    pointer-events: none;
+}
+
+/* The type, on a dark band at the foot of the thumbnail, readable on any image. */
+.edition-visual-mark {
+    position: absolute;
+    inset-block-end: var(--space-xs);
+    inset-inline-start: var(--space-xs);
+    padding: 0 var(--space-xs);
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--color-surface-inverse) 70%, transparent);
+    color: var(--color-text-on-inverse);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+}
+
+.edition-visual-actions {
+    position: absolute;
+    inset-block-start: var(--space-xs);
+    inset-inline-end: var(--space-xs);
+}
+
+.edition-visual-actions ::deep .actions-menu-toggle {
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-surface-inverse) 70%, transparent);
+    color: var(--color-text-on-inverse);
+}
+
+.edition-visual-menu-heading {
+    padding: var(--space-xs) var(--space-s) 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+/* Its parts spaced as the fields of the other blocks of the form. */
+.edition-visuals-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}

@@ -55,7 +55,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 | ~~#207~~ | Saisie d'un auteur |
 | ~~#208~~ | Saisie d'un éditeur et de ses collections |
 | ~~#361~~ | Saisie d'une édition et d'une intention d'achat |
-| #362 | Visuels d'une édition sur sa fiche de saisie |
+| ~~#362~~ | Visuels d'une édition sur sa fiche de saisie |
 | ~~#321~~ | Fiche d'un album : structure, identité, contributions, genres et univers, résumé |
 | ~~#322~~ | Fiche d'un album : visuels de l'édition, éditions de la collection et détail de l'édition choisie |
 | ~~#323~~ | Fiche d'un album : intentions d'achat et reste de la série |

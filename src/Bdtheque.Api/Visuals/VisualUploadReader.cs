@@ -28,6 +28,30 @@ internal static class VisualUploadReader
     /// <exception cref="BadHttpRequestException">The request is not a complete upload form: a technical error.</exception>
     public static async Task<VisualUpload> ReadAsync(HttpRequest request, long maxFileBytes, CancellationToken cancellationToken)
     {
+        var (file, type, albumVersion) = await ReadFieldsAsync(request, maxFileBytes, cancellationToken);
+        if (file is null || type is null || albumVersion is null)
+            throw new BadHttpRequestException("The upload form misses its file, the type of the visual or the version of the album.");
+        if (!Enum.TryParse<ContractEnums.VisualType>(type, out var visualType))
+            throw new BadHttpRequestException($"'{type}' is not a type of visual.");
+        if (!uint.TryParse(albumVersion, NumberStyles.None, CultureInfo.InvariantCulture, out var version))
+            throw new BadHttpRequestException($"'{albumVersion}' is not a version.");
+
+        return new VisualUpload(file, visualType, version);
+    }
+
+    /// <summary>
+    /// Reads the file of a pending visual (choix-implementation/domaine/visuels-stockage-et-traitement.md, Zone d'attente), its
+    /// only field: attached to no edition, it has neither type nor version yet.
+    /// </summary>
+    /// <exception cref="Domain.Common.DomainRuleViolationException">The file weighs more than <paramref name="maxFileBytes"/>.</exception>
+    /// <exception cref="BadHttpRequestException">The request is not a complete upload form: a technical error.</exception>
+    public static async Task<byte[]> ReadFileAsync(HttpRequest request, long maxFileBytes, CancellationToken cancellationToken) =>
+        (await ReadFieldsAsync(request, maxFileBytes, cancellationToken)).File
+        ?? throw new BadHttpRequestException("The upload form misses its file.");
+
+    private static async Task<(byte[]? File, string? Type, string? AlbumVersion)> ReadFieldsAsync(
+        HttpRequest request, long maxFileBytes, CancellationToken cancellationToken)
+    {
         if (!MediaTypeHeaderValue.TryParse(request.ContentType, out var contentType)
             || !string.Equals(contentType.MediaType.Value, "multipart/form-data", StringComparison.OrdinalIgnoreCase)
             || HeaderUtilities.RemoveQuotes(contentType.Boundary).Value is not { Length: > 0 } boundary)
@@ -66,14 +90,7 @@ internal static class VisualUploadReader
             }
         }
 
-        if (file is null || type is null || albumVersion is null)
-            throw new BadHttpRequestException("The upload form misses its file, the type of the visual or the version of the album.");
-        if (!Enum.TryParse<ContractEnums.VisualType>(type, out var visualType))
-            throw new BadHttpRequestException($"'{type}' is not a type of visual.");
-        if (!uint.TryParse(albumVersion, NumberStyles.None, CultureInfo.InvariantCulture, out var version))
-            throw new BadHttpRequestException($"'{albumVersion}' is not a version.");
-
-        return new VisualUpload(file, visualType, version);
+        return (file, type, albumVersion);
     }
 
     private static async Task<string> ReadFieldAsync(Stream body, CancellationToken cancellationToken) =>

@@ -157,6 +157,9 @@ else
                     </div>
                 </Block>
             }
+
+            <EditionVisualsEditor Id="edition-visuals" Visuals="Entry.Visuals" VisualsChanged="StateHasChanged" Limits="Limits!"
+                                  SendingChanged="sending => _sendingVisuals = sending" Functions="VisualFunctions" />
         </ChildContent>
     </EntryForm>
 
@@ -172,6 +175,8 @@ else
     private EntryForm? _form;
     private bool _revealProblem;
     private bool _saving;
+    // Files on their way to api: the visuals they add are not yet in the form, which is not saved before them.
+    private bool _sendingVisuals;
     private string? _savedFingerprint;
     private bool _changesShown;
     private int _publisherChoice;
@@ -203,6 +208,10 @@ else
     /// </summary>
     [PersistentState]
     public List<RecordOption>? PublisherCollections { get; set; }
+
+    /// <summary>What api accepts and keeps of the visuals added, which their block announces.</summary>
+    [PersistentState]
+    public VisualLimits? Limits { get; set; }
 
     // Whether the page creates a purchase intent on a new edition, which it tells by its address.
     private bool IsNewPurchaseIntent => Id is null && AppPaths.IsNewPurchaseIntent(new Uri(Navigation.Uri).AbsolutePath);
@@ -268,6 +277,7 @@ else
 
     private SaveBarState State => Entry!.Id switch
     {
+        _ when _sendingVisuals => SaveBarState.Sending,
         null => SaveBarState.New,
         _ when Entry.Fingerprint() == _savedFingerprint => SaveBarState.Unchanged,
         _ => SaveBarState.Unsaved,
@@ -290,17 +300,27 @@ else
         {
             try
             {
-                AlbumFormat = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
-                Entry = Id switch
+                var format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+                var entry = Id switch
                 {
                     { } id => EditionEntry.Of(await Api.GetAsync<EditionForm>($"/admin/albums/{AlbumId}/editions/{id}")),
                     _ when IsNewPurchaseIntent => EditionEntry.NewPurchaseIntent(
                         await Api.GetAsync<NewPurchaseIntentForm>($"/admin/albums/{AlbumId}/purchase-intents/new")),
                     _ => EditionEntry.New(await Api.GetAsync<NewEditionForm>($"/admin/albums/{AlbumId}/editions/new")),
                 };
-                ReadEntry = Entry.Copy();
-                if (Entry.Publisher is { } publisher)
-                    PublisherCollections = await CollectionsOfAsync(publisher.Id);
+                // Read after the edition: a write between both readings leaves the form the older version of the album, which its
+                // saving sends, refused as a conflict rather than writing over what it did not read.
+                if (entry.Id is { } edition)
+                    entry.Visuals = [.. (await Api.GetAsync<EditionVisualsForm>($"/admin/albums/{AlbumId}/editions/{edition}/visuals")).Visuals.Select(VisualItem.Of)];
+                var limits = await Api.GetAsync<VisualLimits>("/admin/visuals/limits");
+                var collections = entry.Publisher is { } publisher ? await CollectionsOfAsync(publisher.Id) : null;
+
+                // Published once all of it is read: the form is shown only whole, a reading that fails showing the error instead.
+                AlbumFormat = format;
+                Limits = limits;
+                PublisherCollections = collections;
+                ReadEntry = entry.Copy();
+                Entry = entry;
             }
             catch (ApiProblemException exception)
             {
@@ -403,7 +423,7 @@ else
 
     private async Task SaveAsync()
     {
-        if (_saving)
+        if (_saving || _sendingVisuals)
             return;
         _saving = true;
         _saveProblem = null;
@@ -413,7 +433,7 @@ else
             if (entry.Id is { } id)
             {
                 await Api.PutAsync<UpdateEditionRequest, EditionForm>(
-                    $"/admin/albums/{entry.AlbumId}/editions/{id}", new UpdateEditionRequest(entry.ToContent(), entry.AlbumVersion));
+                    $"/admin/albums/{entry.AlbumId}/editions/{id}", new UpdateEditionRequest(entry.ToContent(), entry.AlbumVersion, entry.VisualEntries()));
                 await (entry.PurchaseIntentId is { } intent
                     ? Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentSaved, $"purchase-intent={intent}")
                     : Recorder.RecordActionAsync(AudienceFunctions.AdminEditionSaved, $"edition={id}"));
@@ -422,13 +442,13 @@ else
             {
                 await Api.PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(
                     $"/admin/albums/{entry.AlbumId}/purchase-intents",
-                    new CreatePurchaseIntentRequest(entry.ToPurchaseIntentContent(), entry.AlbumVersion));
+                    new CreatePurchaseIntentRequest(entry.ToPurchaseIntentContent(), entry.AlbumVersion, entry.VisualEntries()));
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentCreated, $"album={entry.AlbumId}");
             }
             else
             {
                 var created = await Api.PostAsync<CreateEditionRequest, EditionForm>(
-                    $"/admin/albums/{entry.AlbumId}/editions", new CreateEditionRequest(entry.ToContent(), entry.AlbumVersion));
+                    $"/admin/albums/{entry.AlbumId}/editions", new CreateEditionRequest(entry.ToContent(), entry.AlbumVersion, entry.VisualEntries()));
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminEditionCreated, $"edition={created.Id}");
             }
 
@@ -471,6 +491,15 @@ else
             _ => Recorder.RecordActionAsync(AudienceFunctions.AdminEditionChanges, $"album={entry.AlbumId}"),
         });
     }
+
+
+    private EditionVisualsEditor.VisualFunctions VisualFunctions => Entry!.IsPurchaseIntent
+        ? new(AudienceFunctions.AdminPurchaseIntentVisualAdded, AudienceFunctions.AdminPurchaseIntentVisualsArranged,
+            AudienceFunctions.AdminPurchaseIntentVisualTypeChanged, AudienceFunctions.AdminPurchaseIntentVisualDeletion,
+            AudienceFunctions.AdminPurchaseIntentVisualDeleted)
+        : new(AudienceFunctions.AdminEditionVisualAdded, AudienceFunctions.AdminEditionVisualsArranged,
+            AudienceFunctions.AdminEditionVisualTypeChanged, AudienceFunctions.AdminEditionVisualDeletion,
+            AudienceFunctions.AdminEditionVisualDeleted);
 
     // The record as it is now, the changes of the form left behind: a navigation that loads the page anew, the same page, which
     // reads anew the edition or, for a new one, the album and what the series pre-fills.
@@ -515,7 +544,19 @@ else
 
     // Each field the user changed since the edition was read, with what they entered, to enter it again once the edition is
     // reloaded: block by block of the form.
-    private List<EntryChange> Changes() => [.. EditionChanges(ReadEntry!, Entry!), .. CopyChanges(ReadEntry!, Entry!)];
+    private List<EntryChange> Changes() => [.. EditionChanges(ReadEntry!, Entry!), .. CopyChanges(ReadEntry!, Entry!), .. VisualChanges(ReadEntry!, Entry!)];
+
+    // Les visuels: their number, whichever were added, removed, ordered or retyped, to add again once the edition is reloaded.
+    private IEnumerable<EntryChange> VisualChanges(EditionEntry read, EditionEntry entry)
+    {
+        if (!read.VisualEntries().SequenceEqual(entry.VisualEntries()))
+            yield return new(L["Visuals"], entry.Visuals.Count switch
+            {
+                0 => L["Visuals.None"],
+                1 => L["Visuals.One"],
+                var count => L["Visuals.Other", count],
+            });
+    }
 
     // L'édition, Fabrication.
     private IEnumerable<EntryChange> EditionChanges(EditionEntry read, EditionEntry entry)

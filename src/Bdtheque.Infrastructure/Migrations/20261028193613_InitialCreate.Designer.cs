@@ -732,6 +732,53 @@ namespace Bdtheque.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bdtheque.Domain.Entities.PendingVisual", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MediaReference")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .UseCollation("fr-FR-x-icu");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Palette", "Bdtheque.Domain.Entities.PendingVisual.Palette#VisualPalette", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<int>("Accent")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Deep")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Dominant")
+                                .HasColumnType("integer");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("PendingVisuals", t =>
+                        {
+                            t.HasCheckConstraint("CK_PendingVisuals_MediaReferenceNotBlank", "COALESCE(LENGTH(TRIM(\"MediaReference\")), 0) > 0");
+
+                            t.HasCheckConstraint("CK_PendingVisuals_Palette_AccentIsRgb", "\"Palette_Accent\" BETWEEN 0 AND 16777215");
+
+                            t.HasCheckConstraint("CK_PendingVisuals_Palette_DeepIsRgb", "\"Palette_Deep\" BETWEEN 0 AND 16777215");
+
+                            t.HasCheckConstraint("CK_PendingVisuals_Palette_DominantIsRgb", "\"Palette_Dominant\" BETWEEN 0 AND 16777215");
+                        });
+                });
+
             modelBuilder.Entity("Bdtheque.Domain.Entities.Publisher", b =>
                 {
                     b.Property<Guid>("Id")

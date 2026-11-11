@@ -1,0 +1,444 @@
+@using System.Globalization
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Errors
+@using Bdtheque.Frontend.Entries
+@implements IDisposable
+@inject IStringLocalizer<EditionVisualsEditor> L
+@inject IStringLocalizer<RuleMessages> Rules
+@inject ApiUploadClient Uploads
+@inject ValueLabels Values
+@inject AudienceRecorder Recorder
+@inject TimeProvider Clock
+
+@* The visuals of an edition, a block of its entry form, saved with it (visuel/saisie-edition/contenu.md, Les visuels): adding,
+   removing, retyping or ordering a visual only changes the form, whose saving sends its visuals. A file chosen or dropped on the
+   file input of the browser is read by the circuit and streamed to the waiting area of api one at a time, which validates it at
+   once (choix-implementation/domaine/visuels-stockage-et-traitement.md, Zone d'attente): the form applies no rule of its own, and
+   says why api refused a file. A visual added is kept there for a limited time, past which it is removed from the form, which a
+   dialog tells. A visual is ordered among those of its type by dragging it, with the drag events of the browser that Blazor
+   handles, without any script. *@
+<Block Title="@L["Block"]" Kicker="@L["Kicker"]" class="edition-visuals">
+    <div class="edition-visuals-body">
+    <p class="edition-visuals-help">@L["Help", Lifetime]</p>
+
+    <div class="edition-visuals-drop">
+        @* The file inputs cover the whole zone, which a file is dropped on anywhere as it is chosen, the choice of the type
+           alone above them: the last one takes the next choice, the others keeping the files still waiting their turn, which
+           a new choice in the same input would discard. *@
+        <div class="edition-visuals-target">
+            <Icon Name="IconName.Upload" />
+            <span>@L["Drop"] <span class="edition-visuals-choose">@L["Choose"]</span></span>
+        </div>
+        <span class="edition-visuals-type">
+            <label for="@($"{Id}-type")">@L["AddedAs"]</label>
+            <select id="@($"{Id}-type")" @bind="_newType">
+                @foreach (var type in Enum.GetValues<VisualType>())
+                {
+                    <option value="@type">@Values.Of(type)</option>
+                }
+            </select>
+        </span>
+        <span class="edition-visuals-formats">@L["Formats", MaxSize(Limits.MaxFileSizeBytes)]</span>
+        @foreach (var input in _inputs)
+        {
+            <InputFile @key="input" class="edition-visuals-input" multiple accept="image/jpeg,image/png,image/webp,image/gif"
+                       aria-label="@L["Choose.Label"]" hidden="@(input != _inputs[^1])" OnChange="ChooseAsync" />
+        }
+    </div>
+
+    @if (_uploads.Count > 0)
+    {
+        <ul class="edition-visuals-uploads" aria-label="@L["Uploads"]">
+            @foreach (var upload in _uploads)
+            {
+                <li class="edition-visuals-upload" data-refused="@(upload.State == UploadState.Refused)">
+                    <span class="edition-visuals-upload-head">
+                        <span class="edition-visuals-upload-name">@upload.Name</span>
+                        <span class="edition-visuals-upload-status">@StatusOf(upload)</span>
+                        @if (upload.State == UploadState.Refused)
+                        {
+                            <button type="button" class="edition-visuals-upload-remove" aria-label="@L["Upload.Remove", upload.Name]"
+                                    @onclick="() => _uploads.Remove(upload)">
+                                <Icon Name="IconName.Close" />
+                            </button>
+                        }
+                    </span>
+                    @if (upload.State == UploadState.Sending)
+                    {
+                        <span class="edition-visuals-upload-bar" aria-hidden="true"><span style="inline-size: @(upload.Percent)%"></span></span>
+                    }
+                    @if (upload.Reason is not null)
+                    {
+                        <span class="edition-visuals-upload-reason">@upload.Reason</span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    <p class="edition-visuals-count">@Count()</p>
+    @if (Visuals.Count > 0)
+    {
+        <ul class="edition-visuals-grid">
+            @foreach (var visual in Visuals)
+            {
+                var label = LabelOf(visual);
+                <li class="edition-visual" draggable="true" data-dragged="@(_dragged == visual)" data-pending="@(visual.PendingId is not null)"
+                    @ondragstart="() => _dragged = visual" @ondragend="() => _dragged = null"
+                    @ondragover:preventDefault="true" @ondrop="() => DropAsync(visual)">
+                    <Cover VisualId="visual.Id" Source="@PendingDisplayOf(visual)" Alt="@label" />
+                    <span class="edition-visual-mark" aria-hidden="true">@ShortOf(visual)</span>
+                    <span class="edition-visual-actions">
+                        <ActionsMenu Id="@($"{Id}-visual-{visual.Key:N}")" Label="@L["Actions", label]">
+                            <span class="edition-visual-menu-heading">@L["Menu.Type"]</span>
+                            @foreach (var type in Enum.GetValues<VisualType>())
+                            {
+                                var current = type == visual.Type;
+                                <MenuItem Label="@Values.Of(type)" Icon="@(current ? IconName.Check : null)" Pressed="current"
+                                          OnClick="() => ChangeTypeAsync(visual, type)" />
+                            }
+                            <MenuSeparator />
+                            <MenuItem Href="@OriginalOf(visual)" External="true" Label="@L["Menu.Original"]" />
+                            <MenuItem Label="@L["Menu.Delete"]" Variant="ButtonVariant.Delete" OnClick="() => AskRemovalAsync(visual)" />
+                        </ActionsMenu>
+                    </span>
+                </li>
+            }
+        </ul>
+        <p class="edition-visuals-help">@L["Drag"]</p>
+    }
+    </div>
+</Block>
+
+@if (_removing is { } removing)
+{
+    <Dialog Id="@($"{Id}-removal")" Title="@L["Removal.Title"]" Subject="@LabelOf(removing)" Tone="DialogTone.Deletion"
+            OnClose="() => _removing = null">
+        <ChildContent>
+            <p>@L["Removal.Text"]</p>
+        </ChildContent>
+        <Actions>
+            <Button Label="@L["Removal.Confirm"]" Variant="ButtonVariant.Delete" Icon="IconName.Delete" OnClick="() => RemoveAsync(removing)" />
+        </Actions>
+    </Dialog>
+}
+
+@if (_expired is { Count: > 0 } expired)
+{
+    <Dialog Id="@($"{Id}-expired")" Title="@L["Expired.Title"]" Tone="DialogTone.Refusal" CloseLabel="@L["Expired.Close"]"
+            OnClose="() => _expired = null">
+        <p>@L["Expired.Text", Lifetime]</p>
+        <ul class="edition-visuals-expired">
+            @foreach (var name in expired)
+            {
+                <li>@name</li>
+            }
+        </ul>
+    </Dialog>
+}
+
+@code {
+    // How much an upload has to progress before it is drawn again: a scan is read in many small pieces.
+    private const int ProgressStep = 2;
+
+    // Removed this long before it is no longer kept: a saving sent just before would otherwise be refused for it.
+    private static readonly TimeSpan ExpiryMargin = TimeSpan.FromMinutes(1);
+
+    private readonly CancellationTokenSource _disposal = new();
+    private readonly List<Upload> _uploads = [];
+    private readonly List<int> _inputs = [0];
+    private VisualType _newType = VisualType.Cover;
+    private bool _sending;
+    private VisualItem? _dragged;
+    private VisualItem? _removing;
+    private List<string>? _expired;
+    private ITimer? _expiry;
+
+    /// <summary>The identifier of the block, unique in the page, on which those of its controls are built.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The visuals of the form, in their presentation order, which the block changes in place.</summary>
+    [Parameter, EditorRequired]
+    public List<VisualItem> Visuals { get; set; } = null!;
+
+    /// <summary>Raised once the visuals of the form changed, for the page to draw itself again.</summary>
+    [Parameter]
+    public EventCallback VisualsChanged { get; set; }
+
+    /// <summary>
+    /// Raised when files start or stop being sent: the visuals they will add are not yet in the form, which is not saved meanwhile.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> SendingChanged { get; set; }
+
+    /// <summary>What api accepts and keeps, which the block announces.</summary>
+    [Parameter, EditorRequired]
+    public VisualLimits Limits { get; set; } = null!;
+
+    /// <summary>The functions of the audience measurement its actions are recorded under, those of the page.</summary>
+    [Parameter, EditorRequired]
+    public VisualFunctions Functions { get; set; } = null!;
+
+    // « 24 heures »: how long a visual added is kept, in hours.
+    private string Lifetime => ((int)Limits.PendingLifetime.TotalHours).ToString(CultureInfo.CurrentCulture);
+
+    protected override void OnParametersSet() => ScheduleExpiry();
+
+    private async Task ChooseAsync(InputFileChangeEventArgs args)
+    {
+        foreach (var file in args.GetMultipleFiles(int.MaxValue))
+            _uploads.Add(new Upload(file, _newType));
+        // A new input for the next choice: the files of this one stay valid until they are sent.
+        _inputs.Add(_inputs[^1] + 1);
+        // The files join the sending under way, if any; otherwise this choice sends them, awaited as the documentation of
+        // InputFile does, the form staying interactive meanwhile.
+        if (!_sending)
+            await SendAllAsync();
+    }
+
+    // One at a time, as api takes them (choix-implementation/domaine/visuels-stockage-et-traitement.md), in the order chosen.
+    // The sending says itself that it is under way, from its start to its end, even when no file of it waits for api.
+    private async Task SendAllAsync()
+    {
+        _sending = true;
+        try
+        {
+            await SendingChanged.InvokeAsync(true);
+            while (_uploads.Find(u => u.State == UploadState.Waiting) is { } upload)
+                await SendAsync(upload);
+        }
+        catch (OperationCanceledException) when (_disposal.IsCancellationRequested)
+        {
+            // The form is gone, and the uploads with it.
+            return;
+        }
+        finally
+        {
+            _sending = false;
+        }
+
+        // Every file sent: only the input of the next choice is still needed.
+        _inputs.RemoveRange(0, _inputs.Count - 1);
+        await SendingChanged.InvokeAsync(false);
+        StateHasChanged();
+    }
+
+    private async Task SendAsync(Upload upload)
+    {
+        // The circuit relays no more than api accepts: a heavier file is refused without being read, the reading
+        // bounded by the same limit (api still checks it, the only one to decide).
+        if (upload.File.Size > Limits.MaxFileSizeBytes)
+        {
+            Refuse(upload, L["Refused.TooLarge", MaxSize(Limits.MaxFileSizeBytes)]);
+            return;
+        }
+
+        upload.State = UploadState.Sending;
+        StateHasChanged();
+        try
+        {
+            var stream = new ProgressStream(upload.File.OpenReadStream(Limits.MaxFileSizeBytes, _disposal.Token), read => Progress(upload, read));
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(stream), UploadVisualFields.File, upload.Name);
+            var pending = await Uploads.PostAsync<PendingVisualForm>("/admin/visuals/pending", content, _disposal.Token);
+
+            _uploads.Remove(upload);
+            Insert(VisualItem.Pending(pending, upload.Type, upload.Name));
+            await ChangedAsync();
+            await Recorder.RecordActionAsync(Functions.Added, $"pending-visual={pending.Id}", _disposal.Token);
+        }
+        catch (ApiProblemException exception)
+        {
+            Refuse(upload, ReasonOf(exception.Problem));
+        }
+        catch (IOException)
+        {
+            // The browser no longer gives the file (e.g. deleted from its folder meanwhile).
+            Refuse(upload, L["Refused.Technical"]);
+        }
+    }
+
+    private void Refuse(Upload upload, string reason)
+    {
+        upload.State = UploadState.Refused;
+        upload.Reason = reason;
+        StateHasChanged();
+    }
+
+    // Read by the HTTP client as it sends the form, outside the renderer: drawn again through it, every few percents.
+    private void Progress(Upload upload, long read)
+    {
+        var percent = upload.File.Size == 0 ? 100 : (int)Math.Min(100, read * 100 / upload.File.Size);
+        if (percent < upload.Percent + ProgressStep && percent < 100)
+            return;
+        upload.Percent = percent;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private string ReasonOf(ApiProblem problem) => problem switch
+    {
+        { Category: ProblemCategory.Business, RuleCode: { } code } => Rules[code],
+        _ => L["Refused.Technical"],
+    };
+
+    private string StatusOf(Upload upload) => upload.State switch
+    {
+        UploadState.Waiting => L["Upload.Waiting"],
+        UploadState.Sending => L["Upload.Progress", upload.Percent],
+        _ => L["Upload.Refused"],
+    };
+
+    // After the visuals of its type, which keep the fixed order of the types
+    // (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md).
+    private void Insert(VisualItem visual)
+    {
+        var after = Visuals.FindLastIndex(v => v.Type <= visual.Type);
+        Visuals.Insert(after + 1, visual);
+    }
+
+    // A visual dropped on another of its type takes its place: before it when it came from after it, after it otherwise.
+    private async Task DropAsync(VisualItem target)
+    {
+        var dragged = _dragged;
+        _dragged = null;
+        if (dragged is null || dragged == target || dragged.Type != target.Type)
+            return;
+
+        var to = Visuals.IndexOf(target);
+        Visuals.Remove(dragged);
+        Visuals.Insert(to, dragged);
+        await ChangedAsync();
+        await Recorder.RecordActionAsync(Functions.Arranged, null, _disposal.Token);
+    }
+
+    // A visual given another type goes after the visuals of that type.
+    private async Task ChangeTypeAsync(VisualItem visual, VisualType type)
+    {
+        if (type == visual.Type)
+            return;
+
+        Visuals.Remove(visual);
+        Insert(visual with { Type = type });
+        await ChangedAsync();
+        await Recorder.RecordActionAsync(Functions.TypeChanged, ParameterOf(visual), _disposal.Token);
+    }
+
+    private async Task AskRemovalAsync(VisualItem visual)
+    {
+        _removing = visual;
+        await Recorder.RecordActionAsync(Functions.Deletion, ParameterOf(visual), _disposal.Token);
+    }
+
+    // Removed from the form: deleted only once the form is saved, which « Annuler » forgoes.
+    private async Task RemoveAsync(VisualItem visual)
+    {
+        _removing = null;
+        Visuals.Remove(visual);
+        await ChangedAsync();
+        await Recorder.RecordActionAsync(Functions.Deleted, ParameterOf(visual), _disposal.Token);
+    }
+
+    private static string ParameterOf(VisualItem visual) =>
+        visual.Id is { } id ? $"visual={id}" : $"pending-visual={visual.PendingId}";
+
+    private Task ChangedAsync()
+    {
+        ScheduleExpiry();
+        return VisualsChanged.InvokeAsync();
+    }
+
+    // The next visual added to be no longer kept, removed from the form just before, which a dialog tells.
+    private void ScheduleExpiry()
+    {
+        _expiry?.Dispose();
+        _expiry = null;
+        var kept = Visuals.Where(v => v.ExpiresAt is not null).Select(v => v.ExpiresAt!.Value).ToList();
+        if (kept.Count == 0)
+            return;
+        var due = kept.Min() - ExpiryMargin - Clock.GetUtcNow();
+        _expiry = Clock.CreateTimer(state => _ = InvokeAsync(ExpireAsync), null, due < TimeSpan.Zero ? TimeSpan.Zero : due, Timeout.InfiniteTimeSpan);
+    }
+
+    private async Task ExpireAsync()
+    {
+        var limit = Clock.GetUtcNow() + ExpiryMargin;
+        var expired = Visuals.Where(v => v.ExpiresAt is { } at && at <= limit).ToList();
+        if (expired.Count == 0)
+        {
+            ScheduleExpiry();
+            return;
+        }
+
+        foreach (var visual in expired)
+            Visuals.Remove(visual);
+        _expired = [.. _expired ?? [], .. expired.Select(v => v.Name ?? LabelOf(v))];
+        await ChangedAsync();
+        StateHasChanged();
+    }
+
+    private string Count() => Visuals.Count switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", count],
+    };
+
+    // A visual added, waiting for the saving of the form, is shown from the waiting area; the others as any cover.
+    private static string? PendingDisplayOf(VisualItem visual) =>
+        visual.PendingId is { } pending ? PendingVisualMediaRoutes.Display(pending) : null;
+
+    // Its original, as uploaded: from the waiting area too for a visual added, before the form is saved.
+    private static string OriginalOf(VisualItem visual) =>
+        visual.PendingId is { } pending ? PendingVisualMediaRoutes.Original(pending) : VisualMediaRoutes.Original(visual.Id!.Value);
+
+    // « Planche 3 », the rank of a plate counted among the plates: what each visual is, in full.
+    private string LabelOf(VisualItem visual) =>
+        visual.Type == VisualType.Plate ? L["Full.Plate", PlateNumber(visual)] : Values.Of(visual.Type);
+
+    // « Pl. 3 », « Couv. »: the type marked on the thumbnail.
+    private string ShortOf(VisualItem visual) =>
+        visual.Type == VisualType.Plate ? L["Short.Plate", PlateNumber(visual)] : L[$"Short.{visual.Type}"];
+
+    private int PlateNumber(VisualItem visual) =>
+        Visuals.TakeWhile(v => v != visual).Count(v => v.Type == VisualType.Plate) + 1;
+
+    // In mebibytes, as the operating systems give the size of a file (« 30 Mio »).
+    private static string MaxSize(long bytes) => (bytes / (1024d * 1024)).ToString("0.#", CultureInfo.CurrentCulture);
+
+    public void Dispose()
+    {
+        _expiry?.Dispose();
+        _disposal.Cancel();
+        _disposal.Dispose();
+    }
+
+    private enum UploadState
+    {
+        Waiting,
+        Sending,
+        Refused,
+    }
+
+    // A file chosen, with the type it is added as, until api accepts it, or why it refused it until it is removed.
+    private sealed class Upload(IBrowserFile file, VisualType type)
+    {
+        public IBrowserFile File { get; } = file;
+
+        public VisualType Type { get; } = type;
+
+        public string Name => File.Name;
+
+        public UploadState State { get; set; } = UploadState.Waiting;
+
+        public int Percent { get; set; }
+
+        public string? Reason { get; set; }
+    }
+
+    /// <summary>The functions of the audience measurement the actions on the visuals are recorded under.</summary>
+    public sealed record VisualFunctions(
+        AudienceFunction Added, AudienceFunction Arranged, AudienceFunction TypeChanged, AudienceFunction Deletion, AudienceFunction Deleted);
+}

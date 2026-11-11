@@ -321,6 +321,39 @@ public sealed class Edition : EntityBase
         }
     }
 
+    /// <summary>
+    /// Sets the visuals of the edition as its entry gives them, saved with it (visuel/saisie-edition/contenu.md): those it
+    /// keeps and the pending ones it adds, each with its type, in its order (<see cref="ArrangeVisuals"/>); those it leaves out are
+    /// removed. Nothing is changed if the entries are refused.
+    /// </summary>
+    /// <param name="entries">Each visual of the edition, by its identifier, or a pending visual it becomes, exactly once.</param>
+    /// <returns>The visuals removed, whose files go once the removal is saved.</returns>
+    /// <exception cref="ArgumentException">
+    /// An entry names neither or both, a visual of another edition, or a visual or a pending visual twice: a programming error,
+    /// the client sending back the visuals it read at the current version of the album.
+    /// </exception>
+    public IReadOnlyList<EditionVisual> SetVisuals(IReadOnlyList<(Guid? VisualId, PendingVisual? Pending, VisualType Type)> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        var kept = entries.Where(e => e.VisualId is not null).Select(e => e.VisualId!.Value).ToList();
+        var added = entries.Where(e => e.Pending is not null).Select(e => e.Pending!).ToList();
+        if (entries.Any(e => (e.VisualId is null) == (e.Pending is null))
+            || kept.Distinct().Count() != kept.Count || added.Distinct().Count() != added.Count
+            || !kept.All(id => _visuals.Any(v => v.Id == id)))
+            throw new ArgumentException("Each entry names one visual of the edition, or one pending visual, exactly once.", nameof(entries));
+        foreach (var entry in entries)
+            EnumGuard.EnsureDefined(entry.Type, nameof(entries));
+
+        var removed = _visuals.Where(v => !kept.Contains(v.Id)).ToList();
+        foreach (var visual in removed)
+            _visuals.Remove(visual);
+        var arrangement = entries
+            .Select(e => (e.VisualId ?? AddVisual(e.Type, e.Pending!.MediaReference, 0, e.Pending.Palette).Id, e.Type))
+            .ToList();
+        ArrangeVisuals(arrangement);
+        return removed;
+    }
+
     // ISO 4217 gives every currency a 3-letter uppercase alphabetic code; validating the shape
     // (rather than a hand-maintained list of codes) matches "any currency" from
     // fonctionnel/valorisation/gestion-des-devises.md without artificially restricting which ones are

@@ -7,7 +7,9 @@ applies_to:
   - 'src/Bdtheque.Api/Endpoints/EditionVisualEndpoints.cs'
   - 'src/Bdtheque.Api/Endpoints/VisualMediaEndpoints.cs'
   - 'src/Bdtheque.Frontend/Api/VisualMediaRelay.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:00:00Z }
+  - 'src/Bdtheque.Frontend/Api/ApiUploadClient.cs'
+  - 'src/Bdtheque.Frontend/Components/Controls/EditionVisualsEditor.razor'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
 ---
 
 # Visuels : stockage et traitement
@@ -30,6 +32,15 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:00:00Z }
   - La limite de transport du serveur est ramenée à la taille d'un formulaire valide : elle borne un envoi sans longueur annoncée sans jamais devancer le refus métier, alors qu'atteinte la première, elle répondrait `413`, erreur technique.
 - **Un téléversement à la fois**, les autres attendant leur tour sans être refusés : chacun mobilise quelque 400 Mo, et plusieurs scans déposés d'un coup épuiseraient la mémoire du NAS. Le tour est pris avant la lecture du corps : une requête en attente ne mobilise rien, et Kestrel ne contrôle le débit d'un corps que pendant sa lecture (code source de Kestrel, `TimeoutControl`), si bien qu'elle n'est jamais coupée pour son attente.
 - **Réarrangement en une écriture** : la liste complète des visuels de l'édition, dans l'ordre voulu, sous la version de l'album ([Concurrence d'accès](../persistance/concurrence-d-acces.md)) : un glisser-déposer réordonne plusieurs visuels d'un coup.
+- **Poids maximal donné à la saisie** : la limite est la configuration d'`api`, seule à la contrôler ; un point d'accès la donne, avec la durée de l'attente (ci-dessous), pour que la saisie les annonce sans les connaître elle-même. La saisie refuse aussitôt, sans le lire, un fichier plus lourd, et borne à ce poids la lecture d'un fichier qu'elle relaie : le circuit ne transmet jamais plus qu'`api` n'accepte, `api` restant seule à fixer la limite et à la contrôler.
+- **Zone d'attente** : les visuels s'enregistrant avec la fiche de l'édition ([Contenu](../../visuel/saisie-edition/contenu.md)), un fichier ajouté à la saisie est téléversé aussitôt, validé et converti comme tout visuel, ses fichiers écrits sur le volume, puis enregistré comme **visuel en attente** (sa référence de média et ses couleurs), rattaché à aucune édition. L'enregistrement de l'édition (création, modification, intention d'achat sur une nouvelle édition) reçoit la liste ordonnée de ses visuels, chacun existant ou en attente, avec son type : dans la même transaction que ses champs, sous la version de l'album, les visuels en attente deviennent ceux de l'édition, l'ordre et les types sont appliqués, et les visuels absents de la liste sont supprimés, leurs fichiers après la validation, comme toute suppression ([Suppression des entités : mise en œuvre](../ecritures/suppression-des-entites-mise-en-oeuvre.md)). Une liste absente laisse les visuels tels qu'ils sont.
+  - Un visuel en attente est **conservé 24 heures** : un visuel en attente plus ancien, ou disparu, refuse l'enregistrement (erreur métier), que la saisie a déjà dû signaler. La réconciliation supprime les visuels en attente expirés, puis tout fichier qu'aucun visuel, enregistré ou en attente, ne désigne.
+  - **Alternative écartée (fichiers gardés par le navigateur, envoyés à l'enregistrement)** : un fichier refusé ne le serait qu'à l'enregistrement, ses champs déjà écrits, et l'enregistrement durerait autant que les envois.
+  - **Alternative écartée (fiche et fichiers en une seule requête)** : plusieurs scans décodés à la fois, contre le téléversement un à la fois.
+- **Médias d'un visuel en attente**, sa version d'affichage et son original, servis par `api` pour l'administration seule, tant qu'il est conservé, sous leurs propres chemins, relayés par `frontend` à l'administrateur authentifié : une vignette ajoutée à la saisie se présente comme les autres, et son original s'ouvre de même avant l'enregistrement de la fiche.
+- **Relais du téléversement par `frontend`, en flux, par le circuit de la fiche** : le fichier, choisi ou déposé sur le champ de fichier du navigateur, est lu par le circuit à mesure qu'il est envoyé à `api`, en formulaire *multipart*, par le client de l'API ([Frontend](../socle/frontend.md), Fiches de saisie). Rien n'est gardé entier en mémoire, et la progression de l'envoi se lit sur ce flux. Le gestionnaire du choix des fichiers attend leur envoi, comme le montre la documentation d'`InputFile`, la fiche restant interactive pendant ce temps ; un choix fait pendant un envoi rejoint celui-ci.
+  - **Alternative écartée (envoi détaché du choix, non attendu)** : aucune tâche n'en dirait la fin, ni ne porterait ses échecs, qu'il faudrait remettre au composant à part ; ses tests ne pourraient qu'en guetter le rendu.
+  - **Alternative écartée (envoi par le navigateur à une route de `frontend` relayée par YARP, comme les médias)** : un script pour envoyer et suivre la progression, une route d'écriture de plus exposée au navigateur, que protégerait un jeton anti-falsification ; le circuit de la fiche, authentifié, y suffit.
 
 ## Cohérence entre fichiers et base
 

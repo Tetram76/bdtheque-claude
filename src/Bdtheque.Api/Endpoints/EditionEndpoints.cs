@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -237,7 +238,7 @@ internal static class EditionEndpoints
     }
 
     private static async Task<Created<EditionForm>> CreateAsync(
-        Guid rootId, CreateEditionRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, CreateEditionRequest request, BdthequeDbContext context, TimeProvider clock, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
@@ -245,6 +246,8 @@ internal static class EditionEndpoints
         var edition = await AddEditionAsync(context, album, request.Content, cancellationToken);
         // Entering an edition records its acquisition, which realizes the intent it satisfies.
         album.RecordAcquisition(edition, ToAcquisition(request.Content));
+        // A new edition has no visual to remove: its pending visuals become its own.
+        await EditionVisualEntries.ApplyAsync(context, edition, request.Visuals, clock, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -296,10 +299,12 @@ internal static class EditionEndpoints
     }
 
     private static async Task<EditionForm> UpdateAsync(
-        Guid rootId, Guid id, UpdateEditionRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, Guid id, UpdateEditionRequest request, BdthequeDbContext context, VisualStorage storage, TimeProvider clock,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
+        var album = await context.LoadAggregateForWriteAsync<Album>(
+            rootId, request.AlbumVersion, request.Visuals is null ? null : EditionVisualEntries.WithVisuals, cancellationToken);
         var edition = album.Editions.SingleOrDefault(e => e.Id == id) ?? throw new EntityNotFoundException(typeof(Edition), id);
         var content = request.Content;
         var (publisher, collection) = await FormReferences.LoadPublisherAsync(
@@ -307,9 +312,12 @@ internal static class EditionEndpoints
 
         ApplyDetails(edition, content, publisher, collection);
         edition.SetPublicationYearAndAcquisition(content.PublicationYear, ToAcquisition(content));
+        var removed = await EditionVisualEntries.ApplyAsync(context, edition, request.Visuals, clock, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
+        // After the commit, as any deletion: a failed one leaves the files intact, a file not deleted is left to the reconciliation.
+        storage.Delete(removed);
         return await GetAsync(rootId, id, context, cancellationToken);
     }
 

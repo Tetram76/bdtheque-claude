@@ -10,9 +10,9 @@
    An album a page puts forward (Volume) may be shown by a theme as a book in volume (the .cover-volume anchor), whose
    spine takes the deep colour of its own cover (--cover-spine). *@
 <span class="@(Volume ? "cover-slot cover-volume" : "cover-slot")" style="@(Volume && Palette is { } palette ? $"--cover-spine: {palette.Deep};" : null)">
-    @if (VisualId is { } visual)
+    @if ((Source ?? (VisualId is { } visual ? VisualMediaRoutes.Display(visual) : null)) is { } source)
     {
-        <img class="cover" src="@VisualMediaRoutes.Display(visual)" alt="@(Alt ?? "")" loading="lazy" decoding="async" />
+        <img class="cover" src="@source" alt="@(Alt ?? "")" loading="lazy" decoding="async" />
     }
     else if (Blank)
     {
@@ -29,6 +29,13 @@
     /// <summary>The visual of the cover; <c>null</c> without cover, the generic visual standing in for it.</summary>
     [Parameter]
     public Guid? VisualId { get; set; }
+
+    /// <summary>
+    /// The address of an image that is no visual of the catalog yet (a visual added to the entry of an edition, waiting for its
+    /// saving), shown as a cover instead of the display version of <see cref="VisualId"/>.
+    /// </summary>
+    [Parameter]
+    public string? Source { get; set; }
 
     /// <summary>What the cover shows, when no label next to it names it already.</summary>
     [Parameter]

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Block" xml:space="preserve">
+    <value>Les visuels</value>
+  </data>
+  <data name="Kicker" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Les visuels s&apos;enregistrent avec la fiche. Chaque fichier ajouté est vérifié aussitôt, puis conservé {0} heures en attente de son enregistrement.</value>
+  </data>
+  <data name="Drop" xml:space="preserve">
+    <value>Déposez des images ici, ou</value>
+  </data>
+  <data name="Choose" xml:space="preserve">
+    <value>choisissez des fichiers</value>
+  </data>
+  <data name="Choose.Label" xml:space="preserve">
+    <value>Choisir des images à ajouter</value>
+  </data>
+  <data name="AddedAs" xml:space="preserve">
+    <value>Ajoutés comme</value>
+  </data>
+  <data name="Formats" xml:space="preserve">
+    <value>JPEG, PNG, WebP ou GIF, {0} Mio au plus.</value>
+  </data>
+  <data name="Uploads" xml:space="preserve">
+    <value>Envois</value>
+  </data>
+  <data name="Upload.Waiting" xml:space="preserve">
+    <value>En attente</value>
+  </data>
+  <data name="Upload.Progress" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="Upload.Refused" xml:space="preserve">
+    <value>Refusé</value>
+  </data>
+  <data name="Upload.Remove" xml:space="preserve">
+    <value>Retirer {0}</value>
+  </data>
+  <data name="Refused.TooLarge" xml:space="preserve">
+    <value>Ce fichier dépasse le poids maximal de {0} Mio.</value>
+  </data>
+  <data name="Refused.Technical" xml:space="preserve">
+    <value>L&apos;envoi n&apos;a pas pu aboutir : réessayez dans un instant.</value>
+  </data>
+  <data name="Count.None" xml:space="preserve">
+    <value>Aucun visuel</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>1 visuel</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} visuels</value>
+  </data>
+  <data name="Short.Cover" xml:space="preserve">
+    <value>Couv.</value>
+  </data>
+  <data name="Short.Dedication" xml:space="preserve">
+    <value>Déd.</value>
+  </data>
+  <data name="Short.Endpaper" xml:space="preserve">
+    <value>Garde</value>
+  </data>
+  <data name="Short.Plate" xml:space="preserve">
+    <value>Pl. {0}</value>
+  </data>
+  <data name="Short.BackCover" xml:space="preserve">
+    <value>4e</value>
+  </data>
+  <data name="Full.Plate" xml:space="preserve">
+    <value>Planche {0}</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions sur {0}</value>
+  </data>
+  <data name="Menu.Type" xml:space="preserve">
+    <value>Changer le type</value>
+  </data>
+  <data name="Menu.Original" xml:space="preserve">
+    <value>Ouvrir l&apos;original</value>
+  </data>
+  <data name="Menu.Delete" xml:space="preserve">
+    <value>Supprimer le visuel…</value>
+  </data>
+  <data name="Drag" xml:space="preserve">
+    <value>Glissez un visuel pour le réordonner parmi ceux de son type ; les types se suivent toujours dans le même ordre.</value>
+  </data>
+  <data name="Removal.Title" xml:space="preserve">
+    <value>Supprimer ce visuel ?</value>
+  </data>
+  <data name="Removal.Text" xml:space="preserve">
+    <value>Il sera supprimé, avec ses fichiers, à l&apos;enregistrement de la fiche ; « Annuler » le garde.</value>
+  </data>
+  <data name="Removal.Confirm" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="Expired.Title" xml:space="preserve">
+    <value>Visuels retirés de la fiche</value>
+  </data>
+  <data name="Expired.Text" xml:space="preserve">
+    <value>La fiche est restée ouverte trop longtemps : ces visuels, ajoutés il y a plus de {0} heures et pas encore enregistrés, ne sont plus conservés et ont été retirés. Ajoutez-les de nouveau :</value>
+  </data>
+  <data name="Expired.Close" xml:space="preserve">
+    <value>J&apos;ai compris</value>
+  </data>
+</root>
