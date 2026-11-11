@@ -175,9 +175,9 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
     }
 
     [Fact]
-    public async Task Visuals_Added_Refused_Retyped_Reordered_AndDeleted_EachWrittenAtOnce()
+    public async Task Visuals_Added_Refused_Retyped_Reordered_AndDeleted_SavedWithTheForm()
     {
-        // visuel/saisie-edition/contenu.md, Les visuels: every write on its own, at once, the form left as it was.
+        // visuel/saisie-edition/contenu.md, Les visuels: a block of the form, saved with it.
         var publisher = await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
         var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
@@ -186,10 +186,10 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
             album.Version));
         var page = await OpenAsync(AppPaths.AdminEditEdition(album.Id, edition.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
-        var visuals = page.Locator(".edition-visuals");
+        var visuals = page.Locator("form .edition-visuals");
         var marks = visuals.Locator(".edition-visual-mark");
 
-        // Three plates, sent one at a time; a file that is no image, refused with its reason.
+        // Three plates, sent one at a time to the waiting area; a file that is no image, refused with its reason.
         await page.GetByLabel("Ajoutés comme").SelectOptionAsync(new SelectOptionValue { Label = "Planche" });
         await visuals.GetByLabel("Choisir des images à ajouter").SetInputFilesAsync(
         [
@@ -200,60 +200,47 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await Assertions.Expect(visuals.Locator(".edition-visuals-upload[data-refused] .edition-visuals-upload-reason"))
             .ToContainTextAsync("n'est pas une image lisible");
         await Assertions.Expect(marks).ToHaveTextAsync(["Pl. 1", "Pl. 2", "Pl. 3"]);
-        var plates = (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Id).ToList();
+        // Nothing saved yet: the form says so.
+        Assert.Empty((await GetVisualsAsync(album.Id, edition.Id)).Visuals);
+        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Modifications non enregistrées");
 
-        // The first plate becomes the cover, which comes first.
+        // The first plate becomes the cover, which comes first; the last plate dragged onto the first takes its place.
         await visuals.GetByRole(AriaRole.Button, new() { Name = "Actions sur Planche 1" }).ClickAsync();
         await page.Locator(".actions-menu-panel:popover-open").GetByRole(AriaRole.Button, new() { Name = "Couverture", Exact = true }).ClickAsync();
         await Assertions.Expect(marks).ToHaveTextAsync(["Couv.", "Pl. 1", "Pl. 2"]);
-
-        // The last plate dragged onto the first takes its place.
+        var third = await visuals.Locator(".edition-visual img").Nth(2).GetAttributeAsync("src");
         await visuals.Locator(".edition-visual").Nth(2).DragToAsync(visuals.Locator(".edition-visual").Nth(1));
-        await Assertions.Expect(visuals.Locator(".edition-visual img").Nth(1)).ToHaveAttributeAsync("src", VisualMediaRoutes.Display(plates[2]));
-        Assert.Equal([plates[0], plates[2], plates[1]], (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Id));
+        await Assertions.Expect(visuals.Locator(".edition-visual img").Nth(1)).ToHaveAttributeAsync("src", third!);
 
-        // A plate deleted once confirmed.
+        // The plate now second deleted once confirmed, then the whole form saved.
         await visuals.GetByRole(AriaRole.Button, new() { Name = "Actions sur Planche 2" }).ClickAsync();
         await page.Locator(".actions-menu-panel:popover-open").GetByRole(AriaRole.Button, new() { Name = "Supprimer le visuel…" }).ClickAsync();
-        await page.Locator("dialog[open]").GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
+        await page.Locator("dialog[open]").GetByRole(AriaRole.Button, new() { Name = "Supprimer", Exact = true }).ClickAsync();
         await Assertions.Expect(visuals.Locator(".edition-visuals-count")).ToHaveTextAsync("2 visuels");
-        Assert.Equal([plates[0], plates[2]], (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Id));
-
-        // The form, untouched, saves under the version the visuals left.
-        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Aucune modification");
-        await page.GetByLabel("Année d'édition").FillAsync("1964");
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
-        Assert.Equal(1964, (await GetEditionAsync(album.Id, edition.Id)).Content.PublicationYear);
+        Assert.Equal([VisualType.Cover, VisualType.Plate], (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Type));
     }
 
     [Fact]
-    public async Task Visuals_OnASmartphone_OpenInAPanelOverThePage_AndCloseWithoutLosingAnything()
+    public async Task Visuals_OfANewEdition_AreCreatedWithIt()
     {
-        var publisher = await CreatePublisherAsync();
+        await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
-        var edition = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
-            new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
-                AcquisitionMode.Gift, false, null, null, null, false, null, null, null, null),
-            album.Version));
-        var page = await NewPageAsync(new ViewportSize { Width = 414, Height = 900 });
-        await ApplicationHost.SignInAsync(page, AppPaths.AdminEditEdition(album.Id, edition.Id));
-        await PageReadiness.WaitAsync(page);
+        var page = await OpenAsync(AppPaths.AdminNewAlbumEdition(album.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
-        var panel = page.Locator("aside.entry-form-aside");
 
-        // Not after the form: waiting in its panel, which the button at the head of the form opens over the page.
-        await Assertions.Expect(panel).ToBeHiddenAsync();
-        await page.GetByRole(AriaRole.Button, new() { Name = "Les visuels (0)" }).ClickAsync();
-        await Assertions.Expect(panel).ToBeVisibleAsync();
-        await Assertions.Expect(panel).ToHaveJSPropertyAsync("offsetTop", 0);
-        await panel.GetByLabel("Choisir des images à ajouter").SetInputFilesAsync(Png("couverture.png", SKColors.SteelBlue));
-        await Assertions.Expect(panel.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Offerte" });
+        await page.GetByLabel("Choisir des images à ajouter").SetInputFilesAsync(Png("couverture.png", SKColors.SteelBlue));
+        await Assertions.Expect(page.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'édition" }).ClickAsync();
 
-        await panel.GetByRole(AriaRole.Button, new() { Name = "Fermer les visuels" }).ClickAsync();
-        await Assertions.Expect(panel).ToBeHiddenAsync();
-        await page.GetByRole(AriaRole.Button, new() { Name = "Les visuels (1)" }).ClickAsync();
-        await Assertions.Expect(panel.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
+        var created = Assert.Single((await GetEditionsPageAsync(album.Id)).Editions).Edition;
+        Assert.Equal([VisualType.Cover], (await GetVisualsAsync(album.Id, created.Id)).Visuals.Select(v => v.Type));
     }
 
     // A small image of one color, a scan as far as api is concerned.
