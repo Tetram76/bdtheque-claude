@@ -217,11 +217,19 @@
 
     private async Task SendAsync(Upload upload)
     {
+        // The circuit relays no more than api accepts: a heavier file is refused without being read, the reading
+        // bounded by the same limit (api still checks it, the only one to decide).
+        if (upload.File.Size > Limits.MaxFileSizeBytes)
+        {
+            Refuse(upload, L["Refused.TooLarge", MaxSize(Limits.MaxFileSizeBytes)]);
+            return;
+        }
+
         upload.State = UploadState.Sending;
         StateHasChanged();
         try
         {
-            var stream = new ProgressStream(upload.File.OpenReadStream(long.MaxValue, _disposal.Token), read => Progress(upload, read));
+            var stream = new ProgressStream(upload.File.OpenReadStream(Limits.MaxFileSizeBytes, _disposal.Token), read => Progress(upload, read));
             using var content = new MultipartFormDataContent();
             content.Add(new StreamContent(stream), UploadVisualFields.File, upload.Name);
             var pending = await Uploads.PostAsync<PendingVisualForm>("/admin/visuals/pending", content, _disposal.Token);

@@ -684,6 +684,19 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Visuals_AFileHeavierThanTheLimit_IsRefused_WithoutBeingSent()
+    {
+        _api.Answers["/admin/visuals/limits"] = new VisualLimits(1024 * 1024, TimeSpan.FromHours(24));
+        var page = OpenOwned();
+
+        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[1024 * 1024 + 1], "scan-600dpi.png"));
+
+        var refused = page.WaitForElement(".edition-visuals-upload[data-refused]");
+        Assert.Equal("Ce fichier dépasse le poids maximal de 1 Mio.", refused.QuerySelector(".edition-visuals-upload-reason")!.TextContent);
+        Assert.Empty(_api.Written);
+    }
+
+    [Fact]
     public void Visuals_AnotherType_PlacesTheVisualAfterThoseOfItsNewType_SavedWithTheForm()
     {
         var page = OpenOwned();
