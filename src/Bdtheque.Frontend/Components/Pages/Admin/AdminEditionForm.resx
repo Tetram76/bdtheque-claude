@@ -130,7 +130,7 @@
     <value>En couleur</value>
   </data>
   <data name="Making.Help" xml:space="preserve">
-    <value>« — » laisse la donnée vide ; les valeurs proposées à la saisie ne sont jamais imposées.</value>
+    <value>Choisir « — » laisse la donnée non renseignée.</value>
   </data>
   <data name="Mode" xml:space="preserve">
     <value>Mode d'acquisition</value>
