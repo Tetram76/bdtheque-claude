@@ -335,6 +335,38 @@ public static class AudienceFunctions
     /// <summary>A new intent on the whole album, set at once from the choice of the new intents.</summary>
     public static readonly AudienceFunction AdminAlbumEditionsAlbumIntentSet = new("admin.album-editions.album-intent-set", AudienceFunctionKind.Action);
 
+    /// <summary>The entry form of an owned edition, with the edition it presents (visuel/saisie-edition/contenu.md).</summary>
+    public static readonly AudienceFunction AdminEditionForm = new("admin.edition-form", AudienceFunctionKind.Screen);
+
+    /// <summary>The entry form of a new owned edition, with the album it is added to.</summary>
+    public static readonly AudienceFunction AdminNewEditionForm = new("admin.edition-form.new", AudienceFunctionKind.Screen);
+
+    // The actions of the form, interactive, each recorded in the visit of the prerendering of its page.
+
+    /// <summary>The creation of an owned edition, with the edition created.</summary>
+    public static readonly AudienceFunction AdminEditionCreated = new("admin.edition-form.created", AudienceFunctionKind.Action);
+
+    /// <summary>The saving of the modification of an owned edition, with the edition saved.</summary>
+    public static readonly AudienceFunction AdminEditionSaved = new("admin.edition-form.saved", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, an edition modified meanwhile, with the edition.</summary>
+    public static readonly AudienceFunction AdminEditionChanges = new("admin.edition-form.changes", AudienceFunctionKind.Action);
+
+    /// <summary>The entry form of the edition a purchase intent targets, with the intent it presents.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentForm = new("admin.purchase-intent-form", AudienceFunctionKind.Screen);
+
+    /// <summary>The entry form of a new purchase intent on a new edition, with the album it is set on.</summary>
+    public static readonly AudienceFunction AdminNewPurchaseIntentForm = new("admin.purchase-intent-form.new", AudienceFunctionKind.Screen);
+
+    /// <summary>The creation of a purchase intent on a new edition, with the album it is set on.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentCreated = new("admin.purchase-intent-form.created", AudienceFunctionKind.Action);
+
+    /// <summary>The saving of the edition a purchase intent targets, with the intent.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentSaved = new("admin.purchase-intent-form.saved", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, the edition a purchase intent targets modified meanwhile, with the intent.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentChanges = new("admin.purchase-intent-form.changes", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -354,6 +386,7 @@ public static class AudienceFunctions
         AdminUniversesSearch, AdminUniversesPage, AdminUniversesDeletion, AdminUniversesDeleted, AdminUniversesMerge, AdminUniversesEdit,
         AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
         AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved,
-        AdminAlbumEditionsAlbumIntentSet,
+        AdminAlbumEditionsAlbumIntentSet, AdminEditionForm, AdminNewEditionForm, AdminEditionCreated, AdminEditionSaved, AdminEditionChanges,
+        AdminPurchaseIntentForm, AdminNewPurchaseIntentForm, AdminPurchaseIntentCreated, AdminPurchaseIntentSaved, AdminPurchaseIntentChanges,
     ];
 }

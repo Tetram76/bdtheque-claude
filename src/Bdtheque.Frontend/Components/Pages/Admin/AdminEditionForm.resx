@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Albums" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="Breadcrumb.Unknown" xml:space="preserve">
+    <value>Édition</value>
+  </data>
+  <data name="OfTheAlbum" xml:space="preserve">
+    <value>de l'album</value>
+  </data>
+  <data name="New.Edition" xml:space="preserve">
+    <value>Nouvelle édition</value>
+  </data>
+  <data name="New.PurchaseIntent" xml:space="preserve">
+    <value>Nouvelle intention d'achat</value>
+  </data>
+  <data name="Edit.Edition" xml:space="preserve">
+    <value>Modifier l'édition</value>
+  </data>
+  <data name="Edit.PurchaseIntent" xml:space="preserve">
+    <value>Modifier l'intention d'achat</value>
+  </data>
+  <data name="Create.Edition" xml:space="preserve">
+    <value>Créer l'édition</value>
+  </data>
+  <data name="Create.PurchaseIntent" xml:space="preserve">
+    <value>Créer l'intention d'achat</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="NoPublisher" xml:space="preserve">
+    <value>&lt;Éditeur à choisir&gt;</value>
+  </data>
+  <data name="Block.Edition" xml:space="preserve">
+    <value>L'édition</value>
+  </data>
+  <data name="Block.Making" xml:space="preserve">
+    <value>Fabrication</value>
+  </data>
+  <data name="Block.Copy" xml:space="preserve">
+    <value>L'exemplaire</value>
+  </data>
+  <data name="Block.Value" xml:space="preserve">
+    <value>Valeur</value>
+  </data>
+  <data name="Kicker.Edition" xml:space="preserve">
+    <value>Publication</value>
+  </data>
+  <data name="Kicker.Making" xml:space="preserve">
+    <value>Objet</value>
+  </data>
+  <data name="Kicker.Copy" xml:space="preserve">
+    <value>Possession</value>
+  </data>
+  <data name="Kicker.Value" xml:space="preserve">
+    <value>Montants</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>(obligatoire)</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>—</value>
+  </data>
+  <data name="Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="Publisher.Placeholder" xml:space="preserve">
+    <value>Taper le nom de l'éditeur…</value>
+  </data>
+  <data name="Collection" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Collection.Help" xml:space="preserve">
+    <value>Toutes celles de l'éditeur.</value>
+  </data>
+  <data name="Collection.NoPublisher" xml:space="preserve">
+    <value>Choisissez d'abord l'éditeur</value>
+  </data>
+  <data name="Collection.Unread" xml:space="preserve">
+    <value>Les collections de l'éditeur n'ont pas pu être lues : choisissez-le de nouveau.</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Année d'édition</value>
+  </data>
+  <data name="Year.Placeholder" xml:space="preserve">
+    <value>aaaa</value>
+  </data>
+  <data name="Isbn" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Binding" xml:space="preserve">
+    <value>Reliure</value>
+  </data>
+  <data name="Orientation" xml:space="preserve">
+    <value>Orientation</value>
+  </data>
+  <data name="ReadingDirection" xml:space="preserve">
+    <value>Sens de lecture</value>
+  </data>
+  <data name="Pages" xml:space="preserve">
+    <value>Pages</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>En couleur</value>
+  </data>
+  <data name="Making.Help" xml:space="preserve">
+    <value>« — » laisse la donnée vide ; les valeurs proposées à la saisie ne sont jamais imposées.</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Mode d'acquisition</value>
+  </data>
+  <data name="Date.Purchase" xml:space="preserve">
+    <value>Date d'achat</value>
+  </data>
+  <data name="Date.Other" xml:space="preserve">
+    <value>Date d'acquisition</value>
+  </data>
+  <data name="Condition" xml:space="preserve">
+    <value>État</value>
+  </data>
+  <data name="SecondHand" xml:space="preserve">
+    <value>D'occasion</value>
+  </data>
+  <data name="Dedicated" xml:space="preserve">
+    <value>Dédicacée</value>
+  </data>
+  <data name="Reference" xml:space="preserve">
+    <value>Numérotation personnelle</value>
+  </data>
+  <data name="Reference.Placeholder" xml:space="preserve">
+    <value>Cote, rangement…</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes personnelles</value>
+  </data>
+  <data name="Notes.Placeholder" xml:space="preserve">
+    <value>Vos annotations sur cet exemplaire…</value>
+  </data>
+  <data name="Price.Purchase" xml:space="preserve">
+    <value>Prix d'achat</value>
+  </data>
+  <data name="Price.Other" xml:space="preserve">
+    <value>Valeur d'acquisition</value>
+  </data>
+  <data name="Price.Help.Purchase" xml:space="preserve">
+    <value>Daté par la date d'achat, à défaut l'année d'édition ou la première publication de l'album.</value>
+  </data>
+  <data name="Price.Help.Other" xml:space="preserve">
+    <value>Daté par la date d'acquisition, à défaut l'année d'édition ou la première publication de l'album.</value>
+  </data>
+  <data name="InitialValue" xml:space="preserve">
+    <value>Valeur initiale</value>
+  </data>
+  <data name="InitialValue.Help" xml:space="preserve">
+    <value>Prix de vente à la parution, daté par l'année d'édition, à défaut la première publication de l'album.</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Gratuite</value>
+  </data>
+  <data name="Free.Help" xml:space="preserve">
+    <value>Sans aucune valeur, ni montant ni estimation.</value>
+  </data>
+  <data name="Free.Help.Free" xml:space="preserve">
+    <value>Sans valeur : les montants sont vidés.</value>
+  </data>
+  <data name="Free.Help.Purchase" xml:space="preserve">
+    <value>Une édition achetée n'est jamais gratuite.</value>
+  </data>
+  <data name="Preset.Defaults" xml:space="preserve">
+    <value>Pré-remplie avec les valeurs proposées pour toute nouvelle édition. Ce ne sont que des propositions : chaque valeur reste modifiable.</value>
+  </data>
+  <data name="Preset.Series" xml:space="preserve">
+    <value>Pré-remplie d'après la série {0} : {1}. Ce ne sont que des propositions : chaque valeur reste modifiable.</value>
+  </data>
+  <data name="Preset.Fields" xml:space="preserve">
+    <value>{0} et {1}</value>
+  </data>
+  <data name="Preset.Nothing" xml:space="preserve">
+    <value>La série {0} ne propose aucune valeur aux nouvelles éditions : la fiche part de champs vides, à compléter.</value>
+  </data>
+  <data name="Preset.Publisher" xml:space="preserve">
+    <value>éditeur</value>
+  </data>
+  <data name="Preset.Collection" xml:space="preserve">
+    <value>collection</value>
+  </data>
+  <data name="Preset.Category" xml:space="preserve">
+    <value>catégorie</value>
+  </data>
+  <data name="Preset.Condition" xml:space="preserve">
+    <value>état</value>
+  </data>
+  <data name="Preset.Binding" xml:space="preserve">
+    <value>reliure</value>
+  </data>
+  <data name="Preset.Orientation" xml:space="preserve">
+    <value>orientation</value>
+  </data>
+  <data name="Preset.ReadingDirection" xml:space="preserve">
+    <value>sens de lecture</value>
+  </data>
+  <data name="Preset.Format" xml:space="preserve">
+    <value>format</value>
+  </data>
+  <data name="Preset.Color" xml:space="preserve">
+    <value>couleur</value>
+  </data>
+  <data name="Dates.Created" xml:space="preserve">
+    <value>Édition créée le</value>
+  </data>
+  <data name="Dates.Entered" xml:space="preserve">
+    <value>, entrée dans la collection le</value>
+  </data>
+  <data name="Dates.Modified" xml:space="preserve">
+    <value>, modifiée le</value>
+  </data>
+  <data name="Dates.IntentSet" xml:space="preserve">
+    <value>Intention d'achat posée le</value>
+  </data>
+  <data name="FieldError.Edition.PublisherRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="FieldError.PublisherCollection.NotOfPublisher" xml:space="preserve">
+    <value>Une collection de l'éditeur choisi.</value>
+  </data>
+  <data name="FieldError.Edition.PublicationYearPositive" xml:space="preserve">
+    <value>Supérieure à zéro.</value>
+  </data>
+  <data name="FieldError.Edition.PageCountPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="FieldError.Edition.AcquisitionModeRequired" xml:space="preserve">
+    <value>Obligatoire pour une édition possédée.</value>
+  </data>
+  <data name="FieldError.Edition.PurchaseCannotBeFree" xml:space="preserve">
+    <value>Une édition achetée n'est jamais gratuite.</value>
+  </data>
+  <data name="FieldError.Edition.AcquisitionAmountCurrencyTogether" xml:space="preserve">
+    <value>Un montant et sa devise, ensemble.</value>
+  </data>
+  <data name="FieldError.Edition.AcquisitionAmountPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="FieldError.Edition.FreeExcludesPrice" xml:space="preserve">
+    <value>Aucun montant pour une édition gratuite.</value>
+  </data>
+  <data name="FieldError.Edition.AcquisitionPriceReferenceDateRequired" xml:space="preserve">
+    <value>Sans date de référence, ce prix ne peut pas être enregistré.</value>
+  </data>
+  <data name="FieldError.Edition.InitialValueAmountCurrencyTogether" xml:space="preserve">
+    <value>Un montant et sa devise, ensemble.</value>
+  </data>
+  <data name="FieldError.Edition.InitialValueAmountPositive" xml:space="preserve">
+    <value>Supérieure à zéro.</value>
+  </data>
+  <data name="FieldError.Edition.FreeExcludesInitialValue" xml:space="preserve">
+    <value>Aucune valeur pour une édition gratuite.</value>
+  </data>
+  <data name="FieldError.Edition.InitialValueReferenceDateRequired" xml:space="preserve">
+    <value>Sans date de référence, cette valeur ne peut pas être enregistrée.</value>
+  </data>
+  <data name="Problem.Functional.Conflict" xml:space="preserve">
+    <value>L'album de cette édition a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
+  </data>
+  <data name="Problem.Functional.NotFound" xml:space="preserve">
+    <value>Une fiche que cite le formulaire (l'album, l'édition, son éditeur ou sa collection) a été supprimée entre-temps : rien n'a été enregistré.</value>
+  </data>
+  <data name="Problem.Technical.Text" xml:space="preserve">
+    <value>L'application n'a pas pu enregistrer l'édition. Vos changements sont toujours là, dans le formulaire : réessayez dans quelques instants.</value>
+  </data>
+  <data name="Changes.Checked" xml:space="preserve">
+    <value>Cochée</value>
+  </data>
+  <data name="Changes.Unchecked" xml:space="preserve">
+    <value>Décochée</value>
+  </data>
+</root>

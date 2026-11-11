@@ -1,0 +1,122 @@
+@inject IStringLocalizer<AmountField> L
+
+@* An amount and its currency, side by side, under one legend (visuel/saisie-edition/contenu.md): the currency of origin, chosen
+   in the list of those a collection of comics meets, the old franc included, or any other entered by its code, an amount being
+   entered in any currency (fonctionnel/valorisation/gestion-des-devises.md). The amount is entered in the display culture; a
+   text that is no amount leaves the amount as it was, as a bound field of Blazor does. *@
+<fieldset class="amount-field">
+    <legend id="@($"{Id}-legend")">@Label</legend>
+    <span class="amount-field-controls">
+        <label class="visually-hidden" for="@Id">@L["Amount"]</label>
+        <input id="@Id" type="text" inputmode="decimal" class="amount-field-amount" value="@AmountText" disabled="@Disabled"
+               aria-invalid="@(Error is null ? null : "true")" aria-describedby="@DescribedBy" @onchange="EnterAmountAsync" />
+        <label class="visually-hidden" for="@CurrencyId">@L["Currency"]</label>
+        <select id="@CurrencyId" class="amount-field-currency" value="@SelectedCurrency" disabled="@Disabled" @onchange="ChooseCurrencyAsync">
+            @foreach (var named in Named)
+            {
+                <option value="@named">@L[$"Currency.{named}"]</option>
+            }
+            <option value="@Other">@L["Currency.Other"]</option>
+        </select>
+        @if (SelectedCurrency == Other)
+        {
+            <label class="visually-hidden" for="@($"{Id}-code")">@L["Currency.Code"]</label>
+            <input id="@($"{Id}-code")" type="text" class="amount-field-code" maxlength="3" autocomplete="off" value="@Currency"
+                   placeholder="@L["Currency.Code.Placeholder"]" disabled="@Disabled" @onchange="EnterCodeAsync" />
+        }
+    </span>
+    @if (Error is not null)
+    {
+        <p class="amount-field-error" id="@($"{Id}-error")"><Icon Name="IconName.Alert" />@Error</p>
+    }
+    @if (Help is not null)
+    {
+        <p class="amount-field-help" id="@($"{Id}-help")">@Help</p>
+    }
+</fieldset>
+
+@code {
+    // The value of the choice of a currency entered by its code.
+    private const string Other = "other";
+
+    // The currencies a collection of comics meets, named in the display culture; the euro, that of the culture, first.
+    private static readonly string[] Named = ["EUR", "QZF", "FRF", "BEF", "LUF", "CHF", "CAD", "USD", "GBP"];
+
+    // Whether the user chose to enter the currency by its code, before entering it.
+    private bool _otherChosen;
+
+    /// <summary>The identifier of the amount, unique in the page; the currency is <c>{Id}-currency</c>.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter]
+    public decimal? Amount { get; set; }
+
+    [Parameter]
+    public EventCallback<decimal?> AmountChanged { get; set; }
+
+    /// <summary>The code of the currency (ISO 4217, or <c>QZF</c> for the old franc); none, the one shown by default.</summary>
+    [Parameter]
+    public string? Currency { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> CurrencyChanged { get; set; }
+
+    /// <summary>The currency shown while none is chosen, sent with an amount entered without one.</summary>
+    [Parameter, EditorRequired]
+    public string DefaultCurrency { get; set; } = null!;
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public string? Help { get; set; }
+
+    /// <summary>What to correct: the amount is then in error.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    private string CurrencyId => $"{Id}-currency";
+
+    private string? AmountText => Amount?.ToString(CultureInfo.CurrentCulture);
+
+    private string SelectedCurrency => _otherChosen || (Currency is { } code && !Named.Contains(code)) ? Other : Currency ?? DefaultCurrency;
+
+    private string? DescribedBy
+    {
+        get
+        {
+            string?[] descriptions = [Error is null ? null : $"{Id}-error", Help is null ? null : $"{Id}-help"];
+            var describedBy = string.Join(' ', descriptions.OfType<string>());
+            return describedBy.Length == 0 ? null : describedBy;
+        }
+    }
+
+    private async Task EnterAmountAsync(ChangeEventArgs args)
+    {
+        var text = (args.Value as string)?.Trim();
+        if (string.IsNullOrEmpty(text))
+            await AmountChanged.InvokeAsync(null);
+        else if (decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var amount))
+            await AmountChanged.InvokeAsync(amount);
+    }
+
+    private async Task ChooseCurrencyAsync(ChangeEventArgs args)
+    {
+        var code = args.Value as string;
+        _otherChosen = code == Other;
+        if (!_otherChosen)
+            await CurrencyChanged.InvokeAsync(code);
+    }
+
+    private Task EnterCodeAsync(ChangeEventArgs args)
+    {
+        var code = (args.Value as string)?.Trim();
+        // A code of the list is then shown by its name.
+        _otherChosen = false;
+        return CurrencyChanged.InvokeAsync(string.IsNullOrEmpty(code) ? null : code.ToUpperInvariant());
+    }
+}

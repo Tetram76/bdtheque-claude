@@ -1,0 +1,81 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md; visuel/saisie-edition/declinaison-par-theme.md). */
+.edition-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+/* The album of the edition, under its label: what the edition belongs to, leading to its own form. */
+.edition-album {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.edition-album a {
+    font-weight: var(--font-weight-strong);
+}
+
+/* The publisher and the collection side by side, stacked on a smartphone (visuel/saisie-edition/contenu.md). */
+.edition-publisher {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m);
+}
+
+@media (min-width: 48rem) {
+    .edition-publisher {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+}
+
+/* Fields on a line that wraps when needed, each keeping the size of what it holds. */
+.edition-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-m) var(--space-l);
+}
+
+/* A list sized to its longest choice, never stretched over the width of its field. */
+.edition-list {
+    inline-size: auto;
+    max-inline-size: 100%;
+}
+
+.edition-date {
+    inline-size: auto;
+}
+
+/* Boxes to check, level with the controls of the fields beside them, under their labels. */
+.edition-flag {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-block-start: calc(var(--font-size-small) * var(--line-height-text) + var(--space-xs));
+}
+
+.edition-flags {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
+}
+
+.edition-free {
+    max-inline-size: 16rem;
+}
+
+.edition-help {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+/* Unavailable until a publisher is chosen, as on the form of a series: in dashes, on the surface around it, its text still
+   read. Only the list disabled by its own attribute: the form disabled while it is saved keeps the look of a disabled control. */
+.edition-collection[disabled] {
+    border-style: dashed;
+    background-color: transparent;
+    opacity: 1;
+}
