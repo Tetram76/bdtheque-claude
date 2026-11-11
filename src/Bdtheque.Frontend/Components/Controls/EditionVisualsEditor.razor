@@ -20,6 +20,7 @@
    dialog tells. A visual is ordered among those of its type by dragging it, with the drag events of the browser that Blazor
    handles, without any script. *@
 <Block Title="@L["Block"]" Kicker="@L["Kicker"]" class="edition-visuals">
+    <div class="edition-visuals-body">
     <p class="edition-visuals-help">@L["Help", Lifetime]</p>
 
     <div class="edition-visuals-drop">
@@ -110,6 +111,7 @@
         </ul>
         <p class="edition-visuals-help">@L["Drag"]</p>
     }
+    </div>
 </Block>
 
 @if (_removing is { } removing)

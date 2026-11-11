@@ -91,6 +91,7 @@
     list-style: none;
 }
 
+/* On the surface of the controls, whatever the color of the block: a refusal in the color of deletion stays readable. */
 .edition-visuals-upload {
     display: flex;
     flex-direction: column;
@@ -98,6 +99,8 @@
     padding: var(--space-s) var(--space-m);
     border: 2px solid var(--color-rule);
     border-radius: var(--radius-tile);
+    background: var(--color-control-background);
+    color: var(--color-text);
     font-size: var(--font-size-small);
 }
 
@@ -220,4 +223,11 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-text-muted);
+}
+
+/* Its parts spaced as the fields of the other blocks of the form. */
+.edition-visuals-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
 }
