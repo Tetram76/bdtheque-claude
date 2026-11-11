@@ -395,8 +395,8 @@ class View extends Mockup {
         roles: roleChips(roles), ...rating(n), ...badge(state)
       }));
       const credited = hasAlbums
-        ? 'crédité sur ' + e.albums.length + (e.albums.length > 1 ? ' albums' : ' album') + ' sur ' + e.seriesSize + ' · ' + owned + ' dans la collection'
-        : 'crédité sur la série seulement, sur aucun de ses ' + e.seriesSize + ' albums';
+        ? 'Crédité sur ' + e.albums.length + (e.albums.length > 1 ? ' albums' : ' album') + ' sur ' + e.seriesSize + ' · ' + owned + ' dans la collection'
+        : 'Série · crédité sur la série seulement, sur aucun de ses ' + e.seriesSize + ' albums';
       return {
         ...base, isAlbum: false, isSeries: true, canOpen: hasAlbums, noOpen: !hasAlbums, open: isOpen, rated: false,
         listLabel: 'Albums de la série ' + e.title,
@@ -412,7 +412,8 @@ class View extends Mockup {
         chevron: isOpen ? '90deg' : '0deg',
         toggleLabel: (isOpen ? 'Replier ' : 'Déplier ') + e.title,
         toggle: () => this.setState({ open: { ...open, [i]: !isOpen } }),
-        meta: 'Série · ' + credited,
+        // « Série » is said only of a series credited on itself alone, that nothing else tells from an album.
+        meta: credited,
         roles: roleChips(e.seriesRoles),
         hasSeriesRoles: e.seriesRoles.length > 0,
         albums

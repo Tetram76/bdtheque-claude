@@ -55,10 +55,10 @@
     <value>{0} · {1}</value>
   </data>
   <data name="Credited.One" xml:space="preserve">
-    <value>Série · crédité sur {0} album sur {1}</value>
+    <value>Crédité sur {0} album sur {1}</value>
   </data>
   <data name="Credited.Other" xml:space="preserve">
-    <value>Série · crédité sur {0} albums sur {1}</value>
+    <value>Crédité sur {0} albums sur {1}</value>
   </data>
   <data name="Owned" xml:space="preserve">
     <value>{0} · {1} dans la collection</value>

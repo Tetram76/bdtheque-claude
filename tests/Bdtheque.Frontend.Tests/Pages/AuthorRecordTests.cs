@@ -187,7 +187,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         var sangre = Entries(page)[2];
         Assert.Equal(3, sangre.QuerySelectorAll(".entry-row .cover-pile .cover-slot").Length);
         Assert.Equal(AppPaths.SeriesRecord(SangreId), sangre.QuerySelector(".entry-row a.entry-title")!.GetAttribute("href"));
-        Assert.Equal("Série · crédité sur 6 albums sur 6 · 5 dans la collection", sangre.QuerySelector(".entry-row .entry-meta")!.TextContent.Trim());
+        Assert.Equal("Crédité sur 6 albums sur 6 · 5 dans la collection", sangre.QuerySelector(".entry-row .entry-meta")!.TextContent.Trim());
         var seriesRoles = sangre.QuerySelector(".entry-row .entry-series-roles")!;
         Assert.StartsWith("Sur la série :", seriesRoles.TextContent.Trim(), StringComparison.Ordinal);
         Assert.Equal(["Dessin"], seriesRoles.QuerySelectorAll(".role").Select(r => r.TextContent.Trim()));
@@ -202,7 +202,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         var page = Open();
 
         var sangre = Entries(page)[0];
-        Assert.Equal("Série · crédité sur 1 album sur 3 · aucun dans la collection", sangre.QuerySelector(".entry-row .entry-meta")!.TextContent.Trim());
+        Assert.Equal("Crédité sur 1 album sur 3 · aucun dans la collection", sangre.QuerySelector(".entry-row .entry-meta")!.TextContent.Trim());
         Assert.Empty(sangre.QuerySelectorAll(".entry-row .entry-series-roles"));
     }
 
