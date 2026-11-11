@@ -270,6 +270,17 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     }
 
     [Fact]
+    public async Task Get_GivesTheHeaviestFileAccepted_WhichTheEntryAnnounces()
+    {
+        // The limit is api's configuration: its clients announce it without knowing it themselves.
+        var edition = await CreateEditionAsync();
+
+        var visuals = await GetVisualsAsync(edition);
+
+        Assert.Equal(ApiWebApplicationFactory.MaxVisualFileSizeBytes, visuals.MaxFileSizeBytes);
+    }
+
+    [Fact]
     public async Task Get_TheVisualsOfTheEditionOfAnotherAlbum_IsAFunctionalError()
     {
         var edition = await CreateEditionAsync();

@@ -9,7 +9,10 @@ namespace Bdtheque.Contracts.Admin;
 /// upload, rearrangement or deletion is the album's.
 /// </summary>
 /// <param name="AlbumVersion">Version of the album, sent back with any write on the visuals.</param>
-public sealed record EditionVisualsForm(Guid EditionId, IReadOnlyList<EditionVisualForm> Visuals, uint AlbumVersion);
+/// <param name="MaxFileSizeBytes">
+/// Heaviest file accepted for a visual, which <c>api</c> alone checks: given for the entry to announce it.
+/// </param>
+public sealed record EditionVisualsForm(Guid EditionId, IReadOnlyList<EditionVisualForm> Visuals, uint AlbumVersion, long MaxFileSizeBytes);
 
 /// <summary>A visual of an edition; <c>api</c> serves its media (<see cref="Catalog.VisualMediaRoutes"/>).</summary>
 /// <param name="DisplayOrder">Rank among the visuals of the same type.</param>

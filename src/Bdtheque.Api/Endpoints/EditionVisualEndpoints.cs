@@ -43,14 +43,15 @@ internal static class EditionVisualEndpoints
         });
     }
 
-    private static async Task<EditionVisualsForm> GetAsync(Guid rootId, Guid editionId, BdthequeDbContext context, CancellationToken cancellationToken)
+    private static async Task<EditionVisualsForm> GetAsync(
+        Guid rootId, Guid editionId, BdthequeDbContext context, IOptions<VisualStorageOptions> options, CancellationToken cancellationToken)
     {
         var read = await context.Editions.AsNoTracking().Include(e => e.Visuals)
                        .Where(e => e.Id == editionId && e.AlbumId == rootId)
                        .Select(e => new { Edition = e, AlbumVersion = EF.Property<uint>(e.Album, BdthequeDbContext.VersionProperty) })
                        .SingleOrDefaultAsync(cancellationToken)
                    ?? throw new EntityNotFoundException(typeof(Edition), editionId);
-        return ToForm(read.Edition, read.AlbumVersion);
+        return ToForm(read.Edition, read.AlbumVersion, options.Value);
     }
 
     /// <summary>
@@ -90,11 +91,12 @@ internal static class EditionVisualEndpoints
         // reconciliation, which decides from the database.
         await transaction.CommitAsync(cancellationToken);
 
-        return TypedResults.Created($"/admin/albums/{rootId}/editions/{editionId}/visuals", ToForm(edition, context.VersionOf(album)));
+        return TypedResults.Created($"/admin/albums/{rootId}/editions/{editionId}/visuals", ToForm(edition, context.VersionOf(album), options.Value));
     }
 
     private static async Task<EditionVisualsForm> ArrangeAsync(
-        Guid rootId, Guid editionId, ArrangeVisualsRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, Guid editionId, ArrangeVisualsRequest request, BdthequeDbContext context, IOptions<VisualStorageOptions> options,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, WithVisuals, cancellationToken);
@@ -104,7 +106,7 @@ internal static class EditionVisualEndpoints
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return ToForm(edition, context.VersionOf(album));
+        return ToForm(edition, context.VersionOf(album), options.Value);
     }
 
     // The editions are always loaded with their album (AlbumConfiguration), their visuals are not.
@@ -116,10 +118,12 @@ internal static class EditionVisualEndpoints
     private static Edition EditionOf(Album album, Guid editionId) =>
         album.Editions.SingleOrDefault(e => e.Id == editionId) ?? throw new EntityNotFoundException(typeof(Edition), editionId);
 
-    private static EditionVisualsForm ToForm(Edition edition, uint albumVersion) =>
+    // The heaviest file accepted is api's configuration, given with the visuals for the entry to announce it.
+    private static EditionVisualsForm ToForm(Edition edition, uint albumVersion, VisualStorageOptions options) =>
         new(edition.Id,
             edition.GetOrderedVisuals()
                 .Select(v => new EditionVisualForm(v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder))
                 .ToList(),
-            albumVersion);
+            albumVersion,
+            options.MaxFileSizeBytes);
 }
