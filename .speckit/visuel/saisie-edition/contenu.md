@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''une édition : pré-remplissage, blocs, exemplaire et valeur, visuels, intention.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T19:30:00Z }
 ---
 
 # Contenu
@@ -21,7 +21,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
   - **Les visuels**, dernier bloc du formulaire, géré comme les autres (décision de l'utilisateur à la validation) : ils s'enregistrent **avec la fiche**, comme ses champs, ce que le bloc rappelle ; un visuel ajouté, retiré, changé de type ou réordonné est une modification de la fiche (« Modifications non enregistrées »), que son enregistrement écrit avec ses champs, d'un seul tenant, et qu'« Annuler » abandonne ; recharger la page sans l'enregistrer la perd, comme toute saisie. Chaque fichier ajouté est envoyé aussitôt et vérifié, un fichier refusé l'étant dès son ajout, puis conservé en attente de l'enregistrement **24 heures** ; une fiche laissée ouverte plus longtemps l'annonce par un **dialogue**, bien visible, qui nomme les visuels retirés, à ajouter de nouveau.
     - une **zone de dépôt**, avec le choix de fichiers et le type des visuels ajoutés (« Couverture » proposé), les formats acceptés et la taille maximale ;
     - les **envois en cours**, traités un à la fois : progression de l'envoi, « En attente » pour les suivants ; un fichier refusé (format, taille) l'est avec sa raison, en couleur d'alerte, et se retire de la liste ;
-    - le **nombre de visuels**, puis tous les visuels en **une seule grille**, dans l'ordre des types ([Ordre des visuels d'une édition](../../fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md)), chaque vignette marquée de son type (« Couv. », « Garde », « Pl. 3 », « 4e »), pour qu'un type d'un seul visuel n'occupe pas une ligne à lui seul ;
+    - le **nombre de visuels**, puis tous les visuels en **une seule grille**, dans l'ordre des types ([Ordre des visuels d'une édition](../../fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md)), chaque vignette marquée de son type (« Couv. », « Garde », « Pl. 3 », « 4e »), pour qu'un type d'un seul visuel n'occupe pas une ligne à lui seul ; chaque image entière, à ses propres proportions, jamais recadrée, centrée dans la place d'une couverture comme toute couverture (décision de l'utilisateur à la validation) ;
     - sur chaque vignette, un bouton « ⋯ » qui ouvre son menu : **Changer le type**, **Ouvrir l'original** et **Supprimer le visuel…** ; une vignette se glisse pour la réordonner parmi celles de son type ;
     - en création, les visuels s'ajoutent de même, enregistrés avec la nouvelle édition ;
     - un visuel retiré l'est après confirmation, sa suppression n'étant faite qu'à l'enregistrement de la fiche.

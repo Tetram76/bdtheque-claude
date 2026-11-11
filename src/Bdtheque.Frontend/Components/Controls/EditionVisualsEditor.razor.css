@@ -171,12 +171,12 @@
     list-style: none;
 }
 
+/* A thumbnail as any cover (Cover): the whole image at its own proportions in the room of a cover, never cropped; its type and its
+   menu over it. */
 .edition-visual {
     position: relative;
-    aspect-ratio: 3 / 4;
-    border-radius: var(--radius-cover);
-    background: var(--color-rule);
-    overflow: hidden;
+    display: grid;
+    --cover-width: 100%;
     cursor: grab;
 }
 
@@ -184,11 +184,9 @@
     opacity: 0.5;
 }
 
-.edition-visual img {
-    display: block;
-    inline-size: 100%;
-    block-size: 100%;
-    object-fit: cover;
+/* Dragged by its thumbnail, the image itself never dragged out of the page. */
+.edition-visual ::deep img {
+    pointer-events: none;
 }
 
 /* The type, on a dark band at the foot of the thumbnail, readable on any image. */

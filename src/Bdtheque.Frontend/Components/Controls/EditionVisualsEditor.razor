@@ -87,7 +87,7 @@
                 <li class="edition-visual" draggable="true" data-dragged="@(_dragged == visual)" data-pending="@(visual.PendingId is not null)"
                     @ondragstart="() => _dragged = visual" @ondragend="() => _dragged = null"
                     @ondragover:preventDefault="true" @ondrop="() => DropAsync(visual)">
-                    <img src="@DisplayOf(visual)" alt="@label" loading="lazy" draggable="false" />
+                    <Cover VisualId="visual.Id" Source="@PendingDisplayOf(visual)" Alt="@label" />
                     <span class="edition-visual-mark" aria-hidden="true">@ShortOf(visual)</span>
                     <span class="edition-visual-actions">
                         <ActionsMenu Id="@($"{Id}-visual-{visual.Key:N}")" Label="@L["Actions", label]">
@@ -367,8 +367,9 @@
         var count => L["Count.Other", count],
     };
 
-    private static string DisplayOf(VisualItem visual) =>
-        visual.Id is { } id ? VisualMediaRoutes.Display(id) : $"/admin/visuals/pending/{visual.PendingId}/display";
+    // A visual added, waiting for the saving of the form, is shown from the waiting area; the others as any cover.
+    private static string? PendingDisplayOf(VisualItem visual) =>
+        visual.PendingId is { } pending ? $"/admin/visuals/pending/{pending}/display" : null;
 
     // « Planche 3 », the rank of a plate counted among the plates: what each visual is, in full.
     private string LabelOf(VisualItem visual) =>
