@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-11
+
+* **Plan** : #209 découpé en deux sous-tickets, la fiche de saisie d'une édition et d'une intention d'achat (#361) puis ses visuels (#362). **Visuel** : sur la saisie d'une édition, les dates de la fiche sont juste au-dessus de son premier bloc, comme sur les autres fiches de saisie, et non plus sous le bloc des visuels ; maquette alignée (décision de l'utilisateur). **Choix** : une page pour une édition et pour l'édition que vise une intention d'achat, adressée par son album, qui ramène à la page de ses éditions ; ISBN vérifié à chaque frappe ; montant et devise côte à côte, devises nommées ou toute autre par son code ; la lecture d'une édition pour sa saisie porte son album, l'intention qui la vise et, en création, le modèle de la série (#365).
+
 ## 2026-11-10
 
 * **Visuel** : sur les fiches de saisie d'un album, d'une série et d'un éditeur, l'enregistrement d'une fiche, créée ou modifiée, ramène à sa liste, et non plus à la fiche à jour ou, en création, à sa page de modification (décision de l'utilisateur à la validation fonctionnelle, #354).
