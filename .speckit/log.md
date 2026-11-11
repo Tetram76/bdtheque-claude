@@ -2,7 +2,7 @@
 
 ## 2026-11-11
 
-* **Visuel** : fiche d'un auteur ; une donnée non renseignée n'est pas affichée : ni nationalité « Non renseignée », ni bloc « Qui est-ce ? » sans biographie, ni bloc « Sur quels albums ? » sans crédit ; fiche d'un album, sans appréciation, ni étoiles ni « Pas encore noté » ; dans sa bibliographie, le titre d'une série ou d'un album, lien vers sa fiche, est souligné en permanence, un écran tactile n'ayant pas de survol (décisions de l'utilisateur à la validation fonctionnelle, #212).
+* **Visuel** : fiche d'un auteur ; une donnée non renseignée n'est pas affichée : ni nationalité « Non renseignée », ni bloc « Qui est-ce ? » sans biographie, ni bloc « Sur quels albums ? » sans crédit ; fiche d'un album, sans appréciation, ni étoiles ni « Pas encore noté » ; dans sa bibliographie, le titre d'une série ou d'un album, lien vers sa fiche, est souligné en permanence, un écran tactile n'ayant pas de survol ; son résumé ne dit plus que chaque album indique ses rôles, ce qui se voit ; maquette alignée (décisions de l'utilisateur à la validation fonctionnelle, #212).
 * **Choix** : fiche d'un auteur ; chaque série de sa bibliographie se déplie par une divulgation du navigateur, ouverte à l'arrivée jusqu'à six albums crédités, sans requête ni action suivie ; « Tout déplier » et « Tout replier » agissent sur toutes les séries par un script, leurs boutons n'apparaissant qu'avec lui (#212).
 
 ## 2026-11-10

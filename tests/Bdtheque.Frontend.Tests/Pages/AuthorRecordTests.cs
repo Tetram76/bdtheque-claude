@@ -152,7 +152,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Equal(["Carnet de croquis", "Les Naufragés d'Ythaq", "Sangre", "Les Terres de Troy"],
             entries.Select(e => e.QuerySelector(".entry-row .entry-title")!.TextContent.Trim()));
         Assert.Equal(["album", "series", "series", "series"], entries.Select(e => e.GetAttribute("data-kind")));
-        Assert.Equal("3 séries et 1 album sans série, rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.",
+        Assert.Equal("3 séries et 1 album sans série, rangés par ordre alphabétique.",
             page.Find(".bibliography-summary").TextContent.Trim());
     }
 
@@ -271,7 +271,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         var page = Open();
 
         Assert.Empty(page.FindAll("[data-fold-all]"));
-        Assert.Equal("Aucune série et 1 album sans série, rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.",
+        Assert.Equal("Aucune série et 1 album sans série, rangés par ordre alphabétique.",
             page.Find(".bibliography-summary").TextContent.Trim());
     }
 

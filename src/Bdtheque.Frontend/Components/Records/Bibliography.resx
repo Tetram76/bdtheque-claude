@@ -19,7 +19,7 @@
     <value>Bibliographie</value>
   </data>
   <data name="Summary" xml:space="preserve">
-    <value>{0} et {1}, rangés par ordre alphabétique ; chaque album indique le ou les rôles tenus.</value>
+    <value>{0} et {1}, rangés par ordre alphabétique.</value>
   </data>
   <data name="Series.None" xml:space="preserve">
     <value>Aucune série</value>
