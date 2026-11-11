@@ -697,6 +697,22 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Visuals_ChosenAfterFilesAllRefusedWithoutBeingSent_AreSent()
+    {
+        // Refused at once, these files ended the sending before any wait: the next choice is sent all the same.
+        _api.Answers["/admin/visuals/limits"] = new VisualLimits(1024 * 1024, TimeSpan.FromHours(24));
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created);
+        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(new byte[1024 * 1024 + 1], "scan-600dpi.png"));
+        page.WaitForElement(".edition-visuals-upload[data-refused]");
+
+        page.FindComponents<InputFile>()[^1].UploadFiles(InputFileContent.CreateFromBinary(new byte[16], "dedicace.png"));
+
+        page.WaitForAssertion(() => Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent));
+        Assert.Single(_api.Written);
+    }
+
+    [Fact]
     public void Visuals_AnotherType_PlacesTheVisualAfterThoseOfItsNewType_SavedWithTheForm()
     {
         var page = OpenOwned();
