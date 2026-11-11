@@ -49,7 +49,7 @@
     gap: 0.1875rem;
     min-inline-size: 0;
     --cover-width: 100%;
-    --rating-star-size: 0.75rem;
+    --star-size: 0.75rem;
 }
 
 .album-card a {

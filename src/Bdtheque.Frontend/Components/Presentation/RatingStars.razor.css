@@ -5,8 +5,8 @@
 }
 
 .star {
-    inline-size: var(--rating-star-size, 1.125rem);
-    block-size: var(--rating-star-size, 1.125rem);
+    inline-size: var(--star-size, 1.125rem);
+    block-size: var(--star-size, 1.125rem);
     fill: none;
     stroke: currentColor;
     stroke-width: 1.8;
