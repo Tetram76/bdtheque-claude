@@ -348,7 +348,7 @@
         if (kept.Count == 0)
             return;
         var due = kept.Min() - ExpiryMargin - Clock.GetUtcNow();
-        _expiry = Clock.CreateTimer(_ => _ = InvokeAsync(ExpireAsync), null, due < TimeSpan.Zero ? TimeSpan.Zero : due, Timeout.InfiniteTimeSpan);
+        _expiry = Clock.CreateTimer(state => _ = InvokeAsync(ExpireAsync), null, due < TimeSpan.Zero ? TimeSpan.Zero : due, Timeout.InfiniteTimeSpan);
     }
 
     private async Task ExpireAsync()
