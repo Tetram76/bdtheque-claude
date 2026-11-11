@@ -853,8 +853,7 @@ namespace Bdtheque.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_PublisherCollections_PublisherId_Name",
                 table: "PublisherCollections",
-                columns: new[] { "PublisherId", "Name" },
-                unique: true);
+                columns: new[] { "PublisherId", "Name" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Publishers_Name",
