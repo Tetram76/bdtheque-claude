@@ -31,7 +31,8 @@ forwards to that session a question of the user about the chantier
 - The user gives the **number of chantiers** of the batch. It is not fixed:
   take the latest the user gave in this conversation; ask for it if never
   given, never assume it.
-- Count the places taken (a chantier whose pull request is not merged yet).
+- Count the places taken (a chantier whose pull request is not merged yet,
+  and the functional consistency check until its conclusion is written).
 - A sub-ticket is a chantier like the others. When it is launched, give it to
   the session that split its ticket only if that session's context suits it
   (what it knows serves the sub-ticket, and its conversation is not too
@@ -64,8 +65,12 @@ forwards to that session a question of the user about the chantier
    chantier) and depends on the sub-tickets its parent orders before it.
    Order them:
    CI stabilization (a flaky test, an intermittent failure — not an
-   optimization) → plan of `.speckit/suivi-implementation/` → milestone of the
-   next version → the rest. Then drop each one that would touch the same
+   optimization) → the functional consistency check, when due (the
+   "Cohérence fonctionnelle" ticket, label `functional-consistency`, bears no
+   check of the current calendar week, done or in progress; checked by the
+   orchestrator alone, once for the batch,
+   `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
+   `.speckit/suivi-implementation/` → milestone of the next version → the rest. Then drop each one that would touch the same
    files as a chantier in progress, or that depends on one not merged yet.
    Read the body of the remaining first candidates to check this.
 3. **Resources, now** (PowerShell, every command bounded in time):
@@ -110,6 +115,9 @@ before any command that starts containers or browsers; wait for another
 session's run to end; size the run for the real resources; one functional
 validation environment at a time); whether the version survey is due
 (`releve-des-versions-a-la-reprise-du-travail.md`), checked once for the batch;
+that the functional consistency check
+(`controle-de-coherence-a-la-reprise-du-travail.md`) is the orchestrator's,
+not the session's, unless the session is the one it was given to;
 that the superpowers plugin is forbidden; that it answers in French.
 
 Tell the user, in one line per chantier, which ticket started and why it was
@@ -119,6 +127,12 @@ chosen before the others.
 
 - Each note of a session of the batch: report it to the user in a line or two,
   with the links of its pull request; never fabricate its result.
+- A note from the functional consistency check session (it has no pull
+  request): its place is freed once its conclusion is in the body of the
+  "Cohérence fonctionnelle" ticket — check it there
+  (`gh issue view <n> --json body`), with a ticket for each of its follow-ups;
+  then archive the session, leave the ticket open, and launch the next
+  chantier as after a merge.
 - A note that reports a merged (or abandoned) pull request: **check the
   cleanup** and finish it if needed, before launching the next chantier:
 
