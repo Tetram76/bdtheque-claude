@@ -289,9 +289,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         // fonctionnel/valorisation/gestion-des-devises.md: any currency, the old franc included.
         var page = OpenOwned();
         var currencies = page.FindAll("#edition-price-currency option").Select(option => option.TextContent.Trim()).ToList();
-        Assert.Equal("EUR · euro", currencies[0]);
-        Assert.Contains("QZF · ancien franc français", currencies);
-        Assert.Equal("Autre devise…", currencies[^1]);
+        // In the order of their likely use in a French-language collection of comics, the old franc among them.
+        Assert.Equal(
+            ["EUR · euro", "FRF · franc français", "BEF · franc belge", "CHF · franc suisse", "QZF · ancien franc français",
+                "USD · dollar des États-Unis", "CAD · dollar canadien", "GBP · livre sterling", "LUF · franc luxembourgeois", "Autre devise…"],
+            currencies);
 
         page.Find("#edition-price-currency").Change("other");
         page.Find("#edition-price-code").Change("jpy");
