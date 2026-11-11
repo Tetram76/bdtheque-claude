@@ -75,7 +75,10 @@ internal static class PurchaseIntentEndpoints
             new PurchaseIntentEditionContent(
                 content.PublisherId, content.PublisherCollectionId, content.PublicationYear, content.Isbn, content.Binding,
                 content.Orientation, content.ReadingDirection, content.Format, content.PageCount, content.Category, content.IsColor),
-            form.AlbumVersion);
+            form.AlbumVersion,
+            form.Album,
+            form.References,
+            form.SeriesTemplate);
     }
 
     private static async Task<Created<PurchaseIntentsForm>> CreateAsync(

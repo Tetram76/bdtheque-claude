@@ -1,3 +1,4 @@
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Admin;
@@ -18,7 +19,15 @@ public sealed record PurchaseIntentForm(Guid Id, Guid? EditionId);
 /// (fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md).
 /// </summary>
 /// <param name="AlbumVersion">Version of the album, sent back with the creation or the conversion of the intent.</param>
-public sealed record NewPurchaseIntentForm(Guid AlbumId, PurchaseIntentEditionContent Edition, uint AlbumVersion);
+/// <param name="Album">The album of the intent, which the form names and leads to.</param>
+/// <param name="References">The records the pre-filled edition references, named for the form to present them.</param>
+/// <param name="SeriesTemplate">
+/// The template of the album's series, whose fields with a value are those the series pre-filled; <c>null</c> for an album
+/// without series.
+/// </param>
+public sealed record NewPurchaseIntentForm(
+    Guid AlbumId, PurchaseIntentEditionContent Edition, uint AlbumVersion, AlbumSummary Album, EditionFormReferences References,
+    SeriesEditionTemplate? SeriesTemplate);
 
 /// <summary>
 /// The edition an intent targets, entered with the minimum of fields: those of the published edition,
