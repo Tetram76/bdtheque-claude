@@ -609,7 +609,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal(["Planche"], menu.QuerySelectorAll("[aria-pressed=true]").Select(item => item.TextContent.Trim()));
         Assert.Equal(VisualMediaRoutes.Original(FirstPlateId), menu.QuerySelector("a")!.GetAttribute("href"));
         Assert.Equal("_blank", menu.QuerySelector("a")!.GetAttribute("target"));
-        Assert.Equal("Supprimer le visuel…", menu.QuerySelectorAll("button").Last().TextContent.Trim());
+        Assert.Equal("Supprimer le visuel…", menu.QuerySelectorAll("button")[^1].TextContent.Trim());
     }
 
     [Fact]
@@ -738,13 +738,13 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
-        page.FindAll(".edition-visual")[1].QuerySelectorAll(".actions-menu-panel button").Last().Click();
+        page.FindAll(".edition-visual")[1].QuerySelectorAll(".actions-menu-panel button")[^1].Click();
         var dialog = page.Find("dialog");
         Assert.Equal("Supprimer ce visuel ?", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal("Planche 1", dialog.QuerySelector(".dialog-subject")!.TextContent.Trim());
         Assert.Contains("à l'enregistrement de la fiche", dialog.TextContent);
 
-        dialog.QuerySelectorAll(".dialog-actions .button").Last().Click();
+        dialog.QuerySelectorAll(".dialog-actions .button")[^1].Click();
 
         Assert.Empty(page.FindAll("dialog"));
         Assert.Equal("2 visuels", page.Find(".edition-visuals-count").TextContent);
