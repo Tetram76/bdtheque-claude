@@ -27,6 +27,9 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     // The lists of the block of the edition and of the making, by the end of their identifier.
     private static readonly string[] ListedFields = ["category", "format", "binding", "orientation", "direction"];
 
+    // The two amounts of the block of the value.
+    private static readonly string[] Amounts = ["price", "initial"];
+
     private static readonly Guid AlbumId = Guid.Parse("01900000-0000-7000-8000-0000000000a1");
     private static readonly Guid EditionId = Guid.Parse("01900000-0000-7000-8000-0000000000a2");
     private static readonly Guid WishedId = Guid.Parse("01900000-0000-7000-8000-0000000000a3");
@@ -223,7 +226,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         page.Find("#edition-mode").Change("Gift");
         Free(page).Change(true);
 
-        Assert.All(new[] { "price", "initial" }, id => Assert.True(string.IsNullOrEmpty(page.Find($"#edition-{id}").GetAttribute("value"))));
+        Assert.All(Amounts, id => Assert.True(string.IsNullOrEmpty(page.Find($"#edition-{id}").GetAttribute("value"))));
         Assert.All(new[] { "price", "price-currency", "initial", "initial-currency" }, id => Assert.True(page.Find($"#edition-{id}").HasAttribute("disabled")));
 
         // A purchase is never free: choosing it unchecks the box, which it disables.
