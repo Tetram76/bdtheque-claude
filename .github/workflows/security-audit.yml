@@ -180,6 +180,7 @@ jobs:
             echo "<!-- end -->"
           } > body.md
           if [ -z "$issue" ]; then
+            # Only the initial title: the user may change it, the issue being found by its labels alone.
             issue=$(basename "$(gh issue create --title "Harnais sécurité : Vulnérabilités connues" --label security-audit --label harness --body-file body.md)")
           else
             gh issue edit "$issue" --body-file body.md

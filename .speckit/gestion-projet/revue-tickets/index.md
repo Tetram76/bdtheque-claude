@@ -7,7 +7,7 @@
 * [Analyse SonarQube Cloud](analyse-sonarqube-cloud.md) - Traitement de l'analyse SonarQube Cloud de chaque PR : moment, problèmes, porte de qualité, marquage et son commentaire, remonté à Sonar au cas par cas, dispense, indisponibilité.
 * [Analyse des vulnérabilités des images Docker](analyse-des-vulnerabilites-des-images-docker.md) - Analyse Docker Scout des images à chaque PR et avant publication ; traitement d'une vulnérabilité relevée.
 * [Revue Codex (bloquante)](revue-codex-bloquante.md) - Revue Codex, condition du merge : ouverture de la PR, budget épuisé, statut et traitement des retours, cycle et surveillance.
-* [Issues](issues.md) - Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, tickets de suivi des harnais, leur titre et leurs étiquettes (celle du harnais, `harness`) ; recherche d'un ticket existant avant toute création.
+* [Issues](issues.md) - Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, tickets de suivi des harnais et leurs étiquettes (celle du harnais, `harness`) ; recherche d'un ticket existant avant toute création.
 * [Suivi par tickets](suivi-par-tickets.md) - Un ticket par chantier, correspondance ticket/PR, découpage, consolidation, clôture et verrouillage, statut dans le suivi ; contenu d'un ticket.
 * [Lien entre Pull Requests et Issues](lien-entre-pull-requests-et-issues.md) - Référencement du ticket dans la PR, mot-clé de fermeture, tickets associés.
 * [Contrôle de cohérence à la reprise du travail](controle-de-coherence-a-la-reprise-du-travail.md) - À chaque reprise du travail : quand le contrôle de cohérence fonctionnelle est dû, qui le vérifie et où sa trace se lit ; s'il est dû, lire Contrôle de cohérence fonctionnelle.
