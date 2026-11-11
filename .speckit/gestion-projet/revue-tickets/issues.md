@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, tickets de suivi des harnais et leur étiquette commune ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
 ---
 
 # Issues
@@ -11,7 +11,14 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:00:00Z }
 Les Issues GitHub (« tickets ») servent à :
 
 - tracer **chaque chantier** du plan d'implémentation (cf. [Suivi par tickets](suivi-par-tickets.md) ci-dessous) ;
-- tracer ponctuellement des **bugs** à corriger ou des **fonctionnalités** à implémenter dans le futur, hors plan d'implémentation.
+- tracer ponctuellement des **bugs** à corriger ou des **fonctionnalités** à implémenter dans le futur, hors plan d'implémentation ;
+- porter l'état d'un **harnais**, contrôle périodique de l'application ou du dépôt (§ Tickets de suivi des harnais).
+
+## Tickets de suivi des harnais
+
+Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose à suivre, que ne réalise aucune Pull Request et qui n'a pas de jalon ([Versions et releases](../depot/versions-et-releases.md)) : « Vulnérabilités connues » (harnais sécurité et mises à jour, [Mises à jour des dépendances](../depot/mises-a-jour-des-dependances.md)), « Dette qualité » (harnais qualité), « Cohérence fonctionnelle » ([Contrôle de cohérence fonctionnelle](controle-de-coherence-fonctionnelle.md)).
+
+- **Étiquettes** : celle de son harnais, par laquelle le harnais le retrouve (`security-audit`, `functional-consistency`…), et l'étiquette commune **`harness`**, que portent tous les tickets de suivi et eux seuls (exigence de l'utilisateur) : elle les réunit en une liste, à part des chantiers. Qui crée un tel ticket, harnais ou agent, lui pose les deux.
 
 ## Avant de créer un ticket
 

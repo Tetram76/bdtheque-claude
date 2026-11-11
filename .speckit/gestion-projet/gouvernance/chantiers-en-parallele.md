@@ -1,8 +1,8 @@
 ---
 type: Gouvernance
 title: 'Chantiers en parallèle'
-description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants et ordre de priorité, indépendance, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:24:49Z }
+description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants et ordre de priorité, contrôle de cohérence fonctionnelle confié par l'orchestrateur, indépendance, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
 ---
 
 # Chantiers en parallèle
@@ -24,9 +24,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:24:49Z }
 - **Choix refait à chaque lancement** : avant de lancer un chantier, l'agent relit les tickets ouverts, dont ceux que les sessions du lot ont créés entre-temps (sous-tickets, tickets ouverts sur un problème relevé), et les Pull Requests ouvertes.
 - **Ordre de priorité** :
   1. **Stabilisation du CI** : un ticket qui corrige une instabilité du CI (test instable, échec intermittent). Retirer au CI une cause d'échec extérieure à son contenu (ex. les quotas d'un registre) n'est pas une stabilisation, mais une optimisation, qui suit l'ordre commun.
-  2. **Plan d'implémentation** : un chantier listé dans [`suivi-implementation/`](../../suivi-implementation/index.md), sous-tickets compris.
-  3. **Jalon de la version en cours** : un ticket rattaché au jalon de la prochaine version ([Versions et releases](../depot/versions-et-releases.md)).
-  4. Les autres tickets.
+  2. **Contrôle de cohérence fonctionnelle**, quand il est dû ([Contrôle de cohérence à la reprise du travail](../revue-tickets/controle-de-coherence-a-la-reprise-du-travail.md)), ce que l'orchestrateur seul vérifie, une fois pour le lot : il le confie à une session à part, qui occupe une place du lot, son ticket étant celui de son suivi. Les tickets qu'il ouvre rejoignent le choix des chantiers suivants.
+  3. **Plan d'implémentation** : un chantier listé dans [`suivi-implementation/`](../../suivi-implementation/index.md), sous-tickets compris.
+  4. **Jalon de la version en cours** : un ticket rattaché au jalon de la prochaine version ([Versions et releases](../depot/versions-et-releases.md)).
+  5. Les autres tickets.
 - **Indépendance** : un chantier qui modifierait les mêmes fichiers qu'un chantier en cours (même écran, même thème, même workflow) est écarté au profit du suivant, tant que l'autre n'est pas fusionné.
 - **Dépendances** : deux chantiers dont l'un doit voir le résultat de l'autre (ex. deux tickets qui modifient le même workflow, l'un devant partir de ce que l'autre décide) sont menés l'un après l'autre, jamais en même temps.
 - **Décisions de l'utilisateur** : un ticket qui attend une décision de l'utilisateur avant toute réalisation reste choisissable ; sa session soumet ces décisions à l'utilisateur, un point à la fois ([Prise de décision](prise-de-decision.md)).

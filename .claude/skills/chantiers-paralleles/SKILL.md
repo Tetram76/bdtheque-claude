@@ -64,8 +64,12 @@ forwards to that session a question of the user about the chantier
    chantier) and depends on the sub-tickets its parent orders before it.
    Order them:
    CI stabilization (a flaky test, an intermittent failure — not an
-   optimization) → plan of `.speckit/suivi-implementation/` → milestone of the
-   next version → the rest. Then drop each one that would touch the same
+   optimization) → the functional consistency check, when due (the
+   "Cohérence fonctionnelle" ticket, label `functional-consistency`, bears no
+   check of the current calendar week, done or in progress; checked by the
+   orchestrator alone, once for the batch,
+   `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
+   `.speckit/suivi-implementation/` → milestone of the next version → the rest. Then drop each one that would touch the same
    files as a chantier in progress, or that depends on one not merged yet.
    Read the body of the remaining first candidates to check this.
 3. **Resources, now** (PowerShell, every command bounded in time):
@@ -110,6 +114,9 @@ before any command that starts containers or browsers; wait for another
 session's run to end; size the run for the real resources; one functional
 validation environment at a time); whether the version survey is due
 (`releve-des-versions-a-la-reprise-du-travail.md`), checked once for the batch;
+that the functional consistency check
+(`controle-de-coherence-a-la-reprise-du-travail.md`) is the orchestrator's,
+not the session's, unless the session is the one it was given to;
 that the superpowers plugin is forbidden; that it answers in French.
 
 Tell the user, in one line per chantier, which ticket started and why it was
