@@ -22,7 +22,7 @@ namespace Bdtheque.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:CollationDefinition:fr_case_accent_insensitive", "fr-FR-u-ks-level1,fr-FR-u-ks-level1,icu,False")
-                .HasAnnotation("ProductVersion", "10.0.14")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -794,7 +794,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PublisherId", "Name")
-                        .IsUnique();
+                        .HasAnnotation("Bdtheque:UniqueAtCommit", true);
 
                     b.ToTable("PublisherCollections", t =>
                         {

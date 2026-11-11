@@ -297,6 +297,65 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
+    public async Task Update_SwappingTheNamesOfTwoCollections_SavesInOneGo()
+    {
+        // #360: the state asked for respects the uniqueness of the names, which is checked on the saved state only.
+        var publisher = await CreateAsync("Les Humanoïdes Associés", "Collection A", "Collection B");
+        var a = publisher.Collections.Single(c => c.Name == "Collection A");
+        var b = publisher.Collections.Single(c => c.Name == "Collection B");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(a.Id, "Collection B"), new(b.Id, "Collection A")]), publisher.Version));
+
+        response.EnsureSuccessStatusCode();
+        var updated = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
+        Assert.Equal([(b.Id, "Collection A"), (a.Id, "Collection B")], updated.Collections.Select(c => (c.Id, c.Name)));
+        SameForm(updated, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
+    }
+
+    [Fact]
+    public async Task Update_RotatingTheNamesOfThreeCollections_SavesInOneGo()
+    {
+        var publisher = await CreateAsync("Sarbacane", "Un", "Deux", "Trois");
+        var one = publisher.Collections.Single(c => c.Name == "Un");
+        var two = publisher.Collections.Single(c => c.Name == "Deux");
+        var three = publisher.Collections.Single(c => c.Name == "Trois");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(one.Id, "Deux"), new(two.Id, "Trois"), new(three.Id, "Un")]), publisher.Version));
+
+        response.EnsureSuccessStatusCode();
+        var updated = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
+        Assert.Equal([(one.Id, "Deux"), (two.Id, "Trois"), (three.Id, "Un")], updated.Collections.Select(c => (c.Id, c.Name)));
+    }
+
+    [Fact]
+    public async Task Update_RenamingACollectionAsAnotherKept_IsABusinessError_AndChangesNothing()
+    {
+        var publisher = await CreateAsync("Rue de Sèvres", "Label 619", "Ciel");
+        var label = publisher.Collections.Single(c => c.Name == "Label 619");
+        var ciel = publisher.Collections.Single(c => c.Name == "Ciel");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(label.Id, "Ciel"), new(ciel.Id, "Ciel")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        SameForm(publisher, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
+    }
+
+    [Fact]
+    public async Task Create_WithTwoCollectionsOfTheSameName_IsABusinessError_AndCreatesNothing()
+    {
+        var response = await _client.PostAsJsonAsync(
+            "/admin/publishers", new PublisherContent("Akileos", null, [new(null, "Regards"), new(null, "Regards")]));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
+        Assert.False(await context.Publishers.AnyAsync(p => p.Name == "Akileos"));
+    }
+
+    [Fact]
     public async Task Update_WithANewCollectionNamedAsAnother_IsABusinessError()
     {
         var publisher = await CreateAsync("Kana", "Big Kana");

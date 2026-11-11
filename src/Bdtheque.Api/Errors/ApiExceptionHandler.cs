@@ -65,32 +65,42 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         // Before DbUpdateException, from which it derives.
         DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, ProblemTypes.Functional, null),
 
-        DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } violation }
-            when violation.ConstraintName is not null && UniqueIndexRules.ByIndexName.TryGetValue(violation.ConstraintName, out var rule) =>
+        // Reported wrapped by the save, or as is by the commit of a transaction, which checks the deferrable unique
+        // constraints (choix-implementation/persistance/unicite-verifiee-a-la-validation.md): the same failure either way.
+        DbUpdateException { InnerException: PostgresException error } => CategorizeDatabaseError(error),
+        PostgresException error => CategorizeDatabaseError(error),
+
+        // A request the frontend built wrongly, whatever the user typed: thrown by the framework
+        // outside Production (RouteHandlerOptions.ThrowOnBadRequest), and in every environment by the
+        // handlers that read their request themselves (e.g. VisualUploadReader).
+        BadHttpRequestException badRequest => (badRequest.StatusCode, ProblemTypes.Technical, null),
+
+        _ => (StatusCodes.Status500InternalServerError, ProblemTypes.Technical, null),
+    };
+
+    // By the nature of the failure, which its SQL state tells, rather than by the constraint alone.
+    private static (int Status, string Type, string? RuleCode) CategorizeDatabaseError(PostgresException error) => error switch
+    {
+        { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: { } constraint }
+            when UniqueIndexRules.ByIndexName.TryGetValue(constraint, out var rule) =>
             (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, rule),
 
         // A text longer than its column, whichever entity and field: a mistake the user can correct by
         // shortening it, whereas the limits themselves live in the schema only (no copy in the domain).
-        DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.StringDataRightTruncation } } =>
+        { SqlState: PostgresErrorCodes.StringDataRightTruncation } =>
             (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, DomainRules.TextTooLong),
 
         // A creation or a modification: the referenced record was deleted in the meantime, as for an
         // unknown identifier. A deletion never raises this code: references are ON DELETE RESTRICT,
         // reported as RestrictViolation, which the deletion translates itself, being the only one
         // able to recompute the impact that blocks it.
-        DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation } } =>
-            (StatusCodes.Status404NotFound, ProblemTypes.Functional, null),
+        { SqlState: PostgresErrorCodes.ForeignKeyViolation } => (StatusCodes.Status404NotFound, ProblemTypes.Functional, null),
 
         // A write other than a deletion removing a record a saved search designates (a contribution removed
         // from the form of its album or series): refused as its deletion would be, which the user resolves by
         // modifying the search first. Any other reference left behind remains a missing check, technical.
-        DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.RestrictViolation, TableName: BdthequeDbContext.SavedSearchDesignationsTable } } =>
+        { SqlState: PostgresErrorCodes.RestrictViolation, TableName: BdthequeDbContext.SavedSearchDesignationsTable } =>
             (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, DomainRules.SavedSearchDesignatedRecordRemoved),
-
-        // A request the frontend built wrongly, whatever the user typed: thrown by the framework
-        // outside Production (RouteHandlerOptions.ThrowOnBadRequest), and in every environment by the
-        // handlers that read their request themselves (e.g. VisualUploadReader).
-        BadHttpRequestException badRequest => (badRequest.StatusCode, ProblemTypes.Technical, null),
 
         _ => (StatusCodes.Status500InternalServerError, ProblemTypes.Technical, null),
     };

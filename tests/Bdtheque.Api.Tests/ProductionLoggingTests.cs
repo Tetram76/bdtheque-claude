@@ -48,6 +48,21 @@ public sealed class ProductionLoggingTests : IClassFixture<ApiWebApplicationFact
         Assert.DoesNotContain(logs.Entries.Skip(before), e => e.Level >= LogLevel.Warning);
     }
 
+    [Fact]
+    public async Task BusinessErrorReportedByTheCommit_IsNotLoggedAsAnError()
+    {
+        // Two collections of a publisher with the same name break a deferrable unique constraint, checked when
+        // the transaction commits (choix-implementation/persistance/unicite-verifiee-a-la-validation.md).
+        var (logs, client) = CapturingLogs();
+        var before = logs.Entries.Count;
+
+        var response = await client.PostAsJsonAsync(
+            "/admin/publishers", new PublisherContent($"Éditeur {Guid.NewGuid():N}", null, [new(null, "Doublon"), new(null, "Doublon")]));
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        Assert.DoesNotContain(logs.Entries.Skip(before), e => e.Level >= LogLevel.Warning);
+    }
+
     private (CapturingLoggerProvider Logs, HttpClient Client) CapturingLogs()
     {
         var logs = new CapturingLoggerProvider();

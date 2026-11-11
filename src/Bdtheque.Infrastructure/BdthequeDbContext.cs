@@ -2,6 +2,7 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Entities.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Bdtheque.Infrastructure;
 
@@ -35,15 +36,21 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
     // editions, intents and contributions (AutoInclude, AlbumConfiguration), which a single statement
     // would join into a cartesian product — whoever queries the album, whatever else it includes.
     //
-    // A failed statement, save or query is not logged here: it always reaches its caller as an
-    // exception, which the caller reports once, at the level its nature calls for — a value already
-    // used is a mistake the user corrects (ApiExceptionHandler), not an error of the application.
+    // A failed statement, save, query or transaction is not logged here: it always reaches its caller as
+    // an exception, which the caller reports once, at the level its nature calls for — a value already
+    // used is a mistake the user corrects (ApiExceptionHandler), not an error of the application, even
+    // when a deferrable unique constraint reports it at commit (DeferredUniqueness).
     // Logged here too, at the error level, it would make every such mistake look like a failure.
+    //
+    // The migrations create the indexes unique at commit as deferrable constraints, which the provider
+    // cannot declare.
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
         optionsBuilder
             .UseNpgsql(npgsql => npgsql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+            .ReplaceService<IMigrationsSqlGenerator, BdthequeMigrationsSqlGenerator>()
             .ConfigureWarnings(warnings => warnings.Ignore(
-                RelationalEventId.CommandError, CoreEventId.SaveChangesFailed, CoreEventId.QueryIterationFailed));
+                RelationalEventId.CommandError, RelationalEventId.TransactionError, CoreEventId.SaveChangesFailed,
+                CoreEventId.QueryIterationFailed));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -25,7 +25,7 @@ public sealed class UniqueIndexRulesTests : IClassFixture<ApiWebApplicationFacto
         var uniqueIndexes = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Model
             .GetEntityTypes()
             .SelectMany(t => t.GetIndexes())
-            .Where(i => i.IsUnique)
+            .Where(i => i.IsUnique || i.IsUniqueAtCommit())
             .Select(i => i.GetDatabaseName()!)
             .Except(UniqueIndexRules.OutsideUserInput)
             .Order(StringComparer.Ordinal);
@@ -40,7 +40,7 @@ public sealed class UniqueIndexRulesTests : IClassFixture<ApiWebApplicationFacto
         var uniqueIndexes = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Model
             .GetEntityTypes()
             .SelectMany(t => t.GetIndexes())
-            .Where(i => i.IsUnique)
+            .Where(i => i.IsUnique || i.IsUniqueAtCommit())
             .Select(i => i.GetDatabaseName()!)
             .ToHashSet();
 
