@@ -87,7 +87,9 @@
     // Bound by @bind:get/@bind:set, and not by a value and a handler: only a binding makes Blazor set the field again to the
     // amount when a text that is no amount leaves it unchanged (data-binding of the documentation of Blazor); a handler would leave
     // that text on screen, while the previous amount, or none, is saved.
-    private string? AmountText => Amount?.ToString(CultureInfo.CurrentCulture);
+    // An amount of money, with two decimals at least, the others (up to the four the database keeps) only when they count: read
+    // back, 16.95 is 16.9500.
+    private string? AmountText => Amount?.ToString("0.00##", CultureInfo.CurrentCulture);
 
     private string SelectedCurrency => _otherChosen || (Currency is { } code && !Named.Contains(code)) ? Other : Currency ?? DefaultCurrency;
 

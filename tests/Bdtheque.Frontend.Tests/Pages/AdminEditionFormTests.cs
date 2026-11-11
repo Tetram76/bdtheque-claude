@@ -570,6 +570,23 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal(new FunctionUse("admin.purchase-intent-form.new", new PresentedRecord(RecordType.Album, AlbumId), null), FirstUse());
     }
 
+    [Theory]
+    [InlineData("16.9500", "16,95")]
+    [InlineData("10", "10,00")]
+    [InlineData("0.1234", "0,1234")]
+    public void Amount_ReadWithTheScaleOfTheDatabase_ShownAsAnAmountOfMoney(string stored, string shown)
+    {
+        // Stored with four decimals, an amount reads back with its trailing zeros (16.9500): shown with two at least, the others
+        // only when they count.
+        var field = Render<AmountField>(parameters => parameters
+            .Add(p => p.Id, "price")
+            .Add(p => p.Label, "Prix d'achat")
+            .Add(p => p.Amount, decimal.Parse(stored, CultureInfo.InvariantCulture))
+            .Add(p => p.DefaultCurrency, "EUR"));
+
+        Assert.Equal(shown, field.Find("#price").GetAttribute("value"));
+    }
+
     [Fact]
     public void Visuals_ABlockOfTheForm_InASingleGrid_InTheOrderOfTheTypes_EachMarkedWithItsType()
     {

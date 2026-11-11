@@ -167,11 +167,11 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
 
         await price.FillAsync("12,5");
         await price.PressAsync("Tab");
-        await Assertions.Expect(price).ToHaveValueAsync("12,5");
+        await Assertions.Expect(price).ToHaveValueAsync("12,50");
         await price.FillAsync("douze");
         await price.PressAsync("Tab");
 
-        await Assertions.Expect(price).ToHaveValueAsync("12,5");
+        await Assertions.Expect(price).ToHaveValueAsync("12,50");
     }
 
     [Fact]
