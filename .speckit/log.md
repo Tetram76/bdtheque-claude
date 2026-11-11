@@ -2,6 +2,7 @@
 
 ## 2026-11-11
 
+* **Visuel** : fiche d'un auteur ; une donnée non renseignée n'est pas affichée : ni nationalité « Non renseignée », ni bloc « Qui est-ce ? » sans biographie (décision de l'utilisateur à la validation fonctionnelle, #212).
 * **Choix** : fiche d'un auteur ; chaque série de sa bibliographie se déplie par une divulgation du navigateur, ouverte à l'arrivée jusqu'à six albums crédités, sans requête ni action suivie ; « Tout déplier » et « Tout replier » agissent sur toutes les séries par un script, leurs boutons n'apparaissant qu'avec lui (#212).
 
 ## 2026-11-10

@@ -40,12 +40,16 @@ else if (_author is { } author)
                     }
                 </div>
 
-                <dl class="author-nationality">
-                    <div>
-                        <dt>@L["Nationality"]</dt>
-                        <dd>@if (author.Nationality is { } nationality){@nationality}else{<NotSet Gender="GrammaticalGender.Feminine" />}</dd>
-                    </div>
-                </dl>
+                @* Data not set is not shown (visuel/fiche-auteur/contenu.md). *@
+                @if (!string.IsNullOrWhiteSpace(author.Nationality))
+                {
+                    <dl class="author-nationality">
+                        <div>
+                            <dt>@L["Nationality"]</dt>
+                            <dd>@author.Nationality</dd>
+                        </div>
+                    </dl>
+                }
 
                 <ul class="author-facts" aria-label="@L["Facts"]">
                     <li class="author-fact" data-fact="credited">@Credited</li>
@@ -61,16 +65,12 @@ else if (_author is { } author)
             </div>
         </div>
 
-        <Block Title="@L["Biography.Title"]" Kicker="@L["Biography.Kicker"]" data-part="biography">
-            @if (author.Biography is { } biography)
-            {
-                <p class="author-biography">@biography</p>
-            }
-            else
-            {
-                <p class="author-biography" data-none>@L["Biography.None"]</p>
-            }
-        </Block>
+        @if (!string.IsNullOrWhiteSpace(author.Biography))
+        {
+            <Block Title="@L["Biography.Title"]" Kicker="@L["Biography.Kicker"]" data-part="biography">
+                <p class="author-biography">@author.Biography</p>
+            </Block>
+        }
 
         <Bibliography Entries="author.Bibliography" />
     </div>

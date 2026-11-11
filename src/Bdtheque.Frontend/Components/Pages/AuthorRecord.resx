@@ -45,9 +45,6 @@
   <data name="Biography.Kicker" xml:space="preserve">
     <value>Portrait</value>
   </data>
-  <data name="Biography.None" xml:space="preserve">
-    <value>Aucune biographie pour l&apos;instant.</value>
-  </data>
   <data name="Dates" xml:space="preserve">
     <value>Auteur créé le {0}, modifié le {1}.</value>
   </data>

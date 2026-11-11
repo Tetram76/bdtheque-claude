@@ -81,7 +81,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Identity_IsTheMainIdentifier_WithItsMonogram_AndANationalityNotSet()
+    public void Identity_IsTheMainIdentifier_WithItsMonogram_WithoutANationalityNotSet()
     {
         _catalog.Author = Author();
 
@@ -91,7 +91,8 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Equal("AF", page.Find(".author-head .monogram").TextContent.Trim());
         // Known by its own name, no other name follows it.
         Assert.Empty(page.FindAll(".author-real-name"));
-        Assert.Equal("Non renseignée", page.Find(".author-nationality dd").TextContent.Trim());
+        // Data not set is not shown.
+        Assert.Empty(page.FindAll(".author-nationality"));
     }
 
     [Fact]
@@ -130,13 +131,14 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Biography_IsPresented_OrSaidToBeMissing()
+    public void Biography_IsPresented_AndItsBlockLeftOutWithout()
     {
         _catalog.Author = Author() with { Biography = "Né à Brest en 1981." };
         Assert.Equal("Né à Brest en 1981.", BlockOf(Open(), "Qui est-ce ?").QuerySelector(".author-biography")!.TextContent.Trim());
 
         _catalog.Author = Author();
-        Assert.Equal("Aucune biographie pour l'instant.", BlockOf(Open(), "Qui est-ce ?").QuerySelector(".author-biography")!.TextContent.Trim());
+        // Data not set is not shown: no block « Qui est-ce ? » either.
+        Assert.DoesNotContain(Open().FindAll("section.block .block-title"), title => title.TextContent.Trim() == "Qui est-ce ?");
     }
 
     [Fact]

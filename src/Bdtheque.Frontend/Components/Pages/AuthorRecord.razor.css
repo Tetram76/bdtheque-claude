@@ -115,10 +115,6 @@
     white-space: pre-line;
 }
 
-.author-biography[data-none] {
-    color: var(--color-text-muted);
-}
-
 .author-dates {
     margin: var(--space-xl) 0 0;
     font-size: var(--font-size-small);

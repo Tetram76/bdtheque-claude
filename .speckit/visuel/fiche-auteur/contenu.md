@@ -2,16 +2,16 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''un auteur : identité, biographie, bibliographie complète.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:00:00Z }
 ---
 
 # Contenu
 
-De haut en bas :
+Une donnée non renseignée de l'auteur n'est pas affichée, sans mention « Non renseigné » à sa place. De haut en bas :
 
 - **En-tête** de la partie Consultation, avec l'entrée « Auteurs » active, puis le **fil d'Ariane** : Auteurs, puis l'auteur.
-- **En-tête de la fiche** : un petit **monogramme** (initiales), décoratif, à gauche du nom, y compris sur smartphone ; l'identifiant principal de l'auteur ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)), suivi de son prénom et de son nom lorsqu'il est connu sous un pseudonyme ; sa nationalité (« Non renseignée » sinon) ; des étiquettes qui donnent le nombre d'albums crédités, puis ce nombre par rôle.
-- **Qui est-ce ?** : la biographie, ou « Aucune biographie pour l'instant. ».
+- **En-tête de la fiche** : un petit **monogramme** (initiales), décoratif, à gauche du nom, y compris sur smartphone ; l'identifiant principal de l'auteur ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)), suivi de son prénom et de son nom lorsqu'il est connu sous un pseudonyme ; sa nationalité, lorsqu'elle est renseignée ; des étiquettes qui donnent le nombre d'albums crédités, puis ce nombre par rôle.
+- **Qui est-ce ?** : la biographie ; sans biographie, pas de bloc.
 - **Sur quels albums ?** : la **bibliographie complète** ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)), en une seule liste :
   - séries et **albums sans série au premier niveau**, triés ensemble par ordre alphabétique (clé de tri), comme le veut [Structure de l'application](../../fonctionnel/structure-de-l-application.md) ;
   - **tout album a la même représentation**, qu'il appartienne à une série ou non : sa vignette de couverture, son titre (le tome seul pour un album sans titre propre), une mention qui le situe (« Série · T. 3 », ou « Album sans série »), le **rôle ou les rôles tenus sur l'album**, son appréciation lorsqu'elle est renseignée et son appartenance à la collection. Les vignettes des albums sans série sont alignées sur les piles des séries ; les albums d'une série dépliée sont réunis en retrait, sous la série, dans un **encadré** au fond teinté, marqué à gauche d'un filet de la couleur d'accent, pour qu'aucune entrée suivante (album sans série ou autre série) ne passe pour l'un d'eux ;
