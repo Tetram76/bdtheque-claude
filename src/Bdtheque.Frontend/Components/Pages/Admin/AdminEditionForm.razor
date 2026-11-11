@@ -300,8 +300,8 @@ else
         {
             try
             {
-                AlbumFormat = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
-                Entry = Id switch
+                var format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+                var entry = Id switch
                 {
                     { } id => EditionEntry.Of(await Api.GetAsync<EditionForm>($"/admin/albums/{AlbumId}/editions/{id}")),
                     _ when IsNewPurchaseIntent => EditionEntry.NewPurchaseIntent(
@@ -310,12 +310,17 @@ else
                 };
                 // Read after the edition: a write between both readings leaves the form the older version of the album, which its
                 // saving sends, refused as a conflict rather than writing over what it did not read.
-                if (Entry.Id is { } edition)
-                    Entry.Visuals = [.. (await Api.GetAsync<EditionVisualsForm>($"/admin/albums/{AlbumId}/editions/{edition}/visuals")).Visuals.Select(VisualItem.Of)];
-                Limits = await Api.GetAsync<VisualLimits>("/admin/visuals/limits");
-                ReadEntry = Entry.Copy();
-                if (Entry.Publisher is { } publisher)
-                    PublisherCollections = await CollectionsOfAsync(publisher.Id);
+                if (entry.Id is { } edition)
+                    entry.Visuals = [.. (await Api.GetAsync<EditionVisualsForm>($"/admin/albums/{AlbumId}/editions/{edition}/visuals")).Visuals.Select(VisualItem.Of)];
+                var limits = await Api.GetAsync<VisualLimits>("/admin/visuals/limits");
+                var collections = entry.Publisher is { } publisher ? await CollectionsOfAsync(publisher.Id) : null;
+
+                // Published once all of it is read: the form is shown only whole, a reading that fails showing the error instead.
+                AlbumFormat = format;
+                Limits = limits;
+                PublisherCollections = collections;
+                ReadEntry = entry.Copy();
+                Entry = entry;
             }
             catch (ApiProblemException exception)
             {

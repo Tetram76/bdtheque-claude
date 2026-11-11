@@ -696,6 +696,24 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Empty(_api.Written);
     }
 
+    [Theory]
+    [InlineData("visuals")]
+    [InlineData("limits")]
+    public void Load_FailingAfterTheEdition_SaysSo_WithoutTheForm(string reading)
+    {
+        // Read after the edition, what the form needs as well: the record is not shown until all of it is read.
+        _api.Failures[reading switch
+        {
+            "visuals" => $"/admin/albums/{AlbumId}/editions/{EditionId}/visuals",
+            _ => "/admin/visuals/limits",
+        }] = HttpStatusCode.InternalServerError;
+
+        var page = OpenOwned();
+
+        Assert.Equal("technical", page.Find("[role=alert]").GetAttribute("data-error-category"));
+        Assert.Empty(page.FindAll("form"));
+    }
+
     [Fact]
     public void Visuals_BeingSent_HoldTheSaving_UntilTheyAreInTheForm()
     {
