@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Contrôle de cohérence fonctionnelle'
 description: 'Contrôle hebdomadaire de la cohérence de toute l''application, au sein des familles d''écrans et de points d''entrée de même nature et pour chaque règle transversale : sources confrontées, classement des écarts, suites, trace ; à lire quand le contrôle est dû ou demandé.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:40:23Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:30:02Z }
 ---
 
 # Contrôle de cohérence fonctionnelle
@@ -49,7 +49,7 @@ Une règle commune confirmée (A corrigé, B tranché) est mise en œuvre **une 
 
 ## Trace
 
-Le ticket « Cohérence fonctionnelle » (étiquettes `functional-consistency` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description** l'état du contrôle, que l'agent réécrit :
+Le ticket de suivi du harnais fonctionnel (étiquettes `ergonomy-audit` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description** l'état du contrôle, que l'agent réécrit :
 
 - « Contrôle en cours », avec sa date, écrit **avant** le contrôle : une autre session qui reprend le travail la même semaine le voit, et ne le refait pas ;
 - à sa fin, le **dernier contrôle** : sa date et le commit de `main` sur lequel il porte, puis chaque écart relevé avec sa classe, les éléments en cause, et sa suite (ticket d'un A, question posée, décision et ticket d'un B, passage cité et raison d'un C), ou l'absence d'écart, constatée explicitement.

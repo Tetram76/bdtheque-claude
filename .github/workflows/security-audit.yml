@@ -2,7 +2,7 @@ name: Security audit
 
 # Daily check of the known vulnerabilities of every technology in use, whether or not the repository is
 # being worked on (contraintes-techniques/suivi-des-versions-et-des-vulnerabilites.md). The
-# current list is kept in the "Vulnérabilités connues" issue; the run only fails, hence only notifies
+# current list is kept in the harness's tracking issue; the run only fails, hence only notifies
 # the user who created the workflow, when a vulnerability absent from that list shows up: a known one
 # does not repeat the notification every day. It is no required check: a vulnerability that no
 # correction fixes yet never blocks a pull request. The agent reads the issue in its version watch, once
@@ -155,9 +155,10 @@ jobs:
           export LC_ALL=C
           cat vulnerabilities-*.txt | sort -u > current.txt
           gh label create security-audit --color B60205 --description "Daily security audit" --force
-          # Borne by the tracking issue of every harness, and by them only (gestion-projet/revue-tickets/issues.md).
+          # Borne by the tracking issue of every harness, and by them only, whereas security-audit also groups
+          # the chantiers of the harness: the tracking issue is the one with both (gestion-projet/revue-tickets/issues.md).
           gh label create harness --color 5319E7 --description "Tracking issue of a harness" --force
-          issue=$(gh issue list --label security-audit --state all --limit 1 --json number -q '.[0].number')
+          issue=$(gh issue list --label security-audit --label harness --state all --limit 1 --json number -q '.[0].number')
           if [ -n "$issue" ]; then
             # A single sed, which succeeds whether or not the list is empty (a filtering grep would fail
             # on an empty one under pipefail).
@@ -179,7 +180,8 @@ jobs:
             echo "<!-- end -->"
           } > body.md
           if [ -z "$issue" ]; then
-            issue=$(basename "$(gh issue create --title "Vulnérabilités connues" --label security-audit --label harness --body-file body.md)")
+            # Only the initial title: the user may change it, the issue being found by its labels alone.
+            issue=$(basename "$(gh issue create --title "Harnais sécurité : Vulnérabilités connues" --label security-audit --label harness --body-file body.md)")
           else
             gh issue edit "$issue" --body-file body.md
           fi
