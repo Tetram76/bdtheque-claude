@@ -34,7 +34,7 @@
     <value>Ancien franc</value>
   </data>
   <data name="Currency.FRF" xml:space="preserve">
-    <value>FRF · franc</value>
+    <value>FRF · franc français</value>
   </data>
   <data name="Currency.BEF" xml:space="preserve">
     <value>BEF · franc belge</value>
@@ -49,7 +49,7 @@
     <value>CAD · dollar canadien</value>
   </data>
   <data name="Currency.USD" xml:space="preserve">
-    <value>USD · dollar</value>
+    <value>USD · dollar des États-Unis</value>
   </data>
   <data name="Currency.GBP" xml:space="preserve">
     <value>GBP · livre sterling</value>
