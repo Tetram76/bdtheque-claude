@@ -15,8 +15,11 @@ description: >-
 The `.speckit/` is the source of truth:
 `.speckit/gestion-projet/gouvernance/chantiers-en-parallele.md`. **Read it again,
 in full, before step 1**: this skill only orders its steps and gives the
-commands, it adds no rule. This session launches and reports; it never
-carries out a chantier itself.
+commands, it adds no rule. This session is the **orchestrator**: it
+chooses, measures, launches and reports. It never carries out a chantier
+itself — no code, no heavy run, no action on a chantier's pull request
+(review, merge, closing): that belongs to the chantier's session, to which a
+question of the user about the chantier is forwarded (`SendMessage`).
 
 ## 1. The batch
 

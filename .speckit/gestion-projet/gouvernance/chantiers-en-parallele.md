@@ -7,7 +7,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:42:55Z }
 
 # Chantiers en parallèle
 
-À la demande de l'utilisateur, l'agent réalise un **lot de chantiers en parallèle** : chaque chantier est confié à une session à part, dans son propre worktree, qui le mène de bout en bout selon les règles du `.speckit/` (lecture du `.speckit/`, découpage, Pull Request, validation fonctionnelle, revue Codex, fusion, clôture). La session qui lance le lot ne réalise aucun chantier elle-même : elle choisit les chantiers, les lance, et rend compte de leur avancement à l'utilisateur.
+À la demande de l'utilisateur, l'agent réalise un **lot de chantiers en parallèle** : chaque chantier est confié à une session à part, dans son propre worktree, qui le mène de bout en bout selon les règles du `.speckit/` (lecture du `.speckit/`, découpage, Pull Request, validation fonctionnelle, revue Codex, fusion, clôture). La session qui lance le lot en est l'**orchestrateur** : elle choisit les chantiers, évalue les ressources, lance les sessions, et rend compte de leur avancement à l'utilisateur. Elle ne réalise aucun chantier elle-même : ni code, ni exécution lourde, ni action sur la Pull Request d'un chantier (revue, fusion, clôture), qui revient à la session du chantier ; une question de l'utilisateur sur un chantier lui est transmise.
 
 ## Le lot
 
