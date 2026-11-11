@@ -22,6 +22,7 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
     private readonly List<Uri> _requested = [];
     private readonly CapturingLogger _logger = new();
     private readonly StubHandler _handler;
+    private readonly List<(DateTimeOffset WakeUp, DateTimeOffset? NextAttempt)> _armedWaits = [];
     private readonly IsbnRangesRefresher _refresher;
 
     public IsbnRangesRefresherTests()
@@ -33,7 +34,12 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
             return _answers.Dequeue()();
         });
         _refresher = new IsbnRangesRefresher(
-            new StubClients(_handler), _formatter, Options.Create(new IsbnRangesOptions { Source = Source }), _clock,
+            new StubClients(_handler), _formatter, Options.Create(new IsbnRangesOptions { Source = Source }),
+            new ObservedClock(_clock, wakeUp =>
+            {
+                lock (_armedWaits)
+                    _armedWaits.Add((wakeUp, _refresher!.NextAttempt));
+            }),
             _logger);
     }
 
@@ -128,6 +134,29 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
         Assert.Equal("9782723445671", _formatter.Format("9782723445671"));
     }
 
+    // Announced before its wait was armed, the next attempt let a test move the clock on before the wait started, which then
+    // ended a whole delay later and left the loop stuck (#375): each wait is armed while the previous attempt is still the
+    // one announced.
+    [Fact]
+    public async Task NextAttempt_IsAnnounced_OnlyOnceItsWaitIsArmedOnTheClock()
+    {
+        _answers.Enqueue(RangeMessage);
+        _answers.Enqueue(() => throw new HttpRequestException("unreachable"));
+
+        await _refresher.StartAsync(CancellationToken.None);
+        await NextAttemptAsync(Start + IsbnRangesRefresher.RefreshDelay);
+        _clock.Advance(IsbnRangesRefresher.RefreshDelay);
+        await NextAttemptAsync(Start + IsbnRangesRefresher.RefreshDelay + IsbnRangesRefresher.RetryDelay);
+
+        lock (_armedWaits)
+            Assert.Equal(
+                [
+                    (Start + IsbnRangesRefresher.RefreshDelay, null),
+                    (Start + IsbnRangesRefresher.RefreshDelay + IsbnRangesRefresher.RetryDelay, Start + IsbnRangesRefresher.RefreshDelay),
+                ],
+                _armedWaits);
+    }
+
     // A bounded wait on the background loop, until it awaits its next attempt at the time given: the fake clock alone moves
     // it on.
     private async Task NextAttemptAsync(DateTimeOffset expected)
@@ -150,6 +179,18 @@ public sealed class IsbnRangesRefresherTests : IAsyncDisposable
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
             Task.FromResult(answer(request));
+    }
+
+    // The fake clock, which tells the time each wait armed on it is to wake up, as it is armed.
+    private sealed class ObservedClock(FakeTimeProvider clock, Action<DateTimeOffset> armed) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => clock.GetUtcNow();
+
+        public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
+        {
+            armed(clock.GetUtcNow() + dueTime);
+            return clock.CreateTimer(callback, state, dueTime, period);
+        }
     }
 
     // What the refresher writes to the journal, with its level and its exception.
