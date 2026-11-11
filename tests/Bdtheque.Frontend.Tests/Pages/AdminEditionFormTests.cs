@@ -24,6 +24,9 @@ namespace Bdtheque.Frontend.Tests.Pages;
 /// </summary>
 public sealed class AdminEditionFormTests : BunitContext, IDisposable
 {
+    // The lists of the block of the edition and of the making, by the end of their identifier.
+    private static readonly string[] ListedFields = ["category", "format", "binding", "orientation", "direction"];
+
     private static readonly Guid AlbumId = Guid.Parse("01900000-0000-7000-8000-0000000000a1");
     private static readonly Guid EditionId = Guid.Parse("01900000-0000-7000-8000-0000000000a2");
     private static readonly Guid WishedId = Guid.Parse("01900000-0000-7000-8000-0000000000a3");
@@ -158,7 +161,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("2007", page.Find("#edition-year").GetAttribute("value"));
         Assert.Equal("978-2-203-00120-8", page.Find("#edition-isbn").GetAttribute("value"));
         Assert.Equal(["", "Standard", "Hardcover", "Portrait", "LeftToRight"],
-            new[] { "category", "format", "binding", "orientation", "direction" }.Select(id => page.Find($"#edition-{id}").GetAttribute("value")));
+            ListedFields.Select(id => page.Find($"#edition-{id}").GetAttribute("value")));
         Assert.Equal("62", page.Find("#edition-pages").GetAttribute("value"));
         Assert.Equal("Purchase", page.Find("#edition-mode").GetAttribute("value"));
         Assert.Equal("2008-03-14", page.Find("#edition-date").GetAttribute("value"));
