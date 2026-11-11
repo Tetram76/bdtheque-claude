@@ -92,10 +92,10 @@
                         </span>
                         <span class="album-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
                         <span class="album-actions" role="cell">
-                            <Button Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["Editions.Title"]"
-                                    IconOnly="true" aria-label="@L["Editions.Label", label]" />
                             <Button Href="@AppPaths.AdminEditAlbum(row.Album.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
                                     IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", label]" />
+                            <Button Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["Editions.Title"]"
+                                    IconOnly="true" aria-label="@L["Editions.Label", label]" />
                             <ActionsMenu Id="@($"album-actions-{row.Album.Id:N}")" Label="@L["More", label]">
                                 <MenuItem Href="@AppPaths.Album(row.Album.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
                                 <MenuItem Href="@((ListOnly with { Merge = row.Album.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />

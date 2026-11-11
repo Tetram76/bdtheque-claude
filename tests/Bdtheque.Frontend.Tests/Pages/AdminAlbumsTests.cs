@@ -119,11 +119,11 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
         Assert.Equal(["Modifier Les Bijoux de la Castafiore (Tintin - T. 21)"], row.QuerySelectorAll($"a[href='{AppPaths.AdminEditAlbum(id)}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal(AppPaths.AdminAlbumEditions(id), row.QuerySelector(".album-editions a")!.GetAttribute("href"));
-        // « Éditions », then « Modifier », in the row itself (visuel/liste-albums/contenu.md, Actions d'une ligne).
+        // « Modifier », then « Éditions », in the row itself (visuel/liste-albums/contenu.md, Actions d'une ligne).
         Assert.Equal(
             [
-                ("Éditions et intentions d'achat de Les Bijoux de la Castafiore (Tintin - T. 21)", AppPaths.AdminAlbumEditions(id)),
                 ("Modifier Les Bijoux de la Castafiore (Tintin - T. 21)", AppPaths.AdminEditAlbum(id)),
+                ("Éditions et intentions d'achat de Les Bijoux de la Castafiore (Tintin - T. 21)", AppPaths.AdminAlbumEditions(id)),
             ],
             row.QuerySelectorAll(".album-actions a.button").Select(link => (link.GetAttribute("aria-label"), link.GetAttribute("href"))));
         Assert.Equal(
