@@ -59,6 +59,18 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         Assert.Equal(top, await page.EvaluateAsync<double>($"() => {EditionsTop}"), tolerance: 1.0);
     }
 
+    // Within the frame a theme gives the visual of a record, an album without cover keeps the stripes of the generic visual
+    // (fonctionnel/regles-metier/visuel-par-defaut.md, #326).
+    [Theory, InEachTheme]
+    public async Task AlbumWithoutCover_ShowsTheStripesOfTheGenericVisual(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await page.GotoAsync(AppPaths.Album(Application.IntendedAlbumId));
+
+        await Assertions.Expect(page.Locator(".album-cover .cover-generic"))
+            .ToHaveCSSAsync("background-image", CoverBackgrounds.GenericVisual());
+    }
+
     [Theory, InEachTheme]
     public async Task OriginalImage_IsServed(string theme)
     {

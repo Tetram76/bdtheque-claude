@@ -18,7 +18,9 @@
     }
 }
 
-/* The cover of the album, put forward: its frame, its tilt and its shadow are the touch of the theme (--record-visual-…). */
+/* The cover of the album, put forward: its frame, its tilt and its shadow are the touch of the theme (--record-visual-…). The
+   frame sets a background colour only: the generic visual of an album without cover is a background image, which the
+   shorthand would wipe out. */
 .album-cover {
     display: flex;
     justify-content: center;
@@ -29,7 +31,7 @@
 .album-cover ::deep .cover {
     padding: var(--record-visual-padding);
     border: var(--record-visual-border);
-    background: var(--record-visual-background);
+    background-color: var(--record-visual-background);
     box-shadow: var(--record-visual-shadow);
     rotate: var(--record-visual-tilt);
 }

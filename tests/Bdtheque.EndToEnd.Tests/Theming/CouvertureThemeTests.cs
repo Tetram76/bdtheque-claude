@@ -48,6 +48,20 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
     }
 
     [Fact]
+    public async Task AlbumsInVolume_AreSolidBooks_TheGenericVisualOfAnAlbumWithoutCoverIncluded()
+    {
+        var page = await OpenAsync(AppPaths.Home);
+
+        // The edge of the pages, drawn behind the cover of a book in volume, shows through anything but an opaque face: the
+        // translucent stripes of the generic visual are painted over the surface of the theme.
+        await Assertions.Expect(page.Locator("[data-area='latest'] .cover-volume .cover-generic")).ToHaveCountAsync(1);
+        var surface = Rgb((await CustomPropertyAsync(page, "--day-surface"))!);
+        Assert.All(await page.Locator(".cover-volume .cover").EvaluateAllAsync<string[]>(
+                "covers => covers.map(cover => getComputedStyle(cover).backgroundColor)"),
+            face => Assert.Equal(surface, face));
+    }
+
+    [Fact]
     public async Task Moves_AreLeftOut_WhenTheReaderAsksForFewerAnimations()
     {
         var reduced = await OpenAsync(AppPaths.Home);

@@ -24,6 +24,21 @@ public sealed class SeriesRecordTests(RecordsApplication application) : BrowserT
             .GetByRole(AriaRole.Link, new() { Name = "Séries" })).ToHaveAttributeAsync("aria-current", "page");
     }
 
+    // Within the frame a theme gives the pile of a record, a volume without cover keeps the stripes of the generic visual, and a
+    // place beyond the volumes its grey card (fonctionnel/regles-metier/visuel-par-defaut.md, visuel/fiche-serie/, #326).
+    [Theory, InEachTheme]
+    public async Task Pile_ShowsTheGenericVisualOfAVolumeWithoutCover_AndTheBlankCardOfAPlaceWithoutVolume(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await page.GotoAsync(AppPaths.SeriesRecord(Application.SeriesId));
+        await Assertions.Expect(page.Locator(".series-pile .cover-generic").First)
+            .ToHaveCSSAsync("background-image", CoverBackgrounds.GenericVisual());
+
+        await page.GotoAsync(AppPaths.SeriesRecord(Application.EmptySeriesId));
+        await Assertions.Expect(page.Locator(".series-pile .cover-blank").First)
+            .ToHaveCSSAsync("background-image", CoverBackgrounds.BlankCard());
+    }
+
     [Theory, InEachTheme]
     public async Task RecordOfAnAlbum_LeadsToTheRecordOfItsSeries_WhichLeadsToAnotherAlbum(string theme)
     {
