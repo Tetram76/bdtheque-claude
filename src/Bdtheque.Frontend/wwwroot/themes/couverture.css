@@ -290,8 +290,13 @@
     /* The profile of a book: almost square on the side of its spine, rounded on the side of its pages. */
     border-radius: 0.125rem 0.3125rem 0.3125rem 0.125rem;
     box-shadow: var(--book-ground);
-    /* A solid book: its face hides the edge of its pages, drawn behind it, in every position. The generic visual of an
-       album without cover, translucent stripes, and a cover with transparent parts are painted over the surface. */
+}
+
+/* A solid book: its face hides the edge of its pages, drawn behind it, in every position. The generic visual of an album
+   without cover, translucent stripes, and a cover with transparent parts are painted over the surface. Of a higher
+   specificity than the frame of the visual of a record (--record-visual-background), which it overrides whatever the order
+   of the style sheets. */
+[data-theme="couverture"] .cover-slot.cover-volume .cover {
     background-color: var(--color-surface);
 }
 

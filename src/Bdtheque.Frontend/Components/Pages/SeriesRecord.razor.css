@@ -29,10 +29,12 @@
     --cover-pile-step: var(--record-pile-step);
 }
 
+/* Framed as the visual of an album: a background colour only, the generic visual of a volume without cover and the blank
+   card of a place without volume being background images, which the shorthand would wipe out. */
 .series-pile ::deep .cover {
     padding: var(--record-visual-padding);
     border: var(--record-visual-border);
-    background: var(--record-visual-background);
+    background-color: var(--record-visual-background);
     box-shadow: var(--record-visual-shadow);
     rotate: var(--record-visual-tilt);
 }
