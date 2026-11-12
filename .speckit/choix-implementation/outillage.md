@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:45:00Z }
 ---
 
 # Outillage de développement
@@ -70,7 +70,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:00:00Z }
   - **Alternative écartée (tests de bout en bout tenus à l'écart des conteneurs par l'ordre des étapes)** : l'ordre déplace les changements d'adresse sans les supprimer (constaté, #294).
   - **Alternative écartée (IPv6 désactivé sur l'exécuteur)** : il modifie le réseau de toute la machine, quand seules les interfaces de Docker changent.
   - **Alternative écartée (navigateur en conteneur)** : les tests devraient joindre depuis ce conteneur l'application qu'ils hébergent, pour le même résultat.
-- **Tests de bout en bout exécutés seuls, dans des jobs à eux** : côte à côte avec les autres tests, ils durent deux fois plus longtemps faute de processeurs (2 min 5 s au lieu d'une minute, constaté), et s'approchent des délais du navigateur. Ils sont répartis par thème, un job par thème proposé, chacun sur son exécuteur, en même temps que celui des autres tests ([Thèmes](socle/themes.md), captures de référence) ; le job du premier thème exécute aussi, une fois par push, ceux qui ne dépendent d'aucun thème ou vérifient un thème qui leur est propre. Les jobs ne lisent que le cache des packages, qu'enregistre celui des autres tests, qui les restaure tous.
+- **Tests de bout en bout exécutés seuls, dans des jobs à eux** : côte à côte avec les autres tests, ils durent deux fois plus longtemps faute de processeurs (2 min 5 s au lieu d'une minute, constaté), et s'approchent des délais du navigateur. Ils sont répartis par thème, un job par thème proposé, chacun sur son exécuteur, en même temps que celui des autres tests ([Thèmes](socle/themes.md), captures de référence) ; le job du premier thème exécute aussi, une fois par push, ceux qui ne dépendent d'aucun thème ou vérifient un thème qui leur est propre. Les jobs ne lisent que le cache des packages, qu'enregistre celui des autres tests, qui les restaure tous. Chacun compile lui-même le projet des tests de bout en bout, en même temps que les autres jobs (20 à 40 s, mesuré).
+  - **Alternative écartée (compilation unique, partagée par un artefact)** : elle épargne ces compilations, du temps d'exécuteur que GitHub ne compte pas pour un dépôt public, mais les jobs de bout en bout attendraient la compilation au lieu de démarrer avec elle, puis le transfert de binaires de plusieurs centaines de Mo (application, navigateur piloté, bibliothèques natives) : environ une minute de plus avant la fin du CI.
 - **Une seule exécution des tests par push** : l'analyse SonarQube Cloud est un job distinct qui suit ceux des tests et réunit leurs couvertures ([Analyse de la qualité du code](../gestion-projet/depot/analyse-de-la-qualite-du-code.md)). Le check des tests dit seul si la non-régression est confirmée, et une analyse impossible n'échoue que son propre job. Le scanner désactivant les avertissements en erreur, sa compilation ne remplace pas celle, stricte, des tests.
   - **Alternative écartée (tests exécutés aussi par l'analyse)** : le double de temps d'exécuteur et de téléchargements de l'image PostgreSQL ([Intégration continue (CI)](../gestion-projet/depot/integration-continue-ci.md), quotas), et deux fois plus de chances qu'une instabilité fasse échouer un push.
   - **Alternative écartée (un seul job compilation, analyse et tests)** : une analyse indisponible ferait échouer le check de la non-régression, sans qu'on distingue l'un de l'autre.
