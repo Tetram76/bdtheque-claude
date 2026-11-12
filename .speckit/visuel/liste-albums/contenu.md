@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la liste des albums : recherche, filtres, navigation, lignes, actions, suppression, fusion.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T20:00:00Z }
 ---
 
 # Contenu
@@ -23,5 +23,11 @@ De haut en bas :
 - **Actions d'une ligne** : le bouton **Modifier**, qui ouvre la fiche de saisie de l'album sur une page dédiée ; le bouton **Éditions**, réduit à son icône, que son infobulle nomme « Éditions et intentions d'achat » (un second libellé prendrait sur grand écran la place des colonnes), qui ouvre la page où se gèrent les éditions de l'album et ses intentions d'achat ([`editions-album/`](../editions-album/index.md)), accès direct à ce que l'on y fait le plus souvent ; et un bouton « ⋯ » qui ouvre le menu des autres actions : **Voir dans la consultation**, **Fusionner avec un autre album…** et, séparée par un filet, **Supprimer…**, de la couleur de suppression du thème. Un clic en dehors d'un menu ouvert le referme. Les listes n'offrent pas d'action groupée ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).
 - **Suppression** : un dialogue qui reprend le libellé de l'album et annonce l'impact de la suppression par type de fiche ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) : fiches supprimées avec l'album, associations retirées. Le bouton de confirmation, « Supprimer définitivement », a la couleur d'alerte du thème. Une suppression refusée le dit dans le même dialogue, avec ce qui la bloque (ex. une recherche enregistrée qui désigne l'album) et la marche à suivre, sans autre bouton que « Fermer ».
 - **Fusion** : un dialogue qui part de l'album choisi et demande l'autre album, retrouvé par une recherche, chaque candidat avec son libellé, ses auteurs, sa date de première publication et ses éditions. « Continuer » mène à l'étape suivante, dont la présentation attend les modalités de la fusion ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).
-- **Liste vide** : une recherche sans résultat le dit, rappelle sur quoi porte la recherche, et propose d'effacer la recherche ou de créer l'album cherché.
+- **Liste vide**, selon ce qui la restreint, l'action qui efface un critère (texte cherché, filtres) n'étant proposée que s'il est actif (décision de l'utilisateur : s'aligner sur les listes qui distinguaient déjà ces cas, auteurs, éditeurs, genres et univers). L'entrée de la navigation par initiale n'est pas un critère mais une navigation : aucune action ne l'efface, et seule la liste vide sous une entrée propose de revenir à « Toutes ».
+  - une **recherche** sans résultat le dit, rappelle sur quoi porte la recherche, et propose d'effacer la recherche, l'entrée restant celle où l'on est, ou de créer l'album cherché, dont la fiche de saisie reprend le texte cherché pour titre (décision de l'utilisateur : le texte est utilisé, ou le bouton ne le promet pas) ;
+  - sans texte cherché, sous des **filtres** : « Aucun album ne correspond à ces critères. », et « Effacer les filtres », l'entrée restant celle où l'on est ;
+  - sans critère, sous une **entrée** de la navigation par initiale : « Aucun album sous cette entrée. », et « Tous les albums », qui revient à « Toutes » ;
+  - **sans critère, sous « Toutes »** : « Aucun album n'est encore enregistré. », et le bouton de création, « Nouvel album ».
+
+  Le rappel de ce sur quoi porte la recherche n'accompagne que le texte cherché. Toutes les listes suivent ces cas, chacune selon les critères qu'elle offre, sauf celle des intentions d'achat, qui rappelle, au lieu de la création, qu'une intention se pose depuis son album ([Principes communs](../listes/principes-communs.md)).
 - **Smartphone** : chaque ligne tient sur deux lignes, la vignette à gauche : le libellé et les actions (Modifier réduit à son icône, comme Éditions), puis la date, les éditions et l'appartenance à la collection ; la date de modification n'y figure pas. Le panneau des filtres passe sur deux colonnes.

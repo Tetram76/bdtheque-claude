@@ -208,14 +208,14 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Empty_WithoutAnyCriterion_SaysThereIsNoAuthorYet_WithNothingToClear()
+    public void Empty_WithoutAnyCriterion_SaysThereIsNoAuthorYet_AndOffersToCreateOne_WithNothingToClear()
     {
         Answer([], totalCount: 0);
 
         var empty = Open("").Find(".empty-list");
 
-        Assert.Equal("Aucun auteur n'est encore enregistré.", Text(empty));
-        Assert.Empty(empty.QuerySelectorAll("a"));
+        Assert.Equal("Aucun auteur n'est encore enregistré.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Nouvel auteur", $"{AppPaths.AdminAuthors}?new=open")], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 
     [Fact]

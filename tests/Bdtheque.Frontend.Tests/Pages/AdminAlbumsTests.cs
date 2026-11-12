@@ -225,8 +225,44 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
 
         Assert.Equal("Aucun album ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
         Assert.Equal(
-            [("Effacer la recherche", AppPaths.AdminAlbums), ("Créer l'album « Zorglub »", AppPaths.AdminNewAlbum)],
+            [("Effacer la recherche", AppPaths.AdminAlbums), ("Créer l'album « Zorglub »", $"{AppPaths.AdminNewAlbum}?searched=Zorglub")],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Empty_UnderFilters_SaysItAndOffersToClearTheFiltersOnly_WithoutRecallingTheSearch()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open($"entry=B&genreId={Genre}").Find(".empty-list");
+
+        Assert.Equal("Aucun album ne correspond à ces critères.", Text(empty.QuerySelector("strong")!));
+        Assert.DoesNotContain(empty.Children, child => child.LocalName == "span" && !child.ClassList.Contains("empty-list-actions"));
+        Assert.Equal([("Effacer les filtres", $"{AppPaths.AdminAlbums}?entry=B")], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Empty_UnderAnEntryOnly_OffersAllTheAlbums()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("entry=Q").Find(".empty-list");
+
+        Assert.Equal("Aucun album sous cette entrée.", Text(empty.QuerySelector("strong")!));
+        Assert.DoesNotContain(empty.Children, child => child.LocalName == "span" && !child.ClassList.Contains("empty-list-actions"));
+        Assert.Equal([("Tous les albums", AppPaths.AdminAlbums)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Empty_WithoutAnyCriterion_SaysThereIsNoAlbumYet_AndOffersToCreateOne_WithNothingToClear()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("").Find(".empty-list");
+
+        Assert.Equal("Aucun album n'est encore enregistré.", Text(empty.QuerySelector("strong")!));
+        Assert.DoesNotContain(empty.Children, child => child.LocalName == "span" && !child.ClassList.Contains("empty-list-actions"));
+        Assert.Equal([("Nouvel album", AppPaths.AdminNewAlbum)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 
     [Fact]

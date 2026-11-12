@@ -29,12 +29,12 @@
 
         @if (_list!.Items.Count == 0)
         {
-            if (_query.Text is { } text)
+            if (_query is { EmptyReason: EmptyListReason.Search, Text: { } text })
             {
                 <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
                     <Actions>
                         <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                        <Button Href="@AppPaths.AdminNewPublisher" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
+                        <Button Href="@AppPaths.NewWithSearched(AppPaths.AdminNewPublisher, text)" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
                     </Actions>
                 </EmptyList>
             }

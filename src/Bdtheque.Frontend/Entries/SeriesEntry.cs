@@ -70,11 +70,15 @@ public sealed class SeriesEntry
     /// <summary>Its authors, genres and universes, those added on the spot included.</summary>
     public CitedRecords Cited { get; set; } = new();
 
-    /// <summary>A new series, from what the API proposes to it: its new editions proposing what any new edition is proposed.</summary>
-    public static SeriesEntry New(SeriesContent proposed)
+    /// <summary>
+    /// A new series, from what the API proposes to it: its new editions proposing what any new edition is proposed, and its title
+    /// the text searched in its list, if any.
+    /// </summary>
+    public static SeriesEntry New(SeriesContent proposed, string? title = null)
     {
         var entry = new SeriesEntry();
         entry.Apply(proposed);
+        entry.Title = title ?? entry.Title;
         return entry;
     }
 

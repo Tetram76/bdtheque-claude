@@ -238,6 +238,15 @@ public static class AppPaths
     /// <summary>The search of an edition in the external sources, from its ISBN (visuel/administration/contenu.md).</summary>
     public const string AdminIsbnLookup = NotYetImplemented;
 
+    /// <summary>
+    /// The text searched in a list that found nothing, which the entry form of a new record on a page of its own takes as its
+    /// title or name (visuel/liste-albums/contenu.md, Liste vide): the list offers to create the record looked for.
+    /// </summary>
+    public const string SearchedParameter = "searched";
+
+    /// <summary>The entry form of a new record (<paramref name="newPath"/>) for the text searched in its list.</summary>
+    public static string NewWithSearched(string newPath, string searched) => $"{newPath}?{SearchedParameter}={Uri.EscapeDataString(searched)}";
+
     /// <summary>The entry form of a new album (visuel/saisie-album/).</summary>
     public const string AdminNewAlbum = $"{AdminAlbums}/new";
 

@@ -136,6 +136,10 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+    /// <summary>For a new publisher, the text searched in its list, which found nothing: its name (AppPaths.NewWithSearched).</summary>
+    [SupplyParameterFromQuery(Name = AppPaths.SearchedParameter)]
+    public string? Searched { get; set; }
+
     /// <summary>The publisher as the form holds it, read once, by the prerendering.</summary>
     [PersistentState]
     public PublisherEntry? Entry { get; set; }
@@ -160,7 +164,7 @@ else
         {
             try
             {
-                Entry = Id is { } id ? PublisherEntry.Of(await Api.GetAsync<PublisherForm>($"/admin/publishers/{id}")) : new PublisherEntry();
+                Entry = Id is { } id ? PublisherEntry.Of(await Api.GetAsync<PublisherForm>($"/admin/publishers/{id}")) : new PublisherEntry { Name = Searched };
                 ReadEntry = Entry.Copy();
             }
             catch (ApiProblemException exception)

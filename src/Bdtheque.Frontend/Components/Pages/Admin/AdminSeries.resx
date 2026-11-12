@@ -141,6 +141,15 @@
   <data name="Empty.ClearFilters" xml:space="preserve">
     <value>Effacer les filtres</value>
   </data>
+  <data name="Empty.Entry" xml:space="preserve">
+    <value>Aucune série sous cette entrée.</value>
+  </data>
+  <data name="Empty.All" xml:space="preserve">
+    <value>Toutes les séries</value>
+  </data>
+  <data name="Empty.None" xml:space="preserve">
+    <value>Aucune série n'est encore enregistrée.</value>
+  </data>
   <data name="Deletion.Title" xml:space="preserve">
     <value>Supprimer cette série ?</value>
   </data>

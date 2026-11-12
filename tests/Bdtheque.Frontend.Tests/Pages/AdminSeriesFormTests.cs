@@ -420,6 +420,18 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal(new FunctionUse("admin.series-form.new", null, null), opened.FirstUse);
     }
 
+    [Fact]
+    public void NewSeries_FromASearchWithoutResult_TakesTheTextSearchedAsItsTitle_ItsAutomaticSortKeyFollowing()
+    {
+        var page = OpenNew("Blacksad");
+
+        Assert.Equal("Blacksad", page.Find("#series-title").GetAttribute("value"));
+        Assert.Equal("Blacksad", page.Find(".entry-form-subject").TextContent.Trim());
+        page.WaitForAssertion(() => Assert.Equal("Blacksad", page.Find("#series-sort-key").GetAttribute("value")));
+        Assert.Contains("/admin/sort-keys/title?title=Blacksad", _api.Requested);
+        Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
+    }
+
     private IRenderedComponent<AdminSeriesForm> OpenSeries()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditSeries(SeriesId));
@@ -428,9 +440,9 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
             .AddCascadingValue(_request.Context));
     }
 
-    private IRenderedComponent<AdminSeriesForm> OpenNew()
+    private IRenderedComponent<AdminSeriesForm> OpenNew(string? searched = null)
     {
-        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminNewSeries);
+        Services.GetRequiredService<NavigationManager>().NavigateTo(searched is null ? AppPaths.AdminNewSeries : AppPaths.NewWithSearched(AppPaths.AdminNewSeries, searched));
         return Render<AdminSeriesForm>(parameters => parameters.AddCascadingValue(_request.Context));
     }
 

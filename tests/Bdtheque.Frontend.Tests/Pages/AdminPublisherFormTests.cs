@@ -352,6 +352,16 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         Assert.Equal(new FunctionUse("admin.publisher-form.new", null, null), opened.FirstUse);
     }
 
+    [Fact]
+    public void NewPublisher_FromASearchWithoutResult_TakesTheTextSearchedAsItsName()
+    {
+        var page = OpenNew("Dargaud");
+
+        Assert.Equal("Dargaud", page.Find("#publisher-name").GetAttribute("value"));
+        Assert.Equal("Dargaud", page.Find(".entry-form-subject").TextContent.Trim());
+        Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
+    }
+
     private IRenderedComponent<AdminPublisherForm> OpenPublisher()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditPublisher(PublisherId));
@@ -360,9 +370,9 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
             .AddCascadingValue(_request.Context));
     }
 
-    private IRenderedComponent<AdminPublisherForm> OpenNew()
+    private IRenderedComponent<AdminPublisherForm> OpenNew(string? searched = null)
     {
-        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminNewPublisher);
+        Services.GetRequiredService<NavigationManager>().NavigateTo(searched is null ? AppPaths.AdminNewPublisher : AppPaths.NewWithSearched(AppPaths.AdminNewPublisher, searched));
         return Render<AdminPublisherForm>(parameters => parameters.AddCascadingValue(_request.Context));
     }
 }
