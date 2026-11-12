@@ -4,7 +4,7 @@ title: 'Contrôle qualité hebdomadaire'
 description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité par urgence (critique, prioritaire, au fil de l''eau), traitement borné à une Pull Request par semaine ; à lire quand le traitement est dû ou pour modifier le contrôle.'
 applies_to:
   - '.github/workflows/quality-audit.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T16:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T16:25:00Z }
 ---
 
 # Contrôle qualité hebdomadaire
@@ -44,6 +44,7 @@ Le contrôle tient la liste de ses entrées dans le ticket de suivi du harnais q
 
 Au moment que fixe [Traitement du contrôle qualité à la reprise du travail](traitement-du-controle-qualite-a-la-reprise-du-travail.md), les entrées critiques puis prioritaires sont traitées, chacune comme un retour de revue ([Revue de code](../revue-tickets/revue-de-code.md), [Traiter un retour](../revue-tickets/revue-codex-bloquante.md#traiter-un-retour)) : contre-vérification, cause de fond ([Qualité du code](../gouvernance/qualite-du-code.md)), puis correction, report tracé ou rejet justifié.
 
+- **Comme l'analyse d'une Pull Request** (exigences de l'utilisateur) : toute entrée se traite exactement comme l'analyse SonarQube Cloud d'une Pull Request ([Analyse SonarQube Cloud](../revue-tickets/analyse-sonarqube-cloud.md)) : contre-vérification, défaut de conception cherché avant tout faux positif, correction à la racine, report ou rejet justifié. Un problème, un point sensible ou une note de SonarQube Cloud est en outre marqué dans SonarQube Cloud, avec la raison exacte, en anglais et sans information privée, et remonté à Sonar au cas par cas ; le rejet d'un écart de style ou d'un mutant, que SonarQube Cloud ne connaît pas, ne s'y marque pas : il est porté dans le code (ci-dessous, rejet).
 - **Critique, en tête** (exigence de l'utilisateur) : une entrée critique est prioritaire au même titre qu'une vulnérabilité connue ([Mises à jour des dépendances](mises-a-jour-des-dependances.md), correction dès qu'elle est disponible). Son traitement passe en tête, avant les entrées prioritaires ; pour une condition en échec de la porte de qualité, il corrige les problèmes qui la font échouer, que le ticket range avec elle.
 - **Volume borné** (exigence de l'utilisateur) : un traitement par exécution du contrôle au plus, en une seule Pull Request de l'agent, qui réunit ses corrections et suit le cycle de toute Pull Request. Ce que le traitement ne couvre pas reste où il est, pour le traitement de la semaine suivante. Un mutant survivant se corrige par le test qui manque.
 - **Au fil de l'eau** (exigence de l'utilisateur) : ces entrées ne sont jamais traitées en elles-mêmes ; l'une d'elles se corrige quand un chantier modifie de toute façon le fichier concerné, dans la Pull Request de ce chantier.
