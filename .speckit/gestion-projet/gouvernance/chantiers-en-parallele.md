@@ -1,8 +1,8 @@
 ---
 type: Gouvernance
 title: 'Chantiers en parallèle'
-description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants et ordre de priorité, contrôle de cohérence fonctionnelle confié par l'orchestrateur, indépendance, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:40:23Z }
+description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants et ordre de priorité, contrôle de cohérence fonctionnelle confié par l''orchestrateur, indépendance et dépendances (toute condition préalable, calendrier compris) vérifiées pour chaque candidat, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T17:50:44Z }
 ---
 
 # Chantiers en parallèle
@@ -30,6 +30,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:40:23Z }
   5. Les autres tickets.
 - **Indépendance** : un chantier qui modifierait les mêmes fichiers qu'un chantier en cours (même écran, même thème, même workflow) est écarté au profit du suivant, tant que l'autre n'est pas fusionné.
 - **Dépendances** : deux chantiers dont l'un doit voir le résultat de l'autre (ex. deux tickets qui modifient le même workflow, l'un devant partir de ce que l'autre décide) sont menés l'un après l'autre, jamais en même temps.
+  - **Toute condition préalable est une dépendance** : est une dépendance toute condition que le ticket, ou la ligne du suivi qui le présente, pose à sa réalisation, pas seulement un autre chantier : un ticket prérequis, une version publiée, une mise en production ([`journal-evenements.md`](../../journal-evenements.md)), un calendrier (« sans objet avant… », « à réaliser avant… »). Un ticket dont une condition n'est pas remplie n'est pas candidat, quel que soit son rang dans l'ordre de priorité, même s'il est listé dans le suivi (ex. #267, sans objet avant la première mise en production).
+  - **Vérifiées par l'orchestrateur, pour chaque candidat** : avant de lancer un chantier, l'orchestrateur lit en entier le corps de chaque candidat qu'il envisage, et la ligne du suivi qui le présente, et y vérifie les deux conditions de son choix : l'indépendance (§ ci-dessus) et ses dépendances. L'une sans l'autre ne suffit pas. C'est son travail : il ne le reporte ni sur la session du chantier, ni sur l'utilisateur.
 - **Décisions de l'utilisateur** : un ticket qui attend une décision de l'utilisateur avant toute réalisation reste choisissable ; sa session soumet ces décisions à l'utilisateur, un point à la fois ([Prise de décision](prise-de-decision.md)).
 
 ## Ressources
