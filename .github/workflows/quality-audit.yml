@@ -70,6 +70,8 @@ jobs:
               new_security_rating) issues "&inNewCodePeriod=true&types=VULNERABILITY" >> critical.txt ;;
               new_maintainability_rating) issues "&inNewCodePeriod=true&types=CODE_SMELL" >> critical.txt ;;
               new_security_hotspots_reviewed | new_security_review_rating) hotspots "&inNewCodePeriod=true" >> critical.txt ;;
+              # Coverage, duplication: no problem to designate, the failing condition alone is the entry.
+              *) ;;
             esac
           done < failing.txt
           issues "&impactSeverities=BLOCKER,HIGH" >> critical.txt
