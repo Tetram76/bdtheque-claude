@@ -21,10 +21,10 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(RecordsApplication.Name)]
 public sealed partial class AlbumRecordTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
 {
-    [Fact]
-    public async Task Record_IsUnderTheAlbumsOfTheMenu_AndNamesTheAlbum()
+    [Theory, InEachTheme]
+    public async Task Record_IsUnderTheAlbumsOfTheMenu_AndNamesTheAlbum(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Lointaines îles du vent");
@@ -32,11 +32,8 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
             .GetByRole(AriaRole.Link, new() { Name = "Albums" })).ToHaveAttributeAsync("aria-current", "page");
     }
 
-    // In each theme: a theme that draws at random (the balloons of « La planche encrée ») keeps its drawing on the same page.
-    public static TheoryData<string> Themes => [.. ThemeCatalog.Offered.Select(theme => theme.Key)];
-
-    [Theory]
-    [MemberData(nameof(Themes))]
+    // A theme that draws at random (the balloons of « La planche encrée ») keeps its drawing on the same page.
+    [Theory, InEachTheme]
     public async Task Viewer_OpensOnAThumbnail_GoesToTheNext_AndCloses_ThePageStayingWhereItWas(string theme)
     {
         var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1280, Height = 720 });
@@ -62,10 +59,10 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         Assert.Equal(top, await page.EvaluateAsync<double>($"() => {EditionsTop}"), tolerance: 1.0);
     }
 
-    [Fact]
-    public async Task OriginalImage_IsServed()
+    [Theory, InEachTheme]
+    public async Task OriginalImage_IsServed(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
         await page.GetByRole(AriaRole.Link, new() { Name = "Couverture", Exact = true }).ClickAsync();
 
@@ -79,10 +76,10 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     // The top of the block of the editions in the window.
     private const string EditionsTop = "document.querySelector('[data-part=\"editions\"]').getBoundingClientRect().top";
 
-    [Fact]
-    public async Task AuthorsOfARole_OnANarrowScreen_HoldOnOneLine_TheOthersUnfoldAndFold()
+    [Theory, InEachTheme]
+    public async Task AuthorsOfARole_OnANarrowScreen_HoldOnOneLine_TheOthersUnfoldAndFold(string theme)
     {
-        var page = await NewPageAsync(new ViewportSize { Width = 414, Height = 896 });
+        var page = await NewPageAsync(theme, new ViewportSize { Width = 414, Height = 896 });
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
         var drawing = page.Locator(".contributions app-fold-row").Nth(1);
         // The drawers by their sort key: the last one is folded first.
@@ -99,10 +96,10 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         Assert.True(await OnOneLineAsync(drawing));
     }
 
-    [Fact]
-    public async Task AuthorsOfARole_StayFolded_AcrossTheViewer()
+    [Theory, InEachTheme]
+    public async Task AuthorsOfARole_StayFolded_AcrossTheViewer(string theme)
     {
-        var page = await NewPageAsync(new ViewportSize { Width = 414, Height = 896 });
+        var page = await NewPageAsync(theme, new ViewportSize { Width = 414, Height = 896 });
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
         var drawing = page.Locator(".contributions app-fold-row").Nth(1);
         var last = drawing.GetByRole(AriaRole.Link, new() { Name = "Inès Vasseur" });
@@ -119,10 +116,10 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         Assert.True(await OnOneLineAsync(drawing));
     }
 
-    [Fact]
-    public async Task AuthorsOfARole_OnAWideScreen_AllHold_UntilTheScreenNarrows()
+    [Theory, InEachTheme]
+    public async Task AuthorsOfARole_OnAWideScreen_AllHold_UntilTheScreenNarrows(string theme)
     {
-        var page = await NewPageAsync(new ViewportSize { Width = 1440, Height = 900 });
+        var page = await NewPageAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
         var drawing = page.Locator(".contributions app-fold-row").Nth(1);
         var last = drawing.GetByRole(AriaRole.Link, new() { Name = "Inès Vasseur" });
@@ -135,10 +132,10 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         Assert.True(await OnOneLineAsync(drawing));
     }
 
-    [Fact]
-    public async Task RestOfTheSeries_Folds_AndLeadsToAnotherAlbumOfTheSeries_PutForwardOnItsRecord()
+    [Theory, InEachTheme]
+    public async Task RestOfTheSeries_Folds_AndLeadsToAnotherAlbumOfTheSeries_PutForwardOnItsRecord(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
         var series = page.Locator("[data-part='series']");
         var other = series.GetByRole(AriaRole.Link, new() { Name = "Les Celtiques" });

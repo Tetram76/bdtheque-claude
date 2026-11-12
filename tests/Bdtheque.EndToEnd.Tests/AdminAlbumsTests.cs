@@ -20,10 +20,10 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -36,12 +36,12 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
-    [Fact]
-    public async Task Search_ThenTheNavigationByInitial_NarrowTheList()
+    [Theory, InEachTheme]
+    public async Task Search_ThenTheNavigationByInitial_NarrowTheList(string theme)
     {
         await CreateAlbumAsync($"Astérix {_marker}");
         await CreateAlbumAsync($"Le Lotus bleu {_marker}");
-        var page = await OpenAsync(AppPaths.AdminAlbums);
+        var page = await OpenAsync(theme, AppPaths.AdminAlbums);
 
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher un album" }).FillAsync(_marker);
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher un album" }).PressAsync("Enter");
@@ -52,13 +52,13 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums, $"?q={_marker}&entry=L"));
     }
 
-    [Fact]
-    public async Task Filter_ChosenByTypingItsName_NarrowsTheList_AndItsTagRemovesIt()
+    [Theory, InEachTheme]
+    public async Task Filter_ChosenByTypingItsName_NarrowsTheList_AndItsTagRemovesIt(string theme)
     {
         var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Genre {_marker}"));
         await CreateAlbumAsync($"Avec le genre {_marker}", [genre.Id]);
         await CreateAlbumAsync($"Sans le genre {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAlbums}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtres" }).ClickAsync();
         await ControlsPage.WaitUntilInteractiveAsync(page);
@@ -71,11 +71,11 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Avec le genre {_marker}", $"Sans le genre {_marker}"]);
     }
 
-    [Fact]
-    public async Task Deletion_ConfirmedInAModalDialog_TakesTheAlbumOutOfTheList()
+    [Theory, InEachTheme]
+    public async Task Deletion_ConfirmedInAModalDialog_TakesTheAlbumOutOfTheList(string theme)
     {
         await CreateAlbumAsync($"À supprimer {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAlbums}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur À supprimer {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -89,11 +89,11 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucun album ne correspond à « {_marker} ».");
     }
 
-    [Fact]
-    public async Task Deletion_Escape_ClosesTheDialogWithoutDeleting()
+    [Theory, InEachTheme]
+    public async Task Deletion_Escape_ClosesTheDialogWithoutDeleting(string theme)
     {
         await CreateAlbumAsync($"À garder {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAlbums}?q={_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur À garder {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Alertdialog)).ToBeVisibleAsync();
@@ -104,12 +104,12 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"À garder {_marker}"]);
     }
 
-    [Fact]
-    public async Task Merge_SearchesTheOtherAlbum_AndContinuesWithTheOneChosen()
+    [Theory, InEachTheme]
+    public async Task Merge_SearchesTheOtherAlbum_AndContinuesWithTheOneChosen(string theme)
     {
         var album = await CreateAlbumAsync($"Barracuda {_marker}");
         var other = await CreateAlbumAsync($"Barracuda bis {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAlbums}?q={_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Barracuda {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Fusionner avec un autre album…" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux albums" });
@@ -122,8 +122,8 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminMergeAlbums, $"?other={other.Id}&album={album.Id}"));
     }
 
-    [Fact]
-    public async Task Cover_WhateverItsFormat_IsHuggedByTheFrameOfTheTheme()
+    [Theory, InEachTheme]
+    public async Task Cover_WhateverItsFormat_IsHuggedByTheFrameOfTheTheme(string theme)
     {
         // Narrower than the slot of a cover (3:4): the white frame of « La planche encrée » once showed in the gap.
         var album = await CreateAlbumAsync($"Couverture étroite {_marker}");
@@ -133,7 +133,7 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
                 AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null),
             album.Version));
         await UploadCoverAsync(edition, 300, 420);
-        var page = await NewPageInThemeAsync("planche", new ViewportSize { Width = 1440, Height = 900 });
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
         await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAlbums}?q={_marker}");
         await PageReadiness.WaitAsync(page);
 
@@ -142,36 +142,34 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         var size = await cover.EvaluateAsync<double[]>("image => { const box = image.getBoundingClientRect(); return [box.width, box.height]; }");
         var border = await cover.EvaluateAsync<string>("image => getComputedStyle(image).borderTopWidth");
 
-        // The frame is the border of the image itself, whose box has the proportions of the cover: no gap can show.
-        Assert.Equal("2px", border);
-        Assert.Equal(300.0 / 420, (size[0] - 4) / (size[1] - 4), 2);
+        // The frame, if the theme draws one, is the border of the image itself, whose box has the proportions of the cover: no
+        // gap can show.
+        var frame = 2 * double.Parse(border.Replace("px", "", StringComparison.Ordinal), System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(300.0 / 420, (size[0] - frame) / (size[1] - frame), 2);
     }
 
     [Theory]
-    [InlineData(414)]
-    [InlineData(768)]
-    [InlineData(1024)]
-    [InlineData(1180)]
-    [InlineData(1440)]
-    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(int width)
+    [InEachTheme(414)]
+    [InEachTheme(768)]
+    [InEachTheme(1024)]
+    [InEachTheme(1180)]
+    [InEachTheme(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(string theme, int width)
     {
         // A label long enough to wrap: squeezed by the columns, it once stood one letter per line on a tablet.
         await CreateAlbumAsync($"L'Horloger d'Ombrelune et les veilleurs du port {_marker}");
-        foreach (var theme in new[] { "base", "planche", "gazette" })
-        {
-            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
-            await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAlbums}?q={_marker}");
-            await PageReadiness.WaitAsync(page);
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAlbums}?q={_marker}");
+        await PageReadiness.WaitAsync(page);
 
-            var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
-            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+        var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+        var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
-            Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
-            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
-            // At the width of the mockups' desktop, the table has all its columns, the last modification included.
-            if (width == 1440)
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifié" })).ToBeVisibleAsync();
-        }
+        Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
+        Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // At the width of the mockups' desktop, the table has all its columns, the last modification included.
+        if (width == 1440)
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifié" })).ToBeVisibleAsync();
     }
 
     private async Task UploadCoverAsync(EditionForm edition, int width, int height)
@@ -193,9 +191,9 @@ public sealed class AdminAlbumsTests(ApplicationHost application) : BrowserTest<
         response.EnsureSuccessStatusCode();
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

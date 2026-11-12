@@ -21,10 +21,10 @@ public sealed class LocalizationTests(ApplicationHost application) : BrowserTest
         Assert.Empty(options.RequestCultureProviders);
     }
 
-    [Fact]
-    public async Task Page_AskedInEnglish_IsInFrench()
+    [Theory, InEachTheme]
+    public async Task Page_AskedInEnglish_IsInFrench(string theme)
     {
-        var context = await NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(theme, new BrowserNewContextOptions
         {
             Locale = "en-US",
         });

@@ -11,10 +11,10 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(ApplicationCollection.Name)]
 public sealed class StaticAssetsTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
-    [Fact]
-    public async Task Page_LoadsItsStylesAndScripts()
+    [Theory, InEachTheme]
+    public async Task Page_LoadsItsStylesAndScripts(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         var failures = new List<string>();
         page.Response += (_, response) =>
         {

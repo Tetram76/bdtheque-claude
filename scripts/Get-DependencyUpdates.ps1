@@ -132,9 +132,10 @@ function Get-TagCommit([string] $repo, [string] $tag) {
 }
 
 # GitHub Actions: each action is pinned to the commit of an exact release of its repository, named in a
-# comment. A commit that is no longer the one of its release stops the watch: the comment would lie.
+# comment. A commit that is no longer the one of its release stops the watch: the comment would lie. An action of
+# a folder of its repository (e.g. actions/cache/restore) is watched as its repository.
 Get-ChildItem (Join-Path $root '.github/workflows') -Filter *.yml |
-    Select-String -Pattern 'uses:\s*([\w.-]+/[\w.-]+)@([0-9a-f]{40}) # v(\d+\.\d+\.\d+)' |
+    Select-String -Pattern 'uses:\s*([\w.-]+/[\w.-]+)(?:/[\w./-]+)?@([0-9a-f]{40}) # v(\d+\.\d+\.\d+)' |
     ForEach-Object { [pscustomobject]@{ Repo = $_.Matches[0].Groups[1].Value; Commit = $_.Matches[0].Groups[2].Value; Version = $_.Matches[0].Groups[3].Value } } |
     Sort-Object Repo, Commit, Version -Unique |
     ForEach-Object {

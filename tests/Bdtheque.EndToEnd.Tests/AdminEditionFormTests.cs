@@ -20,14 +20,14 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task NewEdition_FromThePageOfTheEditions_IsCreated_AndLeadsBackToIt()
+    [Theory, InEachTheme]
+    public async Task NewEdition_FromThePageOfTheEditions_IsCreated_AndLeadsBackToIt(string theme)
     {
         var publisher = await CreatePublisherAsync();
         var collection = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", publisher.Version));
         var album = await CreateAlbumAsync();
-        var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouvelle édition" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewAlbumEdition(album.Id)));
@@ -52,8 +52,8 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
                 saved.Content.AcquisitionCurrency));
     }
 
-    [Fact]
-    public async Task Edition_Modified_FreeOnceGiven_IsSaved()
+    [Theory, InEachTheme]
+    public async Task Edition_Modified_FreeOnceGiven_IsSaved(string theme)
     {
         var publisher = await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
@@ -61,7 +61,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
             new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
                 AcquisitionMode.Purchase, false, null, 10m, "EUR", false, null, null, null, null),
             album.Version));
-        var page = await OpenAsync(AppPaths.AdminEditEdition(album.Id, edition.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditEdition(album.Id, edition.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await Assertions.Expect(page.GetByText("Prix d'achat", new() { Exact = true })).ToBeVisibleAsync();
@@ -78,12 +78,12 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         Assert.Equal((AcquisitionMode.Gift, true, (decimal?)null), (saved.Content.AcquisitionMode, saved.Content.IsFree, saved.Content.AcquisitionAmount));
     }
 
-    [Fact]
-    public async Task NewPurchaseIntent_OnANewEdition_IsCreated_ThenModifiedFromItsMenu()
+    [Theory, InEachTheme]
+    public async Task NewPurchaseIntent_OnANewEdition_IsCreated_ThenModifiedFromItsMenu(string theme)
     {
         var publisher = await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
-        var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Sur une nouvelle édition…" }).ClickAsync();
@@ -110,12 +110,12 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await Assertions.Expect(page.Locator(".intent-row")).ToContainTextAsync($"Éditeur{_marker} [2014]");
     }
 
-    [Fact]
-    public async Task Isbn_Inconsistent_IsAWarning_AndTheEditionIsSavedWithIt()
+    [Theory, InEachTheme]
+    public async Task Isbn_Inconsistent_IsAWarning_AndTheEditionIsSavedWithIt(string theme)
     {
         var publisher = await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
-        var page = await OpenAsync(AppPaths.AdminNewAlbumEdition(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
@@ -133,12 +133,12 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         Assert.Equal("978-2-203-00120-7", edition.Isbn);
     }
 
-    [Fact]
-    public async Task Save_WithoutModeOfAcquisition_IsToCorrect_OnTheMode_WhichGetsTheFocus()
+    [Theory, InEachTheme]
+    public async Task Save_WithoutModeOfAcquisition_IsToCorrect_OnTheMode_WhichGetsTheFocus(string theme)
     {
         await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
-        var page = await OpenAsync(AppPaths.AdminNewAlbumEdition(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
@@ -152,13 +152,13 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewAlbumEdition(album.Id)));
     }
 
-    [Fact]
-    public async Task Amount_ATextThatIsNoAmount_ShowsAgainTheAmountThatWillBeSaved()
+    [Theory, InEachTheme]
+    public async Task Amount_ATextThatIsNoAmount_ShowsAgainTheAmountThatWillBeSaved(string theme)
     {
         // The field shows what will be saved: a text that is no amount is not kept on screen while the previous amount is sent.
         await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
-        var page = await OpenAsync(AppPaths.AdminNewAlbumEdition(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
         var price = page.Locator("#edition-price");
         await price.FillAsync("douze");
@@ -174,8 +174,8 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await Assertions.Expect(price).ToHaveValueAsync("12,50");
     }
 
-    [Fact]
-    public async Task Visuals_Added_Refused_Retyped_Reordered_AndDeleted_SavedWithTheForm()
+    [Theory, InEachTheme]
+    public async Task Visuals_Added_Refused_Retyped_Reordered_AndDeleted_SavedWithTheForm(string theme)
     {
         // visuel/saisie-edition/contenu.md, Les visuels: a block of the form, saved with it.
         var publisher = await CreatePublisherAsync();
@@ -184,7 +184,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
             new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
                 AcquisitionMode.Gift, false, null, null, null, false, null, null, null, null),
             album.Version));
-        var page = await OpenAsync(AppPaths.AdminEditEdition(album.Id, edition.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditEdition(album.Id, edition.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
         var visuals = page.Locator("form .edition-visuals");
         var marks = visuals.Locator(".edition-visual-mark");
@@ -223,12 +223,12 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         Assert.Equal([VisualType.Cover, VisualType.Plate], (await GetVisualsAsync(album.Id, edition.Id)).Visuals.Select(v => v.Type));
     }
 
-    [Fact]
-    public async Task Visuals_OfANewEdition_AreCreatedWithIt()
+    [Theory, InEachTheme]
+    public async Task Visuals_OfANewEdition_AreCreatedWithIt(string theme)
     {
         await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
-        var page = await OpenAsync(AppPaths.AdminNewAlbumEdition(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
@@ -247,8 +247,8 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         Assert.Equal([VisualType.Cover], (await GetVisualsAsync(album.Id, created.Id)).Visuals.Select(v => v.Type));
     }
 
-    [Fact]
-    public async Task Visuals_DroppedAnywhereOnTheirZone_AreAdded()
+    [Theory, InEachTheme]
+    public async Task Visuals_DroppedAnywhereOnTheirZone_AreAdded(string theme)
     {
         // visuel/saisie-edition/contenu.md, Les visuels: the dashed zone takes the files dropped on it, wherever they are dropped.
         var publisher = await CreatePublisherAsync();
@@ -257,7 +257,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
             new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
                 AcquisitionMode.Gift, false, null, null, null, false, null, null, null, null),
             album.Version));
-        var page = await OpenAsync(AppPaths.AdminEditEdition(album.Id, edition.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditEdition(album.Id, edition.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
         var drop = page.Locator(".edition-visuals-drop");
         await drop.ScrollIntoViewIfNeededAsync();
@@ -309,9 +309,9 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         return (await api.GetFromJsonAsync<EditionVisualsForm>($"/admin/albums/{albumId}/editions/{editionId}/visuals"))!;
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

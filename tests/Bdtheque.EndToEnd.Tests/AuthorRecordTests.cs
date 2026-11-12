@@ -13,10 +13,10 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(RecordsApplication.Name)]
 public sealed partial class AuthorRecordTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
 {
-    [Fact]
-    public async Task Record_IsReachedFromTheAuthorsOfAnAlbum_UnderTheAuthorsOfTheMenu()
+    [Theory, InEachTheme]
+    public async Task Record_IsReachedFromTheAuthorsOfAnAlbum_UnderTheAuthorsOfTheMenu(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
 
         await page.Locator(".contributions").GetByRole(AriaRole.Link, new() { Name = "Hugo Pratt" }).First.ClickAsync();
@@ -27,10 +27,10 @@ public sealed partial class AuthorRecordTests(RecordsApplication application) : 
             .GetByRole(AriaRole.Link, new() { Name = "Auteurs" })).ToHaveAttributeAsync("aria-current", "page");
     }
 
-    [Fact]
-    public async Task Series_OfMoreThanSixAlbums_IsFoldedOnArrival_AndEachSeriesUnfoldsAndFolds()
+    [Theory, InEachTheme]
+    public async Task Series_OfMoreThanSixAlbums_IsFoldedOnArrival_AndEachSeriesUnfoldsAndFolds(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AuthorRecord(Application.AuthorId));
         var kirk = Series(page, "Sergent Kirk");
         var corto = Series(page, "Corto Maltese");
@@ -44,10 +44,10 @@ public sealed partial class AuthorRecordTests(RecordsApplication application) : 
         await Assertions.Expect(AlbumOf(corto, "Les Celtiques")).ToBeHiddenAsync();
     }
 
-    [Fact]
-    public async Task UnfoldAll_ThenFoldAll_ActOnEverySeries()
+    [Theory, InEachTheme]
+    public async Task UnfoldAll_ThenFoldAll_ActOnEverySeries(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AuthorRecord(Application.AuthorId));
         var kirk = AlbumOf(Series(page, "Sergent Kirk"), "Le Fort de l'Ouest");
         var corto = AlbumOf(Series(page, "Corto Maltese"), "Les Celtiques");
@@ -61,10 +61,10 @@ public sealed partial class AuthorRecordTests(RecordsApplication application) : 
         await Assertions.Expect(corto).ToBeHiddenAsync();
     }
 
-    [Fact]
-    public async Task AnAlbumOfTheBibliography_LeadsToItsRecord()
+    [Theory, InEachTheme]
+    public async Task AnAlbumOfTheBibliography_LeadsToItsRecord(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AuthorRecord(Application.AuthorId));
 
         await AlbumOf(Series(page, "Corto Maltese"), "Lointaines îles du vent").ClickAsync();

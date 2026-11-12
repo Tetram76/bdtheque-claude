@@ -17,10 +17,10 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -31,11 +31,11 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page.Locator("h1")).ToContainTextAsync("Univers");
     }
 
-    [Fact]
-    public async Task New_InThePanel_UnderAParentChosenByItsName_TakesItsPlaceInTheHierarchy()
+    [Theory, InEachTheme]
+    public async Task New_InThePanel_UnderAParentChosenByItsName_TakesItsPlaceInTheHierarchy(string theme)
     {
         await CreateUniverseAsync($"Univers Hugo Pratt {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminUniverses}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminUniverses}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouvel univers" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
@@ -52,12 +52,12 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page.Locator(".universe-row[data-depth='1']")).ToContainTextAsync($"Corto Maltese {_marker}");
     }
 
-    [Fact]
-    public async Task Edit_UnderOneOfItsOwnSubUniverses_IsRefusedInPlace_WithItsReason()
+    [Theory, InEachTheme]
+    public async Task Edit_UnderOneOfItsOwnSubUniverses_IsRefusedInPlace_WithItsReason(string theme)
     {
         var corto = await CreateUniverseAsync($"Corto Maltese {_marker}");
         await CreateUniverseAsync($"Les Antilles {_marker}", corto.Id);
-        var page = await OpenAsync($"{AppPaths.AdminEditUniverse(corto.Id)}&q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditUniverse(corto.Id)}&q={_marker}");
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
 
         await ControlsPage.WaitUntilInteractiveAsync(page);
@@ -72,11 +72,11 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
             .ToHaveValueAsync($"Corto Maltese {_marker} › Les Antilles {_marker}");
     }
 
-    [Fact]
-    public async Task Panel_Escape_ClosesItWithoutSaving()
+    [Theory, InEachTheme]
+    public async Task Panel_Escape_ClosesItWithoutSaving(string theme)
     {
         var universe = await CreateUniverseAsync($"Les Cités obscures {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminUniverses}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminUniverses}?q={_marker}");
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Les Cités obscures {_marker}" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom" }).FillAsync("Autre chose");
@@ -87,12 +87,12 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(Names(page)).ToHaveTextAsync([universe.Name]);
     }
 
-    [Fact]
-    public async Task Deletion_RefusedWhileTheUniverseHasASubUniverse_ThenConfirmedForTheSubUniverse()
+    [Theory, InEachTheme]
+    public async Task Deletion_RefusedWhileTheUniverseHasASubUniverse_ThenConfirmedForTheSubUniverse(string theme)
     {
         var parent = await CreateUniverseAsync($"Parent {_marker}");
         await CreateUniverseAsync($"Enfant {_marker}", parent.Id);
-        var page = await OpenAsync($"{AppPaths.AdminUniverses}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminUniverses}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Parent {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -109,9 +109,9 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Parent {_marker}"]);
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

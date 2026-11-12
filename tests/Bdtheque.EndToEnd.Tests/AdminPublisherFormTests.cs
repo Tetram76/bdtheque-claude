@@ -17,11 +17,11 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task List_LeadsToTheFormOfAPublisher_AndToANewOne()
+    [Theory, InEachTheme]
+    public async Task List_LeadsToTheFormOfAPublisher_AndToANewOne(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Glénat {_marker}", null, []));
-        var page = await OpenAsync($"{AppPaths.AdminPublishers}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPublishers}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Glénat {_marker}" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditPublisher(publisher.Id)));
@@ -32,10 +32,10 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewPublisher));
     }
 
-    [Fact]
-    public async Task Create_WithItsCollections_LeadsBackToTheList()
+    [Theory, InEachTheme]
+    public async Task Create_WithItsCollections_LeadsBackToTheList(string theme)
     {
-        var page = await OpenAsync(AppPaths.AdminNewPublisher);
+        var page = await OpenAsync(theme, AppPaths.AdminNewPublisher);
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByLabel("Nom(obligatoire)").FillAsync($"Delcourt {_marker}");
@@ -54,12 +54,12 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         Assert.Equal(["Encrages", "Shampooing"], saved.Collections.Select(c => c.Name));
     }
 
-    [Fact]
-    public async Task Modify_RenamesRemovesRestoresAndAddsCollections_SavedWithThePublisher()
+    [Theory, InEachTheme]
+    public async Task Modify_RenamesRemovesRestoresAndAddsCollections_SavedWithThePublisher(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(
             $"Casterman {_marker}", null, [new(null, "Écritures"), new(null, "Fac-similé"), new(null, "Les Romans (À suivre)")]));
-        var page = await OpenAsync(AppPaths.AdminEditPublisher(publisher.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditPublisher(publisher.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByLabel("Nom de la collection").First.FillAsync("Écritures (poche)");
@@ -78,10 +78,10 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         Assert.Equal(["Écritures (poche)", "Les Romans (À suivre)", "Sakka"], saved.Collections.Select(c => c.Name));
     }
 
-    [Fact]
-    public async Task Save_WithoutName_IsToCorrect_OnTheName_WhichGetsTheFocus()
+    [Theory, InEachTheme]
+    public async Task Save_WithoutName_IsToCorrect_OnTheName_WhichGetsTheFocus(string theme)
     {
-        var page = await OpenAsync(AppPaths.AdminNewPublisher);
+        var page = await OpenAsync(theme, AppPaths.AdminNewPublisher);
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'éditeur" }).ClickAsync();
@@ -107,9 +107,9 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await names.Last.FillAsync(name);
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

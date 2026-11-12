@@ -18,6 +18,7 @@ using frontend::Bdtheque.Frontend.Api;
 using frontend::Bdtheque.Frontend.Formatting;
 using frontend::Bdtheque.Frontend.Navigation;
 using frontend::Bdtheque.Frontend.Theming;
+using frontend::Bdtheque.Frontend.Visits;
 using FrontendProgram = frontend::Program;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -127,14 +128,18 @@ public class ApplicationHost : IAsyncLifetime
 
     /// <summary>
     /// A browser context of its own, on <c>frontend</c>: no cookie nor history shared with another one. The caller owns
-    /// it, and closes it once done (<see cref="BrowserTest{TApplication}"/>): an open context keeps its pages, their
-    /// connections to the application, and on the server the circuits of their interactive components.
+    /// it, and closes it once done: an open context keeps its pages, their connections to the application, and on the
+    /// server the circuits of their interactive components. Its theme is the one its options fix, if any: the tests
+    /// open their contexts through <see cref="BrowserTest{TApplication}"/>, which fixes it, the compiler refusing this
+    /// method elsewhere (BannedSymbols.txt).
     /// </summary>
     public Task<IBrowserContext> NewContextAsync(BrowserNewContextOptions options)
     {
         options.BaseURL = BaseAddress.ToString();
         options.TimezoneId ??= BrowserTimeZoneId;
+#pragma warning disable RS0030 // The browser of the tests, whose contexts are opened here only.
         return Browser.NewContextAsync(options);
+#pragma warning restore RS0030
     }
 
     public async Task DisposeAsync()
@@ -183,17 +188,22 @@ public class ApplicationHost : IAsyncLifetime
             });
         }
 
-        // The selector of the application stays the one used by a request that fixes no theme.
+        // The selector of the application stays the one used by a request that fixes no theme. The application, in
+        // production, draws the theme of each visit: no way to fix it is ever part of it (gestion-projet/gouvernance/
+        // qualite-du-code.md), the selector of the tests being added here, by their host only.
         private static void FixTheThemeByRequest(IServiceCollection services)
         {
             var application = services.Single(service => service.ServiceType == typeof(IThemeSelector));
-            var implementation = application.ImplementationType
-                ?? throw new InvalidOperationException("The theme selector of the application is expected to be registered by its type.");
+            if (application.ImplementationType != typeof(VisitThemeSelector))
+                throw new InvalidOperationException(
+                    $"In production, the theme is expected to be drawn for the visit, not chosen by {application.ImplementationType}.");
+            var implementation = application.ImplementationType;
 
             services.Remove(application);
             services.Add(ServiceDescriptor.Describe(implementation, implementation, application.Lifetime));
             services.Add(ServiceDescriptor.Describe(typeof(IThemeSelector),
-                provider => new RequestThemeSelector(provider.GetRequiredService<IHttpContextAccessor>(), (IThemeSelector)provider.GetRequiredService(implementation)),
+                provider => new RequestThemeSelector(provider.GetRequiredService<IHttpContextAccessor>(), provider.GetRequiredService<VisitCookie>(),
+                    (IThemeSelector)provider.GetRequiredService(implementation)),
                 application.Lifetime));
         }
     }

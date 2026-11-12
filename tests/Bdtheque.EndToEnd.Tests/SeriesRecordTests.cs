@@ -13,10 +13,10 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(RecordsApplication.Name)]
 public sealed class SeriesRecordTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
 {
-    [Fact]
-    public async Task Record_IsUnderTheSeriesOfTheMenu_AndNamesTheSeries()
+    [Theory, InEachTheme]
+    public async Task Record_IsUnderTheSeriesOfTheMenu_AndNamesTheSeries(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.SeriesRecord(Application.SeriesId));
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Corto Maltese");
@@ -24,10 +24,10 @@ public sealed class SeriesRecordTests(RecordsApplication application) : BrowserT
             .GetByRole(AriaRole.Link, new() { Name = "Séries" })).ToHaveAttributeAsync("aria-current", "page");
     }
 
-    [Fact]
-    public async Task RecordOfAnAlbum_LeadsToTheRecordOfItsSeries_WhichLeadsToAnotherAlbum()
+    [Theory, InEachTheme]
+    public async Task RecordOfAnAlbum_LeadsToTheRecordOfItsSeries_WhichLeadsToAnotherAlbum(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
 
         // The series above the title of the album, not the universe of the same name.
@@ -40,10 +40,10 @@ public sealed class SeriesRecordTests(RecordsApplication application) : BrowserT
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Les Celtiques");
     }
 
-    [Fact]
-    public async Task RestOfTheSeries_LeadsToTheRecordOfTheSeries()
+    [Theory, InEachTheme]
+    public async Task RestOfTheSeries_LeadsToTheRecordOfTheSeries(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
 
         await page.Locator("[data-part='series']").GetByRole(AriaRole.Link, new() { Name = "Voir la fiche de la série" }).ClickAsync();
