@@ -9,7 +9,8 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// <summary>
 /// The welcome screen of the first request of a browser (visuel/ecran-accueil/), captured once at each width: it has the
 /// common identity of the application, the same whatever the theme the visit will have, which is not drawn yet. Captured
-/// without its script, which would give way to the page at once, under reduced motion, as every capture: the pile fixed.
+/// without its script, which would give way to the page at once, under reduced motion, as every capture: the pile fixed;
+/// its text in a font of the application rather than of the system (<see cref="FontOfTheCapture"/>).
 /// </summary>
 [Collection(ApplicationCollection.Name)]
 public sealed partial class WelcomeScreenCaptureTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
@@ -28,17 +29,30 @@ public sealed partial class WelcomeScreenCaptureTests(ApplicationHost applicatio
         await page.RouteAsync(url => new Uri(url).AbsolutePath == AppPaths.Home, async route =>
         {
             var response = await route.FetchAsync();
-            var screen = WhatGivesWayToThePage().Replace(await response.TextAsync(), "");
+            var screen = WhatGivesWayToThePage().Replace(await response.TextAsync(), "")
+                .Replace("</head>", FontOfTheCapture + "</head>", StringComparison.Ordinal);
             await route.FulfillAsync(new RouteFulfillOptions { Response = response, Body = screen });
         });
 
         await page.GotoAsync(AppPaths.Home);
-        // The screen alone, laid out: it has neither a stylesheet nor a font of its own to wait for.
+        // The screen alone, laid out, its font loaded.
         await (await page.WaitForFunctionAsync("() => document.readyState === 'complete' && document.documentElement.hasAttribute('data-welcome')")).DisposeAsync();
+        await page.EvaluateAsync("async () => { await document.fonts.load('800 28px Capture'); await document.fonts.ready; }");
         await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
 
         CaptureStore.Verify(Common, $"welcome.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }
+
+    // The screen writes in the font of the system, which it does not download (visuel/ecran-accueil/): its text, by design,
+    // is drawn differently from a machine to another, whose fonts differ (observed: the runner of the CI and the container
+    // of Playwright, a shift of the whole screen). The capture writes it in a font served by the application, the one of the
+    // base theme, so that it fixes everything else of the screen: the drawing, its place, the layout of its lines.
+    private const string FontOfTheCapture = """
+        <style>
+            @font-face { font-family: "Capture"; font-weight: 100 900; src: url("/fonts/inter/inter-latin-wght-normal.woff2") format("woff2"); }
+            body { font-family: "Capture"; }
+        </style>
+        """;
 
     // The script of the screen, and its way to the page for a browser without scripts.
     [GeneratedRegex("<script>.*?</script>|<noscript>.*?</noscript>", RegexOptions.Singleline)]
