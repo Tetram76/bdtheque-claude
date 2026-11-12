@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Bdtheque.Api.Endpoints;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
