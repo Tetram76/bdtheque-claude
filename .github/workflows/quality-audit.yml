@@ -4,11 +4,12 @@ name: Quality audit
 # the open problems of its SonarQube Cloud analysis, whose quality gate only judges the new code; the deviations
 # from the style rules that the build does not enforce; the mutants that the tests let survive. The current list is
 # kept in the harness's tracking issue; the run only fails, hence only notifies the user who created the workflow,
-# when an entry absent from that list shows up. It is no required check and blocks nothing. The issue also holds the
-# entries to treat: the new ones, and those of former runs that the agent has not treated yet. The first run sets the
-# reference, the existing debt, which is corrected along the way and is never to treat in itself. The agent treats
-# the entries at a resumption of work, once per run at most, and records it in the issue body: rewriting the whole
-# body here removes that record, which makes the next treatment due.
+# when an entry absent from that list shows up. It is no required check and blocks nothing. The issue sorts the debt
+# by urgency, each entry once: critical (a failing condition of the quality gate and what makes it fail, a problem of a
+# blocker or high severity), priority (the new entries, and those the agent has not treated yet), and the rest, fixed
+# along the way; the first run sets the reference, nothing new. The agent treats the critical then priority entries at
+# a resumption of work, once per run at most, and records it in the issue body: rewriting the whole body here removes
+# that record, which makes the next treatment due.
 on:
   schedule:
     - cron: "23 4 * * 1"
@@ -50,14 +51,14 @@ jobs:
             [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
             page=$((page + 1))
           done
-          # Each failing condition of the quality gate of main is an entry, always to treat, as a known vulnerability is
-          # (gestion-projet/depot/controle-qualite-hebdomadaire.md), and so are the problems of the new code that make it
-          # fail, for a rating: they stay the same entries as above, only listed to treat.
+          # Critical entries, treated first as a known vulnerability is (gestion-projet/depot/controle-qualite-hebdomadaire.md):
+          # each failing condition of the quality gate of main and, for a rating, the problems of the new code that make it
+          # fail; every problem of a blocker or high severity. They stay the same entries as above, only listed apart.
           curl -fsS "$API/qualitygates/project_status?projectKey=$PROJECT&branch=main" \
             | jq -r '.projectStatus.conditions[] | select(.status == "ERROR") | .metricKey' > failing.txt
-          : > gate.txt
+          : > critical.txt
           while read -r metric; do
-            echo "gate $metric" | tee -a findings.txt >> gate.txt
+            echo "gate $metric" | tee -a findings.txt >> critical.txt
             case "$metric" in
               new_reliability_rating) type=BUG ;;
               new_security_rating) type=VULNERABILITY ;;
@@ -67,19 +68,27 @@ jobs:
             esac
             if [ "$type" = HOTSPOT ]; then
               curl -fsS "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW&inNewCodePeriod=true&ps=500" \
-                | jq -r --arg project "$PROJECT:" '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"' >> gate.txt
+                | jq -r --arg project "$PROJECT:" '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"' >> critical.txt
             else
               curl -fsS "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false&inNewCodePeriod=true&types=$type&ps=500" \
-                | jq -r --arg project "$PROJECT:" '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' >> gate.txt
+                | jq -r --arg project "$PROJECT:" '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' >> critical.txt
             fi
           done < failing.txt
-          sort -u gate.txt -o gate-sonar.txt
+          page=1
+          while :; do
+            curl -fsS "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false&impactSeverities=BLOCKER,HIGH&ps=500&p=$page" > page.json
+            jq -r --arg project "$PROJECT:" \
+              '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' page.json >> critical.txt
+            [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
+            page=$((page + 1))
+          done
+          sort -u critical.txt -o critical-sonar.txt
           # A rating other than A is an entry, under its letter: a rating that worsens is a new one.
           curl -fsS "$API/measures/component?component=$PROJECT&branch=main&metricKeys=reliability_rating,security_rating,sqale_rating,security_review_rating" \
             | jq -r '.component.measures[] | (.value | tonumber | floor) as $rating | select($rating > 1)
                 | "rating \(.metric) \("ABCDE"[$rating - 1:$rating])"' >> findings.txt
           sort -u findings.txt > findings-sonar.txt
-          cat findings-sonar.txt gate-sonar.txt
+          cat findings-sonar.txt critical-sonar.txt
 
       - name: Upload the findings
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -87,7 +96,7 @@ jobs:
           name: findings-sonar
           path: |
             findings-sonar.txt
-            gate-sonar.txt
+            critical-sonar.txt
 
   style:
     name: Style rules
@@ -201,10 +210,10 @@ jobs:
           pattern: findings-*
           merge-multiple: true
 
-      # The issue body holds the entries in two lists, each between its markers, every entry in one of them only: those
-      # to treat, and the existing debt. An entry missing from both is new. The entries to treat are the new ones, the
-      # former ones still found that the agent left there, and the failing conditions of the quality gate with the
-      # problems that make it fail, existing debt or not.
+      # The issue body holds the debt in three lists by urgency, each between its markers, every entry in one of them only;
+      # an entry missing from all is new. Critical: the critical entries of SonarQube Cloud, whatever their age.
+      # Priority: the new entries, and the former ones still found that the agent has not treated yet. The rest is fixed
+      # along the way.
       - name: Update the known entries
         run: |
           export LC_ALL=C
@@ -219,23 +228,36 @@ jobs:
             # A single sed each, which succeeds whether or not the list is empty (a filtering grep would fail on an
             # empty one under pipefail).
             sed -n '/^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > pending.txt
-            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u - pending.txt > known.txt
+            sed -n '/^<!-- critical -->$/,/^<!-- end-critical -->$/{/^<!--/d;/^```/d;p}' previous.md > critical-before.txt
+            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md \
+              | sort -u - pending.txt critical-before.txt > known.txt
             comm -23 current.txt known.txt > new.txt
           else
             # The first run sets the reference: the existing debt, nothing new.
             : > pending.txt
             : > new.txt
           fi
-          { comm -12 pending.txt current.txt; cat new.txt; sort -u gate-sonar.txt | comm -12 - current.txt; } | sort -u > to-treat.txt
-          comm -23 current.txt to-treat.txt > debt.txt
+          sort -u critical-sonar.txt | comm -12 - current.txt > critical.txt
+          { comm -12 pending.txt current.txt; cat new.txt; } | sort -u | comm -23 - critical.txt > to-treat.txt
+          sort -u critical.txt to-treat.txt | comm -23 current.txt - > debt.txt
           {
             echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`gate\`, \`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
             echo
             echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) entrée(s), dont $(wc -l < new.txt) nouvelle(s)."
             echo
-            echo "## À traiter"
+            echo "## Critique"
             echo
-            echo "Conditions en échec de la porte de qualité (\`gate\`) et problèmes qui les causent, prioritaires ; entrées nouvelles ; entrées des contrôles précédents que l'agent n'a pas encore traitées."
+            echo "Conditions en échec de la porte de qualité (\`gate\`) et problèmes qui les causent, problèmes de gravité bloquante ou haute : traités en tête, comme une vulnérabilité."
+            echo
+            echo "<!-- critical -->"
+            echo '```text'
+            cat critical.txt
+            echo '```'
+            echo "<!-- end-critical -->"
+            echo
+            echo "## Prioritaire"
+            echo
+            echo "Entrées nouvelles, et entrées des contrôles précédents que l'agent n'a pas encore traitées : traitement hebdomadaire."
             echo
             echo "<!-- to-treat -->"
             echo '```text'
@@ -243,9 +265,9 @@ jobs:
             echo '```'
             echo "<!-- end-to-treat -->"
             echo
-            echo "## Dette existante"
+            echo "## Au fil de l'eau"
             echo
-            echo "Corrigée au fil de l'eau, quand un chantier modifie de toute façon le fichier concerné."
+            echo "Corrigées quand un chantier modifie de toute façon le fichier concerné."
             echo
             echo "<!-- list -->"
             echo '```text'
