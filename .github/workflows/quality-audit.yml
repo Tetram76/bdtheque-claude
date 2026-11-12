@@ -63,7 +63,7 @@ jobs:
                 | "rating \(.metric) \("ABCDE"[$rating - 1:$rating])"' > ratings.txt
           cat ratings.txt >> findings.txt
           # The rating of the code as a whole that matches a failing condition of the gate is critical with it.
-          rating() { grep "^rating $1 " ratings.txt || true; }
+          rating() { local metric=$1; grep "^rating $metric " ratings.txt || true; }
           # Critical entries, treated first as a known vulnerability is (gestion-projet/depot/controle-qualite-hebdomadaire.md):
           # each failing condition of the quality gate of main and, for a rating, its rating and the problems of the new code
           # that make it fail; every problem of a blocker or high severity. They stay the same entries, only listed apart.
@@ -79,8 +79,9 @@ jobs:
                 { rating security_rating; issues "&inNewCodePeriod=true&types=VULNERABILITY"; } >> critical.txt ;;
               new_maintainability_rating)
                 { rating sqale_rating; issues "&inNewCodePeriod=true&types=CODE_SMELL"; } >> critical.txt ;;
+              # The hotspot search filters the new code with sinceLeakPeriod, inNewCodePeriod being the issue search's.
               new_security_hotspots_reviewed | new_security_review_rating)
-                { rating security_review_rating; hotspots "&inNewCodePeriod=true"; } >> critical.txt ;;
+                { rating security_review_rating; hotspots "&sinceLeakPeriod=true"; } >> critical.txt ;;
               # Coverage, duplication: no problem to designate, the failing condition alone is the entry.
               *) ;;
             esac
