@@ -1,7 +1,7 @@
 ---
 type: Choix d'implémentation
 title: 'Outillage de développement'
-description: 'Outillage .NET : packages centralisés, xunit, Testcontainers, bUnit, Playwright, heure fixe des tests, couverture, commentaires XML, CI ; à lire pour tout test ou build.'
+description: 'Outillage .NET : packages centralisés, xunit, Testcontainers, bUnit, Playwright, heure fixe des tests, couverture, commentaires XML, CI, outillage du contrôle qualité (Stryker.NET, règles de style, API de SonarQube Cloud) ; à lire pour tout test ou build.'
 applies_to:
   - 'Directory.Packages.props'
   - 'Directory.Build.props'
@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:26:32Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T12:20:00Z }
 ---
 
 # Outillage de développement
@@ -53,7 +53,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:26:32Z }
 - **Composants partagés testés sur des pages propres aux tests**, avant qu'un écran les emploie, et fixés dans chaque thème par les captures ([Thèmes](socle/themes.md)) ; l'application ne route ces pages que dans les tests.
 - **Règle d'un chantier d'écran** : chaque comportement de l'écran est fixé par un test dans sa PR, avant sa validation fonctionnelle : un test de composant pour ce qu'il présente et chacun de ses états, au moins un test de bout en bout par parcours de l'utilisateur. Un retour de validation qui change un comportement change son test. Les tests désignent les éléments par ce qui ne dépend pas du thème (rôle, lien, structure), jamais par l'apparence.
 - **Un écran qui dépend de toute la collection** (ex. l'accueil) a sa propre application de test par état présenté : la base partagée reçoit les données des autres tests, qui changeraient son rendu selon l'ordre d'exécution.
-- **Couverture collectée par l'unique exécution des tests du CI**, sur le code de l'application seul, la bibliothèque partagée des tests déclarée comme code de test ; elle informe, **sans seuil** : la non-régression se juge sur ce que vérifient les tests ([Qualité du code](../gestion-projet/gouvernance/qualite-du-code.md)), non sur un pourcentage.
+- **Couverture collectée par l'unique exécution des tests du CI**, sur le code de l'application seul, la bibliothèque partagée des tests déclarée comme code de test ; elle informe, **sans seuil propre à l'outillage** : la non-régression se juge sur ce que vérifient les tests ([Qualité du code](../gestion-projet/gouvernance/qualite-du-code.md)), non sur un pourcentage. La collecte n'est pas la porte : la porte de qualité de SonarQube Cloud (« Sonar way ») exige, elle, 80 % de couverture du **nouveau code** d'une Pull Request ([Analyse SonarQube Cloud](../gestion-projet/revue-tickets/analyse-sonarqube-cloud.md)), ce qui fait écrire les tests du code ajouté ; aucun seuil ne porte sur le code global, dont les tests manquants relèvent des tests de mutation ([Contrôle qualité hebdomadaire](../gestion-projet/depot/controle-qualite-hebdomadaire.md)).
   - Les **scripts du frontend** sont hors de la mesure ([Analyse de la qualité du code](../gestion-projet/depot/analyse-de-la-qualite-du-code.md)), non hors des tests : les tests de bout en bout fixent leurs comportements.
   - **Alternative écartée (mesure de leur couverture)** : SonarQube Cloud ne lit qu'un rapport LCOV, dont la conversion depuis Chromium exige un outil Node.js absent de la chaîne ; à reconsidérer quand les scripts ne se limiteront plus à quelques fichiers courts.
 
@@ -73,3 +73,16 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:26:32Z }
 - **CI lancé aussi à la demande**, pour l'analyse de `main` qui suit la publication d'une version ([Versions et releases](../gestion-projet/depot/versions-et-releases.md)) : l'analyse reprenant la couverture des tests, c'est le CI entier qui s'exécute.
 - **Cache NuGet sous une clé tirée de tout ce qui décide des packages restaurés**, sans clé de repli : un cache partiel, complété puis réenregistré, garderait les packages de toutes les versions passées.
 - **Exécution précédente d'une PR annulée** par une nouvelle, pour épargner les quotas ([Intégration continue (CI)](../gestion-projet/depot/integration-continue-ci.md)) ; une exécution sur `main` n'est jamais annulée.
+
+## Contrôle qualité
+
+Outillage du [Contrôle qualité hebdomadaire](../gestion-projet/depot/controle-qualite-hebdomadaire.md) :
+
+- **Tests de mutation par Stryker.NET** (Apache 2.0), outil .NET local épinglé comme les autres ([Mises à jour des dépendances](../gestion-projet/depot/mises-a-jour-des-dependances.md)), qui exécute les tests xunit du projet muté ; sur `Bdtheque.Domain`, dont les tests n'ont besoin ni de conteneur ni de navigateur. **Tous les mutants à chaque exécution** : un passage complet du domaine dure moins de deux minutes sur quatre processeurs, négligeable une fois par semaine.
+  - **Alternative écartée (baseline de Stryker.NET, `--with-baseline`, qui ne rejoue que les mutants touchés depuis l'exécution précédente)** : constaté sur le dépôt avec la version 5.0.0, le rapport n'est pas complet, contrairement à ce qu'annonce sa documentation. Les mutants inchangés sont « écartés par le filtre *since* » au lieu de reprendre leur résultat de la baseline, que le passage réécrit incomplète ; un passage sans aucun changement s'arrête sans écrire de rapport. À reconsidérer quand le périmètre rendra le passage complet long.
+- **Règles de style relevées par une construction du seul contrôle** : le workflow écrit, sur la copie jetable de l'exécuteur, un fichier de configuration global des analyseurs (`.globalconfig` à la racine, que tout projet reprend, documentation Microsoft) qui fait de ses règles des avertissements, relevés dans le journal de la construction, qui n'échoue pas pour eux. La liste des règles vit dans le workflow : le dépôt ne porte aucune configuration de style, et aucune autre construction ne voit ces règles.
+  - **Alternative écartée (fichier de configuration dans le dépôt, inclus sur demande par `Directory.Build.props`)** : une configuration de style dans le dépôt laisse croire à des règles imposées au code, ce que le projet refuse ([Contrôle qualité hebdomadaire](../gestion-projet/depot/controle-qualite-hebdomadaire.md), rien ne bloque).
+  - **Alternative écartée (`dotnet format style --diagnostics`, sans configuration)** : constaté sur le dépôt, il ne relève que les règles dont la gravité par défaut est une suggestion (ex. `IDE0305`, `IDE0290`), jamais celles qui sont silencieuses par défaut (ex. `IDE0005`, `IDE0004`).
+- **SonarQube Cloud lu par son API Web**, sans jeton, le projet étant public : problèmes ouverts et points sensibles de la branche `main`, notes du projet.
+  - **Alternative écartée (second analyseur statique, CodeQL)** : il recoupe SonarQube Cloud.
+  - **Alternative écartée (tests d'architecture, ex. NetArchTest)** : les références entre projets imposent déjà les couches à la compilation.

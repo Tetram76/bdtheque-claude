@@ -35,7 +35,7 @@ Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose �
 | --- | --- | --- |
 | Sécurité et mises à jour ([Mises à jour des dépendances](../depot/mises-a-jour-des-dependances.md)) | vulnérabilités connues | `security-audit` |
 | Fonctionnel ([Contrôle de cohérence fonctionnelle](controle-de-coherence-fonctionnelle.md)) | état du contrôle de cohérence fonctionnelle | `ergonomy-audit` |
-| Qualité | dette qualité | `quality-audit` |
+| Qualité ([Contrôle qualité hebdomadaire](../depot/controle-qualite-hebdomadaire.md)) | dette qualité du code de `main` | `quality-audit` |
 
 - **Étiquette du harnais** : elle réunit **tous** les tickets d'un harnais, son ticket de suivi comme les chantiers qui le créent ou le font évoluer (exigence de l'utilisateur).
 - **Étiquette `harness`** : commune aux tickets de suivi, elle n'est portée **que** par eux (exigence de l'utilisateur), jamais par un chantier, fût-il celui d'un harnais : elle les réunit en une liste, à part des chantiers.

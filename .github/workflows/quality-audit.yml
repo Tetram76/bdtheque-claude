@@ -1,0 +1,239 @@
+name: Quality audit
+
+# Weekly check of the quality of the code of main as a whole (gestion-projet/depot/controle-qualite-hebdomadaire.md):
+# the open problems of its SonarQube Cloud analysis, whose quality gate only judges the new code; the deviations
+# from the style rules that the build does not enforce; the mutants that the tests let survive. The current list is
+# kept in the harness's tracking issue; the run only fails, hence only notifies the user who created the workflow,
+# when an entry absent from that list shows up. It is no required check and blocks nothing. The issue also holds the
+# entries to treat: the new ones, and those of former runs that the agent has not treated yet. The first run sets the
+# reference, the existing debt, which is corrected along the way and is never to treat in itself. The agent treats
+# the entries at a resumption of work, once per run at most, and records it in the issue body: rewriting the whole
+# body here removes that record, which makes the next treatment due.
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-audit
+  cancel-in-progress: false
+
+jobs:
+  sonar:
+    name: SonarQube Cloud
+    runs-on: ubuntu-latest
+    steps:
+      # The project is public: its analysis of main is read without a token. An entry names the rule and the
+      # file, not the line, which moves with every change around it: an entry stays the same from week to week.
+      # The methods too complex to follow are among the problems (rule S3776 of the quality profile).
+      - name: List the problems of main
+        env:
+          API: https://sonarcloud.io/api
+          PROJECT: Tetram76_bdtheque-claude
+        run: |
+          page=1
+          while :; do
+            curl -fsS "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false&ps=500&p=$page" > page.json
+            jq -r --arg project "$PROJECT:" \
+              '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' page.json >> findings.txt
+            [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
+            page=$((page + 1))
+          done
+          page=1
+          while :; do
+            curl -fsS "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW&ps=500&p=$page" > page.json
+            jq -r --arg project "$PROJECT:" \
+              '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"' page.json >> findings.txt
+            [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
+            page=$((page + 1))
+          done
+          # A rating other than A is an entry, under its letter: a rating that worsens is a new one.
+          curl -fsS "$API/measures/component?component=$PROJECT&branch=main&metricKeys=reliability_rating,security_rating,sqale_rating,security_review_rating" \
+            | jq -r '.component.measures[] | (.value | tonumber | floor) as $rating | select($rating > 1)
+                | "rating \(.metric) \("ABCDE"[$rating - 1:$rating])"' >> findings.txt
+          sort -u findings.txt > findings-sonar.txt
+          cat findings-sonar.txt
+
+      - name: Upload the findings
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: findings-sonar
+          path: findings-sonar.txt
+
+  style:
+    name: Style rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The SDK of the Dockerfiles (SdkVersionTests).
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: "10.0.404"
+
+      # No style rule is imposed on the code: this build alone, on the runner's throwaway checkout, raises the rules
+      # below to warnings that do not fail it, through a .globalconfig at the root, which every project picks up.
+      # Only the rules that do not express a preference of form: a defect (code without effect, redundant or
+      # misleading), or a newer syntax of the language left unused where it says the same thing more directly
+      # (contraintes-techniques/exploitation-des-technologies-retenues.md). The rules of preference (var, braces,
+      # expression bodies, form of the namespace, target-typed new…) are left out. An entry names the rule and the
+      # file, not the line, which moves with every change around it.
+      - name: List the style deviations
+        run: |
+          rules=(
+            # Defects: simplifiable name or member access, unnecessary cast or using, unreachable code, field that
+            # can be readonly, unused or unread private member, unused value or parameter, local function that can
+            # be static, struct field assigned whole, unnecessary suppression or !, redundant == true, unnecessary
+            # discard, redundant nullable directive, struct or member that can be readonly, nameof for a parameter.
+            IDE0001 IDE0002 IDE0004 IDE0005 IDE0035 IDE0044 IDE0051 IDE0052 IDE0059 IDE0060 IDE0062 IDE0064
+            IDE0079 IDE0080 IDE0100 IDE0110 IDE0240 IDE0241 IDE0250 IDE0251 IDE0280
+            # Newer syntax left unused: index and range, switch expression, pattern matching, tuple swap, cast in
+            # foreach, UTF-8 literal, primary constructor, collection expressions, static anonymous function,
+            # System.Threading.Lock, unbound generic type in nameof.
+            IDE0056 IDE0057 IDE0066 IDE0078 IDE0083 IDE0150 IDE0170 IDE0260 IDE0180 IDE0220 IDE0230 IDE0290
+            IDE0300 IDE0301 IDE0302 IDE0303 IDE0304 IDE0305 IDE0306 IDE0320 IDE0330 IDE0340
+          )
+          { echo "is_global = true"; printf 'dotnet_diagnostic.%s.severity = warning\n' "${rules[@]}"; } > .globalconfig
+          dotnet build Bdtheque.slnx -p:TreatWarningsAsErrors=false -nologo -clp:NoSummary > build.log
+          sed -nE "s#^$GITHUB_WORKSPACE/([^(]+)\([0-9]+,[0-9]+\): warning (IDE[0-9]+):.*#style \2 \1#p" build.log \
+            | sort -u > findings-style.txt
+          cat findings-style.txt
+
+      - name: Upload the findings
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: findings-style
+          path: findings-style.txt
+
+  mutation:
+    name: Mutation tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The SDK of the Dockerfiles (SdkVersionTests).
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: "10.0.404"
+
+      - name: Restore the tools
+        run: dotnet tool restore
+
+      # Every mutant of the domain, every week: the run is short, and the baseline that would replay only the
+      # mutants changed since the previous run does not give a complete report (choix-implementation/outillage.md).
+      - name: Run the mutation tests
+        working-directory: tests/Bdtheque.Domain.Tests
+        run: dotnet stryker --reporter json --concurrency "$(nproc)" --output "$RUNNER_TEMP/stryker"
+
+      # A mutant that survived, or that no test covers, is a missing test. An entry names the file, the mutator and
+      # the mutated code with its replacement, not the line, which moves with every change around it.
+      - name: List the surviving mutants
+        run: |
+          jq -r --arg root "$GITHUB_WORKSPACE/" '
+            def code($lines; $location):
+              [range($location.start.line - 1; $location.end.line) as $i
+                | $lines[$i]
+                | if $i == $location.end.line - 1 then .[:$location.end.column - 1] else . end
+                | if $i == $location.start.line - 1 then .[$location.start.column - 1:] else . end]
+              | join(" ") | gsub("\\s+"; " ") | .[:80];
+            .files | to_entries[] | .key as $file | (.value.source | split("\n")) as $lines
+            | .value.mutants[] | select(.status == "Survived" or .status == "NoCoverage")
+            | "mutant \($file | ltrimstr($root)) \(.mutatorName): \(code($lines; .location)) → \(.replacement | gsub("\\s+"; " ") | .[:80])"
+          ' "$RUNNER_TEMP/stryker/reports/mutation-report.json" | sort -u > findings-mutation.txt
+          cat findings-mutation.txt
+
+      - name: Upload the findings
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: findings-mutation
+          path: findings-mutation.txt
+
+  # Only a run on main updates the tracking issue: the audit is about main, whose SonarQube Cloud analysis the first
+  # job reads whatever the branch, while the other jobs check out the branch of the run. A run dispatched on another
+  # branch, to try a change of this workflow, leaves its findings in its log and artifacts only.
+  report:
+    name: Report
+    needs: [sonar, style, mutation]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download the findings
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: findings-*
+          merge-multiple: true
+
+      # The issue body holds the list between two markers; an entry missing from it is new. The entries to treat,
+      # between two other markers, are the new ones and the former ones still found that the agent left there.
+      - name: Update the known entries
+        run: |
+          export LC_ALL=C
+          cat findings-*.txt | sort -u > current.txt
+          gh label create quality-audit --color F2C69A --description "Weekly code quality check" --force
+          # Borne by the tracking issue of every harness, and by them only, whereas quality-audit also groups the
+          # chantiers of the harness: the tracking issue is the one with both (gestion-projet/revue-tickets/issues.md).
+          gh label create harness --color 5319E7 --description "Tracking issue of a harness" --force
+          issue=$(gh issue list --label quality-audit --label harness --state all --limit 1 --json number -q '.[0].number')
+          if [ -n "$issue" ]; then
+            gh issue view "$issue" --json body -q .body | tr -d '\r' > previous.md
+            # A single sed each, which succeeds whether or not the list is empty (a filtering grep would fail on an
+            # empty one under pipefail).
+            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > known.txt
+            sed -n '/^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > pending.txt
+            comm -23 current.txt known.txt > new.txt
+          else
+            # The first run sets the reference: the existing debt, nothing new.
+            : > pending.txt
+            : > new.txt
+          fi
+          comm -12 pending.txt current.txt | sort -u - new.txt > to-treat.txt
+          {
+            echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
+            echo
+            echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) entrée(s), dont $(wc -l < new.txt) nouvelle(s)."
+            echo
+            echo "## À traiter"
+            echo
+            echo "Entrées nouvelles, et entrées des contrôles précédents que l'agent n'a pas encore traitées. Le reste de la liste est la dette existante, corrigée au fil de l'eau."
+            echo
+            echo "<!-- to-treat -->"
+            echo '```text'
+            cat to-treat.txt
+            echo '```'
+            echo "<!-- end-to-treat -->"
+            echo
+            echo "## Toutes les entrées"
+            echo
+            echo "<!-- list -->"
+            echo '```text'
+            cat current.txt
+            echo '```'
+            echo "<!-- end -->"
+          } > body.md
+          if [ -z "$issue" ]; then
+            # Only the initial title: the user may change it, the issue being found by its labels alone. The type of
+            # a tracking issue is Task (gestion-projet/revue-tickets/issues.md), set at its creation through the REST API.
+            issue=$(gh api "repos/$GH_REPO/issues" -f title="Harnais qualité : Dette qualité" -F body=@body.md \
+              -f type=Task -f 'labels[]=quality-audit' -f 'labels[]=harness' --jq .number)
+          else
+            gh issue edit "$issue" --body-file body.md
+          fi
+          # Open while an entry is known; reopening an open issue or closing a closed one fails harmlessly.
+          if [ -s current.txt ]; then gh issue reopen "$issue" || true; else gh issue close "$issue" || true; fi
+          if [ -s new.txt ]; then
+            echo "New entries:"
+            cat new.txt
+            exit 1
+          fi
