@@ -107,6 +107,24 @@ forwards to that session a question of the user about the chantier
    containers of the functional validation), and launch that many of the
    candidates (step 3) — every free place filled. If none fits, do not
    launch: tell the user which resource holds it back.
+4. **Present the whole selection to the user**, before starting any session
+   (step 3), at every pass of step 2 — the first launch and each freed
+   place. Never only the chantiers launched now: without the whole
+   selection, the user cannot confirm the number of chantiers of the batch.
+   In French, as a table or a list:
+   - the number of chantiers of the batch the user set, and how many the
+     selection counts (sub-tickets included);
+   - each selected chantier: ticket (`#<n>` and title), rank in the order of
+     priority, state — done (PR merged), in progress (its PR), launched now,
+     or to come, with what it waits for (a free place, a dependency: name
+     it). The ones to come are the current choice, which the next pass may
+     change;
+   - the candidates dropped, each with its reason (independence, dependency),
+     and the shortfall when the selection counts fewer chantiers than the
+     batch for lack of candidates.
+
+   Then launch (step 3) without waiting: the number is the user's, who may
+   correct it at any time.
 
 ## 3. Launch
 
@@ -138,7 +156,7 @@ not the session's, unless the session is the one it was given to;
 that the superpowers plugin is forbidden; that it answers in French.
 
 Tell the user, in one line per chantier, which ticket started and why it was
-chosen before the others.
+chosen before the others; the whole selection was presented at step 2.4.
 
 ## 4. While the batch runs
 
@@ -176,5 +194,6 @@ chosen before the others.
   join the candidates; they are planned at the next pass of step 2 (now, if a
   place is free), after checking them on GitHub (step 2.1).
 - A merge (a note, or `main` that moved) frees a place: back to step 2 —
-  tickets, candidates **and resources** read again — then step 3, unasked,
+  tickets, candidates **and resources** read again, the selection presented
+  again — then step 3, unasked,
   until the number of chantiers of the batch is reached (sub-tickets count).

@@ -2,6 +2,7 @@
 
 ## 2026-11-12
 
+* **Règle** : dans un lot de chantiers en parallèle, l'orchestrateur présente à l'utilisateur, à chaque choix des chantiers et avant de lancer les sessions, la sélection entière du lot et non les seuls chantiers lancés : nombre de chantiers du lot et nombre que compte la sélection, chaque chantier avec son ticket, son rang et son état (terminé, en cours, lancé maintenant, à venir avec ce qu'il attend), candidats écartés avec leur raison ; la présentation ne suspend pas le lancement (exigence de l'utilisateur) (#393).
 * **Choix** : toute capture de référence est prise avec le pointeur écarté de la page, par la capture elle-même, et non à l'endroit où l'ont laissé les interactions du test ; références prises avec un survol involontaire reprises (#392).
 * **Choix** : chaque job de bout en bout du CI compile lui-même le projet des tests de bout en bout, en même temps que les autres jobs ; compilation unique partagée par un artefact écartée, qui allongerait le CI d'environ une minute pour épargner du temps d'exécuteur (#391).
 * **Choix** : focus à l'arrivée sur une page posé sur le champ marqué `autofocus` (l'identifiant de la connexion), sinon sur le titre, par `FocusOnNavigate`, dont le sélecteur ne désigne le titre que dans une page sans champ marqué : le navigateur n'applique pas `autofocus` au contenu qu'insère une navigation améliorée (#390).
