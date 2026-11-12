@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Issues'
 description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), tickets de suivi des harnais et leurs étiquettes (celle du harnais, `harness`) ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T11:28:15Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T20:41:24Z }
 ---
 
 # Issues
@@ -38,6 +38,7 @@ Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose �
 | Qualité ([Contrôle qualité hebdomadaire](../depot/controle-qualite-hebdomadaire.md)) | dette qualité du code de `main` | `quality-audit` |
 
 - **Étiquette du harnais** : elle réunit **tous** les tickets d'un harnais, son ticket de suivi comme les chantiers qui le créent ou le font évoluer (exigence de l'utilisateur).
+  - **Tickets ouverts par un harnais** : tout ticket qu'ouvre un harnais, ou l'agent qui traite ce qu'il relève (suite d'un contrôle de cohérence, correction d'une dette qualité ou d'une vulnérabilité reportée, montée de version, chantier d'amélioration issu d'une revue de l'existant), reçoit l'étiquette de ce harnais dès sa création, quel que soit le harnais (exigence de l'utilisateur) : le ticket de suivi et ses suites se retrouvent ensemble, sans que l'étiquette `harness` leur soit posée.
 - **Étiquette `harness`** : commune aux tickets de suivi, elle n'est portée **que** par eux (exigence de l'utilisateur), jamais par un chantier, fût-il celui d'un harnais : elle les réunit en une liste, à part des chantiers.
 - **Ticket de suivi retrouvé par ses deux étiquettes** : un harnais, comme l'agent, le retrouve par l'étiquette du harnais **et** `harness`, jamais par la première seule, qui désigne aussi ses chantiers. Qui crée un ticket de suivi, harnais ou agent, lui pose les deux.
 
