@@ -27,7 +27,7 @@ public sealed partial class WelcomeScreenCaptureTests(ApplicationHost applicatio
         var page = await NewCapturePageAsync(ThemeCatalog.Base.Key, ScreenCaptureTests.Viewports[viewport]);
         await page.RouteAsync(url => new Uri(url).AbsolutePath == AppPaths.Home, async route =>
         {
-            var response = await route.FetchAsSentAsync();
+            var response = await route.FetchAsync();
             var screen = WhatGivesWayToThePage().Replace(await response.TextAsync(), "");
             await route.FulfillAsync(new RouteFulfillOptions { Response = response, Body = screen });
         });

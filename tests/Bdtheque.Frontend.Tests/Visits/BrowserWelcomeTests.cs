@@ -40,14 +40,28 @@ public sealed class BrowserWelcomeTests
         Assert.False(BrowserWelcome.IsDueFor(request.Context.Request));
     }
 
+    [Fact]
+    public void NavigationOfABrowser_OverPlainHttp_GetsTheScreen()
+    {
+        // A browser sends the metadata of a navigation (Sec-Fetch-*) to a secure origin only (HTTPS, localhost): not to the
+        // NAS reached in HTTP on the internal network.
+        var request = new TestRequest();
+        request.Context.Request.Headers.Accept = HtmlOfANavigation;
+
+        Assert.True(BrowserWelcome.IsDueFor(request.Context.Request));
+    }
+
     [Theory]
-    [InlineData("cors", "empty")] // An enhanced navigation of Blazor, a request of a page already displayed.
-    [InlineData("no-cors", "image")] // A medium.
-    [InlineData("navigate", "iframe")] // A page in a frame, the browser running the page around it.
-    [InlineData(null, null)] // A client that is not a browser (robot, preview of a link), which sends no metadata of the navigation.
-    public void Request_ThatIsNotTheNavigationOfABrowserToAPage_GetsThePage(string? mode, string? destination)
+    [InlineData("text/html; blazor-enhanced-nav=on", null, null)] // An enhanced navigation of Blazor, over HTTP.
+    [InlineData("text/html; blazor-enhanced-nav=on", "cors", "empty")] // The same, to a secure origin.
+    [InlineData("image/avif,image/webp,*/*;q=0.8", null, null)] // A medium, or an address the server does not know, over HTTP.
+    [InlineData(HtmlOfANavigation, "no-cors", "image")] // A medium, to a secure origin, whatever it accepts.
+    [InlineData(HtmlOfANavigation, "navigate", "iframe")] // A page in a frame, the browser running the page around it.
+    [InlineData("*/*", null, null)] // A client that does not ask for a page (a script, a check of the service).
+    public void Request_ThatIsNotTheNavigationOfABrowserToAPage_GetsThePage(string accept, string? mode, string? destination)
     {
         var request = new TestRequest();
+        request.Context.Request.Headers.Accept = accept;
         if (mode is not null)
             request.Context.Request.Headers["Sec-Fetch-Mode"] = mode;
         if (destination is not null)
@@ -82,10 +96,15 @@ public sealed class BrowserWelcomeTests
     public void WithoutRequest_NoScreen() =>
         Assert.False(new BrowserWelcome(new HttpContextAccessor()).IsDue);
 
-    // The navigation of a browser to a page, as Fetch Metadata describes it.
+    // What a browser accepts when it navigates to a page (Chromium).
+    private const string HtmlOfANavigation =
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8";
+
+    // The navigation of a browser to a page, to a secure origin, which receives the metadata of the navigation.
     private static TestRequest Navigation(IReadOnlyDictionary<string, string>? cookies = null)
     {
         var request = new TestRequest(cookies);
+        request.Context.Request.Headers.Accept = HtmlOfANavigation;
         request.Context.Request.Headers["Sec-Fetch-Mode"] = "navigate";
         request.Context.Request.Headers["Sec-Fetch-Dest"] = "document";
         return request;

@@ -174,7 +174,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
     {
         await page.RouteAsync(url => new Uri(url).AbsolutePath == Page, async route =>
         {
-            var response = await route.FetchAsSentAsync();
+            var response = await route.FetchAsync();
             var html = (await response.TextAsync()).Replace(
                 "</main>", "<time datetime=\"2025-12-31T23:30:00Z\" data-local>31/12/2025 23:30</time></main>", StringComparison.Ordinal);
             await route.FulfillAsync(new RouteFulfillOptions { Response = response, Body = html });

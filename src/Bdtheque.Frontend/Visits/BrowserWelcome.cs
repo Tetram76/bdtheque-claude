@@ -10,10 +10,10 @@ namespace Bdtheque.Frontend.Visits;
 /// address again: its first real rendering already knows them, for the dates, the theme of the visit and the audience
 /// measurement alike.
 /// <para>
-/// Only the page a browser navigates to: neither an enhanced navigation of Blazor nor a form it submits (requests of the
-/// page itself, whose browser runs the scripts of its pages), nor a medium, nor a client that is not a browser (robots,
-/// previews of links), which sends no metadata of the navigation. A browser that refuses the cookies, or runs no script,
-/// comes back marked by <see cref="SkipParameter"/>: its page is then rendered as it is, never the screen again and again.
+/// Only a navigation to a page, by <c>GET</c>, asking for HTML: neither an enhanced navigation of Blazor nor a form it
+/// submits (requests of a page already displayed, whose scripts have run), nor a medium, nor a client that does not ask for
+/// a page. A browser that refuses the cookies, or runs no script, comes back marked by <see cref="SkipParameter"/>: its
+/// page is then rendered as it is, never the screen again and again.
 /// </para>
 /// </summary>
 public sealed class BrowserWelcome(IHttpContextAccessor httpContextAccessor)
@@ -21,20 +21,21 @@ public sealed class BrowserWelcome(IHttpContextAccessor httpContextAccessor)
     /// <summary>Query parameter of the request that follows the screen without the cookies: the page, not the screen again.</summary>
     public const string SkipParameter = "welcomed";
 
+    // The flag of the Accept header by which blazor.web.js asks for the page of an enhanced navigation.
+    private const string EnhancedNavigation = "blazor-enhanced-nav=on";
+
     private bool? _isDue;
 
     /// <summary>Whether the request of the page being rendered is answered by the welcome screen.</summary>
     public bool IsDue => _isDue ??= httpContextAccessor.HttpContext?.Request is { } request && IsDueFor(request);
 
     /// <summary>
-    /// The navigation of a browser to a page (Fetch Metadata, <c>Sec-Fetch-Mode</c> and <c>Sec-Fetch-Dest</c>, which every
-    /// browser sends since 2023), by <c>GET</c>, without the cookie of its time zone, nor the mark of a browser that keeps
-    /// none.
+    /// The navigation of a browser to a page, by <c>GET</c>, without the cookie of its time zone, nor the mark of a browser
+    /// that keeps none.
     /// </summary>
     public static bool IsDueFor(HttpRequest request) =>
         HttpMethods.IsGet(request.Method)
-        && request.Headers["Sec-Fetch-Mode"] == "navigate"
-        && request.Headers["Sec-Fetch-Dest"] == "document"
+        && IsNavigationToAPage(request)
         && !request.Cookies.ContainsKey(BrowserTimeZone.CookieName)
         && !request.Query.ContainsKey(SkipParameter);
 
@@ -43,4 +44,22 @@ public sealed class BrowserWelcome(IHttpContextAccessor httpContextAccessor)
         request.PathBase + request.Path + QueryString.Create(
             request.Query.SelectMany(parameter => parameter.Value.Select(value => KeyValuePair.Create(parameter.Key, value)))
                 .Append(KeyValuePair.Create(SkipParameter, (string?)"")));
+
+    // Asking for HTML, which neither a medium nor a client that does not ask for a page does, and not an enhanced navigation.
+    // The metadata of a navigation (Fetch Metadata, Sec-Fetch-Mode and Sec-Fetch-Dest) tells it outright, when the browser
+    // sends it: to a secure origin only (HTTPS, localhost), never to the NAS reached in HTTP on the internal network
+    // (W3C Fetch Metadata Request Headers: a potentially trustworthy URL), where the Accept header alone decides.
+    private static bool IsNavigationToAPage(HttpRequest request)
+    {
+        var accept = request.Headers.Accept.ToString();
+        if (!accept.Contains("text/html", StringComparison.OrdinalIgnoreCase)
+            || accept.Contains(EnhancedNavigation, StringComparison.OrdinalIgnoreCase))
+            return false;
+        var mode = request.Headers[SecFetchMode];
+        var destination = request.Headers[SecFetchDest];
+        return (mode.Count == 0 && destination.Count == 0) || (mode == "navigate" && destination == "document");
+    }
+
+    private const string SecFetchMode = "Sec-Fetch-Mode";
+    private const string SecFetchDest = "Sec-Fetch-Dest";
 }

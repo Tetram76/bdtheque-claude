@@ -35,6 +35,37 @@ public sealed class WelcomeScreenTests(ApplicationHost application) : BrowserTes
     }
 
     [Theory, InEachTheme]
+    public async Task WelcomeScreen_GivesWayToThePage_OnceItsAnimationIsOver(string theme)
+    {
+        // Short enough to be seen to the end (decision of the user): the page comes once the last album has fallen.
+        var page = await NewPageAsync(theme, new BrowserNewContextOptions { ReducedMotion = ReducedMotion.NoPreference });
+        // On the screen, when its animations end and when it is left, in the time of the screen, kept for the page.
+        await page.AddInitScriptAsync("""
+            if (sessionStorage.getItem("animationsOver") === null) {
+                addEventListener("DOMContentLoaded", () => {
+                    if (!document.documentElement.hasAttribute("data-welcome"))
+                        return;
+                    const animations = document.getAnimations();
+                    sessionStorage.setItem("animationsCount", String(animations.length));
+                    Promise.all(animations.map(animation => animation.finished))
+                        .then(() => sessionStorage.setItem("animationsOver", String(performance.now())));
+                    addEventListener("pagehide", () => sessionStorage.setItem("left", String(performance.now())));
+                });
+            }
+            """);
+
+        await PageReadiness.GotoAsync(page, Address);
+
+        Assert.Equal(theme, await page.Locator("html").GetAttributeAsync("data-theme"));
+        Assert.Equal("4", await page.EvaluateAsync<string?>("() => sessionStorage.getItem('animationsCount')"));
+        var over = await page.EvaluateAsync<string?>("() => sessionStorage.getItem('animationsOver')");
+        var left = await page.EvaluateAsync<string?>("() => sessionStorage.getItem('left')");
+        Assert.NotNull(over);
+        Assert.True(double.Parse(left!, System.Globalization.CultureInfo.InvariantCulture) >= double.Parse(over, System.Globalization.CultureInfo.InvariantCulture),
+            "The welcome screen gave way to the page before its animation was over.");
+    }
+
+    [Theory, InEachTheme]
     public async Task BrowserThatGaveItsTimeZone_GetsThePageAtOnce(string theme)
     {
         var page = await NewPageAsync(theme);
@@ -63,9 +94,10 @@ public sealed class WelcomeScreenTests(ApplicationHost application) : BrowserTes
     }
 
     [Theory, InEachTheme]
-    public async Task ClientThatIsNotABrowser_GetsThePage(string theme)
+    public async Task ClientThatDoesNotAskForAPage_GetsThePage(string theme)
     {
-        // A robot or the preview of a link, which neither runs scripts nor sends the metadata of a navigation.
+        // A script, a check of the service: it accepts anything (*/*), not HTML in particular. A robot or the preview of a
+        // link, which asks for HTML, gets the screen, which sends it to the page without a script (BrowserWithoutScripts_…).
         var context = await NewContextAsync(theme);
 
         var response = await context.APIRequest.GetAsync(Address);
@@ -75,12 +107,15 @@ public sealed class WelcomeScreenTests(ApplicationHost application) : BrowserTes
 
     // The documents of the page loads at its address, with their content, as the server answers them: the welcome screen,
     // then the page. Each is noted before the browser gets it, so in their order, and complete once the page is ready.
+    // Fetched by the route, a request does not carry the metadata of a navigation (Sec-Fetch-*), which the network stack of
+    // the browser adds after it: as the navigation of a browser to the NAS in HTTP, which never receives it. The navigations
+    // of the other tests, not routed, carry it, as to a secure origin.
     private static async Task<List<(IAPIResponse Response, string Content)>> DocumentsOfAsync(IPage page)
     {
         var documents = new List<(IAPIResponse, string)>();
         await page.RouteAsync(url => new Uri(url).AbsolutePath == AppPaths.NotYetImplemented, async route =>
         {
-            var response = await route.FetchAsSentAsync();
+            var response = await route.FetchAsync();
             var content = await response.TextAsync();
             lock (documents)
                 documents.Add((response, content));
