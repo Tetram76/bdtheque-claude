@@ -196,6 +196,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.NotEmpty(page!.Items);
     }
 
+    // The latest arrivals of the dashboard, with and without cover: « La couverture du jour » shows them as books in volume,
+    // the generic visual of one without cover included (visuel/dashboard/la-couverture-du-jour.md, #326).
+    [Fact]
+    public async Task LatestArrivals_OfTheDashboard_WithAndWithoutCover()
+    {
+        var dashboard = await _client.GetFromJsonAsync<Dashboard>("/catalog/dashboard");
+
+        var latest = dashboard!.Content!.LatestEntries;
+        Assert.Contains(latest, entry => entry.Cover is not null);
+        Assert.Contains(latest, entry => entry.Cover is null);
+    }
+
     // The home page of the administration: a record modified among the latest changes, a deleted one left out.
     [Fact]
     public async Task LatestChanges_PresentAModification_AndLeaveTheDeletedRecordOut()
