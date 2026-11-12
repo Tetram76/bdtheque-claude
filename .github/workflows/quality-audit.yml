@@ -4,11 +4,12 @@ name: Quality audit
 # the open problems of its SonarQube Cloud analysis, whose quality gate only judges the new code; the deviations
 # from the style rules that the build does not enforce; the mutants that the tests let survive. The current list is
 # kept in the harness's tracking issue; the run only fails, hence only notifies the user who created the workflow,
-# when an entry absent from that list shows up. It is no required check and blocks nothing. The issue sorts the debt
-# by urgency, each entry once: critical (a failing condition of the quality gate and what makes it fail, a problem of a
-# blocker or high severity), priority (every other problem of SonarQube Cloud, the new entries, and those the agent has
-# not treated yet), and the rest, fixed along the way; the first run sets the reference, nothing new. The agent treats the critical then priority entries at
-# a resumption of work, once per run at most, and records it in the issue body: rewriting the whole body here removes
+# while a critical entry remains, at each run even when known, or when a priority entry absent from that list shows
+# up, once. It is no required check and blocks nothing. The issue sorts the debt by urgency, each entry once: critical
+# (a failing condition of the quality gate and what makes it fail, a problem of a blocker or high severity), priority
+# (every other problem of SonarQube Cloud), and the rest, style and mutants, fixed along the way even when new, which
+# never fail the run; the first run sets the reference, nothing new. The agent treats the critical then priority entries at a
+# resumption of work, once per run at most, and records it in the issue body: rewriting the whole body here removes
 # that record, which makes the next treatment due.
 on:
   schedule:
@@ -228,20 +229,18 @@ jobs:
             gh issue view "$issue" --json body -q .body | tr -d '\r' > previous.md
             # A single sed each, which succeeds whether or not the list is empty (a filtering grep would fail on an
             # empty one under pipefail).
-            # A critical entry not treated yet stays to treat once no longer critical (e.g. a release resets the new code):
-            # the critical and priority entries before this run are the pending ones.
+            # The known entries are those of the three lists.
             sed -n '/^<!-- critical -->$/,/^<!-- end-critical -->$/{/^<!--/d;/^```/d;p}
-                    /^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > pending.txt
-            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u - pending.txt > known.txt
+                    /^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}
+                    /^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > known.txt
             comm -23 current.txt known.txt > new.txt
           else
             # The first run sets the reference: the existing debt, nothing new.
-            : > pending.txt
             : > new.txt
           fi
+          # Critical, then every other problem of SonarQube Cloud as priority, then the rest (style, mutants), even new.
           sort -u critical-sonar.txt | comm -12 - current.txt > critical.txt
-          { comm -12 pending.txt current.txt; cat new.txt; grep -E '^(sonar|hotspot|rating) ' current.txt || true; } \
-            | sort -u | comm -23 - critical.txt > to-treat.txt
+          { grep -E '^(sonar|hotspot|rating) ' current.txt || true; } | comm -23 - critical.txt > to-treat.txt
           sort -u critical.txt to-treat.txt | comm -23 current.txt - > debt.txt
           {
             echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`gate\`, \`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
@@ -260,7 +259,7 @@ jobs:
             echo
             echo "## Prioritaire"
             echo
-            echo "Tout autre problème de SonarQube Cloud, corrigé avant qu'il ne fasse tomber une note ; entrées nouvelles ; entrées des contrôles précédents que l'agent n'a pas encore traitées : traitement hebdomadaire."
+            echo "Tout autre problème de SonarQube Cloud, corrigé avant qu'il ne fasse tomber une note : traitement hebdomadaire."
             echo
             echo "<!-- to-treat -->"
             echo '```text'
@@ -270,7 +269,7 @@ jobs:
             echo
             echo "## Au fil de l'eau"
             echo
-            echo "Corrigées quand un chantier modifie de toute façon le fichier concerné."
+            echo "Écarts de style et mutants survivants, même nouveaux : corrigés quand un chantier modifie de toute façon le fichier concerné."
             echo
             echo "<!-- list -->"
             echo '```text'
@@ -288,8 +287,18 @@ jobs:
           fi
           # Open while an entry is known; reopening an open issue or closing a closed one fails harmlessly.
           if [ -s current.txt ]; then gh issue reopen "$issue" || true; else gh issue close "$issue" || true; fi
-          if [ -s new.txt ]; then
-            echo "New entries:"
-            cat new.txt
-            exit 1
+          # A new priority entry fails the run once; a critical one at each run, as long as it stays critical; an entry
+          # fixed along the way never, even new.
+          failed=0
+          comm -12 new.txt to-treat.txt > new-priority.txt
+          if [ -s new-priority.txt ]; then
+            echo "New priority entries:"
+            cat new-priority.txt
+            failed=1
           fi
+          if [ -s critical.txt ]; then
+            echo "Critical entries:"
+            cat critical.txt
+            failed=1
+          fi
+          exit "$failed"
