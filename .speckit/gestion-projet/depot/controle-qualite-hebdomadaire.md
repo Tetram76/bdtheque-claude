@@ -37,7 +37,7 @@ Le contrôle tient la liste de ses entrées dans le ticket de suivi du harnais q
 - **Notification** : le contrôle n'échoue que lorsqu'il trouve une entrée absente de la liste. GitHub notifie alors l'échec à l'utilisateur qui a créé le workflow, une fois par entrée, et non chaque semaine tant qu'elle reste.
 - **Dette par urgence** (exigences de l'utilisateur) : tout ce que relève le contrôle est de la dette ; la description la répartit en trois niveaux d'urgence, où chaque entrée ne figure qu'une fois :
   - **Critique** : chaque condition en échec de la porte de qualité de `main` (`gate`), avec les problèmes du nouveau code qui la font échouer (les vulnérabilités pour la note de sécurité, les bugs pour la fiabilité, les *code smells* pour la maintenabilité, les points sensibles non revus pour leur revue), et tout problème de SonarQube Cloud de gravité bloquante ou haute (`BLOCKER`, `HIGH`, gravité par qualité logicielle) ; une entrée y figure tant qu'elle est critique, quel que soit son âge ;
-  - **Prioritaire** : les entrées **nouvelles** d'une exécution, et celles des exécutions précédentes que l'agent n'a pas encore traitées, tant que le contrôle les relève ;
+  - **Prioritaire** : les entrées **nouvelles** d'une exécution, et celles des exécutions précédentes, critiques ou prioritaires, que l'agent n'a pas encore traitées, tant que le contrôle les relève : une entrée critique qui cesse de l'être sans avoir été traitée (ex. une version publiée qui fait repartir la période du nouveau code) reste à traiter ;
   - **Au fil de l'eau** : toutes les autres. La première exécution pose la référence : elle range tout ce qui n'est pas critique au fil de l'eau, sans rien de nouveau ni d'échec.
 
 ## Traitement des entrées

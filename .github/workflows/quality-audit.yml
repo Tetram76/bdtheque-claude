@@ -216,10 +216,11 @@ jobs:
             gh issue view "$issue" --json body -q .body | tr -d '\r' > previous.md
             # A single sed each, which succeeds whether or not the list is empty (a filtering grep would fail on an
             # empty one under pipefail).
-            sed -n '/^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > pending.txt
-            sed -n '/^<!-- critical -->$/,/^<!-- end-critical -->$/{/^<!--/d;/^```/d;p}' previous.md > critical-before.txt
-            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md \
-              | sort -u - pending.txt critical-before.txt > known.txt
+            # A critical entry not treated yet stays to treat once no longer critical (e.g. a release resets the new code):
+            # the critical and priority entries before this run are the pending ones.
+            sed -n '/^<!-- critical -->$/,/^<!-- end-critical -->$/{/^<!--/d;/^```/d;p}
+                    /^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > pending.txt
+            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u - pending.txt > known.txt
             comm -23 current.txt known.txt > new.txt
           else
             # The first run sets the reference: the existing debt, nothing new.
