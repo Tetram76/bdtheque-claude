@@ -15,7 +15,7 @@ public static class VisitTheme
     /// </summary>
     /// <param name="visit">The visit of the browser, <c>null</c> for a new one.</param>
     /// <param name="today">Date in universal time, which bounds the duration of a visit.</param>
-    /// <param name="browserToday">Date of the browser; <c>null</c> while its time zone is not known.</param>
+    /// <param name="browserToday">Date of the browser; <c>null</c> when its time zone is not known (cookie refused, no script).</param>
     /// <param name="offered">Themes among which the theme is drawn.</param>
     /// <param name="draw">Draws an index below the number it receives.</param>
     public static BrowserVisit Continue(
@@ -26,9 +26,10 @@ public static class VisitTheme
         if (!offered.Any(theme => theme.Key == visit.ThemeKey)
             || (visit.ThemeDate is { } themeDate && browserToday is { } date && date != themeDate))
             return visit with { ThemeKey = Draw(offered, draw), ThemeDate = browserToday ?? visit.ThemeDate };
-        // A theme drawn on the first page, before the browser gave its time zone, is the theme of its first known date:
-        // universal time could be another date than the browser's, and drawing again then would change the theme in the
-        // middle of that date.
+        // A visit without a date is that of a browser that gave no time zone when it started (scripts or cookies refused, the
+        // welcome screen giving it before the first page of any other one, Visits/BrowserWelcome.cs): its theme is that of
+        // the first date the browser gives, without drawing again, as universal time could be another date than the
+        // browser's; the dates that follow draw it again.
         if (visit.ThemeDate is null && browserToday is not null)
             return visit with { ThemeDate = browserToday };
         return visit;

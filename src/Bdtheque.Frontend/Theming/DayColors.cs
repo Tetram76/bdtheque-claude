@@ -22,8 +22,8 @@ public sealed class SpotlightDayColors(ApiClient api, BrowserTimeZone timeZone, 
 {
     public async Task<CoverPalette?> GetAsync(CancellationToken cancellationToken = default)
     {
-        // Without the date of the browser (a first page), the page is rendered again once it is known (App.razor,
-        // data-local): asking for another day would draw and record an edition for a day the visitor does not live.
+        // Without the date of the browser (cookie refused, no script), the theme keeps its own colours: asking for another
+        // day would draw and record an edition for a day the visitor does not live.
         if (timeZone.Today(clock) is not { } today)
             return null;
 

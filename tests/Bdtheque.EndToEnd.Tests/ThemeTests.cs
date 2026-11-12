@@ -61,36 +61,20 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
         Assert.Equal(VisitOf(await VisitCookieAsync(tab)).ThemeKey, await tab.Locator("html").GetAttributeAsync("data-theme"));
     }
 
-    // The date of the theme depends on whether the first page, rendered without the time zone of the browser, is rendered
-    // again once it is known (choix-implementation/socle/transverse/internationalisation.md): each case starts from the
-    // visit its first page left, in a theme fixed by the test rather than drawn (the draw itself: VisitThemeTests).
+    // The welcome screen gives the time zone of the browser before its first page (Visits/BrowserWelcome.cs): the theme of the
+    // visit is drawn for the date of the browser from that page on, whichever theme is drawn. In Kiribati, already the next
+    // day while it is still the day before in universal time at the time of the application: the date of the browser, not
+    // that of the server.
     [Fact]
-    public async Task DateOfTheTheme_IsTheDateOfTheBrowser_FromTheNextPage_InAThemeThatDoesNotDependOnTheTimeZone()
+    public async Task DateOfTheTheme_IsTheDateOfTheBrowser_FromTheFirstPage()
     {
-        var page = await PageOfAVisitStartedInAsync(ThemeCatalog.Base, "Pacific/Kiritimati");
+        var page = await PageInAsync("Pacific/Kiritimati");
+        Assert.NotEqual(DateOnly.FromDateTime(Application.Clock.GetUtcNow().UtcDateTime), Application.TodayIn("Pacific/Kiritimati"));
 
         await PageReadiness.GotoAsync(page, Page);
-        // The first page, not rendered again: its request did not bring the time zone, and its visit has no date yet.
-        Assert.Null(await page.Locator("html").GetAttributeAsync("data-time-zone"));
-        Assert.Null(VisitOf(await VisitCookieAsync(page)).ThemeDate);
-        await page.GotoAsync(Page);
 
-        // The date of the browser, without a new draw: the theme does not change in the middle of the first date.
-        var visit = VisitOf(await VisitCookieAsync(page));
-        Assert.Equal((ThemeCatalog.Base.Key, Application.TodayIn("Pacific/Kiritimati")), (visit.ThemeKey, visit.ThemeDate));
-    }
-
-    [Fact]
-    public async Task DateOfTheTheme_IsTheDateOfTheBrowser_FromTheFirstPage_InAThemePaintedByTheDay()
-    {
-        var page = await PageOfAVisitStartedInAsync(ThemeCatalog.Couverture, "Pacific/Kiritimati");
-
-        await page.GotoAsync(Page);
-        // The first page, rendered again once the browser gave its time zone: its colours are those of the date of the browser.
-        await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", "Pacific/Kiritimati");
-
-        var visit = VisitOf(await VisitCookieAsync(page));
-        Assert.Equal((ThemeCatalog.Couverture.Key, Application.TodayIn("Pacific/Kiritimati")), (visit.ThemeKey, visit.ThemeDate));
+        Assert.Equal("Pacific/Kiritimati", await page.Locator("html").GetAttributeAsync("data-time-zone"));
+        Assert.Equal(Application.TodayIn("Pacific/Kiritimati"), VisitOf(await VisitCookieAsync(page)).ThemeDate);
     }
 
     [Fact]
@@ -154,17 +138,6 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
             TimezoneId = timeZone,
         });
         return await context.NewPageAsync();
-    }
-
-    // A browser whose visit started in the given theme, before it gave its time zone (no cookie of it yet), as its first
-    // page leaves it. In Kiribati, already the next day while it is still the day before in universal time for a part of
-    // each day: the date of the theme is then that of the browser, not of the server.
-    private async Task<IPage> PageOfAVisitStartedInAsync(Theme theme, string timeZone)
-    {
-        var page = await PageInAsync(timeZone);
-        var start = DateOnly.FromDateTime(Application.Clock.GetUtcNow().UtcDateTime);
-        await page.Context.AddCookiesAsync([Cookie(BrowserVisit.CookieName, new BrowserVisit(start, theme.Key, ThemeDate: null).Format())]);
-        return page;
     }
 
     private Cookie Cookie(string name, string value) => new() { Name = name, Value = value, Url = Application.BaseAddress.ToString() };

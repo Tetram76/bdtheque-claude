@@ -41,8 +41,8 @@
         }
         else
         {
-            @* The date of the browser is not known yet (a first page): no edition is guessed for it, until the page is
-               rendered again once the browser gave its time zone (Bloc sans donnée). *@
+            @* The date of a browser that does not give its time zone (cookie refused, no script) is not known: no edition
+               is guessed for it (Bloc sans donnée). *@
             <p class="dashboard-muted">@L["Spotlight.WithoutDay"]</p>
         }
     </Block>

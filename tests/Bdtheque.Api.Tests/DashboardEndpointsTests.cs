@@ -297,7 +297,7 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         (await _client.GetFromJsonAsync<Dashboard>(
             $"/catalog/dashboard?day={day:yyyy-MM-dd}{(latestCount is null ? "" : $"&latestCount={latestCount}")}"))!;
 
-    // As the frontend asks before the browser gave its time zone (a first page): without any day.
+    // As the frontend asks when the browser does not give its time zone (cookie refused, no script): without any day.
     private async Task<Dashboard> GetDashboardWithoutDayAsync() =>
         (await _client.GetFromJsonAsync<Dashboard>("/catalog/dashboard?latestCount=6"))!;
 

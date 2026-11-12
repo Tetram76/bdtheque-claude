@@ -2,6 +2,7 @@ extern alias frontend;
 
 using frontend::Bdtheque.Frontend.Formatting;
 using frontend::Bdtheque.Frontend.Navigation;
+using frontend::Bdtheque.Frontend.Visits;
 
 namespace Bdtheque.EndToEnd.Tests;
 
@@ -16,13 +17,13 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
     // on the collection the other tests change (the dashboard is rendered in the time zone of the browser).
     private const string Page = AppPaths.NotYetImplemented;
 
+    // The welcome screen gives it before the first page of a browser (Visits/BrowserWelcome.cs).
     [Theory, InEachTheme]
-    public async Task Server_LearnsTheTimeZoneOfTheBrowser_FromItsFirstPage(string theme)
+    public async Task Server_KnowsTheTimeZoneOfTheBrowser_FromItsFirstPage(string theme)
     {
         var page = await PageInAsync(theme, "Asia/Tokyo");
 
         await PageReadiness.GotoAsync(page, Page);
-        await page.GotoAsync(Page);
 
         Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
     }
@@ -56,8 +57,10 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", "Europe/Paris");
     }
 
+    // The first document is the welcome screen, the second the page, already in the time zone of the browser: never rendered
+    // again, whether it presents dates and times or not, whether its theme is painted by the day or not.
     [Theory, InEachTheme]
-    public async Task FirstPageWithDatesAndTimes_IsRenderedAgainInTheTimeZoneOfTheBrowser_Once(string theme)
+    public async Task FirstPageWithDatesAndTimes_IsRenderedOnce_InTheTimeZoneOfTheBrowser(string theme)
     {
         var page = await PageInAsync(theme, "Asia/Tokyo");
         var renders = await PresentingADateAndTimeAsync(page);
@@ -70,7 +73,20 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
     }
 
     [Theory, InEachTheme]
-    public async Task PageWithDatesAndTimes_WhenTheBrowserRefusesTheCookie_IsNotRenderedAgain(string theme)
+    public async Task FirstPageWithoutDatesAndTimes_IsRenderedOnce_InTheTimeZoneOfTheBrowser(string theme)
+    {
+        var page = await PageInAsync(theme, "Asia/Tokyo");
+        var renders = RendersOf(page);
+
+        await page.GotoAsync(Page);
+        await WaitForRendersAsync(renders, 2);
+
+        Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
+        Assert.Equal(2, renders.Count);
+    }
+
+    [Theory, InEachTheme]
+    public async Task PageWithDatesAndTimes_WhenTheBrowserRefusesTheCookie_IsRenderedOnce_AfterTheWelcomeScreen(string theme)
     {
         var page = await PageInAsync(theme, "Asia/Tokyo");
         // A browser that refuses the cookies of the application: whatever the script writes, none is kept.
@@ -79,17 +95,20 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
         var renders = await PresentingADateAndTimeAsync(page);
 
         await page.GotoAsync(Page);
-        await WaitForRendersAsync(renders, 1);
+        await WaitForRendersAsync(renders, 2);
 
+        // The welcome screen, then the page, marked so that it is rendered as it is, in universal time: no loop.
         Assert.Null(await page.Locator("html").GetAttributeAsync("data-time-zone"));
-        Assert.Single(renders);
+        Assert.Equal(2, renders.Count);
+        Assert.Contains($"{BrowserWelcome.SkipParameter}=", renders[1], StringComparison.Ordinal);
     }
 
     [Theory, InEachTheme]
     public async Task TabLeftInTheFormerTimeZone_IsRenderedAgain_WhenTheCookieIsAlreadyCurrent(string theme)
     {
         // Two tabs open when the browser changes time zone: the first one the user comes back to updates the cookie,
-        // shared with the other one, which must still be rendered again in the new time zone.
+        // shared with the other one, which must still be rendered again in the new time zone. The welcome screen, then the
+        // page, are its first two documents.
         var page = await PageInAsync(theme, "Asia/Tokyo");
         await page.AddInitScriptAsync(ZoneOfTheBrowser("Asia/Tokyo"));
         var renders = await PresentingADateAndTimeAsync(page);
@@ -114,7 +133,7 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
     public async Task TimeZoneTheServerDoesNotKnow_IsNotRenderedAgainAndAgain(string theme)
     {
         // The server presents in universal time a time zone it does not know: the page is current all the same, the
-        // request having brought the time zone of the browser.
+        // request having brought the time zone of the browser. The welcome screen, then the page, and nothing more.
         var page = await PageInAsync(theme, "Asia/Tokyo");
         await page.AddInitScriptAsync(ZoneOfTheBrowser("Nowhere/Atlantis"));
         var renders = await PresentingADateAndTimeAsync(page);
@@ -124,22 +143,6 @@ public sealed class BrowserTimeZoneTests(ApplicationHost application) : BrowserT
 
         Assert.Equal(2, renders.Count);
         Assert.Equal("Nowhere/Atlantis", await page.Locator("html").GetAttributeAsync("data-time-zone"));
-    }
-
-    // The colours of a theme painted by the cover of the day (« La couverture du jour ») are those of the date of the browser:
-    // any page of it depends on the time zone, dates and times or not, and is rendered again once the server knows it.
-    [Theory, InEachTheme]
-    public async Task PageWithoutDatesAndTimes_IsRenderedAgainInTheTimeZoneOfTheBrowser_OnlyInAThemePaintedByTheDay(string theme)
-    {
-        var page = await PageInAsync(theme, "Asia/Tokyo");
-        var renders = RendersOf(page);
-
-        await page.GotoAsync(Page);
-        await WaitForRendersAsync(renders, 2);
-
-        Assert.Equal(TestThemes.Of(theme).PaintedByTheDay ? 2 : 1, renders.Count);
-        if (TestThemes.Of(theme).PaintedByTheDay)
-            Assert.Equal("Asia/Tokyo", await page.Locator("html").GetAttributeAsync("data-time-zone"));
     }
 
     private async Task<IPage> PageInAsync(string theme, string timeZone)

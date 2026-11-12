@@ -44,9 +44,10 @@ public static class PageReadiness
     // The page loaded, its document complete as its load event fires, and drawn: « La planche encrée » draws each block of
     // the page laid out (themes/planche.js), title balloons included. Judged in the page, by a single call that the driver
     // polls: the client of Playwright waits for a load state in two steps, checking those it received then subscribing to
-    // those to come, and loses one that arrives in between (microsoft/playwright-dotnet#3364, #298).
+    // those to come, and loses one that arrives in between (microsoft/playwright-dotnet#3364, #298). Never the welcome screen
+    // of the first request of a browser, which gives way to the page (Visits/BrowserWelcome.cs).
     private const string LoadedAndDrawn = """
-        () => document.readyState === "complete"
+        () => document.readyState === "complete" && !document.documentElement.hasAttribute("data-welcome")
             && (document.documentElement.dataset.theme !== "planche"
                 || [...document.querySelectorAll(".block")].every(block => block.offsetWidth <= 1 || block.dataset.drawn !== undefined))
         """;

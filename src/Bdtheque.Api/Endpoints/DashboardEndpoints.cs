@@ -37,8 +37,8 @@ internal static class DashboardEndpoints
 
     /// <param name="day">
     /// The date of the visitor, in the time zone of the browser, which the frontend sends: that of the edition in the
-    /// spotlight, the same for every time zone. <c>null</c> as long as the browser has not given its time zone (a first
-    /// page): no edition is then in the spotlight, none being drawn for a day the visitor does not live
+    /// spotlight, the same for every time zone. <c>null</c> when the browser does not give its time zone (cookie
+    /// refused, no script): no edition is then in the spotlight, none being drawn for a day the visitor does not live
     /// (choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md).
     /// </param>
     /// <param name="latestCount">How many latest entries the theme presents.</param>

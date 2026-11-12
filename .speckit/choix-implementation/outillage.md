@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
 ---
 
 # Outillage de développement
@@ -50,7 +50,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:45:00Z }
   - **Alternative écartée (heure du système, comme en production)** : le rendu d'une capture et le résultat d'un test changeaient selon l'heure de l'exécution (échecs chaque soir entre 23 h et minuit en temps universel, #318, #327, #340).
   - **Alternative écartée (horloge figée)** : des écritures successives auraient la même date, leur ordre retombant sur des identifiants que `Guid.CreateVersion7` n'ordonne qu'à la milliseconde du temps réel.
   - **Alternative écartée (heure fixe qui suit ensuite le temps réel)** : un test plus long que prévu, ou interrompu au débogueur, franchirait minuit et changerait de date.
-- **Thème imposé par chaque test de bout en bout, exécuté dans chaque thème proposé** ([Qualité du code](../gestion-projet/gouvernance/qualite-du-code.md)) : le thème est un paramètre du test, dont les lignes viennent du catalogue des thèmes, si bien qu'un thème ajouté ou retiré est couvert sans retoucher les tests ; chaque contexte du navigateur est ouvert dans le thème de son test, qu'impose aux requêtes un sélecteur de l'hôte des tests, absent de l'application. Le compilateur refuse toute autre ouverture d'un contexte (analyseur des API interdites), sauf aux tests du tirage lui-même, seuls laissés au thème tiré. Un test de ce qu'un thème a en propre (son script, ses couleurs du jour, ses polices) s'exécute dans ce seul thème, qu'il impose ; un comportement qui diffère d'un thème à l'autre (ex. une page de « La couverture du jour » rendue de nouveau dans le fuseau du navigateur) est attendu selon le thème du test.
+- **Navigateur des tests en mouvement réduit**, sauf test qui demande le mouvement : lécran daccueil de la première requête de chaque contexte laisse ainsi place à la page aussitôt, au lieu dattendre la fin de son animation ([Internationalisation](socle/transverse/internationalisation.md)), ce qui retiendrait chaque test un peu plus dune seconde ; un test propre à lécran vérifie cette attente, en mouvement.
+- **Thème imposé par chaque test de bout en bout, exécuté dans chaque thème proposé** ([Qualité du code](../gestion-projet/gouvernance/qualite-du-code.md)) : le thème est un paramètre du test, dont les lignes viennent du catalogue des thèmes, si bien qu'un thème ajouté ou retiré est couvert sans retoucher les tests ; chaque contexte du navigateur est ouvert dans le thème de son test, qu'impose aux requêtes un sélecteur de l'hôte des tests, absent de l'application. Le compilateur refuse toute autre ouverture d'un contexte (analyseur des API interdites), sauf aux tests du tirage lui-même, seuls laissés au thème tiré. Un test de ce qu'un thème a en propre (son script, ses couleurs du jour, ses polices) s'exécute dans ce seul thème, qu'il impose ; un comportement qui diffère d'un thème à l'autre (ex. une page de « La couverture du jour » rendue de nouveau quand le navigateur a changé de fuseau) est attendu selon le thème du test.
   - **Alternative écartée (boucle sur les thèmes dans le test)** : le premier thème en échec masque les suivants, et un test qui les parcourt tous ne se répartit pas entre les jobs du CI.
   - **Alternative écartée (classe de tests paramétrée par le thème)** : xunit 2 n'en connaît pas ; il faudrait un découvreur de tests sur mesure pour un résultat que le paramètre donne.
   - **Alternative écartée (thème fixe par défaut)** : un seul thème couvert, les autres jamais exercés.

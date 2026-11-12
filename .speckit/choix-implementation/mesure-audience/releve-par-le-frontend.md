@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Audience/**'
   - 'src/Bdtheque.Frontend/Visits/**'
   - 'src/Bdtheque.Frontend/wwwroot/touch-screen.js'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T15:00:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T19:51:08Z }
 ---
 
 # Relevé par le frontend
@@ -21,7 +21,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T15:00:50Z }
 - **Actions d'une liste déduites de son adresse** : rendue en statique, une liste reçoit chaque action comme une requête `GET`, qui relève l'action avant l'écran, d'après la façon dont chaque contrôle pose ses critères. La suppression confirmée est relevée une fois faite ; de même, la saisie d'une fiche dans sa liste (un genre dans sa ligne, un univers ou un auteur dans son panneau) est relevée à son ouverture, par son adresse, puis à son enregistrement, une fois fait. Une liste sans filtres n'a pas de fonction de filtre, ni une liste dont les fiches ne fusionnent pas (les intentions d'achat) de fonction de fusion : suivie, elle figurerait parmi les fonctions jamais utilisées sans pouvoir l'être. Les actions d'une fiche se déduisent de même de son adresse ([Frontend](../socle/frontend.md), fiches de la consultation) : un visuel montré dans la visionneuse, que tout lien d'un visuel nomme avec son édition.
 - **Fonctions suivies sous une clé stable** ([Mesure d'audience de l'interface web](../../fonctionnel/mesure-audience.md), Indicateurs), jamais renommée ni réaffectée, ses utilisations étant conservées et comptées sous elle ; chaque chantier d'écran y ajoute les siennes. Les pages d'erreur et « pas encore implémenté » ne sont pas des fonctions, et ne sont pas relevées.
 - **Type d'appareil et moteur de rendu lus dans l'agent utilisateur**, la page étant rendue par le serveur :
-  - smartphone si l'agent porte `Mobi` (recommandation de MDN, *Browser detection using the user agent*), tablette pour un iPad ou un Android sans `Mobi`, ordinateur sinon. Safari sur iPad se présente comme un Mac, que seul l'écran tactile distingue : un script le retient dans un cookie, si bien qu'une première page d'iPad compte pour un ordinateur, les suivantes pour une tablette ;
+  - smartphone si l'agent porte `Mobi` (recommandation de MDN, *Browser detection using the user agent*), tablette pour un iPad ou un Android sans `Mobi`, ordinateur sinon. Safari sur iPad se présente comme un Mac, que seul l'écran tactile distingue : un script le retient dans un cookie, que l'écran d'accueil de la première requête écrit avant la première page ([Internationalisation](../socle/transverse/internationalisation.md)), si bien qu'un iPad compte pour une tablette dès sa première page ;
   - moteur : WebKit pour tout navigateur d'iOS, Gecko, Blink, WebKit sur Mac ; version majeure (et mineure pour WebKit, dont les versions mineures de Safari apportent des fonctionnalités) : assez pour dire sur quelles versions l'application est utilisée, sans multiplier les compartiments des compteurs.
   - **Alternative écartée (*User-Agent Client Hints*)** : ni Safari ni Firefox ne les transmettent.
   - **Alternative écartée (détection entière par un script)** : la première page, rendue avant tout script, ne la connaîtrait pas, et chaque relevé attendrait le navigateur.

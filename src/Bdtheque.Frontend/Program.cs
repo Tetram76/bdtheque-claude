@@ -51,6 +51,7 @@ builder.Services.AddSingleton(Random.Shared);
 builder.Services.AddScoped<RecordSearch>();
 builder.Services.AddSingleton(new PageAssemblies([]));
 builder.Services.AddScoped<VisitCookie>();
+builder.Services.AddScoped<BrowserWelcome>();
 if (builder.Environment.IsEnvironment(FrontendEnvironments.Validation))
 {
     builder.Services.AddScoped<VisitThemeSelector>();

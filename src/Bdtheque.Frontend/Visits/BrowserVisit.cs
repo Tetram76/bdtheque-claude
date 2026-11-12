@@ -12,7 +12,7 @@ namespace Bdtheque.Frontend.Visits;
 /// <param name="Start">Date of the start of the visit, in universal time, which bounds its duration (<see cref="IsOver"/>).</param>
 /// <param name="ThemeKey">Theme of the visit.</param>
 /// <param name="ThemeDate">
-/// Date of the browser for which the theme was drawn; unknown while the browser has not given its time zone.
+/// Date of the browser for which the theme was drawn; unknown for a browser that does not give its time zone.
 /// </param>
 /// <param name="AudienceVisit">
 /// The visit the audience measurement records the usages of this one in; none before its first usage recorded, nor

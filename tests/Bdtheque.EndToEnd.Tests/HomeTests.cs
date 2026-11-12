@@ -79,10 +79,10 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Le Port des brumes");
     }
 
-    // The day of the spotlight and the dates of the entries are those of the browser (fonctionnel/page-accueil.md): a
-    // first visit, whose request does not bring its time zone yet, gets the dashboard again once the browser gave it.
+    // The day of the spotlight and the dates of the entries are those of the browser (fonctionnel/page-accueil.md): the
+    // welcome screen gives its time zone before the dashboard of a first visit.
     [Theory, InEachTheme]
-    public async Task FirstVisit_GetsTheDashboardAgain_InTheTimeZoneOfTheBrowser(string theme)
+    public async Task FirstVisit_GetsTheDashboard_InTheTimeZoneOfTheBrowser(string theme)
     {
         var context = await NewContextAsync(theme, new BrowserNewContextOptions
         {
@@ -97,10 +97,9 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
     }
 
     // At the time of the application of the tests, the date of the browser is already the next day while it is still the day
-    // before in universal time (ApplicationHost.Origin). The first page, whose request does not bring the time zone yet,
-    // draws nothing: the edition in the spotlight is drawn, and recorded, for the date of the browser only (#340). Had the
-    // first page drawn the day in universal time, the only edition with a cover would have been recent the next day, and
-    // the page rendered again would have presented the other one.
+    // before in universal time (ApplicationHost.Origin). The edition in the spotlight is drawn, and recorded, for the date of
+    // the browser only (#340): had a day been drawn in universal time, the only edition with a cover would have been recent
+    // the next day, and the dashboard of the date of the browser would have presented the other one.
     [Theory, InEachTheme]
     public async Task Spotlight_IsDrawnForTheDateOfTheBrowserOnly_WhenItIsNotTheDateInUniversalTime(string theme)
     {
