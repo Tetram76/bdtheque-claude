@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T12:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T17:00:00Z }
 ---
 
 # Outillage de développement
@@ -83,6 +83,6 @@ Outillage du [Contrôle qualité hebdomadaire](../gestion-projet/depot/controle-
 - **Règles de style relevées par une construction du seul contrôle** : le workflow écrit, sur la copie jetable de l'exécuteur, un fichier de configuration global des analyseurs (`.globalconfig` à la racine, que tout projet reprend, documentation Microsoft) qui fait de ses règles des avertissements, relevés dans le journal de la construction, qui n'échoue pas pour eux. La liste des règles vit dans le workflow : le dépôt ne porte aucune configuration de style, et aucune autre construction ne voit ces règles.
   - **Alternative écartée (fichier de configuration dans le dépôt, inclus sur demande par `Directory.Build.props`)** : une configuration de style dans le dépôt laisse croire à des règles imposées au code, ce que le projet refuse ([Contrôle qualité hebdomadaire](../gestion-projet/depot/controle-qualite-hebdomadaire.md), rien ne bloque).
   - **Alternative écartée (`dotnet format style --diagnostics`, sans configuration)** : constaté sur le dépôt, il ne relève que les règles dont la gravité par défaut est une suggestion (ex. `IDE0305`, `IDE0290`), jamais celles qui sont silencieuses par défaut (ex. `IDE0005`, `IDE0004`).
-- **SonarQube Cloud lu par son API Web**, sans jeton, le projet étant public : problèmes ouverts et points sensibles de la branche `main`, notes du projet.
+- **SonarQube Cloud lu par son API Web**, sans jeton, le projet étant public : problèmes ouverts et points sensibles de la branche `main`, conditions en échec de sa porte de qualité.
   - **Alternative écartée (second analyseur statique, CodeQL)** : il recoupe SonarQube Cloud.
   - **Alternative écartée (tests d'architecture, ex. NetArchTest)** : les références entre projets imposent déjà les couches à la compilation.
