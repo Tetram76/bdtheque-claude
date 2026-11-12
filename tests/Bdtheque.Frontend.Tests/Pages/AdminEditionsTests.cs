@@ -192,6 +192,17 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
             [("Effacer la recherche", AppPaths.AdminEditions), ("Nouvelle édition", AppPaths.AdminNewEdition)],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
+    [Fact]
+    public void Empty_WithoutAnyCriterion_SaysThereIsNoEditionYet_AndOffersToCreateOne_WithNothingToClear()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("").Find(".empty-list");
+
+        Assert.Equal("Aucune édition n'est encore enregistrée.", Normalized(empty.QuerySelector("strong")!.TextContent));
+        Assert.Equal([("Nouvelle édition", AppPaths.AdminNewEdition)],
+            empty.QuerySelectorAll("a").Select(link => (Normalized(link.TextContent), link.GetAttribute("href"))));
+    }
 
     [Fact]
     public void Deletion_ADialogThatAnnouncesTheImpactOnTheAlbum_AndConfirmsWithTheVersionOfTheAlbum()

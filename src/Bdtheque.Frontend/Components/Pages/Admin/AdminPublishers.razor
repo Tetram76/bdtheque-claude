@@ -29,7 +29,7 @@
 
         @if (_list!.Items.Count == 0)
         {
-            if (_query.Text is { } text)
+            if (_query is { EmptyReason: EmptyListReason.Search, Text: { } text })
             {
                 <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
                     <Actions>

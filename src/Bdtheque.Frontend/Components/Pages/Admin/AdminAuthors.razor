@@ -33,27 +33,31 @@
 
         @if (_list!.Items.Count == 0)
         {
-            @* Without any criterion, the list is merely empty: nothing to clear, nor search to recall (#315). *@
-            if (_query.Text is { } text)
+            @* The authors have no filters: their list is empty under a search, an entry, or nothing. *@
+            switch (_query.EmptyReason)
             {
-                <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
-                    <Actions>
-                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                        <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
-                    </Actions>
-                </EmptyList>
-            }
-            else if (_query.Entry is not null)
-            {
-                <EmptyList Message="@L["Empty.Entry"]">
-                    <Actions>
-                        <Button Href="@AppPaths.AdminAuthors" Label="@L["Empty.All"]" />
-                    </Actions>
-                </EmptyList>
-            }
-            else
-            {
-                <EmptyList Message="@L["Empty.None"]" />
+                case EmptyListReason.Search:
+                    <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
+                        <Actions>
+                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", _query.Text!]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Entry:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminAuthors" Label="@L["Empty.All"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]">
+                        <Actions>
+                            <Button Href="@NewHref" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
             }
         }
         else

@@ -38,19 +38,38 @@
 
         @if (_list!.Albums.Items.Count == 0)
         {
-            <EmptyList Message="@(_query.Text is { } text ? L["Empty.Text", text] : L["Empty.Criteria"])" Hint="@L["Empty.Hint"]">
-                <Actions>
-                    @if (_query.Text is { } text)
-                    {
-                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                        <Button Href="@AppPaths.AdminNewAlbum" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
-                    }
-                    else
-                    {
-                        <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
-                    }
-                </Actions>
-            </EmptyList>
+            switch (_query.EmptyReason)
+            {
+                case EmptyListReason.Search:
+                    <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
+                        <Actions>
+                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@AppPaths.AdminNewAlbum" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", _query.Text!]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Filters:
+                    <EmptyList Message="@L["Empty.Criteria"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Entry:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminAlbums" Label="@L["Empty.All"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminNewAlbum" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+            }
         }
         else
         {

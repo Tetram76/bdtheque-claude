@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T19:18:23Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T20:00:00Z }
 ---
 
 # Frontend
@@ -89,6 +89,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T19:18:23Z }
 ## Listes de l'administration
 
 - **Critères, panneau des filtres et dialogues portés par l'adresse**, en rendu statique ([`visuel/liste-albums/`](../../visuel/liste-albums/index.md), [`visuel/listes/`](../../visuel/listes/index.md)) : chaque lien et chaque formulaire mène à la liste avec d'autres critères, et une liste se partage ou se recharge telle quelle. Ce que les listes partagent est écrit une fois ; chacune n'ajoute que ses filtres, ses chemins, ses fonctions suivies et ses textes.
+- **Cas d'une liste vide tiré de son adresse, une fois pour toutes les listes** ([Contenu](../../visuel/liste-albums/contenu.md), liste vide) : la requête commune d'une liste dit pourquoi elle est vide, du plus précis au plus large : texte cherché, filtres (les deux critères), entrée de la navigation par initiale, qui n'est pas un critère, puis rien ; chaque page n'y ajoute que ses textes et ses chemins, si bien qu'aucune ne propose d'effacer un critère qui n'est pas actif (#315).
+  - **Alternative écartée (conditions écrites dans chaque page)** : c'est ainsi que les listes avaient divergé, l'une proposant « Effacer les filtres » sans filtre, ou sous une entrée, que cette action garde.
 - **Disposition des lignes selon la largeur de la liste elle-même** (requête de conteneur), et non de l'écran, que les marges du thème rendent trompeuse. Chaque page écrit la disposition de ses colonnes, propres à elle. La classe d'une colonne, que portent son en-tête et ses cellules, ne fait que la placer dans la grille ; le style de ses valeurs (taille, couleur, chiffres tabulaires) est réservé aux lignes, si bien que l'en-tête de la colonne garde celui des autres en-têtes (#319), ce que vérifie un test commun à toutes les listes.
   - **Alternative écartée (styles communs des lignes appliqués par `::deep`)** : leur spécificité dépasserait celle des règles de la page, que chaque page devrait forcer.
 - **Filtres liés en un seul composant interactif** (une collection et son éditeur, un album et sa série, [Contenu](../../visuel/liste-albums/contenu.md)) : seul un composant qui porte les deux choix d'une fiche peut poser l'un quand l'autre est choisi, et restreindre les propositions de l'un à l'autre, sans soumettre le formulaire. Une proposition porte la fiche dont elle relève ; une adresse qui combine deux fiches sans lien donne une liste vide, aucune fiche ne répondant aux deux.

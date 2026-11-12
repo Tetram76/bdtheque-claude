@@ -38,19 +38,32 @@
 
         @if (_list!.Editions.Items.Count == 0)
         {
-            <EmptyList Message="@(_query.Text is { } text ? L["Empty.Text", text] : L["Empty.Criteria"])" Hint="@L["Empty.Hint"]">
-                <Actions>
-                    @if (_query.Text is not null)
-                    {
-                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                        <Button Href="@AppPaths.AdminNewEdition" Variant="ButtonVariant.Primary" Label="@L["New"]" />
-                    }
-                    else
-                    {
-                        <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
-                    }
-                </Actions>
-            </EmptyList>
+            @* The editions have no navigation by initial: their list is empty under a search, filters, or nothing. *@
+            switch (_query.EmptyReason)
+            {
+                case EmptyListReason.Search:
+                    <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
+                        <Actions>
+                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@AppPaths.AdminNewEdition" Variant="ButtonVariant.Primary" Label="@L["New"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Filters:
+                    <EmptyList Message="@L["Empty.Criteria"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminNewEdition" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+            }
         }
         else
         {

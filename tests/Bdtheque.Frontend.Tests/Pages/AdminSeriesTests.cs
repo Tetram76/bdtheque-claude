@@ -189,6 +189,27 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
             [("Effacer la recherche", AppPaths.AdminSeries), ("Créer la série « Zorglub »", AppPaths.AdminNewSeries)],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
+    [Fact]
+    public void Empty_UnderAnEntryOnly_OffersAllTheSeries()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("entry=Q").Find(".empty-list");
+
+        Assert.Equal("Aucune série sous cette entrée.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Toutes les séries", AppPaths.AdminSeries)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Empty_WithoutAnyCriterion_SaysThereIsNoSeriesYet_AndOffersToCreateOne_WithNothingToClear()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("").Find(".empty-list");
+
+        Assert.Equal("Aucune série n'est encore enregistrée.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Nouvelle série", AppPaths.AdminNewSeries)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
 
     [Fact]
     public void Deletion_ADialogThatAnnouncesTheImpact_AndConfirmsWithTheVersionAndTheFingerprint()

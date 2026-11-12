@@ -53,6 +53,19 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
     /// <summary>The cross filters chosen: what the button of the filters counts, neither the search nor the entry.</summary>
     public int ActiveFilterCount => Filters.Count(filter => filter.Value is not null);
 
+    /// <summary>
+    /// Why the list is empty, when it is (visuel/liste-albums/contenu.md, Liste vide): the most precise of its criteria, the
+    /// search then the filters, otherwise the entry of the navigation by initial, which is no criterion. What the empty list
+    /// offers follows from it, written once for every list, so that none offers to clear a criterion that is not active.
+    /// </summary>
+    public EmptyListReason EmptyReason => this switch
+    {
+        { Text: not null } => EmptyListReason.Search,
+        { ActiveFilterCount: > 0 } => EmptyListReason.Filters,
+        { Entry: not null } => EmptyListReason.Entry,
+        _ => EmptyListReason.Nothing,
+    };
+
     /// <summary>The address of the list with these criteria.</summary>
     public string Href()
     {
@@ -201,6 +214,22 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
 
     private static string Join(IEnumerable<(string Name, string Value)> parameters) =>
         string.Join('&', parameters.Select(p => $"{p.Name}={Uri.EscapeDataString(p.Value)}"));
+}
+
+/// <summary>Why a list of the administration is empty (<see cref="AdminListQuery.EmptyReason"/>).</summary>
+public enum EmptyListReason
+{
+    /// <summary>Nothing answers the search: the empty list recalls what it looks into, offers to clear it or to create the record.</summary>
+    Search,
+
+    /// <summary>Nothing answers the filters, without search: the empty list offers to clear them.</summary>
+    Filters,
+
+    /// <summary>No record under the entry of the navigation, without criterion: the empty list offers to go back to « Toutes ».</summary>
+    Entry,
+
+    /// <summary>No record at all: the empty list offers to create one.</summary>
+    Nothing,
 }
 
 /// <summary>The functions the audience measurement follows for the actions of a list of the administration.</summary>

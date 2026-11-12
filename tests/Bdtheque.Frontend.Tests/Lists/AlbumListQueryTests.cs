@@ -117,4 +117,15 @@ public sealed class AlbumListQueryTests
     {
         Assert.Equal(AlbumListQuery.All, AlbumListQuery.Parse(criteria));
     }
+
+    [Theory]
+    [InlineData("q=tintin&entry=B&genreId=01900000-0000-7000-8000-000000000002", EmptyListReason.Search)]
+    [InlineData("entry=B&genreId=01900000-0000-7000-8000-000000000002", EmptyListReason.Filters)]
+    [InlineData("entry=B", EmptyListReason.Entry)]
+    [InlineData("page=3", EmptyListReason.Nothing)]
+    [InlineData("", EmptyListReason.Nothing)]
+    public void EmptyReason_IsTheMostPreciseOfTheCriteria_ThenTheEntryOfTheNavigation(string criteria, EmptyListReason reason)
+    {
+        Assert.Equal(reason, AlbumListQuery.Parse(criteria).EmptyReason);
+    }
 }
