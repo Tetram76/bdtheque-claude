@@ -137,6 +137,10 @@ public class ApplicationHost : IAsyncLifetime
     {
         options.BaseURL = BaseAddress.ToString();
         options.TimezoneId ??= BrowserTimeZoneId;
+        // Reduced motion, unless the test asks for motion: the welcome screen of the first request of each context then
+        // gives way to the page at once, rather than when its animation ends (Components/WelcomeScreen.razor), which would
+        // hold back every test the time of the animation.
+        options.ReducedMotion ??= ReducedMotion.Reduce;
 #pragma warning disable RS0030 // The browser of the tests, whose contexts are opened here only.
         return Browser.NewContextAsync(options);
 #pragma warning restore RS0030

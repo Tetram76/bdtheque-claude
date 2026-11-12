@@ -6,7 +6,8 @@
 @* The welcome screen of the first request of a browser (Visits/BrowserWelcome.cs; visuel/ecran-accueil/), in place of the
    page: the theme of the visit not being drawn yet, it has the common identity of the application. It is quick: all of it
    comes in the response, its styles and its drawing (a pile of albums, in SVG), without a font nor a file to download, and
-   it lasts no longer than its script, which writes what only the browser knows and loads the page at once.
+   it lasts no longer than its animation: its script writes what only the browser knows, then loads the page once the pile
+   has fallen.
    A browser whose scripts are disabled is sent to the page, marked so that it is rendered as it is. *@
 <!DOCTYPE html>
 <html lang="fr" data-welcome data-time-zone-cookie="@BrowserTimeZone.CookieName" data-touch-screen-cookie="@AudienceDevice.TouchScreenCookieName" data-skip="@_skipAddress" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)">
@@ -34,8 +35,8 @@
         .name { margin: 0; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
         .name span { color: #2D5DA1; }
         .status { margin: 0; font-size: 0.95rem; color: #63636B; }
-        /* Each album falls faster and faster, bounces a little on the pile, then settles: the pile stays as long as the
-           page takes to come. */
+        /* Each album falls faster and faster, bounces a little on the pile, then settles; the page comes once the last one
+           has, and the pile stays as long as the page takes to come. */
         .album { animation: drop 0.6s 1 both; }
         .album:nth-of-type(2) { animation-delay: 0.2s; }
         .album:nth-of-type(3) { animation-delay: 0.4s; }
@@ -170,8 +171,8 @@
         <p class="name">@L["NameInk"]<span>@L["NameAccent"]</span></p>
         <p class="status">@L["Opening"]</p>
     </main>
-    @* Run as soon as it is parsed, before the screen has even finished loading: the cookies of the time zone and of the touch
-       screen, as the scripts of every page keep them (browser-time-zone.js, touch-screen.js), then the page itself. A
+    @* Run as soon as it is parsed: the cookies of the time zone and of the touch screen, as the scripts of every page keep
+       them (browser-time-zone.js, touch-screen.js), then, the animation over, the page itself. A
        browser that did not keep the cookie (refused, or no time zone to give) goes to the page marked as such, rather than
        to the screen again. *@
     <script>
@@ -188,11 +189,11 @@
             if (root.audience !== "opposed" && navigator.maxTouchPoints > 1) {
                 keep(root.touchScreenCookie, "1");
             }
-            if (document.cookie.split("; ").some(c => c.startsWith(`${root.timeZoneCookie}=`))) {
-                location.reload();
-            } else {
-                location.replace(root.skip + location.hash);
-            }
+            const kept = document.cookie.split("; ").some(c => c.startsWith(`${root.timeZoneCookie}=`));
+            const go = () => kept ? location.reload() : location.replace(root.skip + location.hash);
+            // Once the pile has fallen, short enough to be seen to the end (decision of the user); at once with reduced
+            // motion, which leaves no animation to wait for.
+            Promise.all(document.getAnimations().map(animation => animation.finished)).then(go, go);
         })();
     </script>
 </body>
