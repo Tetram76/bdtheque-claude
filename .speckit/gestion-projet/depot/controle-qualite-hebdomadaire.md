@@ -5,7 +5,7 @@ description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, r�
 applies_to:
   - '.github/workflows/quality-audit.yml'
   - 'scripts/style-audit.globalconfig'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T09:35:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T10:05:00Z }
 ---
 
 # Contrôle qualité hebdomadaire
@@ -34,6 +34,7 @@ Chaque semaine, et à la demande, sur `main` :
 Le contrôle tient la liste de ses entrées dans le ticket de suivi du harnais qualité (étiquettes `quality-audit` et `harness`, par lesquelles il le retrouve, [Issues](../revue-tickets/issues.md#tickets-de-suivi-des-harnais)), dont il réécrit la description à chaque exécution, ouvert tant que la liste n'est pas vide.
 
 - **Entrée** : sa source (`sonar`, `hotspot`, `rating`, `style`, `mutant`), la règle ou le mutateur, et le fichier, ou pour un mutant le code muté et son remplacement ; jamais la ligne, qui bouge à chaque modification voisine : une entrée reste la même d'une semaine à l'autre.
+- **Seule une exécution sur `main` tient le ticket** : une exécution lancée sur une autre branche, pour essayer une modification du contrôle, ne laisse ses relevés que dans son journal, sans mêler au ticket l'état d'une branche non fusionnée.
 - **Notification** : le contrôle n'échoue que lorsqu'il trouve une entrée absente de la liste. GitHub notifie alors l'échec à l'utilisateur qui a créé le workflow, une fois par entrée, et non chaque semaine tant qu'elle reste.
 
 ## Traitement des entrées

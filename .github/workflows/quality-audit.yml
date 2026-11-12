@@ -134,9 +134,13 @@ jobs:
           name: findings-mutation
           path: findings-mutation.txt
 
+  # Only a run on main updates the tracking issue: the audit is about main, whose SonarQube Cloud analysis the first
+  # job reads whatever the branch, while the other jobs check out the branch of the run. A run dispatched on another
+  # branch, to try a change of this workflow, leaves its findings in its log and artifacts only.
   report:
     name: Report
     needs: [sonar, style, mutation]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       issues: write
