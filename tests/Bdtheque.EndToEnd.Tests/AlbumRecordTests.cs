@@ -68,7 +68,7 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         await page.GotoAsync(AppPaths.Album(Application.IntendedAlbumId));
 
         await Assertions.Expect(page.Locator(".album-cover .cover-generic"))
-            .ToHaveCSSAsync("background-image", new Regex("^repeating-linear-gradient"));
+            .ToHaveCSSAsync("background-image", CoverBackgrounds.GenericVisual());
     }
 
     [Theory, InEachTheme]

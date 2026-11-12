@@ -32,11 +32,11 @@ public sealed class SeriesRecordTests(RecordsApplication application) : BrowserT
         var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.SeriesRecord(Application.SeriesId));
         await Assertions.Expect(page.Locator(".series-pile .cover-generic").First)
-            .ToHaveCSSAsync("background-image", new Regex("^repeating-linear-gradient"));
+            .ToHaveCSSAsync("background-image", CoverBackgrounds.GenericVisual());
 
         await page.GotoAsync(AppPaths.SeriesRecord(Application.EmptySeriesId));
         await Assertions.Expect(page.Locator(".series-pile .cover-blank").First)
-            .ToHaveCSSAsync("background-image", new Regex("^linear-gradient"));
+            .ToHaveCSSAsync("background-image", CoverBackgrounds.BlankCard());
     }
 
     [Theory, InEachTheme]
