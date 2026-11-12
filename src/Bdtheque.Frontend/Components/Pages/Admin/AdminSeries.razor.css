@@ -81,6 +81,10 @@
 .series-modified {
     display: none;
     grid-area: modified;
+}
+
+/* The date of a row, not the head of its column, which keeps the style of the other heads (#319). */
+.series-row:not(.series-row-head) .series-modified {
     color: var(--color-text-muted);
     font-size: var(--font-size-small);
     font-variant-numeric: tabular-nums;

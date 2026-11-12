@@ -66,7 +66,6 @@
 
 .album-date {
     grid-area: date;
-    font-variant-numeric: tabular-nums;
 }
 
 .album-editions {
@@ -90,6 +89,14 @@
 .album-modified {
     display: none;
     grid-area: modified;
+}
+
+/* The dates of a row, not the heads of their columns, which keep the style of the other heads (#319). */
+.album-row:not(.album-row-head) .album-date {
+    font-variant-numeric: tabular-nums;
+}
+
+.album-row:not(.album-row-head) .album-modified {
     color: var(--color-text-muted);
     font-size: var(--font-size-small);
     font-variant-numeric: tabular-nums;
