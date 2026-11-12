@@ -116,8 +116,9 @@ jobs:
 
       - name: Check vulnerabilities
         run: |
-          grep -hoP 'uses:\s*\K[\w.-]+/[\w.-]+@[0-9a-f]{40} # v\d+\.\d+\.\d+' .github/workflows/*.yml \
-            | sed -E 's/@[0-9a-f]{40} # v/@/' | sort -u > actions.txt
+          # An action of a folder of its repository (e.g. actions/cache/restore) is watched as its repository.
+          grep -hoP 'uses:\s*\K[\w.-]+/[\w.-]+(/[\w./-]+)?@[0-9a-f]{40} # v\d+\.\d+\.\d+' .github/workflows/*.yml \
+            | sed -E 's#^([^/]+/[^/@]+)[^@]*@#\1@#; s/@[0-9a-f]{40} # v/@/' | sort -u > actions.txt
           cat actions.txt
           while read -r action; do
             gh api "/advisories?ecosystem=actions&affects=$action&per_page=100" \
