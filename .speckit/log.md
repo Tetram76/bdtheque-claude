@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-12
+
+* **Règle** : contrôle qualité hebdomadaire du code global de `main` (`.github/workflows/quality-audit.yml`) : problèmes ouverts, points sensibles non revus et notes de SonarQube Cloud, règles de style .NET de défaut et de syntaxe récente (hors préférences de forme), mutants survivants de `Bdtheque.Domain` ; rien de bloquant ; liste tenue dans le ticket de suivi du harnais qualité (étiquettes `quality-audit` et `harness`), le contrôle n'échouant que sur une entrée nouvelle ; entrées traitées comme des retours de revue (correction, report tracé, rejet porté par le mécanisme de l'outil), traitement vérifié à chaque reprise du travail avec le relevé des versions, trace dans la description du ticket. **Choix** : Stryker.NET, passage complet chaque semaine, sa baseline ne donnant pas de rapport complet ; règles de style dans un fichier de configuration global des analyseurs inclus par la seule construction du contrôle ; SonarQube Cloud lu par son API Web ; couverture sans seuil propre à l'outillage, mise en regard de la porte de qualité, qui exige 80 % du nouveau code (#370).
+
 ## 2026-11-11
 
 * **Règle** : un test qui a un facteur temps (rendu, traitement asynchrone, délai, horloge, navigateur, conteneur, réseau), ajouté, modifié ou dont le code exercé change, n'est tenu pour bon qu'après avoir réussi sur plusieurs exécutions successives, dont certaines sous une charge comparable à celle du CI ; un seul échec est un problème de synchronisation traité à sa cause, jamais par une attente allongée (exigence de l'utilisateur) (#378).
