@@ -82,13 +82,16 @@ public sealed class VisitThemeTests
     }
 
     [Fact]
-    public void ThemeDrawnWithoutADate_IsKept_WhenTheDateOfTheBrowserTurnsUp()
+    public void ThemeDrawnWithoutADate_IsTheThemeOfTheFirstDateTheBrowserGives_WithoutANewDraw()
     {
-        // The welcome screen gives the time zone before the first page of a visit (Visits/BrowserWelcome.cs): a visit
-        // without a date is that of a browser that gives none, which no later page catches up on.
+        // A browser that started its visit without giving its time zone (scripts or cookies refused), then gives it: the
+        // visit takes that date without drawing again, and draws again at the next one.
         var visit = new BrowserVisit(Today, Second.Key, ThemeDate: null);
 
-        Assert.Same(visit, VisitTheme.Continue(visit, Today, Tomorrow, Offered, NoDraw));
+        var dated = VisitTheme.Continue(visit, Today, Tomorrow, Offered, NoDraw);
+
+        Assert.Equal(new BrowserVisit(Today, Second.Key, Tomorrow), dated);
+        Assert.Equal(Third.Key, VisitTheme.Continue(dated, Tomorrow, Tomorrow.AddDays(1), Offered, Draw(2)).ThemeKey);
     }
 
     [Fact]

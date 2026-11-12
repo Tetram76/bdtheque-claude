@@ -26,8 +26,12 @@ public static class VisitTheme
         if (!offered.Any(theme => theme.Key == visit.ThemeKey)
             || (visit.ThemeDate is { } themeDate && browserToday is { } date && date != themeDate))
             return visit with { ThemeKey = Draw(offered, draw), ThemeDate = browserToday ?? visit.ThemeDate };
-        // A visit without a date is that of a browser that gives no time zone: the welcome screen gives it before the first
-        // page of any other one (Visits/BrowserWelcome.cs).
+        // A visit without a date is that of a browser that gave no time zone when it started (scripts or cookies refused, the
+        // welcome screen giving it before the first page of any other one, Visits/BrowserWelcome.cs): its theme is that of
+        // the first date the browser gives, without drawing again, as universal time could be another date than the
+        // browser's; the dates that follow draw it again.
+        if (visit.ThemeDate is null && browserToday is not null)
+            return visit with { ThemeDate = browserToday };
         return visit;
     }
 
