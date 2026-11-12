@@ -35,22 +35,26 @@ jobs:
           API: https://sonarcloud.io/api
           PROJECT: Tetram76_bdtheque-claude
         run: |
-          page=1
-          while :; do
-            curl -fsS "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false&ps=500&p=$page" > page.json
-            jq -r --arg project "$PROJECT:" \
-              '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' page.json >> findings.txt
-            [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
-            page=$((page + 1))
-          done
-          page=1
-          while :; do
-            curl -fsS "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW&ps=500&p=$page" > page.json
-            jq -r --arg project "$PROJECT:" \
-              '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"' page.json >> findings.txt
-            [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
-            page=$((page + 1))
-          done
+          # Every page of a search, each item an entry: every search of this job goes through it, a single place to page.
+          search() {
+            local page=1
+            while :; do
+              curl -fsS "$1&ps=500&p=$page" > page.json
+              jq -r --arg project "$PROJECT:" "$2" page.json
+              [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
+              page=$((page + 1))
+            done
+          }
+          issues() {
+            search "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false$1" \
+              '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"'
+          }
+          hotspots() {
+            search "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW$1" \
+              '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"'
+          }
+          issues "" >> findings.txt
+          hotspots "" >> findings.txt
           # Critical entries, treated first as a known vulnerability is (gestion-projet/depot/controle-qualite-hebdomadaire.md):
           # each failing condition of the quality gate of main and, for a rating, the problems of the new code that make it
           # fail; every problem of a blocker or high severity. They stay the same entries as above, only listed apart.
@@ -60,28 +64,13 @@ jobs:
           while read -r metric; do
             echo "gate $metric" | tee -a findings.txt >> critical.txt
             case "$metric" in
-              new_reliability_rating) type=BUG ;;
-              new_security_rating) type=VULNERABILITY ;;
-              new_maintainability_rating) type=CODE_SMELL ;;
-              new_security_hotspots_reviewed | new_security_review_rating) type=HOTSPOT ;;
-              *) continue ;;
+              new_reliability_rating) issues "&inNewCodePeriod=true&types=BUG" >> critical.txt ;;
+              new_security_rating) issues "&inNewCodePeriod=true&types=VULNERABILITY" >> critical.txt ;;
+              new_maintainability_rating) issues "&inNewCodePeriod=true&types=CODE_SMELL" >> critical.txt ;;
+              new_security_hotspots_reviewed | new_security_review_rating) hotspots "&inNewCodePeriod=true" >> critical.txt ;;
             esac
-            if [ "$type" = HOTSPOT ]; then
-              curl -fsS "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW&inNewCodePeriod=true&ps=500" \
-                | jq -r --arg project "$PROJECT:" '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"' >> critical.txt
-            else
-              curl -fsS "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false&inNewCodePeriod=true&types=$type&ps=500" \
-                | jq -r --arg project "$PROJECT:" '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' >> critical.txt
-            fi
           done < failing.txt
-          page=1
-          while :; do
-            curl -fsS "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false&impactSeverities=BLOCKER,HIGH&ps=500&p=$page" > page.json
-            jq -r --arg project "$PROJECT:" \
-              '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' page.json >> critical.txt
-            [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
-            page=$((page + 1))
-          done
+          issues "&impactSeverities=BLOCKER,HIGH" >> critical.txt
           sort -u critical.txt -o critical-sonar.txt
           # A rating other than A is an entry, under its letter: a rating that worsens is a new one.
           curl -fsS "$API/measures/component?component=$PROJECT&branch=main&metricKeys=reliability_rating,security_rating,sqale_rating,security_review_rating" \
