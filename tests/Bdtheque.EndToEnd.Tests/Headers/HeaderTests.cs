@@ -21,10 +21,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
 
     private static readonly ViewportSize Smartphone = new() { Width = 414, Height = 896 };
 
-    [Fact]
-    public async Task ConsultationMenu_OnASmartphone_ShowsAChevronOnTheSideWithEntriesOutOfView_AndItsChevronScrollsItByItsWidth()
+    [Theory, InEachTheme]
+    public async Task ConsultationMenu_OnASmartphone_ShowsAChevronOnTheSideWithEntriesOutOfView_AndItsChevronScrollsItByItsWidth(string theme)
     {
-        var page = await OpenAsync(ConsultationPage, Smartphone);
+        var page = await OpenAsync(theme, ConsultationPage, Smartphone);
         var row = page.Locator("app-scroll-row.consultation-menu");
         var items = row.Locator(".scroll-row-items");
 
@@ -41,12 +41,12 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(row.Locator(".scroll-row-chevron[data-direction='start']")).ToBeVisibleAsync();
     }
 
-    [Fact]
-    public async Task ConsultationMenu_ShowsItsChevron_WhileItsEntriesOverflow_WhateverChangesTheirWidth()
+    [Theory, InEachTheme]
+    public async Task ConsultationMenu_ShowsItsChevron_WhileItsEntriesOverflow_WhateverChangesTheirWidth(string theme)
     {
         // The entries change width without the row doing so: a font that arrives once the row is laid out, as when the
         // script of the row runs before the font of the text is asked for (document.fonts.ready already resolved), #283.
-        var page = await OpenAsync(ConsultationPage, Smartphone);
+        var page = await OpenAsync(theme, ConsultationPage, Smartphone);
         var row = page.Locator("app-scroll-row.consultation-menu");
         await Assertions.Expect(row).ToHaveAttributeAsync("data-more-end", "");
 
@@ -57,10 +57,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(row).ToHaveAttributeAsync("data-more-end", "", new() { Timeout = 2000 });
     }
 
-    [Fact]
-    public async Task ConsultationMenu_MarksTheCurrentPage_AndLeadsToTheOtherEntries()
+    [Theory, InEachTheme]
+    public async Task ConsultationMenu_MarksTheCurrentPage_AndLeadsToTheOtherEntries(string theme)
     {
-        var page = await OpenAsync(AppPaths.Home);
+        var page = await OpenAsync(theme, AppPaths.Home);
         var menu = page.GetByRole(AriaRole.Navigation, new() { Name = "Menu de la consultation" });
 
         await Assertions.Expect(menu.Locator("a[aria-current='page']")).ToHaveTextAsync("Accueil");
@@ -70,10 +70,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.Albums));
     }
 
-    [Fact]
-    public async Task InitialNavigation_IsCenteredOnItsCurrentEntry_AndScrollsWithTheWheel()
+    [Theory, InEachTheme]
+    public async Task InitialNavigation_IsCenteredOnItsCurrentEntry_AndScrollsWithTheWheel(string theme)
     {
-        var page = await OpenAsync($"{AdminFramePage.Path}?entry=M", Smartphone);
+        var page = await OpenAsync(theme, $"{AdminFramePage.Path}?entry=M", Smartphone);
         var row = page.Locator("app-scroll-row:has(.initial-navigation)");
         var items = row.Locator(".scroll-row-items");
 
@@ -96,10 +96,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
             new object[] { "app-scroll-row:has(.initial-navigation) .scroll-row-items", before });
     }
 
-    [Fact]
-    public async Task InitialNavigation_IsCenteredAgainOnItsNewEntry_AfterAnEnhancedNavigation()
+    [Theory, InEachTheme]
+    public async Task InitialNavigation_IsCenteredAgainOnItsNewEntry_AfterAnEnhancedNavigation(string theme)
     {
-        var page = await OpenAsync($"{AdminFramePage.Path}?entry=B", Smartphone);
+        var page = await OpenAsync(theme, $"{AdminFramePage.Path}?entry=B", Smartphone);
         var navigation = page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" });
 
         await navigation.GetByRole(AriaRole.Link, new() { Name = "H", Exact = true }).ClickAsync();
@@ -115,13 +115,13 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
             """, null, new() { Timeout = 5000 });
     }
 
-    [Fact]
-    public async Task InitialNavigation_ReachedByAnEnhancedNavigationFromAPageWithoutRow_WorksWithoutScriptError()
+    [Theory, InEachTheme]
+    public async Task InitialNavigation_ReachedByAnEnhancedNavigationFromAPageWithoutRow_WorksWithoutScriptError(string theme)
     {
         // The row inserted by the enhanced navigation is centered on the « enhancedload » of Blazor, which comes before the
         // row has run its own code: it had no observer of its sizes yet, and its script failed (#341, from the form of a
         // series back to its list).
-        var page = await NewPageAsync(Smartphone);
+        var page = await NewPageAsync(theme, Smartphone);
         var errors = new List<string>();
         page.PageError += (_, error) => errors.Add(error);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminNewSeries);
@@ -136,10 +136,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         Assert.Empty(errors);
     }
 
-    [Fact]
-    public async Task InitialNavigation_LeadsToTheListOnAnEntry()
+    [Theory, InEachTheme]
+    public async Task InitialNavigation_LeadsToTheListOnAnEntry(string theme)
     {
-        var page = await OpenAsync(AdminFramePage.Path);
+        var page = await OpenAsync(theme, AdminFramePage.Path);
         var navigation = page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" });
         await Assertions.Expect(navigation.Locator("a[aria-current='page']")).ToHaveTextAsync("Toutes");
 
@@ -149,10 +149,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(navigation.Locator("a[aria-current='page']")).ToHaveTextAsync("#");
     }
 
-    [Fact]
-    public async Task Pagination_LeadsToTheNextPage()
+    [Theory, InEachTheme]
+    public async Task Pagination_LeadsToTheNextPage(string theme)
     {
-        var page = await OpenAsync(AdminFramePage.Path);
+        var page = await OpenAsync(theme, AdminFramePage.Path);
         var pagination = page.GetByRole(AriaRole.Navigation, new() { Name = "Pages de la liste" });
 
         await pagination.GetByRole(AriaRole.Link, new() { Name = "Suivante" }).ClickAsync();
@@ -161,10 +161,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(pagination.Locator("[aria-current='page']")).ToHaveTextAsync("2");
     }
 
-    [Fact]
-    public async Task AdminMenu_OpensFromItsButton_OverThePage_WhichStaysStill_AndClosesOnAClickOutside()
+    [Theory, InEachTheme]
+    public async Task AdminMenu_OpensFromItsButton_OverThePage_WhichStaysStill_AndClosesOnAClickOutside(string theme)
     {
-        var page = await OpenAsync(AdminFramePage.Path);
+        var page = await OpenAsync(theme, AdminFramePage.Path);
         var toggle = page.GetByRole(AriaRole.Button, new() { Name = "Menu", Exact = true });
         var menu = page.Locator("#admin-menu");
         var main = await page.Locator("main").BoundingBoxAsync();
@@ -185,12 +185,12 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         Assert.NotEqual("hidden", await page.EvaluateAsync<string>("() => getComputedStyle(document.documentElement).overflow"));
     }
 
-    [Fact]
-    public async Task AdminMenu_ClosesByItsCross_AndByItsButton_AndLeadsToItsEntries()
+    [Theory, InEachTheme]
+    public async Task AdminMenu_ClosesByItsCross_AndByItsButton_AndLeadsToItsEntries(string theme)
     {
         // Signed in first: an entry of the menu leads to a page of the administration, which otherwise sends the page to the
         // login, the address of the entry being only passed through on the way.
-        var page = await NewPageAsync(new ViewportSize { Width = 1440, Height = 900 });
+        var page = await NewPageAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
         await PageReadiness.GotoAsync(page, AdminFramePage.Path);
         var toggle = page.GetByRole(AriaRole.Button, new() { Name = "Menu", Exact = true });
@@ -209,10 +209,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.AdminAlbums));
     }
 
-    [Fact]
-    public async Task Header_StaysAtTheTopOfTheScreen_WhenThePageScrolls()
+    [Theory, InEachTheme]
+    public async Task Header_StaysAtTheTopOfTheScreen_WhenThePageScrolls(string theme)
     {
-        var page = await OpenAsync(AdminFramePage.Path, new ViewportSize { Width = 1440, Height = 300 });
+        var page = await OpenAsync(theme, AdminFramePage.Path, new ViewportSize { Width = 1440, Height = 300 });
 
         await page.EvaluateAsync("() => window.scrollTo(0, document.documentElement.scrollHeight)");
 
@@ -220,10 +220,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         Assert.Equal(0, (await page.Locator("header.app-header").BoundingBoxAsync())!.Y);
     }
 
-    [Fact]
-    public async Task AdminHeader_OnASmartphone_TakesTwoLines_TheSearchUnderTheMenuButton()
+    [Theory, InEachTheme]
+    public async Task AdminHeader_OnASmartphone_TakesTwoLines_TheSearchUnderTheMenuButton(string theme)
     {
-        var page = await OpenAsync(AdminFramePage.Path, Smartphone);
+        var page = await OpenAsync(theme, AdminFramePage.Path, Smartphone);
 
         var toggle = await page.GetByRole(AriaRole.Button, new() { Name = "Menu", Exact = true }).BoundingBoxAsync();
         var search = await page.GetByRole(AriaRole.Searchbox, new() { Name = "Retrouver une fiche" }).BoundingBoxAsync();
@@ -234,10 +234,7 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         Assert.Equal(toggle.Height, toggle.Width, 1);
     }
 
-    public static TheoryData<string> OfferedThemes => [.. ThemeCatalog.Offered.Select(theme => theme.Key)];
-
-    [Theory]
-    [MemberData(nameof(OfferedThemes))]
+    [Theory, InEachTheme]
     public async Task ConsultationMenu_OnADesktopScreen_ShowsEveryEntry_WithoutScrolling(string theme)
     {
         var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
@@ -250,10 +247,10 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         Assert.True(overflow <= 0, $"The menu of the consultation overflows its room by {overflow} px.");
     }
 
-    [Fact]
-    public async Task ConsultationHeader_OnASmartphone_PutsTheSearchUnderTheMenu()
+    [Theory, InEachTheme]
+    public async Task ConsultationHeader_OnASmartphone_PutsTheSearchUnderTheMenu(string theme)
     {
-        var page = await OpenAsync(ConsultationPage, Smartphone);
+        var page = await OpenAsync(theme, ConsultationPage, Smartphone);
 
         var menu = await page.Locator("app-scroll-row.consultation-menu").BoundingBoxAsync();
         var search = await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher" }).BoundingBoxAsync();
@@ -267,9 +264,9 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
     [GeneratedRegex(@"\?page=2$")]
     private static partial Regex SecondPageUrl();
 
-    private async Task<IPage> OpenAsync(string path, ViewportSize? viewport = null)
+    private async Task<IPage> OpenAsync(string theme, string path, ViewportSize? viewport = null)
     {
-        var page = await NewPageAsync(viewport ?? new ViewportSize { Width = 1440, Height = 900 });
+        var page = await NewPageAsync(theme, viewport ?? new ViewportSize { Width = 1440, Height = 900 });
         await PageReadiness.GotoAsync(page, path);
         return page;
     }

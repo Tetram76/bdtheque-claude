@@ -3,7 +3,6 @@ extern alias frontend;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using frontend::Bdtheque.Frontend.Navigation;
-using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests.Captures;
 
@@ -22,7 +21,7 @@ public sealed class AdminSeriesCaptureTests(AdministrationApplication applicatio
         get
         {
             var captures = new TheoryData<string, string, string>();
-            foreach (var theme in ThemeCatalog.Offered)
+            foreach (var theme in TestThemes.Covered)
             foreach (var state in States)
             foreach (var viewport in ScreenCaptureTests.Viewports.Keys)
                 captures.Add(theme.Key, state, viewport);
@@ -30,7 +29,7 @@ public sealed class AdminSeriesCaptureTests(AdministrationApplication applicatio
         }
     }
 
-    [LinuxTheory]
+    [LinuxTheory, EachTheme]
     [MemberData(nameof(Captures))]
     public async Task Screen_LooksLikeItsReference(string theme, string state, string viewport)
     {

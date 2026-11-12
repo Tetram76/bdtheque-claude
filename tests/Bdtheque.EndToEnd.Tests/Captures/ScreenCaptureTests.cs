@@ -1,7 +1,6 @@
 extern alias frontend;
 
 using frontend::Bdtheque.Frontend.Navigation;
-using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests.Captures;
 
@@ -39,7 +38,7 @@ public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTes
         get
         {
             var captures = new TheoryData<string, string, string>();
-            foreach (var theme in ThemeCatalog.Offered)
+            foreach (var theme in TestThemes.Covered)
             foreach (var screen in Screens.Keys)
             foreach (var viewport in Viewports.Keys)
                 captures.Add(theme.Key, screen, viewport);
@@ -47,7 +46,7 @@ public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTes
         }
     }
 
-    [LinuxTheory]
+    [LinuxTheory, EachTheme]
     [MemberData(nameof(Captures))]
     public async Task Screen_LooksLikeItsReference(string theme, string screen, string viewport)
     {

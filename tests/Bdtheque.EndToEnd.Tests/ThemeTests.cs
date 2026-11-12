@@ -7,6 +7,11 @@ using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests;
 
+/// <summary>
+/// The theme of a visit, drawn by the application: the only tests left to the draw, since they check it
+/// (gestion-projet/gouvernance/qualite-du-code.md); what they assert holds whichever theme is drawn.
+/// </summary>
+#pragma warning disable RS0030 // The draw of the theme is what these tests check.
 [Collection(ApplicationCollection.Name)]
 public sealed class ThemeTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
@@ -17,7 +22,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
     [Fact]
     public async Task Page_IsPresentedInAnOfferedTheme_WithTheContractsOfTheBaseTheme()
     {
-        var page = await NewPageAsync();
+        var page = await (await NewContextInTheDrawnThemeAsync()).NewPageAsync();
 
         await PageReadiness.GotoAsync(page, Page);
 
@@ -30,7 +35,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
     [Fact]
     public async Task FirstPage_StartsTheVisit_InASessionCookie_WithTheThemeOfThePage()
     {
-        var page = await NewPageAsync();
+        var page = await (await NewContextInTheDrawnThemeAsync()).NewPageAsync();
 
         await page.GotoAsync(Page);
 
@@ -144,7 +149,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
 
     private async Task<IPage> PageInAsync(string timeZone)
     {
-        var context = await NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextInTheDrawnThemeAsync(new BrowserNewContextOptions
         {
             TimezoneId = timeZone,
         });

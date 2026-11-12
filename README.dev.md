@@ -75,6 +75,12 @@ dotnet test Bdtheque.slnx --configuration Release --no-build
 
 Chaque commande reprend ce que la précédente a produit, comme le CI : la compilation ne refait pas la restauration (`--no-restore`), et les tests ne refont ni la compilation ni la restauration (`--no-build`). Lancé seul, sans ces options, `dotnet test` restaure et compile lui-même.
 
+Un test de bout en bout s'exécute dans chacun des thèmes proposés, jamais dans celui que tirerait l'application. La variable d'environnement `BDTHEQUE_TEST_THEME` limite une exécution à un seul thème, comme le fait chaque job de bout en bout du CI : le filtre `Themes=Each` n'en garde alors que les tests de ce thème, les autres (tirage du thème, tests propres à un thème) s'exécutant sans lui.
+
+```bash
+BDTHEQUE_TEST_THEME=planche dotnet test tests/Bdtheque.EndToEnd.Tests --configuration Release --filter "Themes=Each"
+```
+
 ### Captures de référence des écrans
 
 Chaque écran est capturé dans chacun des thèmes et comparé, pixel par pixel, à sa capture de référence (`tests/Bdtheque.EndToEnd.Tests/Captures/References`). Le rendu des polices n'étant identique que dans un même environnement, la comparaison n'a lieu que sous Linux (CI) : ailleurs, ces tests sont ignorés, et le script suivant les exécute dans un conteneur Linux, sur la copie de travail. Une capture en écart est déposée, avec son image des différences, dans `tests/Bdtheque.EndToEnd.Tests/TestResults/captures`.

@@ -20,10 +20,10 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(EmptyCollectionApplication.Name)]
 public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication application) : BrowserTest<EmptyCollectionApplication>(application)
 {
-    [Fact]
-    public async Task Visitor_IsWelcomed_AndBrowsesTheDocumentaryBase()
+    [Theory, InEachTheme]
+    public async Task Visitor_IsWelcomed_AndBrowsesTheDocumentaryBase(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Home);
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Les étagères attendent leur premier album !");
@@ -34,20 +34,17 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
     }
 
     // The link to the administration of the foot stays with an empty collection (visuel/dashboard/collection-vide.md).
-    [Fact]
-    public async Task Foot_LeadsToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Foot_LeadsToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Home);
 
         await Assertions.Expect(page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" }))
             .ToHaveAttributeAsync("href", AppPaths.AdminHome);
     }
 
-    [Theory]
-    [InlineData("base")]
-    [InlineData("planche")]
-    [InlineData("gazette")]
+    [Theory, InEachTheme]
     public async Task Visitor_IsLedToTheAdministration(string theme)
     {
         var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
@@ -65,10 +62,10 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
 [Collection(CollectionApplication.Name)]
 public sealed class DashboardHomeTests(CollectionApplication application) : BrowserTest<CollectionApplication>(application)
 {
-    [Fact]
-    public async Task Visitor_SeesTheDashboard_AndGoesToTheAlbumInTheSpotlight()
+    [Theory, InEachTheme]
+    public async Task Visitor_SeesTheDashboard_AndGoesToTheAlbumInTheSpotlight(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Home);
 
         // The first greeting, the draws of the tests always picking the first choice.
@@ -84,10 +81,10 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
 
     // The day of the spotlight and the dates of the entries are those of the browser (fonctionnel/page-accueil.md): a
     // first visit, whose request does not bring its time zone yet, gets the dashboard again once the browser gave it.
-    [Fact]
-    public async Task FirstVisit_GetsTheDashboardAgain_InTheTimeZoneOfTheBrowser()
+    [Theory, InEachTheme]
+    public async Task FirstVisit_GetsTheDashboardAgain_InTheTimeZoneOfTheBrowser(string theme)
     {
-        var context = await NewContextAsync(new BrowserNewContextOptions
+        var context = await NewContextAsync(theme, new BrowserNewContextOptions
         {
             TimezoneId = "Pacific/Kiritimati",
         });
@@ -104,12 +101,12 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
     // draws nothing: the edition in the spotlight is drawn, and recorded, for the date of the browser only (#340). Had the
     // first page drawn the day in universal time, the only edition with a cover would have been recent the next day, and
     // the page rendered again would have presented the other one.
-    [Fact]
-    public async Task Spotlight_IsDrawnForTheDateOfTheBrowserOnly_WhenItIsNotTheDateInUniversalTime()
+    [Theory, InEachTheme]
+    public async Task Spotlight_IsDrawnForTheDateOfTheBrowserOnly_WhenItIsNotTheDateInUniversalTime(string theme)
     {
         var universalDay = DateOnly.FromDateTime(Application.Clock.GetUtcNow().UtcDateTime);
         Assert.NotEqual(universalDay, Application.TodayIn(ApplicationHost.BrowserTimeZoneId));
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
 
         await page.GotoAsync(AppPaths.Home);
 
@@ -119,10 +116,10 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
         Assert.DoesNotContain(universalDay, await Application.SpotlightDaysAsync());
     }
 
-    [Fact]
-    public async Task Foot_LeadsToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Foot_LeadsToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Home);
 
         await page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" }).ClickAsync();
@@ -131,19 +128,19 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
     }
 
     // The link belongs to the home page: the other pages of the consultation keep their foot as it is.
-    [Fact]
-    public async Task OtherPagesOfTheConsultation_HaveNoLinkToTheAdministrationInTheirFoot()
+    [Theory, InEachTheme]
+    public async Task OtherPagesOfTheConsultation_HaveNoLinkToTheAdministrationInTheirFoot(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AudienceInformation);
 
         await Assertions.Expect(page.Locator("footer").GetByRole(AriaRole.Link, new() { Name = "Administration" })).ToHaveCountAsync(0);
     }
 
-    [Fact]
-    public async Task LatestEntries_FromTheMostRecentAcquisition()
+    [Theory, InEachTheme]
+    public async Task LatestEntries_FromTheMostRecentAcquisition(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Home);
 
         var latest = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Tout juste arrivés !" }) });

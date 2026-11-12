@@ -20,10 +20,10 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -36,15 +36,15 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
-    [Fact]
-    public async Task Search_OnTheIsbnTypedWithoutItsHyphens_NarrowsTheList()
+    [Theory, InEachTheme]
+    public async Task Search_OnTheIsbnTypedWithoutItsHyphens_NarrowsTheList(string theme)
     {
         var digits = Random.Shared.NextInt64(1_000_000_000, 10_000_000_000).ToString(CultureInfo.InvariantCulture);
         var publisher = await CreatePublisherAsync($"Glénat {_marker}");
         var album = await CreateAlbumAsync($"Les Lunes de Saturne {_marker}");
         await CreateEditionAsync(album, publisher, $"978-{digits[..1]}-{digits[1..5]}-{digits[5..]}");
         await CreateEditionAsync(album, publisher, null);
-        var page = await OpenAsync(AppPaths.AdminEditions);
+        var page = await OpenAsync(theme, AppPaths.AdminEditions);
 
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une édition" }).FillAsync($"978{digits}");
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une édition" }).PressAsync("Enter");
@@ -53,14 +53,14 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditions, $"?q=978{digits}"));
     }
 
-    [Fact]
-    public async Task Filter_OnAnAlbumChosenByTypingItsTitle_NarrowsTheList_AndItsTagRemovesIt()
+    [Theory, InEachTheme]
+    public async Task Filter_OnAnAlbumChosenByTypingItsTitle_NarrowsTheList_AndItsTagRemovesIt(string theme)
     {
         var publisher = await CreatePublisherAsync($"Dupuis {_marker}");
         var kept = await CreateAlbumAsync($"Buddy Longway {_marker}");
         await CreateEditionAsync(kept, publisher, null);
         await CreateEditionAsync(await CreateAlbumAsync($"Bouncer {_marker}"), publisher, null);
-        var page = await OpenAsync($"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtres" }).ClickAsync();
         await ControlsPage.WaitUntilInteractiveAsync(page);
@@ -73,8 +73,8 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         await Assertions.Expect(Albums(page)).ToHaveTextAsync([$"Bouncer {_marker}", $"Buddy Longway {_marker}"]);
     }
 
-    [Fact]
-    public async Task Filter_OnACollection_SetsItsPublisher_ThePublisherChosenOfferingOnlyItsCollections()
+    [Theory, InEachTheme]
+    public async Task Filter_OnACollection_SetsItsPublisher_ThePublisherChosenOfferingOnlyItsCollections(string theme)
     {
         var publisher = await CreatePublisherAsync($"Delcourt {_marker}");
         await PostAsync<PublisherCollectionForm>(
@@ -82,7 +82,7 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         var other = await CreatePublisherAsync($"Soleil {_marker}");
         await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{other.Id}/collections", new CreatePublisherCollectionRequest($"Encrages bis {_marker}", other.Version));
-        var page = await OpenAsync($"{AppPaths.AdminEditions}?filters=open");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?filters=open");
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" }).PressSequentiallyAsync($"Encrages {_marker}");
@@ -99,12 +99,12 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         await Assertions.Expect(page.GetByRole(AriaRole.Option)).ToContainTextAsync($"Encrages {_marker}");
     }
 
-    [Fact]
-    public async Task Deletion_OfTheLastEditionOfAnAlbum_AnnouncesThatTheAlbumLeavesTheCollection_AndTakesTheEditionOutOfTheList()
+    [Theory, InEachTheme]
+    public async Task Deletion_OfTheLastEditionOfAnAlbum_AnnouncesThatTheAlbumLeavesTheCollection_AndTakesTheEditionOutOfTheList(string theme)
     {
         var publisher = await CreatePublisherAsync($"Casterman {_marker}");
         await CreateEditionAsync(await CreateAlbumAsync($"Tintin {_marker}"), publisher, null);
-        var page = await OpenAsync($"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Casterman {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -117,40 +117,37 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
     }
 
     [Theory]
-    [InlineData(414)]
-    [InlineData(768)]
-    [InlineData(1024)]
-    [InlineData(1180)]
-    [InlineData(1440)]
-    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(int width)
+    [InEachTheme(414)]
+    [InEachTheme(768)]
+    [InEachTheme(1024)]
+    [InEachTheme(1180)]
+    [InEachTheme(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(string theme, int width)
     {
         var publisher = await CreatePublisherAsync($"Les Éditions du Grand Large et des Archipels réunis {_marker}");
         var album = await CreateAlbumAsync($"Les Voyages extraordinaires du capitaine Archibald au-delà des mers {_marker}");
         await CreateEditionAsync(album, publisher, "978-2-7234-4567-1", EditionCategory.LimitedEdition, new DateOnly(2014, 5, 2));
-        foreach (var theme in ThemeCatalog.Offered.Select(theme => theme.Key))
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
+        await PageReadiness.WaitAsync(page);
+
+        var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+        var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+
+        Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
+        Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // At the width of the mockups' desktop, the table has all its columns, the category and the last modification
+        // included.
+        if (width == 1440)
         {
-            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
-            await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
-            await PageReadiness.WaitAsync(page);
-
-            var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
-            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
-
-            Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
-            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
-            // At the width of the mockups' desktop, the table has all its columns, the category and the last modification
-            // included.
-            if (width == 1440)
-            {
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Catégorie" })).ToBeVisibleAsync();
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifiée" })).ToBeVisibleAsync();
-            }
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Catégorie" })).ToBeVisibleAsync();
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifiée" })).ToBeVisibleAsync();
         }
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

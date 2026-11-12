@@ -19,11 +19,11 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task List_LeadsToTheFormOfASeries_AndToANewOne()
+    [Theory, InEachTheme]
+    public async Task List_LeadsToTheFormOfASeries_AndToANewOne(string theme)
     {
         var series = await PostAsync<SeriesForm>("/admin/series", Content($"Les Schtroumpfs {_marker}"));
-        var page = await OpenAsync($"{AppPaths.AdminSeries}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminSeries}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Les Schtroumpfs {_marker}" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditSeries(series.Id)));
@@ -34,13 +34,13 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewSeries));
     }
 
-    [Fact]
-    public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsBackToTheList()
+    [Theory, InEachTheme]
+    public async Task Create_WithItsPublisherChosenByTypingItsName_AndItsCollectionInTheList_LeadsBackToTheList(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur{_marker}", null, []));
         var collection = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", publisher.Version));
-        var page = await OpenAsync(AppPaths.AdminNewSeries);
+        var page = await OpenAsync(theme, AppPaths.AdminNewSeries);
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByLabel("Titre").FillAsync($"Le Scorpion {_marker}");
@@ -64,14 +64,14 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
             (template.PublisherId, template.PublisherCollectionId, template.Condition, template.IsColor));
     }
 
-    [Fact]
-    public async Task Collection_UnavailableWithoutPublisher_RemovedWhenThePublisherChanges()
+    [Theory, InEachTheme]
+    public async Task Collection_UnavailableWithoutPublisher_RemovedWhenThePublisherChanges(string theme)
     {
         var first = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Premier{_marker}", null, []));
         var created = await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{first.Id}/collections", new CreatePublisherCollectionRequest($"Collection{_marker}", first.Version));
         await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Second{_marker}", null, []));
-        var page = await OpenAsync(AppPaths.AdminNewSeries);
+        var page = await OpenAsync(theme, AppPaths.AdminNewSeries);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         var publisher = page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true });
         var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
@@ -91,11 +91,11 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(collection).ToHaveValueAsync("");
     }
 
-    [Fact]
-    public async Task Modify_SavesTheWholeForm_AndStaysOnIt()
+    [Theory, InEachTheme]
+    public async Task Modify_SavesTheWholeForm_AndStaysOnIt(string theme)
     {
         var series = await PostAsync<SeriesForm>("/admin/series", Content($"Série {_marker}"));
-        var page = await OpenAsync(AppPaths.AdminEditSeries(series.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditSeries(series.Id));
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByLabel("Statut").SelectOptionAsync("Terminée");
@@ -114,10 +114,10 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
                 saved.EditionTemplate.Binding));
     }
 
-    [Fact]
-    public async Task Save_WithoutTitle_IsToCorrect_OnTheTitle_WhichGetsTheFocus()
+    [Theory, InEachTheme]
+    public async Task Save_WithoutTitle_IsToCorrect_OnTheTitle_WhichGetsTheFocus(string theme)
     {
-        var page = await OpenAsync(AppPaths.AdminNewSeries);
+        var page = await OpenAsync(theme, AppPaths.AdminNewSeries);
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         // From the bottom of the form, where the title is out of sight.
@@ -133,9 +133,9 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewSeries));
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

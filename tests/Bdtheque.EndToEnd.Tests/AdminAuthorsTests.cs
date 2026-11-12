@@ -18,10 +18,10 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -34,14 +34,14 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
-    [Fact]
-    public async Task Search_ThenTheNavigationByInitial_NarrowTheList_ByTheSortKey()
+    [Theory, InEachTheme]
+    public async Task Search_ThenTheNavigationByInitial_NarrowTheList_ByTheSortKey(string theme)
     {
         // Filed by last name, a pseudonym standing for the name: « Gibrat … », then « Gotlib … ».
         await CreateAuthorAsync($"Gibrat {_marker}", "Jean-Pierre", null);
         await CreateAuthorAsync($"Gotlieb {_marker}", "Marcel", $"Gotlib {_marker}");
         await CreateAuthorAsync($"Moebius {_marker}", null, null);
-        var page = await OpenAsync(AppPaths.AdminAuthors);
+        var page = await OpenAsync(theme, AppPaths.AdminAuthors);
 
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher un auteur" }).FillAsync(_marker);
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher un auteur" }).PressAsync("Enter");
@@ -52,10 +52,10 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors, $"?q={_marker}&entry=G"));
     }
 
-    [Fact]
-    public async Task New_InThePanel_TheAuthorSearched_TakesItsPlaceInTheList()
+    [Theory, InEachTheme]
+    public async Task New_InThePanel_TheAuthorSearched_TakesItsPlaceInTheList(string theme)
     {
-        var page = await OpenAsync($"{AppPaths.AdminAuthors}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Créer l'auteur « {_marker} »" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel auteur" });
@@ -73,11 +73,11 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(page.Locator(".author-row:not(.author-row-head) .author-nationality")).ToHaveTextAsync("Belge");
     }
 
-    [Fact]
-    public async Task Edit_WithoutLastNameNorPseudonym_IsRefusedInPlace_ThenSavedOnceCorrected()
+    [Theory, InEachTheme]
+    public async Task Edit_WithoutLastNameNorPseudonym_IsRefusedInPlace_ThenSavedOnceCorrected(string theme)
     {
         var author = await CreateAuthorAsync($"Hugo {_marker}", "Victor", null);
-        var page = await OpenAsync($"{AppPaths.AdminAuthors}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}");
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Victor Hugo {_marker}" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
 
@@ -95,11 +95,11 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         Assert.Equal(author.Id, (await GetAsync<AuthorForm>($"/admin/authors/{author.Id}")).Id);
     }
 
-    [Fact]
-    public async Task Deletion_ConfirmedInAModalDialog_TakesTheAuthorOutOfTheList()
+    [Theory, InEachTheme]
+    public async Task Deletion_ConfirmedInAModalDialog_TakesTheAuthorOutOfTheList(string theme)
     {
         await CreateAuthorAsync($"Asupprimer {_marker}", null, null);
-        var page = await OpenAsync($"{AppPaths.AdminAuthors}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Asupprimer {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -110,14 +110,14 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucun auteur ne correspond à « {_marker} ».");
     }
 
-    [Fact]
-    public async Task Deletion_OfACreditedAuthor_IsRefused_AndSaysWhatToDo()
+    [Theory, InEachTheme]
+    public async Task Deletion_OfACreditedAuthor_IsRefused_AndSaysWhatToDo(string theme)
     {
         var author = await CreateAuthorAsync($"Credite {_marker}", null, null);
         await PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
             $"Album {_marker}", null, null, AlbumType.Regular, false, null, null, null, null, null, null, null, null, [], [],
             [new(author.Id, ContributionRole.Illustrator)]));
-        var page = await OpenAsync($"{AppPaths.AdminAuthors}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Credite {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -129,12 +129,12 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" })).ToHaveCountAsync(0);
     }
 
-    [Fact]
-    public async Task Merge_SearchesTheOtherAuthor_AndContinuesWithTheOneChosen()
+    [Theory, InEachTheme]
+    public async Task Merge_SearchesTheOtherAuthor_AndContinuesWithTheOneChosen(string theme)
     {
         var author = await CreateAuthorAsync($"Giraud {_marker}", "Jean", null);
         var other = await CreateAuthorAsync($"Giraud {_marker}", null, $"Moebius {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminAuthors}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Jean Giraud {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Fusionner avec un autre auteur…" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux auteurs" });
@@ -148,37 +148,34 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
     }
 
     [Theory]
-    [InlineData(414)]
-    [InlineData(768)]
-    [InlineData(1024)]
-    [InlineData(1180)]
-    [InlineData(1440)]
-    public async Task Rows_AtEveryWidth_LeaveTheNameItsRoom_WithoutTheListOverflowing(int width)
+    [InEachTheme(414)]
+    [InEachTheme(768)]
+    [InEachTheme(1024)]
+    [InEachTheme(1180)]
+    [InEachTheme(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheNameItsRoom_WithoutTheListOverflowing(string theme, int width)
     {
         await CreateAuthorAsync($"Van den Bogaert-Delacroix {_marker}", "Jean-Christophe", null);
-        foreach (var theme in new[] { "base", "planche", "gazette", "couverture" })
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAuthors}?q={_marker}");
+        await PageReadiness.WaitAsync(page);
+
+        var name = await page.Locator(".row-entry").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
+        var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+
+        Assert.True(name >= 120, $"{theme} at {width}px: the name is {name}px wide.");
+        Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // At the width of the mockups' desktop, the table has all its columns, the secondary ones included.
+        if (width == 1440)
         {
-            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
-            await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminAuthors}?q={_marker}");
-            await PageReadiness.WaitAsync(page);
-
-            var name = await page.Locator(".row-entry").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
-            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
-
-            Assert.True(name >= 120, $"{theme} at {width}px: the name is {name}px wide.");
-            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
-            // At the width of the mockups' desktop, the table has all its columns, the secondary ones included.
-            if (width == 1440)
-            {
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Nationalité" })).ToBeVisibleAsync();
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifié" })).ToBeVisibleAsync();
-            }
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Nationalité" })).ToBeVisibleAsync();
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifié" })).ToBeVisibleAsync();
         }
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

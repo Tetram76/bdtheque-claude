@@ -19,11 +19,11 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task List_LeadsToTheFormOfAnAlbum_AndToANewOne()
+    [Theory, InEachTheme]
+    public async Task List_LeadsToTheFormOfAnAlbum_AndToANewOne(string theme)
     {
         var album = await CreateAlbumAsync(Content($"Le Lotus bleu {_marker}"));
-        var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAlbums}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Le Lotus bleu {_marker}" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditAlbum(album.Id)));
@@ -34,12 +34,12 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewAlbum));
     }
 
-    [Fact]
-    public async Task Create_WithItsSeriesAndAnAuthorFoundByTypingItsName_LeadsBackToTheList()
+    [Theory, InEachTheme]
+    public async Task Create_WithItsSeriesAndAnAuthorFoundByTypingItsName_LeadsBackToTheList(string theme)
     {
         var series = await PostAsync<SeriesForm>("/admin/series", Series($"Série {_marker}", []));
         var author = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest($"Auteur{_marker}", "Jean", null, null, null));
-        var page = await OpenAsync(AppPaths.AdminNewAlbum);
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbum);
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Série" }).PressSequentiallyAsync($"Série {_marker}");
@@ -62,11 +62,11 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         Assert.Equal([new ContributionContent(author.Id, ContributionRole.Scenarist)], saved.Content.Contributions);
     }
 
-    [Fact]
-    public async Task Author_AddedOnTheSpot_IsCreatedAndCreditedWithTheAlbum()
+    [Theory, InEachTheme]
+    public async Task Author_AddedOnTheSpot_IsCreatedAndCreditedWithTheAlbum(string theme)
     {
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
-        var page = await OpenAsync(AppPaths.AdminEditAlbum(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditAlbum(album.Id));
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un auteur au dessin" }).ClickAsync();
@@ -84,12 +84,12 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         Assert.Equal(ContributionRole.Illustrator, credited.Role);
     }
 
-    [Fact]
-    public async Task UniverseAndGenre_AddedOnTheSpot_AreCreatedWithTheAlbum()
+    [Theory, InEachTheme]
+    public async Task UniverseAndGenre_AddedOnTheSpot_AreCreatedWithTheAlbum(string theme)
     {
         var parent = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Monde{_marker}", null, null));
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
-        var page = await OpenAsync(AppPaths.AdminEditAlbum(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditAlbum(album.Id));
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un genre" }).ClickAsync();
@@ -121,10 +121,10 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         Assert.Equal(parent.Id, Assert.Single(Assert.Single(saved.Universes).Ancestors).Id);
     }
 
-    [Fact]
-    public async Task Save_WithoutTitleNorSeries_IsToCorrect_OnTheTitle_WhichGetsTheFocus()
+    [Theory, InEachTheme]
+    public async Task Save_WithoutTitleNorSeries_IsToCorrect_OnTheTitle_WhichGetsTheFocus(string theme)
     {
-        var page = await OpenAsync(AppPaths.AdminNewAlbum);
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbum);
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         // From the bottom of the form, where the title is out of sight.
@@ -140,11 +140,11 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewAlbum));
     }
 
-    [Fact]
-    public async Task Save_OfAnAlbumModifiedMeanwhile_OverwritesNothing_ShowsTheChanges_AndReloads()
+    [Theory, InEachTheme]
+    public async Task Save_OfAnAlbumModifiedMeanwhile_OverwritesNothing_ShowsTheChanges_AndReloads(string theme)
     {
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
-        var page = await OpenAsync(AppPaths.AdminEditAlbum(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditAlbum(album.Id));
         await ControlsPage.WaitUntilInteractiveAsync(page);
         await UpdateAsync(album, album.Content with { Summary = "Modifié ailleurs" });
 
@@ -165,13 +165,13 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page.GetByLabel("Titre")).ToHaveValueAsync($"Album {_marker}");
     }
 
-    [Fact]
-    public async Task Series_WithAuthors_ChosenForAnAlbumWithout_GivesThemAtOnce_AndSaysSo()
+    [Theory, InEachTheme]
+    public async Task Series_WithAuthors_ChosenForAnAlbumWithout_GivesThemAtOnce_AndSaysSo(string theme)
     {
         var author = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest($"Auteur{_marker}", null, null, null, null));
         await PostAsync<SeriesForm>("/admin/series", Series($"Série {_marker}", [new ContributionContent(author.Id, ContributionRole.Scenarist)]));
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
-        var page = await OpenAsync(AppPaths.AdminEditAlbum(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminEditAlbum(album.Id));
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Série" }).PressSequentiallyAsync($"Série {_marker}");
@@ -185,8 +185,8 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         Assert.Equal([new ContributionContent(author.Id, ContributionRole.Scenarist)], (await GetAsync(album.Id)).Content.Contributions);
     }
 
-    [Fact]
-    public async Task NewAlbum_SeriesChangedThroughNone_ReplacesTheAuthorsTakenFromTheFirst()
+    [Theory, InEachTheme]
+    public async Task NewAlbum_SeriesChangedThroughNone_ReplacesTheAuthorsTakenFromTheFirst(string theme)
     {
         // fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md: the authors are still those of the
         // first series, even once the cross has detached the album from it.
@@ -194,7 +194,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         var second = await PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest($"Second{_marker}", null, null, null, null));
         await PostAsync<SeriesForm>("/admin/series", Series($"Série A {_marker}", [new ContributionContent(first.Id, ContributionRole.Scenarist)]));
         await PostAsync<SeriesForm>("/admin/series", Series($"Série B {_marker}", [new ContributionContent(second.Id, ContributionRole.Scenarist)]));
-        var page = await OpenAsync(AppPaths.AdminNewAlbum);
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbum);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         var series = page.GetByRole(AriaRole.Combobox, new() { Name = "Série" });
         var scenario = page.Locator(".role-credits-line").First;
@@ -213,9 +213,9 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(scenario).Not.ToContainTextAsync($"Premier{_marker}");
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

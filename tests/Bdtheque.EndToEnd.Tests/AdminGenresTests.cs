@@ -18,10 +18,10 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -32,11 +32,11 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page.Locator("h1")).ToContainTextAsync("Genres");
     }
 
-    [Fact]
-    public async Task Edit_InItsRow_SavesTheLabel_AndLeadsBackToTheList()
+    [Theory, InEachTheme]
+    public async Task Edit_InItsRow_SavesTheLabel_AndLeadsBackToTheList(string theme)
     {
         await CreateGenreAsync($"Polar {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminGenres}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Polar {_marker}" }).ClickAsync();
         var label = page.GetByRole(AriaRole.Textbox, new() { Name = $"Libellé de Polar {_marker}" });
@@ -48,10 +48,10 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Roman noir {_marker}"]);
     }
 
-    [Fact]
-    public async Task New_InTheDialogOfAGenreCreatedOnTheSpot_AddsTheGenre()
+    [Theory, InEachTheme]
+    public async Task New_InTheDialogOfAGenreCreatedOnTheSpot_AddsTheGenre(string theme)
     {
-        var page = await OpenAsync($"{AppPaths.AdminGenres}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouveau genre" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" });
@@ -63,11 +63,11 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Western {_marker}"]);
     }
 
-    [Fact]
-    public async Task New_ALabelTakenInAnotherCaseAndWithoutItsAccents_IsRefusedInTheDialog()
+    [Theory, InEachTheme]
+    public async Task New_ALabelTakenInAnotherCaseAndWithoutItsAccents_IsRefusedInTheDialog(string theme)
     {
         await CreateGenreAsync($"Épopée {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminNewGenre}&q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminNewGenre}&q={_marker}");
 
         var label = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" }).GetByRole(AriaRole.Textbox, new() { Name = "Libellé" });
         await label.FillAsync($"EPOPEE {_marker}");
@@ -80,11 +80,11 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Épopée {_marker}"]);
     }
 
-    [Fact]
-    public async Task Edit_Cancelled_LeavesTheGenreAsItWas()
+    [Theory, InEachTheme]
+    public async Task Edit_Cancelled_LeavesTheGenreAsItWas(string theme)
     {
         await CreateGenreAsync($"Humour {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminGenres}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Humour {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Textbox, new() { Name = $"Libellé de Humour {_marker}" }).FillAsync("Autre chose");
@@ -94,11 +94,11 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Humour {_marker}"]);
     }
 
-    [Fact]
-    public async Task Deletion_ConfirmedInAModalDialog_TakesTheGenreOutOfTheList()
+    [Theory, InEachTheme]
+    public async Task Deletion_ConfirmedInAModalDialog_TakesTheGenreOutOfTheList(string theme)
     {
         await CreateGenreAsync($"À supprimer {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminGenres}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur À supprimer {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -109,9 +109,9 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucun genre ne correspond à « {_marker} ».");
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;
