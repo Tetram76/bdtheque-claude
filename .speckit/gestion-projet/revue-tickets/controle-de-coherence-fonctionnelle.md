@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Contrôle de cohérence fonctionnelle'
 description: 'Contrôle hebdomadaire de la cohérence de toute l''application, au sein des familles d''écrans et de points d''entrée de même nature et pour chaque règle transversale : sources confrontées, classement des écarts, suites, trace ; à lire quand le contrôle est dû ou demandé.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:30:02Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T20:41:24Z }
 ---
 
 # Contrôle de cohérence fonctionnelle
@@ -10,7 +10,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:30:02Z }
 Chaque Pull Request vérifie qu'un écran ou un point d'entrée est conforme à **son** concept du `.speckit/`. Aucune ne vérifie que des éléments de **même nature** se comportent de la même façon, ni qu'une même règle se présente partout de même : une divergence naît du code, ou de deux concepts rédigés à des moments différents, chacun conforme à lui-même. Le contrôle de cohérence fonctionnelle, mené chaque semaine par l'agent (exigence de l'utilisateur), la cherche dans **toute l'application** : consultation, administration, aide contextuelle, API et outil pour agents IA.
 
 - **Alternative écartée (workflow planifié du CI)** : la confrontation demande la lecture et le jugement de l'agent, et un écart de classe B la décision de l'utilisateur, ce qu'aucune exécution sans eux ne fournit.
-- **Alternative écartée (agent planifié, sans l'utilisateur)** : il ne pourrait soumettre ses questions un point à la fois, et demanderait des identifiants de plus pour un travail que la session qui reprend le travail fait avec le `.speckit/` chargé.
+- **Alternative écartée (agent planifié, sans l'utilisateur)** : il demanderait des identifiants de plus pour un travail que la session qui reprend le travail fait avec le `.speckit/` chargé.
 
 ## Ce qui est confronté
 
@@ -24,15 +24,16 @@ Pour chaque famille et chaque axe transversal, trois sources sont confrontées :
 ## Classement des écarts
 
 - **A — le code s'écarte du `.speckit/`** : un défaut, dont la correction est un ticket ([Issues](issues.md), cause de fond) ; sa Pull Request est soumise à la validation fonctionnelle s'il change ce que l'utilisateur voit ([Validation fonctionnelle](validation-fonctionnelle.md)).
-- **B — des éléments de même nature divergent sans que le `.speckit/` dise pourquoi** : un point fonctionnel, soumis à la décision de l'utilisateur, **un point à la fois** ([Prise de décision](../gouvernance/prise-de-decision.md)). La décision est aussitôt consignée, dans ses termes, dans un ticket dont la Pull Request l'écrit d'abord dans le concept concerné, puis la réalise.
+- **B — des éléments de même nature divergent sans que le `.speckit/` dise pourquoi** : un point fonctionnel, qui revient à l'utilisateur ([Prise de décision](../gouvernance/prise-de-decision.md)). Le contrôle ne lui pose **aucune question** (exigence de l'utilisateur) : il ouvre, pour chaque écart B, un ticket qui porte l'écart, les éléments en cause, la résolution que propose l'agent et sa raison. La décision est demandée par la **session qui réalise ce ticket**, au démarrage de son chantier, avec un visuel de l'état actuel et de la proposition qui ne change que le point en cause : l'utilisateur confirme ou corrige la proposition. Elle est aussitôt consignée dans le ticket, dans ses termes, et sa Pull Request l'écrit d'abord dans le concept concerné, puis la réalise.
+  - **Alternative écartée (questions posées par la session du contrôle, une à une ou réunies sur une page)** : toutes les questions d'un contrôle arrivent alors dans la même session, ce que l'utilisateur refuse, quelle que soit leur forme (exigence de l'utilisateur, #409).
 - **C — l'écart est justifié** : le `.speckit/` en donne la raison. Rien n'est fait.
 
-Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request. Il se termine quand sa conclusion est écrite dans la description de son ticket (§ Trace), ce qui libère sa place dans un lot de chantiers en parallèle ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md)).
+Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request, qui reçoit dès sa création l'étiquette `ergonomy-audit` ([Issues](issues.md#tickets-de-suivi-des-harnais), tickets ouverts par un harnais). Il se termine quand sa conclusion est écrite dans la description de son ticket (§ Trace), ce qui libère sa place dans un lot de chantiers en parallèle ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md)).
 
 Une raison qui manque ou qui faillit fait d'un écart un B, jamais un C : une question de trop coûte une réponse à l'utilisateur, un écart réel classé C reste dans l'application sans que personne le voie.
 
 - **Décrit n'est pas justifié** : un concept qui décrit le comportement d'un élément sans dire pourquoi il diffère de sa famille ne justifie rien.
-- **Raison jugée** : la raison doit viser exactement cet écart, et non un cas voisin ou une généralité, et les faits sur lesquels elle repose doivent tenir encore. Une raison douteuse, imprécise ou périmée fait de l'écart un B, soumis à l'utilisateur en citant le passage.
+- **Raison jugée** : la raison doit viser exactement cet écart, et non un cas voisin ou une généralité, et les faits sur lesquels elle repose doivent tenir encore. Une raison douteuse, imprécise ou périmée fait de l'écart un B, dont le ticket cite le passage.
 - **Aucun C silencieux** : chaque C figure dans la trace avec le passage cité et ce qui, selon l'agent, le fait couvrir l'écart ; un C que l'utilisateur conteste devient un B.
 - **Revu au changement** : un C est revu dès que change le concept qui porte sa raison, ou l'un des éléments en cause ; il n'est pas signalé de nouveau tant que rien ne change.
 
@@ -52,6 +53,6 @@ Une règle commune confirmée (A corrigé, B tranché) est mise en œuvre **une 
 Le ticket de suivi du harnais fonctionnel (étiquettes `ergonomy-audit` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description** l'état du contrôle, que l'agent réécrit :
 
 - « Contrôle en cours », avec sa date, écrit **avant** le contrôle : une autre session qui reprend le travail la même semaine le voit, et ne le refait pas ;
-- à sa fin, le **dernier contrôle** : sa date et le commit de `main` sur lequel il porte, puis chaque écart relevé avec sa classe, les éléments en cause, et sa suite (ticket d'un A, question posée, décision et ticket d'un B, passage cité et raison d'un C), ou l'absence d'écart, constatée explicitement.
+- à sa fin, le **dernier contrôle** : sa date et le commit de `main` sur lequel il porte, puis chaque écart relevé avec sa classe, les éléments en cause, et sa suite (ticket d'un A ou d'un B, passage cité et raison d'un C), ou l'absence d'écart, constatée explicitement.
 
-Un écart B en attente de la décision de l'utilisateur reste dans la description jusqu'à elle. Le ticket reste ouvert.
+Le ticket reste ouvert.
