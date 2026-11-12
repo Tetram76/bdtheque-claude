@@ -43,7 +43,7 @@
                     <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
                         <Actions>
                             <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                            <Button Href="@AppPaths.AdminNewSeries" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", _query.Text!]" />
+                            <Button Href="@AppPaths.NewWithSearched(AppPaths.AdminNewSeries, _query.Text!)" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", _query.Text!]" />
                         </Actions>
                     </EmptyList>
                     break;

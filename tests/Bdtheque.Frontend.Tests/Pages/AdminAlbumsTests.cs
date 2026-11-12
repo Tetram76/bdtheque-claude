@@ -225,7 +225,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
 
         Assert.Equal("Aucun album ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
         Assert.Equal(
-            [("Effacer la recherche", AppPaths.AdminAlbums), ("Créer l'album « Zorglub »", AppPaths.AdminNewAlbum)],
+            [("Effacer la recherche", AppPaths.AdminAlbums), ("Créer l'album « Zorglub »", $"{AppPaths.AdminNewAlbum}?searched=Zorglub")],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 

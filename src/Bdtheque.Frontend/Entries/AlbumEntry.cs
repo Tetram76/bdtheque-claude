@@ -73,8 +73,8 @@ public sealed class AlbumEntry
     /// <summary>The universes the album displays through its series, each named with its ancestors.</summary>
     public List<string> SeriesUniverses { get; set; } = [];
 
-    /// <summary>A new album, empty.</summary>
-    public static AlbumEntry New() => new();
+    /// <summary>A new album, empty but for the title searched in its list, if any.</summary>
+    public static AlbumEntry New(string? title = null) => new() { Title = title };
 
     /// <summary>The album as the API gives it, with what its series gives it to display, if any.</summary>
     public static AlbumEntry Of(AlbumForm form, SeriesDetail? series)

@@ -186,7 +186,7 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
 
         Assert.Equal("Aucune série ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
         Assert.Equal(
-            [("Effacer la recherche", AppPaths.AdminSeries), ("Créer la série « Zorglub »", AppPaths.AdminNewSeries)],
+            [("Effacer la recherche", AppPaths.AdminSeries), ("Créer la série « Zorglub »", AppPaths.NewWithSearched(AppPaths.AdminNewSeries, "Zorglub"))],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
     [Fact]

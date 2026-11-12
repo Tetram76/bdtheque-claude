@@ -86,10 +86,13 @@
     {
         if (_titleNumber == 0)
         {
-            // The key the record was read with: the title has not changed yet.
+            // The key the record was read with: the title has not changed yet. A new record has none, even when it comes with
+            // a title (the text searched in its list): its key is that of this title.
             _titleNumber = 1;
             _title = Title;
             _computed = StoredKey;
+            if (StoredKey is null && HasTitle)
+                await ComputeAsync();
             return;
         }
         if (Title != _title)

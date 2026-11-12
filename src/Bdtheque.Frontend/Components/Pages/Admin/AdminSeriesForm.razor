@@ -185,6 +185,10 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+    /// <summary>For a new series, the text searched in its list, which found nothing: its title (AppPaths.NewWithSearched).</summary>
+    [SupplyParameterFromQuery(Name = AppPaths.SearchedParameter)]
+    public string? Searched { get; set; }
+
     /// <summary>The series as the form holds it, read once, by the prerendering.</summary>
     [PersistentState]
     public SeriesEntry? Entry { get; set; }
@@ -222,7 +226,7 @@ else
             {
                 Entry = Id is { } id
                     ? SeriesEntry.Of(await Api.GetAsync<SeriesForm>($"/admin/series/{id}"))
-                    : SeriesEntry.New(await Api.GetAsync<SeriesContent>("/admin/series/new"));
+                    : SeriesEntry.New(await Api.GetAsync<SeriesContent>("/admin/series/new"), Searched);
                 ReadEntry = Entry.Copy();
                 if (Entry.Publisher is { } publisher)
                     PublisherCollections = await CollectionsOfAsync(publisher.Id);

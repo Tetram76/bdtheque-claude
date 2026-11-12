@@ -166,7 +166,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
 
         Assert.Equal("Aucun éditeur ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
         Assert.Equal(
-            [("Effacer la recherche", AppPaths.AdminPublishers), ("Créer l'éditeur « Zorglub »", AppPaths.AdminNewPublisher)],
+            [("Effacer la recherche", AppPaths.AdminPublishers), ("Créer l'éditeur « Zorglub »", AppPaths.NewWithSearched(AppPaths.AdminNewPublisher, "Zorglub"))],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 

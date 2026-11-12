@@ -596,6 +596,18 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal(new FunctionUse("admin.album", new PresentedRecord(RecordType.Album, AlbumId), null), opened.FirstUse);
     }
 
+    [Fact]
+    public void NewAlbum_FromASearchWithoutResult_TakesTheTextSearchedAsItsTitle_ItsAutomaticSortKeyFollowing()
+    {
+        var page = OpenNew("Le Lotus bleu");
+
+        Assert.Equal("Le Lotus bleu", page.Find("#album-title").GetAttribute("value"));
+        Assert.Equal("Le Lotus bleu", page.Find(".entry-form-subject").TextContent.Trim());
+        page.WaitForAssertion(() => Assert.Equal("Lotus bleu [Le]", page.Find("#album-sort-key").GetAttribute("value")));
+        Assert.Contains("/admin/sort-keys/title?title=Le%20Lotus%20bleu", _api.Requested);
+        Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
+    }
+
     private IRenderedComponent<AdminAlbumForm> OpenAlbum()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditAlbum(AlbumId));
@@ -604,9 +616,9 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
             .AddCascadingValue(_request.Context));
     }
 
-    private IRenderedComponent<AdminAlbumForm> OpenNew()
+    private IRenderedComponent<AdminAlbumForm> OpenNew(string? searched = null)
     {
-        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminNewAlbum);
+        Services.GetRequiredService<NavigationManager>().NavigateTo(searched is null ? AppPaths.AdminNewAlbum : AppPaths.NewWithSearched(AppPaths.AdminNewAlbum, searched));
         return Render<AdminAlbumForm>(parameters => parameters.AddCascadingValue(_request.Context));
     }
 

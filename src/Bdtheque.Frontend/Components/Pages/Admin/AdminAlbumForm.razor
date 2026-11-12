@@ -148,6 +148,10 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+    /// <summary>For a new album, the text searched in its list, which found nothing: its title (AppPaths.NewWithSearched).</summary>
+    [SupplyParameterFromQuery(Name = AppPaths.SearchedParameter)]
+    public string? Searched { get; set; }
+
     /// <summary>The album as the form holds it, read once, by the prerendering.</summary>
     [PersistentState]
     public AlbumEntry? Entry { get; set; }
@@ -180,7 +184,7 @@ else
             try
             {
                 Format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
-                Entry = Id is { } id ? await ReadAsync(id) : AlbumEntry.New();
+                Entry = Id is { } id ? await ReadAsync(id) : AlbumEntry.New(Searched);
                 ReadEntry = Entry.Copy();
             }
             catch (ApiProblemException exception)
