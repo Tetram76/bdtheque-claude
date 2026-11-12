@@ -37,20 +37,22 @@ jobs:
         run: |
           # Every page of a search, each item an entry: every search of this job goes through it, a single place to page.
           search() {
-            local page=1
+            local url=$1 entry=$2 page=1
             while :; do
-              curl -fsS "$1&ps=500&p=$page" > page.json
-              jq -r --arg project "$PROJECT:" "$2" page.json
+              curl -fsS "$url&ps=500&p=$page" > page.json
+              jq -r --arg project "$PROJECT:" "$entry" page.json
               [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
               page=$((page + 1))
             done
           }
           issues() {
-            search "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false$1" \
+            local filters=$1
+            search "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false$filters" \
               '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"'
           }
           hotspots() {
-            search "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW$1" \
+            local filters=$1
+            search "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW$filters" \
               '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"'
           }
           issues "" >> findings.txt
