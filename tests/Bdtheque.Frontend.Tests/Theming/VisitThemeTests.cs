@@ -72,21 +72,23 @@ public sealed class VisitThemeTests
     }
 
     [Fact]
-    public void FirstPage_BeforeTheBrowserGaveItsTimeZone_LeavesTheDateOfTheThemeUnknown()
+    public void Visit_OfABrowserThatGivesNoTimeZone_LeavesTheDateOfTheThemeUnknown()
     {
-        // No date of the browser to draw for: universal time could be another date than the browser's, whose next page
-        // would then draw a theme again in the middle of the visit's first date.
+        // A browser that refuses the cookie of its time zone, or runs no script: no date of the browser to draw for, universal
+        // time could be another date than the browser's.
         var visit = VisitTheme.Continue(null, Today, browserToday: null, Offered, Draw(1));
 
         Assert.Equal(new BrowserVisit(Today, Second.Key, ThemeDate: null), visit);
     }
 
     [Fact]
-    public void ThemeDrawnBeforeTheTimeZoneWasKnown_IsTheThemeOfTheFirstDateOfTheBrowser()
+    public void ThemeDrawnWithoutADate_IsKept_WhenTheDateOfTheBrowserTurnsUp()
     {
+        // The welcome screen gives the time zone before the first page of a visit (Visits/BrowserWelcome.cs): a visit
+        // without a date is that of a browser that gives none, which no later page catches up on.
         var visit = new BrowserVisit(Today, Second.Key, ThemeDate: null);
 
-        Assert.Equal(new BrowserVisit(Today, Second.Key, Tomorrow), VisitTheme.Continue(visit, Today, Tomorrow, Offered, NoDraw));
+        Assert.Same(visit, VisitTheme.Continue(visit, Today, Tomorrow, Offered, NoDraw));
     }
 
     [Fact]

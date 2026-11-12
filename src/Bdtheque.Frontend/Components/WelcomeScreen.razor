@@ -1,0 +1,216 @@
+@inject IStringLocalizer<WelcomeScreen> L
+@inject IStringLocalizer<LayoutText> LayoutL
+@inject AudienceOpposition AudienceOpposition
+@using Bdtheque.Frontend.Visits
+
+@* The welcome screen of the first request of a browser (Visits/BrowserWelcome.cs; visuel/ecran-accueil/), in place of the
+   page: the theme of the visit not being drawn yet, it has the common identity of the application. It is quick: all of it
+   comes in the response, its styles and its drawing (a pile of albums, in SVG), without a font nor a file to download, and
+   it lasts no longer than its script, which writes what only the browser knows and loads the page at once.
+   A browser whose scripts are disabled is sent to the page, marked so that it is rendered as it is. *@
+<!DOCTYPE html>
+<html lang="fr" data-welcome data-time-zone-cookie="@BrowserTimeZone.CookieName" data-touch-screen-cookie="@AudienceDevice.TouchScreenCookieName" data-skip="@_skipAddress" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@LayoutL["AppName"]</title>
+    <noscript><meta http-equiv="refresh" content="0; url=@_skipAddress" /></noscript>
+    @* The colours of the base theme (themes/base.css), not loaded here; the font of the system. *@
+    <style>
+        :root { color-scheme: light; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; height: 100%; }
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: #F6F5F2;
+            color: #1D1D21;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        .welcome { display: grid; justify-items: center; gap: 14px; padding: 16px; text-align: center; }
+        .welcome svg { width: min(320px, 80vw); height: auto; overflow: visible; }
+        .name { margin: 0; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
+        .name span { color: #2D5DA1; }
+        .status { margin: 0; font-size: 0.95rem; color: #63636B; }
+        /* Each album falls faster and faster, bounces a little on the pile, then settles: the pile stays as long as the
+           page takes to come. */
+        .album { animation: drop 0.6s 1 both; }
+        .album:nth-of-type(2) { animation-delay: 0.2s; }
+        .album:nth-of-type(3) { animation-delay: 0.4s; }
+        .album:nth-of-type(4) { animation-delay: 0.6s; }
+        @@keyframes drop {
+            0% { translate: 0 -140px; opacity: 0; animation-timing-function: cubic-bezier(.55, 0, 1, .45); }
+            17% { opacity: 1; }
+            70% { translate: 0 0; animation-timing-function: cubic-bezier(0, .55, .45, 1); }
+            85% { translate: 0 -5px; animation-timing-function: cubic-bezier(.55, 0, 1, .45); }
+            100% { translate: 0 0; opacity: 1; }
+        }
+        /* Reduced motion: the pile, fixed. */
+        @@media (prefers-reduced-motion: reduce) {
+            .album { animation: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="welcome" role="status">
+        <svg viewBox="20 80 270 130" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="front-pages" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#D6C8A8" /><stop offset=".35" stop-color="#F7F1E2" /><stop offset=".6" stop-color="#FCF8EE" /><stop offset="1" stop-color="#CDBD9B" />
+                </linearGradient>
+                <linearGradient id="side-pages" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#D3C3A1" /><stop offset="1" stop-color="#B09D78" />
+                </linearGradient>
+                <pattern id="page-lines" width="7" height="1.3" patternUnits="userSpaceOnUse">
+                    <rect width="7" height="0.4" fill="#8E7D60" opacity=".5" />
+                </pattern>
+                <filter id="uneven" x="0" y="-20%" width="100%" height="140%">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.02 0.9" numOctaves="2" seed="7" />
+                    <feDisplacementMap in="SourceGraphic" scale="1.6" xChannelSelector="R" yChannelSelector="G" />
+                </filter>
+                <linearGradient id="cover-light" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0" stop-color="#FFFFFF" stop-opacity=".2" /><stop offset=".45" stop-color="#FFFFFF" stop-opacity="0" />
+                    <stop offset="1" stop-color="#000000" stop-opacity=".2" />
+                </linearGradient>
+                <linearGradient id="reflection" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset=".28" stop-color="#FFFFFF" stop-opacity="0" /><stop offset=".34" stop-color="#FFFFFF" stop-opacity=".22" />
+                    <stop offset=".4" stop-color="#FFFFFF" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="front-light" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#FFFFFF" stop-opacity=".3" /><stop offset=".18" stop-color="#FFFFFF" stop-opacity="0" />
+                    <stop offset=".8" stop-color="#000000" stop-opacity=".05" /><stop offset="1" stop-color="#000000" stop-opacity=".35" />
+                </linearGradient>
+                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#8DC3E0" /><stop offset=".7" stop-color="#E9EEDC" /><stop offset="1" stop-color="#F7E6C4" />
+                </linearGradient>
+                <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#7DB487" /><stop offset="1" stop-color="#4E8A60" />
+                </linearGradient>
+                <filter id="grain" x="0" y="0" width="100%" height="100%">
+                    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4" result="noise" />
+                    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 -.22" result="speckle" />
+                    <feComposite in="speckle" in2="SourceAlpha" operator="in" result="grain" />
+                    <feMerge><feMergeNode in="SourceGraphic" /><feMergeNode in="grain" /></feMerge>
+                </filter>
+                <filter id="soft" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="2.2" /></filter>
+                <filter id="softer" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="5" /></filter>
+            </defs>
+
+            <ellipse cx="160" cy="198" rx="130" ry="9" fill="#1D1D21" opacity=".18" filter="url(#softer)" />
+            <rect x="44" y="194" width="210" height="4" fill="#1D1D21" opacity=".35" filter="url(#soft)" />
+
+            @* Hardcover albums in volume, seen from above and a corner: each casts its shadow on the cover below, shows its
+               own cover, the front edge of its pages between its two boards, and its side edge, in the shade. Offset from
+               one another, the covers below show past the ones above. *@
+            <g class="album"><g filter="url(#grain)">
+                <path d="M40 180 L240 180 L262 150 L62 150 Z" fill="#C9553F" />
+                <path d="M40 180 L240 180 L262 150 L62 150 Z" fill="url(#cover-light)" />
+                <path d="M40 180 L240 180 L262 150 L62 150 Z" fill="url(#reflection)" />
+                <rect x="40" y="180" width="200" height="16" rx="1.5" fill="#B74A36" />
+                <rect x="41.5" y="182.3" width="196.5" height="11.4" fill="url(#front-pages)" />
+                <rect x="41.5" y="182.3" width="196.5" height="11.4" fill="url(#page-lines)" filter="url(#uneven)" />
+                <rect x="40" y="180" width="200" height="16" rx="1.5" fill="url(#front-light)" />
+                <path d="M240 180 L262 150 L262 166 L240 196 Z" fill="url(#side-pages)" />
+                <path d="M240 180 L262 150 L262 152.3 L240 182.3 Z M240 193.7 L262 163.7 L262 166 L240 196 Z" fill="#7E2E20" />
+            </g></g>
+            <g class="album"><g filter="url(#grain)">
+                <path d="M59 182 L249 182 L271 152 L81 152 Z" fill="#1D1D21" opacity=".4" filter="url(#soft)" />
+                <path d="M56 165 L246 165 L268 135 L78 135 Z" fill="#2E5C9C" />
+                <path d="M56 165 L246 165 L268 135 L78 135 Z" fill="url(#cover-light)" />
+                <path d="M56 165 L246 165 L268 135 L78 135 Z" fill="url(#reflection)" />
+                <path d="M236.5 148 L254.5 148 L258.5 142.5 L240.5 142.5 Z" fill="#F4EEDD" />
+                <rect x="56" y="165" width="190" height="15" rx="1.5" fill="#25508C" />
+                <rect x="57.5" y="167.3" width="186.5" height="10.4" fill="url(#front-pages)" />
+                <rect x="57.5" y="167.3" width="186.5" height="10.4" fill="url(#page-lines)" filter="url(#uneven)" />
+                <rect x="56" y="165" width="190" height="15" rx="1.5" fill="url(#front-light)" />
+                <path d="M246 165 L268 135 L268 150 L246 180 Z" fill="url(#side-pages)" />
+                <path d="M246 165 L268 135 L268 137.3 L246 167.3 Z M246 177.7 L268 147.7 L268 150 L246 180 Z" fill="#183463" />
+            </g></g>
+            <g class="album"><g filter="url(#grain)">
+                <path d="M37 168 L233 168 L255 138 L59 138 Z" fill="#1D1D21" opacity=".4" filter="url(#soft)" />
+                <path d="M34 148 L230 148 L252 118 L56 118 Z" fill="#E09A36" />
+                <path d="M34 148 L230 148 L252 118 L56 118 Z" fill="url(#cover-light)" />
+                <path d="M34 148 L230 148 L252 118 L56 118 Z" fill="url(#reflection)" />
+                <path d="M38 143 L49 143 L53 137.5 L42 137.5 Z" fill="#B3452F" opacity=".9" />
+                <rect x="34" y="148" width="196" height="17" rx="1.5" fill="#C9862A" />
+                <rect x="35.5" y="150.3" width="192.5" height="12.4" fill="url(#front-pages)" />
+                <rect x="35.5" y="150.3" width="192.5" height="12.4" fill="url(#page-lines)" filter="url(#uneven)" />
+                <rect x="34" y="148" width="196" height="17" rx="1.5" fill="url(#front-light)" />
+                <path d="M230 148 L252 118 L252 135 L230 165 Z" fill="url(#side-pages)" />
+                <path d="M230 148 L252 118 L252 120.3 L230 150.3 Z M230 162.7 L252 132.7 L252 135 L230 165 Z" fill="#83540F" />
+            </g></g>
+            @* The top album shows its whole cover: a title, and a scene where a character speaks. *@
+            <g class="album"><g filter="url(#grain)">
+                <path d="M53 151 L239 151 L261 121 L75 121 Z" fill="#1D1D21" opacity=".4" filter="url(#soft)" />
+                <path d="M50 134 L236 134 L258 104 L72 104 Z" fill="#3C8566" />
+                <path d="M89.9 110 L231.3 110 L233.9 106.4 L92.6 106.4 Z" fill="#F4EEDD" />
+                <path d="M100 108.2 h30 M134 108.2 h20 M158 108.2 h40" stroke="#1F4F3C" stroke-width="1.8" />
+                <path d="M70.4 131.6 L219.2 131.6 L233.2 112.4 L84.4 112.4 Z" fill="url(#sky)" />
+                <circle cx="207" cy="117.5" r="6" fill="#F7D98A" opacity=".5" />
+                <circle cx="207" cy="117.5" r="3.6" fill="#F2C14E" />
+                <path d="M71.5 131.6 Q108 119 148 125.5 T226.6 121.5 L219.2 131.6 Z" fill="url(#hill)" />
+                <path d="M71.5 131.6 Q120 126 170 129 T221 129 L219.2 131.6 Z" fill="#3F7A52" />
+                <path d="M146.5 128 l3.2 -9.5 l3.2 9.5 z" fill="#C9553F" />
+                <circle cx="149.7" cy="116.6" r="3" fill="#EBC09A" />
+                <path d="M108 111.5 h24 a4 4 0 0 1 4 4 v1.5 a4 4 0 0 1 -4 4 h-4 l9 3.5 l-13 -3.5 h-12 a4 4 0 0 1 -4 -4 v-1.5 a4 4 0 0 1 4 -4 z" fill="#FFFFFF" stroke="#1D1D21" stroke-width=".8" />
+                <path d="M111 115.3 h18 M111 118 h11" stroke="#1D1D21" stroke-width=".9" opacity=".55" />
+                <path d="M50 134 L236 134 L258 104 L72 104 Z" fill="url(#cover-light)" />
+                <path d="M50 134 L236 134 L258 104 L72 104 Z" fill="url(#reflection)" />
+                <rect x="50" y="134" width="186" height="14" rx="1.5" fill="#31735A" />
+                <rect x="51.5" y="136.3" width="182.5" height="9.4" fill="url(#front-pages)" />
+                <rect x="51.5" y="136.3" width="182.5" height="9.4" fill="url(#page-lines)" filter="url(#uneven)" />
+                <rect x="50" y="134" width="186" height="14" rx="1.5" fill="url(#front-light)" />
+                <path d="M236 134 L258 104 L258 118 L236 148 Z" fill="url(#side-pages)" />
+                <path d="M236 134 L258 104 L258 106.3 L236 136.3 Z M236 145.7 L258 115.7 L258 118 L236 148 Z" fill="#1B4636" />
+            </g></g>
+        </svg>
+        <p class="name">@L["NameInk"]<span>@L["NameAccent"]</span></p>
+        <p class="status">@L["Opening"]</p>
+    </main>
+    @* Run as soon as it is parsed, before the screen has even finished loading: the cookies of the time zone and of the touch
+       screen, as the scripts of every page keep them (browser-time-zone.js, touch-screen.js), then the page itself. A
+       browser that did not keep the cookie (refused, or no time zone to give) goes to the page marked as such, rather than
+       to the screen again. *@
+    <script>
+        (() => {
+            const root = document.documentElement.dataset;
+            // A year, below the 13 months a cookie may live (fonctionnel/mesure-audience.md).
+            const keep = (name, value) => {
+                document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`;
+            };
+            const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (zone) {
+                keep(root.timeZoneCookie, zone);
+            }
+            if (root.audience !== "opposed" && navigator.maxTouchPoints > 1) {
+                keep(root.touchScreenCookie, "1");
+            }
+            if (document.cookie.split("; ").some(c => c.startsWith(`${root.timeZoneCookie}=`))) {
+                location.reload();
+            } else {
+                location.replace(root.skip + location.hash);
+            }
+        })();
+    </script>
+</body>
+
+</html>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? _skipAddress;
+
+    protected override void OnInitialized()
+    {
+        if (HttpContext is null)
+            throw new InvalidOperationException("The welcome screen answers a request, rendered statically.");
+        _skipAddress = BrowserWelcome.SkipAddress(HttpContext.Request);
+        // Never kept: once the browser has written its cookies, the same address must bring the page, not this screen again.
+        HttpContext.Response.Headers.CacheControl = "no-store";
+    }
+}

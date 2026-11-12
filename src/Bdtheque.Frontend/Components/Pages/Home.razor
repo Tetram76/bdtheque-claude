@@ -39,9 +39,9 @@ else if (_dashboard is not null)
     {
         try
         {
-            // The day of the visitor, in the time zone of their browser: that of the edition in the spotlight. Unknown on a
-            // first page, rendered again once the browser gave it (DashboardBoard, data-local): the dashboard is then asked
-            // without any day, so that no edition is drawn for a day the visitor does not live.
+            // The day of the visitor, in the time zone of their browser: that of the edition in the spotlight. Unknown for a
+            // browser that does not give it (cookie refused, no script): the dashboard is then asked without any day, so that
+            // no edition is drawn for a day the visitor does not live.
             var day = TimeZone.Today(Clock) is { } today
                 ? $"day={today.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)}&"
                 : "";

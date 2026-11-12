@@ -1,6 +1,7 @@
 // Keeps the time zone of the browser in the cookie each request brings to the server, which presents the dates and
-// times in it (Formatting/BrowserTimeZone.cs). Checked again when the user comes back to the tab: a traveller's
-// browser that changed time zone is followed, in each of its tabs.
+// times in it (Formatting/BrowserTimeZone.cs). The welcome screen writes it before the first page of a browser
+// (Components/WelcomeScreen.razor); checked again at each page and when the user comes back to the tab: a traveller's
+// browser that changed time zone since is followed, in each of its tabs.
 (() => {
     const cookieName = "Bdtheque.TimeZone";
 

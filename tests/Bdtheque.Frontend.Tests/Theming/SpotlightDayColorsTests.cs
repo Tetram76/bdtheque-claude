@@ -30,8 +30,9 @@ public sealed class SpotlightDayColorsTests
         Assert.Equal(["/catalog/spotlight/colors?day=2026-11-06"], _api.Requested);
     }
 
-    // A first page, whose request does not bring the time zone of the browser yet: the theme keeps its own colours, and nothing
-    // is asked, so that no edition is drawn for a day the visitor does not live (the date in universal time, the 5th).
+    // A request that does not bring the time zone of the browser (cookie refused, no script): the theme keeps its own
+    // colours, and nothing is asked, so that no edition is drawn for a day the visitor does not live (the date in universal
+    // time, the 5th).
     [Fact]
     public async Task WithoutTheTimeZoneOfTheBrowser_TheThemeKeepsItsOwnColours_WithoutAnyDraw()
     {

@@ -23,9 +23,9 @@ public sealed class BrowserTimeZone
 
     /// <summary>
     /// The time zone in which the dates and times are presented: that of the browser, or universal time as long as the
-    /// browser has not given one this application knows by its IANA name (a first page, a cookie refused or altered). Only
-    /// for a presentation, which a page marked as such presents again once the time zone is known: a decision or a write
-    /// takes <see cref="Today"/>, which is never guessed.
+    /// browser has not given one this application knows by its IANA name (a cookie refused or altered, no script: the welcome
+    /// screen gives it before the first page of any other browser, Visits/BrowserWelcome.cs). Only for a presentation: a
+    /// decision or a write takes <see cref="Today"/>, which is never guessed.
     /// </summary>
     public TimeZoneInfo Zone => Known ?? TimeZoneInfo.Utc;
 

@@ -9,7 +9,7 @@ public sealed record Dashboard(DashboardContent? Content);
 
 /// <summary>The blocks of the dashboard, every statistic bearing on the collection only.</summary>
 /// <param name="Spotlight">
-/// <c>null</c> when the dashboard is asked without the day of the visitor, which the browser has not given yet: nothing is
+/// <c>null</c> when the dashboard is asked without the day of the visitor, which their browser does not give: nothing is
 /// drawn for a day the visitor does not live.
 /// </param>
 /// <param name="LatestEntries">The latest editions entered in the collection, from the most recent.</param>

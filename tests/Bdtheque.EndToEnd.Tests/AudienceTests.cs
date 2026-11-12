@@ -4,7 +4,6 @@ using System.Net.Http.Json;
 using Bdtheque.Contracts.Audience;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Audience;
-using frontend::Bdtheque.Frontend.Formatting;
 using frontend::Bdtheque.Frontend.Navigation;
 using frontend::Bdtheque.Frontend.Visits;
 
@@ -20,23 +19,12 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     private const string SafariOnAMac =
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15";
 
-    // A browser that gave its time zone already: no page is rendered again once the browser gives it, which would record
-    // its screen a second time (the dashboard, which the shared collection of the tests may show, depends on it).
-    private async Task<IPage> NewPageKnowingItsTimeZoneAsync(string theme)
-    {
-        var page = await NewPageAsync(theme);
-        var zone = await page.EvaluateAsync<string>("() => Intl.DateTimeFormat().resolvedOptions().timeZone");
-        await page.Context.AddCookiesAsync([new Cookie
-        {
-            Name = BrowserTimeZone.CookieName, Value = zone, Url = Application.BaseAddress.ToString(),
-        }]);
-        return page;
-    }
-
+    // The first page of a browser comes after the welcome screen (Visits/BrowserWelcome.cs), which records nothing: the visit
+    // opens with the screen of that page, displayed once.
     [Theory, InEachTheme]
     public async Task FirstPage_OpensTheVisit_WithTheScreenItDisplays(string theme)
     {
-        var page = await NewPageKnowingItsTimeZoneAsync(theme);
+        var page = await NewPageAsync(theme);
 
         await page.GotoAsync(AppPaths.Home);
 
@@ -52,7 +40,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     [Theory, InEachTheme]
     public async Task Visit_GathersThePagesOfEveryTabOfTheBrowser_InTheirOrder(string theme)
     {
-        var page = await NewPageKnowingItsTimeZoneAsync(theme);
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Home);
         await page.GotoAsync(AppPaths.AudienceInformation);
         var tab = await page.Context.NewPageAsync();
@@ -68,7 +56,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     [Theory, InEachTheme]
     public async Task EveryPage_LeadsToTheInformation_FromItsFoot(string theme)
     {
-        var page = await NewPageKnowingItsTimeZoneAsync(theme);
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Home);
 
         await page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "Mesure d'audience" }).ClickAsync();
@@ -81,7 +69,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     [Theory, InEachTheme]
     public async Task Visitor_WhoOpposes_IsNoLongerRecorded_UntilTheyComeBackOnIt(string theme)
     {
-        var page = await NewPageKnowingItsTimeZoneAsync(theme);
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AudienceInformation);
         var before = (await AudienceVisitAsync(page)).Visit.Id;
 
@@ -113,7 +101,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     [Theory, InEachTheme]
     public async Task Login_AndLogout_GoOnInAVisitOfTheirKind(string theme)
     {
-        var page = await NewPageKnowingItsTimeZoneAsync(theme);
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AdminHome);
         var visitor = (await AudienceVisitAsync(page)).Visit.Id;
 
@@ -140,7 +128,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     [Theory, InEachTheme]
     public async Task Opposition_IsKeptByTheBrowser_BeyondItsSession(string theme)
     {
-        var page = await NewPageKnowingItsTimeZoneAsync(theme);
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AudienceInformation);
         await page.GetByRole(AriaRole.Button, new() { Name = "Refuser la mesure d'audience" }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Accepter de nouveau la mesure d'audience" }).WaitForAsync();
@@ -153,16 +141,14 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     }
 
     [Theory, InEachTheme]
-    public async Task Ipad_ThatAsksForTheWebsiteOfAComputer_IsATablet_FromItsNextVisit(string theme)
+    public async Task Ipad_ThatAsksForTheWebsiteOfAComputer_IsATablet_FromItsFirstPage(string theme)
     {
-        // The touch screen, which only the browser tells, is known from the first page on: the visits that follow are a tablet's.
+        // The touch screen, which only the browser tells, is told by the welcome screen, before the first page.
         var page = await TouchScreenMacAsync(theme);
+
         await PageReadiness.GotoAsync(page, AppPaths.Home);
+
         Assert.Contains(await page.Context.CookiesAsync(), c => c.Name == AudienceDevice.TouchScreenCookieName);
-
-        await page.Context.ClearCookiesAsync(new BrowserContextClearCookiesOptions { Name = BrowserVisit.CookieName });
-        await page.GotoAsync(AppPaths.Home);
-
         var visit = await AudienceVisitAsync(page);
         Assert.Equal((DeviceType.Tablet, RenderingEngine.WebKit, "26.1"), (visit.Visit.DeviceType, visit.Visit.RenderingEngine, visit.Visit.EngineVersion));
     }
