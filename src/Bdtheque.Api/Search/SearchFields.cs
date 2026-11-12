@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Bdtheque.Api.Endpoints;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -157,7 +156,7 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
             otherData,
             (escaping, character) => Expression.Call(
                 escaping, Replace, Expression.Constant(character), Expression.Constant(LikeEscapeCharacter + character)));
-        Expression Joined(Expression left, Expression right) => Expression.Call(Concat, left, right);
+        static Expression Joined(Expression left, Expression right) => Expression.Call(Concat, left, right);
         var anywhere = Joined(Joined(Expression.Constant("%"), escaped), Expression.Constant("%"));
         return comparison.Comparison switch
         {
