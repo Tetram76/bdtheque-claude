@@ -1,10 +1,10 @@
 ---
 type: Gouvernance
 title: 'Contrôle qualité hebdomadaire'
-description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité, référence et entrées à traiter, traitement borné à une Pull Request par semaine, dette existante corrigée au fil de l''eau ; à lire quand le traitement est dû ou pour modifier le contrôle.'
+description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité, référence et entrées à traiter, porte de qualité en échec prioritaire, traitement borné à une Pull Request par semaine, dette existante corrigée au fil de l''eau ; à lire quand le traitement est dû ou pour modifier le contrôle.'
 applies_to:
   - '.github/workflows/quality-audit.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T12:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T14:40:00Z }
 ---
 
 # Contrôle qualité hebdomadaire
@@ -15,7 +15,7 @@ La porte de qualité de SonarQube Cloud ne juge que le nouveau code d'une Pull R
 
 Chaque semaine, et à la demande, sur `main` :
 
-- **SonarQube Cloud, code global** : les problèmes ouverts de l'analyse de `main`, dont les méthodes à la complexité cognitive au-delà du seuil de la règle `S3776` du profil de qualité ; les points sensibles de sécurité non revus ; chaque note du projet (fiabilité, sécurité, maintenabilité, revue de sécurité) autre que A.
+- **SonarQube Cloud, code global** : chaque condition en échec de la porte de qualité de `main` ; les problèmes ouverts de l'analyse de `main`, dont les méthodes à la complexité cognitive au-delà du seuil de la règle `S3776` du profil de qualité ; les points sensibles de sécurité non revus ; chaque note du projet (fiabilité, sécurité, maintenabilité, revue de sécurité) autre que A.
 - **Règles de style .NET** (catégorie *Style*) qui n'expriment pas une préférence de forme, listées dans le workflow : celles d'un **défaut**, code sans effet, redondant ou trompeur (ex. `IDE0005`, `IDE0004`, `IDE0060`, `IDE0059`), et celles d'une **syntaxe plus récente** du langage non employée là où elle dit la même chose plus directement (ex. `IDE0300` à `IDE0306`, `IDE0290`), ce que demande [Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md). Les règles de préférence (`var`, accolades, corps d'expression, forme du namespace, `new` ciblé…) en sont exclues.
 - **Tests de mutation** : les mutants survivants ou qu'aucun test ne couvre, chacun un test qui manque, d'abord sur `Bdtheque.Domain` ; d'autres projets s'y ajoutent selon ce qu'il apprend.
 
@@ -35,12 +35,13 @@ Le contrôle tient la liste de ses entrées dans le ticket de suivi du harnais q
 - **Entrée** : sa source (`sonar`, `hotspot`, `rating`, `style`, `mutant`), la règle ou le mutateur, et le fichier, ou pour un mutant le code muté et son remplacement ; jamais la ligne, qui bouge à chaque modification voisine : une entrée reste la même d'une semaine à l'autre.
 - **Seule une exécution sur `main` tient le ticket** : une exécution lancée sur une autre branche, pour essayer une modification du contrôle, ne laisse ses relevés que dans son journal, sans mêler au ticket l'état d'une branche non fusionnée.
 - **Notification** : le contrôle n'échoue que lorsqu'il trouve une entrée absente de la liste. GitHub notifie alors l'échec à l'utilisateur qui a créé le workflow, une fois par entrée, et non chaque semaine tant qu'elle reste.
-- **Référence, puis entrées à traiter** : la première exécution pose la référence, la **dette existante**, sans rien de nouveau ni d'échec. Ensuite, la description distingue, dans une section « À traiter », les entrées **nouvelles** d'une exécution et celles des exécutions précédentes que l'agent n'a pas encore traitées, tant que le contrôle les relève ; le reste de la liste est la dette existante.
+- **Référence, puis entrées à traiter** : la première exécution pose la référence, la **dette existante**, sans rien de nouveau ni d'échec. Ensuite, la description distingue, dans une section « À traiter », les entrées **nouvelles** d'une exécution et celles des exécutions précédentes que l'agent n'a pas encore traitées, tant que le contrôle les relève ; le reste de la liste est la dette existante. Une condition en échec de la porte de qualité (`gate`) est **toujours** à traiter tant que le contrôle la relève, même dans la référence, dette existante ou non.
 
 ## Traitement des entrées
 
 Au moment que fixe [Traitement du contrôle qualité à la reprise du travail](traitement-du-controle-qualite-a-la-reprise-du-travail.md), les entrées de la section « À traiter » sont traitées, chacune comme un retour de revue ([Revue de code](../revue-tickets/revue-de-code.md), [Traiter un retour](../revue-tickets/revue-codex-bloquante.md#traiter-un-retour)) : contre-vérification, cause de fond ([Qualité du code](../gouvernance/qualite-du-code.md)), puis correction, report tracé ou rejet justifié.
 
+- **Porte de qualité, en priorité** (exigence de l'utilisateur) : une condition en échec de la porte de qualité de `main` est prioritaire au même titre qu'une vulnérabilité connue ([Mises à jour des dépendances](mises-a-jour-des-dependances.md), correction dès qu'elle est disponible). Son traitement passe en tête, avant toute autre entrée, et corrige les problèmes qui la font échouer, que l'analyse de `main` désigne, dette existante comprise.
 - **Volume borné** (exigence de l'utilisateur) : un traitement par exécution du contrôle au plus, en une seule Pull Request de l'agent, qui réunit ses corrections et suit le cycle de toute Pull Request. Ce que le traitement ne couvre pas reste dans « À traiter », pour le traitement de la semaine suivante. Un mutant survivant se corrige par le test qui manque.
 - **Dette existante, au fil de l'eau** (exigence de l'utilisateur) : elle n'est jamais traitée en elle-même ; une de ses entrées se corrige quand un chantier modifie de toute façon le fichier concerné, dans la Pull Request de ce chantier.
 - **Report** : un ticket ([Issues](../revue-tickets/issues.md)) porte la correction ; l'entrée reste dans la liste jusqu'à elle, mais quitte « À traiter ».

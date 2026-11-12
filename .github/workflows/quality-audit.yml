@@ -50,6 +50,10 @@ jobs:
             [ "$((page * 500))" -lt "$(jq '.paging.total' page.json)" ] || break
             page=$((page + 1))
           done
+          # Each failing condition of the quality gate of main is an entry, always to treat, as a known vulnerability is
+          # (gestion-projet/depot/controle-qualite-hebdomadaire.md).
+          curl -fsS "$API/qualitygates/project_status?projectKey=$PROJECT&branch=main" \
+            | jq -r '.projectStatus.conditions[] | select(.status == "ERROR") | "gate \(.metricKey)"' >> findings.txt
           # A rating other than A is an entry, under its letter: a rating that worsens is a new one.
           curl -fsS "$API/measures/component?component=$PROJECT&branch=main&metricKeys=reliability_rating,security_rating,sqale_rating,security_review_rating" \
             | jq -r '.component.measures[] | (.value | tonumber | floor) as $rating | select($rating > 1)
@@ -176,7 +180,8 @@ jobs:
           merge-multiple: true
 
       # The issue body holds the list between two markers; an entry missing from it is new. The entries to treat,
-      # between two other markers, are the new ones and the former ones still found that the agent left there.
+      # between two other markers, are the new ones, the former ones still found that the agent left there, and every
+      # failing condition of the quality gate, existing debt or not.
       - name: Update the known entries
         run: |
           export LC_ALL=C
@@ -198,15 +203,15 @@ jobs:
             : > pending.txt
             : > new.txt
           fi
-          comm -12 pending.txt current.txt | sort -u - new.txt > to-treat.txt
+          { comm -12 pending.txt current.txt; cat new.txt; grep '^gate ' current.txt || true; } | sort -u > to-treat.txt
           {
-            echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
+            echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`gate\`, \`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
             echo
             echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) entrée(s), dont $(wc -l < new.txt) nouvelle(s)."
             echo
             echo "## À traiter"
             echo
-            echo "Entrées nouvelles, et entrées des contrôles précédents que l'agent n'a pas encore traitées. Le reste de la liste est la dette existante, corrigée au fil de l'eau."
+            echo "Entrées nouvelles, entrées des contrôles précédents que l'agent n'a pas encore traitées, et conditions en échec de la porte de qualité (\`gate\`), prioritaires. Le reste de la liste est la dette existante, corrigée au fil de l'eau."
             echo
             echo "<!-- to-treat -->"
             echo '```text'
