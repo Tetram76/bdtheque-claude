@@ -76,11 +76,30 @@ jobs:
         with:
           dotnet-version: "10.0.404"
 
-      # The rules of scripts/style-audit.globalconfig, as warnings that do not fail the build. An entry names the rule and
-      # the file, not the line, which moves with every change around it.
+      # No style rule is imposed on the code: this build alone, on the runner's throwaway checkout, raises the rules
+      # below to warnings that do not fail it, through a .globalconfig at the root, which every project picks up.
+      # Only the rules that do not express a preference of form: a defect (code without effect, redundant or
+      # misleading), or a newer syntax of the language left unused where it says the same thing more directly
+      # (contraintes-techniques/exploitation-des-technologies-retenues.md). The rules of preference (var, braces,
+      # expression bodies, form of the namespace, target-typed new…) are left out. An entry names the rule and the
+      # file, not the line, which moves with every change around it.
       - name: List the style deviations
         run: |
-          dotnet build Bdtheque.slnx -p:StyleAudit=true -p:TreatWarningsAsErrors=false -nologo -clp:NoSummary > build.log
+          rules=(
+            # Defects: simplifiable name or member access, unnecessary cast or using, unreachable code, field that
+            # can be readonly, unused or unread private member, unused value or parameter, local function that can
+            # be static, struct field assigned whole, unnecessary suppression or !, redundant == true, unnecessary
+            # discard, redundant nullable directive, struct or member that can be readonly, nameof for a parameter.
+            IDE0001 IDE0002 IDE0004 IDE0005 IDE0035 IDE0044 IDE0051 IDE0052 IDE0059 IDE0060 IDE0062 IDE0064
+            IDE0079 IDE0080 IDE0100 IDE0110 IDE0240 IDE0241 IDE0250 IDE0251 IDE0280
+            # Newer syntax left unused: index and range, switch expression, pattern matching, tuple swap, cast in
+            # foreach, UTF-8 literal, primary constructor, collection expressions, static anonymous function,
+            # System.Threading.Lock, unbound generic type in nameof.
+            IDE0056 IDE0057 IDE0066 IDE0078 IDE0083 IDE0150 IDE0170 IDE0260 IDE0180 IDE0220 IDE0230 IDE0290
+            IDE0300 IDE0301 IDE0302 IDE0303 IDE0304 IDE0305 IDE0306 IDE0320 IDE0330 IDE0340
+          )
+          { echo "is_global = true"; printf 'dotnet_diagnostic.%s.severity = warning\n' "${rules[@]}"; } > .globalconfig
+          dotnet build Bdtheque.slnx -p:TreatWarningsAsErrors=false -nologo -clp:NoSummary > build.log
           sed -nE "s#^$GITHUB_WORKSPACE/([^(]+)\([0-9]+,[0-9]+\): warning (IDE[0-9]+):.*#style \2 \1#p" build.log \
             | sort -u > findings-style.txt
           cat findings-style.txt

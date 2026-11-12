@@ -4,8 +4,7 @@ title: 'Contrôle qualité hebdomadaire'
 description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité, référence et entrées à traiter, traitement borné à une Pull Request par semaine, dette existante corrigée au fil de l''eau ; à lire quand le traitement est dû ou pour modifier le contrôle.'
 applies_to:
   - '.github/workflows/quality-audit.yml'
-  - 'scripts/style-audit.globalconfig'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T10:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T12:20:00Z }
 ---
 
 # Contrôle qualité hebdomadaire
@@ -17,13 +16,13 @@ La porte de qualité de SonarQube Cloud ne juge que le nouveau code d'une Pull R
 Chaque semaine, et à la demande, sur `main` :
 
 - **SonarQube Cloud, code global** : les problèmes ouverts de l'analyse de `main`, dont les méthodes à la complexité cognitive au-delà du seuil de la règle `S3776` du profil de qualité ; les points sensibles de sécurité non revus ; chaque note du projet (fiabilité, sécurité, maintenabilité, revue de sécurité) autre que A.
-- **Règles de style .NET** (catégorie *Style*) qui n'expriment pas une préférence de forme (`scripts/style-audit.globalconfig`) : celles d'un **défaut**, code sans effet, redondant ou trompeur (ex. `IDE0005`, `IDE0004`, `IDE0060`, `IDE0059`), et celles d'une **syntaxe plus récente** du langage non employée là où elle dit la même chose plus directement (ex. `IDE0300` à `IDE0306`, `IDE0290`), ce que demande [Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md). Les règles de préférence (`var`, accolades, corps d'expression, forme du namespace, `new` ciblé…) en sont exclues.
+- **Règles de style .NET** (catégorie *Style*) qui n'expriment pas une préférence de forme, listées dans le workflow : celles d'un **défaut**, code sans effet, redondant ou trompeur (ex. `IDE0005`, `IDE0004`, `IDE0060`, `IDE0059`), et celles d'une **syntaxe plus récente** du langage non employée là où elle dit la même chose plus directement (ex. `IDE0300` à `IDE0306`, `IDE0290`), ce que demande [Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md). Les règles de préférence (`var`, accolades, corps d'expression, forme du namespace, `new` ciblé…) en sont exclues.
 - **Tests de mutation** : les mutants survivants ou qu'aucun test ne couvre, chacun un test qui manque, d'abord sur `Bdtheque.Domain` ; d'autres projets s'y ajoutent selon ce qu'il apprend.
 
 ## Rien ne bloque
 
 - Le contrôle n'est **pas un check requis**, et n'échoue que pour notifier (ci-dessous).
-- **Aucune règle de style n'est imposée à la compilation** : leur configuration n'est incluse que par la construction du contrôle.
+- **Aucune règle n'est imposée au code** (exigence de l'utilisateur), si ce n'est d'être sain, propre et cohérent, et de profiter des évolutions du langage quand elles vont dans ce sens : le contrôle observe, il ne prescrit pas. Le dépôt ne porte aucune configuration de style ; seule la construction du contrôle, sur la copie jetable de l'exécuteur, relève ces règles, et une entrée n'est qu'un signal à juger, que l'agent corrige ou rejette.
   - **Alternative écartée (`.editorconfig` et règles de style imposées à la compilation)** : mesuré sur le dépôt (catégorie *Style* entière, sens par défaut des préférences), l'essentiel des écarts sont des désaccords entre le sens par défaut des règles de préférence et le code du dépôt, ou des règles de jugement. Les imposer figerait un modèle de code, contraire à [Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md), qui demande la syntaxe la plus récente « dès qu'elle améliore » l'élément, jugement que seul l'agent porte au cas par cas.
 - **Aucun seuil**, de mutation comme de couverture ([Outillage de développement](../../choix-implementation/outillage.md)), ne fait échouer une Pull Request ni le contrôle : un mutant survivant est un test qui manque, traité comme toute entrée.
 - **Aucun outil n'écrit dans le dépôt ni n'ouvre de Pull Request** ([Budget IA](../gouvernance/budget-ia.md)) : le contrôle ne tient qu'un ticket ; une correction est une Pull Request de l'agent, faite de ses commits signés.

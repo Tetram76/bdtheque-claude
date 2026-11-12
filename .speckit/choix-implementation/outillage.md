@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T09:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T12:20:00Z }
 ---
 
 # Outillage de développement
@@ -80,8 +80,9 @@ Outillage du [Contrôle qualité hebdomadaire](../gestion-projet/depot/controle-
 
 - **Tests de mutation par Stryker.NET** (Apache 2.0), outil .NET local épinglé comme les autres ([Mises à jour des dépendances](../gestion-projet/depot/mises-a-jour-des-dependances.md)), qui exécute les tests xunit du projet muté ; sur `Bdtheque.Domain`, dont les tests n'ont besoin ni de conteneur ni de navigateur. **Tous les mutants à chaque exécution** : un passage complet du domaine dure moins de deux minutes sur quatre processeurs, négligeable une fois par semaine.
   - **Alternative écartée (baseline de Stryker.NET, `--with-baseline`, qui ne rejoue que les mutants touchés depuis l'exécution précédente)** : constaté sur le dépôt avec la version 5.0.0, le rapport n'est pas complet, contrairement à ce qu'annonce sa documentation. Les mutants inchangés sont « écartés par le filtre *since* » au lieu de reprendre leur résultat de la baseline, que le passage réécrit incomplète ; un passage sans aucun changement s'arrête sans écrire de rapport. À reconsidérer quand le périmètre rendra le passage complet long.
-- **Règles de style par un fichier de configuration global des analyseurs** (`scripts/style-audit.globalconfig`), que `Directory.Build.props` n'inclut que dans la construction du contrôle (`StyleAudit=true`, inclusion conditionnelle que documente Microsoft) : ses règles y sont des avertissements, relevés dans le journal de la construction, qui n'échoue pas pour eux. Toute autre construction les ignore.
-  - **Alternative écartée (`.editorconfig` écrit par le workflow le temps du contrôle)** : la liste des règles vivrait dans le workflow, et une construction locale, qui reproduit le relevé pour traiter une entrée, ne pourrait la reprendre qu'en la recopiant.
+- **Règles de style relevées par une construction du seul contrôle** : le workflow écrit, sur la copie jetable de l'exécuteur, un fichier de configuration global des analyseurs (`.globalconfig` à la racine, que tout projet reprend, documentation Microsoft) qui fait de ses règles des avertissements, relevés dans le journal de la construction, qui n'échoue pas pour eux. La liste des règles vit dans le workflow : le dépôt ne porte aucune configuration de style, et aucune autre construction ne voit ces règles.
+  - **Alternative écartée (fichier de configuration dans le dépôt, inclus sur demande par `Directory.Build.props`)** : une configuration de style dans le dépôt laisse croire à des règles imposées au code, ce que le projet refuse ([Contrôle qualité hebdomadaire](../gestion-projet/depot/controle-qualite-hebdomadaire.md), rien ne bloque).
+  - **Alternative écartée (`dotnet format style --diagnostics`, sans configuration)** : constaté sur le dépôt, il ne relève que les règles dont la gravité par défaut est une suggestion (ex. `IDE0305`, `IDE0290`), jamais celles qui sont silencieuses par défaut (ex. `IDE0005`, `IDE0004`).
 - **SonarQube Cloud lu par son API Web**, sans jeton, le projet étant public : problèmes ouverts et points sensibles de la branche `main`, notes du projet.
   - **Alternative écartée (second analyseur statique, CodeQL)** : il recoupe SonarQube Cloud.
   - **Alternative écartée (tests d'architecture, ex. NetArchTest)** : les références entre projets imposent déjà les couches à la compilation.

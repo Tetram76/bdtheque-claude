@@ -37,12 +37,6 @@
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <!-- The weekly quality audit (quality-audit.yml) lists the deviations from these style rules, in a build run with
-       StyleAudit=true; no other build enforces them (gestion-projet/depot/controle-qualite-hebdomadaire.md). -->
-  <ItemGroup Condition="'$(StyleAudit)' == 'true'">
-    <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)scripts/style-audit.globalconfig" />
-  </ItemGroup>
-
   <PropertyGroup>
     <Authors>BDthèque</Authors>
     <Company>BDthèque</Company>
