@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, tickets de suivi des harnais et leurs étiquettes (celle du harnais, `harness`) ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), tickets de suivi des harnais et leurs étiquettes (celle du harnais, `harness`) ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T09:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T11:28:15Z }
 ---
 
 # Issues
@@ -13,6 +13,19 @@ Les Issues GitHub (« tickets ») servent à :
 - tracer **chaque chantier** du plan d'implémentation (cf. [Suivi par tickets](suivi-par-tickets.md) ci-dessous) ;
 - tracer ponctuellement des **bugs** à corriger ou des **fonctionnalités** à implémenter dans le futur, hors plan d'implémentation ;
 - porter l'état d'un **harnais**, contrôle périodique de l'application ou du dépôt (§ Tickets de suivi des harnais).
+
+## Type d'un ticket
+
+Tout ticket reçoit, dès sa création, un **type** GitHub (*issue type*), parmi les trois du dépôt (exigence de l'utilisateur) :
+
+- **`Bug`** : un élément de l'**application** déjà réalisé se comporte ou s'affiche autrement qu'attendu, au regard du `.speckit/`, des maquettes, du reste de l'application (ex. un formulaire qui ne pose pas le focus que posent les autres) ou de ce que l'utilisateur en attend sans avoir à le demander. Le ticket décrit un constat ou une cause, sans changement d'exigence.
+  - **Le type suit le problème, pas la solution** : un défaut reste un `Bug` même si sa correction ajoute un mécanisme ou retravaille un texte.
+  - Qu'un ticket soit une demande de l'utilisateur n'en fait pas une `Feature` : seule compte la nature du travail.
+  - `Bug` est réservé à l'application : un défaut de l'outillage du dépôt (test instable, workflow, script) est une `Task`.
+- **`Feature`** : un comportement ou une capacité de l'application, visible de l'utilisateur, que le `.speckit/` ne prévoit pas encore : un changement d'exigence, que l'utilisateur décide et qui est écrit dans `fonctionnel/` ou `visuel/` avant sa réalisation ([Gouvernance documentaire](../gouvernance/gouvernance-documentaire.md#qui-décide-du-contenu)).
+- **`Task`** : tout ce qui ne change pas le comportement visible de l'application : ticket de suivi d'un harnais, toujours ; chantier technique (outillage, CI, harnais, déploiement, exploitation, sécurité, montée de version) ; travail technique interne, comme celui de la reprise des données.
+
+Un chantier fonctionnel du plan est un `Bug` ou une `Feature` selon la nature du travail à faire ; un chantier technique du plan est une `Task`. Un sous-ticket reçoit le type de son propre contenu, qui peut différer de celui de son ticket parent.
 
 ## Tickets de suivi des harnais
 
