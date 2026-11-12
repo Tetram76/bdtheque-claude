@@ -51,21 +51,43 @@ jobs:
             page=$((page + 1))
           done
           # Each failing condition of the quality gate of main is an entry, always to treat, as a known vulnerability is
-          # (gestion-projet/depot/controle-qualite-hebdomadaire.md).
+          # (gestion-projet/depot/controle-qualite-hebdomadaire.md), and so are the problems of the new code that make it
+          # fail, for a rating: they stay the same entries as above, only listed to treat.
           curl -fsS "$API/qualitygates/project_status?projectKey=$PROJECT&branch=main" \
-            | jq -r '.projectStatus.conditions[] | select(.status == "ERROR") | "gate \(.metricKey)"' >> findings.txt
+            | jq -r '.projectStatus.conditions[] | select(.status == "ERROR") | .metricKey' > failing.txt
+          : > gate.txt
+          while read -r metric; do
+            echo "gate $metric" | tee -a findings.txt >> gate.txt
+            case "$metric" in
+              new_reliability_rating) type=BUG ;;
+              new_security_rating) type=VULNERABILITY ;;
+              new_maintainability_rating) type=CODE_SMELL ;;
+              new_security_hotspots_reviewed | new_security_review_rating) type=HOTSPOT ;;
+              *) continue ;;
+            esac
+            if [ "$type" = HOTSPOT ]; then
+              curl -fsS "$API/hotspots/search?projectKey=$PROJECT&branch=main&status=TO_REVIEW&inNewCodePeriod=true&ps=500" \
+                | jq -r --arg project "$PROJECT:" '.hotspots[] | "hotspot \(.ruleKey) \(.component | ltrimstr($project))"' >> gate.txt
+            else
+              curl -fsS "$API/issues/search?componentKeys=$PROJECT&branch=main&resolved=false&inNewCodePeriod=true&types=$type&ps=500" \
+                | jq -r --arg project "$PROJECT:" '.issues[] | "sonar \(.rule) \(.component | ltrimstr($project))"' >> gate.txt
+            fi
+          done < failing.txt
+          sort -u gate.txt -o gate-sonar.txt
           # A rating other than A is an entry, under its letter: a rating that worsens is a new one.
           curl -fsS "$API/measures/component?component=$PROJECT&branch=main&metricKeys=reliability_rating,security_rating,sqale_rating,security_review_rating" \
             | jq -r '.component.measures[] | (.value | tonumber | floor) as $rating | select($rating > 1)
                 | "rating \(.metric) \("ABCDE"[$rating - 1:$rating])"' >> findings.txt
           sort -u findings.txt > findings-sonar.txt
-          cat findings-sonar.txt
+          cat findings-sonar.txt gate-sonar.txt
 
       - name: Upload the findings
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: findings-sonar
-          path: findings-sonar.txt
+          path: |
+            findings-sonar.txt
+            gate-sonar.txt
 
   style:
     name: Style rules
@@ -179,9 +201,10 @@ jobs:
           pattern: findings-*
           merge-multiple: true
 
-      # The issue body holds the list between two markers; an entry missing from it is new. The entries to treat,
-      # between two other markers, are the new ones, the former ones still found that the agent left there, and every
-      # failing condition of the quality gate, existing debt or not.
+      # The issue body holds the entries in two lists, each between its markers, every entry in one of them only: those
+      # to treat, and the existing debt. An entry missing from both is new. The entries to treat are the new ones, the
+      # former ones still found that the agent left there, and the failing conditions of the quality gate with the
+      # problems that make it fail, existing debt or not.
       - name: Update the known entries
         run: |
           export LC_ALL=C
@@ -195,15 +218,16 @@ jobs:
             gh issue view "$issue" --json body -q .body | tr -d '\r' > previous.md
             # A single sed each, which succeeds whether or not the list is empty (a filtering grep would fail on an
             # empty one under pipefail).
-            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > known.txt
             sed -n '/^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > pending.txt
+            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u - pending.txt > known.txt
             comm -23 current.txt known.txt > new.txt
           else
             # The first run sets the reference: the existing debt, nothing new.
             : > pending.txt
             : > new.txt
           fi
-          { comm -12 pending.txt current.txt; cat new.txt; grep '^gate ' current.txt || true; } | sort -u > to-treat.txt
+          { comm -12 pending.txt current.txt; cat new.txt; sort -u gate-sonar.txt | comm -12 - current.txt; } | sort -u > to-treat.txt
+          comm -23 current.txt to-treat.txt > debt.txt
           {
             echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`gate\`, \`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
             echo
@@ -211,7 +235,7 @@ jobs:
             echo
             echo "## À traiter"
             echo
-            echo "Entrées nouvelles, entrées des contrôles précédents que l'agent n'a pas encore traitées, et conditions en échec de la porte de qualité (\`gate\`), prioritaires. Le reste de la liste est la dette existante, corrigée au fil de l'eau."
+            echo "Conditions en échec de la porte de qualité (\`gate\`) et problèmes qui les causent, prioritaires ; entrées nouvelles ; entrées des contrôles précédents que l'agent n'a pas encore traitées."
             echo
             echo "<!-- to-treat -->"
             echo '```text'
@@ -219,11 +243,13 @@ jobs:
             echo '```'
             echo "<!-- end-to-treat -->"
             echo
-            echo "## Toutes les entrées"
+            echo "## Dette existante"
+            echo
+            echo "Corrigée au fil de l'eau, quand un chantier modifie de toute façon le fichier concerné."
             echo
             echo "<!-- list -->"
             echo '```text'
-            cat current.txt
+            cat debt.txt
             echo '```'
             echo "<!-- end -->"
           } > body.md
