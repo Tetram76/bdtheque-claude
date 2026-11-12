@@ -70,9 +70,26 @@ forwards to that session a question of the user about the chantier
    current calendar week, done or in progress; checked by the
    orchestrator alone, once for the batch,
    `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
-   `.speckit/suivi-implementation/` → milestone of the next version → the rest. Then drop each one that would touch the same
-   files as a chantier in progress, or that depends on one not merged yet.
-   Read the body of the remaining first candidates to check this.
+   `.speckit/suivi-implementation/` → milestone of the next version → the rest.
+
+   Then, **for each candidate you consider, in that order, you check yourself
+   both conditions below** — never one without the other, never left to the
+   chantier's session or to the user. Read the **whole body** of the ticket,
+   and its line in `.speckit/suivi-implementation/` with the paragraph that
+   introduces it when it is a plan ticket:
+   - **Independence**: it does not touch the same files as a chantier in
+     progress (same screen, theme, workflow, test base).
+   - **Dependencies**: every precondition that the ticket or its plan line
+     sets is met. A dependency is **any** precondition, not only another
+     chantier: a prerequisite ticket not merged yet, a sub-ticket its parent
+     orders before it, a published version, a production deployment
+     (`.speckit/journal-evenements.md`), a calendar (« sans objet avant… »,
+     « à réaliser avant… », a « Calendrier » section). A ticket with an unmet
+     precondition is **not a candidate**, whatever its rank, even when the
+     plan lists it (e.g. #267, « sans objet avant la première mise en
+     production »).
+
+   Drop each candidate that fails either check, and go on to the next one.
 3. **Resources, now** (PowerShell, every command bounded in time):
 
    ```powershell
