@@ -1,11 +1,11 @@
 ---
 type: Gouvernance
 title: 'Contrôle qualité hebdomadaire'
-description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité et ses entrées, traitement des entrées (correction, report, rejet, trace) ; à lire quand le traitement est dû ou pour modifier le contrôle.'
+description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité, référence et entrées à traiter, traitement borné à une Pull Request par semaine, dette existante corrigée au fil de l''eau ; à lire quand le traitement est dû ou pour modifier le contrôle.'
 applies_to:
   - '.github/workflows/quality-audit.yml'
   - 'scripts/style-audit.globalconfig'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T10:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T10:45:00Z }
 ---
 
 # Contrôle qualité hebdomadaire
@@ -36,14 +36,15 @@ Le contrôle tient la liste de ses entrées dans le ticket de suivi du harnais q
 - **Entrée** : sa source (`sonar`, `hotspot`, `rating`, `style`, `mutant`), la règle ou le mutateur, et le fichier, ou pour un mutant le code muté et son remplacement ; jamais la ligne, qui bouge à chaque modification voisine : une entrée reste la même d'une semaine à l'autre.
 - **Seule une exécution sur `main` tient le ticket** : une exécution lancée sur une autre branche, pour essayer une modification du contrôle, ne laisse ses relevés que dans son journal, sans mêler au ticket l'état d'une branche non fusionnée.
 - **Notification** : le contrôle n'échoue que lorsqu'il trouve une entrée absente de la liste. GitHub notifie alors l'échec à l'utilisateur qui a créé le workflow, une fois par entrée, et non chaque semaine tant qu'elle reste.
+- **Référence, puis entrées à traiter** : la première exécution pose la référence, la **dette existante**, sans rien de nouveau ni d'échec. Ensuite, la description distingue, dans une section « À traiter », les entrées **nouvelles** d'une exécution et celles des exécutions précédentes que l'agent n'a pas encore traitées, tant que le contrôle les relève ; le reste de la liste est la dette existante.
 
 ## Traitement des entrées
 
-Au moment que fixe [Traitement du contrôle qualité à la reprise du travail](traitement-du-controle-qualite-a-la-reprise-du-travail.md), chaque entrée est traitée comme un retour de revue ([Revue de code](../revue-tickets/revue-de-code.md), [Traiter un retour](../revue-tickets/revue-codex-bloquante.md#traiter-un-retour)) : contre-vérification, cause de fond ([Qualité du code](../gouvernance/qualite-du-code.md)), puis correction, report tracé ou rejet justifié.
+Au moment que fixe [Traitement du contrôle qualité à la reprise du travail](traitement-du-controle-qualite-a-la-reprise-du-travail.md), les entrées de la section « À traiter » sont traitées, chacune comme un retour de revue ([Revue de code](../revue-tickets/revue-de-code.md), [Traiter un retour](../revue-tickets/revue-codex-bloquante.md#traiter-un-retour)) : contre-vérification, cause de fond ([Qualité du code](../gouvernance/qualite-du-code.md)), puis correction, report tracé ou rejet justifié.
 
-- **Correction** : une Pull Request de l'agent réunit les corrections d'un traitement, et suit le cycle de toute Pull Request. Un mutant survivant se corrige par le test qui manque.
-- **Report** : un ticket ([Issues](../revue-tickets/issues.md)) porte la correction ; l'entrée reste dans la liste jusqu'à elle.
+- **Volume borné** (exigence de l'utilisateur) : un traitement par exécution du contrôle au plus, en une seule Pull Request de l'agent, qui réunit ses corrections et suit le cycle de toute Pull Request. Ce que le traitement ne couvre pas reste dans « À traiter », pour le traitement de la semaine suivante. Un mutant survivant se corrige par le test qui manque.
+- **Dette existante, au fil de l'eau** (exigence de l'utilisateur) : elle n'est jamais traitée en elle-même ; une de ses entrées se corrige quand un chantier modifie de toute façon le fichier concerné, dans la Pull Request de ce chantier.
+- **Report** : un ticket ([Issues](../revue-tickets/issues.md)) porte la correction ; l'entrée reste dans la liste jusqu'à elle, mais quitte « À traiter ».
 - **Rejet** : porté, avec sa raison, par le mécanisme de l'outil, pour que le contrôle suivant ne relève plus l'entrée : marquage dans SonarQube Cloud ([Analyse SonarQube Cloud](../revue-tickets/analyse-sonarqube-cloud.md), trace) ; suppression de la règle de style à l'endroit en cause, avec sa justification ; commentaire de désactivation de Stryker.NET sur le mutant (mutant équivalent), avec sa raison.
-- **Trace** : une section « Traitement du `<date>` », que l'agent ajoute à la description du ticket, après la liste, donne la conclusion du traitement : rien à faire, ou la Pull Request et les tickets qu'il a produits.
-- **Première exécution** : son volume est bien plus élevé que celui des suivantes ; ses entrées sont traitées comme toutes les autres.
-  - **Alternative écartée (ticket séparé pour la dette existante)** : la première exécution du contrôle la porte déjà.
+- **Trace** : l'agent retire de « À traiter » les entrées qu'il a traitées (corrigées, reportées ou rejetées), et ajoute à la description du ticket, après la liste, une section « Traitement du `<date>` », qui donne la conclusion du traitement : rien à faire, ou la Pull Request et les tickets qu'il a produits.
+  - **Alternative écartée (ticket séparé pour la dette existante)** : la référence du contrôle la porte déjà, dans son ticket de suivi.

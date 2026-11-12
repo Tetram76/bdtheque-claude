@@ -4,9 +4,11 @@ name: Quality audit
 # the open problems of its SonarQube Cloud analysis, whose quality gate only judges the new code; the deviations
 # from the style rules that the build does not enforce; the mutants that the tests let survive. The current list is
 # kept in the harness's tracking issue; the run only fails, hence only notifies the user who created the workflow,
-# when an entry absent from that list shows up. It is no required check and blocks nothing. The agent treats the
-# entries at a resumption of work, and records it in the issue body: rewriting the whole body here removes that
-# record, which makes the next treatment due.
+# when an entry absent from that list shows up. It is no required check and blocks nothing. The issue also holds the
+# entries to treat: the new ones, and those of former runs that the agent has not treated yet. The first run sets the
+# reference, the existing debt, which is corrected along the way and is never to treat in itself. The agent treats
+# the entries at a resumption of work, once per run at most, and records it in the issue body: rewriting the whole
+# body here removes that record, which makes the next treatment due.
 on:
   schedule:
     - cron: "23 4 * * 1"
@@ -154,7 +156,8 @@ jobs:
           pattern: findings-*
           merge-multiple: true
 
-      # The issue body holds the list between two markers; an entry missing from it is new.
+      # The issue body holds the list between two markers; an entry missing from it is new. The entries to treat,
+      # between two other markers, are the new ones and the former ones still found that the agent left there.
       - name: Update the known entries
         run: |
           export LC_ALL=C
@@ -165,18 +168,34 @@ jobs:
           gh label create harness --color 5319E7 --description "Tracking issue of a harness" --force
           issue=$(gh issue list --label quality-audit --label harness --state all --limit 1 --json number -q '.[0].number')
           if [ -n "$issue" ]; then
-            # A single sed, which succeeds whether or not the list is empty (a filtering grep would fail on an
+            gh issue view "$issue" --json body -q .body | tr -d '\r' > previous.md
+            # A single sed each, which succeeds whether or not the list is empty (a filtering grep would fail on an
             # empty one under pipefail).
-            gh issue view "$issue" --json body -q .body | tr -d '\r' \
-              | sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' | sort -u > known.txt
+            sed -n '/^<!-- list -->$/,/^<!-- end -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > known.txt
+            sed -n '/^<!-- to-treat -->$/,/^<!-- end-to-treat -->$/{/^<!--/d;/^```/d;p}' previous.md | sort -u > pending.txt
+            comm -23 current.txt known.txt > new.txt
           else
-            : > known.txt
+            # The first run sets the reference: the existing debt, nothing new.
+            : > pending.txt
+            : > new.txt
           fi
-          comm -23 current.txt known.txt > new.txt
+          comm -12 pending.txt current.txt | sort -u - new.txt > to-treat.txt
           {
             echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
             echo
-            echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) entrée(s)."
+            echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) entrée(s), dont $(wc -l < new.txt) nouvelle(s)."
+            echo
+            echo "## À traiter"
+            echo
+            echo "Entrées nouvelles, et entrées des contrôles précédents que l'agent n'a pas encore traitées. Le reste de la liste est la dette existante, corrigée au fil de l'eau."
+            echo
+            echo "<!-- to-treat -->"
+            echo '```text'
+            cat to-treat.txt
+            echo '```'
+            echo "<!-- end-to-treat -->"
+            echo
+            echo "## Toutes les entrées"
             echo
             echo "<!-- list -->"
             echo '```text'
