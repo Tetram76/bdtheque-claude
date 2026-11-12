@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-12
+
+* **Règle** : tout ticket reçoit dès sa création un type GitHub : `Bug` pour un élément de l'application déjà réalisé qui s'écarte de ce qui est attendu, le type suivant le problème et non la solution, ni l'origine de la demande ; `Feature` pour un comportement ou une capacité de l'application que le `.speckit/` ne prévoit pas encore ; `Task` pour tout le reste (tickets de suivi des harnais, chantiers techniques, défauts de l'outillage, `Bug` étant réservé à l'application) ; un chantier fonctionnel du plan est un `Bug` ou une `Feature` selon la nature du travail, un sous-ticket prend le type de son propre contenu (exigences de l'utilisateur) (#380).
+
 ## 2026-11-11
 
 * **Règle** : un test qui a un facteur temps (rendu, traitement asynchrone, délai, horloge, navigateur, conteneur, réseau), ajouté, modifié ou dont le code exercé change, n'est tenu pour bon qu'après avoir réussi sur plusieurs exécutions successives, dont certaines sous une charge comparable à celle du CI ; un seul échec est un problème de synchronisation traité à sa cause, jamais par une attente allongée (exigence de l'utilisateur) (#378).
