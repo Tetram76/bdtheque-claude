@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Écran d’accueil — maquettes</title>
+<link rel="stylesheet" href="../shared/viewer.css">
+<script src="../shared/viewer.js"></script>
+</head>
+<body>
+<script>
+Viewer.show({
+  title: 'Écran d’accueil',
+  lead: 'L’écran affiché à la première requête d’un navigateur, le temps d’apprendre son fuseau, sa date et son écran tactile : à l’identité commune de l’application, le thème de la visite n’étant pas encore tiré. L’animation tourne en boucle ici pour être vue, l’écran réel étant remplacé par la page dès que possible (le plus souvent une fraction de seconde). Présentation : ecran-accueil.md.',
+  versions: [
+    { title: 'Animé', page: 'mockup.html', params: {} },
+    { title: 'Mouvement réduit', page: 'mockup.html', params: { mouvement: 'reduit' } }
+  ]
+});
+</script>
+</body>
+</html>
