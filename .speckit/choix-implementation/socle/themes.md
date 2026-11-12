@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:42:20Z }
 ---
 
 # Thèmes
