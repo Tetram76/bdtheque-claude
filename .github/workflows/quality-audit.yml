@@ -57,29 +57,36 @@ jobs:
           }
           issues "" >> findings.txt
           hotspots "" >> findings.txt
+          # A rating other than A is an entry, under its letter: a rating that worsens is a new one.
+          curl -fsS "$API/measures/component?component=$PROJECT&branch=main&metricKeys=reliability_rating,security_rating,sqale_rating,security_review_rating" \
+            | jq -r '.component.measures[] | (.value | tonumber | floor) as $rating | select($rating > 1)
+                | "rating \(.metric) \("ABCDE"[$rating - 1:$rating])"' > ratings.txt
+          cat ratings.txt >> findings.txt
+          # The rating of the code as a whole that matches a failing condition of the gate is critical with it.
+          rating() { grep "^rating $1 " ratings.txt || true; }
           # Critical entries, treated first as a known vulnerability is (gestion-projet/depot/controle-qualite-hebdomadaire.md):
-          # each failing condition of the quality gate of main and, for a rating, the problems of the new code that make it
-          # fail; every problem of a blocker or high severity. They stay the same entries as above, only listed apart.
+          # each failing condition of the quality gate of main and, for a rating, its rating and the problems of the new code
+          # that make it fail; every problem of a blocker or high severity. They stay the same entries, only listed apart.
           curl -fsS "$API/qualitygates/project_status?projectKey=$PROJECT&branch=main" \
             | jq -r '.projectStatus.conditions[] | select(.status == "ERROR") | .metricKey' > failing.txt
           : > critical.txt
           while read -r metric; do
             echo "gate $metric" | tee -a findings.txt >> critical.txt
             case "$metric" in
-              new_reliability_rating) issues "&inNewCodePeriod=true&types=BUG" >> critical.txt ;;
-              new_security_rating) issues "&inNewCodePeriod=true&types=VULNERABILITY" >> critical.txt ;;
-              new_maintainability_rating) issues "&inNewCodePeriod=true&types=CODE_SMELL" >> critical.txt ;;
-              new_security_hotspots_reviewed | new_security_review_rating) hotspots "&inNewCodePeriod=true" >> critical.txt ;;
+              new_reliability_rating)
+                { rating reliability_rating; issues "&inNewCodePeriod=true&types=BUG"; } >> critical.txt ;;
+              new_security_rating)
+                { rating security_rating; issues "&inNewCodePeriod=true&types=VULNERABILITY"; } >> critical.txt ;;
+              new_maintainability_rating)
+                { rating sqale_rating; issues "&inNewCodePeriod=true&types=CODE_SMELL"; } >> critical.txt ;;
+              new_security_hotspots_reviewed | new_security_review_rating)
+                { rating security_review_rating; hotspots "&inNewCodePeriod=true"; } >> critical.txt ;;
               # Coverage, duplication: no problem to designate, the failing condition alone is the entry.
               *) ;;
             esac
           done < failing.txt
           issues "&impactSeverities=BLOCKER,HIGH" >> critical.txt
           sort -u critical.txt -o critical-sonar.txt
-          # A rating other than A is an entry, under its letter: a rating that worsens is a new one.
-          curl -fsS "$API/measures/component?component=$PROJECT&branch=main&metricKeys=reliability_rating,security_rating,sqale_rating,security_review_rating" \
-            | jq -r '.component.measures[] | (.value | tonumber | floor) as $rating | select($rating > 1)
-                | "rating \(.metric) \("ABCDE"[$rating - 1:$rating])"' >> findings.txt
           sort -u findings.txt > findings-sonar.txt
           cat findings-sonar.txt critical-sonar.txt
 
