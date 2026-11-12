@@ -45,8 +45,6 @@ public sealed class AlbumRecordCaptureTests(RecordsApplication application) : Br
         if (state == "unfolded")
         {
             await page.Locator(".contributions-toggle:visible summary").ClickAsync();
-            // Off the names, which the pointer would leave hovered.
-            await page.Mouse.MoveAsync(0, 0);
             // At the top, where the header that stays on screen is in each capture.
             await page.EvaluateAsync("() => window.scrollTo(0, 0)");
         }
