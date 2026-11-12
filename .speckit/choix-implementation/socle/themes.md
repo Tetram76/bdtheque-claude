@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:42:20Z }
 ---
 
 # Thèmes
@@ -65,6 +65,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:00:00Z }
 - **Page qui a une barre collée au bas de l'écran capturée dans une fenêtre aussi haute qu'elle** (barre d'enregistrement d'une fiche de saisie, page des contrôles des tests), ce que décide la capture elle-même, pour toute page : la barre s'y trouve sous le formulaire, comme à la fin de son défilement, et la capture ne change pas la fenêtre.
   - **Alternative écartée (capture de la page entière au-delà de la fenêtre)** : elle laisserait la barre au bas de la fenêtre, par-dessus le formulaire ; et, agrandissant la fenêtre pendant la capture, la page cessant d'y défiler, elle change la façon dont le navigateur compose la barre, placée à une fraction de pixel après le contenu qui la précède. La capture montrait l'une ou l'autre composition selon son moment : le point de l'état de la barre, à moins d'un dixième de pixel d'une limite d'arrondi, se dessinait parfois un pixel plus haut (constaté #343 : 3 captures sur 50 au-delà de la fenêtre, aucune sur 50 dans une fenêtre aussi haute que la page).
   - **Alternative écartée (toute page capturée dans une fenêtre aussi haute qu'elle)** : un panneau latéral ou un dialogue, dimensionnés sur la hauteur de l'écran, s'étendraient à toute la page. L'en-tête, seul autre élément collé à l'écran, l'est en haut de la page, à son origine, qu'aucun contenu ne place à une fraction de pixel.
+- **Pointeur écarté de la page par la capture elle-même**, au-dessus et à gauche de la fenêtre, pour toute capture : un clic laisse le pointeur sur l'élément cliqué, que la page déplace ensuite (erreur affichée au-dessus, fenêtre agrandie par la capture), et ce qu'il survolait au moment de la capture dépendait de l'instant où le navigateur l'avait mis à jour (constaté #383 : « Annuler » d'une fiche à corriger capturé survolé ou non selon l'exécution). La capture montre ainsi la page qu'aucune interaction n'a touchée, quelles que soient celles du test.
+  - **Alternative écartée (pointeur ramené à l'origine de la page par chaque test qui interagit)** : un test qui l'oublie retrouve l'instabilité, et l'origine de la page est dans l'en-tête, dont les liens et les boutons ont un état de survol, selon la largeur et le thème qui les y placent.
 - **Références mises à jour seulement après la validation de l'utilisateur** : la validation fonctionnelle est le seul juge du rendu ([Validation fonctionnelle](../../gestion-projet/revue-tickets/validation-fonctionnelle.md)), et chaque correction lui est soumise sans attendre de captures. Jusque-là, les captures d'une PR en brouillon diffèrent de leurs références, sans que ce soit à corriger ; les références mises à jour fixent ensuite le rendu validé.
 - **Captures comparées sous Linux seulement**, dans le CI et, ailleurs, dans le conteneur officiel de Playwright pour .NET : le rendu des polices diffère d'un système à l'autre.
   - **Alternative écartée (références propres à chaque système)** : chaque changement de rendu les demanderait toutes, sans garantie qu'elles montrent le même rendu.

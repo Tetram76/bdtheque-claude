@@ -74,6 +74,11 @@ public sealed class ScreenCaptureTests(ApplicationHost application) : BrowserTes
     /// </summary>
     internal static async Task<byte[]> CaptureAsync(IPage page)
     {
+        // Off the page, above and left of it, where neither the page laid out again nor the window enlarged below brings
+        // anything: a click leaves the pointer on the element clicked, which the page moves before it is captured, and
+        // what it hovers then depended on when the browser updated it (#383).
+        await page.Mouse.MoveAsync(-1, -1);
+
         if (await page.EvaluateAsync<bool>(HasABarStuckToTheBottom))
         {
             var height = await page.EvaluateAsync<int>("() => document.documentElement.scrollHeight");

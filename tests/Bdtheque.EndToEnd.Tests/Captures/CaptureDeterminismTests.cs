@@ -55,6 +55,26 @@ public sealed class CaptureDeterminismTests(ApplicationHost application) : Brows
         Assert.Equal(height, page.ViewportSize!.Height);
     }
 
+    /// <summary>
+    /// A capture depends on the page, never on where the interactions of the test left the pointer: a click leaves it on
+    /// the element clicked, which the page then moves (an error shown above it, the window enlarged by the capture), and
+    /// whether the browser had already updated what lies under the pointer depended on when the capture was taken (#383).
+    /// The capture is taken with the pointer off the page, as on a page that no interaction touched.
+    /// </summary>
+    [Theory, InEachTheme]
+    public async Task APageLeftUnderThePointer_IsCapturedWithNothingHovered(string theme)
+    {
+        var page = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports["desktop"]);
+        await PageReadiness.GotoAsync(page, ControlsPage.Path);
+        var heading = page.GetByRole(AriaRole.Heading, new() { Name = "Contrôles" });
+        await heading.HoverAsync();
+        Assert.True(await heading.EvaluateAsync<bool>("element => element.matches(':hover')"), "The pointer is expected over the heading.");
+
+        await ScreenCaptureTests.CaptureAsync(page);
+
+        Assert.Equal(0, await page.EvaluateAsync<int>("() => document.querySelectorAll(':hover').length"));
+    }
+
     // Both pages in the same state: the choice of a record rendered by its circuit, then whatever this rendering changed
     // in the page laid out (the chevron of the menu row).
     private static async Task SettleAsync(IPage page)

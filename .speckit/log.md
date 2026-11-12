@@ -2,6 +2,7 @@
 
 ## 2026-11-12
 
+* **Choix** : toute capture de référence est prise avec le pointeur écarté de la page, par la capture elle-même, et non à l'endroit où l'ont laissé les interactions du test ; références prises avec un survol involontaire reprises (#392).
 * **Choix** : chaque job de bout en bout du CI compile lui-même le projet des tests de bout en bout, en même temps que les autres jobs ; compilation unique partagée par un artefact écartée, qui allongerait le CI d'environ une minute pour épargner du temps d'exécuteur (#391).
 * **Choix** : focus à l'arrivée sur une page posé sur le champ marqué `autofocus` (l'identifiant de la connexion), sinon sur le titre, par `FocusOnNavigate`, dont le sélecteur ne désigne le titre que dans une page sans champ marqué : le navigateur n'applique pas `autofocus` au contenu qu'insère une navigation améliorée (#390).
 * **Choix** : chaque test de bout en bout impose le thème de ses pages, paramètre du test tiré du catalogue des thèmes, et s'exécute dans chaque thème proposé ; le compilateur refuse toute autre ouverture d'un contexte du navigateur, sauf aux tests du tirage du thème ; un test de ce qu'un thème a en propre s'exécute dans ce seul thème ; tests de bout en bout répartis dans le CI en un job par thème, le premier exécutant aussi ceux qui ne dépendent d'aucun thème, l'analyse SonarQube Cloud réunissant les couvertures de tous les jobs (#389).

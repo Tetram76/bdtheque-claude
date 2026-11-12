@@ -36,8 +36,6 @@ public sealed class AuthorRecordCaptureTests(RecordsApplication application) : B
         if (state == "unfolded")
         {
             await page.GetByRole(AriaRole.Button, new() { Name = "Tout déplier" }).ClickAsync();
-            // Off the button, which the pointer would leave hovered.
-            await page.Mouse.MoveAsync(0, 0);
             // At the top, where the header that stays on screen is in each capture.
             await page.EvaluateAsync("() => window.scrollTo(0, 0)");
         }
