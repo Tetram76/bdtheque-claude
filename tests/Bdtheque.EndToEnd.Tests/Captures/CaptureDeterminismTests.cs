@@ -61,10 +61,10 @@ public sealed class CaptureDeterminismTests(ApplicationHost application) : Brows
     /// whether the browser had already updated what lies under the pointer depended on when the capture was taken (#383).
     /// The capture is taken with the pointer off the page, as on a page that no interaction touched.
     /// </summary>
-    [Fact]
-    public async Task APageLeftUnderThePointer_IsCapturedWithNothingHovered()
+    [Theory, InEachTheme]
+    public async Task APageLeftUnderThePointer_IsCapturedWithNothingHovered(string theme)
     {
-        var page = await NewCapturePageAsync("base", ScreenCaptureTests.Viewports["desktop"]);
+        var page = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports["desktop"]);
         await PageReadiness.GotoAsync(page, ControlsPage.Path);
         var heading = page.GetByRole(AriaRole.Heading, new() { Name = "Contrôles" });
         await heading.HoverAsync();
