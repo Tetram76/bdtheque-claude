@@ -50,6 +50,10 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         // Still refused at the address of the administration: no cookie was given.
         await page.GotoAsync(AppPaths.AdminHome);
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AdminLogin)}\?"));
+
+        // Signed in, which forgets the failure: the attempts are counted for the whole application, which the other tests
+        // of the collection share, and failures left behind, one per theme, would end up refusing their logins.
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
     }
 
     [Theory, InEachTheme]

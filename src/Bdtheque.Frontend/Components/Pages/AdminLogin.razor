@@ -14,7 +14,8 @@
 
 @* The login of the administration (contraintes-techniques/architecture-deploiement/authentification.md), outside it: open
    to anyone, in the theme of the visit. Rendered statically, as a page that writes the authentication cookie must be
-   (choix-implementation/socle/frontend.md); once signed in, back to the page that asked for it. *@
+   (choix-implementation/socle/frontend.md); once signed in, back to the page that asked for it. The login has the focus as
+   the page opens, and again as it is given back after a refusal, the login typed kept. *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminLogin" />
 
@@ -29,7 +30,7 @@
             <AntiforgeryToken />
             <Field Id="admin-login-name" Label="@L["Login"]" Context="field">
                 <input id="@field.Id" name="@nameof(Login)" type="text" value="@Login" autocomplete="username"
-                       autocapitalize="none" spellcheck="false" required />
+                       autocapitalize="none" spellcheck="false" required autofocus />
             </Field>
             <Field Id="admin-login-password" Label="@L["Password"]" Context="field">
                 <input id="@field.Id" name="@nameof(Password)" type="password" autocomplete="current-password" required />
