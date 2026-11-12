@@ -6,8 +6,8 @@ name: Quality audit
 # kept in the harness's tracking issue; the run only fails, hence only notifies the user who created the workflow,
 # when an entry absent from that list shows up. It is no required check and blocks nothing. The issue sorts the debt
 # by urgency, each entry once: critical (a failing condition of the quality gate and what makes it fail, a problem of a
-# blocker or high severity), priority (the new entries, and those the agent has not treated yet), and the rest, fixed
-# along the way; the first run sets the reference, nothing new. The agent treats the critical then priority entries at
+# blocker or high severity), priority (every other problem of SonarQube Cloud, the new entries, and those the agent has
+# not treated yet), and the rest, fixed along the way; the first run sets the reference, nothing new. The agent treats the critical then priority entries at
 # a resumption of work, once per run at most, and records it in the issue body: rewriting the whole body here removes
 # that record, which makes the next treatment due.
 on:
@@ -212,8 +212,8 @@ jobs:
 
       # The issue body holds the debt in three lists by urgency, each between its markers, every entry in one of them only;
       # an entry missing from all is new. Critical: the critical entries of SonarQube Cloud, whatever their age.
-      # Priority: the new entries, and the former ones still found that the agent has not treated yet. The rest is fixed
-      # along the way.
+      # Priority: every other problem of SonarQube Cloud, fixed before it makes a rating fall; the new entries; the former
+      # ones still found that the agent has not treated yet. The rest is fixed along the way.
       - name: Update the known entries
         run: |
           export LC_ALL=C
@@ -239,7 +239,8 @@ jobs:
             : > new.txt
           fi
           sort -u critical-sonar.txt | comm -12 - current.txt > critical.txt
-          { comm -12 pending.txt current.txt; cat new.txt; } | sort -u | comm -23 - critical.txt > to-treat.txt
+          { comm -12 pending.txt current.txt; cat new.txt; grep -E '^(sonar|hotspot|rating) ' current.txt || true; } \
+            | sort -u | comm -23 - critical.txt > to-treat.txt
           sort -u critical.txt to-treat.txt | comm -23 current.txt - > debt.txt
           {
             echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`gate\`, \`sonar\`, \`hotspot\`, \`rating\`), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
@@ -258,7 +259,7 @@ jobs:
             echo
             echo "## Prioritaire"
             echo
-            echo "Entrées nouvelles, et entrées des contrôles précédents que l'agent n'a pas encore traitées : traitement hebdomadaire."
+            echo "Tout autre problème de SonarQube Cloud, corrigé avant qu'il ne fasse tomber une note ; entrées nouvelles ; entrées des contrôles précédents que l'agent n'a pas encore traitées : traitement hebdomadaire."
             echo
             echo "<!-- to-treat -->"
             echo '```text'
