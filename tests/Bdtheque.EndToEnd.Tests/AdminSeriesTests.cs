@@ -20,10 +20,10 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
 
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -36,12 +36,12 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
-    [Fact]
-    public async Task Search_ThenTheNavigationByInitial_NarrowTheList()
+    [Theory, InEachTheme]
+    public async Task Search_ThenTheNavigationByInitial_NarrowTheList(string theme)
     {
         await CreateSeriesAsync($"Barracuda {_marker}");
         await CreateSeriesAsync($"Le Lotus bleu {_marker}");
-        var page = await OpenAsync(AppPaths.AdminSeries);
+        var page = await OpenAsync(theme, AppPaths.AdminSeries);
 
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une série" }).FillAsync(_marker);
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une série" }).PressAsync("Enter");
@@ -52,13 +52,13 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries, $"?q={_marker}&entry=L"));
     }
 
-    [Fact]
-    public async Task Filter_ChosenByTypingItsName_NarrowsTheList_AndItsTagRemovesIt()
+    [Theory, InEachTheme]
+    public async Task Filter_ChosenByTypingItsName_NarrowsTheList_AndItsTagRemovesIt(string theme)
     {
         var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Genre {_marker}"));
         await CreateSeriesAsync($"Avec le genre {_marker}", [genre.Id]);
         await CreateSeriesAsync($"Sans le genre {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminSeries}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminSeries}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtres" }).ClickAsync();
         await ControlsPage.WaitUntilInteractiveAsync(page);
@@ -71,11 +71,11 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Titles(page)).ToHaveTextAsync([$"Avec le genre {_marker}", $"Sans le genre {_marker}"]);
     }
 
-    [Fact]
-    public async Task Deletion_ConfirmedInAModalDialog_TakesTheSeriesOutOfTheList()
+    [Theory, InEachTheme]
+    public async Task Deletion_ConfirmedInAModalDialog_TakesTheSeriesOutOfTheList(string theme)
     {
         await CreateSeriesAsync($"À supprimer {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminSeries}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminSeries}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur À supprimer {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -86,13 +86,13 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucune série ne correspond à « {_marker} ».");
     }
 
-    [Fact]
-    public async Task Deletion_OfASeriesWithAlbums_IsRefused_AndSaysWhatToDo()
+    [Theory, InEachTheme]
+    public async Task Deletion_OfASeriesWithAlbums_IsRefused_AndSaysWhatToDo(string theme)
     {
         var series = await CreateSeriesAsync($"Avec un album {_marker}");
         await PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
             null, null, series.Id, AlbumType.Regular, false, 1, null, null, null, null, null, null, null, [], [], []));
-        var page = await OpenAsync($"{AppPaths.AdminSeries}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminSeries}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Avec un album {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -104,12 +104,12 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" })).ToHaveCountAsync(0);
     }
 
-    [Fact]
-    public async Task Merge_SearchesTheOtherSeries_AndContinuesWithTheOneChosen()
+    [Theory, InEachTheme]
+    public async Task Merge_SearchesTheOtherSeries_AndContinuesWithTheOneChosen(string theme)
     {
         var series = await CreateSeriesAsync($"Barracuda {_marker}");
         var other = await CreateSeriesAsync($"Barracuda bis {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminSeries}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminSeries}?q={_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Barracuda {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Fusionner avec une autre série…" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux séries" });
@@ -123,34 +123,31 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
     }
 
     [Theory]
-    [InlineData(414)]
-    [InlineData(768)]
-    [InlineData(1024)]
-    [InlineData(1180)]
-    [InlineData(1440)]
-    public async Task Rows_AtEveryWidth_LeaveTheTitleItsRoom_WithoutTheListOverflowing(int width)
+    [InEachTheme(414)]
+    [InEachTheme(768)]
+    [InEachTheme(1024)]
+    [InEachTheme(1180)]
+    [InEachTheme(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheTitleItsRoom_WithoutTheListOverflowing(string theme, int width)
     {
         await CreateSeriesAsync($"Les Chroniques d'Ombrelune et des veilleurs du port {_marker}", isComplete: true);
-        foreach (var theme in new[] { "base", "planche", "gazette" })
-        {
-            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
-            await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminSeries}?q={_marker}");
-            await PageReadiness.WaitAsync(page);
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminSeries}?q={_marker}");
+        await PageReadiness.WaitAsync(page);
 
-            var title = await page.Locator(".row-entry").EvaluateAsync<double>("title => title.getBoundingClientRect().width");
-            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+        var title = await page.Locator(".row-entry").EvaluateAsync<double>("title => title.getBoundingClientRect().width");
+        var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
-            Assert.True(title >= 120, $"{theme} at {width}px: the title is {title}px wide.");
-            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
-            // At the width of the mockups' desktop, the table has all its columns, the last modification included.
-            if (width == 1440)
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifiée" })).ToBeVisibleAsync();
-        }
+        Assert.True(title >= 120, $"{theme} at {width}px: the title is {title}px wide.");
+        Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // At the width of the mockups' desktop, the table has all its columns, the last modification included.
+        if (width == 1440)
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifiée" })).ToBeVisibleAsync();
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

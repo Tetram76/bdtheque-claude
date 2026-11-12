@@ -18,10 +18,10 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -34,15 +34,15 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
-    [Fact]
-    public async Task Search_OnTheTitleOfTheSeries_NarrowsTheList()
+    [Theory, InEachTheme]
+    public async Task Search_OnTheTitleOfTheSeries_NarrowsTheList(string theme)
     {
         var series = await PostAsync<SeriesForm>("/admin/series", new SeriesContent(
             $"Le Château des étoiles {_marker}", null, null, null, false, false, false, null, null,
             new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));
         await CreateAlbumIntentAsync(await CreateAlbumAsync(null, series.Id, 4));
         await CreateAlbumIntentAsync(await CreateAlbumAsync($"Les Vieux Fourneaux {_marker}"));
-        var page = await OpenAsync(AppPaths.AdminPurchaseIntents);
+        var page = await OpenAsync(theme, AppPaths.AdminPurchaseIntents);
 
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une intention d'achat" }).FillAsync($"Château des étoiles {_marker}");
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une intention d'achat" }).PressAsync("Enter");
@@ -50,14 +50,14 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Le Château des étoiles {_marker} - T. 4"]);
     }
 
-    [Fact]
-    public async Task Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt_AndTakesTheIntentOutOfTheList()
+    [Theory, InEachTheme]
+    public async Task Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt_AndTakesTheIntentOutOfTheList(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Buddy Longway {_marker}");
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, 1974, null, null, null, null, null, null, null, true), await AlbumVersionAsync(album.Id)));
-        var page = await OpenAsync($"{AppPaths.AdminPurchaseIntents}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention d'achat de Buddy Longway {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Retirer l'intention…" }).ClickAsync();
@@ -70,12 +70,12 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
     }
 
     [Theory]
-    [InlineData(414)]
-    [InlineData(768)]
-    [InlineData(1024)]
-    [InlineData(1180)]
-    [InlineData(1440)]
-    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(int width)
+    [InEachTheme(414)]
+    [InEachTheme(768)]
+    [InEachTheme(1024)]
+    [InEachTheme(1180)]
+    [InEachTheme(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutTheListOverflowing(string theme, int width)
     {
         var publisher = await PostAsync<PublisherForm>(
             "/admin/publishers", new PublisherContent($"Les Éditions du Grand Large et des Archipels réunis {_marker}", null, []));
@@ -83,26 +83,23 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, 2014, "978-2-7234-4567-1", null, null, null, null, null, null, true),
             await AlbumVersionAsync(album.Id)));
-        foreach (var theme in ThemeCatalog.Offered.Select(theme => theme.Key))
-        {
-            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
-            await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
-            await PageReadiness.WaitAsync(page);
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
+        await PageReadiness.WaitAsync(page);
 
-            var label = await page.Locator(".intent-label").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
-            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+        var label = await page.Locator(".intent-label").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+        var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
-            Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
-            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
-            // At the width of the mockups' desktop, the table has all its columns, the membership of the collection included.
-            if (width == 1440)
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Collection" })).ToBeVisibleAsync();
-        }
+        Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
+        Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // At the width of the mockups' desktop, the table has all its columns, the membership of the collection included.
+        if (width == 1440)
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Collection" })).ToBeVisibleAsync();
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

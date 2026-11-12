@@ -51,11 +51,10 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
     public async Task Moves_AreLeftOut_WhenTheReaderAsksForFewerAnimations()
     {
         var reduced = await OpenAsync(AppPaths.Home);
-        var moving = await NewPageAsync(new BrowserNewContextOptions
+        var moving = await NewPageAsync(ThemeCatalog.Couverture.Key, new BrowserNewContextOptions
         {
             ViewportSize = Desktop,
             ReducedMotion = ReducedMotion.NoPreference,
-            ExtraHTTPHeaders = new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Couverture.Key },
         });
         await PageReadiness.GotoAsync(moving, AppPaths.Home);
 

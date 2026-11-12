@@ -12,10 +12,10 @@ namespace Bdtheque.EndToEnd.Tests.Controls;
 [Collection(ApplicationCollection.Name)]
 public sealed partial class ControlsTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
-    [Fact]
-    public async Task Menu_OpensFromItsButton_UnderIt_AndClosesOnAClickOutside()
+    [Theory, InEachTheme]
+    public async Task Menu_OpensFromItsButton_UnderIt_AndClosesOnAClickOutside(string theme)
     {
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
         var toggle = page.GetByRole(AriaRole.Button, new() { Name = "Autres actions sur Le Lotus bleu" });
         var menu = page.Locator("#row-1");
 
@@ -31,10 +31,10 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(menu).ToBeHiddenAsync();
     }
 
-    [Fact]
-    public async Task Menu_ClosesOnEscape_AndLeadsByItsItems()
+    [Theory, InEachTheme]
+    public async Task Menu_ClosesOnEscape_AndLeadsByItsItems(string theme)
     {
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
         var toggle = page.GetByRole(AriaRole.Button, new() { Name = "Autres actions sur Le Lotus bleu" });
         var menu = page.Locator("#row-1");
 
@@ -47,10 +47,10 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(page).ToHaveURLAsync(EditedUrl());
     }
 
-    [Fact]
-    public async Task Dialog_ChosenFromAMenu_OpensAsAModal_FocusingItsClosing_AndEscapeLeadsToThePageWithoutIt()
+    [Theory, InEachTheme]
+    public async Task Dialog_ChosenFromAMenu_OpensAsAModal_FocusingItsClosing_AndEscapeLeadsToThePageWithoutIt(string theme)
     {
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
         await page.GetByRole(AriaRole.Button, new() { Name = "Autres actions sur Le Lotus bleu" }).ClickAsync();
         await page.Locator("#row-1").GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
 
@@ -67,10 +67,10 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(page.Locator("dialog.dialog")).ToHaveCountAsync(0);
     }
 
-    [Fact]
-    public async Task Dialog_OfAPageLoadedWithIt_OpensAsAModal_AndClosesByItsLink()
+    [Theory, InEachTheme]
+    public async Task Dialog_OfAPageLoadedWithIt_OpensAsAModal_AndClosesByItsLink(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(ControlsPage.Path + "?dialog=true");
 
         var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Supprimer l'album ?" });
@@ -82,14 +82,14 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(page.Locator("dialog.dialog")).ToHaveCountAsync(0);
     }
 
-    [Fact]
-    public async Task RecordPicker_SuggestsByTheTextTyped_AndTheKeyboardChoosesWithoutSubmittingTheForm()
+    [Theory, InEachTheme]
+    public async Task RecordPicker_SuggestsByTheTextTyped_AndTheKeyboardChoosesWithoutSubmittingTheForm(string theme)
     {
         var token = $"Zorglub{Guid.NewGuid():N}"[..14];
         var genre = await CreateGenreAsync($"{token} cosmique");
         await CreateGenreAsync($"{token} galactique");
         await CreateDecoyAsync(token);
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
         await TypeAndAwaitSuggestionsAsync(page, input, token);
@@ -108,13 +108,13 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"genreId={genre}"));
     }
 
-    [Fact]
-    public async Task RecordPicker_KeepsTheActiveSuggestionInView_WhenTheListOverflows()
+    [Theory, InEachTheme]
+    public async Task RecordPicker_KeepsTheActiveSuggestionInView_WhenTheListOverflows(string theme)
     {
         var token = $"Gaston{Guid.NewGuid():N}"[..12];
         for (var index = 0; index < 10; index++)
             await CreateGenreAsync($"{token} {index}");
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
         // At once rather than letter by letter: a single search, whose answer no later one replaces.
@@ -132,13 +132,13 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(last).ToBeInViewportAsync();
     }
 
-    [Fact]
-    public async Task RecordPicker_Escape_ClosesTheSuggestions_WithoutErasingTheText()
+    [Theory, InEachTheme]
+    public async Task RecordPicker_Escape_ClosesTheSuggestions_WithoutErasingTheText(string theme)
     {
         var token = $"Marsupilami{Guid.NewGuid():N}"[..16];
         await CreateGenreAsync(token);
         await CreateDecoyAsync(token);
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
         var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
 
         await TypeAndAwaitSuggestionsAsync(page, input, token);
@@ -149,10 +149,10 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(input).ToHaveValueAsync(token);
     }
 
-    [Fact]
-    public async Task Placeholder_KeepsItsColor_WithoutOpacity()
+    [Theory, InEachTheme]
+    public async Task Placeholder_KeepsItsColor_WithoutOpacity(string theme)
     {
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
 
         var placeholder = await page.EvaluateAsync<string[]>("""
             () => {
@@ -165,10 +165,10 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         Assert.Equal("1", placeholder[1]);
     }
 
-    [Fact]
-    public async Task Focus_IsAnOutlineOfTheText_SetApartByABandOfTheSurfaceAround()
+    [Theory, InEachTheme]
+    public async Task Focus_IsAnOutlineOfTheText_SetApartByABandOfTheSurfaceAround(string theme)
     {
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
 
         await page.Locator("#f-title").FocusAsync();
         // In a block, the band is its fill: the tint a theme deals it, or its surface.
@@ -183,10 +183,10 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         }
     }
 
-    [Fact]
-    public async Task ControlInError_IsBorderedWithTheAlertColor()
+    [Theory, InEachTheme]
+    public async Task ControlInError_IsBorderedWithTheAlertColor(string theme)
     {
-        var page = await OpenAsync();
+        var page = await OpenAsync(theme);
 
         var colors = await page.EvaluateAsync<string[]>("""
             () => [getComputedStyle(document.getElementById('f-key')).borderTopColor, resolve('--color-alert')]
@@ -221,9 +221,9 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
             }
             """.Replace("resolve(", ResolveColor));
 
-    private async Task<IPage> OpenAsync()
+    private async Task<IPage> OpenAsync(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await PageReadiness.GotoAsync(page, ControlsPage.Path);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         return page;

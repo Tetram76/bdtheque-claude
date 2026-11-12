@@ -16,10 +16,10 @@ namespace Bdtheque.EndToEnd.Tests;
 [Collection(ApplicationCollection.Name)]
 public sealed partial class AdministrationAccessTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
-    [Fact]
-    public async Task Administrator_SignsIn_AndIsLedBackToThePageAskedFor()
+    [Theory, InEachTheme]
+    public async Task Administrator_SignsIn_AndIsLedBackToThePageAskedFor(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
 
         await page.GotoAsync(AppPaths.AdminHome);
 
@@ -33,10 +33,10 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Administration");
     }
 
-    [Fact]
-    public async Task WrongPassword_IsRefused_AsAnErrorToCorrect()
+    [Theory, InEachTheme]
+    public async Task WrongPassword_IsRefused_AsAnErrorToCorrect(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.AdminLogin);
 
         await page.GetByLabel("Identifiant").FillAsync(ApplicationHost.AdminLogin);
@@ -52,10 +52,10 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AdminLogin)}\?"));
     }
 
-    [Fact]
-    public async Task ReturnPage_OfAnotherSite_IsNeverFollowed()
+    [Theory, InEachTheme]
+    public async Task ReturnPage_OfAnotherSite_IsNeverFollowed(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await page.GotoAsync($"{AppPaths.AdminLogin}?{AppPaths.ReturnUrlParameter}=%2F%2Fother.example%2F");
 
         await page.GetByLabel("Identifiant").FillAsync(ApplicationHost.AdminLogin);
@@ -65,10 +65,10 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
-    [Fact]
-    public async Task Administrator_SignsOutFromTheMenu_AndTheAdministrationAsksForTheLoginAgain()
+    [Theory, InEachTheme]
+    public async Task Administrator_SignsOutFromTheMenu_AndTheAdministrationAsksForTheLoginAgain(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -79,10 +79,10 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AdminLogin)}\?"));
     }
 
-    [Fact]
-    public async Task LoginPage_OnceSignedIn_LeadsStraightToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task LoginPage_OnceSignedIn_LeadsStraightToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GotoAsync(AppPaths.AdminLogin);
@@ -98,10 +98,10 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
 [Collection(AdministrationApplication.Name)]
 public sealed class AdminHomeTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)
 {
-    [Fact]
-    public async Task Administrator_SeesTheRecordsTheChecksAndTheLatestChanges()
+    [Theory, InEachTheme]
+    public async Task Administrator_SeesTheRecordsTheChecksAndTheLatestChanges(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         var albums = page.Locator(".admin-record", new() { Has = page.Locator(".admin-record-name").GetByText("Albums", new() { Exact = true }) });
@@ -115,10 +115,10 @@ public sealed class AdminHomeTests(AdministrationApplication application) : Brow
         await Assertions.Expect(changes).Not.ToContainTextAsync(["Polar"]);
     }
 
-    [Fact]
-    public async Task Menu_GivesTheNumberOfRecords_AndLeadsToTheLists()
+    [Theory, InEachTheme]
+    public async Task Menu_GivesTheNumberOfRecords_AndLeadsToTheLists(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();

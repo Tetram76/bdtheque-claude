@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T19:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:00:00Z }
 ---
 
 # Thèmes
@@ -72,5 +72,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T19:05:00Z }
   - **Alternative écartée (attendre une page stable)** : la course porte sur le premier rendu, pendant le chargement ; une capture prise trois secondes après différait encore une fois sur cinq.
 - **Une unité d'écart tolérée par composante de couleur**, et rien au-delà : les bords d'un élément composé en 3D (un album en volume, tourné avec une perspective, [La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) varient d'une unité d'une exécution du CI à l'autre, sur l'exécuteur seulement, ce qu'aucun réglage du navigateur ne corrige (sans GPU, constaté #314). Un changement réel de rendu (une couleur, un pixel de décalage) dépasse cette unité.
   - **Alternative écartée (albums en volume dessinés sans perspective)** : un rendu validé par l'utilisateur, qu'il a choisi de garder.
-- **Toute la matrice à chaque contrôle**, écrans, thèmes et largeurs : une capture coûte surtout le rendu de sa page. Au-delà de 5 minutes de tests de bout en bout dans le CI, les captures sont réparties par thème entre plusieurs jobs.
+- **Toute la matrice à chaque contrôle**, écrans, thèmes et largeurs : une capture coûte surtout le rendu de sa page. Au-delà de 5 minutes de tests de bout en bout dans le CI, ils sont répartis par thème entre plusieurs jobs. Chaque test de bout en bout s'exécutant dans chaque thème ([Outillage de développement .NET](../outillage.md)), le seuil est dépassé : un job par thème proposé exécute les captures et les tests de son thème.
   - **Alternative écartée (empreinte de rendu : ne reprendre que les captures dont l'empreinte a changé)** : réalisée et mesurée ; elle n'épargne que la prise et la comparaison, le rendu restant à faire, et ajoute une empreinte à tenir et des échecs sans changement de pixels. Conservée dans `poc/empreinte-de-rendu/`, à reconsidérer si la prise et la comparaison redevenaient la part dominante.

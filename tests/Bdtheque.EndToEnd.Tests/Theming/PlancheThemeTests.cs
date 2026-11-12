@@ -161,7 +161,7 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
     {
         var page = await OpenAsync(ThemeCatalog.Base.Key);
 
-        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Planche.Key });
+        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = ThemeCatalog.Planche.Key });
         await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(CasesPage.Path, "?again=1"));
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Planche.Key);
@@ -176,7 +176,7 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
     {
         var page = await OpenAsync(ThemeCatalog.Planche.Key);
 
-        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [Captures.RequestThemeSelector.HeaderName] = ThemeCatalog.Base.Key });
+        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = ThemeCatalog.Base.Key });
         await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(CasesPage.Path, "?again=1"));
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Base.Key);

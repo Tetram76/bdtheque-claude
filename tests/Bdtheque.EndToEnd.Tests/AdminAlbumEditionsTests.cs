@@ -18,11 +18,11 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task ListOfTheAlbums_LeadsToThePage_WhoseFilDAraneLeadsToTheListOfTheIntents()
+    [Theory, InEachTheme]
+    public async Task ListOfTheAlbums_LeadsToThePage_WhoseFilDAraneLeadsToTheListOfTheIntents(string theme)
     {
         await CreateAlbumAsync($"Le Château des étoiles {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminAlbums}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAlbums}?q={_marker}");
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Éditions et intentions d'achat de Le Château des étoiles {_marker}" }).ClickAsync();
 
@@ -32,12 +32,12 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
     }
 
-    [Fact]
+    [Theory, InEachTheme]
     // Nothing is entered for an intent on the whole album: choosing it sets it at once (visuel/editions-album/contenu.md).
-    public async Task IntentOnTheAlbum_Chosen_IsSetAtOnce_AndNoOtherIntentIsOffered()
+    public async Task IntentOnTheAlbum_Chosen_IsSetAtOnce_AndNoOtherIntentIsOffered(string theme)
     {
         var album = await CreateAlbumAsync($"Blacksad {_marker}");
-        var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Sur l'album…" }).ClickAsync();
@@ -50,8 +50,8 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" })).ToHaveCountAsync(0);
     }
 
-    [Fact]
-    public async Task Deletion_OfTheOnlyOwnedEdition_AnnouncesTheAlbumLeavingTheCollection_AndLeavesNoEdition()
+    [Theory, InEachTheme]
+    public async Task Deletion_OfTheOnlyOwnedEdition_AnnouncesTheAlbumLeavingTheCollection_AndLeavesNoEdition(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Casterman {_marker}", null, []));
         var album = await CreateAlbumAsync($"Les Bijoux de la Castafiore {_marker}");
@@ -59,7 +59,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
             new EditionContent(publisher.Id, null, 1963, null, null, null, null, null, null, null, false, true, null,
                 AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null),
             album.Version));
-        var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Casterman {_marker} [1963]" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer l'édition…" }).ClickAsync();
@@ -72,14 +72,14 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Hors collection");
     }
 
-    [Fact]
-    public async Task Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt_AndOffersBothTargetsAgain()
+    [Theory, InEachTheme]
+    public async Task Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt_AndOffersBothTargetsAgain(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Buddy Longway {_marker}");
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, 1974, null, null, null, null, null, null, null, true), album.Version));
-        var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention : Dupuis {_marker} [1974]" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Retirer l'intention…" }).ClickAsync();
@@ -93,8 +93,8 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" })).ToBeVisibleAsync();
     }
 
-    [Fact]
-    public async Task Removal_OfAnIntent_AfterTheDeletionOfTheOwnedEdition_LeavesTheAlbumWithoutEither()
+    [Theory, InEachTheme]
+    public async Task Removal_OfAnIntent_AfterTheDeletionOfTheOwnedEdition_LeavesTheAlbumWithoutEither(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Lagune {_marker}", null, []));
         var album = await CreateAlbumAsync($"Brouillard sur Ombrelune {_marker}");
@@ -104,7 +104,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
             album.Version));
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, 2023, null, null, null, null, null, null, null, true), owned.AlbumVersion));
-        var page = await OpenAsync(AppPaths.AdminAlbumEditions(album.Id));
+        var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Lagune {_marker} [2008]" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer l'édition…" }).ClickAsync();
@@ -121,11 +121,11 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     }
 
     [Theory]
-    [InlineData(414)]
-    [InlineData(768)]
-    [InlineData(1024)]
-    [InlineData(1440)]
-    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutThePageOverflowing(int width)
+    [InEachTheme(414)]
+    [InEachTheme(768)]
+    [InEachTheme(1024)]
+    [InEachTheme(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheLabelItsRoom_WithoutThePageOverflowing(string theme, int width)
     {
         var publisher = await PostAsync<PublisherForm>(
             "/admin/publishers", new PublisherContent($"Les Éditions du Grand Large et des Archipels réunis {_marker}", null, []));
@@ -139,23 +139,20 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
             new PurchaseIntentEditionContent(publisher.Id, null, 2020, "978-2-7234-4568-8", BindingType.Hardcover, null, null, null, null,
                 EditionCategory.LimitedEdition, true),
             edition.AlbumVersion));
-        foreach (var theme in ThemeCatalog.Offered.Select(theme => theme.Key))
-        {
-            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
-            await ApplicationHost.SignInAsync(page, AppPaths.AdminAlbumEditions(album.Id));
-            await PageReadiness.WaitAsync(page);
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminAlbumEditions(album.Id));
+        await PageReadiness.WaitAsync(page);
 
-            var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
-            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+        var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+        var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
-            Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
-            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
-        }
+        Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
+        Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;

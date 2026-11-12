@@ -14,15 +14,15 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 public sealed class CaptureDeterminismTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
 {
     [LinuxTheory]
-    [InlineData("desktop")]
-    [InlineData("smartphone")]
-    public async Task APagePaintedBeforeItChanges_IsCapturedAsThePagePaintedOnceSettled(string viewport)
+    [InEachTheme("desktop")]
+    [InEachTheme("smartphone")]
+    public async Task APagePaintedBeforeItChanges_IsCapturedAsThePagePaintedOnceSettled(string theme, string viewport)
     {
-        var settled = await NewCapturePageAsync("base", ScreenCaptureTests.Viewports[viewport]);
+        var settled = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
         await PageReadiness.GotoAsync(settled, ControlsPage.Path);
         await SettleAsync(settled);
 
-        var painted = await NewCapturePageAsync("base", ScreenCaptureTests.Viewports[viewport]);
+        var painted = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
         await painted.GotoAsync(ControlsPage.Path, new PageGotoOptions { WaitUntil = WaitUntilState.Commit });
         await painted.WaitForSelectorAsync(".record-picker", new PageWaitForSelectorOptions { State = WaitForSelectorState.Attached });
         // A capture paints the page as it is: here, before the choice of a record is interactive.
@@ -42,10 +42,10 @@ public sealed class CaptureDeterminismTests(ApplicationHost application) : Brows
     /// compositions the capture shows depended on when it was taken: the dot of its state was a pixel higher in some of
     /// them (#343). Such a page is captured in a window already as high as itself, which the capture leaves unchanged.
     /// </summary>
-    [Fact]
-    public async Task APageWithABarStuckToTheBottom_IsCapturedInAWindowAsHighAsItself()
+    [Theory, InEachTheme]
+    public async Task APageWithABarStuckToTheBottom_IsCapturedInAWindowAsHighAsItself(string theme)
     {
-        var page = await NewCapturePageAsync("base", ScreenCaptureTests.Viewports["smartphone"]);
+        var page = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports["smartphone"]);
         await PageReadiness.GotoAsync(page, ControlsPage.Path);
         var height = await page.EvaluateAsync<int>("() => document.documentElement.scrollHeight");
         Assert.True(height > page.ViewportSize!.Height, "The page of the controls is expected taller than the window of a smartphone.");

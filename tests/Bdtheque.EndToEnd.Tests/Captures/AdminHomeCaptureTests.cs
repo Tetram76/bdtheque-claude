@@ -13,7 +13,7 @@ public sealed class AdminHomeCaptureTests(AdministrationApplication application)
 {
     public static TheoryData<string, string> Captures => HomeCaptures.All;
 
-    [LinuxTheory]
+    [LinuxTheory, EachTheme]
     [MemberData(nameof(Captures))]
     public async Task Screen_LooksLikeItsReference(string theme, string viewport)
     {

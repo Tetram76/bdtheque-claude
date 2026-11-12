@@ -18,10 +18,10 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
-    [Fact]
-    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration()
+    [Theory, InEachTheme]
+    public async Task Menu_LeadsToTheList_WhoseFilDAraneLeadsBackToTheAdministration(string theme)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
@@ -34,12 +34,12 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
 
-    [Fact]
-    public async Task Search_OnTheName_NarrowsTheList()
+    [Theory, InEachTheme]
+    public async Task Search_OnTheName_NarrowsTheList(string theme)
     {
         await CreatePublisherAsync($"Glénat {_marker}");
         await CreatePublisherAsync($"Delcourt {_marker}");
-        var page = await OpenAsync(AppPaths.AdminPublishers);
+        var page = await OpenAsync(theme, AppPaths.AdminPublishers);
 
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher un éditeur" }).FillAsync(_marker);
         await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher un éditeur" }).PressAsync("Enter");
@@ -48,11 +48,11 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers, $"?q={_marker}"));
     }
 
-    [Fact]
-    public async Task Website_OfAPublisher_OpensBesideTheList()
+    [Theory, InEachTheme]
+    public async Task Website_OfAPublisher_OpensBesideTheList(string theme)
     {
         await CreatePublisherAsync($"Dargaud {_marker}", "https://www.dargaud.example/");
-        var page = await OpenAsync($"{AppPaths.AdminPublishers}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPublishers}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Dargaud {_marker}" }).ClickAsync();
         var website = page.GetByRole(AriaRole.Link, new() { Name = "Ouvrir le site web" });
@@ -61,13 +61,13 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(website).ToHaveAttributeAsync("target", "_blank");
     }
 
-    [Fact]
-    public async Task Deletion_ConfirmedInAModalDialog_TakesThePublisherAndItsCollectionsOutOfTheList()
+    [Theory, InEachTheme]
+    public async Task Deletion_ConfirmedInAModalDialog_TakesThePublisherAndItsCollectionsOutOfTheList(string theme)
     {
         var publisher = await CreatePublisherAsync($"À supprimer {_marker}");
         await PostAsync<PublisherCollectionForm>(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest("Signé", publisher.Version));
-        var page = await OpenAsync($"{AppPaths.AdminPublishers}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPublishers}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur À supprimer {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -79,8 +79,8 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucun éditeur ne correspond à « {_marker} ».");
     }
 
-    [Fact]
-    public async Task Deletion_OfAPublisherOfAnEdition_IsRefused_AndSaysWhatToDo()
+    [Theory, InEachTheme]
+    public async Task Deletion_OfAPublisherOfAnEdition_IsRefused_AndSaysWhatToDo(string theme)
     {
         var publisher = await CreatePublisherAsync($"Avec une édition {_marker}");
         var album = await PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
@@ -89,7 +89,7 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
             new EditionContent(publisher.Id, null, null, null, null, null, null, null, null, null, false, true, null,
                 AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null),
             album.Version));
-        var page = await OpenAsync($"{AppPaths.AdminPublishers}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPublishers}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Avec une édition {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
@@ -101,12 +101,12 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" })).ToHaveCountAsync(0);
     }
 
-    [Fact]
-    public async Task Merge_SearchesTheOtherPublisher_AndContinuesWithTheOneChosen()
+    [Theory, InEachTheme]
+    public async Task Merge_SearchesTheOtherPublisher_AndContinuesWithTheOneChosen(string theme)
     {
         var publisher = await CreatePublisherAsync($"Dupuis {_marker}");
         var other = await CreatePublisherAsync($"Dupuis bis {_marker}");
-        var page = await OpenAsync($"{AppPaths.AdminPublishers}?q={_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPublishers}?q={_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Dupuis {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Fusionner avec un autre éditeur…" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux éditeurs" });
@@ -120,12 +120,12 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
     }
 
     [Theory]
-    [InlineData(414)]
-    [InlineData(768)]
-    [InlineData(1024)]
-    [InlineData(1180)]
-    [InlineData(1440)]
-    public async Task Rows_AtEveryWidth_LeaveTheNameItsRoom_WithoutTheListOverflowing(int width)
+    [InEachTheme(414)]
+    [InEachTheme(768)]
+    [InEachTheme(1024)]
+    [InEachTheme(1180)]
+    [InEachTheme(1440)]
+    public async Task Rows_AtEveryWidth_LeaveTheNameItsRoom_WithoutTheListOverflowing(string theme, int width)
     {
         var publisher = await CreatePublisherAsync(
             $"Les Éditions du Grand Large et des Archipels réunis {_marker}", "https://www.editions-du-grand-large-et-des-archipels.example/catalogue");
@@ -133,30 +133,27 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         foreach (var collection in new[] { "Carnets de voyage", "Escapades", "Horizons lointains", "Lumières du Nord" })
             version = (await PostAsync<PublisherCollectionForm>(
                 $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest(collection, version))).PublisherVersion;
-        foreach (var theme in ThemeCatalog.Offered.Select(theme => theme.Key))
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPublishers}?q={_marker}");
+        await PageReadiness.WaitAsync(page);
+
+        var name = await page.Locator(".row-entry").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
+        var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+
+        Assert.True(name >= 120, $"{theme} at {width}px: the name is {name}px wide.");
+        Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // At the width of the mockups' desktop, the table has all its columns, the website and the last modification
+        // included.
+        if (width == 1440)
         {
-            var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
-            await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPublishers}?q={_marker}");
-            await PageReadiness.WaitAsync(page);
-
-            var name = await page.Locator(".row-entry").EvaluateAsync<double>("name => name.getBoundingClientRect().width");
-            var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
-
-            Assert.True(name >= 120, $"{theme} at {width}px: the name is {name}px wide.");
-            Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
-            // At the width of the mockups' desktop, the table has all its columns, the website and the last modification
-            // included.
-            if (width == 1440)
-            {
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Site web" })).ToBeVisibleAsync();
-                await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifié" })).ToBeVisibleAsync();
-            }
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Site web" })).ToBeVisibleAsync();
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Modifié" })).ToBeVisibleAsync();
         }
     }
 
-    private async Task<IPage> OpenAsync(string path)
+    private async Task<IPage> OpenAsync(string theme, string path)
     {
-        var page = await NewPageAsync();
+        var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         return page;
