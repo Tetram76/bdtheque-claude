@@ -7,6 +7,10 @@
                 <RedirectToLogin />
             </NotAuthorized>
         </AuthorizeRouteView>
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        @* The focus on the field a page marks autofocus, or else on its title. The browser applies autofocus only as it
+           loads a document, never to what an enhanced navigation inserts (choix-implementation/socle/frontend.md): this
+           component focuses after such a navigation, and leaves autofocus alone on a load. querySelector returning the
+           first element of the page that any part matches, the title, before the form, is only matched without a field. *@
+        <FocusOnNavigate RouteData="routeData" Selector="[autofocus], body:not(:has([autofocus])) h1" />
     </Found>
 </Router>

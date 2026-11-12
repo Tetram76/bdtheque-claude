@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T17:45:00Z }
 ---
 
 # Frontend
@@ -28,6 +28,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
 
 - **Pages de l'administration réservées en bloc** par leur dossier à l'administrateur authentifié ([Authentification](../../contraintes-techniques/architecture-deploiement/authentification.md)) : une page ajoutée ne peut pas l'oublier.
 - **Chemins des pages déclarés une fois**, pour tout lien et toute route. Une page pas encore réalisée a le chemin de la page « Pas encore implémenté » ([`suivi-implementation/`](../../suivi-implementation/index.md), Phase 3) : le chantier qui la réalise lui donne le sien, et tous les liens suivent.
+- **Focus à l'arrivée sur une page** : sur le champ que la page marque `autofocus` (premier champ d'un formulaire, ex. l'identifiant de la connexion), sinon sur son titre, par le composant `FocusOnNavigate` de Blazor, sans interactivité ni script propre : le navigateur n'applique `autofocus` qu'au chargement d'un document, jamais au contenu qu'une navigation améliorée insère dans la page (un lien de l'application, la redirection vers la connexion qu'elle suit) ; `FocusOnNavigate` y pose le focus après chaque navigation vers une autre page, et laisse `autofocus` agir au chargement (source de Blazor, `FocusOnNavigate.ts`). Son sélecteur ne désigne le titre que dans une page sans champ marqué (`:has()`), `querySelector` rendant le premier élément de la page qui répond à l'une de ses parties, le titre précédant le formulaire.
+  - **Alternative écartée (`autofocus` seul)** : la connexion, atteinte par un lien de l'application, recevait le focus sur son titre (constaté, #374).
+  - **Alternative écartée (script qui pose le focus après une navigation améliorée)** : un script pour ce que Blazor offre déjà, et qui disputerait le focus à `FocusOnNavigate`.
 - **Un client unique de l'API**, qui ajoute le secret interne. Tout appel qui n'aboutit pas lève une exception porteuse de ce que la présentation de l'erreur exige, et rien d'interne ; seule une réponse ProblemDetails d'une des trois catégories est prise pour ce qu'elle dit, tout autre échec est technique ([Erreurs métier, fonctionnelles et techniques](../ecritures/erreurs-metier-fonctionnelles-et-techniques.md)).
   - **Alternative écartée (type résultat)** : comme pour le domaine, chaque appelant le propagerait, alors qu'un échec interrompt toujours l'action et n'appelle qu'une présentation.
 
