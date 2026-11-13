@@ -2,6 +2,7 @@
 
 ## 2026-11-13
 
+* **Règle** : quand un retour de l'utilisateur porte sur ce qu'un autre ticket prévoit, l'agent le relève et lui dit quel ticket le prévoit, sans présumer qu'il le sait, puis lui demande s'il faut le déplacer dans le chantier en cours ou le laisser dans son ticket ; il ne le déplace jamais de lui-même (exigence de l'utilisateur) (#430).
 * **Choix** : la page de modification d'une fiche est choisie d'après son type, chaque type nommé, sans cas par défaut vers « Pas encore implémenté », un test fixant la page de chaque type ; l'API lit avec chaque entrée du journal le parent sous lequel la page de la fiche est adressée (album d'une édition ou d'une intention d'achat, éditeur d'une collection), sans l'enregistrer dans l'entrée (#396).
 * **Règle** : dans un lot de chantiers en parallèle, le nombre de chantiers du lot, s'il n'a pas été donné, n'est demandé à l'utilisateur qu'après l'identification et le classement des candidats, présentés avec les candidats écartés et leur raison ; un lot sert à compléter le jalon en cours, pas à anticiper de futurs développements ; l'ordre de priorité conjugue plan et jalon : après les harnais, plan du jalon en cours, puis autres tickets de ce jalon ; un ticket hors du jalon en cours, chantier du plan compris, n'est candidat que rattaché à ce jalon ou demandé explicitement par l'utilisateur, la stabilisation du CI gardant son rang quel que soit son jalon (exigences de l'utilisateur) (#426).
 
