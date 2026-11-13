@@ -134,7 +134,8 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        var publisher = page.Find(".series-publishing a.external");
+        // The presentation of a publisher shared by every page that presents one.
+        var publisher = page.Find(".series-publishing a.publisher");
         Assert.Equal(("Casterman", "https://www.casterman.com", "_blank", "noopener noreferrer"),
             (publisher.FirstChild!.TextContent.Trim(), publisher.GetAttribute("href"), publisher.GetAttribute("target"), publisher.GetAttribute("rel")));
         Assert.Equal(["Casterman, site externe", "Univers d'auteurs"], page.FindAll(".series-publishing dd").Select(d => d.TextContent.Trim()));

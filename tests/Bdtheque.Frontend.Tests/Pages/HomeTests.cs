@@ -178,6 +178,23 @@ public sealed class HomeTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void LatestEntries_ThePublisherLeadsToItsWebsite_WhenKnown_AndIsNoLinkOtherwise()
+    {
+        _catalog.Dashboard = Collection();
+
+        var page = Render<Home>();
+
+        // A publisher whose website is known leads to it, and is otherwise no link (visuel/dashboard/contenu-commun.md), as on
+        // the records of the consultation: the same presentation of a publisher.
+        var entries = BlockOf(page, "Tout juste arrivés !").QuerySelectorAll("li");
+        var casterman = entries[0].QuerySelector("a.publisher")!;
+        Assert.Equal(("Casterman, site externe", "https://www.casterman.com", "_blank"),
+            (casterman.TextContent, casterman.GetAttribute("href"), casterman.GetAttribute("target")));
+        Assert.Null(entries[1].QuerySelector("a.publisher"));
+        Assert.Equal("Dargaud", entries[1].QuerySelector("span.publisher")!.TextContent);
+    }
+
+    [Fact]
     public void BlocksNotComputableYet_AreShownWithoutAnyFigure()
     {
         _catalog.Dashboard = Collection();
@@ -223,8 +240,8 @@ public sealed class HomeTests : BunitContext, IDisposable
             new DashboardCounters(1234, 56, 1300),
             new SpotlightEdition(lotus, casterman, null, "Tintin en Chine."),
             [
-                new LatestEntry(lotus, casterman, null, new DateOnly(2026, 11, 1), new DateTimeOffset(2026, 11, 2, 10, 0, 0, TimeSpan.Zero)),
-                new LatestEntry(asterix, dargaud, null, null, new DateTimeOffset(2026, 10, 4, 23, 30, 0, TimeSpan.Zero)),
+                new LatestEntry(lotus, casterman, "https://www.casterman.com", null, new DateOnly(2026, 11, 1), new DateTimeOffset(2026, 11, 2, 10, 0, 0, TimeSpan.Zero)),
+                new LatestEntry(asterix, dargaud, null, null, null, new DateTimeOffset(2026, 10, 4, 23, 30, 0, TimeSpan.Zero)),
             ],
             AreValueIndicatorsComputable: false,
             AreRandomStatisticsComputable: false));

@@ -1,0 +1,23 @@
+@inject IStringLocalizer<PublisherName> L
+
+@* A publisher, wherever a page presents it (records of the consultation, dashboard): written once, so that its presentation
+   never diverges from one page to another (gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md, Cohérence
+   tenue dans la durée). Having no record of its own, a publisher whose website is known leads to that site, and is otherwise
+   no link (fonctionnel/structure-de-l-application.md). The site is out of the application: it opens beside it, without access
+   to the page that opened it (choix-implementation/socle/frontend.md, site extérieur), and screen readers are told so. *@
+@if (Website is { } website)
+{
+    <a class="publisher" href="@website" target="_blank" rel="noopener noreferrer">@Name<span class="visually-hidden">@L["External"]</span></a>
+}
+else
+{
+    <span class="publisher">@Name</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string? Website { get; set; }
+}

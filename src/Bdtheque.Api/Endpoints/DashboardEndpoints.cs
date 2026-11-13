@@ -33,7 +33,8 @@ internal static class DashboardEndpoints
 
     private static readonly Expression<Func<Edition, LatestEntry>> LatestEntryOf = CatalogExpressions.Expand(
         (Edition e) => new LatestEntry(
-            e.Album.ToSummary(), e.ToSummary(), CatalogExpressions.ToCover(e.CoverVisualOf()), e.AcquisitionDate, e.EnteredCollectionAt!.Value));
+            e.Album.ToSummary(), e.ToSummary(), e.Publisher.Website, CatalogExpressions.ToCover(e.CoverVisualOf()), e.AcquisitionDate,
+            e.EnteredCollectionAt!.Value));
 
     /// <param name="day">
     /// The date of the visitor, in the time zone of the browser, which the frontend sends: that of the edition in the

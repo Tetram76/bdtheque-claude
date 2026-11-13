@@ -59,8 +59,8 @@ else if (_series is { } series)
                     </div>
                 }
 
-                @* Its template publisher and collection; only a publisher with a known website is a link, to that site, which opens
-                   apart from the record (fonctionnel/structure-de-l-application.md). *@
+                @* Its template publisher and collection; only a publisher with a known website is a link
+                   (fonctionnel/structure-de-l-application.md). *@
                 @if (series.Publisher is not null || series.PublisherCollection is not null)
                 {
                     <dl class="series-publishing">
@@ -68,23 +68,14 @@ else if (_series is { } series)
                         {
                             <div>
                                 <dt>@L["Publisher"]</dt>
-                                <dd>
-                                    @if (publisher.Website is { } website)
-                                    {
-                                        <a class="external" href="@website" target="_blank" rel="noopener noreferrer">@publisher.Name<Icon Name="IconName.Exit" /><span class="visually-hidden">@L["External"]</span></a>
-                                    }
-                                    else
-                                    {
-                                        <span class="series-publisher">@publisher.Name</span>
-                                    }
-                                </dd>
+                                <dd><PublisherName Name="@publisher.Name" Website="@publisher.Website" /></dd>
                             </div>
                         }
                         @if (series.PublisherCollection is { } collection)
                         {
                             <div>
                                 <dt>@L["Collection"]</dt>
-                                <dd><span class="series-publisher">@collection.Name</span></dd>
+                                <dd>@collection.Name</dd>
                             </div>
                         }
                     </dl>

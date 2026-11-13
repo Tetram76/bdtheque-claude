@@ -320,8 +320,9 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        var publisher = RowElement(page, "Éditeur").QuerySelector("a")!;
-        Assert.Equal(("Casterman", "https://www.casterman.com", "_blank", "noopener noreferrer"),
+        // The presentation of a publisher shared by every page that presents one.
+        var publisher = RowElement(page, "Éditeur").QuerySelector("a.publisher")!;
+        Assert.Equal(("Casterman, site externe", "https://www.casterman.com", "_blank", "noopener noreferrer"),
             (publisher.TextContent.Trim(), publisher.GetAttribute("href"), publisher.GetAttribute("target"), publisher.GetAttribute("rel")));
         Assert.Equal("2001", Row(page, "Année d'édition"));
         Assert.Equal("Cartonnée", Row(page, "Reliure"));

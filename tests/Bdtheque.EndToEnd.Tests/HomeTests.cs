@@ -147,6 +147,21 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
         await Assertions.Expect(latest.Locator("li").First).ToContainTextAsync("Le Port des brumes");
         await Assertions.Expect(latest.Locator("li").First).ToContainTextAsync("12/10/2026");
     }
+
+    [Theory, InEachTheme]
+    public async Task LatestEntries_ThePublisherLeadsToItsWebsite_BesideTheApplication(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await page.GotoAsync(AppPaths.Home);
+
+        // Its site out of the application, opened in a new tab, the dashboard staying as it was
+        // (choix-implementation/socle/frontend.md, site extérieur).
+        var latest = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Tout juste arrivés !" }) });
+        var publisher = latest.Locator("li").First.GetByRole(AriaRole.Link, new() { NameRegex = new Regex(@"^Casterman\s*, site externe$") });
+        await Assertions.Expect(publisher).ToHaveAttributeAsync("href", "https://www.casterman.com");
+        await Assertions.Expect(publisher).ToHaveAttributeAsync("target", "_blank");
+        await Assertions.Expect(publisher).ToHaveAttributeAsync("rel", "noopener noreferrer");
+    }
 }
 
 /// <summary>An application without any data: the welcome screen of an empty collection.</summary>
@@ -173,7 +188,7 @@ public sealed class CollectionApplication : ApplicationHost
     protected override async Task SeedAsync()
     {
         using var api = CreateApiClient();
-        var publisher = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Casterman", null, []));
+        var publisher = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Casterman", "https://www.casterman.com", []));
         var series = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", new SeriesContent(
             "Nestor Burma", null, null, null, false, false, false, null, null,
             new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));

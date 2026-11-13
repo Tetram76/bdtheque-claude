@@ -345,4 +345,31 @@ public sealed class PresentationTests : BunitContext
         Assert.Empty(text.FindAll(".label-isbn"));
         Assert.Equal("Dargaud [1978]", text.Markup);
     }
+
+    [Fact]
+    public void PublisherName_WithAWebsite_LeadsToIt_InANewTab_AnnouncedAsLeavingTheApplication()
+    {
+        var publisher = Render<PublisherName>(parameters => parameters
+            .Add(p => p.Name, "Casterman")
+            .Add(p => p.Website, "https://www.casterman.com"));
+
+        // A site out of the application opens beside it, without access to the page that opened it
+        // (choix-implementation/socle/frontend.md, site extérieur), and screen readers are told it leaves the application.
+        var link = publisher.Find("a.publisher");
+        Assert.Equal(("https://www.casterman.com", "_blank", "noopener noreferrer"),
+            (link.GetAttribute("href"), link.GetAttribute("target"), link.GetAttribute("rel")));
+        Assert.Equal("Casterman, site externe", link.TextContent);
+        Assert.Equal(", site externe", link.QuerySelector(".visually-hidden")?.TextContent);
+    }
+
+    [Fact]
+    public void PublisherName_WithoutWebsite_IsItsNameAlone_NoLink()
+    {
+        var publisher = Render<PublisherName>(parameters => parameters
+            .Add(p => p.Name, "Bulles & Cie")
+            .Add(p => p.Website, null));
+
+        Assert.Empty(publisher.FindAll("a"));
+        Assert.Equal("Bulles & Cie", publisher.Find("span.publisher").TextContent);
+    }
 }

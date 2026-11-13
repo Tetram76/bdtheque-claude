@@ -222,6 +222,23 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task LatestEntries_CarryTheWebsiteOfTheirPublisher_WhenKnown()
+    {
+        // The publisher of an entry leads to its website (visuel/dashboard/contenu-commun.md): the entry carries it.
+        var withWebsite = await CreatePublisherAsync("Futuropolis", "https://www.futuropolis.fr");
+        var withoutWebsite = await CreatePublisherAsync("Bulles & Cie");
+        var album = await CreateAlbumAsync("Le Combat ordinaire", null);
+        var older = await CreateOwnedEditionAsync(album.Id, withoutWebsite.Id, enteredAt: new(2026, 9, 1, 9, 0, 0, TimeSpan.Zero));
+        var newer = await CreateOwnedEditionAsync(album.Id, withWebsite.Id, enteredAt: new(2026, 10, 1, 9, 0, 0, TimeSpan.Zero));
+
+        var entries = (await GetDashboardAsync(Day, latestCount: 2)).Content!.LatestEntries;
+
+        Assert.Equal(
+            [(newer, (string?)"https://www.futuropolis.fr"), (older, null)],
+            entries.Select(e => (e.Edition.Id, e.PublisherWebsite)));
+    }
+
+    [Fact]
     public async Task Spotlights_AreCountedByTheAdvancedSearch()
     {
         var publisher = await CreatePublisherAsync("Vents d'Ouest");
@@ -312,8 +329,8 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
 
     private static string VisualsUri(Guid albumId, Guid editionId) => $"/admin/albums/{albumId}/editions/{editionId}/visuals";
 
-    private Task<PublisherForm> CreatePublisherAsync(string name) =>
-        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, null, []));
+    private Task<PublisherForm> CreatePublisherAsync(string name, string? website = null) =>
+        PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(name, website, []));
 
     private Task<SeriesForm> CreateSeriesAsync(string title) =>
         PostAsync<SeriesForm>("/admin/series", new SeriesContent(title, null, null, null, false, false, false, null, null, NoTemplate, [], [], []));
