@@ -6,8 +6,8 @@ name: Security audit
 # the user who created the workflow, when a vulnerability absent from that list shows up: a known one
 # does not repeat the notification every day. It is no required check: a vulnerability that no
 # correction fixes yet never blocks a pull request. The agent reads the issue in its version watch, once
-# per run of this audit, and records the watch in the issue body: rewriting the whole body here removes
-# that record, which makes the next watch due (gestion-projet/depot/mises-a-jour-des-dependances.md).
+# per run of this audit, and records the date of that watch in the issue body: rewriting the whole body
+# here removes it, which makes the next watch due (gestion-projet/revue-tickets/issues.md).
 on:
   schedule:
     - cron: "11 6 * * *"
@@ -172,7 +172,7 @@ jobs:
           {
             echo "Vulnérabilités connues des technologies du dépôt, tenues à jour chaque jour par le contrôle de sécurité (\`.github/workflows/security-audit.yml\`, \`gestion-projet/depot/mises-a-jour-des-dependances.md\`). Chacune est corrigée dès qu'une correction est disponible."
             echo
-            echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) vulnérabilité(s)."
+            echo "Dernier contrôle : $(date -u +%F)"
             echo
             echo "<!-- list -->"
             echo '```text'

@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), tickets de suivi des harnais et leurs étiquettes (celle du harnais, `harness`) ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T20:41:24Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T18:30:00Z }
 ---
 
 # Issues
@@ -40,6 +40,16 @@ Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose �
 - **Étiquette du harnais** : elle réunit **tous** les tickets d'un harnais, son ticket de suivi comme les chantiers qui le créent ou le font évoluer (exigence de l'utilisateur).
   - **Tickets ouverts par un harnais** : tout ticket qu'ouvre un harnais, ou l'agent qui traite ce qu'il relève (suite d'un contrôle de cohérence, correction d'une dette qualité ou d'une vulnérabilité reportée, montée de version, chantier d'amélioration issu d'une revue de l'existant), reçoit l'étiquette de ce harnais dès sa création, quel que soit le harnais (exigence de l'utilisateur) : le ticket de suivi et ses suites se retrouvent ensemble, sans que l'étiquette `harness` leur soit posée.
 - **Étiquette `harness`** : commune aux tickets de suivi, elle n'est portée **que** par eux (exigence de l'utilisateur), jamais par un chantier, fût-il celui d'un harnais : elle les réunit en une liste, à part des chantiers.
+- **Un état, pas un historique** (exigences de l'utilisateur) : la description d'un ticket de suivi se compose de trois parties, dans cet ordre, et de rien d'autre :
+  1. la **description du ticket et de son objectif** ;
+  2. les **dates utiles au traitement**, l'une sous l'autre : `Dernier contrôle : AAAA-MM-JJ`, écrite par le contrôle automatique du harnais, qui réécrit la description en entier à chaque exécution ; puis `Dernière prise en compte : AAAA-MM-JJ`, ajoutée par l'agent à chaque traitement, que cette réécriture retire ;
+  3. les **points relevés à corriger**.
+
+  Ni décompte, ni compte rendu, ni justification, ni Pull Request, ni point déjà traité : la raison d'un rejet est portée par le mécanisme de l'outil qui l'a relevé (ex. commentaire du marquage dans SonarQube Cloud), celle d'une correction par sa Pull Request ou son ticket.
+  - **Traitement dû** quand la description ne porte pas la ligne `Dernière prise en compte` : aucun traitement n'a suivi le dernier contrôle. Le concept de chaque harnais précise ce qui, en outre, le rend dû.
+  - **Point traité, aussitôt retiré** : un point corrigé ou rejeté n'est plus à corriger. Dès que son traitement est acquis, c'est-à-dire dès que le contrôle ne le relèverait plus (marquage dans l'outil, fusion sur `main` de la Pull Request qui le corrige ou porte son rejet dans le code), l'agent le retire de la description, sans attendre le contrôle suivant ; ou, quand le contrôle seul sait ce qui reste (ex. vulnérabilités d'une image après une montée de version), il relance le contrôle, qui réécrit la description, puis remet la ligne de sa prise en compte. Retiré plus tôt, un point encore relevé reviendrait au contrôle suivant comme nouveau, et le ferait échouer pour lui.
+  - **Harnais sans contrôle automatique** (fonctionnel) : ses points relevés sont les tickets ouverts de ses suites, listés par leur numéro et leur titre ; seule la date de la dernière prise en compte y figure, et l'agent retire un point à la fermeture de son ticket.
+  - **Dans le concept de chaque harnais**, la trace renvoie à cette règle, sans la redire : il ne précise que ce qui est propre au harnais.
 - **Ticket de suivi retrouvé par ses deux étiquettes** : un harnais, comme l'agent, le retrouve par l'étiquette du harnais **et** `harness`, jamais par la première seule, qui désigne aussi ses chantiers. Qui crée un ticket de suivi, harnais ou agent, lui pose les deux.
 
 ## Avant de créer un ticket
