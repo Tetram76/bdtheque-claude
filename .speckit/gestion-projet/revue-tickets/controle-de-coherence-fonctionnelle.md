@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Contrôle de cohérence fonctionnelle'
 description: 'Contrôle hebdomadaire de la cohérence de toute l''application, au sein des familles d''écrans et de points d''entrée de même nature et pour chaque règle transversale : sources confrontées, classement des écarts, suites, trace ; à lire quand le contrôle est dû ou demandé.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T20:41:24Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T18:30:00Z }
 ---
 
 # Contrôle de cohérence fonctionnelle
@@ -28,13 +28,13 @@ Pour chaque famille et chaque axe transversal, trois sources sont confrontées :
   - **Alternative écartée (questions posées par la session du contrôle, une à une ou réunies sur une page)** : toutes les questions d'un contrôle arrivent alors dans la même session, ce que l'utilisateur refuse, quelle que soit leur forme (exigence de l'utilisateur, #409).
 - **C — l'écart est justifié** : le `.speckit/` en donne la raison. Rien n'est fait.
 
-Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request. Il se termine quand sa conclusion est écrite dans la description de son ticket (§ Trace), ce qui libère sa place dans un lot de chantiers en parallèle ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md)).
+Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request. Il se termine quand la date de sa prise en compte est écrite dans la description de son ticket (§ Trace), ce qui libère sa place dans un lot de chantiers en parallèle ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md)).
 
 Une raison qui manque ou qui faillit fait d'un écart un B, jamais un C : une question de trop coûte une réponse à l'utilisateur, un écart réel classé C reste dans l'application sans que personne le voie.
 
 - **Décrit n'est pas justifié** : un concept qui décrit le comportement d'un élément sans dire pourquoi il diffère de sa famille ne justifie rien.
 - **Raison jugée** : la raison doit viser exactement cet écart, et non un cas voisin ou une généralité, et les faits sur lesquels elle repose doivent tenir encore. Une raison douteuse, imprécise ou périmée fait de l'écart un B, dont le ticket cite le passage.
-- **Aucun C silencieux** : chaque C figure dans la trace avec le passage cité et ce qui, selon l'agent, le fait couvrir l'écart ; un C que l'utilisateur conteste devient un B.
+- **Aucun C silencieux** : chaque C est présenté à l'utilisateur dans le message qui conclut le contrôle, avec le passage cité et ce qui, selon l'agent, le fait couvrir l'écart, et non dans le ticket de suivi, qui ne porte que ce qui reste à corriger (§ Trace) ; un C que l'utilisateur conteste devient un B.
 - **Revu au changement** : un C est revu dès que change le concept qui porte sa raison, ou l'un des éléments en cause ; il n'est pas signalé de nouveau tant que rien ne change.
 
 ## Cohérence tenue dans la durée
@@ -46,13 +46,15 @@ Une règle commune confirmée (A corrigé, B tranché) est mise en œuvre **une 
 ## Moment et proportion
 
 - **Dû** chaque semaine calendaire (du lundi au dimanche, ISO 8601), à la reprise du travail ([Contrôle de cohérence à la reprise du travail](controle-de-coherence-a-la-reprise-du-travail.md)), ou à la demande de l'utilisateur, qui vaut le contrôle de la semaine.
-- **Proportion** ([Budget IA](../gouvernance/budget-ia.md)) : le contrôle porte sur ce qui a changé depuis le commit de `main` du contrôle précédent, dans le code comme dans le `.speckit/`. Chaque famille dont un élément a changé est revue entière ; chaque axe transversal dont une occurrence a changé est revu partout où il apparaît. Le premier contrôle, sans commit précédent, porte sur toute l'application. Sans aucun changement, il se réduit à le constater dans la trace.
+- **Proportion** ([Budget IA](../gouvernance/budget-ia.md)) : le contrôle porte sur ce qui a changé sur `main` depuis la dernière prise en compte (§ Trace), dans le code comme dans le `.speckit/`. Chaque famille dont un élément a changé est revue entière ; chaque axe transversal dont une occurrence a changé est revu partout où il apparaît. Le premier contrôle, sans prise en compte précédente, porte sur toute l'application. Sans aucun changement, il se réduit à le constater, et à mettre à jour la date de la prise en compte.
 
 ## Trace
 
-Le ticket de suivi du harnais fonctionnel (étiquettes `ergonomy-audit` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description** l'état du contrôle, que l'agent réécrit :
+Le ticket de suivi du harnais fonctionnel (étiquettes `ergonomy-audit` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description**, que l'agent réécrit, l'état du harnais et rien d'autre : un état, pas un historique ([Issues](issues.md#tickets-de-suivi-des-harnais), exigences de l'utilisateur).
 
-- « Contrôle en cours », avec sa date, écrit **avant** le contrôle : une autre session qui reprend le travail la même semaine le voit, et ne le refait pas ;
-- à sa fin, le **dernier contrôle** : sa date et le commit de `main` sur lequel il porte, puis chaque écart relevé avec sa classe, les éléments en cause, et sa suite (ticket d'un A ou d'un B, passage cité et raison d'un C), ou l'absence d'écart, constatée explicitement.
+- « Contrôle en cours », écrit **avant** le contrôle : une autre session qui reprend le travail la même semaine le voit, et ne le refait pas ;
+- à sa fin, à sa place, la seule ligne `Dernière prise en compte : <date>`.
+
+Ce qui reste à corriger, ce sont les tickets ouverts de ses suites, étiquetés `ergonomy-audit` dès leur création, que GitHub liste par cette étiquette : la description ne les recopie pas, une copie ne suivant pas leur fermeture. Ni écart C, ni décision de l'utilisateur, ni compte rendu n'y figurent : un écart C est présenté à l'utilisateur à la fin du contrôle, une décision est consignée dans le ticket de son écart.
 
 Le ticket reste ouvert.
