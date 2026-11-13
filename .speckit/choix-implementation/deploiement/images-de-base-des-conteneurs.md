@@ -7,7 +7,7 @@ applies_to:
   - 'docker/frontend/**'
   - 'src/Bdtheque.HealthProbe/**'
   - 'docker-compose.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T17:30:00Z }
 ---
 
 # Images de base des conteneurs
@@ -16,7 +16,7 @@ Les conteneurs sont imposés ([Architecture des tiers](../../contraintes-techniq
 
 - **Versions épinglées** : chaque image de base est désignée par la version exacte de son composant (.NET, PostgreSQL, Alpine), qui ne change donc jamais sans une montée visible, revue avant sa fusion ([Mises à jour des dépendances](../../gestion-projet/depot/mises-a-jour-des-dependances.md)). Sous ce tag, l'éditeur reconstruit l'image pour les correctifs de son système tant qu'il la maintient (documentation de `dotnet/dotnet-docker`, *supported tags*).
   - **Alternative écartée (tags flottants, ex. `10.0`, `18-alpine`)** : la version change sans que rien dans le dépôt ne le montre ni n'en déclenche la revue.
-  - **Alternative écartée (empreinte, *digest*, en plus de la version)** : chaque correctif du système attendrait une montée dans le dépôt, et serait retardé sans gain ; l'application n'exige aucun niveau précis de correctifs, et Docker Scout refuse de toute façon une image qui ajoute une vulnérabilité corrigeable ([Publication des images Docker](publication-des-images-docker.md)).
+  - **Alternative écartée (empreinte, *digest*, en plus de la version)** : chaque correctif du système attendrait une montée dans le dépôt, et serait retardé sans gain ; l'application n'exige aucun niveau précis de correctifs, et Docker Scout refuse de toute façon une image qui contient une vulnérabilité corrigeable par le dépôt ([Publication des images Docker](publication-des-images-docker.md)).
 - **`frontend` et `api` : `mcr.microsoft.com/dotnet/aspnet`, variante `noble-chiseled-extra`** : image runtime officielle, *chiseled* (ni shell ni gestionnaire de paquets, utilisateur non root, le strict nécessaire, [Déploiement](../../contraintes-techniques/architecture-deploiement/deploiement.md)), *extra* pour ICU, qu'exigent le tri et le formatage culturels ([Internationalisation](../socle/transverse/internationalisation.md)).
   - **Alternative écartée (`aspnet` sur Ubuntu complet)** : plus lourde, avec un shell et un gestionnaire de paquets sans usage, et `curl` à installer pour le bilan de santé.
 - **Bilan de santé par une sonde .NET** ([Organisation du code](../organisation-du-code.md)), exécutée sur le runtime de l'image, faute de shell et de `curl` : l'équipe .NET n'a pas de recommandation officielle pour ces images, et propose cette approche (dépôt `dotnet/dotnet-docker`, demande n° 4300).
