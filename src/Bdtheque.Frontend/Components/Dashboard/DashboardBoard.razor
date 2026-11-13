@@ -55,7 +55,7 @@
                     <Cover VisualId="entry.Cover?.VisualId" Palette="entry.Cover?.Palette" Volume="true" />
                     <div>
                         <a href="@AppPaths.Album(entry.Album.Id)">@Labels.Album(entry.Album, LabelFormat)</a>
-                        <span class="dashboard-muted">@entry.Edition.PublisherName · @Format.Date(DayOf(entry))</span>
+                        <span class="dashboard-muted"><PublisherName Name="@entry.Edition.PublisherName" Website="@entry.PublisherWebsite" /> · @Format.Date(DayOf(entry))</span>
                     </div>
                 </li>
             }

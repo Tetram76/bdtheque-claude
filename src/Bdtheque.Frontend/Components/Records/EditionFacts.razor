@@ -17,16 +17,7 @@
         <dl>
             <div>
                 <dt>@L["Publisher"]</dt>
-                <dd>
-                    @if (Edition.PublisherWebsite is { } website)
-                    {
-                        <a href="@website" target="_blank" rel="noopener noreferrer">@Edition.Edition.PublisherName</a>
-                    }
-                    else
-                    {
-                        @Edition.Edition.PublisherName
-                    }
-                </dd>
+                <dd><PublisherName Name="@Edition.Edition.PublisherName" Website="@Edition.PublisherWebsite" /></dd>
             </div>
             @Row(L["Collection"], Edition.Edition.PublisherCollectionName)
             @Row(L["Year"], Edition.Edition.PublicationYear?.ToString(CultureInfo.InvariantCulture))

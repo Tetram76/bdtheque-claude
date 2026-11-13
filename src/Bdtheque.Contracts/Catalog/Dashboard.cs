@@ -39,11 +39,20 @@ public sealed record DashboardCounters(int AlbumCount, int SeriesCount, int Edit
 public sealed record SpotlightEdition(AlbumSummary Album, EditionSummary Edition, AlbumCover? Cover, string? Summary);
 
 /// <summary>An edition entered in the collection.</summary>
+/// <param name="PublisherWebsite">
+/// Where the publisher of the edition leads, having no record of its own (fonctionnel/structure-de-l-application.md);
+/// <c>null</c> when unknown, the publisher being then no link.
+/// </param>
 /// <param name="Cover">The first cover of the edition; <c>null</c> without any.</param>
 /// <param name="AcquisitionDate">When the user got the edition, if known.</param>
 /// <param name="EnteredCollectionAt">When the edition became owned, always known.</param>
 public sealed record LatestEntry(
-    AlbumSummary Album, EditionSummary Edition, AlbumCover? Cover, DateOnly? AcquisitionDate, DateTimeOffset EnteredCollectionAt);
+    AlbumSummary Album,
+    EditionSummary Edition,
+    string? PublisherWebsite,
+    AlbumCover? Cover,
+    DateOnly? AcquisitionDate,
+    DateTimeOffset EnteredCollectionAt);
 
 /// <summary>
 /// The colours of the day (visuel/dashboard/la-couverture-du-jour.md): those of the cover of the edition in the spotlight

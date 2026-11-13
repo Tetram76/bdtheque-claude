@@ -45,9 +45,6 @@
   <data name="Collection" xml:space="preserve">
     <value>Collection</value>
   </data>
-  <data name="External" xml:space="preserve">
-    <value>, site externe</value>
-  </data>
   <data name="Story.Title" xml:space="preserve">
     <value>De quoi ça parle ?</value>
   </data>

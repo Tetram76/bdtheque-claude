@@ -208,6 +208,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Contains(latest, entry => entry.Cover is null);
     }
 
+    // The publishers of the latest arrivals, with and without website: one leads to its site, the other is no link
+    // (visuel/dashboard/contenu-commun.md, #397).
+    [Fact]
+    public async Task LatestArrivals_OfTheDashboard_WithAndWithoutTheWebsiteOfTheirPublisher()
+    {
+        var dashboard = await _client.GetFromJsonAsync<Dashboard>("/catalog/dashboard");
+
+        var latest = dashboard!.Content!.LatestEntries;
+        Assert.Contains(latest, entry => entry.PublisherWebsite is not null);
+        Assert.Contains(latest, entry => entry.PublisherWebsite is null);
+    }
+
     // The home page of the administration: a record modified among the latest changes, a deleted one left out, and the
     // records whose page is their own or under their parent (an edition and an intent under their album, a collection under
     // its publisher), which carry it.

@@ -129,23 +129,7 @@
 
 .series-publishing dd {
     margin: 0;
-}
-
-.series-publisher,
-.external {
     font-weight: var(--font-weight-strong);
-}
-
-/* A link out of the application, marked as such by its arrow. */
-.external {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.external ::deep .icon {
-    inline-size: 0.875em;
-    block-size: 0.875em;
 }
 
 .series-notes-title {
