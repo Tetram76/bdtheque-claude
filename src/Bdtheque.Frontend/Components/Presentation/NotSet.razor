@@ -1,14 +1,15 @@
 @inject IStringLocalizer<NotSet> L
 
 @* A missing data is shown, never left blank (visuel/listes/principes-communs.md): its mention, or, brief, a dash that a screen
-   reader reads as the mention, where a mention would crowd (a column of a list). *@
+   reader reads as the mention, where a mention would crowd (a column of a list). Every missing data goes through here, so that
+   none writes its dash itself, which a screen reader would read as a dash. *@
 @if (Brief)
 {
-    <span class="not-set"><span aria-hidden="true">—</span><span class="visually-hidden">@L[Gender.ToString()]</span></span>
+    <span class="not-set"><span aria-hidden="true">—</span><span class="visually-hidden">@Text</span></span>
 }
 else
 {
-    <span class="not-set">@L[Gender.ToString()]</span>
+    <span class="not-set">@Text</span>
 }
 
 @code {
@@ -18,4 +19,13 @@ else
     /// <summary>A dash rather than the mention.</summary>
     [Parameter]
     public bool Brief { get; set; }
+
+    /// <summary>
+    /// The mention of a data whose absence says more than « Non renseigné » (an author credited on no album: « Aucun album »);
+    /// by default, « Non renseigné » in the gender of the data.
+    /// </summary>
+    [Parameter]
+    public string? Mention { get; set; }
+
+    private string Text => Mention ?? L[Gender.ToString()];
 }

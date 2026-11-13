@@ -82,7 +82,7 @@
     <value>Couleurs</value>
   </data>
   <data name="Roles.None" xml:space="preserve">
-    <value>—</value>
+    <value>Aucun rôle</value>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Modifier</value>
