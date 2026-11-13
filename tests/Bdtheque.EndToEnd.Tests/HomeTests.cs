@@ -60,7 +60,7 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
 }
 
 [Collection(CollectionApplication.Name)]
-public sealed class DashboardHomeTests(CollectionApplication application) : BrowserTest<CollectionApplication>(application)
+public sealed partial class DashboardHomeTests(CollectionApplication application) : BrowserTest<CollectionApplication>(application)
 {
     [Theory, InEachTheme]
     public async Task Visitor_SeesTheDashboard_AndGoesToTheAlbumInTheSpotlight(string theme)
@@ -157,11 +157,15 @@ public sealed class DashboardHomeTests(CollectionApplication application) : Brow
         // Its site out of the application, opened in a new tab, the dashboard staying as it was
         // (choix-implementation/socle/frontend.md, site extérieur).
         var latest = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Tout juste arrivés !" }) });
-        var publisher = latest.Locator("li").First.GetByRole(AriaRole.Link, new() { NameRegex = new Regex(@"^Casterman\s*, site externe$") });
+        var publisher = latest.Locator("li").First.GetByRole(AriaRole.Link, new() { NameRegex = CastermanLeavingTheApplication() });
         await Assertions.Expect(publisher).ToHaveAttributeAsync("href", "https://www.casterman.com");
         await Assertions.Expect(publisher).ToHaveAttributeAsync("target", "_blank");
         await Assertions.Expect(publisher).ToHaveAttributeAsync("rel", "noopener noreferrer");
     }
+
+    // Its accessible name, which Chromium composes with a space before the mention hidden but to screen readers.
+    [GeneratedRegex(@"^Casterman\s*, site externe$")]
+    private static partial Regex CastermanLeavingTheApplication();
 }
 
 /// <summary>An application without any data: the welcome screen of an empty collection.</summary>
