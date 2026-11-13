@@ -120,13 +120,13 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [("—", "Non renseignée"), ("—", "Aucun album"), ("—", "Aucun rôle")],
-            new[] { ".author-nationality", ".author-albums", ".author-roles" }.Select(cell => SeenAndHeard(gomez.QuerySelector(cell)!)));
+            [SeenAndHeard(gomez, ".author-nationality"), SeenAndHeard(gomez, ".author-albums"), SeenAndHeard(gomez, ".author-roles")]);
     }
 
-    // What the eye reads in a cell, then what a screen reader reads of it: each skips what is hidden from it.
-    private static (string Seen, string Heard) SeenAndHeard(IElement cell) => (
-        string.Concat(cell.QuerySelectorAll(".not-set > :not(.visually-hidden)").Select(part => part.TextContent)),
-        string.Concat(cell.QuerySelectorAll(".not-set > :not([aria-hidden='true'])").Select(part => part.TextContent)));
+    // What the eye reads in a cell of a row, then what a screen reader reads of it: each skips what is hidden from it.
+    private static (string Seen, string Heard) SeenAndHeard(IElement row, string cellSelector) => (
+        string.Concat(row.QuerySelectorAll($"{cellSelector} .not-set > :not(.visually-hidden)").Select(part => part.TextContent)),
+        string.Concat(row.QuerySelectorAll($"{cellSelector} .not-set > :not([aria-hidden='true'])").Select(part => part.TextContent)));
 
     [Fact]
     public void Rows_AMonogramOfItsInitials_InTheToneOfItsAuthor_WhateverItsPlace()
