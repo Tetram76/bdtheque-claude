@@ -27,7 +27,7 @@ public sealed class GenreListQueryTests
     {
         Assert.Equal(AppPaths.AdminNewGenre, new GenreListQuery(Adding: true).Href());
         Assert.Equal(new GenreListQuery(Edit: Genre).Href(), AppPaths.AdminEditGenre(Genre));
-        Assert.Equal(AppPaths.AdminEditGenre(Genre), AppPaths.AdminEdit(Contracts.Enums.RecordType.Genre, Genre));
+        Assert.Equal(AppPaths.AdminEditGenre(Genre), AppPaths.AdminEdit(Contracts.Enums.RecordType.Genre, Genre, null));
     }
 
     [Fact]

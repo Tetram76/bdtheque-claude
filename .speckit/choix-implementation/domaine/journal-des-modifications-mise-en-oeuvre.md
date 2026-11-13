@@ -7,7 +7,7 @@ applies_to:
   - 'src/Bdtheque.Domain/Entities/ChangeLog*.cs'
   - 'src/Bdtheque.Domain/Entities/RecordLabel.cs'
   - 'src/Bdtheque.Api/Endpoints/ChangeLogEndpoints.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T10:00:00Z }
 ---
 
 # Journal des modifications : mise en œuvre
@@ -22,3 +22,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 - **Des données, jamais des textes** ([Langue et culture d'affichage](../../fonctionnel/presentation/langue-et-culture-d-affichage.md)) : le libellé est enregistré par ses composantes, chaque valeur par son type, et le frontend construit le message dans la culture d'affichage. Le libellé est relevé sur la fiche telle que l'écriture la laisse, ou telle qu'elle était pour une suppression. La référence du média d'un visuel, donnée technique ([Visuel d'édition](../../modele-metier/visuel-d-edition.md)), n'en fait pas partie.
 - **Stockage en `jsonb`, sans clé étrangère vers la fiche**, qui peut disparaître. Le journal n'étant jamais purgé, sa forme JSON est **figée par des tests** (discriminants et noms de propriétés jamais renommés : un renommage rendrait illisibles les entrées déjà écrites), les membres d'énumération étant enregistrés par leur valeur, qui garde son sens ([Conventions de persistance (EF Core)](../persistance/conventions-de-persistance-ef-core.md)). `jsonb` réordonnant les clés, la lecture accepte le discriminant à toute position : une entrée relue est toujours l'entrée écrite.
 - **Dernières fiches écrites** ([Contenu](../../visuel/administration/contenu.md), Dernières modifications) : chaque fiche une fois, par sa dernière entrée, sans les fiches supprimées (un identifiant n'est jamais redonné). Les fiches sont lues d'abord, par regroupement, puis leurs entrées : EF Core ne traduit la première entrée d'un groupe que comme dernier opérateur d'une requête (documentation d'EF Core, *Complex query operators*).
+- **Parent lu avec l'entrée, jamais enregistré** : une édition et une intention d'achat, adressées par leur album, une collection, saisie avec son éditeur, n'ont de page que sous leur parent ([Contenu](../../visuel/administration/contenu.md), Dernières modifications) ; l'API le lit avec les entrées, pour les fiches qui existent encore, et la fiche supprimée depuis n'en a pas, ni de page où mener.
+  - **Alternative écartée (parent enregistré dans l'entrée)** : un attribut de plus dans le modèle de l'entrée, que les entrées déjà écrites n'ont pas, pour une donnée qui dit où est la fiche, et non ce qu'elle était, ce que l'entrée consigne.

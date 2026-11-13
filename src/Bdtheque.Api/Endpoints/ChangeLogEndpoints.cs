@@ -6,6 +6,7 @@ using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Contract = Bdtheque.Contracts.Admin;
 using ContractEnums = Bdtheque.Contracts.Enums;
+using DomainEnums = Bdtheque.Domain.Enums;
 using Model = Bdtheque.Domain.Entities;
 
 namespace Bdtheque.Api.Endpoints;
@@ -34,8 +35,10 @@ internal static class ChangeLogEndpoints
             .OrderByDescending(e => e.CreatedAt)
             .ThenByDescending(e => e.Id)
             .ToPageAsync(page, pageSize, e => e, cancellationToken);
+        var parents = await ReadParentsAsync(context, entries.Items, cancellationToken);
 
-        return new Page<Contract.ChangeLogEntryItem>(entries.Items.Select(ToItem).ToList(), entries.Number, entries.Size, entries.TotalCount);
+        return new Page<Contract.ChangeLogEntryItem>(
+            entries.Items.Select(e => ToItem(e, parents)).ToList(), entries.Number, entries.Size, entries.TotalCount);
     }
 
     /// <summary>
@@ -70,18 +73,62 @@ internal static class ChangeLogEndpoints
             .OrderByDescending(e => e.CreatedAt)
             .ThenByDescending(e => e.Id)
             .ToListAsync(cancellationToken);
+        var latest = records.Select(r => entries.First(e => e.RecordType == r.RecordType && e.RecordId == r.RecordId)).ToList();
+        var parents = await ReadParentsAsync(context, latest, cancellationToken);
 
-        return records
-            .Select(r => ToItem(entries.First(e => e.RecordType == r.RecordType && e.RecordId == r.RecordId)))
-            .ToList();
+        return latest.Select(e => ToItem(e, parents)).ToList();
     }
 
-    private static Contract.ChangeLogEntryItem ToItem(Model.ChangeLogEntry entry) =>
+    /// <summary>
+    /// The parent of each record of the entries whose page is addressed under it, by the identifier of the record: the album
+    /// of an edition or of a purchase intent, the publisher of a collection. Read rather than written in the entry, which
+    /// holds what the record was, not where it is: a record deleted since has none, and has no page to lead to.
+    /// </summary>
+    private static async Task<IReadOnlyDictionary<Guid, Guid>> ReadParentsAsync(
+        BdthequeDbContext context, IReadOnlyCollection<Model.ChangeLogEntry> entries, CancellationToken cancellationToken)
+    {
+        var editions = IdsOf(entries, DomainEnums.RecordType.Edition);
+        var intents = IdsOf(entries, DomainEnums.RecordType.PurchaseIntent);
+        var collections = IdsOf(entries, DomainEnums.RecordType.PublisherCollection);
+        var parents = new List<KeyValuePair<Guid, Guid>>();
+        if (editions.Count > 0)
+        {
+            parents.AddRange(await context.Editions.AsNoTracking()
+                .Where(e => editions.Contains(e.Id))
+                .Select(e => new KeyValuePair<Guid, Guid>(e.Id, e.AlbumId))
+                .ToListAsync(cancellationToken));
+        }
+
+        if (intents.Count > 0)
+        {
+            parents.AddRange(await context.PurchaseIntents.AsNoTracking()
+                .Where(i => intents.Contains(i.Id))
+                .Select(i => new KeyValuePair<Guid, Guid>(i.Id, i.AlbumId))
+                .ToListAsync(cancellationToken));
+        }
+
+        if (collections.Count > 0)
+        {
+            parents.AddRange(await context.PublisherCollections.AsNoTracking()
+                .Where(c => collections.Contains(c.Id))
+                .Select(c => new KeyValuePair<Guid, Guid>(c.Id, c.PublisherId))
+                .ToListAsync(cancellationToken));
+        }
+
+        // Identifiers are unique across every table (Guid v7), so one dictionary holds the three kinds.
+        return new Dictionary<Guid, Guid>(parents);
+    }
+
+    private static List<Guid> IdsOf(IEnumerable<Model.ChangeLogEntry> entries, DomainEnums.RecordType type) =>
+        entries.Where(e => e.RecordType == type).Select(e => e.RecordId).Distinct().ToList();
+
+    private static Contract.ChangeLogEntryItem ToItem(Model.ChangeLogEntry entry, IReadOnlyDictionary<Guid, Guid> parents) =>
         new(
             entry.Id,
             entry.CreatedAt,
             EnumMapping.Map<ContractEnums.RecordType>(entry.RecordType)!.Value,
             entry.RecordId,
+            parents.TryGetValue(entry.RecordId, out var parent) ? parent : null,
             ToLabel(entry.Label),
             EnumMapping.Map<ContractEnums.ChangeLogOperation>(entry.Operation)!.Value,
             entry.Changes.Select(ToChange).ToList());

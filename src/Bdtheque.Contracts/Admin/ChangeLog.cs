@@ -11,6 +11,11 @@ namespace Bdtheque.Contracts.Admin;
 /// </summary>
 /// <param name="Date">Date of the write.</param>
 /// <param name="RecordId">Identifier of the record written, kept after its deletion.</param>
+/// <param name="ParentId">
+/// The record under which the page of this one is addressed: the album of an edition or of a purchase intent, the publisher of
+/// a collection (visuel/administration/contenu.md, Dernières modifications). Read with the entry, for a record that still
+/// exists; <c>null</c> for any other record.
+/// </param>
 /// <param name="Label">What the label of the record was built from at the time of the write.</param>
 /// <param name="Changes">For a modification only: each attribute changed.</param>
 public sealed record ChangeLogEntryItem(
@@ -18,6 +23,7 @@ public sealed record ChangeLogEntryItem(
     DateTimeOffset Date,
     RecordType RecordType,
     Guid RecordId,
+    Guid? ParentId,
     RecordLabel Label,
     ChangeLogOperation Operation,
     IReadOnlyList<ChangeLogChange> Changes);
