@@ -29,8 +29,11 @@ forwards to that session a question of the user about the chantier
   or a dependency between chantiers require it. Never ask the user how many
   at once.
 - The user gives the **number of chantiers** of the batch. It is not fixed:
-  take the latest the user gave in this conversation; ask for it if never
-  given, never assume it.
+  take the latest the user gave in this conversation; never assume it. If
+  never given, ask for it **only after** step 2.2: once every candidate is
+  identified and ranked (dependencies and independence checked), present the
+  ranked candidates and the dropped ones, then ask how many chantiers the
+  batch counts — never before, the user deciding from that ranking.
 - Count the places taken (a chantier whose pull request is not merged yet,
   and the functional consistency check until its conclusion is written).
 - A sub-ticket is a chantier like the others. When it is launched, give it to
