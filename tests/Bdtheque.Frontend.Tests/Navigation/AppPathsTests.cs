@@ -29,7 +29,7 @@ public sealed class AppPathsTests
         [RecordType.ApplicationSettings] = AppPaths.AdminSettings,
     };
 
-    public static TheoryData<RecordType> RecordTypes => new(Enum.GetValues<RecordType>());
+    public static TheoryData<RecordType> RecordTypes => [.. Enum.GetValues<RecordType>()];
 
     [Theory]
     [MemberData(nameof(RecordTypes))]
