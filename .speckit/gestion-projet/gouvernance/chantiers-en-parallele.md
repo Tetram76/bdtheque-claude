@@ -25,9 +25,12 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T12:00:00Z }
 - **Ordre de priorité** :
   1. **Stabilisation du CI** : un ticket qui corrige une instabilité du CI (test instable, échec intermittent). Retirer au CI une cause d'échec extérieure à son contenu (ex. les quotas d'un registre) n'est pas une stabilisation, mais une optimisation, qui suit l'ordre commun.
   2. **Contrôle de cohérence fonctionnelle**, quand il est dû ([Contrôle de cohérence à la reprise du travail](../revue-tickets/controle-de-coherence-a-la-reprise-du-travail.md)), ce que l'orchestrateur seul vérifie, une fois pour le lot : il le confie à une session à part, qui occupe une place du lot, son ticket étant celui de son suivi. Les tickets qu'il ouvre rejoignent le choix des chantiers suivants.
-  3. **Plan d'implémentation** : un chantier listé dans [`suivi-implementation/`](../../suivi-implementation/index.md), sous-tickets compris.
-  4. **Jalon de la version en cours** : un ticket rattaché au jalon de la prochaine version ([Versions et releases](../depot/versions-et-releases.md)).
-  5. Les autres tickets.
+  3. **Plan du jalon en cours** : un chantier listé dans [`suivi-implementation/`](../../suivi-implementation/index.md), sous-tickets compris, rattaché au jalon de la prochaine version ([Versions et releases](../depot/versions-et-releases.md)).
+  4. **Jalon en cours** : un autre ticket rattaché à ce jalon.
+  5. **Plan hors jalon** : un chantier listé dans le suivi, rattaché à un autre jalon ou à aucun.
+  6. Les autres tickets.
+
+  Plan et jalon se conjuguent : après les harnais, ce qui prime est le plan **du jalon en cours** ; la partie du plan hors de ce jalon ne vient qu'après tous les tickets du jalon (exigence de l'utilisateur).
 - **Indépendance** : un chantier qui modifierait les mêmes fichiers qu'un chantier en cours (même écran, même thème, même workflow) est écarté au profit du suivant, tant que l'autre n'est pas fusionné.
 - **Dépendances** : deux chantiers dont l'un doit voir le résultat de l'autre (ex. deux tickets qui modifient le même workflow, l'un devant partir de ce que l'autre décide) sont menés l'un après l'autre, jamais en même temps.
   - **Toute condition préalable est une dépendance** : est une dépendance toute condition que le ticket, ou la ligne du suivi qui le présente, pose à sa réalisation, pas seulement un autre chantier : un ticket prérequis, une version publiée, une mise en production ([`journal-evenements.md`](../../journal-evenements.md)), un calendrier (« sans objet avant… », « à réaliser avant… »). Un ticket dont une condition n'est pas remplie n'est pas candidat, quel que soit son rang dans l'ordre de priorité, même s'il est listé dans le suivi (ex. #267, sans objet avant la première mise en production).

@@ -73,7 +73,10 @@ forwards to that session a question of the user about the chantier
    current calendar week, done or in progress; checked by the
    orchestrator alone, once for the batch,
    `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
-   `.speckit/suivi-implementation/` → milestone of the next version → the rest.
+   `.speckit/suivi-implementation/` **in** the milestone of the next version →
+   the other tickets of that milestone → the plan outside that milestone →
+   the rest. Plan and milestone combine: the plan outside the current
+   milestone comes after every ticket of the milestone.
 
    Then, **for each candidate you consider, in that order, you check yourself
    both conditions below** — never one without the other, never left to the

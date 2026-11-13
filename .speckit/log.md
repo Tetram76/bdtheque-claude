@@ -2,7 +2,7 @@
 
 ## 2026-11-13
 
-* **Règle** : dans un lot de chantiers en parallèle, le nombre de chantiers du lot, s'il n'a pas été donné, n'est demandé à l'utilisateur qu'après l'identification et le classement des candidats, présentés avec les candidats écartés et leur raison (exigence de l'utilisateur).
+* **Règle** : dans un lot de chantiers en parallèle, le nombre de chantiers du lot, s'il n'a pas été donné, n'est demandé à l'utilisateur qu'après l'identification et le classement des candidats, présentés avec les candidats écartés et leur raison ; l'ordre de priorité conjugue plan et jalon : après les harnais, plan du jalon en cours, puis autres tickets de ce jalon, puis plan hors de ce jalon, puis le reste (exigences de l'utilisateur).
 
 ## 2026-11-12
 
