@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et ses chantiers, notes des parties suivantes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T07:41:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T19:00:00Z }
 ---
 
 # Phase 3 — Frontend Blazor
@@ -70,4 +70,4 @@ Contenu, nombre et version à établir au découpage de chacune.
 - **Note — style des contrôles** : dans chaque thème, le texte indicatif (*placeholder*) des champs garde un contraste d'au moins 4,5:1, et l'indicateur de focus clavier contraste à la fois avec le contrôle et avec la surface qui l'entoure, y compris sur un bouton à fond coloré. Les maquettes de l'administration (`visuel/maquettes/administration/`) ne respectent pas ces deux points (texte indicatif atténué par une opacité, contour de focus dans la couleur du texte du contrôle). Le style des contrôles relève des contrats du thème de base (#194, réalisé par #256), que tout thème ajouté respecte.
 - **Note — paramétrage de l'application** : le modèle de domaine et l'API du paramétrage sont réalisés par la partie 1 (#193), dont la page d'accueil de l'administration présente les valeurs ; l'écran qui le modifie reste à réaliser.
 - **Note — mesure d'audience de l'interface web** : la partie 1 réalise le relevé, les visites, l'information des visiteurs et leur opposition (#197), et chaque écran ajoute ses fonctions à la liste des fonctions suivies ; l'écran de l'administration qui présente les indicateurs reste à réaliser.
-- **Note — recherche avancée** : les écrans de la recherche avancée ([Recherche avancée](../fonctionnel/recherche-avancee/recherche-avancee.md)) sont intégrés à cette phase : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données ([Recherche avancée : mise en œuvre](../choix-implementation/recherche-avancee/recherche-avancee-mise-en-oeuvre.md)), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
+- **Note — recherche avancée** : les écrans de la recherche avancée ([Recherche avancée](../fonctionnel/recherche-avancee/recherche-avancee.md)) sont intégrés à cette phase, dont ils sont l'**objectif principal de la partie 3** (décision de l'utilisateur) : formulaire de construction des critères, utilisable sans aucune connaissance de SQL et qui met en évidence le chemin suivi entre entités, y compris vers l'autre donnée d'une comparaison entre deux données ([Recherche avancée : mise en œuvre](../choix-implementation/recherche-avancee/recherche-avancee-mise-en-oeuvre.md)), rejeu des recherches enregistrées avec la saisie de leurs variables, et page d'administration des recherches enregistrées.
