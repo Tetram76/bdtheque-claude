@@ -105,7 +105,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
                 ("Christophe Gibelin", null, "Française", "14 albums", "Scénario"),
                 ("Jean-Pierre Gibrat", null, "Française", "1 album", "Scénario · Dessin · Couleurs"),
                 // No album credited: a dash, said in full to a screen reader.
-                ("Alain Gomez", null, "—Non renseignée", "—Aucun album", "—"),
+                ("Alain Gomez", null, "—Non renseignée", "—Aucun album", "—Aucun rôle"),
                 // Under a pseudonym, the first name and the last name below it.
                 ("Gotlib", "Marcel Gotlieb", "Française", "22 albums", "Scénario · Dessin"),
             ],
@@ -113,15 +113,20 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_MarkTheDataThatIsMissing_ByThePresenceOfTheirAttribute()
+    public void Rows_ADataThatIsMissing_ADashHiddenFromScreenReaders_WhichAreToldItsMention()
     {
-        // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
-        var rows = Open("").FindAll(".author-row:not(.author-row-head)").Select(row => (
-            row.QuerySelector(".author-albums")!.HasAttribute("data-empty"),
-            row.QuerySelector(".author-roles")!.HasAttribute("data-empty")));
+        // Gomez: no nationality, credited on no album, hence no role (visuel/charte-graphique/convivialite-et-efficacite.md).
+        var gomez = Open("").FindAll(".author-row:not(.author-row-head)")[2];
 
-        Assert.Equal([(false, false), (false, false), (true, true), (false, false)], rows);
+        Assert.Equal(
+            [("—", "Non renseignée"), ("—", "Aucun album"), ("—", "Aucun rôle")],
+            [SeenAndHeard(gomez, ".author-nationality"), SeenAndHeard(gomez, ".author-albums"), SeenAndHeard(gomez, ".author-roles")]);
     }
+
+    // What the eye reads in a cell of a row, then what a screen reader reads of it: each skips what is hidden from it.
+    private static (string Seen, string Heard) SeenAndHeard(IElement row, string cellSelector) => (
+        string.Concat(row.QuerySelectorAll($"{cellSelector} .not-set > :not(.visually-hidden)").Select(part => part.TextContent)),
+        string.Concat(row.QuerySelectorAll($"{cellSelector} .not-set > :not([aria-hidden='true'])").Select(part => part.TextContent)));
 
     [Fact]
     public void Rows_AMonogramOfItsInitials_InTheToneOfItsAuthor_WhateverItsPlace()

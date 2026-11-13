@@ -74,11 +74,6 @@
     grid-area: roles;
 }
 
-.author-albums[data-empty],
-.author-roles[data-empty] {
-    color: var(--color-text-muted);
-}
-
 .author-modified {
     display: none;
     grid-area: modified;

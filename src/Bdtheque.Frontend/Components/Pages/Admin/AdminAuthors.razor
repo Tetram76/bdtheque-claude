@@ -97,19 +97,28 @@
                                     <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
                                 }
                             </span>
-                            <span class="author-albums" role="cell" data-empty="@(row.CreditedAlbumCount == 0)">
+                            @* No album credited, hence no role: a datum missing from the row (visuel/listes/liste-par-liste.md), a dash
+                               as in any list, said to a screen reader by what it means. *@
+                            <span class="author-albums" role="cell">
                                 @if (row.CreditedAlbumCount == 0)
                                 {
-                                    @* A count of none is a datum missing from the row: a dash, as in any list
-                                       (visuel/charte-graphique/convivialite-et-efficacite.md), said in full to a screen reader. *@
-                                    <span class="not-set"><span aria-hidden="true">—</span><span class="visually-hidden">@L["Albums.None"]</span></span>
+                                    <NotSet Brief="true" Mention="@L["Albums.None"]" />
                                 }
                                 else
                                 {
                                     @AlbumsText(row)
                                 }
                             </span>
-                            <span class="author-roles" role="cell" data-empty="@(row.Roles.Count == 0)">@RolesText(row)</span>
+                            <span class="author-roles" role="cell">
+                                @if (row.Roles.Count == 0)
+                                {
+                                    <NotSet Brief="true" Mention="@L["Roles.None"]" />
+                                }
+                                else
+                                {
+                                    @RolesText(row)
+                                }
+                            </span>
                         </span>
                         <span class="author-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
                         <span class="author-actions" role="cell">
@@ -457,9 +466,8 @@
         var count => L["Albums.Other", Format.Number(count)],
     };
 
-    // « Scénario · Dessin », in role order; « — » for an author credited on nothing.
-    private string RolesText(AuthorAdminListItem row) =>
-        row.Roles.Count == 0 ? L["Roles.None"] : string.Join(" · ", row.Roles.Select(role => L[$"Role.{role}"].Value));
+    // « Scénario · Dessin », in role order.
+    private string RolesText(AuthorAdminListItem row) => string.Join(" · ", row.Roles.Select(role => L[$"Role.{role}"].Value));
 
     private string CandidateDetail(AuthorAdminListItem candidate) => string.Join(" · ", new[]
     {
