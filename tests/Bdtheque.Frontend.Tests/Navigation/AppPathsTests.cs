@@ -14,7 +14,7 @@ public sealed class AppPathsTests
 
     // Every type of record, with the page that modifies it: a type added to the contracts without its page here fails
     // EveryTypeOfRecord_HasItsPage, so that no type is left on « Pas encore implémenté » once its page exists.
-    private static readonly IReadOnlyDictionary<RecordType, string> Expected = new Dictionary<RecordType, string>
+    private static readonly Dictionary<RecordType, string> Expected = new()
     {
         [RecordType.Album] = AppPaths.AdminEditAlbum(Record),
         [RecordType.Edition] = AppPaths.AdminEditEdition(Parent, Record),
