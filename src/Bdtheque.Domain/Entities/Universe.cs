@@ -29,7 +29,7 @@ public sealed class Universe : EntityBase, IAggregateRoot
     }
 
     public void SetName(string name) =>
-        Name = DomainText.Required(name, DomainRules.UniverseNameRequired, "A universe must have a name.");
+        Name = DomainText.Required(name, DomainRules.UniverseNameRequired, "A universe must have a name.", this, nameof(Name));
 
     public void SetDescription(string? description) => Description = DomainText.NullIfBlank(description);
 
@@ -123,6 +123,6 @@ public sealed class Universe : EntityBase, IAggregateRoot
         ParentId = parent?.Id;
     }
 
-    private static DomainRuleViolationException CycleViolation() =>
-        new(DomainRules.UniverseHierarchyCycle, "A universe cannot be its own ancestor.");
+    private DomainRuleViolationException CycleViolation() =>
+        new(DomainRules.UniverseHierarchyCycle, "A universe cannot be its own ancestor.", this, nameof(ParentId));
 }

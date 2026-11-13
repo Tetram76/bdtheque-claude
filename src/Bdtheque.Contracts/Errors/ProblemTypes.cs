@@ -27,6 +27,21 @@ public static class ProblemTypes
     public const string RuleCodeExtension = "ruleCode";
 
     /// <summary>
+    /// Extension member of a <see cref="Business"/> problem holding the fields of the value in cause, where the request entered
+    /// it: JSON Pointers (RFC 6901) into the content it sent (e.g. <c>/name</c>, <c>/collections/1/name</c>), the first one
+    /// being the field to correct first. Absent when the rule concerns no value of the content (e.g. a deletion refused).
+    /// </summary>
+    public const string FieldsExtension = "fields";
+
+    /// <summary>
+    /// Extension member of a <see cref="Business"/> problem holding the fields that hold the values those of
+    /// <see cref="FieldsExtension"/> clash with, entered in the same content but left as they were (e.g. the other collection
+    /// of a publisher already named so): presented with the error, they are not the ones to correct. Absent when there are
+    /// none.
+    /// </summary>
+    public const string RelatedFieldsExtension = "relatedFields";
+
+    /// <summary>
     /// Extension member of the problem of a refused deletion (<see cref="Business"/>) or of one whose
     /// impact changed since it was confirmed (<see cref="Functional"/>), holding the current impact of
     /// the deletion (<see cref="Deletion.DeletionImpact"/>).

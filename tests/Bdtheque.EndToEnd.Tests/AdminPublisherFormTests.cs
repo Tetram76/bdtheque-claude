@@ -94,6 +94,25 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewPublisher));
     }
 
+    [Theory, InEachTheme]
+    public async Task Save_RenamingACollectionAsAnother_IsToCorrect_OnTheRenamedOne_WhichGetsTheFocus(string theme)
+    {
+        // The collection renamed comes second: the focus goes to it, not to the first field in error.
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(
+            $"Dargaud {_marker}", null, [new(null, "Carnets"), new(null, "Escales")]));
+        var page = await OpenAsync(theme, AppPaths.AdminEditPublisher(publisher.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+
+        var names = page.GetByLabel("Nom de la collection");
+        await names.Last.FillAsync("Carnets");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("À corriger");
+        await Assertions.Expect(names.First).ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(names.Last).ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(names.Last).ToBeFocusedAsync();
+    }
+
     /// <summary>
     /// Adds a collection and names it, once its row is rendered by the circuit: named before, the last row would still be
     /// the one before it.

@@ -33,7 +33,7 @@ public sealed class PublisherCollectionTests
     public void Constructor_EmptyName_Throws(string? name)
     {
         var publisher = new Publisher("Dargaud");
-        DomainAssert.Violates(DomainRules.PublisherCollectionNameRequired, () => publisher.AddCollection(name!));
+        DomainAssert.Violates<PublisherCollection>(DomainRules.PublisherCollectionNameRequired, nameof(PublisherCollection.Name), () => publisher.AddCollection(name!));
     }
 
     [Fact]

@@ -41,7 +41,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     {
         var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent(" ", null, []));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameRequired, ["/name"]);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     {
         var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent(new string('A', 301), null, []));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/name"]);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PostAsJsonAsync(
             "/admin/publishers", new PublisherContent("Éditeur au site interminable", "https://example.com/" + new string('a', 2040), []));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/website"]);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PutAsJsonAsync(
             $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent(new string('B', 301), null, []), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/name"]);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     {
         var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent("Glénat", "pas une url", []));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherWebsiteInvalid);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherWebsiteInvalid, ["/website"]);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
 
         var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent("Casterman", null, []));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PutAsJsonAsync(
             $"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(new PublisherContent("Lombard", null, []), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -339,7 +339,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
             new PublisherContent(publisher.Name, null, [new(label.Id, "Ciel"), new(ciel.Id, "Ciel")]), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/0/name"], ["/collections/1/name"]);
         SameForm(publisher, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
     }
 
@@ -349,7 +349,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PostAsJsonAsync(
             "/admin/publishers", new PublisherContent("Akileos", null, [new(null, "Regards"), new(null, "Regards")]));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/0/name", "/collections/1/name"]);
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
         Assert.False(await context.Publishers.AnyAsync(p => p.Name == "Akileos"));
@@ -363,7 +363,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
             new PublisherContent("Kana", null, [new(publisher.Collections[0].Id, "Big Kana"), new(null, "Big Kana")]), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/1/name"], ["/collections/0/name"]);
     }
 
     [Fact]
@@ -374,7 +374,61 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
             new PublisherContent("Pika", null, [new(null, " ")]), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired, ["/collections/0/name"]);
+    }
+
+    [Fact]
+    public async Task Update_WithTwoClashesAtOnce_DesignatesTheWrittenCollectionsToCorrect_AndTheUnchangedOneAsRelated()
+    {
+        // A collection renamed as another left unchanged, and two collections added under the same name.
+        var publisher = await CreateAsync("Éditeur aux deux collisions", "Grand Large", "Escales");
+        var (grandLarge, escales) = (publisher.Collections.Single(c => c.Name == "Grand Large"), publisher.Collections.Single(c => c.Name == "Escales"));
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(grandLarge.Id, "Escales"), new(escales.Id, "Escales"), new(null, "Test"), new(null, "Test")]),
+            publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(
+            response, DomainRules.PublisherCollectionNameAlreadyUsed,
+            ["/collections/0/name", "/collections/2/name", "/collections/3/name"], ["/collections/1/name"]);
+    }
+
+    [Fact]
+    public async Task Update_RenamingTwoCollectionsAlike_DesignatesBothToCorrect()
+    {
+        var publisher = await CreateAsync("Éditeur aux deux renommages", "Un", "Deux");
+        var (one, two) = (publisher.Collections.Single(c => c.Name == "Un"), publisher.Collections.Single(c => c.Name == "Deux"));
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(one.Id, "Trois"), new(two.Id, "Trois")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(
+            response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/0/name", "/collections/1/name"]);
+    }
+
+    [Fact]
+    public async Task Update_RenamingACollectionBlank_DesignatesItsName()
+    {
+        var publisher = await CreateAsync("Éditeur à la collection vidée", "Vécu", "Grafica");
+        var vecu = publisher.Collections.Single(c => c.Name == "Vécu");
+        var grafica = publisher.Collections.Single(c => c.Name == "Grafica");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(grafica.Id, "Grafica"), new(vecu.Id, " ")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired, ["/collections/1/name"]);
+    }
+
+    [Fact]
+    public async Task Update_WithACollectionNameLongerThanTheColumn_DesignatesItsName()
+    {
+        var publisher = await CreateAsync("Éditeur à la collection trop longue", "32");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(publisher.Collections[0].Id, "32"), new(null, new string('C', 301))]),
+            publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/collections/1/name"]);
     }
 
     [Fact]

@@ -26,7 +26,7 @@ public sealed class Publisher : EntityBase, IAggregateRoot
     }
 
     public void SetName(string name) =>
-        Name = DomainText.Required(name, DomainRules.PublisherNameRequired, "A publisher must have a name.");
+        Name = DomainText.Required(name, DomainRules.PublisherNameRequired, "A publisher must have a name.", this, nameof(Name));
 
     public PublisherCollection AddCollection(string name)
     {
@@ -53,7 +53,8 @@ public sealed class Publisher : EntityBase, IAggregateRoot
             && (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
                 || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)))
             throw new DomainRuleViolationException(
-                DomainRules.PublisherWebsiteInvalid, $"'{trimmed}' is not a valid absolute web URL (http or https required).");
+                DomainRules.PublisherWebsiteInvalid, $"'{trimmed}' is not a valid absolute web URL (http or https required).", this,
+                nameof(Website));
 
         Website = trimmed;
     }

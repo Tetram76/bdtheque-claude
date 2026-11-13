@@ -50,7 +50,7 @@ public sealed class EditionTests
         // The publisher is a required field of the form: leaving it empty is an input mistake.
         var album = CreateAlbum();
 
-        DomainAssert.Violates(DomainRules.EditionPublisherRequired, () => new Edition(album, null));
+        DomainAssert.Violates<Edition>(DomainRules.EditionPublisherRequired, nameof(Edition.PublisherId), () => new Edition(album, null));
         Assert.Empty(album.Editions);
     }
 
@@ -75,7 +75,7 @@ public sealed class EditionTests
         var otherPublisher = new Publisher("Dargaud");
         var foreignCollection = otherPublisher.AddCollection("Lucky Luke");
 
-        DomainAssert.Violates(DomainRules.PublisherCollectionNotOfPublisher, () => edition.SetPublisher(CreatePublisher(), foreignCollection));
+        DomainAssert.Violates<Edition>(DomainRules.PublisherCollectionNotOfPublisher, nameof(Edition.PublisherCollectionId), () => edition.SetPublisher(CreatePublisher(), foreignCollection));
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        DomainAssert.Violates(DomainRules.EditionPublisherRequired, () => edition.SetPublisher(null, null));
+        DomainAssert.Violates<Edition>(DomainRules.EditionPublisherRequired, nameof(Edition.PublisherId), () => edition.SetPublisher(null, null));
         Assert.NotNull(edition.Publisher);
     }
 
@@ -94,7 +94,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        DomainAssert.Violates(DomainRules.EditionPublicationYearPositive, () => edition.SetPublicationYear(year));
+        DomainAssert.Violates<Edition>(DomainRules.EditionPublicationYearPositive, nameof(Edition.PublicationYear), () => edition.SetPublicationYear(year));
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        DomainAssert.Violates(DomainRules.EditionPageCountPositive, () => edition.SetPageCount(count));
+        DomainAssert.Violates<Edition>(DomainRules.EditionPageCountPositive, nameof(Edition.PageCount), () => edition.SetPageCount(count));
     }
 
     [Fact]

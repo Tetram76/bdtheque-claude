@@ -34,6 +34,15 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         var problem = new ProblemDetails { Status = status, Type = type };
         if (ruleCode is not null)
             problem.Extensions[ProblemTypes.RuleCodeExtension] = ruleCode;
+        // What the user is to correct, where they entered it.
+        if (type == ProblemTypes.Business)
+        {
+            var designation = DesignationOf(httpContext, exception);
+            if (designation.Fields.Count > 0)
+                problem.Extensions[ProblemTypes.FieldsExtension] = designation.Fields;
+            if (designation.Related.Count > 0)
+                problem.Extensions[ProblemTypes.RelatedFieldsExtension] = designation.Related;
+        }
         // What the message has to announce beyond the category: the records concerned by the deletion.
         if (ImpactOf(exception) is { } impact)
             problem.Extensions[ProblemTypes.ImpactExtension] = impact;
@@ -42,6 +51,12 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         // The exception is deliberately not passed on: nothing internal reaches the response.
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext { HttpContext = httpContext, ProblemDetails = problem });
     }
+
+    private static BusinessErrorFields.Designation DesignationOf(HttpContext httpContext, Exception exception) =>
+        BusinessErrorFields.Of(
+            exception,
+            httpContext.RequestServices.GetRequiredService<ContentFields>(),
+            httpContext.RequestServices.GetRequiredService<BdthequeDbContext>());
 
     private static DeletionImpact? ImpactOf(Exception exception) => exception switch
     {

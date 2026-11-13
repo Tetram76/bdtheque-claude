@@ -7,6 +7,8 @@
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<AdminEditionForm> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
+@inject IStringLocalizer<RuleMessages> RuleTexts
 @inject ApiClient Api
 @inject ValueLabels Values
 @inject RecordLabels Labels
@@ -53,14 +55,14 @@ else
             <Block Title="@L["Block.Edition"]" Kicker="@L["Kicker.Edition"]">
                 <div class="edition-fields">
                     <div class="edition-publisher">
-                        <Field Id="edition-publisher" Label="@L["Publisher"]" Note="@L["Required"]" Error="@FieldError("publisher")" Context="control">
+                        <Field Id="edition-publisher" Label="@L["Publisher"]" Note="@L["Required"]" Error="@Errors.For("/publisherId")" Context="control">
                             <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="ChoosePublisherAsync"
                                           Placeholder="@L["Publisher.Placeholder"]" aria-describedby="@control.DescribedBy"
                                           aria-invalid="@control.Invalid" />
                         </Field>
                         @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and
                            removed when it changes (choix-implementation/socle/frontend.md, Fiches de saisie). *@
-                        <Field Id="edition-collection" Label="@L["Collection"]" Error="@FieldError("collection")"
+                        <Field Id="edition-collection" Label="@L["Collection"]" Error="@Errors.For("/publisherCollectionId")"
                                Help="@(CollectionsUnread ? L["Collection.Unread"].Value : L["Collection.Help"].Value)" Context="control">
                             <select id="@control.Id" class="edition-collection" disabled="@(Entry.Publisher is null)"
                                     aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
@@ -74,11 +76,11 @@ else
                         </Field>
                     </div>
                     <div class="edition-row">
-                        <Field Id="edition-year" Label="@L["Year"]" Characters="4" Error="@FieldError("year")" Context="control">
+                        <Field Id="edition-year" Label="@L["Year"]" Characters="4" Error="@Errors.For("/publicationYear")" Context="control">
                             <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" placeholder="@L["Year.Placeholder"]"
                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="Entry.PublicationYear" />
                         </Field>
-                        <IsbnField Id="edition-isbn" @bind-Value="Entry.Isbn" ReadCheck="Entry.IsbnChecksumValid" />
+                        <IsbnField Id="edition-isbn" @bind-Value="Entry.Isbn" ReadCheck="Entry.IsbnChecksumValid" Error="@Errors.For("/isbn")" />
                         @EnumList("edition-category", L["Category"], () => Entry.Category, value => Entry.Category = value)
                     </div>
                 </div>
@@ -91,7 +93,7 @@ else
                         @EnumList("edition-binding", L["Binding"], () => Entry.Binding, value => Entry.Binding = value)
                         @EnumList("edition-orientation", L["Orientation"], () => Entry.Orientation, value => Entry.Orientation = value)
                         @EnumList("edition-direction", L["ReadingDirection"], () => Entry.ReadingDirection, value => Entry.ReadingDirection = value)
-                        <Field Id="edition-pages" Label="@L["Pages"]" Characters="4" Error="@FieldError("pages")" Context="control">
+                        <Field Id="edition-pages" Label="@L["Pages"]" Characters="4" Error="@Errors.For("/pageCount")" Context="control">
                             <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" aria-describedby="@control.DescribedBy"
                                    aria-invalid="@control.Invalid" @bind="Entry.PageCount" />
                         </Field>
@@ -107,7 +109,7 @@ else
                 <Block Title="@L["Block.Copy"]" Kicker="@L["Kicker.Copy"]">
                     <div class="edition-fields">
                         <div class="edition-row">
-                            <Field Id="edition-mode" Label="@L["Mode"]" Note="@L["Required"]" Error="@FieldError("mode")" Context="control">
+                            <Field Id="edition-mode" Label="@L["Mode"]" Note="@L["Required"]" Error="@Errors.For("/acquisitionMode")" Context="control">
                                 <select id="@control.Id" class="edition-list" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
                                         value="@(Entry.AcquisitionMode?.ToString() ?? "")"
                                         @onchange="args => Entry.ChooseAcquisitionMode(Enum.TryParse<AcquisitionMode>(args.Value as string, out var mode) ? mode : null)">
@@ -118,7 +120,7 @@ else
                                     }
                                 </select>
                             </Field>
-                            <Field Id="edition-date" Label="@DateLabel" Error="@FieldError("date")" Context="control">
+                            <Field Id="edition-date" Label="@DateLabel" Error="@Errors.For("/acquisitionDate")" Context="control">
                                 <input id="@control.Id" type="date" class="edition-date" aria-describedby="@control.DescribedBy"
                                        aria-invalid="@control.Invalid" @bind="Entry.AcquisitionDate" />
                             </Field>
@@ -127,12 +129,15 @@ else
                                 <Choice Label="@L["SecondHand"]"><input type="checkbox" @bind="Entry.IsSecondHand" /></Choice>
                                 <Choice Label="@L["Dedicated"]"><input type="checkbox" @bind="Entry.IsDedicated" /></Choice>
                             </div>
-                            <Field Id="edition-reference" Label="@L["Reference"]" Characters="12" Context="control">
-                                <input id="@control.Id" type="text" placeholder="@L["Reference.Placeholder"]" @bind="Entry.PersonalReference" />
+                            <Field Id="edition-reference" Label="@L["Reference"]" Characters="12" Error="@Errors.For("/personalReference")"
+                                   Context="control">
+                                <input id="@control.Id" type="text" placeholder="@L["Reference.Placeholder"]" aria-describedby="@control.DescribedBy"
+                                       aria-invalid="@control.Invalid" @bind="Entry.PersonalReference" />
                             </Field>
                         </div>
-                        <Field Id="edition-notes" Label="@L["Notes"]" Context="control">
-                            <textarea id="@control.Id" rows="2" placeholder="@L["Notes.Placeholder"]" @bind="Entry.PersonalNotes"></textarea>
+                        <Field Id="edition-notes" Label="@L["Notes"]" Error="@Errors.For("/personalNotes")" Context="control">
+                            <textarea id="@control.Id" rows="2" placeholder="@L["Notes.Placeholder"]" aria-describedby="@control.DescribedBy"
+                                      aria-invalid="@control.Invalid" @bind="Entry.PersonalNotes"></textarea>
                         </Field>
                     </div>
                 </Block>
@@ -140,11 +145,11 @@ else
                 <Block Title="@L["Block.Value"]" Kicker="@L["Kicker.Value"]">
                     <div class="edition-row">
                         <AmountField Id="edition-price" Label="@AmountLabel" @bind-Amount="Entry.AcquisitionAmount" @bind-Currency="Entry.AcquisitionCurrency"
-                                     DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree" Error="@FieldError("price")"
+                                     DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree" Error="@Errors.For("/acquisitionAmount", "/acquisitionCurrency")"
                                      Help="@(IsPurchase ? L["Price.Help.Purchase"] : L["Price.Help.Other"])" />
                         <AmountField Id="edition-initial" Label="@L["InitialValue"]" @bind-Amount="Entry.InitialValueAmount"
                                      @bind-Currency="Entry.InitialValueCurrency" DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree"
-                                     Error="@FieldError("initial")" Help="@L["InitialValue.Help"]" />
+                                     Error="@Errors.For("/initialValueAmount", "/initialValueCurrency")" Help="@L["InitialValue.Help"]" />
                         @* A free edition has no value: its amounts are emptied and disabled; a purchase is never free, the box
                            disabled by the mode « Achat » (fonctionnel/presentation/libelles-contextuels-sur-l-edition.md). *@
                         <div class="edition-flag edition-free">
@@ -505,23 +510,9 @@ else
     // reads anew the edition or, for a new one, the album and what the series pre-fills.
     private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
 
-    // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own.
-    private string? FieldError(string field) =>
-        _saveProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field ? L[$"FieldError.{code}"].Value : null;
-
-    private static string? FieldOf(string ruleCode) => ruleCode switch
-    {
-        "Edition.PublisherRequired" => "publisher",
-        "PublisherCollection.NotOfPublisher" => "collection",
-        "Edition.PublicationYearPositive" => "year",
-        "Edition.PageCountPositive" => "pages",
-        "Edition.AcquisitionModeRequired" or "Edition.PurchaseCannotBeFree" => "mode",
-        "Edition.AcquisitionAmountCurrencyTogether" or "Edition.AcquisitionAmountPositive" or "Edition.FreeExcludesPrice"
-            or "Edition.AcquisitionPriceReferenceDateRequired" => "price",
-        "Edition.InitialValueAmountCurrencyTogether" or "Edition.InitialValueAmountPositive" or "Edition.FreeExcludesInitialValue"
-            or "Edition.InitialValueReferenceDateRequired" => "initial",
-        _ => null,
-    };
+    // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md); an amount and its
+    // currency, entered side by side, are a single field of the form.
+    private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-edition/contenu.md).
     // A conflict can always be reloaded: a new edition or intent is written, as a modified one, under the version of its album,

@@ -20,7 +20,7 @@ public sealed class PublisherTests
     [InlineData("   ")]
     public void Constructor_EmptyName_Throws(string? name)
     {
-        DomainAssert.Violates(DomainRules.PublisherNameRequired, () => new Publisher(name!));
+        DomainAssert.Violates<Publisher>(DomainRules.PublisherNameRequired, nameof(Publisher.Name), () => new Publisher(name!));
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class PublisherTests
     public void SetWebsite_InvalidUrl_Throws(string url)
     {
         var publisher = new Publisher("Dargaud");
-        DomainAssert.Violates(DomainRules.PublisherWebsiteInvalid, () => publisher.SetWebsite(url));
+        DomainAssert.Violates<Publisher>(DomainRules.PublisherWebsiteInvalid, nameof(Publisher.Website), () => publisher.SetWebsite(url));
     }
 
     [Theory]

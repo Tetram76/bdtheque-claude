@@ -231,7 +231,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     {
         var response = await _client.PostAsJsonAsync("/admin/series", Content(" "));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesTitleRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesTitleRequired, ["/title"]);
     }
 
     [Fact]
@@ -239,7 +239,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     {
         var response = await _client.PostAsJsonAsync("/admin/series", Content(UniqueTitle()) with { ManualSortKey = " " });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesSortKeyRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesSortKeyRequired, ["/manualSortKey"]);
     }
 
     [Fact]
@@ -247,7 +247,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     {
         var response = await _client.PostAsJsonAsync("/admin/series", Content(UniqueTitle()) with { TheoreticalVolumeCount = 0 });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesTheoreticalVolumeCountPositive);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesTheoreticalVolumeCountPositive, ["/theoreticalVolumeCount"]);
     }
 
     [Fact]
@@ -255,7 +255,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     {
         var response = await _client.PostAsJsonAsync("/admin/series", Content(new string('x', 501)));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/title"]);
     }
 
     [Fact]
@@ -265,7 +265,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
         var response = await _client.PostAsJsonAsync("/admin/series", WithTemplate(Content(UniqueTitle()), null, collection.Id));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNotOfPublisher);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNotOfPublisher, ["/editionTemplate/publisherCollectionId"]);
     }
 
     [Fact]
@@ -276,7 +276,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
         var response = await _client.PostAsJsonAsync("/admin/series", WithTemplate(Content(UniqueTitle()), otherPublisher.Id, collection.Id));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNotOfPublisher);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNotOfPublisher, ["/editionTemplate/publisherCollectionId"]);
     }
 
     [Fact]
@@ -409,7 +409,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
         var response = await _client.PutAsJsonAsync($"/admin/series/{created.Id}", new UpdateSeriesRequest(invalid, created.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesTheoreticalVolumeCountPositive);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesTheoreticalVolumeCountPositive, ["/theoreticalVolumeCount"]);
         Assert.Equal(created, await GetAsync(created.Id), SeriesFormComparer.Instance);
     }
 

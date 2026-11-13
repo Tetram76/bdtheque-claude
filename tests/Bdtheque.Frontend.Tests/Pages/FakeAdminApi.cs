@@ -51,13 +51,34 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
     public static HttpResponseMessage Json(object content, HttpStatusCode status = HttpStatusCode.OK) =>
         new(status) { Content = JsonContent.Create(content, content.GetType()) };
 
-    /// <summary>A ProblemDetails of the given category, as the API answers an error.</summary>
-    public static HttpResponseMessage Problem(string type, HttpStatusCode status, string? ruleCode = null) =>
-        new(status)
+    /// <summary>A ProblemDetails of the given category, as the API answers an error, with the fields a business error designates.</summary>
+    public static HttpResponseMessage Problem(string type, HttpStatusCode status, string? ruleCode = null, params string[] fields)
+    {
+        var body = new Dictionary<string, object> { ["type"] = type, ["status"] = (int)status };
+        if (ruleCode is not null)
+            body[ProblemTypes.RuleCodeExtension] = ruleCode;
+        if (fields.Length > 0)
+            body[ProblemTypes.FieldsExtension] = fields;
+        return new(status)
         {
             Content = JsonContent.Create(
-                ruleCode is null ? new Dictionary<string, object> { ["type"] = type, ["status"] = (int)status }
-                    : new Dictionary<string, object> { ["type"] = type, ["status"] = (int)status, [ProblemTypes.RuleCodeExtension] = ruleCode },
+                body, mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
+        };
+    }
+
+    /// <summary>
+    /// A business error, as the API answers it, designating <paramref name="fields"/> to correct and the
+    /// <paramref name="related"/> fields their values clash with.
+    /// </summary>
+    public static HttpResponseMessage BusinessProblem(string ruleCode, string[] fields, string[] related) =>
+        new(HttpStatusCode.UnprocessableEntity)
+        {
+            Content = JsonContent.Create(
+                new Dictionary<string, object>
+                {
+                    ["type"] = ProblemTypes.Business, ["status"] = 422, [ProblemTypes.RuleCodeExtension] = ruleCode,
+                    [ProblemTypes.FieldsExtension] = fields, [ProblemTypes.RelatedFieldsExtension] = related,
+                },
                 mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
         };
 

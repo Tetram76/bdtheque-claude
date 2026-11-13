@@ -22,7 +22,7 @@ public sealed class AuthorTests
     [InlineData("  ", null, "  ")]
     public void Constructor_NeitherLastNameNorPseudonym_Throws(string? lastName, string? firstName, string? pseudonym)
     {
-        DomainAssert.Violates(DomainRules.AuthorLastNameOrPseudonymRequired, () => new Author(lastName, firstName, pseudonym));
+        DomainAssert.Violates<Author>(DomainRules.AuthorLastNameOrPseudonymRequired, nameof(Author.LastName), () => new Author(lastName, firstName, pseudonym));
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public sealed class AuthorTests
     {
         var author = new Author("Hugo", null, null);
 
-        DomainAssert.Violates(DomainRules.AuthorLastNameOrPseudonymRequired, () => author.UpdateIdentity(null, null, null));
+        DomainAssert.Violates<Author>(DomainRules.AuthorLastNameOrPseudonymRequired, nameof(Author.LastName), () => author.UpdateIdentity(null, null, null));
     }
 
     [Fact]
@@ -118,7 +118,7 @@ public sealed class AuthorTests
     {
         var author = new Author(null, null, "Moebius");
 
-        DomainAssert.Violates(DomainRules.AuthorLastNameOrPseudonymRequired, () => author.UpdateIdentity(null, "Jean", null));
+        DomainAssert.Violates<Author>(DomainRules.AuthorLastNameOrPseudonymRequired, nameof(Author.LastName), () => author.UpdateIdentity(null, "Jean", null));
 
         Assert.Equal("Moebius", author.SortKey);
         Assert.Equal("M", author.NavigationEntry);

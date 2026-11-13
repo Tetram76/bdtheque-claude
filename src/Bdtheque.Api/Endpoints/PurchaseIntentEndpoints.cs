@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
@@ -82,7 +83,8 @@ internal static class PurchaseIntentEndpoints
     }
 
     private static async Task<Created<PurchaseIntentsForm>> CreateAsync(
-        Guid rootId, CreatePurchaseIntentRequest request, BdthequeDbContext context, TimeProvider clock, CancellationToken cancellationToken)
+        Guid rootId, CreatePurchaseIntentRequest request, BdthequeDbContext context, ContentFields fields, TimeProvider clock,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
@@ -90,7 +92,7 @@ internal static class PurchaseIntentEndpoints
         PurchaseIntent intent;
         if (request.Edition is { } content)
         {
-            var edition = await AddEditionAsync(context, album, content, cancellationToken);
+            var edition = await AddEditionAsync(context, fields, album, content, cancellationToken);
             intent = album.AddPurchaseIntent(edition);
             // A new edition has no visual to remove: its pending visuals become its own.
             await EditionVisualEntries.ApplyAsync(context, edition, request.Visuals, clock, cancellationToken);
@@ -108,13 +110,14 @@ internal static class PurchaseIntentEndpoints
     }
 
     private static async Task<PurchaseIntentsForm> ConvertToEditionAsync(
-        Guid rootId, Guid id, ConvertPurchaseIntentToEditionRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, Guid id, ConvertPurchaseIntentToEditionRequest request, BdthequeDbContext context, ContentFields fields,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
         var intent = album.PurchaseIntents.SingleOrDefault(p => p.Id == id) ?? throw new EntityNotFoundException(typeof(PurchaseIntent), id);
 
-        var edition = await AddEditionAsync(context, album, request.Edition, cancellationToken);
+        var edition = await AddEditionAsync(context, fields, album, request.Edition, cancellationToken);
         context.PurchaseIntents.Add(album.ConvertPurchaseIntentToEdition(intent, edition));
 
         await context.SaveChangesAsync(cancellationToken);
@@ -171,9 +174,10 @@ internal static class PurchaseIntentEndpoints
     // Entered with the minimum of fields: the traits of the copy keep the values of an edition not
     // owned (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention).
     private static Task<Edition> AddEditionAsync(
-        BdthequeDbContext context, Album album, PurchaseIntentEditionContent edition, CancellationToken cancellationToken) =>
+        BdthequeDbContext context, ContentFields fields, Album album, PurchaseIntentEditionContent edition,
+        CancellationToken cancellationToken) =>
         EditionEndpoints.AddEditionAsync(
-            context, album,
+            context, fields, album,
             new EditionContent(
                 edition.PublisherId, edition.PublisherCollectionId, edition.PublicationYear, edition.Isbn, edition.Binding,
                 edition.Orientation, edition.ReadingDirection, edition.Format, edition.PageCount, edition.Category,

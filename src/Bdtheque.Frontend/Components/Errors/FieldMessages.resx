@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Album.ManualSortKeyRequiresTitle" xml:space="preserve">
+    <value>Sans titre, l&apos;album est rangé à la clé de sa série : réinitialisez la clé.</value>
+  </data>
+  <data name="Album.PublicationMonthRange" xml:space="preserve">
+    <value>Un mois de l&apos;année.</value>
+  </data>
+  <data name="Album.PublicationMonthRequiresYear" xml:space="preserve">
+    <value>Le mois demande son année.</value>
+  </data>
+  <data name="Album.PublicationYearPositive" xml:space="preserve">
+    <value>Une année supérieure à zéro.</value>
+  </data>
+  <data name="Album.SortKeyRequired" xml:space="preserve">
+    <value>Saisissez une clé, ou réinitialisez-la.</value>
+  </data>
+  <data name="Album.TitleRequiredWithoutSeries" xml:space="preserve">
+    <value>Obligatoire pour un album sans série.</value>
+  </data>
+  <data name="Album.VolumeNumberPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="Album.VolumeRangeBothOrNeither" xml:space="preserve">
+    <value>Les deux, ou aucun.</value>
+  </data>
+  <data name="Album.VolumeRangeOmnibusOnly" xml:space="preserve">
+    <value>Seule une intégrale couvre des tomes.</value>
+  </data>
+  <data name="Album.VolumeRangeOrder" xml:space="preserve">
+    <value>Le premier tome ne dépasse pas le dernier.</value>
+  </data>
+  <data name="Album.VolumeRangeStartPositive" xml:space="preserve">
+    <value>Le premier tome est supérieur à zéro.</value>
+  </data>
+  <data name="Edition.AcquisitionAmountCurrencyTogether" xml:space="preserve">
+    <value>Un montant et sa devise, ensemble.</value>
+  </data>
+  <data name="Edition.AcquisitionAmountPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="Edition.AcquisitionModeRequired" xml:space="preserve">
+    <value>Obligatoire pour une édition possédée.</value>
+  </data>
+  <data name="Edition.AcquisitionPriceReferenceDateRequired" xml:space="preserve">
+    <value>Sans date de référence, ce prix ne peut pas être enregistré.</value>
+  </data>
+  <data name="Edition.CurrencyCodeInvalid" xml:space="preserve">
+    <value>Une devise désignée par son code à trois lettres (ex. EUR).</value>
+  </data>
+  <data name="Edition.FreeExcludesInitialValue" xml:space="preserve">
+    <value>Aucune valeur pour une édition gratuite.</value>
+  </data>
+  <data name="Edition.FreeExcludesPrice" xml:space="preserve">
+    <value>Aucun montant pour une édition gratuite.</value>
+  </data>
+  <data name="Edition.InitialValueAmountCurrencyTogether" xml:space="preserve">
+    <value>Un montant et sa devise, ensemble.</value>
+  </data>
+  <data name="Edition.InitialValueAmountPositive" xml:space="preserve">
+    <value>Supérieure à zéro.</value>
+  </data>
+  <data name="Edition.InitialValueReferenceDateRequired" xml:space="preserve">
+    <value>Sans date de référence, cette valeur ne peut pas être enregistrée.</value>
+  </data>
+  <data name="Edition.PageCountPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="Edition.PublicationYearPositive" xml:space="preserve">
+    <value>Supérieure à zéro.</value>
+  </data>
+  <data name="Edition.PublisherRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="Edition.PurchaseCannotBeFree" xml:space="preserve">
+    <value>Une édition achetée n&apos;est jamais gratuite.</value>
+  </data>
+  <data name="Publisher.NameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà le nom d&apos;un autre éditeur.</value>
+  </data>
+  <data name="Publisher.NameRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="Publisher.WebsiteInvalid" xml:space="preserve">
+    <value>Une adresse web complète, commençant par https:// ou http://.</value>
+  </data>
+  <data name="PublisherCollection.NameAlreadyUsed" xml:space="preserve">
+    <value>Une autre collection de cet éditeur porte aussi ce nom.</value>
+  </data>
+  <data name="PublisherCollection.NameAlreadyUsed.Related" xml:space="preserve">
+    <value>Une autre collection prend aussi ce nom.</value>
+  </data>
+  <data name="PublisherCollection.NameRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="PublisherCollection.NotOfPublisher" xml:space="preserve">
+    <value>Une collection de l&apos;éditeur choisi.</value>
+  </data>
+  <data name="Series.SortKeyRequired" xml:space="preserve">
+    <value>Saisissez une clé, ou réinitialisez-la.</value>
+  </data>
+  <data name="Series.TheoreticalVolumeCountPositive" xml:space="preserve">
+    <value>Supérieur à zéro.</value>
+  </data>
+  <data name="Series.TitleRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="Text.TooLong" xml:space="preserve">
+    <value>Trop long : raccourcissez ce texte.</value>
+  </data>
+  <data name="Related" xml:space="preserve">
+    <value>Une valeur liée à celle à corriger.</value>
+  </data>
+</root>

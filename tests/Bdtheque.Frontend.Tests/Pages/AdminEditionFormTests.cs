@@ -443,15 +443,15 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Theory]
-    [InlineData("Edition.PublisherRequired", "edition-publisher", "Obligatoire.")]
-    [InlineData("Edition.AcquisitionModeRequired", "edition-mode", "Obligatoire pour une édition possédée.")]
-    [InlineData("Edition.AcquisitionPriceReferenceDateRequired", "edition-price", "Sans date de référence, ce prix ne peut pas être enregistré.")]
-    [InlineData("Edition.InitialValueReferenceDateRequired", "edition-initial", "Sans date de référence, cette valeur ne peut pas être enregistrée.")]
-    [InlineData("Edition.PageCountPositive", "edition-pages", "Supérieur à zéro.")]
-    public void BusinessError_ToCorrect_PointsToItsField(string rule, string field, string message)
+    [InlineData("Edition.PublisherRequired", "/publisherId", "edition-publisher", "Obligatoire.")]
+    [InlineData("Edition.AcquisitionModeRequired", "/acquisitionMode", "edition-mode", "Obligatoire pour une édition possédée.")]
+    [InlineData("Edition.AcquisitionPriceReferenceDateRequired", "/acquisitionAmount", "edition-price", "Sans date de référence, ce prix ne peut pas être enregistré.")]
+    [InlineData("Edition.InitialValueReferenceDateRequired", "/initialValueAmount", "edition-initial", "Sans date de référence, cette valeur ne peut pas être enregistrée.")]
+    [InlineData("Edition.PageCountPositive", "/pageCount", "edition-pages", "Supérieur à zéro.")]
+    public void BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
         var page = OpenOwned();
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule);
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule, pointer);
 
         page.Find("form").Submit();
 

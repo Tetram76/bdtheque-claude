@@ -216,18 +216,6 @@
   <data name="Dates.Modified" xml:space="preserve">
     <value>, modifiée le</value>
   </data>
-  <data name="FieldError.Series.TitleRequired" xml:space="preserve">
-    <value>Obligatoire.</value>
-  </data>
-  <data name="FieldError.Series.SortKeyRequired" xml:space="preserve">
-    <value>Saisissez une clé, ou réinitialisez-la.</value>
-  </data>
-  <data name="FieldError.Series.TheoreticalVolumeCountPositive" xml:space="preserve">
-    <value>Supérieur à zéro.</value>
-  </data>
-  <data name="FieldError.PublisherCollection.NotOfPublisher" xml:space="preserve">
-    <value>Une collection de l&apos;éditeur choisi.</value>
-  </data>
   <data name="Problem.Functional.Conflict" xml:space="preserve">
     <value>La série a été modifiée entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
   </data>

@@ -2,7 +2,8 @@
    control is the caller's (a native input, an InputText bound to a form, a RecordPicker…), styled by the base theme
    (themes/base.css). A field sized to its content (a volume, a year) is as wide as its characters, never stretched over
    the whole width (visuel/saisie-album/contenu.md). *@
-<div class="field" style="@WidthStyle">
+@* A field whose value the one to correct clashes with is marked: the focus goes to the field to correct (entry-form.js). *@
+<div class="field" style="@WidthStyle" data-error-related="@(ErrorRelated && Error is not null ? "true" : null)">
     <label class="@(LabelHidden ? "visually-hidden" : "field-label")" for="@Id">
         @Label
         @if (Note is not null)
@@ -46,6 +47,13 @@
     /// <summary>What to correct: the field is then in error.</summary>
     [Parameter]
     public string? Error { get; set; }
+
+    /// <summary>
+    /// Whether <see cref="Error"/> concerns the value the field to correct clashes with (e.g. the other collection already
+    /// named so), rather than the value to correct.
+    /// </summary>
+    [Parameter]
+    public bool ErrorRelated { get; set; }
 
     /// <summary>The width of the control in characters, for a field sized to its content; the whole width otherwise.</summary>
     [Parameter]

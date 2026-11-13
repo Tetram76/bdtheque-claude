@@ -1,5 +1,6 @@
 using System.Data;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -214,11 +215,11 @@ internal static class SeriesEndpoints
     }
 
     private static async Task<Created<SeriesForm>> CreateAsync(
-        SeriesContent request, BdthequeDbContext context, CancellationToken cancellationToken)
+        SeriesContent request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var added = await FormReferences.CreateAddedAsync(context, request.NewRecords, cancellationToken);
-        var series = new Series(request.Title);
+        var series = fields.Create("", () => new Series(request.Title), EnteredOtherwise);
         await ApplyAsync(series, request, added, context, cancellationToken);
         context.Series.Add(series);
         await context.SaveChangesAsync(cancellationToken);
@@ -227,10 +228,11 @@ internal static class SeriesEndpoints
     }
 
     private static async Task<SeriesForm> UpdateAsync(
-        Guid id, UpdateSeriesRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid id, UpdateSeriesRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var series = await context.LoadAggregateForWriteAsync<Series>(id, request.Version, WithChildren, cancellationToken);
+        fields.Place(series, renamed: EnteredOtherwise);
         var added = await FormReferences.CreateAddedAsync(context, request.Content.NewRecords, cancellationToken);
         await ApplyAsync(series, request.Content, added, context, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
@@ -242,6 +244,13 @@ internal static class SeriesEndpoints
     private static IQueryable<Series> WithChildren(IQueryable<Series> query) =>
         query.Include(s => s.Genres).Include(s => s.Universes).Include(s => s.TemplatePublisher).Include(s => s.TemplatePublisherCollection)
             .Include(s => s.TemplateContributions).ThenInclude(c => c.Author);
+
+    // The fields of the content that enter a property of the series under another name, which an error designates.
+    private static readonly Dictionary<string, string> EnteredOtherwise = new()
+    {
+        [nameof(Series.SortKey)] = "/manualSortKey",
+        [nameof(Series.TemplatePublisherCollectionId)] = "/editionTemplate/publisherCollectionId",
+    };
 
     /// <summary>
     /// Applies the whole form to the series: scalar fields, then the records it references, each of

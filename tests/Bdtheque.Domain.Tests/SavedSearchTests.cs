@@ -29,7 +29,7 @@ public sealed class SavedSearchTests
     [InlineData("   ")]
     public void Constructor_EmptyName_Throws(string? name)
     {
-        DomainAssert.Violates(DomainRules.SavedSearchNameRequired, () => new SavedSearch(name!, EntityKind.Album, Criteria, [], []));
+        DomainAssert.Violates<SavedSearch>(DomainRules.SavedSearchNameRequired, nameof(SavedSearch.Name), () => new SavedSearch(name!, EntityKind.Album, Criteria, [], []));
     }
 
     [Fact]

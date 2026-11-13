@@ -5,6 +5,8 @@
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<AdminPublisherForm> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
+@inject IStringLocalizer<RuleMessages> RuleTexts
 @inject ApiClient Api
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
@@ -35,11 +37,11 @@ else
                Problem="@SaveProblem" Dates="@Dates">
         <Block Title="@L["Block.Publisher"]" Kicker="@L["Kicker.Publisher"]">
             <div class="publisher-fields">
-                <Field Id="publisher-name" Label="@L["Name"]" Note="@L["Name.Note"]" Error="@FieldError("name")" Context="control">
+                <Field Id="publisher-name" Label="@L["Name"]" Note="@L["Name.Note"]" Error="@Errors.For("/name")" Context="control">
                     <input id="@control.Id" type="text" placeholder="@L["Name.Placeholder"]" aria-describedby="@control.DescribedBy"
                            aria-invalid="@control.Invalid" @bind="Entry.Name" @bind:event="oninput" />
                 </Field>
-                <Field Id="publisher-website" Label="@L["Website"]" Help="@L["Website.Help"]" Error="@FieldError("website")" Context="control">
+                <Field Id="publisher-website" Label="@L["Website"]" Help="@L["Website.Help"]" Error="@Errors.For("/website")" Context="control">
                     <span class="publisher-website">
                         <input id="@control.Id" type="url" placeholder="https://…" aria-describedby="@control.DescribedBy"
                                aria-invalid="@control.Invalid" @bind="Entry.Website" @bind:event="oninput" />
@@ -75,9 +77,13 @@ else
                                 else
                                 {
                                     <span class="publisher-collection-name">
-                                        <label class="visually-hidden" for="@CollectionId(collection)">@L["Collection.Name"]</label>
-                                        <input id="@CollectionId(collection)" type="text" placeholder="@L["Collection.Name"]"
-                                               @bind="collection.Name" @bind:event="oninput" />
+                                        <Field Id="@CollectionId(collection)" Label="@L["Collection.Name"]" LabelHidden
+                                               Error="@Errors.For(CollectionField(collection))" ErrorRelated="@Errors.IsRelated(CollectionField(collection))"
+                                               Context="control">
+                                            <input id="@control.Id" type="text" placeholder="@L["Collection.Name"]"
+                                                   aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
+                                                   @bind="collection.Name" @bind:event="oninput" />
+                                        </Field>
                                     </span>
                                 }
                                 <span class="publisher-collection-use">
@@ -126,6 +132,9 @@ else
 @code {
     private ApiProblem? _loadProblem;
     private ApiProblem? _saveProblem;
+    // The collections the last saving sent, in the order of its content, where its error designates them: the collections
+    // added or removed since leave the error on the collection it designates.
+    private List<Guid> _sentCollections = [];
     private EntryForm? _form;
     private bool _revealProblem;
     private bool _saving;
@@ -214,6 +223,7 @@ else
         _saving = true;
         _saveProblem = null;
         var content = Entry!.ToContent();
+        _sentCollections = [.. Entry.Kept.Select(c => c.Key)];
         try
         {
             if (Entry.Id is { } id)
@@ -260,19 +270,12 @@ else
     // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
     private void Reload() => Navigation.NavigateTo(AppPaths.AdminEditPublisher(Entry!.Id!.Value), forceLoad: true);
 
-    // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own (a
-    // collection: the error does not say which one).
-    private string? FieldError(string field) =>
-        _saveProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field
-            ? L[$"FieldError.{code}", Subject].Value
-            : null;
+    // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
+    private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
 
-    private static string? FieldOf(string ruleCode) => ruleCode switch
-    {
-        "Publisher.NameRequired" or "Publisher.NameAlreadyUsed" => "name",
-        "Publisher.WebsiteInvalid" => "website",
-        _ => null,
-    };
+    // The name of a collection, where the content of the last saving listed it; none for a collection added since.
+    private string CollectionField(CollectionEntry collection) =>
+        _sentCollections.IndexOf(collection.Key) is var index and >= 0 ? $"/collections/{index}/name" : "";
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-editeur/contenu.md).
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
