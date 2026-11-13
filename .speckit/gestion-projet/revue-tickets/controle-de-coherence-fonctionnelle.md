@@ -46,7 +46,7 @@ Une règle commune confirmée (A corrigé, B tranché) est mise en œuvre **une 
 ## Moment et proportion
 
 - **Dû** chaque semaine calendaire (du lundi au dimanche, ISO 8601), à la reprise du travail ([Contrôle de cohérence à la reprise du travail](controle-de-coherence-a-la-reprise-du-travail.md)), ou à la demande de l'utilisateur, qui vaut le contrôle de la semaine.
-- **Proportion** ([Budget IA](../gouvernance/budget-ia.md)) : le contrôle porte sur ce qui a changé sur `main` depuis la dernière prise en compte (§ Trace), dans le code comme dans le `.speckit/`. Chaque famille dont un élément a changé est revue entière ; chaque axe transversal dont une occurrence a changé est revu partout où il apparaît. Le premier contrôle, sans prise en compte précédente, porte sur toute l'application. Sans aucun changement, il se réduit à le constater, et à mettre à jour la date de la prise en compte.
+- **Proportion** ([Budget IA](../gouvernance/budget-ia.md)) : le contrôle porte sur ce qui a changé sur `main` depuis le **début du jour** de la dernière prise en compte (§ Trace), dans le code comme dans le `.speckit/`. La date ne dit pas quel état de `main` le contrôle précédent a revu, quand d'autres Pull Requests ont été fusionnées le même jour : repartir du début de ce jour fait au pire revoir une famille déjà revue, jamais omettre une famille changée. Chaque famille dont un élément a changé est revue entière ; chaque axe transversal dont une occurrence a changé est revu partout où il apparaît. Le premier contrôle, sans prise en compte précédente, porte sur toute l'application. Sans aucun changement, il se réduit à le constater, et à mettre à jour la date de la prise en compte.
 
 ## Trace
 
