@@ -199,7 +199,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
 
         var response = await PostCreateAsync(album, Content((await CreatePublisherAsync()).Id) with { AcquisitionMode = null });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionModeRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionModeRequired, ["/acquisitionMode"]);
         await AssertNoEditionAsync(album.Id);
     }
 
@@ -210,7 +210,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
 
         var response = await PostCreateAsync(album, Content(null));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionPublisherRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionPublisherRequired, ["/publisherId"]);
     }
 
     [Fact]
@@ -221,7 +221,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var response = await PostCreateAsync(
             await CreateAlbumAsync(), Content((await CreatePublisherAsync()).Id) with { PublisherCollectionId = collection.Id });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNotOfPublisher);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNotOfPublisher, ["/publisherCollectionId"]);
     }
 
     [Fact]
@@ -229,7 +229,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
     {
         var response = await PostCreateAsync(await CreateAlbumAsync(), Content((await CreatePublisherAsync()).Id) with { IsFree = true });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionPurchaseCannotBeFree);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionPurchaseCannotBeFree, ["/acquisitionMode"]);
     }
 
     [Fact]
@@ -238,7 +238,18 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var response = await PostCreateAsync(
             await CreateAlbumAsync(), Content((await CreatePublisherAsync()).Id) with { AcquisitionAmount = 10m, AcquisitionCurrency = "EUR" });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionPriceReferenceDateRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionPriceReferenceDateRequired, ["/acquisitionAmount"]);
+    }
+
+    [Fact]
+    public async Task Update_WithAPersonalReferenceLongerThanItsColumn_DesignatesIt()
+    {
+        var created = await CreateAsync(await CreateAlbumAsync(), Content((await CreatePublisherAsync()).Id));
+
+        var response = await _client.PutAsJsonAsync(
+            EditionUri(created), new UpdateEditionRequest(created.Content with { PersonalReference = new string('r', 201) }, created.AlbumVersion));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/personalReference"]);
     }
 
     [Fact]
@@ -365,7 +376,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var response = await _client.PutAsJsonAsync(
             EditionUri(created), new UpdateEditionRequest(created.Content with { AcquisitionMode = null }, created.AlbumVersion));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionModeRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionModeRequired, ["/acquisitionMode"]);
         Assert.Equal(created, await GetAsync(created));
     }
 

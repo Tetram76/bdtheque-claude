@@ -1,6 +1,7 @@
 using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -221,13 +222,13 @@ internal static class AlbumEndpoints
     }
 
     private static async Task<Created<AlbumForm>> CreateAsync(
-        AlbumContent request, BdthequeDbContext context, CancellationToken cancellationToken)
+        AlbumContent request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var added = await FormReferences.CreateAddedAsync(context, request.NewRecords, cancellationToken);
         var series = await LoadSeriesAsync(request.SeriesId, context, cancellationToken);
         var contributions = await FormReferences.LoadContributionsAsync(context, request.Contributions, cancellationToken, added.Authors);
-        var album = new Album(request.Title, series, contributions);
+        var album = fields.Create("", () => new Album(request.Title, series, contributions), EnteredOtherwise);
         await ApplyAsync(album, request, added, context, cancellationToken);
         context.Albums.Add(album);
         await context.SaveChangesAsync(cancellationToken);
@@ -236,10 +237,11 @@ internal static class AlbumEndpoints
     }
 
     private static async Task<AlbumForm> UpdateAsync(
-        Guid id, UpdateAlbumRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid id, UpdateAlbumRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(id, request.Version, WithAssociations, cancellationToken);
+        fields.Place(album, renamed: EnteredOtherwise);
         var content = request.Content;
         var added = await FormReferences.CreateAddedAsync(context, content.NewRecords, cancellationToken);
         var series = await LoadSeriesAsync(content.SeriesId, context, cancellationToken);
@@ -251,6 +253,9 @@ internal static class AlbumEndpoints
         await transaction.CommitAsync(cancellationToken);
         return await ToFormAsync(context, album, cancellationToken);
     }
+
+    // The field of the content that enters the sort key of the album, which an error designates.
+    private static readonly Dictionary<string, string> EnteredOtherwise = new() { [nameof(Album.SortKey)] = "/manualSortKey" };
 
     // The editions, intents and contributions are always loaded with the album (AlbumConfiguration); its series and the
     // authors of its contributions, for the form to name them.

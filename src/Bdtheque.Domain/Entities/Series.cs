@@ -56,14 +56,14 @@ public sealed class Series : EntityBase, IAggregateRoot
 
     public void SetTitle(string title)
     {
-        Title = DomainText.Required(title, DomainRules.SeriesTitleRequired, "A series must have a title.");
+        Title = DomainText.Required(title, DomainRules.SeriesTitleRequired, "A series must have a title.", this, nameof(Title));
         if (!IsManualSortKey)
             ApplySortKey(TitleSortKeyCalculator.Compute(Title));
     }
 
     public void SetSortKey(string sortKey)
     {
-        ApplySortKey(DomainText.Required(sortKey, DomainRules.SeriesSortKeyRequired, "A manual sort key must not be blank."));
+        ApplySortKey(DomainText.Required(sortKey, DomainRules.SeriesSortKeyRequired, "A manual sort key must not be blank.", this, nameof(SortKey)));
         IsManualSortKey = true;
     }
 
@@ -92,7 +92,8 @@ public sealed class Series : EntityBase, IAggregateRoot
     {
         if (count is <= 0)
             throw new DomainRuleViolationException(
-                DomainRules.SeriesTheoreticalVolumeCountPositive, "Theoretical volume count must be positive when specified.");
+                DomainRules.SeriesTheoreticalVolumeCountPositive, "Theoretical volume count must be positive when specified.", this,
+                nameof(TheoreticalVolumeCount));
         TheoreticalVolumeCount = count;
     }
 
@@ -197,7 +198,8 @@ public sealed class Series : EntityBase, IAggregateRoot
     {
         if (collection is not null && (publisher is null || collection.PublisherId != publisher.Id))
             throw new DomainRuleViolationException(
-                DomainRules.PublisherCollectionNotOfPublisher, "The template publisher collection must belong to the template publisher.");
+                DomainRules.PublisherCollectionNotOfPublisher, "The template publisher collection must belong to the template publisher.", this,
+                nameof(TemplatePublisherCollectionId));
 
         TemplatePublisher = publisher;
         TemplatePublisherId = publisher?.Id;

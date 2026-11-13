@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
@@ -238,12 +239,13 @@ internal static class EditionEndpoints
     }
 
     private static async Task<Created<EditionForm>> CreateAsync(
-        Guid rootId, CreateEditionRequest request, BdthequeDbContext context, TimeProvider clock, CancellationToken cancellationToken)
+        Guid rootId, CreateEditionRequest request, BdthequeDbContext context, ContentFields fields, TimeProvider clock,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
 
-        var edition = await AddEditionAsync(context, album, request.Content, cancellationToken);
+        var edition = await AddEditionAsync(context, fields, album, request.Content, cancellationToken);
         // Entering an edition records its acquisition, which realizes the intent it satisfies.
         album.RecordAcquisition(edition, ToAcquisition(request.Content));
         // A new edition has no visual to remove: its pending visuals become its own.
@@ -261,11 +263,13 @@ internal static class EditionEndpoints
     /// with the acquisition, which realizes the intent.
     /// </summary>
     private static async Task<EditionForm> AcquireAsync(
-        Guid rootId, Guid id, AcquireEditionRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, Guid id, AcquireEditionRequest request, BdthequeDbContext context, ContentFields fields,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
         var edition = album.Editions.SingleOrDefault(e => e.Id == id) ?? throw new EntityNotFoundException(typeof(Edition), id);
+        fields.Place(edition);
         var content = request.Content;
         var (publisher, collection) = await FormReferences.LoadPublisherAsync(
             context, content.PublisherId, content.PublisherCollectionId, cancellationToken);
@@ -282,15 +286,16 @@ internal static class EditionEndpoints
 
     /// <summary>
     /// Adds to the album an edition entered with <paramref name="content"/>, not owned until its
-    /// acquisition is recorded: the caller records it, or targets the edition by an intent.
+    /// acquisition is recorded: the caller records it, or targets the edition by an intent. The edition is placed at the root
+    /// of the content that enters it.
     /// </summary>
     internal static async Task<Edition> AddEditionAsync(
-        BdthequeDbContext context, Album album, EditionContent content, CancellationToken cancellationToken)
+        BdthequeDbContext context, ContentFields fields, Album album, EditionContent content, CancellationToken cancellationToken)
     {
         var (publisher, collection) = await FormReferences.LoadPublisherAsync(
             context, content.PublisherId, content.PublisherCollectionId, cancellationToken);
 
-        var edition = new Edition(album, publisher);
+        var edition = fields.Create("", () => new Edition(album, publisher));
         ApplyDetails(edition, content, publisher, collection);
         // Not owned yet, the edition has no amount its year could leave undated.
         edition.SetPublicationYear(content.PublicationYear);
@@ -299,13 +304,14 @@ internal static class EditionEndpoints
     }
 
     private static async Task<EditionForm> UpdateAsync(
-        Guid rootId, Guid id, UpdateEditionRequest request, BdthequeDbContext context, VisualStorage storage, TimeProvider clock,
-        CancellationToken cancellationToken)
+        Guid rootId, Guid id, UpdateEditionRequest request, BdthequeDbContext context, ContentFields fields, VisualStorage storage,
+        TimeProvider clock, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(
             rootId, request.AlbumVersion, request.Visuals is null ? null : EditionVisualEntries.WithVisuals, cancellationToken);
         var edition = album.Editions.SingleOrDefault(e => e.Id == id) ?? throw new EntityNotFoundException(typeof(Edition), id);
+        fields.Place(edition);
         var content = request.Content;
         var (publisher, collection) = await FormReferences.LoadPublisherAsync(
             context, content.PublisherId, content.PublisherCollectionId, cancellationToken);

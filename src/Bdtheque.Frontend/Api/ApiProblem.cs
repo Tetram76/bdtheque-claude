@@ -20,6 +20,26 @@ public enum ProblemCategory
 /// <param name="Impact">Records concerned by a refused deletion, or by one whose impact changed.</param>
 public sealed record ApiProblem(ProblemCategory Category, int? Status, string? RuleCode, DeletionImpact? Impact)
 {
+    /// <summary>
+    /// The fields of a business error, where the request entered the value in cause: JSON Pointers into the content it sent
+    /// (e.g. <c>/collections/1/name</c>), the first one to correct first; none for a rule that concerns no value of its own.
+    /// </summary>
+    public IReadOnlyList<string> Fields { get; init; } = [];
+
+    /// <summary>
+    /// The fields holding the values those of <see cref="Fields"/> clash with, entered in the same content and left as they
+    /// were (e.g. the other collection already named so): presented with the error, they are not the ones to correct.
+    /// </summary>
+    public IReadOnlyList<string> RelatedFields { get; init; } = [];
+
+    // Two problems are the same error when they designate the same fields, not the same lists.
+    public bool Equals(ApiProblem? other) =>
+        other is not null
+        && (Category, Status, RuleCode, Impact) == (other.Category, other.Status, other.RuleCode, other.Impact)
+        && Fields.SequenceEqual(other.Fields) && RelatedFields.SequenceEqual(other.RelatedFields);
+
+    public override int GetHashCode() => HashCode.Combine(Category, Status, RuleCode, Impact, Fields.Count);
+
     public static ApiProblem Technical(int? status = null) => new(ProblemCategory.Technical, status, null, null);
 }
 

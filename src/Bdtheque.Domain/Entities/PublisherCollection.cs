@@ -27,5 +27,5 @@ public sealed class PublisherCollection : EntityBase
     }
 
     public void SetName(string name) =>
-        Name = DomainText.Required(name, DomainRules.PublisherCollectionNameRequired, "A publisher collection must have a name.");
+        Name = DomainText.Required(name, DomainRules.PublisherCollectionNameRequired, "A publisher collection must have a name.", this, nameof(Name));
 }

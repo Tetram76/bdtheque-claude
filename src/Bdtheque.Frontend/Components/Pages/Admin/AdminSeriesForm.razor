@@ -5,6 +5,8 @@
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<AdminSeriesForm> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
+@inject IStringLocalizer<RuleMessages> RuleTexts
 @inject ApiClient Api
 @inject ValueLabels Values
 @inject AudienceRecorder Recorder
@@ -36,12 +38,12 @@ else
                Problem="@SaveProblem" Dates="@Dates">
         <Block Title="@L["Block.Series"]" Kicker="@L["Kicker.Series"]">
             <div class="series-fields">
-                <Field Id="series-title" Label="@L["Title"]" Note="@L["Title.Note"]" Error="@FieldError("title")" Context="control">
+                <Field Id="series-title" Label="@L["Title"]" Note="@L["Title.Note"]" Error="@Errors.For("/title")" Context="control">
                     <input id="@control.Id" type="text" placeholder="@L["Title.Placeholder"]" aria-describedby="@control.DescribedBy"
                            aria-invalid="@control.Invalid" @bind="Entry.Title" @bind:event="oninput" />
                 </Field>
                 <TitleSortKeyField Id="series-sort-key" Title="@Entry.Title" StoredKey="@Entry.StoredSortKey" @bind-ManualKey="Entry.ManualSortKey"
-                                   UntitledPlaceholder="@L["SortKey.Placeholder"]" UntitledHelp="@L["SortKey.Help"]" Error="@FieldError("sortKey")" />
+                                   UntitledPlaceholder="@L["SortKey.Placeholder"]" UntitledHelp="@L["SortKey.Help"]" Error="@Errors.For("/manualSortKey")" />
                 <Field Id="series-status" Label="@L["Status"]" Help="@L["Status.Help"]" Context="control">
                     <select id="@control.Id" class="series-list" aria-describedby="@control.DescribedBy" @bind="Entry.Status">
                         <option value="">@L["Status.None"]</option>
@@ -57,7 +59,7 @@ else
         <div class="series-pair">
             <Block Title="@L["Block.Progress"]" Kicker="@L["Kicker.Progress"]">
                 <div class="series-fields">
-                    <Field Id="series-volumes" Label="@L["Volumes"]" Help="@L["Volumes.Help"]" Characters="4" Error="@FieldError("volumes")" Context="control">
+                    <Field Id="series-volumes" Label="@L["Volumes"]" Help="@L["Volumes.Help"]" Characters="4" Error="@Errors.For("/theoreticalVolumeCount")" Context="control">
                         <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" aria-describedby="@control.DescribedBy"
                                aria-invalid="@control.Invalid" @bind="Entry.TheoreticalVolumeCount" />
                     </Field>
@@ -98,7 +100,7 @@ else
                     </Field>
                     @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and removed
                        when it changes. *@
-                    <Field Id="series-collection" Label="@L["Collection"]" Error="@FieldError("collection")"
+                    <Field Id="series-collection" Label="@L["Collection"]" Error="@Errors.For("/editionTemplate/publisherCollectionId")"
                            Help="@(CollectionsUnread ? L["Collection.Unread"].Value : null)" Context="control">
                         <select id="@control.Id" class="series-collection" disabled="@(Entry.Publisher is null)"
                                 aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
@@ -342,18 +344,8 @@ else
     // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
     private void Reload() => Navigation.NavigateTo(AppPaths.AdminEditSeries(Entry!.Id!.Value), forceLoad: true);
 
-    // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own.
-    private string? FieldError(string field) =>
-        _saveProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field ? L[$"FieldError.{code}"].Value : null;
-
-    private static string? FieldOf(string ruleCode) => ruleCode switch
-    {
-        "Series.TitleRequired" => "title",
-        "Series.SortKeyRequired" => "sortKey",
-        "Series.TheoreticalVolumeCountPositive" => "volumes",
-        "PublisherCollection.NotOfPublisher" => "collection",
-        _ => null,
-    };
+    // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
+    private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-serie/contenu.md).
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null

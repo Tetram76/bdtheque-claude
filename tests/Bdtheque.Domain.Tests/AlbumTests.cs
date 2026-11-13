@@ -39,7 +39,7 @@ public sealed class AlbumTests
     [InlineData("   ")]
     public void Constructor_BlankTitleAndNoSeries_Throws(string? title)
     {
-        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => new Album(title, null));
+        DomainAssert.Violates<Album>(DomainRules.AlbumTitleRequiredWithoutSeries, nameof(Album.Title), () => new Album(title, null));
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Le Lotus bleu", null);
 
-        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => SetTitle(album, null));
+        DomainAssert.Violates<Album>(DomainRules.AlbumTitleRequiredWithoutSeries, nameof(Album.Title), () => SetTitle(album, null));
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public sealed class AlbumTests
         var series = new Series("Tintin");
         var album = new Album(null, series);
 
-        DomainAssert.Violates(DomainRules.AlbumManualSortKeyRequiresTitle, () => album.SetSortKey("Custom Key"));
+        DomainAssert.Violates<Album>(DomainRules.AlbumManualSortKeyRequiresTitle, nameof(Album.SortKey), () => album.SetSortKey("Custom Key"));
     }
 
     [Theory]
@@ -102,7 +102,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumSortKeyRequired, () => album.SetSortKey(sortKey));
+        DomainAssert.Violates<Album>(DomainRules.AlbumSortKeyRequired, nameof(Album.SortKey), () => album.SetSortKey(sortKey));
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public sealed class AlbumTests
         var series = new Series("Tintin");
         var album = new Album(null, series);
 
-        DomainAssert.Violates(DomainRules.AlbumTitleRequiredWithoutSeries, () => SetSeries(album, null));
+        DomainAssert.Violates<Album>(DomainRules.AlbumTitleRequiredWithoutSeries, nameof(Album.Title), () => SetSeries(album, null));
     }
 
     [Theory]
@@ -145,7 +145,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeNumberPositive, () => album.SetVolumeNumber(number));
+        DomainAssert.Violates<Album>(DomainRules.AlbumVolumeNumberPositive, nameof(Album.VolumeNumber), () => album.SetVolumeNumber(number));
     }
 
     [Fact]
@@ -163,7 +163,8 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeBothOrNeither, () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, null));
+        DomainAssert.Violates<Album>(
+            DomainRules.AlbumVolumeRangeBothOrNeither, nameof(Album.EndVolumeNumber), () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, null));
     }
 
     [Fact]
@@ -171,7 +172,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOrder, () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, 5, 1));
+        DomainAssert.Violates<Album>(DomainRules.AlbumVolumeRangeOrder, nameof(Album.EndVolumeNumber), () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, 5, 1));
     }
 
     [Theory]
@@ -181,7 +182,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeStartPositive, () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, start, 6));
+        DomainAssert.Violates<Album>(DomainRules.AlbumVolumeRangeStartPositive, nameof(Album.StartVolumeNumber), () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, start, 6));
     }
 
     [Fact]
@@ -189,7 +190,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetTypeAndVolumeRange(AlbumType.Regular, 1, 6));
+        DomainAssert.Violates<Album>(DomainRules.AlbumVolumeRangeOmnibusOnly, nameof(Album.StartVolumeNumber), () => album.SetTypeAndVolumeRange(AlbumType.Regular, 1, 6));
     }
 
     [Fact]
@@ -221,7 +222,7 @@ public sealed class AlbumTests
         var album = new Album("Tintin", null);
         album.SetTypeAndVolumeRange(AlbumType.Omnibus, 1, 6);
 
-        DomainAssert.Violates(DomainRules.AlbumVolumeRangeOmnibusOnly, () => album.SetTypeAndVolumeRange(AlbumType.Regular, 2, 3));
+        DomainAssert.Violates<Album>(DomainRules.AlbumVolumeRangeOmnibusOnly, nameof(Album.StartVolumeNumber), () => album.SetTypeAndVolumeRange(AlbumType.Regular, 2, 3));
 
         Assert.Equal((AlbumType.Omnibus, 1, 6), (album.Type, album.StartVolumeNumber, album.EndVolumeNumber));
     }
@@ -251,7 +252,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumPublicationMonthRequiresYear, () => album.SetFirstPublicationDate(null, 6));
+        DomainAssert.Violates<Album>(DomainRules.AlbumPublicationMonthRequiresYear, nameof(Album.FirstPublicationYear), () => album.SetFirstPublicationDate(null, 6));
     }
 
     [Theory]
@@ -261,7 +262,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumPublicationMonthRange, () => album.SetFirstPublicationDate(1978, month));
+        DomainAssert.Violates<Album>(DomainRules.AlbumPublicationMonthRange, nameof(Album.FirstPublicationMonth), () => album.SetFirstPublicationDate(1978, month));
     }
 
     [Theory]
@@ -271,7 +272,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        DomainAssert.Violates(DomainRules.AlbumPublicationYearPositive, () => album.SetFirstPublicationDate(year, null));
+        DomainAssert.Violates<Album>(DomainRules.AlbumPublicationYearPositive, nameof(Album.FirstPublicationYear), () => album.SetFirstPublicationDate(year, null));
     }
 
     [Fact]
@@ -504,8 +505,8 @@ public sealed class AlbumTests
         var album = new Album("Le Lotus bleu", series);
         var author = new Author(null, null, "Hergé");
 
-        DomainAssert.Violates(
-            DomainRules.AlbumTitleRequiredWithoutSeries,
+        DomainAssert.Violates<Album>(
+            DomainRules.AlbumTitleRequiredWithoutSeries, nameof(Album.Title),
             () => album.SetTitleSeriesAndContributions(" ", null, [(author, ContributionRole.Scenarist)]));
 
         Assert.Equal(("Le Lotus bleu", (Guid?)series.Id), (album.Title, album.SeriesId));

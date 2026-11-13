@@ -120,15 +120,6 @@
   <data name="Dates.Modified" xml:space="preserve">
     <value>, modifié le</value>
   </data>
-  <data name="FieldError.Publisher.NameRequired" xml:space="preserve">
-    <value>Obligatoire.</value>
-  </data>
-  <data name="FieldError.Publisher.NameAlreadyUsed" xml:space="preserve">
-    <value>« {0} » est déjà le nom d&apos;un autre éditeur.</value>
-  </data>
-  <data name="FieldError.Publisher.WebsiteInvalid" xml:space="preserve">
-    <value>Une adresse web complète, commençant par https:// ou http://.</value>
-  </data>
   <data name="Problem.Functional.Conflict" xml:space="preserve">
     <value>L&apos;éditeur a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
   </data>

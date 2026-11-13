@@ -35,7 +35,8 @@ public sealed class Author : EntityBase, IAggregateRoot
     {
         if (string.IsNullOrWhiteSpace(lastName) && string.IsNullOrWhiteSpace(pseudonym))
             throw new DomainRuleViolationException(
-                DomainRules.AuthorLastNameOrPseudonymRequired, "An author must have at least a last name or a pseudonym.");
+                DomainRules.AuthorLastNameOrPseudonymRequired, "An author must have at least a last name or a pseudonym.", this,
+                nameof(LastName));
 
         LastName = DomainText.NullIfBlank(lastName);
         FirstName = DomainText.NullIfBlank(firstName);

@@ -81,10 +81,11 @@ public sealed class Edition : EntityBase
     public void SetPublisher(Publisher? publisher, PublisherCollection? collection)
     {
         if (publisher is null)
-            throw new DomainRuleViolationException(DomainRules.EditionPublisherRequired, "An edition must have a publisher.");
+            throw new DomainRuleViolationException(DomainRules.EditionPublisherRequired, "An edition must have a publisher.", this, nameof(PublisherId));
         if (collection is not null && collection.PublisherId != publisher.Id)
             throw new DomainRuleViolationException(
-                DomainRules.PublisherCollectionNotOfPublisher, "The publisher collection must belong to the given publisher.");
+                DomainRules.PublisherCollectionNotOfPublisher, "The publisher collection must belong to the given publisher.", this,
+                nameof(PublisherCollectionId));
 
         Publisher = publisher;
         PublisherId = publisher.Id;
@@ -125,7 +126,8 @@ public sealed class Edition : EntityBase
                 "An edition is acquired through Album.RecordAcquisition, which realizes the intents it satisfies.");
         if (AcquisitionMode is not null && acquisition.Mode is null)
             throw new DomainRuleViolationException(
-                DomainRules.EditionAcquisitionModeRequired, "An owned edition keeps an acquisition mode until it is deleted.");
+                DomainRules.EditionAcquisitionModeRequired, "An owned edition keeps an acquisition mode until it is deleted.", this,
+                nameof(AcquisitionMode));
         EnsurePublicationYearPositive(publicationYear);
         EnsureValid(acquisition, publicationYear);
 
@@ -143,7 +145,8 @@ public sealed class Edition : EntityBase
     public void SetPageCount(int? count)
     {
         if (count is <= 0)
-            throw new DomainRuleViolationException(DomainRules.EditionPageCountPositive, "Page count must be positive when specified.");
+            throw new DomainRuleViolationException(
+                DomainRules.EditionPageCountPositive, "Page count must be positive when specified.", this, nameof(PageCount));
         PageCount = count;
     }
 
@@ -238,39 +241,45 @@ public sealed class Edition : EntityBase
             EnumGuard.EnsureDefined(acquisition.Mode.Value, nameof(acquisition));
         if ((acquisition.PriceAmount is null) != (acquisition.PriceCurrency is null))
             throw new DomainRuleViolationException(
-                DomainRules.EditionAcquisitionAmountCurrencyTogether, "An acquisition amount and its currency must be provided together, or not at all.");
+                DomainRules.EditionAcquisitionAmountCurrencyTogether, "An acquisition amount and its currency must be provided together, or not at all.",
+                this, acquisition.PriceCurrency is null ? nameof(AcquisitionCurrency) : nameof(AcquisitionAmount));
         if ((acquisition.InitialValueAmount is null) != (acquisition.InitialValueCurrency is null))
             throw new DomainRuleViolationException(
-                DomainRules.EditionInitialValueAmountCurrencyTogether, "An initial value amount and its currency must be provided together, or not at all.");
+                DomainRules.EditionInitialValueAmountCurrencyTogether, "An initial value amount and its currency must be provided together, or not at all.",
+                this, acquisition.InitialValueCurrency is null ? nameof(InitialValueCurrency) : nameof(InitialValueAmount));
 
         // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
         // until the edition is acquired (fonctionnel/regles-metier/intention-d-achat.md).
         if (acquisition.Mode is null
             && (acquisition.Date is not null || acquisition.PriceAmount is not null || acquisition.InitialValueAmount is not null))
             throw new DomainRuleViolationException(
-                DomainRules.EditionAcquisitionModeRequired, "An acquisition date, price or initial value requires an acquisition mode.");
+                DomainRules.EditionAcquisitionModeRequired, "An acquisition date, price or initial value requires an acquisition mode.", this,
+                nameof(AcquisitionMode));
 
         // A free edition has no value at all: neither price paid, nor market value, nor initial value.
         if (acquisition.IsFree)
         {
             if (acquisition.PriceAmount is not null)
-                throw new DomainRuleViolationException(DomainRules.EditionFreeExcludesPrice, "A free edition has no acquisition price.");
+                throw new DomainRuleViolationException(
+                    DomainRules.EditionFreeExcludesPrice, "A free edition has no acquisition price.", this, nameof(AcquisitionAmount));
             if (acquisition.InitialValueAmount is not null)
-                throw new DomainRuleViolationException(DomainRules.EditionFreeExcludesInitialValue, "A free edition has no initial value.");
+                throw new DomainRuleViolationException(
+                    DomainRules.EditionFreeExcludesInitialValue, "A free edition has no initial value.", this, nameof(InitialValueAmount));
             if (acquisition.Mode == Enums.AcquisitionMode.Purchase)
-                throw new DomainRuleViolationException(DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.");
+                throw new DomainRuleViolationException(
+                    DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.", this, nameof(AcquisitionMode));
         }
 
         if (acquisition.PriceAmount is <= 0)
             throw new DomainRuleViolationException(
-                DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.");
+                DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.", this, nameof(AcquisitionAmount));
         if (acquisition.PriceCurrency is not null)
-            EnsureValidCurrencyCode(acquisition.PriceCurrency);
+            EnsureValidCurrencyCode(acquisition.PriceCurrency, nameof(AcquisitionCurrency));
         if (acquisition.InitialValueAmount is <= 0)
             throw new DomainRuleViolationException(
-                DomainRules.EditionInitialValueAmountPositive, "Initial value amount must be positive when specified.");
+                DomainRules.EditionInitialValueAmountPositive, "Initial value amount must be positive when specified.", this, nameof(InitialValueAmount));
         if (acquisition.InitialValueCurrency is not null)
-            EnsureValidCurrencyCode(acquisition.InitialValueCurrency);
+            EnsureValidCurrencyCode(acquisition.InitialValueCurrency, nameof(InitialValueCurrency));
 
         EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, IsAlbumDated);
     }
@@ -360,17 +369,18 @@ public sealed class Edition : EntityBase
     // accepted — including
     // the old franc's reserved code QZF, which has the same shape
     // (choix-implementation/domaine/representation-de-la-devise.md).
-    private static void EnsureValidCurrencyCode(string currencyCode)
+    private void EnsureValidCurrencyCode(string currencyCode, string attribute)
     {
         if (currencyCode.Length != 3 || !currencyCode.All(c => c is >= 'A' and <= 'Z'))
             throw new DomainRuleViolationException(
-                DomainRules.EditionCurrencyCodeInvalid, "Currency code must be a 3-letter uppercase ISO 4217 code.");
+                DomainRules.EditionCurrencyCodeInvalid, "Currency code must be a 3-letter uppercase ISO 4217 code.", this, attribute);
     }
 
-    private static void EnsurePublicationYearPositive(int? year)
+    private void EnsurePublicationYearPositive(int? year)
     {
         if (year is <= 0)
-            throw new DomainRuleViolationException(DomainRules.EditionPublicationYearPositive, "Publication year must be positive when specified.");
+            throw new DomainRuleViolationException(
+                DomainRules.EditionPublicationYearPositive, "Publication year must be positive when specified.", this, nameof(PublicationYear));
     }
 
     // Run by Album.SetFirstPublicationDate before it clears its date: the album's date is the last
@@ -384,17 +394,19 @@ public sealed class Edition : EntityBase
     /// edition year, or album's first publication; the initial value: edition year, or album's
     /// first publication. The album is only consulted when the edition's own dates do not suffice.
     /// </summary>
-    private static void EnsureAmountsDated(
+    private void EnsureAmountsDated(
         decimal? price, decimal? initialValue, DateOnly? acquisitionDate, int? publicationYear, Func<bool> albumDated)
     {
         if (price is not null && acquisitionDate is null && publicationYear is null && !albumDated())
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionPriceReferenceDateRequired,
-                "An acquisition price requires an acquisition date, an edition year or the album's first publication date.");
+                "An acquisition price requires an acquisition date, an edition year or the album's first publication date.", this,
+                nameof(AcquisitionAmount));
         if (initialValue is not null && publicationYear is null && !albumDated())
             throw new DomainRuleViolationException(
                 DomainRules.EditionInitialValueReferenceDateRequired,
-                "An initial value requires an edition year or the album's first publication date.");
+                "An initial value requires an edition year or the album's first publication date.", this,
+                nameof(InitialValueAmount));
     }
 
     // A programming error, not a business one, when the album is missing: an edition read without

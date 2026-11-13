@@ -359,7 +359,8 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     public void BusinessError_ToCorrect_PointsToItsField()
     {
         var page = OpenNew();
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Album.TitleRequiredWithoutSeries");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Album.TitleRequiredWithoutSeries", "/title");
 
         page.Find("form").Submit();
 

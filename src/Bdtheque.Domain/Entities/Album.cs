@@ -79,11 +79,11 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// A title is required unless the album is attached to a series (the series and volume
     /// number can then suffice to identify it) — see modele-metier/album.md.
     /// </summary>
-    private static void EnsureTitleOrSeries(string? title, Series? series)
+    private void EnsureTitleOrSeries(string? title, Series? series)
     {
         if (string.IsNullOrWhiteSpace(title) && series is null)
             throw new DomainRuleViolationException(
-                DomainRules.AlbumTitleRequiredWithoutSeries, "An album must have a title when it is not attached to a series.");
+                DomainRules.AlbumTitleRequiredWithoutSeries, "An album must have a title when it is not attached to a series.", this, nameof(Title));
     }
 
     /// <summary>
@@ -129,8 +129,8 @@ public sealed class Album : EntityBase, IAggregateRoot
     {
         if (Title is null)
             throw new DomainRuleViolationException(
-                DomainRules.AlbumManualSortKeyRequiresTitle, "Cannot set a manual sort key on an album with no title.");
-        ApplySortKey(DomainText.Required(sortKey, DomainRules.AlbumSortKeyRequired, "A manual sort key must not be blank."));
+                DomainRules.AlbumManualSortKeyRequiresTitle, "Cannot set a manual sort key on an album with no title.", this, nameof(SortKey));
+        ApplySortKey(DomainText.Required(sortKey, DomainRules.AlbumSortKeyRequired, "A manual sort key must not be blank.", this, nameof(SortKey)));
         IsManualSortKey = true;
     }
 
@@ -153,7 +153,8 @@ public sealed class Album : EntityBase, IAggregateRoot
     public void SetVolumeNumber(int? number)
     {
         if (number is <= 0)
-            throw new DomainRuleViolationException(DomainRules.AlbumVolumeNumberPositive, "Volume number must be positive when specified.");
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumVolumeNumberPositive, "Volume number must be positive when specified.", this, nameof(VolumeNumber));
         VolumeNumber = number;
     }
 
@@ -168,18 +169,21 @@ public sealed class Album : EntityBase, IAggregateRoot
         EnumGuard.EnsureDefined(type, nameof(type));
         if ((start is null) != (end is null))
             throw new DomainRuleViolationException(
-                DomainRules.AlbumVolumeRangeBothOrNeither, "Start and end volume numbers must be provided together, or not at all.");
+                DomainRules.AlbumVolumeRangeBothOrNeither, "Start and end volume numbers must be provided together, or not at all.", this,
+                start is null ? nameof(StartVolumeNumber) : nameof(EndVolumeNumber));
 
         if (start is not null)
         {
             if (type != AlbumType.Omnibus)
                 throw new DomainRuleViolationException(
-                    DomainRules.AlbumVolumeRangeOmnibusOnly, "A volume range is only applicable to omnibus (Intégrale) albums.");
+                    DomainRules.AlbumVolumeRangeOmnibusOnly, "A volume range is only applicable to omnibus (Intégrale) albums.", this,
+                    nameof(StartVolumeNumber));
             if (start <= 0)
-                throw new DomainRuleViolationException(DomainRules.AlbumVolumeRangeStartPositive, "Start volume number must be positive.");
+                throw new DomainRuleViolationException(
+                    DomainRules.AlbumVolumeRangeStartPositive, "Start volume number must be positive.", this, nameof(StartVolumeNumber));
             if (start > end)
                 throw new DomainRuleViolationException(
-                    DomainRules.AlbumVolumeRangeOrder, "Start volume number must not exceed the end volume number.");
+                    DomainRules.AlbumVolumeRangeOrder, "Start volume number must not exceed the end volume number.", this, nameof(EndVolumeNumber));
         }
 
         Type = type;
@@ -195,12 +199,13 @@ public sealed class Album : EntityBase, IAggregateRoot
     {
         if (month is not null && year is null)
             throw new DomainRuleViolationException(
-                DomainRules.AlbumPublicationMonthRequiresYear, "A publication month requires a publication year.");
+                DomainRules.AlbumPublicationMonthRequiresYear, "A publication month requires a publication year.", this, nameof(FirstPublicationYear));
         if (month is < 1 or > 12)
             throw new DomainRuleViolationException(
-                DomainRules.AlbumPublicationMonthRange, "Publication month must be between 1 and 12.");
+                DomainRules.AlbumPublicationMonthRange, "Publication month must be between 1 and 12.", this, nameof(FirstPublicationMonth));
         if (year is <= 0)
-            throw new DomainRuleViolationException(DomainRules.AlbumPublicationYearPositive, "Publication year must be positive.");
+            throw new DomainRuleViolationException(
+                DomainRules.AlbumPublicationYearPositive, "Publication year must be positive.", this, nameof(FirstPublicationYear));
         if (year is null)
         {
             foreach (var edition in _editions)
@@ -322,7 +327,8 @@ public sealed class Album : EntityBase, IAggregateRoot
         EnsureOwnEdition(edition);
         ArgumentNullException.ThrowIfNull(acquisition);
         if (acquisition.Mode is null)
-            throw new DomainRuleViolationException(DomainRules.EditionAcquisitionModeRequired, "An acquisition requires its mode.");
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionModeRequired, "An acquisition requires its mode.", edition, nameof(Edition.AcquisitionMode));
         if (edition.AcquisitionMode is not null)
             throw new DomainRuleViolationException(DomainRules.EditionAlreadyOwned, "This edition is already owned.");
         edition.EnsureValid(acquisition, edition.PublicationYear);

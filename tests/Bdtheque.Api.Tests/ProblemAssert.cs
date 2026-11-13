@@ -31,6 +31,29 @@ internal static class ProblemAssert
         return problem;
     }
 
+    /// <summary>
+    /// Asserts that <paramref name="response"/> is a business error reporting <paramref name="ruleCode"/> that designates
+    /// exactly <paramref name="fields"/>, in the content the request sent
+    /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md).
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="related"/>: the fields holding the values those to correct clash with, entered in the same content.
+    /// </remarks>
+    public static async Task<JsonElement> IsBusinessProblemAsync(
+        HttpResponseMessage response, string ruleCode, string[] fields, string[]? related = null)
+    {
+        var problem = await IsBusinessProblemAsync(response, ruleCode);
+        Assert.Equal(fields, FieldsOf(problem));
+        Assert.Equal(related ?? [], FieldsOf(problem, ProblemTypes.RelatedFieldsExtension));
+        return problem;
+    }
+
+    /// <summary>The fields a business problem designates (or the related ones); none when it carries none.</summary>
+    public static string[] FieldsOf(JsonElement problem, string extension = ProblemTypes.FieldsExtension) =>
+        problem.TryGetProperty(extension, out var fields)
+            ? [.. fields.EnumerateArray().Select(field => field.GetString()!)]
+            : [];
+
     /// <summary>The deletion impact a problem carries.</summary>
     public static DeletionImpact ImpactOf(JsonElement problem) =>
         problem.GetProperty(ProblemTypes.ImpactExtension).Deserialize<DeletionImpact>(JsonSerializerOptions.Web)!;

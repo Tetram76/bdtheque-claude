@@ -89,8 +89,8 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase);
 
-        DomainAssert.Violates(
-            DomainRules.EditionPublicationYearPositive, () => edition.SetPublicationYearAndAcquisition(0, Acquisition(AcquisitionMode.Purchase)));
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionPublicationYearPositive, nameof(Edition.PublicationYear), () => edition.SetPublicationYearAndAcquisition(0, Acquisition(AcquisitionMode.Purchase)));
     }
 
     [Fact]
@@ -111,8 +111,8 @@ public sealed class EditionValueTests
         // (fonctionnel/regles-metier/intention-d-achat.md), and a form can leave the mode empty.
         var edition = CreateOwnedEdition(AcquisitionMode.Gift);
 
-        DomainAssert.Violates(
-            DomainRules.EditionAcquisitionModeRequired, () => edition.SetPublicationYearAndAcquisition(null, Acquisition(null)));
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionAcquisitionModeRequired, nameof(Edition.AcquisitionMode), () => edition.SetPublicationYearAndAcquisition(null, Acquisition(null)));
         Assert.Equal(AcquisitionMode.Gift, edition.AcquisitionMode);
     }
 
@@ -129,7 +129,7 @@ public sealed class EditionValueTests
             withPrice ? 10m : null, withPrice ? "EUR" : null,
             initialValue: withInitialValue ? 35m : null, initialValueCurrency: withInitialValue ? "FRF" : null);
 
-        DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => edition.SetPublicationYearAndAcquisition(null, acquisition));
+        DomainAssert.Violates<Edition>(DomainRules.EditionAcquisitionModeRequired, nameof(Edition.AcquisitionMode), () => edition.SetPublicationYearAndAcquisition(null, acquisition));
     }
 
     [Fact]
@@ -151,8 +151,10 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
 
-        DomainAssert.Violates(
+        // The value missing is the one designated.
+        DomainAssert.Violates<Edition>(
             DomainRules.EditionAcquisitionAmountCurrencyTogether,
+            currency is null ? nameof(Edition.AcquisitionCurrency) : nameof(Edition.AcquisitionAmount),
             () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: amount, priceCurrency: currency)));
     }
 
@@ -163,8 +165,9 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
 
-        DomainAssert.Violates(
+        DomainAssert.Violates<Edition>(
             DomainRules.EditionInitialValueAmountCurrencyTogether,
+            currency is null ? nameof(Edition.InitialValueCurrency) : nameof(Edition.InitialValueAmount),
             () => edition.SetPublicationYearAndAcquisition(
                 null, Acquisition(AcquisitionMode.Purchase, initialValue: amount, initialValueCurrency: currency)));
     }
@@ -176,8 +179,8 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
 
-        DomainAssert.Violates(
-            DomainRules.EditionAcquisitionAmountPositive,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionAcquisitionAmountPositive, nameof(Edition.AcquisitionAmount),
             () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: amount, priceCurrency: "EUR")));
     }
 
@@ -188,8 +191,8 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
 
-        DomainAssert.Violates(
-            DomainRules.EditionInitialValueAmountPositive,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionInitialValueAmountPositive, nameof(Edition.InitialValueAmount),
             () => edition.SetPublicationYearAndAcquisition(
                 null, Acquisition(AcquisitionMode.Purchase, initialValue: amount, initialValueCurrency: "FRF")));
     }
@@ -202,11 +205,11 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
 
-        DomainAssert.Violates(
-            DomainRules.EditionCurrencyCodeInvalid,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionCurrencyCodeInvalid, nameof(Edition.AcquisitionCurrency),
             () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: currency)));
-        DomainAssert.Violates(
-            DomainRules.EditionCurrencyCodeInvalid,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionCurrencyCodeInvalid, nameof(Edition.InitialValueCurrency),
             () => edition.SetPublicationYearAndAcquisition(
                 null, Acquisition(AcquisitionMode.Purchase, initialValue: 10m, initialValueCurrency: currency)));
     }
@@ -230,8 +233,8 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Gift, albumYear: 1978);
 
-        DomainAssert.Violates(
-            DomainRules.EditionFreeExcludesPrice,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionFreeExcludesPrice, nameof(Edition.AcquisitionAmount),
             () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Gift, price: 10m, priceCurrency: "EUR", isFree: true)));
     }
 
@@ -240,8 +243,8 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Gift, albumYear: 1978);
 
-        DomainAssert.Violates(
-            DomainRules.EditionFreeExcludesInitialValue,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionFreeExcludesInitialValue, nameof(Edition.InitialValueAmount),
             () => edition.SetPublicationYearAndAcquisition(
                 null, Acquisition(AcquisitionMode.Gift, isFree: true, initialValue: 35m, initialValueCurrency: "FRF")));
     }
@@ -251,8 +254,8 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Gift);
 
-        DomainAssert.Violates(
-            DomainRules.EditionPurchaseCannotBeFree,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionPurchaseCannotBeFree, nameof(Edition.AcquisitionMode),
             () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, isFree: true)));
         Assert.Equal(AcquisitionMode.Gift, edition.AcquisitionMode);
         Assert.False(edition.IsFree);
@@ -273,8 +276,8 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase);
 
-        DomainAssert.Violates(
-            DomainRules.EditionAcquisitionPriceReferenceDateRequired,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionAcquisitionPriceReferenceDateRequired, nameof(Edition.AcquisitionAmount),
             () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR")));
     }
 
@@ -299,8 +302,8 @@ public sealed class EditionValueTests
         // The acquisition date is no reference date for the initial value, a price at publication.
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase);
 
-        DomainAssert.Violates(
-            DomainRules.EditionInitialValueReferenceDateRequired,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionInitialValueReferenceDateRequired, nameof(Edition.InitialValueAmount),
             () => edition.SetPublicationYearAndAcquisition(
                 null, Acquisition(AcquisitionMode.Purchase, new DateOnly(2020, 1, 1), initialValue: 35m, initialValueCurrency: "FRF")));
     }
@@ -338,8 +341,8 @@ public sealed class EditionValueTests
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase);
         edition.SetPublicationYearAndAcquisition(2019, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR"));
 
-        DomainAssert.Violates(
-            DomainRules.EditionAcquisitionPriceReferenceDateRequired,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionAcquisitionPriceReferenceDateRequired, nameof(Edition.AcquisitionAmount),
             () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Gift, price: 20m, priceCurrency: "USD")));
 
         Assert.Equal(2019, edition.PublicationYear);
@@ -353,7 +356,7 @@ public sealed class EditionValueTests
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase);
         edition.SetPublicationYearAndAcquisition(2019, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR"));
 
-        DomainAssert.Violates(DomainRules.EditionAcquisitionPriceReferenceDateRequired, () => edition.SetPublicationYear(null));
+        DomainAssert.Violates<Edition>(DomainRules.EditionAcquisitionPriceReferenceDateRequired, nameof(Edition.AcquisitionAmount), () => edition.SetPublicationYear(null));
         Assert.Equal(2019, edition.PublicationYear);
     }
 
@@ -365,7 +368,7 @@ public sealed class EditionValueTests
         edition.SetPublicationYearAndAcquisition(
             2019, Acquisition(AcquisitionMode.Purchase, new DateOnly(2020, 1, 1), initialValue: 15m, initialValueCurrency: "EUR"));
 
-        DomainAssert.Violates(DomainRules.EditionInitialValueReferenceDateRequired, () => edition.SetPublicationYear(null));
+        DomainAssert.Violates<Edition>(DomainRules.EditionInitialValueReferenceDateRequired, nameof(Edition.InitialValueAmount), () => edition.SetPublicationYear(null));
     }
 
     [Fact]
@@ -386,8 +389,8 @@ public sealed class EditionValueTests
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 2001);
         edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR"));
 
-        DomainAssert.Violates(
-            DomainRules.EditionAcquisitionPriceReferenceDateRequired, () => edition.Album.SetFirstPublicationDate(null, null));
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionAcquisitionPriceReferenceDateRequired, nameof(Edition.AcquisitionAmount), () => edition.Album.SetFirstPublicationDate(null, null));
         Assert.Equal(2001, edition.Album.FirstPublicationYear);
     }
 
@@ -398,8 +401,8 @@ public sealed class EditionValueTests
         edition.SetPublicationYearAndAcquisition(
             null, Acquisition(AcquisitionMode.Purchase, new DateOnly(2020, 1, 1), initialValue: 15m, initialValueCurrency: "EUR"));
 
-        DomainAssert.Violates(
-            DomainRules.EditionInitialValueReferenceDateRequired, () => edition.Album.SetFirstPublicationDate(null, null));
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionInitialValueReferenceDateRequired, nameof(Edition.InitialValueAmount), () => edition.Album.SetFirstPublicationDate(null, null));
     }
 
     [Fact]
@@ -452,7 +455,7 @@ public sealed class EditionValueTests
         album.AddPurchaseIntent();
         var edition = new Edition(album, CreatePublisher());
 
-        DomainAssert.Violates(DomainRules.EditionAcquisitionModeRequired, () => album.RecordAcquisition(edition, Acquisition(null)));
+        DomainAssert.Violates<Edition>(DomainRules.EditionAcquisitionModeRequired, nameof(Edition.AcquisitionMode), () => album.RecordAcquisition(edition, Acquisition(null)));
         Assert.Null(edition.AcquisitionMode);
         Assert.Single(album.PurchaseIntents);
     }
@@ -466,8 +469,8 @@ public sealed class EditionValueTests
         var album = edition.Album;
         album.AddPurchaseIntent(edition);
 
-        DomainAssert.Violates(
-            DomainRules.EditionAcquisitionPriceReferenceDateRequired,
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionAcquisitionPriceReferenceDateRequired, nameof(Edition.AcquisitionAmount),
             () => album.RecordAcquisition(edition, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR")));
         Assert.Null(edition.AcquisitionMode);
         Assert.Null(edition.AcquisitionAmount);
@@ -484,7 +487,7 @@ public sealed class EditionValueTests
         album.AddPurchaseIntent(edition);
         edition.SetPublicationYearAndAcquisition(null, Acquisition(null, isFree: true));
 
-        DomainAssert.Violates(DomainRules.EditionPurchaseCannotBeFree, () => album.RecordAcquisition(edition, AcquisitionMode.Purchase));
+        DomainAssert.Violates<Edition>(DomainRules.EditionPurchaseCannotBeFree, nameof(Edition.AcquisitionMode), () => album.RecordAcquisition(edition, AcquisitionMode.Purchase));
         Assert.Null(edition.AcquisitionMode);
         Assert.Single(album.PurchaseIntents);
     }

@@ -148,10 +148,10 @@
     <value>Ce libellé est déjà celui d&apos;un autre genre.</value>
   </data>
   <data name="Publisher.NameAlreadyUsed" xml:space="preserve">
-    <value>Ce nom est déjà celui d&apos;un autre éditeur : deux éditeurs ne peuvent pas porter exactement le même nom ; une différence de casse suffit à les distinguer.</value>
+    <value>Deux éditeurs ne peuvent pas porter exactement le même nom ; une différence de casse suffit à les distinguer.</value>
   </data>
   <data name="PublisherCollection.NameAlreadyUsed" xml:space="preserve">
-    <value>Cet éditeur a déjà une collection de ce nom.</value>
+    <value>Deux collections d&apos;un même éditeur ne peuvent pas porter le même nom.</value>
   </data>
   <data name="Contribution.AlreadyCredited" xml:space="preserve">
     <value>Cet auteur est déjà crédité dans ce rôle.</value>

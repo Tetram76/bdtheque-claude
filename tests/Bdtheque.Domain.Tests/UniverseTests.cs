@@ -21,7 +21,7 @@ public sealed class UniverseTests
     [InlineData("   ")]
     public void Constructor_EmptyName_Throws(string? name)
     {
-        DomainAssert.Violates(DomainRules.UniverseNameRequired, () => new Universe(name!));
+        DomainAssert.Violates<Universe>(DomainRules.UniverseNameRequired, nameof(Universe.Name), () => new Universe(name!));
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class UniverseTests
     {
         var universe = new Universe("Self");
 
-        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => universe.SetParent(universe));
+        DomainAssert.Violates<Universe>(DomainRules.UniverseHierarchyCycle, nameof(Universe.ParentId), () => universe.SetParent(universe));
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public sealed class UniverseTests
         b.SetParent(a);
 
         // A → B already; making B parent of A would create A → B → A
-        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => a.SetParent(b));
+        DomainAssert.Violates<Universe>(DomainRules.UniverseHierarchyCycle, nameof(Universe.ParentId), () => a.SetParent(b));
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public sealed class UniverseTests
         c.SetParent(b);
 
         // Chain: A → B → C; making C parent of A would create A → B → C → A
-        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => a.SetParent(c));
+        DomainAssert.Violates<Universe>(DomainRules.UniverseHierarchyCycle, nameof(Universe.ParentId), () => a.SetParent(c));
     }
 
     [Fact]
@@ -162,6 +162,6 @@ public sealed class UniverseTests
         // We achieve this by creating a fresh B-like universe with only the ParentId set
         // via the public SetParent API (which sets both Parent and ParentId).
         // After this, a.SetParent(b) should detect cycle because b.ParentId == a.Id.
-        DomainAssert.Violates(DomainRules.UniverseHierarchyCycle, () => a.SetParent(b));
+        DomainAssert.Violates<Universe>(DomainRules.UniverseHierarchyCycle, nameof(Universe.ParentId), () => a.SetParent(b));
     }
 }
