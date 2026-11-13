@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # The SDK runs on the platform of the build machine, and targets the platform of the image
 # (TARGETARCH, set by BuildKit): only the native libraries of that platform are published.
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.404 AS build

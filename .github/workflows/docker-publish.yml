@@ -92,13 +92,18 @@ jobs:
       # (first nightly) leaves nothing to delete; a registry error fails the job, since a replaced
       # image could not be deleted without its digest. When both nightly images are already built
       # from the head of `main` (revision label set by metadata-action), nothing is published.
-      # On-demand runs record them too: they are the reference of the vulnerability check below.
+      # An on-demand run replaces no nightly image: it reads none, reading the label of one counting
+      # as a pull against the quota of the account (gestion-projet/depot/integration-continue-ci.md).
       # Every later step runs only when this one sets `publish`, which a skipped step never does.
       - name: Record the current nightly images
         id: previous
         if: steps.immutable.outputs.nothing-new != 'true'
         run: |
-          up_to_date=$([ "$GITHUB_EVENT_NAME" = schedule ] && echo true || echo false)
+          if [ "$GITHUB_EVENT_NAME" != schedule ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          up_to_date=true
           for image in api frontend; do
             variable="${image^^}_REPOSITORY"
             repository=${!variable}
@@ -175,31 +180,28 @@ jobs:
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
 
-      # An image that adds a fixable vulnerability to the published one is never published, nor is
-      # the other image of the pair (same check as the CI, see ci.yml). Without a published image,
-      # no fixable vulnerability is accepted at all.
+      # An image that holds a fixable vulnerability of a package the repository chooses is never
+      # published, nor is the other image of the pair (same check as the CI, see ci.yml).
       - name: Check vulnerabilities of the api image
         if: steps.previous.outputs.publish == 'true'
         uses: docker/scout-action@a4119c5a8c5076236a54e4ce99531f7e4dd2ef84 # v1.27.0
         with:
-          command: ${{ steps.previous.outputs.api-digest && 'compare' || 'cves' }}
+          command: cves
           image: local://bdtheque-api:scan
-          to: registry://${{ env.API_REPOSITORY }}:nightly
           only-fixed: true
-          exit-on: vulnerability
-          exit-code: ${{ !steps.previous.outputs.api-digest }}
+          only-package-types: nuget
+          exit-code: true
           write-comment: false
 
       - name: Check vulnerabilities of the frontend image
         if: steps.previous.outputs.publish == 'true'
         uses: docker/scout-action@a4119c5a8c5076236a54e4ce99531f7e4dd2ef84 # v1.27.0
         with:
-          command: ${{ steps.previous.outputs.frontend-digest && 'compare' || 'cves' }}
+          command: cves
           image: local://bdtheque-frontend:scan
-          to: registry://${{ env.FRONTEND_REPOSITORY }}:nightly
           only-fixed: true
-          exit-on: vulnerability
-          exit-code: ${{ !steps.previous.outputs.frontend-digest }}
+          only-package-types: nuget
+          exit-code: true
           write-comment: false
 
       # Without attestations each image is a single manifest, deleted in one call: an image index

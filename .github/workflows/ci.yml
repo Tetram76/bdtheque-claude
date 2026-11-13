@@ -32,6 +32,7 @@ jobs:
     outputs:
       sources: ${{ steps.changes.outputs.sources }}
       rendering: ${{ steps.changes.outputs.rendering }}
+      images: ${{ steps.changes.outputs.images }}
     steps:
       # The merge commit of a pull request (refs/pull/<number>/merge) and its first parent, the head of main it merges
       # into: their difference is the pull request as it would be merged.
@@ -47,6 +48,7 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
             echo "sources=true" >> "$GITHUB_OUTPUT"
             echo "rendering=true" >> "$GITHUB_OUTPUT"
+            echo "images=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           cd "$RUNNER_TEMP"
@@ -56,9 +58,14 @@ jobs:
           { grep -vE "$not_sources" changed.txt || true; grep -xF .github/workflows/ci.yml changed.txt || true; } > sources.txt
           # The tests without a browser render no screen.
           grep -vE '^tests/Bdtheque\.(Api|Domain|Frontend|Infrastructure|ValidationData)\.Tests/' sources.txt > rendering.txt || true
+          # What the images built below are made of: their build context, their Dockerfiles and this workflow, which
+          # builds and analyzes them. The image of the validation data is not built here.
+          not_images='^(\.speckit/|\.claude/|poc/|scripts/|tests/|\.github/|docker/validation-data/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.gitignore$)'
+          { grep -vE "$not_images" changed.txt || true; grep -xF .github/workflows/ci.yml changed.txt || true; } > images.txt
           echo "sources=$([ -s sources.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "rendering=$([ -s rendering.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          for list in changed sources rendering; do
+          echo "images=$([ -s images.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          for list in changed sources rendering images; do
             echo "::group::$list ($(wc -l < "$list.txt"))"; cat "$list.txt"; echo "::endgroup::"
           done
 
@@ -346,31 +353,29 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: dotnet tool run dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
+  # A pull request that changes nothing the images are made of builds and analyzes none: it cannot change them. The
+  # job and its required check stay, only its steps are skipped (gestion-projet/depot/integration-continue-ci.md).
   docker-build:
     name: Build Docker image (${{ matrix.image }})
+    needs: changes
     runs-on: ubuntu-latest
     strategy:
       matrix:
         image: [api, frontend]
     steps:
       - name: Checkout
+        if: needs.changes.outputs.images == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Docker Buildx
+        if: needs.changes.outputs.images == 'true'
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      # The publishing token: the code of the branch and of its dependencies only runs inside the
-      # build containers, which never get the registry credentials
-      # (gestion-projet/depot/integration-continue-ci.md).
-      - name: Log in to Docker Hub
-        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
-        with:
-          username: tetram76
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       # Same platform as the published images (docker-publish.yml), so that a pull request
-      # cannot break their publication. Loaded into the local image store for Docker Scout.
+      # cannot break their publication. Loaded into the local image store for Docker Scout. Built before the login:
+      # whatever the build pulls never counts against the quota of the account.
       - name: Build ${{ matrix.image }} image
+        if: needs.changes.outputs.images == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -382,25 +387,26 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
 
-      - name: Find the published nightly image
-        id: reference
-        env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: |
-          digest=$(.github/scripts/registry-digest.sh "tetram76/bdtheque-${{ matrix.image }}" nightly)
-          [ -n "$digest" ] && echo "published=true" >> "$GITHUB_OUTPUT" || true
+      # Docker Scout requires a Docker account; it analyzes the local image and pulls nothing. The code of the branch
+      # and of its dependencies only ran inside the build containers, which never got the registry credentials
+      # (gestion-projet/depot/integration-continue-ci.md).
+      - name: Log in to Docker Hub
+        if: needs.changes.outputs.images == 'true'
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          username: tetram76
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Fails when the image adds a fixable vulnerability to the published one: a vulnerability it
-      # already holds is not introduced by this change
-      # (choix-implementation/deploiement/publication-des-images-docker.md). Without a published image, no
-      # fixable vulnerability is accepted at all.
+      # Fails on any fixable vulnerability of a package the repository chooses, the .NET runtime among them, whether
+      # the published image holds it or not; the system packages of the chiseled base image are fixed by its rebuild,
+      # which every build takes (choix-implementation/deploiement/publication-des-images-docker.md).
       - name: Check vulnerabilities of the ${{ matrix.image }} image
+        if: needs.changes.outputs.images == 'true'
         uses: docker/scout-action@a4119c5a8c5076236a54e4ce99531f7e4dd2ef84 # v1.27.0
         with:
-          command: ${{ steps.reference.outputs.published == 'true' && 'compare' || 'cves' }}
+          command: cves
           image: local://bdtheque-${{ matrix.image }}:scan
-          to: registry://tetram76/bdtheque-${{ matrix.image }}:nightly
           only-fixed: true
-          exit-on: vulnerability
-          exit-code: ${{ steps.reference.outputs.published != 'true' }}
+          only-package-types: nuget
+          exit-code: true
           write-comment: false

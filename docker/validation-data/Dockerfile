@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Loader of the validation data, run once by the validation environment
 # (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md). Never published: built on
 # the machine of the validation,
