@@ -2,8 +2,9 @@
 name: chantiers-paralleles
 description: >-
   Runs a batch of chantiers in parallel on this repository, each in its own
-  session and worktree: picks them among the open tickets in the order of
-  priority of the .speckit, evaluates the resources of the machine before each
+  session and worktree, to complete the current milestone: picks them among
+  its open tickets in the order of priority of the .speckit, evaluates the
+  resources of the machine before each
   launch, starts a session per chantier and starts the next one each time a
   pull request of the batch is merged. Use when the user asks to run the next
   chantiers « en parallèle » / « en // », to launch a batch of chantiers, or
@@ -21,6 +22,10 @@ principle it does not do what belongs to a chantier's session (code, heavy
 runs, actions on the chantier's pull request: review, merge, closing), and it
 forwards to that session a question of the user about the chantier
 (`SendMessage`).
+
+A batch serves to **complete the current milestone**, never to anticipate
+future work: its chantiers are chosen among that milestone's tickets only
+(step 2.2).
 
 ## 1. The batch
 

@@ -9,6 +9,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T12:00:00Z }
 
 À la demande de l'utilisateur, l'agent réalise un **lot de chantiers en parallèle** : chaque chantier est confié à une session à part, dans son propre worktree, qui le mène de bout en bout selon les règles du `.speckit/` (lecture du `.speckit/`, découpage, Pull Request, validation fonctionnelle, revue Codex, fusion, clôture). La session qui lance le lot en est l'**orchestrateur** : elle choisit les chantiers, évalue les ressources, lance les sessions, et rend compte de leur avancement à l'utilisateur. C'est essentiellement son rôle : elle n'a pas, en principe, à réaliser elle-même ce qui revient à la session d'un chantier (code, exécution lourde, action sur la Pull Request du chantier : revue, fusion, clôture), et transmet à cette session une question de l'utilisateur sur le chantier.
 
+**Objet** : un lot sert à **compléter le jalon en cours**, pas à anticiper de futurs développements (exigence de l'utilisateur) ; d'où le choix de ses chantiers parmi les seuls tickets de ce jalon (§ Choix des chantiers).
+
 ## Le lot
 
 - **Toujours en parallèle** : les chantiers du lot sont toujours menés en parallèle, jamais l'un après l'autre par choix ; seules les dépendances entre chantiers (§ Choix des chantiers) en font attendre un.
