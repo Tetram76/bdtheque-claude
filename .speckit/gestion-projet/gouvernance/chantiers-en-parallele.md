@@ -1,7 +1,7 @@
 ---
 type: Gouvernance
 title: 'Chantiers en parallèle'
-description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants et ordre de priorité, contrôle de cohérence fonctionnelle confié par l''orchestrateur, indépendance et dépendances (toute condition préalable, calendrier compris) vérifiées pour chaque candidat, sélection du lot présentée à l''utilisateur à chaque choix, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
+description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants du jalon en cours (stabilisation du CI exceptée) et ordre de priorité, contrôle de cohérence fonctionnelle confié par l''orchestrateur, indépendance et dépendances (toute condition préalable, calendrier compris) vérifiées pour chaque candidat, sélection du lot présentée à l''utilisateur à chaque choix, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T12:00:00Z }
 ---
 
@@ -27,10 +27,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T12:00:00Z }
   2. **Contrôle de cohérence fonctionnelle**, quand il est dû ([Contrôle de cohérence à la reprise du travail](../revue-tickets/controle-de-coherence-a-la-reprise-du-travail.md)), ce que l'orchestrateur seul vérifie, une fois pour le lot : il le confie à une session à part, qui occupe une place du lot, son ticket étant celui de son suivi. Les tickets qu'il ouvre rejoignent le choix des chantiers suivants.
   3. **Plan du jalon en cours** : un chantier listé dans [`suivi-implementation/`](../../suivi-implementation/index.md), sous-tickets compris, rattaché au jalon de la prochaine version ([Versions et releases](../depot/versions-et-releases.md)).
   4. **Jalon en cours** : un autre ticket rattaché à ce jalon.
-  5. **Plan hors jalon** : un chantier listé dans le suivi, rattaché à un autre jalon ou à aucun.
-  6. Les autres tickets.
 
-  Plan et jalon se conjuguent : après les harnais, ce qui prime est le plan **du jalon en cours** ; la partie du plan hors de ce jalon ne vient qu'après tous les tickets du jalon (exigence de l'utilisateur).
+  Plan et jalon se conjuguent : après les harnais, ce qui prime est le plan **du jalon en cours** (exigence de l'utilisateur).
+- **Tickets hors du jalon en cours exclus** : un ticket rattaché à un autre jalon ou à aucun, chantier du plan compris, n'est pas candidat ; il le devient s'il est rattaché au jalon en cours, ou si l'utilisateur le demande explicitement pour le lot. Seuls font exception les deux premiers rangs : un ticket de stabilisation du CI est candidat quel que soit son jalon, et le contrôle de cohérence fonctionnelle n'a pas de jalon, son ticket étant celui d'un harnais (exigences de l'utilisateur).
 - **Indépendance** : un chantier qui modifierait les mêmes fichiers qu'un chantier en cours (même écran, même thème, même workflow) est écarté au profit du suivant, tant que l'autre n'est pas fusionné.
 - **Dépendances** : deux chantiers dont l'un doit voir le résultat de l'autre (ex. deux tickets qui modifient le même workflow, l'un devant partir de ce que l'autre décide) sont menés l'un après l'autre, jamais en même temps.
   - **Toute condition préalable est une dépendance** : est une dépendance toute condition que le ticket, ou la ligne du suivi qui le présente, pose à sa réalisation, pas seulement un autre chantier : un ticket prérequis, une version publiée, une mise en production ([`journal-evenements.md`](../../journal-evenements.md)), un calendrier (« sans objet avant… », « à réaliser avant… »). Un ticket dont une condition n'est pas remplie n'est pas candidat, quel que soit son rang dans l'ordre de priorité, même s'il est listé dans le suivi (ex. #267, sans objet avant la première mise en production).

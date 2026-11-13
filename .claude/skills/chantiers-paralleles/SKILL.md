@@ -74,9 +74,11 @@ forwards to that session a question of the user about the chantier
    orchestrator alone, once for the batch,
    `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
    `.speckit/suivi-implementation/` **in** the milestone of the next version →
-   the other tickets of that milestone → the plan outside that milestone →
-   the rest. Plan and milestone combine: the plan outside the current
-   milestone comes after every ticket of the milestone.
+   the other tickets of that milestone. A ticket outside the current
+   milestone (another milestone or none, plan tickets included) is **not a
+   candidate**, unless the user asked for it explicitly for the batch; only
+   CI stabilization (any milestone) and the functional consistency check
+   (a harness, never in a milestone) are exempt.
 
    Then, **for each candidate you consider, in that order, you check yourself
    both conditions below** — never one without the other, never left to the
