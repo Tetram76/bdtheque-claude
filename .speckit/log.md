@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-13
+
+* **Règle** : dans un lot de chantiers en parallèle, le nombre de chantiers du lot, s'il n'a pas été donné, n'est demandé à l'utilisateur qu'après l'identification et le classement des candidats, présentés avec les candidats écartés et leur raison ; un lot sert à compléter le jalon en cours, pas à anticiper de futurs développements ; l'ordre de priorité conjugue plan et jalon : après les harnais, plan du jalon en cours, puis autres tickets de ce jalon ; un ticket hors du jalon en cours, chantier du plan compris, n'est candidat que rattaché à ce jalon ou demandé explicitement par l'utilisateur, la stabilisation du CI gardant son rang quel que soit son jalon (exigences de l'utilisateur) (#426).
+
 ## 2026-11-12
 
 * **Décision de l'utilisateur** : la liste vide de toute liste de l'administration suit ce qui la restreint, comme le faisaient déjà les auteurs, éditeurs, genres et univers : recherche sans résultat inchangée ; sous des filtres, « … ne correspond à ces critères » et « Effacer les filtres » ; sous une entrée de la navigation par initiale, qui n'est pas un critère, « … sous cette entrée » et retour à « Toutes » ; sans rien, « … n'est encore enregistré » et la création ; le rappel de la recherche n'accompagne que le texte cherché. **Choix** : le cas d'une liste vide tiré une fois, par la requête commune des listes. La fiche en page créée depuis une liste vide (album, série, éditeur) reprend le texte cherché pour titre ou nom, sa clé de tri Auto suivant ce titre (décision de l'utilisateur ; #315, #401).

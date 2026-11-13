@@ -2,8 +2,9 @@
 name: chantiers-paralleles
 description: >-
   Runs a batch of chantiers in parallel on this repository, each in its own
-  session and worktree: picks them among the open tickets in the order of
-  priority of the .speckit, evaluates the resources of the machine before each
+  session and worktree, to complete the current milestone: picks them among
+  its open tickets in the order of priority of the .speckit, evaluates the
+  resources of the machine before each
   launch, starts a session per chantier and starts the next one each time a
   pull request of the batch is merged. Use when the user asks to run the next
   chantiers « en parallèle » / « en // », to launch a batch of chantiers, or
@@ -22,6 +23,10 @@ runs, actions on the chantier's pull request: review, merge, closing), and it
 forwards to that session a question of the user about the chantier
 (`SendMessage`).
 
+A batch serves to **complete the current milestone**, never to anticipate
+future work: its chantiers are chosen among that milestone's tickets only
+(step 2.2).
+
 ## 1. The batch
 
 - A batch is **always run in parallel**, never one chantier after the other
@@ -29,8 +34,11 @@ forwards to that session a question of the user about the chantier
   or a dependency between chantiers require it. Never ask the user how many
   at once.
 - The user gives the **number of chantiers** of the batch. It is not fixed:
-  take the latest the user gave in this conversation; ask for it if never
-  given, never assume it.
+  take the latest the user gave in this conversation; never assume it. If
+  never given, ask for it **only after** step 2.2: once every candidate is
+  identified and ranked (dependencies and independence checked), present the
+  ranked candidates and the dropped ones, then ask how many chantiers the
+  batch counts — never before, the user deciding from that ranking.
 - Count the places taken (a chantier whose pull request is not merged yet,
   and the functional consistency check until its conclusion is written).
 - A sub-ticket is a chantier like the others. When it is launched, give it to
@@ -70,7 +78,12 @@ forwards to that session a question of the user about the chantier
    current calendar week, done or in progress; checked by the
    orchestrator alone, once for the batch,
    `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
-   `.speckit/suivi-implementation/` → milestone of the next version → the rest.
+   `.speckit/suivi-implementation/` **in** the milestone of the next version →
+   the other tickets of that milestone. A ticket outside the current
+   milestone (another milestone or none, plan tickets included) is **not a
+   candidate**, unless the user asked for it explicitly for the batch; only
+   CI stabilization (any milestone) and the functional consistency check
+   (a harness, never in a milestone) are exempt.
 
    Then, **for each candidate you consider, in that order, you check yourself
    both conditions below** — never one without the other, never left to the
