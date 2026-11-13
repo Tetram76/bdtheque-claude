@@ -304,7 +304,9 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
         page.Find("form").Submit();
 
-        Assert.Contains("une différence de casse suffit à les distinguer", page.WaitForElement("[role=alert]").TextContent);
+        Assert.Equal(
+            "Deux éditeurs ne peuvent pas porter exactement le même nom ; une différence de casse suffit à les distinguer.",
+            page.WaitForElement("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
     }
 
     [Fact]
