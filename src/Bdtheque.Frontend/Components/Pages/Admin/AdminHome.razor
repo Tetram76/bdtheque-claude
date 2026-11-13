@@ -109,7 +109,7 @@
                                     <span class="admin-change-label"><LabelText Text="@Labels.Record(entry.Label, _settings!.AlbumLabelFormat)" /></span>
                                     <span class="admin-home-note">@L[$"Latest.{entry.RecordType}.{entry.Operation}"] · <LocalDateTime Value="entry.Date" /></span>
                                 </span>
-                                <a href="@AppPaths.AdminEdit(entry.RecordType, entry.RecordId)">@L["Edit"]</a>
+                                <a href="@AppPaths.AdminEdit(entry.RecordType, entry.RecordId, entry.ParentId)">@L["Edit"]</a>
                             </li>
                         }
                     </ul>

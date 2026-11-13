@@ -256,19 +256,23 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
         await data.IntentOnAlbumAsync(convoy);
 
-        // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
-        // whole album (visuel/listes/saisie-selon-l-entite.md).
-        var tide = await data.AlbumAsync(OneShot("La Marée des phares", 2024, 9, [adventure], [], [Credit(arnaud, ContributionRole.Scenarist), Credit(keita, ContributionRole.Illustrator)]));
-        await data.IntentOnEditionAsync(tide, new PurchaseIntentEditionContent(horizon.Id, null, 2024, null, null, null, null, null, null, null, true));
-
         // The cases of the entry form of an album (visuel/saisie-album/contenu.md): a sort key entered by hand, a universe
         // two levels down, shown with its ancestors, and no author nor series yet, so that attaching it to a series with
         // authors credits them and says so.
         await data.AlbumAsync(new AlbumContent("Les Carnets de Port-Grisé", "Port-Grisé (carnets)", null, AlbumType.Regular, false, null, null, null,
             2019, null, null, "À relier à sa série.", null, [humour], [greyPort], []));
 
-        // The latest writes, which the home page of the administration presents: a record modified, under its new name,
+        // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
+        // whole album (visuel/listes/saisie-selon-l-entite.md).
+        var tide = await data.AlbumAsync(OneShot("La Marée des phares", 2024, 9, [adventure], [], [Credit(arnaud, ContributionRole.Scenarist), Credit(keita, ContributionRole.Illustrator)]));
+        await data.IntentOnEditionAsync(tide, new PurchaseIntentEditionContent(horizon.Id, null, 2024, null, null, null, null, null, null, null, true));
+
+        // The latest writes, which the home page of the administration presents (visuel/administration/contenu.md, Dernières
+        // modifications), each leading to its page: after the edition and the intent of the tide above, addressed by their
+        // album, a series, a publisher and its new collection, entered with it; then a record modified, under its new name,
         // and a record deleted, left out of the latest changes.
+        await data.ModifySeriesAsync(moons, series => series with { PersonalNotes = "Relue en entier, de la première à la dernière lune." });
+        await data.ModifyPublisherAsync(blackPlate.Id, "https://www.example.com/planche-noire/catalogue", "Nuit blanche");
         await data.RenameGenreAsync(western, "Western spaghetti");
         await data.DeleteGenreAsync(await data.GenreAsync(DeletedGenre));
     }
@@ -470,6 +474,25 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
         // As the entry form does once the series is chosen, an album attached to a series gets the authors it gives it
         // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+        public async Task ModifySeriesAsync(Guid id, Func<SeriesContent, SeriesContent> change)
+        {
+            var series = await GetAsync<SeriesForm>($"/admin/series/{id}");
+            using var response = await client.PutAsJsonAsync(
+                $"/admin/series/{id}", new UpdateSeriesRequest(change(series.Content), series.Version), cancellationToken);
+            await ReadAsync<SeriesForm>(response);
+        }
+
+        // As its entry form saves it: its collections sent whole, those added without identifier.
+        public async Task ModifyPublisherAsync(Guid id, string? website, params string[] addedCollections)
+        {
+            var publisher = await GetAsync<PublisherForm>($"/admin/publishers/{id}");
+            var content = new PublisherContent(publisher.Name, website,
+                [.. publisher.Collections.Select(c => new PublisherCollectionContent(c.Id, c.Name)), .. addedCollections.Select(c => new PublisherCollectionContent(null, c))]);
+            using var response = await client.PutAsJsonAsync(
+                $"/admin/publishers/{id}", new UpdatePublisherRequest(content, publisher.Version), cancellationToken);
+            await ReadAsync<PublisherForm>(response);
+        }
+
         public async Task<AlbumWrite> AlbumAsync(AlbumContent content)
         {
             if (content.SeriesId is { } series)

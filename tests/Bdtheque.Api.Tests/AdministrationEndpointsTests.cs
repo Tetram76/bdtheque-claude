@@ -83,6 +83,37 @@ public sealed class AdministrationEndpointsTests(ApiWebApplicationFactory factor
         Assert.Equal(new NameLabel("Aventures"), latest[0].Label);
     }
 
+    // An edition, a purchase intent and a publisher collection have their page under their parent, which the frontend needs
+    // to lead to it (visuel/administration/contenu.md, Dernières modifications); any other record has none.
+    [Fact]
+    public async Task LatestRecords_ThoseAddressedByTheirParent_CarryIt()
+    {
+        var publisher = await PostAsync<PublisherContent, PublisherForm>(
+            "/admin/publishers", new("Le Lombard", null, [new PublisherCollectionContent(null, "Signé")]));
+        var album = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("Le Sceptre d'Ottokar"));
+        var edition = await PostAsync<CreateEditionRequest, EditionForm>(
+            $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id, null), album.Version));
+        // An album that has editions cannot be intended as a whole (PurchaseIntent.AlbumHasEditions): the intent is on another one.
+        var intended = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("L'Oreille cassée"));
+        var intents = await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(
+            $"/admin/albums/{intended.Id}/purchase-intents", new(null, intended.Version));
+
+        var latest = (await _client.GetFromJsonAsync<IReadOnlyList<ChangeLogEntryItem>>("/admin/change-log/latest-records?count=6"))!;
+
+        // The publisher and its collection share the date of their save: compared in no particular order.
+        Assert.Equal(
+            new (RecordType, Guid, Guid?)[]
+            {
+                (RecordType.PurchaseIntent, Assert.Single(intents.Intents).Id, intended.Id),
+                (RecordType.Album, intended.Id, null),
+                (RecordType.Edition, edition.Id, album.Id),
+                (RecordType.Album, album.Id, null),
+                (RecordType.PublisherCollection, Assert.Single(publisher.Collections).Id, publisher.Id),
+                (RecordType.Publisher, publisher.Id, null),
+            }.OrderBy(e => e.Item2),
+            latest.Select(e => (e.RecordType, e.RecordId, e.ParentId)).OrderBy(e => e.RecordId));
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(21)]

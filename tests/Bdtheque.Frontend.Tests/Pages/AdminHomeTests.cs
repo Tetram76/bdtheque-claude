@@ -126,15 +126,19 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     public void LatestChanges_TheRecordsWithTheirTypeTheirOperationAndTheirDate_EachToModify()
     {
         var album = Guid.CreateVersion7();
+        var edition = Guid.CreateVersion7();
         var genre = Guid.CreateVersion7();
+        var iris = new AlbumLabel("L'Iris blanc", "Astérix", AlbumType.Regular, false, 40, null, null);
         _api.Answers["/admin/change-log/latest-records"] = new[]
         {
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 6, 9, 42, 0, TimeSpan.Zero), RecordType.Album, album,
-                new AlbumLabel("L'Iris blanc", "Astérix", AlbumType.Regular, false, 40, null, null), ChangeLogOperation.Modification, []),
+                null, iris, ChangeLogOperation.Modification, []),
+            new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 6, 9, 30, 0, TimeSpan.Zero), RecordType.Edition, edition,
+                album, new EditionLabel(iris, "Albert René", null, 2023, null), ChangeLogOperation.Creation, []),
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 5, 20, 8, 0, TimeSpan.Zero), RecordType.Genre,
-                genre, new NameLabel("Western"), ChangeLogOperation.Creation, []),
+                genre, null, new NameLabel("Western"), ChangeLogOperation.Creation, []),
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 4, 8, 0, 0, TimeSpan.Zero), RecordType.ApplicationSettings,
-                Guid.CreateVersion7(), new ApplicationSettingsLabel(), ChangeLogOperation.Modification, []),
+                Guid.CreateVersion7(), null, new ApplicationSettingsLabel(), ChangeLogOperation.Modification, []),
         };
 
         var page = Render<AdminHome>();
@@ -143,6 +147,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("L'Iris blanc (Astérix - T. 40)", "Album modifié · 06/11/2026 10:42", AppPaths.AdminEditAlbum(album)),
+                ("L'Iris blanc (Astérix - T. 40) · Albert René [2023]", "Édition créée · 06/11/2026 10:30", AppPaths.AdminEditEdition(album, edition)),
                 ("Western", "Genre créé · 05/11/2026 21:08", AppPaths.AdminEditGenre(genre)),
                 ("Paramétrage de l'application", "Paramétrage modifié · 04/11/2026 09:00", AppPaths.AdminSettings),
             ],
