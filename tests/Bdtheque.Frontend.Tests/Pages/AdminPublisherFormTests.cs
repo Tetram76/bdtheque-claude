@@ -242,13 +242,13 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Theory]
-    [InlineData("Publisher.NameRequired", "publisher-name", "Obligatoire.")]
-    [InlineData("Publisher.NameAlreadyUsed", "publisher-name", "« Dargaud » est déjà le nom d'un autre éditeur.")]
-    [InlineData("Publisher.WebsiteInvalid", "publisher-website", "Une adresse web complète, commençant par https:// ou http://.")]
-    public void BusinessError_ToCorrect_PointsToItsField(string rule, string field, string message)
+    [InlineData("Publisher.NameRequired", "/name", "publisher-name", "Obligatoire.")]
+    [InlineData("Publisher.NameAlreadyUsed", "/name", "publisher-name", "« Dargaud » est déjà le nom d'un autre éditeur.")]
+    [InlineData("Publisher.WebsiteInvalid", "/website", "publisher-website", "Une adresse web complète, commençant par https:// ou http://.")]
+    public void BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
         var page = OpenPublisher();
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule);
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule, pointer);
 
         page.Find("#publisher-name").Input("Dargaud");
         page.Find("form").Submit();
@@ -257,6 +257,22 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         Assert.Equal("business", error.GetAttribute("data-error-category"));
         Assert.Equal("true", page.Find($"#{field}").GetAttribute("aria-invalid"));
         Assert.Contains(message, page.Find($"#{field}-error").TextContent);
+    }
+
+    [Fact]
+    public void BusinessError_OnACollectionName_BordersThatCollectionsRow()
+    {
+        var page = OpenPublisher();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "PublisherCollection.NameRequired", "/collections/1/name");
+
+        page.Find("form").Submit();
+
+        page.WaitForElement("[role=alert]");
+        var fields = page.FindAll("[aria-invalid=true]");
+        var field = Assert.Single(fields);
+        // The second collection sent, by the order of the kept collections.
+        Assert.Equal("Obligatoire.", page.Find($"#{field.Id}-error").TextContent);
     }
 
     [Fact]

@@ -161,7 +161,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
 
         var response = await _client.PostAsJsonAsync(IntentsUri(album.Id), new CreatePurchaseIntentRequest(Edition(null), album.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionPublisherRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionPublisherRequired, ["/publisherId"]);
     }
 
     [Fact]
@@ -396,7 +396,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
             $"/admin/albums/{album.Id}/editions/{intent.EditionId}/acquisition",
             new AcquireEditionRequest(OwnedContent(publisherId) with { AcquisitionMode = null }, intents.AlbumVersion));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionModeRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAcquisitionModeRequired, ["/acquisitionMode"]);
         AssertSameIntents(intents, await GetIntentsAsync(album.Id));
     }
 
@@ -411,7 +411,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
         var response = await _client.PostAsJsonAsync(
             $"/admin/albums/{album.Id}/editions/{owned.Id}/acquisition", new AcquireEditionRequest(owned.Content, owned.AlbumVersion));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAlreadyOwned);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.EditionAlreadyOwned, []);
     }
 
     private static PurchaseIntentEditionContent Edition(Guid? publisherId) =>

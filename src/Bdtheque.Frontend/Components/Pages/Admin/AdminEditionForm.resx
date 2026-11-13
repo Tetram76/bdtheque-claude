@@ -240,48 +240,6 @@
   <data name="Dates.IntentSet" xml:space="preserve">
     <value>Intention d'achat posée le</value>
   </data>
-  <data name="FieldError.Edition.PublisherRequired" xml:space="preserve">
-    <value>Obligatoire.</value>
-  </data>
-  <data name="FieldError.PublisherCollection.NotOfPublisher" xml:space="preserve">
-    <value>Une collection de l'éditeur choisi.</value>
-  </data>
-  <data name="FieldError.Edition.PublicationYearPositive" xml:space="preserve">
-    <value>Supérieure à zéro.</value>
-  </data>
-  <data name="FieldError.Edition.PageCountPositive" xml:space="preserve">
-    <value>Supérieur à zéro.</value>
-  </data>
-  <data name="FieldError.Edition.AcquisitionModeRequired" xml:space="preserve">
-    <value>Obligatoire pour une édition possédée.</value>
-  </data>
-  <data name="FieldError.Edition.PurchaseCannotBeFree" xml:space="preserve">
-    <value>Une édition achetée n'est jamais gratuite.</value>
-  </data>
-  <data name="FieldError.Edition.AcquisitionAmountCurrencyTogether" xml:space="preserve">
-    <value>Un montant et sa devise, ensemble.</value>
-  </data>
-  <data name="FieldError.Edition.AcquisitionAmountPositive" xml:space="preserve">
-    <value>Supérieur à zéro.</value>
-  </data>
-  <data name="FieldError.Edition.FreeExcludesPrice" xml:space="preserve">
-    <value>Aucun montant pour une édition gratuite.</value>
-  </data>
-  <data name="FieldError.Edition.AcquisitionPriceReferenceDateRequired" xml:space="preserve">
-    <value>Sans date de référence, ce prix ne peut pas être enregistré.</value>
-  </data>
-  <data name="FieldError.Edition.InitialValueAmountCurrencyTogether" xml:space="preserve">
-    <value>Un montant et sa devise, ensemble.</value>
-  </data>
-  <data name="FieldError.Edition.InitialValueAmountPositive" xml:space="preserve">
-    <value>Supérieure à zéro.</value>
-  </data>
-  <data name="FieldError.Edition.FreeExcludesInitialValue" xml:space="preserve">
-    <value>Aucune valeur pour une édition gratuite.</value>
-  </data>
-  <data name="FieldError.Edition.InitialValueReferenceDateRequired" xml:space="preserve">
-    <value>Sans date de référence, cette valeur ne peut pas être enregistrée.</value>
-  </data>
   <data name="Visuals" xml:space="preserve">
     <value>Visuels</value>
   </data>

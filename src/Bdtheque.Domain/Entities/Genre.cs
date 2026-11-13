@@ -19,5 +19,5 @@ public sealed class Genre : EntityBase, IAggregateRoot
     }
 
     public void SetLabel(string label) =>
-        Label = DomainText.Required(label, DomainRules.GenreLabelRequired, "A genre must have a label.");
+        Label = DomainText.Required(label, DomainRules.GenreLabelRequired, "A genre must have a label.", this, nameof(Label));
 }

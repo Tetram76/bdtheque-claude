@@ -51,15 +51,20 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
     public static HttpResponseMessage Json(object content, HttpStatusCode status = HttpStatusCode.OK) =>
         new(status) { Content = JsonContent.Create(content, content.GetType()) };
 
-    /// <summary>A ProblemDetails of the given category, as the API answers an error.</summary>
-    public static HttpResponseMessage Problem(string type, HttpStatusCode status, string? ruleCode = null) =>
-        new(status)
+    /// <summary>A ProblemDetails of the given category, as the API answers an error, with the fields a business error designates.</summary>
+    public static HttpResponseMessage Problem(string type, HttpStatusCode status, string? ruleCode = null, params string[] fields)
+    {
+        var body = new Dictionary<string, object> { ["type"] = type, ["status"] = (int)status };
+        if (ruleCode is not null)
+            body[ProblemTypes.RuleCodeExtension] = ruleCode;
+        if (fields.Length > 0)
+            body[ProblemTypes.FieldsExtension] = fields;
+        return new(status)
         {
             Content = JsonContent.Create(
-                ruleCode is null ? new Dictionary<string, object> { ["type"] = type, ["status"] = (int)status }
-                    : new Dictionary<string, object> { ["type"] = type, ["status"] = (int)status, [ProblemTypes.RuleCodeExtension] = ruleCode },
-                mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
+                body, mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
         };
+    }
 
     /// <summary>The services a page of the administration needs, on this API, for the given request.</summary>
     public void AddServices(IServiceCollection services, TestRequest request)

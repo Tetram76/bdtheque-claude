@@ -14,9 +14,29 @@ namespace Bdtheque.Domain.Common;
 public sealed class DomainRuleViolationException(string rule, string message) : Exception(message)
 {
     /// <summary>
+    /// A violation of <paramref name="rule"/> that concerns <paramref name="attribute"/> of <paramref name="record"/>: the
+    /// value the user is to correct, which the error designates to whoever entered it
+    /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md).
+    /// </summary>
+    /// <param name="record">The record whose value breaks the rule, possibly the one being created.</param>
+    /// <param name="attribute">The name of its property that holds the value (e.g. <c>nameof(Album.Title)</c>).</param>
+    public DomainRuleViolationException(string rule, string message, object record, string attribute)
+        : this(rule, message)
+    {
+        Record = record;
+        Attribute = attribute;
+    }
+
+    /// <summary>
     /// Stable code of the broken rule, one of <see cref="DomainRules"/>. User-facing text is
     /// produced from it by the frontend's localization (gestion-projet/gouvernance/qualite-du-code.md: no user text is
     /// hard-coded); <see cref="Exception.Message"/> is for logs only.
     /// </summary>
     public string Rule { get; } = rule;
+
+    /// <summary>The record whose value breaks the rule; none for a rule that concerns no value of its own.</summary>
+    public object? Record { get; }
+
+    /// <summary>The property of <see cref="Record"/> holding the value in cause.</summary>
+    public string? Attribute { get; }
 }

@@ -1,4 +1,5 @@
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -120,22 +121,23 @@ internal static class PublisherEndpoints
     }
 
     private static async Task<Created<PublisherForm>> CreateAsync(
-        PublisherContent request, BdthequeDbContext context, CancellationToken cancellationToken)
+        PublisherContent request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
-        var publisher = new Publisher(request.Name);
-        await ApplyAsync(context, publisher, request, cancellationToken);
+        var publisher = fields.Create("", () => new Publisher(request.Name));
+        await ApplyAsync(context, fields, publisher, request, cancellationToken);
         context.Publishers.Add(publisher);
         await context.SaveChangesAsync(cancellationToken);
         return TypedResults.Created($"/admin/publishers/{publisher.Id}", await ToFormAsync(context, publisher, cancellationToken));
     }
 
     private static async Task<PublisherForm> UpdateAsync(
-        Guid id, UpdatePublisherRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid id, UpdatePublisherRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var publisher = await context.LoadAggregateForWriteAsync<Publisher>(
             id, request.Version, query => query.Include(p => p.Collections), cancellationToken);
-        await ApplyAsync(context, publisher, request.Content, cancellationToken);
+        fields.Place(publisher);
+        await ApplyAsync(context, fields, publisher, request.Content, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return await ToFormAsync(context, publisher, cancellationToken);
@@ -144,7 +146,8 @@ internal static class PublisherEndpoints
     /// <summary>
     /// Writes the content of the form on the publisher, its collections replaced by those listed
     /// (choix-implementation/api/organisation-de-l-api.md): a collection listed is renamed, one added created, and one of
-    /// the publisher's left out removed, provided nothing references it.
+    /// the publisher's left out removed, provided nothing references it. Each collection listed is placed where the content
+    /// lists it, which an error on its name designates.
     /// </summary>
     /// <exception cref="EntityNotFoundException">A collection listed is not one of the publisher's.</exception>
     /// <exception cref="DomainRuleViolationException">
@@ -152,26 +155,34 @@ internal static class PublisherEndpoints
     /// publisher or of its collections.
     /// </exception>
     private static async Task ApplyAsync(
-        BdthequeDbContext context, Publisher publisher, PublisherContent content, CancellationToken cancellationToken)
+        BdthequeDbContext context, ContentFields fields, Publisher publisher, PublisherContent content,
+        CancellationToken cancellationToken)
     {
         publisher.SetName(content.Name);
         publisher.SetWebsite(content.Website);
 
-        var listed = content.Collections.Where(c => c.Id is not null).ToDictionary(c => c.Id!.Value, c => c.Name);
+        var listed = content.Collections.Index().Where(c => c.Item.Id is not null).ToDictionary(c => c.Item.Id!.Value);
         if (listed.Keys.Cast<Guid?>().FirstOrDefault(id => publisher.Collections.All(c => c.Id != id)) is { } unknown)
             throw new EntityNotFoundException(typeof(PublisherCollection), unknown);
 
         foreach (var collection in publisher.Collections.ToList())
         {
-            if (listed.TryGetValue(collection.Id, out var name))
-                collection.SetName(name);
+            if (listed.TryGetValue(collection.Id, out var entered))
+            {
+                fields.Place(collection, CollectionPath(entered.Index));
+                collection.SetName(entered.Item.Name);
+            }
             else
+            {
                 await RemoveCollectionAsync(context, publisher, collection, cancellationToken);
+            }
         }
 
-        foreach (var added in content.Collections.Where(c => c.Id is null))
-            publisher.AddCollection(added.Name);
+        foreach (var (index, added) in content.Collections.Index().Where(c => c.Item.Id is null))
+            fields.Create(CollectionPath(index), () => publisher.AddCollection(added.Name));
     }
+
+    private static string CollectionPath(int index) => $"/collections/{index}";
 
     // A collection is removed as it would be deleted (fonctionnel/regles-metier/suppression-des-entites.md): refused while
     // editions, series templates or saved searches reference it, whose count is that of its deletion. Its row is locked

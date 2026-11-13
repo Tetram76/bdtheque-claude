@@ -57,6 +57,18 @@ public sealed class ApiClientTests
         var problem = await ProblemOf(() => client.GetAsync<object>("/admin/genres"));
 
         Assert.Equal(new ApiProblem(ProblemCategory.Business, 422, "Genre.LabelRequired", null), problem);
+        Assert.Empty(problem.Fields);
+    }
+
+    [Fact]
+    public async Task BusinessProblem_CarriesTheFieldsItDesignates()
+    {
+        var client = ClientAnswering(HttpStatusCode.UnprocessableContent, "application/problem+json",
+            $$"""{"type":"{{ProblemTypes.Business}}","status":422,"ruleCode":"PublisherCollection.NameAlreadyUsed","fields":["/collections/0/name","/collections/1/name"]}""");
+
+        var problem = await ProblemOf(() => client.PutAsync<object, object>("/admin/publishers/1", new { }));
+
+        Assert.Equal(["/collections/0/name", "/collections/1/name"], problem.Fields);
     }
 
     [Fact]

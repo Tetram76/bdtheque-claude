@@ -7,7 +7,17 @@ internal static class DomainText
     public static string? NullIfBlank(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    /// <summary>Trims a mandatory value, rejecting a blank one as a violation of <paramref name="rule"/>.</summary>
+    /// <summary>
+    /// Trims a mandatory value that is not entered by the user (e.g. the file of a visual), rejecting a blank one as a
+    /// violation of <paramref name="rule"/>.
+    /// </summary>
     public static string Required(string? value, string rule, string message) =>
         NullIfBlank(value) ?? throw new DomainRuleViolationException(rule, message);
+
+    /// <summary>
+    /// Trims a mandatory value, rejecting a blank one as a violation of <paramref name="rule"/>, which concerns
+    /// <paramref name="attribute"/> of <paramref name="record"/>.
+    /// </summary>
+    public static string Required(string? value, string rule, string message, object record, string attribute) =>
+        NullIfBlank(value) ?? throw new DomainRuleViolationException(rule, message, record, attribute);
 }

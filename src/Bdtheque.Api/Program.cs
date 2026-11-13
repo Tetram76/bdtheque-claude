@@ -31,6 +31,7 @@ builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = 
         context.ProblemDetails.Type = ProblemTypes.Technical;
 });
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.AddScoped<ContentFields>();
 
 builder.Services.AddOptions<InternalApiKeyOptions>()
     .Bind(builder.Configuration.GetSection(InternalApiKeyOptions.SectionName))

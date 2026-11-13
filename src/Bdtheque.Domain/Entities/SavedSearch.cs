@@ -55,7 +55,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     }
 
     public void SetName(string name) =>
-        Name = DomainText.Required(name, DomainRules.SavedSearchNameRequired, "A saved search must have a name.");
+        Name = DomainText.Required(name, DomainRules.SavedSearchNameRequired, "A saved search must have a name.", this, nameof(Name));
 
     /// <summary>
     /// Replaces what the search looks for: its variables designate constants of its criteria, and some of

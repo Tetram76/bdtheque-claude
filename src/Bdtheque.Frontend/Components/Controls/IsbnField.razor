@@ -8,10 +8,11 @@
    domain's, asked of the API (choix-implementation/domaine/validation-de-l-isbn.md), which also gives the ISBN as it will be
    saved, its check character in capitals, taken up as soon as it is typed: the frontend applies no rule of its own. *@
 <div class="@(_checked == false ? "isbn-field isbn-field-warning" : "isbn-field")">
-    <Field Id="@Id" Label="@L["Label"]" Help="@Help" Context="control">
+    <Field Id="@Id" Label="@L["Label"]" Help="@Help" Error="@Error" Context="control">
         <span class="isbn-field-control">
             <input id="@control.Id" type="text" inputmode="numeric" autocomplete="off" placeholder="@L["Placeholder"]" value="@Value"
-                   aria-describedby="@control.DescribedBy" data-warning="@(_checked == false ? "true" : null)" @oninput="EnterAsync" />
+                   aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
+                   data-warning="@(_checked == false ? "true" : null)" @oninput="EnterAsync" />
             @if (_checked is { } valid)
             {
                 <Icon Name="@(valid ? IconName.Check : IconName.Alert)" />
@@ -36,6 +37,10 @@
 
     [Parameter]
     public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>What to correct in the ISBN, the saving of the edition refused (e.g. an ISBN longer than its column).</summary>
+    [Parameter]
+    public string? Error { get; set; }
 
     /// <summary>The result of the check of the ISBN the edition was read with; <c>null</c> without ISBN.</summary>
     [Parameter]

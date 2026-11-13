@@ -309,14 +309,14 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Theory]
-    [InlineData("Series.TitleRequired", "series-title", "Obligatoire.")]
-    [InlineData("Series.SortKeyRequired", "series-sort-key", "Saisissez une clé, ou réinitialisez-la.")]
-    [InlineData("Series.TheoreticalVolumeCountPositive", "series-volumes", "Supérieur à zéro.")]
-    [InlineData("PublisherCollection.NotOfPublisher", "series-collection", "Une collection de l'éditeur choisi.")]
-    public void BusinessError_ToCorrect_PointsToItsField(string rule, string field, string message)
+    [InlineData("Series.TitleRequired", "/title", "series-title", "Obligatoire.")]
+    [InlineData("Series.SortKeyRequired", "/manualSortKey", "series-sort-key", "Saisissez une clé, ou réinitialisez-la.")]
+    [InlineData("Series.TheoreticalVolumeCountPositive", "/theoreticalVolumeCount", "series-volumes", "Supérieur à zéro.")]
+    [InlineData("PublisherCollection.NotOfPublisher", "/editionTemplate/publisherCollectionId", "series-collection", "Une collection de l'éditeur choisi.")]
+    public void BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
         var page = OpenNew();
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule);
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule, pointer);
 
         page.Find("form").Submit();
 

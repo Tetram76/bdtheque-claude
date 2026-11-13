@@ -75,39 +75,6 @@
   <data name="Edit" xml:space="preserve">
     <value>Modifier l&apos;album</value>
   </data>
-  <data name="FieldError.Album.ManualSortKeyRequiresTitle" xml:space="preserve">
-    <value>Sans titre, l&apos;album est rangé à la clé de sa série : réinitialisez la clé.</value>
-  </data>
-  <data name="FieldError.Album.PublicationMonthRange" xml:space="preserve">
-    <value>Un mois de l&apos;année.</value>
-  </data>
-  <data name="FieldError.Album.PublicationMonthRequiresYear" xml:space="preserve">
-    <value>Le mois demande son année.</value>
-  </data>
-  <data name="FieldError.Album.PublicationYearPositive" xml:space="preserve">
-    <value>Une année supérieure à zéro.</value>
-  </data>
-  <data name="FieldError.Album.SortKeyRequired" xml:space="preserve">
-    <value>Saisissez une clé, ou réinitialisez-la.</value>
-  </data>
-  <data name="FieldError.Album.TitleRequiredWithoutSeries" xml:space="preserve">
-    <value>Obligatoire pour un album sans série.</value>
-  </data>
-  <data name="FieldError.Album.VolumeNumberPositive" xml:space="preserve">
-    <value>Supérieur à zéro.</value>
-  </data>
-  <data name="FieldError.Album.VolumeRangeBothOrNeither" xml:space="preserve">
-    <value>Les deux, ou aucun.</value>
-  </data>
-  <data name="FieldError.Album.VolumeRangeOmnibusOnly" xml:space="preserve">
-    <value>Seule une intégrale couvre des tomes.</value>
-  </data>
-  <data name="FieldError.Album.VolumeRangeOrder" xml:space="preserve">
-    <value>Le premier tome ne dépasse pas le dernier.</value>
-  </data>
-  <data name="FieldError.Album.VolumeRangeStartPositive" xml:space="preserve">
-    <value>Le premier tome est supérieur à zéro.</value>
-  </data>
   <data name="Genres" xml:space="preserve">
     <value>Genres</value>
   </data>

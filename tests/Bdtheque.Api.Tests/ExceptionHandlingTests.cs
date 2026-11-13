@@ -35,6 +35,21 @@ public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFact
             HttpStatusCode.UnprocessableContent, ProblemTypes.Business);
 
         Assert.Equal(DomainRules.GenreLabelRequired, problem.GetProperty(ProblemTypes.RuleCodeExtension).GetString());
+        Assert.Empty(ProblemAssert.FieldsOf(problem));
+    }
+
+    [Fact]
+    public async Task DomainRuleViolation_DesignatesTheFieldThatEnteredItsValue()
+    {
+        // A collection placed where the content of its publisher lists it, its name entered under its own name.
+        var collection = new Publisher("Dargaud").AddCollection("Lucky Comics");
+
+        var problem = await HandleAsync(
+            new DomainRuleViolationException(DomainRules.PublisherCollectionNameRequired, "log only", collection, nameof(PublisherCollection.Name)),
+            HttpStatusCode.UnprocessableContent, ProblemTypes.Business,
+            fields => fields.Place(collection, "/collections/2"));
+
+        Assert.Equal(["/collections/2/name"], ProblemAssert.FieldsOf(problem));
     }
 
     [Fact]
@@ -130,9 +145,11 @@ public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFact
     private static DbUpdateException DatabaseError(string sqlState, string constraintName) =>
         new("Save failed", new PostgresException("violation", "ERROR", "ERROR", sqlState, constraintName: constraintName));
 
-    private async Task<JsonElement> HandleAsync(Exception exception, HttpStatusCode status, string category)
+    private async Task<JsonElement> HandleAsync(
+        Exception exception, HttpStatusCode status, string category, Action<ContentFields>? placeRecords = null)
     {
         using var scope = _factory.Services.CreateScope();
+        placeRecords?.Invoke(scope.ServiceProvider.GetRequiredService<ContentFields>());
         var context = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
         var body = new MemoryStream();
         context.Response.Body = body;

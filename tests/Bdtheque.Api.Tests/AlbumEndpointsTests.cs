@@ -382,7 +382,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     {
         var response = await _client.PostAsJsonAsync("/admin/albums", Content(" "));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumTitleRequiredWithoutSeries);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumTitleRequiredWithoutSeries, ["/title"]);
     }
 
     [Fact]
@@ -392,7 +392,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var response = await _client.PostAsJsonAsync("/admin/albums", Content(null) with { SeriesId = series.Id, ManualSortKey = "Clé" });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumManualSortKeyRequiresTitle);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumManualSortKeyRequiresTitle, ["/manualSortKey"]);
     }
 
     [Fact]
@@ -400,7 +400,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     {
         var response = await _client.PostAsJsonAsync("/admin/albums", Content(UniqueTitle()) with { StartVolumeNumber = 1, EndVolumeNumber = 2 });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumVolumeRangeOmnibusOnly);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumVolumeRangeOmnibusOnly, ["/startVolumeNumber"]);
     }
 
     [Fact]
@@ -408,7 +408,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     {
         var response = await _client.PostAsJsonAsync("/admin/albums", Content(UniqueTitle()) with { FirstPublicationMonth = 3 });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumPublicationMonthRequiresYear);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumPublicationMonthRequiresYear, ["/firstPublicationYear"]);
     }
 
     [Fact]
@@ -418,7 +418,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var response = await _client.PostAsJsonAsync("/admin/albums", Content(UniqueTitle()) with { Contributions = [credit, credit] });
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.ContributionAlreadyCredited);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.ContributionAlreadyCredited, []);
     }
 
     [Fact]
@@ -426,7 +426,19 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     {
         var response = await _client.PostAsJsonAsync("/admin/albums", Content(new string('x', 501)));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/title"]);
+    }
+
+    [Fact]
+    public async Task Update_WithAManualSortKeyLongerThanItsColumn_DesignatesTheSortKey()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/albums/{created.Id}",
+            new UpdateAlbumRequest(created.Content with { ManualSortKey = new string('k', 511) }, created.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/manualSortKey"]);
     }
 
     [Theory]
@@ -473,7 +485,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var response = await _client.PutAsJsonAsync($"/admin/albums/{created.Id}", new UpdateAlbumRequest(invalid, created.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumVolumeNumberPositive);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AlbumVolumeNumberPositive, ["/volumeNumber"]);
         Assert.Equal(created, await GetAsync(created.Id), AlbumFormComparer.Instance);
     }
 

@@ -38,13 +38,19 @@ internal static class ApiProblemReader
             var impact = root.TryGetProperty(ProblemTypes.ImpactExtension, out var element) && element.ValueKind == JsonValueKind.Object
                 ? element.Deserialize<DeletionImpact>(JsonSerializerOptions.Web)
                 : null;
-            return new ApiProblem(category, status, ruleCode, impact);
+            return new ApiProblem(category, status, ruleCode, impact) { Fields = category == ProblemCategory.Business ? FieldsOf(root) : [] };
         }
         catch (JsonException)
         {
             return ApiProblem.Technical(status);
         }
     }
+
+    // Its fields, if the problem names them as expected: an array of strings.
+    private static string[] FieldsOf(JsonElement root) =>
+        root.TryGetProperty(ProblemTypes.FieldsExtension, out var fields) && fields.ValueKind == JsonValueKind.Array
+            ? [.. fields.EnumerateArray().Where(field => field.ValueKind == JsonValueKind.String).Select(field => field.GetString()!)]
+            : [];
 
     private static string? StringOf(JsonElement root, string property) =>
         root.ValueKind == JsonValueKind.Object && root.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
