@@ -1,12 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Erreurs métier, fonctionnelles et techniques'
-description: 'Erreurs métier par code de règle, réponses ProblemDetails en trois catégories, traduction des violations de contraintes en base.'
+description: 'Erreurs métier par code de règle, champ en cause porté par l''erreur, réponses ProblemDetails en trois catégories, traduction des violations de contraintes en base.'
 applies_to:
   - 'src/Bdtheque.Api/Errors/**'
   - 'src/Bdtheque.Domain/Common/DomainRule*.cs'
   - 'src/Bdtheque.Contracts/Errors/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:16:20Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T10:30:00Z }
 ---
 
 # Erreurs métier, fonctionnelles et techniques
@@ -14,6 +14,12 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:16:20Z }
 - **Une violation de règle métier est une exception dédiée, porteuse d'un code de règle stable** ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)) : le frontend en produit le texte par sa localisation, le message de l'exception ne servant qu'aux journaux. Un code publié n'est jamais renommé ni réaffecté (clé de localisation).
   - **Alternative écartée (exceptions .NET standard)** : levées aussi par le framework et par les erreurs de programmation, elles ne distinguent pas une erreur métier.
   - **Alternative écartée (type résultat)** : un résultat à propager à travers chaque setter et chaque appelant, pour un gain nul : une violation interrompt toujours l'opération, et l'API la traduit en une réponse unique.
+- **Champ en cause porté par l'erreur métier** ([Contenu](../../visuel/saisie-album/contenu.md), erreur d'enregistrement) : la réponse désigne, par des pointeurs JSON (RFC 6901, comme l'exemple de la RFC 9457) dans le contenu que la requête a envoyé, les champs de la valeur à corriger, le premier à corriger d'abord (ex. `/title`, `/collections/1/name`). Le client ne déduit rien du code de règle : il présente l'erreur sur le champ qu'elle désigne.
+  - **La règle du domaine nomme la fiche et l'attribut en cause**, seule à les connaître ; l'endpoint qui applique un contenu place chaque fiche qu'il écrit là où ce contenu la saisit, création comprise (une règle refusée à la construction désigne la fiche qu'elle aurait créée), un attribut saisi sous un autre nom étant déclaré à ce placement. Le gestionnaire d'exceptions en tire les pointeurs.
+  - **Une violation de la base est rapportée aux fiches que la requête écrit** : PostgreSQL ne nomme ni la colonne ni la ligne d'un texte trop long, si bien que les valeurs écrites sont mesurées, en caractères, aux longueurs que le modèle déclare pour le schéma, sans copie de ces longueurs ; une unicité refusée désigne la fiche écrite de ce type, ou celles dont les valeurs se heurtent entre elles (deux collections d'un éditeur enregistrées ensemble sous le même nom), par les attributs saisis de l'index, hors clés étrangères.
+  - **Alternative écartée (champ déduit du code de règle par le client)** : une règle commune à plusieurs champs (texte trop long) ou à plusieurs lignes d'une liste ne situe pas son champ, et chaque client tiendrait sa propre correspondance (#398).
+  - **Alternative écartée (longueurs vérifiées avant l'enregistrement)** : une seconde vérification de la règle de la base, que celle-ci garde de toute façon ; mesurer les valeurs n'a lieu qu'une fois la violation constatée.
+  - **Alternative écartée (champ lu dans le message d'erreur de PostgreSQL)** : le texte trop long n'y nomme pas la colonne, et le détail d'une unicité refusée n'est livré qu'avec les données de la ligne, à ne pas journaliser.
 - **Métier : ce qu'une saisie peut provoquer et que l'utilisateur corrige ; technique : ce qu'aucune saisie ne peut provoquer**, quelle que soit la couche qui le détecte (une image illisible que seule l'API vérifie est une erreur métier).
 - **Réponses ProblemDetails (RFC 9457) dont le `type` est l'une des trois catégories, et aucune autre** : c'est tout ce dont les clients ont besoin pour la présentation distinctive exigée ; le code HTTP précise la nature de l'erreur dans sa catégorie (métier `422` avec le code de règle ; fonctionnelle `409` ou `404`, la demande ne pouvant aboutir en l'état des données ; technique `500`, sans détail interne). Seul le bilan de santé, que lit l'orchestrateur et jamais le frontend, garde son format.
   - **Deux points centraux, et deux seulement**, produisent ces réponses, aucun endpoint n'en construisant : le gestionnaire d'exceptions, et le service ProblemDetails pour toute réponse d'erreur émise sans corps par le framework (liaison de requête, route inconnue), classée technique, le frontend construisant les requêtes. Un `type` hors des trois catégories est remplacé par « technique ».
