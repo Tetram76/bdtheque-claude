@@ -284,7 +284,10 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
         page.Find("form").Submit();
 
-        page.WaitForElement("[role=alert]");
+        // Above the form, a text that needs no field to make sense.
+        Assert.Equal(
+            "Deux collections d'un même éditeur ne peuvent pas porter le même nom.",
+            page.WaitForElement("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
         var (clashing, renamed) = (page.FindAll("[aria-invalid=true]")[0], page.FindAll("[aria-invalid=true]")[1]);
         Assert.Equal("Une autre collection de cet éditeur porte aussi ce nom.", page.Find($"#{renamed.Id}-error").TextContent);
         Assert.Equal("Une autre collection prend aussi ce nom.", page.Find($"#{clashing.Id}-error").TextContent);
