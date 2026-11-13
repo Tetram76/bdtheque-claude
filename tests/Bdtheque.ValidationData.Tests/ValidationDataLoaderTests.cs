@@ -208,7 +208,9 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Contains(latest, entry => entry.Cover is null);
     }
 
-    // The home page of the administration: a record modified among the latest changes, a deleted one left out.
+    // The home page of the administration: a record modified among the latest changes, a deleted one left out, and the
+    // records whose page is their own or under their parent (an edition and an intent under their album, a collection under
+    // its publisher), which carry it.
     [Fact]
     public async Task LatestChanges_PresentAModification_AndLeaveTheDeletedRecordOut()
     {
@@ -217,6 +219,11 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Equal((ChangeLogOperation.Modification, (Contracts.Admin.RecordLabel)new Contracts.Admin.NameLabel("Western spaghetti")),
             (latest![0].Operation, latest[0].Label));
         Assert.DoesNotContain(latest, entry => entry.Label == new Contracts.Admin.NameLabel(ValidationDataLoader.DeletedGenre));
+        Assert.Equal(
+            [RecordType.Edition, RecordType.Series, RecordType.PurchaseIntent, RecordType.Publisher, RecordType.PublisherCollection, RecordType.Genre],
+            latest.Select(entry => entry.RecordType).Order());
+        Assert.All(latest, entry => Assert.Equal(
+            entry.RecordType is RecordType.Edition or RecordType.PurchaseIntent or RecordType.PublisherCollection, entry.ParentId is not null));
     }
 
     // Without the demand of the pale cover, the edition in the spotlight is the one the application draws among all the owned

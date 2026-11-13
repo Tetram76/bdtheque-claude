@@ -35,7 +35,7 @@ public sealed class AuthorListQueryTests
     {
         Assert.Equal(AppPaths.AdminNewAuthor, new AuthorListQuery(Adding: true).Href());
         Assert.Equal(new AuthorListQuery(Edit: Author).Href(), AppPaths.AdminEditAuthor(Author));
-        Assert.Equal(AppPaths.AdminEditAuthor(Author), AppPaths.AdminEdit(Contracts.Enums.RecordType.Author, Author));
+        Assert.Equal(AppPaths.AdminEditAuthor(Author), AppPaths.AdminEdit(Contracts.Enums.RecordType.Author, Author, null));
     }
 
     [Fact]

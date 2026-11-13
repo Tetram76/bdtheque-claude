@@ -231,6 +231,9 @@ public static class AppPaths
     /// </summary>
     public const string AdminMergeUniverses = NotYetImplemented;
 
+    /// <summary>The saved searches of the administration (fonctionnel/recherche-avancee/recherches-enregistrees.md).</summary>
+    public const string AdminSavedSearches = NotYetImplemented;
+
     public const string AdminSettings = NotYetImplemented;
 
     public const string AdminStatistics = NotYetImplemented;
@@ -268,14 +271,31 @@ public static class AppPaths
     /// <summary>The editions whose ISBN has a check digit that disagrees with it (visuel/administration/contenu.md, À vérifier).</summary>
     public const string AdminInvalidIsbns = NotYetImplemented;
 
-    /// <summary>The page that modifies a record of the given type.</summary>
-    public static string AdminEdit(RecordType type, Guid id) => type switch
+    /// <summary>
+    /// The page that modifies a record of the given type (visuel/administration/contenu.md, Dernières modifications). Every
+    /// type is named, none falling to a default: a type added without its page is refused, and a type whose page is
+    /// implemented cannot be left on <see cref="NotYetImplemented"/>.
+    /// </summary>
+    /// <param name="parentId">
+    /// The record the page of this one is addressed under: the album of an edition or of a purchase intent, the publisher of a
+    /// collection. Without it, a record deleted since it was read, there is no page to lead to.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">A value that names no type of record.</exception>
+    public static string AdminEdit(RecordType type, Guid id, Guid? parentId) => type switch
     {
-        RecordType.ApplicationSettings => AdminSettings,
         RecordType.Album => AdminEditAlbum(id),
+        RecordType.Edition => parentId is { } album ? AdminEditEdition(album, id) : NotYetImplemented,
+        RecordType.Series => AdminEditSeries(id),
+        // No record of its own: the page of the editions and purchase intents of its album (visuel/listes/saisie-selon-l-entite.md).
+        RecordType.PurchaseIntent => parentId is { } album ? AdminAlbumEditions(album) : NotYetImplemented,
         RecordType.Author => AdminEditAuthor(id),
+        RecordType.Publisher => AdminEditPublisher(id),
+        // Entered with its publisher, without a page of its own (visuel/saisie-editeur/contenu.md).
+        RecordType.PublisherCollection => parentId is { } publisher ? AdminEditPublisher(publisher) : NotYetImplemented,
         RecordType.Genre => AdminEditGenre(id),
         RecordType.Universe => AdminEditUniverse(id),
-        _ => NotYetImplemented,
+        RecordType.SavedSearch => AdminSavedSearches,
+        RecordType.ApplicationSettings => AdminSettings,
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown type of record."),
     };
 }

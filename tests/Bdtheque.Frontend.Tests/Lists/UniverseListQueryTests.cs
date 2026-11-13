@@ -25,7 +25,7 @@ public sealed class UniverseListQueryTests
     {
         Assert.Equal(AppPaths.AdminNewUniverse, new UniverseListQuery(Adding: true).Href());
         Assert.Equal(new UniverseListQuery(Edit: Universe).Href(), AppPaths.AdminEditUniverse(Universe));
-        Assert.Equal(AppPaths.AdminEditUniverse(Universe), AppPaths.AdminEdit(Contracts.Enums.RecordType.Universe, Universe));
+        Assert.Equal(AppPaths.AdminEditUniverse(Universe), AppPaths.AdminEdit(Contracts.Enums.RecordType.Universe, Universe, null));
     }
 
     [Fact]
