@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Suivi par tickets'
-description: 'Un ticket par chantier, correspondance ticket/PR, découpage, consolidation, clôture et verrouillage, statut dans le suivi ; contenu d''un ticket.'
+description: 'Un ticket par chantier, correspondance ticket/PR, demande déplacée entre tickets soumise à l''utilisateur, découpage, consolidation, clôture et verrouillage, statut dans le suivi ; contenu d''un ticket.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T10:15:00Z }
 ---
 
 # Suivi par tickets
@@ -16,6 +16,7 @@ Chaque chantier listé dans [`suivi-implementation/`](../../suivi-implementation
   - un ticket associé partiellement réalisé reste ouvert, avec un commentaire qui indique ce que la PR en a réalisé et ce qui reste à faire : il est complété par une PR ultérieure, dont il est le ticket de référence.
 
   Un ticket parent, découpé en sous-tickets (ci-dessous), n'est réalisé par aucune PR en propre : chacun de ses sous-tickets l'est par la sienne. « Ticket » désigne toute Issue GitHub : la règle vaut pour les chantiers du plan comme pour les bugs et fonctionnalités tracés hors plan.
+- **Demande déplacée entre tickets** : quand un retour de l'utilisateur porte sur ce qu'un autre ticket prévoit, l'agent le relève lui-même et lui dit quel ticket le prévoit, sans présumer qu'il le sait (« je sais à peu près tout ce qui est demandé, mais pas forcément dans quel ticket. Je ne connais pas par coeur tous les tickets ! ») ; il lui demande alors s'il faut le déplacer dans le chantier en cours ou le laisser dans son ticket, et ne le déplace jamais de lui-même (exigence de l'utilisateur).
 - **Chantiers hors suivi** : un chantier mené hors du plan d'implémentation peut faire l'objet d'un ticket, sans que ce soit obligatoire. Seuls les chantiers listés dans le suivi **doivent** avoir un ticket, à l'exception des chantiers de consolidation (ci-dessous).
 - **Création** : le ticket d'un chantier du suivi est créé au moment du **découpage de la phase** en chantiers ; ses sous-tickets, s'il est découpé, le sont au démarrage de son chantier (ci-dessous).
 - **Règles transverses au découpage d'une phase** : au découpage d'une phase, l'agent établit comment les règles transverses du `.speckit/` s'appliquent à ce qu'elle produit — non-régression et TDD ([Qualité du code](../gouvernance/qualite-du-code.md)), exploitation des technologies retenues ([Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md)), analyse des vulnérabilités ([Analyse des vulnérabilités des images Docker](analyse-des-vulnerabilites-des-images-docker.md))… —, en particulier à une nature de livrable qu'aucune phase précédente n'a produite (interface, outil pour agents IA, modèle d'estimation…). Les moyens qu'elles exigent (outillage, jobs du CI) sont portés par un chantier du découpage, ou par un élément d'un ticket, placé avant les chantiers qui en dépendent : un découpage qui les omet est incomplet.
