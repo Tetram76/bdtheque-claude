@@ -97,7 +97,10 @@
     <value>Une adresse web complète, commençant par https:// ou http://.</value>
   </data>
   <data name="PublisherCollection.NameAlreadyUsed" xml:space="preserve">
-    <value>Déjà le nom d&apos;une autre collection de cet éditeur.</value>
+    <value>Une autre collection de cet éditeur porte aussi ce nom.</value>
+  </data>
+  <data name="PublisherCollection.NameAlreadyUsed.Related" xml:space="preserve">
+    <value>Une autre collection prend aussi ce nom.</value>
   </data>
   <data name="PublisherCollection.NameRequired" xml:space="preserve">
     <value>Obligatoire.</value>
@@ -116,5 +119,8 @@
   </data>
   <data name="Text.TooLong" xml:space="preserve">
     <value>Trop long : raccourcissez ce texte.</value>
+  </data>
+  <data name="Related" xml:space="preserve">
+    <value>Une valeur liée à celle à corriger.</value>
   </data>
 </root>

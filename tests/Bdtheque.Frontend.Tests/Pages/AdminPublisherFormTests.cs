@@ -276,6 +276,24 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void BusinessError_OnACollectionNamedAsAnother_TellsTheRenamedOneFromTheOneItClashesWith()
+    {
+        var page = OpenPublisher();
+        _api.Write = (_, _, _) => FakeAdminApi.BusinessProblem(
+            "PublisherCollection.NameAlreadyUsed", fields: ["/collections/1/name"], related: ["/collections/0/name"]);
+
+        page.Find("form").Submit();
+
+        page.WaitForElement("[role=alert]");
+        var (clashing, renamed) = (page.FindAll("[aria-invalid=true]")[0], page.FindAll("[aria-invalid=true]")[1]);
+        Assert.Equal("Une autre collection de cet éditeur porte aussi ce nom.", page.Find($"#{renamed.Id}-error").TextContent);
+        Assert.Equal("Une autre collection prend aussi ce nom.", page.Find($"#{clashing.Id}-error").TextContent);
+        // The focus goes to the field to correct, not to the one it clashes with (wwwroot/entry-form.js).
+        Assert.NotNull(clashing.Closest("[data-error-related]"));
+        Assert.Null(renamed.Closest("[data-error-related]"));
+    }
+
+    [Fact]
     public void BusinessError_NameAlreadyUsed_RemindsThatTheCaseSufficesToTellTwoPublishersApart()
     {
         var page = OpenPublisher();

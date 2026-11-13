@@ -339,7 +339,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
             new PublisherContent(publisher.Name, null, [new(label.Id, "Ciel"), new(ciel.Id, "Ciel")]), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/0/name", "/collections/1/name"]);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/0/name"], ["/collections/1/name"]);
         SameForm(publisher, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"));
     }
 
@@ -363,7 +363,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
             new PublisherContent("Kana", null, [new(publisher.Collections[0].Id, "Big Kana"), new(null, "Big Kana")]), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/0/name", "/collections/1/name"]);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/1/name"], ["/collections/0/name"]);
     }
 
     [Fact]
@@ -375,6 +375,35 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
             new PublisherContent("Pika", null, [new(null, " ")]), publisher.Version));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired, ["/collections/0/name"]);
+    }
+
+    [Fact]
+    public async Task Update_WithTwoClashesAtOnce_DesignatesTheWrittenCollectionsToCorrect_AndTheUnchangedOneAsRelated()
+    {
+        // A collection renamed as another left unchanged, and two collections added under the same name.
+        var publisher = await CreateAsync("Éditeur aux deux collisions", "Grand Large", "Escales");
+        var (grandLarge, escales) = (publisher.Collections.Single(c => c.Name == "Grand Large"), publisher.Collections.Single(c => c.Name == "Escales"));
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(grandLarge.Id, "Escales"), new(escales.Id, "Escales"), new(null, "Test"), new(null, "Test")]),
+            publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(
+            response, DomainRules.PublisherCollectionNameAlreadyUsed,
+            ["/collections/0/name", "/collections/2/name", "/collections/3/name"], ["/collections/1/name"]);
+    }
+
+    [Fact]
+    public async Task Update_RenamingTwoCollectionsAlike_DesignatesBothToCorrect()
+    {
+        var publisher = await CreateAsync("Éditeur aux deux renommages", "Un", "Deux");
+        var (one, two) = (publisher.Collections.Single(c => c.Name == "Un"), publisher.Collections.Single(c => c.Name == "Deux"));
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(one.Id, "Trois"), new(two.Id, "Trois")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(
+            response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/0/name", "/collections/1/name"]);
     }
 
     [Fact]

@@ -66,6 +66,22 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         };
     }
 
+    /// <summary>
+    /// A business error, as the API answers it, designating <paramref name="fields"/> to correct and the
+    /// <paramref name="related"/> fields their values clash with.
+    /// </summary>
+    public static HttpResponseMessage BusinessProblem(string ruleCode, string[] fields, string[] related) =>
+        new(HttpStatusCode.UnprocessableEntity)
+        {
+            Content = JsonContent.Create(
+                new Dictionary<string, object>
+                {
+                    ["type"] = ProblemTypes.Business, ["status"] = 422, [ProblemTypes.RuleCodeExtension] = ruleCode,
+                    [ProblemTypes.FieldsExtension] = fields, [ProblemTypes.RelatedFieldsExtension] = related,
+                },
+                mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
+        };
+
     /// <summary>The services a page of the administration needs, on this API, for the given request.</summary>
     public void AddServices(IServiceCollection services, TestRequest request)
     {

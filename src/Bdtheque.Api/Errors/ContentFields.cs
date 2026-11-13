@@ -1,5 +1,7 @@
 using System.Text.Json;
 using Bdtheque.Domain.Common;
+using Bdtheque.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Api.Errors;
 
@@ -13,6 +15,19 @@ namespace Bdtheque.Api.Errors;
 internal sealed class ContentFields
 {
     private readonly Dictionary<object, Location> _places = new(ReferenceEqualityComparer.Instance);
+    private readonly HashSet<object> _written = new(ReferenceEqualityComparer.Instance);
+
+    // The records each saving of the request writes: once saved, they look unchanged, although the commit of the transaction
+    // may still refuse them (choix-implementation/persistance/unicite-verifiee-a-la-validation.md).
+    public ContentFields(BdthequeDbContext context) =>
+        context.SavingChanges += (_, _) =>
+        {
+            foreach (var entry in context.ChangeTracker.Entries().Where(entry => entry.State is EntityState.Added or EntityState.Modified))
+                _written.Add(entry.Entity);
+        };
+
+    /// <summary>Whether the request wrote <paramref name="record"/>: created it, or changed one of its values.</summary>
+    public bool Wrote(object record) => _written.Contains(record);
 
     /// <summary>Places a record of the content at <paramref name="path"/> (<c>""</c> for the record the content describes).</summary>
     /// <param name="renamed">

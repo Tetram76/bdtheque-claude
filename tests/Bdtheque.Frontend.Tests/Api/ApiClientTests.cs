@@ -64,11 +64,12 @@ public sealed class ApiClientTests
     public async Task BusinessProblem_CarriesTheFieldsItDesignates()
     {
         var client = ClientAnswering(HttpStatusCode.UnprocessableContent, "application/problem+json",
-            $$"""{"type":"{{ProblemTypes.Business}}","status":422,"ruleCode":"PublisherCollection.NameAlreadyUsed","fields":["/collections/0/name","/collections/1/name"]}""");
+            $$"""{"type":"{{ProblemTypes.Business}}","status":422,"ruleCode":"PublisherCollection.NameAlreadyUsed","fields":["/collections/1/name"],"relatedFields":["/collections/0/name"]}""");
 
         var problem = await ProblemOf(() => client.PutAsync<object, object>("/admin/publishers/1", new { }));
 
-        Assert.Equal(["/collections/0/name", "/collections/1/name"], problem.Fields);
+        Assert.Equal(["/collections/1/name"], problem.Fields);
+        Assert.Equal(["/collections/0/name"], problem.RelatedFields);
     }
 
     [Fact]

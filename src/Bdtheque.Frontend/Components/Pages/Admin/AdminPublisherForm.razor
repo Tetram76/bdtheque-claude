@@ -78,7 +78,8 @@ else
                                 {
                                     <span class="publisher-collection-name">
                                         <Field Id="@CollectionId(collection)" Label="@L["Collection.Name"]" LabelHidden
-                                               Error="@CollectionError(collection)" Context="control">
+                                               Error="@Errors.For(CollectionField(collection))" ErrorRelated="@Errors.IsRelated(CollectionField(collection))"
+                                               Context="control">
                                             <input id="@control.Id" type="text" placeholder="@L["Collection.Name"]"
                                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
                                                    @bind="collection.Name" @bind:event="oninput" />
@@ -272,9 +273,9 @@ else
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
     private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
 
-    // The name of a collection, where the content of the last saving listed it.
-    private string? CollectionError(CollectionEntry collection) =>
-        _sentCollections.IndexOf(collection.Key) is var index and >= 0 ? Errors.For($"/collections/{index}/name") : null;
+    // The name of a collection, where the content of the last saving listed it; none for a collection added since.
+    private string CollectionField(CollectionEntry collection) =>
+        _sentCollections.IndexOf(collection.Key) is var index and >= 0 ? $"/collections/{index}/name" : "";
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-editeur/contenu.md).
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null

@@ -35,8 +35,14 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         if (ruleCode is not null)
             problem.Extensions[ProblemTypes.RuleCodeExtension] = ruleCode;
         // What the user is to correct, where they entered it.
-        if (type == ProblemTypes.Business && FieldsOf(httpContext, exception) is { Count: > 0 } fields)
-            problem.Extensions[ProblemTypes.FieldsExtension] = fields;
+        if (type == ProblemTypes.Business)
+        {
+            var designation = DesignationOf(httpContext, exception);
+            if (designation.Fields.Count > 0)
+                problem.Extensions[ProblemTypes.FieldsExtension] = designation.Fields;
+            if (designation.Related.Count > 0)
+                problem.Extensions[ProblemTypes.RelatedFieldsExtension] = designation.Related;
+        }
         // What the message has to announce beyond the category: the records concerned by the deletion.
         if (ImpactOf(exception) is { } impact)
             problem.Extensions[ProblemTypes.ImpactExtension] = impact;
@@ -46,7 +52,7 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext { HttpContext = httpContext, ProblemDetails = problem });
     }
 
-    private static IReadOnlyList<string> FieldsOf(HttpContext httpContext, Exception exception) =>
+    private static BusinessErrorFields.Designation DesignationOf(HttpContext httpContext, Exception exception) =>
         BusinessErrorFields.Of(
             exception,
             httpContext.RequestServices.GetRequiredService<ContentFields>(),

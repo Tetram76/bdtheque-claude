@@ -36,16 +36,21 @@ internal static class ProblemAssert
     /// exactly <paramref name="fields"/>, in the content the request sent
     /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md).
     /// </summary>
-    public static async Task<JsonElement> IsBusinessProblemAsync(HttpResponseMessage response, string ruleCode, string[] fields)
+    /// <remarks>
+    /// <paramref name="related"/>: the fields holding the values those to correct clash with, entered in the same content.
+    /// </remarks>
+    public static async Task<JsonElement> IsBusinessProblemAsync(
+        HttpResponseMessage response, string ruleCode, string[] fields, string[]? related = null)
     {
         var problem = await IsBusinessProblemAsync(response, ruleCode);
         Assert.Equal(fields, FieldsOf(problem));
+        Assert.Equal(related ?? [], FieldsOf(problem, ProblemTypes.RelatedFieldsExtension));
         return problem;
     }
 
-    /// <summary>The fields a business problem designates; none when it carries none.</summary>
-    public static string[] FieldsOf(JsonElement problem) =>
-        problem.TryGetProperty(ProblemTypes.FieldsExtension, out var fields)
+    /// <summary>The fields a business problem designates (or the related ones); none when it carries none.</summary>
+    public static string[] FieldsOf(JsonElement problem, string extension = ProblemTypes.FieldsExtension) =>
+        problem.TryGetProperty(extension, out var fields)
             ? [.. fields.EnumerateArray().Select(field => field.GetString()!)]
             : [];
 

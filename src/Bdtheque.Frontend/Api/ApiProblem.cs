@@ -26,11 +26,17 @@ public sealed record ApiProblem(ProblemCategory Category, int? Status, string? R
     /// </summary>
     public IReadOnlyList<string> Fields { get; init; } = [];
 
-    // Two problems are the same error when they designate the same fields, not the same list.
+    /// <summary>
+    /// The fields holding the values those of <see cref="Fields"/> clash with, entered in the same content and left as they
+    /// were (e.g. the other collection already named so): presented with the error, they are not the ones to correct.
+    /// </summary>
+    public IReadOnlyList<string> RelatedFields { get; init; } = [];
+
+    // Two problems are the same error when they designate the same fields, not the same lists.
     public bool Equals(ApiProblem? other) =>
         other is not null
         && (Category, Status, RuleCode, Impact) == (other.Category, other.Status, other.RuleCode, other.Impact)
-        && Fields.SequenceEqual(other.Fields);
+        && Fields.SequenceEqual(other.Fields) && RelatedFields.SequenceEqual(other.RelatedFields);
 
     public override int GetHashCode() => HashCode.Combine(Category, Status, RuleCode, Impact, Fields.Count);
 
