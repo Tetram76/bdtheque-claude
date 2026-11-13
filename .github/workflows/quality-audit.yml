@@ -9,8 +9,8 @@ name: Quality audit
 # critical (what makes a condition of the quality gate fail, a problem of a blocker or high severity), priority
 # (every other problem of SonarQube Cloud), and the rest, style and mutants, fixed along the way even when new, which
 # never fail the run; the first run sets the reference, nothing new. The agent treats the critical then priority entries at a
-# resumption of work, once per run at most, and records it in the issue body: rewriting the whole body here removes
-# that record, which makes the next treatment due.
+# resumption of work, once per run at most, and records the date of that processing in the issue body: rewriting
+# the whole body here removes it, which makes the next treatment due (gestion-projet/revue-tickets/issues.md).
 on:
   schedule:
     - cron: "23 4 * * 1"
@@ -236,7 +236,7 @@ jobs:
           {
             echo "Dette qualité du code de \`main\`, tenue à jour chaque semaine par le contrôle qualité (\`.github/workflows/quality-audit.yml\`, \`gestion-projet/depot/controle-qualite-hebdomadaire.md\`) : problèmes de SonarQube Cloud (\`sonar\`, \`hotspot\`, \`gate\` pour une condition de la porte de qualité qu'aucun problème ne désigne), écarts aux règles de style (\`style\`), mutants survivants (\`mutant\`)."
             echo
-            echo "Dernier contrôle : $(date -u +%F), $(wc -l < current.txt) entrée(s), dont $(wc -l < new.txt) nouvelle(s)."
+            echo "Dernier contrôle : $(date -u +%F)"
             echo
             echo "## Critique"
             echo

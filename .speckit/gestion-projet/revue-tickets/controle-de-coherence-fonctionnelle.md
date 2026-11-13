@@ -50,11 +50,6 @@ Une règle commune confirmée (A corrigé, B tranché) est mise en œuvre **une 
 
 ## Trace
 
-Le ticket de suivi du harnais fonctionnel (étiquettes `ergonomy-audit` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description**, que l'agent réécrit, l'état du harnais et rien d'autre : un état, pas un historique ([Issues](issues.md#tickets-de-suivi-des-harnais), exigences de l'utilisateur).
-
-- « Contrôle en cours », écrit **avant** le contrôle : une autre session qui reprend le travail la même semaine le voit, et ne le refait pas ;
-- à sa fin, à sa place, la seule ligne `Dernière prise en compte : <date>`.
-
-Ce qui reste à corriger, ce sont les tickets ouverts de ses suites, étiquetés `ergonomy-audit` dès leur création, que GitHub liste par cette étiquette : la description ne les recopie pas, une copie ne suivant pas leur fermeture. Ni écart C, ni décision de l'utilisateur, ni compte rendu n'y figurent : un écart C est présenté à l'utilisateur à la fin du contrôle, une décision est consignée dans le ticket de son écart.
+Le ticket de suivi du harnais fonctionnel (étiquettes `ergonomy-audit` et `harness`, [Issues](issues.md#tickets-de-suivi-des-harnais)), sans jalon, que ne réalise aucune Pull Request ([Versions et releases](../depot/versions-et-releases.md)), porte dans sa **description**, que l'agent réécrit, un état, pas un historique ([Issues](issues.md#tickets-de-suivi-des-harnais)) : traitement acquis par la fermeture du ticket d'une suite. Un écart C est présenté à l'utilisateur à la fin du contrôle, une décision consignée dans le ticket de son écart. En propre à ce harnais, pendant le contrôle, « Contrôle en cours » tient la place de la ligne `Dernière prise en compte : <date>`, écrit **avant** lui : une autre session qui reprend le travail la même semaine le voit, et ne le refait pas.
 
 Le ticket reste ouvert.
