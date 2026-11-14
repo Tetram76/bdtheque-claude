@@ -258,7 +258,8 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
     [Theory]
     [InlineData("Publisher.NameRequired", "/name", "publisher-name", "Obligatoire.")]
-    [InlineData("Publisher.NameAlreadyUsed", "/name", "publisher-name", "« Dargaud » est déjà le nom d'un autre éditeur.")]
+    [InlineData("Publisher.NameAlreadyUsed", "/name", "publisher-name",
+        "« Dargaud » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même éditeur.")]
     [InlineData("Publisher.WebsiteInvalid", "/website", "publisher-website", "Une adresse web complète, commençant par https:// ou http://.")]
     public void BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
@@ -301,18 +302,20 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
         // Above the form, a text that needs no field to make sense.
         Assert.Equal(
-            "Deux collections d'un même éditeur ne peuvent pas porter le même nom.",
+            "Deux collections d'un même éditeur ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.",
             page.WaitForElement("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
         var (clashing, renamed) = (page.FindAll("[aria-invalid=true]")[0], page.FindAll("[aria-invalid=true]")[1]);
-        Assert.Equal("Une autre collection de cet éditeur porte aussi ce nom.", page.Find($"#{renamed.Id}-error").TextContent);
-        Assert.Equal("Une autre collection prend aussi ce nom.", page.Find($"#{clashing.Id}-error").TextContent);
+        Assert.Equal(
+            "Ce nom est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.",
+            page.Find($"#{renamed.Id}-error").TextContent);
+        Assert.Equal("Une autre collection prend aussi ce nom, à la casse ou aux accents près.", page.Find($"#{clashing.Id}-error").TextContent);
         // The focus goes to the field to correct, not to the one it clashes with (wwwroot/entry-form.js).
         Assert.NotNull(clashing.Closest("[data-error-related]"));
         Assert.Null(renamed.Closest("[data-error-related]"));
     }
 
     [Fact]
-    public void BusinessError_NameAlreadyUsed_RemindsThatTheCaseSufficesToTellTwoPublishersApart()
+    public void BusinessError_NameAlreadyUsed_RemindsThatNeitherCaseNorAccentsTellTwoPublishersApart()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Publisher.NameAlreadyUsed");
@@ -320,7 +323,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         page.Find("form").Submit();
 
         Assert.Equal(
-            "Deux éditeurs ne peuvent pas porter exactement le même nom ; une différence de casse suffit à les distinguer.",
+            "Deux éditeurs ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.",
             page.WaitForElement("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
     }
 

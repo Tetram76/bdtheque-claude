@@ -358,8 +358,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Theory]
-    [InlineData("", "Gotlib", "pseudonym", "« Gotlib » est déjà le nom d'un autre auteur")]
-    [InlineData("Marcel", "", "lastName", "« Marcel Gotlieb » est déjà le nom d'un autre auteur")]
+    [InlineData("", "Gotlib", "pseudonym", "« Gotlib » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même auteur.")]
+    [InlineData("Marcel", "", "lastName", "« Marcel Gotlieb » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même auteur.")]
     public void Panel_ADisplayNameAlreadyTaken_IsRefusedAtTheFieldItComesFrom(string firstName, string pseudonym, string field, string message)
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.DisplayNameAlreadyUsed");

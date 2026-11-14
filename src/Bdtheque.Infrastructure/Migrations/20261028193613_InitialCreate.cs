@@ -159,7 +159,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
+                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr_case_accent_insensitive"),
                     Website = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true, collation: "fr-FR-x-icu"),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -195,7 +195,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
+                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr_case_accent_insensitive"),
                     Description = table.Column<string>(type: "text", nullable: true, collation: "fr-FR-x-icu"),
                     ParentId = table.Column<Guid>(type: "uuid", nullable: true),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
@@ -271,7 +271,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr-FR-x-icu"),
+                    Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr_case_accent_insensitive"),
                     PublisherId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
@@ -997,9 +997,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 column: "UniversesId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Universes_ParentId",
+                name: "IX_Universes_ParentId_Name",
                 table: "Universes",
-                column: "ParentId");
+                columns: new[] { "ParentId", "Name" },
+                unique: true)
+                .Annotation("Npgsql:NullsDistinct", false);
         }
 
         /// <inheritdoc />

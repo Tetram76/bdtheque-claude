@@ -30,6 +30,25 @@ public sealed class RuleMessagesTests
         Assert.False(string.IsNullOrWhiteSpace(text.Value));
     }
 
+    // One rule for every name unique regardless of case and accents (modele-metier/): presented alike, reminder included, above
+    // the form as under the field.
+    [Theory]
+    [InlineData(DomainRules.GenreLabelAlreadyUsed)]
+    [InlineData(DomainRules.AuthorDisplayNameAlreadyUsed)]
+    [InlineData(DomainRules.PublisherNameAlreadyUsed)]
+    [InlineData(DomainRules.PublisherCollectionNameAlreadyUsed)]
+    [InlineData(DomainRules.UniverseNameAlreadyUsed)]
+    public void EveryNameUniqueRegardlessOfCaseAndAccents_RemindsItInBothItsTexts(string ruleCode)
+    {
+        var rule = Services.GetRequiredService<IStringLocalizer<RuleMessages>>()[ruleCode];
+        var field = Services.GetRequiredService<IStringLocalizer<FieldMessages>>()[ruleCode, "Nom"];
+
+        Assert.EndsWith("sans tenir compte de la casse ni des accents.", rule.Value);
+        Assert.False(field.ResourceNotFound, $"No text under the field for the rule {ruleCode}.");
+        Assert.Contains("est déjà pris : deux ", field.Value);
+        Assert.Contains(" qui ne diffèrent que par la casse ou les accents désignent ", field.Value);
+    }
+
     [Theory]
     [MemberData(nameof(EntityKinds))]
     public void EveryEntityKind_HasItsSingularAndPluralName(EntityKind kind)

@@ -10,7 +10,9 @@ internal sealed class PublisherConfiguration : IEntityTypeConfiguration<Publishe
     {
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Name).IsRequired().HasMaxLength(300);
+        // A publisher name is unique regardless of case and accents (modele-metier/editeur.md), as a genre label.
+        builder.Property(p => p.Name).IsRequired().HasMaxLength(300)
+            .UseCollation(BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation);
         builder.Property(p => p.Website).HasMaxLength(2048);
 
         builder.HasIndex(p => p.Name).IsUnique();

@@ -73,6 +73,24 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
     }
 
     [Theory, InEachTheme]
+    public async Task New_ANameTakenUnderTheSameParentInAnotherCaseAndWithoutItsAccents_IsRefusedInThePanel(string theme)
+    {
+        await CreateUniverseAsync($"Les Mondes d'Aldébaran {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminUniverses}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Nouvel univers" }).ClickAsync();
+        var name = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" }).GetByRole(AriaRole.Textbox, new() { Name = "Nom" });
+        await name.FillAsync($"LES MONDES D'ALDEBARAN {_marker}");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'univers" }).ClickAsync();
+
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
+        await Assertions.Expect(panel).ToContainTextAsync(
+            $"« LES MONDES D'ALDEBARAN {_marker} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.");
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom" })).ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Les Mondes d'Aldébaran {_marker}"]);
+    }
+
+    [Theory, InEachTheme]
     public async Task Panel_Escape_ClosesItWithoutSaving(string theme)
     {
         var universe = await CreateUniverseAsync($"Les Cités obscures {_marker}");

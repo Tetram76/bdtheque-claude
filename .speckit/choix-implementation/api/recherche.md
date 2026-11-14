@@ -6,12 +6,12 @@ applies_to:
   - 'src/Bdtheque.Api/Endpoints/CatalogFilters.cs'
   - 'src/Bdtheque.Api/Endpoints/CatalogExpressions.cs'
   - 'src/Bdtheque.Api/Endpoints/UniverseTree.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T12:00:00Z }
 ---
 
 # Recherche
 
-- **Recherche par inclusion** (« contient »), insensible à la casse et aux accents par la collation non déterministe ([Collation des colonnes texte](../persistance/collation-des-colonnes-texte.md)), **appliquée à la recherche** et non portée par les colonnes, qui gardent la collation française déterministe ; **sans index dédié** : un parcours de quelques milliers de lignes reste instantané.
+- **Recherche par inclusion** (« contient »), insensible à la casse et aux accents par la collation non déterministe ([Collation des colonnes texte](../persistance/collation-des-colonnes-texte.md)), **appliquée à la recherche** et non déduite des colonnes, dont la plupart gardent la collation française déterministe ; **sans index dédié** : un parcours de quelques milliers de lignes reste instantané.
   - **Alternative écartée (`pg_trgm` / `unaccent`, recherche plein texte)** : extensions et index de plus pour un gain nul à ce volume ; le plein texte découpe en mots et en racines, ce qui ne correspond pas à la recherche d'un fragment de titre ou de nom.
 - **Texte recherché : ce qui identifie chaque fiche dans les listes** (titre, nom, nom complet d'un auteur dans ses deux ordres ; titre de la série pour un album, qu'elle identifie dans son libellé, [Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md)). Une édition se recherche par son ISBN, séparateurs ignorés de part et d'autre (ISBN cherché et ISBN saisi), un ISBN étant saisi tel qu'imprimé, et souvent collé depuis une application bureautique : espaces et tirets, insécables compris (espace insécable, espace fine, trait d'union insécable, tiret demi-cadratin…), dans les listes comme dans la recherche avancée ; ses autres composantes, par les filtres croisés.
 - **Filtres croisés des listes de consultation**, combinables avec la recherche et la navigation par initiale : ils servent aux fiches liées en nombre non borné ([Organisation de l'API](organisation-de-l-api.md), fiches de consultation).

@@ -92,6 +92,19 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
     }
 
     [Fact]
+    public async Task Create_WithANameOfThePublisherDifferingOnlyByCaseAndAccents_IsABusinessError()
+    {
+        // modele-metier/collection-editeur.md: unique within its publisher regardless of case and accents.
+        var publisher = await CreatePublisherAsync($"Glénat {Guid.NewGuid():N}");
+        var first = await CreateAsync(publisher, "Vécu");
+
+        var response = await _client.PostAsJsonAsync(
+            $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest("VECU", first.PublisherVersion));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+    }
+
+    [Fact]
     public async Task Create_WithANameUsedByAnotherPublisher_IsAccepted()
     {
         var first = await CreatePublisherAsync("Dupuis");

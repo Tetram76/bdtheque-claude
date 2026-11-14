@@ -91,14 +91,14 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
-    public async Task Create_WithANameDifferingOnlyByCase_IsAccepted()
+    public async Task Create_WithANameDifferingOnlyByCaseAndAccents_IsABusinessError()
     {
-        // modele-metier/editeur.md: unique as typed, 'Dargaud' and 'dargaud' remain distinct.
-        await CreateAsync("Delcourt");
+        // modele-metier/editeur.md: unique regardless of case and accents, as the label of a genre.
+        await CreateAsync("Éditions Delcourt");
 
-        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent("delcourt", null, []));
+        var response = await _client.PostAsJsonAsync("/admin/publishers", new PublisherContent("EDITIONS DELCOURT", null, []));
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -362,6 +362,18 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
 
         var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
             new PublisherContent("Kana", null, [new(publisher.Collections[0].Id, "Big Kana"), new(null, "Big Kana")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/1/name"], ["/collections/0/name"]);
+    }
+
+    [Fact]
+    public async Task Update_WithANewCollectionNamedAsAnother_DifferingOnlyByCaseAndAccents_DesignatesItsField()
+    {
+        // The clash is found as the database finds it, regardless of case and accents (modele-metier/collection-editeur.md).
+        var publisher = await CreateAsync("Glénat Manga", "Vécu");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(publisher.Collections[0].Id, "Vécu"), new(null, "VECU")]), publisher.Version));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/1/name"], ["/collections/0/name"]);
     }

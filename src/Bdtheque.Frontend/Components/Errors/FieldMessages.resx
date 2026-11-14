@@ -45,6 +45,9 @@
   <data name="Album.VolumeRangeStartPositive" xml:space="preserve">
     <value>Le premier tome est supérieur à zéro.</value>
   </data>
+  <data name="Author.DisplayNameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même auteur.</value>
+  </data>
   <data name="Edition.AcquisitionAmountCurrencyTogether" xml:space="preserve">
     <value>Un montant et sa devise, ensemble.</value>
   </data>
@@ -87,8 +90,11 @@
   <data name="Edition.PurchaseCannotBeFree" xml:space="preserve">
     <value>Une édition achetée n&apos;est jamais gratuite.</value>
   </data>
+  <data name="Genre.LabelAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà pris : deux libellés qui ne diffèrent que par la casse ou les accents désignent le même genre.</value>
+  </data>
   <data name="Publisher.NameAlreadyUsed" xml:space="preserve">
-    <value>« {0} » est déjà le nom d&apos;un autre éditeur.</value>
+    <value>« {0} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même éditeur.</value>
   </data>
   <data name="Publisher.NameRequired" xml:space="preserve">
     <value>Obligatoire.</value>
@@ -97,10 +103,10 @@
     <value>Une adresse web complète, commençant par https:// ou http://.</value>
   </data>
   <data name="PublisherCollection.NameAlreadyUsed" xml:space="preserve">
-    <value>Une autre collection de cet éditeur porte aussi ce nom.</value>
+    <value>Ce nom est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.</value>
   </data>
   <data name="PublisherCollection.NameAlreadyUsed.Related" xml:space="preserve">
-    <value>Une autre collection prend aussi ce nom.</value>
+    <value>Une autre collection prend aussi ce nom, à la casse ou aux accents près.</value>
   </data>
   <data name="PublisherCollection.NameRequired" xml:space="preserve">
     <value>Obligatoire.</value>
@@ -119,6 +125,9 @@
   </data>
   <data name="Text.TooLong" xml:space="preserve">
     <value>Trop long : raccourcissez ce texte.</value>
+  </data>
+  <data name="Universe.NameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.</value>
   </data>
   <data name="Related" xml:space="preserve">
     <value>Une valeur liée à celle à corriger.</value>

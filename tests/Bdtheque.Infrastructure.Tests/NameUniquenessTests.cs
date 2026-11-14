@@ -1,12 +1,13 @@
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
-/// Pins the uniqueness rules of referential names (modele-metier/): a genre label is unique
-/// regardless of case and accents, a publisher name is unique as typed.
+/// Pins the uniqueness rules of referential names (modele-metier/): a genre label, a publisher name, the name of a collection
+/// within its publisher and that of a universe within its parent are unique regardless of case and accents.
 /// </summary>
 public sealed class NameUniquenessTests : IAsyncLifetime
 {
@@ -23,10 +24,8 @@ public sealed class NameUniquenessTests : IAsyncLifetime
         await _fixture.Context.SaveChangesAsync();
 
         _fixture.Context.Genres.Add(new Genre("aventure"));
-        var exception = await Assert.ThrowsAnyAsync<Exception>(() => _fixture.Context.SaveChangesAsync());
 
-        var violation = Assert.IsType<PostgresException>(exception.InnerException);
-        Assert.Equal("IX_Genres_Label", violation.ConstraintName);
+        await AssertViolatesAsync("IX_Genres_Label");
     }
 
     [Fact]
@@ -36,10 +35,8 @@ public sealed class NameUniquenessTests : IAsyncLifetime
         await _fixture.Context.SaveChangesAsync();
 
         _fixture.Context.Genres.Add(new Genre("Epopee"));
-        var exception = await Assert.ThrowsAnyAsync<Exception>(() => _fixture.Context.SaveChangesAsync());
 
-        var violation = Assert.IsType<PostgresException>(exception.InnerException);
-        Assert.Equal("IX_Genres_Label", violation.ConstraintName);
+        await AssertViolatesAsync("IX_Genres_Label");
     }
 
     [Fact]
@@ -50,30 +47,84 @@ public sealed class NameUniquenessTests : IAsyncLifetime
         await _fixture.Context.SaveChangesAsync();
 
         _fixture.Context.SavedSearches.Add(new SavedSearch("editions DEDICACEES", EntityKind.Edition, criteria, [], []));
-        var exception = await Assert.ThrowsAnyAsync<Exception>(() => _fixture.Context.SaveChangesAsync());
 
-        var violation = Assert.IsType<PostgresException>(exception.InnerException);
-        Assert.Equal("IX_SavedSearches_Name", violation.ConstraintName);
+        await AssertViolatesAsync("IX_SavedSearches_Name");
     }
 
     [Fact]
-    public async Task PublisherName_DifferingOnlyByCase_IsAccepted()
+    public async Task PublisherName_DifferingOnlyByCaseAndAccents_IsRejected()
     {
-        _fixture.Context.Publishers.AddRange(new Publisher("Dargaud"), new Publisher("dargaud"));
-
+        _fixture.Context.Publishers.Add(new Publisher("Éditions Dargaud"));
         await _fixture.Context.SaveChangesAsync();
+
+        _fixture.Context.Publishers.Add(new Publisher("EDITIONS DARGAUD"));
+
+        await AssertViolatesAsync("IX_Publishers_Name");
     }
 
     [Fact]
-    public async Task PublisherName_Identical_IsRejected()
+    public async Task CollectionName_DifferingOnlyByCaseAndAccents_IsRejectedWithinItsPublisher_AtCommit()
     {
-        _fixture.Context.Publishers.Add(new Publisher("Dargaud"));
+        var publisher = new Publisher("Glénat");
+        publisher.AddCollection("Vécu");
+        _fixture.Context.Publishers.Add(publisher);
         await _fixture.Context.SaveChangesAsync();
 
-        _fixture.Context.Publishers.Add(new Publisher("Dargaud"));
+        publisher.AddCollection("VECU");
+
+        await AssertViolatesAsync("IX_PublisherCollections_PublisherId_Name");
+    }
+
+    [Fact]
+    public async Task CollectionName_OfAnotherPublisher_IsAccepted()
+    {
+        var first = new Publisher("Dupuis");
+        first.AddCollection("Aire Libre");
+        var second = new Publisher("Le Lombard");
+        second.AddCollection("aire libre");
+        _fixture.Context.Publishers.AddRange(first, second);
+
+        await _fixture.Context.SaveChangesAsync();
+
+        _fixture.Context.ChangeTracker.Clear();
+        Assert.Equal(2, await _fixture.Context.Set<PublisherCollection>().CountAsync(c => c.Name == "AIRE LIBRE"));
+    }
+
+    [Fact]
+    public async Task UniverseName_DifferingOnlyByCaseAndAccents_IsRejectedAmongTheUniversesWithoutParent()
+    {
+        _fixture.Context.Universes.Add(new Universe("Les Mondes d'Aldébaran"));
+        await _fixture.Context.SaveChangesAsync();
+
+        _fixture.Context.Universes.Add(new Universe("les mondes d'aldebaran"));
+
+        await AssertViolatesAsync("IX_Universes_ParentId_Name");
+    }
+
+    [Fact]
+    public async Task UniverseName_IsUniqueWithinItsParent_NotAcrossParents()
+    {
+        var marvel = new Universe("Marvel");
+        var dc = new Universe("DC");
+        var marvelOrigins = new Universe("Origines");
+        marvelOrigins.SetParent(marvel);
+        var dcOrigins = new Universe("Origines");
+        dcOrigins.SetParent(dc);
+        _fixture.Context.Universes.AddRange(marvel, dc, marvelOrigins, dcOrigins);
+        await _fixture.Context.SaveChangesAsync();
+
+        var duplicate = new Universe("ORIGINES");
+        duplicate.SetParent(marvel);
+        _fixture.Context.Universes.Add(duplicate);
+
+        await AssertViolatesAsync("IX_Universes_ParentId_Name");
+    }
+
+    private async Task AssertViolatesAsync(string constraint)
+    {
         var exception = await Assert.ThrowsAnyAsync<Exception>(() => _fixture.Context.SaveChangesAsync());
 
-        var violation = Assert.IsType<PostgresException>(exception.InnerException);
-        Assert.Equal("IX_Publishers_Name", violation.ConstraintName);
+        var violation = Assert.IsType<PostgresException>(exception is PostgresException ? exception : exception.InnerException);
+        Assert.Equal((PostgresErrorCodes.UniqueViolation, constraint), (violation.SqlState, violation.ConstraintName));
     }
 }

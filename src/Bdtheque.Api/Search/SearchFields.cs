@@ -132,10 +132,15 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
 {
     private const string LikeEscapeCharacter = "\\";
 
-    // The column collation is deterministic: a LIKE or an equality on it respects case and accents.
     private static readonly Expression<Func<string, string, bool>> Like = (text, pattern) => EF.Functions.Like(text, pattern, LikeEscapeCharacter);
+
+    // Both collations are explicit: a column does not tell by itself whether it compares case and accents, a name unique
+    // regardless of them being stored under the insensitive collation of its uniqueness
+    // (choix-implementation/persistance/collation-des-colonnes-texte.md).
     private static readonly Expression<Func<string, string>> IgnoringCaseAndAccents =
         text => EF.Functions.Collate(text, BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation);
+    private static readonly Expression<Func<string, string>> MatchingCaseAndAccents =
+        text => EF.Functions.Collate(text, BdthequeDbContext.FrenchCollation);
 
     public override SearchDataType Type => SearchDataType.Text;
 
@@ -146,12 +151,12 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
 
     public override IReadOnlyList<SearchComparison> DataComparisons => TypeComparisons;
 
-    // The pattern is built from the other text as stored: PostgreSQL refuses replace() on a nondeterministic
-    // collation, and the collation set explicitly on the compared text prevails over that of the column.
+    // The pattern is built from the other text as stored, without a collation of its own: the one set explicitly on the
+    // compared text prevails over that of the other column, where a second explicit one would conflict with it.
     protected override Expression CompareData(
         Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData, SearchScope scope)
     {
-        var text = comparison.MatchCaseAndAccents ? data : Inline(IgnoringCaseAndAccents, data);
+        var text = Compared(data, comparison.MatchCaseAndAccents);
         var escaped = new[] { LikeEscapeCharacter, "%", "_" }.Aggregate(
             otherData,
             (escaping, character) => Expression.Call(
@@ -172,7 +177,7 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
     protected override Expression Compare(Expression record, Expression data, SearchCriterion criterion, IReadOnlyList<string> values, SearchScope scope)
     {
         var value = normalize is null ? values[0] : normalize(values[0]);
-        var text = criterion.MatchCaseAndAccents ? data : Inline(IgnoringCaseAndAccents, data);
+        var text = Compared(data, criterion.MatchCaseAndAccents);
         return criterion.Comparison switch
         {
             Contains => LikeOf(text, $"%{CatalogFilters.EscapeLike(value)}%"),
@@ -183,6 +188,9 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
             _ => throw new ArgumentOutOfRangeException(nameof(criterion)),
         };
     }
+
+    private static Expression Compared(Expression data, bool matchCaseAndAccents) =>
+        Inline(matchCaseAndAccents ? MatchingCaseAndAccents : IgnoringCaseAndAccents, data);
 
     private static Expression LikeOf(Expression text, string pattern) => Inline(Like, text, SearchValues.Parameter(pattern));
 

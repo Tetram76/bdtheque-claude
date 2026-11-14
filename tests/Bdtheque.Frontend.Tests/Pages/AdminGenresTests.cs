@@ -161,6 +161,20 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Edit_ALabelLeftBlank_IsRefusedInPlace_WithItsOwnText()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Genre.LabelRequired");
+        var page = Open($"edit={Biography.Id}");
+
+        page.Find("form.genre-row input[type='text']").Change(" ");
+        page.Find("form.genre-row").Submit();
+
+        var form = page.Find("form.genre-row");
+        Assert.Equal("true", form.QuerySelector("input[type='text']")!.GetAttribute("aria-invalid"));
+        Assert.Equal("Le libellé du genre est obligatoire.", Text(form.QuerySelector(".field-error")!));
+    }
+
+    [Fact]
     public void Edit_OfAGenreChangedMeanwhile_SaysSoInItsRow()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);

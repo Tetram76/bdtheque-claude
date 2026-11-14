@@ -142,16 +142,19 @@
     <value>Une collection retirée est désignée par une édition, une série ou une recherche enregistrée : elle ne peut pas être retirée. Rétablissez-la.</value>
   </data>
   <data name="Author.DisplayNameAlreadyUsed" xml:space="preserve">
-    <value>Ce nom est déjà celui d&apos;un autre auteur.</value>
+    <value>Deux auteurs ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
   </data>
   <data name="Genre.LabelAlreadyUsed" xml:space="preserve">
-    <value>Ce libellé est déjà celui d&apos;un autre genre.</value>
+    <value>Deux genres ne peuvent pas porter le même libellé, sans tenir compte de la casse ni des accents.</value>
   </data>
   <data name="Publisher.NameAlreadyUsed" xml:space="preserve">
-    <value>Deux éditeurs ne peuvent pas porter exactement le même nom ; une différence de casse suffit à les distinguer.</value>
+    <value>Deux éditeurs ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
   </data>
   <data name="PublisherCollection.NameAlreadyUsed" xml:space="preserve">
-    <value>Deux collections d&apos;un même éditeur ne peuvent pas porter le même nom.</value>
+    <value>Deux collections d&apos;un même éditeur ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
+  </data>
+  <data name="Universe.NameAlreadyUsed" xml:space="preserve">
+    <value>Deux univers de même parent ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
   </data>
   <data name="Contribution.AlreadyCredited" xml:space="preserve">
     <value>Cet auteur est déjà crédité dans ce rôle.</value>
