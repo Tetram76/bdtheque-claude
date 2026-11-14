@@ -27,6 +27,7 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     public const string CollectiveTitle = "...Et après ?";
     public const string SeriesWithoutAlbumTitle = "Les Gardiens du phare";
     public const string PaleCoverTitle = "Soleil pâle";
+    public const string WishedForOnlyTitle = "La Marée des phares";
 
     public const string UncreditedAuthorLastName = "Delorme";
 
@@ -263,9 +264,11 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             2019, null, null, "À relier à sa série.", null, [humour], [greyPort], []));
 
         // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
-        // whole album (visuel/listes/saisie-selon-l-entite.md).
-        var tide = await data.AlbumAsync(OneShot("La Marée des phares", 2024, 9, [adventure], [], [Credit(arnaud, ContributionRole.Scenarist), Credit(keita, ContributionRole.Illustrator)]));
-        await data.IntentOnEditionAsync(tide, new PurchaseIntentEditionContent(horizon.Id, null, 2024, null, null, null, null, null, null, null, true));
+        // whole album (visuel/listes/saisie-selon-l-entite.md). Its edition, with a cover, gives the album its cover, on
+        // its record as on its cards (fonctionnel/regles-metier/couverture-d-un-album.md).
+        var tide = await data.AlbumAsync(OneShot(WishedForOnlyTitle, 2024, 9, [adventure], [], [Credit(arnaud, ContributionRole.Scenarist), Credit(keita, ContributionRole.Illustrator)]));
+        var tideIntents = await data.IntentOnEditionAsync(tide, new PurchaseIntentEditionContent(horizon.Id, null, 2024, null, null, null, null, null, null, null, true));
+        await data.VisualAsync(tide, tideIntents.Intents.Single().EditionId!.Value, VisualType.Cover, Images.Portrait(0.92));
 
         // The latest writes, which the home page of the administration presents (visuel/administration/contenu.md, Dernières
         // modifications), each leading to its page: after the edition and the intent of the tide above, addressed by their
@@ -545,11 +548,16 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
         public Task IntentOnAlbumAsync(AlbumWrite album) => IntentAsync(album, null);
 
-        public Task IntentOnEditionAsync(AlbumWrite album, PurchaseIntentEditionContent edition) => IntentAsync(album, edition);
+        /// <summary>An intent on a new edition of the album; the intents of the album after it.</summary>
+        public Task<PurchaseIntentsForm> IntentOnEditionAsync(AlbumWrite album, PurchaseIntentEditionContent edition) => IntentAsync(album, edition);
 
-        private async Task IntentAsync(AlbumWrite album, PurchaseIntentEditionContent? edition) =>
-            album.Version = (await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(
-                $"/admin/albums/{album.Id}/purchase-intents", new(edition, album.Version))).AlbumVersion;
+        private async Task<PurchaseIntentsForm> IntentAsync(AlbumWrite album, PurchaseIntentEditionContent? edition)
+        {
+            var intents = await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(
+                $"/admin/albums/{album.Id}/purchase-intents", new(edition, album.Version));
+            album.Version = intents.AlbumVersion;
+            return intents;
+        }
 
         private async Task<T> GetAsync<T>(string path)
         {
