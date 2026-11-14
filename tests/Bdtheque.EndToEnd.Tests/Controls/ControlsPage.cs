@@ -2,6 +2,7 @@ extern alias frontend;
 
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
+using frontend::Bdtheque.Frontend.Api;
 using frontend::Bdtheque.Frontend.Components.Controls;
 using frontend::Bdtheque.Frontend.Components.Presentation;
 using Microsoft.AspNetCore.Components;
@@ -139,6 +140,20 @@ public sealed class ControlsPage : ComponentBase
                 select.CloseElement();
             }));
 
+        // A field that met an error without anything to correct in it, as the collections of a publisher not read.
+        builder.AddContent(45, FieldOf("f-collection", "Collection", failure: ApiProblem.Technical(),
+            failureText: "Les collections de l'éditeur n'ont pas pu être lues : choisissez-le de nouveau.",
+            control: context => select =>
+            {
+                select.OpenElement(0, "select");
+                select.AddAttribute(1, "id", context.Id);
+                select.AddAttribute(2, "aria-describedby", context.DescribedBy);
+                select.OpenElement(3, "option");
+                select.AddContent(4, "—");
+                select.CloseElement();
+                select.CloseElement();
+            }));
+
         builder.OpenComponent<Choice>(50);
         builder.AddComponentParameter(51, nameof(Choice.Label), "Intégrale");
         builder.AddComponentParameter(52, nameof(Choice.ChildContent), (RenderFragment)(box =>
@@ -172,7 +187,8 @@ public sealed class ControlsPage : ComponentBase
     }
 
     private static RenderFragment FieldOf(string id, string label, RenderFragment<FieldContext> control,
-        bool required = false, string? help = null, string? error = null, int? characters = null) => builder =>
+        bool required = false, string? help = null, string? error = null, int? characters = null, ApiProblem? failure = null,
+        string? failureText = null) => builder =>
     {
         builder.OpenComponent<Field>(0);
         builder.AddComponentParameter(1, nameof(Field.Id), id);
@@ -182,6 +198,8 @@ public sealed class ControlsPage : ComponentBase
         builder.AddComponentParameter(5, nameof(Field.Error), error);
         builder.AddComponentParameter(6, nameof(Field.Characters), characters);
         builder.AddComponentParameter(7, nameof(Field.ChildContent), control);
+        builder.AddComponentParameter(8, nameof(Field.Failure), failure);
+        builder.AddComponentParameter(9, nameof(Field.FailureText), failureText);
         builder.CloseComponent();
     };
 

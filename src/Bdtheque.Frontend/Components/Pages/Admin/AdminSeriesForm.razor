@@ -101,7 +101,7 @@ else
                     @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and removed
                        when it changes. *@
                     <Field Id="series-collection" Label="@L["Collection"]" Error="@Errors.For("/editionTemplate/publisherCollectionId")"
-                           Help="@(CollectionsUnread ? L["Collection.Unread"].Value : null)" Context="control">
+                           Failure="CollectionsProblem" FailureText="@L["Collection.Unread"]" Context="control">
                         <select id="@control.Id" class="series-collection" disabled="@(Entry.Publisher is null)"
                                 aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
                                 aria-invalid="@control.Invalid" value="@(Entry.PublisherCollection?.Id.ToString() ?? "")" @onchange="ChooseCollection">
@@ -200,15 +200,18 @@ else
     public SeriesEntry? ReadEntry { get; set; }
 
     /// <summary>
-    /// The collections of the publisher chosen, by name, which its collection is chosen among; none without publisher, and
-    /// none either if they could not be read, which the field then says. Persisted with the form, so that collections not read
-    /// by the prerendering stay so once interactive.
+    /// The collections of the publisher chosen, by name, which its collection is chosen among; none without publisher, nor
+    /// while they are read, nor if they could not be.
     /// </summary>
     [PersistentState]
     public List<RecordOption>? PublisherCollections { get; set; }
 
-    // A publisher chosen, whose collections could not be read.
-    private bool CollectionsUnread => Entry!.Publisher is not null && PublisherCollections is null;
+    /// <summary>
+    /// The error the reading of the collections of the publisher chosen met, which the field presents; none once they are
+    /// read. Persisted with the form, so that collections not read by the prerendering stay so once interactive.
+    /// </summary>
+    [PersistentState]
+    public ApiProblem? CollectionsProblem { get; set; }
 
     // The title of the series, as typed; « <Sans titre> » while nothing is.
     private string Subject => string.IsNullOrWhiteSpace(Entry!.Title) ? L["Untitled"] : Entry.Title.Trim();
@@ -231,7 +234,7 @@ else
                     : SeriesEntry.New(await Api.GetAsync<SeriesContent>("/admin/series/new"), Searched);
                 ReadEntry = Entry.Copy();
                 if (Entry.Publisher is { } publisher)
-                    PublisherCollections = await CollectionsOfAsync(publisher.Id);
+                    (PublisherCollections, CollectionsProblem) = await CollectionsOfAsync(publisher.Id);
             }
             catch (ApiProblemException exception)
             {
@@ -266,25 +269,25 @@ else
         if (!changed)
             return;
         // None while those of the new one are read.
-        PublisherCollections = [];
+        (PublisherCollections, CollectionsProblem) = ([], null);
         if (publisher is null)
             return;
-        var collections = await CollectionsOfAsync(publisher.Id);
+        var read = await CollectionsOfAsync(publisher.Id);
         if (choice == _publisherChoice)
-            PublisherCollections = collections;
+            (PublisherCollections, CollectionsProblem) = read;
     }
 
-    // The collections of a publisher, by name; null if they cannot be read.
-    private async Task<List<RecordOption>?> CollectionsOfAsync(Guid publisherId)
+    // The collections of a publisher, by name; none, with the error met, if they cannot be read.
+    private async Task<(List<RecordOption> Collections, ApiProblem? Problem)> CollectionsOfAsync(Guid publisherId)
     {
         try
         {
             var collections = await Api.GetAsync<List<PublisherCollectionForm>>($"/admin/publishers/{publisherId}/collections");
-            return [.. collections.Select(c => new RecordOption(c.Id, c.Name, null))];
+            return ([.. collections.Select(c => new RecordOption(c.Id, c.Name, null))], null);
         }
-        catch (ApiProblemException)
+        catch (ApiProblemException exception)
         {
-            return null;
+            return ([], exception.Problem);
         }
     }
 

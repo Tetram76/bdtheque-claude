@@ -97,6 +97,44 @@ public sealed class ErrorMessageTests : BunitContext
         Assert.DoesNotContain("500", message.Markup);
     }
 
+    // An error presented in a control (a list of suggestions, the line of an upload, under a field): the same category, icon
+    // and frame, at the scale of the control (choix-implementation/socle/frontend.md, Présentation, #438).
+    [Fact]
+    public void CompactError_KeepsItsCategory_AtTheScaleOfAControl()
+    {
+        var message = Render<ErrorMessage>(parameters => parameters
+            .Add(p => p.Problem, ApiProblem.Technical())
+            .Add(p => p.Compact, true));
+
+        var alert = message.Find("[role=alert]");
+        Assert.True(alert.HasAttribute("data-error-compact"));
+        Assert.Equal("technical", alert.GetAttribute("data-error-category"));
+        Assert.Equal("Erreur technique", alert.QuerySelector("[data-error-label]")!.TextContent.Trim());
+        Assert.NotNull(alert.QuerySelector(".error-icon path"));
+    }
+
+    [Fact]
+    public void Error_IsFullSized_UnlessCompact()
+    {
+        var message = Render<ErrorMessage>(parameters => parameters.Add(p => p.Problem, ApiProblem.Technical()));
+
+        Assert.False(message.Find("[role=alert]").HasAttribute("data-error-compact"));
+    }
+
+    // The generic text of a technical error, said for the action of a control that failed (e.g. its search); an error of
+    // another category keeps its own text, which says what to do about it.
+    [Theory]
+    [InlineData(ProblemCategory.Technical, "La recherche n'a pas abouti.")]
+    [InlineData(ProblemCategory.Functional, "Cette fiche n'existe plus : elle a été supprimée entre-temps.")]
+    public void TechnicalText_WordsOnlyATechnicalError(ProblemCategory category, string expected)
+    {
+        var message = Render<ErrorMessage>(parameters => parameters
+            .Add(p => p.Problem, new ApiProblem(category, 404, null, null))
+            .Add(p => p.TechnicalText, "La recherche n'a pas abouti."));
+
+        Assert.Equal(expected, message.Find("[data-error-text]").TextContent.Trim());
+    }
+
     private string TextOf(ApiProblem problem) =>
         Render<ErrorMessage>(parameters => parameters.Add(p => p.Problem, problem)).Find("[data-error-text]").TextContent.Trim();
 }

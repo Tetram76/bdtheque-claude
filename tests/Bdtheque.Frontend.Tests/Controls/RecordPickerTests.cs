@@ -393,14 +393,20 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
-    public async Task FailedSearch_SaysSo_WithoutDisclosingItsCause()
+    public async Task FailedSearch_IsATechnicalError_InTheSuggestions_WithoutDisclosingItsCause()
     {
+        // Presented by the single component of the errors, in its compact form (choix-implementation/socle/frontend.md,
+        // Présentation, #438).
         _answer = _ => new HttpResponseMessage(HttpStatusCode.InternalServerError);
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
 
         await TypeAsync(picker, "ti");
 
-        Assert.Equal("La recherche n'a pas abouti. Réessayez dans un instant.", picker.Find("[role=listbox] .record-picker-status").TextContent.Trim());
+        var error = picker.Find("[role=listbox] .record-picker-status [role=alert]");
+        Assert.Equal("technical", error.GetAttribute("data-error-category"));
+        Assert.True(error.HasAttribute("data-error-compact"));
+        Assert.Equal("La recherche n'a pas abouti. Réessayez dans un instant.", error.QuerySelector("[data-error-text]")!.TextContent.Trim());
+        Assert.Empty(picker.FindAll("[role=option]"));
     }
 
     [Fact]

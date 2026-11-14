@@ -48,13 +48,16 @@
   <data name="Upload.Refused" xml:space="preserve">
     <value>Refusé</value>
   </data>
+  <data name="Upload.Failed" xml:space="preserve">
+    <value>Non envoyé</value>
+  </data>
   <data name="Upload.Remove" xml:space="preserve">
     <value>Retirer {0}</value>
   </data>
   <data name="Refused.TooLarge" xml:space="preserve">
     <value>Ce fichier dépasse le poids maximal de {0} Mio.</value>
   </data>
-  <data name="Refused.Technical" xml:space="preserve">
+  <data name="Failed.Technical" xml:space="preserve">
     <value>L&apos;envoi n&apos;a pas pu aboutir : réessayez dans un instant.</value>
   </data>
   <data name="Count.None" xml:space="preserve">

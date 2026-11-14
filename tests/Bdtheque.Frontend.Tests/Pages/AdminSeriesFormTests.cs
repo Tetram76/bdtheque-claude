@@ -6,6 +6,7 @@ using Bdtheque.Contracts.Audience;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
+using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Navigation;
@@ -193,14 +194,20 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Collections_ThatCannotBeRead_SaySo()
+    public void Collections_ThatCannotBeRead_AreATechnicalErrorUnderTheField()
     {
+        // In the compact form of the single component of the errors, which the field describes itself by (#438).
         _api.Failures[$"/admin/publishers/{Casterman}/collections"] = HttpStatusCode.InternalServerError;
         var page = OpenSeries();
 
         ChoosePublisher(page, new RecordOption(Casterman, "Casterman", null));
 
-        Assert.Contains("n'ont pas pu être lues", page.Find("#series-collection-help").TextContent);
+        var error = page.Find("#series-collection-failure [role=alert]");
+        Assert.Equal("technical", error.GetAttribute("data-error-category"));
+        Assert.True(error.HasAttribute("data-error-compact"));
+        Assert.Equal("Les collections de l'éditeur n'ont pas pu être lues : choisissez-le de nouveau.", error.QuerySelector("[data-error-text]")!.TextContent.Trim());
+        Assert.Empty(page.FindAll("#series-collection-help"));
+        Assert.Contains("series-collection-failure", page.Find("#series-collection").GetAttribute("aria-describedby"));
     }
 
     [Fact]
@@ -214,7 +221,8 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         var prerendered = OpenSeries().Instance;
 
         Assert.NotNull(prerendered.Entry!.Publisher);
-        Assert.Null(prerendered.PublisherCollections);
+        Assert.Equal(ProblemCategory.Technical, prerendered.CollectionsProblem?.Category);
+        Assert.Empty(prerendered.PublisherCollections!);
     }
 
     [Fact]

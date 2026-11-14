@@ -195,6 +195,35 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         Assert.Equal(colors[1], colors[0]);
     }
 
+    // An error the field met, the technical error of the single component of the errors at the scale of the field
+    // (choix-implementation/socle/frontend.md, Présentation): its category, its dotted frame in the neutral color, an icon
+    // no higher than a line of the small text, within the width of the field, which describes itself by it.
+    [Theory, InEachTheme]
+    public async Task ControlFailure_IsTheTechnicalError_AtTheScaleOfTheField(string theme)
+    {
+        var page = await OpenAsync(theme);
+        var error = page.Locator("#f-collection-failure [role=alert]");
+
+        await Assertions.Expect(error).ToHaveAttributeAsync("data-error-category", "technical");
+        await Assertions.Expect(error.Locator("[data-error-label]")).ToHaveTextAsync("Erreur technique");
+        await Assertions.Expect(page.Locator("#f-collection")).ToHaveAttributeAsync("aria-describedby", "f-collection-failure");
+        var look = await error.EvaluateAsync<double[]>("""
+            element => {
+                const style = getComputedStyle(element);
+                const icon = element.querySelector('.error-icon').getBoundingClientRect();
+                const field = element.closest('.field').getBoundingClientRect();
+                const box = element.getBoundingClientRect();
+                return [style.borderTopStyle === 'dotted' ? 1 : 0, icon.height, parseFloat(style.fontSize) * 1.6,
+                    box.right - field.right, box.left - field.left];
+            }
+            """);
+
+        Assert.Equal(1, look[0]);
+        Assert.InRange(look[1], 1, look[2]);
+        Assert.InRange(look[3], double.MinValue, 0.5);
+        Assert.InRange(look[4], -0.5, double.MaxValue);
+    }
+
     [GeneratedRegex(@"\?edited=true$")]
     private static partial Regex EditedUrl();
 

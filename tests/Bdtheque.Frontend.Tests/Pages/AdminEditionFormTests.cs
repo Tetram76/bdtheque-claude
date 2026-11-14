@@ -312,6 +312,24 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.True(page.Find("#edition-collection").HasAttribute("disabled"));
     }
 
+    // Under the field, in the compact form of the single component of the errors, which the field describes itself by; its
+    // help stays what it is (#438).
+    [Fact]
+    public void Collections_ThatCannotBeRead_AreATechnicalErrorUnderTheField()
+    {
+        _api.Failures[$"/admin/publishers/{Dargaud}/collections"] = HttpStatusCode.InternalServerError;
+        var page = OpenOwned();
+
+        ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
+
+        var error = page.Find("#edition-collection-failure [role=alert]");
+        Assert.Equal("technical", error.GetAttribute("data-error-category"));
+        Assert.True(error.HasAttribute("data-error-compact"));
+        Assert.Equal("Les collections de l'éditeur n'ont pas pu être lues : choisissez-le de nouveau.", error.QuerySelector("[data-error-text]")!.TextContent.Trim());
+        Assert.DoesNotContain("n'ont pas pu être lues", page.Find("#edition-collection-help").TextContent);
+        Assert.Contains("edition-collection-failure", page.Find("#edition-collection").GetAttribute("aria-describedby"));
+    }
+
     [Fact]
     public void Currency_NamedInItsList_AnyOtherEnteredByItsCode()
     {
@@ -687,6 +705,31 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Contains("n'est pas une image lisible", refused.QuerySelector(".edition-visuals-upload-reason")!.TextContent);
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
         Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
+
+        page.Find(".edition-visuals-upload-remove").Click();
+
+        Assert.Empty(page.FindAll(".edition-visuals-upload"));
+    }
+
+    // An upload that fails is not a refusal of the file: « Non envoyé », with a technical error in the compact form of the
+    // single component of the errors, and none of the alert color of a refused file (#438).
+    [Fact]
+    public async Task Visuals_AnUploadThatFails_IsNotSent_WithATechnicalError_UntilItIsRemoved()
+    {
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
+
+        await SendAsync(page, new TestBrowserFile("dedicace.png", new byte[16]));
+
+        var failed = page.Find(".edition-visuals-upload");
+        Assert.False(failed.HasAttribute("data-refused"));
+        Assert.Equal("Non envoyé", failed.QuerySelector(".edition-visuals-upload-status")!.TextContent);
+        Assert.Null(failed.QuerySelector(".edition-visuals-upload-reason"));
+        var error = failed.QuerySelector("[role=alert]")!;
+        Assert.Equal("technical", error.GetAttribute("data-error-category"));
+        Assert.True(error.HasAttribute("data-error-compact"));
+        Assert.Equal("L'envoi n'a pas pu aboutir : réessayez dans un instant.", error.QuerySelector("[data-error-text]")!.TextContent.Trim());
+        Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
 
         page.Find(".edition-visuals-upload-remove").Click();
 
