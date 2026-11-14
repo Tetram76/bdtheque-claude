@@ -3,6 +3,7 @@
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Deletion
 @inject IStringLocalizer<AdminUniverses> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
@@ -343,8 +344,14 @@
     }
 
     // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own.
+    // A name already taken under the parent, in the text shared by every name unique regardless of case and accents
+    // (modele-metier/univers.md).
     private string? FieldError(string field) =>
-        _entryProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field ? L[$"FieldError.{code}"].Value : null;
+        _entryProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field
+            ? code == DuplicateRule ? FieldTexts[code, EntryName?.Trim() ?? ""].Value : L[$"FieldError.{code}"].Value
+            : null;
+
+    private const string DuplicateRule = "Universe.NameAlreadyUsed";
 
     // Any other error, presented at the top of the panel: a universe changed or deleted meanwhile, a technical error.
     private ApiProblem? OtherProblem =>
@@ -352,7 +359,7 @@
 
     private static string? FieldOf(string ruleCode) => ruleCode switch
     {
-        "Universe.NameRequired" => "name",
+        "Universe.NameRequired" or DuplicateRule => "name",
         "Universe.HierarchyCycle" => "parent",
         _ => null,
     };

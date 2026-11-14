@@ -87,6 +87,56 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
+    public async Task Create_UnderAParent_WithTheNameOfASiblingDifferingOnlyByCaseAndAccents_IsABusinessError()
+    {
+        // modele-metier/univers.md: unique within its parent regardless of case and accents.
+        var parent = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        await CreateAsync("Les Mondes d'Aldébaran", parent.Id);
+
+        var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest("LES MONDES D'ALDEBARAN", null, parent.Id));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed);
+    }
+
+    [Fact]
+    public async Task Create_AtTheTop_WithTheNameOfAnotherTopUniverse_IsABusinessError()
+    {
+        // Two universes without a parent are siblings: their names are unique among them too.
+        var name = $"Univers {Guid.NewGuid():N}";
+        await CreateAsync(name);
+
+        var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(name.ToUpperInvariant(), null, null));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed);
+    }
+
+    [Fact]
+    public async Task Create_WithTheNameOfAUniverseUnderAnotherParent_IsAccepted()
+    {
+        var first = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var second = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        await CreateAsync("Origines", first.Id);
+
+        var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest("Origines", null, second.Id));
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_MovingTheUniverseUnderAParentWhereItsNameIsTaken_IsABusinessError()
+    {
+        var first = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var second = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        await CreateAsync("Épilogue", first.Id);
+        var universe = await CreateAsync("épilogue", second.Id);
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/universes/{universe.Id}", new UpdateUniverseRequest(universe.Name, null, first.Id, universe.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed);
+    }
+
+    [Fact]
     public async Task Create_UnderAnUnknownParent_IsAFunctionalError()
     {
         var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest("Orphelin", null, Guid.CreateVersion7()));
@@ -135,9 +185,9 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     {
         // B under A, C at the top. Moving A under C while C is concurrently moved under B would, if
         // each change were checked without seeing the other, persist the cycle A → C → B → A.
-        var a = await CreateAsync("A");
-        var b = await CreateAsync("B", a.Id);
-        var c = await CreateAsync("C");
+        var a = await CreateAsync($"A {Guid.NewGuid():N}");
+        var b = await CreateAsync($"B {Guid.NewGuid():N}", a.Id);
+        var c = await CreateAsync($"C {Guid.NewGuid():N}");
         await using var scope = _factory.Services.CreateAsyncScope();
         await using var otherChange = new NpgsqlConnection(
             scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.GetConnectionString());
@@ -145,7 +195,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         await using var transaction = await otherChange.BeginTransactionAsync();
         await ExecuteAsync(otherChange, $"SELECT pg_advisory_xact_lock({UniverseHierarchy.LockKey})");
 
-        var move = _client.PutAsJsonAsync($"/admin/universes/{a.Id}", new UpdateUniverseRequest("A", null, c.Id, a.Version));
+        var move = _client.PutAsJsonAsync($"/admin/universes/{a.Id}", new UpdateUniverseRequest(a.Name, null, c.Id, a.Version));
         await Task.Delay(TimeSpan.FromSeconds(1));
         Assert.False(move.IsCompleted, "A hierarchy change must wait for the one in progress.");
         await ExecuteAsync(otherChange, $"UPDATE \"Universes\" SET \"ParentId\" = '{b.Id}' WHERE \"Id\" = '{c.Id}'");
@@ -159,8 +209,8 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     {
         // A under C and C under A, requested together: both must queue on the hierarchy before
         // locking their own row, or each would hold the row the other's foreign key check needs.
-        var a = await CreateAsync("A");
-        var c = await CreateAsync("C");
+        var a = await CreateAsync($"A {Guid.NewGuid():N}");
+        var c = await CreateAsync($"C {Guid.NewGuid():N}");
         await using var scope = _factory.Services.CreateAsyncScope();
         await using var otherChange = new NpgsqlConnection(
             scope.ServiceProvider.GetRequiredService<BdthequeDbContext>().Database.GetConnectionString());
@@ -170,8 +220,8 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
 
         var moves = new[]
         {
-            _client.PutAsJsonAsync($"/admin/universes/{a.Id}", new UpdateUniverseRequest("A", null, c.Id, a.Version)),
-            _client.PutAsJsonAsync($"/admin/universes/{c.Id}", new UpdateUniverseRequest("C", null, a.Id, c.Version)),
+            _client.PutAsJsonAsync($"/admin/universes/{a.Id}", new UpdateUniverseRequest(a.Name, null, c.Id, a.Version)),
+            _client.PutAsJsonAsync($"/admin/universes/{c.Id}", new UpdateUniverseRequest(c.Name, null, a.Id, c.Version)),
         };
         await Task.Delay(TimeSpan.FromSeconds(1));
         await transaction.CommitAsync();

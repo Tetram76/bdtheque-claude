@@ -4,6 +4,7 @@
 @using Bdtheque.Contracts.Deletion
 @using Bdtheque.Contracts.Enums
 @inject IStringLocalizer<AdminAuthors> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
@@ -385,8 +386,9 @@
 
     private string? PseudonymError => IsProblem(DuplicateRule) && UnderPseudonym ? DuplicateText : null;
 
+    // The text shared by every name unique regardless of case and accents (modele-metier/auteur-artiste.md).
     private string DuplicateText =>
-        L[$"FieldError.{DuplicateRule}", RecordSearch.AuthorName(EntryLastName?.Trim(), EntryFirstName?.Trim(), EntryPseudonym?.Trim())].Value;
+        FieldTexts[DuplicateRule, RecordSearch.AuthorName(EntryLastName?.Trim(), EntryFirstName?.Trim(), EntryPseudonym?.Trim())].Value;
 
     // Any other error, presented at the top of the panel: an author changed or deleted meanwhile, a text too long, a technical error.
     private ApiProblem? OtherProblem => IsProblem(RequiredRule) || IsProblem(DuplicateRule) ? null : _entryProblem;

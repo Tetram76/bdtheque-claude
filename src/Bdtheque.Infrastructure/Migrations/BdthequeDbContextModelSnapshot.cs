@@ -791,7 +791,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)")
-                        .UseCollation("fr-FR-x-icu");
+                        .UseCollation("fr_case_accent_insensitive");
 
                     b.Property<uint>("Version")
                         .IsConcurrencyToken()
@@ -830,7 +830,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)")
-                        .UseCollation("fr-FR-x-icu");
+                        .UseCollation("fr_case_accent_insensitive");
 
                     b.Property<Guid>("PublisherId")
                         .HasColumnType("uuid");
@@ -1145,7 +1145,7 @@ namespace Bdtheque.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)")
-                        .UseCollation("fr-FR-x-icu");
+                        .UseCollation("fr_case_accent_insensitive");
 
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid");
@@ -1158,7 +1158,10 @@ namespace Bdtheque.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentId");
+                    b.HasIndex("ParentId", "Name")
+                        .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("ParentId", "Name"), false);
 
                     b.ToTable("Universes", t =>
                         {

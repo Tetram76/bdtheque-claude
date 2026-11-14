@@ -20,6 +20,7 @@ internal static class UniqueIndexRules
         ["IX_Genres_Label"] = DomainRules.GenreLabelAlreadyUsed,
         ["IX_Publishers_Name"] = DomainRules.PublisherNameAlreadyUsed,
         ["IX_PublisherCollections_PublisherId_Name"] = DomainRules.PublisherCollectionNameAlreadyUsed,
+        ["IX_Universes_ParentId_Name"] = DomainRules.UniverseNameAlreadyUsed,
         ["IX_Contributions_AlbumId_Role_AuthorId"] = DomainRules.ContributionAlreadyCredited,
         ["IX_Contributions_SeriesId_Role_AuthorId"] = DomainRules.ContributionAlreadyCredited,
         ["IX_PurchaseIntents_AlbumId_WholeAlbum"] = DomainRules.PurchaseIntentAlbumAlreadyTargeted,

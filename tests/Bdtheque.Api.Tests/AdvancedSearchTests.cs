@@ -163,6 +163,21 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
     }
 
     [Fact]
+    public async Task Text_OfANameUniqueRegardlessOfCaseAndAccents_IsComparedWithThemWhenTheCriterionAsks()
+    {
+        // A label is stored under the case- and accent-insensitive collation of its uniqueness: the comparison does not rely on it.
+        var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Épopée {_marker}"));
+        async Task<IEnumerable<Guid>> GenreIdsAsync(SearchCondition criteria) =>
+            Ids(await SearchAsync<GenreListItem>(EntityKind.Genre, And(Text("label", Contains, _marker), criteria)));
+
+        AssertIds([genre.Id], await GenreIdsAsync(Text("label", EqualTo, $"EPOPEE {_marker}")));
+        Assert.Empty(await GenreIdsAsync(new SearchCriterion("label", EqualTo, [$"EPOPEE {_marker}"], MatchCaseAndAccents: true)));
+        Assert.Empty(await GenreIdsAsync(new SearchCriterion("label", StartsWith, ["epopee"], MatchCaseAndAccents: true)));
+        AssertIds([genre.Id], await GenreIdsAsync(new SearchCriterion("label", Contains, [$"Épopée {_marker}"], MatchCaseAndAccents: true)));
+        AssertIds([genre.Id], await GenreIdsAsync(new SearchDataComparison("label", StartsWith, new SearchOperand("label"), MatchCaseAndAccents: true)));
+    }
+
+    [Fact]
     public async Task Text_LooksForTheWildcardsOfLikeAsTheyAre()
     {
         var percent = await CreateAlbumAsync($"{_marker} 100%");

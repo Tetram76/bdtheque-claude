@@ -4,6 +4,7 @@
 @using Bdtheque.Contracts.Deletion
 @inject IStringLocalizer<AdminGenres> L
 @inject IStringLocalizer<GenreCreationDialog> Creation
+@inject IStringLocalizer<FieldMessages> FieldTexts
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
@@ -351,17 +352,19 @@
         Navigation.NavigateTo(ListOnly.Href());
     }
 
-    // The error of a label, presented at its field (a label required, or already taken, which the case and the accents do not
-    // tell apart from another: modele-metier/genre.md).
+    // The error of a label, presented at its field: a label required, or already taken, in the text shared by every name unique
+    // regardless of case and accents (modele-metier/genre.md).
     private string? FieldError(ApiProblem? problem, string? label) => problem is { Category: ProblemCategory.Business, RuleCode: { } code } && IsOfLabel(code)
-        ? L[$"FieldError.{code}", label?.Trim() ?? ""].Value
+        ? code == DuplicateRule ? FieldTexts[code, label?.Trim() ?? ""].Value : L[$"FieldError.{code}"].Value
         : null;
+
+    private const string DuplicateRule = "Genre.LabelAlreadyUsed";
 
     // Any other error, presented with the entry: a genre changed or deleted meanwhile, a technical error.
     private static ApiProblem? OtherProblem(ApiProblem? problem) =>
         problem is { Category: ProblemCategory.Business, RuleCode: { } code } && IsOfLabel(code) ? null : problem;
 
-    private static bool IsOfLabel(string ruleCode) => ruleCode is "Genre.LabelRequired" or "Genre.LabelAlreadyUsed";
+    private static bool IsOfLabel(string ruleCode) => ruleCode is "Genre.LabelRequired" or DuplicateRule;
 
     private async Task LoadImpactAsync(Guid genreId)
     {

@@ -105,9 +105,6 @@
   <data name="FieldError.Genre.LabelRequired" xml:space="preserve">
     <value>Le libellé du genre est obligatoire.</value>
   </data>
-  <data name="FieldError.Genre.LabelAlreadyUsed" xml:space="preserve">
-    <value>« {0} » est déjà pris : deux libellés qui ne diffèrent que par la casse ou les accents désignent le même genre.</value>
-  </data>
   <data name="Empty.Text" xml:space="preserve">
     <value>Aucun genre ne correspond à « {0} ».</value>
   </data>

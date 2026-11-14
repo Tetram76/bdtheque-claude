@@ -10,7 +10,10 @@ internal sealed class PublisherCollectionConfiguration : IEntityTypeConfiguratio
     {
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Name).IsRequired().HasMaxLength(300);
+        // A collection name is unique within its publisher regardless of case and accents (modele-metier/collection-editeur.md):
+        // the constraint below compares through this collation, which only a column, not a constraint, can carry.
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(300)
+            .UseCollation(BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation);
 
         // Checked at commit: one save of the publisher can swap the names of two of its collections (#360).
         builder.HasIndex(c => new { c.PublisherId, c.Name }).IsUniqueAtCommit();

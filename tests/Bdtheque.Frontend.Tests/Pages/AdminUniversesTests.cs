@@ -202,6 +202,23 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Panel_ANameAlreadyTakenUnderTheParent_IsRefusedAtTheName()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameAlreadyUsed", "/name");
+        var page = Open("new=open");
+        page.Find("input[name='name']").Change(" star wars ");
+
+        page.Find("form.side-panel-form").Submit();
+
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal("true", panel.QuerySelector("input[name='name']")!.GetAttribute("aria-invalid"));
+        Assert.Equal(
+            "« star wars » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.",
+            Text(panel.QuerySelector("input[name='name']")!.ParentElement!.QuerySelector(".field-error")!));
+        Assert.Empty(panel.QuerySelectorAll("[data-error-category]"));
+    }
+
+    [Fact]
     public void Panel_CreatesTheUniverse_ThenLeadsBackToTheList()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"], HttpStatusCode.Created);

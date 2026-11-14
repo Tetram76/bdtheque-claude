@@ -100,10 +100,13 @@ public static class DomainRules
 
     // Uniqueness rules: enforced by unique indexes, since the domain cannot see the other rows. The
     // API translates the violation of each index into its code (see Bdtheque.Api's UniqueIndexRules).
+    // A name is unique regardless of case and accents, within its publisher for a collection and within its
+    // parent for a universe (modele-metier/).
     public const string GenreLabelAlreadyUsed = "Genre.LabelAlreadyUsed";
     public const string AuthorDisplayNameAlreadyUsed = "Author.DisplayNameAlreadyUsed";
     public const string PublisherNameAlreadyUsed = "Publisher.NameAlreadyUsed";
     public const string PublisherCollectionNameAlreadyUsed = "PublisherCollection.NameAlreadyUsed";
+    public const string UniverseNameAlreadyUsed = "Universe.NameAlreadyUsed";
 
     /// <summary>The same author credited twice with the same role on an album, or on a series template.</summary>
     public const string ContributionAlreadyCredited = "Contribution.AlreadyCredited";

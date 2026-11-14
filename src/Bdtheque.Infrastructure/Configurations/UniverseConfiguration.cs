@@ -10,7 +10,11 @@ internal sealed class UniverseConfiguration : IEntityTypeConfiguration<Universe>
     {
         builder.HasKey(u => u.Id);
 
-        builder.Property(u => u.Name).IsRequired().HasMaxLength(300);
+        // A universe name is unique within its parent regardless of case and accents (modele-metier/univers.md); the universes
+        // without a parent are siblings too, hence nulls not distinct.
+        builder.Property(u => u.Name).IsRequired().HasMaxLength(300)
+            .UseCollation(BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation);
+        builder.HasIndex(u => new { u.ParentId, u.Name }).IsUnique().AreNullsDistinct(false);
         builder.Property(u => u.Description);
 
         // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
