@@ -3,6 +3,7 @@
 ## 2026-11-14
 
 * **Plan** : note sur la Phase 4 : le détail d'une édition de la fiche d'un album présente chaque montant seul et n'a pas de ligne pour un montant d'acquisition absent, la gratuité exceptée, tant que la valeur en euros du jour et la valeur estimée n'existent pas ; la phase les y ajoute, sans mention à leur place lorsqu'elles n'existent pas (#439).
+* **Décision de l'utilisateur** : un même champ porte la même mention à tous ses points de saisie (fiches en page, panneaux et lignes des listes, dialogues de création sur place) : « (obligatoire) » après le libellé de tout champ que le modèle métier rend obligatoire à ce moment de la saisie, aucune mention sur un champ facultatif ; le titre d'un album est marqué « (obligatoire) » sans série et sans mention dans une série ; un champ sans libellé affiché porte la mention pour les lecteurs d'écran. **Choix** : la mention est écrite par le composant commun des champs, chaque point de saisie ne disant que si son champ est obligatoire, sans `aria-required` ni attribut `required` (#412).
 
 ## 2026-11-13
 

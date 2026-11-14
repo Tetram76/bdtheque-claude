@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''un album : erreurs, blocs du formulaire, barre d''enregistrement.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T10:00:00Z }
 ---
 
 # Contenu
@@ -18,7 +18,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
 - **Le formulaire**, en blocs, sur la colonne principale :
   - **L'album** :
     - la **série**, choisie en tapant son titre, que l'on retire pour faire de l'album un album isolé ; l'aide rappelle ce que change la série pour le titre ;
-    - le **titre**, dont la mention suit la série : « facultatif dans une série », « obligatoire sans série » ;
+    - le **titre**, obligatoire sans série seulement : marqué « (obligatoire) » sans série, sans mention dans une série, l'aide de la série rappelant qu'un album isolé doit avoir un titre ;
     - la **clé de tri**, toujours visible, marquée **Auto** ou **Manuelle** ; en mode manuel, **Réinitialiser** la recalcule à partir du titre ([Calcul et stockage de la clé de tri](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri)) ; sans titre propre, l'aide indique que l'album est rangé à la clé de sa série.
   - **Tomaison** et **Parution**, deux petits blocs côte à côte sous « L'album » (empilés sur smartphone) : deux notions sans rapport, la place de l'album dans la numérotation et sa date, que rien ne doit faire confondre, sans que l'une ou l'autre alourdisse « L'album » face aux blocs suivants. « Parution » prend la largeur de son contenu, « Tomaison » le reste.
     - **Tomaison**, dont les champs tiennent sur une ligne, qui passe à la ligne au besoin :
@@ -26,6 +26,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:00:00Z }
       - les cases **Intégrale** et **Hors-série** sont indépendantes l'une de l'autre ; sans case cochée, l'album est régulier. Une donnée à deux valeurs se saisit par une case à cocher, jamais par un sélecteur à boutons.
     - **Parution** : la **première publication**, une liste de mois (« — » pour un mois inconnu) et l'année, côte à côte, jamais le jour.
   - Dans toute la fiche, chaque champ est **dimensionné à ce qu'il contient** (quelques chiffres pour un tome ou une année, un nom de mois), jamais étiré sur toute la largeur ; seuls les textes libres (série, titre, clé de tri, résumé, notes) l'occupent.
+  - **Mentions des champs**, les mêmes à tous les points de saisie de l'application (fiches en page, panneaux et lignes des listes, dialogues de création sur place) : « (obligatoire) » après le libellé de tout champ que le modèle métier ([`modele-metier/`](../../modele-metier/index.md)) rend obligatoire à ce moment de la saisie (ex. le titre d'un album sans série, le mode d'acquisition d'une édition possédée), aucune mention sur un champ facultatif ; un champ saisi sans libellé affiché (nom d'une collection dans la fiche de son éditeur, genre modifié dans sa ligne) la porte pour les lecteurs d'écran. Un même champ porte ainsi la même mention partout où il se saisit (décision de l'utilisateur, #412).
   - **Les auteurs** : une ligne par rôle (scénario, dessin, couleurs), chaque auteur en étiquette retirable, puis **Ajouter**, qui trouve un auteur en tapant son nom ou en ajoute un nouveau, créé à l'enregistrement de l'album ; rien ne remplace les étiquettes d'un rôle sans auteur, **Ajouter** suffisant à le dire. Un auteur ainsi ajouté se trouve de même pour un autre rôle, sans être créé deux fois, marqué « nouvel auteur » par une pastille bien distincte de son nom, quel que soit le thème. Dès qu'une série est choisie, ses auteurs sont repris sur un album qui n'en a pas encore, ou, en création, qui n'a que ceux de la série choisie précédemment, qu'ils remplacent ([Initialisation des contributions depuis la série](../../fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)) ; un encadré le dit, et rappelle que les modifier ici ne change pas ceux de la série. Il disparaît dès que les auteurs sont modifiés, désormais personnalisés.
   - **Genres et univers** : ceux de l'album, en étiquettes retirables, avec **Ajouter**, sans rien à leur place quand il n'y en a pas, qui trouve un genre ou un univers en tapant son nom ou en ajoute un nouveau, créé à l'enregistrement de l'album ; en dessous, **par la série**, ceux qu'il affiche par sa série, en étiquettes en tirets, non modifiables ici ([Genres et univers d'un album](../../fonctionnel/regles-metier/genres-et-univers-d-un-album.md)). Un univers est présenté avec ses ancêtres.
   - **Résumé, notes et appréciation** : le résumé et les notes personnelles en zones de texte, puis l'appréciation en cinq étoiles, avec son libellé (« Bien », « Pas encore noté ») et **Retirer**.
