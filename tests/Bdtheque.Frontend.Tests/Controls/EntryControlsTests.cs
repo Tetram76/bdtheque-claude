@@ -267,10 +267,29 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.Name, " Le port ")
             .Add(p => p.OnCreated, value => created = value));
 
+        // Its name required, its parent optional, as in the panel of a universe (visuel/saisie-album/contenu.md, mentions).
+        Assert.Equal(["universe-creation-name"], dialog.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
+        Assert.Equal("(obligatoire)", dialog.Find("label[for=universe-creation-name] .field-note").TextContent);
         dialog.Find(".dialog-actions .button[data-variant=primary]").Click();
 
         Assert.Equal(("Le port", (Guid?)null, (RecordOption?)null), (created!.Value.Universe.Name, created.Value.Universe.ParentId, created.Value.Parent));
         Assert.Empty(_sent);
+    }
+
+    [Fact]
+    public void GenreCreationDialog_ItsLabelRequired_AsInTheListOfGenres()
+    {
+        var dialog = Render<GenreCreationDialog>(parameters => parameters.Add(p => p.Id, "genre-creation").Add(p => p.Label, "Polar"));
+
+        Assert.Equal("(obligatoire)", dialog.Find("label[for=genre-creation-label] .field-note").TextContent);
+    }
+
+    [Fact]
+    public void AuthorCreationDialog_NoMention_NeitherNameNorPseudonymBeingRequiredAlone()
+    {
+        var dialog = Render<AuthorCreationDialog>(parameters => parameters.Add(p => p.Id, "author-creation").Add(p => p.Name, "Moebius"));
+
+        Assert.Empty(dialog.FindAll(".field-note"));
     }
 
     [Fact]

@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T18:26:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T10:00:00Z }
 ---
 
 # Frontend
@@ -39,6 +39,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T18:26:50Z }
 ## Contrôles
 
 - **Apparence des contrôles posée sur les éléments HTML eux-mêmes**, si bien qu'un contrôle natif et un contrôle de formulaire Blazor sont identiques. Un champ est **dimensionné à ce qu'il contient**, jamais étiré sur toute la largeur ([Contenu](../../visuel/saisie-album/contenu.md)).
+- **Mention « (obligatoire) » écrite par le composant commun des champs** ([Contenu](../../visuel/saisie-album/contenu.md), mentions des champs) : chaque point de saisie dit seulement si son champ est obligatoire, et le composant pose la mention dans le libellé, affiché ou réservé aux lecteurs d'écran ; la règle, écrite une fois, ne peut plus diverger d'un point de saisie à l'autre (#412). Un libellé qui dit déjà « obligatoire » se passe d'`aria-required`, qui le ferait lire deux fois (documentation MDN, *aria-required*).
+  - **Alternative écartée (mention passée en texte par chaque page)** : c'est ainsi que les points de saisie avaient divergé, le nom d'un univers marqué dans son panneau et non dans le dialogue de sa création sur place, son parent « facultatif » dans le seul dialogue (contrôle de cohérence, #412).
+  - **Alternative écartée (attribut `required` du champ)** : le navigateur refuserait d'envoyer le formulaire, alors que le frontend envoie ce qui est saisi et que l'enregistrement rapporte ce qui est à corriger (§ Fiches de saisie, aucune règle de saisie dans le frontend).
 - **Choix d'une fiche en tapant son nom** (*combobox* de l'ARIA), dont les suggestions viennent de la recherche des listes ([Recherche](../api/recherche.md)) :
   - chaque changement du texte reçoit un **numéro**, avant toute attente, et seule la recherche du dernier écrit les suggestions : le circuit peut traiter la frappe suivante dès la première attente d'un gestionnaire, et une réponse antérieure, quel que soit son moment, est ignorée ;
   - la recherche attend une **pause de la frappe de 500 ms**, valeur courante d'un anti-rebond : un mot tapé d'un trait n'interroge le serveur qu'une fois ;

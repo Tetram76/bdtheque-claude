@@ -54,9 +54,6 @@
   <data name="Name" xml:space="preserve">
     <value>Nom</value>
   </data>
-  <data name="Name.Note" xml:space="preserve">
-    <value>(obligatoire)</value>
-  </data>
   <data name="Name.Placeholder" xml:space="preserve">
     <value>Nom de l&apos;éditeur</value>
   </data>

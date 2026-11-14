@@ -137,6 +137,21 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Mentions_TheNameAndTheNameOfEachCollectionRequired_TheWebsiteOptional()
+    {
+        // The name of a collection has no label shown: its mention is for screen readers (visuel/saisie-album/contenu.md, mentions).
+        var page = OpenPublisher();
+
+        Assert.Equal("(obligatoire)", page.Find("label[for=publisher-name] .field-note").TextContent);
+        Assert.Empty(page.FindAll("label[for=publisher-website] .field-note"));
+        Assert.All(page.FindAll(".publisher-collection label"), label =>
+        {
+            Assert.Equal("visually-hidden", label.GetAttribute("class"));
+            Assert.Equal("(obligatoire)", label.QuerySelector(".field-note")?.TextContent);
+        });
+    }
+
+    [Fact]
     public void RemovedCollection_StaysStruckUntilTheSaving_AndCanBeRestored()
     {
         var page = OpenPublisher();

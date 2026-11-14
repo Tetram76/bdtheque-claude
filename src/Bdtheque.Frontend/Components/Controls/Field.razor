@@ -1,3 +1,5 @@
+@inject IStringLocalizer<Field> L
+
 @* A labelled field: its label, the control it gives its identifier to, then the error and the help that describe it. The
    control is the caller's (a native input, an InputText bound to a form, a RecordPicker…), styled by the base theme
    (themes/base.css). A field sized to its content (a volume, a year) is as wide as its characters, never stretched over
@@ -6,9 +8,9 @@
 <div class="field" style="@WidthStyle" data-error-related="@(ErrorRelated && Error is not null ? "true" : null)">
     <label class="@(LabelHidden ? "visually-hidden" : "field-label")" for="@Id">
         @Label
-        @if (Note is not null)
+        @if (Required)
         {
-            <span class="field-note">@Note</span>
+            <span class="field-note">@L["Required"]</span>
         }
     </label>
     @ChildContent?.Invoke(Context)
@@ -37,9 +39,14 @@
     [Parameter]
     public bool LabelHidden { get; set; }
 
-    /// <summary>A short mention after the label (e.g. « facultatif dans une série »).</summary>
+    /// <summary>
+    /// Whether the model requires the field at this point of the entry: the label then says so, the same mention for every
+    /// point of entry of a field (visuel/saisie-album/contenu.md, mentions des champs), screen readers reading it in a hidden
+    /// label too. Written here once, so that no point of entry words it its own way. No aria-required, which would have it read
+    /// twice, nor required, the browser then refusing to send what the saving is to report (choix-implementation/socle/frontend.md).
+    /// </summary>
     [Parameter]
-    public string? Note { get; set; }
+    public bool Required { get; set; }
 
     [Parameter]
     public string? Help { get; set; }

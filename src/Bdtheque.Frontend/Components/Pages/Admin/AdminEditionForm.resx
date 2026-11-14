@@ -75,9 +75,6 @@
   <data name="Kicker.Value" xml:space="preserve">
     <value>Montants</value>
   </data>
-  <data name="Required" xml:space="preserve">
-    <value>(obligatoire)</value>
-  </data>
   <data name="None" xml:space="preserve">
     <value>—</value>
   </data>

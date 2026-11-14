@@ -90,7 +90,7 @@ public sealed class ControlsPage : ComponentBase
         // Laid out by the page, as every screen lays out its own fields.
         builder.AddAttribute(3, "style", "display: flex; flex-direction: column; gap: 0.75rem");
 
-        builder.AddContent(10, FieldOf("f-title", "Titre", note: "facultatif dans une série", help: "La série et le tome suffisent à identifier l'album.",
+        builder.AddContent(10, FieldOf("f-title", "Titre", required: true, help: "La série et le tome suffisent à identifier l'album.",
             control: context => input =>
             {
                 input.OpenElement(0, "input");
@@ -172,12 +172,12 @@ public sealed class ControlsPage : ComponentBase
     }
 
     private static RenderFragment FieldOf(string id, string label, RenderFragment<FieldContext> control,
-        string? note = null, string? help = null, string? error = null, int? characters = null) => builder =>
+        bool required = false, string? help = null, string? error = null, int? characters = null) => builder =>
     {
         builder.OpenComponent<Field>(0);
         builder.AddComponentParameter(1, nameof(Field.Id), id);
         builder.AddComponentParameter(2, nameof(Field.Label), label);
-        builder.AddComponentParameter(3, nameof(Field.Note), note);
+        builder.AddComponentParameter(3, nameof(Field.Required), required);
         builder.AddComponentParameter(4, nameof(Field.Help), help);
         builder.AddComponentParameter(5, nameof(Field.Error), error);
         builder.AddComponentParameter(6, nameof(Field.Characters), characters);

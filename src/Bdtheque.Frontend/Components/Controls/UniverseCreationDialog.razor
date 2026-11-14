@@ -10,10 +10,10 @@
     <ChildContent>
         <p class="record-creation-lead">@L["Lead"]</p>
         <div class="record-creation-fields">
-            <Field Id="@($"{Id}-name")" Label="@L["Name"]" Context="control">
+            <Field Id="@($"{Id}-name")" Label="@L["Name"]" Required Context="control">
                 <input id="@control.Id" type="text" @bind="_name" />
             </Field>
-            <Field Id="@($"{Id}-parent")" Label="@L["Parent"]" Note="@L["Parent.Note"]" Help="@L["Parent.Help"]" Context="control">
+            <Field Id="@($"{Id}-parent")" Label="@L["Parent"]" Help="@L["Parent.Help"]" Context="control">
                 <RecordPicker Id="@control.Id" Kind="RecordKind.Universe" @bind-Value="_parent" Placeholder="@L["Parent.Placeholder"]"
                               aria-describedby="@control.DescribedBy" />
             </Field>

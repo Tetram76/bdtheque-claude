@@ -99,9 +99,6 @@
   <data name="Name" xml:space="preserve">
     <value>Nom</value>
   </data>
-  <data name="Required" xml:space="preserve">
-    <value>(obligatoire)</value>
-  </data>
   <data name="Description" xml:space="preserve">
     <value>Description</value>
   </data>
