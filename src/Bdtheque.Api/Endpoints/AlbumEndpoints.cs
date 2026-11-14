@@ -73,6 +73,8 @@ internal static class AlbumEndpoints
                             a.Summary,
                             a.PersonalNotes,
                             a.Rating,
+                            // That of its cards, the record being of the documentary base (fonctionnel/regles-metier/couverture-d-un-album.md).
+                            CoverVisual = a.CoverVisualOf(),
                             Genres = context.Genres
                                 .Where(g => a.Genres.Any(o => o.Id == g.Id) || a.Series!.Genres.Any(o => o.Id == g.Id))
                                 .OrderBy(g => g.Label).ThenBy(g => g.Id)
@@ -97,7 +99,7 @@ internal static class AlbumEndpoints
 
         return new AlbumDetail(
             album.Album, album.FirstPublicationYear, album.FirstPublicationMonth, album.Summary, album.PersonalNotes,
-            EnumMapping.Map<ContractEnums.AlbumRating>(album.Rating), album.Genres, universes, album.Contributions, editions,
+            EnumMapping.Map<ContractEnums.AlbumRating>(album.Rating), CatalogExpressions.ToCover(album.CoverVisual), album.Genres, universes, album.Contributions, editions,
             album.PurchaseIntent, seriesAlbums, album.CreatedAt, album.ModifiedAt);
     }
 

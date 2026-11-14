@@ -31,7 +31,7 @@ else if (_album is { } album)
         <div class="album-head">
             @* The cover of the album, put forward as a theme puts it (--record-visual-…, themes/base.css). *@
             <div class="album-cover">
-                <Cover VisualId="CoverId" Alt="@L["Cover", Heading]" Volume="true" />
+                <Cover VisualId="album.Cover?.VisualId" Alt="@L["Cover", Heading]" Volume="true" />
             </div>
 
             <div class="album-identity">
@@ -165,17 +165,6 @@ else if (_album is { } album)
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
-
-    // The cover of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among the editions of the collection: the
-    // first cover of the oldest edition by its year of edition that has one, those without year last; none, the generic
-    // visual.
-    private Guid? CoverId => _owned
-        .Where(e => e.Visuals.Any(v => v.Type == VisualType.Cover))
-        .OrderBy(e => e.Edition.PublicationYear is null)
-        .ThenBy(e => e.Edition.PublicationYear)
-        .Select(e => e.Visuals.First(v => v.Type == VisualType.Cover).Id)
-        .Cast<Guid?>()
-        .FirstOrDefault();
 
     private string Heading => _album!.Album.Title ?? Labels.Album(_album.Album, _format);
 

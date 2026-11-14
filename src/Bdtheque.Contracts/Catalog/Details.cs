@@ -10,6 +10,11 @@ namespace Bdtheque.Contracts.Catalog;
 // (modele-metier/attributs-communs-a-toutes-les-entites.md), and so does each entity it presents
 // without a record of its own (edition, contribution, visual, purchase intent).
 
+/// <param name="Cover">
+/// That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not, as on its cards:
+/// the record is of the documentary base. <c>null</c> without any, the generic visual standing in for it
+/// (fonctionnel/regles-metier/visuel-par-defaut.md).
+/// </param>
 /// <param name="Genres">Those of the album and of its series, without duplicates (fonctionnel/regles-metier/genres-et-univers-d-un-album.md).</param>
 /// <param name="Universes">Those of the album and of its series, without duplicates, by name.</param>
 /// <param name="Editions">Every edition, owned or targeted by a purchase intent, whole, by year.</param>
@@ -26,6 +31,7 @@ public sealed record AlbumDetail(
     string? Summary,
     string? PersonalNotes,
     AlbumRating? Rating,
+    AlbumCover? Cover,
     IReadOnlyList<GenreListItem> Genres,
     IReadOnlyList<UniverseInHierarchy> Universes,
     IReadOnlyList<ContributionItem> Contributions,

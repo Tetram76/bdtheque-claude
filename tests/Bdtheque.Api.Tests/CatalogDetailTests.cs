@@ -118,6 +118,33 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     }
 
     [Fact]
+    public async Task Album_HasTheCoverOfItsCard_AmongAllItsEditions_ThoseTargetedByAnIntentIncluded()
+    {
+        // fonctionnel/regles-metier/couverture-d-un-album.md: the record of an album is of the documentary base, like its card.
+        var publisher = await CreatePublisherAsync("Glénat");
+        var series = await PostAsync<SeriesForm>("/admin/series", SeriesContentOf("Série visée"));
+        var album = await CreateAlbumAsync("Seulement visé", series.Id, volume: 1);
+        var (intended, _) = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2020);
+        var cover = await UploadAsync(album.Id, intended, VisualType.Cover);
+
+        var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}");
+
+        Assert.Equal(cover.Id, detail.Cover?.VisualId);
+        Assert.Equal(Assert.Single(detail.SeriesAlbums).Cover, detail.Cover);
+    }
+
+    [Fact]
+    public async Task Album_WithoutAnyCover_HasNone()
+    {
+        var publisher = await CreatePublisherAsync("Glénat");
+        var album = await CreateAlbumAsync("Sans couverture", null);
+        var edition = await CreateOwnedEditionAsync(album.Id, publisher.Id, 2020);
+        await UploadAsync(album.Id, edition.Id, VisualType.BackCover);
+
+        Assert.Null((await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}")).Cover);
+    }
+
+    [Fact]
     public async Task Album_NotInTheCollection_SaysSoAndShowsItsIntentOnTheWholeAlbum()
     {
         var album = await CreateAlbumAsync("Album sans édition", null);
