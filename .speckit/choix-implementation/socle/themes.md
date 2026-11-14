@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T19:51:08Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T13:00:00Z }
 ---
 
 # Thèmes
@@ -28,6 +28,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T19:51:08Z }
 ## Couleurs du jour
 
 - **Couleurs d'un thème peint par la couverture du jour posées sur la racine de la page**, à chaque requête, en propriétés personnalisées (`--day-…`) que lit sa feuille ([La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) : connues seulement avec l'édition à la une, elles sont un contrat du thème de base sans valeur, que seul ce thème lit. Le frontend les lit au point d'accès des couleurs du jour ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)) ; sans elles (collection vide, édition du jour sans couverture, date du navigateur pas encore connue, API qui ne répond pas), le thème garde ses propres couleurs : elles ne font jamais échouer une page. Une navigation améliorée les reçoit avec le thème, Blazor synchronisant les attributs de `<html>`.
+  - **Lues avant le rendu de la page**, par la requête qui la rend, réexécutée comprise : la racine de la page ne les attend jamais. Blazor n'attend pas l'initialisation asynchrone d'une page réexécutée pour son code de statut (la page introuvable), qu'il envoie dès son premier rendu : la page arrivait sans elles, ses fonds et son en-tête transparents (constaté à la validation, #437). Les tests reçoivent de même leurs couleurs du jour de façon asynchrone, comme de l'API.
+    - **Alternative écartée (couleurs lues par l'initialisation de la racine de la page)** : perdues par toute page réexécutée, ce que des couleurs reçues de façon synchrone dans les tests cachaient.
+    - **Alternative écartée (page introuvable rendue par une route attrape-tout plutôt que réexécutée)** : l'écran d'accueil de la première requête, rendu à la place de la page, répondait alors 200 à une adresse qui ne mène à rien, et toute autre page réexécutée perdait encore ses couleurs.
   - **Alternative écartée (couleurs calculées dans le navigateur)** : la page arriverait dans d'autres couleurs, puis changerait, comme le tirage du thème écarté pour la même raison.
 - **Toute couleur lue avec une autre dérivée par le frontend**, en notation hexadécimale, plutôt que mélangée par la feuille : fonds teintés de la dominante, liens et textes assombris jusqu'au contraste attendu, accent dont le texte est blanc ou presque noir (un accent de ton moyen étant assombri jusqu'à ce que le blanc l'atteigne), champ et reflet sur la couleur profonde. Le test des contrastes vérifie ainsi le thème sur des couvertures de toute sorte (pâle, de ton moyen, sombre, grise, couleur profonde trop claire), et non sur une seule palette.
   - **Alternative écartée (`color-mix()` dans la feuille)** : aucun test ne lirait les couleurs obtenues, et la lisibilité d'une couverture pâle ne serait vérifiée que par l'œil.

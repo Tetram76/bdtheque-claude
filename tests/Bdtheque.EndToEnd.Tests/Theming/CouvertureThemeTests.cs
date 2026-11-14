@@ -177,6 +177,25 @@ public sealed class AdministrationCouvertureThemeTests(ApplicationHost applicati
     }
 }
 
+/// <summary>
+/// The page of an address that leads nowhere takes the colours of the day as any other page: they are known before its
+/// page is rendered, whatever the way the request reaches it (#437).
+/// </summary>
+[Collection(ApplicationCollection.Name)]
+public sealed class NotFoundCouvertureThemeTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
+{
+    [Fact]
+    public async Task UnknownPage_TakesTheColorsOfTheDay_InItsHeader()
+    {
+        var page = await NewPageInThemeAsync(ThemeCatalog.Couverture.Key, CouvertureThemeTests.Desktop);
+        var response = await page.GotoAsync("/no-such-page");
+
+        Assert.Equal(404, response!.Status);
+        Assert.Equal(DayPalette.Own.Deep, await CouvertureThemeTests.CustomPropertyAsync(page, "--day-deep"));
+        await Assertions.Expect(page.Locator(".app-header")).ToHaveCSSAsync("background-color", CouvertureThemeTests.Rgb(DayPalette.Own.Deep));
+    }
+}
+
 /// <summary>A thumbnail of a list is no book: its corners are regular, the profile of a book being for the albums in volume.</summary>
 [Collection(AdministrationApplication.Name)]
 public sealed class ListCouvertureThemeTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)

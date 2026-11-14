@@ -1,7 +1,7 @@
 @inject BrowserTimeZone TimeZone
 @inject IThemeSelector ThemeSelector
 @inject AudienceOpposition AudienceOpposition
-@inject IDayColorsSource DayColors
+@inject PageDayColors DayColors
 @inject BrowserWelcome Welcome
 @using Bdtheque.Frontend.Visits
 
@@ -21,7 +21,7 @@ else
        of the day of a theme painted by them, only known at each request: an enhanced navigation brings them with the theme.
        Those colours are the ones of the date of the browser: the whole page then depends on its time zone (data-local), and is
        rendered again if its request did not bring the current one (wwwroot/browser-time-zone.js), dates and times or not. *@
-    <html lang="fr" data-time-zone="@TimeZone.Name" data-theme="@Theme.Key" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)" style="@_dayStyle" data-local="@Theme.PaintedByTheDay">
+    <html lang="fr" data-time-zone="@TimeZone.Name" data-theme="@Theme.Key" data-audience="@(AudienceOpposition.IsOpposed ? "opposed" : null)" style="@DayColors.Style" data-local="@Theme.PaintedByTheDay">
 
     <head>
         <meta charset="utf-8" />
@@ -63,13 +63,5 @@ else
 }
 
 @code {
-    private string? _dayStyle;
-
     private Theme Theme => ThemeSelector.Current;
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (!Welcome.IsDue && Theme.PaintedByTheDay)
-            _dayStyle = DayPalette.Of(await DayColors.GetAsync()).Style;
-    }
 }
