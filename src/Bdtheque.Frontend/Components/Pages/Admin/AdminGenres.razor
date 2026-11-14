@@ -352,11 +352,18 @@
         Navigation.NavigateTo(ListOnly.Href());
     }
 
-    // The error of a label, presented at its field: a label required, or already taken, in the text shared by every name unique
-    // regardless of case and accents (modele-metier/genre.md).
+    // The error of a label, presented at its field: a label required, or already taken (modele-metier/genre.md).
     private string? FieldError(ApiProblem? problem, string? label) => problem is { Category: ProblemCategory.Business, RuleCode: { } code } && IsOfLabel(code)
-        ? code == DuplicateRule ? FieldTexts[code, label?.Trim() ?? ""].Value : L[$"FieldError.{code}"].Value
+        ? LabelErrorText(code, label?.Trim() ?? "")
         : null;
+
+    // A label already taken has the text shared by every name unique regardless of case and accents; a label required, its own.
+    private string LabelErrorText(string code, string label)
+    {
+        if (code == DuplicateRule)
+            return FieldTexts[code, label].Value;
+        return L[$"FieldError.{code}"].Value;
+    }
 
     private const string DuplicateRule = "Genre.LabelAlreadyUsed";
 
