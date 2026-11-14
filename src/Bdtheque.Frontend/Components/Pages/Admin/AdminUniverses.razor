@@ -344,12 +344,17 @@
     }
 
     // The field a business error points to, by the code of its rule; none for a rule that concerns no field of its own.
-    // A name already taken under the parent, in the text shared by every name unique regardless of case and accents
-    // (modele-metier/univers.md).
     private string? FieldError(string field) =>
-        _entryProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field
-            ? code == DuplicateRule ? FieldTexts[code, EntryName?.Trim() ?? ""].Value : L[$"FieldError.{code}"].Value
-            : null;
+        _entryProblem is { Category: ProblemCategory.Business, RuleCode: { } code } && FieldOf(code) == field ? FieldErrorText(code) : null;
+
+    // A name already taken under the parent has the text shared by every name unique regardless of case and accents
+    // (modele-metier/univers.md); any other rule, its own.
+    private string FieldErrorText(string code)
+    {
+        if (code == DuplicateRule)
+            return FieldTexts[code, EntryName?.Trim() ?? ""].Value;
+        return L[$"FieldError.{code}"].Value;
+    }
 
     private const string DuplicateRule = "Universe.NameAlreadyUsed";
 
