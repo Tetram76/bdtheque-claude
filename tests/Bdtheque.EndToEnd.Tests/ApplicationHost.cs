@@ -227,8 +227,15 @@ internal sealed class FirstChoice : Random
     public override int Next(int minValue, int maxValue) => minValue;
 }
 
-/// <summary>No colours of the day: a theme painted by them keeps its own.</summary>
+/// <summary>
+/// No colours of the day: a theme painted by them keeps its own. Answered asynchronously, as the request to the API answers
+/// in production: a page that would render before them is then seen by the tests, which a synchronous answer hid (#437).
+/// </summary>
 internal sealed class OwnDayColors : IDayColorsSource
 {
-    public Task<CoverPalette?> GetAsync(CancellationToken cancellationToken = default) => Task.FromResult<CoverPalette?>(null);
+    public async Task<CoverPalette?> GetAsync(CancellationToken cancellationToken = default)
+    {
+        await Task.Yield();
+        return null;
+    }
 }

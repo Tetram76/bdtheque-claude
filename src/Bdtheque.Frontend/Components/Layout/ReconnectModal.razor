@@ -2,6 +2,9 @@
 
 <script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
 
+@* Each state is shown by a class the script of Blazor sets on the dialog. Waiting for the reconnection, or a session paused
+   by the server, is no error; a failed reconnection or resumption is a technical error, presented as any other
+   (choix-implementation/socle/frontend.md, Présentation), with its action. *@
 <dialog id="components-reconnect-modal" data-nosnippet>
     <div class="components-reconnect-container">
         <div class="components-rejoining-animation" aria-hidden="true">
@@ -14,20 +17,23 @@
         <p class="components-reconnect-repeated-attempt-visible">
             @L["Reconnect.RepeatedAttempt"] <span id="components-seconds-to-next-attempt"></span> @L["Reconnect.Seconds"]
         </p>
-        <p class="components-reconnect-failed-visible">
-            @L["Reconnect.Failed"]
-        </p>
-        <button id="components-reconnect-button" class="components-reconnect-failed-visible">
-            @L["Reconnect.Retry"]
-        </button>
-        <p class="components-pause-visible">
-            @L["Reconnect.Paused"]
-        </p>
-        <p class="components-resume-failed-visible">
-            @L["Reconnect.ResumeFailed"]
-        </p>
-        <button id="components-resume-button" class="components-pause-visible components-resume-failed-visible">
-            @L["Reconnect.Resume"]
-        </button>
+        <div class="components-reconnect-failed-visible">
+            <ErrorMessage Problem="ApiProblem.Technical()" Message="@L["Reconnect.Failed"]">
+                <Actions>
+                    <Button Label="@L["Reconnect.Retry"]" Icon="IconName.Reload" id="components-reconnect-button" />
+                </Actions>
+            </ErrorMessage>
+        </div>
+        <div class="components-pause-visible">
+            <p>@L["Reconnect.Paused"]</p>
+            <Button Label="@L["Reconnect.Resume"]" Variant="ButtonVariant.Primary" data-reconnect-resume />
+        </div>
+        <div class="components-resume-failed-visible">
+            <ErrorMessage Problem="ApiProblem.Technical()" Message="@L["Reconnect.ResumeFailed"]">
+                <Actions>
+                    <Button Label="@L["Reconnect.Resume"]" Icon="IconName.Reload" data-reconnect-resume />
+                </Actions>
+            </ErrorMessage>
+        </div>
     </div>
 </dialog>

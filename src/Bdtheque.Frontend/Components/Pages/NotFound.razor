@@ -2,10 +2,21 @@
 @layout PublicLayout
 @inject IStringLocalizer<NotFound> L
 
+@* An address that leads nowhere: a request that cannot succeed as the data stand, a functional error
+   (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md), named for what happened rather than by
+   its category, which speaks of a record modified in the meantime. Not a function of the audience measurement
+   (choix-implementation/mesure-audience/releve-par-le-frontend.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 
 <section class="block">
     <h1 class="block-title">@L["Title"]</h1>
-    <p>@L["Message"]</p>
-    <a href="@AppPaths.Home">@L["Home"]</a>
+    <ErrorMessage Problem="Problem" Label="@L["Label"]" Message="@L["Message"]">
+        <Actions>
+            <Button Label="@L["Home"]" Href="@AppPaths.Home" />
+        </Actions>
+    </ErrorMessage>
 </section>
+
+@code {
+    private static readonly ApiProblem Problem = new(ProblemCategory.Functional, StatusCodes.Status404NotFound, null, null);
+}

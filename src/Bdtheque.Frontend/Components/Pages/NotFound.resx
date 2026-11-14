@@ -15,8 +15,11 @@
   <data name="Title" xml:space="preserve">
     <value>Page introuvable</value>
   </data>
+  <data name="Label" xml:space="preserve">
+    <value>Rien à cette adresse</value>
+  </data>
   <data name="Message" xml:space="preserve">
-    <value>La page demandée n&apos;existe pas.</value>
+    <value>La page demandée n&apos;existe pas, ou n&apos;existe plus : vérifiez l&apos;adresse, ou repartez de l&apos;accueil.</value>
   </data>
   <data name="Home" xml:space="preserve">
     <value>Revenir à l&apos;accueil</value>

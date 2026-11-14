@@ -63,6 +63,7 @@ else
 }
 // The colours of the day of a theme painted by the cover of the spotlight, read by the root of the page.
 builder.Services.AddScoped<IDayColorsSource, SpotlightDayColors>();
+builder.Services.AddScoped<PageDayColors>();
 builder.Services.AddScoped<AudienceOpposition>();
 builder.Services.AddScoped<CircuitAudienceVisit>();
 builder.Services.AddScoped<AudienceRecorder>();
@@ -154,6 +155,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery();
+
+// After the status code pages, so that a page re-executed for its status code reads them too, in its own scope.
+PageDayColors.ReadBeforeRendering(app);
 
 app.MapHealthChecks("/health");
 

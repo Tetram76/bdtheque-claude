@@ -89,20 +89,23 @@
     text-align: center;
 }
 
-#components-reconnect-modal button {
-    min-height: var(--control-height);
-    padding: 0 var(--control-padding-inline);
-    border: 0;
-    border-radius: var(--radius-control);
-    background: var(--color-accent);
-    color: var(--color-text-on-accent);
-    font: inherit;
-    font-weight: var(--font-weight-strong);
-    cursor: pointer;
+/* The session paused: its text, then the button that resumes it, the button of the theme as any other. */
+.components-pause-visible {
+    text-align: center;
 }
 
-#components-reconnect-modal button:hover {
-    text-decoration: underline;
+#components-reconnect-modal .components-pause-visible p {
+    margin-block-end: var(--space-l);
+}
+
+/* A failure is the error alone, across the dialog: no space left below it, as within a page. */
+.components-reconnect-failed-visible,
+.components-resume-failed-visible {
+    align-self: stretch;
+}
+
+#components-reconnect-modal ::deep .error-message {
+    margin: 0;
 }
 
 .components-rejoining-animation {

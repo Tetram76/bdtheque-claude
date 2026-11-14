@@ -91,8 +91,6 @@
     --color-text-on-info: #FFFFFF;
     --color-delete: #B42318;
     --color-text-on-delete: #FFFFFF;
-    --color-failure: #4A4A57;
-    --color-text-on-failure: #FFFFFF;
     /* A filled tag (e.g. « Dans la collection », an active filter): its own fill, which a theme sets apart from the accent. */
     --color-tag: #E3E1DA;
     --color-text-on-tag: #1D1D21;

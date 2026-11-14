@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T12:00:00Z }
 ---
 
 # Frontend
@@ -142,3 +142,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T10:00:00Z }
   - **Alternative écartée (tirets insécables dans le texte du libellé)** : un ISBN copié depuis la page porterait d'autres caractères que les tirets ; la recherche de l'application les ignore ([Recherche](../api/recherche.md)), mais pas toujours celle d'un autre site (moteur de recherche, libraire) où il serait collé.
 - **Tirages d'une page par le générateur aléatoire du conteneur de services**, que les tests de bout en bout remplacent par un tirage constant, pour qu'une page soit la même à chaque capture.
 - **Un composant unique présente toute erreur** ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)), avec sa catégorie, qui lui donne cadre, icône et couleur pour la distinguer au premier coup d'œil, à l'arrondi d'une tuile, jamais d'un contrôle, qu'un thème arrondit en pilule. Le texte d'une erreur métier est celui de son code de règle ; une erreur technique n'a qu'un texte générique. Le frontend ne référençant pas le domaine, un test confronte ses textes aux codes de règle.
+  - **Erreurs que l'application ne détecte pas elle-même, présentées par le même composant** : la page introuvable, une demande qui ne peut aboutir en l'état des données, donc une erreur fonctionnelle ([Erreurs métier, fonctionnelles et techniques](../ecritures/erreurs-metier-fonctionnelles-et-techniques.md)), nommée pour ce qui est arrivé plutôt que par sa catégorie, qui parle d'une fiche modifiée entre-temps ; le bandeau d'une erreur non gérée et les échecs du dialogue de reconnexion, que montre le script de Blazor, des erreurs techniques. Le script ne cherche que leurs éléments (identifiant, classes de leurs actions, classes de l'état du dialogue), quelle que soit leur forme ; le bandeau flotte au bas de la page sur une surface élevée, qui le garde lisible au-dessus de ce qu'il couvre. L'attente de la reconnexion et la session suspendue par le serveur ne sont pas des erreurs.
+    - **Alternative écartée (forme propre au bandeau, celle du gabarit de Blazor)** : une seconde présentation de l'erreur technique, que la règle des trois catégories, écrite dans le composant, n'atteignait pas (#400).

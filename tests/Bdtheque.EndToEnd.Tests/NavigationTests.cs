@@ -42,4 +42,19 @@ public sealed class NavigationTests(ApplicationHost application) : BrowserTest<A
         await Assertions.Expect(page.Locator("main h1")).ToBeVisibleAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Aide sur cette page" })).ToBeVisibleAsync();
     }
+
+    // A request that cannot succeed as the data stand: a functional error, which leads home
+    // (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md).
+    [Theory, InEachTheme]
+    public async Task UnknownPage_PresentsAFunctionalError_ThatLeadsHome(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await page.GotoAsync("/no-such-page");
+
+        var error = page.Locator("main [role=alert][data-error-category=functional]");
+        await Assertions.Expect(error).ToBeVisibleAsync();
+
+        await error.GetByRole(AriaRole.Link, new() { Name = "Revenir à l'accueil" }).ClickAsync();
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.Home));
+    }
 }

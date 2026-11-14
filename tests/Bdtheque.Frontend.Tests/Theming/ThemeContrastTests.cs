@@ -33,7 +33,6 @@ public sealed partial class ThemeContrastTests
         ("text-on-alert", "alert", Text),
         ("text-on-info", "info", Text),
         ("text-on-delete", "delete", Text),
-        ("text-on-failure", "failure", Text),
         ("text-on-tag", "tag", Text),
         ("control-border", "background", NonText),
         ("control-border", "surface", NonText),
