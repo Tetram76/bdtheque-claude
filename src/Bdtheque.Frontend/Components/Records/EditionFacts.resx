@@ -75,12 +75,6 @@
   <data name="Free" xml:space="preserve">
     <value>Gratuite</value>
   </data>
-  <data name="Estimated" xml:space="preserve">
-    <value>Valeur estimée : pas encore disponible</value>
-  </data>
-  <data name="EurosOfTheDay" xml:space="preserve">
-    <value>en euros d&apos;aujourd&apos;hui : pas encore disponible</value>
-  </data>
   <data name="InitialValue" xml:space="preserve">
     <value>Valeur initiale</value>
   </data>

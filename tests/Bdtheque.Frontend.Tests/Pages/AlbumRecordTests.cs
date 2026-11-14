@@ -339,29 +339,35 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void EditionDetail_PresentsTheCopy_WithTheLabelsOfItsMode_AndItsAmountsInEurosOfTheDayNotAvailableYet()
+    public void EditionDetail_PresentsTheCopy_WithTheLabelsOfItsMode_AndEachAmountAlone()
     {
-        _catalog.Album = Album();
+        _catalog.Album = Album() with
+        {
+            Editions = [Owned(FirstEditionId, 2001) with { InitialValueAmount = 99m, InitialValueCurrency = "FRF" }],
+        };
 
         var page = Open();
 
         Assert.Equal("Achat", Row(page, "Mode d'acquisition"));
         Assert.Equal("09/09/2006", Row(page, "Date d'achat"));
-        var price = RowElement(page, "Prix d'achat");
-        Assert.Contains("16,95", price.TextContent);
-        Assert.Contains("en euros d'aujourd'hui : pas encore disponible", price.TextContent);
+        // Its value in euros of the day does not exist yet (Phase 4): nothing stands in its place, the amount is alone.
+        Assert.Equal("16,95 €", Row(page, "Prix d'achat"));
+        Assert.Equal("99,00\u00a0F", Row(page, "Valeur initiale"));
         Assert.Equal("Neuve", Row(page, "Neuve ou d'occasion"));
         Assert.Equal("Non", Row(page, "Dédicacée"));
     }
 
     [Fact]
-    public void EditionDetail_WithoutAmount_PresentsItsEstimatedValue_NotAvailableYet_UnlessFree()
+    public void EditionDetail_WithoutAmount_HasNoAmountRow_UnlessFree()
     {
         _catalog.Album = Album();
 
         var page = Open();
+        // The estimated value, which would replace it, does not exist yet (Phase 4): nothing stands in its place.
         Assert.Equal("25/12/2011", Row(page, "Date d'acquisition", edition: 1));
-        Assert.Equal("Valeur estimée : pas encore disponible", Row(page, "Valeur d'acquisition", edition: 1));
+        var labels = page.FindAll(".edition-detail")[1].QuerySelectorAll("dt").Select(dt => dt.TextContent.Trim()).ToList();
+        Assert.DoesNotContain("Valeur d'acquisition", labels);
+        Assert.DoesNotContain("pas encore disponible", page.Markup, StringComparison.Ordinal);
 
         _catalog.Album = Album() with { Editions = [Owned(FirstEditionId, 2001) with { IsFree = true, AcquisitionMode = AcquisitionMode.Gift, AcquisitionAmount = null, AcquisitionCurrency = null }] };
         Assert.Equal("Gratuite", Row(Open(), "Valeur d'acquisition"));

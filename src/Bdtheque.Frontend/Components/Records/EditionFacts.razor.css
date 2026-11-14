@@ -41,11 +41,6 @@
     overflow-wrap: anywhere;
 }
 
-.edition-unavailable {
-    font-size: var(--font-size-small);
-    color: var(--color-text-muted);
-}
-
 .edition-dates {
     margin: var(--space-m) 0 0;
     font-size: var(--font-size-small);
