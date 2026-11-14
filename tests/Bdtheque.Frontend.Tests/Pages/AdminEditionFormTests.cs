@@ -731,7 +731,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("L'envoi n'a pas pu aboutir : réessayez dans un instant.", error.QuerySelector("[data-error-text]")!.TextContent.Trim());
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
 
-        page.Find(".edition-visuals-upload-remove").Click();
+        await page.ClickAsync(".edition-visuals-upload-remove");
 
         Assert.Empty(page.FindAll(".edition-visuals-upload"));
     }
