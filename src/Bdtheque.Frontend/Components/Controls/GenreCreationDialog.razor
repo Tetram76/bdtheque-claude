@@ -9,7 +9,7 @@
     <ChildContent>
         <p class="record-creation-lead">@L["Lead"]</p>
         <div class="record-creation-fields">
-            <Field Id="@($"{Id}-label")" Label="@L["Label"]" Context="control">
+            <Field Id="@($"{Id}-label")" Label="@L["Label"]" Required Context="control">
                 <input id="@control.Id" type="text" @bind="_label" />
             </Field>
         </div>

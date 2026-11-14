@@ -27,9 +27,6 @@
   <data name="Parent.Help" xml:space="preserve">
     <value>L&apos;univers qui le contient, s&apos;il en fait partie.</value>
   </data>
-  <data name="Parent.Note" xml:space="preserve">
-    <value>facultatif</value>
-  </data>
   <data name="Parent.Placeholder" xml:space="preserve">
     <value>Aucun : univers de premier niveau</value>
   </data>

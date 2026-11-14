@@ -68,7 +68,7 @@
                             <AntiforgeryToken />
                             <input type="hidden" name="@VersionName" value="@EditVersion" />
                             <span class="genre-main" role="cell">
-                                <Field Id="genre-edit-label" Label="@L["Label.Of", row.Label]" LabelHidden="true"
+                                <Field Id="genre-edit-label" Label="@L["Label.Of", row.Label]" LabelHidden="true" Required
                                        Error="@FieldError(_editProblem, EditLabel)" Context="control">
                                     <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
                                            aria-invalid="@control.Invalid" @bind="EditLabel" />
@@ -120,7 +120,7 @@
                 <AntiforgeryToken />
                 <Dialog Id="genre-new" Title="@Creation["Title"]" Tone="DialogTone.Creation" CloseHref="@ListOnly.Href()">
                     <ChildContent>
-                        <Field Id="genre-new-label" Label="@Creation["Label"]" Error="@FieldError(_newProblem, NewLabel)" Context="control">
+                        <Field Id="genre-new-label" Label="@Creation["Label"]" Required Error="@FieldError(_newProblem, NewLabel)" Context="control">
                             <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
                                    aria-invalid="@control.Invalid" @bind="NewLabel" />
                         </Field>

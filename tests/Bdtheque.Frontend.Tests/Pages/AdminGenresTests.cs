@@ -117,7 +117,9 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
 
         var form = page.Find("form.genre-row");
         Assert.Equal("Biographie", form.QuerySelector("input[type='text']")!.GetAttribute("value"));
-        Assert.Equal("Libellé de Biographie", form.QuerySelector("label")!.TextContent.Trim());
+        // The label of the field, under the head of its column, is for screen readers, with its mention.
+        Assert.Equal("Libellé de Biographie", form.QuerySelector("label")!.FirstChild!.TextContent.Trim());
+        Assert.Equal("(obligatoire)", form.QuerySelector("label.visually-hidden .field-note")!.TextContent);
         Assert.Equal(["Enregistrer"], form.QuerySelectorAll("button[type='submit']").Select(Text));
         Assert.Equal($"{AppPaths.AdminGenres}?q=a", form.QuerySelector("a.button")!.GetAttribute("href"));
         // The other rows stay as they are, the genre changed being alone in its form.
@@ -208,8 +210,9 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         var dialog = Open("q=a&new=open").Find("form.genre-new dialog");
 
         // The dialog of a genre created on the spot from the entry form of an album (GenreCreationDialog).
-        Assert.Equal(("Nouveau genre", "Libellé"),
-            (Text(dialog.QuerySelector(".dialog-title")!), dialog.QuerySelector("label")!.TextContent.Trim()));
+        Assert.Equal(("Nouveau genre", "Libellé", "(obligatoire)"),
+            (Text(dialog.QuerySelector(".dialog-title")!), dialog.QuerySelector("label")!.FirstChild!.TextContent.Trim(),
+             dialog.QuerySelector("label .field-note")!.TextContent));
         Assert.Equal(
             [("Annuler", $"{AppPaths.AdminGenres}?q=a"), ("Ajouter le genre", null)],
             dialog.QuerySelectorAll(".dialog-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));

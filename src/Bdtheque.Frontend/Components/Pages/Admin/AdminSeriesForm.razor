@@ -38,7 +38,7 @@ else
                Problem="@SaveProblem" Dates="@Dates">
         <Block Title="@L["Block.Series"]" Kicker="@L["Kicker.Series"]">
             <div class="series-fields">
-                <Field Id="series-title" Label="@L["Title"]" Note="@L["Title.Note"]" Error="@Errors.For("/title")" Context="control">
+                <Field Id="series-title" Label="@L["Title"]" Required Error="@Errors.For("/title")" Context="control">
                     <input id="@control.Id" type="text" placeholder="@L["Title.Placeholder"]" aria-describedby="@control.DescribedBy"
                            aria-invalid="@control.Invalid" @bind="Entry.Title" @bind:event="oninput" />
                 </Field>

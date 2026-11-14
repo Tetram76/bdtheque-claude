@@ -37,7 +37,7 @@ else
                Problem="@SaveProblem" Dates="@Dates">
         <Block Title="@L["Block.Publisher"]" Kicker="@L["Kicker.Publisher"]">
             <div class="publisher-fields">
-                <Field Id="publisher-name" Label="@L["Name"]" Note="@L["Name.Note"]" Error="@Errors.For("/name")" Context="control">
+                <Field Id="publisher-name" Label="@L["Name"]" Required Error="@Errors.For("/name")" Context="control">
                     <input id="@control.Id" type="text" placeholder="@L["Name.Placeholder"]" aria-describedby="@control.DescribedBy"
                            aria-invalid="@control.Invalid" @bind="Entry.Name" @bind:event="oninput" />
                 </Field>
@@ -77,7 +77,7 @@ else
                                 else
                                 {
                                     <span class="publisher-collection-name">
-                                        <Field Id="@CollectionId(collection)" Label="@L["Collection.Name"]" LabelHidden
+                                        <Field Id="@CollectionId(collection)" Label="@L["Collection.Name"]" LabelHidden Required
                                                Error="@Errors.For(CollectionField(collection))" ErrorRelated="@Errors.IsRelated(CollectionField(collection))"
                                                Context="control">
                                             <input id="@control.Id" type="text" placeholder="@L["Collection.Name"]"

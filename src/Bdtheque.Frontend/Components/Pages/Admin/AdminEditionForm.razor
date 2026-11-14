@@ -55,7 +55,7 @@ else
             <Block Title="@L["Block.Edition"]" Kicker="@L["Kicker.Edition"]">
                 <div class="edition-fields">
                     <div class="edition-publisher">
-                        <Field Id="edition-publisher" Label="@L["Publisher"]" Note="@L["Required"]" Error="@Errors.For("/publisherId")" Context="control">
+                        <Field Id="edition-publisher" Label="@L["Publisher"]" Required Error="@Errors.For("/publisherId")" Context="control">
                             <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="ChoosePublisherAsync"
                                           Placeholder="@L["Publisher.Placeholder"]" aria-describedby="@control.DescribedBy"
                                           aria-invalid="@control.Invalid" />
@@ -109,7 +109,7 @@ else
                 <Block Title="@L["Block.Copy"]" Kicker="@L["Kicker.Copy"]">
                     <div class="edition-fields">
                         <div class="edition-row">
-                            <Field Id="edition-mode" Label="@L["Mode"]" Note="@L["Required"]" Error="@Errors.For("/acquisitionMode")" Context="control">
+                            <Field Id="edition-mode" Label="@L["Mode"]" Required Error="@Errors.For("/acquisitionMode")" Context="control">
                                 <select id="@control.Id" class="edition-list" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
                                         value="@(Entry.AcquisitionMode?.ToString() ?? "")"
                                         @onchange="args => Entry.ChooseAcquisitionMode(Enum.TryParse<AcquisitionMode>(args.Value as string, out var mode) ? mode : null)">

@@ -43,7 +43,7 @@ else
                     <RecordPicker Id="@control.Id" Kind="RecordKind.Series" Value="Entry.Series" ValueChanged="ChooseSeriesAsync"
                                   Placeholder="@L["Series.Placeholder"]" aria-describedby="@control.DescribedBy" />
                 </Field>
-                <Field Id="album-title" Label="@L["Title"]" Note="@(Entry.Series is null ? L["Title.Note.Required"] : L["Title.Note.Optional"])"
+                <Field Id="album-title" Label="@L["Title"]" Required="@(Entry.Series is null)"
                        Error="@Errors.For("/title")" Context="control">
                     <input id="@control.Id" type="text" placeholder="@(Entry.Series is null ? L["Title.Placeholder"] : L["Title.Placeholder.Series"])"
                            aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="Entry.Title" @bind:event="oninput" />

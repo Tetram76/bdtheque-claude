@@ -180,6 +180,9 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var page = OpenOwned();
 
         Assert.Equal("Casterman", page.Find("#edition-publisher").GetAttribute("value"));
+        // Required: the publisher, and the mode of acquisition of an edition owned; no other field has a mention.
+        Assert.Equal(["edition-publisher", "edition-mode"], page.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
+        Assert.All(page.FindAll(".field-note"), note => Assert.Equal("(obligatoire)", note.TextContent));
         Assert.Equal("", page.Find("#edition-collection").GetAttribute("value"));
         Assert.Equal("2007", page.Find("#edition-year").GetAttribute("value"));
         Assert.Equal("978-2-203-00120-8", page.Find("#edition-isbn").GetAttribute("value"));
@@ -396,6 +399,8 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Modifier l'intention d'achat", page.Find("h1").TextContent.Trim());
         Assert.Equal(["L'édition", "Fabrication", "Les visuels"], page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(["En couleur"], page.FindAll(".choice").Select(choice => choice.TextContent.Trim()));
+        // The publisher alone is required (visuel/saisie-edition/contenu.md).
+        Assert.Equal(["edition-publisher"], page.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
         Assert.Equal("Intention d'achat posée le 08/10/2026 12:00, modifiée le 12/10/2026 12:00.", page.Find(".entry-form-dates").TextContent.Trim());
         Assert.Equal(FacSimile.ToString(), page.Find("#edition-collection").GetAttribute("value"));
     }

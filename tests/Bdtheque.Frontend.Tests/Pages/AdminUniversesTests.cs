@@ -132,6 +132,9 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
 
         Assert.Equal("Modifier l'univers", Text(panel.QuerySelector("h2")!));
         Assert.Equal("Corto Maltese", panel.QuerySelector("input[name='name']")!.GetAttribute("value"));
+        // The name alone is required, the parent and the description being optional (visuel/saisie-album/contenu.md, mentions).
+        Assert.Equal(["universe-name"], panel.QuerySelectorAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
+        Assert.Equal("(obligatoire)", Text(panel.QuerySelector("label[for='universe-name'] .field-note")!));
         Assert.Equal("Les voyages du marin.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='description']")!).Value);
         Assert.Equal("Univers Hugo Pratt", panel.QuerySelector(".record-picker input[role='combobox']")!.GetAttribute("value"));
         Assert.Equal(PrattItem.Id.ToString(), panel.QuerySelector("input[type='hidden'][name='parentId']")!.GetAttribute("value"));

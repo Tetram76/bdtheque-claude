@@ -21,7 +21,7 @@ public sealed class ControlsTests : BunitContext
         var field = Render<Field>(parameters => parameters
             .Add(p => p.Id, "f-title")
             .Add(p => p.Label, "Titre")
-            .Add(p => p.Note, "facultatif dans une série")
+            .Add(p => p.Required, true)
             .Add(p => p.Help, "La série et le tome suffisent à identifier l'album.")
             .Add(p => p.ChildContent, context => builder =>
             {
@@ -34,12 +34,41 @@ public sealed class ControlsTests : BunitContext
 
         var label = field.Find(".field label");
         Assert.Equal("f-title", label.GetAttribute("for"));
-        Assert.Equal("facultatif dans une série", label.QuerySelector(".field-note")?.TextContent);
+        Assert.Equal("(obligatoire)", label.QuerySelector(".field-note")?.TextContent);
         var input = field.Find("input#f-title");
         Assert.Equal("f-title-help", input.GetAttribute("aria-describedby"));
         Assert.Equal("La série et le tome suffisent à identifier l'album.", field.Find("#f-title-help").TextContent);
         Assert.Null(input.GetAttribute("aria-invalid"));
         Assert.Empty(field.FindAll(".field-error"));
+    }
+
+    // One mention for every point of entry (visuel/saisie-album/contenu.md, mentions des champs): « (obligatoire) » on a
+    // required field, nothing on an optional one; the label saying it, the control has neither aria-required nor required.
+    [Theory]
+    [InlineData(false, false, null)]
+    [InlineData(true, false, "(obligatoire)")]
+    [InlineData(true, true, "(obligatoire)")]
+    public void Field_Mention_SaysOnlyARequiredField_InItsLabel_ShownOrNot(bool required, bool labelHidden, string? mention)
+    {
+        var field = Render<Field>(parameters => parameters
+            .Add(p => p.Id, "f-name")
+            .Add(p => p.Label, "Nom")
+            .Add(p => p.Required, required)
+            .Add(p => p.LabelHidden, labelHidden)
+            .Add(p => p.ChildContent, context => builder =>
+            {
+                builder.OpenElement(0, "input");
+                builder.AddAttribute(1, "id", context.Id);
+                builder.CloseElement();
+            }));
+
+        var label = field.Find("label[for=f-name]");
+        Assert.Equal(labelHidden ? "visually-hidden" : "field-label", label.GetAttribute("class"));
+        Assert.Equal(mention, label.QuerySelector(".field-note")?.TextContent);
+        Assert.DoesNotContain("facultatif", label.TextContent);
+        var input = field.Find("input");
+        Assert.Null(input.GetAttribute("aria-required"));
+        Assert.False(input.HasAttribute("required"));
     }
 
     [Fact]

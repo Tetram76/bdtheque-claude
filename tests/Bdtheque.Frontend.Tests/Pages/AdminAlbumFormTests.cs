@@ -112,7 +112,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
 
         Assert.Equal("Tintin", page.Find("#album-series").GetAttribute("value"));
         Assert.Equal("Les Bijoux de la Castafiore", page.Find("#album-title").GetAttribute("value"));
-        Assert.Contains("(facultatif dans une série)", page.Find("label[for=album-title]").TextContent);
+        Assert.Empty(page.FindAll("label[for=album-title] .field-note"));
         Assert.Equal("Bijoux de la Castafiore [Les]", page.Find("#album-sort-key").GetAttribute("value"));
         Assert.Equal("Auto", page.Find(".sort-key-mode").TextContent);
         Assert.Equal("21", page.Find("#album-volume").GetAttribute("value"));
@@ -178,7 +178,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal("Nouvel album", page.Find("h1").TextContent.Trim());
         Assert.Equal("<Sans titre>", page.Find(".entry-form-subject").TextContent.Trim());
         Assert.Equal("Nouvel album", page.FindAll(".breadcrumb li")[^1].TextContent.Trim());
-        Assert.Contains("(obligatoire sans série)", page.Find("label[for=album-title]").TextContent);
+        Assert.Equal("(obligatoire)", page.Find("label[for=album-title] .field-note").TextContent);
         Assert.Empty(page.FindAll(".entry-form-dates"));
         Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
         Assert.Equal("Créer l'album", page.Find(".save-bar button[type=submit]").TextContent.Trim());
@@ -438,7 +438,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         page.Find(".record-picker-clear").Click();
 
         Assert.Empty(page.FindAll(".inherited-tags"));
-        Assert.Contains("(obligatoire sans série)", page.Find("label[for=album-title]").TextContent);
+        Assert.Equal("(obligatoire)", page.Find("label[for=album-title] .field-note").TextContent);
         Assert.Equal("Les Bijoux de la Castafiore (T. 21)", page.Find(".entry-form-subject").TextContent.Trim());
     }
 
