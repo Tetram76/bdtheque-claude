@@ -307,6 +307,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal(VisualMediaRoutes.Display(intendedCover), page.Find(".album-cover img").GetAttribute("src"));
         Assert.Equal("Couverture de Lointaines îles du vent", page.Find(".album-cover img").GetAttribute("alt"));
+        // Put forward in volume, its spine of the deep colour of its own cover (choix-implementation/socle/themes.md).
+        Assert.Contains("--cover-spine: #0B2540;", page.Find(".album-cover .cover-volume").GetAttribute("style"));
     }
 
     [Fact]
