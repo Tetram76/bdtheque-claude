@@ -3,6 +3,7 @@ using Bdtheque.Domain.Common;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 
@@ -73,18 +74,37 @@ internal static class BusinessErrorFields
         var records = context.ChangeTracker.Entries()
             .Where(entry => entry.Metadata == index.DeclaringEntityType && entry.State != EntityState.Deleted)
             .ToList();
+        var insensitive = CaseAndAccentInsensitive(context, index);
         var clashing = records.Count == 1
             ? records
-            : [.. records.GroupBy(entry => KeyOf(entry, index), StringComparer.Ordinal).Where(group => group.Count() > 1).SelectMany(group => group)];
+            : [.. records.GroupBy(entry => KeyOf(entry, index, insensitive), StringComparer.Ordinal)
+                .Where(group => group.Count() > 1).SelectMany(group => group)];
         var anyWritten = clashing.Any(entry => fields.Wrote(entry.Entity));
         var entered = index.Properties.Where(property => !property.IsForeignKey()).ToList();
         return clashing.SelectMany(entry => entered.Select(property =>
             new Value(entry.Entity, property.Name, Related: anyWritten && !fields.Wrote(entry.Entity))));
     }
 
-    // The values of the index, compared as entered: the collations of the values the forms enter together are deterministic,
-    // and consider two strings equal only if they are the same bytes (documentation of PostgreSQL, « Collation Support »).
-    private static string KeyOf(EntityEntry entry, IIndex index) =>
-        string.Join('\u001f', index.Properties.Select(property =>
-            Convert.ToString(entry.Property(property.Name).CurrentValue, CultureInfo.InvariantCulture)));
+    // The values of the index, compared as their column compares them: a deterministic collation considers two strings equal
+    // only if they are the same bytes (documentation of PostgreSQL, « Collation Support »); the case- and accent-insensitive
+    // one, carried by the names unique regardless of them, compares their base letters only, as the primary strength of the
+    // French collation does, which a sort key ignoring case and accents reproduces.
+    private static string KeyOf(EntityEntry entry, IIndex index, IReadOnlySet<string> insensitive) =>
+        string.Join('\u001f', index.Properties.Select(property => entry.Property(property.Name).CurrentValue switch
+        {
+            string text when insensitive.Contains(property.Name) =>
+                Convert.ToBase64String(FrenchComparison.GetSortKey(text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace).KeyData),
+            var value => Convert.ToString(value, CultureInfo.InvariantCulture),
+        }));
+
+    // The properties of the index under the case- and accent-insensitive collation, read on the design-time model: the
+    // runtime model keeps no collation (EF Core, « The requested configuration is not stored in the read-optimized model »).
+    private static HashSet<string> CaseAndAccentInsensitive(BdthequeDbContext context, IIndex index)
+    {
+        var designed = context.GetService<IDesignTimeModel>().Model.FindEntityType(index.DeclaringEntityType.Name);
+        return [.. index.Properties.Select(property => property.Name)
+            .Where(name => designed?.FindProperty(name)?.GetCollation() == BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation)];
+    }
+
+    private static readonly CompareInfo FrenchComparison = CultureInfo.GetCultureInfo("fr-FR").CompareInfo;
 }

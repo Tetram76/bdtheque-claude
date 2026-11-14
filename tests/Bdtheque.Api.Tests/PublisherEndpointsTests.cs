@@ -367,6 +367,18 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
+    public async Task Update_WithANewCollectionNamedAsAnother_DifferingOnlyByCaseAndAccents_DesignatesItsField()
+    {
+        // The clash is found as the database finds it, regardless of case and accents (modele-metier/collection-editeur.md).
+        var publisher = await CreateAsync("Glénat Manga", "Vécu");
+
+        var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
+            new PublisherContent(publisher.Name, null, [new(publisher.Collections[0].Id, "Vécu"), new(null, "VECU")]), publisher.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/collections/1/name"], ["/collections/0/name"]);
+    }
+
+    [Fact]
     public async Task Update_WithABlankCollectionName_IsABusinessError()
     {
         var publisher = await CreateAsync("Pika");
