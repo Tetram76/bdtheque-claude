@@ -89,7 +89,7 @@ internal static class BusinessErrorFields
     // only if they are the same bytes (documentation of PostgreSQL, « Collation Support »); the case- and accent-insensitive
     // one, carried by the names unique regardless of them, compares their base letters only, as the primary strength of the
     // French collation does, which a sort key ignoring case and accents reproduces.
-    private static string KeyOf(EntityEntry entry, IIndex index, IReadOnlySet<string> insensitive) =>
+    private static string KeyOf(EntityEntry entry, IIndex index, HashSet<string> insensitive) =>
         string.Join('\u001f', index.Properties.Select(property => entry.Property(property.Name).CurrentValue switch
         {
             string text when insensitive.Contains(property.Name) =>
