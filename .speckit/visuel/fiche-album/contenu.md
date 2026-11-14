@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''un album : visuels, identité, contributions, éditions, intentions, reste de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T12:00:00Z }
 ---
 
 # Contenu
@@ -12,7 +12,7 @@ De haut en bas :
 - **En-tête** de la partie Consultation : le logo, le menu, avec l'entrée « Albums » active, le champ de recherche et le bouton d'aide ([Apparence propre à chaque alternative](../charte-graphique/apparence-propre-a-chaque-alternative.md)).
 - **Fil d'Ariane** : Albums, la série, puis l'album.
 - **En-tête de la fiche**, sur deux colonnes, qui s'empilent sur smartphone :
-  - **Couverture de l'album** ([Couverture d'un album](../../fonctionnel/regles-metier/couverture-d-un-album.md)), parmi les éditions de la collection : la première couverture de la plus ancienne selon son année d'édition, mise en avant selon le thème ; le visuel générique sans couverture.
+  - **Couverture de l'album** ([Couverture d'un album](../../fonctionnel/regles-metier/couverture-d-un-album.md)), parmi toutes ses éditions, possédées ou visées par une intention d'achat, la fiche relevant de la base documentaire ([Périmètre de la consultation](../../fonctionnel/regles-metier/perimetre-de-la-consultation.md)), comme sur ses cartes : la première couverture de la plus ancienne selon son année d'édition, mise en avant selon le thème ; le visuel générique sans couverture.
   - **Identité de l'album** : le lien vers la série, le titre, puis des étiquettes : le tome ([Représentation du tome selon le type d'album](../../fonctionnel/presentation/libelle-d-un-album.md#représentation-du-tome-selon-le-type-dalbum)), la date de première publication et l'appartenance à la collection, avec le nombre d'éditions possédées. Puis l'appréciation, en cinq étoiles, lorsqu'elle est renseignée. Un album qui n'est pas dans la collection est marqué au premier coup d'œil, par un bandeau en tête de son identité, et ses deux cas bien distingués : une **intention d'achat**, bandeau plein, de la couleur de l'information ; un album **hors collection**, simplement catalogué, bandeau en tirets, atténué. Un album de la collection n'a pas de bandeau.
   - **Contributions** : une ligne par rôle crédité (scénario, dessin, couleurs), avec le nombre d'auteurs du rôle et leurs noms en étiquettes, chacun menant à la fiche de l'auteur. Les noms d'un rôle tiennent sur une ligne, à la largeur de l'écran : ceux qu'elle ne tient pas sont repliés derrière un lien « et N autres », qui le déplie (« Réduire » le replie) ; un album collectif ne repousse pas le reste de la fiche, et aucun rôle ne passe à la ligne sur un écran étroit. Un rôle sans contribution n'a pas de ligne, et un album sans aucun auteur n'a pas de contributions.
   - **Genres et univers** affichés, chacun seulement si l'album en a ([Genres et univers d'un album](../../fonctionnel/regles-metier/genres-et-univers-d-un-album.md)). Chaque univers est présenté avec la **chaîne de ses ancêtres**, de la racine à l'univers rattaché (« Univers Hugo Pratt › Corto Maltese › Les Antilles ») : les ancêtres sont de simples liens, l'univers rattaché une étiquette colorée ; chacun mène à la liste de ses séries et albums, sous-univers compris, présentée comme la bibliographie d'un auteur ([Structure de l'application](../../fonctionnel/structure-de-l-application.md), [Hiérarchie des univers](../../fonctionnel/regles-metier/hierarchie-des-univers.md)).

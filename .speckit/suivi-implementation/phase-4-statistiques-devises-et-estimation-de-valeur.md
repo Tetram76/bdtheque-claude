@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 4 — Statistiques, devises et estimation de valeur'
 description: 'Phase 4, statistiques, devises et estimation de valeur, et ses notes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T12:00:00Z }
 ---
 
 # Phase 4 — Statistiques, devises et estimation de valeur
@@ -12,5 +12,5 @@ Dashboard public et statistiques (sur la collection uniquement) ; conversion des
 Découpage et version à établir à l'ouverture de la phase. La qualité de l'estimation de valeur ne peut être évaluée que sur des données réelles (collection issue de l'application existante).
 
 - **Note — recherche avancée** : les montants en euros courants et en euros du jour et la valeur estimée des éditions deviennent des critères de la recherche avancée ([Recherche avancée](../fonctionnel/recherche-avancee/recherche-avancee.md)), avec leurs comparaisons (version choisie par critère, montant non convertible), à une valeur comme à un autre montant.
-- **Note — couverture d'un album** : une statistique qui présente un album par sa couverture (ex. doyen et benjamin) est une donnée de la collection, qui ne retient que les éditions possédées ([Couverture d'un album](../fonctionnel/regles-metier/couverture-d-un-album.md)) ; l'expression de la couverture ([Organisation de l'API](../choix-implementation/api/organisation-de-l-api.md), cartes d'album) ne couvre encore que la variante sans filtre.
+- **Note — couverture d'un album** : une statistique qui présente un album par sa couverture (ex. doyen et benjamin) relève du contexte de collection, qui ne retient que les éditions possédées ([Couverture d'un album](../fonctionnel/regles-metier/couverture-d-un-album.md)) ; l'expression de la couverture ([Organisation de l'API](../choix-implementation/api/organisation-de-l-api.md), cartes d'album) ne couvre encore que la variante sans filtre.
 - **Note — fiche d'un album** : le détail d'une édition présente chaque montant seul, et n'a pas de ligne pour un montant d'acquisition absent, la gratuité exceptée, tant que la valeur en euros du jour et la valeur estimée n'existent pas. La phase les y ajoute ([Contenu](../visuel/fiche-album/contenu.md)) : chaque montant suivi de sa valeur en euros du jour, le montant d'acquisition absent remplacé par la valeur estimée, et rien à leur place lorsqu'elles n'existent pas (montant non convertible, édition sans valeur estimée, [Convivialité et efficacité](../visuel/charte-graphique/convivialite-et-efficacite.md)).

@@ -9,7 +9,7 @@
 * [Ordre des albums dans une série](ordre-des-albums-dans-une-serie.md) - Hors-séries en dernier, tome puis date de première publication.
 * [Ordre des visuels d'une édition](ordre-des-visuels-d-une-edition.md) - Visuels par type dans un ordre fixe, puis par ordre d'affichage.
 * [Visuel par défaut](visuel-par-defaut.md) - Visuel générique pour toute édition sans couverture.
-* [Couverture d'un album](couverture-d-un-album.md) - Couverture d'un album : première couverture de sa plus ancienne édition illustrée, selon le contexte d'affichage.
+* [Couverture d'un album](couverture-d-un-album.md) - Couverture d'un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire.
 * [Validation de l'ISBN](validation-de-l-isbn.md) - ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l'enregistrement.
 * [Séquence théorique de tomes d'une série](sequence-theorique-de-tomes-d-une-serie.md) - Séquence des tomes attendus d'une série, référence des manquants et des rythmes de parution.
 * [Suppression des entités](suppression-des-entites.md) - Confirmation, impact par type d'entité, natures de lien (référence, association, composition) entité par entité.
