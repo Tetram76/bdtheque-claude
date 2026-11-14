@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-14
+
+* **Plan** : note sur la Phase 4 : le détail d'une édition de la fiche d'un album présente chaque montant seul et n'a pas de ligne pour un montant d'acquisition absent, la gratuité exceptée, tant que la valeur en euros du jour et la valeur estimée n'existent pas ; la phase les y ajoute, sans mention à leur place lorsqu'elles n'existent pas (#439).
+
 ## 2026-11-13
 
 * **Choix** : un composant unique présente toute donnée absente, la mention « Non renseigné(e) » ou, dans une liste, un tiret atténué masqué aux lecteurs d'écran qui reçoivent la mention ; une donnée dont l'absence se dit mieux autrement (« Aucun album », « Aucun rôle ») lui donne sa mention, sans écrire son tiret elle-même (#399).
