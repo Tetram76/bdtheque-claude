@@ -127,7 +127,7 @@
     <value>Se déconnecter</value>
   </data>
   <data name="UnhandledError" xml:space="preserve">
-    <value>Une erreur inattendue s&apos;est produite.</value>
+    <value>Une erreur inattendue a interrompu la page : rechargez-la pour continuer.</value>
   </data>
   <data name="Reload" xml:space="preserve">
     <value>Recharger la page</value>

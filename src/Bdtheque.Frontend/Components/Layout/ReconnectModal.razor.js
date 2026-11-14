@@ -5,8 +5,10 @@ reconnectModal.addEventListener("components-reconnect-state-changed", handleReco
 const retryButton = document.getElementById("components-reconnect-button");
 retryButton.addEventListener("click", retry);
 
-const resumeButton = document.getElementById("components-resume-button");
-resumeButton.addEventListener("click", resume);
+// One button resumes a session paused by the server, another one after a failed resumption, within its error.
+for (const resumeButton of reconnectModal.querySelectorAll("[data-reconnect-resume]")) {
+    resumeButton.addEventListener("click", resume);
+}
 
 function handleReconnectStateChanged(event) {
     if (event.detail.state === "show") {
