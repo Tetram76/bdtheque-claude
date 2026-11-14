@@ -13,10 +13,10 @@
 * [Édition](edition.md) - Attributs d'une édition : publication, fabrication, acquisition, montants, gratuité, valeurs proposées, contraintes d'intégrité.
 * [Auteur / Artiste](auteur-artiste.md) - Attributs d'un auteur, au moins un nom ou un pseudonyme.
 * [Contribution *(relation Album ↔ Auteur/Artiste)*](contribution-relation-album-auteur-artiste.md) - Rôle et artiste d'une contribution.
-* [Éditeur](editeur.md) - Attributs d'un éditeur, nom unique tel que saisi.
-* [Collection éditeur](collection-editeur.md) - Nom d'une collection éditeur.
+* [Éditeur](editeur.md) - Attributs d'un éditeur, nom unique sans casse ni accents.
+* [Collection éditeur](collection-editeur.md) - Nom d'une collection éditeur, unique chez son éditeur sans casse ni accents.
 * [Genre](genre.md) - Libellé d'un genre, unique sans casse ni accents.
-* [Univers](univers.md) - Nom et description d'un univers.
+* [Univers](univers.md) - Nom et description d'un univers, nom unique sous son parent sans casse ni accents.
 * [Visuel d'édition](visuel-d-edition.md) - Type, fichier, ordre et couleurs d'un visuel d'édition.
 * [Intention d'achat](intention-d-achat.md) - Cible album ou édition d'une intention d'achat et ses contraintes.
 * [Recherche enregistrée](recherche-enregistree.md) - Nom, entité, critères et variables d'une recherche enregistrée.

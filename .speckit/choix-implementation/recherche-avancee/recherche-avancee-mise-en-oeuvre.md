@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Api/Search/**'
   - 'src/Bdtheque.Contracts/Search/**'
   - 'src/Bdtheque.Api/Endpoints/AdvancedSearchEndpoints.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T12:00:00Z }
 ---
 
 # Recherche avancée : mise en œuvre
@@ -18,7 +18,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
   - Un **lien suit la relation du modèle, jamais une clé technique**, et un lien inverse est l'inverse exact de son lien direct : les fiches atteintes par un chemin différent (ex. albums qui affichent un genre par leur série) le sont par ce chemin, que l'utilisateur choisit ([Liens entre entités](../../fonctionnel/recherche-avancee/liens-entre-entites.md)).
   - Les montants ne sont interrogés que sur leur présence, jusqu'à leur conversion en euros (Phase 4, [`suivi-implementation/`](../../suivi-implementation/index.md)).
 - **Traduction en prédicat EF Core, exécuté par la base**, liens compris. Toute comparaison exige d'abord une donnée renseignée, et le NON retient ce que le critère n'établit pas ([Comparaisons](../../fonctionnel/recherche-avancee/comparaisons.md)). Les **valeurs sont des paramètres**, jamais écrites dans le SQL, celles de « est l'un de » un seul paramètre tableau, quel que soit le mode de traduction des collections du contexte : une même forme de critères reste une seule requête en cache.
-  - **Texte** : par défaut sur la collation insensible à la casse et aux accents ([Collation des colonnes texte](../persistance/collation-des-colonnes-texte.md)) ; l'ISBN sans ses séparateurs, comme dans les listes.
+  - **Texte** : par défaut sur la collation insensible à la casse et aux accents, sinon sur la collation française, l'une ou l'autre explicite, quelle que soit celle de la colonne ([Collation des colonnes texte](../persistance/collation-des-colonnes-texte.md)) ; l'ISBN sans ses séparateurs, comme dans les listes.
   - **Dates comparées comme des périodes** (année, mois, jour). Une date et heure se compare par son jour dans le **fuseau horaire de la recherche**, celui du navigateur où le frontend la présente ([Langue et culture d'affichage](../../fonctionnel/presentation/langue-et-culture-d-affichage.md)), et non en temps universel, où elle est enregistrée. Le fuseau est un paramètre de la requête, jamais une partie des critères : une recherche enregistrée se rejoue depuis tout fuseau. Seuls les noms IANA sont admis, PostgreSQL ne connaissant pas les noms Windows que .NET accepte aussi.
   - **Univers** : la relation d'ancêtre est déroulée dans la requête sur la profondeur de la hiérarchie, lue sur le référentiel des univers dans le même instantané que les résultats ; un univers déplacé plus profond entre les deux échapperait sinon au prédicat ([Hiérarchie des univers](../../fonctionnel/regles-metier/hierarchie-des-univers.md)).
     - **Alternative écartée (vue récursive en base)** : du SQL hors du modèle EF, à ajouter à la main à chaque régénération de la migration unique ([Migrations EF Core](../persistance/migrations-ef-core.md)), pour une hiérarchie de quelques niveaux.
