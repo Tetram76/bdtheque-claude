@@ -1,5 +1,6 @@
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace Bdtheque.Infrastructure.Tests;
@@ -84,6 +85,9 @@ public sealed class NameUniquenessTests : IAsyncLifetime
         _fixture.Context.Publishers.AddRange(first, second);
 
         await _fixture.Context.SaveChangesAsync();
+
+        _fixture.Context.ChangeTracker.Clear();
+        Assert.Equal(2, await _fixture.Context.Set<PublisherCollection>().CountAsync(c => c.Name == "AIRE LIBRE"));
     }
 
     [Fact]
