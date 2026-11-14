@@ -139,6 +139,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task AlbumOnlyWishedFor_HasTheCoverOfTheEditionItTargets()
+    {
+        var album = await AlbumAsync(ValidationDataLoader.WishedForOnlyTitle);
+
+        // Its record, of the documentary base, takes its cover among all its editions (fonctionnel/regles-metier/couverture-d-un-album.md).
+        Assert.False(album.Album.IsInCollection);
+        var edition = Assert.Single(album.Editions);
+        Assert.NotNull(edition.PurchaseIntent);
+        Assert.Equal(edition.Visuals.Single(visual => visual.Type == VisualType.Cover).Id, album.Cover?.VisualId);
+    }
+
+    [Fact]
     public async Task Universes_NestOnSeveralLevels_OneWithSubUniversesAndOneWithout()
     {
         var universes = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.UniverseAdminListItem>>("/admin/universes?pageSize=100"))!.Items;

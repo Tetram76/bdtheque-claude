@@ -227,6 +227,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         _catalog.Album = Album() with
         {
             Album = Summary() with { IsInCollection = false },
+            Cover = null,
             Editions = [],
             PurchaseIntent = new PurchaseIntentItem(Guid.NewGuid(), Modified, Modified),
         };
@@ -295,20 +296,25 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Cover_IsTheFirstCoverOfTheOldestEditionThatHasOne()
+    public void Cover_IsThatOfTheAlbum_AsTheApiRetainsIt_EvenFromAnEditionTargetedByAnIntent()
     {
-        _catalog.Album = Album();
+        // The record computes no cover: the API retains it by the rule of the cards
+        // (fonctionnel/regles-metier/couverture-d-un-album.md), here from an edition no edition of the collection shows.
+        var intendedCover = Guid.NewGuid();
+        _catalog.Album = Album() with { Cover = new AlbumCover(intendedCover, CoverColors) };
 
         var page = Open();
 
-        Assert.Equal(VisualMediaRoutes.Display(Visuals[0]), page.Find(".album-cover img").GetAttribute("src"));
+        Assert.Equal(VisualMediaRoutes.Display(intendedCover), page.Find(".album-cover img").GetAttribute("src"));
         Assert.Equal("Couverture de Lointaines îles du vent", page.Find(".album-cover img").GetAttribute("alt"));
+        // Put forward in volume, its spine of the deep colour of its own cover (choix-implementation/socle/themes.md).
+        Assert.Contains("--cover-spine: #0B2540;", page.Find(".album-cover .cover-volume").GetAttribute("style"));
     }
 
     [Fact]
-    public void Cover_IsTheGenericVisual_WhenNoEditionOfTheCollectionHasOne()
+    public void Cover_IsTheGenericVisual_WhenTheAlbumHasNone()
     {
-        _catalog.Album = Album() with { Editions = [Owned(FirstEditionId, 2001)] };
+        _catalog.Album = Album() with { Cover = null };
 
         Assert.NotNull(Open().Find(".album-cover svg.cover-generic"));
     }
@@ -622,6 +628,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
     private static readonly Guid[] Visuals = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
 
+    private static readonly CoverPalette CoverColors = new("#1F4E79", "#0B2540", "#E0A030");
+
     private static AlbumSummary Summary() =>
         new(AlbumId, "Lointaines îles du vent", SeriesId, "Corto Maltese", AlbumType.Regular, false, 5, null, null, true);
 
@@ -686,6 +694,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         };
         return new AlbumDetail(
             Summary(), 1970, 11, "Venezuela, vers 1913.", "Réunit les trois premiers récits.", null,
+            new AlbumCover(Visuals[0], CoverColors),
             [new GenreListItem(Guid.NewGuid(), "Aventure")],
             [new UniverseInHierarchy(new UniverseListItem(Guid.NewGuid(), "Les Antilles", corto.Id, corto.Name), [root, corto])],
             [
