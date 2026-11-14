@@ -6,8 +6,9 @@
 
 @* The category tells the three kinds of errors apart at first glance (fonctionnel/presentation-des-erreurs.md), by its
    name, its icon, its color and its frame (visuel/saisie-album/contenu.md), carried by an attribute
-   (ErrorMessage.razor.css). *@
-<div role="alert" class="error-message" data-error-category="@CategoryName">
+   (ErrorMessage.razor.css). Compact, at the scale of a control (a list of suggestions, the line of an upload, under a
+   field): the same name, icon, color and frame, smaller. *@
+<div role="alert" class="error-message" data-error-category="@CategoryName" data-error-compact="@Compact">
     <span class="error-icon"><Icon Name="CategoryIcon" /></span>
     <div class="error-content">
         <p data-error-label>@(Label ?? L[$"Category.{Problem.Category}"])</p>
@@ -46,9 +47,20 @@
     [Parameter]
     public string? Message { get; set; }
 
+    /// <summary>
+    /// The text of a technical error, said for the action of a control that failed (e.g. its search), in place of the generic
+    /// text of the request of a page; an error of another category keeps its own text, which says what to do about it.
+    /// </summary>
+    [Parameter]
+    public string? TechnicalText { get; set; }
+
     /// <summary>What the user can do about the error (e.g. reload the record, try again).</summary>
     [Parameter]
     public RenderFragment? Actions { get; set; }
+
+    /// <summary>Presented within a control rather than over a page or a form: the same error, at the scale of the control.</summary>
+    [Parameter]
+    public bool Compact { get; set; }
 
     private string CategoryName => Problem.Category.ToString().ToLowerInvariant();
 
@@ -67,7 +79,7 @@
         ProblemCategory.Functional when Problem.Impact is not null => L["Functional.ImpactChanged"],
         ProblemCategory.Functional when Problem.Status == StatusCodes.Status404NotFound => L["Functional.NotFound"],
         ProblemCategory.Functional => L["Functional.Conflict"],
-        _ => L["Technical"],
+        _ => TechnicalText ?? L["Technical"],
     };
 
     private string CountText(ImpactCount count) =>

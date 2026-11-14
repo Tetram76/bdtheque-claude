@@ -57,7 +57,7 @@
                     <span class="edition-visuals-upload-head">
                         <span class="edition-visuals-upload-name">@upload.Name</span>
                         <span class="edition-visuals-upload-status">@StatusOf(upload)</span>
-                        @if (upload.State == UploadState.Refused)
+                        @if (upload.State is UploadState.Refused or UploadState.Failed)
                         {
                             <button type="button" class="edition-visuals-upload-remove" aria-label="@L["Upload.Remove", upload.Name]"
                                     @onclick="() => _uploads.Remove(upload)">
@@ -72,6 +72,12 @@
                     @if (upload.Reason is not null)
                     {
                         <span class="edition-visuals-upload-reason">@upload.Reason</span>
+                    }
+                    @if (upload.Failure is { } failure)
+                    {
+                        @* Not a refusal of the file: an error, presented by the single component of the errors at the scale of
+                           its line (choix-implementation/socle/frontend.md, Présentation). *@
+                        <ErrorMessage Problem="failure" Compact="true" TechnicalText="@L["Failed.Technical"]" />
                     }
                 </li>
             }
@@ -250,14 +256,19 @@
             await ChangedAsync();
             await Recorder.RecordActionAsync(Functions.Added, $"pending-visual={pending.Id}", _disposal.Token);
         }
+        // Refused by a rule of api, the file says why; any other error is not a refusal of the file, which was not sent.
+        catch (ApiProblemException exception) when (exception.Problem is { Category: ProblemCategory.Business, RuleCode: { } code })
+        {
+            Refuse(upload, Rules[code]);
+        }
         catch (ApiProblemException exception)
         {
-            Refuse(upload, ReasonOf(exception.Problem));
+            Fail(upload, exception.Problem);
         }
         catch (IOException)
         {
             // The browser no longer gives the file (e.g. deleted from its folder meanwhile).
-            Refuse(upload, L["Refused.Technical"]);
+            Fail(upload, ApiProblem.Technical());
         }
     }
 
@@ -265,6 +276,13 @@
     {
         upload.State = UploadState.Refused;
         upload.Reason = reason;
+        StateHasChanged();
+    }
+
+    private void Fail(Upload upload, ApiProblem failure)
+    {
+        upload.State = UploadState.Failed;
+        upload.Failure = failure;
         StateHasChanged();
     }
 
@@ -278,16 +296,11 @@
         _ = InvokeAsync(StateHasChanged);
     }
 
-    private string ReasonOf(ApiProblem problem) => problem switch
-    {
-        { Category: ProblemCategory.Business, RuleCode: { } code } => Rules[code],
-        _ => L["Refused.Technical"],
-    };
-
     private string StatusOf(Upload upload) => upload.State switch
     {
         UploadState.Waiting => L["Upload.Waiting"],
         UploadState.Sending => L["Upload.Progress", upload.Percent],
+        UploadState.Failed => L["Upload.Failed"],
         _ => L["Upload.Refused"],
     };
 
@@ -419,10 +432,14 @@
     {
         Waiting,
         Sending,
+        // Refused by a rule (its format, its size), which its reason says.
         Refused,
+        // Not sent, by an error that is not a refusal of the file (e.g. api unreachable), which its failure is.
+        Failed,
     }
 
-    // A file chosen, with the type it is added as, until api accepts it, or why it refused it until it is removed.
+    // A file chosen, with the type it is added as, until api accepts it, or why it was refused or not sent until it is
+    // removed.
     private sealed class Upload(IBrowserFile file, VisualType type)
     {
         public IBrowserFile File { get; } = file;
@@ -436,6 +453,8 @@
         public int Percent { get; set; }
 
         public string? Reason { get; set; }
+
+        public ApiProblem? Failure { get; set; }
     }
 
     /// <summary>The functions of the audience measurement the actions on the visuals are recorded under.</summary>

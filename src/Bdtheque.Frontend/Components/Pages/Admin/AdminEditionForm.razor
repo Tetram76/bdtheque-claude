@@ -63,7 +63,7 @@ else
                         @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and
                            removed when it changes (choix-implementation/socle/frontend.md, Fiches de saisie). *@
                         <Field Id="edition-collection" Label="@L["Collection"]" Error="@Errors.For("/publisherCollectionId")"
-                               Help="@(CollectionsUnread ? L["Collection.Unread"].Value : L["Collection.Help"].Value)" Context="control">
+                               Failure="CollectionsProblem" FailureText="@L["Collection.Unread"]" Help="@L["Collection.Help"]" Context="control">
                             <select id="@control.Id" class="edition-collection" disabled="@(Entry.Publisher is null)"
                                     aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
                                     value="@(Entry.PublisherCollection?.Id.ToString() ?? "")" @onchange="ChooseCollection">
@@ -207,12 +207,18 @@ else
     public AlbumLabelFormat AlbumFormat { get; set; }
 
     /// <summary>
-    /// The collections of the publisher chosen, by name, which its collection is chosen among; none without publisher, and
-    /// none either if they could not be read, which the field then says. Persisted with the form, so that collections not read
-    /// by the prerendering stay so once interactive.
+    /// The collections of the publisher chosen, by name, which its collection is chosen among; none without publisher, nor
+    /// while they are read, nor if they could not be.
     /// </summary>
     [PersistentState]
     public List<RecordOption>? PublisherCollections { get; set; }
+
+    /// <summary>
+    /// The error the reading of the collections of the publisher chosen met, which the field presents; none once they are
+    /// read. Persisted with the form, so that collections not read by the prerendering stay so once interactive.
+    /// </summary>
+    [PersistentState]
+    public ApiProblem? CollectionsProblem { get; set; }
 
     /// <summary>What api accepts and keeps of the visuals added, which their block announces.</summary>
     [PersistentState]
@@ -224,8 +230,6 @@ else
     private bool IsPurchaseIntent => Entry?.IsPurchaseIntent ?? IsNewPurchaseIntent;
 
     private bool IsPurchase => Entry!.AcquisitionMode == AcquisitionMode.Purchase;
-
-    private bool CollectionsUnread => Entry!.Publisher is not null && PublisherCollections is null;
 
     private AudienceFunction ScreenFunction => (Id, IsPurchaseIntent) switch
     {
@@ -318,12 +322,12 @@ else
                 if (entry.Id is { } edition)
                     entry.Visuals = [.. (await Api.GetAsync<EditionVisualsForm>($"/admin/albums/{AlbumId}/editions/{edition}/visuals")).Visuals.Select(VisualItem.Of)];
                 var limits = await Api.GetAsync<VisualLimits>("/admin/visuals/limits");
-                var collections = entry.Publisher is { } publisher ? await CollectionsOfAsync(publisher.Id) : null;
+                var collections = entry.Publisher is { } publisher ? await CollectionsOfAsync(publisher.Id) : ([], null);
 
                 // Published once all of it is read: the form is shown only whole, a reading that fails showing the error instead.
                 AlbumFormat = format;
                 Limits = limits;
-                PublisherCollections = collections;
+                (PublisherCollections, CollectionsProblem) = collections;
                 ReadEntry = entry.Copy();
                 Entry = entry;
             }
@@ -401,25 +405,25 @@ else
         if (!changed)
             return;
         // None while those of the new one are read.
-        PublisherCollections = [];
+        (PublisherCollections, CollectionsProblem) = ([], null);
         if (publisher is null)
             return;
-        var collections = await CollectionsOfAsync(publisher.Id);
+        var read = await CollectionsOfAsync(publisher.Id);
         if (choice == _publisherChoice)
-            PublisherCollections = collections;
+            (PublisherCollections, CollectionsProblem) = read;
     }
 
-    // The collections of a publisher, by name; null if they cannot be read.
-    private async Task<List<RecordOption>?> CollectionsOfAsync(Guid publisherId)
+    // The collections of a publisher, by name; none, with the error met, if they cannot be read.
+    private async Task<(List<RecordOption> Collections, ApiProblem? Problem)> CollectionsOfAsync(Guid publisherId)
     {
         try
         {
             var collections = await Api.GetAsync<List<PublisherCollectionForm>>($"/admin/publishers/{publisherId}/collections");
-            return [.. collections.Select(c => new RecordOption(c.Id, c.Name, null))];
+            return ([.. collections.Select(c => new RecordOption(c.Id, c.Name, null))], null);
         }
-        catch (ApiProblemException)
+        catch (ApiProblemException exception)
         {
-            return null;
+            return ([], exception.Problem);
         }
     }
 

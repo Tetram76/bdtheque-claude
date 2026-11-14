@@ -29,7 +29,15 @@
         <input type="hidden" name="@Name" value="@(Value?.Id.ToString() ?? "")" />
     }
     <ul id="@ListId" class="record-picker-list" role="listbox" aria-label="@L["Suggestions"]" hidden="@(!IsOpen)">
-        @if (_status is not SearchStatus.Done)
+        @if (_status is SearchStatus.Failed)
+        {
+            @* A search that failed is an error, presented by the single component of the errors at the scale of the list
+               (choix-implementation/socle/frontend.md, Présentation). *@
+            <li class="record-picker-status" role="presentation">
+                <ErrorMessage Problem="_failure!" Compact="true" TechnicalText="@L["Failed"]" />
+            </li>
+        }
+        else if (_status is not SearchStatus.Done)
         {
             <li class="record-picker-status" role="presentation">@L[_status.ToString()]</li>
         }
@@ -72,6 +80,8 @@
     private string _text = "";
     private bool _open;
     private SearchStatus _status = SearchStatus.Done;
+    // The error the search of the text shown met, while its status is Failed.
+    private ApiProblem? _failure;
     private IReadOnlyList<RecordOption> _options = [];
     private int _active = -1;
     private string? _revealedOptionId;
@@ -214,9 +224,9 @@
             IReadOnlyList<RecordOption> options = [.. PendingMatching(_text), .. found];
             Suggest(options, options.Count == 0 ? SearchStatus.NoResult : SearchStatus.Done);
         }
-        catch (ApiProblemException) when (number == _textNumber)
+        catch (ApiProblemException exception) when (number == _textNumber)
         {
-            Suggest([], SearchStatus.Failed);
+            Suggest([], SearchStatus.Failed, exception.Problem);
         }
         catch (ApiProblemException)
         {
@@ -300,11 +310,13 @@
         Suggest([], SearchStatus.Done);
     }
 
-    // The only writing of the suggestions: the active one, an index in them, never outlives them.
-    private void Suggest(IReadOnlyList<RecordOption> options, SearchStatus status)
+    // The only writing of the suggestions: the active one, an index in them, never outlives them, nor the error of a failed
+    // search the search of another text.
+    private void Suggest(IReadOnlyList<RecordOption> options, SearchStatus status, ApiProblem? failure = null)
     {
         _options = options;
         _status = status;
+        _failure = failure;
         _active = -1;
     }
 

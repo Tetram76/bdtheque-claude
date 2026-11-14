@@ -18,6 +18,12 @@
     {
         <p class="field-error" id="@ErrorId"><Icon Name="IconName.Alert" />@Error</p>
     }
+    @if (Failure is not null)
+    {
+        <div class="field-failure" id="@FailureId">
+            <ErrorMessage Problem="Failure" Compact="true" TechnicalText="@FailureText" />
+        </div>
+    }
     @if (Help is not null)
     {
         <p class="field-help" id="@HelpId">@Help</p>
@@ -62,6 +68,17 @@
     [Parameter]
     public bool ErrorRelated { get; set; }
 
+    /// <summary>
+    /// An error the field met without anything to correct in it (e.g. the collections of the publisher that could not be
+    /// read): presented under the control by the single component of the errors, at the scale of the field.
+    /// </summary>
+    [Parameter]
+    public ApiProblem? Failure { get; set; }
+
+    /// <summary>The text of <see cref="Failure"/> when it is technical, said for what the field could not do.</summary>
+    [Parameter]
+    public string? FailureText { get; set; }
+
     /// <summary>The width of the control in characters, for a field sized to its content; the whole width otherwise.</summary>
     [Parameter]
     public int? Characters { get; set; }
@@ -73,13 +90,15 @@
 
     private string HelpId => $"{Id}-help";
 
+    private string FailureId => $"{Id}-failure";
+
     private string? WidthStyle => Characters is { } characters ? $"--field-characters: {characters}" : null;
 
     private FieldContext Context
     {
         get
         {
-            string?[] descriptions = [Error is null ? null : ErrorId, Help is null ? null : HelpId];
+            string?[] descriptions = [Error is null ? null : ErrorId, Failure is null ? null : FailureId, Help is null ? null : HelpId];
             var describedBy = string.Join(' ', descriptions.OfType<string>());
             return new FieldContext(Id, describedBy.Length == 0 ? null : describedBy, Error is null ? null : "true");
         }

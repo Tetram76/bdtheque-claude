@@ -74,6 +74,32 @@
     margin-block-start: var(--space-s);
 }
 
+/* Within a control: the same name, icon, color and frame, at the scale of the control, in the size of its small texts, and
+   without the margin of a box within the page. */
+.error-message[data-error-compact] {
+    gap: var(--space-s);
+    margin: 0;
+    padding: var(--space-xs) var(--space-s);
+    border-width: 1px;
+    border-inline-start-width: 4px;
+    font-size: var(--font-size-small);
+}
+
+.error-message[data-error-compact] .error-icon {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+}
+
+.error-message[data-error-compact] .error-icon ::deep .icon {
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+}
+
+.error-message[data-error-compact] [data-error-label] {
+    margin: 0;
+    font-size: inherit;
+}
+
 [data-error-impact] {
     margin: var(--space-s) 0 0;
     padding-inline-start: var(--space-xl);
