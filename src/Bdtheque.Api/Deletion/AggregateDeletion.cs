@@ -84,7 +84,43 @@ internal static class AggregateDeletion
         if (designating.Count > 0)
             records[(LinkNature.Reference, EntityKind.SavedSearch)] = designating;
 
+        // Once the saved searches are found: one may designate an edition targeted, looked for as an edition.
+        await CountTargetedEditionsAsIntentsAsync(context, id, records, cancellationToken);
         return records;
+    }
+
+    /// <summary>
+    /// Counts every edition a purchase intent targets as that intent, under the same nature of link, never among the
+    /// editions (fonctionnel/regles-metier/suppression-des-entites.md): the links each resource declares follow the schema,
+    /// in which an intent takes its edition along, and no resource can forget the rule. The intent being deleted is not
+    /// counted in what it takes along.
+    /// </summary>
+    private static async Task CountTargetedEditionsAsIntentsAsync(
+        BdthequeDbContext context, Guid deletedId, SortedDictionary<(LinkNature Nature, EntityKind Kind), SortedSet<Guid>> records,
+        CancellationToken cancellationToken)
+    {
+        foreach (var nature in records.Keys.Where(k => k.Kind == EntityKind.Edition).Select(k => k.Nature).ToList())
+        {
+            var editions = records[(nature, EntityKind.Edition)];
+            var editionIds = editions.ToList();
+            var targeted = await context.PurchaseIntents
+                .Where(p => p.EditionId != null && editionIds.Contains(p.EditionId.Value))
+                .Select(p => new { p.Id, EditionId = p.EditionId!.Value })
+                .ToListAsync(cancellationToken);
+            if (targeted.Count == 0)
+                continue;
+
+            editions.ExceptWith(targeted.Select(t => t.EditionId));
+            if (editions.Count == 0)
+                records.Remove((nature, EntityKind.Edition));
+
+            var intentIds = targeted.Select(t => t.Id).Where(intentId => intentId != deletedId).ToList();
+            if (intentIds.Count == 0)
+                continue;
+            if (!records.TryGetValue((nature, EntityKind.PurchaseIntent), out var intents))
+                records[(nature, EntityKind.PurchaseIntent)] = intents = [];
+            intents.UnionWith(intentIds);
+        }
     }
 
     /// <summary>

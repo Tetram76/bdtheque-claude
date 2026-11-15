@@ -184,8 +184,10 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
     }
 
     [Fact]
-    public async Task DeletionImpact_OfAnIntentOnAnEdition_AnnouncesTheEditionWithItsVisuals()
+    public async Task DeletionImpact_OfAnIntentOnAnEdition_AnnouncesOnlyTheVisualsOfTheEditionTargeted()
     {
+        // The edition targeted is the intent itself, which is not counted in what it takes along
+        // (fonctionnel/regles-metier/suppression-des-entites.md).
         var album = await CreateAlbumAsync();
         var intents = await CreateAsync(album, Edition((await CreatePublisherAsync()).Id));
         var intent = Assert.Single(intents.Intents);
@@ -195,7 +197,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
 
         Assert.Empty(impact.BlockedBy);
         Assert.Empty(impact.AssociationsRemoved);
-        Assert.Equal([new ImpactCount(EntityKind.Edition, 1), new ImpactCount(EntityKind.EditionVisual, 2)], impact.DeletedWith);
+        Assert.Equal([new ImpactCount(EntityKind.EditionVisual, 2)], impact.DeletedWith);
         Assert.Empty(impact.LeavingCollection);
     }
 

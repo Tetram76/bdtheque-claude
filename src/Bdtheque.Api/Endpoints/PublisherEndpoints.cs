@@ -201,8 +201,8 @@ internal static class PublisherEndpoints
         publisher.RemoveCollection(collection);
     }
 
-    // Its collections in the order of the base, by name, each with what references it: the editions and the series templates
-    // its deletion counts (CollectionDeletionLinks), editions targeted by a purchase intent included.
+    // Its collections in the order of the base, by name, each with what references it, counted as the impact of its deletion
+    // (CollectionDeletionLinks, AggregateDeletion): an edition a purchase intent targets is counted as that intent.
     private static async Task<PublisherForm> ToFormAsync(BdthequeDbContext context, Publisher publisher, CancellationToken cancellationToken) =>
         new(
             publisher.Id,
@@ -215,7 +215,8 @@ internal static class PublisherEndpoints
                 .Select(c => new PublisherCollectionUse(
                     c.Id,
                     c.Name,
-                    context.Editions.Count(e => e.PublisherCollectionId == c.Id),
+                    context.Editions.Count(e => e.PublisherCollectionId == c.Id && !context.PurchaseIntents.Any(p => p.EditionId == e.Id)),
+                    context.PurchaseIntents.Count(p => p.Edition!.PublisherCollectionId == c.Id),
                     context.Series.Count(s => s.TemplatePublisherCollectionId == c.Id)))
                 .ToListAsync(cancellationToken),
             publisher.CreatedAt,

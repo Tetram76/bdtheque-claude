@@ -98,6 +98,24 @@ public sealed class SavedSearchDesignationTests : IClassFixture<ApiWebApplicatio
     }
 
     [Fact]
+    public async Task DeleteAlbum_WhoseTargetedEditionIsDesignated_IsRefused()
+    {
+        // The edition targeted, counted as its intent in the impact, is still the record the search designates.
+        var album = await PostAsync<AlbumForm>("/admin/albums", AlbumContent([]));
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {_marker}", null, []));
+        var intents = await PostAsync<PurchaseIntentsForm>(
+            $"/admin/albums/{album.Id}/purchase-intents",
+            new CreatePurchaseIntentRequest(new PurchaseIntentEditionContent(publisher.Id, null, null, null, null, null, null, null, null, null, true), album.Version));
+        var editionId = Assert.Single(intents.Intents).EditionId!.Value;
+        await CreateSearchAsync(EntityKind.Edition, new SearchCriterion("record", IsOneOf, [editionId.ToString()]));
+
+        var impact = await ImpactAsync($"/admin/albums/{album.Id}");
+
+        Assert.Equal([new ImpactCount(EntityKind.SavedSearch, 1)], impact.BlockedBy);
+        Assert.Equal([new ImpactCount(EntityKind.PurchaseIntent, 1)], impact.DeletedWith);
+    }
+
+    [Fact]
     public async Task RemoveContribution_DesignatedByASavedSearch_IsABusinessError()
     {
         // Removed from the form of its album, the contribution is deleted without any confirmation: refused all the same.
