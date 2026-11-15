@@ -127,10 +127,7 @@
     <value>La suppression est définitive et emporte avec l&apos;édition :</value>
   </data>
   <data name="Refusal.Lead" xml:space="preserve">
-    <value>L&apos;édition est encore liée à d&apos;autres fiches : la suppression est refusée tant que ces liens existent.</value>
-  </data>
-  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
-    <value>Retirez d&apos;abord l&apos;édition des critères de ces recherches enregistrées, puis recommencez.</value>
+    <value>L'édition est encore désignée par :</value>
   </data>
   <data name="Merge.Title" xml:space="preserve">
     <value>Fusionner deux éditions</value>
@@ -155,5 +152,11 @@
   </data>
   <data name="Merge.Note" xml:space="preserve">
     <value>L&apos;étape suivante présentera les deux éditions côte à côte, avec ce que la fusion garde de chacune.</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez l'édition de ses critères</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez l'édition de leurs critères</value>
   </data>
 </root>

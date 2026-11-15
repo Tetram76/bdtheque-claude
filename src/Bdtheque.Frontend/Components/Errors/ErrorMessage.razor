@@ -18,7 +18,7 @@
             <ul data-error-impact>
                 @foreach (var count in impact.BlockedBy)
                 {
-                    <li>@CountText(count)</li>
+                    <li>@Entities.Of(count)</li>
                 }
             </ul>
         }
@@ -81,7 +81,4 @@
         ProblemCategory.Functional => L["Functional.Conflict"],
         _ => TechnicalText ?? L["Technical"],
     };
-
-    private string CountText(ImpactCount count) =>
-        Entities[$"{count.Kind}.{(count.Count == 1 ? "One" : "Other")}", count.Count];
 }

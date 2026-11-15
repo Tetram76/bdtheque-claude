@@ -251,13 +251,13 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
-        Assert.Contains("22 albums", Text(dialog.QuerySelector(".deletion-impact")!));
+        Assert.Equal("L'auteur est encore utilisé par :", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Equal(
             [
-                "Retirez d'abord l'auteur des contributions de ces albums, ou fusionnez-le avec un autre auteur, puis recommencez.",
-                "Retirez d'abord l'auteur des auteurs de ces séries, ou fusionnez-le avec un autre auteur, puis recommencez.",
+                "22 albums : retirez l'auteur de leurs contributions, ou fusionnez-le avec un autre auteur ;",
+                "2 séries : retirez l'auteur de leurs auteurs, ou fusionnez-le avec un autre auteur.",
             ],
-            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+            dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
         Assert.Equal(["Fermer"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));
     }
 

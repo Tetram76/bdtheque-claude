@@ -344,9 +344,8 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
-        Assert.Equal(
-            ["Retirez d'abord le genre des critères de ces recherches enregistrées, puis recommencez."],
-            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Equal("Le genre est encore désigné par :", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["1 recherche enregistrée : retirez le genre de ses critères."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
     }
 
     [Fact]

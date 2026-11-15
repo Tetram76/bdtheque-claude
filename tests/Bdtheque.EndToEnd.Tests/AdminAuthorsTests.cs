@@ -175,8 +175,7 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
 
         var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Suppression impossible" });
-        await Assertions.Expect(dialog).ToContainTextAsync("1 album");
-        await Assertions.Expect(dialog).ToContainTextAsync("Retirez d'abord l'auteur des contributions de ces albums");
+        await Assertions.Expect(dialog).ToContainTextAsync("1 album : retirez l'auteur de ses contributions, ou fusionnez-le avec un autre auteur.");
         await Assertions.Expect(dialog.GetByRole(AriaRole.Link, new() { Name = "Fermer" })).ToBeVisibleAsync();
         await Assertions.Expect(dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" })).ToHaveCountAsync(0);
     }

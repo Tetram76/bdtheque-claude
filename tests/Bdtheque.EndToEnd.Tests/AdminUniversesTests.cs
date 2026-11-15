@@ -118,7 +118,7 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Parent {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
         var refusal = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Suppression impossible" });
-        await Assertions.Expect(refusal).ToContainTextAsync("Rangez d'abord ses sous-univers sous un autre univers");
+        await Assertions.Expect(refusal).ToContainTextAsync("1 univers : rangez-le sous un autre univers, ou supprimez-le.");
         await refusal.GetByRole(AriaRole.Link, new() { Name = "Fermer" }).ClickAsync();
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Enfant {_marker}" }).ClickAsync();

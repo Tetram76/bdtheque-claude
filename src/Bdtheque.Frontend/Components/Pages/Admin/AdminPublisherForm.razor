@@ -191,7 +191,8 @@ else
     // The name of a collection, as typed, which its removal names; « <Sans nom> » while nothing is.
     private string Label(CollectionEntry collection) => string.IsNullOrWhiteSpace(collection.Name) ? L["Unnamed"] : collection.Name.Trim();
 
-    // What references a collection (« 58 éditions · 3 séries »); what becomes of a collection removed at the saving.
+    // What references a collection (« 58 éditions · 1 intention · 3 séries »), an edition targeted counted as its intent
+    // (fonctionnel/regles-metier/suppression-des-entites.md); what becomes of a collection removed at the saving.
     private string Use(CollectionEntry collection)
     {
         if (collection.Removed)
@@ -201,6 +202,7 @@ else
         string?[] parts =
         [
             Counted(collection.EditionCount, "Collection.Edition", "Collection.Editions"),
+            Counted(collection.PurchaseIntentCount, "Collection.PurchaseIntent", "Collection.PurchaseIntents"),
             Counted(collection.SeriesCount, "Collection.Series", "Collection.Series.Plural"),
         ];
         return string.Join(" · ", parts.OfType<string>());

@@ -126,7 +126,7 @@
             {
                 <DeletionDialog Id="publisher-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@_dialogPublisher.Name"
                                 CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
-                                RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_deletionProblem"
+                                RefusalHint="@(key => L[$"Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_deletionProblem"
                                 Version="_dialogPublisher.Version" OnConfirm="DeleteAsync" />
             }
         }

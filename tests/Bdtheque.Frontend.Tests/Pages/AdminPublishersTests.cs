@@ -209,14 +209,35 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
-        Assert.Contains("412 éditions", Text(dialog.QuerySelector(".deletion-impact")!));
+        Assert.Equal("L'éditeur est encore utilisé par :", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Equal(
             [
-                "Rattachez d'abord ses éditions à un autre éditeur, ou supprimez-les, puis recommencez.",
-                "Retirez d'abord l'éditeur des valeurs des nouvelles éditions de ces séries, puis recommencez.",
+                "412 éditions : rattachez-les à un autre éditeur, ou supprimez-les ;",
+                "3 séries : retirez l'éditeur des valeurs de leurs nouvelles éditions.",
             ],
-            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+            dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
         Assert.Equal(["Fermer"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));
+    }
+
+    [Fact]
+    public void Deletion_RefusedWhileAPurchaseIntentTargetsAnEditionOfThePublisher_SaysWhatToDo_InTheSingular()
+    {
+        // fonctionnel/regles-metier/suppression-des-entites.md: an edition targeted is counted as its intent, and what to do
+        // agrees with the number of records.
+        var id = Casterman.Id;
+        _api.Answers[$"/admin/publishers/{id}/deletion-impact"] = new DeletionImpact(
+            [new ImpactCount(EntityKind.Edition, 1), new ImpactCount(EntityKind.PurchaseIntent, 1), new ImpactCount(EntityKind.SavedSearch, 1)],
+            [], [], [], "f2");
+
+        var dialog = Open($"delete={id}").Find("dialog");
+
+        Assert.Equal(
+            [
+                "1 édition : rattachez-la à un autre éditeur, ou supprimez-la ;",
+                "1 intention d'achat : rattachez son édition à un autre éditeur, ou retirez-la ;",
+                "1 recherche enregistrée : retirez de ses critères l'éditeur et ses collections.",
+            ],
+            dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
     }
 
     [Fact]

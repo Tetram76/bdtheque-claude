@@ -130,16 +130,7 @@
     <value>La suppression de l'auteur est définitive.</value>
   </data>
   <data name="Refusal.Lead" xml:space="preserve">
-    <value>L'auteur est encore crédité sur d'autres fiches : la suppression est refusée tant qu'il l'est.</value>
-  </data>
-  <data name="Refusal.Hint.Album" xml:space="preserve">
-    <value>Retirez d'abord l'auteur des contributions de ces albums, ou fusionnez-le avec un autre auteur, puis recommencez.</value>
-  </data>
-  <data name="Refusal.Hint.Series" xml:space="preserve">
-    <value>Retirez d'abord l'auteur des auteurs de ces séries, ou fusionnez-le avec un autre auteur, puis recommencez.</value>
-  </data>
-  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
-    <value>Retirez d'abord l'auteur des critères de ces recherches enregistrées, puis recommencez.</value>
+    <value>L'auteur est encore utilisé par :</value>
   </data>
   <data name="Merge.Title" xml:space="preserve">
     <value>Fusionner deux auteurs</value>
@@ -212,5 +203,23 @@
   </data>
   <data name="Problem.Technical.Text" xml:space="preserve">
     <value>L&apos;application n&apos;a pas pu enregistrer l&apos;auteur. Vos changements sont toujours là, dans le panneau : réessayez dans quelques instants.</value>
+  </data>
+  <data name="Refusal.Hint.Album.One" xml:space="preserve">
+    <value>retirez l'auteur de ses contributions, ou fusionnez-le avec un autre auteur</value>
+  </data>
+  <data name="Refusal.Hint.Album.Other" xml:space="preserve">
+    <value>retirez l'auteur de leurs contributions, ou fusionnez-le avec un autre auteur</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez l'auteur de ses critères</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez l'auteur de leurs critères</value>
+  </data>
+  <data name="Refusal.Hint.Series.One" xml:space="preserve">
+    <value>retirez l'auteur de ses auteurs, ou fusionnez-le avec un autre auteur</value>
+  </data>
+  <data name="Refusal.Hint.Series.Other" xml:space="preserve">
+    <value>retirez l'auteur de leurs auteurs, ou fusionnez-le avec un autre auteur</value>
   </data>
 </root>

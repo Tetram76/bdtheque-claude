@@ -267,23 +267,6 @@ public sealed class ControlsTests : BunitContext
     }
 
     [Fact]
-    public void DeletionImpact_OfARefusal_AnnouncesWhatBlocksIt_Only()
-    {
-        var impact = new DeletionImpact(
-            BlockedBy: [new ImpactCount(EntityKind.SavedSearch, 1)],
-            AssociationsRemoved: [],
-            DeletedWith: [new ImpactCount(EntityKind.Edition, 2)],
-            LeavingCollection: [],
-            Fingerprint: "abc");
-
-        var summary = Render<DeletionImpactSummary>(parameters => parameters.Add(p => p.Impact, impact));
-
-        var line = Assert.Single(summary.FindAll(".deletion-impact li"));
-        Assert.Equal("blocked", line.GetAttribute("data-nature"));
-        Assert.Equal("Suppression bloquée par 1 recherche enregistrée", Normalize(line.TextContent));
-    }
-
-    [Fact]
     public void DeletionImpact_WithoutAnyOtherRecord_SaysSo()
     {
         var summary = Render<DeletionImpactSummary>(parameters => parameters.Add(p => p.Impact, new DeletionImpact([], [], [], [], "abc")));

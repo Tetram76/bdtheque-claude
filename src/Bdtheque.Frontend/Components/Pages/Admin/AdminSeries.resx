@@ -157,13 +157,7 @@
     <value>La suppression est définitive et emporte avec la série :</value>
   </data>
   <data name="Refusal.Lead" xml:space="preserve">
-    <value>La série est encore liée à d'autres fiches : la suppression est refusée tant que ces liens existent.</value>
-  </data>
-  <data name="Refusal.Hint.Album" xml:space="preserve">
-    <value>Rattachez d'abord ses albums à une autre série, ou supprimez-les, puis recommencez.</value>
-  </data>
-  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
-    <value>Retirez d'abord la série des critères de ces recherches enregistrées, puis recommencez.</value>
+    <value>La série est encore utilisée par :</value>
   </data>
   <data name="Merge.Title" xml:space="preserve">
     <value>Fusionner deux séries</value>
@@ -188,5 +182,17 @@
   </data>
   <data name="Merge.Note" xml:space="preserve">
     <value>L'étape suivante présentera les deux séries côte à côte, avec ce que la fusion garde de chacune.</value>
+  </data>
+  <data name="Refusal.Hint.Album.One" xml:space="preserve">
+    <value>rattachez-le à une autre série, ou supprimez-le</value>
+  </data>
+  <data name="Refusal.Hint.Album.Other" xml:space="preserve">
+    <value>rattachez-les à une autre série, ou supprimez-les</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez la série de ses critères</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez la série de leurs critères</value>
   </data>
 </root>

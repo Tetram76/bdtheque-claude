@@ -124,10 +124,7 @@
     <value>La suppression du genre est définitive ; les fiches qui le portent restent enregistrées.</value>
   </data>
   <data name="Refusal.Lead" xml:space="preserve">
-    <value>Le genre est encore désigné par d'autres fiches : la suppression est refusée tant que ces liens existent.</value>
-  </data>
-  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
-    <value>Retirez d'abord le genre des critères de ces recherches enregistrées, puis recommencez.</value>
+    <value>Le genre est encore désigné par :</value>
   </data>
   <data name="Merge.Title" xml:space="preserve">
     <value>Fusionner deux genres</value>
@@ -161,5 +158,11 @@
   </data>
   <data name="Problem.Technical.Text" xml:space="preserve">
     <value>L&apos;application n&apos;a pas pu enregistrer le genre. Vos changements sont toujours là : réessayez dans quelques instants.</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez le genre de ses critères</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez le genre de leurs critères</value>
   </data>
 </root>

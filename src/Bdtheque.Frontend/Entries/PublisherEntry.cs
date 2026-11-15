@@ -40,7 +40,8 @@ public sealed class PublisherEntry
         Website = form.Website,
         Collections = [.. form.Collections.Select(c => new CollectionEntry
         {
-            Key = c.Id, Id = c.Id, Name = c.Name, EditionCount = c.EditionCount, SeriesCount = c.SeriesCount,
+            Key = c.Id, Id = c.Id, Name = c.Name, EditionCount = c.EditionCount, PurchaseIntentCount = c.PurchaseIntentCount,
+            SeriesCount = c.SeriesCount,
         })],
     };
 
@@ -93,8 +94,11 @@ public sealed class CollectionEntry
 
     public string? Name { get; set; }
 
-    /// <summary>The editions of the collection, when it was read.</summary>
+    /// <summary>The editions of the collection, no purchase intent targets, when it was read.</summary>
     public int EditionCount { get; set; }
+
+    /// <summary>The purchase intents targeting an edition of the collection, when it was read.</summary>
+    public int PurchaseIntentCount { get; set; }
 
     /// <summary>The series whose new editions are proposed the collection, when it was read.</summary>
     public int SeriesCount { get; set; }
@@ -106,5 +110,5 @@ public sealed class CollectionEntry
     /// Referenced when it was read: it cannot be removed (fonctionnel/regles-metier/suppression-des-entites.md), which the
     /// saving would refuse anyway.
     /// </summary>
-    public bool InUse => EditionCount > 0 || SeriesCount > 0;
+    public bool InUse => EditionCount > 0 || PurchaseIntentCount > 0 || SeriesCount > 0;
 }

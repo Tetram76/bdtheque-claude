@@ -109,9 +109,12 @@
     <value>Le retrait est définitif et emporte avec l&apos;intention :</value>
   </data>
   <data name="Refusal.Lead" xml:space="preserve">
-    <value>L&apos;intention est encore liée à d&apos;autres fiches : le retrait est refusé tant que ces liens existent.</value>
+    <value>L'intention est encore désignée par :</value>
   </data>
-  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
-    <value>Retirez d&apos;abord l&apos;intention des critères de ces recherches enregistrées, puis recommencez.</value>
+  <data name="Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez l'intention de ses critères</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez l'intention de leurs critères</value>
   </data>
 </root>

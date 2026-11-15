@@ -295,8 +295,8 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
-        Assert.Contains("1 recherche enregistrée", Text(dialog.QuerySelector(".deletion-impact")!));
-        Assert.Contains("Retirez d'abord l'album des critères de ces recherches enregistrées, puis recommencez.", Text(dialog));
+        Assert.Equal("L'album est encore désigné par :", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["1 recherche enregistrée : retirez l'album de ses critères."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
         Assert.Equal(["Fermer"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));
     }
 

@@ -287,10 +287,8 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
 
         Assert.Equal(("Suppression impossible", "Univers Hugo Pratt"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
-        Assert.Contains("3 univers", Text(dialog.QuerySelector(".deletion-impact")!));
-        Assert.Equal(
-            ["Rangez d'abord ses sous-univers sous un autre univers, ou supprimez-les, puis recommencez."],
-            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Equal("L'univers est encore utilisé par :", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["3 univers : rangez-les sous un autre univers, ou supprimez-les."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
     }
 
     [Fact]

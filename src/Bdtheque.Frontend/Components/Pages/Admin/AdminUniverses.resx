@@ -139,13 +139,7 @@
     <value>La suppression de l'univers est définitive ; les fiches qui le portent restent enregistrées.</value>
   </data>
   <data name="Refusal.Lead" xml:space="preserve">
-    <value>L'univers est encore désigné par d'autres fiches : la suppression est refusée tant que ces liens existent.</value>
-  </data>
-  <data name="Refusal.Hint.Universe" xml:space="preserve">
-    <value>Rangez d'abord ses sous-univers sous un autre univers, ou supprimez-les, puis recommencez.</value>
-  </data>
-  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
-    <value>Retirez d'abord l'univers des critères de ces recherches enregistrées, puis recommencez.</value>
+    <value>L'univers est encore utilisé par :</value>
   </data>
   <data name="Merge.Title" xml:space="preserve">
     <value>Fusionner deux univers</value>
@@ -179,5 +173,17 @@
   </data>
   <data name="Problem.Technical.Text" xml:space="preserve">
     <value>L&apos;application n&apos;a pas pu enregistrer l&apos;univers. Vos changements sont toujours là, dans le panneau : réessayez dans quelques instants.</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez l'univers de ses critères</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez l'univers de leurs critères</value>
+  </data>
+  <data name="Refusal.Hint.Universe.One" xml:space="preserve">
+    <value>rangez-le sous un autre univers, ou supprimez-le</value>
+  </data>
+  <data name="Refusal.Hint.Universe.Other" xml:space="preserve">
+    <value>rangez-les sous un autre univers, ou supprimez-les</value>
   </data>
 </root>
