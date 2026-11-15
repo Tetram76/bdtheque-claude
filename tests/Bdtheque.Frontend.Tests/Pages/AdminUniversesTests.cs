@@ -158,13 +158,13 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_SavesTheUniverseWithItsVersion_ThenLeadsBackToTheList()
+    public async Task Panel_SavesTheUniverseWithItsVersion_ThenLeadsBackToTheList()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"]);
         var page = Open($"q=c&edit={Corto.Id}", recorded: true);
 
-        page.Find("input[name='name']").Change("Corto");
-        page.Find("form.side-panel-form").Submit();
+        await page.ChangeAsync("input[name='name']", "Corto");
+        await page.SubmitAsync("form.side-panel-form");
 
         var written = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/universes/{Corto.Id}", "Corto", "Les voyages du marin.", PrattItem.Id.ToString(), 42u),
@@ -175,12 +175,12 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_AParentThatWouldMakeACycle_IsRefusedInPlace_WithItsReason()
+    public async Task Panel_AParentThatWouldMakeACycle_IsRefusedInPlace_WithItsReason()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.HierarchyCycle");
         var page = Open($"edit={Corto.Id}");
 
-        page.Find("form.side-panel-form").Submit();
+        await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
         Assert.Equal(
@@ -190,25 +190,25 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_ANameRequired_IsRefusedAtTheName()
+    public async Task Panel_ANameRequired_IsRefusedAtTheName()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameRequired");
         var page = Open("new=open");
 
-        page.Find("form.side-panel-form").Submit();
+        await page.SubmitAsync("form.side-panel-form");
 
         Assert.Equal("true", page.Find("input[name='name']").GetAttribute("aria-invalid"));
         Assert.Equal("Le nom de l'univers est obligatoire.", Text(page.Find("input[name='name']").ParentElement!.QuerySelector(".field-error")!));
     }
 
     [Fact]
-    public void Panel_ANameAlreadyTakenUnderTheParent_IsRefusedAtTheName()
+    public async Task Panel_ANameAlreadyTakenUnderTheParent_IsRefusedAtTheName()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameAlreadyUsed", "/name");
         var page = Open("new=open");
-        page.Find("input[name='name']").Change(" star wars ");
+        await page.ChangeAsync("input[name='name']", " star wars ");
 
-        page.Find("form.side-panel-form").Submit();
+        await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
         Assert.Equal("true", panel.QuerySelector("input[name='name']")!.GetAttribute("aria-invalid"));
@@ -219,13 +219,13 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_CreatesTheUniverse_ThenLeadsBackToTheList()
+    public async Task Panel_CreatesTheUniverse_ThenLeadsBackToTheList()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"], HttpStatusCode.Created);
         var page = Open("new=open", recorded: true);
 
-        page.Find("input[name='name']").Change("Les Scorpions du désert");
-        page.Find("form.side-panel-form").Submit();
+        await page.ChangeAsync("input[name='name']", "Les Scorpions du désert");
+        await page.SubmitAsync("form.side-panel-form");
 
         var written = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Post, "/admin/universes", "Les Scorpions du désert"), (written.Method, written.Path, written.Body.GetProperty("name").GetString()));

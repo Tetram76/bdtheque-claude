@@ -310,13 +310,13 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_SavesTheAuthorWithItsVersion_ThenLeadsBackToTheList()
+    public async Task Panel_SavesTheAuthorWithItsVersion_ThenLeadsBackToTheList()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"]);
         var page = Open($"q=gib&edit={Gotlib.Id}", recorded: true);
 
-        page.Find("input[name='nationality']").Change("Belge");
-        page.Find("form.side-panel-form").Submit();
+        await page.ChangeAsync("input[name='nationality']", "Belge");
+        await page.SubmitAsync("form.side-panel-form");
 
         var written = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/authors/{Gotlib.Id}", "Gotlieb", "Marcel", "Gotlib", "Belge", "Créateur de Gai-Luron.", 44u),
@@ -328,12 +328,12 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_CreatesTheAuthor_ThenLeadsBackToTheList()
+    public async Task Panel_CreatesTheAuthor_ThenLeadsBackToTheList()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"], HttpStatusCode.Created);
         var page = Open("new=open", recorded: true);
 
-        page.Find("form.side-panel-form").Submit();
+        await page.SubmitAsync("form.side-panel-form");
 
         var written = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Post, "/admin/authors"), (written.Method, written.Path));
@@ -342,12 +342,12 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_AnAuthorWithoutLastNameNorPseudonym_IsRefusedAtBothFields()
+    public async Task Panel_AnAuthorWithoutLastNameNorPseudonym_IsRefusedAtBothFields()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.LastNameOrPseudonymRequired");
         var page = Open("new=open");
 
-        page.Find("form.side-panel-form").Submit();
+        await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
         Assert.Equal(("true", "true"), (panel.QuerySelector("input[name='lastName']")!.GetAttribute("aria-invalid"),
@@ -360,15 +360,15 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     [Theory]
     [InlineData("", "Gotlib", "pseudonym", "« Gotlib » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même auteur.")]
     [InlineData("Marcel", "", "lastName", "« Marcel Gotlieb » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même auteur.")]
-    public void Panel_ADisplayNameAlreadyTaken_IsRefusedAtTheFieldItComesFrom(string firstName, string pseudonym, string field, string message)
+    public async Task Panel_ADisplayNameAlreadyTaken_IsRefusedAtTheFieldItComesFrom(string firstName, string pseudonym, string field, string message)
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.DisplayNameAlreadyUsed");
         var page = Open("new=open");
-        page.Find("input[name='firstName']").Change(firstName);
-        page.Find("input[name='lastName']").Change("Gotlieb");
-        page.Find("input[name='pseudonym']").Change(pseudonym);
+        await page.ChangeAsync("input[name='firstName']", firstName);
+        await page.ChangeAsync("input[name='lastName']", "Gotlieb");
+        await page.ChangeAsync("input[name='pseudonym']", pseudonym);
 
-        page.Find("form.side-panel-form").Submit();
+        await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
         Assert.Equal(["true"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.GetAttribute("aria-invalid")));
@@ -378,12 +378,12 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Panel_AnAuthorChangedMeanwhile_IsPresentedAtTheTopOfThePanel()
+    public async Task Panel_AnAuthorChangedMeanwhile_IsPresentedAtTheTopOfThePanel()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
         var page = Open($"edit={Gotlib.Id}");
 
-        page.Find("form.side-panel-form").Submit();
+        await page.SubmitAsync("form.side-panel-form");
 
         Assert.Equal("functional", page.Find("dialog.side-panel [data-error-category]").GetAttribute("data-error-category"));
         Assert.Empty(page.FindAll("dialog.side-panel [aria-invalid]"));

@@ -9,11 +9,9 @@ using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Navigation;
-using Bdtheque.Frontend.Tests.Controls;
 using Bdtheque.Frontend.Tests.Audience;
 using Bdtheque.Frontend.Visits;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -225,7 +223,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Labels_FollowTheModeOfAcquisition()
+    public async Task Labels_FollowTheModeOfAcquisition()
     {
         // fonctionnel/presentation/libelles-contextuels-sur-l-edition.md
         var page = OpenOwned();
@@ -233,74 +231,74 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Date d'achat", page.Find("label[for=edition-date]").TextContent.Trim());
         Assert.Equal("Prix d'achat", page.Find("#edition-price-legend").TextContent.Trim());
 
-        page.Find("#edition-mode").Change("Gift");
+        await page.ChangeAsync("#edition-mode", "Gift");
 
         Assert.Equal("Date d'acquisition", page.Find("label[for=edition-date]").TextContent.Trim());
         Assert.Equal("Valeur d'acquisition", page.Find("#edition-price-legend").TextContent.Trim());
     }
 
     [Fact]
-    public void Free_IsUnavailableForAPurchase_AndEmptiesAndDisablesTheAmounts()
+    public async Task Free_IsUnavailableForAPurchase_AndEmptiesAndDisablesTheAmounts()
     {
         var page = OpenOwned();
 
         Assert.True(Free(page).HasAttribute("disabled"));
 
-        page.Find("#edition-mode").Change("Gift");
-        Free(page).Change(true);
+        await page.ChangeAsync("#edition-mode", "Gift");
+        await page.ChangeAsync("#edition-free", true);
 
         Assert.All(Amounts, id => Assert.True(string.IsNullOrEmpty(page.Find($"#edition-{id}").GetAttribute("value"))));
         Assert.All(AmountControls, id => Assert.True(page.Find($"#edition-{id}").HasAttribute("disabled")));
 
         // A purchase is never free: choosing it unchecks the box, which it disables.
-        page.Find("#edition-mode").Change("Purchase");
+        await page.ChangeAsync("#edition-mode", "Purchase");
 
         Assert.False(Free(page).HasAttribute("checked"));
         Assert.False(page.Find("#edition-price").HasAttribute("disabled"));
     }
 
     [Fact]
-    public void Isbn_CheckedAsItIsEntered_WithoutBlocking()
+    public async Task Isbn_CheckedAsItIsEntered_WithoutBlocking()
     {
         // fonctionnel/regles-metier/validation-de-l-isbn.md
         var page = OpenOwned();
         Assert.Contains("Chiffre de contrôle correct.", page.Find("#edition-isbn-help").TextContent);
         _api.Answers["/admin/editions/isbn-check?isbn=978-2-203-00120-7"] = new IsbnCheck(false, "978-2-203-00120-7");
 
-        page.Find("#edition-isbn").Input("978-2-203-00120-7");
+        await page.InputAsync("#edition-isbn", "978-2-203-00120-7");
 
-        page.WaitForAssertion(() => Assert.Contains("Chiffre de contrôle incohérent", page.Find("#edition-isbn-help").TextContent));
+        Assert.Contains("Chiffre de contrôle incohérent", page.Find("#edition-isbn-help").TextContent);
         Assert.Contains("peut être enregistré tel quel", page.Find("#edition-isbn-help").TextContent);
         Assert.Equal("true", page.Find("#edition-isbn").GetAttribute("data-warning"));
     }
 
     [Fact]
-    public void Isbn_TheCheckCharacterIsWrittenInCapitalsAsItIsEntered()
+    public async Task Isbn_TheCheckCharacterIsWrittenInCapitalsAsItIsEntered()
     {
         var page = OpenOwned();
         _api.Answers["/admin/editions/isbn-check?isbn=2-905123-01-x"] = new IsbnCheck(false, "2-905123-01-X");
 
-        page.Find("#edition-isbn").Input("2-905123-01-x");
+        await page.InputAsync("#edition-isbn", "2-905123-01-x");
 
-        page.WaitForAssertion(() => Assert.Equal("2-905123-01-X", page.Find("#edition-isbn").GetAttribute("value")));
+        Assert.Equal("2-905123-01-X", page.Find("#edition-isbn").GetAttribute("value"));
     }
 
     [Fact]
-    public void Label_FollowsTheTyping()
+    public async Task Label_FollowsTheTyping()
     {
         var page = OpenOwned();
 
-        page.Find("#edition-year").Change("2011");
+        await page.ChangeAsync("#edition-year", "2011");
 
         Assert.Equal("Casterman [2011] - ISBN 978-2-203-00120-8", page.Find(".entry-form-subject").TextContent.Trim());
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
     }
 
     [Fact]
-    public void Collection_TheChangeOfPublisherRemovesIt_AndListsItsOwn()
+    public async Task Collection_TheChangeOfPublisherRemovesIt_AndListsItsOwn()
     {
         var page = OpenOwned();
-        page.Find("#edition-collection").Change(Pastiches.ToString());
+        await page.ChangeAsync("#edition-collection", Pastiches.ToString());
 
         ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
 
@@ -331,7 +329,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Currency_NamedInItsList_AnyOtherEnteredByItsCode()
+    public async Task Currency_NamedInItsList_AnyOtherEnteredByItsCode()
     {
         // fonctionnel/valorisation/gestion-des-devises.md: any currency, the old franc included.
         var page = OpenOwned();
@@ -342,26 +340,26 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
                 "FRF · franc français", "BEF · franc belge", "LUF · franc luxembourgeois", "QZF · ancien franc français", "Autre devise…"],
             currencies);
 
-        page.Find("#edition-price-currency").Change("other");
-        page.Find("#edition-price-code").Change("jpy");
+        await page.ChangeAsync("#edition-price-currency", "other");
+        await page.ChangeAsync("#edition-price-code", "jpy");
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Single(_api.Written);
         Assert.Equal("JPY", _api.Written.Single().Body.GetProperty("content").GetProperty("acquisitionCurrency").GetString());
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtTheVersionOfTheAlbum_RecordsTheSaving_AndLeadsBackToTheEditionsOfTheAlbum()
+    public async Task Save_SendsTheWholeFormAtTheVersionOfTheAlbum_RecordsTheSaving_AndLeadsBackToTheEditionsOfTheAlbum()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
-        page.Find("#edition-pages").Change("64");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#edition-pages", "64");
+        await page.SubmitAsync("form");
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), new Uri(navigation.Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), new Uri(navigation.Uri).AbsolutePath);
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/albums/{AlbumId}/editions/{EditionId}"), (method, path));
         var request = body.Deserialize<UpdateEditionRequest>(JsonSerializerOptions.Web)!;
@@ -371,7 +369,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void NewEdition_PreFilledFromTheSeries_SaysWhichFields_AndIsCreated()
+    public async Task NewEdition_PreFilledFromTheSeries_SaysWhichFields_AndIsCreated()
     {
         var page = OpenNewOwned();
 
@@ -384,11 +382,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Créer l'édition", page.Find(".save-bar button[type=submit]").TextContent.Trim());
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned, HttpStatusCode.Created);
 
-        page.Find("#edition-mode").Change("Purchase");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#edition-mode", "Purchase");
+        await page.SubmitAsync("form");
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), new Uri(navigation.Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), new Uri(navigation.Uri).AbsolutePath);
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, $"/admin/albums/{AlbumId}/editions"), (method, path));
         Assert.Equal(NewOwned.Content with { AcquisitionMode = AcquisitionMode.Purchase },
@@ -424,15 +422,15 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void PurchaseIntent_IsSavedAsAnEditionNotOwned()
+    public async Task PurchaseIntent_IsSavedAsAnEditionNotOwned()
     {
         var page = OpenWished();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Wished);
 
-        page.Find("#edition-year").Change("2014");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#edition-year", "2014");
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Single(_api.Written);
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Put, $"/admin/albums/{AlbumId}/editions/{WishedId}"), (method, path));
         Assert.Equal(Wished.Content with { PublicationYear = 2014 }, body.Deserialize<UpdateEditionRequest>(JsonSerializerOptions.Web)!.Content);
@@ -440,7 +438,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void NewPurchaseIntent_OnANewEdition_IsCreated()
+    public async Task NewPurchaseIntent_OnANewEdition_IsCreated()
     {
         var page = OpenNewIntent();
 
@@ -452,11 +450,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         _api.Write = (_, _, _) => FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [new PurchaseIntentForm(IntentId, WishedId)], 13),
             HttpStatusCode.Created);
 
-        page.Find("#edition-year").Change("2013");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#edition-year", "2013");
+        await page.SubmitAsync("form");
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), new Uri(navigation.Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), new Uri(navigation.Uri).AbsolutePath);
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, $"/admin/albums/{AlbumId}/purchase-intents"), (method, path));
         var request = body.Deserialize<CreatePurchaseIntentRequest>(JsonSerializerOptions.Web)!;
@@ -471,35 +469,35 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     [InlineData("Edition.AcquisitionPriceReferenceDateRequired", "/acquisitionAmount", "edition-price", "Sans date de référence, ce prix ne peut pas être enregistré.")]
     [InlineData("Edition.InitialValueReferenceDateRequired", "/initialValueAmount", "edition-initial", "Sans date de référence, cette valeur ne peut pas être enregistrée.")]
     [InlineData("Edition.PageCountPositive", "/pageCount", "edition-pages", "Supérieur à zéro.")]
-    public void BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
+    public async Task BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule, pointer);
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("business", error.GetAttribute("data-error-category"));
         Assert.Equal("true", page.Find($"#{field}").GetAttribute("aria-invalid"));
         Assert.Contains(message, page.Find($"#{field}-error").TextContent);
     }
 
     [Fact]
-    public void FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
+    public async Task FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
 
-        page.Find("#edition-year").Change("2011");
-        page.Find("#edition-mode").Change("Gift");
-        page.Find("#edition-price").Change("12,5");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#edition-year", "2011");
+        await page.ChangeAsync("#edition-mode", "Gift");
+        await page.ChangeAsync("#edition-price", "12,5");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("functional", error.GetAttribute("data-error-category"));
         Assert.Contains("L'album de cette édition a été modifié entre-temps", error.TextContent);
 
-        error.QuerySelectorAll("button")[1].Click();
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[1]);
 
         var changes = page.Find("dialog .changes-dialog-list");
         Assert.Equal(["Année d'édition", "Mode d'acquisition", "Valeur d'acquisition"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
@@ -510,7 +508,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void FunctionalError_ModifiedMeanwhileOnCreation_OffersToReloadTheNewRecordAndToSeeTheChanges(bool intent)
+    public async Task FunctionalError_ModifiedMeanwhileOnCreation_OffersToReloadTheNewRecordAndToSeeTheChanges(bool intent)
     {
         // A new edition, or intent, is written under the version of its album, as a modified one: the album modified meanwhile,
         // the creation is to start again from its current state, which only a reload reads.
@@ -518,35 +516,34 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var path = intent ? AppPaths.AdminNewPurchaseIntent(AlbumId) : AppPaths.AdminNewAlbumEdition(AlbumId);
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
         ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
-        page.Find("#edition-year").Change("2011");
+        await page.ChangeAsync("#edition-year", "2011");
         if (!intent)
-            page.Find("#edition-mode").Change("Gift");
-        page.Find("form").Submit();
+            await page.ChangeAsync("#edition-mode", "Gift");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("functional", error.GetAttribute("data-error-category"));
-        var buttons = error.QuerySelectorAll("button");
-        Assert.Equal(["Recharger la fiche", "Voir mes changements"], buttons.Select(button => button.TextContent.Trim()));
-        buttons[1].Click();
+        Assert.Equal(["Recharger la fiche", "Voir mes changements"], error.QuerySelectorAll("button").Select(button => button.TextContent.Trim()));
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[1]);
         Assert.Contains("Année d'édition", page.Find("dialog .changes-dialog-list").TextContent);
         Assert.Contains(intent ? "admin.purchase-intent-form.changes" : "admin.edition-form.changes", _audience.Functions);
 
-        page.Find("[role=alert]").QuerySelectorAll("button")[0].Click();
+        await page.ClickAsync("[role=alert] button");
 
         var navigation = Services.GetRequiredService<NavigationManager>();
         Assert.Equal(path, new Uri(navigation.Uri).AbsolutePath);
     }
 
     [Fact]
-    public void TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
+    public async Task TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
 
-        page.Find("#edition-year").Change("2011");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#edition-year", "2011");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("technical", error.GetAttribute("data-error-category"));
         Assert.Contains("n'a pas pu enregistrer l'édition", error.TextContent);
         Assert.Equal("2011", page.Find("#edition-year").GetAttribute("value"));
@@ -645,7 +642,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
             ? FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddHours(24)), HttpStatusCode.Created)
             : FakeAdminApi.Json(Owned);
 
-        page.Find("#edition-visuals-type").Change("Dedication");
+        await page.ChangeAsync("#edition-visuals-type", "Dedication");
         await SendAsync(page, new TestBrowserFile("dedicace.png", new byte[2048]));
 
         Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent);
@@ -662,9 +659,9 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
         Assert.Contains("admin.edition-form.visual-added", _audience.Functions);
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Equal(HttpMethod.Put, _api.Written.Last().Method));
+        Assert.Equal(HttpMethod.Put, _api.Written.Last().Method);
         Assert.Equal(
             [(CoverId, (Guid?)null, "Cover"), (null, AddedId, "Dedication"), (FirstPlateId, null, "Plate"), (SecondPlateId, null, "Plate")],
             VisualsSent());
@@ -681,13 +678,13 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
             : intent ? FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [], 13), HttpStatusCode.Created) : FakeAdminApi.Json(Owned, HttpStatusCode.Created);
         ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
         if (!intent)
-            page.Find("#edition-mode").Change("Gift");
+            await page.ChangeAsync("#edition-mode", "Gift");
 
         await SendAsync(page, new TestBrowserFile("couverture.png", new byte[16]));
         Assert.Equal("1 visuel", page.Find(".edition-visuals-count").TextContent);
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
+        Assert.Equal(2, _api.Written.Count);
         Assert.Equal([((Guid?)null, (Guid?)AddedId, "Cover")], VisualsSent());
     }
 
@@ -706,7 +703,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
         Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
 
-        page.Find(".edition-visuals-upload-remove").Click();
+        await page.ClickAsync(".edition-visuals-upload-remove");
 
         Assert.Empty(page.FindAll(".edition-visuals-upload"));
     }
@@ -782,15 +779,15 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
         Assert.Equal("Envoi de fichiers en cours", page.Find(".save-bar-state-long").TextContent);
         Assert.True(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
         Assert.Single(_api.Written);
 
         sent.SetResult();
         await sending.EndAsync("Sending dedicace.png");
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
         Assert.False(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
-        page.Find("form").Submit();
-        page.WaitForAssertion(() => Assert.Equal(2, _api.Written.Count));
+        await page.SubmitAsync("form");
+        Assert.Equal(2, _api.Written.Count);
         Assert.Contains(((Guid?)null, (Guid?)AddedId, "Cover"), VisualsSent());
     }
 
@@ -811,61 +808,59 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_AnotherType_PlacesTheVisualAfterThoseOfItsNewType_SavedWithTheForm()
+    public async Task Visuals_AnotherType_PlacesTheVisualAfterThoseOfItsNewType_SavedWithTheForm()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
-        page.FindAll(".edition-visual")[0].QuerySelectorAll(".actions-menu-panel button").First(item => item.TextContent.Trim() == "Planche").Click();
+        await page.ClickAsync(() => page.FindAll(".edition-visual")[0].QuerySelectorAll(".actions-menu-panel button").First(item => item.TextContent.Trim() == "Planche"));
 
         Assert.Empty(_api.Written);
         Assert.Equal(["Pl. 1", "Pl. 2", "Pl. 3"], page.FindAll(".edition-visual-mark").Select(mark => mark.TextContent));
         Assert.Contains("admin.edition-form.visual-type-changed", _audience.Functions);
-        page.Find("form").Submit();
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        await page.SubmitAsync("form");
+        Assert.Single(_api.Written);
         Assert.Equal([(FirstPlateId, (Guid?)null, "Plate"), (SecondPlateId, null, "Plate"), (CoverId, null, "Plate")], VisualsSent());
     }
 
     [Fact]
-    public void Visuals_Dragged_TakesThePlaceOfAnotherOfItsType_ButNotOfAnotherType()
+    public async Task Visuals_Dragged_TakesThePlaceOfAnotherOfItsType_ButNotOfAnotherType()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
-        page.FindAll(".edition-visual")[2].TriggerEvent("ondragstart", new DragEventArgs());
-        page.FindAll(".edition-visual")[0].TriggerEvent("ondrop", new DragEventArgs());
+        await page.DragAndDropAsync(() => page.FindAll(".edition-visual")[2], () => page.FindAll(".edition-visual")[0]);
         Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
 
-        page.FindAll(".edition-visual")[2].TriggerEvent("ondragstart", new DragEventArgs());
-        page.FindAll(".edition-visual")[1].TriggerEvent("ondrop", new DragEventArgs());
+        await page.DragAndDropAsync(() => page.FindAll(".edition-visual")[2], () => page.FindAll(".edition-visual")[1]);
 
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
         Assert.Contains("admin.edition-form.visuals-arranged", _audience.Functions);
-        page.Find("form").Submit();
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        await page.SubmitAsync("form");
+        Assert.Single(_api.Written);
         Assert.Equal([CoverId, SecondPlateId, FirstPlateId], VisualsSent().Select(v => v.Id!.Value));
     }
 
     [Fact]
-    public void Visuals_Deleted_OnceConfirmed_LeaveTheFormWhichSavesWithoutThem()
+    public async Task Visuals_Deleted_OnceConfirmed_LeaveTheFormWhichSavesWithoutThem()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
 
-        page.FindAll(".edition-visual")[1].QuerySelectorAll(".actions-menu-panel button")[^1].Click();
+        await page.ClickAsync(() => page.FindAll(".edition-visual")[1].QuerySelectorAll(".actions-menu-panel button")[^1]);
         var dialog = page.Find("dialog");
         Assert.Equal("Supprimer ce visuel ?", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal("Planche 1", dialog.QuerySelector(".dialog-subject")!.TextContent.Trim());
         Assert.Contains("à l'enregistrement de la fiche", dialog.TextContent);
 
-        dialog.QuerySelectorAll(".dialog-actions .button")[^1].Click();
+        await page.ClickAsync(() => page.Find("dialog").QuerySelectorAll(".dialog-actions .button")[^1]);
 
         Assert.Empty(page.FindAll("dialog"));
         Assert.Equal("2 visuels", page.Find(".edition-visuals-count").TextContent);
         Assert.Equal(["admin.edition-form.visual-deletion", "admin.edition-form.visual-deleted"],
             _audience.Functions.Where(function => function.Contains("visual", StringComparison.Ordinal)));
-        page.Find("form").Submit();
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        await page.SubmitAsync("form");
+        Assert.Single(_api.Written);
         Assert.Equal([CoverId, SecondPlateId], VisualsSent().Select(v => v.Id!.Value));
     }
 
@@ -882,20 +877,19 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("Visuels retirés de la fiche", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal(["planche-oubliee.png"], dialog.QuerySelectorAll(".edition-visuals-expired li").Select(item => item.TextContent));
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
-        dialog.QuerySelector(".dialog-actions .button")!.Click();
+        await page.ClickAsync("dialog .dialog-actions .button");
         Assert.Empty(page.FindAll("dialog"));
     }
 
     [Fact]
-    public void Visuals_Changed_AreShownAmongTheChanges_OfAnEditionModifiedMeanwhile()
+    public async Task Visuals_Changed_AreShownAmongTheChanges_OfAnEditionModifiedMeanwhile()
     {
         var page = OpenOwned();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
-        page.FindAll(".edition-visual")[2].TriggerEvent("ondragstart", new DragEventArgs());
-        page.FindAll(".edition-visual")[1].TriggerEvent("ondrop", new DragEventArgs());
+        await page.DragAndDropAsync(() => page.FindAll(".edition-visual")[2], () => page.FindAll(".edition-visual")[1]);
 
-        page.Find("form").Submit();
-        page.WaitForElement("[role=alert]").QuerySelectorAll("button")[1].Click();
+        await page.SubmitAsync("form");
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[1]);
 
         var changes = page.Find("dialog .changes-dialog-list");
         Assert.Equal(["Visuels"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));

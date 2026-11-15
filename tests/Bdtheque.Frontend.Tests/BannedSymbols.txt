@@ -1,0 +1,3 @@
+T:Bunit.EventHandlerDispatchExtensions;Its synchronous methods (Click, Change…) leave the event unawaited, queued after a handling the dispatcher is still completing, and its asynchronous ones find the element apart from the dispatcher (#344). Raise the event with CircuitEvents (choix-implementation/outillage.md).
+T:Bunit.TriggerEventDispatchExtensions;TriggerEvent leaves the event unawaited, TriggerEventAsync finds the element apart from the dispatcher (#344). Raise the event with CircuitEvents (choix-implementation/outillage.md).
+T:Bunit.InputFileExtensions;UploadFiles raises the choice synchronously and blocks the test until its handling ends, which cannot then be awaited as the other events are. Raise the choice on the renderer's dispatcher with TestBrowserFile.
