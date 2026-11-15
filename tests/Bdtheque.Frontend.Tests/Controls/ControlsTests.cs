@@ -169,7 +169,7 @@ public sealed class ControlsTests : BunitContext
     }
 
     [Fact]
-    public void ActionsMenu_ClosesWhenAButtonOfItIsChosen_AndLeadsByItsLinks()
+    public async Task ActionsMenu_ClosesWhenAButtonOfItIsChosen_AndLeadsByItsLinks()
     {
         var chosen = false;
         var menu = Render<ActionsMenu>(parameters => parameters
@@ -198,7 +198,7 @@ public sealed class ControlsTests : BunitContext
         Assert.Equal("delete", deletion.GetAttribute("data-variant"));
         Assert.Equal("album-1", deletion.GetAttribute("popovertarget"));
         Assert.Equal("hide", deletion.GetAttribute("popovertargetaction"));
-        deletion.Click();
+        await menu.ClickAsync("#album-1 button.menu-item");
         Assert.True(chosen);
     }
 

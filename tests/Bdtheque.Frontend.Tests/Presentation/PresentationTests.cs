@@ -74,7 +74,7 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Fact]
-    public void Button_WithoutAddress_IsAButtonOfItsType()
+    public async Task Button_WithoutAddress_IsAButtonOfItsType()
     {
         var clicked = false;
         var button = Render<Button>(parameters => parameters
@@ -85,7 +85,7 @@ public sealed class PresentationTests : BunitContext
         var element = button.Find("button.button");
         Assert.Equal("button", element.GetAttribute("type"));
         Assert.Equal("delete", element.GetAttribute("data-variant"));
-        element.Click();
+        await button.ClickAsync("button.button");
         Assert.True(clicked);
     }
 
