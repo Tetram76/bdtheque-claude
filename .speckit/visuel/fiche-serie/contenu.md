@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''une série : pile de couvertures, avancement, auteurs, albums dans l''ordre de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:47:00Z }
 ---
 
 # Contenu
@@ -14,7 +14,7 @@ De haut en bas :
   - une **pile de trois couvertures**, décorative : celles des premiers tomes de la série ; la pile garde toujours trois cartes, pour qu'une série ne se confonde jamais avec un album, une place au-delà des tomes de la série étant une carte générique ;
   - le titre, puis des étiquettes : le **statut**, le **nombre de tomes prévus** (nombre de tomes théorique) et la mention **Complète** ou **À compléter** ;
   - l'**avancement de la collection** : « N albums sur M dans la collection », avec une barre de progression ;
-  - l'**éditeur** et la **collection** de la série (éditeur et collection template) ; l'éditeur mène à son site web lorsqu'il est connu, signalé comme un lien externe, la collection n'est pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)) ;
+  - l'**éditeur** et la **collection** de la série (éditeur et collection template) ; l'éditeur mène à son site web lorsqu'il est connu, signalé comme un lien qui fait sortir de l'application ([Liens qui font sortir de l'application](../charte-graphique/liens-qui-font-sortir-de-l-application.md)), la collection n'est pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)) ;
   - les **auteurs de la série** (contributions template), présentés comme les contributions d'un album ([Contenu](../fiche-album/contenu.md)) : une ligne par rôle crédité, repliée au-delà de ce que tient la ligne ;
   - les **genres** et les **univers**, chaque univers avec la chaîne de ses ancêtres, comme sur la fiche d'un album.
   - Ce qui n'est pas renseigné (statut, nombre de tomes prévus, éditeur, collection, auteurs, genres, univers) n'est pas affiché, ni sa ligne ni son étiquette ([Convivialité et efficacité](../charte-graphique/convivialite-et-efficacite.md)). Une série sans album n'a pas d'avancement, ni texte ni barre : son bloc **Combien d'albums ?** le dit (« Aucun album dans la série pour l'instant. »), seule exception à la règle, une série sans album ayant peu de sens.

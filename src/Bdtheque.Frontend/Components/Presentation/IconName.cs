@@ -30,6 +30,7 @@ public enum IconName
     Publisher,
     Genre,
     Universe,
+    Website,
     Star,
     Copy,
     Check,

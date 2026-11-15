@@ -1,0 +1,14 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the globe takes the color of the link it
+   follows, in every theme; small, so that it marks the link without competing with its text. A link that has an icon of its
+   own size (an item of a menu, a button with an icon only) sizes the globe as that icon. */
+.external-mark {
+    display: inline-flex;
+    flex: none;
+    margin-inline-start: 0.25em;
+    vertical-align: -0.0625em;
+}
+
+.external-mark ::deep .icon {
+    inline-size: 0.875em;
+    block-size: 0.875em;
+}

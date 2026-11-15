@@ -62,6 +62,33 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
     }
 
     [Theory, InEachTheme]
+    public async Task Website_ALongAddress_HoldsOnOneLine_WholeInItsTooltip(string theme)
+    {
+        // visuel/listes/liste-par-liste.md: whatever the length of the address, its link keeps a single line, an ellipsis ending
+        // what does not fit, its globe in view; the whole address stays in its tooltip and its link.
+        const string longAddress = "https://www.example.com/planche-noire/catalogue/albums-et-integrales";
+        await CreatePublisherAsync($"Dargaud {_marker}", "https://www.dargaud.example/");
+        await CreatePublisherAsync($"Planche noire {_marker}", longAddress);
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1440, Height = 900 });
+        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPublishers}?q={_marker}");
+        await PageReadiness.WaitAsync(page);
+
+        var links = page.Locator(".publisher-website a");
+        var (shortLink, longLink) = (links.Nth(0), links.Nth(1));
+        await Assertions.Expect(longLink).ToHaveAttributeAsync("href", longAddress);
+        await Assertions.Expect(longLink).ToHaveAttributeAsync("title", longAddress);
+        await Assertions.Expect(longLink).ToHaveAttributeAsync("target", "_blank");
+        await Assertions.Expect(longLink.Locator(".external-mark")).ToBeInViewportAsync();
+        var heights = await Task.WhenAll(
+            shortLink.EvaluateAsync<double>("link => link.getBoundingClientRect().height"),
+            longLink.EvaluateAsync<double>("link => link.getBoundingClientRect().height"));
+        Assert.Equal(heights[0], heights[1]);
+        Assert.True(
+            await longLink.Locator(".publisher-website-text").EvaluateAsync<bool>("text => text.scrollWidth > text.clientWidth"),
+            $"{theme}: the long address is not cut by its ellipsis.");
+    }
+
+    [Theory, InEachTheme]
     public async Task Deletion_ConfirmedInAModalDialog_TakesThePublisherAndItsCollectionsOutOfTheList(string theme)
     {
         var publisher = await CreatePublisherAsync($"À supprimer {_marker}");

@@ -91,12 +91,12 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
             Text(row.QuerySelector(".publisher-collections")!),
             Text(row.QuerySelector(".publisher-editions")!)));
 
-        // The website without its scheme, « www. » nor final slash. On two lines, each number is preceded by the name of its
+        // The website without its scheme, « www. » nor final slash, announced as leaving the application. On two lines, each number is preceded by the name of its
         // column, which the styles hide in a table.
         Assert.Equal(
             [
-                ("Casterman", "Écritures, Fac-similé, Univers d'auteurs", "casterman.com", "Collections 3", "Éditions 412"),
-                ("Dargaud", "Long courrier", "dargaud.com/bd", "Collections 1", "Éditions 1"),
+                ("Casterman", "Écritures, Fac-similé, Univers d'auteurs", "casterman.com, site externe", "Collections 3", "Éditions 412"),
+                ("Dargaud", "Long courrier", "dargaud.com/bd, site externe", "Collections 1", "Éditions 1"),
                 ("Futuropolis", "Aucune collection", "—Non renseigné", "Collections 0", "Éditions 0"),
             ],
             rows);
@@ -127,9 +127,13 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         var website = rows[0].QuerySelector(".publisher-website a")!;
         Assert.Equal(("https://www.casterman.com/", "_blank", "noopener noreferrer"),
             (website.GetAttribute("href"), website.GetAttribute("target"), website.GetAttribute("rel")));
+        // Marked as leaving the application, the whole address in its tooltip, which an ellipsis may cut
+        // (visuel/listes/liste-par-liste.md).
+        Assert.Equal("https://www.casterman.com/", website.GetAttribute("title"));
+        Assert.Equal("external-mark", website.LastElementChild?.ClassName);
         Assert.Equal(
             [
-                ("Ouvrir le site web", "https://www.casterman.com/", "_blank"),
+                ("Ouvrir le site web, site externe", "https://www.casterman.com/", "_blank"),
                 ("Fusionner avec un autre éditeur…", $"{AppPaths.AdminPublishers}?q=c&merge={id}", null),
                 ("Supprimer…", $"{AppPaths.AdminPublishers}?q=c&delete={id}", null),
             ],
