@@ -84,6 +84,18 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Columns_TheSeriesBeforeTheAlbums()
+    {
+        // fonctionnel/presentation/ordre-des-types-de-fiche.md: in the head as in each row.
+        var page = Open("");
+
+        Assert.Equal(["Séries", "Albums"], page.FindAll(".genre-row-head [role=columnheader]").Select(Text).Where(name => name is "Séries" or "Albums"));
+        Assert.Equal(
+            ["genre-series", "genre-albums"],
+            page.Find(".genre-row:not(.genre-row-head)").QuerySelectorAll("[role=cell]").Select(cell => cell.ClassName).Where(name => name is "genre-series" or "genre-albums"));
+    }
+
+    [Fact]
     public void Rows_ChangeTheGenreInTheList_AndOpenTheirDialogsThere()
     {
         var row = Open("q=a").FindAll(".genre-row:not(.genre-row-head)")[0];
@@ -307,7 +319,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
 
         Assert.Equal("Fusionner deux genres", Text(dialog.QuerySelector(".dialog-title")!));
         Assert.Equal(
-            [("Biographie", "37 albums · aucune série"), ("Western", "aucun album · aucune série")],
+            [("Biographie", "aucune série · 37 albums"), ("Western", "aucune série · aucun album")],
             dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
         Assert.Equal(AppPaths.AdminMergeGenres, dialog.QuerySelector("#genre-merge-continue")!.GetAttribute("action"));
     }

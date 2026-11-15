@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Api/Deletion/**'
   - 'src/Bdtheque.Api/Endpoints/DeletionEndpoints.cs'
   - 'src/Bdtheque.Contracts/Deletion/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T16:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:30:00Z }
 ---
 
 # Suppression des entités : mise en œuvre
@@ -25,6 +25,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T16:00:00Z }
 - **Ce qui désigne une collection, dans la saisie de son éditeur, compté comme l'impact de sa suppression** : une édition que vise une intention compte pour cette intention, comme dans le mécanisme commun, en une requête pour toutes les collections de l'éditeur.
   - **Alternative écartée (impact de suppression calculé pour chaque collection)** : plusieurs requêtes par collection à chaque lecture de la fiche, pour des nombres que la projection donne d'un coup.
 - **Refus présenté par le dialogue commun** ([Frontend](../socle/frontend.md)) : une ligne par type de fiche qui bloque, son nombre et la marche à suivre, que chaque page donne au singulier et au pluriel ; le résumé de l'impact ne présente plus que ce que fait une suppression confirmée.
+- **Ordre unique des types de fiche écrit une fois, dans les contrats** ([Ordre des types de fiche](../../fonctionnel/presentation/ordre-des-types-de-fiche.md)) : l'API rend chaque liste de l'impact dans cet ordre, que tout client présente tel quel ; un écran qui assemble lui-même un décompte (collection d'un éditeur, colonnes d'une liste, candidats d'une fusion) le suit, fixé par ses tests.
+  - **Alternative écartée (ordre appliqué par le frontend à la présentation)** : l'outil pour agents IA, autre client de l'API, devrait le redire.
 - **Un enfant d'agrégat est supprimé par sa racine**, dont la version est vérifiée, puis marquée modifiée ; une suppression qui emporte plus que sa ligne (une intention emporte son édition) passe par l'opération de l'agrégat, dont l'effet est celui que l'impact annonce.
 - **Le schéma reflète les mêmes règles** : `RESTRICT` pour chaque *Référence* (filet de sécurité, traduit en erreur métier), `CASCADE` pour chaque *Composition* et pour les jointures des *Associations*. Un test classe chaque clé étrangère dans une de ces natures, et échoue pour toute clé ajoutée sans classement, qui échapperait sinon aux règles de suppression.
 - **Fichiers des visuels supprimés après la validation** de la transaction, d'après les visuels que l'impact annonce : un échec de la suppression laisse les fichiers intacts, un échec sur un fichier ne laisse qu'un orphelin, rattrapé par la réconciliation ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)). Ce relevé appartient au mécanisme commun, pour qu'aucune suppression ne l'oublie.

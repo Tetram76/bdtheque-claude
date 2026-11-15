@@ -125,7 +125,7 @@
 @container universe-rows (min-width: 36rem) {
     .universe-row {
         grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--universe-actions-width);
-        grid-template-areas: "main albums series actions";
+        grid-template-areas: "main series albums actions";
         align-items: center;
     }
 
@@ -151,7 +151,7 @@
 @container universe-rows (min-width: 54rem) {
     .universe-row {
         grid-template-columns: minmax(0, 1fr) 6rem 6rem 6.5rem 6.75rem var(--universe-actions-width);
-        grid-template-areas: "main albums series subuniverses modified actions";
+        grid-template-areas: "main series albums subuniverses modified actions";
     }
 
     .universe-subuniverses,

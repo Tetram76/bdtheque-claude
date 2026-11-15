@@ -55,8 +55,8 @@
             <div class="genre-rows" role="table" aria-label="@L["Title"]">
                 <div class="genre-row genre-row-head" role="row">
                     <span class="genre-main" role="columnheader">@L["Column.Genre"]</span>
-                    <span class="genre-albums" role="columnheader">@L["Column.Albums"]</span>
                     <span class="genre-series" role="columnheader">@L["Column.Series"]</span>
+                    <span class="genre-albums" role="columnheader">@L["Column.Albums"]</span>
                     <span class="genre-modified" role="columnheader">@L["Column.Modified"]</span>
                     <span class="genre-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
                 </div>
@@ -202,11 +202,11 @@
     private RenderFragment Numbers(GenreAdminListItem row) =>
         @<text>
             <span class="genre-meta">
-                <span class="genre-albums" role="cell" data-empty="@(row.AlbumCount == 0)">
-                    <span class="genre-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)
-                </span>
                 <span class="genre-series" role="cell" data-empty="@(row.SeriesCount == 0)">
                     <span class="genre-caption">@L["Column.Series"]</span> @Format.Number(row.SeriesCount)
+                </span>
+                <span class="genre-albums" role="cell" data-empty="@(row.AlbumCount == 0)">
+                    <span class="genre-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)
                 </span>
             </span>
             <span class="genre-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
@@ -447,9 +447,10 @@
         var count => L["Count.Other", Format.Number(count)],
     };
 
-    // « 37 albums · aucune série »: what tells two genres of close labels apart.
+    // « aucune série · 37 albums »: what tells two genres of close labels apart, in the order of the entity types
+    // (fonctionnel/presentation/ordre-des-types-de-fiche.md).
     private string CandidateDetail(GenreAdminListItem candidate) =>
-        $"{Plural("Albums", candidate.AlbumCount)} · {Plural("Series", candidate.SeriesCount)}";
+        $"{Plural("Series", candidate.SeriesCount)} · {Plural("Albums", candidate.AlbumCount)}";
 
     private string Plural(string name, int count) => count switch
     {

@@ -179,7 +179,7 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
         var impact = await _client.GetFromJsonAsync<DeletionImpact>($"/admin/authors/{author.Id}/deletion-impact");
 
-        Assert.Equal([new ImpactCount(EntityKind.Album, 2), new ImpactCount(EntityKind.Series, 1)], impact!.BlockedBy);
+        Assert.Equal([new ImpactCount(EntityKind.Series, 1), new ImpactCount(EntityKind.Album, 2)], impact!.BlockedBy);
         Assert.Empty(impact.AssociationsRemoved);
         Assert.Empty(impact.DeletedWith);
         Assert.NotEmpty(impact.Fingerprint);

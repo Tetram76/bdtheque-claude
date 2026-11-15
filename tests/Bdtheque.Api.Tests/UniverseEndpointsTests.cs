@@ -280,7 +280,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
 
         var response = await _client.DeleteAsync(DeleteUri(universe, impact!.Fingerprint));
 
-        Assert.Equal([new ImpactCount(EntityKind.Album, 1), new ImpactCount(EntityKind.Series, 1)], impact.AssociationsRemoved);
+        Assert.Equal([new ImpactCount(EntityKind.Series, 1), new ImpactCount(EntityKind.Album, 1)], impact.AssociationsRemoved);
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();

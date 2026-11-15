@@ -96,6 +96,21 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Columns_TheSeriesBeforeTheAlbums_ThenTheSubUniverses()
+    {
+        // fonctionnel/presentation/ordre-des-types-de-fiche.md: in the head as in each row.
+        string[] counts = ["universe-series", "universe-albums", "universe-subuniverses"];
+        var page = Open("");
+
+        Assert.Equal(
+            ["Séries", "Albums", "Sous-univers"],
+            page.FindAll(".universe-row-head [role=columnheader]").Select(Text).Where(name => name is "Séries" or "Albums" or "Sous-univers"));
+        Assert.Equal(
+            counts,
+            page.Find(".universe-row:not(.universe-row-head)").QuerySelectorAll("[role=cell]").Select(cell => cell.ClassName).Where(counts.Contains));
+    }
+
+    [Fact]
     public void Rows_WhoseParentIsNotOnThePage_NameTheirAncestors()
     {
         Answer([Antilles, Cities], totalCount: 2);

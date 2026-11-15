@@ -4,13 +4,13 @@ using Bdtheque.Api.Endpoints;
 using Bdtheque.Api.Search;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Deletion;
+using Bdtheque.Contracts.Enums;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using DomainEnums = Bdtheque.Domain.Enums;
-using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Deletion;
 
@@ -160,8 +160,12 @@ internal static class AggregateDeletion
             CountsOf(LinkNature.LeavingCollection),
             Fingerprint(records));
 
+        // In the single order of the entity types (fonctionnel/presentation/ordre-des-types-de-fiche.md), which every client presents.
         List<ImpactCount> CountsOf(LinkNature nature) =>
-            records.Where(r => r.Key.Nature == nature).Select(r => new ImpactCount(r.Key.Kind, r.Value.Count)).ToList();
+            records.Where(r => r.Key.Nature == nature)
+                .OrderBy(r => EntityKindOrder.Of(r.Key.Kind))
+                .Select(r => new ImpactCount(r.Key.Kind, r.Value.Count))
+                .ToList();
     }
 
     /// <summary>

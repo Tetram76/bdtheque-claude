@@ -589,9 +589,9 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         Assert.Equal(
             [
                 new ImpactCount(EntityKind.Edition, 1),
-                new ImpactCount(EntityKind.EditionVisual, 3),
-                new ImpactCount(EntityKind.Contribution, 2),
                 new ImpactCount(EntityKind.PurchaseIntent, 1),
+                new ImpactCount(EntityKind.Contribution, 2),
+                new ImpactCount(EntityKind.EditionVisual, 3),
             ],
             impact.DeletedWith);
         // Deleted with all its editions, the album does not merely leave the collection.
