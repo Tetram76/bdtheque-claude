@@ -9,7 +9,7 @@
    chosen. *@
 <Field Id="@Id" Label="@L["Label"]" Error="@_error" Help="@(_error is null ? HelpText : null)" Context="control">
     <RecordPicker Id="@control.Id" Kind="RecordKind.Universe" Name="@Name" Value="_value" ValueChanged="ChooseAsync"
-                  Placeholder="@L["Placeholder"]" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
+                  Placeholder="@L["Placeholder"]" AutoFocus="@Autofocus" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
 </Field>
 
 @code {
@@ -27,6 +27,10 @@
     /// <summary>The parent chosen, with its ancestors; <c>null</c> at the top of the hierarchy.</summary>
     [Parameter]
     public UniverseInHierarchy? Parent { get; set; }
+
+    /// <summary>Whether the field takes the focus once interactive: the parent sent was refused (a cycle).</summary>
+    [Parameter]
+    public bool Autofocus { get; set; }
 
     /// <summary>Why the parent sent was refused.</summary>
     [Parameter]

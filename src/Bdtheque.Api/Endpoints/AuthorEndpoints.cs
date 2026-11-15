@@ -1,5 +1,6 @@
 using System.Data;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -166,9 +167,10 @@ internal static class AuthorEndpoints
         ?? throw new EntityNotFoundException(typeof(Author), id);
 
     private static async Task<Created<AuthorForm>> CreateAsync(
-        CreateAuthorRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        CreateAuthorRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
-        var author = new Author(request.LastName, request.FirstName, request.Pseudonym);
+        var author = fields.Create(
+            "", () => new Author(request.LastName, request.FirstName, request.Pseudonym), EnteredOtherwise(request.Pseudonym));
         author.UpdateBiography(request.Biography);
         author.UpdateNationality(request.Nationality);
         context.Authors.Add(author);
@@ -177,16 +179,26 @@ internal static class AuthorEndpoints
     }
 
     private static async Task<AuthorForm> UpdateAsync(
-        Guid id, UpdateAuthorRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid id, UpdateAuthorRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var author = await context.LoadAggregateForWriteAsync<Author>(id, request.Version, cancellationToken: cancellationToken);
+        fields.Place(author, renamed: EnteredOtherwise(request.Pseudonym));
         author.UpdateIdentity(request.LastName, request.FirstName, request.Pseudonym);
         author.UpdateBiography(request.Biography);
         author.UpdateNationality(request.Nationality);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return ToForm(context, author);
+    }
+
+    // The display name, and the sort key drawn from it, come from the pseudonym if any, otherwise from the names
+    // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes): a display name already taken, or too long, is
+    // corrected there.
+    private static Dictionary<string, string> EnteredOtherwise(string? pseudonym)
+    {
+        var field = string.IsNullOrWhiteSpace(pseudonym) ? "/lastName" : "/pseudonym";
+        return new() { [nameof(Author.DisplayName)] = field, [nameof(Author.SortKey)] = field };
     }
 
     private static AuthorForm ToForm(BdthequeDbContext context, Author author) =>

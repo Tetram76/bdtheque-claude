@@ -2,6 +2,8 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
+using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
 
@@ -85,7 +87,10 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
         panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
-        await Assertions.Expect(panel).ToContainTextAsync("Un auteur a au moins un nom ou un pseudonyme : renseignez l'un ou l'autre.");
+        await Assertions.Expect(panel.Locator("[data-error-category=business]")).ToContainTextAsync("Renseignez au moins le nom ou le pseudonyme de l'auteur.");
+        await Assertions.Expect(panel).ToContainTextAsync("Au moins le nom ou le pseudonyme.");
+        // The field in cause gets the focus (visuel/listes/saisie-selon-l-entite.md).
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true })).ToBeFocusedAsync();
         await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Pseudonyme" })).ToHaveAttributeAsync("aria-invalid", "true");
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Pseudonyme" }).FillAsync($"VH {_marker}");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
@@ -93,6 +98,53 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors, $"?q={_marker}"));
         await Assertions.Expect(Names(page)).ToHaveTextAsync([$"VH {_marker}"]);
         Assert.Equal(author.Id, (await GetAsync<AuthorForm>($"/admin/authors/{author.Id}")).Id);
+    }
+
+    // Deleted meanwhile, from another tab or device: the panel stays open with what was typed, and says so
+    // (visuel/listes/saisie-selon-l-entite.md, #411), rather than creating the author anew or failing without a word.
+    [Theory, InEachTheme]
+    public async Task Edit_OfAnAuthorDeletedMeanwhile_KeepsThePanelOpen_AndSaysSo(string theme)
+    {
+        var author = await CreateAuthorAsync($"Disparu {_marker}", null, null);
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}&edit={author.Id}");
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        await DeleteAuthorAsync(author);
+
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" }).FillAsync("Belge");
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        var error = panel.Locator("[data-error-category=functional]");
+        await Assertions.Expect(error).ToContainTextAsync("Modifiée entre-temps");
+        await Assertions.Expect(error).ToContainTextAsync("L'auteur a été supprimé entre-temps : rien n'a été enregistré.");
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" })).ToHaveValueAsync("Belge");
+        using var api = Application.CreateApiClient();
+        Assert.Empty((await api.GetFromJsonAsync<Page<AuthorAdminListItem>>($"/admin/authors?q={_marker}"))!.Items);
+    }
+
+    // Changed meanwhile: nothing overwritten; « Recharger la fiche » presents the author as it now is.
+    [Theory, InEachTheme]
+    public async Task Edit_OfAnAuthorChangedMeanwhile_IsReloadedAtItsCurrentState(string theme)
+    {
+        var author = await CreateAuthorAsync($"Change {_marker}", null, null);
+        var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}&edit={author.Id}");
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        using (var api = Application.CreateApiClient())
+        {
+            (await api.PutAsJsonAsync($"/admin/authors/{author.Id}", new UpdateAuthorRequest(author.LastName, null, null, null, "Suisse", author.Version)))
+                .EnsureSuccessStatusCode();
+        }
+
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" }).FillAsync("Belge");
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        await Assertions.Expect(panel.Locator("[data-error-category=functional]")).ToContainTextAsync("rien n'a été écrasé");
+        await Assertions.Expect(panel.GetByRole(AriaRole.Button, new() { Name = "Voir mes changements" })).ToHaveCountAsync(0);
+        await panel.GetByRole(AriaRole.Link, new() { Name = "Recharger la fiche" }).ClickAsync();
+
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" })).ToHaveValueAsync("Suisse");
+        await Assertions.Expect(panel.Locator("[data-error-category]")).ToHaveCountAsync(0);
     }
 
     [Theory, InEachTheme]
@@ -185,6 +237,14 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
 
     private Task<AuthorForm> CreateAuthorAsync(string lastName, string? firstName, string? pseudonym) =>
         PostAsync<AuthorForm>("/admin/authors", new CreateAuthorRequest(lastName, firstName, pseudonym, null, null));
+
+    private async Task DeleteAuthorAsync(AuthorForm author)
+    {
+        using var api = Application.CreateApiClient();
+        var impact = await api.GetFromJsonAsync<DeletionImpact>($"/admin/authors/{author.Id}/deletion-impact");
+        (await api.DeleteAsync($"/admin/authors/{author.Id}?version={author.Version}&fingerprint={Uri.EscapeDataString(impact!.Fingerprint)}"))
+            .EnsureSuccessStatusCode();
+    }
 
     private async Task<TForm> GetAsync<TForm>(string path)
     {

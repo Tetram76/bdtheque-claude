@@ -2,6 +2,8 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
+using Bdtheque.Contracts.Deletion;
 using frontend::Bdtheque.Frontend.Navigation;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -93,6 +95,28 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres, $"?q={_marker}"));
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Humour {_marker}"]);
     }
+    // Deleted meanwhile, from another tab or device: the row stays open with what was typed, and says so
+    // (visuel/listes/saisie-selon-l-entite.md, #411), even though the list no longer shows the genre.
+    [Theory, InEachTheme]
+    public async Task Edit_OfAGenreDeletedMeanwhile_KeepsItsRowOpen_AndSaysSo(string theme)
+    {
+        var genre = await CreateGenreAsync($"Disparu {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}&edit={genre.Id}");
+        using (var api = Application.CreateApiClient())
+        {
+            var impact = await api.GetFromJsonAsync<DeletionImpact>($"/admin/genres/{genre.Id}/deletion-impact");
+            (await api.DeleteAsync($"/admin/genres/{genre.Id}?version={genre.Version}&fingerprint={Uri.EscapeDataString(impact!.Fingerprint)}"))
+                .EnsureSuccessStatusCode();
+        }
+
+        await page.GetByRole(AriaRole.Textbox, new() { Name = $"Libellé de Disparu {_marker}" }).FillAsync($"Revenu {_marker}");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        var error = page.Locator("form.genre-row [data-error-category=functional]");
+        await Assertions.Expect(error).ToContainTextAsync("Le genre a été supprimé entre-temps : rien n'a été enregistré.");
+        await Assertions.Expect(page.Locator("form.genre-row input[type=text]")).ToHaveValueAsync($"Revenu {_marker}");
+    }
+
 
     [Theory, InEachTheme]
     public async Task Deletion_ConfirmedInAModalDialog_TakesTheGenreOutOfTheList(string theme)
@@ -119,10 +143,11 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
 
     private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Genres" }).Locator(".row-entry");
 
-    private async Task CreateGenreAsync(string label)
+    private async Task<GenreForm> CreateGenreAsync(string label)
     {
         using var api = Application.CreateApiClient();
         using var response = await api.PostAsJsonAsync("/admin/genres", new CreateGenreRequest(label));
         response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<GenreForm>())!;
     }
 }

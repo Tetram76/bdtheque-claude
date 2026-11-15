@@ -67,17 +67,18 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
     {
         var response = await _client.PostAsJsonAsync("/admin/authors", new CreateAuthorRequest(" ", "Jean", null, null, null));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired, ["/lastName"]);
     }
 
     // Two authors never share a display name, regardless of case and accents (modele-metier/auteur-artiste.md): the
-    // pseudonym, otherwise "First Last".
+    // pseudonym, otherwise "First Last"; the refusal designates the field the display name comes from.
     [Theory]
-    [InlineData(null, null, "Hergé {0}", "HERGE {0}", null, null)]
-    [InlineData("Van Hamme {0}", "Jean", null, null, null, "jean van hamme {0}")]
-    [InlineData(null, null, "Moebius {0}", "Giraud {0}", "Jean", "moëbius {0}")]
+    [InlineData(null, null, "Hergé {0}", "HERGE {0}", null, null, "/lastName")]
+    [InlineData("Van Hamme {0}", "Jean", null, null, null, "jean van hamme {0}", "/pseudonym")]
+    [InlineData(null, null, "Moebius {0}", "Giraud {0}", "Jean", "moëbius {0}", "/pseudonym")]
     public async Task Create_WithTheDisplayNameOfAnotherAuthor_IsABusinessError(
-        string? lastName, string? firstName, string? pseudonym, string? otherLastName, string? otherFirstName, string? otherPseudonym)
+        string? lastName, string? firstName, string? pseudonym, string? otherLastName, string? otherFirstName, string? otherPseudonym,
+        string field)
     {
         var marker = Guid.NewGuid().ToString("N");
         string? Marked(string? value) => value is null ? null : string.Format(value, marker);
@@ -87,7 +88,7 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var response = await _client.PostAsJsonAsync(
             "/admin/authors", new CreateAuthorRequest(Marked(otherLastName), Marked(otherFirstName), Marked(otherPseudonym), null, null));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorDisplayNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorDisplayNameAlreadyUsed, [field]);
     }
 
     [Fact]
@@ -107,7 +108,7 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var response = await _client.PostAsJsonAsync(
             "/admin/authors", new CreateAuthorRequest(new string('x', 5000), null, null, null, null));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/lastName"]);
     }
 
     [Fact]
@@ -142,7 +143,7 @@ public sealed class AuthorEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var response = await _client.PutAsJsonAsync(
             $"/admin/authors/{author.Id}", new UpdateAuthorRequest(null, "Jean", null, null, null, author.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired, ["/lastName"]);
         Assert.Equal(author, await _client.GetFromJsonAsync<AuthorForm>($"/admin/authors/{author.Id}"));
     }
 

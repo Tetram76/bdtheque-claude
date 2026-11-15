@@ -102,9 +102,6 @@
   <data name="Cancel" xml:space="preserve">
     <value>Annuler</value>
   </data>
-  <data name="FieldError.Genre.LabelRequired" xml:space="preserve">
-    <value>Le libellé du genre est obligatoire.</value>
-  </data>
   <data name="Empty.Text" xml:space="preserve">
     <value>Aucun genre ne correspond à « {0} ».</value>
   </data>
@@ -155,5 +152,14 @@
   </data>
   <data name="Merge.Note" xml:space="preserve">
     <value>L'étape suivante présentera les deux genres côte à côte, avec ce que la fusion garde de chacun.</value>
+  </data>
+  <data name="Problem.Functional.Conflict" xml:space="preserve">
+    <value>Le genre a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans la ligne jusque-là.</value>
+  </data>
+  <data name="Problem.Functional.NotFound" xml:space="preserve">
+    <value>Le genre a été supprimé entre-temps : rien n&apos;a été enregistré.</value>
+  </data>
+  <data name="Problem.Technical.Text" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas pu enregistrer le genre. Vos changements sont toujours là : réessayez dans quelques instants.</value>
   </data>
 </root>

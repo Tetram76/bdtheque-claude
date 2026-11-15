@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:00:00Z }
 ---
 
 # Frontend
@@ -107,6 +107,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:00:00Z }
 - **Recherche et filtres en formulaire `GET`**, dont le premier bouton, que le navigateur soumet sur Entrée, est la recherche ; replier ou déplier les filtres soumet aussi le formulaire, sans perdre un texte tapé.
 - **Suppression confirmée par un formulaire `POST`** qui envoie version et empreinte de l'impact affiché ([Suppression des entités : mise en œuvre](../ecritures/suppression-des-entites-mise-en-oeuvre.md)), puis redirige vers la liste ; un refus ou un impact changé est présenté dans le même dialogue.
 - **Saisie d'un genre, d'un univers ou d'un auteur dans sa liste** ([Saisie selon l'entité](../../visuel/listes/saisie-selon-l-entite.md)) : la ligne d'un genre changée en champ, le dialogue d'un nouveau genre et le panneau latéral d'un univers ou d'un auteur sont ouverts par l'adresse, comme un dialogue, et enregistrés par un formulaire `POST` de la liste statique, qui redirige vers la liste ou la présente de nouveau avec ce qui a été saisi et l'erreur à sa place. Seul le choix du parent d'un univers est interactif : un champ dans un îlot, qui présente le parent avec ses ancêtres et l'envoie avec le formulaire, comme les filtres d'une liste. Le panneau latéral est un dialogue modal (`<dialog>`) collé à droite, ouvert par le script des dialogues ; ses champs se disposent selon sa largeur (requête de conteneur).
+  - **Erreur d'enregistrement présentée par le composant de celle des fiches en page** (#411) : ses actions y sont celles du navigateur, « Recharger la fiche » un lien vers l'adresse de la fiche, que la liste relit, « Réessayer » un nouvel envoi du formulaire, avec ce qui a été saisi. Le champ d'une erreur métier est celui que désigne l'erreur, par le mécanisme partagé des fiches (§ Fiches de saisie) ; le premier à corriger reçoit le focus à l'ouverture du dialogue (`autofocus`), ou, pour le parent d'un univers, interactif, par son circuit.
+  - **Fiche supprimée entre-temps** : le formulaire renvoyé porte la version de la fiche lue, si bien que le panneau, ou la ligne en tête de la liste quand la page ne la montre plus, reste ouvert sur ce qui a été saisi, et l'enregistrement s'adresse toujours à la fiche lue, dont l'API dit qu'elle n'existe plus.
+    - **Alternative écartée (panneau ouvert sur la seule fiche relue)** : une fiche supprimée entre-temps ne se relit plus, et le panneau, que la page ne rendait plus, ne pouvait présenter l'erreur de son enregistrement (constaté).
   - **Alternative écartée (panneau ou ligne interactifs, comme une fiche de saisie)** : une connexion par page et l'état persistant d'un circuit pour quelques champs, dont seul le parent d'un univers a besoin d'interactivité ; la page de liste, statique, l'aurait été à moitié.
   - **Alternative écartée (page de saisie dédiée)** : écartée par la présentation elle-même, qui saisit un genre dans sa ligne, un univers et un auteur par-dessus leur liste.
 - **Site extérieur ouvert dans un nouvel onglet** (site web d'un éditeur, depuis sa ligne ou son menu), sans accès à la page d'origine ni adresse de provenance (`noopener noreferrer`) : la liste reste telle qu'elle était, avec ses critères.

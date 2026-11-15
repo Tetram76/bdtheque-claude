@@ -341,10 +341,13 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Contains("admin.author.created", _audience.Functions);
     }
 
+    // As on an entry form (visuel/listes/saisie-selon-l-entite.md, #411): the error at the top of the panel, the field it
+    // designates bordered with its text under it, and focused.
     [Fact]
     public async Task Panel_AnAuthorWithoutLastNameNorPseudonym_IsRefusedAtBothFields()
     {
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.LastNameOrPseudonymRequired");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.LastNameOrPseudonymRequired", "/lastName");
         var page = Open("new=open");
 
         await page.SubmitAsync("form.side-panel-form");
@@ -352,9 +355,10 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         var panel = page.Find("dialog.side-panel");
         Assert.Equal(("true", "true"), (panel.QuerySelector("input[name='lastName']")!.GetAttribute("aria-invalid"),
             panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-invalid")));
-        Assert.Equal("Un auteur a au moins un nom ou un pseudonyme : renseignez l'un ou l'autre.", Text(panel.QuerySelector(".field-error")!));
+        Assert.Equal("Au moins le nom ou le pseudonyme.", Text(panel.QuerySelector(".field-error")!));
         Assert.StartsWith("author-last-name-error", panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-describedby"));
-        Assert.Empty(panel.QuerySelectorAll("[data-error-category]"));
+        Assert.Equal(("business", "À corriger"), ErrorOf(panel));
+        Assert.Equal(["lastName"], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
     }
 
     [Theory]
@@ -362,7 +366,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     [InlineData("Marcel", "", "lastName", "« Marcel Gotlieb » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même auteur.")]
     public async Task Panel_ADisplayNameAlreadyTaken_IsRefusedAtTheFieldItComesFrom(string firstName, string pseudonym, string field, string message)
     {
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.DisplayNameAlreadyUsed");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.DisplayNameAlreadyUsed", $"/{field}");
         var page = Open("new=open");
         await page.ChangeAsync("input[name='firstName']", firstName);
         await page.ChangeAsync("input[name='lastName']", "Gotlieb");
@@ -374,19 +379,67 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal(["true"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.GetAttribute("aria-invalid")));
         Assert.Equal(field, panel.QuerySelector("[aria-invalid]")!.GetAttribute("name"));
         Assert.StartsWith(message, Text(panel.QuerySelector(".field-error")!));
-        Assert.Empty(panel.QuerySelectorAll("[data-error-category]"));
+        Assert.Equal(("business", "À corriger"), ErrorOf(panel));
+        Assert.Equal([field], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
     }
 
+    // A text too long is refused at its own field, whichever it is.
     [Fact]
-    public async Task Panel_AnAuthorChangedMeanwhile_IsPresentedAtTheTopOfThePanel()
+    public async Task Panel_ATextTooLong_IsRefusedAtItsField()
     {
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Text.TooLong", "/nationality");
         var page = Open($"edit={Gotlib.Id}");
 
         await page.SubmitAsync("form.side-panel-form");
 
-        Assert.Equal("functional", page.Find("dialog.side-panel [data-error-category]").GetAttribute("data-error-category"));
-        Assert.Empty(page.FindAll("dialog.side-panel [aria-invalid]"));
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal(["nationality"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.GetAttribute("name")));
+        Assert.Equal(["nationality"], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
+        Assert.Equal("Trop long : raccourcissez ce texte.", Text(panel.QuerySelector(".field-error")!));
+    }
+
+    // Changed or deleted meanwhile: nothing overwritten nor saved, the author reloaded at its address, what was typed staying in
+    // the panel until then.
+    [Theory]
+    [InlineData(HttpStatusCode.Conflict, "L'auteur a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans le panneau jusque-là.")]
+    [InlineData(HttpStatusCode.NotFound, "L'auteur a été supprimé entre-temps : rien n'a été enregistré.")]
+    public async Task Panel_AnAuthorChangedOrDeletedMeanwhile_OffersToReloadIt(HttpStatusCode status, string text)
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, status);
+        var page = Open($"q=gib&edit={Gotlib.Id}");
+        await page.ChangeAsync("input[name='nationality']", "Belge");
+
+        await page.SubmitAsync("form.side-panel-form");
+
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal(("functional", "Modifiée entre-temps"), ErrorOf(panel));
+        Assert.Equal(text, Text(panel.QuerySelector("[data-error-text]")!));
+        Assert.Equal([("Recharger la fiche", $"{AppPaths.AdminAuthors}?q=gib&edit={Gotlib.Id}")],
+            panel.QuerySelectorAll(".error-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
+        Assert.Equal("Belge", panel.QuerySelector("input[name='nationality']")!.GetAttribute("value"));
+        Assert.Empty(panel.QuerySelectorAll("[aria-invalid]"));
+    }
+
+    // A technical error: the same mention as any other, and the form sent again with what was typed.
+    [Fact]
+    public async Task Panel_ATechnicalError_OffersToSendTheFormAgain()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
+        var page = Open("new=open");
+
+        await page.SubmitAsync("form.side-panel-form");
+
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal(("technical", "Problème technique"), ErrorOf(panel));
+        var retry = panel.QuerySelector(".error-actions button")!;
+        Assert.Equal(("Réessayer", "submit"), (Text(retry), retry.GetAttribute("type")));
+        Assert.NotNull(retry.Closest("form.side-panel-form"));
+    }
+
+    private static (string?, string) ErrorOf(IElement panel)
+    {
+        var error = panel.QuerySelector("[data-error-category]")!;
+        return (error.GetAttribute("data-error-category"), Text(error.QuerySelector("[data-error-label]")!));
     }
 
     [Fact]
