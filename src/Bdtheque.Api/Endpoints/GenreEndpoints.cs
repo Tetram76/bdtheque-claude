@@ -1,5 +1,6 @@
 using System.Data;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -95,19 +96,20 @@ internal static class GenreEndpoints
         ?? throw new EntityNotFoundException(typeof(Genre), id);
 
     private static async Task<Created<GenreForm>> CreateAsync(
-        CreateGenreRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        CreateGenreRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
-        var genre = new Genre(request.Label);
+        var genre = fields.Create("", () => new Genre(request.Label));
         context.Genres.Add(genre);
         await context.SaveChangesAsync(cancellationToken);
         return TypedResults.Created($"/admin/genres/{genre.Id}", ToForm(context, genre));
     }
 
     private static async Task<GenreForm> UpdateAsync(
-        Guid id, UpdateGenreRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid id, UpdateGenreRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var genre = await context.LoadAggregateForWriteAsync<Genre>(id, request.Version, cancellationToken: cancellationToken);
+        fields.Place(genre);
         genre.SetLabel(request.Label);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

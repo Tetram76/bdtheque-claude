@@ -1,6 +1,7 @@
 using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
+using Bdtheque.Api.Errors;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -158,10 +159,10 @@ internal static class UniverseEndpoints
         (await UniverseTree.LoadAsync(context, cancellationToken)).InHierarchy(id);
 
     private static async Task<Created<UniverseForm>> CreateAsync(
-        CreateUniverseRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        CreateUniverseRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var universe = new Universe(request.Name);
+        var universe = fields.Create("", () => new Universe(request.Name));
         universe.SetDescription(request.Description);
         if (request.ParentId is { } parentId)
         {
@@ -176,7 +177,7 @@ internal static class UniverseEndpoints
     }
 
     private static async Task<UniverseForm> UpdateAsync(
-        Guid id, UpdateUniverseRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid id, UpdateUniverseRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         // Before the row lock: two crossed moves (A under C, C under A) would otherwise each hold the
@@ -185,6 +186,7 @@ internal static class UniverseEndpoints
         if (request.ParentId is not null)
             await UniverseHierarchy.LockAsync(context, cancellationToken);
         var universe = await context.LoadAggregateForWriteAsync<Universe>(id, request.Version, cancellationToken: cancellationToken);
+        fields.Place(universe);
         universe.SetName(request.Name);
         universe.SetDescription(request.Description);
         if (request.ParentId != universe.ParentId)

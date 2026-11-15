@@ -43,7 +43,7 @@ public sealed class GenreEndpointsTests : IClassFixture<ApiWebApplicationFactory
     {
         var response = await _client.PostAsJsonAsync("/admin/genres", new CreateGenreRequest(" "));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.GenreLabelRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.GenreLabelRequired, ["/label"]);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public sealed class GenreEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var response = await _client.PostAsJsonAsync("/admin/genres", new CreateGenreRequest($"EPOPEE {label}"));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.GenreLabelAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.GenreLabelAlreadyUsed, ["/label"]);
     }
 
     [Fact]

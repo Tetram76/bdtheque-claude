@@ -83,7 +83,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     {
         var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(" ", null, null));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameRequired, ["/name"]);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
 
         var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest("LES MONDES D'ALDEBARAN", null, parent.Id));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
 
         var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(name.ToUpperInvariant(), null, null));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         var response = await _client.PutAsJsonAsync(
             $"/admin/universes/{universe.Id}", new UpdateUniverseRequest(universe.Name, null, first.Id, universe.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         var response = await _client.PutAsJsonAsync(
             $"/admin/universes/{root.Id}", new UpdateUniverseRequest(root.Name, null, grandChild.Id, root.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseHierarchyCycle);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseHierarchyCycle, ["/parentId"]);
     }
 
     [Fact]
@@ -201,7 +201,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         await ExecuteAsync(otherChange, $"UPDATE \"Universes\" SET \"ParentId\" = '{b.Id}' WHERE \"Id\" = '{c.Id}'");
         await transaction.CommitAsync();
 
-        await ProblemAssert.IsBusinessProblemAsync(await move, DomainRules.UniverseHierarchyCycle);
+        await ProblemAssert.IsBusinessProblemAsync(await move, DomainRules.UniverseHierarchyCycle, ["/parentId"]);
     }
 
     [Fact]
@@ -229,7 +229,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
 
         Assert.Equal([HttpStatusCode.OK, HttpStatusCode.UnprocessableContent], responses.Select(r => r.StatusCode).Order());
         await ProblemAssert.IsBusinessProblemAsync(
-            responses.Single(r => r.StatusCode != HttpStatusCode.OK), DomainRules.UniverseHierarchyCycle);
+            responses.Single(r => r.StatusCode != HttpStatusCode.OK), DomainRules.UniverseHierarchyCycle, ["/parentId"]);
     }
 
     [Fact]
