@@ -31,7 +31,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         var label = LabelOf(album);
         return album.Title is { } title
             ? new AlbumInSeries(title, Volume(label, abbreviated: true))
-            : new AlbumInSeries(Volume(label, abbreviated: false) ?? texts["Untitled"], null);
+            : new AlbumInSeries(Volume(label, abbreviated: false) ?? Untitled, null);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
     {
         var label = LabelOf(album);
         if (album is not { Type: AlbumType.Omnibus, IsSpecialIssue: false, StartVolumeNumber: { } start, EndVolumeNumber: { } end })
-            return new AlbumInSeries(album.Title ?? Volume(label, abbreviated: false) ?? texts["Untitled"], Volume(label, abbreviated: true));
+            return new AlbumInSeries(album.Title ?? Volume(label, abbreviated: false) ?? Untitled, Volume(label, abbreviated: true));
 
         var bounds = label with { StartVolumeNumber = null, EndVolumeNumber = null };
         var range = string.Format(CultureInfo.CurrentCulture, texts["Range"], VolumeNumbered(start), VolumeNumbered(end));
@@ -90,8 +90,11 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         PublisherCollectionLabel collection => $"{collection.Name} ({collection.PublisherName})",
         NameLabel name => name.Name,
         ApplicationSettingsLabel => texts["ApplicationSettings"],
-        _ => texts["Untitled"],
+        _ => Untitled,
     };
+
+    // The fallback of any label whose components are all empty (fonctionnel/presentation/libelle-d-un-album.md#fallback).
+    private string Untitled => texts["Untitled"];
 
     private static AlbumLabel LabelOf(AlbumSummary album) => new(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue,
         album.VolumeNumber, album.StartVolumeNumber, album.EndVolumeNumber);
@@ -103,7 +106,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         var volume = Volume(album, abbreviated: title is not null || series is not null);
 
         if (title is null && series is null)
-            return volume ?? texts["Untitled"];
+            return volume ?? Untitled;
 
         return format switch
         {
@@ -148,7 +151,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         if (author.Pseudonym is { } pseudonym)
             return pseudonym;
         var name = string.Join(' ', new[] { author.FirstName, author.LastName }.OfType<string>());
-        return name.Length > 0 ? name : texts["Untitled"];
+        return name.Length > 0 ? name : Untitled;
     }
 
     // Never both null: the caller has already stood the volume in for a label without either.
