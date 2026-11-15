@@ -122,6 +122,33 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Theory, InEachTheme]
+    public async Task Save_WithAGenreCreatedOnTheSpotAlreadyTaken_DesignatesItsTag_WhichGetsTheFocus(string theme)
+    {
+        // visuel/saisie-album/contenu.md (decision of the user, #413): the case does not tell two genres apart.
+        await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Polar{_marker}"));
+        var album = await CreateAlbumAsync(Content($"Album {_marker}"));
+        var page = await OpenAsync(theme, AppPaths.AdminEditAlbum(album.Id));
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un genre" }).ClickAsync();
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Ajouter un genre" }).PressSequentiallyAsync($"polar{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer le genre « polar{_marker} »" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" });
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter le genre" }).ClickAsync();
+        await Assertions.Expect(dialog).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("À corriger");
+        // Its removal, the only thing to act on in the tag, gets the focus, described by the message of the list of the genres.
+        var removal = page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « polar{_marker} »" });
+        await Assertions.Expect(removal).ToBeFocusedAsync();
+        await Assertions.Expect(removal).ToBeInViewportAsync();
+        await Assertions.Expect(removal).ToHaveAccessibleDescriptionAsync(
+            $"« polar{_marker} » est déjà pris : deux libellés qui ne diffèrent que par la casse ou les accents désignent le même genre.");
+        Assert.Empty((await GetAsync(album.Id)).References.Genres);
+    }
+
+    [Theory, InEachTheme]
     public async Task Save_WithoutTitleNorSeries_IsToCorrect_OnTheTitle_WhichGetsTheFocus(string theme)
     {
         var page = await OpenAsync(theme, AppPaths.AdminNewAlbum);

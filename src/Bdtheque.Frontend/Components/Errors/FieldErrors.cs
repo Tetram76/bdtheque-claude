@@ -1,4 +1,6 @@
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Frontend.Api;
+using Bdtheque.Frontend.Components.Controls;
 using Microsoft.Extensions.Localization;
 
 namespace Bdtheque.Frontend.Components.Errors;
@@ -24,21 +26,47 @@ public sealed class FieldErrors(
     /// A field whose value the one to correct clashes with (<see cref="IsRelated"/>) gets a text of its own, which does not
     /// present it as the one to correct.
     /// </remarks>
-    public string? For(params string[] fields)
+    public string? For(params string[] fields) => Text(field => fields.Contains(field), subject);
+
+    /// <summary>
+    /// What to correct in the record added on the spot under <paramref name="key"/> (an author, a genre, a universe), which the
+    /// last saving sent with its content (<paramref name="sent"/>), where the error designates it: any of its fields, the
+    /// text citing that record, as its own list or panel does (visuel/saisie-album/contenu.md); none if the error designates
+    /// none of them, or if that saving did not send it.
+    /// </summary>
+    public string? ForAdded(NewRecords? sent, Guid key) => Added(sent, key) is var (path, name)
+        ? Text(field => field.StartsWith($"{path}/", StringComparison.Ordinal), name)
+        : null;
+
+    // Where the content enters the records added on the spot (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md).
+    private static (string Path, string Name)? Added(NewRecords? sent, Guid key)
+    {
+        if (sent is null)
+            return null;
+        IEnumerable<(Guid Key, string Path, string Name)> places =
+        [
+            .. sent.Authors.Select((a, i) => (a.Key, $"/newRecords/authors/{i}", RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym))),
+            .. sent.Genres.Select((g, i) => (g.Key, $"/newRecords/genres/{i}", g.Label)),
+            .. sent.Universes.Select((u, i) => (u.Key, $"/newRecords/universes/{i}", u.Name)),
+        ];
+        return places.Where(place => place.Key == key).Select(place => ((string, string)?)(place.Path, place.Name)).FirstOrDefault();
+    }
+
+    private string? Text(Func<string, bool> designates, string named)
     {
         if (problem is not { Category: ProblemCategory.Business, RuleCode: { } rule })
             return null;
 
-        if (problem.Fields.Intersect(fields).Any())
+        if (problem.Fields.Any(designates))
         {
             // A rule without a short text still says under its field what to correct, by its text above the form.
-            var text = texts[rule, subject];
+            var text = texts[rule, named];
             return text.ResourceNotFound ? rules[rule].Value : text.Value;
         }
 
-        if (problem.RelatedFields.Intersect(fields).Any())
+        if (problem.RelatedFields.Any(designates))
         {
-            var related = texts[$"{rule}.Related", subject];
+            var related = texts[$"{rule}.Related", named];
             return related.ResourceNotFound ? texts["Related"].Value : related.Value;
         }
 

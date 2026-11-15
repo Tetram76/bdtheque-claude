@@ -19,7 +19,7 @@
                         OnRemove="author => UncreditAsync(role, author)"
                         RemoveLabel="@(author => L["Remove", author.Label, Values.Of(role)].Value)"
                         OnCreate="text => _creation = (role, text)" CreateLabel="@(text => L["Create", text].Value)"
-                        Pending="Pending" />
+                        Pending="Pending" ErrorOf="author => ErrorOf(author.Id)" />
         </div>
     }
 </div>
@@ -52,6 +52,13 @@
     /// <summary>The authors changed: added, removed or created on the spot; the page renders anew, its save bar telling the record changed.</summary>
     [Parameter, EditorRequired]
     public EventCallback OnChange { get; set; }
+
+    /// <summary>
+    /// What to correct in a record the form cites, by its identifier: one it added on the spot, that the saving refused
+    /// (visuel/saisie-album/contenu.md); none for the others.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<Guid, string?> ErrorOf { get; set; } = null!;
 
     // The authors added on the spot, created with the record only: another role credits them under the same key.
     private IReadOnlyList<RecordOption> Pending =>

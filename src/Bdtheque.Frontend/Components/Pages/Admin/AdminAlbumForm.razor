@@ -102,14 +102,14 @@ else
                 {
                     <Notice Icon="IconName.Copy">@L["Authors.Copied", series]</Notice>
                 }
-                <RoleCredits Id="album" Records="Entry.Cited" Help="@L["Authors.Help"]" AuthorCreated="AudienceFunctions.AdminAlbumAuthorCreated"
+                <RoleCredits Id="album" Records="Entry.Cited" ErrorOf="AddedError" Help="@L["Authors.Help"]" AuthorCreated="AudienceFunctions.AdminAlbumAuthorCreated"
                              OnChange="AuthorsChanged" />
             </div>
         </Block>
 
         <Block Title="@L["Block.Classification"]" Kicker="@L["Kicker.Classification"]">
             <div class="album-fields">
-                <ClassificationTags Id="album" Records="Entry.Cited" Help="@L["Classification.Help"]" OnChange="StateHasChanged" InheritedLabel="@L["BySeries"]"
+                <ClassificationTags Id="album" Records="Entry.Cited" ErrorOf="AddedError" Help="@L["Classification.Help"]" OnChange="StateHasChanged" InheritedLabel="@L["BySeries"]"
                                     InheritedGenres="Entry.SeriesGenres" InheritedUniverses="Entry.SeriesUniverses"
                                     GenreCreated="AudienceFunctions.AdminAlbumGenreCreated" UniverseCreated="AudienceFunctions.AdminAlbumUniverseCreated" />
             </div>
@@ -137,6 +137,8 @@ else
 @code {
     private ApiProblem? _loadProblem;
     private ApiProblem? _saveProblem;
+    // The records added on the spot that the last saving sent, in the order of its content, where its error designates them.
+    private NewRecords? _sentRecords;
     private EntryForm? _form;
     private bool _revealProblem;
     private int _seriesChoice;
@@ -279,6 +281,7 @@ else
         await _seriesChoiceInProgress;
         _authorsCopiedFrom = null;
         var content = Entry!.ToContent();
+        _sentRecords = content.NewRecords;
         try
         {
             if (Entry.Id is { } id)
@@ -327,6 +330,9 @@ else
 
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
     private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Label);
+
+    // A record added on the spot that the saving refused, designated by its tag (visuel/saisie-album/contenu.md).
+    private string? AddedError(Guid key) => Errors.ForAdded(_sentRecords, key);
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-album/contenu.md).
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null

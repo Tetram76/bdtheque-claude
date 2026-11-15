@@ -14,14 +14,16 @@
     <span class="classification-tags-name">@L["Genres"]</span>
     <RecordTags Id="@($"{Id}-add-genre")" Kind="RecordKind.Genre" Items="Records.Genres" AddText="@L["Add"]"
                 AddLabel="@L["Genres.Add"]" OnAdd="AddGenreAsync" OnRemove="genre => RemoveAsync(Records.Genres, genre)"
-                OnCreate="text => _genreCreation = text" CreateLabel="@(text => L["Genres.Create", text].Value)" />
+                OnCreate="text => _genreCreation = text" CreateLabel="@(text => L["Genres.Create", text].Value)"
+                ErrorOf="genre => ErrorOf(genre.Id)" />
     <InheritedTags Label="@InheritedLabel" Items="InheritedGenres" />
 </div>
 <div class="classification-tags">
     <span class="classification-tags-name">@L["Universes"]</span>
     <RecordTags Id="@($"{Id}-add-universe")" Kind="RecordKind.Universe" Items="Records.Universes" AddText="@L["Add"]"
                 AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => RemoveAsync(Records.Universes, universe)"
-                OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)" />
+                OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)"
+                ErrorOf="universe => ErrorOf(universe.Id)" />
     <InheritedTags Label="@InheritedLabel" Items="InheritedUniverses" />
 </div>
 <p class="classification-tags-help">@Help</p>
@@ -74,6 +76,13 @@
     /// <summary>The genres or the universes changed: added, removed or created on the spot; the page renders anew, its save bar telling the record changed.</summary>
     [Parameter, EditorRequired]
     public EventCallback OnChange { get; set; }
+
+    /// <summary>
+    /// What to correct in a record the form cites, by its identifier: one it added on the spot, that the saving refused
+    /// (visuel/saisie-album/contenu.md); none for the others.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<Guid, string?> ErrorOf { get; set; } = null!;
 
     private async Task AddGenreAsync(RecordOption genre)
     {
