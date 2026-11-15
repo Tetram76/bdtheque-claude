@@ -10,7 +10,7 @@
 * [Présentation des erreurs](presentation-des-erreurs.md) - Erreurs métier, fonctionnelles et techniques distinguées au premier coup d'œil.
 * [Mesure d'audience de l'interface web](mesure-audience.md) - Mesure d'audience de l'interface web conforme à la CNIL : fonctions suivies, visites, minimisation, indicateurs, information et opposition, conservation.
 * [Page d'accueil](page-accueil.md) - Dashboard public : blocs fixes, édition à la une, statistiques tirées au hasard et règles du tirage, écran d'une collection vide.
-* [Présentation des données](presentation/index.md) - Langue, culture et fuseau horaire d'affichage, tri et navigation par initiale, libellés des albums et des éditions.
+* [Présentation des données](presentation/index.md) - Langue, culture et fuseau horaire d'affichage, tri et navigation par initiale, libellés des albums et des éditions, ordre des types de fiche.
 * [Recherche avancée](recherche-avancee/index.md)
 * [Règles métier](regles-metier/index.md) - Règles métier de l'application : appartenance à la collection, périmètre de la consultation, initialisation des saisies, rattachements, ordres de présentation, visuels, ISBN, séquence de tomes, suppression des entités et intention d'achat.
 * [Fonctionnalités de second plan](second-plan/index.md)
