@@ -197,9 +197,26 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired, ["/newRecords/authors/0/lastName"]);
         Assert.Empty((await _client.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q={label}"))!.Items);
         Assert.Empty((await _client.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q={Uri.EscapeDataString(title)}"))!.Items);
+    }
+
+    [Fact]
+    public async Task Create_WithAUniverseAddedOnTheSpotAlreadyTakenUnderItsParent_DesignatesIt()
+    {
+        var parent = await CreateUniverseAsync();
+        var taken = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Monde {Guid.NewGuid():N}", null, parent.Id));
+        var universe = Guid.NewGuid();
+        var content = Content(UniqueTitle()) with
+        {
+            UniverseIds = [universe],
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)]),
+        };
+
+        var response = await _client.PostAsJsonAsync("/admin/series", content);
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/newRecords/universes/0/name"]);
     }
 
     [Fact]

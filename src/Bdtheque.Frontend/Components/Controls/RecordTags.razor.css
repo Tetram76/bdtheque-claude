@@ -1,5 +1,13 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md). Compact, as tags are
    (visuel/charte-graphique/convivialite-et-efficacite.md). */
+/* The tags, then what to correct in them, as a field and its error. */
+.record-tags-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
 .record-tags {
     display: flex;
     flex-wrap: wrap;

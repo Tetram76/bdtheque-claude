@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
 
 namespace Bdtheque.Api.Errors;
@@ -26,13 +27,14 @@ internal static class BusinessErrorFields
 
     private sealed record Value(object Record, string Attribute, bool Related = false);
 
-    public static Designation Of(Exception exception, ContentFields fields, BdthequeDbContext context)
+    public static async Task<Designation> OfAsync(
+        Exception exception, ContentFields fields, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         var designated = (exception switch
         {
             DomainRuleViolationException { Record: { } record, Attribute: { } attribute } => [new Value(record, attribute)],
-            DbUpdateException { InnerException: PostgresException error } => Refused(error, fields, context),
-            PostgresException error => Refused(error, fields, context),
+            DbUpdateException { InnerException: PostgresException error } => await RefusedAsync(error, fields, context, cancellationToken),
+            PostgresException error => await RefusedAsync(error, fields, context, cancellationToken),
             _ => [],
         }).ToList();
         return new(FieldsOf(designated.Where(value => !value.Related), fields), FieldsOf(designated.Where(value => value.Related), fields));
@@ -41,10 +43,12 @@ internal static class BusinessErrorFields
     private static string[] FieldsOf(IEnumerable<Value> values, ContentFields fields) =>
         [.. values.Select(value => fields.FieldOf(value.Record, value.Attribute)).OfType<string>().Distinct().Order(StringComparer.Ordinal)];
 
-    private static IEnumerable<Value> Refused(PostgresException error, ContentFields fields, BdthequeDbContext context) => error switch
+    private static async Task<IEnumerable<Value>> RefusedAsync(
+        PostgresException error, ContentFields fields, BdthequeDbContext context, CancellationToken cancellationToken) => error switch
     {
         { SqlState: PostgresErrorCodes.StringDataRightTruncation } => TooLong(context),
-        { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: { } constraint } => AlreadyTaken(context, fields, constraint),
+        { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: { } constraint } =>
+            await AlreadyTakenAsync(context, fields, constraint, cancellationToken),
         _ => [],
     };
 
@@ -59,12 +63,14 @@ internal static class BusinessErrorFields
               && value.EnumerateRunes().Count() > maxLength
         select new Value(entry.Entity, property.Metadata.Name);
 
-    // The records of the index's type the request writes: the only one, or those whose values clash among themselves (the
-    // collections of a publisher, saved together, that end up with the same name). Of these, the values to correct are those
-    // the request wrote (a collection renamed or added), the others only related (the collection left as it was, already
-    // named so), unless it wrote none of them. The values the user enters are the properties of the index other than its
-    // foreign keys (the name of a collection, not its publisher).
-    private static IEnumerable<Value> AlreadyTaken(BdthequeDbContext context, ContentFields fields, string constraint)
+    // The records of the index's type whose values clash among themselves (the collections of a publisher, saved together,
+    // that end up with the same name), or, if none does, those the request wrote whose values a row it did not read holds
+    // already (a genre added on the spot, beside the authors an album credits, read with it). Of these, the values to correct
+    // are those the request wrote (a collection renamed or added), the others only related (the collection left as it was,
+    // already named so), unless it wrote none of them. The values the user enters are the properties of the index other than
+    // its foreign keys (the name of a collection, not its publisher).
+    private static async Task<IEnumerable<Value>> AlreadyTakenAsync(
+        BdthequeDbContext context, ContentFields fields, string constraint, CancellationToken cancellationToken)
     {
         var index = context.Model.GetEntityTypes().SelectMany(type => type.GetDeclaredIndexes())
             .FirstOrDefault(candidate => candidate.GetDatabaseName() == constraint);
@@ -75,14 +81,61 @@ internal static class BusinessErrorFields
             .Where(entry => entry.Metadata == index.DeclaringEntityType && entry.State != EntityState.Deleted)
             .ToList();
         var insensitive = CaseAndAccentInsensitive(context, index);
-        var clashing = records.Count == 1
-            ? records
-            : [.. records.GroupBy(entry => KeyOf(entry, index, insensitive), StringComparer.Ordinal)
-                .Where(group => group.Count() > 1).SelectMany(group => group)];
+        List<EntityEntry> clashing = [.. records.GroupBy(entry => KeyOf(entry, index, insensitive), StringComparer.Ordinal)
+            .Where(group => group.Count() > 1).SelectMany(group => group)];
+        if (clashing.Count == 0)
+            clashing = await HeldByAnotherRowAsync(context, index, [.. records.Where(entry => fields.Wrote(entry.Entity))], cancellationToken);
         var anyWritten = clashing.Any(entry => fields.Wrote(entry.Entity));
         var entered = index.Properties.Where(property => !property.IsForeignKey()).ToList();
         return clashing.SelectMany(entry => entered.Select(property =>
             new Value(entry.Entity, property.Name, Related: anyWritten && !fields.Wrote(entry.Entity))));
+    }
+
+    // Of the records the request wrote, those whose values of the index another row holds. A single one is the record refused;
+    // among several (two genres added on the spot), the database tells which: the request having failed, its transaction is
+    // rolled back when this runs, and the database answers as it was before it. The column compares the values as its
+    // collation does (case and accents ignored for a name), the parameter taking the collation of the column.
+    private static async Task<List<EntityEntry>> HeldByAnotherRowAsync(
+        BdthequeDbContext context, IIndex index, List<EntityEntry> written, CancellationToken cancellationToken)
+    {
+        if (written.Count <= 1)
+            return written;
+
+        var type = index.DeclaringEntityType;
+        var table = StoreObjectIdentifier.Table(type.GetTableName()!, type.GetSchema());
+        var sql = context.GetService<ISqlGenerationHelper>();
+        var key = type.FindPrimaryKey()!.Properties.Single();
+        var held = new List<EntityEntry>();
+        foreach (var entry in written)
+        {
+            var values = new List<object>();
+            var conditions = new List<string>();
+            foreach (var property in index.Properties)
+            {
+                var column = sql.DelimitIdentifier(property.GetColumnName(table)!);
+                if (ProviderValue(entry, property) is { } value)
+                {
+                    values.Add(value);
+                    conditions.Add($"{column} = {{{values.Count - 1}}}");
+                }
+                else
+                    conditions.Add($"{column} IS NULL");
+            }
+
+            values.Add(ProviderValue(entry, key)!);
+            conditions.Add($"{sql.DelimitIdentifier(key.GetColumnName(table)!)} <> {{{values.Count - 1}}}");
+            var query = $"SELECT EXISTS (SELECT 1 FROM {sql.DelimitIdentifier(table.Name, table.Schema)} WHERE {string.Join(" AND ", conditions)}) AS \"Value\"";
+            if (await context.Database.SqlQueryRaw<bool>(query, [.. values]).SingleAsync(cancellationToken))
+                held.Add(entry);
+        }
+
+        return held;
+    }
+
+    private static object? ProviderValue(EntityEntry entry, IReadOnlyProperty property)
+    {
+        var value = entry.Property(property.Name).CurrentValue;
+        return value is null ? null : property.GetTypeMapping().Converter?.ConvertToProvider(value) ?? value;
     }
 
     // The values of the index, compared as their column compares them: a deterministic collation considers two strings equal

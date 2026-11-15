@@ -3,7 +3,9 @@
 @* A short mark: the membership of the collection, an active filter, an author of an album being entered… A removable tag
    leads to the page without it (e.g. the list without this filter): a link, which needs no interactivity
    (choix-implementation/socle/frontend.md); in an interactive form, a button removes it in place. *@
-<span class="tag" data-variant="@Variant.ToString().ToLowerInvariant()">
+@* A tag in error (a record created on the spot that the saving refused) is bordered as a control in error; its removal, the
+   only thing to act on in it, is described by the error and gets the focus as a field to correct does (entry-form.js). *@
+<span class="tag" data-variant="@Variant.ToString().ToLowerInvariant()" data-invalid="@(Invalid ? "true" : null)">
     @if (Icon is { } icon)
     {
         <Icon Name="icon" />
@@ -15,7 +17,8 @@
     }
     else if (OnRemove.HasDelegate)
     {
-        <button type="button" class="tag-remove" aria-label="@(RemoveLabel ?? L["Remove", Text])" @onclick="OnRemove"><Icon Name="IconName.Close" /></button>
+        <button type="button" class="tag-remove" aria-label="@(RemoveLabel ?? L["Remove", Text])" aria-describedby="@DescribedBy"
+                data-error-focus="@(Invalid ? "true" : null)" @onclick="OnRemove"><Icon Name="IconName.Close" /></button>
     }
 </span>
 
@@ -40,4 +43,12 @@
     /// <summary>What the removal says to assistive technologies, when the text alone does not (e.g. the role of an author).</summary>
     [Parameter]
     public string? RemoveLabel { get; set; }
+
+    /// <summary>Whether the tag is in error: the record it presents is to correct.</summary>
+    [Parameter]
+    public bool Invalid { get; set; }
+
+    /// <summary>The identifier of what describes the tag in error (its message), read with its removal.</summary>
+    [Parameter]
+    public string? DescribedBy { get; set; }
 }

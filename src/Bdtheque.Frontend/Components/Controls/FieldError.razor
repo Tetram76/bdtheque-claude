@@ -1,0 +1,13 @@
+@* What to correct in a control, under it: in the color of the text, the border of the control, in the alert color, and the
+   icon pointing to the error (visuel/saisie-album/contenu.md). Written once, for every control that presents one (a field,
+   the tags of the records an entry form cites). *@
+<p class="field-error" id="@Id"><Icon Name="IconName.Alert" />@Text</p>
+
+@code {
+    /// <summary>The identifier the control is described by.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = null!;
+}

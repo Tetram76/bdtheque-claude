@@ -227,7 +227,7 @@ internal static class AlbumEndpoints
         AlbumContent request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var added = await FormReferences.CreateAddedAsync(context, request.NewRecords, cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, fields, request.NewRecords, cancellationToken);
         var series = await LoadSeriesAsync(request.SeriesId, context, cancellationToken);
         var contributions = await FormReferences.LoadContributionsAsync(context, request.Contributions, cancellationToken, added.Authors);
         var album = fields.Create("", () => new Album(request.Title, series, contributions), EnteredOtherwise);
@@ -245,7 +245,7 @@ internal static class AlbumEndpoints
         var album = await context.LoadAggregateForWriteAsync<Album>(id, request.Version, WithAssociations, cancellationToken);
         fields.Place(album, renamed: EnteredOtherwise);
         var content = request.Content;
-        var added = await FormReferences.CreateAddedAsync(context, content.NewRecords, cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, fields, content.NewRecords, cancellationToken);
         var series = await LoadSeriesAsync(content.SeriesId, context, cancellationToken);
         var contributions = await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken, added.Authors);
 

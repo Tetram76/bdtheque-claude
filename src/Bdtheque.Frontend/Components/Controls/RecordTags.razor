@@ -1,26 +1,44 @@
 @* The records an entry form associates with the one it enters (e.g. the authors of a role, the genres of an album,
    visuel/saisie-album/contenu.md): each a removable tag, then « Ajouter », which opens the choice of a record by typing
-   its name, and may offer to create it (RecordPicker); nothing stands for no record. Interactive. *@
-<div class="record-tags">
-    @foreach (var item in Items)
+   its name, and may offer to create it (RecordPicker); nothing stands for no record. A record the saving refused (created on
+   the spot) is designated by its tag, in error, its message under the tags, as a field's under it. Interactive. *@
+<div class="record-tags-field">
+    <div class="record-tags">
+        @foreach (var item in Items)
+        {
+            var error = ErrorOf?.Invoke(item);
+            <Tag Text="@item.Label" OnRemove="() => OnRemove.InvokeAsync(item)" RemoveLabel="@RemoveLabel?.Invoke(item)"
+                 Invalid="@(error is not null)" DescribedBy="@(error is null ? null : ErrorId(error))" />
+        }
+        @if (_adding)
+        {
+            <span class="record-tags-picker">
+                <RecordPicker Id="@Id" Kind="Kind" AutoFocus="true" ValueChanged="AddAsync" OnLeave="Close" OnCreate="CreateAsync"
+                              CreateLabel="CreateLabel" Pending="Pending" aria-label="@AddLabel" />
+            </span>
+        }
+        else
+        {
+            <button type="button" class="record-tags-add" aria-label="@AddLabel" @onclick="Open"><Icon Name="IconName.Add" /><span>@AddText</span></button>
+        }
+    </div>
+    @foreach (var error in Errors)
     {
-        <Tag Text="@item.Label" OnRemove="() => OnRemove.InvokeAsync(item)" RemoveLabel="@RemoveLabel?.Invoke(item)" />
-    }
-    @if (_adding)
-    {
-        <span class="record-tags-picker">
-            <RecordPicker Id="@Id" Kind="Kind" AutoFocus="true" ValueChanged="AddAsync" OnLeave="Close" OnCreate="CreateAsync"
-                          CreateLabel="CreateLabel" Pending="Pending" aria-label="@AddLabel" />
-        </span>
-    }
-    else
-    {
-        <button type="button" class="record-tags-add" aria-label="@AddLabel" @onclick="Open"><Icon Name="IconName.Add" /><span>@AddText</span></button>
+        <FieldError Id="@ErrorId(error)" Text="@error" />
     }
 </div>
 
 @code {
     private bool _adding;
+
+    /// <summary>What to correct in the record of a tag; none for a record the error does not designate.</summary>
+    [Parameter]
+    public Func<RecordOption, string?>? ErrorOf { get; set; }
+
+    // Each message once, though it may designate several tags.
+    private List<string> Errors => [.. Items.Select(item => ErrorOf?.Invoke(item)).OfType<string>().Distinct()];
+
+    private string ErrorId(string error) => $"{Id}-error-{Errors.IndexOf(error)}";
 
     /// <summary>The identifier of the field of the choice, unique in the page.</summary>
     [Parameter, EditorRequired]

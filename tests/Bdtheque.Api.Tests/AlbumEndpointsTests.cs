@@ -372,9 +372,66 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired, ["/newRecords/authors/0/lastName"]);
         var genres = await _client.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q={label}");
         Assert.Empty(genres!.Items);
+    }
+
+    [Fact]
+    public async Task Create_WithAGenreAddedOnTheSpotAlreadyTaken_DesignatesIt()
+    {
+        // The case and the accents do not tell two genres apart (modele-metier/genre.md).
+        var taken = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Épopée {Guid.NewGuid():N}"));
+        var genre = Guid.NewGuid();
+        var content = Content(UniqueTitle()) with
+        {
+            GenreIds = [genre],
+            NewRecords = new NewRecords([], [new NewGenre(genre, taken.Label.Replace("Épopée", "EPOPEE"))], []),
+        };
+
+        var response = await _client.PostAsJsonAsync("/admin/albums", content);
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.GenreLabelAlreadyUsed, ["/newRecords/genres/0/label"]);
+    }
+
+    [Fact]
+    public async Task Update_WithAnAuthorAddedOnTheSpotNamedAsAnother_DesignatesIt_AmongTheAuthorsItCredits()
+    {
+        // Beside an author already credited, read by the request, and another one added on the spot: only the author added
+        // whose name an author it did not read already has is designated.
+        var credited = await CreateAuthorAsync();
+        var taken = await CreateAuthorAsync();
+        var created = await CreateAsync(Content(UniqueTitle()) with { Contributions = [new ContributionContent(credited.Id, ContributionRole.Scenarist)] });
+        var (added, clashing) = (Guid.NewGuid(), Guid.NewGuid());
+
+        var response = await _client.PutAsJsonAsync($"/admin/albums/{created.Id}", new UpdateAlbumRequest(created.Content with
+        {
+            Contributions =
+            [
+                new ContributionContent(credited.Id, ContributionRole.Scenarist), new ContributionContent(added, ContributionRole.Illustrator),
+                new ContributionContent(clashing, ContributionRole.Colorist),
+            ],
+            NewRecords = new NewRecords(
+                [new NewAuthor(added, $"Nouveau {Guid.NewGuid():N}", null, null), new NewAuthor(clashing, taken.LastName!.ToUpperInvariant(), null, null)],
+                [], []),
+        }, created.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorDisplayNameAlreadyUsed, ["/newRecords/authors/1/lastName"]);
+    }
+
+    [Fact]
+    public async Task Create_WithAUniverseAddedOnTheSpotTooLong_DesignatesIt()
+    {
+        var universe = Guid.NewGuid();
+        var content = Content(UniqueTitle()) with
+        {
+            UniverseIds = [universe],
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, new string('u', 1_000), null)]),
+        };
+
+        var response = await _client.PostAsJsonAsync("/admin/albums", content);
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/newRecords/universes/0/name"]);
     }
 
     [Fact]
