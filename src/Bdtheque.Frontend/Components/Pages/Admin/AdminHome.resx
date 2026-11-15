@@ -58,7 +58,7 @@
     <value>Fiches</value>
   </data>
   <data name="Records.OpenList" xml:space="preserve">
-    <value>, voir la liste</value>
+    <value>{0}, voir la liste</value>
   </data>
   <data name="Records.Note" xml:space="preserve">
     <value>Les éditions et leurs visuels se saisissent depuis leur album.</value>

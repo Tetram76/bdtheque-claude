@@ -81,7 +81,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         // The title of a card, a heading under that of the block, is the link to its list, named after that list for assistive
         // technologies; the card has no « Voir les … » link (#431).
         var titles = BlockOf(page, "Les fiches").QuerySelectorAll("li").Select(card => card.QuerySelector("h3 > a")!).Select(link => (
-            link.FirstChild!.TextContent.Trim(), Text(link), link.GetAttribute("href")));
+            link.TextContent.Trim(), link.GetAttribute("aria-label"), link.GetAttribute("href")));
         Assert.Equal(
             [
                 ("Albums", "Albums, voir la liste", AppPaths.AdminAlbums),
@@ -94,9 +94,6 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             ],
             titles);
         Assert.DoesNotContain(BlockOf(page, "Les fiches").QuerySelectorAll("a"), link => link.TextContent.Contains("Voir les", StringComparison.Ordinal));
-        Assert.All(
-            BlockOf(page, "Les fiches").QuerySelectorAll("li"),
-            card => Assert.Equal(", voir la liste", card.QuerySelector("h3 > a > .visually-hidden")!.TextContent));
     }
 
     [Fact]

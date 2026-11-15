@@ -55,8 +55,9 @@
                     <li class="admin-record">
                         <span class="admin-record-chip"><Icon Name="record.Icon" /></span>
                         @* The title of the card opens its list, the only link to it (#431); its name for assistive technologies
-                           starts with the visible title, then says what the link does. *@
-                        <h3 class="admin-record-name"><a href="@record.List">@L[$"Records.{record.Name}"]<span class="visually-hidden">@L["Records.OpenList"]</span></a></h3>
+                           starts with the visible title, then says what the link does, written as one text: a hidden text next
+                           to the title, out of the flow, would be joined to it by a space of the browser's own. *@
+                        <h3 class="admin-record-name"><a href="@record.List" aria-label="@L["Records.OpenList", L[$"Records.{record.Name}"]]">@L[$"Records.{record.Name}"]</a></h3>
                         <strong class="admin-record-count">@Format.Number(record.Count(_counts))</strong>
                         <span class="admin-record-detail">@Detail(record)</span>
                         @if (record.New is { } create)
