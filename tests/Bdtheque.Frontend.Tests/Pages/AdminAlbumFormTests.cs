@@ -580,6 +580,50 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task BusinessError_OnAGenreCreatedOnTheSpot_DesignatesItsTag_WithTheMessageOfItsList()
+    {
+        // visuel/saisie-album/contenu.md (decision of the user, #413): the message the list of the genres gives, citing it.
+        var page = OpenAlbum();
+        await CreateOnTheSpotAsync(page, RecordKind.Genre, "polar");
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Genre.LabelAlreadyUsed", "/newRecords/genres/0/label");
+
+        await page.SubmitAsync("form");
+
+        var genres = page.FindAll(".classification-tags")[0];
+        var removal = AssertInError(genres, "polar");
+        Assert.Equal("« polar » est déjà pris : deux libellés qui ne diffèrent que par la casse ou les accents désignent le même genre.",
+            page.Find($"#{removal.GetAttribute("aria-describedby")}").TextContent.Trim());
+        Assert.Null(Tag(genres, "Humour").GetAttribute("data-invalid"));
+    }
+
+    [Fact]
+    public async Task BusinessError_OnAnAuthorCreatedOnTheSpot_DesignatesItsTags_AsTheLastSavingSentIt()
+    {
+        // The second author added, as the saving sent it, credited with two roles: each of its tags; not the first one.
+        var page = OpenNew();
+        await CreateAuthorOnTheSpotAsync(page, ContributionRole.Scenarist, "Jean Nouveau");
+        await CreateAuthorOnTheSpotAsync(page, ContributionRole.Illustrator, "Juan Diaz Canales");
+        var juan = page.Instance.Entry!.Cited.NewAuthors[1].Key;
+        var colorists = AuthorTags(page, ContributionRole.Colorist);
+        await colorists.InvokeAsync(() => colorists.Instance.OnAdd.InvokeAsync(new RecordOption(juan, "Juan Diaz Canales", null)));
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.DisplayNameAlreadyUsed", "/newRecords/authors/1/lastName");
+
+        await page.SubmitAsync("form");
+
+        var lines = page.FindAll(".role-credits-line");
+        Assert.Null(Tag(lines[0], "Jean Nouveau").GetAttribute("data-invalid"));
+        foreach (var line in lines.Skip(1))
+        {
+            var removal = AssertInError(line, "Juan Diaz Canales");
+            Assert.Equal("« Juan Diaz Canales » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même auteur.",
+                line.QuerySelector($"#{removal.GetAttribute("aria-describedby")}")!.TextContent.Trim());
+        }
+    }
+
+    [Fact]
     public void LoadError_IsPresentedInsteadOfTheForm()
     {
         _api.Failures[$"/admin/albums/{AlbumId}"] = HttpStatusCode.InternalServerError;
@@ -631,6 +675,29 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == kind);
         return tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync(text));
     }
+
+    private static async Task CreateAuthorOnTheSpotAsync(IRenderedComponent<AdminAlbumForm> page, ContributionRole role, string name)
+    {
+        var tags = AuthorTags(page, role);
+        await tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync(name));
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
+    }
+
+    // The tags of the authors of a role, in the order of the roles.
+    private static IRenderedComponent<RecordTags> AuthorTags(IRenderedComponent<AdminAlbumForm> page, ContributionRole role) =>
+        page.FindComponents<RecordTags>().Where(t => t.Instance.Kind == RecordKind.Author).ElementAt((int)role - 1);
+
+    // The tag in error, bordered; its removal, which gets the focus, described by its message.
+    private static IElement AssertInError(IElement within, string label)
+    {
+        var tag = Tag(within, label);
+        Assert.Equal("true", tag.GetAttribute("data-invalid"));
+        var removal = tag.QuerySelector(".tag-remove")!;
+        Assert.Equal("true", removal.GetAttribute("data-error-focus"));
+        return removal;
+    }
+
+    private static IElement Tag(IElement within, string label) => within.QuerySelectorAll(".tag").Single(t => t.TextContent.Trim() == label);
 
     private static Task ChooseSeriesAsync(IRenderedComponent<AdminAlbumForm> page, RecordOption? series)
     {

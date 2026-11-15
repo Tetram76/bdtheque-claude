@@ -34,6 +34,12 @@
     color: var(--color-text);
 }
 
+/* Bordered as a control in error (themes/base.css), whatever its variant. */
+.tag[data-invalid] {
+    border-color: var(--color-alert);
+    box-shadow: inset 0 0 0 1px var(--color-alert);
+}
+
 .tag ::deep .icon {
     flex: none;
     inline-size: 1em;

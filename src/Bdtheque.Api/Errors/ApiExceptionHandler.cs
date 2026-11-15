@@ -37,7 +37,7 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         // What the user is to correct, where they entered it.
         if (type == ProblemTypes.Business)
         {
-            var designation = DesignationOf(httpContext, exception);
+            var designation = await DesignationOfAsync(httpContext, exception, cancellationToken);
             if (designation.Fields.Count > 0)
                 problem.Extensions[ProblemTypes.FieldsExtension] = designation.Fields;
             if (designation.Related.Count > 0)
@@ -52,11 +52,13 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext { HttpContext = httpContext, ProblemDetails = problem });
     }
 
-    private static BusinessErrorFields.Designation DesignationOf(HttpContext httpContext, Exception exception) =>
-        BusinessErrorFields.Of(
+    private static Task<BusinessErrorFields.Designation> DesignationOfAsync(
+        HttpContext httpContext, Exception exception, CancellationToken cancellationToken) =>
+        BusinessErrorFields.OfAsync(
             exception,
             httpContext.RequestServices.GetRequiredService<ContentFields>(),
-            httpContext.RequestServices.GetRequiredService<BdthequeDbContext>());
+            httpContext.RequestServices.GetRequiredService<BdthequeDbContext>(),
+            cancellationToken);
 
     private static DeletionImpact? ImpactOf(Exception exception) => exception switch
     {

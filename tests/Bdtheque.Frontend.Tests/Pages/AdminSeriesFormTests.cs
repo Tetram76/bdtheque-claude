@@ -400,6 +400,27 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task BusinessError_OnAUniverseCreatedOnTheSpot_DesignatesItsTag_WithTheMessageOfItsPanel()
+    {
+        // visuel/saisie-album/contenu.md, taken up by the entry form of a series (decision of the user, #413).
+        var page = OpenSeries();
+        var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == RecordKind.Universe);
+        await tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync("Le port"));
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameAlreadyUsed", "/newRecords/universes/0/name");
+
+        await page.SubmitAsync("form");
+
+        var tag = page.FindAll(".classification-tags")[1].QuerySelectorAll(".tag").Single(t => t.TextContent.Trim() == "Le port");
+        Assert.Equal("true", tag.GetAttribute("data-invalid"));
+        var removal = tag.QuerySelector(".tag-remove")!;
+        Assert.Equal("true", removal.GetAttribute("data-error-focus"));
+        Assert.Equal("« Le port » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.",
+            page.Find($"#{removal.GetAttribute("aria-describedby")}").TextContent.Trim());
+    }
+
+    [Fact]
     public void LoadError_IsPresentedInsteadOfTheForm()
     {
         _api.Failures[$"/admin/series/{SeriesId}"] = HttpStatusCode.InternalServerError;

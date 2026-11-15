@@ -16,7 +16,7 @@
     @ChildContent?.Invoke(Context)
     @if (Error is not null)
     {
-        <p class="field-error" id="@ErrorId"><Icon Name="IconName.Alert" />@Error</p>
+        <FieldError Id="@ErrorId" Text="@Error" />
     }
     @if (Failure is not null)
     {

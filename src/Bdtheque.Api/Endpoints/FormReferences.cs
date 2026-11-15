@@ -1,3 +1,4 @@
+using Bdtheque.Api.Errors;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
@@ -12,6 +13,9 @@ namespace Bdtheque.Api.Endpoints;
 /// <summary>The records an administration form references, shared by the resources whose forms list them.</summary>
 internal static class FormReferences
 {
+    // Where the content of a form enters the records it added on the spot (its NewRecords).
+    private const string AddedPath = "/newRecords";
+
     /// <summary>
     /// Loads the records with the given identifiers, each of which must still exist: a record deleted
     /// since the form was read is a functional error.
@@ -79,20 +83,26 @@ internal static class FormReferences
 
     /// <summary>
     /// Creates, through the domain, the records the form added on the spot, in the transaction of the record it saves: they are
-    /// saved with it, or not at all (choix-implementation/api/organisation-de-l-api.md). A new universe whose parent is given
+    /// saved with it, or not at all (choix-implementation/api/organisation-de-l-api.md). Each is placed where the content enters
+    /// it, so that an error it raises designates it, as any record the request writes
+    /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md). A new universe whose parent is given
     /// takes the hierarchy lock, as any change of parent.
     /// </summary>
-    public static async Task<AddedRecords> CreateAddedAsync(BdthequeDbContext context, NewRecords? records, CancellationToken cancellationToken)
+    public static async Task<AddedRecords> CreateAddedAsync(
+        BdthequeDbContext context, ContentFields fields, NewRecords? records, CancellationToken cancellationToken)
     {
         records ??= NewRecords.None;
-        var authors = records.Authors.ToDictionary(a => a.Key, a => new Author(a.LastName, a.FirstName, a.Pseudonym));
-        var genres = records.Genres.ToDictionary(g => g.Key, g => new Genre(g.Label));
+        var authors = records.Authors.Select((a, index) => (a.Key, Author: fields.Create(
+                $"{AddedPath}/authors/{index}", () => new Author(a.LastName, a.FirstName, a.Pseudonym), AuthorEndpoints.EnteredOtherwise(a.Pseudonym))))
+            .ToDictionary(a => a.Key, a => a.Author);
+        var genres = records.Genres.Select((g, index) => (g.Key, Genre: fields.Create($"{AddedPath}/genres/{index}", () => new Genre(g.Label))))
+            .ToDictionary(g => g.Key, g => g.Genre);
         var universes = new Dictionary<Guid, Universe>();
         if (records.Universes.Any(u => u.ParentId is not null))
             await UniverseHierarchy.LockAsync(context, cancellationToken);
-        foreach (var added in records.Universes)
+        foreach (var (added, index) in records.Universes.Select((u, index) => (u, index)))
         {
-            var universe = new Universe(added.Name);
+            var universe = fields.Create($"{AddedPath}/universes/{index}", () => new Universe(added.Name));
             if (added.ParentId is { } parentId)
                 universe.SetParent(await UniverseEndpoints.LoadWithAncestorsAsync(context, parentId, cancellationToken));
             universes[added.Key] = universe;

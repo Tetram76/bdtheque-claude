@@ -218,7 +218,7 @@ internal static class SeriesEndpoints
         SeriesContent request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var added = await FormReferences.CreateAddedAsync(context, request.NewRecords, cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, fields, request.NewRecords, cancellationToken);
         var series = fields.Create("", () => new Series(request.Title), EnteredOtherwise);
         await ApplyAsync(series, request, added, context, cancellationToken);
         context.Series.Add(series);
@@ -233,7 +233,7 @@ internal static class SeriesEndpoints
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var series = await context.LoadAggregateForWriteAsync<Series>(id, request.Version, WithChildren, cancellationToken);
         fields.Place(series, renamed: EnteredOtherwise);
-        var added = await FormReferences.CreateAddedAsync(context, request.Content.NewRecords, cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, fields, request.Content.NewRecords, cancellationToken);
         await ApplyAsync(series, request.Content, added, context, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

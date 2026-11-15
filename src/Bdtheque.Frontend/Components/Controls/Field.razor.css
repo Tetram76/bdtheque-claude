@@ -26,28 +26,8 @@
     max-inline-size: 100%;
 }
 
-.field-error,
 .field-help {
     margin: 0;
     font-size: var(--font-size-small);
-}
-
-.field-help {
     color: var(--color-text-muted);
-}
-
-/* In the color of the text: the border of the control, in the alert color, and the icon point to the error. */
-.field-error {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-xs);
-    font-weight: var(--font-weight-strong);
-}
-
-.field-error ::deep .icon {
-    flex: none;
-    inline-size: 1.1em;
-    block-size: 1.1em;
-    margin-block-start: 0.2em;
-    color: var(--color-alert);
 }
