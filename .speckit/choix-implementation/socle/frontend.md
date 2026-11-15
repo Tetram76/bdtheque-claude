@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:30:00Z }
 ---
 
 # Frontend
@@ -85,6 +85,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:00:00Z }
 - **Genre ou univers créé sur place** de même, depuis leur choix : le dialogue reprend le texte tapé, et, pour un univers, propose de choisir l'univers qui le contient.
 - **Fiche créée sur place, créée à l'enregistrement de la fiche qui la cite**, dans la même transaction, jamais avant : une saisie annulée n'en laisse aucune. La fiche saisie la cite par une clé qu'elle lui donne, et l'envoie avec ce qu'elle enregistre, si elle la cite encore ; les règles de la fiche créée sont celles du domaine, et une erreur est présentée avec l'enregistrement.
   - **Alternative écartée (fiche créée dès la confirmation du dialogue)** : une saisie annulée laisserait des auteurs, genres ou univers créés pour elle, et que rien ne cite.
+  - **Erreur d'une fiche créée sur place, sur son étiquette** ([Contenu](../../visuel/saisie-album/contenu.md), erreur d'enregistrement, #413) : l'erreur la désigne par ses champs dans le contenu envoyé, comme toute erreur métier (§ Champ d'une erreur métier porté par l'erreur), et le mécanisme partagé la retrouve par sa place parmi les fiches créées sur place que le dernier enregistrement a envoyées, retenues avec lui. Son texte est celui que donne sa liste ou son panneau, qui la cite par son nom. Chacune de ses étiquettes, quel que soit le rôle qui la crédite, est bordée, son message sous les étiquettes, écrit par le composant commun du message sous un champ ; le retrait de l'étiquette, seul élément actionnable de celle-ci, reçoit le focus par la même règle que le premier champ à corriger, marqué pour cela d'un attribut propre, `aria-invalid` ne s'appliquant pas à un bouton (ARIA 1.2).
+    - **Alternative écartée (erreur en tête seulement)** : le message de la règle ne disait pas quelle fiche était en cause, quand la liste ou le panneau de la même fiche borde son champ et la cite (contrôle de cohérence, #413).
 
 ## En-têtes et navigation
 
