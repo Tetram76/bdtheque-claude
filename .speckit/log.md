@@ -2,6 +2,7 @@
 
 ## 2026-11-15
 
+* **Décision de l'utilisateur** : un album est dans l'un de trois états, « Dans la collection », « Intention d'achat » ou « Hors collection », de même sens partout où son appartenance est présentée, comptée ou filtrée : « Hors collection » ne compte jamais un album visé ; la colonne « Collection » de la liste des intentions d'achat et le décompte des albums hors de la collection de l'accueil de l'administration le suivent (#417).
 * **Choix** : tout évènement d'un test de composant bUnit, page rendue statiquement en production comprise, est déclenché sur le répartiteur du rendu et attendu jusqu'à la fin de son traitement ; le compilateur refuse tout autre déclenchement dans les tests du frontend (analyseur des API interdites), sans exception pour les composants statiques (#450).
 
 ## 2026-11-14

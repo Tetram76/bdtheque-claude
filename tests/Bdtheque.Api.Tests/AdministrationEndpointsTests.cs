@@ -41,10 +41,12 @@ public sealed class AdministrationEndpointsTests(ApiWebApplicationFactory factor
 
         var counts = await _client.GetFromJsonAsync<RecordCounts>("/admin/record-counts");
 
-        // What this test added to what the other tests of the class have written.
+        // What this test added to what the other tests of the class have written. Outside the collection, as the filter of the
+        // list of the albums keeps them: only « Z comme Zorglub », neither owned nor targeted by an intent
+        // (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album).
         Assert.Equal(
             new RecordCounts(
-                before.Albums + 4, before.AlbumsOutsideCollection + 3, before.Editions + 1, before.Series + 2,
+                before.Albums + 4, before.AlbumsOutsideCollection + 1, before.Editions + 1, before.Series + 2,
                 before.SeriesWithoutStatus + 1, before.PurchaseIntents + 2, before.Authors + 1, before.Publishers + 2,
                 before.PublisherCollections + 1, before.Genres + 1, before.Universes + 2, before.SubUniverses + 1),
             counts);
