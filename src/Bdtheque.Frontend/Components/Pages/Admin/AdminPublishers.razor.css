@@ -71,7 +71,7 @@
    that does not fit, its mark kept in view after it. */
 .publisher-website a {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     max-inline-size: 100%;
     vertical-align: top;
     font-weight: var(--font-weight-strong);
