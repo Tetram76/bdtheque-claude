@@ -128,7 +128,12 @@
     block-size: 1.125rem;
 }
 
+/* The title of the card, a heading under that of the block, keeps the text of the card; its link, which opens the list,
+   has the look of any link of the application (visuel/administration/contenu.md). */
 .admin-record-name {
+    min-inline-size: 0;
+    margin: 0;
+    font: inherit;
     font-weight: var(--font-weight-strong);
 }
 

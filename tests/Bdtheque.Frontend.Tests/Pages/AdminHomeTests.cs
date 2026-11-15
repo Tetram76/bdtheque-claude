@@ -49,45 +49,51 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Records_ACardPerType_TitledByItsName_WithItsNumberItsDetailAndItsLinks()
+    public void Records_ACardPerType_WithItsNumberItsDetail_AndItsCreationButForTheEditions()
     {
         var page = Render<AdminHome>();
 
         var cards = BlockOf(page, "Les fiches").QuerySelectorAll("li").Select(card => (
-            card.QuerySelector(".admin-record-name")!.TextContent.Trim(),
             Text(card.QuerySelector(".admin-record-count")!),
             Text(card.QuerySelector(".admin-record-detail")!),
             string.Join(" | ", card.QuerySelectorAll(".admin-record-links a").Select(link => link.TextContent.Trim()))));
 
-        // The purchase intents stand apart (#358); the name of a card is a plain title, a single link leads to its list (#320).
+        // The purchase intents stand apart (#358); the editions are entered from their album, never created here.
         Assert.Equal(
             [
-                ("Albums", "2 847", "dont 214 hors de la collection", "Voir les albums | + Nouvel album"),
-                ("Éditions", "2 913", "saisies depuis leur album, avec leurs visuels", "Voir les éditions"),
-                ("Séries", "412", "dont 28 sans statut", "Voir les séries | + Nouvelle série"),
-                ("Auteurs", "1 106", "scénaristes, dessinateurs, coloristes…", "Voir les auteurs | + Nouvel auteur"),
-                ("Éditeurs", "96", "collections éditeur : 214", "Voir les éditeurs | + Nouvel éditeur"),
-                ("Genres", "24", "référentiel", "Voir les genres | + Nouveau genre"),
-                ("Univers", "37", "dont 9 sous-univers", "Voir les univers | + Nouvel univers"),
+                ("2 847", "dont 214 hors de la collection", "+ Nouvel album"),
+                ("2 913", "saisies depuis leur album, avec leurs visuels", ""),
+                ("412", "dont 28 sans statut", "+ Nouvelle série"),
+                ("1 106", "scénaristes, dessinateurs, coloristes…", "+ Nouvel auteur"),
+                ("96", "collections éditeur : 214", "+ Nouvel éditeur"),
+                ("24", "référentiel", "+ Nouveau genre"),
+                ("37", "dont 9 sous-univers", "+ Nouvel univers"),
             ],
             cards);
         Assert.Equal("Les éditions et leurs visuels se saisissent depuis leur album.", BlockOf(page, "Les fiches").QuerySelector(".admin-home-note")!.TextContent.Trim());
-        Assert.Empty(BlockOf(page, "Les fiches").QuerySelectorAll(".admin-record-name a, a.admin-record-name"));
-        // The lists of the albums (#200), of the editions (#333), of the series (#301), of the authors (#302), of the publishers
-        // (#303), of the genres and of the universes (#203), and the entry forms of an album (#205), of a series (#206), of an
-        // author (#207) and of a publisher (#208), are implemented; the other pages are still to come.
-        var links = BlockOf(page, "Les fiches").QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))).ToList();
-        IEnumerable<(string, string?)> implemented =
-        [
-            ("Voir les albums", AppPaths.AdminAlbums), ("+ Nouvel album", AppPaths.AdminNewAlbum),
-            ("Voir les éditions", AppPaths.AdminEditions),
-            ("Voir les séries", AppPaths.AdminSeries), ("+ Nouvelle série", AppPaths.AdminNewSeries),
-            ("Voir les auteurs", AppPaths.AdminAuthors), ("+ Nouvel auteur", AppPaths.AdminNewAuthor),
-            ("Voir les éditeurs", AppPaths.AdminPublishers), ("+ Nouvel éditeur", AppPaths.AdminNewPublisher),
-            ("Voir les genres", AppPaths.AdminGenres), ("+ Nouveau genre", AppPaths.AdminNewGenre),
-            ("Voir les univers", AppPaths.AdminUniverses), ("+ Nouvel univers", AppPaths.AdminNewUniverse),
-        ];
-        Assert.Equal(implemented, links.Where(link => link.Item2 != AppPaths.NotYetImplemented));
+    }
+
+    [Fact]
+    public void Records_TheTitleOfEachCard_OpensItsList_WithNoOtherLinkToIt()
+    {
+        var page = Render<AdminHome>();
+
+        // The title of a card, a heading under that of the block, is the link to its list, named after that list for assistive
+        // technologies; the card has no « Voir les … » link (#431).
+        var titles = BlockOf(page, "Les fiches").QuerySelectorAll("li").Select(card => card.QuerySelector("h3 > a")!).Select(link => (
+            link.TextContent.Trim(), link.GetAttribute("aria-label"), link.GetAttribute("href")));
+        Assert.Equal(
+            [
+                ("Albums", "Albums, voir la liste", AppPaths.AdminAlbums),
+                ("Éditions", "Éditions, voir la liste", AppPaths.AdminEditions),
+                ("Séries", "Séries, voir la liste", AppPaths.AdminSeries),
+                ("Auteurs", "Auteurs, voir la liste", AppPaths.AdminAuthors),
+                ("Éditeurs", "Éditeurs, voir la liste", AppPaths.AdminPublishers),
+                ("Genres", "Genres, voir la liste", AppPaths.AdminGenres),
+                ("Univers", "Univers, voir la liste", AppPaths.AdminUniverses),
+            ],
+            titles);
+        Assert.DoesNotContain(BlockOf(page, "Les fiches").QuerySelectorAll("a"), link => link.TextContent.Contains("Voir les", StringComparison.Ordinal));
     }
 
     [Fact]

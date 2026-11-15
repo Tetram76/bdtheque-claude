@@ -57,14 +57,14 @@
   <data name="Records.Kicker" xml:space="preserve">
     <value>Fiches</value>
   </data>
+  <data name="Records.OpenList" xml:space="preserve">
+    <value>{0}, voir la liste</value>
+  </data>
   <data name="Records.Note" xml:space="preserve">
     <value>Les éditions et leurs visuels se saisissent depuis leur album.</value>
   </data>
   <data name="Records.Albums" xml:space="preserve">
     <value>Albums</value>
-  </data>
-  <data name="Records.Albums.List" xml:space="preserve">
-    <value>Voir les albums</value>
   </data>
   <data name="Records.Albums.Detail" xml:space="preserve">
     <value>dont {0} hors de la collection</value>
@@ -75,17 +75,11 @@
   <data name="Records.Editions" xml:space="preserve">
     <value>Éditions</value>
   </data>
-  <data name="Records.Editions.List" xml:space="preserve">
-    <value>Voir les éditions</value>
-  </data>
   <data name="Records.Editions.Detail" xml:space="preserve">
     <value>saisies depuis leur album, avec leurs visuels</value>
   </data>
   <data name="Records.Series" xml:space="preserve">
     <value>Séries</value>
-  </data>
-  <data name="Records.Series.List" xml:space="preserve">
-    <value>Voir les séries</value>
   </data>
   <data name="Records.Series.Detail" xml:space="preserve">
     <value>dont {0} sans statut</value>
@@ -96,9 +90,6 @@
   <data name="Records.Authors" xml:space="preserve">
     <value>Auteurs</value>
   </data>
-  <data name="Records.Authors.List" xml:space="preserve">
-    <value>Voir les auteurs</value>
-  </data>
   <data name="Records.Authors.Detail" xml:space="preserve">
     <value>scénaristes, dessinateurs, coloristes…</value>
   </data>
@@ -107,9 +98,6 @@
   </data>
   <data name="Records.Publishers" xml:space="preserve">
     <value>Éditeurs</value>
-  </data>
-  <data name="Records.Publishers.List" xml:space="preserve">
-    <value>Voir les éditeurs</value>
   </data>
   <data name="Records.Publishers.Detail" xml:space="preserve">
     <value>collections éditeur : {0}</value>
@@ -120,9 +108,6 @@
   <data name="Records.Genres" xml:space="preserve">
     <value>Genres</value>
   </data>
-  <data name="Records.Genres.List" xml:space="preserve">
-    <value>Voir les genres</value>
-  </data>
   <data name="Records.Genres.Detail" xml:space="preserve">
     <value>référentiel</value>
   </data>
@@ -131,9 +116,6 @@
   </data>
   <data name="Records.Universes" xml:space="preserve">
     <value>Univers</value>
-  </data>
-  <data name="Records.Universes.List" xml:space="preserve">
-    <value>Voir les univers</value>
   </data>
   <data name="Records.Universes.Detail" xml:space="preserve">
     <value>dont {0} sous-univers</value>
