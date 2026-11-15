@@ -604,6 +604,9 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var line = BlockOf(page, "Et le reste de la série ?").QuerySelectorAll("details ol > li")[0];
         Assert.Equal("T. 1 à T. 4", line.QuerySelector(".series-album-volume")!.TextContent.Trim());
         Assert.Equal("Intégrale - 1", line.QuerySelector(".series-album-title")!.TextContent.Trim());
+        // Every line keeps room for the longest volume of the list, so that the names line up.
+        Assert.Equal(["T. 1 à T. 4", "T. 1 à T. 4"], BlockOf(page, "Et le reste de la série ?").QuerySelectorAll(".series-album-volume")
+            .Select(volume => volume.GetAttribute("data-room")));
     }
 
     [Fact]
