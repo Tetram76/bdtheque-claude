@@ -54,16 +54,15 @@
                 {
                     <li class="admin-record">
                         <span class="admin-record-chip"><Icon Name="record.Icon" /></span>
-                        <span class="admin-record-name">@L[$"Records.{record.Name}"]</span>
+                        @* The title of the card opens its list, the only link to it (#431); its name for assistive technologies
+                           starts with the visible title, then says what the link does. *@
+                        <h3 class="admin-record-name"><a href="@record.List">@L[$"Records.{record.Name}"]<span class="visually-hidden">@L["Records.OpenList"]</span></a></h3>
                         <strong class="admin-record-count">@Format.Number(record.Count(_counts))</strong>
                         <span class="admin-record-detail">@Detail(record)</span>
-                        <span class="admin-record-links">
-                            <a href="@record.List">@L[$"Records.{record.Name}.List"]</a>
-                            @if (record.New is { } create)
-                            {
-                                <a href="@create">+ @L[$"Records.New.{record.Name}"]</a>
-                            }
-                        </span>
+                        @if (record.New is { } create)
+                        {
+                            <span class="admin-record-links"><a href="@create">+ @L[$"Records.New.{record.Name}"]</a></span>
+                        }
                     </li>
                 }
             </ul>
@@ -151,6 +150,7 @@
     ];
 
     // A card per type of record; the editions are entered from their album, never created here. The purchase intents, which
+    // have no record of their own, stand apart in a block of their own.
     private static readonly IReadOnlyList<RecordCard> Records =
     [
         new("Albums", IconName.Album, AppPaths.AdminAlbums, AppPaths.AdminNewAlbum, c => c.Albums, c => c.AlbumsOutsideCollection),
