@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Présentation des erreurs'
 description: 'Erreurs métier, fonctionnelles et techniques distinguées au premier coup d''œil.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T14:00:00Z }
 ---
 
 # Présentation des erreurs
@@ -14,6 +14,8 @@ Toute erreur présentée à l'utilisateur doit lui permettre de distinguer **tr�
 - d'une **erreur technique** : l'application n'a pas pu traiter la demande pour une raison indépendante de la saisie de l'utilisateur (dysfonctionnement, service indisponible, etc.).
 
 Cette distinction s'applique à toutes les parties de l'application (consultation, administration, aide contextuelle).
+
+Une erreur technique porte partout la même mention, **« Problème technique »**, qu'elle survienne à l'enregistrement d'une fiche ou ailleurs (liste, fiche de la consultation, bandeau, contrôle) : l'utilisateur la reconnaît d'un écran à l'autre (décision de l'utilisateur, #411).
 
 
 <!-- À compléter : cas d'usage, user stories, autres règles métier, flux applicatifs, etc. -->
