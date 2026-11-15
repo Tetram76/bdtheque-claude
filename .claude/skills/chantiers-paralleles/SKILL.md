@@ -23,6 +23,14 @@ runs, actions on the chantier's pull request: review, merge, closing), and it
 forwards to that session a question of the user about the chantier
 (`SendMessage`).
 
+The orchestrator **never commits**, so it has **no branch and no worktree**:
+it works from the main checkout, read-only (`gh`, `git fetch`,
+`git worktree list`), and never runs `git switch` there, other sessions using
+it. If this session was opened in a worktree (`git rev-parse --show-toplevel`
+under `.claude/worktrees/`), say so to the user in your first message; when
+the session is archived, its worktree and branch are removed like a
+chantier's (step 4, cleanup).
+
 A batch serves to **complete the current milestone**, never to anticipate
 future work: its chantiers are chosen among that milestone's tickets only
 (step 2.2).
