@@ -51,7 +51,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
     }
 
     [Theory, InEachTheme]
-    public async Task Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt_AndTakesTheIntentOutOfTheList(string theme)
+    public async Task Removal_OfAnIntentOnAnEdition_DoesNotAnnounceTheEditionTargeted_AndTakesTheIntentOutOfTheList(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Buddy Longway {_marker}");
@@ -62,7 +62,9 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention d'achat de Buddy Longway {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Retirer l'intention…" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'achat ?" });
-        await Assertions.Expect(dialog).ToContainTextAsync("Suppression aussi de 1 édition");
+        // The edition targeted is the intent itself, which is not counted in what it takes along
+        // (fonctionnel/regles-metier/suppression-des-entites.md); without visuals, nothing else is concerned.
+        await Assertions.Expect(dialog).ToContainTextAsync("Aucune autre fiche n'est concernée.");
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents, $"?q={_marker}"));
