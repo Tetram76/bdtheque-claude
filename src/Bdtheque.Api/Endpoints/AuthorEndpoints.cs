@@ -195,7 +195,7 @@ internal static class AuthorEndpoints
     // The display name, and the sort key drawn from it, come from the pseudonym if any, otherwise from the names
     // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes): a display name already taken, or too long, is
     // corrected there.
-    private static Dictionary<string, string> EnteredOtherwise(string? pseudonym)
+    internal static Dictionary<string, string> EnteredOtherwise(string? pseudonym)
     {
         var field = string.IsNullOrWhiteSpace(pseudonym) ? "/lastName" : "/pseudonym";
         return new() { [nameof(Author.DisplayName)] = field, [nameof(Author.SortKey)] = field };
