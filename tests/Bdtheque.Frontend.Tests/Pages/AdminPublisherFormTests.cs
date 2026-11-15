@@ -84,11 +84,11 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Subject_FollowsTheName_UnnamedWhileBlank()
+    public async Task Subject_FollowsTheName_UnnamedWhileBlank()
     {
         var page = OpenPublisher();
 
-        page.Find("#publisher-name").Input("  ");
+        await page.InputAsync("#publisher-name", "  ");
 
         Assert.Equal("<Sans nom>", page.Find(".entry-form-subject").TextContent.Trim());
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
@@ -104,7 +104,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Website_OpensInANewTab_OnlyOnceEntered()
+    public async Task Website_OpensInANewTab_OnlyOnceEntered()
     {
         var page = OpenPublisher();
 
@@ -113,7 +113,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
             (open.GetAttribute("href"), open.GetAttribute("target"), open.GetAttribute("rel")));
         Assert.Equal("Ouvrir le site web", open.GetAttribute("aria-label"));
 
-        page.Find("#publisher-website").Input("");
+        await page.InputAsync("#publisher-website", "");
 
         Assert.Empty(page.FindAll(".publisher-website-open"));
     }
@@ -152,11 +152,11 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void RemovedCollection_StaysStruckUntilTheSaving_AndCanBeRestored()
+    public async Task RemovedCollection_StaysStruckUntilTheSaving_AndCanBeRestored()
     {
         var page = OpenPublisher();
 
-        page.Find("button[aria-label='Retirer Les Romans (À suivre)']").Click();
+        await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
 
         var removed = page.FindAll(".publisher-collection")[2];
         Assert.Equal("true", removed.GetAttribute("data-removed"));
@@ -165,24 +165,24 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         Assert.Equal("Retirée à l'enregistrement", removed.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
 
-        removed.QuerySelector("button")!.Click();
+        await page.ClickAsync(() => page.FindAll(".publisher-collection")[2].QuerySelector("button")!);
 
         Assert.Equal("Les Romans (À suivre)", page.FindAll(".publisher-collection")[2].QuerySelector("input")!.GetAttribute("value"));
         Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
     }
 
     [Fact]
-    public void AddedCollection_IsMarkedNew_AndLeavesTheListWhenRemoved()
+    public async Task AddedCollection_IsMarkedNew_AndLeavesTheListWhenRemoved()
     {
         var page = OpenPublisher();
 
-        page.Find(".publisher-collections-add").Click();
+        await page.ClickAsync(".publisher-collections-add");
 
         var added = page.FindAll(".publisher-collection")[4];
         Assert.Equal("Nouvelle", added.QuerySelector(".tag")!.TextContent.Trim());
         Assert.Equal("Aucune édition ni série", added.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
 
-        added.QuerySelector("button[aria-label^='Retirer']")!.Click();
+        await page.ClickAsync(() => page.FindAll(".publisher-collection")[4].QuerySelector("button[aria-label^='Retirer']")!);
 
         Assert.Equal(4, page.FindAll(".publisher-collection").Count);
     }
@@ -212,19 +212,19 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_TheRemovedCollectionsLeftOut_AndLeadsBackToTheList()
+    public async Task Save_SendsTheWholeFormAtItsVersion_TheRemovedCollectionsLeftOut_AndLeadsBackToTheList()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Casterman with { Version = 13 });
 
-        page.Find($"#publisher-collection-{FacSimile}").Input("Fac-similé (rééditions)");
-        page.Find("button[aria-label='Retirer Les Romans (À suivre)']").Click();
-        page.Find(".publisher-collections-add").Click();
-        page.FindAll(".publisher-collection")[4].QuerySelector("input")!.Input("Sakka");
-        page.Find("form").Submit();
+        await page.InputAsync($"#publisher-collection-{FacSimile}", "Fac-similé (rééditions)");
+        await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
+        await page.ClickAsync(".publisher-collections-add");
+        await page.InputAsync(() => page.FindAll(".publisher-collection")[4].QuerySelector("input")!, "Sakka");
+        await page.SubmitAsync("form");
 
         // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminPublishers, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminPublishers, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/publishers/{PublisherId}"), (method, path));
         var request = body.Deserialize<UpdatePublisherRequest>(JsonSerializerOptions.Web)!;
@@ -237,7 +237,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Create_LeadsBackToTheList()
+    public async Task Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Casterman, HttpStatusCode.Created);
@@ -245,11 +245,11 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         Assert.Equal(("Nouvel éditeur", "<Sans nom>", "Créer l'éditeur"),
             (page.Find("h1").TextContent.Trim(), page.Find(".entry-form-subject").TextContent.Trim(),
                 page.Find("button[type=submit]").TextContent.Trim()));
-        page.Find("#publisher-name").Input("Casterman");
-        page.Find("form").Submit();
+        await page.InputAsync("#publisher-name", "Casterman");
+        await page.SubmitAsync("form");
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminPublishers, new Uri(navigation.Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminPublishers, new Uri(navigation.Uri).AbsolutePath);
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, "/admin/publishers"), (method, path));
         Assert.Equal("Casterman", body.Deserialize<PublisherContent>(JsonSerializerOptions.Web)!.Name);
@@ -261,30 +261,30 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     [InlineData("Publisher.NameAlreadyUsed", "/name", "publisher-name",
         "« Dargaud » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même éditeur.")]
     [InlineData("Publisher.WebsiteInvalid", "/website", "publisher-website", "Une adresse web complète, commençant par https:// ou http://.")]
-    public void BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
+    public async Task BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule, pointer);
 
-        page.Find("#publisher-name").Input("Dargaud");
-        page.Find("form").Submit();
+        await page.InputAsync("#publisher-name", "Dargaud");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("business", error.GetAttribute("data-error-category"));
         Assert.Equal("true", page.Find($"#{field}").GetAttribute("aria-invalid"));
         Assert.Contains(message, page.Find($"#{field}-error").TextContent);
     }
 
     [Fact]
-    public void BusinessError_OnACollectionName_BordersThatCollectionsRow()
+    public async Task BusinessError_OnACollectionName_BordersThatCollectionsRow()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(
             ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "PublisherCollection.NameRequired", "/collections/1/name");
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForElement("[role=alert]");
+        page.Find("[role=alert]");
         var fields = page.FindAll("[aria-invalid=true]");
         var field = Assert.Single(fields);
         // The second collection sent, by the order of the kept collections.
@@ -292,18 +292,18 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void BusinessError_OnACollectionNamedAsAnother_TellsTheRenamedOneFromTheOneItClashesWith()
+    public async Task BusinessError_OnACollectionNamedAsAnother_TellsTheRenamedOneFromTheOneItClashesWith()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.BusinessProblem(
             "PublisherCollection.NameAlreadyUsed", fields: ["/collections/1/name"], related: ["/collections/0/name"]);
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
         // Above the form, a text that needs no field to make sense.
         Assert.Equal(
             "Deux collections d'un même éditeur ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.",
-            page.WaitForElement("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
+            page.Find("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
         var (clashing, renamed) = (page.FindAll("[aria-invalid=true]")[0], page.FindAll("[aria-invalid=true]")[1]);
         Assert.Equal(
             "Ce nom est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.",
@@ -315,49 +315,49 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void BusinessError_NameAlreadyUsed_RemindsThatNeitherCaseNorAccentsTellTwoPublishersApart()
+    public async Task BusinessError_NameAlreadyUsed_RemindsThatNeitherCaseNorAccentsTellTwoPublishersApart()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Publisher.NameAlreadyUsed");
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
         Assert.Equal(
             "Deux éditeurs ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.",
-            page.WaitForElement("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
+            page.Find("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
     }
 
     [Fact]
-    public void BusinessError_CollectionInUse_IsPresentedAboveTheForm()
+    public async Task BusinessError_CollectionInUse_IsPresentedAboveTheForm()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "PublisherCollection.InUse");
 
-        page.Find("button[aria-label='Retirer Les Romans (À suivre)']").Click();
-        page.Find("form").Submit();
+        await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Contains("ne peut pas être retirée", error.TextContent);
         Assert.Empty(page.FindAll("[aria-invalid=true]"));
     }
 
     [Fact]
-    public void FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
+    public async Task FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
 
-        page.Find("#publisher-name").Input("Casterman BD");
-        page.Find("button[aria-label='Retirer Les Romans (À suivre)']").Click();
-        page.Find(".publisher-collections-add").Click();
-        page.FindAll(".publisher-collection")[4].QuerySelector("input")!.Input("Sakka");
-        page.Find("form").Submit();
+        await page.InputAsync("#publisher-name", "Casterman BD");
+        await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
+        await page.ClickAsync(".publisher-collections-add");
+        await page.InputAsync(() => page.FindAll(".publisher-collection")[4].QuerySelector("input")!, "Sakka");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("functional", error.GetAttribute("data-error-category"));
         Assert.Contains("L'éditeur a été modifié entre-temps", error.TextContent);
 
-        error.QuerySelectorAll("button")[1].Click();
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[1]);
 
         var changes = page.Find("dialog .changes-dialog-list");
         Assert.Equal(["Nom", "Collections"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
@@ -366,15 +366,15 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
+    public async Task TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
     {
         var page = OpenPublisher();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
 
-        page.Find("#publisher-name").Input("Casterman BD");
-        page.Find("form").Submit();
+        await page.InputAsync("#publisher-name", "Casterman BD");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("technical", error.GetAttribute("data-error-category"));
         Assert.Contains("n'a pas pu enregistrer l'éditeur", error.TextContent);
         Assert.Equal("Casterman BD", page.Find("#publisher-name").GetAttribute("value"));

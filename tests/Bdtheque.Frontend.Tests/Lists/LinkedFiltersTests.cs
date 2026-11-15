@@ -3,7 +3,6 @@ using System.Text;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Lists;
-using Bdtheque.Frontend.Tests.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 

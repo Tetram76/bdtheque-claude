@@ -185,52 +185,52 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Label_FollowsTheTyping()
+    public async Task Label_FollowsTheTyping()
     {
         var page = OpenAlbum();
 
-        page.Find("#album-title").Input("Le Lotus bleu");
-        page.Find("#album-volume").Change("5");
+        await page.InputAsync("#album-title", "Le Lotus bleu");
+        await page.ChangeAsync("#album-volume", "5");
 
         Assert.Equal("Le Lotus bleu (Tintin - T. 5)", page.Find(".entry-form-subject").TextContent.Trim());
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
     }
 
     [Fact]
-    public void SortKey_InTheAutomaticMode_IsTheDomainsForTheTitleTyped()
+    public async Task SortKey_InTheAutomaticMode_IsTheDomainsForTheTitleTyped()
     {
         var page = OpenAlbum();
 
-        page.Find("#album-title").Input("Le Lotus bleu");
+        await page.InputAsync("#album-title", "Le Lotus bleu");
 
         page.WaitForAssertion(() => Assert.Equal("Lotus bleu [Le]", page.Find("#album-sort-key").GetAttribute("value")));
         Assert.Contains("/admin/sort-keys/title?title=Le%20Lotus%20bleu", _api.Requested);
     }
 
     [Fact]
-    public void SortKey_TypedByHand_IsManual_UntilReset()
+    public async Task SortKey_TypedByHand_IsManual_UntilReset()
     {
         var page = OpenAlbum();
 
-        page.Find("#album-sort-key").Input("Castafiore");
+        await page.InputAsync("#album-sort-key", "Castafiore");
 
         Assert.Equal("Manuelle", page.Find(".sort-key-mode").TextContent);
-        page.Find(".sort-key-reset").Click();
+        await page.ClickAsync(".sort-key-reset");
         Assert.Equal("Auto", page.Find(".sort-key-mode").TextContent);
-        page.WaitForAssertion(() => Assert.Equal("Lotus bleu [Le]", page.Find("#album-sort-key").GetAttribute("value")));
+        Assert.Equal("Lotus bleu [Le]", page.Find("#album-sort-key").GetAttribute("value"));
     }
 
     [Fact]
-    public void Omnibus_ShowsItsNumberAndTheVolumesCovered()
+    public async Task Omnibus_ShowsItsNumberAndTheVolumesCovered()
     {
         var page = OpenAlbum();
         Assert.Empty(page.FindAll("#album-range-start"));
 
-        page.FindAll("input[type=checkbox]")[0].Change(true);
+        await page.ChangeAsync("input[type=checkbox]", true);
 
         Assert.Equal("Numéro", page.Find("label[for=album-volume]").TextContent.Trim());
-        page.Find("#album-range-start").Change("1");
-        page.Find("#album-range-end").Change("5");
+        await page.ChangeAsync("#album-range-start", "1");
+        await page.ChangeAsync("#album-range-end", "5");
         Assert.Equal("Les Bijoux de la Castafiore (Tintin - INT. - 21 [1 à 5])", page.Find(".entry-form-subject").TextContent.Trim());
     }
 
@@ -259,16 +259,16 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
+    public async Task Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
     {
         var page = OpenAlbum();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux with { Version = 42, Content = Bijoux.Content with { Summary = "Autre" } });
 
-        page.Find("#album-summary").Change("Autre");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#album-summary", "Autre");
+        await page.SubmitAsync("form");
 
         // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbums, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminAlbums, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/albums/{AlbumId}"), (method, path));
         var request = body.Deserialize<UpdateAlbumRequest>(JsonSerializerOptions.Web)!;
@@ -279,20 +279,21 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_InProgress_DisablesTheForm_UntilItEnds()
+    public async Task Save_InProgress_DisablesTheForm_UntilItEnds()
     {
         // A field changed during the saving would be overwritten by the album as saved.
         var saved = new TaskCompletionSource();
         _api.Hold = (_, body) => body.ValueKind == JsonValueKind.Undefined ? Task.CompletedTask : saved.Task;
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
         var page = OpenAlbum();
-        page.Find("#album-title").Input("Le Lotus bleu");
+        await page.InputAsync("#album-title", "Le Lotus bleu");
 
-        page.Find("form").Submit();
+        var saving = await page.StartSubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.True(page.Find(".entry-form-blocks").HasAttribute("disabled")));
+        Assert.True(page.Find(".entry-form-blocks").HasAttribute("disabled"));
         saved.SetResult();
-        page.WaitForAssertion(() => Assert.False(page.Find(".entry-form-blocks").HasAttribute("disabled")));
+        await saving.EndAsync("The saving");
+        Assert.False(page.Find(".entry-form-blocks").HasAttribute("disabled"));
     }
 
     [Fact]
@@ -309,9 +310,9 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == RecordKind.Universe);
 
         var adding = tags.InvokeAsync(() => tags.Instance.OnAdd.InvokeAsync(new RecordOption(harbour, "Le port", "Univers Hergé")));
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Single(_api.Written);
         Assert.Contains(harbour.ToString(), _api.Written.Single().Body.GetProperty("content").GetProperty("universeIds").EnumerateArray().Select(u => u.GetString()));
         hierarchy.SetResult();
         await adding;
@@ -331,40 +332,41 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         var page = OpenNew();
 
         var choosing = ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
-        page.Find("form").Submit();
+        var saving = await page.StartSubmitAsync("form");
         given.SetResult();
         await choosing;
+        await saving.EndAsync("The saving");
 
-        page.WaitForAssertion(() => Assert.Contains(_api.Written, w => w.Path == "/admin/albums"));
+        Assert.Contains(_api.Written, w => w.Path == "/admin/albums");
         var saved = _api.Written.Single(w => w.Path == "/admin/albums").Body;
         Assert.Equal(guarnido.ToString(), saved.GetProperty("contributions")[0].GetProperty("authorId").GetString());
     }
 
     [Fact]
-    public void Create_LeadsBackToTheList()
+    public async Task Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux, HttpStatusCode.Created);
 
-        page.Find("#album-title").Input("Les Bijoux de la Castafiore");
-        page.Find("form").Submit();
+        await page.InputAsync("#album-title", "Les Bijoux de la Castafiore");
+        await page.SubmitAsync("form");
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminAlbums, new Uri(navigation.Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminAlbums, new Uri(navigation.Uri).AbsolutePath);
         Assert.Equal((HttpMethod.Post, "/admin/albums"), (_api.Written.Single().Method, _api.Written.Single().Path));
         Assert.Contains("admin.album.created", _audience.Functions);
     }
 
     [Fact]
-    public void BusinessError_ToCorrect_PointsToItsField()
+    public async Task BusinessError_ToCorrect_PointsToItsField()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(
             ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Album.TitleRequiredWithoutSeries", "/title");
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("business", error.GetAttribute("data-error-category"));
         Assert.Equal("À corriger", error.QuerySelector("[data-error-label]")!.TextContent);
         Assert.Equal("Le titre est obligatoire pour un album qui n'appartient à aucune série.", error.QuerySelector("[data-error-text]")!.TextContent);
@@ -373,7 +375,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Error_OfASaving_IsBroughtIntoView()
+    public async Task Error_OfASaving_IsBroughtIntoView()
     {
         // visuel/saisie-album/contenu.md: the first field to correct gets the focus, the page scrolling to it.
         var page = OpenNew();
@@ -381,27 +383,27 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
             .SetupVoid("revealProblem", _ => true);
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Album.TitleRequiredWithoutSeries");
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Single(reveal.Invocations));
+        Assert.Single(reveal.Invocations);
     }
 
     [Fact]
-    public void FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
+    public async Task FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
     {
         var page = OpenAlbum();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
 
-        page.Find("#album-title").Input("Le Lotus rouge");
-        page.Find("form").Submit();
+        await page.InputAsync("#album-title", "Le Lotus rouge");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("functional", error.GetAttribute("data-error-category"));
         Assert.Equal("Modifiée entre-temps", error.QuerySelector("[data-error-label]")!.TextContent);
         Assert.Contains("rien n'a été écrasé", error.TextContent);
         Assert.Equal(["Recharger la fiche", "Voir mes changements"], error.QuerySelectorAll("button").Select(b => b.TextContent.Trim()));
 
-        error.QuerySelectorAll("button")[1].Click();
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[1]);
 
         var changes = page.Find("dialog .changes-dialog-list");
         Assert.Equal(["Titre"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
@@ -410,32 +412,32 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
+    public async Task TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
     {
         var page = OpenAlbum();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
 
-        page.Find("#album-title").Input("Le Lotus rouge");
-        page.Find("form").Submit();
+        await page.InputAsync("#album-title", "Le Lotus rouge");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("technical", error.GetAttribute("data-error-category"));
         Assert.Equal("Problème technique", error.QuerySelector("[data-error-label]")!.TextContent);
         Assert.Equal("Le Lotus rouge", page.Find("#album-title").GetAttribute("value"));
 
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
-        page.Find("[role=alert] button").Click();
+        await page.ClickAsync("[role=alert] button");
 
-        page.WaitForAssertion(() => Assert.Empty(page.FindAll("[role=alert]")));
+        Assert.Empty(page.FindAll("[role=alert]"));
         Assert.Equal(2, _api.Written.Count);
     }
 
     [Fact]
-    public void Series_Chosen_GivesWhatTheAlbumDisplaysThroughIt()
+    public async Task Series_Chosen_GivesWhatTheAlbumDisplaysThroughIt()
     {
         var page = OpenAlbum();
 
-        page.Find(".record-picker-clear").Click();
+        await page.ClickAsync(".record-picker-clear");
 
         Assert.Empty(page.FindAll(".inherited-tags"));
         Assert.Equal("(obligatoire)", page.Find("label[for=album-title] .field-note").TextContent);
@@ -472,7 +474,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal("Auteurs repris de la série Tintin. Les modifier ici ne change pas ceux de la série.",
             page.Find(".notice-text").TextContent.Trim());
 
-        page.Find(".role-credits-line .tag-remove").Click();
+        await page.ClickAsync(".role-credits-line .tag-remove");
 
         Assert.Empty(page.FindAll(".notice"));
     }
@@ -539,12 +541,12 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         var page = OpenAlbum();
         await CreateOnTheSpotAsync(page, RecordKind.Genre, " Polar ");
         Assert.Equal("Polar", page.Find("#album-genre-creation-label").GetAttribute("value"));
-        page.Find(".dialog-actions .button[data-variant=primary]").Click();
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
         await CreateOnTheSpotAsync(page, RecordKind.Universe, "Le port");
-        page.Find(".dialog-actions .button[data-variant=primary]").Click();
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
         var tags = page.FindComponents<RecordTags>().First(t => t.Instance.Kind == RecordKind.Author);
         await tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync("Jean Nouveau"));
-        page.Find(".dialog-actions .button[data-variant=primary]").Click();
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
 
         Assert.Empty(page.FindAll("dialog"));
         Assert.Empty(_api.Written);
@@ -554,9 +556,9 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
             _audience.Functions.Where(f => f.EndsWith("-created", StringComparison.Ordinal)));
 
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Single(_api.Written);
         var added = _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords");
         Assert.Equal(("Polar", "Le port", "Nouveau"), (added.GetProperty("genres")[0].GetProperty("label").GetString(),
             added.GetProperty("universes")[0].GetProperty("name").GetString(), added.GetProperty("authors")[0].GetProperty("lastName").GetString()));
@@ -567,13 +569,13 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     {
         var page = OpenAlbum();
         await CreateOnTheSpotAsync(page, RecordKind.Genre, "Polar");
-        page.Find(".dialog-actions .button[data-variant=primary]").Click();
-        page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag-remove")[^1].Click();
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
+        await page.ClickAsync(() => page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag-remove")[^1]);
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Single(_api.Written);
         Assert.Equal(JsonValueKind.Null, _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords").ValueKind);
     }
 

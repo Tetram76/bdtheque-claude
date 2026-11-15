@@ -13,6 +13,15 @@
   <ItemGroup>
     <PackageReference Include="bunit" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The ways of raising an event that the compiler refuses (RS0030), and why (choix-implementation/outillage.md, tests). -->
+    <AdditionalFiles Include="BannedSymbols.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +31,8 @@
 
   <ItemGroup>
     <Using Include="Bunit" />
+    <!-- CircuitEvents: the only way a test raises an event (BannedSymbols.txt). -->
+    <Using Include="Bdtheque.Frontend.Tests.Controls" />
   </ItemGroup>
 
 </Project>
