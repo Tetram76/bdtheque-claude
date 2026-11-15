@@ -32,7 +32,9 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
 
         var row = Assert.Single(await ListAsync(_marker));
 
-        Assert.Equal((intent, album.Id, false), (row.Id, row.Album.Id, row.Album.IsInCollection));
+        // Without an owned edition, the album is wished for, never outside the collection
+        // (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album).
+        Assert.Equal((intent, album.Id, AlbumCollectionState.PurchaseIntent), (row.Id, row.Album.Id, row.State));
         Assert.Null(row.Edition);
         // An album without an edition has no cover: the generic visual stands for it.
         Assert.Null(row.Cover);
@@ -54,7 +56,7 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
 
         var row = Assert.Single(await ListAsync(_marker));
 
-        Assert.True(row.Album.IsInCollection);
+        Assert.Equal(AlbumCollectionState.InCollection, row.State);
         Assert.Equal(new EditionSummary(targeted, publisher.Id, $"Casterman {_marker}", null, null, 2013, null), row.Edition);
         Assert.Equal(cover, row.Cover);
         // The album has another edition: the intent cannot turn into one on the whole album.
@@ -70,7 +72,7 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
 
         var row = Assert.Single(await ListAsync(_marker));
 
-        Assert.False(row.Album.IsInCollection);
+        Assert.Equal(AlbumCollectionState.PurchaseIntent, row.State);
         Assert.True(row.IsConvertible);
     }
 

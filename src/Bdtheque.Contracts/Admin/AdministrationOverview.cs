@@ -4,7 +4,9 @@ namespace Bdtheque.Contracts.Admin;
 /// The number of records of each type, with the detail the home page of the administration gives of each
 /// (visuel/administration/contenu.md, Les fiches), which its menu also presents (visuel/administration/en-tete-et-menu.md).
 /// </summary>
-/// <param name="AlbumsOutsideCollection">Albums without any owned edition (fonctionnel/regles-metier/appartenance-a-la-collection.md).</param>
+/// <param name="AlbumsOutsideCollection">
+/// Albums outside the collection, neither owned nor wished for (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album).
+/// </param>
 /// <param name="SeriesWithoutStatus">Series whose status is not set.</param>
 /// <param name="SubUniverses">Universes that have a parent universe.</param>
 public sealed record RecordCounts(
