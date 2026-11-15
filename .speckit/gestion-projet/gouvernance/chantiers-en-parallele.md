@@ -1,13 +1,15 @@
 ---
 type: Gouvernance
 title: 'Chantiers en parallèle'
-description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants du jalon en cours (stabilisation du CI exceptée) et ordre de priorité, contrôle de cohérence fonctionnelle confié par l''orchestrateur, indépendance et dépendances (toute condition préalable, calendrier compris) vérifiées pour chaque candidat, sélection du lot présentée à l''utilisateur à chaque choix, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T12:00:00Z }
+description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, orchestrateur sans branche ni worktree, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants du jalon en cours (stabilisation du CI exceptée) et ordre de priorité, contrôle de cohérence fonctionnelle confié par l''orchestrateur, indépendance et dépendances (toute condition préalable, calendrier compris) vérifiées pour chaque candidat, sélection du lot présentée à l''utilisateur à chaque choix, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
 ---
 
 # Chantiers en parallèle
 
 À la demande de l'utilisateur, l'agent réalise un **lot de chantiers en parallèle** : chaque chantier est confié à une session à part, dans son propre worktree, qui le mène de bout en bout selon les règles du `.speckit/` (lecture du `.speckit/`, découpage, Pull Request, validation fonctionnelle, revue Codex, fusion, clôture). La session qui lance le lot en est l'**orchestrateur** : elle choisit les chantiers, évalue les ressources, lance les sessions, et rend compte de leur avancement à l'utilisateur. C'est essentiellement son rôle : elle n'a pas, en principe, à réaliser elle-même ce qui revient à la session d'un chantier (code, exécution lourde, action sur la Pull Request du chantier : revue, fusion, clôture), et transmet à cette session une question de l'utilisateur sur le chantier.
+
+**Orchestrateur sans branche ni worktree** (exigence de l'utilisateur) : l'orchestrateur ne commite jamais, tout changement du dépôt passant par la Pull Request d'un chantier ; une branche ou un worktree ne lui servirait à rien, et ne ferait que s'ajouter au ménage du lot. Il travaille donc depuis le checkout principal, en lecture seule (`gh`, `git fetch`, `git worktree list`), sans jamais y changer de branche (`git switch`) : d'autres sessions s'en servent en même temps. Une session d'orchestrateur ouverte par erreur dans un worktree (l'application peut en créer un pour toute nouvelle session) le signale à l'utilisateur dès son premier message ; à son archivage, son worktree et sa branche sont supprimés, comme ceux d'une session de chantier (§ Le lot, ménage en fin de session).
 
 **Objet** : un lot sert à **compléter le jalon en cours**, pas à anticiper de futurs développements (exigence de l'utilisateur) ; d'où le choix de ses chantiers parmi les seuls tickets de ce jalon (§ Choix des chantiers).
 
