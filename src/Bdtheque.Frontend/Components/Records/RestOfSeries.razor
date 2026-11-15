@@ -17,15 +17,15 @@
             <span class="series-albums-title">@SeriesTitle</span>
             <span class="series-albums-count">@Count</span>
         </summary>
-        <ol>
-            @foreach (var card in Albums)
+        @* The column of the volume as wide as its longest volume (« T. 21 à T. 24 »), so that the names line up. *@
+        <ol style="--series-volume-chars: @VolumeChars">
+            @foreach (var (card, name) in Lines)
             {
                 var album = card.Album;
-                var name = Labels.InItsSeries(album);
                 <li data-current="@(album.Id == AlbumId ? "" : null)">
-                    @* Each line is a card that identifies its album: one named by its volume leaves the place of the volume
-                       empty, its volume being presented once. *@
-                    <span class="series-album-volume">@if (name.Volume is { } volume){@volume}else if (!name.NamedByVolume){<NotSet Brief="true" />}</span>
+                    @* A special case: the column of the volume is always given, beside a name that says it too (« Tome 3 »),
+                       and holds the range of an omnibus (visuel/fiche-album/contenu.md). *@
+                    <span class="series-album-volume">@if (name.Volume is { } volume){@volume}else{<NotSet Brief="true" />}</span>
                     @if (album.Id == AlbumId)
                     {
                         <span class="series-album-title" aria-current="page">@name.Name</span>
@@ -54,6 +54,10 @@
     /// <summary>Every album of the series, the one shown included, in the order of the series.</summary>
     [Parameter, EditorRequired]
     public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
+
+    private IEnumerable<(AlbumCard Card, AlbumInSeries Name)> Lines => Albums.Select(card => (card, Labels.InTheRestOfItsSeries(card.Album)));
+
+    private int VolumeChars => Lines.Max(line => line.Name.Volume?.Length) ?? 0;
 
     private string Count
     {

@@ -52,7 +52,9 @@
 
 .series-album-volume {
     flex: none;
-    min-inline-size: 2.75rem;
+    /* As wide as the longest volume of the list (--series-volume-chars, RestOfSeries.razor), a range of an omnibus
+       included, so that the names line up; never narrower than a short volume. */
+    min-inline-size: max(2.75rem, calc(var(--series-volume-chars, 0) * 1ch));
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
     font-variant-numeric: tabular-nums;

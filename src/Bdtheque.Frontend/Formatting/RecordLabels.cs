@@ -29,11 +29,26 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
     public AlbumInSeries InItsSeries(AlbumSummary album)
     {
         var label = LabelOf(album);
-        if (album.Title is { } title)
-            return new AlbumInSeries(title, Volume(label, abbreviated: true), NamedByVolume: false);
-        return Volume(label, abbreviated: false) is { } volume
-            ? new AlbumInSeries(volume, null, NamedByVolume: true)
-            : new AlbumInSeries(texts["Untitled"], null, NamedByVolume: false);
+        return album.Title is { } title
+            ? new AlbumInSeries(title, Volume(label, abbreviated: true))
+            : new AlbumInSeries(Volume(label, abbreviated: false) ?? texts["Untitled"], null);
+    }
+
+    /// <summary>
+    /// An album in the rest of its series, special case of <see cref="InItsSeries"/> (visuel/fiche-album/contenu.md): its name
+    /// without the series, and its column of the volume, always given, abbreviated; an omnibus that is no special issue, with
+    /// both its bounds, shows them there (« T. 1 à T. 4 »), and its name leaves them out (« Intégrale - 1 »). <c>Volume</c> is
+    /// <c>null</c> for a regular album without number only.
+    /// </summary>
+    public AlbumInSeries InTheRestOfItsSeries(AlbumSummary album)
+    {
+        var label = LabelOf(album);
+        if (album is not { Type: AlbumType.Omnibus, IsSpecialIssue: false, StartVolumeNumber: { } start, EndVolumeNumber: { } end })
+            return new AlbumInSeries(album.Title ?? Volume(label, abbreviated: false) ?? texts["Untitled"], Volume(label, abbreviated: true));
+
+        var bounds = label with { StartVolumeNumber = null, EndVolumeNumber = null };
+        var range = string.Format(CultureInfo.CurrentCulture, texts["Range"], VolumeNumbered(start), VolumeNumbered(end));
+        return new AlbumInSeries(album.Title ?? Volume(bounds, abbreviated: false)!, range);
     }
 
     /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
@@ -143,6 +158,9 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         (_, null) => title,
         _ => $"{title} ({series})",
     };
+
+    // A volume of a range, as next to a title: « T. 4 ».
+    private string VolumeNumbered(int number) => $"{texts["Volume.Short"]} {number.ToString(CultureInfo.CurrentCulture)}";
 
     // The volume of the album, as its type wants it; null for a regular album without number.
     private string? Volume(AlbumLabel album, bool abbreviated)
