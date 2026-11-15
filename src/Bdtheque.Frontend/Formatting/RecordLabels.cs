@@ -15,13 +15,41 @@ namespace Bdtheque.Frontend.Formatting;
 public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnFormatter isbns)
 {
     /// <summary>
-    /// The label of an album in the format of the settings. <paramref name="withSeries"/> leaves the series out where the
-    /// context makes it plain; with it, the series stands in for a missing title, and the volume is then abbreviated as
-    /// next to any title (fonctionnel/presentation/libelle-d-un-album.md, examples).
+    /// The label of an album in the format of the settings, its series included, where the context does not make the series
+    /// plain: the series stands in for a missing title, and the volume is then abbreviated as next to any title
+    /// (fonctionnel/presentation/libelle-d-un-album.md, examples). Where the context makes it plain, see <see cref="InItsSeries"/>.
     /// </summary>
-    public string Album(AlbumSummary album, AlbumLabelFormat format, bool withSeries = true) =>
-        Album(new AlbumLabel(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue, album.VolumeNumber,
-            album.StartVolumeNumber, album.EndVolumeNumber), format, withSeries);
+    public string Album(AlbumSummary album, AlbumLabelFormat format) => Album(LabelOf(album), format);
+
+    /// <summary>
+    /// The identification of an album where its series goes without saying: its name without the series, and the volume that
+    /// goes with it, none when the name already says it (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte).
+    /// The one place this choice is made, so that no such context names the series, nor identifies an album by its volume twice.
+    /// </summary>
+    public AlbumInSeries InItsSeries(AlbumSummary album)
+    {
+        var label = LabelOf(album);
+        return album.Title is { } title
+            ? new AlbumInSeries(title, Volume(label, abbreviated: true))
+            : new AlbumInSeries(Volume(label, abbreviated: false) ?? Untitled, null);
+    }
+
+    /// <summary>
+    /// An album in the rest of its series, special case of <see cref="InItsSeries"/> (visuel/fiche-album/contenu.md): its name
+    /// without the series, and its column of the volume, always given, abbreviated; an omnibus that is no special issue, with
+    /// both its bounds, shows them there (« T. 1 à T. 4 »), and its name leaves them out (« Intégrale - 1 »). <c>Volume</c> is
+    /// <c>null</c> for a regular album without number only.
+    /// </summary>
+    public AlbumInSeries InTheRestOfItsSeries(AlbumSummary album)
+    {
+        var label = LabelOf(album);
+        if (album is not { Type: AlbumType.Omnibus, IsSpecialIssue: false, StartVolumeNumber: { } start, EndVolumeNumber: { } end })
+            return new AlbumInSeries(album.Title ?? Volume(label, abbreviated: false) ?? Untitled, Volume(label, abbreviated: true));
+
+        var bounds = label with { StartVolumeNumber = null, EndVolumeNumber = null };
+        var range = string.Format(CultureInfo.CurrentCulture, texts["Range"], VolumeNumbered(start), VolumeNumbered(end));
+        return new AlbumInSeries(album.Title ?? Volume(bounds, abbreviated: false)!, range);
+    }
 
     /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
     public string Edition(EditionSummary edition) =>
@@ -37,14 +65,6 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         var start = label.LastIndexOf($" - {texts["Isbn"]}\u00A0", StringComparison.Ordinal);
         return start < 0 ? (label, null) : (label[..(start + 3)], label[(start + 3)..]);
     }
-
-    /// <summary>
-    /// The volume of an album alone, as next to a title (fonctionnel/presentation/libelle-d-un-album.md); <c>null</c> for a
-    /// regular album without number.
-    /// </summary>
-    public string? Volume(AlbumSummary album) =>
-        Volume(new AlbumLabel(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue, album.VolumeNumber,
-            album.StartVolumeNumber, album.EndVolumeNumber), abbreviated: true);
 
     /// <summary>
     /// The label of a purchase intent: the album it targets, followed by the edition when it targets one, as the change log
@@ -70,17 +90,23 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         PublisherCollectionLabel collection => $"{collection.Name} ({collection.PublisherName})",
         NameLabel name => name.Name,
         ApplicationSettingsLabel => texts["ApplicationSettings"],
-        _ => texts["Untitled"],
+        _ => Untitled,
     };
 
-    private string Album(AlbumLabel album, AlbumLabelFormat format, bool withSeries = true)
+    // The fallback of any label whose components are all empty (fonctionnel/presentation/libelle-d-un-album.md#fallback).
+    private string Untitled => texts["Untitled"];
+
+    private static AlbumLabel LabelOf(AlbumSummary album) => new(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue,
+        album.VolumeNumber, album.StartVolumeNumber, album.EndVolumeNumber);
+
+    private string Album(AlbumLabel album, AlbumLabelFormat format)
     {
-        var series = withSeries ? album.SeriesTitle : null;
+        var series = album.SeriesTitle;
         var title = album.Title;
         var volume = Volume(album, abbreviated: title is not null || series is not null);
 
         if (title is null && series is null)
-            return volume ?? texts["Untitled"];
+            return volume ?? Untitled;
 
         return format switch
         {
@@ -125,7 +151,7 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         if (author.Pseudonym is { } pseudonym)
             return pseudonym;
         var name = string.Join(' ', new[] { author.FirstName, author.LastName }.OfType<string>());
-        return name.Length > 0 ? name : texts["Untitled"];
+        return name.Length > 0 ? name : Untitled;
     }
 
     // Never both null: the caller has already stood the volume in for a label without either.
@@ -135,6 +161,9 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         (_, null) => title,
         _ => $"{title} ({series})",
     };
+
+    // A volume of a range, as next to a title: « T. 4 ».
+    private string VolumeNumbered(int number) => $"{texts["Volume.Short"]} {number.ToString(CultureInfo.CurrentCulture)}";
 
     // The volume of the album, as its type wants it; null for a regular album without number.
     private string? Volume(AlbumLabel album, bool abbreviated)

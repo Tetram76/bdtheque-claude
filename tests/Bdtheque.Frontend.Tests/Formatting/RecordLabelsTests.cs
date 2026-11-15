@@ -49,16 +49,44 @@ public sealed class RecordLabelsTests
             new AlbumSummary(Guid.NewGuid(), "Titre", Guid.NewGuid(), "Série", type, special, volume, start, end, true),
             AlbumLabelFormat.TitleSeriesVolume));
 
-    // Without the series, an album without its own title keeps only its volume, written in full.
+    // Where its series goes without saying (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte),
+    // an album is never named with it: by its own title, its volume beside; without one, by its volume written in full, which
+    // is then not presented a second time; failing both, by the fallback.
+    [Theory]
+    [InlineData("Le Lotus bleu", 5, "Le Lotus bleu", "T. 5")]
+    [InlineData(null, 5, "Tome 5", null)]
+    [InlineData("Le Lotus bleu", null, "Le Lotus bleu", null)]
+    [InlineData(null, null, "<Sans titre>", null)]
+    public void InItsSeries_NamesTheAlbumWithoutItsSeries_AndIdentifiesItByItsVolumeOnce(
+        string? title, int? volume, string name, string? volumeBeside) =>
+        Assert.Equal(new AlbumInSeries(name, volumeBeside), _labels.InItsSeries(Regular(title, "Tintin", volume)));
+
     [Theory]
     [InlineData(AlbumType.Regular, false, "Tome 5")]
     [InlineData(AlbumType.Regular, true, "Hors-série 5")]
     [InlineData(AlbumType.Omnibus, false, "Intégrale - 5")]
     [InlineData(AlbumType.Omnibus, true, "Intégrale hors-série - 5")]
-    public void Album_WithoutSeriesNorTitle_WritesItsVolumeInFull(AlbumType type, bool special, string expected) =>
-        Assert.Equal(expected, _labels.Album(
-            new AlbumSummary(Guid.NewGuid(), null, Guid.NewGuid(), "Série", type, special, 5, null, null, true),
-            AlbumLabelFormat.TitleSeriesVolume, withSeries: false));
+    public void InItsSeries_NamesAnAlbumWithoutTitle_ByItsVolumeInFull(AlbumType type, bool special, string expected) =>
+        Assert.Equal(new AlbumInSeries(expected, null), _labels.InItsSeries(
+            new AlbumSummary(Guid.NewGuid(), null, Guid.NewGuid(), "Série", type, special, 5, null, null, true)));
+
+    // The rest of the series, a special case (visuel/fiche-album/contenu.md): the column of the volume is always given, even
+    // beside a name that says it; an omnibus that is no special issue, with both its bounds, shows them there, and its name
+    // leaves them out; a special omnibus, or one without both bounds, keeps the representation of its volume.
+    [Theory]
+    [InlineData("Le Lotus bleu", AlbumType.Regular, false, 5, null, null, "Le Lotus bleu", "T. 5")]
+    [InlineData(null, AlbumType.Regular, false, 5, null, null, "Tome 5", "T. 5")]
+    [InlineData(null, AlbumType.Regular, true, 1, null, null, "Hors-série 1", "HS 1")]
+    [InlineData(null, AlbumType.Regular, false, null, null, null, "<Sans titre>", null)]
+    [InlineData(null, AlbumType.Omnibus, false, 1, 1, 4, "Intégrale - 1", "T. 1 à T. 4")]
+    [InlineData("Les Années folles", AlbumType.Omnibus, false, 2, 5, 8, "Les Années folles", "T. 5 à T. 8")]
+    [InlineData(null, AlbumType.Omnibus, false, null, 1, 4, "Intégrale", "T. 1 à T. 4")]
+    [InlineData(null, AlbumType.Omnibus, false, 1, 1, null, "Intégrale - 1", "INT. - 1")]
+    [InlineData(null, AlbumType.Omnibus, true, 1, 1, 3, "Intégrale hors-série - 1 [1 à 3]", "INT.HS - 1 [1 à 3]")]
+    public void InTheRestOfItsSeries_AlwaysGivesTheColumnOfTheVolume_WithTheRangeOfAnOmnibus(
+        string? title, AlbumType type, bool special, int? volume, int? start, int? end, string name, string? column) =>
+        Assert.Equal(new AlbumInSeries(name, column), _labels.InTheRestOfItsSeries(
+            new AlbumSummary(Guid.NewGuid(), title, Guid.NewGuid(), "Série", type, special, volume, start, end, true)));
 
     [Theory]
     [InlineData(null, null, null, "Dargaud")]
@@ -120,14 +148,9 @@ public sealed class RecordLabelsTests
     [InlineData(AlbumType.Regular, false, 5, null, null, "T. 5")]
     [InlineData(AlbumType.Regular, true, 2, null, null, "HS 2")]
     [InlineData(AlbumType.Omnibus, false, null, 1, 6, "INT. [1 à 6]")]
-    public void Volume_Alone_IsTheOneNextToATitle(AlbumType type, bool special, int? volume, int? start, int? end, string expected) =>
-        Assert.Equal(expected, _labels.Volume(
-            new AlbumSummary(Guid.NewGuid(), "Titre", Guid.NewGuid(), "Série", type, special, volume, start, end, true)));
-
-    [Fact]
-    public void Volume_OfARegularAlbumWithoutNumber_IsNone() =>
-        Assert.Null(_labels.Volume(Regular("Titre", "Série", null)));
-
+    public void InItsSeries_PresentsTheVolumeBesideATitle_AsNextToATitle(AlbumType type, bool special, int? volume, int? start, int? end, string expected) =>
+        Assert.Equal(expected, _labels.InItsSeries(
+            new AlbumSummary(Guid.NewGuid(), "Titre", Guid.NewGuid(), "Série", type, special, volume, start, end, true)).Volume);
     [Theory]
     [InlineData("Gotlieb", "Marcel", "Gotlib", "Gotlib")]
     [InlineData("Franquin", "André", null, "André Franquin")]

@@ -27,22 +27,16 @@
                     @foreach (var card in albums)
                     {
                         var album = card.Album;
+                        @* Without its own title, an album is named by its volume alone (« Tome 3 »), presented once. *@
+                        var name = Labels.InItsSeries(album);
                         <li class="album-card">
                             <a href="@AppPaths.Album(album.Id)">
                                 <Cover VisualId="card.Cover?.VisualId" />
-                                @if (album.Title is { } own)
+                                @if (name.Volume is { } volume)
                                 {
-                                    @if (Labels.Volume(album) is { } volume)
-                                    {
-                                        <span class="album-card-volume">@volume</span>
-                                    }
-                                    <span class="album-card-title">@own</span>
+                                    <span class="album-card-volume">@volume</span>
                                 }
-                                else
-                                {
-                                    @* Without its own title, an album is named by its volume alone (« Tome 3 »). *@
-                                    <span class="album-card-title">@Labels.Album(album, LabelFormat, withSeries: false)</span>
-                                }
+                                <span class="album-card-title">@name.Name</span>
                             </a>
                             <RatingStars Rating="card.Rating" />
                             <CollectionStateTag State="AlbumCardStates.Of(card)" />
@@ -58,9 +52,6 @@
     /// <summary>Every album of the series, in its order.</summary>
     [Parameter, EditorRequired]
     public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
-
-    [Parameter, EditorRequired]
-    public AlbumLabelFormat LabelFormat { get; set; }
 
     // The order of the series puts the special issues last: each group keeps it.
     private IEnumerable<(string Title, List<AlbumCard> Albums)> Groups =>

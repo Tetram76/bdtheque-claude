@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''une série : pile de couvertures, avancement, auteurs, albums dans l''ordre de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:00:00Z }
 ---
 
 # Contenu
@@ -21,7 +21,7 @@ De haut en bas :
   - Les autres valeurs template et les indicateurs d'exclusion n'y figurent pas ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).
 - **De quoi ça parle ?** : le résumé, puis les notes personnelles de la série, chacun seulement s'il est renseigné (ni « Non renseigné », ni intitulé des notes sans notes) ; une série sans résumé ni notes n'a pas ce bloc.
 - **Combien d'albums ?** : le décompte (tomes, intégrales, hors-séries), puis les albums **dans l'ordre de la série** ([Ordre des albums dans une série](../../fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md)), en deux groupes : **Tomes et intégrales**, puis **Hors-séries**. Chaque album est une carte, en grille, qui mène à sa fiche :
-  - sa couverture, son tome ([Représentation du tome selon le type d'album](../../fonctionnel/presentation/libelle-d-un-album.md#représentation-du-tome-selon-le-type-dalbum)) et son titre ; un album sans titre propre est nommé par son tome seul (« Tome 3 ») ;
+  - sa couverture, son tome ([Représentation du tome selon le type d'album](../../fonctionnel/presentation/libelle-d-un-album.md#représentation-du-tome-selon-le-type-dalbum)) et son titre ; un album sans titre propre est nommé par son tome seul (« Tome 3 »), la série étant évidente, sans répéter son tome à part ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte)) ;
   - son appréciation, en étoiles, lorsqu'elle est renseignée ;
   - son **appartenance à la collection** : étiquette pleine « Dans la collection », ou étiquette en tirets « Hors collection » ou « Intention d'achat ».
 - **Pied de page** : les dates de création et de modification de la série, introduites par ce qu'elles concernent (« Série créée le …, modifiée le … »), jamais par « Fiche ».
