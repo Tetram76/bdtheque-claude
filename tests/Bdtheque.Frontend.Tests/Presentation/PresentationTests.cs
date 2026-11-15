@@ -364,10 +364,11 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Fact]
-    public void ExternalMark_IsAGlobe_NeitherThatOfTheUniversesNorTheArrow_AnnouncedAsLeavingTheApplication()
+    public void ExternalMark_IsAGlobe_NeitherTheIconOfTheUniversesNorTheArrow_AnnouncedAsLeavingTheApplication()
     {
-        // visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md: a small globe, told apart from the globe of the
-        // universes and from the arrow of a link that stays in the application, and « site externe » for screen readers.
+        // visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md: a small globe, the only globe of the application
+        // (the universes have a thought bubble), told apart from the arrow of a link that stays in the application, and
+        // « site externe » for screen readers.
         var mark = Render<ExternalMark>().Find(".external-mark");
 
         Assert.Equal(", site externe", mark.QuerySelector(".visually-hidden")?.TextContent);
