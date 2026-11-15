@@ -110,7 +110,7 @@ public sealed class GenreEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var impact = await _client.GetFromJsonAsync<DeletionImpact>($"/admin/genres/{genre.Id}/deletion-impact");
 
         Assert.Empty(impact!.BlockedBy);
-        Assert.Equal([new ImpactCount(EntityKind.Album, 2), new ImpactCount(EntityKind.Series, 1)], impact.AssociationsRemoved);
+        Assert.Equal([new ImpactCount(EntityKind.Series, 1), new ImpactCount(EntityKind.Album, 2)], impact.AssociationsRemoved);
         Assert.Empty(impact.DeletedWith);
         Assert.NotEmpty(impact.Fingerprint);
     }

@@ -238,8 +238,8 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
-        Assert.Contains("6 albums", Text(dialog.QuerySelector(".deletion-impact")!));
-        Assert.Contains("Rattachez d'abord ses albums à une autre série, ou supprimez-les, puis recommencez.", Text(dialog));
+        Assert.Equal("La série est encore utilisée par :", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["6 albums : rattachez-les à une autre série, ou supprimez-les."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
         Assert.Equal(["Fermer"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));
     }
 

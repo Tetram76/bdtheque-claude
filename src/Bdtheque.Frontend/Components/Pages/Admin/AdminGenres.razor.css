@@ -96,7 +96,7 @@
 @container genre-rows (min-width: 34rem) {
     .genre-row {
         grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--genre-actions-width);
-        grid-template-areas: "main albums series actions";
+        grid-template-areas: "main series albums actions";
         align-items: center;
     }
 
@@ -118,7 +118,7 @@
 @container genre-rows (min-width: 48rem) {
     .genre-row {
         grid-template-columns: minmax(0, 1fr) 6rem 6rem 6.75rem var(--genre-actions-width);
-        grid-template-areas: "main albums series modified actions";
+        grid-template-areas: "main series albums modified actions";
     }
 
     .genre-modified {

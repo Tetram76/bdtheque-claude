@@ -21,4 +21,11 @@
   <data name="Close" xml:space="preserve">
     <value>Fermer</value>
   </data>
+  <data name="Refusal.Line" xml:space="preserve">
+    <value>{0} : {1} ;</value>
+    <comment>A record type blocking the deletion, not the last one: its count, then what to do.</comment>
+  </data>
+  <data name="Refusal.LastLine" xml:space="preserve">
+    <value>{0} : {1}.</value>
+  </data>
 </root>

@@ -1,12 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Suppression des entités : mise en œuvre'
-description: 'Impact et empreinte de suppression, verrouillage racine puis enfant, mécanisme commun, règles ON DELETE, fichiers des visuels.'
+description: 'Impact et empreinte de suppression, édition visée comptée comme son intention, refus par le dialogue commun, verrouillage racine puis enfant, mécanisme commun, règles ON DELETE, fichiers des visuels.'
 applies_to:
   - 'src/Bdtheque.Api/Deletion/**'
   - 'src/Bdtheque.Api/Endpoints/DeletionEndpoints.cs'
   - 'src/Bdtheque.Contracts/Deletion/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:30:00Z }
 ---
 
 # Suppression des entités : mise en œuvre
@@ -19,6 +19,14 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
   - La garantie porte sur ce que la suppression **ajoute** à l'impact confirmé, jamais sur ce qu'une autre écriture en **retire** : l'état final est alors un sous-ensemble de l'effet confirmé, sans rien d'inattendu. Verrouiller les lignes de jointure n'apporterait rien.
   - La version de l'entité ne suffit pas : ajouter un genre à un album modifie l'album, pas le genre.
 - **Un mécanisme commun**, tiré des liens que déclare chaque ressource : les **recherches enregistrées qui désignent** la fiche ou ses compositions ([Recherches enregistrées : mise en œuvre](../recherche-avancee/recherches-enregistrees-mise-en-oeuvre.md)) y sont ajoutées par le mécanisme lui-même, sans qu'aucune ressource puisse les oublier.
+- **Édition visée comptée comme son intention par le mécanisme commun** ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) : une fois relevées les fiches de chaque lien et les recherches enregistrées qui les désignent, toute édition que vise une intention passe du compte des éditions à celui des intentions, sous la même nature de lien, l'intention supprimée elle-même exceptée. Chaque ressource déclare ses liens tels que le schéma les connaît (une intention emporte une édition) : aucune ne peut oublier la règle. L'empreinte porte sur les identités ainsi comptées, et le relevé des visuels comme celui des recherches enregistrées, faits avant, gardent l'édition visée.
+  - **Alternative écartée (liens restreints aux éditions possédées dans chaque ressource, et liens d'intentions ajoutés)** : la règle serait écrite dans l'album, l'éditeur, la collection et l'intention, et une ressource qui l'oublierait recompterait l'édition visée.
+  - **Alternative écartée (règle appliquée par le frontend à la présentation)** : l'impact ne porte que des nombres par type, d'où l'on ne sait pas quelles éditions sont visées ; et l'outil pour agents IA, autre client, devrait la redire.
+- **Ce qui désigne une collection, dans la saisie de son éditeur, compté comme l'impact de sa suppression** : une édition que vise une intention compte pour cette intention, comme dans le mécanisme commun, en une requête pour toutes les collections de l'éditeur.
+  - **Alternative écartée (impact de suppression calculé pour chaque collection)** : plusieurs requêtes par collection à chaque lecture de la fiche, pour des nombres que la projection donne d'un coup.
+- **Refus présenté par le dialogue commun** ([Frontend](../socle/frontend.md)) : une ligne par type de fiche qui bloque, son nombre et la marche à suivre, que chaque page donne au singulier et au pluriel ; le résumé de l'impact ne présente plus que ce que fait une suppression confirmée.
+- **Ordre unique des types de fiche écrit une fois, dans les contrats** ([Ordre des types de fiche](../../fonctionnel/presentation/ordre-des-types-de-fiche.md)) : l'API rend chaque liste de l'impact dans cet ordre, que tout client présente tel quel ; un écran qui assemble lui-même un décompte (collection d'un éditeur, colonnes d'une liste, candidats d'une fusion) le suit, fixé par ses tests.
+  - **Alternative écartée (ordre appliqué par le frontend à la présentation)** : l'outil pour agents IA, autre client de l'API, devrait le redire.
 - **Un enfant d'agrégat est supprimé par sa racine**, dont la version est vérifiée, puis marquée modifiée ; une suppression qui emporte plus que sa ligne (une intention emporte son édition) passe par l'opération de l'agrégat, dont l'effet est celui que l'impact annonce.
 - **Le schéma reflète les mêmes règles** : `RESTRICT` pour chaque *Référence* (filet de sécurité, traduit en erreur métier), `CASCADE` pour chaque *Composition* et pour les jointures des *Associations*. Un test classe chaque clé étrangère dans une de ces natures, et échoue pour toute clé ajoutée sans classement, qui échapperait sinon aux règles de suppression.
 - **Fichiers des visuels supprimés après la validation** de la transaction, d'après les visuels que l'impact annonce : un échec de la suppression laisse les fichiers intacts, un échec sur un fichier ne laisse qu'un orphelin, rattrapé par la réconciliation ([Visuels : stockage et traitement](../domaine/visuels-stockage-et-traitement.md)). Ce relevé appartient au mécanisme commun, pour qu'aucune suppression ne l'oublie.

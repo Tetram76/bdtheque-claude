@@ -22,6 +22,6 @@
     <value>Sans parent, l'univers est de premier niveau.</value>
   </data>
   <data name="Help.Parent" xml:space="preserve">
-    <value>Ses albums et séries sont aussi ceux de {0}.</value>
+    <value>Ses séries et albums sont aussi ceux de {0}.</value>
   </data>
 </root>

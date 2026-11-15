@@ -221,7 +221,8 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         var dialog = Open($"delete={OnEdition.Id}").Find("dialog");
 
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
-        Assert.Contains("Retirez d'abord l'intention des critères de ces recherches enregistrées, puis recommencez.", Text(dialog));
+        Assert.Equal("L'intention est encore désignée par :", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["1 recherche enregistrée : retirez l'intention de ses critères."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
     }
 
     [Fact]

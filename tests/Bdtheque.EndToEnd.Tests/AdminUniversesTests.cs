@@ -44,7 +44,7 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await ControlsPage.WaitUntilInteractiveAsync(page);
         await panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Hugo Pratt {_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Univers Hugo Pratt {_marker}" }).ClickAsync();
-        await Assertions.Expect(panel).ToContainTextAsync($"Ses albums et séries sont aussi ceux de Univers Hugo Pratt {_marker}.");
+        await Assertions.Expect(panel).ToContainTextAsync($"Ses séries et albums sont aussi ceux de Univers Hugo Pratt {_marker}.");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Créer l'univers" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminUniverses, $"?q={_marker}"));
@@ -118,7 +118,7 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Parent {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
         var refusal = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Suppression impossible" });
-        await Assertions.Expect(refusal).ToContainTextAsync("Rangez d'abord ses sous-univers sous un autre univers");
+        await Assertions.Expect(refusal).ToContainTextAsync("1 univers : rangez-le sous un autre univers, ou supprimez-le.");
         await refusal.GetByRole(AriaRole.Link, new() { Name = "Fermer" }).ClickAsync();
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur Enfant {_marker}" }).ClickAsync();

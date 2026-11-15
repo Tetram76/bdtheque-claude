@@ -1,3 +1,6 @@
+using Bdtheque.Contracts.Deletion;
+using Microsoft.Extensions.Localization;
+
 namespace Bdtheque.Frontend.Components.Errors;
 
 /// <summary>
@@ -19,3 +22,17 @@ public sealed class EntityNames;
 /// subject of the form (<c>{0}</c>, e.g. the name of the publisher as typed).
 /// </summary>
 public sealed class FieldMessages;
+
+/// <summary>
+/// A number of records of an entity type, in the singular or the plural, and the form (<c>One</c>, <c>Other</c>) that
+/// suffixes the key of every text agreeing with it: those of <see cref="EntityNames"/>, or what to do about records
+/// blocking a deletion.
+/// </summary>
+public static class EntityCounts
+{
+    public static string Form(int count) => count == 1 ? "One" : "Other";
+
+    /// <summary>« 2 éditions », « 1 intention d'achat ».</summary>
+    public static string Of(this IStringLocalizer<EntityNames> names, ImpactCount count) =>
+        names[$"{count.Kind}.{Form(count.Count)}", count.Count];
+}

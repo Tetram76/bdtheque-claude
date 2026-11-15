@@ -56,8 +56,8 @@
             <div class="universe-rows" role="table" aria-label="@L["Title"]">
                 <div class="universe-row universe-row-head" role="row">
                     <span class="universe-main" role="columnheader">@L["Column.Universe"]</span>
-                    <span class="universe-albums" role="columnheader">@L["Column.Albums"]</span>
                     <span class="universe-series" role="columnheader">@L["Column.Series"]</span>
+                    <span class="universe-albums" role="columnheader">@L["Column.Albums"]</span>
                     <span class="universe-subuniverses" role="columnheader">@L["Column.SubUniverses"]</span>
                     <span class="universe-modified" role="columnheader">@L["Column.Modified"]</span>
                     <span class="universe-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
@@ -84,11 +84,11 @@
                         </span>
                         <span class="universe-meta">
                             @* On two lines, a number loses its column header: it carries the name of its column. *@
-                            <span class="universe-albums" role="cell" data-empty="@(row.AlbumCount == 0)">
-                                <span class="universe-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)
-                            </span>
                             <span class="universe-series" role="cell" data-empty="@(row.SeriesCount == 0)">
                                 <span class="universe-caption">@L["Column.Series"]</span> @Format.Number(row.SeriesCount)
+                            </span>
+                            <span class="universe-albums" role="cell" data-empty="@(row.AlbumCount == 0)">
+                                <span class="universe-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)
                             </span>
                             <span class="universe-subuniverses" role="cell" data-empty="@(row.SubUniverseCount == 0)">
                                 <span class="universe-caption">@L["Column.SubUniverses"]</span> @Format.Number(row.SubUniverseCount)
@@ -173,7 +173,7 @@
             {
                 <DeletionDialog Id="universe-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@_dialogUniverse.Name"
                                 CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
-                                RefusalHint="@(kind => L[$"Refusal.Hint.{kind}"].Value)" Impact="_impact" Problem="_deletionProblem"
+                                RefusalHint="@(key => L[$"Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_deletionProblem"
                                 Version="_dialogUniverse.Version" OnConfirm="DeleteAsync" />
             }
         }

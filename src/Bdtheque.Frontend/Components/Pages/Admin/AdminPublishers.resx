@@ -118,16 +118,7 @@
     <value>La suppression est définitive et emporte avec l'éditeur :</value>
   </data>
   <data name="Refusal.Lead" xml:space="preserve">
-    <value>L'éditeur est encore lié à d'autres fiches : la suppression est refusée tant que ces liens existent.</value>
-  </data>
-  <data name="Refusal.Hint.Edition" xml:space="preserve">
-    <value>Rattachez d'abord ses éditions à un autre éditeur, ou supprimez-les, puis recommencez.</value>
-  </data>
-  <data name="Refusal.Hint.Series" xml:space="preserve">
-    <value>Retirez d'abord l'éditeur des valeurs des nouvelles éditions de ces séries, puis recommencez.</value>
-  </data>
-  <data name="Refusal.Hint.SavedSearch" xml:space="preserve">
-    <value>Retirez d'abord l'éditeur, ou ses collections, des critères de ces recherches enregistrées, puis recommencez.</value>
+    <value>L'éditeur est encore utilisé par :</value>
   </data>
   <data name="Merge.Title" xml:space="preserve">
     <value>Fusionner deux éditeurs</value>
@@ -152,5 +143,29 @@
   </data>
   <data name="Merge.Note" xml:space="preserve">
     <value>L'étape suivante présentera les deux éditeurs côte à côte, avec ce que la fusion garde de chacun.</value>
+  </data>
+  <data name="Refusal.Hint.Edition.One" xml:space="preserve">
+    <value>rattachez-la à un autre éditeur, ou supprimez-la</value>
+  </data>
+  <data name="Refusal.Hint.Edition.Other" xml:space="preserve">
+    <value>rattachez-les à un autre éditeur, ou supprimez-les</value>
+  </data>
+  <data name="Refusal.Hint.PurchaseIntent.One" xml:space="preserve">
+    <value>rattachez son édition à un autre éditeur, ou retirez-la</value>
+  </data>
+  <data name="Refusal.Hint.PurchaseIntent.Other" xml:space="preserve">
+    <value>rattachez leurs éditions à un autre éditeur, ou retirez-les</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez de ses critères l'éditeur et ses collections</value>
+  </data>
+  <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez de leurs critères l'éditeur et ses collections</value>
+  </data>
+  <data name="Refusal.Hint.Series.One" xml:space="preserve">
+    <value>retirez l'éditeur des valeurs de ses nouvelles éditions</value>
+  </data>
+  <data name="Refusal.Hint.Series.Other" xml:space="preserve">
+    <value>retirez l'éditeur des valeurs de leurs nouvelles éditions</value>
   </data>
 </root>

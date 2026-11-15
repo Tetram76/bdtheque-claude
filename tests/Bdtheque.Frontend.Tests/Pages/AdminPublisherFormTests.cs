@@ -31,10 +31,10 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     private static readonly PublisherForm Casterman = new(
         PublisherId, "Casterman", "https://www.casterman.com",
         [
-            new PublisherCollectionUse(Ecritures, "Écritures", 58, 3),
-            new PublisherCollectionUse(FacSimile, "Fac-similé", 34, 0),
-            new PublisherCollectionUse(Romans, "Les Romans (À suivre)", 0, 0),
-            new PublisherCollectionUse(Univers, "Univers d'auteurs", 0, 1),
+            new PublisherCollectionUse(Ecritures, "Écritures", 58, 1, 3),
+            new PublisherCollectionUse(FacSimile, "Fac-similé", 34, 0, 0),
+            new PublisherCollectionUse(Romans, "Les Romans (À suivre)", 0, 0, 0),
+            new PublisherCollectionUse(Univers, "Univers d'auteurs", 0, 0, 1),
         ],
         new DateTimeOffset(2026, 1, 12, 10, 0, 0, TimeSpan.Zero),
         new DateTimeOffset(2026, 11, 9, 17, 40, 0, TimeSpan.Zero),
@@ -128,7 +128,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
             ["Écritures", "Fac-similé", "Les Romans (À suivre)", "Univers d'auteurs"],
             rows.Select(row => row.QuerySelector("input")!.GetAttribute("value")));
         Assert.Equal(
-            ["58 éditions · 3 séries", "34 éditions", "Aucune édition ni série", "1 série"],
+            ["3 séries · 58 éditions · 1 intention", "34 éditions", "Aucune série, édition ni intention", "1 série"],
             rows.Select(row => row.QuerySelector(".publisher-collection-count")!.TextContent.Trim()));
         // A lock where the removal of a collection in use would be.
         Assert.Equal([false, false, true, false], rows.Select(row => row.QuerySelector("button[aria-label^='Retirer']") is not null));
@@ -180,7 +180,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
         var added = page.FindAll(".publisher-collection")[4];
         Assert.Equal("Nouvelle", added.QuerySelector(".tag")!.TextContent.Trim());
-        Assert.Equal("Aucune édition ni série", added.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
+        Assert.Equal("Aucune série, édition ni intention", added.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
 
         await page.ClickAsync(() => page.FindAll(".publisher-collection")[4].QuerySelector("button[aria-label^='Retirer']")!);
 

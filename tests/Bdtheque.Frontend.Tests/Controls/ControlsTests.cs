@@ -251,7 +251,7 @@ public sealed class ControlsTests : BunitContext
         var impact = new DeletionImpact(
             BlockedBy: [],
             AssociationsRemoved: [new ImpactCount(EntityKind.Genre, 2)],
-            DeletedWith: [new ImpactCount(EntityKind.Edition, 2), new ImpactCount(EntityKind.EditionVisual, 5), new ImpactCount(EntityKind.PurchaseIntent, 1)],
+            DeletedWith: [new ImpactCount(EntityKind.Edition, 2), new ImpactCount(EntityKind.PurchaseIntent, 1), new ImpactCount(EntityKind.EditionVisual, 5)],
             LeavingCollection: [new ImpactCount(EntityKind.Album, 1)],
             Fingerprint: "abc");
 
@@ -259,28 +259,11 @@ public sealed class ControlsTests : BunitContext
 
         Assert.Equal(
             [
-                "Suppression aussi de 2 éditions, 5 visuels et 1 intention d'achat",
+                "Suppression aussi de 2 éditions, 1 intention d'achat et 5 visuels",
                 "Retrait de l'association avec 2 genres",
                 "Sortie de la collection de 1 album",
             ],
             summary.FindAll(".deletion-impact li").Select(line => Normalize(line.TextContent)));
-    }
-
-    [Fact]
-    public void DeletionImpact_OfARefusal_AnnouncesWhatBlocksIt_Only()
-    {
-        var impact = new DeletionImpact(
-            BlockedBy: [new ImpactCount(EntityKind.SavedSearch, 1)],
-            AssociationsRemoved: [],
-            DeletedWith: [new ImpactCount(EntityKind.Edition, 2)],
-            LeavingCollection: [],
-            Fingerprint: "abc");
-
-        var summary = Render<DeletionImpactSummary>(parameters => parameters.Add(p => p.Impact, impact));
-
-        var line = Assert.Single(summary.FindAll(".deletion-impact li"));
-        Assert.Equal("blocked", line.GetAttribute("data-nature"));
-        Assert.Equal("Suppression bloquée par 1 recherche enregistrée", Normalize(line.TextContent));
     }
 
     [Fact]

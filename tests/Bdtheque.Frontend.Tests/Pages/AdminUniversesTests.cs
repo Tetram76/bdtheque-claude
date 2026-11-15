@@ -71,7 +71,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal(("Univers", "37"), (page.Find("h1").FirstChild!.TextContent.Trim(), Text(page.Find(".list-heading-count"))));
         Assert.Equal(("Nouvel univers", $"{AppPaths.AdminUniverses}?q=c&new=open"),
             (Text(page.Find(".list-heading a.button")), page.Find(".list-heading a.button").GetAttribute("href")));
-        Assert.Equal(("4 univers sur 37", "Chaque univers suivi de ses sous-univers, dont il compte les albums et séries"),
+        Assert.Equal(("4 univers sur 37", "Chaque univers suivi de ses sous-univers, dont il compte les séries et albums"),
             (Text(page.Find(".list-summary").Children[0]), Text(page.Find(".list-summary").Children[1])));
     }
 
@@ -93,6 +93,21 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
                 ("Les Cités obscures", "0", "Albums 14", "Séries 1", "Sous-univers 0"),
             ],
             rows);
+    }
+
+    [Fact]
+    public void Columns_TheSeriesBeforeTheAlbums_ThenTheSubUniverses()
+    {
+        // fonctionnel/presentation/ordre-des-types-de-fiche.md: in the head as in each row.
+        string[] counts = ["universe-series", "universe-albums", "universe-subuniverses"];
+        var page = Open("");
+
+        Assert.Equal(
+            ["Séries", "Albums", "Sous-univers"],
+            page.FindAll(".universe-row-head [role=columnheader]").Select(Text).Where(name => name is "Séries" or "Albums" or "Sous-univers"));
+        Assert.Equal(
+            counts,
+            page.Find(".universe-row:not(.universe-row-head)").QuerySelectorAll("[role=cell]").Select(cell => cell.ClassName).Where(counts.Contains));
     }
 
     [Fact]
@@ -138,7 +153,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal("Les voyages du marin.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='description']")!).Value);
         Assert.Equal("Univers Hugo Pratt", panel.QuerySelector(".record-picker input[role='combobox']")!.GetAttribute("value"));
         Assert.Equal(PrattItem.Id.ToString(), panel.QuerySelector("input[type='hidden'][name='parentId']")!.GetAttribute("value"));
-        Assert.Equal("Ses albums et séries sont aussi ceux de Univers Hugo Pratt.", Text(panel.QuerySelector(".field-help")!));
+        Assert.Equal("Ses séries et albums sont aussi ceux de Univers Hugo Pratt.", Text(panel.QuerySelector(".field-help")!));
         // The dates at the top of the panel, above its first field.
         Assert.Equal("Univers créé le 12/01/2026 10:30, modifié le 12/01/2026 10:30.", Text(panel.QuerySelector(".side-panel-body > :first-child")!));
         Assert.Equal(
@@ -287,10 +302,8 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
 
         Assert.Equal(("Suppression impossible", "Univers Hugo Pratt"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
-        Assert.Contains("3 univers", Text(dialog.QuerySelector(".deletion-impact")!));
-        Assert.Equal(
-            ["Rangez d'abord ses sous-univers sous un autre univers, ou supprimez-les, puis recommencez."],
-            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Equal("L'univers est encore utilisé par :", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["3 univers : rangez-les sous un autre univers, ou supprimez-les."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
     }
 
     [Fact]

@@ -67,7 +67,7 @@
     <value>Ouvrir le site web</value>
   </data>
   <data name="Collections.Help" xml:space="preserve">
-    <value>Elles s&apos;enregistrent avec l&apos;éditeur. Une collection que désigne une édition ou une série ne peut pas être retirée.</value>
+    <value>Elles s&apos;enregistrent avec l&apos;éditeur. Une collection que désigne une série, une édition ou une intention d&apos;achat ne peut pas être retirée.</value>
   </data>
   <data name="Collections.None" xml:space="preserve">
     <value>Aucune collection.</value>
@@ -82,7 +82,7 @@
     <value>Nouvelle</value>
   </data>
   <data name="Collection.Unused" xml:space="preserve">
-    <value>Aucune édition ni série</value>
+    <value>Aucune série, édition ni intention</value>
   </data>
   <data name="Collection.Removed" xml:space="preserve">
     <value>Retirée à l&apos;enregistrement</value>
@@ -92,6 +92,12 @@
   </data>
   <data name="Collection.Editions" xml:space="preserve">
     <value>{0:N0} éditions</value>
+  </data>
+  <data name="Collection.PurchaseIntent" xml:space="preserve">
+    <value>{0:N0} intention</value>
+  </data>
+  <data name="Collection.PurchaseIntents" xml:space="preserve">
+    <value>{0:N0} intentions</value>
   </data>
   <data name="Collection.Series" xml:space="preserve">
     <value>{0:N0} série</value>

@@ -84,6 +84,18 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Columns_TheSeriesBeforeTheAlbums()
+    {
+        // fonctionnel/presentation/ordre-des-types-de-fiche.md: in the head as in each row.
+        var page = Open("");
+
+        Assert.Equal(["Séries", "Albums"], page.FindAll(".genre-row-head [role=columnheader]").Select(Text).Where(name => name is "Séries" or "Albums"));
+        Assert.Equal(
+            ["genre-series", "genre-albums"],
+            page.Find(".genre-row:not(.genre-row-head)").QuerySelectorAll("[role=cell]").Select(cell => cell.ClassName).Where(name => name is "genre-series" or "genre-albums"));
+    }
+
+    [Fact]
     public void Rows_ChangeTheGenreInTheList_AndOpenTheirDialogsThere()
     {
         var row = Open("q=a").FindAll(".genre-row:not(.genre-row-head)")[0];
@@ -292,12 +304,12 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     {
         var id = Adventure.Id;
         _api.Answers[$"/admin/genres/{id}/deletion-impact"] = new DeletionImpact(
-            [], [new ImpactCount(EntityKind.Album, 612), new ImpactCount(EntityKind.Series, 118)], [], [], "f1");
+            [], [new ImpactCount(EntityKind.Series, 118), new ImpactCount(EntityKind.Album, 612)], [], [], "f1");
 
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal(("Supprimer ce genre ?", "Aventure"), (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
-        Assert.Contains("612 albums", Text(dialog.QuerySelector(".deletion-impact")!));
+        Assert.Contains("118 séries et 612 albums", Text(dialog.QuerySelector(".deletion-impact")!));
     }
 
     [Fact]
@@ -307,7 +319,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
 
         Assert.Equal("Fusionner deux genres", Text(dialog.QuerySelector(".dialog-title")!));
         Assert.Equal(
-            [("Biographie", "37 albums · aucune série"), ("Western", "aucun album · aucune série")],
+            [("Biographie", "aucune série · 37 albums"), ("Western", "aucune série · aucun album")],
             dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
         Assert.Equal(AppPaths.AdminMergeGenres, dialog.QuerySelector("#genre-merge-continue")!.GetAttribute("action"));
     }
@@ -344,9 +356,8 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
-        Assert.Equal(
-            ["Retirez d'abord le genre des critères de ces recherches enregistrées, puis recommencez."],
-            dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Equal("Le genre est encore désigné par :", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["1 recherche enregistrée : retirez le genre de ses critères."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
     }
 
     [Fact]

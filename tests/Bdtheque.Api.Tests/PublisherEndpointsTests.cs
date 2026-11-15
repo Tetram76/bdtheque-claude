@@ -8,6 +8,7 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using AcquisitionMode = Bdtheque.Domain.Enums.AcquisitionMode;
 using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Tests;
@@ -177,6 +178,18 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
+    public async Task DeletionImpact_OfAPublisherOfAnEditionTargetedByAnIntent_CountsTheIntent_NeverTheEdition()
+    {
+        // fonctionnel/regles-metier/suppression-des-entites.md: « utilisé par 2 éditions et 1 intention d'achat ».
+        var publisher = await CreateAsync("Les Éditions de la Cerise", "Cerise noire");
+        await SeedReferencesAsync(publisher.Id, publisher.Collections.Single().Id, editions: 2, series: 0, intents: 1);
+
+        var impact = await _client.GetFromJsonAsync<DeletionImpact>($"/admin/publishers/{publisher.Id}/deletion-impact");
+
+        Assert.Equal([new ImpactCount(EntityKind.Edition, 2), new ImpactCount(EntityKind.PurchaseIntent, 1)], impact!.BlockedBy);
+    }
+
+    [Fact]
     public async Task Delete_AsConfirmed_RemovesThePublisherWithItsCollections()
     {
         var publisher = await CreateAsync("Vents d'Ouest");
@@ -218,7 +231,9 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var created = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
-        Assert.Equal([("Âge d'or", 0, 0), ("Écritures", 0, 0)], created.Collections.Select(c => (c.Name, c.EditionCount, c.SeriesCount)));
+        Assert.Equal(
+            [("Âge d'or", 0, 0, 0), ("Écritures", 0, 0, 0)],
+            created.Collections.Select(c => (c.Name, c.EditionCount, c.PurchaseIntentCount, c.SeriesCount)));
         Assert.NotEqual(default, created.CreatedAt);
         Assert.Equal(created.CreatedAt, created.ModifiedAt);
         SameForm(created, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{created.Id}"));
@@ -227,14 +242,17 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     [Fact]
     public async Task Get_CountsWhatReferencesEachCollection()
     {
-        // visuel/saisie-editeur/contenu.md: « 58 éditions · 3 séries », an edition targeted by an intent included.
+        // visuel/saisie-editeur/contenu.md: « 58 éditions · 1 intention · 3 séries », counted as the impact of its deletion,
+        // an edition targeted by an intent counted as its intent.
         var publisher = await CreateAsync("Glénat", "Treize étrange", "Vécu");
         var thirteen = publisher.Collections.Single(c => c.Name == "Treize étrange");
-        await SeedReferencesAsync(publisher.Id, thirteen.Id, editions: 2, series: 1);
+        await SeedReferencesAsync(publisher.Id, thirteen.Id, editions: 2, series: 1, intents: 1);
 
         var form = await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}");
 
-        Assert.Equal([("Treize étrange", 2, 1), ("Vécu", 0, 0)], form!.Collections.Select(c => (c.Name, c.EditionCount, c.SeriesCount)));
+        Assert.Equal(
+            [("Treize étrange", 2, 1, 1), ("Vécu", 0, 0, 0)],
+            form!.Collections.Select(c => (c.Name, c.EditionCount, c.PurchaseIntentCount, c.SeriesCount)));
     }
 
     [Fact]
@@ -488,18 +506,23 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         return (await response.Content.ReadFromJsonAsync<PublisherCollectionForm>())!;
     }
 
-    // Editions of albums of their own, and series whose new editions are proposed the collection.
-    private async Task SeedReferencesAsync(Guid publisherId, Guid collectionId, int editions, int series)
+    // Owned editions and editions targeted by an intent, of albums of their own, and series whose new editions are proposed
+    // the collection.
+    private async Task SeedReferencesAsync(Guid publisherId, Guid collectionId, int editions, int series, int intents = 0)
     {
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
         var publisher = await context.Publishers.Include(p => p.Collections).SingleAsync(p => p.Id == publisherId);
         var collection = publisher.Collections.Single(c => c.Id == collectionId);
-        for (var i = 0; i < editions; i++)
+        for (var i = 0; i < editions + intents; i++)
         {
             var album = new Album($"Album {Guid.NewGuid():N}", null);
             var edition = new Edition(album, publisher);
             edition.SetPublisher(publisher, collection);
+            if (i < editions)
+                album.RecordAcquisition(edition, AcquisitionMode.Purchase);
+            else
+                album.AddPurchaseIntent(edition);
             context.AddRange(album, edition);
         }
 

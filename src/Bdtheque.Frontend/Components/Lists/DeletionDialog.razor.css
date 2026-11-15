@@ -1,6 +1,9 @@
-/* The hints of a refused deletion, in muted text. */
-.dialog-note {
+/* The lines of a refused deletion, one per entity type blocking it. Built on the contracts of the theme only
+   (choix-implementation/socle/themes.md). */
+.deletion-refusal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
     margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-small);
+    padding-left: var(--space-l);
 }

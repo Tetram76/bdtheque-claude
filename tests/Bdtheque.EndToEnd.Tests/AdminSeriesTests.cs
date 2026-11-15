@@ -98,8 +98,7 @@ public sealed class AdminSeriesTests(ApplicationHost application) : BrowserTest<
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
 
         var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Suppression impossible" });
-        await Assertions.Expect(dialog).ToContainTextAsync("1 album");
-        await Assertions.Expect(dialog).ToContainTextAsync("Rattachez d'abord ses albums à une autre série");
+        await Assertions.Expect(dialog).ToContainTextAsync("1 album : rattachez-le à une autre série, ou supprimez-le.");
         await Assertions.Expect(dialog.GetByRole(AriaRole.Link, new() { Name = "Fermer" })).ToBeVisibleAsync();
         await Assertions.Expect(dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" })).ToHaveCountAsync(0);
     }

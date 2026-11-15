@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Liste par liste'
 description: 'Visuel, entrée, colonnes et filtres de chaque liste de l''administration.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:15:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:00:00Z }
 ---
 
 # Liste par liste
@@ -14,5 +14,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:15:00Z }
 | Intentions d'achat | vignette de couverture de l'album | libellé de l'album visé | ce qu'elle vise, distingué au premier coup d'œil par une étiquette : **Album**, pleine, de la couleur d'accent, suivie de « toute édition » en texte atténué, ou **Édition**, en contour, suivie du libellé de l'édition en gras, chacune avec sa propre icône ; appartenance de l'album à la collection (colonne « Collection »), « Dans la collection » ou « Intention d'achat », étiquettes de la liste des albums ([États d'un album](../../fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album)) ; date | titre de l'album ou de sa série ; dans l'ordre des albums |
 | Auteurs | monogramme | identifiant principal, et le prénom et le nom dessous sous un pseudonyme | nationalité, nombre d'albums crédités (un tiret pour aucun, comme une donnée absente), rôles tenus, modification | nom, prénom ou pseudonyme ; navigation par initiale ; par clé de tri |
 | Éditeurs | — | nom, et ses collections dessous | site web (lien), nombre de collections, nombre d'éditions, modification | nom ; par nom |
-| Genres | — | libellé | nombre d'albums, nombre de séries, modification | libellé ; par libellé |
-| Univers | — | nom, en retrait sous son parent, chaque univers suivi de ses sous-univers | nombre d'albums et de séries, sous-univers compris, nombre de sous-univers, modification | nom ; selon la hiérarchie |
+| Genres | — | libellé | nombre de séries, nombre d'albums, modification | libellé ; par libellé |
+| Univers | — | nom, en retrait sous son parent, chaque univers suivi de ses sous-univers | nombre de séries et d'albums, sous-univers compris, nombre de sous-univers, modification | nom ; selon la hiérarchie |

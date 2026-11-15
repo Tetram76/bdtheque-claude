@@ -5,3 +5,4 @@
 * [Libellé d'un album](libelle-d-un-album.md) - Libellé d'un album : série reprise selon que le contexte la rend évidente, tome présenté une seule fois dans l'identification d'un album, tome selon le type, deux formats paramétrables, repli.
 * [Libellé d'une édition](libelle-d-une-edition.md) - Libellé d'une édition : éditeur, collection, année, ISBN.
 * [Libellés contextuels sur l'édition](libelles-contextuels-sur-l-edition.md) - Libellés de la date et du montant selon le mode d'acquisition, gratuité.
+* [Ordre des types de fiche](ordre-des-types-de-fiche.md) - Ordre unique des types de fiche partout où l'application cite les fiches liées à une fiche (suppression et son refus, fiche, liste, fusion) : du contenant au contenu.

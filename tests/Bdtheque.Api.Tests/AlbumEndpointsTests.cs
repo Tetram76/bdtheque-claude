@@ -572,6 +572,8 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     [Fact]
     public async Task DeletionImpact_AnnouncesEverythingDeletedWithTheAlbum()
     {
+        // An owned edition, and an edition targeted by an intent, counted as its intent, never among the editions
+        // (fonctionnel/regles-metier/suppression-des-entites.md).
         var author = await CreateAuthorAsync();
         var created = await CreateAsync(Content(UniqueTitle()) with
         {
@@ -586,10 +588,10 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         Assert.Empty(impact.AssociationsRemoved);
         Assert.Equal(
             [
-                new ImpactCount(EntityKind.Edition, 2),
-                new ImpactCount(EntityKind.EditionVisual, 3),
-                new ImpactCount(EntityKind.Contribution, 2),
+                new ImpactCount(EntityKind.Edition, 1),
                 new ImpactCount(EntityKind.PurchaseIntent, 1),
+                new ImpactCount(EntityKind.Contribution, 2),
+                new ImpactCount(EntityKind.EditionVisual, 3),
             ],
             impact.DeletedWith);
         // Deleted with all its editions, the album does not merely leave the collection.

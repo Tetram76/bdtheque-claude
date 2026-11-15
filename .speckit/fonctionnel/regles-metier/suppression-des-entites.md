@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Suppression des entités'
-description: 'Confirmation, impact par type d''entité, natures de lien (référence, association, composition) entité par entité.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+description: 'Confirmation, impact par type d''entité (édition visée comptée comme intention d''achat), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:00:00Z }
 ---
 
 # Suppression des entités
@@ -15,7 +15,10 @@ Toute suppression est soumise à la **confirmation** de l'utilisateur. Son effet
 
 La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 
-**Impact de la suppression** : le message de confirmation — comme l'erreur d'une suppression refusée — indique l'impact de la suppression, c'est-à-dire le **nombre de fiches impactées, distingué par type d'entité** (ex. « utilisé par 12 albums et 3 séries », « supprime 2 éditions et 5 visuels ») : fiches qui perdent leur association avec l'entité supprimée, fiches supprimées avec elle, ou fiches qui bloquent la suppression.
+**Impact de la suppression** : le message de confirmation — comme l'erreur d'une suppression refusée — indique l'impact de la suppression, c'est-à-dire le **nombre de fiches impactées, distingué par type d'entité** (ex. « utilisé par 3 séries et 12 albums », « supprime 2 éditions et 5 visuels »), dans l'ordre des types de fiche ([Ordre des types de fiche](../presentation/ordre-des-types-de-fiche.md)) : fiches qui perdent leur association avec l'entité supprimée, fiches supprimées avec elle, ou fiches qui bloquent la suppression.
+
+- **Une édition visée est comptée comme une intention d'achat**, jamais parmi les éditions, comme partout ailleurs ([Intention d'achat](intention-d-achat.md)) : supprimer un album qui a 2 éditions possédées et 1 édition visée « supprime 2 éditions et 1 intention d'achat » ; un éditeur dont relèvent ces trois éditions est « utilisé par 2 éditions et 1 intention d'achat ». L'intention que l'on retire n'est pas comptée dans ce qu'elle emporte : retirer une intention sur une édition « supprime 1 visuel », celui de l'édition visée (décision de l'utilisateur, #418).
+- **Une suppression refusée** présente une ligne par type de fiche qui la bloque, avec son nombre et ce qu'il faut faire (« 2 éditions : rattachez-les à un autre éditeur, ou supprimez-les ») ; rien d'autre ne la redit (décision de l'utilisateur, #418 : « trop long, trop de choses à lire »).
 
 | Entité supprimée | Lien | Type | Effet |
 | --- | --- | --- | --- |

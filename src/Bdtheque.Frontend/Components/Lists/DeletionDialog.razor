@@ -1,21 +1,24 @@
 @using Bdtheque.Contracts.Deletion
-@using Bdtheque.Contracts.Enums
 @inject IStringLocalizer<DeletionDialog> L
+@inject IStringLocalizer<EntityNames> Entities
 
 @* The deletion of a record of a list of the administration (visuel/liste-albums/contenu.md): the dialog announces the impact of
    the deletion (fonctionnel/regles-metier/suppression-des-entites.md) and confirms it by a form protected against forgery,
    which sends the version of the record and the fingerprint of the impact shown
-   (choix-implementation/ecritures/suppression-des-entites-mise-en-oeuvre.md); a refused deletion says what blocks it and what
-   to do, without any other button than « Fermer ». The page receives the form (VersionName, FingerprintName) and deletes. *@
+   (choix-implementation/ecritures/suppression-des-entites-mise-en-oeuvre.md); a refused deletion says, one line per entity type
+   blocking it, how many records and what to do, without any other button than « Fermer ». The page receives the form
+   (VersionName, FingerprintName) and deletes. *@
 @if (Impact is { BlockedBy.Count: > 0 })
 {
     <Dialog Id="@Id" Title="@L["Refusal.Title"]" Subject="@Subject" Tone="DialogTone.Refusal" CloseHref="@CloseHref" CloseLabel="@L["Close"]">
         <p>@RefusalLead</p>
-        <DeletionImpactSummary Impact="Impact" />
-        @foreach (var kind in Impact.BlockedBy.Select(count => count.Kind).Distinct())
-        {
-            <p class="dialog-note">@RefusalHint(kind)</p>
-        }
+        <ul class="deletion-refusal">
+            @for (var i = 0; i < Impact.BlockedBy.Count; i++)
+            {
+                var count = Impact.BlockedBy[i];
+                <li data-kind="@count.Kind">@L[i == Impact.BlockedBy.Count - 1 ? "Refusal.LastLine" : "Refusal.Line", Entities.Of(count), RefusalHint($"{count.Kind}.{EntityCounts.Form(count.Count)}")]</li>
+            }
+        </ul>
     </Dialog>
 }
 else if (Impact is not null)
@@ -75,13 +78,17 @@ else if (Problem is not null)
     [Parameter, EditorRequired]
     public string Lead { get; set; } = null!;
 
-    /// <summary>Why the deletion is refused, before what blocks it.</summary>
+    /// <summary>What the record is still used by, before the lines of what blocks its deletion (« L'éditeur est encore utilisé par : »).</summary>
     [Parameter, EditorRequired]
     public string RefusalLead { get; set; } = null!;
 
-    /// <summary>What to do about the records of a type that block the deletion.</summary>
+    /// <summary>
+    /// What to do about the records of a type that block the deletion, agreeing with their number (« rattachez-les à un
+    /// autre éditeur, ou supprimez-les »), given the key of the type and of the number (e.g. <c>Edition.Other</c>,
+    /// <see cref="EntityCounts.Form"/>).
+    /// </summary>
     [Parameter, EditorRequired]
-    public Func<EntityKind, string> RefusalHint { get; set; } = null!;
+    public Func<string, string> RefusalHint { get; set; } = null!;
 
     /// <summary>The impact of the deletion; <c>null</c> when it could not be read.</summary>
     [Parameter]
