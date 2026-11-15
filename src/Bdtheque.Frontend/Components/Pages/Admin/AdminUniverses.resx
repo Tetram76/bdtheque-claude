@@ -31,7 +31,7 @@
     <value>Nom de l'univers…</value>
   </data>
   <data name="Order" xml:space="preserve">
-    <value>Chaque univers suivi de ses sous-univers, dont il compte les albums et séries</value>
+    <value>Chaque univers suivi de ses sous-univers, dont il compte les séries et albums</value>
   </data>
   <data name="Count.None" xml:space="preserve">
     <value>Aucun univers</value>

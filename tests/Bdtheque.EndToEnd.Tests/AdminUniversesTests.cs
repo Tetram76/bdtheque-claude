@@ -44,7 +44,7 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await ControlsPage.WaitUntilInteractiveAsync(page);
         await panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Hugo Pratt {_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Univers Hugo Pratt {_marker}" }).ClickAsync();
-        await Assertions.Expect(panel).ToContainTextAsync($"Ses albums et séries sont aussi ceux de Univers Hugo Pratt {_marker}.");
+        await Assertions.Expect(panel).ToContainTextAsync($"Ses séries et albums sont aussi ceux de Univers Hugo Pratt {_marker}.");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Créer l'univers" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminUniverses, $"?q={_marker}"));
