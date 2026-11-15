@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''un éditeur : nom, site web, collections.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T11:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T16:00:00Z }
 ---
 
 # Contenu
@@ -15,7 +15,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T11:00:00Z }
   - **L'éditeur** : le **nom**, obligatoire, et le **site web**, avec, une fois renseigné, un bouton qui l'ouvre ; l'aide rappelle que dans la consultation le nom de l'éditeur mène à son site, et n'est pas un lien sans lui ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).
   - **Les collections** : les collections éditeur n'ont ni liste ni page à elles ; elles se saisissent ici et s'enregistrent avec l'éditeur, dont elles font partie ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)), ce que le bloc rappelle. Une ligne par collection, par ordre alphabétique :
     - son **nom**, dans un champ, qui suffit à la renommer ;
-    - ce qui la désigne : le nombre d'éditions et de séries (« 58 éditions · 3 séries », « Aucune édition ni série ») ;
+    - ce qui la désigne, compté comme l'impact de sa suppression ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) : le nombre d'éditions, d'intentions d'achat et de séries (« 58 éditions · 1 intention · 3 séries », « Aucune édition, intention ni série ») ;
     - **Retirer**, une corbeille de la couleur de suppression, lorsque rien ne la désigne ; sinon, à sa place, un cadenas atténué dit qu'elle est utilisée et ne peut pas être retirée ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) ;
     - une collection **retirée** reste dans la liste jusqu'à l'enregistrement, barrée, « Retirée à l'enregistrement », avec **Rétablir** ; une collection **ajoutée** porte l'étiquette « Nouvelle » ;
     - **Ajouter une collection**, en tirets, sous la liste ; « Aucune collection » à défaut.
