@@ -117,12 +117,6 @@
   <data name="Create" xml:space="preserve">
     <value>Créer l'univers</value>
   </data>
-  <data name="FieldError.Universe.NameRequired" xml:space="preserve">
-    <value>Le nom de l'univers est obligatoire.</value>
-  </data>
-  <data name="FieldError.Universe.HierarchyCycle" xml:space="preserve">
-    <value>Un univers ne peut pas être placé sous lui-même, ni sous l'un de ses propres sous-univers.</value>
-  </data>
   <data name="Empty.Text" xml:space="preserve">
     <value>Aucun univers ne correspond à « {0} ».</value>
   </data>
@@ -176,5 +170,14 @@
   </data>
   <data name="Merge.Note" xml:space="preserve">
     <value>L'étape suivante présentera les deux univers côte à côte, avec ce que la fusion garde de chacun.</value>
+  </data>
+  <data name="Problem.Functional.Conflict" xml:space="preserve">
+    <value>L&apos;univers a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans le panneau jusque-là.</value>
+  </data>
+  <data name="Problem.Functional.NotFound" xml:space="preserve">
+    <value>L&apos;univers, ou son univers parent, a été supprimé entre-temps : rien n&apos;a été enregistré.</value>
+  </data>
+  <data name="Problem.Technical.Text" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas pu enregistrer l&apos;univers. Vos changements sont toujours là, dans le panneau : réessayez dans quelques instants.</value>
   </data>
 </root>

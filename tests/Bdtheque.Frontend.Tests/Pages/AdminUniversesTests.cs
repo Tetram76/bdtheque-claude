@@ -174,31 +174,39 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Contains("admin.universe.saved", _audience.Functions);
     }
 
+    // As on an entry form (visuel/listes/saisie-selon-l-entite.md, #411): the error at the top of the panel, the field it
+    // designates bordered with its text under it, and focused.
     [Fact]
     public async Task Panel_AParentThatWouldMakeACycle_IsRefusedInPlace_WithItsReason()
     {
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.HierarchyCycle");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.HierarchyCycle", "/parentId");
         var page = Open($"edit={Corto.Id}");
 
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
-        Assert.Equal(
-            "Un univers ne peut pas être placé sous lui-même, ni sous l'un de ses propres sous-univers.",
-            Text(panel.QuerySelector(".record-picker")!.ParentElement!.QuerySelector(".field-error")!));
-        Assert.Equal("true", panel.QuerySelector(".record-picker input[role='combobox']")!.GetAttribute("aria-invalid"));
+        var parent = panel.QuerySelector(".record-picker input[role='combobox']")!;
+        Assert.Equal("Ni lui-même, ni l'un de ses sous-univers.", Text(panel.QuerySelector(".record-picker")!.ParentElement!.QuerySelector(".field-error")!));
+        Assert.Equal("true", parent.GetAttribute("aria-invalid"));
+        // The parent, interactive, takes the focus once its circuit has rendered it; no other field of the panel takes it.
+        Assert.True(page.FindComponent<RecordPicker>().Instance.AutoFocus);
+        Assert.Empty(panel.QuerySelectorAll("[autofocus]"));
+        Assert.Equal("Un univers ne peut pas être rangé sous lui-même, ni sous l'un de ses sous-univers.",
+            Text(panel.QuerySelector("[data-error-category='business'] [data-error-text]")!));
     }
 
     [Fact]
     public async Task Panel_ANameRequired_IsRefusedAtTheName()
     {
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameRequired");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameRequired", "/name");
         var page = Open("new=open");
 
         await page.SubmitAsync("form.side-panel-form");
 
-        Assert.Equal("true", page.Find("input[name='name']").GetAttribute("aria-invalid"));
-        Assert.Equal("Le nom de l'univers est obligatoire.", Text(page.Find("input[name='name']").ParentElement!.QuerySelector(".field-error")!));
+        var name = page.Find("input[name='name']");
+        Assert.Equal(("true", true), (name.GetAttribute("aria-invalid"), name.HasAttribute("autofocus")));
+        Assert.Equal("Obligatoire.", Text(name.ParentElement!.QuerySelector(".field-error")!));
     }
 
     [Fact]
@@ -215,7 +223,23 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal(
             "« star wars » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.",
             Text(panel.QuerySelector("input[name='name']")!.ParentElement!.QuerySelector(".field-error")!));
-        Assert.Empty(panel.QuerySelectorAll("[data-error-category]"));
+        Assert.Equal("À corriger", Text(panel.QuerySelector("[data-error-category='business'] [data-error-label]")!));
+    }
+
+    // Deleted meanwhile, or its parent: nothing saved, the universe reloaded at its address.
+    [Fact]
+    public async Task Panel_AUniverseDeletedMeanwhile_OffersToReloadIt()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.NotFound);
+        var page = Open($"edit={Corto.Id}");
+
+        await page.SubmitAsync("form.side-panel-form");
+
+        var error = page.Find("dialog.side-panel [data-error-category='functional']");
+        Assert.Equal("L'univers, ou son univers parent, a été supprimé entre-temps : rien n'a été enregistré.",
+            Text(error.QuerySelector("[data-error-text]")!));
+        Assert.Equal([("Recharger la fiche", $"{AppPaths.AdminUniverses}?edit={Corto.Id}")],
+            error.QuerySelectorAll(".error-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
     }
 
     [Fact]

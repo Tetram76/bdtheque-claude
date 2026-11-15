@@ -19,7 +19,7 @@
     <value>Données modifiées entre-temps</value>
   </data>
   <data name="Category.Technical" xml:space="preserve">
-    <value>Erreur technique</value>
+    <value>Problème technique</value>
   </data>
   <data name="Business.Generic" xml:space="preserve">
     <value>La demande enfreint une règle de l&apos;application : corrigez votre saisie.</value>

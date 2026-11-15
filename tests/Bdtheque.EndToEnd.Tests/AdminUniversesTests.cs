@@ -66,7 +66,10 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
         panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
-        await Assertions.Expect(panel).ToContainTextAsync("Un univers ne peut pas être placé sous lui-même, ni sous l'un de ses propres sous-univers.");
+        await Assertions.Expect(panel).ToContainTextAsync("Un univers ne peut pas être rangé sous lui-même, ni sous l'un de ses sous-univers.");
+        await Assertions.Expect(panel).ToContainTextAsync("Ni lui-même, ni l'un de ses sous-univers.");
+        // The field in cause gets the focus, once interactive (visuel/listes/saisie-selon-l-entite.md).
+        await Assertions.Expect(panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" })).ToBeFocusedAsync();
         // The parent refused stays chosen, presented with its ancestors, to be corrected.
         await Assertions.Expect(panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }))
             .ToHaveValueAsync($"Corto Maltese {_marker} › Les Antilles {_marker}");

@@ -5,6 +5,7 @@
 @inject IStringLocalizer<AdminGenres> L
 @inject IStringLocalizer<GenreCreationDialog> Creation
 @inject IStringLocalizer<FieldMessages> FieldTexts
+@inject IStringLocalizer<RuleMessages> Rules
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
@@ -29,7 +30,7 @@
 
         <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Genres" Order="@L["Order"]" />
 
-        @if (_list!.Items.Count == 0)
+        @if (_list!.Items.Count == 0 && !StrayEdit)
         {
             if (_query is { EmptyReason: EmptyListReason.Search, Text: { } searched })
             {
@@ -59,32 +60,17 @@
                     <span class="genre-modified" role="columnheader">@L["Column.Modified"]</span>
                     <span class="genre-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
                 </div>
+                @if (StrayEdit)
+                {
+                    @* The genre changed, sent back but no longer in the page (deleted, or renamed, meanwhile): its row stays open at
+                       the head of the list, with what was typed and the error of its saving. *@
+                    @EditRow(null)
+                }
                 @foreach (var row in _list.Items)
                 {
                     if (row.Id == _editedGenre?.Id)
                     {
-                        @* The genre changed in its row: its label becomes a field, saved or cancelled in place. *@
-                        <form class="genre-row" role="row" method="post" @formname="@EditFormName" @onsubmit="SaveAsync"
-                              data-invalid="@(_editProblem is not null)">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="@VersionName" value="@EditVersion" />
-                            <span class="genre-main" role="cell">
-                                <Field Id="genre-edit-label" Label="@L["Label.Of", row.Label]" LabelHidden="true" Required
-                                       Error="@FieldError(_editProblem, EditLabel)" Context="control">
-                                    <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
-                                           aria-invalid="@control.Invalid" @bind="EditLabel" />
-                                </Field>
-                                @if (OtherProblem(_editProblem) is { } problem)
-                                {
-                                    <ErrorMessage Problem="problem" />
-                                }
-                            </span>
-                            @Numbers(row)
-                            <span class="genre-actions" role="cell">
-                                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Save"]" />
-                                <Button Href="@ListOnly.Href()" Label="@L["Cancel"]" />
-                            </span>
-                        </form>
+                        @EditRow(row)
                         continue;
                     }
 
@@ -121,13 +107,13 @@
                 <AntiforgeryToken />
                 <Dialog Id="genre-new" Title="@Creation["Title"]" Tone="DialogTone.Creation" CloseHref="@ListOnly.Href()">
                     <ChildContent>
-                        <Field Id="genre-new-label" Label="@Creation["Label"]" Required Error="@FieldError(_newProblem, NewLabel)" Context="control">
+                        <Field Id="genre-new-label" Label="@Creation["Label"]" Required Error="@LabelError(_newProblem, NewLabel)" Context="control">
                             <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
                                    aria-invalid="@control.Invalid" @bind="NewLabel" />
                         </Field>
-                        @if (OtherProblem(_newProblem) is { } problem)
+                        @if (_newProblem is { } problem)
                         {
-                            <ErrorMessage Problem="problem" />
+                            @SaveProblem(problem, canReload: false)
                         }
                     </ChildContent>
                     <Actions>
@@ -256,8 +242,8 @@
         }
 
         // A genre changed from elsewhere than its row (the change log of the home of the administration) is changed on the page of
-        // the list searched on its label that shows it.
-        if (_query.Edit is { } edited && _editedGenre is null && await LocateAsync(edited) is { } located)
+        // the list searched on its label that shows it; never a row sent back, which keeps what was typed (StrayEdit).
+        if (_query.Edit is { } edited && _editedGenre is null && EditVersion is null && await LocateAsync(edited) is { } located)
         {
             Navigation.NavigateTo(located.Href());
             return;
@@ -318,12 +304,13 @@
 
     private async Task SaveAsync()
     {
-        if (_editedGenre is null || EditVersion is not { } version)
+        // The genre changed, as its row read it, even deleted meanwhile: the API then says so.
+        if (_query.Edit is not { } edited || EditVersion is not { } version)
             return;
 
         try
         {
-            await Api.PutAsync<UpdateGenreRequest, GenreForm>($"/admin/genres/{_editedGenre.Id}", new UpdateGenreRequest(EditLabel ?? "", version));
+            await Api.PutAsync<UpdateGenreRequest, GenreForm>($"/admin/genres/{edited}", new UpdateGenreRequest(EditLabel ?? "", version));
         }
         catch (ApiProblemException exception)
         {
@@ -331,7 +318,7 @@
             return;
         }
 
-        await Recorder.RecordActionAsync(AudienceFunctions.AdminGenreSaved, $"genre={_editedGenre.Id}", HttpContext?.RequestAborted ?? default);
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminGenreSaved, $"genre={edited}", HttpContext?.RequestAborted ?? default);
         Navigation.NavigateTo(ListOnly.Href());
     }
 
@@ -352,26 +339,57 @@
         Navigation.NavigateTo(ListOnly.Href());
     }
 
-    // The error of a label, presented at its field: a label required, or already taken (modele-metier/genre.md).
-    private string? FieldError(ApiProblem? problem, string? label) => problem is { Category: ProblemCategory.Business, RuleCode: { } code } && IsOfLabel(code)
-        ? LabelErrorText(code, label?.Trim() ?? "")
-        : null;
+    // What to correct in the label, which the refused saving designates (choix-implementation/socle/frontend.md, champ d'une
+    // erreur métier): a label already taken has the text shared by every name unique regardless of case and accents
+    // (modele-metier/genre.md), naming the genre as typed.
+    private string? LabelError(ApiProblem? problem, string? label) =>
+        new FieldErrors(problem, FieldTexts, Rules, label?.Trim() ?? "").For(LabelField);
 
-    // A label already taken has the text shared by every name unique regardless of case and accents; a label required, its own.
-    private string LabelErrorText(string code, string label)
-    {
-        if (code == DuplicateRule)
-            return FieldTexts[code, label].Value;
-        return L[$"FieldError.{code}"].Value;
-    }
+    private const string LabelField = "/label";
 
-    private const string DuplicateRule = "Genre.LabelAlreadyUsed";
+    // The error of the saving, as on an entry form (visuel/listes/saisie-selon-l-entite.md), under the field of the row or of
+    // the dialog of a new genre, which has nothing to reload.
+    private RenderFragment SaveProblem(ApiProblem problem, bool canReload) =>
+        @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
+                    Technical="@L["Problem.Technical.Text"]" CanReload="canReload" StaticForm="true"
+                    ReloadHref="@((ListOnly with { Edit = _query.Edit }).Href())" />;
 
-    // Any other error, presented with the entry: a genre changed or deleted meanwhile, a technical error.
-    private static ApiProblem? OtherProblem(ApiProblem? problem) =>
-        problem is { Category: ProblemCategory.Business, RuleCode: { } code } && IsOfLabel(code) ? null : problem;
+    // The genre changed in its row, as the page shows it, or sent back without the page showing it (null).
+    private RenderFragment EditRow(GenreAdminListItem? row) =>
+        @<form class="genre-row" role="row" method="post" @formname="@EditFormName" @onsubmit="SaveAsync"
+               data-invalid="@(_editProblem is not null)">
+            <AntiforgeryToken />
+            <input type="hidden" name="@VersionName" value="@EditVersion" />
+            <span class="genre-main" role="cell">
+                <Field Id="genre-edit-label" Label="@L["Label.Of", row?.Label ?? EditLabel ?? ""]" LabelHidden="true" Required
+                       Error="@LabelError(_editProblem, EditLabel)" Context="control">
+                    <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
+                           aria-invalid="@control.Invalid" @bind="EditLabel" />
+                </Field>
+            </span>
+            @if (row is not null)
+            {
+                @Numbers(row)
+            }
+            else
+            {
+                <span class="genre-meta"></span>
+                <span class="genre-modified" role="cell"></span>
+            }
+            <span class="genre-actions" role="cell">
+                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Save"]" />
+                <Button Href="@ListOnly.Href()" Label="@L["Cancel"]" />
+            </span>
+            @* Under the whole row, which is too narrow on a smartphone to hold it beside the actions. *@
+            @if (_editProblem is { } problem)
+            {
+                <div class="genre-error" role="cell">@SaveProblem(problem, canReload: true)</div>
+            }
+        </form>;
 
-    private static bool IsOfLabel(string ruleCode) => ruleCode is "Genre.LabelRequired" or DuplicateRule;
+    // The genre changed, sent back with its version, but which the page does not show: deleted, or renamed out of the search,
+    // meanwhile.
+    private bool StrayEdit => _query.Edit is not null && _editedGenre is null && EditVersion is not null;
 
     private async Task LoadImpactAsync(Guid genreId)
     {

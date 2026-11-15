@@ -125,3 +125,8 @@
         display: block;
     }
 }
+
+/* The error of the saving of a row, under the whole row, whatever its layout. */
+.genre-error {
+    grid-column: 1 / -1;
+}

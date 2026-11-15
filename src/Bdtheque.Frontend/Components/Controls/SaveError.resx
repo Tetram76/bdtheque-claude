@@ -27,7 +27,4 @@
   <data name="ShowChanges" xml:space="preserve">
     <value>Voir mes changements</value>
   </data>
-  <data name="Technical" xml:space="preserve">
-    <value>Problème technique</value>
-  </data>
 </root>

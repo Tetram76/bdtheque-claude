@@ -1,28 +1,46 @@
 @inject IStringLocalizer<SaveError> L
 
-@* The error of the saving of an entry form, above it (visuel/saisie-album/contenu.md): its three categories told apart at
-   first glance (fonctionnel/presentation-des-erreurs.md), each with what the user can do about it. A business error says
-   what to correct, by the text of its rule; the page points to its field. *@
+@* The error of the saving of a record, wherever it is entered: above the form of an entry form, at the top of a side panel,
+   in the row of a list (visuel/saisie-album/contenu.md, visuel/listes/saisie-selon-l-entite.md). Its three categories are
+   told apart at first glance (fonctionnel/presentation-des-erreurs.md), each with what the user can do about it. A business
+   error says what to correct, by the text of its rule; the form points to its field.
+   A form sent by the browser (StaticForm: a side panel, a row, a dialog of a list) offers the same actions by the browser
+   alone: the reload is a link to the record, read anew, and the retry sends the form again, with what was typed; « Voir mes
+   changements » is not there, what was typed staying in front of the user until the reload. *@
 @switch (Problem.Category)
 {
     case ProblemCategory.Business:
         <ErrorMessage Problem="Problem" Label="@L["Business"]" />
         break;
     case ProblemCategory.Functional:
-        <ErrorMessage Problem="Problem" Label="@L["Functional"]" Message="@(Problem.Status == 404 ? NotFound : Conflict)">
+        <ErrorMessage Problem="Problem" Label="@L["Functional"]" Message="@(Problem.Status == StatusCodes.Status404NotFound ? NotFound : Conflict)">
             <Actions>
                 @if (CanReload)
                 {
-                    <Button Label="@L["Reload"]" Icon="IconName.Reload" OnClick="OnReload" />
-                    <Button Label="@L["ShowChanges"]" OnClick="OnShowChanges" />
+                    @if (StaticForm)
+                    {
+                        <Button Href="@ReloadHref" Label="@L["Reload"]" Icon="IconName.Reload" />
+                    }
+                    else
+                    {
+                        <Button Label="@L["Reload"]" Icon="IconName.Reload" OnClick="OnReload" />
+                        <Button Label="@L["ShowChanges"]" OnClick="OnShowChanges" />
+                    }
                 }
             </Actions>
         </ErrorMessage>
         break;
     default:
-        <ErrorMessage Problem="Problem" Label="@L["Technical"]" Message="@Technical">
+        <ErrorMessage Problem="Problem" Message="@Technical">
             <Actions>
-                <Button Label="@L["Retry"]" Icon="IconName.Reload" OnClick="OnRetry" />
+                @if (StaticForm)
+                {
+                    <Button Type="submit" Label="@L["Retry"]" Icon="IconName.Reload" />
+                }
+                else
+                {
+                    <Button Label="@L["Retry"]" Icon="IconName.Reload" OnClick="OnRetry" />
+                }
             </Actions>
         </ErrorMessage>
         break;
@@ -36,7 +54,7 @@
     [Parameter, EditorRequired]
     public string Conflict { get; set; } = null!;
 
-    /// <summary>A record the form cites deleted in the meantime: nothing was saved.</summary>
+    /// <summary>The record, or one the form cites, deleted in the meantime: nothing was saved.</summary>
     [Parameter, EditorRequired]
     public string NotFound { get; set; } = null!;
 
@@ -47,6 +65,17 @@
     /// <summary>Whether the record is already saved, which a reload reads anew: a new record has nothing to reload.</summary>
     [Parameter]
     public bool CanReload { get; set; }
+
+    /// <summary>
+    /// Whether the form is sent by the browser, rendered statically, rather than saved from the circuit of an entry form: the
+    /// error is then within the form, whose sending is the retry.
+    /// </summary>
+    [Parameter]
+    public bool StaticForm { get; set; }
+
+    /// <summary>The address of the record, which reads it anew: the reload of a form sent by the browser.</summary>
+    [Parameter]
+    public string? ReloadHref { get; set; }
 
     [Parameter]
     public EventCallback OnReload { get; set; }

@@ -132,4 +132,16 @@
   <data name="Related" xml:space="preserve">
     <value>Une valeur liée à celle à corriger.</value>
   </data>
+  <data name="Author.LastNameOrPseudonymRequired" xml:space="preserve">
+    <value>Au moins le nom ou le pseudonyme.</value>
+  </data>
+  <data name="Genre.LabelRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
+  <data name="Universe.HierarchyCycle" xml:space="preserve">
+    <value>Ni lui-même, ni l&apos;un de ses sous-univers.</value>
+  </data>
+  <data name="Universe.NameRequired" xml:space="preserve">
+    <value>Obligatoire.</value>
+  </data>
 </root>

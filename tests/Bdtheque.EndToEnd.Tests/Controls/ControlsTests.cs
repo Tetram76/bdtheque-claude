@@ -205,7 +205,7 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         var error = page.Locator("#f-collection-failure [role=alert]");
 
         await Assertions.Expect(error).ToHaveAttributeAsync("data-error-category", "technical");
-        await Assertions.Expect(error.Locator("[data-error-label]")).ToHaveTextAsync("Erreur technique");
+        await Assertions.Expect(error.Locator("[data-error-label]")).ToHaveTextAsync("Problème technique");
         await Assertions.Expect(page.Locator("#f-collection")).ToHaveAttributeAsync("aria-describedby", "f-collection-failure");
         var look = await error.EvaluateAsync<double[]>("""
             element => {

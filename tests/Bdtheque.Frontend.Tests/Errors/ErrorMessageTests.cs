@@ -109,7 +109,7 @@ public sealed class ErrorMessageTests : BunitContext
         var alert = message.Find("[role=alert]");
         Assert.True(alert.HasAttribute("data-error-compact"));
         Assert.Equal("technical", alert.GetAttribute("data-error-category"));
-        Assert.Equal("Erreur technique", alert.QuerySelector("[data-error-label]")!.TextContent.Trim());
+        Assert.Equal("Problème technique", alert.QuerySelector("[data-error-label]")!.TextContent.Trim());
         Assert.NotNull(alert.QuerySelector(".error-icon path"));
     }
 
