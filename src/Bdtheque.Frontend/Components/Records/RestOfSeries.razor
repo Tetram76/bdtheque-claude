@@ -17,11 +17,11 @@
             <span class="series-albums-title">@SeriesTitle</span>
             <span class="series-albums-count">@Count</span>
         </summary>
-        @* The column of the volume as wide as its longest volume (« T. 21 à T. 24 »), so that the names line up. *@
-        <ol style="--series-volume-chars: @VolumeChars">
-            @foreach (var (card, name) in Lines)
+        <ol>
+            @foreach (var card in Albums)
             {
                 var album = card.Album;
+                var name = Labels.InTheRestOfItsSeries(album);
                 <li data-current="@(album.Id == AlbumId ? "" : null)">
                     @* A special case: the column of the volume is always given, beside a name that says it too (« Tome 3 »),
                        and holds the range of an omnibus (visuel/fiche-album/contenu.md). *@
@@ -55,9 +55,6 @@
     [Parameter, EditorRequired]
     public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
 
-    private IEnumerable<(AlbumCard Card, AlbumInSeries Name)> Lines => Albums.Select(card => (card, Labels.InTheRestOfItsSeries(card.Album)));
-
-    private int VolumeChars => Lines.Max(line => line.Name.Volume?.Length) ?? 0;
 
     private string Count
     {
