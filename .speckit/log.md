@@ -2,6 +2,7 @@
 
 ## 2026-11-15
 
+* **Règle** : l'orchestrateur d'un lot de chantiers en parallèle ne commite jamais, et n'a ni branche ni worktree : il travaille depuis le checkout principal, en lecture seule, sans jamais y changer de branche ; une session d'orchestrateur ouverte par erreur dans un worktree le signale dès son premier message, et son worktree et sa branche sont supprimés à son archivage (exigence de l'utilisateur) (#453).
 * **Choix** : tout évènement d'un test de composant bUnit, page rendue statiquement en production comprise, est déclenché sur le répartiteur du rendu et attendu jusqu'à la fin de son traitement ; le compilateur refuse tout autre déclenchement dans les tests du frontend (analyseur des API interdites), sans exception pour les composants statiques (#450).
 
 ## 2026-11-14
