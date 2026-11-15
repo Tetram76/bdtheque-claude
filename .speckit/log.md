@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-15
+
+* **Décision de l'utilisateur** : un album n'est nommé avec sa série que là où le contexte ne la rend pas évidente ; sur sa fiche, dans « Et le reste de la série ? », sur la fiche de sa série et dans la bibliographie d'un auteur, un album sans titre propre est nommé par son tome écrit en entier (« Tome 3 ») ; un même écran ne présente le tome d'un album qu'une fois : un album nommé par son tome n'a ni étiquette ni colonne du tome. **Choix** : le service des libellés donne ensemble le nom d'un album là où sa série est évidente et le tome à présenter à part, repris par chacun de ces contextes (#405).
+
 ## 2026-11-14
 
 * **Décision de l'utilisateur** : la couverture d'un album est prise parmi ses éditions possédées dans un contexte de collection (statistiques, consultation limitée à la collection), parmi toutes ses éditions, visées par une intention d'achat comprises, dans un contexte de base documentaire, dont relève la fiche d'un album, comme ses cartes. **Choix** : la fiche d'un album porte sa couverture, calculée par l'API avec l'expression des cartes, le frontend n'en calculant aucune (#442).
