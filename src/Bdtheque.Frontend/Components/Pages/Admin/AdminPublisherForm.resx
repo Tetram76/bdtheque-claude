@@ -67,7 +67,7 @@
     <value>Ouvrir le site web</value>
   </data>
   <data name="Collections.Help" xml:space="preserve">
-    <value>Elles s&apos;enregistrent avec l&apos;éditeur. Une collection que désigne une édition ou une série ne peut pas être retirée.</value>
+    <value>Elles s&apos;enregistrent avec l&apos;éditeur. Une collection que désigne une édition, une intention d&apos;achat ou une série ne peut pas être retirée.</value>
   </data>
   <data name="Collections.None" xml:space="preserve">
     <value>Aucune collection.</value>
