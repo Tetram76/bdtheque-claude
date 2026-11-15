@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu commun'
 description: 'Rubriques communes à toutes les alternatives du dashboard.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:47:00Z }
 ---
 
 # Contenu commun
@@ -27,4 +27,4 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
 - **Plutôt quel genre ?** : les genres et leur nombre d'albums ; un album peut relever de plusieurs genres.
 - **Chez quels éditeurs ?** : les éditeurs et leur nombre d'éditions possédées.
 
-Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu mène à ce site, et n'est sinon pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).
+Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu mène à ce site, signalé comme un lien qui fait sortir de l'application ([Liens qui font sortir de l'application](../charte-graphique/liens-qui-font-sortir-de-l-application.md)), et n'est sinon pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).

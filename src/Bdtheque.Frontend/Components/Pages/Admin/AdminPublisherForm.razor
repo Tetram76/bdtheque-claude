@@ -46,11 +46,12 @@ else
                         <input id="@control.Id" type="url" placeholder="https://…" aria-describedby="@control.DescribedBy"
                                aria-invalid="@control.Invalid" @bind="Entry.Website" @bind:event="oninput" />
                         @* An external site opened in a new tab, without access to the form nor referrer
-                           (choix-implementation/socle/frontend.md, site extérieur). *@
+                           (choix-implementation/socle/frontend.md, site extérieur), its globe the icon of the button
+                           (visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md). *@
                         @if (!string.IsNullOrWhiteSpace(Entry.Website))
                         {
                             <a class="publisher-website-open" href="@Entry.Website.Trim()" target="_blank" rel="noopener noreferrer"
-                               aria-label="@L["Website.Open"]" title="@L["Website.Open"]"><Icon Name="IconName.Exit" /></a>
+                               title="@L["Website.Open"]"><span class="visually-hidden">@L["Website.Open"]</span><ExternalMark /></a>
                         }
                     </span>
                 </Field>

@@ -71,7 +71,9 @@
                             <span class="publisher-website" role="cell">
                                 @if (row.Website is { } website)
                                 {
-                                    <a href="@website" target="_blank" rel="noopener noreferrer">@WebsiteText(website)</a>
+                                    @* On a single line whatever its length, which an ellipsis ends when it does not fit, the
+                                       whole address in a tooltip and in the link (visuel/listes/liste-par-liste.md). *@
+                                    <a href="@website" target="_blank" rel="noopener noreferrer" title="@website"><span class="publisher-website-text">@WebsiteText(website)</span><ExternalMark /></a>
                                 }
                                 else
                                 {
@@ -93,7 +95,7 @@
                             <ActionsMenu Id="@($"publisher-actions-{row.Id:N}")" Label="@L["More", row.Name]">
                                 @if (row.Website is { } website)
                                 {
-                                    <MenuItem Href="@website" External="true" Icon="IconName.Exit" Label="@L["Menu.Website"]" />
+                                    <MenuItem Href="@website" External="true" Label="@L["Menu.Website"]" />
                                 }
                                 <MenuItem Href="@((ListOnly with { Merge = row.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
                                 <MenuSeparator />
