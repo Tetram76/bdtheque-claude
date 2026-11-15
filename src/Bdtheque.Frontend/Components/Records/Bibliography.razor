@@ -124,9 +124,9 @@
         return owned == 0 ? L["Owned.None", credited] : L["Owned", credited, Format.Number(owned)];
     }
 
-    // What places an album in its series, listed under it, which it does not repeat: its volume, unless its title is already
-    // that volume (« Tome 3 »).
-    private string? InSeries(AlbumSummary album) => album.Title is not null ? Labels.Volume(album) : null;
+    // What places an album in its series, listed under it, which it does not repeat: its volume, unless its name is already
+    // that volume (« Tome 3 », RecordLabels.InItsSeries).
+    private string? InSeries(AlbumSummary album) => Labels.InItsSeries(album).Volume;
 
     // What places an album: its volume in its series (InSeries), then its date of first publication when set; nothing
     // without either, « Album sans série » saying nothing useful.
@@ -138,7 +138,7 @@
         <Cover VisualId="item.Album.Cover?.VisualId" />
         <span class="entry-text">
             @* Its own title; without one, its volume alone (« Tome 3 »), the series being said under it. *@
-            <a class="entry-title" href="@AppPaths.Album(album.Id)">@(album.Title ?? Labels.Album(album, AlbumLabelFormat.TitleSeriesVolume, withSeries: false))</a>
+            <a class="entry-title" href="@AppPaths.Album(album.Id)">@Labels.InItsSeries(album).Name</a>
             @if (meta is not null)
             {
                 <span class="entry-meta">@meta</span>

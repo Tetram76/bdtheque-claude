@@ -14,7 +14,8 @@
    an edition targeted by a purchase intent being never presented as an edition, but under them with the other intents
    (fonctionnel/regles-metier/intention-d-achat.md); the rest of its series; its dates; and the viewer of a visual, a dialog
    above the record that its address opens (Navigation/AlbumRecordQuery.cs). Its styles read the contracts of the base theme only
-   (visuel/fiche-album/declinaison-par-theme.md). *@
+   (visuel/fiche-album/declinaison-par-theme.md). The title of the page, read apart from it (a tab, the history), names its
+   series: only the record makes it plain (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte). *@
 <PageTitle>@(_album is null ? L["Title"] : Labels.Album(_album.Album, _format))</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AlbumRecord" Record="new PresentedRecord(RecordType.Album, Id)" />
 
@@ -46,7 +47,7 @@ else if (_album is { } album)
                 </div>
 
                 <ul class="album-facts" aria-label="@L["Facts"]">
-                    @if (Labels.Volume(album.Album) is { } volume)
+                    @if (Name.Volume is { } volume)
                     {
                         <li class="album-fact" data-fact="volume">@volume</li>
                     }
@@ -115,7 +116,7 @@ else if (_album is { } album)
 
         @if (album.Album.SeriesId is { } series)
         {
-            <RestOfSeries AlbumId="Id" SeriesId="series" SeriesTitle="@(album.Album.SeriesTitle!)" Albums="album.SeriesAlbums" LabelFormat="_format" />
+            <RestOfSeries AlbumId="Id" SeriesId="series" SeriesTitle="@(album.Album.SeriesTitle!)" Albums="album.SeriesAlbums" />
         }
     </div>
 
@@ -166,7 +167,10 @@ else if (_album is { } album)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
 
-    private string Heading => _album!.Album.Title ?? Labels.Album(_album.Album, _format);
+    // Under the link to its series, which makes it plain: without the series, its volume presented once (RecordLabels.InItsSeries).
+    private AlbumInSeries Name => Labels.InItsSeries(_album!.Album);
+
+    private string Heading => Name.Name;
 
     private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
     [

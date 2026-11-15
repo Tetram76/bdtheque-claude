@@ -21,15 +21,17 @@
             @foreach (var card in Albums)
             {
                 var album = card.Album;
+                var name = Labels.InItsSeries(album);
                 <li data-current="@(album.Id == AlbumId ? "" : null)">
-                    <span class="series-album-volume">@if (Labels.Volume(album) is { } volume){@volume}else{<NotSet Brief="true" />}</span>
+                    @* An album named by its volume leaves its column empty: its volume is presented once. *@
+                    <span class="series-album-volume">@if (name.Volume is { } volume){@volume}else if (!name.NamedByVolume){<NotSet Brief="true" />}</span>
                     @if (album.Id == AlbumId)
                     {
-                        <span class="series-album-title" aria-current="page">@Title(album)</span>
+                        <span class="series-album-title" aria-current="page">@name.Name</span>
                     }
                     else
                     {
-                        <a class="series-album-title" href="@AppPaths.Album(album.Id)">@Title(album)</a>
+                        <a class="series-album-title" href="@AppPaths.Album(album.Id)">@name.Name</a>
                     }
                     <CollectionStateTag State="AlbumCardStates.Of(card)" />
                 </li>
@@ -52,9 +54,6 @@
     [Parameter, EditorRequired]
     public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
 
-    [Parameter, EditorRequired]
-    public AlbumLabelFormat LabelFormat { get; set; }
-
     private string Count
     {
         get
@@ -64,7 +63,4 @@
             return owned == 0 ? L["Owned.None", total] : L["Owned", total, Format.Number(owned)];
         }
     }
-
-    // Its own title, as on its record; failing that, its label.
-    private string Title(AlbumSummary album) => album.Title ?? Labels.Album(album, LabelFormat);
 }

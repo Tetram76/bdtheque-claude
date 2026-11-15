@@ -15,13 +15,26 @@ namespace Bdtheque.Frontend.Formatting;
 public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnFormatter isbns)
 {
     /// <summary>
-    /// The label of an album in the format of the settings. <paramref name="withSeries"/> leaves the series out where the
-    /// context makes it plain; with it, the series stands in for a missing title, and the volume is then abbreviated as
-    /// next to any title (fonctionnel/presentation/libelle-d-un-album.md, examples).
+    /// The label of an album in the format of the settings, its series included, where the context does not make the series
+    /// plain: the series stands in for a missing title, and the volume is then abbreviated as next to any title
+    /// (fonctionnel/presentation/libelle-d-un-album.md, examples). Where the context makes it plain, see <see cref="InItsSeries"/>.
     /// </summary>
-    public string Album(AlbumSummary album, AlbumLabelFormat format, bool withSeries = true) =>
-        Album(new AlbumLabel(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue, album.VolumeNumber,
-            album.StartVolumeNumber, album.EndVolumeNumber), format, withSeries);
+    public string Album(AlbumSummary album, AlbumLabelFormat format) => Album(LabelOf(album), format);
+
+    /// <summary>
+    /// An album where its series goes without saying: its name without the series, and the volume to present beside it, none
+    /// when the name already says it (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte). The one
+    /// place this choice is made, so that no such context names the series, nor presents a volume twice.
+    /// </summary>
+    public AlbumInSeries InItsSeries(AlbumSummary album)
+    {
+        var label = LabelOf(album);
+        if (album.Title is { } title)
+            return new AlbumInSeries(title, Volume(label, abbreviated: true), NamedByVolume: false);
+        return Volume(label, abbreviated: false) is { } volume
+            ? new AlbumInSeries(volume, null, NamedByVolume: true)
+            : new AlbumInSeries(texts["Untitled"], null, NamedByVolume: false);
+    }
 
     /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
     public string Edition(EditionSummary edition) =>
@@ -37,14 +50,6 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         var start = label.LastIndexOf($" - {texts["Isbn"]}\u00A0", StringComparison.Ordinal);
         return start < 0 ? (label, null) : (label[..(start + 3)], label[(start + 3)..]);
     }
-
-    /// <summary>
-    /// The volume of an album alone, as next to a title (fonctionnel/presentation/libelle-d-un-album.md); <c>null</c> for a
-    /// regular album without number.
-    /// </summary>
-    public string? Volume(AlbumSummary album) =>
-        Volume(new AlbumLabel(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue, album.VolumeNumber,
-            album.StartVolumeNumber, album.EndVolumeNumber), abbreviated: true);
 
     /// <summary>
     /// The label of a purchase intent: the album it targets, followed by the edition when it targets one, as the change log
@@ -73,9 +78,12 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         _ => texts["Untitled"],
     };
 
-    private string Album(AlbumLabel album, AlbumLabelFormat format, bool withSeries = true)
+    private static AlbumLabel LabelOf(AlbumSummary album) => new(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue,
+        album.VolumeNumber, album.StartVolumeNumber, album.EndVolumeNumber);
+
+    private string Album(AlbumLabel album, AlbumLabelFormat format)
     {
-        var series = withSeries ? album.SeriesTitle : null;
+        var series = album.SeriesTitle;
         var title = album.Title;
         var volume = Volume(album, abbreviated: title is not null || series is not null);
 
