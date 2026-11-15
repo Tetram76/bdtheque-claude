@@ -103,7 +103,7 @@ else if (_series is { } series)
             </Block>
         }
 
-        <SeriesAlbums Albums="series.Albums" LabelFormat="_format" />
+        <SeriesAlbums Albums="series.Albums" />
     </div>
 
     <p class="series-dates" data-local>@L["Dates", Format.LocalDate(series.CreatedAt), Format.LocalDate(series.ModifiedAt)]</p>
@@ -114,14 +114,14 @@ else if (_series is { } series)
     public Guid Id { get; set; }
 
     private SeriesDetail? _series;
-    private AlbumLabelFormat _format;
     private ApiProblem? _problem;
 
+    // No format of the settings to read: the record makes the series plain, where an album is named without it
+    // (RecordLabels.InItsSeries).
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
             _series = await Api.GetAsync<SeriesDetail>($"/catalog/series/{Id}");
         }
         catch (ApiProblemException exception)

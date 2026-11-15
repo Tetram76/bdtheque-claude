@@ -18,18 +18,22 @@
             <span class="series-albums-count">@Count</span>
         </summary>
         <ol>
-            @foreach (var card in Albums)
+            @foreach (var (card, name) in Lines)
             {
                 var album = card.Album;
                 <li data-current="@(album.Id == AlbumId ? "" : null)">
-                    <span class="series-album-volume">@if (Labels.Volume(album) is { } volume){@volume}else{<NotSet Brief="true" />}</span>
+                    @* A special case: the column of the volume is always given, beside a name that says it too (« Tome 3 »),
+                       and holds the range of an omnibus (visuel/fiche-album/contenu.md). Each line keeps room for the longest
+                       volume of the list (data-room), which the browser measures in the font of the column, so that the
+                       names line up however wide the volumes. *@
+                    <span class="series-album-volume" data-room="@LongestVolume">@if (name.Volume is { } volume){@volume}else{<NotSet Brief="true" />}</span>
                     @if (album.Id == AlbumId)
                     {
-                        <span class="series-album-title" aria-current="page">@Title(album)</span>
+                        <span class="series-album-title" aria-current="page">@name.Name</span>
                     }
                     else
                     {
-                        <a class="series-album-title" href="@AppPaths.Album(album.Id)">@Title(album)</a>
+                        <a class="series-album-title" href="@AppPaths.Album(album.Id)">@name.Name</a>
                     }
                     <CollectionStateTag State="AlbumCardStates.Of(card)" />
                 </li>
@@ -52,8 +56,11 @@
     [Parameter, EditorRequired]
     public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
 
-    [Parameter, EditorRequired]
-    public AlbumLabelFormat LabelFormat { get; set; }
+    private List<(AlbumCard Card, AlbumInSeries Name)> Lines => [.. Albums.Select(card => (card, Labels.InTheRestOfItsSeries(card.Album)))];
+
+    // The volume with the most characters stands for the widest: volumes differ in their digits, of the same width
+    // (tabular figures), and in « à », one per range.
+    private string? LongestVolume => Lines.Select(line => line.Name.Volume).MaxBy(volume => volume?.Length ?? 0);
 
     private string Count
     {
@@ -64,7 +71,4 @@
             return owned == 0 ? L["Owned.None", total] : L["Owned", total, Format.Number(owned)];
         }
     }
-
-    // Its own title, as on its record; failing that, its label.
-    private string Title(AlbumSummary album) => album.Title ?? Labels.Album(album, LabelFormat);
 }

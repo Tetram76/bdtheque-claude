@@ -97,25 +97,24 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Empty(page.FindAll(".collection-status"));
     }
 
-    [Fact]
-    public void Identity_OfAnAlbumWithoutTitle_IsItsLabel_AndTheTitleOfThePage()
+    // Under the link to its series, which makes it plain, an album without its own title is named by its volume, written in
+    // full, whatever the format of the settings, and its volume is not presented a second time beside it
+    // (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte).
+    [Theory]
+    [InlineData(AlbumLabelFormat.TitleSeriesVolume)]
+    [InlineData(AlbumLabelFormat.VolumeTitleSeries)]
+    public void Identity_OfAnAlbumWithoutTitle_IsItsVolume_PresentedOnce(AlbumLabelFormat format)
     {
+        _catalog.Settings = new ApplicationSettings(format, Contracts.Enums.DisplayCulture.FrenchFrance);
         _catalog.Album = Album() with { Album = Summary() with { Title = null } };
 
         var page = Open();
 
-        Assert.Equal("Corto Maltese - T. 5", page.Find("h1").TextContent.Trim());
-    }
-
-    [Fact]
-    public void Identity_FollowsTheFormatOfTheSettings_InTheTitleOfThePage()
-    {
-        _catalog.Settings = new ApplicationSettings(AlbumLabelFormat.VolumeTitleSeries, Contracts.Enums.DisplayCulture.FrenchFrance);
-        _catalog.Album = Album() with { Album = Summary() with { Title = null } };
-
-        var page = Open();
-
-        Assert.Equal("T. 5 - Corto Maltese", page.Find("h1").TextContent.Trim());
+        Assert.Equal("Corto Maltese", page.Find(".album-identity a.album-series").TextContent.Trim());
+        Assert.Equal("Tome 5", page.Find("h1").TextContent.Trim());
+        Assert.Equal(["Paru en novembre 1970", "Dans la collection, en 2 éditions"],
+            page.FindAll(".album-facts li").Select(f => f.TextContent.Trim()));
+        Assert.Equal(["Albums", "Corto Maltese", "Tome 5"], page.FindAll("nav.breadcrumb li").Select(l => l.TextContent.Trim()));
     }
 
     [Fact]
@@ -579,16 +578,35 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal("Corto Maltese 4 albums, dont 2 dans la collection",
             string.Join(' ', series.QuerySelectorAll("summary > span").Select(s => s.TextContent.Trim())));
         var albums = series.QuerySelectorAll("details ol > li");
+        // The series being plain, an album without its own title is named by its volume in full; the column of the volume, a
+        // special case, is always given (visuel/fiche-album/contenu.md).
         Assert.Equal(["T. 1", "T. 5", "T. 6", "HS 1"], albums.Select(a => a.QuerySelector(".series-album-volume")!.TextContent.Trim()));
-        Assert.Equal(["La Jeunesse", "Lointaines îles du vent", "Les Celtiques", "Corto Maltese - HS 1"],
-            albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));
-        Assert.Equal(["Dans la collection", "Dans la collection", "Intention d'achat", "Hors collection"],
+        Assert.Equal(["La Jeunesse", "Lointaines îles du vent", "Les Celtiques", "Hors-série 1"],
+            albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));        Assert.Equal(["Dans la collection", "Dans la collection", "Intention d'achat", "Hors collection"],
             albums.Select(a => a.QuerySelector(".tag")!.TextContent.Trim()));
         // The album shown is no link to itself; the others lead to their records.
         Assert.Equal("page", albums[1].QuerySelector(".series-album-title")!.GetAttribute("aria-current"));
         Assert.Null(albums[1].QuerySelector("a"));
         Assert.Equal([AppPaths.Album(SeriesAlbumIds[0]), AppPaths.Album(SeriesAlbumIds[2]), AppPaths.Album(SeriesAlbumIds[3])],
             series.QuerySelectorAll("details ol a").Select(a => a.GetAttribute("href")));
+    }
+
+    // An omnibus that is no special issue shows the range of its volumes in the column, and its name leaves it out
+    // (visuel/fiche-album/contenu.md).
+    [Fact]
+    public void RestOfTheSeries_ShowsTheRangeOfAnOmnibus_InTheColumnOfTheVolume_NotInItsName()
+    {
+        var omnibus = Summary() with { Id = Guid.NewGuid(), Title = null, Type = AlbumType.Omnibus, VolumeNumber = 1, StartVolumeNumber = 1, EndVolumeNumber = 4 };
+        _catalog.Album = Album() with { SeriesAlbums = [new(omnibus, null, null, false), new(Summary(), null, null, false)] };
+
+        var page = Open();
+
+        var line = BlockOf(page, "Et le reste de la série ?").QuerySelectorAll("details ol > li")[0];
+        Assert.Equal("T. 1 à T. 4", line.QuerySelector(".series-album-volume")!.TextContent.Trim());
+        Assert.Equal("Intégrale - 1", line.QuerySelector(".series-album-title")!.TextContent.Trim());
+        // Every line keeps room for the longest volume of the list, so that the names line up.
+        Assert.Equal(["T. 1 à T. 4", "T. 1 à T. 4"], BlockOf(page, "Et le reste de la série ?").QuerySelectorAll(".series-album-volume")
+            .Select(volume => volume.GetAttribute("data-room")));
     }
 
     [Fact]
