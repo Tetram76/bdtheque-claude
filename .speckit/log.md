@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-15
+
+* **Choix** : tout évènement d'un test de composant bUnit, page rendue statiquement en production comprise, est déclenché sur le répartiteur du rendu et attendu jusqu'à la fin de son traitement ; le compilateur refuse tout autre déclenchement dans les tests du frontend (analyseur des API interdites), sans exception pour les composants statiques (#450).
+
 ## 2026-11-14
 
 * **Décision de l'utilisateur** : la couverture d'un album est prise parmi ses éditions possédées dans un contexte de collection (statistiques, consultation limitée à la collection), parmi toutes ses éditions, visées par une intention d'achat comprises, dans un contexte de base documentaire, dont relève la fiche d'un album, comme ses cartes. **Choix** : la fiche d'un album porte sa couverture, calculée par l'API avec l'expression des cartes, le frontend n'en calculant aucune (#442).
