@@ -160,6 +160,7 @@ internal static class PurchaseIntentEndpoints
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((PurchaseIntent p) => new PurchaseIntentAdminListItem(
                 p.Id,
                 p.Album.ToSummary(),
+                p.Album.CollectionState(),
                 p.Edition == null ? null : p.Edition.ToSummary(),
                 CatalogExpressions.ToCover(p.Album.CoverVisualOf()),
                 // fonctionnel/regles-metier/intention-d-achat.md: an intent on an edition turns into one on the album only when
