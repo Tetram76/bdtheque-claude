@@ -51,7 +51,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void RecordTags_EachRemovable_AndAddOpensTheChoice()
+    public async Task RecordTags_EachRemovable_AndAddOpensTheChoice()
     {
         RecordOption? removed = null;
         var hergé = new RecordOption(Guid.NewGuid(), "Hergé", null);
@@ -65,10 +65,10 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.RemoveLabel, option => $"Retirer {option.Label} (Scénario)"));
 
         Assert.Equal("Hergé", tags.Find(".tag").TextContent.Trim());
-        tags.Find("button[aria-label='Retirer Hergé (Scénario)']").Click();
+        await tags.ClickAsync("button[aria-label='Retirer Hergé (Scénario)']");
         Assert.Equal(hergé, removed);
 
-        tags.Find("button[aria-label='Ajouter un auteur au scénario']").Click();
+        await tags.ClickAsync("button[aria-label='Ajouter un auteur au scénario']");
 
         var field = tags.Find("input[role=combobox]");
         Assert.Equal("add-scenarist", field.Id);
@@ -76,7 +76,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Assert.Empty(tags.FindAll(".record-tags-add"));
 
         // Left without a record chosen, the choice closes.
-        field.Blur();
+        await tags.BlurAsync("input[role=combobox]");
         Assert.Single(tags.FindAll(".record-tags-add"));
     }
 
@@ -108,7 +108,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void RatingInput_FiveStarsAsRadioButtons_FilledUpToTheOneChosen()
+    public async Task RatingInput_FiveStarsAsRadioButtons_FilledUpToTheOneChosen()
     {
         AlbumRating? chosen = AlbumRating.Good;
         var rating = Render<RatingInput>(parameters => parameters
@@ -123,9 +123,9 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Assert.Equal(4, rating.FindAll(".rating-star[data-filled]").Count);
         Assert.Equal("Bien", rating.Find(".rating-name").TextContent);
 
-        stars[4].Change(true);
+        await rating.ChangeAsync("input[type=radio][name=rating][value=VeryGood]", true);
         Assert.Equal(AlbumRating.VeryGood, chosen);
-        rating.Find(".rating-clear").Click();
+        await rating.ClickAsync(".rating-clear");
         Assert.Null(chosen);
     }
 
@@ -140,7 +140,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void PartialDateInput_TheMonthsByName_AnUnknownMonth_AndTheYear()
+    public async Task PartialDateInput_TheMonthsByName_AnUnknownMonth_AndTheYear()
     {
         int? month = 10;
         int? year = 2023;
@@ -159,8 +159,8 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Assert.Equal("2023", date.Find("#publication-year").GetAttribute("value"));
         Assert.Equal("Première publication", date.Find("legend").TextContent);
 
-        date.Find("#publication-month").Change("");
-        date.Find("#publication-year").Change("1963");
+        await date.ChangeAsync("#publication-month", "");
+        await date.ChangeAsync("#publication-year", "1963");
 
         Assert.Equal((null, 1963), (month, year));
     }
@@ -210,7 +210,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void TitleSortKeyField_Manual_KeepsItsKeyWhateverTheTitle_UntilReset()
+    public async Task TitleSortKeyField_Manual_KeepsItsKeyWhateverTheTitle_UntilReset()
     {
         string? manual = "Castafiore";
         var field = Render<TitleSortKeyField>(parameters => parameters
@@ -222,15 +222,15 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.UntitledHelp, "—"));
 
         Assert.Equal(("Castafiore", "Manuelle"), (field.Find("#sort-key").GetAttribute("value"), field.Find(".sort-key-mode").TextContent));
-        field.Find("#sort-key").Input("Bijoux");
+        await field.InputAsync("#sort-key", "Bijoux");
         Assert.Equal("Bijoux", manual);
 
-        field.Find(".sort-key-reset").Click();
+        await field.ClickAsync(".sort-key-reset");
         Assert.Null(manual);
     }
 
     [Fact]
-    public void AuthorCreationDialog_SplitsTheNameTyped_AndGivesTheAuthorCorrected_WithoutCreatingIt()
+    public async Task AuthorCreationDialog_SplitsTheNameTyped_AndGivesTheAuthorCorrected_WithoutCreatingIt()
     {
         // The author is created with the record that cites it, when that record is saved (choix-implementation/socle/frontend.md).
         NewAuthor? author = null;
@@ -241,8 +241,8 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
 
         Assert.Equal("Jean", dialog.Find("#author-creation-first-name").GetAttribute("value"));
         Assert.Equal("Van Hamme", dialog.Find("#author-creation-last-name").GetAttribute("value"));
-        dialog.Find("#author-creation-pseudonym").Change("JVH");
-        dialog.Find(".dialog-actions .button[data-variant=primary]").Click();
+        await dialog.ChangeAsync("#author-creation-pseudonym", "JVH");
+        await dialog.ClickAsync(".dialog-actions .button[data-variant=primary]");
 
         Assert.Equal(("Van Hamme", "Jean", "JVH"), (author!.LastName, author.FirstName, author.Pseudonym));
         Assert.NotEqual(Guid.Empty, author.Key);
@@ -259,7 +259,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void UniverseCreationDialog_GivesTheUniverseInItsParent_WithoutCreatingIt()
+    public async Task UniverseCreationDialog_GivesTheUniverseInItsParent_WithoutCreatingIt()
     {
         (NewUniverse Universe, RecordOption? Parent)? created = null;
         var dialog = Render<UniverseCreationDialog>(parameters => parameters
@@ -270,7 +270,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         // Its name required, its parent optional, as in the panel of a universe (visuel/saisie-album/contenu.md, mentions).
         Assert.Equal(["universe-creation-name"], dialog.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
         Assert.Equal("(obligatoire)", dialog.Find("label[for=universe-creation-name] .field-note").TextContent);
-        dialog.Find(".dialog-actions .button[data-variant=primary]").Click();
+        await dialog.ClickAsync(".dialog-actions .button[data-variant=primary]");
 
         Assert.Equal(("Le port", (Guid?)null, (RecordOption?)null), (created!.Value.Universe.Name, created.Value.Universe.ParentId, created.Value.Parent));
         Assert.Empty(_sent);

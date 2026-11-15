@@ -127,13 +127,13 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Edit_SavesTheLabelWithTheVersion_ThenLeadsBackToTheList()
+    public async Task Edit_SavesTheLabelWithTheVersion_ThenLeadsBackToTheList()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(new GenreForm(Biography.Id, "Biographies", 44));
         var page = Open($"q=a&edit={Biography.Id}", recorded: true);
 
-        page.Find("form.genre-row input[type='text']").Change("Biographies");
-        page.Find("form.genre-row").Submit();
+        await page.ChangeAsync("form.genre-row input[type='text']", "Biographies");
+        await page.SubmitAsync("form.genre-row");
 
         var written = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/genres/{Biography.Id}", "Biographies", 42u),
@@ -143,13 +143,13 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Edit_ALabelAlreadyTaken_IsRefusedInPlace_RemindingThatCaseAndAccentsDoNotTellTwoGenresApart()
+    public async Task Edit_ALabelAlreadyTaken_IsRefusedInPlace_RemindingThatCaseAndAccentsDoNotTellTwoGenresApart()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Genre.LabelAlreadyUsed");
         var page = Open($"edit={Biography.Id}");
 
-        page.Find("form.genre-row input[type='text']").Change("aventure");
-        page.Find("form.genre-row").Submit();
+        await page.ChangeAsync("form.genre-row input[type='text']", "aventure");
+        await page.SubmitAsync("form.genre-row");
 
         var form = page.Find("form.genre-row");
         Assert.Equal(("aventure", "true"),
@@ -161,13 +161,13 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Edit_ALabelLeftBlank_IsRefusedInPlace_WithItsOwnText()
+    public async Task Edit_ALabelLeftBlank_IsRefusedInPlace_WithItsOwnText()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Genre.LabelRequired");
         var page = Open($"edit={Biography.Id}");
 
-        page.Find("form.genre-row input[type='text']").Change(" ");
-        page.Find("form.genre-row").Submit();
+        await page.ChangeAsync("form.genre-row input[type='text']", " ");
+        await page.SubmitAsync("form.genre-row");
 
         var form = page.Find("form.genre-row");
         Assert.Equal("true", form.QuerySelector("input[type='text']")!.GetAttribute("aria-invalid"));
@@ -175,12 +175,12 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Edit_OfAGenreChangedMeanwhile_SaysSoInItsRow()
+    public async Task Edit_OfAGenreChangedMeanwhile_SaysSoInItsRow()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
         var page = Open($"edit={Biography.Id}");
 
-        page.Find("form.genre-row").Submit();
+        await page.SubmitAsync("form.genre-row");
 
         Assert.Equal("functional", page.Find("form.genre-row [data-error-category]").GetAttribute("data-error-category"));
     }
@@ -234,13 +234,13 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void New_AddsTheGenre_ThenLeadsBackToTheList()
+    public async Task New_AddsTheGenre_ThenLeadsBackToTheList()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Json(new GenreForm(Guid.NewGuid(), "Polar", 1), HttpStatusCode.Created);
         var page = Open("new=open", recorded: true);
 
-        page.Find("form.genre-new input[type='text']").Change("Polar");
-        page.Find("form.genre-new").Submit();
+        await page.ChangeAsync("form.genre-new input[type='text']", "Polar");
+        await page.SubmitAsync("form.genre-new");
 
         var written = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Post, "/admin/genres", "Polar"), (written.Method, written.Path, written.Body.GetProperty("label").GetString()));
@@ -249,13 +249,13 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void New_ALabelAlreadyTaken_IsRefusedInTheDialog()
+    public async Task New_ALabelAlreadyTaken_IsRefusedInTheDialog()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Genre.LabelAlreadyUsed");
         var page = Open("new=open");
 
-        page.Find("form.genre-new input[type='text']").Change("AVENTURE");
-        page.Find("form.genre-new").Submit();
+        await page.ChangeAsync("form.genre-new input[type='text']", "AVENTURE");
+        await page.SubmitAsync("form.genre-new");
 
         var form = page.Find("form.genre-new");
         Assert.Equal("AVENTURE", form.QuerySelector("input[type='text']")!.GetAttribute("value"));

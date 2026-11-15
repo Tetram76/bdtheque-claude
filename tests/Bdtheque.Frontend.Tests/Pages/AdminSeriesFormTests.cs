@@ -161,7 +161,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Collection_IsChosenInTheListOfThoseOfThePublisher()
+    public async Task Collection_IsChosenInTheListOfThoseOfThePublisher()
     {
         // visuel/saisie-serie/contenu.md: the name of a collection, chosen and sometimes changed by its publisher, is ill
         // remembered: the list shows them all.
@@ -169,9 +169,9 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
 
         Assert.Equal(["—", "Grand angle", "Ligne noire"],
             page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
-        page.Find("#series-collection").Change(Angle.ToString());
+        await page.ChangeAsync("#series-collection", Angle.ToString());
         Assert.Equal(Angle.ToString(), page.Find("#series-collection").GetAttribute("value"));
-        page.Find("#series-collection").Change("");
+        await page.ChangeAsync("#series-collection", "");
 
         Assert.Equal("", page.Find("#series-collection").GetAttribute("value"));
     }
@@ -243,11 +243,11 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Title_FollowsTheTyping()
+    public async Task Title_FollowsTheTyping()
     {
         var page = OpenSeries();
 
-        page.Find("#series-title").Input("Blacksad, l'intégrale");
+        await page.InputAsync("#series-title", "Blacksad, l'intégrale");
 
         Assert.Equal("Blacksad, l'intégrale", page.Find(".entry-form-subject").TextContent.Trim());
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
@@ -278,17 +278,17 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
+    public async Task Save_SendsTheWholeFormAtItsVersion_RecordsTheSaving_AndLeadsBackToTheList()
     {
         var page = OpenSeries();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad with { Version = 13, Content = Blacksad.Content with { IsComplete = true } });
 
-        page.FindAll("input[type=checkbox]")[0].Change(true);
-        page.Find("#series-color").Change("false");
-        page.Find("form").Submit();
+        await page.ChangeAsync("input[type=checkbox]", true);
+        await page.ChangeAsync("#series-color", "false");
+        await page.SubmitAsync("form");
 
         // A modification saved leads back to the list (visuel/saisie-album/contenu.md).
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminSeries, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminSeries, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
         var (method, path, body) = Assert.Single(_api.Written);
         Assert.Equal((HttpMethod.Put, $"/admin/series/{SeriesId}"), (method, path));
         var request = body.Deserialize<UpdateSeriesRequest>(JsonSerializerOptions.Web)!;
@@ -300,16 +300,16 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Create_LeadsBackToTheList()
+    public async Task Create_LeadsBackToTheList()
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad, HttpStatusCode.Created);
 
-        page.Find("#series-title").Input("Blacksad");
-        page.Find("form").Submit();
+        await page.InputAsync("#series-title", "Blacksad");
+        await page.SubmitAsync("form");
 
         var navigation = Services.GetRequiredService<NavigationManager>();
-        page.WaitForAssertion(() => Assert.Equal(AppPaths.AdminSeries, new Uri(navigation.Uri).AbsolutePath));
+        Assert.Equal(AppPaths.AdminSeries, new Uri(navigation.Uri).AbsolutePath);
         var (method, path, body) = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, "/admin/series"), (method, path));
         Assert.Equal(Proposed.EditionTemplate, body.Deserialize<SeriesContent>(JsonSerializerOptions.Web)!.EditionTemplate);
@@ -321,14 +321,14 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     [InlineData("Series.SortKeyRequired", "/manualSortKey", "series-sort-key", "Saisissez une clé, ou réinitialisez-la.")]
     [InlineData("Series.TheoreticalVolumeCountPositive", "/theoreticalVolumeCount", "series-volumes", "Supérieur à zéro.")]
     [InlineData("PublisherCollection.NotOfPublisher", "/editionTemplate/publisherCollectionId", "series-collection", "Une collection de l'éditeur choisi.")]
-    public void BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
+    public async Task BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
         var page = OpenNew();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, rule, pointer);
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("business", error.GetAttribute("data-error-category"));
         Assert.Equal("À corriger", error.QuerySelector("[data-error-label]")!.TextContent);
         Assert.Equal("true", page.Find($"#{field}").GetAttribute("aria-invalid"));
@@ -336,23 +336,23 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
+    public async Task FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
     {
         var page = OpenSeries();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
 
-        page.Find("#series-title").Input("Blacksad, l'intégrale");
-        page.Find("#series-status").Change("Completed");
+        await page.InputAsync("#series-title", "Blacksad, l'intégrale");
+        await page.ChangeAsync("#series-status", "Completed");
         ChoosePublisher(page, null);
-        page.Find("#series-binding").Change("Paperback");
-        page.Find("form").Submit();
+        await page.ChangeAsync("#series-binding", "Paperback");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("functional", error.GetAttribute("data-error-category"));
         Assert.Contains("La série a été modifiée entre-temps", error.TextContent);
         Assert.Equal(["Recharger la fiche", "Voir mes changements"], error.QuerySelectorAll("button").Select(b => b.TextContent.Trim()));
 
-        error.QuerySelectorAll("button")[1].Click();
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[1]);
 
         var changes = page.Find("dialog .changes-dialog-list");
         Assert.Equal(["Titre", "Statut", "Éditeur", "Collection éditeur", "Reliure"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
@@ -361,23 +361,23 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
+    public async Task TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
     {
         var page = OpenSeries();
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
 
-        page.Find("#series-title").Input("Blacksad, l'intégrale");
-        page.Find("form").Submit();
+        await page.InputAsync("#series-title", "Blacksad, l'intégrale");
+        await page.SubmitAsync("form");
 
-        var error = page.WaitForElement("[role=alert]");
+        var error = page.Find("[role=alert]");
         Assert.Equal("technical", error.GetAttribute("data-error-category"));
         Assert.Contains("n'a pas pu enregistrer la série", error.TextContent);
         Assert.Equal("Blacksad, l'intégrale", page.Find("#series-title").GetAttribute("value"));
 
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
-        page.Find("[role=alert] button").Click();
+        await page.ClickAsync("[role=alert] button");
 
-        page.WaitForAssertion(() => Assert.Empty(page.FindAll("[role=alert]")));
+        Assert.Empty(page.FindAll("[role=alert]"));
         Assert.Equal(2, _api.Written.Count);
     }
 
@@ -387,14 +387,14 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         var page = OpenSeries();
         var tags = page.FindComponents<RecordTags>().First(t => t.Instance.Kind == RecordKind.Author);
         await tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync("Juanjo Guarnido"));
-        page.Find(".dialog-actions .button[data-variant=primary]").Click();
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
         Assert.Empty(_api.Written);
         Assert.Contains("admin.series-form.author-created", _audience.Functions);
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
 
-        page.Find("form").Submit();
+        await page.SubmitAsync("form");
 
-        page.WaitForAssertion(() => Assert.Single(_api.Written));
+        Assert.Single(_api.Written);
         var added = _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords");
         Assert.Equal("Guarnido", added.GetProperty("authors")[0].GetProperty("lastName").GetString());
     }

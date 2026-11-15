@@ -2,7 +2,6 @@ using System.Net;
 using System.Text;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
@@ -263,7 +262,7 @@ public sealed class RecordPickerTests : BunitContext
         // Typed within a pause, the clock standing still: each keystroke awaits its pause on the clock once raised.
         var keystrokes = new List<Task>();
         foreach (var text in new[] { "t", "ti", "tin" })
-            keystrokes.Add(await picker.RaiseAsync("input", field => field.InputAsync(new ChangeEventArgs { Value = text })));
+            keystrokes.Add(await picker.StartInputAsync("input", text));
         _clock.Advance(RecordPicker.TypingPause - TimeSpan.FromMilliseconds(1));
 
         lock (_requests)
@@ -414,7 +413,7 @@ public sealed class RecordPickerTests : BunitContext
     {
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
 
-        await (await picker.RaiseAsync("input", field => field.InputAsync(new ChangeEventArgs { Value = "   " }))).EndAsync("Erasing the text");
+        await picker.InputAsync("input", "   ");
 
         Assert.Empty(_requests);
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
