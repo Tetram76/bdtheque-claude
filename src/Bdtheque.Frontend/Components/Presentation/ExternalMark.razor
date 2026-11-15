@@ -1,0 +1,9 @@
+@inject IStringLocalizer<ExternalMark> L
+
+@* What a link that leads out of the application says of it, after its text
+   (visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md): a small globe, and « site externe » for screen readers.
+   Every such link (the website of a publisher, and any site outside the application to come) carries this mark, so that the
+   way it says so never diverges from one link to another (gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md,
+   Cohérence tenue dans la durée). The link itself opens the site beside the application
+   (choix-implementation/socle/frontend.md, site extérieur). *@
+<span class="external-mark"><Icon Name="IconName.Website" /><span class="visually-hidden">@L["External"]</span></span>

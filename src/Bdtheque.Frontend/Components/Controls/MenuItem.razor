@@ -3,9 +3,10 @@
    label when the choice it makes needs saying (e.g. « Toute édition de l'album fera l'affaire. »). *@
 @if (Href is not null)
 {
-    @* A site outside the application opens beside it, so that the page it was opened from stays as it was. *@
-    <a class="menu-item" href="@Href" data-variant="@VariantName" target="@(External ? "_blank" : null)"
-       rel="@(External ? "noopener noreferrer" : null)">@Content</a>
+    @* What opens beside the page (a site outside the application, the original of a visual) leaves the page it was opened
+       from as it was; a site outside the application says so by the mark of such links, its globe in place of the icon. *@
+    <a class="menu-item" href="@Href" data-variant="@VariantName" target="@(OpensBeside ? "_blank" : null)"
+       rel="@(OpensBeside ? "noopener noreferrer" : null)">@Content</a>
 }
 else
 {
@@ -38,9 +39,21 @@ else
     [Parameter]
     public string? Href { get; set; }
 
-    /// <summary>Whether <see cref="Href"/> is a site outside the application (e.g. the website of a publisher).</summary>
+    /// <summary>
+    /// Whether <see cref="Href"/> is a site outside the application (e.g. the website of a publisher), marked as such
+    /// (visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md): its globe takes the place of <see cref="Icon"/>.
+    /// </summary>
     [Parameter]
     public bool External { get; set; }
+
+    /// <summary>
+    /// Whether <see cref="Href"/> opens beside the page while staying in the application (e.g. the original of a visual): in a
+    /// new tab, without the mark of a site outside the application.
+    /// </summary>
+    [Parameter]
+    public bool Beside { get; set; }
+
+    private bool OpensBeside => External || Beside;
 
     /// <summary>The type of a button: <c>button</c>, or <c>submit</c> in a form.</summary>
     [Parameter]
@@ -61,7 +74,7 @@ else
     private string VariantName => Variant.ToString().ToLowerInvariant();
 
     private RenderFragment Content => @<text>
-        @if (Icon is { } icon)
+        @if (Icon is { } icon && !External)
         {
             <Icon Name="icon" />
         }
@@ -75,6 +88,10 @@ else
                 <span>@Label</span>
                 <span class="menu-item-hint">@Hint</span>
             </span>
+        }
+        @if (External)
+        {
+            <ExternalMark />
         }
     </text>;
 }

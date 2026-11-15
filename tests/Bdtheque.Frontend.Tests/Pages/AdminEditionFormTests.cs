@@ -654,8 +654,10 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal(("Déd.", "/admin/visuals/pending/" + AddedId + "/display"),
             (added.QuerySelector(".edition-visual-mark")!.TextContent, added.QuerySelector("img")!.GetAttribute("src")));
         // Its original as uploaded, from the waiting area too, before the form is saved.
-        Assert.Equal("/admin/visuals/pending/" + AddedId + "/original",
-            added.QuerySelectorAll(".actions-menu-panel a").Single(link => link.TextContent.Trim() == "Ouvrir l'original").GetAttribute("href"));
+        // Opened beside the form, but in the application: without the mark of a site outside it.
+        var original = added.QuerySelectorAll(".actions-menu-panel a").Single(link => link.TextContent.Trim() == "Ouvrir l'original");
+        Assert.Equal(("/admin/visuals/pending/" + AddedId + "/original", "_blank"), (original.GetAttribute("href"), original.GetAttribute("target")));
+        Assert.Null(original.QuerySelector(".external-mark"));
         Assert.Equal("Modifications non enregistrées", page.Find(".save-bar-state-long").TextContent);
         Assert.Contains("admin.edition-form.visual-added", _audience.Functions);
 

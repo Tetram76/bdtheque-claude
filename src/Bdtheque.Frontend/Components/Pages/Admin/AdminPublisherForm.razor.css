@@ -40,11 +40,16 @@
     color: var(--color-text);
 }
 
-.publisher-website-open ::deep .icon,
+.publisher-website-open ::deep .external-mark .icon,
 .publisher-collection-remove ::deep .icon,
 .publisher-collection-locked ::deep .icon {
     inline-size: 1.125rem;
     block-size: 1.125rem;
+}
+
+/* The globe of the website is the icon of its button (visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md). */
+.publisher-website-open ::deep .external-mark {
+    margin: 0;
 }
 
 /* A collection per row: its name, what references it, and its removal or the lock that forbids it (visuel/saisie-editeur/contenu.md). */

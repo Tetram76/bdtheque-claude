@@ -106,7 +106,7 @@
                                           OnClick="() => ChangeTypeAsync(visual, type)" />
                             }
                             <MenuSeparator />
-                            <MenuItem Href="@OriginalOf(visual)" External="true" Label="@L["Menu.Original"]" />
+                            <MenuItem Href="@OriginalOf(visual)" Beside="true" Label="@L["Menu.Original"]" />
                             <MenuItem Label="@L["Menu.Delete"]" Variant="ButtonVariant.Delete" OnClick="() => AskRemovalAsync(visual)" />
                         </ActionsMenu>
                     </span>

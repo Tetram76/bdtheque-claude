@@ -55,3 +55,15 @@
     text-decoration-thickness: 2px;
     text-underline-offset: 0.2em;
 }
+
+/* The mark of a site outside the application follows the label for screen readers, and its globe takes the place of the
+   icon of the item, lined up with the others' and of their size. */
+.menu-item ::deep .external-mark {
+    order: -1;
+    margin: 0;
+}
+
+.menu-item ::deep .external-mark .icon {
+    inline-size: 1.125em;
+    block-size: 1.125em;
+}

@@ -193,6 +193,9 @@ public sealed class ControlsTests : BunitContext
 
         var link = menu.Find("#album-1 a.menu-item");
         Assert.Equal("/albums/1", link.GetAttribute("href"));
+        // A page of the application: opened in place, without the mark of a site outside it.
+        Assert.Null(link.GetAttribute("target"));
+        Assert.Null(link.QuerySelector(".external-mark"));
         Assert.NotNull(menu.Find("#album-1 hr.menu-separator"));
         var deletion = menu.Find("#album-1 button.menu-item");
         Assert.Equal("delete", deletion.GetAttribute("data-variant"));
@@ -200,6 +203,24 @@ public sealed class ControlsTests : BunitContext
         Assert.Equal("hide", deletion.GetAttribute("popovertargetaction"));
         await menu.ClickAsync("#album-1 button.menu-item");
         Assert.True(chosen);
+    }
+
+    [Fact]
+    public void MenuItem_ToASiteOutsideTheApplication_OpensBeside_ItsGlobeInPlaceOfItsIcon()
+    {
+        var item = Render<MenuItem>(parameters => parameters
+            .Add(p => p.Label, "Ouvrir le site web")
+            .Add(p => p.Href, "https://www.dargaud.com")
+            .Add(p => p.External, true)
+            .Add(p => p.Icon, IconName.Exit));
+
+        // choix-implementation/socle/frontend.md, site extérieur; visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md.
+        var link = item.Find("a.menu-item");
+        Assert.Equal(("_blank", "noopener noreferrer"), (link.GetAttribute("target"), link.GetAttribute("rel")));
+        Assert.Equal("Ouvrir le site web, site externe", link.TextContent);
+        // The globe is its only icon: the arrow is that of a link which stays in the application.
+        Assert.Single(link.QuerySelectorAll("svg.icon"));
+        Assert.NotNull(link.QuerySelector(".external-mark svg.icon"));
     }
 
     [Fact]

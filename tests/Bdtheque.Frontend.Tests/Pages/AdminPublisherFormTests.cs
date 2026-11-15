@@ -111,7 +111,11 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         var open = page.Find(".publisher-website-open");
         Assert.Equal(("https://www.casterman.com", "_blank", "noopener noreferrer"),
             (open.GetAttribute("href"), open.GetAttribute("target"), open.GetAttribute("rel")));
-        Assert.Equal("Ouvrir le site web", open.GetAttribute("aria-label"));
+        // Its globe is its icon, the mark of a link leading out of the application
+        // (visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md), its name read with the announcement.
+        Assert.Equal("Ouvrir le site web, site externe", open.TextContent);
+        Assert.Equal("Ouvrir le site web", open.GetAttribute("title"));
+        Assert.NotNull(open.QuerySelector(".external-mark svg.icon"));
 
         await page.InputAsync("#publisher-website", "");
 

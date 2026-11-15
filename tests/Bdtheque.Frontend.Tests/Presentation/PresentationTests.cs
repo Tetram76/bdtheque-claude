@@ -359,8 +359,26 @@ public sealed class PresentationTests : BunitContext
         Assert.Equal(("https://www.casterman.com", "_blank", "noopener noreferrer"),
             (link.GetAttribute("href"), link.GetAttribute("target"), link.GetAttribute("rel")));
         Assert.Equal("Casterman, site externe", link.TextContent);
-        Assert.Equal(", site externe", link.QuerySelector(".visually-hidden")?.TextContent);
+        // Its name followed by the mark of a link leading out of the application.
+        Assert.Equal("external-mark", link.LastElementChild?.ClassName);
     }
+
+    [Fact]
+    public void ExternalMark_IsAGlobe_NeitherThatOfTheUniversesNorTheArrow_AnnouncedAsLeavingTheApplication()
+    {
+        // visuel/charte-graphique/liens-qui-font-sortir-de-l-application.md: a small globe, told apart from the globe of the
+        // universes and from the arrow of a link that stays in the application, and « site externe » for screen readers.
+        var mark = Render<ExternalMark>().Find(".external-mark");
+
+        Assert.Equal(", site externe", mark.QuerySelector(".visually-hidden")?.TextContent);
+        var globe = mark.QuerySelector("svg.icon path")?.GetAttribute("d");
+        Assert.Equal(IconPath(IconName.Website), globe);
+        Assert.NotEqual(IconPath(IconName.Universe), globe);
+        Assert.NotEqual(IconPath(IconName.Exit), globe);
+    }
+
+    private string? IconPath(IconName name) =>
+        Render<Icon>(parameters => parameters.Add(p => p.Name, name)).Find("path").GetAttribute("d");
 
     [Fact]
     public void PublisherName_WithoutWebsite_IsItsNameAlone_NoLink()

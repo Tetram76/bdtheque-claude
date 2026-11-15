@@ -67,9 +67,21 @@
     min-inline-size: 0;
 }
 
+/* Its website on a single line, as dense as the other columns (visuel/listes/liste-par-liste.md): an ellipsis ends an address
+   that does not fit, its mark kept in view after it. */
 .publisher-website a {
+    display: inline-flex;
+    align-items: baseline;
+    max-inline-size: 100%;
+    vertical-align: top;
     font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
+}
+
+.publisher-website-text {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .publisher-collections {
