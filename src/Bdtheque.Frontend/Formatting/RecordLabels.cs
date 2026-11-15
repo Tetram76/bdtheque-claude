@@ -22,9 +22,9 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
     public string Album(AlbumSummary album, AlbumLabelFormat format) => Album(LabelOf(album), format);
 
     /// <summary>
-    /// An album where its series goes without saying: its name without the series, and the volume to present beside it, none
-    /// when the name already says it (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte). The one
-    /// place this choice is made, so that no such context names the series, nor presents a volume twice.
+    /// The identification of an album where its series goes without saying: its name without the series, and the volume that
+    /// goes with it, none when the name already says it (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte).
+    /// The one place this choice is made, so that no such context names the series, nor identifies an album by its volume twice.
     /// </summary>
     public AlbumInSeries InItsSeries(AlbumSummary album)
     {

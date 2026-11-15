@@ -57,7 +57,7 @@ public sealed class RecordLabelsTests
     [InlineData(null, 5, "Tome 5", null, true)]
     [InlineData("Le Lotus bleu", null, "Le Lotus bleu", null, false)]
     [InlineData(null, null, "<Sans titre>", null, false)]
-    public void InItsSeries_NamesTheAlbumWithoutItsSeries_AndPresentsItsVolumeOnce(
+    public void InItsSeries_NamesTheAlbumWithoutItsSeries_AndIdentifiesItByItsVolumeOnce(
         string? title, int? volume, string name, string? volumeBeside, bool namedByVolume) =>
         Assert.Equal(new AlbumInSeries(name, volumeBeside, namedByVolume), _labels.InItsSeries(Regular(title, "Tintin", volume)));
 
@@ -133,7 +133,6 @@ public sealed class RecordLabelsTests
     public void InItsSeries_PresentsTheVolumeBesideATitle_AsNextToATitle(AlbumType type, bool special, int? volume, int? start, int? end, string expected) =>
         Assert.Equal(expected, _labels.InItsSeries(
             new AlbumSummary(Guid.NewGuid(), "Titre", Guid.NewGuid(), "Série", type, special, volume, start, end, true)).Volume);
-
     [Theory]
     [InlineData("Gotlieb", "Marcel", "Gotlib", "Gotlib")]
     [InlineData("Franquin", "André", null, "André Franquin")]

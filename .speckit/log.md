@@ -2,7 +2,7 @@
 
 ## 2026-11-15
 
-* **Décision de l'utilisateur** : un album n'est nommé avec sa série que là où le contexte ne la rend pas évidente ; sur sa fiche, dans « Et le reste de la série ? », sur la fiche de sa série et dans la bibliographie d'un auteur, un album sans titre propre est nommé par son tome écrit en entier (« Tome 3 ») ; un même écran ne présente le tome d'un album qu'une fois : un album nommé par son tome n'a ni étiquette ni colonne du tome. **Choix** : le service des libellés donne ensemble le nom d'un album là où sa série est évidente et le tome à présenter à part, repris par chacun de ces contextes (#405).
+* **Décision de l'utilisateur** : un album n'est nommé avec sa série que là où le contexte ne la rend pas évidente ; sur sa fiche, dans « Et le reste de la série ? », sur la fiche de sa série et dans la bibliographie d'un auteur, un album sans titre propre est nommé par son tome écrit en entier (« Tome 3 ») ; l'identification d'un album ne présente son tome qu'une fois : un album nommé par son tome n'a ni étiquette, ni tome de sa carte (« Et le reste de la série ? », grille de cartes), ni mention du tome ; une colonne d'une liste, qui n'est pas de l'identification, reste renseignée. **Choix** : le service des libellés donne ensemble le nom d'un album là où sa série est évidente et le tome qui l'accompagne pour l'identifier, repris par chacun de ces contextes (#405).
 
 ## 2026-11-14
 

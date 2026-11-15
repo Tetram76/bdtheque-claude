@@ -578,8 +578,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal("Corto Maltese 4 albums, dont 2 dans la collection",
             string.Join(' ', series.QuerySelectorAll("summary > span").Select(s => s.TextContent.Trim())));
         var albums = series.QuerySelectorAll("details ol > li");
-        // The series being plain, an album without its own title is named by its volume in full, its column of the volume
-        // left empty: its volume is presented once (fonctionnel/presentation/libelle-d-un-album.md#tome-présenté-une-seule-fois).
+        // The series being plain, an album without its own title is named by its volume in full; each line, a card that
+        // identifies its album, leaves the place of the volume empty (fonctionnel/presentation/libelle-d-un-album.md#tome-présenté-une-seule-fois).
         Assert.Equal(["T. 1", "T. 5", "T. 6", ""], albums.Select(a => a.QuerySelector(".series-album-volume")!.TextContent.Trim()));
         Assert.Equal(["La Jeunesse", "Lointaines îles du vent", "Les Celtiques", "Hors-série 1"],
             albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));        Assert.Equal(["Dans la collection", "Dans la collection", "Intention d'achat", "Hors collection"],

@@ -1,7 +1,7 @@
 ---
 type: Règle métier
 title: 'Libellé d''un album'
-description: 'Libellé d''un album : série reprise selon que le contexte la rend évidente, tome présenté une seule fois sur un écran, tome selon le type, deux formats paramétrables, repli.'
+description: 'Libellé d''un album : série reprise selon que le contexte la rend évidente, tome présenté une seule fois dans l''identification d''un album, tome selon le type, deux formats paramétrables, repli.'
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:00:00Z }
 ---
 
@@ -20,7 +20,9 @@ Le libellé d'un album utilise son titre en forme naturelle (cf. [Tri et navigat
 
 > Sur sa fiche, avoir 2 fois l'information du numéro de tome, c'est une de trop ! (exigence de l'utilisateur)
 
-Un même écran ne présente le tome d'un album **qu'une fois**. Un album nommé par son tome (sans titre propre, dans un contexte qui rend la série évidente) n'a donc, à côté de son nom, ni étiquette, ni colonne, ni mention de son tome ; un album qui a un titre propre présente son tome à part, en abrégé (« T. 3 »).
+> C'est dans l'identification de l'album que le tome ne doit apparaître qu'une fois ; dans une liste, une colonne autre que « nom/titre » n'est pas de l'identification. (exigence de l'utilisateur)
+
+L'**identification** d'un album ne présente son tome **qu'une fois** : son nom, et ce qui l'accompagne pour l'identifier (l'étiquette du tome sur sa fiche, le tome d'une carte, la mention qui le situe dans la bibliographie d'un auteur). Un album nommé par son tome (sans titre propre, dans un contexte qui rend la série évidente) n'y a donc ni étiquette, ni tome de sa carte, ni mention de son tome ; un album qui a un titre propre présente son tome à part, en abrégé (« T. 3 »). Une **colonne** d'une liste autre que celle du nom n'est pas de l'identification : une colonne du tome reste renseignée (« T. 3 »), même à côté d'un album nommé « Tome 3 ».
 
 ## Représentation du tome selon le type d'album
 

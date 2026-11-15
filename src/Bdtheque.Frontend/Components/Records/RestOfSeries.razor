@@ -23,7 +23,8 @@
                 var album = card.Album;
                 var name = Labels.InItsSeries(album);
                 <li data-current="@(album.Id == AlbumId ? "" : null)">
-                    @* An album named by its volume leaves its column empty: its volume is presented once. *@
+                    @* Each line is a card that identifies its album: one named by its volume leaves the place of the volume
+                       empty, its volume being presented once. *@
                     <span class="series-album-volume">@if (name.Volume is { } volume){@volume}else if (!name.NamedByVolume){<NotSet Brief="true" />}</span>
                     @if (album.Id == AlbumId)
                     {
