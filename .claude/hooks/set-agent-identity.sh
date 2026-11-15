@@ -14,18 +14,18 @@ readonly agent_account='Tetram76-bot'
 # resets the helpers of lower-priority configuration files (Git Credential Manager), which ignore GH_TOKEN.
 helper='!gh auth git-credential'
 repo="${CLAUDE_PROJECT_DIR:-.}"
-if [ "$(git -C "$repo" config --local --get-all credential.https://github.com.helper 2>/dev/null)" != $'\n'"$helper" ]; then
+if [[ "$(git -C "$repo" config --local --get-all credential.https://github.com.helper 2>/dev/null)" != $'\n'"$helper" ]]; then
   git -C "$repo" config --local --replace-all credential.https://github.com.helper ''
   git -C "$repo" config --local --add credential.https://github.com.helper "$helper"
 fi
 
-[ -n "${CLAUDE_ENV_FILE:-}" ] || exit 0
+[[ -n "${CLAUDE_ENV_FILE:-}" ]] || exit 0
 
 # The token stays in the credential store of the workstation, where `gh auth login` put it; it is written nowhere in
 # the repository. Without it, an invalid token makes every GitHub command of the agent fail, rather than silently
 # fall back on the user's account.
 token=$(gh auth token --hostname github.com --user "$agent_account" 2>/dev/null) || token=''
-if [ -z "$token" ]; then
+if [[ -z "$token" ]]; then
   token='missing-agent-account-token'
   # The standard output of a SessionStart hook reaches the agent's context.
   echo "No gh token for $agent_account: the agent's GitHub commands will fail until 'gh auth login' adds it."
