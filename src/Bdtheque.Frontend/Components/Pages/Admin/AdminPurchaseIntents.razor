@@ -79,7 +79,7 @@
                                 }
                             </span>
                             <span class="intent-collection" role="cell">
-                                <CollectionStateTag State="@(row.Album.IsInCollection ? AlbumCollectionState.InCollection : AlbumCollectionState.OutsideCollection)" />
+                                <CollectionStateTag State="row.State" />
                             </span>
                             <span class="intent-created" role="cell">
                                 <span class="intent-caption">@L["Column.Created"]</span> <LocalDateTime Value="row.CreatedAt" DateOnly="true" />

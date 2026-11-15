@@ -36,18 +36,18 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
     // On the whole album, which has no edition.
     private static readonly PurchaseIntentAdminListItem OnAlbum = new(
-        Guid.Parse("01900000-0000-7000-8000-000000000001"), Blacksad, null, null, true,
+        Guid.Parse("01900000-0000-7000-8000-000000000001"), Blacksad, AlbumCollectionState.PurchaseIntent, null, null, true,
         new DateTimeOffset(2026, 10, 8, 8, 0, 0, TimeSpan.Zero), 41);
 
     // On an edition of an album of the collection, which has another one.
     private static readonly PurchaseIntentAdminListItem OnEdition = new(
-        Guid.Parse("01900000-0000-7000-8000-000000000002"), Castafiore,
+        Guid.Parse("01900000-0000-7000-8000-000000000002"), Castafiore, AlbumCollectionState.InCollection,
         new EditionSummary(Guid.Parse("01900000-0000-7000-8000-0000000000e2"), Guid.NewGuid(), "Casterman", Guid.NewGuid(), "Fac-similé", 2013, null),
         Cover, false, new DateTimeOffset(2026, 10, 8, 9, 0, 0, TimeSpan.Zero), 42);
 
     // On the only edition of its album.
     private static readonly PurchaseIntentAdminListItem OnOnlyEdition = new(
-        Guid.Parse("01900000-0000-7000-8000-000000000003"), Longway,
+        Guid.Parse("01900000-0000-7000-8000-000000000003"), Longway, AlbumCollectionState.PurchaseIntent,
         new EditionSummary(Guid.Parse("01900000-0000-7000-8000-0000000000e3"), Guid.NewGuid(), "Dupuis", null, null, 1974, null),
         null, true, new DateTimeOffset(2026, 10, 9, 8, 0, 0, TimeSpan.Zero), 43);
 
@@ -97,7 +97,8 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    // What an intent targets is told apart at first glance: the whole album, any edition doing, or one edition, named.
+    // What an intent targets is told apart at first glance: the whole album, any edition doing, or one edition, named. Its album is
+    // in the collection or wished for, never outside it (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album).
     public void Rows_TheAlbumWhatTheIntentTargetsItsMembershipAndItsDate()
     {
         var rows = Open("").FindAll(".intent-row:not(.intent-row-head)").Select(row => (
@@ -109,9 +110,9 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Blacksad - INT. [1 à 5]", "Album", "toute édition", "Hors collection", "Posée le 08/10/2026"),
+                ("Blacksad - INT. [1 à 5]", "Album", "toute édition", "Intention d'achat", "Posée le 08/10/2026"),
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Édition", "Casterman (Fac-similé) [2013]", "Dans la collection", "Posée le 08/10/2026"),
-                ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Hors collection", "Posée le 09/10/2026"),
+                ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Intention d'achat", "Posée le 09/10/2026"),
             ],
             rows);
     }
