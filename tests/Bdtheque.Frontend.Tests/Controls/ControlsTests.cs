@@ -251,7 +251,7 @@ public sealed class ControlsTests : BunitContext
         var impact = new DeletionImpact(
             BlockedBy: [],
             AssociationsRemoved: [new ImpactCount(EntityKind.Genre, 2)],
-            DeletedWith: [new ImpactCount(EntityKind.Edition, 2), new ImpactCount(EntityKind.EditionVisual, 5), new ImpactCount(EntityKind.PurchaseIntent, 1)],
+            DeletedWith: [new ImpactCount(EntityKind.Edition, 2), new ImpactCount(EntityKind.PurchaseIntent, 1), new ImpactCount(EntityKind.EditionVisual, 5)],
             LeavingCollection: [new ImpactCount(EntityKind.Album, 1)],
             Fingerprint: "abc");
 
@@ -259,7 +259,7 @@ public sealed class ControlsTests : BunitContext
 
         Assert.Equal(
             [
-                "Suppression aussi de 2 éditions, 5 visuels et 1 intention d'achat",
+                "Suppression aussi de 2 éditions, 1 intention d'achat et 5 visuels",
                 "Retrait de l'association avec 2 genres",
                 "Sortie de la collection de 1 album",
             ],

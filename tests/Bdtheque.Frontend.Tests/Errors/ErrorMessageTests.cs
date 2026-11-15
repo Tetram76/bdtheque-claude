@@ -78,13 +78,13 @@ public sealed class ErrorMessageTests : BunitContext
     [Fact]
     public void RefusedDeletion_ListsTheRecordsThatBlockIt_ByEntityType()
     {
-        var impact = new DeletionImpact([new ImpactCount(EntityKind.Album, 12), new ImpactCount(EntityKind.Series, 1)], [], [], [], "x");
+        var impact = new DeletionImpact([new ImpactCount(EntityKind.Series, 1), new ImpactCount(EntityKind.Album, 12)], [], [], [], "x");
 
         var message = Render<ErrorMessage>(parameters => parameters.Add(p => p.Problem,
             new ApiProblem(ProblemCategory.Business, 422, "Deletion.BlockedByReferences", impact)));
 
         var items = message.FindAll("[data-error-impact] li").Select(item => item.TextContent.Trim()).ToList();
-        Assert.Equal(["12 albums", "1 série"], items);
+        Assert.Equal(["1 série", "12 albums"], items);
     }
 
     [Fact]

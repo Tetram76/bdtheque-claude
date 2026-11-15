@@ -246,7 +246,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     {
         var id = Gotlib.Id;
         _api.Answers[$"/admin/authors/{id}/deletion-impact"] = new DeletionImpact(
-            [new ImpactCount(EntityKind.Album, 22), new ImpactCount(EntityKind.Series, 2)], [], [], [], "f2");
+            [new ImpactCount(EntityKind.Series, 2), new ImpactCount(EntityKind.Album, 22)], [], [], [], "f2");
 
         var dialog = Open($"delete={id}").Find("dialog");
 
@@ -254,8 +254,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal("L'auteur est encore utilisé par :", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Equal(
             [
-                "22 albums : retirez l'auteur de leurs contributions, ou fusionnez-le avec un autre auteur ;",
-                "2 séries : retirez l'auteur de leurs auteurs, ou fusionnez-le avec un autre auteur.",
+                "2 séries : retirez l'auteur de leurs auteurs, ou fusionnez-le avec un autre auteur ;",
+                "22 albums : retirez l'auteur de leurs contributions, ou fusionnez-le avec un autre auteur.",
             ],
             dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
         Assert.Equal(["Fermer"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));

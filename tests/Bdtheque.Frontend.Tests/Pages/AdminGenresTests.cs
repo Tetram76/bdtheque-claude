@@ -304,12 +304,12 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     {
         var id = Adventure.Id;
         _api.Answers[$"/admin/genres/{id}/deletion-impact"] = new DeletionImpact(
-            [], [new ImpactCount(EntityKind.Album, 612), new ImpactCount(EntityKind.Series, 118)], [], [], "f1");
+            [], [new ImpactCount(EntityKind.Series, 118), new ImpactCount(EntityKind.Album, 612)], [], [], "f1");
 
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal(("Supprimer ce genre ?", "Aventure"), (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
-        Assert.Contains("612 albums", Text(dialog.QuerySelector(".deletion-impact")!));
+        Assert.Contains("118 séries et 612 albums", Text(dialog.QuerySelector(".deletion-impact")!));
     }
 
     [Fact]
