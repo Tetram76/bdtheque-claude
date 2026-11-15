@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-15
+
+* **Décision de l'utilisateur** : un album est dans l'un de trois états, « Dans la collection », « Intention d'achat » ou « Hors collection », de même sens partout où son appartenance est présentée, comptée ou filtrée : « Hors collection » ne compte jamais un album visé ; la colonne « Collection » de la liste des intentions d'achat et le décompte des albums hors de la collection de l'accueil de l'administration le suivent (#417).
+
 ## 2026-11-14
 
 * **Décision de l'utilisateur** : la couverture d'un album est prise parmi ses éditions possédées dans un contexte de collection (statistiques, consultation limitée à la collection), parmi toutes ses éditions, visées par une intention d'achat comprises, dans un contexte de base documentaire, dont relève la fiche d'un album, comme ses cartes. **Choix** : la fiche d'un album porte sa couverture, calculée par l'API avec l'expression des cartes, le frontend n'en calculant aucune (#442).
