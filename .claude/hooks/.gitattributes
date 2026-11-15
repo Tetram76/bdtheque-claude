@@ -1,0 +1,2 @@
+# Bash rejects the carriage returns that core.autocrlf would add on a Windows checkout.
+*.sh text eol=lf
