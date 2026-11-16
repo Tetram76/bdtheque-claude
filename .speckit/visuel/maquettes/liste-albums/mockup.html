@@ -540,7 +540,7 @@ class View extends Mockup {
         mark: a.cover ? a.mark : '',
         date: a.date || 'Non renseignée',
         dateFg: a.date ? t.text : t.muted,
-        eds: (owned ? owned + (owned > 1 ? ' éditions' : ' édition') : 'Aucune édition') + (intents ? ' · ' + intents + (intents > 1 ? ' intentions' : ' intention') : ''),
+        eds: [owned ? owned + (owned > 1 ? ' éditions' : ' édition') : '', intents ? intents + (intents > 1 ? ' intentions' : ' intention') : ''].filter(Boolean).join(' · ') || '—',
         edsFg: owned + intents === 0 ? t.muted : t.text,
         intent: a.state === 'intent',
         badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? "Intention d'achat" : 'Hors collection'),
