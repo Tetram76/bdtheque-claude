@@ -546,7 +546,8 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             album.Version = (await ReadAsync<EditionVisualsForm>(response)).AlbumVersion;
         }
 
-        public Task IntentOnAlbumAsync(AlbumWrite album) => IntentAsync(album, null);
+        /// <summary>An intent on the album itself; the intents of the album after it.</summary>
+        public Task<PurchaseIntentsForm> IntentOnAlbumAsync(AlbumWrite album) => IntentAsync(album, null);
 
         /// <summary>An intent on a new edition of the album; the intents of the album after it.</summary>
         public Task<PurchaseIntentsForm> IntentOnEditionAsync(AlbumWrite album, PurchaseIntentEditionContent edition) => IntentAsync(album, edition);
