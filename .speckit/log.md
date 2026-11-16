@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-16
+
+* **Règle** : dans un lot de chantiers en parallèle, les harnais dus à la reprise du travail (relevé des versions, traitement du contrôle qualité, contrôle de cohérence fonctionnelle) sont traités, mais ne sont pas des chantiers du lot : hors de l'ordre de priorité, du nombre de chantiers du lot et des places des chantiers menés en même temps, ils sont vérifiés une fois pour le lot par l'orchestrateur, qui les confie à une session à part ; leurs suites en tickets restent candidates comme tout ticket du jalon en cours (exigence de l'utilisateur). La Pull Request qu'ouvre le traitement d'un harnais lui-même (montée de version, corrections du contrôle qualité) fait partie de ce traitement, sans être un chantier du lot, et compte pour l'indépendance des chantiers (décision de l'utilisateur) (#462).
+
 ## 2026-11-15
 
 * **Décision de l'utilisateur** : sur l'accueil de l'administration, c'est le titre de chaque carte du bloc « Les fiches » qui ouvre sa liste, et il se lit comme un lien ; la carte n'a plus de lien « Voir les … », la création d'une nouvelle fiche restant, sauf pour les éditions ; maquette de l'administration revue en conséquence (#431).
