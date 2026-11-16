@@ -5,26 +5,43 @@
     gap: var(--record-gap);
 }
 
+/* The mention of its kind, just over the pile (Records/RecordVisual.razor); then, on a smartphone, the identity, at the
+   distance of the blocks of the head. */
 .series-head {
     display: grid;
-    gap: var(--space-l);
+    gap: var(--space-s) var(--space-l);
     align-items: start;
 }
 
+.series-identity {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
+    margin-block-start: calc(var(--space-l) - var(--space-s));
+}
+
+/* On a wide screen, the identity beside the pile, under the mention, never beside it. */
 @media (min-width: 48rem) {
     .series-head {
         grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
-        gap: var(--space-xl);
+        column-gap: var(--space-xl);
+    }
+
+    .series-identity {
+        grid-column: 2;
+        grid-row: 2;
+        margin-block-start: 0;
     }
 }
 
 /* The pile of the covers of the first volumes, larger than that of a row of a list, each card framed as the visual an album
    record puts forward: the frame, the tilt and the shadow are the touch of the theme (--record-visual-…), the step that of
-   a pile so framed (--record-pile-step). No room on the sides, which the widest step needs within its column. */
+   a pile so framed (--record-pile-step). No room on the sides, which the widest step needs within its column, nor above it, for
+   the mention of its kind to be on its edge. */
 .series-pile {
     display: flex;
     justify-content: center;
-    padding-block: var(--space-m);
+    padding-block-end: var(--space-m);
     --cover-width: 7.75rem;
     --cover-pile-step: var(--record-pile-step);
 }
@@ -37,12 +54,6 @@
     background-color: var(--record-visual-background);
     box-shadow: var(--record-visual-shadow);
     rotate: var(--record-visual-tilt);
-}
-
-.series-identity {
-    display: grid;
-    gap: var(--space-m);
-    min-inline-size: 0;
 }
 
 .series-identity h1 {

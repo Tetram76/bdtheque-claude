@@ -82,6 +82,21 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal([AppPaths.Albums, AppPaths.SeriesRecord(SeriesId)], page.FindAll("nav.breadcrumb a").Select(a => a.GetAttribute("href")));
     }
 
+    // The mention of its kind, alone on its line over its cover, as a title: the identity starts under it, never beside it
+    // (visuel/fiche-album/contenu.md).
+    [Fact]
+    public void Head_IsUnderTheMentionOfItsKind_OverItsVisual_TheIdentityBesideIt()
+    {
+        _catalog.Album = Album();
+
+        var page = Open();
+
+        Assert.Equal(["record-visual", "album-identity"], page.Find(".album-head").Children.Select(child => child.ClassName));
+        var visual = page.Find(".album-head > .record-visual");
+        Assert.Equal("Album", visual.QuerySelector(".record-kind")!.TextContent);
+        Assert.NotNull(visual.QuerySelector(".album-cover .cover"));
+    }
+
     [Fact]
     public void Identity_LeadsToTheSeries_AndTellsVolumePublicationAndMembership()
     {

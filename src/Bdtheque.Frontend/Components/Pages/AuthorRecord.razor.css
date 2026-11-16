@@ -1,21 +1,21 @@
 /* Built on the contracts of the theme only (visuel/fiche-auteur/declinaison-par-theme.md, choix-implementation/socle/themes.md):
-   the head of the record, the small monogram on the left of the name, on a smartphone too; then the blocks, one under the
-   other. */
+   the head of the record, the mention of its kind over the small monogram (Records/RecordVisual.razor), the monogram on the
+   left of the name, on a smartphone too, the name under the mention, never beside it; then the blocks, one under the other. */
 .author-record {
     display: grid;
     gap: var(--record-gap);
 }
 
 .author-head {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-l);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-s) var(--space-l);
+    align-items: start;
 }
 
 /* The monogram, put forward as the visual of a record: its border, its shadow and its tilt are the touch of the theme
    (--record-visual-…), its corners those the theme gives that visual (--record-monogram-radius). */
 .author-monogram {
-    flex: none;
     margin-block-start: var(--space-xs);
     --monogram-size: 3.25rem;
 }
@@ -29,8 +29,9 @@
 }
 
 .author-identity {
+    grid-column: 2;
+    grid-row: 2;
     display: grid;
-    flex: 1 1 0;
     gap: var(--space-m);
     min-inline-size: 0;
 }
@@ -38,15 +39,6 @@
 .author-name {
     display: grid;
     gap: var(--space-xs);
-}
-
-.author-kind {
-    margin: 0;
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-strong);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
 }
 
 .author-name h1 {

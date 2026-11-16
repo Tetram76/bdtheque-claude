@@ -80,6 +80,21 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Equal([AppPaths.Authors], page.FindAll("nav.breadcrumb a").Select(a => a.GetAttribute("href")));
     }
 
+    // The mention of its kind, alone on its line over its monogram, as a title: the identity starts under it, never beside it
+    // (visuel/fiche-auteur/contenu.md).
+    [Fact]
+    public void Head_IsUnderTheMentionOfItsKind_OverItsVisual_TheIdentityBesideIt()
+    {
+        _catalog.Author = Author();
+
+        var page = Open();
+
+        Assert.Equal(["record-visual", "author-identity"], page.Find(".author-head").Children.Select(child => child.ClassName));
+        var visual = page.Find(".author-head > .record-visual");
+        Assert.Equal("Auteur", visual.QuerySelector(".record-kind")!.TextContent);
+        Assert.NotNull(visual.QuerySelector(".author-monogram .monogram"));
+    }
+
     [Fact]
     public void Identity_IsTheMainIdentifier_WithItsMonogram_WithoutANationalityNotSet()
     {

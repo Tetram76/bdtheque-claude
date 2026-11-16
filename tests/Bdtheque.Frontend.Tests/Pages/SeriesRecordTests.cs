@@ -79,6 +79,21 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
         Assert.Equal([AppPaths.Series], page.FindAll("nav.breadcrumb a").Select(a => a.GetAttribute("href")));
     }
 
+    // The mention of its kind, alone on its line over its pile of covers, as a title: the identity starts under it, never beside it
+    // (visuel/fiche-serie/contenu.md).
+    [Fact]
+    public void Head_IsUnderTheMentionOfItsKind_OverItsVisual_TheIdentityBesideIt()
+    {
+        _catalog.Series = Series();
+
+        var page = Open();
+
+        Assert.Equal(["record-visual", "series-identity"], page.Find(".series-head").Children.Select(child => child.ClassName));
+        var visual = page.Find(".series-head > .record-visual");
+        Assert.Equal("Série", visual.QuerySelector(".record-kind")!.TextContent);
+        Assert.NotNull(visual.QuerySelector(".series-pile .cover"));
+    }
+
     [Fact]
     public void Identity_TellsStatus_PlannedVolumes_AndWhetherComplete()
     {

@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''un auteur : identité, biographie, bibliographie complète.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:32:39Z }
 ---
 
 # Contenu
@@ -10,7 +10,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:00:00Z }
 Ce qui n'est pas renseigné n'est pas affiché ([Convivialité et efficacité](../charte-graphique/convivialite-et-efficacite.md)). De haut en bas :
 
 - **En-tête** de la partie Consultation, avec l'entrée « Auteurs » active, puis le **fil d'Ariane** : Auteurs, puis l'auteur.
-- **En-tête de la fiche** : un petit **monogramme** (initiales), décoratif, à gauche du nom, y compris sur smartphone ; l'identifiant principal de l'auteur ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)), suivi de son prénom et de son nom lorsqu'il est connu sous un pseudonyme ; sa nationalité, lorsqu'elle est renseignée ; des étiquettes qui donnent le nombre d'albums crédités, puis ce nombre par rôle.
+- **En-tête de la fiche** : la mention de sa nature, **« Auteur »**, alignée sur le bord gauche du monogramme, juste au-dessus de lui, comme celle de la fiche d'un album ([Contenu](../fiche-album/contenu.md)) : seule sur sa ligne, comme un titre, l'identité de l'auteur commençant sous elle, à la hauteur du monogramme, y compris sur smartphone ; un petit **monogramme** (initiales), décoratif, à gauche du nom, y compris sur smartphone ; l'identifiant principal de l'auteur ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)), suivi de son prénom et de son nom lorsqu'il est connu sous un pseudonyme ; sa nationalité, lorsqu'elle est renseignée ; des étiquettes qui donnent le nombre d'albums crédités, puis ce nombre par rôle.
 - **Qui est-ce ?** : la biographie ; sans biographie, pas de bloc.
 - **Sur quels albums ?** : la **bibliographie complète** ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)), en une seule liste :
   - séries et **albums sans série au premier niveau**, triés ensemble par ordre alphabétique (clé de tri), comme le veut [Structure de l'application](../../fonctionnel/structure-de-l-application.md) ;

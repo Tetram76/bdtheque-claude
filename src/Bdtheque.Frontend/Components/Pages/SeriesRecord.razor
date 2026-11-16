@@ -27,9 +27,11 @@ else if (_series is { } series)
         <div class="series-head">
             @* Decorative: the covers of its first volumes, so that a series never passes for a single album; each framed as the
                visual of an album, a theme putting it forward (--record-visual-…, themes/base.css). *@
-            <div class="series-pile">
-                <CoverPile Covers="series.Overview.FirstVolumeCovers" />
-            </div>
+            <RecordVisual Kind="RecordType.Series">
+                <div class="series-pile">
+                    <CoverPile Covers="series.Overview.FirstVolumeCovers" />
+                </div>
+            </RecordVisual>
 
             <div class="series-identity">
                 <h1>@series.Title</h1>
