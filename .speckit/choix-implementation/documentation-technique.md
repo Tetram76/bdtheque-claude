@@ -9,7 +9,7 @@ applies_to:
   - 'scripts/Update-TechnicalReferences.ps1'
   - 'docker/validation-docs/**'
   - 'tests/Bdtheque.Documentation.Tests/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
 ---
 
 # Documentation technique : mise en œuvre
@@ -51,7 +51,8 @@ Mise en œuvre de [Documentation technique](../gestion-projet/gouvernance/docume
   - **Alternative écartée (toute Pull Request modifie `docs/tech/`)** : une contrainte artificielle, contournée par des modifications de pure forme.
   - **Alternative écartée (mention dans la description de la Pull Request)** : la modifier ne relance pas le CI, sauf à le déclencher à chaque modification de la description, chaque fois en entier ([Intégration continue (CI)](../gestion-projet/depot/integration-continue-ci.md), quotas).
 - **Références générées** par un script, versionnées, et vérifiées par sa régénération comparée au dossier lui-même, fichiers non suivis compris. Générée aujourd'hui : les références entre projets, depuis les fichiers de projet. Le contrat OpenAPI et le schéma de la base ne le sont pas encore (tickets de suivi, couverture de la documentation) : le premier se consulte exact pour chaque commit dans l'environnement de validation, le second exige une base migrée.
-- **Rendu dans Chromium** (`Bdtheque.Documentation.Tests`, Playwright, comme les tests de bout en bout) : le site construit, chaque page est ouverte, chaque diagramme doit être rendu sans erreur de Mermaid, sans formes qui se chevauchent, sans texte réduit sous un seuil de lisibilité par la mise à l'échelle, et sans requête hors du poste. La syntaxe seule (analyse sans rendu) ne verrait ni le chevauchement ni la taille.
+- **Rendu dans Chromium** (`Bdtheque.Documentation.Tests`, Playwright, comme les tests de bout en bout) : le site construit, chaque page est ouverte sur un écran de bureau, chaque diagramme écrit doit être rendu sans erreur de Mermaid, sans être réduit sous 0,75 de sa taille (Mermaid rétrécit un diagramme trop large à la colonne de la page, son texte avec lui), et sans requête hors du poste. Une analyse de la seule syntaxe ne verrait pas cette réduction, cause constatée des diagrammes illisibles ; la disposition elle-même (croisements, libellés), que Mermaid calcule, reste inspectée sur le rendu par l'agent.
+  - **Alternative écartée (détection géométrique des chevauchements)** : Mermaid place lui-même les formes sans les superposer ; un tel contrôle serait du code à tenir pour un défaut que l'outil ne produit pas.
 - **Job du CI à part** (« Technical documentation »), toujours exécuté, ses étapes omises selon les fichiers modifiés : impact et références à chaque Pull Request ; construction et rendu quand la documentation ou son outillage change. Une Pull Request documentaire seule n'exécute ni les tests de l'application, ni ceux de bout en bout, ni la construction des images.
 
 ## Environnement de validation

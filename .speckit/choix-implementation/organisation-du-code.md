@@ -6,7 +6,7 @@ applies_to:
   - 'Bdtheque.slnx'
   - 'src/*/*.csproj'
   - 'tests/*/*.csproj'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
 ---
 
 # Organisation du code
@@ -24,4 +24,4 @@ La solution est découpée en **projets par responsabilité** (`src/`), chacun n
 | `Bdtheque.HealthProbe` | Sonde de santé des images publiées, qui n'ont ni shell ni `curl` ([Images de base des conteneurs](deploiement/images-de-base-des-conteneurs.md)). |
 | `Bdtheque.ValidationData` | Données de l'[Environnement de validation fonctionnelle](deploiement/environnement-de-validation-fonctionnelle.md), chargées par l'API d'administration (seulement `Bdtheque.Contracts`) ; jamais déployé. |
 
-Chaque projet source a son miroir de tests sous `tests/` (ex. `Bdtheque.Api.Tests`) dès que son contenu en justifie ([Qualité du code](../gestion-projet/gouvernance/qualite-du-code.md), non-régression). S'y ajoutent les tests de bout en bout de l'application complète (`Bdtheque.EndToEnd.Tests`) et la bibliothèque que partagent les tests (`Bdtheque.Testing`), cf. [Outillage de développement .NET](outillage.md).
+Chaque projet source a son miroir de tests sous `tests/` (ex. `Bdtheque.Api.Tests`) dès que son contenu en justifie ([Qualité du code](../gestion-projet/gouvernance/qualite-du-code.md), non-régression). S'y ajoutent les tests de bout en bout de l'application complète (`Bdtheque.EndToEnd.Tests`), ceux de la documentation technique (`Bdtheque.Documentation.Tests`, [Documentation technique : mise en œuvre](documentation-technique.md)) et la bibliothèque que partagent les tests (`Bdtheque.Testing`), cf. [Outillage de développement .NET](outillage.md).

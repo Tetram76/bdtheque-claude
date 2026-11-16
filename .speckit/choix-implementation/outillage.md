@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:20:55Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
 ---
 
 # Outillage de développement
@@ -77,6 +77,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T10:20:55Z }
 - **Une seule exécution des tests par push** : l'analyse SonarQube Cloud est un job distinct qui suit ceux des tests et réunit leurs couvertures ([Analyse de la qualité du code](../gestion-projet/depot/analyse-de-la-qualite-du-code.md)). Le check des tests dit seul si la non-régression est confirmée, et une analyse impossible n'échoue que son propre job. Le scanner désactivant les avertissements en erreur, sa compilation ne remplace pas celle, stricte, des tests.
   - **Alternative écartée (tests exécutés aussi par l'analyse)** : le double de temps d'exécuteur et de téléchargements de l'image PostgreSQL ([Intégration continue (CI)](../gestion-projet/depot/integration-continue-ci.md), quotas), et deux fois plus de chances qu'une instabilité fasse échouer un push.
   - **Alternative écartée (un seul job compilation, analyse et tests)** : une analyse indisponible ferait échouer le check de la non-régression, sans qu'on distingue l'un de l'autre.
+- **Job de la documentation technique** (impact des changements, références générées, site et rendu de ses diagrammes) : [Documentation technique : mise en œuvre](documentation-technique.md).
 - **CI lancé aussi à la demande**, pour l'analyse de `main` qui suit la publication d'une version ([Versions et releases](../gestion-projet/depot/versions-et-releases.md)) : l'analyse reprenant la couverture des tests, c'est le CI entier qui s'exécute.
 - **Cache NuGet sous une clé tirée de tout ce qui décide des packages restaurés**, sans clé de repli : un cache partiel, complété puis réenregistré, garderait les packages de toutes les versions passées.
 - **Exécution précédente d'une PR annulée** par une nouvelle, pour épargner les quotas ([Intégration continue (CI)](../gestion-projet/depot/integration-continue-ci.md)) ; une exécution sur `main` n'est jamais annulée.

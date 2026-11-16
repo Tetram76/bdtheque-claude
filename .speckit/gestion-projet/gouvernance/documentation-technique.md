@@ -8,7 +8,7 @@ applies_to:
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
 ---
 
 # Documentation technique

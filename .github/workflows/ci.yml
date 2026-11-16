@@ -33,6 +33,7 @@ jobs:
       sources: ${{ steps.changes.outputs.sources }}
       rendering: ${{ steps.changes.outputs.rendering }}
       images: ${{ steps.changes.outputs.images }}
+      documentation: ${{ steps.changes.outputs.documentation }}
     steps:
       # The merge commit of a pull request (refs/pull/<number>/merge) and its first parent, the head of main it merges
       # into: their difference is the pull request as it would be merged.
@@ -49,23 +50,30 @@ jobs:
             echo "sources=true" >> "$GITHUB_OUTPUT"
             echo "rendering=true" >> "$GITHUB_OUTPUT"
             echo "images=true" >> "$GITHUB_OUTPUT"
+            echo "documentation=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           cd "$RUNNER_TEMP"
           git -C "$GITHUB_WORKSPACE" diff --name-only --no-renames HEAD^1 HEAD > changed.txt
-          # Documentation, and tooling that no test runs: the tests of the repository check what they read of it.
-          not_sources='^(\.speckit/|\.claude/|poc/|scripts/|docker/|\.github/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.dockerignore$|\.gitignore$)'
+          # Documentation, and tooling that no test runs: the tests of the repository check what they read of it. The tests
+          # of the technical documentation run in the job of their own.
+          not_sources='^(\.speckit/|\.claude/|poc/|docs/|scripts/|docker/|\.github/|tests/Bdtheque\.Documentation\.Tests/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.dockerignore$|\.gitignore$)'
           { grep -vE "$not_sources" changed.txt || true; grep -xF .github/workflows/ci.yml changed.txt || true; } > sources.txt
           # The tests without a browser render no screen.
           grep -vE '^tests/Bdtheque\.(Api|Domain|Frontend|Infrastructure|ValidationData)\.Tests/' sources.txt > rendering.txt || true
           # What the images built below are made of: their build context, their Dockerfiles and this workflow, which
-          # builds and analyzes them. The image of the validation data is not built here.
-          not_images='^(\.speckit/|\.claude/|poc/|scripts/|tests/|\.github/|docker/validation-data/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.gitignore$)'
+          # builds and analyzes them. The images of the validation data and of the technical documentation are not built here.
+          not_images='^(\.speckit/|\.claude/|poc/|docs/|scripts/|tests/|\.github/|docker/validation-data/|docker/validation-docs/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.gitignore$)'
           { grep -vE "$not_images" changed.txt || true; grep -xF .github/workflows/ci.yml changed.txt || true; } > images.txt
+          # What the site of the technical documentation is built and tested from: its pages, its scripts, its tests, their
+          # tools and packages, and this workflow.
+          documentation='^(docs/|scripts/(Build-TechnicalDocumentation|Get-TechnicalDocumentationImpact|Update-TechnicalReferences)\.ps1$|tests/Bdtheque\.Documentation\.Tests/|tests/Directory\.Build\.props$|dotnet-tools\.json$|Directory\.(Packages|Build)\.props$|\.github/workflows/ci\.yml$)'
+          grep -E "$documentation" changed.txt > documentation.txt || true
           echo "sources=$([ -s sources.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "rendering=$([ -s rendering.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "images=$([ -s images.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          for list in changed sources rendering images; do
+          echo "documentation=$([ -s documentation.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          for list in changed sources rendering images documentation; do
             echo "::group::$list ($(wc -l < "$list.txt"))"; cat "$list.txt"; echo "::endgroup::"
           done
 
@@ -107,14 +115,15 @@ jobs:
           dotnet tool restore
           dotnet ef migrations has-pending-model-changes --project src/Bdtheque.Infrastructure --configuration Release --no-build
 
-      # The only run of each test without a browser, side by side; the end-to-end tests run in jobs of their own. It
+      # The only run of each test without a browser, side by side; the end-to-end tests and those of the technical
+      # documentation run in jobs of their own. It
       # collects the coverage that the SonarQube Cloud analysis reports, on the code of the application only, the library
       # shared by the tests being left out (choix-implementation/outillage.md).
       - name: Run tests
         if: needs.changes.outputs.sources == 'true'
         run: >-
           dotnet test Bdtheque.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
-          --filter "FullyQualifiedName!~Bdtheque.EndToEnd.Tests."
+          --filter "FullyQualifiedName!~Bdtheque.EndToEnd.Tests.&FullyQualifiedName!~Bdtheque.Documentation.Tests."
           --collect "XPlat Code Coverage"
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"
@@ -275,6 +284,74 @@ jobs:
           name: captures-${{ matrix.theme }}
           path: tests/Bdtheque.EndToEnd.Tests/TestResults/captures
           if-no-files-found: ignore
+
+  # The technical documentation (gestion-projet/gouvernance/documentation-technique.md): on each pull request, the impact
+  # of its changes and the generated references, both cheap; the site and the rendering of its diagrams only when the
+  # documentation or its tooling changes. A pull request of documentation alone runs this job and the tests of the
+  # repository, neither the tests of the application nor its images.
+  documentation:
+    name: Technical documentation
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      # The whole history of a pull request: one of its commits may carry the trailer that says why a page did not change.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
+
+      # The merge commit of the pull request against the head of main, as the job of the changed files compares them; the
+      # commits of the pull request are those of its second parent.
+      - name: Check the impact of the changes on the documentation
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: ./scripts/Get-TechnicalDocumentationImpact.ps1 -Base HEAD^1 -Head HEAD -Commits 'HEAD^1..HEAD^2' -Check
+
+      - name: Check the generated references
+        shell: pwsh
+        run: ./scripts/Update-TechnicalReferences.ps1 -Check
+
+      # The SDK of the Dockerfiles (SdkVersionTests).
+      - name: Setup .NET
+        id: dotnet
+        if: needs.changes.outputs.documentation == 'true'
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: "10.0.404"
+
+      # The packages restored by the job of the tests, under the same key, only read, as the end-to-end jobs do.
+      - name: Restore the NuGet packages from the cache
+        if: needs.changes.outputs.documentation == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('Directory.Packages.props', '**/Directory.Build.props', '**/*.csproj', 'dotnet-tools.json') }}
+
+      # DocFX, a local tool of dotnet-tools.json, and the project of the tests.
+      - name: Build (Release)
+        if: needs.changes.outputs.documentation == 'true'
+        run: |
+          dotnet tool restore
+          dotnet build tests/Bdtheque.Documentation.Tests --configuration Release
+
+      # The headless shell of Chromium, which renders the diagrams, with the system libraries it needs on the runner.
+      - name: Install the browser of the tests
+        if: needs.changes.outputs.documentation == 'true'
+        run: pwsh tests/Bdtheque.Documentation.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps --only-shell chromium
+
+      - name: Run the tests of the documentation
+        if: needs.changes.outputs.documentation == 'true'
+        run: >-
+          dotnet test tests/Bdtheque.Documentation.Tests --configuration Release --no-build
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Publish test results
+        if: always() && needs.changes.outputs.documentation == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results-documentation
+          path: "**/TestResults/test-results.trx"
+          if-no-files-found: warn
 
   # SonarQube Cloud analysis of the code, with the coverage of the tests run above, for the quality indicators of the
   # README and the pull request decoration (gestion-projet/depot/analyse-de-la-qualite-du-code.md). A job of its own: the

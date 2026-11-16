@@ -11,7 +11,7 @@ applies_to:
   - 'tests/Bdtheque.ValidationData.Tests/**'
   - 'src/Bdtheque.Frontend/Theming/ChosenThemeSelector.cs'
   - 'src/Bdtheque.Frontend/Hosting/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:26:20Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
 ---
 
 # Environnement de validation fonctionnelle
@@ -20,6 +20,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T20:26:20Z }
 - **Images construites sur le poste**, avec les Dockerfiles de production, depuis les sources du commit de tête de la PR extraites hors de la copie de travail : ni les modifications locales ni la branche courante n'entrent dans ce qui est validé. Quelques minutes au premier lancement, les suivants reprenant le cache, et seules des images de base épinglées sont téléchargées.
   - **Alternative écartée (images de la PR publiées sur Docker Hub)** : chaque validation consommerait les quotas de Docker Hub et de l'API GitHub ([Intégration continue (CI)](../../gestion-projet/depot/integration-continue-ci.md)), les dépôts privés exigeraient un jeton sur le poste, et un workflow de plus devrait supprimer les tags de chaque PR à sa fermeture ([Déploiement](../../contraintes-techniques/architecture-deploiement/deploiement.md)). Un coût sans justification pour éviter quelques minutes de construction.
 - **Un projet Compose distinct**, surchargeant celui de production sans le modifier, avec des valeurs fixes et fictives : ses conteneurs, réseaux, volumes et images locales ne touchent ni un déploiement local ni les images publiées, et ses ports ne s'ouvrent qu'au poste lui-même.
+- **Documentation technique du commit validé**, servie à côté de l'application par un service du même projet, sur une adresse du seul poste que la commande affiche ; la documentation de l'API reste celle d'`api` (mise en œuvre : [Documentation technique : mise en œuvre](../documentation-technique.md)).
 - **Environnement ASP.NET Core `Validation`**, qui se comporte comme la production, avec deux ajouts : la documentation de l'API ([Documentation de l'API](../socle/transverse/documentation-de-l-api.md)), et le **thème choisi par l'adresse**, qui devient celui de la visite, pour juger chaque thème sans attendre qu'il soit tiré ([Design et charte graphique](../../fonctionnel/design-et-charte-graphique.md)).
   - **Alternative écartée (environnement `Development`)** : il change d'autres comportements (page d'exception du développeur, liaison des requêtes, validation des services), que l'utilisateur validerait à tort pour ceux de la production.
 - **Données de validation fictives, chargées par l'API d'administration**, comme le ferait un client : chaque règle de l'application s'y applique, le journal des modifications les consigne, et elles suivent le schéma sans rien à tenir aligné. Elles **évoluent avec les écrans** : le chantier d'un écran y ajoute les cas qu'il présente. Leur chargement est vérifié par les tests : une évolution de l'API qui les refuserait fait échouer le CI.
