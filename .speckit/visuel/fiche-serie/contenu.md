@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''une série : pile de couvertures, avancement, auteurs, albums dans l''ordre de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:47:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:32:39Z }
 ---
 
 # Contenu
@@ -11,6 +11,7 @@ De haut en bas :
 
 - **En-tête** de la partie Consultation, avec l'entrée « Séries » active, puis le **fil d'Ariane** : Séries, puis la série.
 - **En-tête de la fiche**, sur deux colonnes, qui s'empilent sur smartphone :
+  - la mention de sa nature, **« Série »**, alignée sur le bord gauche de la pile de couvertures, juste au-dessus d'elle, comme celle de la fiche d'un album ([Contenu](../fiche-album/contenu.md)) : seule sur sa ligne, comme un titre, l'identité de la série commençant sous elle, à la hauteur de la pile ; sur smartphone, la mention, la pile, puis l'identité ;
   - une **pile de trois couvertures**, décorative : celles des premiers tomes de la série ; la pile garde toujours trois cartes, pour qu'une série ne se confonde jamais avec un album, une place au-delà des tomes de la série étant une carte générique ;
   - le titre, puis des étiquettes : le **statut**, le **nombre de tomes prévus** (nombre de tomes théorique) et la mention **Complète** ou **À compléter** ;
   - l'**avancement de la collection** : « N albums sur M dans la collection », avec une barre de progression ;

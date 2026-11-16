@@ -30,10 +30,13 @@ else if (_album is { } album)
 
     <div class="album-record">
         <div class="album-head">
-            @* The cover of the album, put forward as a theme puts it (--record-visual-…, themes/base.css). *@
-            <div class="album-cover">
-                <Cover VisualId="album.Cover?.VisualId" Palette="album.Cover?.Palette" Alt="@L["Cover", Heading]" Volume="true" />
-            </div>
+            @* The cover of the album, put forward as a theme puts it (--record-visual-…, themes/base.css), under the mention
+               of its kind. *@
+            <RecordVisual Kind="RecordType.Album">
+                <div class="album-cover">
+                    <Cover VisualId="album.Cover?.VisualId" Palette="album.Cover?.Palette" Alt="@L["Cover", Heading]" Volume="true" />
+                </div>
+            </RecordVisual>
 
             <div class="album-identity">
                 @* Not in the collection, at first glance: wished for, or catalogued only (visuel/fiche-album/contenu.md). *@

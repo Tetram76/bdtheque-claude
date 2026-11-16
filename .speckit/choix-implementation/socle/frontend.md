@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T14:50:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:32:56Z }
 ---
 
 # Frontend
@@ -119,6 +119,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T14:50:43Z }
 
 ## Fiches de la consultation
 
+- **Mention de la nature d'une fiche écrite une fois**, par un composant commun aux fiches d'un album, d'une série et d'un auteur, qui présente ensemble la mention et le visuel de l'en-tête ([Contenu](../../visuel/fiche-album/contenu.md)) : la page ne lui donne que le type de sa fiche et son visuel, si bien que ni le texte ni la place de la mention ne peuvent diverger d'une fiche à l'autre (#408). Le composant est une sous-grille des lignes de l'en-tête (`subgrid`) : la mention en occupe la première, le visuel la seconde, et l'identité de la fiche, placée par la page sur cette seconde ligne, commence à la hauteur du visuel, sous la mention, quelle que soit la hauteur de celle-ci. Sa colonne a la largeur du visuel, que la page lui donne quand elle dépend de la place (la couverture d'un album), centrée dans la colonne de l'en-tête : la mention, au début de cette colonne, est calée sur le bord gauche du visuel.
+  - **Alternative écartée (mention écrite par chaque page)** : c'est ainsi que seule la fiche d'un auteur portait la sienne, au-dessus de son nom (contrôle de cohérence, #408).
+  - **Alternative écartée (bloc ajusté à son contenu, mention et visuel)** : une couverture dont la largeur est une part de sa place s'y réduit à presque rien, sa largeur dépendant de celle du bloc qui dépend d'elle (pourcentage cyclique, constaté dans Chromium).
+  - **Alternative écartée (identité décalée d'une marge égale à la hauteur de la mention)** : cette hauteur dépend de la police de chaque thème, que la marge devrait suivre.
 - **Visionneuse des visuels d'une fiche en dialogue modal porté par l'adresse** (le visuel ouvert de la fiche d'un album, désigné par son édition et sa position, [`visuel/fiche-album/`](../../visuel/fiche-album/index.md)), en rendu statique, comme les dialogues des listes : chaque lien mène à la fiche avec la visionneuse sur un autre visuel, sans ancre, et sa fermeture à la fiche seule. Le dialogue est au-dessus de la page, qui ne change pas : la navigation améliorée de Blazor la garde où elle était. Une fiche se partage ou se recharge telle quelle, et l'action se relève d'après l'adresse ([Relevé par le frontend](../mesure-audience/releve-par-le-frontend.md)).
   - **Alternative écartée (édition choisie dont la fiche montre le détail et les visuels)** : selon le nombre de visuels de l'édition choisie, la hauteur de la fiche change au-dessus des éditions, qui ne peuvent rester à leur place à l'écran (constaté pendant la validation).
   - **Alternative écartée (visionneuse interactive)** : une connexion SignalR par visiteur pour une page de lecture, ce que le rendu statique par défaut évite.

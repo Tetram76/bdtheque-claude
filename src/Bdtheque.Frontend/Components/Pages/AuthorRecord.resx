@@ -18,9 +18,6 @@
   <data name="Breadcrumb.Authors" xml:space="preserve">
     <value>Auteurs</value>
   </data>
-  <data name="Kind" xml:space="preserve">
-    <value>Auteur</value>
-  </data>
   <data name="Nationality" xml:space="preserve">
     <value>Nationalité</value>
   </data>

@@ -52,6 +52,8 @@ summary{cursor:pointer}
 
     <main style="display: flex; flex-direction: column; gap: 22px">
 
+      <div>
+      <span style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">Auteur</span>
       <div style="display: flex; align-items: flex-start; gap: 16px">
         <div aria-hidden="true" style="position: relative; flex: none; width: 52px; height: 52px; margin-top: 4px">
           <span style="width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0; border: {{t.cvB}}; border-radius: {{mono.r}}; background: {{mono.bg}}; color: {{mono.fg}}; box-shadow: {{t.cvSh}}; transform: rotate({{t.cvRot}}); font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 20px; text-transform: uppercase">{{a.initials}}</span>
@@ -60,7 +62,6 @@ summary{cursor:pointer}
         </div>
         <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 10px">
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <span style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">Auteur</span>
             <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">{{a.name}}</h1>
             <sc-if value="{{a.hasRealName}}" hint-placeholder-val="{{false}}"><span style="font-size: 16px; color: {{t.muted}}">{{a.realName}}</span></sc-if>
           </div>
@@ -76,6 +77,7 @@ summary{cursor:pointer}
             </sc-for>
           </ul>
         </div>
+      </div>
       </div>
 
       <sc-if value="{{a.hasBio}}" hint-placeholder-val="{{false}}"><section aria-labelledby="a-bio" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
