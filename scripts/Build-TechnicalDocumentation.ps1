@@ -96,30 +96,36 @@ function Get-TocItem([string] $folder, [string] $prefix, [int] $depth) {
 # Markdown links outside the fences: a fence holds a diagram or an example, never a link to rewrite.
 $linkPattern = [regex] '\]\((?<href>[^)\s]+)\)'
 
+# The address on GitHub of a relative link that leaves docs/tech, or nothing for a link that stays in it (DocFX resolves
+# it) or is no relative link. The target is not read: the image of the validation environment holds docs/tech alone, and
+# the tests of the repository check that every target exists.
+function Get-GitHubAddress([string] $markdownFile, [string] $href) {
+    if ($href -match '^[a-z]+:' -or $href.StartsWith('#')) { return }
+    $parts = $href.Split('#', 2)
+    $target = [IO.Path]::GetFullPath((Join-Path (Split-Path $markdownFile -Parent) $parts[0]))
+    if ($target.StartsWith($Source + [IO.Path]::DirectorySeparatorChar) -or $target -eq $Source) { return }
+    $path = [IO.Path]::GetRelativePath($repositoryRoot, $target).Replace('\', '/')
+    $kind = if ($parts[0].EndsWith('/')) { 'tree' } else { 'blob' }
+    $anchor = if ($parts.Count -eq 2) { "#$($parts[1])" } else { '' }
+    "$repositoryUrl/$kind/$reference/$path$anchor"
+}
+
+# A link written as code is an example, not a link.
+function Convert-LinkOfLine([string] $markdownFile, [string] $line) {
+    $codeSpans = @([regex]::Matches($line, '`[^`]*`'))
+    $linkPattern.Replace($line, {
+        param($match)
+        $inCode = $codeSpans | Where-Object { $_.Index -lt $match.Index -and $match.Index -lt $_.Index + $_.Length }
+        $address = if (-not $inCode) { Get-GitHubAddress $markdownFile $match.Groups['href'].Value }
+        if ($address) { "]($address)" } else { $match.Value }
+    })
+}
+
 function Convert-Link([string] $markdownFile, [string] $text) {
     $inFence = $false
     $lines = foreach ($line in $text -split "`n") {
-        if ($line -match '^\s*```') { $inFence = -not $inFence; $line; continue }
-        if ($inFence) { $line; continue }
-        # A link written as code is an example, not a link.
-        $codeSpans = @([regex]::Matches($line, '`[^`]*`'))
-        $linkPattern.Replace($line, {
-            param($match)
-            $href = $match.Groups['href'].Value
-            if ($href -match '^[a-z]+:' -or $href.StartsWith('#')) { return $match.Value }
-            if ($codeSpans | Where-Object { $_.Index -lt $match.Index -and $match.Index -lt $_.Index + $_.Length }) { return $match.Value }
-            $parts = $href.Split('#', 2)
-            $target = [IO.Path]::GetFullPath((Join-Path (Split-Path $markdownFile -Parent) $parts[0]))
-            # Inside docs/tech, DocFX resolves the link. Outside, the target is not read: the image of the validation
-            # environment holds docs/tech alone, and the tests of the repository check that every target exists.
-            if ($target.StartsWith($Source + [IO.Path]::DirectorySeparatorChar) -or $target -eq $Source) {
-                return $match.Value
-            }
-            $path = [IO.Path]::GetRelativePath($repositoryRoot, $target).Replace('\', '/')
-            $kind = if ($parts[0].EndsWith('/')) { 'tree' } else { 'blob' }
-            $anchor = if ($parts.Count -eq 2) { "#$($parts[1])" } else { '' }
-            "]($repositoryUrl/$kind/$reference/$path$anchor)"
-        })
+        if ($line -match '^\s*```') { $inFence = -not $inFence }
+        if ($inFence -or $line -match '^\s*```') { $line } else { Convert-LinkOfLine $markdownFile $line }
     }
     $lines -join "`n"
 }
