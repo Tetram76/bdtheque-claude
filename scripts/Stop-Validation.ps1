@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     Validation environment of choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md:
-    removes its containers, networks and data, and the sources extracted for it. The images built for it are
+    removes its containers (the technical documentation among them), networks and data, and the sources extracted for it. The images built for it are
     kept: the next validation rebuilds only what its pull request changes.
 #>
 [CmdletBinding()]

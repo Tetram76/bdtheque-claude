@@ -40,6 +40,22 @@ public sealed partial class DockerComposeTests
         Assert.All(sources, source => Assert.Matches(ProjectScopedSource(), source));
     }
 
+    [Fact]
+    public void PortsOfTheValidation_AreOpenedToTheMachineOnly()
+    {
+        // The validation environment runs on the machine of the user, with fixed and fictitious secrets, and serves what
+        // production never exposes (api and its documentation, the technical documentation): no port of it may be reached
+        // from another machine (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md).
+        var ports = ValidationPort().Matches(RepositoryFiles.Read("docker/validation/compose.yaml"))
+            .Select(match => match.Groups["port"].Value).ToList();
+
+        Assert.NotEmpty(ports);
+        Assert.All(ports, port => Assert.StartsWith("127.0.0.1:", port));
+    }
+
+    [GeneratedRegex(@"^\s+-\s+""(?<port>[^""]+:\d+)""\s*$", RegexOptions.Multiline)]
+    private static partial Regex ValidationPort();
+
     [GeneratedRegex(@"^\s*(name|container_name):", RegexOptions.Multiline)]
     private static partial Regex FixedName();
 

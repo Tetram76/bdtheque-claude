@@ -28,6 +28,19 @@ services:
     ports: !override
       - "127.0.0.1:${FRONTEND_PORT}:8080"
 
+  # The technical documentation of the commit validated (docs/tech), built from its sources like the other images
+  # (choix-implementation/documentation-technique.md). Nothing to reach: no network but its own.
+  docs:
+    image: bdtheque-validation-docs
+    build:
+      context: .
+      dockerfile: docker/validation-docs/Dockerfile
+      args:
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-unknown}
+    # From this machine only.
+    ports:
+      - "127.0.0.1:${DOCS_PORT}:8080"
+
   # Loads the validation data through the API, once, into an empty database: started only on demand.
   validation-data:
     image: bdtheque-validation-data
