@@ -14,6 +14,9 @@
 }
 
 .series-identity {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
     margin-block-start: calc(var(--space-l) - var(--space-s));
 }
 
@@ -51,12 +54,6 @@
     background-color: var(--record-visual-background);
     box-shadow: var(--record-visual-shadow);
     rotate: var(--record-visual-tilt);
-}
-
-.series-identity {
-    display: grid;
-    gap: var(--space-m);
-    min-inline-size: 0;
 }
 
 .series-identity h1 {
