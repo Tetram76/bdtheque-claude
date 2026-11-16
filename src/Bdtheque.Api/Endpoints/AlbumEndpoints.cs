@@ -266,11 +266,15 @@ internal static class AlbumEndpoints
 
     // The series of the album, unless the form added it on the spot, created with the album.
     private static async Task<Series?> LoadSeriesAsync(
-        Guid? seriesId, AddedRecords added, BdthequeDbContext context, CancellationToken cancellationToken) =>
-        seriesId is not { } id ? null
-        : added.Series.TryGetValue(id, out var series) ? series
-        : await context.Series.SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
-          ?? throw new EntityNotFoundException(typeof(Series), id);
+        Guid? seriesId, AddedRecords added, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        if (seriesId is not { } id)
+            return null;
+        if (added.Series.TryGetValue(id, out var series))
+            return series;
+        return await context.Series.SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
+               ?? throw new EntityNotFoundException(typeof(Series), id);
+    }
 
     /// <summary>
     /// Applies the rest of the form to the album, its title, series and contributions being set
