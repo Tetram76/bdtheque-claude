@@ -16,8 +16,9 @@ public sealed class ImpactScriptTests : IAsyncLifetime
         _git.Write("src/Other.cs", "class Other { }");
         _git.Write("docs/tech/index.md", "# Documentation\n\n* [Portes](portes.md) - Les portes.\n");
         _git.Write("docs/tech/portes.md",
-            "---\ntitle: 'Portes'\ndescription: 'Les portes.'\ncode:\n  - 'src/Gates/**'\n---\n\n# Portes\n\nVoir [Linked](../../src/Linked.cs).\n");
+            "---\ntitle: 'Portes'\ndescription: 'Les portes.'\ncode:\n  - 'src/Gates/**'\n---\n\n# Portes\n\nVoir [Linked](../../src/Linked.cs) et le [README](../../README.md).\n");
         _git.Write(".speckit/regle.md", "# Règle\n");
+        _git.Write("README.md", "# Projet\n");
         await _git.CommitAsync("base");
         await _git.GitAsync("switch", "--quiet", "--create", "change");
     }
@@ -111,11 +112,13 @@ public sealed class ImpactScriptTests : IAsyncLifetime
         Assert.Contains("src/New.cs", result.Output, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public async Task SpeckitChanged_DescribesNothing()
+    [Theory]
+    [InlineData(".speckit/regle.md")]
+    [InlineData("README.md")]
+    public async Task DocumentChanged_IsNoFileThePagesDescribe(string document)
     {
-        _git.Write(".speckit/regle.md", "# Règle modifiée\n");
-        await _git.CommitAsync("change a rule");
+        _git.Write(document, "# Modifié\n");
+        await _git.CommitAsync("change a document");
 
         var result = await CheckAsync();
 

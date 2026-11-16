@@ -30,6 +30,9 @@ internal static class Processes
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            // What git and the scripts write, French text included, whatever the code page of the machine.
+            StandardOutputEncoding = System.Text.Encoding.UTF8,
+            StandardErrorEncoding = System.Text.Encoding.UTF8,
             UseShellExecute = false,
         };
         foreach (var argument in arguments)

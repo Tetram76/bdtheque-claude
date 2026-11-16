@@ -48,6 +48,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
+# The messages of the commits, in French, are read from git and written in UTF-8, whatever the code page of the console
+# when the output is redirected (the CI, the tests).
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+
 $trailer = 'Documentation-technique'
 $Root = (Resolve-Path $Root).Path
 $documentation = 'docs/tech/'
@@ -96,7 +100,8 @@ function Get-LinkPattern([string] $path) {
             $target = [IO.Path]::GetFullPath((Join-Path (Split-Path $path -Parent) $href))
             if (-not $target.StartsWith($Root)) { continue }
             $relative = [IO.Path]::GetRelativePath($Root, $target).Replace('\', '/')
-            if ($relative.StartsWith($documentation) -or $relative.StartsWith('.speckit/')) { continue }
+            # A link to another document (README, AGENTS.md) refers the reader to it: the page does not describe it.
+            if ($relative.StartsWith($documentation) -or $relative.StartsWith('.speckit/') -or $relative.EndsWith('.md')) { continue }
             if (Test-Path $target -PathType Container) { "$($relative.TrimEnd('/'))/**" } else { $relative }
         }
     }
