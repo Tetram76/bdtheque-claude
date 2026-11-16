@@ -28,7 +28,7 @@ Pour chaque famille et chaque axe transversal, trois sources sont confrontées :
   - **Alternative écartée (questions posées par la session du contrôle, une à une ou réunies sur une page)** : toutes les questions d'un contrôle arrivent alors dans la même session, ce que l'utilisateur refuse, quelle que soit leur forme (exigence de l'utilisateur, #409).
 - **C — l'écart est justifié** : le `.speckit/` en donne la raison. Rien n'est fait.
 
-Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request. Il se termine quand la date de sa prise en compte est écrite dans la description de son ticket (§ Trace). Dans un lot de chantiers en parallèle, il n'est pas un chantier du lot et n'y occupe aucune place ; ses suites, elles, y sont des tickets candidats ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md#harnais)).
+Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request. Il se termine quand la date de sa prise en compte est écrite dans la description de son ticket (§ Trace). Dans un lot de chantiers en parallèle, il n'est pas un chantier du lot et n'y occupe aucune place ; ses suites, elles, y sont candidates comme tout ticket du jalon en cours ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md#harnais)).
 
 Une raison qui manque ou qui faillit fait d'un écart un B, jamais un C : une question de trop coûte une réponse à l'utilisateur, un écart réel classé C reste dans l'application sans que personne le voie.
 
