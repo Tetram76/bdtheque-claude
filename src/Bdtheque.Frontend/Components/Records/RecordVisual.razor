@@ -6,7 +6,7 @@
    as a title, on the left edge of the visual. A subgrid of the rows of the head, so that the identity of the record, which
    the page places on the row of the visual, starts under the mention whatever its height. *@
 <div class="record-visual">
-    <p class="record-kind">@L[KindKey]</p>
+    <p class="record-kind">@L[KeyOf(Kind)]</p>
     @ChildContent
 </div>
 
@@ -19,11 +19,11 @@
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    private string KindKey => Kind switch
+    private static string KeyOf(RecordType kind) => kind switch
     {
         RecordType.Album => "Album",
         RecordType.Series => "Series",
         RecordType.Author => "Author",
-        _ => throw new ArgumentOutOfRangeException(nameof(Kind), Kind, "Only the records of an album, a series and an author carry the mention of their kind."),
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only the records of an album, a series and an author carry the mention of their kind."),
     };
 }
