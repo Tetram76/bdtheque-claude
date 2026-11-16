@@ -25,14 +25,16 @@ else if (_author is { } author)
 
     <div class="author-record">
         <div class="author-head">
-            @* Decorative, as in the lists, but put forward as a theme puts forward the visual of a record (--record-visual-…). *@
-            <span class="author-monogram">
-                <Monogram LastName="@author.LastName" FirstName="@author.FirstName" Pseudonym="@author.Pseudonym" />
-            </span>
+            @* Decorative, as in the lists, but put forward as a theme puts forward the visual of a record (--record-visual-…),
+               under the mention of its kind. *@
+            <RecordVisual Kind="RecordType.Author">
+                <span class="author-monogram">
+                    <Monogram LastName="@author.LastName" FirstName="@author.FirstName" Pseudonym="@author.Pseudonym" />
+                </span>
+            </RecordVisual>
 
             <div class="author-identity">
                 <div class="author-name">
-                    <p class="author-kind">@L["Kind"]</p>
                     <h1>@Name</h1>
                     @if (RealName is { } realName)
                     {

@@ -1,0 +1,24 @@
+/* The mention on the first row of the head, the visual on the second (a subgrid of its rows): the page places the identity
+   of the record on the second row, beside the visual, never beside the mention. The column has the width of the visual
+   (--record-visual-track, set by the page when that width depends on the room, e.g. the cover of an album), centred in the
+   column of the head: the mention, at its start, is on the left edge of the visual, which stretches over the column. */
+.record-visual {
+    display: grid;
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+    grid-template-columns: var(--record-visual-track, auto);
+    justify-content: center;
+    min-inline-size: 0;
+}
+
+/* A mention, as the kind of an entry is told elsewhere: small capitals, muted. */
+.record-kind {
+    justify-self: start;
+    align-self: end;
+    margin: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}

@@ -5,26 +5,40 @@
     gap: var(--record-gap);
 }
 
+/* The mention of its kind, just over the cover (Records/RecordVisual.razor), which has the width of a cover of a record; then,
+   on a smartphone, the identity, at the distance of the blocks of the head. */
 .album-head {
     display: grid;
-    gap: var(--space-l);
+    gap: var(--space-s) var(--space-l);
     align-items: start;
+    --record-visual-track: var(--record-visual-width);
 }
 
+.album-identity {
+    margin-block-start: calc(var(--space-l) - var(--space-s));
+}
+
+/* On a wide screen, the identity beside the cover, under the mention, never beside it. */
 @media (min-width: 48rem) {
     .album-head {
         grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-        gap: var(--space-xl);
+        column-gap: var(--space-xl);
+    }
+
+    .album-identity {
+        grid-column: 2;
+        grid-row: 2;
+        margin-block-start: 0;
     }
 }
 
 /* The cover of the album, put forward: its frame, its tilt and its shadow are the touch of the theme (--record-visual-…). The
    frame sets a background colour only: the generic visual of an album without cover is a background image, which the
-   shorthand would wipe out. */
+   shorthand would wipe out. Room under it for its shadow, none above it or on its left, for the mention to be on its edge. */
 .album-cover {
     display: flex;
     justify-content: center;
-    padding: var(--space-m);
+    padding-block-end: var(--space-m);
     --cover-width: var(--record-visual-width);
 }
 
