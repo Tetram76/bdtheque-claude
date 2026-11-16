@@ -6,7 +6,7 @@
 .DESCRIPTION
     Validation environment of choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md:
     the whole application (frontend, api, db), built from the sources of the pull request by Docker alone,
-    with the validation data. Each start begins from an empty database, so that nothing is left from one
+    with the validation data, and the technical documentation of the same commit (docs). Each start begins from an empty database, so that nothing is left from one
     validation to the next: starting again resets the environment. Stopped by Stop-Validation.ps1.
 
     Requires git and a running Docker service (Docker Desktop, Rancher Desktop), nothing else: neither the
@@ -70,6 +70,10 @@ git -C $repository archive --format=tar --output $archive $commit
 tar -xf $archive -C $sources
 Remove-Item $archive
 
+# The commit validated, which the technical documentation names on each page (docker/validation/compose.yaml): the
+# extracted sources have no history to read it from.
+$env:SOURCE_COMMIT = $commit
+
 $compose = @(
     'compose', '--project-name', 'bdtheque-validation', '--project-directory', $sources,
     '--file', (Join-Path $sources 'docker-compose.yml'), '--file', (Join-Path $sources 'docker/validation/compose.yaml'),
@@ -96,6 +100,10 @@ if ($PullRequest) {
 Write-Host "Version validated: $commit"
 Write-Host "Application:       http://localhost:$($settings.FRONTEND_PORT)"
 Write-Host "API documentation: http://localhost:$($settings.API_PORT)/scalar/v1"
+# The versions validated before the technical documentation have no service for it.
+if ($settings.DOCS_PORT) {
+    Write-Host "Technical docs:    http://localhost:$($settings.DOCS_PORT)/"
+}
 # The account of the administration, fixed and fictitious, for the versions that have one.
 if ($settings.ADMIN_LOGIN) {
     Write-Host "Administration:    login '$($settings.ADMIN_LOGIN)', password '$($settings.ADMIN_PASSWORD)'"

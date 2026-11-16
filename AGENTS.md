@@ -33,7 +33,7 @@ Les règles et protocoles décrits dans le `.speckit/` ont une valeur **au moins
 | --- | --- | --- |
 | Créer un ticket | `gh issue create`, `create_issue`, `issue_write` | [`gestion-projet/revue-tickets/issues.md`](.speckit/gestion-projet/revue-tickets/issues.md), [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md) |
 | Créer une Pull Request | `gh pr create`, `create_pull_request` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md) |
-| Pousser sur une Pull Request | `git push`, `push_files`, `create_or_update_file` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/revue-tickets/analyse-sonarqube-cloud.md`](.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md) |
+| Pousser sur une Pull Request | `git push`, `push_files`, `create_or_update_file` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/revue-tickets/analyse-sonarqube-cloud.md`](.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md), [`gestion-projet/gouvernance/documentation-technique.md`](.speckit/gestion-projet/gouvernance/documentation-technique.md) |
 | Passer une Pull Request en revue | `gh pr ready`, `update_pull_request` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/revue-tickets/analyse-sonarqube-cloud.md`](.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md), [`gestion-projet/revue-tickets/validation-fonctionnelle.md`](.speckit/gestion-projet/revue-tickets/validation-fonctionnelle.md) |
 | Commenter une Pull Request (demande de revue comprise) | `gh pr comment`, `add_issue_comment` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md) |
 | Traiter un retour de revue (Codex, SonarQube Cloud) | — | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/revue-tickets/analyse-sonarqube-cloud.md`](.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md) |
@@ -48,6 +48,13 @@ Les règles et protocoles décrits dans le `.speckit/` ont une valeur **au moins
 - **Lecture intégrale sur demande** : à la demande de l'utilisateur, un dossier entier, ou tout le `.speckit/`, est lu en entier.
 - **[`log.md`](.speckit/log.md)**, journal des changements du `.speckit/`, n'est pas lu systématiquement : il l'est lorsque l'on a besoin de savoir ce qui a changé dans le `.speckit/` (ex. depuis une version).
 - **Le dossier `poc/`** (prototypes exploratoires, hors `.speckit/`) n'est pas lu systématiquement : il ne l'est que lorsque le contexte de la discussion le nécessite. Rien de ce qu'il contient n'est statué : il ne fait jamais foi face au `.speckit/`.
+
+## Documentation technique
+
+[`docs/tech/`](docs/tech/index.md) décrit l'application telle qu'elle est implémentée ; elle ne prescrit rien et ne remplace aucune lecture du `.speckit/` ci-dessus. Ses règles sont celles de [Documentation technique](.speckit/gestion-projet/gouvernance/documentation-technique.md) (socle), et valent pour tout agent :
+
+- **Consultation** : seulement si le sujet touche l'implémentation, par sa carte racine `docs/tech/index.md`, puis la carte du domaine, puis les seules pages utiles ; jamais tout le dossier.
+- **Maintenance** : avant chaque push, `scripts/Get-TechnicalDocumentationImpact.ps1` liste les pages que les changements de la branche peuvent rendre fausses ; elles sont mises à jour dans la même Pull Request, ou un commit dit pourquoi elles n'ont pas à l'être (*trailer* `Documentation-technique:`), ce que le CI vérifie.
 
 ## Dossiers
 

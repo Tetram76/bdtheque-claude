@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Bdtheque.Api.Tests/Bdtheque.Api.Tests.csproj" />
+    <Project Path="tests/Bdtheque.Documentation.Tests/Bdtheque.Documentation.Tests.csproj" />
     <Project Path="tests/Bdtheque.Domain.Tests/Bdtheque.Domain.Tests.csproj" />
     <Project Path="tests/Bdtheque.EndToEnd.Tests/Bdtheque.EndToEnd.Tests.csproj" />
     <Project Path="tests/Bdtheque.Frontend.Tests/Bdtheque.Frontend.Tests.csproj" />

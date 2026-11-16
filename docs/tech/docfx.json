@@ -1,0 +1,18 @@
+{
+  "build": {
+    "content": [
+      {
+        "files": [ "**/*.md", "toc.yml" ]
+      }
+    ],
+    "template": [ "default", "modern" ],
+    "globalMetadata": {
+      "_appTitle": "BDthèque — documentation technique",
+      "_appName": "BDthèque",
+      "_lang": "fr",
+      "_enableSearch": true,
+      "_disableContribution": true,
+      "_disableNextArticle": true
+    }
+  }
+}

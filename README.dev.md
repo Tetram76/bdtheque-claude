@@ -22,6 +22,22 @@ Le `.speckit/` est écrit au format [OKF](https://github.com/GoogleCloudPlatform
 | [`suivi-implementation/`](.speckit/suivi-implementation/index.md) | Avancement du plan d'implémentation (phases, PR, statut) |
 | [`visuel/`](.speckit/visuel/index.md) | Charte graphique, présentation des écrans, maquettes |
 
+## Documentation technique
+
+La spécification dit ce que l'application doit être ; la **documentation technique**, dans [`docs/tech/`](docs/tech/index.md), décrit comment elle est réellement construite : architecture, mécanismes, déploiement, références générées depuis le code, avec leurs diagrammes (Mermaid, que GitHub affiche). Elle se lit à partir de sa [carte](docs/tech/index.md), et se tient à jour dans la même Pull Request que le code qu'elle décrit ; sa forme, ses contrôles et leurs limites sont dans [Consulter, construire, vérifier et maintenir](docs/tech/documentation/consulter-et-maintenir.md).
+
+Son site (navigation, recherche, diagrammes) se construit et se consulte localement, sur `http://localhost:8182` :
+
+```bash
+pwsh ./scripts/Build-TechnicalDocumentation.ps1 -Serve
+```
+
+Avant de pousser, la liste des pages que les changements de la branche peuvent rendre fausses :
+
+```bash
+pwsh ./scripts/Get-TechnicalDocumentationImpact.ps1
+```
+
 ## Organisation du code
 
 ```text
@@ -35,8 +51,10 @@ Le `.speckit/` est écrit au format [OKF](https://github.com/GoogleCloudPlatform
 │   ├── api/Dockerfile
 │   ├── frontend/Dockerfile
 │   ├── validation/                # Environnement de validation fonctionnelle (surcharge Compose, valeurs)
-│   └── validation-data/Dockerfile # Chargement des données de validation
-├── scripts/                       # Relevé des dépendances, lancement et arrêt de la validation
+│   ├── validation-data/Dockerfile # Chargement des données de validation
+│   └── validation-docs/Dockerfile # Site de la documentation technique, en validation
+├── docs/tech/                     # Documentation technique (cf. § Documentation technique)
+├── scripts/                       # Relevé des dépendances, validation, documentation technique
 ├── src/
 │   ├── Bdtheque.Domain/           # Entités, enums, value objects — aucune dépendance externe
 │   ├── Bdtheque.Contracts/        # DTOs échangés entre api et frontend
@@ -52,6 +70,7 @@ Le `.speckit/` est écrit au format [OKF](https://github.com/GoogleCloudPlatform
 │   ├── Bdtheque.Frontend.Tests/       # Tests des composants Blazor (bUnit)
 │   ├── Bdtheque.EndToEnd.Tests/       # Tests de bout en bout dans Chromium (Playwright), application complète
 │   ├── Bdtheque.ValidationData.Tests/ # Chargement des données de validation par l'API
+│   ├── Bdtheque.Documentation.Tests/  # Site de la documentation technique, rendu de ses diagrammes, scripts
 │   └── Bdtheque.Testing/              # Support partagé : conteneur PostgreSQL de test, hôte de l'API
 └── .speckit/                      # Source de vérité du projet (cf. § Spécifications)
 ```
@@ -138,7 +157,8 @@ pwsh ./scripts/Start-Validation.ps1 -PullRequest 245
 Le premier lancement construit les images, en quelques minutes ; les suivants ne reconstruisent que ce que la Pull Request a changé. Une fois les conteneurs démarrés et les données chargées, le script affiche :
 
 - l'application : `http://localhost:8180` ;
-- la documentation de l'API (Scalar), pour information : `http://localhost:8181/scalar/v1`. Pour y essayer un appel, lui ajouter l'en-tête `X-Internal-Api-Key` avec la valeur de `INTERNAL_API_KEY` de `validation.env`.
+- la documentation de l'API (Scalar), pour information : `http://localhost:8181/scalar/v1`. Pour y essayer un appel, lui ajouter l'en-tête `X-Internal-Api-Key` avec la valeur de `INTERNAL_API_KEY` de `validation.env` ;
+- la documentation technique du commit validé, dont l'empreinte figure au pied de chaque page : `http://localhost:8182/`.
 
 Ces ports ne sont ouverts qu'au poste lui-même.
 
@@ -163,7 +183,7 @@ Chaque lancement repart d'une base vide (sauf `-KeepData`) : relancer la command
 pwsh ./scripts/Stop-Validation.ps1
 ```
 
-Les images construites restent sur le poste, pour accélérer la validation suivante ; `docker image rm bdtheque-validation-api bdtheque-validation-frontend bdtheque-validation-data` les supprime.
+Les images construites restent sur le poste, pour accélérer la validation suivante ; `docker image rm bdtheque-validation-api bdtheque-validation-frontend bdtheque-validation-data bdtheque-validation-docs` les supprime.
 
 ## Publication des images
 
