@@ -75,6 +75,12 @@
   <data name="Series.Other" xml:space="preserve">
     <value>{0} séries</value>
   </data>
+  <data name="Albums.None" xml:space="preserve">
+    <value>Aucun album</value>
+  </data>
+  <data name="Series.None" xml:space="preserve">
+    <value>Aucune série</value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>Modifier</value>
   </data>

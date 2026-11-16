@@ -103,9 +103,11 @@
                                     <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
                                 }
                             </span>
-                            <span class="album-editions" role="cell">
-                                <a href="@AppPaths.AdminAlbumEditions(row.Album.Id)" title="@L["Editions.Title"]"
-                                   data-empty="@(row.EditionCount + row.PurchaseIntentCount == 0)">@EditionsText(row)</a>
+                            @* Nothing to open but the dash of a zero: « Éditions » leads to the page all the same. *@
+                            <span class="album-editions" role="cell" data-zero="@(row.EditionCount + row.PurchaseIntentCount == 0)">
+                                <ListCount Value="row.EditionCount + row.PurchaseIntentCount" None="@L["Editions.None"]">
+                                    <a href="@AppPaths.AdminAlbumEditions(row.Album.Id)" title="@L["Editions.Title"]">@EditionsText(row)</a>
+                                </ListCount>
                             </span>
                             <span class="album-state" role="cell"><CollectionStateTag State="row.State" /></span>
                         </span>
@@ -279,21 +281,26 @@
     private static string AuthorsText(AlbumAdminListItem row) =>
         string.Join(" · ", row.Authors.Select(a => RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym)));
 
-    // « 2 éditions · 1 intention »: an intent is never one of the editions (fonctionnel/regles-metier/intention-d-achat.md).
+    // « 2 éditions · 1 intention »: an intent is never one of the editions (fonctionnel/regles-metier/intention-d-achat.md); a
+    // zero says nothing, and is left out beside the other number (« 1 intention »).
     private string EditionsText(AlbumAdminListItem row)
     {
-        var editions = row.EditionCount switch
-        {
-            0 => L["Editions.None"].Value,
-            1 => L["Editions.One"].Value,
-            var count => L["Editions.Other", Format.Number(count)].Value,
-        };
-        return row.PurchaseIntentCount switch
-        {
-            0 => editions,
-            1 => L["Editions.WithIntent", editions],
-            var count => L["Editions.WithIntents", editions, Format.Number(count)],
-        };
+        string?[] parts =
+        [
+            row.EditionCount switch
+            {
+                0 => null,
+                1 => L["Editions.One"].Value,
+                var count => L["Editions.Other", Format.Number(count)].Value,
+            },
+            row.PurchaseIntentCount switch
+            {
+                0 => null,
+                1 => L["Intents.One"].Value,
+                var count => L["Intents.Other", Format.Number(count)].Value,
+            },
+        ];
+        return parts.Any(part => part is not null) ? string.Join(" · ", parts.OfType<string>()) : L["Editions.None"];
     }
 
     private string CandidateDetail(AlbumAdminListItem candidate) => string.Join(" · ", new[]

@@ -90,10 +90,11 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Barracuda", "Terminée", "6 albums · 6 dans la collection", "Complète"),
-                ("Bécassine", "En cours", "27 albums · 1 dans la collection", "À compléter"),
-                ("Bone", "—Non renseigné", "9 albums · aucun dans la collection", "À compléter"),
-                ("Le Bureau des prolongations", "Abandonnée", "Aucun album", "À compléter"),
+                // All its albums in the collection, part of them, none, no album at all (visuel/listes/liste-par-liste.md).
+                ("Barracuda", "Terminée", "6 albums dans la collection", "Complète"),
+                ("Bécassine", "En cours", "27 albums dont 1 dans la collection", "À compléter"),
+                ("Bone", "—Non renseigné", "9 albums", "À compléter"),
+                ("Le Bureau des prolongations", "Abandonnée", "—Aucun album", "À compléter"),
             ],
             rows);
     }
@@ -103,7 +104,7 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
     {
         // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
         var rows = Open("").FindAll(".series-row:not(.series-row-head)").Select(row => (
-            row.QuerySelector(".series-albums")!.HasAttribute("data-empty"),
+            row.QuerySelector(".series-albums")!.HasAttribute("data-zero"),
             row.QuerySelector(".series-complete")!.HasAttribute("data-complete")));
 
         Assert.Equal([(false, true), (false, false), (false, false), (true, false)], rows);
@@ -251,8 +252,8 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
         Assert.Equal("Fusionner deux séries", Text(dialog.QuerySelector(".dialog-title")!));
         Assert.Equal(
             [
-                ("Bécassine", "En cours · 27 albums · 1 dans la collection"),
-                ("Bone", "9 albums · aucun dans la collection"),
+                ("Bécassine", "En cours · 27 albums dont 1 dans la collection"),
+                ("Bone", "9 albums"),
                 ("Le Bureau des prolongations", "Abandonnée · Aucun album"),
             ],
             dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));

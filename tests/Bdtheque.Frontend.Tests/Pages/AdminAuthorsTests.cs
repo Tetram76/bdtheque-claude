@@ -123,6 +123,16 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
             [SeenAndHeard(gomez, ".author-nationality"), SeenAndHeard(gomez, ".author-albums"), SeenAndHeard(gomez, ".author-roles")]);
     }
 
+    [Fact]
+    public void Rows_MarkAnAuthorCreditedOnNoAlbum_ByThePresenceOfTheAttribute()
+    {
+        // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on: on
+        // two lines, a zero is withdrawn (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul).
+        var rows = Open("").FindAll(".author-row:not(.author-row-head)").Select(row => row.QuerySelector(".author-albums")!.HasAttribute("data-zero"));
+
+        Assert.Equal([false, false, true, false], rows);
+    }
+
     // What the eye reads in a cell of a row, then what a screen reader reads of it: each skips what is hidden from it.
     private static (string Seen, string Heard) SeenAndHeard(IElement row, string cellSelector) => (
         string.Concat(row.QuerySelectorAll($"{cellSelector} .not-set > :not(.visually-hidden)").Select(part => part.TextContent)),

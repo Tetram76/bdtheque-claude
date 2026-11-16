@@ -95,19 +95,23 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Hergé", "1963", "2 éditions · 1 intention", "Dans la collection"),
-                ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido", "octobre 2023", "Aucune édition · 1 intention", "Intention d'achat"),
-                ("Le Bleu est une couleur chaude", "", "—Non renseignée", "Aucune édition", "Hors collection"),
+                ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido", "octobre 2023", "1 intention", "Intention d'achat"),
+                // No edition nor intent: a zero is not shown, but the dash of a missing data, said to a screen reader.
+                ("Le Bleu est une couleur chaude", "", "—Non renseignée", "—Aucune édition", "Hors collection"),
             ],
             rows);
     }
 
     [Fact]
-    public void Rows_MarkAnAlbumWithoutEditionNorIntent_ByThePresenceOfTheAttribute()
+    public void Rows_MarkAnAlbumWithoutEditionNorIntent_ByThePresenceOfTheAttribute_AndLeadNowhere()
     {
-        // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
-        var rows = Open("").FindAll(".album-row:not(.album-row-head)").Select(row => row.QuerySelector(".album-editions a")!.HasAttribute("data-empty"));
+        // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on: on
+        // two lines, a zero is withdrawn. The dash leads nowhere, « Éditions » leading to the page.
+        var rows = Open("").FindAll(".album-row:not(.album-row-head)").Select(row => (
+            row.QuerySelector(".album-editions")!.HasAttribute("data-zero"),
+            row.QuerySelector(".album-editions a") is not null));
 
-        Assert.Equal([false, false, true], rows);
+        Assert.Equal([(false, true), (false, true), (true, false)], rows);
     }
 
     [Fact]
@@ -309,7 +313,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         Assert.Equal("Fusionner deux albums", Text(dialog.QuerySelector(".dialog-title")!));
         Assert.Equal(
             [
-                ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido · octobre 2023 · Aucune édition · 1 intention"),
+                ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido · octobre 2023 · 1 intention"),
                 ("Le Bleu est une couleur chaude", "Aucune édition"),
             ],
             dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
