@@ -8,7 +8,7 @@ applies_to:
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T19:42:27Z }
 ---
 
 # Documentation technique
@@ -19,7 +19,7 @@ Le projet tient, à côté de sa spécification, une **documentation technique**
 
 - **`.speckit/`, normatif** : exigences, contraintes, gouvernance, modèle métier, choix d'implémentation et leurs raisons ([Gouvernance documentaire](gouvernance-documentaire.md)). Il prime sur la documentation technique comme sur tout le reste.
 - **`docs/tech/`, descriptif** : comment l'application est structurée et fonctionne (responsabilités, échanges, frontières, flux, mécanismes, invariants non évidents, exploitation, tests), avec ses points d'entrée dans le code. Elle n'autorise jamais un écart au `.speckit/` et ne recopie pas ses exigences ni ses raisons : elle y renvoie.
-- **Documentation utilisateur et aide intégrée à l'application**, réservées à un chantier à venir : rien de la documentation technique n'en tient lieu, ne leur impose une forme, un outil ou un emplacement, ni n'en crée de page anticipée. Le contenu de l'aide contextuelle reste un livrable de l'agent ([Périmètre de l'agent](perimetre-de-l-agent.md)).
+- **Documentation utilisateur et aide intégrée à l'application**, réservées à la partie 4 de la Phase 3 ([Phase 3 — Frontend Blazor](../../suivi-implementation/phase-3-frontend-blazor.md#parties-suivantes)) : rien de la documentation technique n'en tient lieu, ne leur impose une forme, un outil ou un emplacement, ni n'en crée de page anticipée. Le contenu de l'aide contextuelle reste un livrable de l'agent ([Périmètre de l'agent](perimetre-de-l-agent.md)).
 
 ## Ce qu'elle affirme
 
