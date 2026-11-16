@@ -89,10 +89,23 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
             [
                 ("Univers Hugo Pratt", "0", "Albums 31", "Séries 4", "Sous-univers 3"),
                 ("Corto Maltese", "1", "Albums 18", "Séries 1", "Sous-univers 1"),
-                ("Les Antilles", "2", "Albums 4", "Séries 0", "Sous-univers 0"),
-                ("Les Cités obscures", "0", "Albums 14", "Séries 1", "Sous-univers 0"),
+                // A zero is not shown, but the dash of a missing data, said to a screen reader.
+                ("Les Antilles", "2", "Albums 4", "—Aucune série", "—Aucun sous-univers"),
+                ("Les Cités obscures", "0", "Albums 14", "Séries 1", "—Aucun sous-univers"),
             ],
             rows);
+    }
+
+    [Fact]
+    public void Rows_MarkAZero_ByThePresenceOfTheAttribute()
+    {
+        // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on: on
+        // two lines, a zero is withdrawn (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul).
+        var rows = Open("").FindAll(".universe-row:not(.universe-row-head)").Select(row => (
+            row.QuerySelector(".universe-series")!.HasAttribute("data-zero"),
+            row.QuerySelector(".universe-subuniverses")!.HasAttribute("data-zero")));
+
+        Assert.Equal([(false, false), (false, false), (true, true), (false, true)], rows);
     }
 
     [Fact]

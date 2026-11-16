@@ -198,15 +198,15 @@
     private string NewHref => (ListOnly with { Adding = true }).Href();
 
     // The numbers and the modification of a genre, which its row keeps while it is changed. On two lines, a number loses its
-    // column header: it carries the name of its column.
+    // column header: it carries the name of its column, and a zero is withdrawn.
     private RenderFragment Numbers(GenreAdminListItem row) =>
         @<text>
             <span class="genre-meta">
-                <span class="genre-series" role="cell" data-empty="@(row.SeriesCount == 0)">
-                    <span class="genre-caption">@L["Column.Series"]</span> @Format.Number(row.SeriesCount)
+                <span class="genre-series" role="cell" data-zero="@(row.SeriesCount == 0)">
+                    <ListCount Value="row.SeriesCount" None="@L["Series.None"]"><span class="genre-caption">@L["Column.Series"]</span> @Format.Number(row.SeriesCount)</ListCount>
                 </span>
-                <span class="genre-albums" role="cell" data-empty="@(row.AlbumCount == 0)">
-                    <span class="genre-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)
+                <span class="genre-albums" role="cell" data-zero="@(row.AlbumCount == 0)">
+                    <ListCount Value="row.AlbumCount" None="@L["Albums.None"]"><span class="genre-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)</ListCount>
                 </span>
             </span>
             <span class="genre-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>

@@ -65,10 +65,6 @@
     grid-area: albums;
 }
 
-.series-albums[data-empty] {
-    color: var(--color-text-muted);
-}
-
 .series-complete {
     grid-area: complete;
 }
@@ -127,5 +123,13 @@
 
     .series-modified {
         display: block;
+    }
+}
+
+/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn
+   (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container series-rows (width < 60rem) {
+    .series-meta [data-zero] {
+        display: none;
     }
 }

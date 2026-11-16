@@ -99,17 +99,10 @@
                                     <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
                                 }
                             </span>
-                            @* No album credited, hence no role: a datum missing from the row (visuel/listes/liste-par-liste.md), a dash
-                               as in any list, said to a screen reader by what it means. *@
-                            <span class="author-albums" role="cell">
-                                @if (row.CreditedAlbumCount == 0)
-                                {
-                                    <NotSet Brief="true" Mention="@L["Albums.None"]" />
-                                }
-                                else
-                                {
-                                    @AlbumsText(row)
-                                }
+                            @* No album credited: a zero, which says nothing (visuel/charte-graphique/convivialite-et-efficacite.md,
+                               nombre nul); hence no role, a datum missing from the row. *@
+                            <span class="author-albums" role="cell" data-zero="@(row.CreditedAlbumCount == 0)">
+                                <ListCount Value="row.CreditedAlbumCount" None="@L["Albums.None"]">@AlbumsText(row)</ListCount>
                             </span>
                             <span class="author-roles" role="cell">
                                 @if (row.Roles.Count == 0)

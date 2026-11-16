@@ -1,0 +1,26 @@
+@* A number of a column of a list of the administration (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul): a
+   zero says nothing worth showing, neither « 0 » nor « Aucun… », and takes the dash of a missing data, which a screen reader
+   reads as its mention; any other number is what the page writes. The page marks the cell of a zero, which it withdraws from
+   its layout on two lines, the only one to know it. *@
+@if (Value == 0)
+{
+    <NotSet Brief="true" Mention="@None" />
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    /// <summary>The number that decides whether there is anything to show.</summary>
+    [Parameter, EditorRequired]
+    public int Value { get; set; }
+
+    /// <summary>What a zero means, told to a screen reader (« Aucun album »).</summary>
+    [Parameter, EditorRequired]
+    public string None { get; set; } = null!;
+
+    /// <summary>The number as the column writes it, when it is not zero.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = null!;
+}
