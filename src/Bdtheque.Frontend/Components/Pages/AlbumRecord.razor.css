@@ -15,6 +15,9 @@
 }
 
 .album-identity {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
     margin-block-start: calc(var(--space-l) - var(--space-s));
 }
 
@@ -48,12 +51,6 @@
     background-color: var(--record-visual-background);
     box-shadow: var(--record-visual-shadow);
     rotate: var(--record-visual-tilt);
-}
-
-.album-identity {
-    display: grid;
-    gap: var(--space-m);
-    min-inline-size: 0;
 }
 
 /* A banner for an album not in the collection: filled with the color of information for a purchase intent, dashed and muted
