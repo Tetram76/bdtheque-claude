@@ -78,6 +78,12 @@
   <data name="Editions.Other" xml:space="preserve">
     <value>{0} éditions</value>
   </data>
+  <data name="Collections.None" xml:space="preserve">
+    <value>Aucune collection</value>
+  </data>
+  <data name="Editions.None" xml:space="preserve">
+    <value>Aucune édition</value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>Modifier</value>
   </data>

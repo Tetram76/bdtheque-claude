@@ -97,8 +97,7 @@
     grid-area: subuniverses;
 }
 
-.universe-caption,
-.universe-meta [data-empty] {
+.universe-caption {
     color: var(--color-text-muted);
 }
 
@@ -157,5 +156,13 @@
     .universe-subuniverses,
     .universe-modified {
         display: block;
+    }
+}
+
+/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn,
+   with the name of its column (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container universe-rows (width < 36rem) {
+    .universe-meta [data-zero] {
+        display: none;
     }
 }

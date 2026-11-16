@@ -80,12 +80,13 @@
                                     <NotSet Brief="true" />
                                 }
                             </span>
-                            @* On two lines, a number loses its column header: it carries the name of its column. *@
-                            <span class="publisher-collections" role="cell" data-empty="@(row.Collections.Count == 0)">
-                                <span class="publisher-caption">@L["Column.Collections"]</span> @Format.Number(row.Collections.Count)
+                            @* On two lines, a number loses its column header: it carries the name of its column, and a zero is
+                               withdrawn. *@
+                            <span class="publisher-collections" role="cell" data-zero="@(row.Collections.Count == 0)">
+                                <ListCount Value="row.Collections.Count" None="@L["Collections.None"]"><span class="publisher-caption">@L["Column.Collections"]</span> @Format.Number(row.Collections.Count)</ListCount>
                             </span>
-                            <span class="publisher-editions" role="cell" data-empty="@(row.EditionCount == 0)">
-                                <span class="publisher-caption">@L["Column.Editions"]</span> @Format.Number(row.EditionCount)
+                            <span class="publisher-editions" role="cell" data-zero="@(row.EditionCount == 0)">
+                                <ListCount Value="row.EditionCount" None="@L["Editions.None"]"><span class="publisher-caption">@L["Column.Editions"]</span> @Format.Number(row.EditionCount)</ListCount>
                             </span>
                         </span>
                         <span class="publisher-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>

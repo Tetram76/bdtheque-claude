@@ -69,6 +69,15 @@
   <data name="Albums.Other" xml:space="preserve">
     <value>{0} albums</value>
   </data>
+  <data name="Albums.None" xml:space="preserve">
+    <value>Aucun album</value>
+  </data>
+  <data name="Series.None" xml:space="preserve">
+    <value>Aucune série</value>
+  </data>
+  <data name="SubUniverses.None" xml:space="preserve">
+    <value>Aucun sous-univers</value>
+  </data>
   <data name="Candidate.In" xml:space="preserve">
     <value>Dans {0}</value>
   </data>

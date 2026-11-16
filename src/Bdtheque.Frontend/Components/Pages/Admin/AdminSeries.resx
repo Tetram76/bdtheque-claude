@@ -94,10 +94,10 @@
     <value>{0} albums</value>
   </data>
   <data name="Albums.InCollection" xml:space="preserve">
-    <value>{0} · {1} dans la collection</value>
+    <value>{0} dont {1} dans la collection</value>
   </data>
-  <data name="Albums.NoneInCollection" xml:space="preserve">
-    <value>{0} · aucun dans la collection</value>
+  <data name="Albums.AllInCollection" xml:space="preserve">
+    <value>{0} dans la collection</value>
   </data>
   <data name="Complete" xml:space="preserve">
     <value>Complète</value>

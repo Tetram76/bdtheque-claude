@@ -92,9 +92,7 @@
     grid-area: editions;
 }
 
-.publisher-caption,
-.publisher-collections[data-empty],
-.publisher-editions[data-empty] {
+.publisher-caption {
     color: var(--color-text-muted);
 }
 
@@ -149,5 +147,13 @@
     .publisher-website,
     .publisher-modified {
         display: block;
+    }
+}
+
+/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn,
+   with the name of its column (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container publisher-rows (width < 40rem) {
+    .publisher-meta [data-zero] {
+        display: none;
     }
 }

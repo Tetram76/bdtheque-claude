@@ -77,10 +77,11 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
             Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".genre-albums")!),
             Text(row.QuerySelector(".genre-series")!),
-            row.QuerySelector(".genre-series")!.HasAttribute("data-empty")));
+            row.QuerySelector(".genre-series")!.HasAttribute("data-zero")));
 
-        // On two lines, each number is preceded by the name of its column, which the styles hide in a table.
-        Assert.Equal([("Aventure", "Albums 612", "Séries 118", false), ("Biographie", "Albums 37", "Séries 0", true), ("Western", "Albums 0", "Séries 0", true)], rows);
+        // On two lines, each number is preceded by the name of its column, which the styles hide in a table; a zero is not shown,
+        // but the dash of a missing data, said to a screen reader, which the styles withdraw on two lines.
+        Assert.Equal([("Aventure", "Albums 612", "Séries 118", false), ("Biographie", "Albums 37", "—Aucune série", true), ("Western", "—Aucun album", "—Aucune série", true)], rows);
     }
 
     [Fact]

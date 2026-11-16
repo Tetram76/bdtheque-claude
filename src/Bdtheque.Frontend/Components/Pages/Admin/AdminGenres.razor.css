@@ -67,9 +67,7 @@
     grid-area: series;
 }
 
-.genre-caption,
-.genre-albums[data-empty],
-.genre-series[data-empty] {
+.genre-caption {
     color: var(--color-text-muted);
 }
 
@@ -129,4 +127,12 @@
 /* The error of the saving of a row, under the whole row, whatever its layout. */
 .genre-error {
     grid-column: 1 / -1;
+}
+
+/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn,
+   with the name of its column (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container genre-rows (width < 34rem) {
+    .genre-meta [data-zero] {
+        display: none;
+    }
 }

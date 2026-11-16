@@ -455,14 +455,14 @@ const ENTITIES = {
     primary: ['Modifier', ICON.edit],
     rowMenu: menuOf(VIEW('Voir dans la consultation'), MERGE('Fusionner avec une autre série…'), DELETE),
     rows: [
-      ['Barracuda', '', ['Terminée', '6 albums · 6 dans la collection', { badge: 'Complète', full: true }, '3 sept. 2026']],
-      ['Bécassine', '', ['Terminée', '27 albums · 3 dans la collection', { text: 'À compléter', hideSm: true }, '21 juil. 2026']],
-      ['Blacksad', '', ['En cours', '9 albums · 8 dans la collection', { text: 'À compléter', hideSm: true }, '8 oct. 2026']],
-      ['Blake et Mortimer', '', ['En cours', '31 albums · 12 dans la collection', { text: 'À compléter', hideSm: true }, '2 févr. 2026']],
-      ['Bone', '', [{ text: 'Non renseigné', muted: true }, '9 albums · aucun dans la collection', { text: 'À compléter', hideSm: true }, '19 mai 2026']],
-      ['Bouncer', '', ['Abandonnée', '10 albums · 4 dans la collection', { text: 'À compléter', hideSm: true }, '30 juin 2026']],
-      ['Buddy Longway', '', ['Terminée', '20 albums · 11 dans la collection', { text: 'À compléter', hideSm: true }, '9 oct. 2026']],
-      ['Le Bureau des prolongations', '', [{ text: 'Non renseigné', muted: true }, { text: 'Aucun album', muted: true }, { text: 'À compléter', hideSm: true }, "aujourd'hui"]]
+      ['Barracuda', '', ['Terminée', '6 albums dans la collection', { badge: 'Complète', full: true }, '3 sept. 2026']],
+      ['Bécassine', '', ['Terminée', '27 albums dont 3 dans la collection', { text: 'À compléter', hideSm: true }, '21 juil. 2026']],
+      ['Blacksad', '', ['En cours', '9 albums dont 8 dans la collection', { text: 'À compléter', hideSm: true }, '8 oct. 2026']],
+      ['Blake et Mortimer', '', ['En cours', '31 albums dont 12 dans la collection', { text: 'À compléter', hideSm: true }, '2 févr. 2026']],
+      ['Bone', '', [{ text: 'Non renseigné', muted: true }, '9 albums', { text: 'À compléter', hideSm: true }, '19 mai 2026']],
+      ['Bouncer', '', ['Abandonnée', '10 albums dont 4 dans la collection', { text: 'À compléter', hideSm: true }, '30 juin 2026']],
+      ['Buddy Longway', '', ['Terminée', '20 albums dont 11 dans la collection', { text: 'À compléter', hideSm: true }, '9 oct. 2026']],
+      ['Le Bureau des prolongations', '', [{ text: 'Non renseigné', muted: true }, { text: '—', muted: true }, { text: 'À compléter', hideSm: true }, "aujourd'hui"]]
     ]
   },
   editions: {
@@ -518,7 +518,7 @@ const ENTITIES = {
       ['Christophe Gibelin', '', ['Française', '14 albums', 'Scénario', '2 mai 2026'], { mono: 'CG' }],
       ['Jean-Pierre Gibrat', '', ['Française', '9 albums', 'Scénario · Dessin · Couleurs', '19 avr. 2026'], { mono: 'JG' }],
       ['Jean Giraud', '', ['Française', '61 albums', 'Scénario · Dessin', '3 sept. 2026'], { mono: 'JG' }],
-      ['Alain Gomez', '', [{ text: 'Non renseignée', muted: true }, { text: 'Aucun album', muted: true }, { text: '—', muted: true }, "aujourd'hui"], { mono: 'AG' }],
+      ['Alain Gomez', '', [{ text: 'Non renseignée', muted: true }, { text: '—', muted: true }, { text: '—', muted: true }, "aujourd'hui"], { mono: 'AG' }],
       ['René Goscinny', '', ['Française', '83 albums', 'Scénario', '12 févr. 2026'], { mono: 'RG' }],
       ['Gotlib', 'Marcel Gotlieb', ['Française', '22 albums', 'Scénario · Dessin', '30 mars 2026'], { mono: 'G' }],
       ['Juanjo Guarnido', '', ['Espagnole', '9 albums', 'Dessin · Couleurs', '8 oct. 2026'], { mono: 'JG' }]
@@ -538,7 +538,7 @@ const ENTITIES = {
       ['Dargaud', 'Poisson Pilote, Long courrier', [{ link: 'dargaud.com' }, '2', '688', '3 sept. 2026']],
       ['Delcourt', 'Encrages, Mirages, Neopolis…', [{ link: 'editions-delcourt.fr' }, '9', '377', '14 mai 2026']],
       ['Dupuis', 'Repérages, Aire libre, Expresso…', [{ link: 'dupuis.com' }, '5', '596', '9 oct. 2026']],
-      ['Futuropolis', 'Aucune collection', [{ text: 'Non renseigné', muted: true }, { text: '0', muted: true }, '41', '2 févr. 2026']],
+      ['Futuropolis', 'Aucune collection', [{ text: 'Non renseigné', muted: true }, { text: '—', muted: true }, '41', '2 févr. 2026']],
       ['Glénat', 'Vécu, Treize étrange, Grafica…', [{ link: 'glenat.com' }, '7', '233', '12 janv. 2026']],
       ['Le Lombard', 'Signé', [{ link: 'lelombard.com' }, '1', '154', '21 juil. 2026']]
     ]
@@ -577,12 +577,12 @@ const ENTITIES = {
     rows: [
       ['Univers Hergé', '', ['24', '3', '2', '2 févr. 2026'], { depth: 0 }],
       ['Tintin', '', ['24', '1', '1', '2 févr. 2026'], { depth: 1 }],
-      ['Moulinsart', '', ['3', '0', { text: '0', muted: true }, 'hier'], { depth: 2 }],
+      ['Moulinsart', '', ['3', { text: '—', muted: true }, { text: '—', muted: true }, 'hier'], { depth: 2 }],
       ['Univers Hugo Pratt', '', ['31', '4', '3', '12 janv. 2026'], { depth: 0 }],
       ['Corto Maltese', '', ['18', '1', '1', '12 janv. 2026'], { depth: 1 }],
-      ['Les Antilles', '', ['4', '0', { text: '0', muted: true }, '12 janv. 2026'], { depth: 2 }],
-      ['Les Scorpions du désert', '', ['5', '1', { text: '0', muted: true }, '3 mars 2026'], { depth: 1 }],
-      ['Les Cités obscures', '', ['14', '1', { text: '0', muted: true }, '30 juin 2026'], { depth: 0 }]
+      ['Les Antilles', '', ['4', { text: '—', muted: true }, { text: '—', muted: true }, '12 janv. 2026'], { depth: 2 }],
+      ['Les Scorpions du désert', '', ['5', '1', { text: '—', muted: true }, '3 mars 2026'], { depth: 1 }],
+      ['Les Cités obscures', '', ['14', '1', { text: '—', muted: true }, '30 juin 2026'], { depth: 0 }]
     ]
   }
 };

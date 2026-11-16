@@ -100,7 +100,7 @@
                                     <NotSet Brief="true" />
                                 }
                             </span>
-                            <span class="series-albums" role="cell" data-empty="@(row.Overview.AlbumCount == 0)">@AlbumsText(row)</span>
+                            <span class="series-albums" role="cell" data-zero="@(row.Overview.AlbumCount == 0)"><ListCount Value="row.Overview.AlbumCount" None="@L["Albums.None"]">@AlbumsText(row)</ListCount></span>
                             <span class="series-complete" role="cell" data-complete="@row.IsComplete">
                                 @if (row.IsComplete)
                                 {
@@ -274,14 +274,18 @@
         var count => L["Count.Other", Format.Number(count)],
     };
 
-    // « 6 albums · 6 dans la collection »: its albums, and those of them that are part of the collection.
+    // Its albums, and those of them that are part of the collection, in one sentence: « 6 albums dans la collection » when all
+    // are, « 27 albums dont 3 dans la collection » when part of them are, « 9 albums » when none is, a zero saying nothing
+    // (visuel/listes/liste-par-liste.md).
     private string AlbumsText(SeriesAdminListItem row)
     {
         if (row.Overview.AlbumCount == 0)
             return L["Albums.None"];
         var albums = row.Overview.AlbumCount == 1 ? L["Albums.One"].Value : L["Albums.Other", Format.Number(row.Overview.AlbumCount)].Value;
-        return row.AlbumsInCollectionCount == 0
-            ? L["Albums.NoneInCollection", albums]
+        if (row.AlbumsInCollectionCount == 0)
+            return albums;
+        return row.AlbumsInCollectionCount == row.Overview.AlbumCount
+            ? L["Albums.AllInCollection", albums]
             : L["Albums.InCollection", albums, Format.Number(row.AlbumsInCollectionCount)];
     }
 

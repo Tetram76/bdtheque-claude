@@ -97,7 +97,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
             [
                 ("Casterman", "Écritures, Fac-similé, Univers d'auteurs", "casterman.com, site externe", "Collections 3", "Éditions 412"),
                 ("Dargaud", "Long courrier", "dargaud.com/bd, site externe", "Collections 1", "Éditions 1"),
-                ("Futuropolis", "Aucune collection", "—Non renseigné", "Collections 0", "Éditions 0"),
+                ("Futuropolis", "Aucune collection", "—Non renseigné", "—Aucune collection", "—Aucune édition"),
             ],
             rows);
     }
@@ -108,8 +108,8 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
         var rows = Open("").FindAll(".publisher-row:not(.publisher-row-head)").Select(row => (
             row.QuerySelector(".publisher-collection-names")!.HasAttribute("data-empty"),
-            row.QuerySelector(".publisher-collections")!.HasAttribute("data-empty"),
-            row.QuerySelector(".publisher-editions")!.HasAttribute("data-empty")));
+            row.QuerySelector(".publisher-collections")!.HasAttribute("data-zero"),
+            row.QuerySelector(".publisher-editions")!.HasAttribute("data-zero")));
 
         Assert.Equal([(false, false, false), (false, false, false), (true, true, true)], rows);
     }
