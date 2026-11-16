@@ -51,14 +51,18 @@ public sealed class CitedRecords
 
     public List<ContributionContent> Contributions() => [.. Credits.Select(c => new ContributionContent(c.Author.Id, c.Role))];
 
-    /// <summary>The records added on the spot that the record still cites, to create with it; <c>null</c> for none.</summary>
-    public NewRecords? Added()
+    /// <summary>
+    /// The records added on the spot that the record still cites, to create with it, with those it cites otherwise (the series
+    /// of an album, added on the spot and still chosen); <c>null</c> for none.
+    /// </summary>
+    public NewRecords? Added(IReadOnlyList<NewSeries>? series = null)
     {
         var added = new NewRecords(
             [.. NewAuthors.Where(a => Credits.Any(c => c.Author.Id == a.Key))],
             [.. NewGenres.Where(g => Genres.Any(o => o.Id == g.Key))],
-            [.. NewUniverses.Where(u => Universes.Any(o => o.Id == u.Key))]);
-        return added.Authors.Count + added.Genres.Count + added.Universes.Count == 0 ? null : added;
+            [.. NewUniverses.Where(u => Universes.Any(o => o.Id == u.Key))],
+            series ?? []);
+        return added.Authors.Count + added.Genres.Count + added.Universes.Count + added.Series.Count == 0 ? null : added;
     }
 
     public IReadOnlyList<RecordOption> AuthorsOf(ContributionRole role) => [.. Credits.Where(c => c.Role == role).Select(c => c.Author)];

@@ -29,7 +29,7 @@ public sealed class FieldErrors(
     public string? For(params string[] fields) => Text(field => fields.Contains(field), subject);
 
     /// <summary>
-    /// What to correct in the record added on the spot under <paramref name="key"/> (an author, a genre, a universe), which the
+    /// What to correct in the record added on the spot under <paramref name="key"/> (an author, a genre, a universe, a series), which the
     /// last saving sent with its content (<paramref name="sent"/>), where the error designates it: any of its fields, the
     /// text citing that record, as its own list or panel does (visuel/saisie-album/contenu.md); none if the error designates
     /// none of them, or if that saving did not send it.
@@ -48,6 +48,7 @@ public sealed class FieldErrors(
             .. sent.Authors.Select((a, i) => (a.Key, $"/newRecords/authors/{i}", RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym))),
             .. sent.Genres.Select((g, i) => (g.Key, $"/newRecords/genres/{i}", g.Label)),
             .. sent.Universes.Select((u, i) => (u.Key, $"/newRecords/universes/{i}", u.Name)),
+            .. sent.Series.Select((s, i) => (s.Key, $"/newRecords/series/{i}", s.Title)),
         ];
         return places.Where(place => place.Key == key).Select(place => ((string, string)?)(place.Path, place.Name)).FirstOrDefault();
     }

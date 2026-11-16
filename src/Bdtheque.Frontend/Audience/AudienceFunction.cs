@@ -105,6 +105,9 @@ public static class AudienceFunctions
     /// <summary>The creation of a universe on the spot, from the form of an album, with the universe created.</summary>
     public static readonly AudienceFunction AdminAlbumUniverseCreated = new("admin.album.universe-created", AudienceFunctionKind.Action);
 
+    /// <summary>The creation of a series on the spot, from the form of an album, with the series created.</summary>
+    public static readonly AudienceFunction AdminAlbumSeriesCreated = new("admin.album.series-created", AudienceFunctionKind.Action);
+
     /// <summary>The changes of the user shown, the album having been modified in the meantime.</summary>
     public static readonly AudienceFunction AdminAlbumChanges = new("admin.album.changes", AudienceFunctionKind.Action);
 
@@ -419,7 +422,7 @@ public static class AudienceFunctions
         SeriesRecord, AuthorRecord,
         Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
-        AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated,
+        AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated, AdminAlbumSeriesCreated,
         AdminAlbumChanges,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
         AdminSeriesMerge, AdminSeriesForm, AdminNewSeriesForm, AdminSeriesCreated, AdminSeriesSaved, AdminSeriesAuthorCreated,

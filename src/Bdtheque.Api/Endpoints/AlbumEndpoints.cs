@@ -228,7 +228,7 @@ internal static class AlbumEndpoints
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var added = await FormReferences.CreateAddedAsync(context, fields, request.NewRecords, cancellationToken);
-        var series = await LoadSeriesAsync(request.SeriesId, context, cancellationToken);
+        var series = await LoadSeriesAsync(request.SeriesId, added, context, cancellationToken);
         var contributions = await FormReferences.LoadContributionsAsync(context, request.Contributions, cancellationToken, added.Authors);
         var album = fields.Create("", () => new Album(request.Title, series, contributions), EnteredOtherwise);
         await ApplyAsync(album, request, added, context, cancellationToken);
@@ -246,7 +246,7 @@ internal static class AlbumEndpoints
         fields.Place(album, renamed: EnteredOtherwise);
         var content = request.Content;
         var added = await FormReferences.CreateAddedAsync(context, fields, content.NewRecords, cancellationToken);
-        var series = await LoadSeriesAsync(content.SeriesId, context, cancellationToken);
+        var series = await LoadSeriesAsync(content.SeriesId, added, context, cancellationToken);
         var contributions = await FormReferences.LoadContributionsAsync(context, content.Contributions, cancellationToken, added.Authors);
 
         album.SetTitleSeriesAndContributions(content.Title, series, contributions);
@@ -264,11 +264,13 @@ internal static class AlbumEndpoints
     private static IQueryable<Album> WithAssociations(IQueryable<Album> query) =>
         query.Include(a => a.Genres).Include(a => a.Universes).Include(a => a.Series).Include(a => a.Contributions).ThenInclude(c => c.Author);
 
-    private static async Task<Series?> LoadSeriesAsync(Guid? seriesId, BdthequeDbContext context, CancellationToken cancellationToken) =>
-        seriesId is { } id
-            ? await context.Series.SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
-              ?? throw new EntityNotFoundException(typeof(Series), id)
-            : null;
+    // The series of the album, unless the form added it on the spot, created with the album.
+    private static async Task<Series?> LoadSeriesAsync(
+        Guid? seriesId, AddedRecords added, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        seriesId is not { } id ? null
+        : added.Series.TryGetValue(id, out var series) ? series
+        : await context.Series.SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
+          ?? throw new EntityNotFoundException(typeof(Series), id);
 
     /// <summary>
     /// Applies the rest of the form to the album, its title, series and contributions being set

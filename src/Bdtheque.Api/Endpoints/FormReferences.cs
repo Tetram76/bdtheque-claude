@@ -108,10 +108,15 @@ internal static class FormReferences
             universes[added.Key] = universe;
         }
 
+        var series = records.Series.Select((s, index) => (s.Key, Series: fields.Create(
+                $"{AddedPath}/series/{index}", () => Series.WithProposedEditionTemplate(s.Title))))
+            .ToDictionary(s => s.Key, s => s.Series);
+
         context.Authors.AddRange(authors.Values);
         context.Genres.AddRange(genres.Values);
         context.Universes.AddRange(universes.Values);
-        return new AddedRecords(authors, genres, universes);
+        context.Series.AddRange(series.Values);
+        return new AddedRecords(authors, genres, universes, series);
     }
 
     /// <summary>The authors of the contributions, each once, named as the lists name them.</summary>
@@ -146,4 +151,5 @@ internal static class FormReferences
 
 /// <summary>The records a form added on the spot, created with the record it saves, by the key that stands for their identifier.</summary>
 internal sealed record AddedRecords(
-    IReadOnlyDictionary<Guid, Author> Authors, IReadOnlyDictionary<Guid, Genre> Genres, IReadOnlyDictionary<Guid, Universe> Universes);
+    IReadOnlyDictionary<Guid, Author> Authors, IReadOnlyDictionary<Guid, Genre> Genres, IReadOnlyDictionary<Guid, Universe> Universes,
+    IReadOnlyDictionary<Guid, Series> Series);

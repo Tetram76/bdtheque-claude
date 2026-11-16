@@ -54,6 +54,24 @@ public sealed class Series : EntityBase, IAggregateRoot
         SetTitle(title);
     }
 
+    /// <summary>
+    /// A series created by its title alone, on the spot, from the entry form of an album (visuel/saisie-album/contenu.md): it
+    /// proposes to its new editions what any new series proposes (modele-metier/serie.md), the rest being entered on its own form.
+    /// </summary>
+    public static Series WithProposedEditionTemplate(string title)
+    {
+        var series = new Series(title);
+        var proposed = EditionPreset.Defaults;
+        series.SetTemplateEditionCategory(proposed.Category);
+        series.SetTemplateCondition(proposed.Condition);
+        series.SetTemplateBinding(proposed.Binding);
+        series.SetTemplateOrientation(proposed.Orientation);
+        series.SetTemplateReadingDirection(proposed.ReadingDirection);
+        series.SetTemplateFormat(proposed.Format);
+        series.SetTemplateIsColor(proposed.IsColor);
+        return series;
+    }
+
     public void SetTitle(string title)
     {
         Title = DomainText.Required(title, DomainRules.SeriesTitleRequired, "A series must have a title.", this, nameof(Title));
@@ -126,14 +144,26 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// <param name="previousSeries">The series the album was attached to until then, if any, its template loaded.</param>
     /// <param name="albumIsNew">Whether the album is being created, not saved yet.</param>
     public IReadOnlyList<Contribution>? ContributionsForAlbum(
+        IReadOnlyCollection<(Guid AuthorId, ContributionRole Role)> albumCredits, Series? previousSeries, bool albumIsNew) =>
+        Personalized(albumCredits, previousSeries, albumIsNew) ? null : [.. _templateContributions];
+
+    /// <summary>
+    /// The contributions a series not created yet, added on the spot by the entry form of the album, gives it: none, a series
+    /// created by its title alone having no authors; <c>null</c> for an album whose authors were personalized, as
+    /// <see cref="ContributionsForAlbum"/>.
+    /// </summary>
+    public static IReadOnlyList<Contribution>? ContributionsForAlbumOfNewSeries(
+        IReadOnlyCollection<(Guid AuthorId, ContributionRole Role)> albumCredits, Series? previousSeries, bool albumIsNew) =>
+        Personalized(albumCredits, previousSeries, albumIsNew) ? null : [];
+
+    private static bool Personalized(
         IReadOnlyCollection<(Guid AuthorId, ContributionRole Role)> albumCredits, Series? previousSeries, bool albumIsNew)
     {
         ArgumentNullException.ThrowIfNull(albumCredits);
-        var personalized = albumCredits.Count > 0
-                           && (!albumIsNew
-                               || previousSeries is null
-                               || !albumCredits.ToHashSet().SetEquals(previousSeries.TemplateContributions.Select(c => (c.AuthorId, c.Role))));
-        return personalized ? null : [.. _templateContributions];
+        return albumCredits.Count > 0
+               && (!albumIsNew
+                   || previousSeries is null
+                   || !albumCredits.ToHashSet().SetEquals(previousSeries.TemplateContributions.Select(c => (c.AuthorId, c.Role))));
     }
 
     /// <summary>

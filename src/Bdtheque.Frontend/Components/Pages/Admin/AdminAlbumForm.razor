@@ -39,9 +39,12 @@ else
                Problem="@SaveProblem" Dates="@Dates" Status="@Status">
         <Block Title="@L["Block.Album"]" Kicker="@L["Kicker.Album"]">
             <div class="album-fields">
-                <Field Id="album-series" Label="@L["Series"]" Help="@(Entry.Series is null ? L["Series.Help.None"] : L["Series.Help"])" Context="control">
+                <Field Id="album-series" Label="@L["Series"]" Help="@(Entry.Series is null ? L["Series.Help.None"] : L["Series.Help"])"
+                       Error="@(Entry.Series is { } chosen ? AddedError(chosen.Id) : null)" Context="control">
                     <RecordPicker Id="@control.Id" Kind="RecordKind.Series" Value="Entry.Series" ValueChanged="ChooseSeriesAsync"
-                                  Placeholder="@L["Series.Placeholder"]" aria-describedby="@control.DescribedBy" />
+                                  Placeholder="@L["Series.Placeholder"]" OnCreate="text => _seriesCreation = text"
+                                  CreateLabel="@(text => L["Series.Create", text].Value)" Pending="PendingSeries"
+                                  aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
                 </Field>
                 <Field Id="album-title" Label="@L["Title"]" Required="@(Entry.Series is null)"
                        Error="@Errors.For("/title")" Context="control">
@@ -128,6 +131,10 @@ else
         </Block>
     </EntryForm>
 
+    @if (_seriesCreation is { } seriesTitle)
+    {
+        <SeriesCreationDialog Id="album-series-creation" Text="@seriesTitle" OnCreated="SeriesCreatedAsync" OnCancel="() => _seriesCreation = null" />
+    }
     @if (_changesShown)
     {
         <ChangesDialog Id="album-changes" Subject="@Label" Changes="Changes()" OnClose="() => _changesShown = false" />
@@ -147,6 +154,8 @@ else
     private string? _savedFingerprint;
     private string? _authorsCopiedFrom;
     private bool _changesShown;
+    // The title typed in the choice of the series, while its creation on the spot is being confirmed.
+    private string? _seriesCreation;
 
     /// <summary>The album to modify; none for a new album.</summary>
     [Parameter]
@@ -241,7 +250,10 @@ else
         var choice = ++_seriesChoice;
         Entry!.Series = series;
         _authorsCopiedFrom = null;
-        var shown = await SeriesOrNoneAsync(series?.Id);
+        // A series added on the spot does not exist yet: it displays nothing through it, and its authors are asked of the
+        // domain as those of a series not created yet (choix-implementation/api/organisation-de-l-api.md).
+        var added = Entry.SeriesIsNew;
+        var shown = added ? null : await SeriesOrNoneAsync(series?.Id);
         if (choice != _seriesChoice)
             return;
         Entry.ShowSeries(shown);
@@ -251,7 +263,7 @@ else
         {
             var credits = Entry.ToContent().Contributions;
             var given = await Api.PostAsync<SeriesAlbumContributionsRequest, SeriesAlbumContributions>(
-                $"/admin/series/{series.Id}/album-contributions",
+                added ? "/admin/series/new/album-contributions" : $"/admin/series/{series.Id}/album-contributions",
                 new SeriesAlbumContributionsRequest(Entry.Id is null, Entry.AuthorsSeriesId, credits));
             if (choice == _seriesChoice && given.Applied && Entry.ToContent().Contributions.SequenceEqual(credits))
             {
@@ -266,6 +278,19 @@ else
             // Nothing taken from a series that cannot be read.
         }
     }
+
+    // The series added on the spot, created only with the album when it is saved: cancelling creates none of them. It is chosen
+    // as any series, which gives the album its authors.
+    private async Task SeriesCreatedAsync(NewSeries series)
+    {
+        _seriesCreation = null;
+        Entry!.NewSeries.Add(series);
+        await ChooseSeriesAsync(new RecordOption(series.Key, series.Title, null));
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumSeriesCreated);
+    }
+
+    // Suggested again once replaced, rather than created twice, as the search does not know them.
+    private IReadOnlyList<RecordOption> PendingSeries => [.. Entry!.NewSeries.Select(s => new RecordOption(s.Key, s.Title, null))];
 
     // Authors changed are personalized: the notice of those taken from the series no longer applies
     // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).

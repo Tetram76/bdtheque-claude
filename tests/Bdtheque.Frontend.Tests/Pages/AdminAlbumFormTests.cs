@@ -540,7 +540,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         // Nothing is written before the album is saved: cancelling creates none of them.
         var page = OpenAlbum();
         await CreateOnTheSpotAsync(page, RecordKind.Genre, " Polar ");
-        Assert.Equal("Polar", page.Find("#album-genre-creation-label").GetAttribute("value"));
+        Assert.Equal("Polar", page.Find("#album-genre-creation-name").GetAttribute("value"));
         await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
         await CreateOnTheSpotAsync(page, RecordKind.Universe, "Le port");
         await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
@@ -624,6 +624,66 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task SeriesCreatedOnTheSpot_IsChosen_ItsAuthorsAskedOfTheDomain_AndCreatedWithTheAlbum_WhenItIsSaved()
+    {
+        // visuel/saisie-album/contenu.md (decision of the user, #414): the title typed, the series created only with the album.
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(false, []));
+        var page = OpenNew();
+
+        await CreateSeriesOnTheSpotAsync(page, " Les Vieux Fourneaux ");
+
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.Equal("Les Vieux Fourneaux", page.Find("#album-series").GetAttribute("value"));
+        Assert.Equal("admin.album.series-created", _audience.Functions.Last());
+        // A series that does not exist yet is not read: its authors are asked of the domain as those of a series not created yet.
+        var asked = _api.Written.Single();
+        Assert.Equal((HttpMethod.Post, "/admin/series/new/album-contributions"), (asked.Method, asked.Path));
+        Assert.DoesNotContain(_api.Requested, path => path.StartsWith("/catalog/series/", StringComparison.Ordinal));
+        Assert.Empty(page.FindAll(".inherited-tags"));
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
+        await page.SubmitAsync("form");
+
+        var content = _api.Written.Last().Body;
+        var series = content.GetProperty("newRecords").GetProperty("series").EnumerateArray().Single();
+        Assert.Equal("Les Vieux Fourneaux", series.GetProperty("title").GetString());
+        Assert.Equal(series.GetProperty("key").GetString(), content.GetProperty("seriesId").GetString());
+    }
+
+    [Fact]
+    public async Task SeriesCreatedOnTheSpot_ThenReplaced_IsNotCreated_ButSuggestedAgain()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(false, []));
+        var page = OpenAlbum();
+        await CreateSeriesOnTheSpotAsync(page, "Les Vieux Fourneaux");
+
+        await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
+
+        var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Series);
+        Assert.Equal(["Les Vieux Fourneaux"], picker.Instance.Pending.Select(p => p.Label));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
+        await page.SubmitAsync("form");
+        Assert.Equal(JsonValueKind.Null, _api.Written.Last().Body.GetProperty("content").GetProperty("newRecords").ValueKind);
+    }
+
+    [Fact]
+    public async Task BusinessError_OnASeriesCreatedOnTheSpot_DesignatesTheFieldOfTheSeries()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(false, []));
+        var page = OpenNew();
+        await CreateSeriesOnTheSpotAsync(page, "Les Vieux Fourneaux");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Text.TooLong", "/newRecords/series/0/title");
+
+        await page.SubmitAsync("form");
+
+        var field = page.Find("#album-series");
+        Assert.Equal("true", field.GetAttribute("aria-invalid"));
+        Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
+            id => page.Find($"#{id}").TextContent.Trim() == "Trop long : raccourcissez ce texte.");
+    }
+
+    [Fact]
     public void LoadError_IsPresentedInsteadOfTheForm()
     {
         _api.Failures[$"/admin/albums/{AlbumId}"] = HttpStatusCode.InternalServerError;
@@ -674,6 +734,14 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     {
         var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == kind);
         return tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync(text));
+    }
+
+    // As the choice of the series offers it for the title typed, then confirmed in its dialog.
+    private static async Task CreateSeriesOnTheSpotAsync(IRenderedComponent<AdminAlbumForm> page, string title)
+    {
+        var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Series);
+        await picker.InvokeAsync(() => picker.Instance.OnCreate.InvokeAsync(title));
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
     }
 
     private static async Task CreateAuthorOnTheSpotAsync(IRenderedComponent<AdminAlbumForm> page, ContributionRole role, string name)
