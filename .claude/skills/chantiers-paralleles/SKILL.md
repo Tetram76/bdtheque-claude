@@ -47,14 +47,41 @@ future work: its chantiers are chosen among that milestone's tickets only
   identified and ranked (dependencies and independence checked), present the
   ranked candidates and the dropped ones, then ask how many chantiers the
   batch counts — never before, the user deciding from that ranking.
-- Count the places taken (a chantier whose pull request is not merged yet,
-  and the functional consistency check until its conclusion is written).
+- Count the places taken: a chantier whose pull request is not merged yet.
+  A harness never takes a place nor counts in the batch (below).
 - A sub-ticket is a chantier like the others. When it is launched, give it to
   the session that split its ticket only if that session's context suits it
   (what it knows serves the sub-ticket, and its conversation is not too
   loaded to carry it end to end — read it with `get_session` /
   `list_events`): then send it the brief with `SendMessage`. Otherwise start a
   new session (step 3).
+
+## Harnesses: handled, never chantiers of the batch
+
+The harnesses due when work resumes — version survey
+(`releve-des-versions-a-la-reprise-du-travail.md`), quality treatment
+(`traitement-du-controle-qualite-a-la-reprise-du-travail.md`), functional
+consistency check (`controle-de-coherence-a-la-reprise-du-travail.md`) — are
+handled during the batch, but are **not chantiers of the batch**: never in the
+order of priority, never counted in the number of chantiers the user set,
+never taking one of the places of the chantiers run at once.
+
+- **Checked once for the batch, by the orchestrator alone**, at its start:
+  read each tracking ticket (labels `security-audit`, `quality-audit`,
+  `ergonomy-audit`, each with `harness`) and decide from those concepts which
+  are due. Give the due ones to **one separate session** (step 3, same
+  launch, title `Harnais <week or date>`), whose brief names them and the
+  concepts to follow; no chantier session checks or runs them.
+- **A pull request opened by a harness itself** (monthly or security version
+  bump, corrections of the quality treatment), with no ticket of its own, is
+  part of that harness: its session carries it to the merge; it is not a
+  chantier of the batch. It counts for the **independence** of the chantiers
+  (step 2.2): a chantier touching the same files waits for its merge.
+- **Follow-up tickets** a harness opens (consistency gap, major version bump
+  of the stack and its review, improvement found by a review, deferred
+  quality entry) are tickets like any other: candidates when they are in the
+  current milestone.
+- Its heavy runs count in the resources (step 2.3) like any session's.
 
 ## 2. Before each launch — every time, never reused
 
@@ -81,17 +108,13 @@ future work: its chantiers are chosen among that milestone's tickets only
    chantier) and depends on the sub-tickets its parent orders before it.
    Order them:
    CI stabilization (a flaky test, an intermittent failure — not an
-   optimization) → the functional consistency check, when due (its tracking
-   ticket, labels `ergonomy-audit` and `harness`, bears no check of the
-   current calendar week, done or in progress; checked by the
-   orchestrator alone, once for the batch,
-   `controle-de-coherence-a-la-reprise-du-travail.md`) → plan of
+   optimization) → plan of
    `.speckit/suivi-implementation/` **in** the milestone of the next version →
    the other tickets of that milestone. A ticket outside the current
    milestone (another milestone or none, plan tickets included) is **not a
    candidate**, unless the user asked for it explicitly for the batch; only
-   CI stabilization (any milestone) and the functional consistency check
-   (a harness, never in a milestone) are exempt.
+   CI stabilization (any milestone) is exempt. A harness is never a
+   candidate (above).
 
    Then, **for each candidate you consider, in that order, you check yourself
    both conditions below** — never one without the other, never left to the
@@ -99,7 +122,8 @@ future work: its chantiers are chosen among that milestone's tickets only
    and its line in `.speckit/suivi-implementation/` with the paragraph that
    introduces it when it is a plan ticket:
    - **Independence**: it does not touch the same files as a chantier in
-     progress (same screen, theme, workflow, test base).
+     progress, or as the open pull request of a harness (same screen, theme,
+     workflow, test base).
    - **Dependencies**: every precondition that the ticket or its plan line
      sets is met. A dependency is **any** precondition, not only another
      chantier: a prerequisite ticket not merged yet, a sub-ticket its parent
@@ -169,11 +193,10 @@ ticket and pull request) with the files they may share; the resources measured
 at this launch and the rule of the heavy runs (check `docker ps`, bounded,
 before any command that starts containers or browsers; wait for another
 session's run to end; size the run for the real resources; one functional
-validation environment at a time); whether the version survey is due
-(`releve-des-versions-a-la-reprise-du-travail.md`), checked once for the batch;
-that the functional consistency check
-(`controle-de-coherence-a-la-reprise-du-travail.md`) is the orchestrator's,
-not the session's, unless the session is the one it was given to;
+validation environment at a time); that the harnesses (version survey,
+quality treatment, functional consistency check) are checked by the
+orchestrator once for the batch and run by the harness session, not by a
+chantier session, with the harness pull request open if any;
 that the superpowers plugin is forbidden; that it answers in French.
 
 Tell the user, in one line per chantier, which ticket started and why it was
@@ -183,12 +206,12 @@ chosen before the others; the whole selection was presented at step 2.4.
 
 - Each note of a session of the batch: report it to the user in a line or two,
   with the links of its pull request; never fabricate its result.
-- A note from the functional consistency check session (it has no pull
-  request): its place is freed once its conclusion is in the body of its
-  tracking ticket (labels `ergonomy-audit` and `harness`) — check it there
-  (`gh issue view <n> --json body`), with a ticket for each of its follow-ups;
-  then archive the session, leave the ticket open, and launch the next
-  chantier as after a merge.
+- A note from the harness session: it frees no place. Once every harness
+  given to it is done, check its trace in the body of each tracking ticket
+  (`gh issue view <n> --json body`), a ticket for each follow-up, and its
+  pull request merged, cleaned as below; then archive the session and leave
+  the tracking tickets open. Its follow-up tickets join the candidates
+  (step 2.1).
 - A note that reports a merged (or abandoned) pull request: **check the
   cleanup** and finish it if needed, before launching the next chantier:
 
