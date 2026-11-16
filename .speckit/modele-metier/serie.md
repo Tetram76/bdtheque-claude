@@ -5,7 +5,7 @@ description: 'Attributs d''une série : titre, clé de tri, statut, tomes prévu
 applies_to:
   - 'src/Bdtheque.Domain/Entities/Series.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/SeriesConfiguration.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:40:00Z }
 ---
 
 # Série
@@ -30,4 +30,4 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 | *(template)* État | énuméré | non | Valeur par défaut pour les nouvelles éditions. |
 | *(template)* En couleur | booléen | non | Valeur par défaut pour les nouvelles éditions. |
 
-> Le formulaire de création d'une série pré-remplit ses valeurs template avec les **valeurs par défaut** des attributs correspondants de l'édition (cf. [Édition](edition.md)) ; elles restent modifiables, et ne sont pas portées par la base (aucune clause `DEFAULT`).
+> Le formulaire de création d'une série pré-remplit ses valeurs template avec les **valeurs par défaut** des attributs correspondants de l'édition (cf. [Édition](edition.md)) ; elles restent modifiables, et ne sont pas portées par la base (aucune clause `DEFAULT`). Une série créée sur place depuis la saisie d'un album, par son seul titre, reçoit ces mêmes valeurs ([Contenu](../visuel/saisie-album/contenu.md)).

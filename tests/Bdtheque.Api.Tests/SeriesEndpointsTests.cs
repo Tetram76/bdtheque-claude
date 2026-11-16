@@ -151,7 +151,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             NewRecords = new NewRecords(
                 [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
                 [new NewGenre(genre, $"Genre{marker}")],
-                [new NewUniverse(universe, $"Univers{marker}", parent.Id)]),
+                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], []),
         };
 
         var created = await CreateAsync(content);
@@ -175,7 +175,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var updated = await UpdateAsync(created, created.Content with
         {
             Contributions = [new ContributionContent(author, ContributionRole.Colorist)],
-            NewRecords = new NewRecords([new NewAuthor(author, null, null, $"Pseudo{marker}")], [], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, null, $"Pseudo{marker}")], [], [], []),
         });
 
         Assert.Equal($"Pseudo{marker}", Assert.Single(updated.References.Authors).Pseudonym);
@@ -192,7 +192,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         {
             Contributions = [new ContributionContent(author, ContributionRole.Scenarist)],
             GenreIds = [genre],
-            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
@@ -211,7 +211,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var content = Content(UniqueTitle()) with
         {
             UniverseIds = [universe],
-            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)]),
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
@@ -571,6 +571,23 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     }
 
     [Fact]
+    public async Task AlbumContributions_OfASeriesAddedOnTheSpot_AreNone_PersonalizedOnesKept()
+    {
+        // A series not created yet, added on the spot by the entry form of an album, has no authors: it replaces by none those
+        // of the previous series, and keeps those of the album's own.
+        var author = await CreateAuthorAsync();
+        var previous = await CreateAsync(Content(UniqueTitle()) with { Contributions = [new ContributionContent(author.Id, ContributionRole.Scenarist)] });
+
+        var replaced = await NewSeriesAlbumContributionsAsync(new SeriesAlbumContributionsRequest(
+            true, previous.Id, [new ContributionContent(author.Id, ContributionRole.Scenarist)]));
+        var kept = await NewSeriesAlbumContributionsAsync(new SeriesAlbumContributionsRequest(
+            false, previous.Id, [new ContributionContent(author.Id, ContributionRole.Scenarist)]));
+
+        Assert.Equal((true, 0), (replaced.Applied, replaced.Contributions.Count));
+        Assert.False(kept.Applied);
+    }
+
+    [Fact]
     public async Task AlbumContributions_OfAnUnknownSeries_IsAFunctionalError()
     {
         var response = await _client.PostAsJsonAsync(
@@ -582,6 +599,13 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     private async Task<SeriesAlbumContributions> AlbumContributionsAsync(Guid seriesId, SeriesAlbumContributionsRequest request)
     {
         var response = await _client.PostAsJsonAsync($"/admin/series/{seriesId}/album-contributions", request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<SeriesAlbumContributions>())!;
+    }
+
+    private async Task<SeriesAlbumContributions> NewSeriesAlbumContributionsAsync(SeriesAlbumContributionsRequest request)
+    {
+        var response = await _client.PostAsJsonAsync("/admin/series/new/album-contributions", request);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SeriesAlbumContributions>())!;
     }

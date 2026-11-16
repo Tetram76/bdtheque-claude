@@ -1,0 +1,25 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<SeriesCreationDialog> L
+
+@* The creation of a series on the spot, from the entry form of an album that belongs to it (visuel/saisie-album/contenu.md,
+   L'album): its title alone, in the common dialog of a record created on the spot by its name; the series proposes to its
+   new editions what any new series proposes, the rest being entered on its own form (modele-metier/serie.md). *@
+<NameCreationDialog Id="@Id" Title="@L["Title"]" Lead="@L["Lead"]" Label="@L["SeriesTitle"]" CreateLabel="@L["Create"]" Text="@Text"
+                    OnCreated="title => OnCreated.InvokeAsync(new NewSeries(Guid.NewGuid(), title))" OnCancel="OnCancel" />
+
+@code {
+    /// <summary>The identifier of the dialog, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The title typed in the choice of a series.</summary>
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = null!;
+
+    /// <summary>The series to create with the album, to attach it to.</summary>
+    [Parameter]
+    public EventCallback<NewSeries> OnCreated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+}

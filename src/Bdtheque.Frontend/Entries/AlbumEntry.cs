@@ -38,6 +38,12 @@ public sealed class AlbumEntry
 
     public RecordOption? Series { get; set; }
 
+    /// <summary>The series added on the spot, referenced by their key; only the one still chosen is created with the album.</summary>
+    public List<NewSeries> NewSeries { get; set; } = [];
+
+    /// <summary>Whether the series chosen was added on the spot: it does not exist yet, and the API cannot read it.</summary>
+    public bool SeriesIsNew => Series is { } series && NewSeries.Any(s => s.Key == series.Id);
+
     /// <summary>
     /// The series whose contributions the album last received, whatever series was chosen since: those of the album as read,
     /// then those of the form (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
@@ -137,7 +143,7 @@ public sealed class AlbumEntry
         Cited.GenreIds(),
         Cited.UniverseIds(),
         Cited.Contributions(),
-        Cited.Added());
+        Cited.Added([.. NewSeries.Where(s => s.Key == Series?.Id)]));
 
     /// <summary>
     /// What tells two states of the form apart: the content it would save, the order of its associations aside, which the

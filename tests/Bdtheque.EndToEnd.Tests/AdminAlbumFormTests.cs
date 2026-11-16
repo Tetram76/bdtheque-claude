@@ -43,7 +43,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Série" }).PressSequentiallyAsync($"Série {_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Série {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Série {_marker}", Exact = true }).ClickAsync();
         await page.GetByLabel("Titre").FillAsync($"Le Lotus bleu {_marker}");
         await Assertions.Expect(page.GetByLabel("Clé de tri")).ToHaveValueAsync($"Lotus bleu {_marker} [Le]");
         await page.GetByLabel("Tome", new() { Exact = true }).FillAsync("5");
@@ -119,6 +119,32 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         var saved = (await GetAsync(album.Id)).References;
         Assert.Equal($"Genre{_marker}", Assert.Single(saved.Genres).Label);
         Assert.Equal(parent.Id, Assert.Single(Assert.Single(saved.Universes).Ancestors).Id);
+    }
+
+    [Theory, InEachTheme]
+    public async Task Series_AddedOnTheSpot_IsCreatedWithTheAlbum(string theme)
+    {
+        // visuel/saisie-album/contenu.md (decision of the user, #414): its title alone, the series created only with the album.
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbum);
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Série" }).PressSequentiallyAsync($"Fourneaux{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer la série « Fourneaux{_marker} »" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvelle série" });
+        await Assertions.Expect(dialog.GetByLabel("Titre")).ToHaveValueAsync($"Fourneaux{_marker}");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter la série" }).ClickAsync();
+        await Assertions.Expect(dialog).ToHaveCountAsync(0);
+        await Assertions.Expect(page.GetByRole(AriaRole.Combobox, new() { Name = "Série" })).ToHaveValueAsync($"Fourneaux{_marker}");
+        using (var api = Application.CreateApiClient())
+            Assert.Empty((await api.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q=Fourneaux{_marker}"))!.Items);
+        await page.GetByLabel("Titre").FillAsync($"Album {_marker}");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'album" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
+        using var client = Application.CreateApiClient();
+        var series = Assert.Single((await client.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q=Fourneaux{_marker}"))!.Items);
+        var created = Assert.Single((await client.GetFromJsonAsync<AlbumAdminList>($"/admin/albums?q=Album {_marker}"))!.Albums.Items);
+        Assert.Equal(series.Id, (await GetAsync(created.Album.Id)).Content.SeriesId);
     }
 
     [Theory, InEachTheme]
@@ -202,7 +228,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Série" }).PressSequentiallyAsync($"Série {_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Série {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Série {_marker}", Exact = true }).ClickAsync();
 
         // As soon as the series is chosen, before any saving.
         await Assertions.Expect(page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Auteurs repris de la série" })).ToContainTextAsync($"Série {_marker}");
@@ -227,14 +253,14 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         var scenario = page.Locator(".role-credits-line").First;
 
         await series.PressSequentiallyAsync($"Série A {_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Série A {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Série A {_marker}", Exact = true }).ClickAsync();
         await Assertions.Expect(scenario).ToContainTextAsync($"Premier{_marker}");
         await page.Locator(".record-picker-clear").First.ClickAsync();
         // The field emptied by the circuit before typing: otherwise the typing could reach it before the clearing.
         await Assertions.Expect(series).ToHaveValueAsync("");
         await Assertions.Expect(page.Locator(".record-picker-clear")).ToHaveCountAsync(0);
         await series.PressSequentiallyAsync($"Série B {_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Série B {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Série B {_marker}", Exact = true }).ClickAsync();
 
         await Assertions.Expect(scenario).ToContainTextAsync($"Second{_marker}");
         await Assertions.Expect(scenario).Not.ToContainTextAsync($"Premier{_marker}");

@@ -281,7 +281,25 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     {
         var dialog = Render<GenreCreationDialog>(parameters => parameters.Add(p => p.Id, "genre-creation").Add(p => p.Label, "Polar"));
 
-        Assert.Equal("(obligatoire)", dialog.Find("label[for=genre-creation-label] .field-note").TextContent);
+        Assert.Equal("(obligatoire)", dialog.Find("label[for=genre-creation-name] .field-note").TextContent);
+    }
+
+    [Fact]
+    public async Task SeriesCreationDialog_ItsTitleAlone_Required_TheTextTyped_ForTheSeriesToCreate()
+    {
+        // A series created on the spot asks for what it requires only, its title (visuel/saisie-album/contenu.md, #414).
+        NewSeries? created = null;
+        var dialog = Render<SeriesCreationDialog>(parameters => parameters
+            .Add(p => p.Id, "series-creation").Add(p => p.Text, " Les Vieux Fourneaux ")
+            .Add(p => p.OnCreated, (NewSeries series) => created = series));
+
+        Assert.Equal("Nouvelle série", dialog.Find("dialog h2").TextContent.Trim());
+        Assert.Equal(["Titre(obligatoire)"], dialog.FindAll("dialog label").Select(l => l.TextContent.Trim()));
+        Assert.Equal("Les Vieux Fourneaux", dialog.Find("#series-creation-name").GetAttribute("value"));
+        await dialog.ClickAsync(".dialog-actions .button[data-variant=primary]");
+
+        Assert.Equal("Les Vieux Fourneaux", created!.Title);
+        Assert.Equal("Ajouter la série", dialog.Find(".dialog-actions .button[data-variant=primary]").TextContent.Trim());
     }
 
     [Fact]

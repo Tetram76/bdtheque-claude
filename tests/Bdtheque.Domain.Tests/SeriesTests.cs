@@ -479,6 +479,53 @@ public sealed class SeriesTests
         Assert.NotNull(series.ContributionsForAlbum([], previous, albumIsNew: false));
     }
 
+    [Fact]
+    public void WithProposedEditionTemplate_ProposesWhatAnyNewSeriesProposes()
+    {
+        // A series created on the spot, by its title alone, proposes to its new editions what the form of a new series starts
+        // from (modele-metier/serie.md).
+        var series = Series.WithProposedEditionTemplate("Les Vieux Fourneaux");
+        var proposed = EditionPreset.Defaults;
+
+        Assert.Equal("Les Vieux Fourneaux", series.Title);
+        Assert.Equal(
+            (proposed.Category, proposed.Condition, proposed.Binding, proposed.Orientation, proposed.ReadingDirection, proposed.Format, (bool?)proposed.IsColor),
+            (series.TemplateEditionCategory, series.TemplateCondition, series.TemplateBinding, series.TemplateOrientation,
+                series.TemplateReadingDirection, series.TemplateFormat, series.TemplateIsColor));
+        Assert.Null(series.TemplatePublisherId);
+        Assert.Null(series.TemplatePublisherCollectionId);
+    }
+
+    [Fact]
+    public void WithProposedEditionTemplate_BlankTitle_Throws()
+    {
+        DomainAssert.Violates<Series>(DomainRules.SeriesTitleRequired, nameof(Series.Title), () => Series.WithProposedEditionTemplate(" "));
+    }
+
+    [Fact]
+    public void ContributionsForAlbumOfNewSeries_StillThoseOfThePreviousSeries_AreNone()
+    {
+        // A series created on the spot has no authors yet: those the previous series gave a new album are replaced by none
+        // (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md).
+        var (previous, scenarist, illustrator) = SeriesWithTemplate();
+
+        var contributions = Series.ContributionsForAlbumOfNewSeries(
+            [(scenarist.Id, ContributionRole.Scenarist), (illustrator.Id, ContributionRole.Illustrator)], previous, albumIsNew: true);
+
+        Assert.NotNull(contributions);
+        Assert.Empty(contributions);
+    }
+
+    [Fact]
+    public void ContributionsForAlbumOfNewSeries_Personalized_AreKept()
+    {
+        var (previous, scenarist, _) = SeriesWithTemplate();
+
+        Assert.Null(Series.ContributionsForAlbumOfNewSeries([(scenarist.Id, ContributionRole.Scenarist)], previous, albumIsNew: true));
+        Assert.Null(Series.ContributionsForAlbumOfNewSeries([(scenarist.Id, ContributionRole.Scenarist)], null, albumIsNew: true));
+        Assert.Empty(Series.ContributionsForAlbumOfNewSeries([], null, albumIsNew: false)!);
+    }
+
     private static (Series Series, Author Scenarist, Author Illustrator) SeriesWithTemplate()
     {
         var series = new Series("Tintin");

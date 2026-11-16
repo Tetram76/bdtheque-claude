@@ -147,6 +147,9 @@
   <data name="Series" xml:space="preserve">
     <value>Série</value>
   </data>
+  <data name="Series.Create" xml:space="preserve">
+    <value>Créer la série « {0} »</value>
+  </data>
   <data name="Series.Help" xml:space="preserve">
     <value>Rattaché à une série, l&apos;album peut se passer de titre : la série et le tome l&apos;identifient.</value>
   </data>

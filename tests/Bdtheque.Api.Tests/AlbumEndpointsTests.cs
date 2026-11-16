@@ -327,7 +327,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
             NewRecords = new NewRecords(
                 [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
                 [new NewGenre(genre, $"Genre{marker}")],
-                [new NewUniverse(universe, $"Univers{marker}", parent.Id)]),
+                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], []),
         };
 
         var created = await CreateAsync(content);
@@ -351,7 +351,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var updated = await UpdateAsync(created, created.Content with
         {
             GenreIds = [genre],
-            NewRecords = new NewRecords([], [new NewGenre(genre, label)], []),
+            NewRecords = new NewRecords([], [new NewGenre(genre, label)], [], []),
         });
 
         Assert.Equal(label, Assert.Single(updated.References.Genres).Label);
@@ -367,7 +367,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         {
             Contributions = [new ContributionContent(author, ContributionRole.Scenarist)],
             GenreIds = [genre],
-            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);
@@ -386,7 +386,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var content = Content(UniqueTitle()) with
         {
             GenreIds = [genre],
-            NewRecords = new NewRecords([], [new NewGenre(genre, taken.Label.Replace("Épopée", "EPOPEE"))], []),
+            NewRecords = new NewRecords([], [new NewGenre(genre, taken.Label.Replace("Épopée", "EPOPEE"))], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);
@@ -413,7 +413,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
             ],
             NewRecords = new NewRecords(
                 [new NewAuthor(added, $"Nouveau {Guid.NewGuid():N}", null, null), new NewAuthor(clashing, taken.LastName!.ToUpperInvariant(), null, null)],
-                [], []),
+                [], [], []),
         }, created.Version));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorDisplayNameAlreadyUsed, ["/newRecords/authors/1/lastName"]);
@@ -426,12 +426,55 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var content = Content(UniqueTitle()) with
         {
             UniverseIds = [universe],
-            NewRecords = new NewRecords([], [], [new NewUniverse(universe, new string('u', 1_000), null)]),
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, new string('u', 1_000), null)], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/newRecords/universes/0/name"]);
+    }
+
+    [Fact]
+    public async Task Create_WithASeriesAddedOnTheSpot_CreatesItWithTheAlbum_ProposingWhatAnyNewSeriesProposes()
+    {
+        // A series created by its title alone (visuel/saisie-album/contenu.md): its new editions are proposed what the form of
+        // a new series starts from (modele-metier/serie.md).
+        var series = Guid.NewGuid();
+        var title = UniqueTitle();
+        var content = Content(null) with
+        {
+            SeriesId = series,
+            VolumeNumber = 1,
+            NewRecords = new NewRecords([], [], [], [new NewSeries(series, title)]),
+        };
+
+        var created = await CreateAsync(content);
+
+        var named = created.References.Series!;
+        Assert.Equal(title, named.Title);
+        Assert.Equal(named.Id, created.Content.SeriesId);
+        var form = await _client.GetFromJsonAsync<SeriesForm>($"/admin/series/{named.Id}");
+        var proposed = await _client.GetFromJsonAsync<SeriesContent>("/admin/series/new");
+        Assert.Equal(proposed!.EditionTemplate, form!.Content.EditionTemplate);
+    }
+
+    [Fact]
+    public async Task Create_WithASeriesAddedOnTheSpotWithoutTitle_DesignatesIt_CreatingNothing()
+    {
+        var (series, genre) = (Guid.NewGuid(), Guid.NewGuid());
+        var label = $"Genre{Guid.NewGuid():N}";
+        var content = Content(UniqueTitle()) with
+        {
+            SeriesId = series,
+            GenreIds = [genre],
+            NewRecords = new NewRecords([], [new NewGenre(genre, label)], [], [new NewSeries(series, " ")]),
+        };
+
+        var response = await _client.PostAsJsonAsync("/admin/albums", content);
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SeriesTitleRequired, ["/newRecords/series/0/title"]);
+        var genres = await _client.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q={label}");
+        Assert.Empty(genres!.Items);
     }
 
     [Fact]
