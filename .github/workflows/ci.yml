@@ -295,10 +295,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # The whole history of a pull request: one of its commits may carry the trailer that says why a page did not change.
+      # The depths are strings: the number 0 is false in an expression, which would always give 1.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
+          fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
 
       # The merge commit of the pull request against the head of main, as the job of the changed files compares them; the
       # commits of the pull request are those of its second parent.
