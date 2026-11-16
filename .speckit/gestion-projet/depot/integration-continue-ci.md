@@ -5,7 +5,7 @@ description: 'Workflows CI, tests et images selon ce que modifie la Pull Request
 tags: [socle]
 applies_to:
   - '.github/workflows/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T11:32:42Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T11:59:38Z }
 ---
 
 # Intégration continue (CI)
@@ -33,6 +33,6 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T11:32:42Z }
     - **Sans authentification** : chaque job qui construit des images télécharge l'image de BuildKit (`moby/buildkit`), et chaque job qui exécute des tests sur conteneur l'image PostgreSQL des tests : celui des tests, et chacun de ceux des tests de bout en bout, un par thème proposé ([Outillage de développement .NET](../../choix-implementation/outillage.md)).
       - **Alternative écartée (image PostgreSQL des tests en cache, ou lue sur un miroir)** : aucun échec du CI sur le quota sans authentification n'a été constaté (40 derniers échecs relus), quand tous ceux constatés venaient du compte ; un cache ou un miroir ajouterait une mécanique à tenir pour un risque non avéré.
 
-- **Échec d'un appel à un service extérieur** (API GitHub, téléchargement depuis GitHub, Docker Hub) : un `403` ou un `429` ne suffit pas à l'imputer à un quota. L'agent ne retient un quota comme cause que sur des faits qui l'établissent : réponse du service qui nomme sa limite (ex. `API rate limit exceeded`, `toomanyrequests`), ou exécutions du CI de la période assez nombreuses pour l'atteindre. Le même appel réussi dans une autre exécution du dépôt pendant la période du quota l'écarte : un quota épuisé refuse tout jusqu'à la fin de sa période.
+- **Échec d'un appel à un service extérieur** (API GitHub, téléchargement depuis GitHub, Docker Hub) : un `403` ou un `429` ne suffit pas à l'imputer à un quota. L'agent ne retient un quota comme cause que sur des faits qui l'établissent : réponse du service qui nomme sa limite (ex. `API rate limit exceeded`, `toomanyrequests`), ou exécutions du CI de la période assez nombreuses pour l'atteindre. Faute d'une telle réponse, le même appel réussi **après** l'échec, pendant la même période et **sous le même quota**, l'écarte : un quota épuisé refuse tout ce qu'il compte jusqu'à la fin de sa période. Un appel réussi sous un autre quota ne prouve rien : le quota de l'API GitHub est celui du dépôt, que partagent toutes ses exécutions, mais le quota de Docker Hub sans authentification est celui d'une adresse IP, que deux exécuteurs hébergés ne partagent pas.
   - **Refus ponctuel** : un échec dont le quota est ainsi écarté est un refus ponctuel du service. Exemple : un `403` reçu en quelques dizaines de millisecondes au téléchargement de l'outil de Docker Scout, publié comme fichier d'une release GitHub. La bibliothèque de téléchargement des actions (`@actions/tool-cache`) ne retente que les réponses `408`, `429` et `5xx`, si bien qu'un seul refus fait échouer le job.
   - **Conduite** : quota ou refus ponctuel, l'agent ne pousse pas de nouveau commit, qui consommerait les quotas sans rien corriger. Il relance les seuls jobs en échec (`gh run rerun --failed`), une fois la période du quota écoulée pour un quota, aussitôt pour un refus ponctuel, et signale à l'utilisateur un échec qui persiste. Ce qu'il en écrit, à l'utilisateur comme sur la Pull Request, nomme la cause établie, jamais une cause supposée.
