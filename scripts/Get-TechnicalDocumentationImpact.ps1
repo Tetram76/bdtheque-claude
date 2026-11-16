@@ -15,7 +15,7 @@
     (docs/tech/documentation/couverture.md).
 
     Changed files are compared without rename detection, so that a moved file counts at its old path as at its new one.
-    The .speckit, normative, and docs/tech itself are no files a page describes.
+    Documents are no files a page describes: the .speckit, normative, docs/tech itself, and any other Markdown file.
 
 .EXAMPLE
     ./scripts/Get-TechnicalDocumentationImpact.ps1
@@ -69,7 +69,8 @@ else {
     if (-not $Commits) { $Commits = "$mergeBase..HEAD" }
 }
 $changed = @($changed | Where-Object { $_ } | Sort-Object -Unique)
-$described = @($changed | Where-Object { -not $_.StartsWith($documentation) -and -not $_.StartsWith('.speckit/') })
+# Documents (the .speckit, docs/tech itself, README, AGENTS.md…) are no implementation a page describes.
+$described = @($changed | Where-Object { -not $_.StartsWith($documentation) -and -not $_.StartsWith('.speckit/') -and -not $_.EndsWith('.md') })
 
 # Patterns of the front matter: '**' crosses folders, '*' does not.
 function ConvertTo-GlobRegex([string] $pattern) {
@@ -88,21 +89,25 @@ function Get-CodePattern([string] $path) {
     }
 }
 
-# Links to the files of the repository outside docs/tech, out of the fences; a folder covers what it holds.
+# The pattern of the files a link of a page designates, or nothing for a link that describes no file: an address, a link
+# out of the repository, into docs/tech or the .speckit, or to another document (README, AGENTS.md), to which the page
+# refers its reader without describing it. A folder covers what it holds.
+function Get-DescribedPattern([string] $page, [string] $href) {
+    if ($href -match '^[a-z]+:') { return }
+    $target = [IO.Path]::GetFullPath((Join-Path (Split-Path $page -Parent) $href))
+    if (-not $target.StartsWith($Root)) { return }
+    $relative = [IO.Path]::GetRelativePath($Root, $target).Replace('\', '/')
+    if ($relative.StartsWith($documentation) -or $relative.StartsWith('.speckit/') -or $relative.EndsWith('.md')) { return }
+    if (Test-Path $target -PathType Container) { "$($relative.TrimEnd('/'))/**" } else { $relative }
+}
+
+# The links of a page out of its fences, which hold diagrams and examples.
 function Get-LinkPattern([string] $path) {
     $inFence = $false
     foreach ($line in [IO.File]::ReadLines($path)) {
-        if ($line -match '^\s*```') { $inFence = -not $inFence; continue }
-        if ($inFence) { continue }
-        foreach ($link in [regex]::Matches($line, '\]\((?<href>[^)\s#]+)(#[^)]*)?\)')) {
-            $href = $link.Groups['href'].Value
-            if ($href -match '^[a-z]+:') { continue }
-            $target = [IO.Path]::GetFullPath((Join-Path (Split-Path $path -Parent) $href))
-            if (-not $target.StartsWith($Root)) { continue }
-            $relative = [IO.Path]::GetRelativePath($Root, $target).Replace('\', '/')
-            # A link to another document (README, AGENTS.md) refers the reader to it: the page does not describe it.
-            if ($relative.StartsWith($documentation) -or $relative.StartsWith('.speckit/') -or $relative.EndsWith('.md')) { continue }
-            if (Test-Path $target -PathType Container) { "$($relative.TrimEnd('/'))/**" } else { $relative }
+        if ($line -match '^\s*```') { $inFence = -not $inFence }
+        elseif (-not $inFence) {
+            [regex]::Matches($line, '\]\((?<href>[^)\s#]+)(#[^)]*)?\)') | ForEach-Object { Get-DescribedPattern $path $_.Groups['href'].Value }
         }
     }
 }
