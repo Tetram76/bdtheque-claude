@@ -3,7 +3,9 @@ name: chantiers-paralleles
 description: >-
   Runs a batch of chantiers in parallel on this repository, each in its own
   session and worktree, to complete the current milestone: picks them among
-  its open tickets in the order of priority of the .speckit, evaluates the
+  its open tickets (within the user's scope, if any) in the order of priority
+  of the .speckit, briefs each session to notify the orchestrator of major
+  events and to run its own time-boxed watches, evaluates the
   resources of the machine before each
   launch, starts a session per chantier and starts the next one each time a
   pull request of the batch is merged. Use when the user asks to run the next
@@ -33,7 +35,9 @@ chantier's (step 4, cleanup).
 
 A batch serves to **complete the current milestone**, never to anticipate
 future work: its chantiers are chosen among that milestone's tickets only
-(step 2.2).
+(step 2.2). The user may also **restrict the candidates to a scope** (a list
+of tickets, a label, a screen, a part of the plan…): take the latest scope the
+user gave in this conversation; only the tickets within it are candidates.
 
 ## 1. The batch
 
@@ -71,7 +75,8 @@ never taking one of the places of the chantiers run at once.
   `ergonomy-audit`, each with `harness`) and decide from those concepts which
   are due. Give the due ones to **one separate session** (step 3, same
   launch, title `Harnais <week or date>`), whose brief names them and the
-  concepts to follow; no chantier session checks or runs them.
+  concepts to follow, with the same notification, exchange and watch rules
+  as a chantier's brief (step 3); no chantier session checks or runs them.
 - **A pull request opened by a harness itself** (monthly or security version
   bump, corrections of the quality treatment), with no ticket of its own, is
   part of that harness: its session carries it to the merge; it is not a
@@ -116,6 +121,13 @@ never taking one of the places of the chantiers run at once.
    CI stabilization (any milestone) is exempt. A harness is never a
    candidate (above).
 
+   **Scope of the user**, if given: keep only the tickets within it, and the
+   sub-tickets of those tickets. It adds to the criteria above and to the
+   checks below, never lifts them, except for the tickets the user names
+   explicitly. A ticket created during the batch outside the scope is not a
+   candidate. When the extent of the scope is ambiguous, ask the user before
+   ranking.
+
    Then, **for each candidate you consider, in that order, you check yourself
    both conditions below** — never one without the other, never left to the
    chantier's session or to the user. Read the **whole body** of the ticket,
@@ -157,6 +169,7 @@ never taking one of the places of the chantiers run at once.
    place. Never only the chantiers launched now: without the whole
    selection, the user cannot confirm the number of chantiers of the batch.
    In French, as a table or a list:
+   - the scope the user set, if any;
    - the number of chantiers of the batch the user set, and how many the
      selection counts (sub-tickets included);
    - each selected chantier: ticket (`#<n>` and title), rank in the order of
@@ -186,10 +199,30 @@ brief (`prompt`) says:
   associated or duplicate tickets, a split expected, decisions of the user to
   ask one at a time);
 - that, if it splits the ticket, it carries out the first sub-ticket only and
-  reports the others, which are launched as chantiers of the batch.
+  reports the others, which are launched as chantiers of the batch;
+- that it **notifies the orchestrator** with `SendMessage` (`to`: the
+  orchestrator's session id, given in the brief) at **each major event, and
+  only then**: the end of its chantier (pull request merged, ticket commented
+  and locked, branches and worktree cleaned), with the pull request, the
+  squashed commit and what is left to do; its abandonment; a problem that
+  blocks it or goes beyond its chantier; a split of its ticket or a ticket
+  created; a wait on the user (decision, functional validation). It never
+  reports its progress at regular intervals;
+- that it may exchange directly with the sessions of the other chantiers of
+  the batch, only for information **useful** in the light of the context its
+  brief gives (coordinating a heavy run or a shared environment, a file both
+  chantiers touch, a finding that concerns the other chantier); nothing else;
+- that the **watches** of its chantier (CI, Codex review, SonarQube Cloud
+  analysis…) are its own: nobody does them for it, neither the orchestrator
+  nor the user. Each watch is **time-boxed** (maximum delay set from the
+  expected duration, `regles-de-travail-de-l-agent.md`): when the delay
+  expires, it reads the real state itself (checks, comments, reactions)
+  instead of trusting the silence of its watching script — a badly written
+  script may detect nothing without noticing it is badly written.
 
 The `background` says: the batch and the other chantiers in progress (by
-ticket and pull request) with the files they may share; the resources measured
+ticket, pull request and **session id**) with the files they may share; the
+orchestrator's session id; the resources measured
 at this launch and the rule of the heavy runs (check `docker ps`, bounded,
 before any command that starts containers or browsers; wait for another
 session's run to end; size the run for the real resources; one functional
@@ -204,8 +237,13 @@ chosen before the others; the whole selection was presented at step 2.4.
 
 ## 4. While the batch runs
 
-- Each note of a session of the batch: report it to the user in a line or two,
-  with the links of its pull request; never fabricate its result.
+- Each message or note of a session of the batch: report it to the user in a
+  line or two, with the links of its pull request; never fabricate its
+  result. A message is the session's report, not a proof: check on GitHub
+  what it announces (cleanup, tickets created) before acting on it. The notes
+  the app relays at the end of a session's turn do not always say whether the
+  chantier is over, and an archived session sends none: when a session goes
+  quiet, check its pull request on GitHub.
 - A note from the harness session: it frees no place. Once every harness
   given to it is done, check its trace in the body of each tracking ticket
   (`gh issue view <n> --json body`), a ticket for each follow-up, and its
@@ -235,7 +273,7 @@ chosen before the others; the whole selection was presented at step 2.4.
   squash-merged) is deleted with `git branch -D`.
   Report to the user in one line what was cleaned.
 - A note that reports a split or a new ticket: tell the user which tickets
-  join the candidates; they are planned at the next pass of step 2 (now, if a
+  join the candidates (within the user's scope, if any); they are planned at the next pass of step 2 (now, if a
   place is free), after checking them on GitHub (step 2.1).
 - A merge (a note, or `main` that moved) frees a place: back to step 2 —
   tickets, candidates **and resources** read again, the selection presented
