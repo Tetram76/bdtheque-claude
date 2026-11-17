@@ -1,4 +1,5 @@
 # Références générées
 
 * [Dépendances des projets](dependances-des-projets.md) - Références entre les projets de la solution, générées depuis ses fichiers de projet ; pour un fait exact sur qui référence qui.
+* [Schéma de la base](schema-de-la-base.md) - Tables, colonnes, contraintes, index, collations et relations de la base, générés depuis une base qui a reçu les migrations ; pour un fait exact sur le schéma physique.
 * [Contrat HTTP de l'API](api-http.md) - Familles de routes, contrat OpenAPI versionné et généré depuis les endpoints, son exploration interactive (Scalar) ; pour connaître un endpoint, relire ce qu'un changement fait au contrat, ou l'essayer en validation.

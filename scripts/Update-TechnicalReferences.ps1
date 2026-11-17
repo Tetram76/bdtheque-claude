@@ -14,7 +14,9 @@
     Generated today: the references between the projects of the solution (Bdtheque.slnx, ProjectReference), and the
     OpenAPI contract of the API (openapi-v1.json), which the endpoints produce in the test host of the API. That host
     applies the migrations to a PostgreSQL database, so Docker is required to write the contract; -Check leaves it out:
-    OpenApiContractTests, in the tests of the API, compares it whenever a source changes.
+    OpenApiContractTests, in the tests of the API, compares it whenever a source changes. The schema of the database
+    (schema-de-la-base.md) likewise: read from the catalog of a migrated database by DatabaseSchemaReferenceTests, which
+    writes it here and compares it in the tests of the infrastructure, never in -Check.
 
 .EXAMPLE
     ./scripts/Update-TechnicalReferences.ps1
@@ -22,7 +24,7 @@
 .EXAMPLE
     ./scripts/Update-TechnicalReferences.ps1 -Check
 
-    Checks the pages generated here, the OpenAPI contract excepted.
+    Checks the pages generated here, the OpenAPI contract and the schema of the database excepted.
 #>
 [CmdletBinding()]
 param(
@@ -31,6 +33,9 @@ param(
 
     # Leaves the OpenAPI contract out of the generation: on a machine without Docker, or in a repository without the API.
     [switch] $NoOpenApiContract,
+
+    # Leaves the schema of the database out of the generation: on a machine without Docker, or in a repository without it.
+    [switch] $NoDatabaseSchema,
 
     # Root of the repository whose references are generated: this one by default.
     [string] $Root = (Split-Path $PSScriptRoot -Parent)
@@ -122,12 +127,29 @@ function Update-OpenApiContract {
     }
 }
 
+# The schema is the one a migrated database gives (DatabaseSchemaReferenceTests), written by that test where it is told.
+function Update-DatabaseSchema {
+    $env:BDTHEQUE_DATABASE_SCHEMA_OUTPUT = Join-Path $references $databaseSchemaPage
+    try {
+        dotnet test (Join-Path $Root 'tests/Bdtheque.Infrastructure.Tests') --configuration Release `
+            --filter 'FullyQualifiedName~Bdtheque.Infrastructure.Tests.DatabaseSchemaReferenceTests' | Out-Host
+        if ($LASTEXITCODE -ne 0) { Write-Error 'The schema of the database could not be generated: see the output of the test above.' }
+    }
+    finally {
+        Remove-Item Env:BDTHEQUE_DATABASE_SCHEMA_OUTPUT
+    }
+}
+
+# Generated from a migrated database by its test, never by this script itself: neither compared nor left over here.
+$databaseSchemaPage = 'schema-de-la-base.md'
+
 $pages = @(New-ProjectDependencyPage)
 
 # The pages this script generated before: those whose front matter names it.
 $existing = @(Get-ChildItem $references -Filter *.md -File -ErrorAction SilentlyContinue |
         Where-Object { (Get-Content $_.FullName -TotalCount 12) -contains "generated: '$generator'" } |
-        ForEach-Object Name)
+        ForEach-Object Name |
+        Where-Object { $_ -ne $databaseSchemaPage })
 
 if ($Check) {
     $differences = @(
@@ -154,3 +176,4 @@ foreach ($name in $existing | Where-Object { $_ -notin $pages.Name }) {
     Remove-Item (Join-Path $references $name)
 }
 if (-not $NoOpenApiContract) { Update-OpenApiContract }
+if (-not $NoDatabaseSchema) { Update-DatabaseSchema }
