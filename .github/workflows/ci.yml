@@ -56,11 +56,12 @@ jobs:
           cd "$RUNNER_TEMP"
           git -C "$GITHUB_WORKSPACE" diff --name-only --no-renames HEAD^1 HEAD > changed.txt
           # Documentation, and tooling that no test runs: the tests of the repository check what they read of it. The tests
-          # of the technical documentation run in the job of their own.
+          # of the technical documentation run in the job of their own. The versioned OpenAPI contract is the exception:
+          # the tests of the API compare it with the one the endpoints produce, which no other job can generate.
           not_sources='^(\.speckit/|\.claude/|poc/|docs/|scripts/|docker/|\.github/|tests/Bdtheque\.Documentation\.Tests/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.dockerignore$|\.gitignore$)'
-          { grep -vE "$not_sources" changed.txt || true; grep -xF .github/workflows/ci.yml changed.txt || true; } > sources.txt
-          # The tests without a browser render no screen.
-          grep -vE '^tests/Bdtheque\.(Api|Domain|Frontend|Infrastructure|ValidationData)\.Tests/' sources.txt > rendering.txt || true
+          { grep -vE "$not_sources" changed.txt || true; grep -xE '\.github/workflows/ci\.yml|docs/tech/references/openapi-v1\.json' changed.txt || true; } > sources.txt
+          # The tests without a browser render no screen, nor does the contract they compare.
+          grep -vE '^(tests/Bdtheque\.(Api|Domain|Frontend|Infrastructure|ValidationData)\.Tests/|docs/)' sources.txt > rendering.txt || true
           # What the images built below are made of: their build context, their Dockerfiles and this workflow, which
           # builds and analyzes them. The images of the validation data and of the technical documentation are not built here.
           not_images='^(\.speckit/|\.claude/|poc/|docs/|scripts/|tests/|\.github/|docker/validation-data/|docker/validation-docs/|[^/]+\.md$|docker-compose\.yml$|\.env\.example$|\.gitignore$)'

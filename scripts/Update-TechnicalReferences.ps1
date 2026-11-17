@@ -11,18 +11,26 @@
     sources no longer produce (a page carrying `generated:` in its front matter) each fail it, untracked files
     included, since the comparison reads the folder itself.
 
-    Generated today: the references between the projects of the solution (Bdtheque.slnx, ProjectReference).
+    Generated today: the references between the projects of the solution (Bdtheque.slnx, ProjectReference), and the
+    OpenAPI contract of the API (openapi-v1.json), which the endpoints produce in the test host of the API. That host
+    applies the migrations to a PostgreSQL database, so Docker is required to write the contract; -Check leaves it out:
+    OpenApiContractTests, in the tests of the API, compares it whenever a source changes.
 
 .EXAMPLE
     ./scripts/Update-TechnicalReferences.ps1
 
 .EXAMPLE
     ./scripts/Update-TechnicalReferences.ps1 -Check
+
+    Checks the pages generated here, the OpenAPI contract excepted.
 #>
 [CmdletBinding()]
 param(
     # Fails, naming each difference, instead of writing.
     [switch] $Check,
+
+    # Leaves the OpenAPI contract out of the generation: on a machine without Docker, or in a repository without the API.
+    [switch] $NoOpenApiContract,
 
     # Root of the repository whose references are generated: this one by default.
     [string] $Root = (Split-Path $PSScriptRoot -Parent)
@@ -100,6 +108,20 @@ function New-ProjectDependencyPage {
     [pscustomobject]@{ Name = 'dependances-des-projets.md'; Content = ($lines -join "`n") + "`n" }
 }
 
+# The contract is the document the API host produces (OpenApiContractTests), never a second declaration: the test writes
+# it where it is told, then compares it with the versioned file, which it then is.
+function Update-OpenApiContract {
+    $env:BDTHEQUE_OPENAPI_CONTRACT_OUTPUT = Join-Path $references 'openapi-v1.json'
+    try {
+        dotnet test (Join-Path $Root 'tests/Bdtheque.Api.Tests') --configuration Release `
+            --filter 'FullyQualifiedName~Bdtheque.Api.Tests.OpenApiContractTests' | Out-Host
+        if ($LASTEXITCODE -ne 0) { Write-Error 'The OpenAPI contract could not be generated: see the output of the test above.' }
+    }
+    finally {
+        Remove-Item Env:BDTHEQUE_OPENAPI_CONTRACT_OUTPUT
+    }
+}
+
 $pages = @(New-ProjectDependencyPage)
 
 # The pages this script generated before: those whose front matter names it.
@@ -131,3 +153,4 @@ foreach ($page in $pages) {
 foreach ($name in $existing | Where-Object { $_ -notin $pages.Name }) {
     Remove-Item (Join-Path $references $name)
 }
+if (-not $NoOpenApiContract) { Update-OpenApiContract }
