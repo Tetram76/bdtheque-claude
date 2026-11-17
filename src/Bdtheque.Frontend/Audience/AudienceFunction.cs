@@ -156,6 +156,9 @@ public static class AudienceFunctions
     /// <summary>The creation of a universe on the spot, from the form of a series.</summary>
     public static readonly AudienceFunction AdminSeriesUniverseCreated = new("admin.series-form.universe-created", AudienceFunctionKind.Action);
 
+    /// <summary>The creation of a publisher on the spot, from the form of a series.</summary>
+    public static readonly AudienceFunction AdminSeriesPublisherCreated = new("admin.series-form.publisher-created", AudienceFunctionKind.Action);
+
     /// <summary>The changes of the user shown, the series having been modified in the meantime.</summary>
     public static readonly AudienceFunction AdminSeriesChanges = new("admin.series-form.changes", AudienceFunctionKind.Action);
 
@@ -364,6 +367,9 @@ public static class AudienceFunctions
     /// <summary>The changes of the user shown, an edition modified meanwhile, with the edition.</summary>
     public static readonly AudienceFunction AdminEditionChanges = new("admin.edition-form.changes", AudienceFunctionKind.Action);
 
+    /// <summary>The creation of a publisher on the spot, from the form of an owned edition.</summary>
+    public static readonly AudienceFunction AdminEditionPublisherCreated = new("admin.edition-form.publisher-created", AudienceFunctionKind.Action);
+
     /// <summary>The entry form of the edition a purchase intent targets, with the intent it presents.</summary>
     public static readonly AudienceFunction AdminPurchaseIntentForm = new("admin.purchase-intent-form", AudienceFunctionKind.Screen);
 
@@ -378,6 +384,10 @@ public static class AudienceFunctions
 
     /// <summary>The changes of the user shown, the edition a purchase intent targets modified meanwhile, with the intent.</summary>
     public static readonly AudienceFunction AdminPurchaseIntentChanges = new("admin.purchase-intent-form.changes", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a publisher on the spot, from the form of the edition a purchase intent targets.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentPublisherCreated =
+        new("admin.purchase-intent-form.publisher-created", AudienceFunctionKind.Action);
 
     // The visuals of the edition, written as soon as they are added, ordered, retyped or deleted (visuel/saisie-edition/contenu.md),
     // each with the visual concerned, or the edition for an arrangement.
@@ -426,7 +436,7 @@ public static class AudienceFunctions
         AdminAlbumChanges,
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
         AdminSeriesMerge, AdminSeriesForm, AdminNewSeriesForm, AdminSeriesCreated, AdminSeriesSaved, AdminSeriesAuthorCreated,
-        AdminSeriesGenreCreated, AdminSeriesUniverseCreated, AdminSeriesChanges, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
+        AdminSeriesGenreCreated, AdminSeriesUniverseCreated, AdminSeriesPublisherCreated, AdminSeriesChanges, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
         AdminAuthorsMerge, AdminAuthorsEdit, AdminAuthorsNew, AdminAuthorSaved, AdminAuthorCreated, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
         AdminPublishersMerge, AdminPublisherForm, AdminNewPublisherForm, AdminPublisherCreated, AdminPublisherSaved, AdminPublisherChanges,
         AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
@@ -437,7 +447,8 @@ public static class AudienceFunctions
         AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
         AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved,
         AdminAlbumEditionsAlbumIntentSet, AdminEditionForm, AdminNewEditionForm, AdminEditionCreated, AdminEditionSaved, AdminEditionChanges,
-        AdminPurchaseIntentForm, AdminNewPurchaseIntentForm, AdminPurchaseIntentCreated, AdminPurchaseIntentSaved, AdminPurchaseIntentChanges,
+        AdminEditionPublisherCreated, AdminPurchaseIntentForm, AdminNewPurchaseIntentForm, AdminPurchaseIntentCreated, AdminPurchaseIntentSaved,
+        AdminPurchaseIntentChanges, AdminPurchaseIntentPublisherCreated,
         AdminEditionVisualAdded, AdminEditionVisualsArranged, AdminEditionVisualTypeChanged, AdminEditionVisualDeletion, AdminEditionVisualDeleted,
         AdminPurchaseIntentVisualAdded, AdminPurchaseIntentVisualsArranged, AdminPurchaseIntentVisualTypeChanged, AdminPurchaseIntentVisualDeletion,
         AdminPurchaseIntentVisualDeleted,

@@ -2,6 +2,7 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
@@ -48,7 +49,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         // Its new editions proposing what any new edition is proposed.
         await Assertions.Expect(page.GetByLabel("Reliure")).ToHaveValueAsync(nameof(BindingType.Hardcover));
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
         await Assertions.Expect(collectionField).ToBeEnabledAsync();
         await collectionField.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
@@ -65,6 +66,37 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
     }
 
     [Theory, InEachTheme]
+    public async Task Publisher_AddedOnTheSpot_IsCreatedWithTheSeries(string theme)
+    {
+        // visuel/saisie-serie/contenu.md (decision of the user, #414): its name alone, the publisher created only with the series.
+        var page = await OpenAsync(theme, AppPaths.AdminNewSeries);
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+
+        await page.GetByLabel("Titre").FillAsync($"Série {_marker}");
+        var publisher = page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true });
+        await publisher.PressSequentiallyAsync($"Éditeur{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'éditeur « Éditeur{_marker} »" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel éditeur" });
+        await Assertions.Expect(dialog.GetByLabel("Nom")).ToHaveValueAsync($"Éditeur{_marker}");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter l'éditeur" }).ClickAsync();
+        await Assertions.Expect(dialog).ToHaveCountAsync(0);
+        await Assertions.Expect(publisher).ToHaveValueAsync($"Éditeur{_marker}");
+        // Not created yet, it has no collection.
+        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
+        await Assertions.Expect(collection).ToBeEnabledAsync();
+        await Assertions.Expect(collection.Locator("option")).ToHaveCountAsync(1);
+        using (var api = Application.CreateApiClient())
+            Assert.Empty((await api.GetFromJsonAsync<Page<PublisherAdminListItem>>($"/admin/publishers?q={_marker}"))!.Items);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
+        using var client = Application.CreateApiClient();
+        var created = Assert.Single((await client.GetFromJsonAsync<Page<PublisherAdminListItem>>($"/admin/publishers?q={_marker}"))!.Items);
+        var series = Assert.Single((await client.GetFromJsonAsync<SeriesAdminList>($"/admin/series?q={_marker}"))!.Series.Items);
+        Assert.Equal(created.Id, (await GetAsync(series.Id)).Content.EditionTemplate.PublisherId);
+    }
+
+    [Theory, InEachTheme]
     public async Task Collection_UnavailableWithoutPublisher_RemovedWhenThePublisherChanges(string theme)
     {
         var first = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Premier{_marker}", null, []));
@@ -78,14 +110,14 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(collection).ToBeDisabledAsync();
 
         await publisher.PressSequentiallyAsync($"Premier{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Premier{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Premier{_marker}", Exact = true }).ClickAsync();
         await Assertions.Expect(collection).ToBeEnabledAsync();
         await collection.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
         await Assertions.Expect(collection).ToHaveValueAsync(created.Id.ToString());
         await page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « Premier{_marker} »" }).ClickAsync();
         await Assertions.Expect(publisher).ToHaveValueAsync("");
         await publisher.PressSequentiallyAsync($"Second{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Second{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Second{_marker}", Exact = true }).ClickAsync();
 
         await Assertions.Expect(collection).ToBeEnabledAsync();
         await Assertions.Expect(collection).ToHaveValueAsync("");

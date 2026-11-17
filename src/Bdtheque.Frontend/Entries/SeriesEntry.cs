@@ -51,6 +51,12 @@ public sealed class SeriesEntry
     /// <summary>One of the collections of <see cref="Publisher"/>.</summary>
     public RecordOption? PublisherCollection { get; set; }
 
+    /// <summary>The publishers added on the spot, referenced by their key; only the one still chosen is created with the series.</summary>
+    public List<NewPublisher> NewPublishers { get; set; } = [];
+
+    /// <summary>Whether the publisher chosen was added on the spot: it does not exist yet, nor any collection of it.</summary>
+    public bool PublisherIsNew => Publisher is { } publisher && NewPublishers.Any(p => p.Key == publisher.Id);
+
     // The values proposed to the new editions of the albums of the series; none for a value it does not propose.
 
     public EditionCategory? Category { get; set; }
@@ -150,7 +156,7 @@ public sealed class SeriesEntry
         Cited.GenreIds(),
         Cited.UniverseIds(),
         Cited.Contributions(),
-        Cited.Added());
+        Cited.Added(publishers: [.. NewPublishers.Where(p => p.Key == Publisher?.Id)]));
 
     /// <summary>
     /// What tells two states of the form apart: the content it would save, the order of its associations aside, which the

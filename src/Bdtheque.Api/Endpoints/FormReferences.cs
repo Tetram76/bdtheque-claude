@@ -38,17 +38,17 @@ internal static class FormReferences
 
     /// <summary>
     /// Loads the publisher and the publisher collection a form references, each of which must still
-    /// exist when given. Whether the collection belongs to the publisher is left to the domain
-    /// operation that receives both: a mismatch is a business error.
+    /// exist when given, unless the form added the publisher on the spot. Whether the collection belongs to the publisher is
+    /// left to the domain operation that receives both: a mismatch is a business error.
     /// </summary>
     /// <exception cref="EntityNotFoundException">The publisher or the collection no longer exists.</exception>
     public static async Task<(Publisher? Publisher, PublisherCollection? Collection)> LoadPublisherAsync(
-        BdthequeDbContext context, Guid? publisherId, Guid? collectionId, CancellationToken cancellationToken)
+        BdthequeDbContext context, Guid? publisherId, Guid? collectionId, AddedRecords added, CancellationToken cancellationToken)
     {
-        var publisher = publisherId is { } pid
-            ? await context.Publishers.SingleOrDefaultAsync(p => p.Id == pid, cancellationToken)
-              ?? throw new EntityNotFoundException(typeof(Publisher), pid)
-            : null;
+        Publisher? publisher = null;
+        if (publisherId is { } pid && !added.Publishers.TryGetValue(pid, out publisher))
+            publisher = await context.Publishers.SingleOrDefaultAsync(p => p.Id == pid, cancellationToken)
+                        ?? throw new EntityNotFoundException(typeof(Publisher), pid);
         var collection = collectionId is { } cid
             ? await context.PublisherCollections.SingleOrDefaultAsync(c => c.Id == cid, cancellationToken)
               ?? throw new EntityNotFoundException(typeof(PublisherCollection), cid)
@@ -111,12 +111,16 @@ internal static class FormReferences
         var series = records.Series.Select((s, index) => (s.Key, Series: fields.Create(
                 $"{AddedPath}/series/{index}", () => Series.WithProposedEditionTemplate(s.Title))))
             .ToDictionary(s => s.Key, s => s.Series);
+        var publishers = records.Publishers.Select((p, index) => (p.Key, Publisher: fields.Create(
+                $"{AddedPath}/publishers/{index}", () => new Publisher(p.Name))))
+            .ToDictionary(p => p.Key, p => p.Publisher);
 
         context.Authors.AddRange(authors.Values);
         context.Genres.AddRange(genres.Values);
         context.Universes.AddRange(universes.Values);
         context.Series.AddRange(series.Values);
-        return new AddedRecords(authors, genres, universes, series);
+        context.Publishers.AddRange(publishers.Values);
+        return new AddedRecords(authors, genres, universes, series, publishers);
     }
 
     /// <summary>The authors of the contributions, each once, named as the lists name them.</summary>
@@ -152,4 +156,4 @@ internal static class FormReferences
 /// <summary>The records a form added on the spot, created with the record it saves, by the key that stands for their identifier.</summary>
 internal sealed record AddedRecords(
     IReadOnlyDictionary<Guid, Author> Authors, IReadOnlyDictionary<Guid, Genre> Genres, IReadOnlyDictionary<Guid, Universe> Universes,
-    IReadOnlyDictionary<Guid, Series> Series);
+    IReadOnlyDictionary<Guid, Series> Series, IReadOnlyDictionary<Guid, Publisher> Publishers);

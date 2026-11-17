@@ -226,6 +226,64 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task PublisherCreatedOnTheSpot_IsChosen_WithoutCollection_AndCreatedWithTheSeries_WhenItIsSaved()
+    {
+        // visuel/saisie-serie/contenu.md (decision of the user, #414): the name typed, the publisher created only with the series.
+        var page = OpenSeries();
+
+        await CreatePublisherOnTheSpotAsync(page, " Delcourt ");
+
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.Equal("Delcourt", page.Find("#series-publisher").GetAttribute("value"));
+        Assert.Equal("admin.series-form.publisher-created", _audience.Functions.Last());
+        // A publisher that does not exist yet has no collection, and is not read.
+        Assert.False(page.Find("#series-collection").HasAttribute("disabled"));
+        Assert.Equal(["—"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
+        Assert.DoesNotContain(_api.Requested, path => path.StartsWith("/admin/publishers/", StringComparison.Ordinal) && !path.Contains(Dargaud.ToString(), StringComparison.Ordinal));
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
+        await page.SubmitAsync("form");
+
+        var content = _api.Written.Single().Body.GetProperty("content");
+        var publisher = content.GetProperty("newRecords").GetProperty("publishers").EnumerateArray().Single();
+        Assert.Equal("Delcourt", publisher.GetProperty("name").GetString());
+        var template = content.GetProperty("editionTemplate");
+        Assert.Equal(publisher.GetProperty("key").GetString(), template.GetProperty("publisherId").GetString());
+        Assert.Equal(JsonValueKind.Null, template.GetProperty("publisherCollectionId").ValueKind);
+    }
+
+    [Fact]
+    public async Task PublisherCreatedOnTheSpot_ThenReplaced_IsNotCreated_ButSuggestedAgain()
+    {
+        var page = OpenSeries();
+        await CreatePublisherOnTheSpotAsync(page, "Delcourt");
+
+        ChoosePublisher(page, new RecordOption(Casterman, "Casterman", null));
+
+        var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
+        Assert.Equal(["Delcourt"], picker.Instance.Pending.Select(p => p.Label));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
+        await page.SubmitAsync("form");
+        Assert.Equal(JsonValueKind.Null, _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords").ValueKind);
+    }
+
+    [Fact]
+    public async Task BusinessError_OnAPublisherCreatedOnTheSpot_DesignatesTheFieldOfThePublisher()
+    {
+        var page = OpenSeries();
+        await CreatePublisherOnTheSpotAsync(page, "Dargaud");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Publisher.NameAlreadyUsed", "/newRecords/publishers/0/name");
+
+        await page.SubmitAsync("form");
+
+        var field = page.Find("#series-publisher");
+        Assert.Equal("true", field.GetAttribute("aria-invalid"));
+        Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
+            id => page.Find($"#{id}").TextContent.Trim().StartsWith("« Dargaud » est déjà pris", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void NewSeries_EmptyWithoutDates_ItsNewEditionsPreFilled_AndSaySo()
     {
         var page = OpenNew();
@@ -479,5 +537,12 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     {
         var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
         picker.InvokeAsync(() => picker.Instance.ValueChanged.InvokeAsync(publisher)).GetAwaiter().GetResult();
+    }
+
+    private static async Task CreatePublisherOnTheSpotAsync(IRenderedComponent<AdminSeriesForm> page, string name)
+    {
+        var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
+        await picker.InvokeAsync(() => picker.Instance.OnCreate.InvokeAsync(name));
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
     }
 }
