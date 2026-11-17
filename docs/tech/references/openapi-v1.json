@@ -9600,7 +9600,7 @@
             "format": "uint32"
           }
         },
-        "description": "Confirms the purchase of an edition targeted by an intent\n(fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention): the edition, with its\nacquisition, which realizes the intent."
+        "description": "Confirms the purchase of an edition targeted by an intent\r\n(fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention): the edition, with its\r\nacquisition, which realizes the intent."
       },
       "AcquisitionMode": {
         "enum": [
@@ -9628,7 +9628,7 @@
             "format": "int32"
           }
         },
-        "description": "The checks of the records to correct or complete (visuel/administration/contenu.md, À vérifier): only those the\nspecification defines."
+        "description": "The checks of the records to correct or complete (visuel/administration/contenu.md, À vérifier): only those the\r\nspecification defines."
       },
       "AdvancedSearchRequest": {
         "required": [
@@ -9664,7 +9664,7 @@
             "$ref": "#/components/schemas/AlbumListFilters"
           }
         },
-        "description": "The list of the albums of the administration (visuel/liste-albums/contenu.md): one page of its albums, and\nwhat the list presents of the records it is filtered on."
+        "description": "The list of the albums of the administration (visuel/liste-albums/contenu.md): one page of its albums, and\r\nwhat the list presents of the records it is filtered on."
       },
       "AlbumAdminListItem": {
         "required": [
@@ -9690,7 +9690,7 @@
                 "type": "null"
               },
               {
-                "description": "Its cover among all its editions, owned or targeted by a purchase intent\n(fonctionnel/regles-metier/couverture-d-un-album.md); `null` for the generic visual.",
+                "description": "Its cover among all its editions, owned or targeted by a purchase intent\r\n(fonctionnel/regles-metier/couverture-d-un-album.md); `null` for the generic visual.",
                 "$ref": "#/components/schemas/AlbumCover"
               }
             ]
@@ -9793,7 +9793,7 @@
             "format": "int32"
           }
         },
-        "description": "An album of a bibliography, with every role the author is credited with on it, and its date of first publication,\n`null` when not set."
+        "description": "An album of a bibliography, with every role the author is credited with on it, and its date of first publication,\r\n`null` when not set."
       },
       "AlbumCard": {
         "required": [
@@ -9823,7 +9823,7 @@
                 "type": "null"
               },
               {
-                "description": "That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not;\n`null` without any, the generic visual standing in for it (fonctionnel/regles-metier/visuel-par-defaut.md).",
+                "description": "That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not;\r\n`null` without any, the generic visual standing in for it (fonctionnel/regles-metier/visuel-par-defaut.md).",
                 "$ref": "#/components/schemas/AlbumCover"
               }
             ]
@@ -9833,7 +9833,7 @@
             "description": "Whether a purchase intent targets the album, or one of its editions."
           }
         },
-        "description": "An album as a card, illustrated by its cover: in the record of a series, the bibliography of an author\nand the works of a genre or of a universe."
+        "description": "An album as a card, illustrated by its cover: in the record of a series, the bibliography of an author\r\nand the works of a genre or of a universe."
       },
       "AlbumCollectionState": {
         "enum": [
@@ -9841,7 +9841,7 @@
           "PurchaseIntent",
           "OutsideCollection"
         ],
-        "description": "Where an album stands with regard to the collection, as the list of the administration marks it and filters it\n(fonctionnel/regles-metier/appartenance-a-la-collection.md): each album has exactly one."
+        "description": "Where an album stands with regard to the collection, as the list of the administration marks it and filters it\r\n(fonctionnel/regles-metier/appartenance-a-la-collection.md): each album has exactly one."
       },
       "AlbumContent": {
         "required": [
@@ -9876,7 +9876,7 @@
               "null",
               "string"
             ],
-            "description": "The sort key entered by hand, which is then kept whatever the title becomes; `null` for the\nautomatic mode, where the sort key follows the title\n(fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri). Requires a\ntitle."
+            "description": "The sort key entered by hand, which is then kept whatever the title becomes; `null` for the\r\nautomatic mode, where the sort key follows the title\r\n(fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri). Requires a\r\ntitle."
           },
           "seriesId": {
             "type": [
@@ -9981,7 +9981,7 @@
             "items": {
               "$ref": "#/components/schemas/ContributionContent"
             },
-            "description": "Contributions of the album, as the form holds them: saving copies nothing from the series, the form having taken its\nauthors when it was chosen (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)."
+            "description": "Contributions of the album, as the form holds them: saving copies nothing from the series, the form having taken its\r\nauthors when it was chosen (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)."
           },
           "newRecords": {
             "oneOf": [
@@ -9995,7 +9995,7 @@
             ]
           }
         },
-        "description": "Everything the user edits on an album, sent to create it, and sent whole to modify it (the form\nalways sends the entire record)."
+        "description": "Everything the user edits on an album, sent to create it, and sent whole to modify it (the form\r\nalways sends the entire record)."
       },
       "AlbumCover": {
         "required": [
@@ -10085,7 +10085,7 @@
                 "type": "null"
               },
               {
-                "description": "That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not, as on its cards:\nthe record is of the documentary base. `null` without any, the generic visual standing in for it\n(fonctionnel/regles-metier/visuel-par-defaut.md).",
+                "description": "That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not, as on its cards:\r\nthe record is of the documentary base. `null` without any, the generic visual standing in for it\r\n(fonctionnel/regles-metier/visuel-par-defaut.md).",
                 "$ref": "#/components/schemas/AlbumCover"
               }
             ]
@@ -10133,7 +10133,7 @@
             "items": {
               "$ref": "#/components/schemas/AlbumCard"
             },
-            "description": "Every album of its series, itself included, as a card, in the order of the series\n(fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md); none without series. A series counts a few dozen albums at\nmost: the record carries them whole (choix-implementation/api/organisation-de-l-api.md, consultation)."
+            "description": "Every album of its series, itself included, as a card, in the order of the series\r\n(fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md); none without series. A series counts a few dozen albums at\r\nmost: the record carries them whole (choix-implementation/api/organisation-de-l-api.md, consultation)."
           },
           "createdAt": {
             "type": "string",
@@ -10258,7 +10258,7 @@
             "description": "Its purchase intents, in the order they were set."
           }
         },
-        "description": "The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md): the album in brief, as a row\nof the list of the albums presents it, its editions of the collection and its purchase intents. An edition targeted by an\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md)."
+        "description": "The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md): the album in brief, as a row\r\nof the list of the albums presents it, its editions of the collection and its purchase intents. An edition targeted by an\r\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md)."
       },
       "AlbumForm": {
         "required": [
@@ -10282,7 +10282,7 @@
               "null",
               "string"
             ],
-            "description": "The sort key in force, computed from the title or entered by hand (see\nstring? AlbumContent.ManualSortKey); `null` for an album with no title, sorted by its\nseries."
+            "description": "The sort key in force, computed from the title or entered by hand (see\r\nstring? AlbumContent.ManualSortKey); `null` for an album with no title, sorted by its\r\nseries."
           },
           "content": {
             "$ref": "#/components/schemas/AlbumContent"
@@ -10496,7 +10496,7 @@
             ]
           }
         },
-        "description": "The records the list is filtered on, as the list names them; each `null` when the list is not filtered on\nits type, or on a record that does not exist (a filtered list does not address its record: the list is then\nempty, choix-implementation/api/recherche.md)."
+        "description": "The records the list is filtered on, as the list names them; each `null` when the list is not filtered on\r\nits type, or on a record that does not exist (a filtered list does not address its record: the list is then\r\nempty, choix-implementation/api/recherche.md)."
       },
       "AlbumPurchaseIntentItem": {
         "required": [
@@ -10548,7 +10548,7 @@
           },
           "isConvertible": {
             "type": "boolean",
-            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent\non the album; for an intent on an edition, only when that edition is the only one of its album."
+            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent\r\non the album; for an intent on an edition, only when that edition is the only one of its album."
           },
           "createdAt": {
             "type": "string",
@@ -10645,7 +10645,7 @@
             "description": "Whether the album has at least one owned edition (fonctionnel/regles-metier/appartenance-a-la-collection.md)."
           }
         },
-        "description": "What the label of an album is built from (fonctionnel/presentation/libelle-d-un-album.md), with its membership\nof the collection."
+        "description": "What the label of an album is built from (fonctionnel/presentation/libelle-d-un-album.md), with its membership\r\nof the collection."
       },
       "AlbumType": {
         "enum": [
@@ -10668,7 +10668,7 @@
             "$ref": "#/components/schemas/DisplayCulture"
           }
         },
-        "description": "The setting of the application (modele-metier/parametrage-de-l-application.md), which every presentation follows:\nthe label of the albums (fonctionnel/presentation/libelle-d-un-album.md) and the display culture."
+        "description": "The setting of the application (modele-metier/parametrage-de-l-application.md), which every presentation follows:\r\nthe label of the albums (fonctionnel/presentation/libelle-d-un-album.md) and the display culture."
       },
       "ApplicationSettingsForm": {
         "required": [
@@ -10720,7 +10720,7 @@
             "format": "uint32"
           }
         },
-        "description": "The arrangement of the visuals of an edition, as the user ordered them: each visual takes its\ntype, and its rank among the visuals of that type is its position in the list."
+        "description": "The arrangement of the visuals of an edition, as the user ordered them: each visual takes its\r\ntype, and its rank among the visuals of that type is its position in the list."
       },
       "AudienceUsageItem": {
         "required": [
@@ -10958,7 +10958,7 @@
             "items": {
               "$ref": "#/components/schemas/BibliographyEntry"
             },
-            "description": "The whole bibliography, a single list reconciling the series and the albums the author took part in\n(fonctionnel/structure-de-l-application.md): the series and the albums without series together, by\nsort key."
+            "description": "The whole bibliography, a single list reconciling the series and the albums the author took part in\r\n(fonctionnel/structure-de-l-application.md): the series and the albums without series together, by\r\nsort key."
           },
           "createdAt": {
             "type": "string",
@@ -11065,7 +11065,7 @@
             ]
           }
         },
-        "description": "What the main identifier of an author is built from\n            (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)."
+        "description": "What the main identifier of an author is built from\r\n            (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)."
       },
       "AuthorListItem": {
         "required": [
@@ -11099,7 +11099,7 @@
             ]
           }
         },
-        "description": "What the main identifier of an author is built from\n            (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)."
+        "description": "What the main identifier of an author is built from\r\n            (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)."
       },
       "BibliographyEntry": {
         "required": [
@@ -11129,7 +11129,7 @@
             ]
           }
         },
-        "description": "An entry of a bibliography: either a series, or an album without series, exactly one of the two. The\nentries are an index leading to the records, which carry the contributions themselves, whole."
+        "description": "An entry of a bibliography: either a series, or an album without series, exactly one of the two. The\r\nentries are an index leading to the records, which carry the contributions themselves, whole."
       },
       "BindingType": {
         "enum": [
@@ -11214,7 +11214,7 @@
           "AlbumLabelFormat",
           "DisplayCulture"
         ],
-        "description": "Attribute of a record changed by a modification, as the change log names it\n(modele-metier/entree-du-journal-des-modifications.md). The type of the record gives it its\ncontext: the title of\nan album and the title of a series are both ChangeLogAttribute.Title."
+        "description": "Attribute of a record changed by a modification, as the change log names it\r\n(modele-metier/entree-du-journal-des-modifications.md). The type of the record gives it its\r\ncontext: the title of\r\nan album and the title of a series are both ChangeLogAttribute.Title."
       },
       "ChangeLogChange": {
         "required": [
@@ -11248,7 +11248,7 @@
             ]
           }
         },
-        "description": "One attribute changed by a modification: an element added (genre, contribution, visual…) has no\nvalue before, an element removed none after."
+        "description": "One attribute changed by a modification: an element added (genre, contribution, visual…) has no\r\nvalue before, an element removed none after."
       },
       "ChangeLogEntryItem": {
         "required": [
@@ -11285,7 +11285,7 @@
               "null",
               "string"
             ],
-            "description": "The record under which the page of this one is addressed: the album of an edition or of a purchase intent, the publisher of\na collection (visuel/administration/contenu.md, Dernières modifications). Read with the entry, for a record that still\nexists; `null` for any other record.",
+            "description": "The record under which the page of this one is addressed: the album of an edition or of a purchase intent, the publisher of\r\na collection (visuel/administration/contenu.md, Dernières modifications). Read with the entry, for a record that still\r\nexists; `null` for any other record.",
             "format": "uuid"
           },
           "label": {
@@ -11303,7 +11303,7 @@
             "description": "For a modification only: each attribute changed."
           }
         },
-        "description": "An entry of the change log (modele-metier/entree-du-journal-des-modifications.md). It carries\ndata, never a text: the client builds the message in the display culture in force when it presents\nit (fonctionnel/presentation/langue-et-culture-d-affichage.md), and always the same message for the same entry."
+        "description": "An entry of the change log (modele-metier/entree-du-journal-des-modifications.md). It carries\r\ndata, never a text: the client builds the message in the display culture in force when it presents\r\nit (fonctionnel/presentation/langue-et-culture-d-affichage.md), and always the same message for the same entry."
       },
       "ChangeLogOperation": {
         "enum": [
@@ -11731,7 +11731,7 @@
             ]
           }
         },
-        "description": "An author credited with a role, which leads to the record of the album or of the series carrying the\ncontribution: exactly one of Album and Series."
+        "description": "An author credited with a role, which leads to the record of the album or of the series carrying the\r\ncontribution: exactly one of Album and Series."
       },
       "ContributionRole": {
         "enum": [
@@ -11762,7 +11762,7 @@
             "description": "Fingerprint of the deletion impact of the intent, as confirmed by the user."
           }
         },
-        "description": "Converts an intent on an edition into an intent on the whole album, which deletes the edition\ntargeted with its visuals: the same effect as deleting the intent, whose impact the user confirms."
+        "description": "Converts an intent on an edition into an intent on the whole album, which deletes the edition\r\ntargeted with its visuals: the same effect as deleting the intent, whose impact the user confirms."
       },
       "ConvertPurchaseIntentToEditionRequest": {
         "required": [
@@ -11807,7 +11807,7 @@
             "description": "A colour of the cover that sets itself apart from Dominant."
           }
         },
-        "description": "The three colours drawn from a cover (visuel/dashboard/la-couverture-du-jour.md), each in the hexadecimal notation\nof CSS, `#RRGGBB`. Legibility of a text set on them is up to the theme that paints them."
+        "description": "The three colours drawn from a cover (visuel/dashboard/la-couverture-du-jour.md), each in the hexadecimal notation\r\nof CSS, `#RRGGBB`. Legibility of a text set on them is up to the theme that paints them."
       },
       "CreateAuthorRequest": {
         "required": [
@@ -11991,7 +11991,7 @@
                 "type": "null"
               },
               {
-                "description": "`null` when the collection is empty, without any draw nor statistic: the home page then presents its\n        welcome screen instead of the dashboard.",
+                "description": "`null` when the collection is empty, without any draw nor statistic: the home page then presents its\r\n        welcome screen instead of the dashboard.",
                 "$ref": "#/components/schemas/DashboardContent"
               }
             ]
@@ -12018,7 +12018,7 @@
                 "type": "null"
               },
               {
-                "description": "`null` when the dashboard is asked without the day of the visitor, which their browser does not give: nothing is\n        drawn for a day the visitor does not live.",
+                "description": "`null` when the dashboard is asked without the day of the visitor, which their browser does not give: nothing is\r\n        drawn for a day the visitor does not live.",
                 "$ref": "#/components/schemas/SpotlightEdition"
               }
             ]
@@ -12032,11 +12032,11 @@
           },
           "areValueIndicatorsComputable": {
             "type": "boolean",
-            "description": "`false` until the amounts are converted into euros (Phase 4): the block of the value indicators is then\n        presented without any data, as the theme sees fit."
+            "description": "`false` until the amounts are converted into euros (Phase 4): the block of the value indicators is then\r\n        presented without any data, as the theme sees fit."
           },
           "areRandomStatisticsComputable": {
             "type": "boolean",
-            "description": "`false` until the statistics drawn at random are computed (Phase 4): their blocks are then presented without\n        any data."
+            "description": "`false` until the statistics drawn at random are computed (Phase 4): their blocks are then presented without\r\n        any data."
           }
         },
         "description": "The blocks of the dashboard, every statistic bearing on the collection only."
@@ -12114,14 +12114,14 @@
             "items": {
               "$ref": "#/components/schemas/ImpactCount"
             },
-            "description": "Albums that leave the collection, the deletion taking along their last owned edition: they are\nneither deleted nor detached, which no other count reveals."
+            "description": "Albums that leave the collection, the deletion taking along their last owned edition: they are\r\nneither deleted nor detached, which no other count reveals."
           },
           "fingerprint": {
             "type": "string",
-            "description": "Identifies the exact records concerned, not only their counts. Sent back with the deletion, which\nis refused if the impact has changed since the user confirmed it."
+            "description": "Identifies the exact records concerned, not only their counts. Sent back with the deletion, which\r\nis refused if the impact has changed since the user confirmed it."
           }
         },
-        "description": "What deleting a record would do (fonctionnel/regles-metier/suppression-des-entites.md): the number of\nrecords concerned, by entity type and by nature of link — everything the confirmation message,\nor the error of a refused deletion, has to announce."
+        "description": "What deleting a record would do (fonctionnel/regles-metier/suppression-des-entites.md): the number of\r\nrecords concerned, by entity type and by nature of link — everything the confirmation message,\r\nor the error of a refused deletion, has to announce."
       },
       "DeviceType": {
         "enum": [
@@ -12135,7 +12135,7 @@
         "enum": [
           "FrenchFrance"
         ],
-        "description": "Display culture, a setting of the application (fonctionnel/presentation/langue-et-culture-d-affichage.md):\nFrench of France, the only one offered."
+        "description": "Display culture, a setting of the application (fonctionnel/presentation/langue-et-culture-d-affichage.md):\r\nFrench of France, the only one offered."
       },
       "EditionAdminList": {
         "required": [
@@ -12151,7 +12151,7 @@
             "$ref": "#/components/schemas/EditionListFilters"
           }
         },
-        "description": "The list of the editions of the administration (visuel/listes/liste-par-liste.md): one page of the editions of the\ncollection, and what the list presents of the records it is filtered on."
+        "description": "The list of the editions of the administration (visuel/listes/liste-par-liste.md): one page of the editions of the\r\ncollection, and what the list presents of the records it is filtered on."
       },
       "EditionAdminListItem": {
         "required": [
@@ -12220,7 +12220,7 @@
             "format": "uint32"
           }
         },
-        "description": "An edition of the collection as a row of the list of the administration presents it; an edition targeted by a purchase\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md)."
+        "description": "An edition of the collection as a row of the list of the administration presents it; an edition targeted by a purchase\r\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md)."
       },
       "EditionCategory": {
         "enum": [
@@ -12381,7 +12381,7 @@
                 "type": "null"
               },
               {
-                "description": "Required to create an edition, which is then owned, and kept by an owned edition. Without it,\nthe edition — targeted by a purchase intent — carries neither acquisition date nor amount.",
+                "description": "Required to create an edition, which is then owned, and kept by an owned edition. Without it,\r\nthe edition — targeted by a purchase intent — carries neither acquisition date nor amount.",
                 "$ref": "#/components/schemas/AcquisitionMode"
               }
             ]
@@ -12403,7 +12403,7 @@
               "number",
               "string"
             ],
-            "description": "Together with AcquisitionCurrency (ISO 4217 code, or `QZF` for the old\nfranc). Requires a reference date: acquisition date, edition year or album's first publication.",
+            "description": "Together with AcquisitionCurrency (ISO 4217 code, or `QZF` for the old\r\nfranc). Requires a reference date: acquisition date, edition year or album's first publication.",
             "format": "double"
           },
           "acquisitionCurrency": {
@@ -12423,7 +12423,7 @@
               "number",
               "string"
             ],
-            "description": "Together with InitialValueCurrency. Requires the edition year or the album's\nfirst publication.",
+            "description": "Together with InitialValueCurrency. Requires the edition year or the album's\r\nfirst publication.",
             "format": "double"
           },
           "initialValueCurrency": {
@@ -12450,13 +12450,13 @@
                 "type": "null"
               },
               {
-                "description": "The records the form added on the spot (a publisher), created with the edition: PublisherId cites one by its\nkey. `null` for none, as in what a reading returns.",
+                "description": "The records the form added on the spot (a publisher), created with the edition: PublisherId cites one by its\r\nkey. `null` for none, as in what a reading returns.",
                 "$ref": "#/components/schemas/NewRecords"
               }
             ]
           }
         },
-        "description": "Everything the user edits on an edition, sent to create it, and sent whole to modify it (the form\nalways sends the entire record)."
+        "description": "Everything the user edits on an edition, sent to create it, and sent whole to modify it (the form\r\nalways sends the entire record)."
       },
       "EditionDetail": {
         "required": [
@@ -12506,7 +12506,7 @@
               "null",
               "boolean"
             ],
-            "description": "Whether the check digit of the ISBN is consistent, `null` without ISBN: a warning only, an\ninconsistent ISBN being stored as entered (fonctionnel/regles-metier/validation-de-l-isbn.md)."
+            "description": "Whether the check digit of the ISBN is consistent, `null` without ISBN: a warning only, an\r\ninconsistent ISBN being stored as entered (fonctionnel/regles-metier/validation-de-l-isbn.md)."
           },
           "binding": {
             "oneOf": [
@@ -12689,7 +12689,7 @@
             "format": "date-time"
           }
         },
-        "description": "An edition, which has no record of its own: the record of its album presents it whole, with its visuals\n(fonctionnel/structure-de-l-application.md)."
+        "description": "An edition, which has no record of its own: the record of its album presents it whole, with its visuals\r\n(fonctionnel/structure-de-l-application.md)."
       },
       "EditionForm": {
         "required": [
@@ -12723,7 +12723,7 @@
               "null",
               "boolean"
             ],
-            "description": "Whether the check digit of the ISBN is consistent, `null` without ISBN: a warning only, an\ninconsistent ISBN being stored as entered (fonctionnel/regles-metier/validation-de-l-isbn.md)."
+            "description": "Whether the check digit of the ISBN is consistent, `null` without ISBN: a warning only, an\r\ninconsistent ISBN being stored as entered (fonctionnel/regles-metier/validation-de-l-isbn.md)."
           },
           "albumVersion": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -12770,7 +12770,7 @@
             "format": "date-time"
           }
         },
-        "description": "An edition as its administration form edits it. The edition belongs to the aggregate of its\nalbum: the version sent back with any modification or deletion is the album's."
+        "description": "An edition as its administration form edits it. The edition belongs to the aggregate of its\r\nalbum: the version sent back with any modification or deletion is the album's."
       },
       "EditionFormat": {
         "enum": [
@@ -12903,7 +12903,7 @@
             ]
           }
         },
-        "description": "The records the list of the editions is filtered on, as the list names them; each `null` when the list is not\nfiltered on its type, or on a record that does not exist (choix-implementation/api/recherche.md)."
+        "description": "The records the list of the editions is filtered on, as the list names them; each `null` when the list is not\r\nfiltered on its type, or on a record that does not exist (choix-implementation/api/recherche.md)."
       },
       "EditionListItem": {
         "required": [
@@ -13007,7 +13007,7 @@
             "$ref": "#/components/schemas/VisualType"
           }
         },
-        "description": "A visual of an edition as its entry gives it, saved with the edition\n(choix-implementation/domaine/visuels-stockage-et-traitement.md, Zone d'attente): a visual of the edition, kept, or a pending\nvisual, which becomes one; its place in the list is its rank among the visuals of its type."
+        "description": "A visual of an edition as its entry gives it, saved with the edition\r\n(choix-implementation/domaine/visuels-stockage-et-traitement.md, Zone d'attente): a visual of the edition, kept, or a pending\r\nvisual, which becomes one; its place in the list is its rank among the visuals of its type."
       },
       "EditionVisualForm": {
         "required": [
@@ -13096,7 +13096,7 @@
             "$ref": "#/components/schemas/EditionSummary"
           }
         },
-        "description": "A visual of an edition, which leads to the record of the album of its edition; `api` serves its\nmedia (VisualMediaRoutes)."
+        "description": "A visual of an edition, which leads to the record of the album of its edition; `api` serves its\r\nmedia (VisualMediaRoutes)."
       },
       "EditionVisualsForm": {
         "required": [
@@ -13126,7 +13126,7 @@
             "format": "uint32"
           }
         },
-        "description": "The visuals of an edition, in their presentation order\n(fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md). The edition belongs to the aggregate of its\nalbum: the version sent back with any\nupload, rearrangement or deletion is the album's."
+        "description": "The visuals of an edition, in their presentation order\r\n(fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md). The edition belongs to the aggregate of its\r\nalbum: the version sent back with any\r\nupload, rearrangement or deletion is the album's."
       },
       "EntityKind": {
         "enum": [
@@ -13143,7 +13143,7 @@
           "Genre",
           "SavedSearch"
         ],
-        "description": "An entity type of the model: of the records counted by a DeletionImpact, of those\nthe advanced search returns or follows (SearchSchema), and of those a saved search\nreturns."
+        "description": "An entity type of the model: of the records counted by a DeletionImpact, of those\r\nthe advanced search returns or follows (SearchSchema), and of those a saved search\r\nreturns."
       },
       "FunctionIndicators": {
         "required": [
@@ -13235,7 +13235,7 @@
             ]
           }
         },
-        "description": "A function used — screen displayed or action triggered —, with either the record its screen presents or the\nparameters of its action, never both. The parameters are compared as they are written."
+        "description": "A function used — screen displayed or action triggered —, with either the record its screen presents or the\r\nparameters of its action, never both. The parameters are compared as they are written."
       },
       "GenreAdminListItem": {
         "required": [
@@ -13261,7 +13261,7 @@
               "integer",
               "string"
             ],
-            "description": "The albums of the genre, theirs or that of their series (fonctionnel/regles-metier/genres-et-univers-d-un-album.md): those\nthe list of the albums filtered on the genre finds.",
+            "description": "The albums of the genre, theirs or that of their series (fonctionnel/regles-metier/genres-et-univers-d-un-album.md): those\r\nthe list of the albums filtered on the genre finds.",
             "format": "int32"
           },
           "seriesCount": {
@@ -13416,7 +13416,7 @@
               "null",
               "string"
             ],
-            "description": "Where the publisher of the edition leads, having no record of its own (fonctionnel/structure-de-l-application.md);\n`null` when unknown, the publisher being then no link."
+            "description": "Where the publisher of the edition leads, having no record of its own (fonctionnel/structure-de-l-application.md);\r\n`null` when unknown, the publisher being then no link."
           },
           "cover": {
             "oneOf": [
@@ -13550,13 +13550,13 @@
                 "type": "null"
               },
               {
-                "description": "The template of the album's series, whose fields with a value are those the series pre-filled; `null` for an album\nwithout series, whose form starts from the default values.",
+                "description": "The template of the album's series, whose fields with a value are those the series pre-filled; `null` for an album\r\nwithout series, whose form starts from the default values.",
                 "$ref": "#/components/schemas/SeriesEditionTemplate"
               }
             ]
           }
         },
-        "description": "The form of a new edition of an album, pre-filled from the template of the album's series, or\nwith the default values for an album without series\n(fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)."
+        "description": "The form of a new edition of an album, pre-filled from the template of the album's series, or\r\nwith the default values for an album without series\r\n(fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)."
       },
       "NewGenre": {
         "required": [
@@ -13590,6 +13590,29 @@
           }
         },
         "description": "A publisher created by its name alone, without website nor collection, which its own form completes."
+      },
+      "NewPublisherCollection": {
+        "required": [
+          "key",
+          "publisherId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publisherId": {
+            "type": "string",
+            "description": "Its publisher: an existing one, or the key of a publisher added on the spot by the same form.",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "A collection created by its name alone, in one of the publishers of the form."
       },
       "NewPurchaseIntentForm": {
         "required": [
@@ -13632,13 +13655,13 @@
                 "type": "null"
               },
               {
-                "description": "The template of the album's series, whose fields with a value are those the series pre-filled; `null` for an album\nwithout series.",
+                "description": "The template of the album's series, whose fields with a value are those the series pre-filled; `null` for an album\r\nwithout series.",
                 "$ref": "#/components/schemas/SeriesEditionTemplate"
               }
             ]
           }
         },
-        "description": "The form of an intent on a new edition, pre-filled as the form of a new edition is\n(fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)."
+        "description": "The form of an intent on a new edition, pre-filled as the form of a new edition is\r\n(fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)."
       },
       "NewRecords": {
         "required": [
@@ -13646,7 +13669,8 @@
           "genres",
           "universes",
           "series",
-          "publishers"
+          "publishers",
+          "publisherCollections"
         ],
         "type": "object",
         "properties": {
@@ -13679,9 +13703,15 @@
             "items": {
               "$ref": "#/components/schemas/NewPublisher"
             }
+          },
+          "publisherCollections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewPublisherCollection"
+            }
           }
         },
-        "description": "The records an entry form adds without creating them (authors, genres, universes, series, publishers added on the spot): they\nare created with the record the form saves, in the same transaction, or not at all. The form references each by its\n`Key`, which it chose, in place of an identifier, among the records it cites."
+        "description": "The records an entry form adds without creating them (authors, genres, universes, series, publishers and publisher collections\r\nadded on the spot): they are created with the record the form saves, in the same transaction, or not at all. The form references\r\neach by its `Key`, which it chose, in place of an identifier, among the records it cites."
       },
       "NewSeries": {
         "required": [
@@ -13811,7 +13841,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfAlbumSummary": {
         "required": [
@@ -13856,7 +13886,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfAudienceVisitItem": {
         "required": [
@@ -13901,7 +13931,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfAuthorAdminListItem": {
         "required": [
@@ -13946,7 +13976,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfAuthorListItem": {
         "required": [
@@ -13991,7 +14021,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfChangeLogEntryItem": {
         "required": [
@@ -14036,7 +14066,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfContributionListItem": {
         "required": [
@@ -14081,7 +14111,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfEditionAdminListItem": {
         "required": [
@@ -14126,7 +14156,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfEditionListItem": {
         "required": [
@@ -14171,7 +14201,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfEditionVisualListItem": {
         "required": [
@@ -14216,7 +14246,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfGenreAdminListItem": {
         "required": [
@@ -14261,7 +14291,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfGenreListItem": {
         "required": [
@@ -14306,7 +14336,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfPublisherAdminListItem": {
         "required": [
@@ -14351,7 +14381,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfPublisherCollectionListItem": {
         "required": [
@@ -14396,7 +14426,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfPublisherListItem": {
         "required": [
@@ -14441,7 +14471,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfPurchaseIntentAdminListItem": {
         "required": [
@@ -14486,7 +14516,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfPurchaseIntentListItem": {
         "required": [
@@ -14531,7 +14561,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfSavedSearchListItem": {
         "required": [
@@ -14576,7 +14606,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfSeriesAdminListItem": {
         "required": [
@@ -14621,7 +14651,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfSeriesListItem": {
         "required": [
@@ -14666,7 +14696,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfUniverseAdminListItem": {
         "required": [
@@ -14711,7 +14741,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfUniverseListItem": {
         "required": [
@@ -14756,7 +14786,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PageOfWorksEntry": {
         "required": [
@@ -14801,7 +14831,7 @@
             "format": "int32"
           }
         },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+        "description": "One page of a list of the consultation, paginated by offset\r\n(choix-implementation/api/organisation-de-l-api.md)."
       },
       "PendingVisualForm": {
         "required": [
@@ -14819,7 +14849,7 @@
             "format": "date-time"
           }
         },
-        "description": "A file uploaded for a visual while an edition is entered (`POST /admin/visuals/pending`, form field\nstring UploadVisualFields.File), kept until ExpiresAt for the saving of the edition."
+        "description": "A file uploaded for a visual while an edition is entered (`POST /admin/visuals/pending`, form field\r\nstring UploadVisualFields.File), kept until ExpiresAt for the saving of the edition."
       },
       "PresentedRecord": {
         "required": [
@@ -14915,7 +14945,7 @@
               "integer",
               "string"
             ],
-            "description": "Its editions in the collection, an edition targeted by a purchase intent being none\n(fonctionnel/regles-metier/intention-d-achat.md).",
+            "description": "Its editions in the collection, an edition targeted by a purchase intent being none\r\n(fonctionnel/regles-metier/intention-d-achat.md).",
             "format": "int32"
           },
           "modifiedAt": {
@@ -14981,7 +15011,7 @@
               "integer",
               "string"
             ],
-            "description": "Version of the publisher the collection belongs to — the aggregate root, whose version guards\nevery write on its collections — sent back with any modification or deletion.",
+            "description": "Version of the publisher the collection belongs to — the aggregate root, whose version guards\r\nevery write on its collections — sent back with any modification or deletion.",
             "format": "uint32"
           }
         },
@@ -15057,7 +15087,7 @@
             "format": "int32"
           }
         },
-        "description": "A collection of a publisher as the form of its publisher presents it: what references it, editions, purchase intents and series\ntemplates, which forbids its removal, counted as the impact of its deletion (fonctionnel/regles-metier/suppression-des-entites.md)."
+        "description": "A collection of a publisher as the form of its publisher presents it: what references it, editions, purchase intents and series\r\ntemplates, which forbids its removal, counted as the impact of its deletion (fonctionnel/regles-metier/suppression-des-entites.md)."
       },
       "PublisherContent": {
         "required": [
@@ -15083,7 +15113,7 @@
             }
           }
         },
-        "description": "Everything the user edits on a publisher, sent to create it, and sent whole to modify it: its collections are replaced\nby those listed, a collection of the publisher absent from the list being removed."
+        "description": "Everything the user edits on a publisher, sent to create it, and sent whole to modify it: its collections are replaced\r\nby those listed, a collection of the publisher absent from the list being removed."
       },
       "PublisherForm": {
         "required": [
@@ -15135,7 +15165,7 @@
             "format": "uint32"
           }
         },
-        "description": "A publisher as its administration form edits it (visuel/saisie-editeur/contenu.md), with its collections, which are entered\nand saved with it, and the dates of the record, which the form presents."
+        "description": "A publisher as its administration form edits it (visuel/saisie-editeur/contenu.md), with its collections, which are entered\r\nand saved with it, and the dates of the record, which the form presents."
       },
       "PublisherListItem": {
         "required": [
@@ -15182,7 +15212,7 @@
             "$ref": "#/components/schemas/AlbumSummary"
           },
           "state": {
-            "description": "Where the album stands with regard to the collection, as every list tells it\n(fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album): in the collection, or wished for, never outside it.",
+            "description": "Where the album stands with regard to the collection, as every list tells it\r\n(fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album): in the collection, or wished for, never outside it.",
             "$ref": "#/components/schemas/AlbumCollectionState"
           },
           "edition": {
@@ -15209,7 +15239,7 @@
           },
           "isConvertible": {
             "type": "boolean",
-            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent\non the album; for an intent on an edition, only when that edition is the only one of its album."
+            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent\r\non the album; for an intent on an edition, only when that edition is the only one of its album."
           },
           "createdAt": {
             "type": "string",
@@ -15226,7 +15256,7 @@
             "format": "uint32"
           }
         },
-        "description": "A purchase intent as a row of the list of the administration presents it (visuel/listes/liste-par-liste.md): the album it\ntargets, with its membership of the collection, and what it targets, the whole album or one of its editions."
+        "description": "A purchase intent as a row of the list of the administration presents it (visuel/listes/liste-par-liste.md): the album it\r\ntargets, with its membership of the collection, and what it targets, the whole album or one of its editions."
       },
       "PurchaseIntentEditionContent": {
         "required": [
@@ -15343,13 +15373,13 @@
                 "type": "null"
               },
               {
-                "description": "The records the form added on the spot (a publisher), created with the edition: PublisherId cites one by its\nkey. `null` for none, as in what a reading returns.",
+                "description": "The records the form added on the spot (a publisher), created with the edition: PublisherId cites one by its\r\nkey. `null` for none, as in what a reading returns.",
                 "$ref": "#/components/schemas/NewRecords"
               }
             ]
           }
         },
-        "description": "The edition an intent targets, entered with the minimum of fields: those of the published edition,\nwithout the traits of the copy once owned (condition, second hand, dedication, freeness,\nacquisition, personal reference and notes —\nfonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)."
+        "description": "The edition an intent targets, entered with the minimum of fields: those of the published edition,\r\nwithout the traits of the copy once owned (condition, second hand, dedication, freeness,\r\nacquisition, personal reference and notes —\r\nfonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)."
       },
       "PurchaseIntentForm": {
         "required": [
@@ -15394,7 +15424,7 @@
             "format": "date-time"
           }
         },
-        "description": "A purchase intent, which has no record of its own: the record of its album presents it, with the album\nor the edition it targets (fonctionnel/structure-de-l-application.md)."
+        "description": "A purchase intent, which has no record of its own: the record of its album presents it, with the album\r\nor the edition it targets (fonctionnel/structure-de-l-application.md)."
       },
       "PurchaseIntentListItem": {
         "required": [
@@ -15423,7 +15453,7 @@
             ]
           }
         },
-        "description": "An entry of the public list of the purchase intents, which leads to the record of the album, or of\nthe edition targeted (fonctionnel/structure-de-l-application.md)."
+        "description": "An entry of the public list of the purchase intents, which leads to the record of the album, or of\r\nthe edition targeted (fonctionnel/structure-de-l-application.md)."
       },
       "PurchaseIntentsForm": {
         "required": [
@@ -15453,7 +15483,7 @@
             "format": "uint32"
           }
         },
-        "description": "The purchase intents of an album, which belong to the aggregate of the album: the version sent\nback with any write on them is the album's."
+        "description": "The purchase intents of an album, which belong to the aggregate of the album: the version sent\r\nback with any write on them is the album's."
       },
       "ReadingDirection": {
         "enum": [
@@ -15579,7 +15609,7 @@
             "format": "int32"
           }
         },
-        "description": "The number of records of each type, with the detail the home page of the administration gives of each\n(visuel/administration/contenu.md, Les fiches), which its menu also presents (visuel/administration/en-tete-et-menu.md)."
+        "description": "The number of records of each type, with the detail the home page of the administration gives of each\r\n(visuel/administration/contenu.md, Les fiches), which its menu also presents (visuel/administration/en-tete-et-menu.md)."
       },
       "RecordLabel": {
         "required": [
@@ -15731,7 +15761,7 @@
             ]
           }
         },
-        "description": "What the main identifier of an author is built from\n            (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)."
+        "description": "What the main identifier of an author is built from\r\n            (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)."
       },
       "RecordLabelEditionLabel": {
         "required": [
@@ -15865,7 +15895,7 @@
           "SavedSearch",
           "ApplicationSettings"
         ],
-        "description": "Type of a record written by the application, as the change log names it\n(modele-metier/entree-du-journal-des-modifications.md)."
+        "description": "Type of a record written by the application, as the change log names it\r\n(modele-metier/entree-du-journal-des-modifications.md)."
       },
       "RenderingEngine": {
         "enum": [
@@ -15890,7 +15920,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "The value of each variable given one, by its name (ignoring case and accents, as variables are told\napart), written as the values of the criteria; the others keep their default value."
+            "description": "The value of each variable given one, by its name (ignoring case and accents, as variables are told\r\napart), written as the values of the criteria; the others keep their default value."
           }
         },
         "description": "The replay of a saved search, whose results are paginated by the query of the request."
@@ -15913,7 +15943,7 @@
             "$ref": "#/components/schemas/EntityKind"
           },
           "criteria": {
-            "description": "What the records must satisfy, as for an advanced search; its constants are the default values of the\nvariables that replace them.",
+            "description": "What the records must satisfy, as for an advanced search; its constants are the default values of the\r\nvariables that replace them.",
             "$ref": "#/components/schemas/SearchCondition"
           },
           "variables": {
@@ -15924,7 +15954,7 @@
             "description": "The constants of the criteria replaced by a variable, whose value is asked at replay."
           }
         },
-        "description": "Everything the administrator edits on a saved search, sent to create it, and sent whole to modify it:\nrenaming it, changing its criteria, or the default values of its variables."
+        "description": "Everything the administrator edits on a saved search, sent to create it, and sent whole to modify it:\r\nrenaming it, changing its criteria, or the default values of its variables."
       },
       "SavedSearchDetail": {
         "required": [
@@ -15957,7 +15987,7 @@
             }
           }
         },
-        "description": "A saved search, with what its replay asks and what preloads the form of a new search: its criteria,\nwith no link kept to the saved search."
+        "description": "A saved search, with what its replay asks and what preloads the form of a new search: its criteria,\r\nwith no link kept to the saved search."
       },
       "SavedSearchForm": {
         "required": [
@@ -16073,7 +16103,7 @@
             "$ref": "#/components/schemas/SearchConditionSearchDataComparison"
           }
         ],
-        "description": "A condition of the advanced search (fonctionnel/recherche-avancee/recherche-avancee.md), on the records of an entity: a\ncriterion on one of its data, a link to related records, or a combination of conditions.",
+        "description": "A condition of the advanced search (fonctionnel/recherche-avancee/recherche-avancee.md), on the records of an entity: a\r\ncriterion on one of its data, a link to related records, or a combination of conditions.",
         "discriminator": {
           "propertyName": "kind",
           "mapping": {
@@ -16105,11 +16135,11 @@
             "$ref": "#/components/schemas/SearchComparison"
           },
           "values": {
-            "description": "None for SearchComparison.IsSet and SearchComparison.IsNotSet, two for\nSearchComparison.Between, at least one for SearchComparison.IsOneOf and\nSearchComparison.IsNoneOf, one otherwise. Each is written according to the type of the\ndata: a text as is; a number in decimal digits; a date as `yyyy`, `yyyy-MM` or\n`yyyy-MM-dd`, its precision being that of the comparison; a boolean as `true` or\n`false`; a member of an enumeration by its name; a record by its identifier."
+            "description": "None for SearchComparison.IsSet and SearchComparison.IsNotSet, two for\r\nSearchComparison.Between, at least one for SearchComparison.IsOneOf and\r\nSearchComparison.IsNoneOf, one otherwise. Each is written according to the type of the\r\ndata: a text as is; a number in decimal digits; a date as `yyyy`, `yyyy-MM` or\r\n`yyyy-MM-dd`, its precision being that of the comparison; a boolean as `true` or\r\n`false`; a member of an enumeration by its name; a record by its identifier."
           },
           "matchCaseAndAccents": {
             "type": "boolean",
-            "description": "For a text only: compares it respecting case and accents, ignored otherwise\n(fonctionnel/recherche-avancee/comparaisons.md).",
+            "description": "For a text only: compares it respecting case and accents, ignored otherwise\r\n(fonctionnel/recherche-avancee/comparaisons.md).",
             "default": false
           }
         },
@@ -16137,7 +16167,7 @@
             "$ref": "#/components/schemas/SearchComparison"
           },
           "other": {
-            "description": "The data compared to: of the same type, of the same enumeration for an enumeration, of the same entity for\na record; any date for a date.",
+            "description": "The data compared to: of the same type, of the same enumeration for an enumeration, of the same entity for\r\na record; any date for a date.",
             "$ref": "#/components/schemas/SearchOperand"
           },
           "matchCaseAndAccents": {
@@ -16151,13 +16181,13 @@
                 "type": "null"
               },
               {
-                "description": "For dates only, and required: the precision both are compared at, each covering the whole period it is\nknown to at that precision (e.g. a date known to the year covers its twelve months).",
+                "description": "For dates only, and required: the precision both are compared at, each covering the whole period it is\r\nknown to at that precision (e.g. a date known to the year covers its twelve months).",
                 "$ref": "#/components/schemas/SearchDatePrecision"
               }
             ]
           }
         },
-        "description": "A comparison of one data of the entity to another data of the same type (fonctionnel/recherche-avancee/comparaisons.md), of\nthe same record or of a record it leads to: it holds only if both data are set and the comparison\nestablishes it."
+        "description": "A comparison of one data of the entity to another data of the same type (fonctionnel/recherche-avancee/comparaisons.md), of\r\nthe same record or of a record it leads to: it holds only if both data are set and the comparison\r\nestablishes it."
       },
       "SearchConditionSearchGroup": {
         "required": [
@@ -16204,7 +16234,7 @@
                 "type": "null"
               },
               {
-                "description": "What the same related record must satisfy; `null` for any related record (e.g. \"has a series\", \"has\nat least one edition\").",
+                "description": "What the same related record must satisfy; `null` for any related record (e.g. \"has a series\", \"has\r\nat least one edition\").",
                 "$ref": "#/components/schemas/SearchCondition"
               }
             ]
@@ -16215,13 +16245,13 @@
                 "type": "null"
               },
               {
-                "description": "How many related records must satisfy the condition, for a link to several records only; `null`\nfor a link to one record, which must exist and satisfy it.",
+                "description": "How many related records must satisfy the condition, for a link to several records only; `null`\r\nfor a link to one record, which must exist and satisfy it.",
                 "$ref": "#/components/schemas/SearchQuantifier"
               }
             ]
           }
         },
-        "description": "A condition on the records related by a link of the model (fonctionnel/recherche-avancee/liens-entre-entites.md), which\nmay itself follow further links: the path of the criteria it holds."
+        "description": "A condition on the records related by a link of the model (fonctionnel/recherche-avancee/liens-entre-entites.md), which\r\nmay itself follow further links: the path of the criteria it holds."
       },
       "SearchConditionSearchNot": {
         "required": [
@@ -16317,7 +16347,7 @@
             "items": {
               "$ref": "#/components/schemas/SearchComparison"
             },
-            "description": "Those its type allows to another data of the same type (SearchDataComparison); none for a type\nthat cannot be compared so."
+            "description": "Those its type allows to another data of the same type (SearchDataComparison); none for a type\r\nthat cannot be compared so."
           },
           "datePrecision": {
             "oneOf": [
@@ -16407,7 +16437,7 @@
             }
           }
         },
-        "description": "What the advanced search can query, for the clients to build its form in the terms of the business\n(fonctionnel/recherche-avancee/recherche-avancee.md): its keys are localized by the client, never shown as they are."
+        "description": "What the advanced search can query, for the clients to build its form in the terms of the business\r\n(fonctionnel/recherche-avancee/recherche-avancee.md): its keys are localized by the client, never shown as they are."
       },
       "SearchVariableContent": {
         "required": [
@@ -16422,7 +16452,7 @@
           },
           "location": {
             "type": "string",
-            "description": "JSON pointer (RFC 6901) to the constant in the criteria, as they are written in JSON: one of the\n`values` of a criterion or of a quantifier, e.g. `/conditions/1/values/0`."
+            "description": "JSON pointer (RFC 6901) to the constant in the criteria, as they are written in JSON: one of the\r\n`values` of a criterion or of a quantifier, e.g. `/conditions/1/values/0`."
           }
         },
         "description": "A constant of the criteria replaced by a variable."
@@ -16441,7 +16471,7 @@
             "$ref": "#/components/schemas/SeriesListFilters"
           }
         },
-        "description": "The list of the series of the administration (visuel/listes/liste-par-liste.md): one page of its series, and what the\nlist presents of the records it is filtered on."
+        "description": "The list of the series of the administration (visuel/listes/liste-par-liste.md): one page of its series, and what the\r\nlist presents of the records it is filtered on."
       },
       "SeriesAdminListItem": {
         "required": [
@@ -16483,7 +16513,7 @@
               "integer",
               "string"
             ],
-            "description": "Its albums that are part of the collection, an album only targeted by a purchase intent being none\n(fonctionnel/regles-metier/appartenance-a-la-collection.md).",
+            "description": "Its albums that are part of the collection, an album only targeted by a purchase intent being none\r\n(fonctionnel/regles-metier/appartenance-a-la-collection.md).",
             "format": "int32"
           },
           "isComplete": {
@@ -16539,7 +16569,7 @@
             }
           }
         },
-        "description": "The contributions a series gives an album attached to it: Applied when they replace those of the album\n(none yet, or, being created, still exactly those of the series chosen before); otherwise it keeps its own."
+        "description": "The contributions a series gives an album attached to it: Applied when they replace those of the album\r\n(none yet, or, being created, still exactly those of the series chosen before); otherwise it keeps its own."
       },
       "SeriesAlbumContributionsRequest": {
         "required": [
@@ -16566,7 +16596,7 @@
             }
           }
         },
-        "description": "What the entry form of an album holds when a series is chosen: whether the album is being created, the series whose\ncontributions it last received (PreviousSeriesId), whatever series was chosen since, and its\ncontributions (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)."
+        "description": "What the entry form of an album holds when a series is chosen: whether the album is being created, the series whose\r\ncontributions it last received (PreviousSeriesId), whatever series was chosen since, and its\r\ncontributions (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md)."
       },
       "SeriesBibliographyItem": {
         "required": [
@@ -16627,7 +16657,7 @@
               "null",
               "string"
             ],
-            "description": "The sort key entered by hand, which is then kept whatever the title becomes; `null` for the\nautomatic mode, where the sort key follows the title\n(fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri)."
+            "description": "The sort key entered by hand, which is then kept whatever the title becomes; `null` for the\r\nautomatic mode, where the sort key follows the title\r\n(fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri)."
           },
           "status": {
             "oneOf": [
@@ -16707,7 +16737,7 @@
             ]
           }
         },
-        "description": "Everything the user edits on a series, sent to create it, and sent whole to modify it (the\nform always sends the entire record)."
+        "description": "Everything the user edits on a series, sent to create it, and sent whole to modify it (the\r\nform always sends the entire record)."
       },
       "SeriesDetail": {
         "required": [
@@ -16930,7 +16960,7 @@
             ]
           }
         },
-        "description": "Default values of a new edition of an album of the series\n(fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)."
+        "description": "Default values of a new edition of an album of the series\r\n(fonctionnel/regles-metier/initialisation-d-une-nouvelle-edition-depuis-la-serie.md)."
       },
       "SeriesForm": {
         "required": [
@@ -16950,7 +16980,7 @@
           },
           "sortKey": {
             "type": "string",
-            "description": "The sort key in force, computed from the title or entered by hand (see\nstring? SeriesContent.ManualSortKey): always shown by the form."
+            "description": "The sort key in force, computed from the title or entered by hand (see\r\nstring? SeriesContent.ManualSortKey): always shown by the form."
           },
           "content": {
             "$ref": "#/components/schemas/SeriesContent"
@@ -17094,7 +17124,7 @@
             ]
           }
         },
-        "description": "The records the list of the series is filtered on, as the list names them; each `null` when the list is not\nfiltered on its type, or on a record that does not exist (choix-implementation/api/recherche.md)."
+        "description": "The records the list of the series is filtered on, as the list names them; each `null` when the list is not\r\nfiltered on its type, or on a record that does not exist (choix-implementation/api/recherche.md)."
       },
       "SeriesListItem": {
         "required": [
@@ -17133,10 +17163,10 @@
             "items": {
               "$ref": "#/components/schemas/AlbumCover"
             },
-            "description": "Those of its first int SeriesOverview.FirstVolumeCount regular volumes at most — neither\nomnibus nor special issue —, in the order of the series\n(fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), `null` for a volume without cover. A place\nbeyond them is a generic card (visuel/fiche-serie/)."
+            "description": "Those of its first int SeriesOverview.FirstVolumeCount regular volumes at most — neither\r\nomnibus nor special issue —, in the order of the series\r\n(fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), `null` for a volume without cover. A place\r\nbeyond them is a generic card (visuel/fiche-serie/)."
           }
         },
-        "description": "What represents a series: the number of its albums, and the covers of its first volumes, whether the\nlist presents them or not (e.g. a series an author is credited on itself only)."
+        "description": "What represents a series: the number of its albums, and the covers of its first volumes, whether the\r\nlist presents them or not (e.g. a series an author is credited on itself only)."
       },
       "SeriesStatus": {
         "enum": [
@@ -17169,7 +17199,7 @@
             "description": "The albums of the series attached, all of them for a series attached itself, in the order of the series."
           }
         },
-        "description": "A series of the works, attached itself or through one of its albums, the genres and universes of an\nalbum in a series being those of the album and of the series\n(fonctionnel/regles-metier/genres-et-univers-d-un-album.md)."
+        "description": "A series of the works, attached itself or through one of its albums, the genres and universes of an\r\nalbum in a series being those of the album and of the series\r\n(fonctionnel/regles-metier/genres-et-univers-d-un-album.md)."
       },
       "SpotlightColors": {
         "required": [
@@ -17189,7 +17219,7 @@
             ]
           }
         },
-        "description": "The colours of the day (visuel/dashboard/la-couverture-du-jour.md): those of the cover of the edition in the spotlight\nof the day, which the theme « La couverture du jour » paints every page with, in the consultation as in the\nadministration."
+        "description": "The colours of the day (visuel/dashboard/la-couverture-du-jour.md): those of the cover of the edition in the spotlight\r\nof the day, which the theme « La couverture du jour » paints every page with, in the consultation as in the\r\nadministration."
       },
       "SpotlightEdition": {
         "required": [
@@ -17241,7 +17271,7 @@
             "description": "`null` for a blank title, which has none."
           }
         },
-        "description": "The sort key the domain computes from a title, which an entry form shows in its automatic mode while the title is\ntyped (fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri)."
+        "description": "The sort key the domain computes from a title, which an entry form shows in its automatic mode while the title is\r\ntyped (fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri)."
       },
       "UniverseAdminListItem": {
         "required": [
@@ -17276,7 +17306,7 @@
             "items": {
               "$ref": "#/components/schemas/UniverseListItem"
             },
-            "description": "Its ancestors, from the top of the hierarchy down to its parent: the depth of its row, and what names it when its parent is\nnot on the page (a search, a page that begins below it)."
+            "description": "Its ancestors, from the top of the hierarchy down to its parent: the depth of its row, and what names it when its parent is\r\nnot on the page (a search, a page that begins below it)."
           },
           "albumCount": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -17284,7 +17314,7 @@
               "integer",
               "string"
             ],
-            "description": "Its albums, those of its sub-universes included (fonctionnel/regles-metier/hierarchie-des-univers.md), through their series\ntoo (fonctionnel/regles-metier/genres-et-univers-d-un-album.md): those the list of the albums filtered on it finds.",
+            "description": "Its albums, those of its sub-universes included (fonctionnel/regles-metier/hierarchie-des-univers.md), through their series\r\ntoo (fonctionnel/regles-metier/genres-et-univers-d-un-album.md): those the list of the albums filtered on it finds.",
             "format": "int32"
           },
           "seriesCount": {
@@ -17319,7 +17349,7 @@
             "format": "uint32"
           }
         },
-        "description": "A universe as a row of the list of the administration presents it (visuel/listes/liste-par-liste.md), the list following\nthe hierarchy: each universe followed by its sub-universes."
+        "description": "A universe as a row of the list of the administration presents it (visuel/listes/liste-par-liste.md), the list following\r\nthe hierarchy: each universe followed by its sub-universes."
       },
       "UniverseForm": {
         "required": [
@@ -17403,7 +17433,7 @@
             "description": "From the top of the hierarchy down to the parent; empty for a universe at the top."
           }
         },
-        "description": "A universe with the chain of its ancestors, each leading, like the universe itself, to its works\n(fonctionnel/structure-de-l-application.md)."
+        "description": "A universe with the chain of its ancestors, each leading, like the universe itself, to its works\r\n(fonctionnel/structure-de-l-application.md)."
       },
       "UniverseListItem": {
         "required": [
@@ -17448,7 +17478,7 @@
             "$ref": "#/components/schemas/UniverseInHierarchy"
           },
           "works": {
-            "description": "The series and the albums without series together, by sort key, those of its sub-universes included\n(fonctionnel/regles-metier/hierarchie-des-univers.md).",
+            "description": "The series and the albums without series together, by sort key, those of its sub-universes included\r\n(fonctionnel/regles-metier/hierarchie-des-univers.md).",
             "$ref": "#/components/schemas/PageOfWorksEntry"
           }
         }
@@ -17772,7 +17802,7 @@
           "Plate",
           "BackCover"
         ],
-        "description": "Type of visual attached to an edition (Type de visuel), its values following the fixed display\norder of fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md."
+        "description": "Type of visual attached to an edition (Type de visuel), its values following the fixed display\r\norder of fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md."
       },
       "WorksEntry": {
         "required": [

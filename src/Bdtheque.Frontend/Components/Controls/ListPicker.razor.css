@@ -1,0 +1,27 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md); the button is a list of the base theme, its
+   list of options the OptionList's, placed under it. */
+.list-picker {
+    position: relative;
+}
+
+/* Its text on one line, as a select, cut by an ellipsis rather than growing the control. */
+.list-picker-button {
+    display: block;
+    overflow: hidden;
+    text-align: start;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-picker-button:enabled {
+    cursor: pointer;
+}
+
+/* Unavailable until something else is chosen (e.g. the publisher, visuel/saisie-serie/contenu.md): in dashes, on the surface around
+   it, its text still read. Only the list disabled by its own attribute: the form disabled while it is saved keeps the look of a
+   disabled control. */
+.list-picker-button[disabled] {
+    border-style: dashed;
+    background-color: transparent;
+    opacity: 1;
+}

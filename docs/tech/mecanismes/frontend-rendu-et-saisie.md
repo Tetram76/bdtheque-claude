@@ -116,6 +116,7 @@ Les éléments qui composent une fiche de saisie se répartissent ainsi :
 - Le frontend n'applique lui-même aucune règle de saisie. La clé de tri, les auteurs repris d'une série et la vérification d'un ISBN sont demandés à l'API pendant la saisie. Chaque demande est numérotée, et seule la réponse de la dernière est affichée, pour qu'une réponse lente ne remplace pas une réponse plus récente.
 - L'enregistrement envoie ce qui a été saisi, accompagné de la version de la fiche lue à l'ouverture, ce qui permet à l'API de refuser l'écriture si la fiche a changé entre-temps. Un refus est présenté sur le champ en cause, comme le décrit [Erreurs, de la règle à leur présentation](erreurs.md).
 - Une fiche créée sur place pendant la saisie, par exemple un nouvel auteur, est envoyée avec la fiche qui la cite, sous une clé que celle-ci lui donne. L'API la crée dans la même transaction que la fiche principale.
+- Une fiche citée se choisit de deux façons. La plupart se choisissent en tapant leur nom, par [`RecordPicker`](../../../src/Bdtheque.Frontend/Components/Controls/RecordPicker.razor), qui propose les fiches trouvées par la recherche. La collection d'un éditeur se choisit dans la liste de toutes celles de l'éditeur, par [`ListPicker`](../../../src/Bdtheque.Frontend/Components/Controls/ListPicker.razor) : un bouton qui a l'apparence d'une liste du navigateur et ouvre la liste de ses options. Les deux contrôles partagent cette liste, [`OptionList`](../../../src/Bdtheque.Frontend/Components/Controls/OptionList.razor), et l'entrée qui la termine pour créer une fiche sur place, [`CreationOption`](../../../src/Bdtheque.Frontend/Components/Controls/CreationOption.razor), si bien que « Nouvelle collection… » a le même aspect que « Créer l'éditeur « … » ». Une liste du navigateur (`<select>`) ne permettait pas cette entrée, ses options se réduisant à leur texte.
 
 ## Les scripts du navigateur
 
@@ -129,7 +130,7 @@ Les scripts de l'application sont courts, écrits à la main et sans dépendance
 | `scroll-row.js` | Il gère les lignes qui défilent horizontalement, comme le menu ou la navigation par initiale : il affiche les chevrons et centre l'entrée courante. |
 | `fold-row.js` | Il replie les noms d'un rôle selon la largeur disponible sur leur ligne. |
 | `bibliography-folds.js` | Il fournit les boutons « Tout déplier » et « Tout replier » d'une bibliographie, sous la forme d'un élément HTML personnalisé. |
-| `record-picker.js` | Ce module retient l'action des touches du clavier dans la liste ouverte d'un choix de fiche. |
+| `combobox.js` | Ce module retient l'action des touches du clavier qu'emploient les listes d'options : celle d'un choix de fiche par son nom, tant qu'elle est ouverte, et celle d'un choix dans une liste, dont le bouton ne doit pas être cliqué par Entrée ou Espace. |
 | `entry-form.js` | Ce module met en vue le premier champ à corriger après un refus de l'API. |
 | `themes/planche.js` | Il réalise le dessin propre au thème « La planche encrée ». |
 

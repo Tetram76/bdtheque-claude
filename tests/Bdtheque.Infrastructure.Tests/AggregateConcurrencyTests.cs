@@ -85,6 +85,42 @@ public sealed class AggregateConcurrencyTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task LoadOtherForWrite_ReloadsARootAlreadyTracked_AndChangesItsVersion()
+    {
+        // A collection created on the spot from the form of a series, whose publisher the series read before the lock: the
+        // publisher is written back as its locked row holds it, not as read, and its version changes.
+        var publisher = new Publisher("Dupuis");
+        _fixture.Context.Publishers.Add(publisher);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+        var version = await ReadVersionAsync<Publisher>(publisher.Id);
+
+        await using (var transaction = await _fixture.Context.Database.BeginTransactionAsync())
+        {
+            var read = await _fixture.Context.Publishers.SingleAsync(p => p.Id == publisher.Id);
+            await using (var otherConnection = new NpgsqlConnection(_fixture.Context.Database.GetConnectionString()))
+            {
+                await otherConnection.OpenAsync();
+                await using var rename = new NpgsqlCommand("UPDATE \"Publishers\" SET \"Name\" = 'Dupuis renommé' WHERE \"Id\" = @id", otherConnection);
+                rename.Parameters.AddWithValue("id", publisher.Id);
+                await rename.ExecuteNonQueryAsync();
+            }
+
+            var locked = await _fixture.Context.LoadOtherAggregateForWriteAsync<Publisher>(publisher.Id, CancellationToken.None);
+            locked.AddCollection("Aire libre");
+            await _fixture.Context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            Assert.Same(read, locked);
+        }
+
+        _fixture.Context.ChangeTracker.Clear();
+        var saved = await _fixture.Context.Publishers.Include(p => p.Collections).SingleAsync(p => p.Id == publisher.Id);
+        Assert.Equal("Dupuis renommé", saved.Name);
+        Assert.Equal(["Aire libre"], saved.Collections.Select(c => c.Name));
+        Assert.NotEqual(version, await ReadVersionAsync<Publisher>(publisher.Id));
+    }
+
+    [Fact]
     public async Task LoadForWrite_LocksTheRootRowUntilTheTransactionEnds()
     {
         var (albumId, version) = await SeedAlbumAsync();
@@ -144,9 +180,11 @@ public sealed class AggregateConcurrencyTests : IAsyncLifetime
         return (album.Id, await ReadVersionAsync(album.Id));
     }
 
-    private Task<uint> ReadVersionAsync(Guid albumId) =>
-        _fixture.Context.Albums.AsNoTracking()
-            .Where(a => a.Id == albumId)
-            .Select(a => EF.Property<uint>(a, BdthequeDbContext.VersionProperty))
+    private Task<uint> ReadVersionAsync(Guid albumId) => ReadVersionAsync<Album>(albumId);
+
+    private Task<uint> ReadVersionAsync<TRoot>(Guid id) where TRoot : EntityBase, IAggregateRoot =>
+        _fixture.Context.Set<TRoot>().AsNoTracking()
+            .Where(r => r.Id == id)
+            .Select(r => EF.Property<uint>(r, BdthequeDbContext.VersionProperty))
             .SingleAsync();
 }

@@ -1,5 +1,5 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md); the text field is
-   the base theme's. */
+   the base theme's, its list of suggestions the OptionList's, placed under it. */
 .record-picker {
     position: relative;
 }
@@ -36,91 +36,4 @@
 .record-picker ::deep .icon {
     inline-size: 1rem;
     block-size: 1rem;
-}
-
-.record-picker-list {
-    --focus-gap: var(--color-surface-raised);
-    position: absolute;
-    inset-block-start: calc(100% + var(--space-xs));
-    inset-inline: 0;
-    z-index: 20;
-    max-block-size: 18rem;
-    overflow-y: auto;
-    margin: 0;
-    padding: var(--space-xs);
-    list-style: none;
-    border: var(--border-floating);
-    border-radius: var(--radius-block);
-    background: var(--color-surface-raised);
-    color: var(--color-text);
-    box-shadow: var(--shadow-floating);
-}
-
-.record-picker-option,
-.record-picker-status {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0 var(--space-s);
-    min-block-size: var(--control-height);
-    padding: var(--space-s);
-    border-radius: var(--radius-control);
-}
-
-.record-picker-option {
-    cursor: pointer;
-}
-
-.record-picker-option:hover,
-.record-picker-option[aria-selected="true"] {
-    background: var(--color-tag);
-    color: var(--color-text-on-tag);
-}
-
-.record-picker-detail,
-.record-picker-status {
-    font-size: var(--font-size-small);
-    color: var(--color-text-muted);
-}
-
-.record-picker-option:is(:hover, [aria-selected="true"]) .record-picker-detail {
-    color: inherit;
-}
-
-/* The mention of a record added on the spot (« nouvel auteur »), not created yet: a badge in the color of the links, in
-   bold, outlined, so it never reads as the end of the name, whatever the theme. */
-.record-picker-pending .record-picker-detail {
-    padding: 0 0.5em;
-    border: var(--border-width-control) solid currentColor;
-    border-radius: var(--radius-pill);
-    color: var(--color-accent-text);
-    font-weight: var(--font-weight-strong);
-}
-
-/* The creation of the record typed, after the suggestions, set apart from them by a straight rule across the list, drawn
-   outside the option: the rounded corners of its highlight never bend it. In the color of the links, in bold: an action,
-   not a record. */
-.record-picker-create {
-    position: relative;
-    align-items: center;
-    color: var(--color-accent-text);
-    font-weight: var(--font-weight-strong);
-}
-
-.record-picker-create:not(:first-child) {
-    margin-block-start: calc(2 * var(--space-xs) + 1px);
-}
-
-.record-picker-create:not(:first-child)::before {
-    content: "";
-    position: absolute;
-    inset-inline: calc(-1 * var(--space-xs));
-    inset-block-start: calc(-1 * var(--space-xs) - 1px);
-    border-block-start: 1px solid var(--color-rule);
-}
-
-.record-picker-create ::deep .icon {
-    flex: none;
-    inline-size: 1em;
-    block-size: 1em;
 }

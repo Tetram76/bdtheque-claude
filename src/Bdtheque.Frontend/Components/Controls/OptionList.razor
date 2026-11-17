@@ -1,0 +1,23 @@
+@* The list of the options of a combobox, under its field: the suggestions of the choice of a record by typing its name
+   (RecordPicker), or the options of the choice in a list (ListPicker), ended alike by the creation of a record on the spot
+   (CreationOption). Written once, so that the creation looks the same in both, whatever the control it ends
+   (visuel/saisie-album/contenu.md, création sur place; decision of the user, #414). Its options are the caller's, each an
+   option-list-option, which its styles reach. *@
+<ul id="@Id" class="option-list" role="listbox" aria-label="@Label" hidden="@Hidden">
+    @ChildContent
+</ul>
+
+@code {
+    /// <summary>The identifier of the list, which its combobox controls.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter]
+    public bool Hidden { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -28,39 +28,36 @@
     {
         <input type="hidden" name="@Name" value="@(Value?.Id.ToString() ?? "")" />
     }
-    <ul id="@ListId" class="record-picker-list" role="listbox" aria-label="@L["Suggestions"]" hidden="@(!IsOpen)">
+    <OptionList Id="@ListId" Label="@L["Suggestions"]" Hidden="!IsOpen">
         @if (_status is SearchStatus.Failed)
         {
             @* A search that failed is an error, presented by the single component of the errors at the scale of the list
                (choix-implementation/socle/frontend.md, Présentation). *@
-            <li class="record-picker-status" role="presentation">
+            <li class="option-list-status" role="presentation">
                 <ErrorMessage Problem="_failure!" Compact="true" TechnicalText="@L["Failed"]" />
             </li>
         }
         else if (_status is not SearchStatus.Done)
         {
-            <li class="record-picker-status" role="presentation">@L[_status.ToString()]</li>
+            <li class="option-list-status" role="presentation">@L[_status.ToString()]</li>
         }
         @for (var index = 0; index < _options.Count; index++)
         {
             var option = _options[index];
-            <li id="@OptionId(index)" class="record-picker-option @(IsPending(option) ? "record-picker-pending" : null)" role="option" aria-selected="@(index == _active ? "true" : "false")"
+            <li id="@OptionId(index)" class="option-list-option @(IsPending(option) ? "option-list-pending" : null)" role="option" aria-selected="@(index == _active ? "true" : "false")"
                 @onmousedown:preventDefault @onclick="() => ChooseAsync(option)">
                 <span>@option.Label</span>
                 @if (option.Detail is not null)
                 {
-                    <span class="record-picker-detail">@option.Detail</span>
+                    <span class="option-list-detail">@option.Detail</span>
                 }
             </li>
         }
         @if (CanCreate)
         {
-            <li id="@OptionId(_options.Count)" class="record-picker-option record-picker-create" role="option"
-                aria-selected="@(_active == _options.Count ? "true" : "false")" @onmousedown:preventDefault @onclick="CreateAsync">
-                <Icon Name="IconName.Add" /><span>@CreateLabel!(_text.Trim())</span>
-            </li>
+            <CreationOption Id="@OptionId(_options.Count)" Label="@CreateLabel!(_text.Trim())" Active="_active == _options.Count" OnChoose="CreateAsync" />
         }
-    </ul>
+    </OptionList>
 </div>
 
 @code {
@@ -178,7 +175,7 @@
     {
         if (firstRender)
         {
-            _module = await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["record-picker.js"]}");
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["combobox.js"]}");
             await _module.InvokeVoidAsync("keepKeysForTheList", _input);
             if (AutoFocus)
                 await _input.FocusAsync();

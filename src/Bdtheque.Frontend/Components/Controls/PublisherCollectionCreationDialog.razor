@@ -1,0 +1,25 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<PublisherCollectionCreationDialog> L
+
+@* The creation of a collection of the publisher chosen, on the spot, from the entry form of a series or of an edition that cites
+   it (visuel/saisie-serie/contenu.md, visuel/saisie-edition/contenu.md): its name alone, in the common dialog of a record created
+   on the spot by its name, empty at first, nothing being typed in a list (modele-metier/collection-editeur.md). *@
+<NameCreationDialog Id="@Id" Title="@L["Title"]" Lead="@L["Lead"]" Label="@L["Name"]" CreateLabel="@L["Create"]" Text=""
+                    OnCreated="name => OnCreated.InvokeAsync(new NewPublisherCollection(Guid.NewGuid(), PublisherId, name))" OnCancel="OnCancel" />
+
+@code {
+    /// <summary>The identifier of the dialog, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The publisher chosen, which the collection is created in: an existing one, or the key of one added on the spot.</summary>
+    [Parameter, EditorRequired]
+    public Guid PublisherId { get; set; }
+
+    /// <summary>The collection to create with the record that cites it, to choose it.</summary>
+    [Parameter]
+    public EventCallback<NewPublisherCollection> OnCreated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+}

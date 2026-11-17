@@ -181,7 +181,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         // Required: the publisher, and the mode of acquisition of an edition owned; no other field has a mention.
         Assert.Equal(["edition-publisher", "edition-mode"], page.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
         Assert.All(page.FindAll(".field-note"), note => Assert.Equal("(obligatoire)", note.TextContent));
-        Assert.Equal("", page.Find("#edition-collection").GetAttribute("value"));
+        Assert.Equal("—", page.Find("#edition-collection").TextContent.Trim());
         Assert.Equal("2007", page.Find("#edition-year").GetAttribute("value"));
         Assert.Equal("978-2-203-00120-8", page.Find("#edition-isbn").GetAttribute("value"));
         Assert.Equal(["", "Standard", "Hardcover", "Portrait", "LeftToRight"],
@@ -219,7 +219,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
             page.FindAll("#edition-category option").Select(option => option.TextContent.Trim()));
         Assert.Equal(["—", "Achat", "Offerte", "Échange", "Gagnée", "Héritée"],
             page.FindAll("#edition-mode option").Select(option => option.TextContent.Trim()));
-        Assert.Equal(["—", "Fac-similé", "Pastiches"], page.FindAll("#edition-collection option").Select(option => option.TextContent.Trim()));
+        Assert.Equal(["—", "Fac-similé", "Pastiches", "Nouvelle collection…"], CollectionOptions(page));
     }
 
     [Fact]
@@ -298,12 +298,13 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     public async Task Collection_TheChangeOfPublisherRemovesIt_AndListsItsOwn()
     {
         var page = OpenOwned();
-        await page.ChangeAsync("#edition-collection", Pastiches.ToString());
+        await ChooseCollectionAsync(page, 2);
+        Assert.Equal("Pastiches", page.Find("#edition-collection").TextContent.Trim());
 
         ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
 
-        Assert.Equal("", page.Find("#edition-collection").GetAttribute("value"));
-        Assert.Equal(["—"], page.FindAll("#edition-collection option").Select(option => option.TextContent.Trim()));
+        Assert.Equal("—", page.Find("#edition-collection").TextContent.Trim());
+        Assert.Equal(["—", "Nouvelle collection…"], CollectionOptions(page));
 
         ChoosePublisher(page, null);
 
@@ -321,7 +322,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Empty(page.FindAll("dialog"));
         Assert.Equal("Delcourt", page.Find("#edition-publisher").GetAttribute("value"));
         Assert.Equal("admin.edition-form.publisher-created", _audience.Functions.Last());
-        Assert.Equal(["—"], page.FindAll("#edition-collection option").Select(option => option.TextContent.Trim()));
+        Assert.Equal(["—", "Nouvelle collection…"], CollectionOptions(page));
         Assert.DoesNotContain(_api.Requested, path => path.StartsWith("/admin/publishers/", StringComparison.Ordinal) && !path.Contains(Casterman.ToString(), StringComparison.Ordinal));
 
         _api.Write = (_, _, _) => FakeAdminApi.Json(Owned, HttpStatusCode.Created);
@@ -379,6 +380,58 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("true", field.GetAttribute("aria-invalid"));
         Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
             id => page.Find($"#{id}").TextContent.Trim().StartsWith("« Dargaud » est déjà pris", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CollectionCreatedOnTheSpot_IsChosen_AndCreatedInThePublisherWithTheEdition_WhenItIsSaved()
+    {
+        // visuel/saisie-edition/contenu.md, as for a series: « Nouvelle collection… », its name alone, created with the edition.
+        var page = OpenOwned();
+
+        await CreateCollectionOnTheSpotAsync(page, " Aire libre ");
+
+        Assert.Equal("Aire libre", page.Find("#edition-collection").TextContent.Trim());
+        Assert.Equal(["—", "Aire libre", "Fac-similé", "Pastiches", "Nouvelle collection…"], CollectionOptions(page));
+        Assert.Equal("admin.edition-form.collection-created", _audience.Functions.Last());
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
+        await page.SubmitAsync("form");
+
+        var content = _api.Written.Single(w => w.Method == HttpMethod.Put).Body.GetProperty("content");
+        var collection = content.GetProperty("newRecords").GetProperty("publisherCollections").EnumerateArray().Single();
+        Assert.Equal(("Aire libre", Casterman.ToString()), (collection.GetProperty("name").GetString(), collection.GetProperty("publisherId").GetString()));
+        Assert.Equal(collection.GetProperty("key").GetString(), content.GetProperty("publisherCollectionId").GetString());
+    }
+
+    [Fact]
+    public async Task CollectionCreatedOnTheSpot_ForANewPurchaseIntent_IsCreatedWithTheEditionTargeted()
+    {
+        var page = OpenNewIntent();
+        await CreateCollectionOnTheSpotAsync(page, "Aire libre");
+        Assert.Equal("admin.purchase-intent-form.collection-created", _audience.Functions.Last());
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [], 13), HttpStatusCode.Created);
+        await page.SubmitAsync("form");
+
+        var edition = _api.Written.Single(w => w.Path == $"/admin/albums/{AlbumId}/purchase-intents").Body.GetProperty("edition");
+        var collection = edition.GetProperty("newRecords").GetProperty("publisherCollections").EnumerateArray().Single();
+        Assert.Equal(("Aire libre", collection.GetProperty("key").GetString()),
+            (collection.GetProperty("name").GetString(), edition.GetProperty("publisherCollectionId").GetString()));
+    }
+
+    [Fact]
+    public async Task BusinessError_OnACollectionCreatedOnTheSpot_DesignatesTheFieldOfTheCollection()
+    {
+        var page = OpenOwned();
+        await CreateCollectionOnTheSpotAsync(page, "PASTICHES");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "PublisherCollection.NameAlreadyUsed", "/newRecords/publisherCollections/0/name");
+
+        await page.SubmitAsync("form");
+
+        var field = page.Find("#edition-collection");
+        Assert.Equal("true", field.GetAttribute("aria-invalid"));
+        Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
+            id => page.Find($"#{id}").TextContent.Trim().StartsWith("Ce nom est déjà pris", StringComparison.Ordinal));
     }
 
     // Under the field, in the compact form of the single component of the errors, which the field describes itself by; its
@@ -489,7 +542,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         // The publisher alone is required (visuel/saisie-edition/contenu.md).
         Assert.Equal(["edition-publisher"], page.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
         Assert.Equal("Intention d'achat posée le 08/10/2026 12:00, modifiée le 12/10/2026 12:00.", page.Find(".entry-form-dates").TextContent.Trim());
-        Assert.Equal(FacSimile.ToString(), page.Find("#edition-collection").GetAttribute("value"));
+        Assert.Equal("Fac-similé", page.Find("#edition-collection").TextContent.Trim());
     }
 
     [Fact]
@@ -1024,6 +1077,25 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     {
         var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
         await picker.InvokeAsync(() => picker.Instance.OnCreate.InvokeAsync(name));
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
+    }
+
+    // The options of the list of the collections, its creation last, open or not.
+    private static List<string> CollectionOptions(IRenderedComponent<AdminEditionForm> page) =>
+        [.. page.FindAll("#edition-collection-options [role=option]").Select(option => option.TextContent.Trim())];
+
+    // Opens the list of the collections, and chooses its option at that place: « — » first, its creation last.
+    private static async Task ChooseCollectionAsync(IRenderedComponent<AdminEditionForm> page, int index)
+    {
+        await page.ClickAsync("#edition-collection");
+        await page.ClickAsync($"#edition-collection-option-{index}");
+    }
+
+    private static async Task CreateCollectionOnTheSpotAsync(IRenderedComponent<AdminEditionForm> page, string name)
+    {
+        await page.ClickAsync("#edition-collection");
+        await page.ClickAsync("#edition-collection-options .option-list-create");
+        await page.ChangeAsync("#edition-collection-creation-name", name);
         await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
     }
 }

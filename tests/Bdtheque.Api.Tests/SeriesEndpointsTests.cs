@@ -151,7 +151,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             NewRecords = new NewRecords(
                 [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
                 [new NewGenre(genre, $"Genre{marker}")],
-                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], [], []),
+                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], [], [], []),
         };
 
         var created = await CreateAsync(content);
@@ -175,7 +175,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var updated = await UpdateAsync(created, created.Content with
         {
             Contributions = [new ContributionContent(author, ContributionRole.Colorist)],
-            NewRecords = new NewRecords([new NewAuthor(author, null, null, $"Pseudo{marker}")], [], [], [], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, null, $"Pseudo{marker}")], [], [], [], [], []),
         });
 
         Assert.Equal($"Pseudo{marker}", Assert.Single(updated.References.Authors).Pseudonym);
@@ -192,7 +192,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         {
             Contributions = [new ContributionContent(author, ContributionRole.Scenarist)],
             GenreIds = [genre],
-            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], [], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], [], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
@@ -211,7 +211,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var content = Content(UniqueTitle()) with
         {
             UniverseIds = [universe],
-            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)], [], []),
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)], [], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
@@ -225,7 +225,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         // A publisher created by its name alone (visuel/saisie-serie/contenu.md), its website and collections entered on its own form.
         var publisher = Guid.NewGuid();
         var name = $"Éditeur {Guid.NewGuid():N}";
-        var content = WithTemplate(Content(UniqueTitle()), publisher, null) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)]) };
+        var content = WithTemplate(Content(UniqueTitle()), publisher, null) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)], []) };
 
         var created = await CreateAsync(content);
 
@@ -246,12 +246,111 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             WithTemplate(created.Content, publisher, null) with
             {
                 Title = UniqueTitle(),
-                NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, taken.Name.ToUpperInvariant())]),
+                NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, taken.Name.ToUpperInvariant())], []),
             },
             created.Version));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed, ["/newRecords/publishers/0/name"]);
         Assert.Equal(created, await GetAsync(created.Id), SeriesFormComparer.Instance);
+    }
+
+    [Fact]
+    public async Task Create_WithACollectionAddedOnTheSpot_CreatesItInItsPublisher_WhoseVersionChanges()
+    {
+        // A collection created by its name alone (visuel/saisie-serie/contenu.md), with the series: a child of the aggregate of its
+        // publisher, written from another form, which changes the version of the publisher
+        // (choix-implementation/persistance/concurrence-d-acces.md).
+        var publisher = await CreatePublisherAsync();
+        var collection = Guid.NewGuid();
+        var name = $"Collection {Guid.NewGuid():N}";
+        var content = WithTemplate(Content(UniqueTitle()), publisher.Id, collection) with
+        {
+            NewRecords = NewRecords.None with { PublisherCollections = [new NewPublisherCollection(collection, publisher.Id, name)] },
+        };
+
+        var created = await CreateAsync(content);
+
+        var named = created.References.PublisherCollection!;
+        Assert.Equal((name, publisher.Id), (named.Name, named.PublisherId));
+        Assert.Equal(named.Id, created.Content.EditionTemplate.PublisherCollectionId);
+        Assert.Equal([name], (await GetCollectionsAsync(publisher.Id)).Select(c => c.Name));
+        Assert.NotEqual(publisher.Version, (await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}"))!.Version);
+    }
+
+    [Fact]
+    public async Task Update_WithACollectionAddedOnTheSpotToAPublisherAddedOnTheSpot_CreatesBoth()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+        var publisher = Guid.NewGuid();
+        var collection = Guid.NewGuid();
+        var name = $"Collection {Guid.NewGuid():N}";
+
+        var updated = await UpdateAsync(created, WithTemplate(created.Content, publisher, collection) with
+        {
+            NewRecords = NewRecords.None with
+            {
+                Publishers = [new NewPublisher(publisher, $"Éditeur {Guid.NewGuid():N}")],
+                PublisherCollections = [new NewPublisherCollection(collection, publisher, name)],
+            },
+        });
+
+        var publisherId = updated.References.Publisher!.Id;
+        Assert.Equal((name, publisherId), (updated.References.PublisherCollection!.Name, updated.References.PublisherCollection.PublisherId));
+        Assert.Equal([name], (await GetCollectionsAsync(publisherId)).Select(c => c.Name));
+    }
+
+    [Fact]
+    public async Task Update_WithACollectionAddedOnTheSpotAlreadyNamedSoByItsPublisher_DesignatesIt_CreatingNothing()
+    {
+        // Already taken by the publisher, whatever the case and the accents (modele-metier/collection-editeur.md), the series
+        // citing its publisher already: the publisher is read with the series before the collection is added to it.
+        var publisher = await CreatePublisherAsync();
+        var taken = await CreateCollectionAsync(publisher);
+        var created = await CreateAsync(WithTemplate(Content(UniqueTitle()), publisher.Id, null));
+        var collection = Guid.NewGuid();
+
+        var response = await _client.PutAsJsonAsync($"/admin/series/{created.Id}", new UpdateSeriesRequest(
+            WithTemplate(created.Content, publisher.Id, collection) with
+            {
+                Title = UniqueTitle(),
+                NewRecords = NewRecords.None with
+                {
+                    PublisherCollections = [new NewPublisherCollection(collection, publisher.Id, taken.Name.ToUpperInvariant())],
+                },
+            },
+            created.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/newRecords/publisherCollections/0/name"]);
+        Assert.Equal(created, await GetAsync(created.Id), SeriesFormComparer.Instance);
+        Assert.Equal([taken.Id], (await GetCollectionsAsync(publisher.Id)).Select(c => c.Id));
+    }
+
+    [Fact]
+    public async Task Create_WithACollectionAddedOnTheSpotWithoutName_DesignatesIt()
+    {
+        var publisher = await CreatePublisherAsync();
+        var collection = Guid.NewGuid();
+
+        var response = await _client.PostAsJsonAsync("/admin/series", WithTemplate(Content(UniqueTitle()), publisher.Id, collection) with
+        {
+            NewRecords = NewRecords.None with { PublisherCollections = [new NewPublisherCollection(collection, publisher.Id, " ")] },
+        });
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired, ["/newRecords/publisherCollections/0/name"]);
+    }
+
+    [Fact]
+    public async Task Create_WithACollectionAddedOnTheSpotToAPublisherDeletedMeanwhile_IsAFunctionalError()
+    {
+        var collection = Guid.NewGuid();
+        var deleted = Guid.NewGuid();
+
+        var response = await _client.PostAsJsonAsync("/admin/series", WithTemplate(Content(UniqueTitle()), deleted, collection) with
+        {
+            NewRecords = NewRecords.None with { PublisherCollections = [new NewPublisherCollection(collection, deleted, "Collection")] },
+        });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -685,6 +784,9 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
     private Task<PublisherForm> CreatePublisherAsync() =>
         PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur {Guid.NewGuid():N}", null, []));
+
+    private async Task<List<PublisherCollectionForm>> GetCollectionsAsync(Guid publisherId) =>
+        (await _client.GetFromJsonAsync<List<PublisherCollectionForm>>($"/admin/publishers/{publisherId}/collections"))!;
 
     private Task<PublisherCollectionForm> CreateCollectionAsync(PublisherForm publisher) =>
         PostAsync<PublisherCollectionForm>(

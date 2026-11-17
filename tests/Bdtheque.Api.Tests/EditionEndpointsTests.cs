@@ -221,7 +221,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var name = $"Éditeur {Guid.NewGuid():N}";
 
         var created = await CreateAsync(
-            await CreateAlbumAsync(), Content(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)]) });
+            await CreateAlbumAsync(), Content(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)], []) });
 
         var named = created.References.Publisher!;
         Assert.Equal((name, null), (named.Name, named.Website));
@@ -236,7 +236,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var publisher = Guid.NewGuid();
 
         var response = await _client.PutAsJsonAsync(EditionUri(created), new UpdateEditionRequest(
-            created.Content with { PublisherId = publisher, NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, " ")]) },
+            created.Content with { PublisherId = publisher, NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, " ")], []) },
             created.AlbumVersion));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameRequired, ["/newRecords/publishers/0/name"]);
@@ -251,9 +251,50 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
         var publisher = Guid.NewGuid();
 
         var response = await PostCreateAsync(
-            album, Content(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, taken.Name.ToLowerInvariant())]) });
+            album, Content(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, taken.Name.ToLowerInvariant())], []) });
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed, ["/newRecords/publishers/0/name"]);
+        await AssertNoEditionAsync(album.Id);
+    }
+
+    [Fact]
+    public async Task Update_WithACollectionAddedOnTheSpot_CreatesItInItsPublisher()
+    {
+        // A collection created by its name alone (visuel/saisie-edition/contenu.md), with the edition, in the same transaction.
+        var publisher = await CreatePublisherAsync();
+        var created = await CreateAsync(await CreateAlbumAsync(), Content(publisher.Id));
+        var collection = Guid.NewGuid();
+        var name = $"Collection {Guid.NewGuid():N}";
+
+        var response = await _client.PutAsJsonAsync(EditionUri(created), new UpdateEditionRequest(
+            created.Content with
+            {
+                PublisherCollectionId = collection,
+                NewRecords = NewRecords.None with { PublisherCollections = [new NewPublisherCollection(collection, publisher.Id, name)] },
+            },
+            created.AlbumVersion));
+
+        response.EnsureSuccessStatusCode();
+        var updated = (await response.Content.ReadFromJsonAsync<EditionForm>())!;
+        Assert.Equal((name, publisher.Id), (updated.References.PublisherCollection!.Name, updated.References.PublisherCollection.PublisherId));
+        Assert.Equal(updated.References.PublisherCollection.Id, updated.Content.PublisherCollectionId);
+    }
+
+    [Fact]
+    public async Task Create_WithACollectionAddedOnTheSpotAlreadyNamedSoByItsPublisher_DesignatesIt_CreatingNothing()
+    {
+        var album = await CreateAlbumAsync();
+        var publisher = await CreatePublisherAsync();
+        var taken = await CreateCollectionAsync(publisher);
+        var collection = Guid.NewGuid();
+
+        var response = await PostCreateAsync(album, Content(publisher.Id) with
+        {
+            PublisherCollectionId = collection,
+            NewRecords = NewRecords.None with { PublisherCollections = [new NewPublisherCollection(collection, publisher.Id, taken.Name.ToLowerInvariant())] },
+        });
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/newRecords/publisherCollections/0/name"]);
         await AssertNoEditionAsync(album.Id);
     }
 

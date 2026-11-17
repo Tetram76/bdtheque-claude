@@ -1,0 +1,22 @@
+@* The creation of a record on the spot, last option of an OptionList (e.g. « Créer l'auteur « Moebius » », « Nouvelle
+   collection… »): the same in every combobox, which the user tells apart from the records at first glance. Choosing it, with the
+   mouse or the finger, leaves the focus on the combobox, which the keyboard keeps. *@
+<li id="@Id" class="option-list-option option-list-create" role="option" aria-selected="@(Active ? "true" : "false")"
+    @onmousedown:preventDefault @onclick="OnChoose">
+    <Icon Name="IconName.Add" /><span>@Label</span>
+</li>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>Whether the keyboard is on it (the active option of its combobox).</summary>
+    [Parameter]
+    public bool Active { get; set; }
+
+    [Parameter]
+    public EventCallback OnChoose { get; set; }
+}
