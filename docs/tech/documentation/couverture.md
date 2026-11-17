@@ -5,7 +5,7 @@ description: 'Ce que la documentation décrit aujourd''hui, et ce qui reste à d
 
 # Couverture
 
-La documentation technique est **partielle** : elle décrit la vue d'ensemble, l'authentification et les appels internes, la persistance, le parcours des erreurs, le frontend, la recherche, les visuels et le journal des modifications. Un sujet absent ici n'est pas documenté ; c'est le code, guidé par la [vue d'ensemble](../architecture/vue-d-ensemble.md) et les [projets de la solution](../architecture/projets-de-la-solution.md), qui le décrit. `Get-TechnicalDocumentationImpact.ps1` signale les fichiers modifiés qu'aucune page ne décrit.
+La documentation technique est **partielle** : elle décrit la vue d'ensemble, l'authentification et les appels internes, la persistance, le parcours des erreurs, le frontend, la recherche, les visuels, le journal des modifications, l'intégration continue et la stratégie de tests. Un sujet absent ici n'est pas documenté ; c'est le code, guidé par la [vue d'ensemble](../architecture/vue-d-ensemble.md) et les [projets de la solution](../architecture/projets-de-la-solution.md), qui le décrit. `Get-TechnicalDocumentationImpact.ps1` signale les fichiers modifiés qu'aucune page ne décrit.
 
 ## Documenté
 
@@ -23,16 +23,11 @@ La documentation technique est **partielle** : elle décrit la vue d'ensemble, l
 | Recherche des listes, recherche avancée et recherches enregistrées | [Recherche simple et avancée](../mecanismes/recherche.md) |
 | Visuels : téléversement, zone d'attente, stockage, médias, réconciliation | [Visuels](../mecanismes/visuels.md) |
 | Journal des modifications : capture, correspondance des attributs, stockage, lecture | [Journal des modifications](../mecanismes/journal-des-modifications.md) |
+| Workflow CI : classement des fichiers modifiés, jobs et leurs conditions, tests de bout en bout par thème, analyse SonarQube Cloud, analyse des images | [Intégration continue](../integration-et-tests/integration-continue.md) |
+| Projets de tests et leurs ressources, tests du dépôt, horloge et thème imposés, API interdites, captures de référence | [Stratégie de tests](../integration-et-tests/strategie-de-tests.md) |
+| Contrôle qualité hebdomadaire, contrôle de sécurité quotidien, relevé des versions | [Contrôles périodiques](../integration-et-tests/controles-periodiques.md) |
 | Familles de routes et accès au contrat de l'API | [Contrat HTTP de l'API](../references/api-http.md) |
 | La documentation technique elle-même | [Consulter, construire, vérifier et maintenir](consulter-et-maintenir.md) |
-
-## À documenter
-
-Par ordre de priorité : transversalité et risque de régression d'abord.
-
-| Sujet | Ticket |
-| --- | --- |
-| Intégration continue et stratégie de tests | [#499](https://github.com/Tetram76/bdtheque-claude/issues/499) |
 
 ## Références à générer
 
