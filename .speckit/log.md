@@ -2,6 +2,7 @@
 
 ## 2026-11-17
 
+* **Règle** : un ticket reçoit dès sa création l'étiquette `ui` s'il porte sur un écran, `tests` s'il ne porte que sur les tests, `ci` s'il porte sur les workflows ; chaque étiquette que pose le projet a sur GitHub une description, en anglais, qui résume sa règle de pose, et qu'un workflow qui la crée lui donne de même (#515).
 * **Choix** : le script de construction de la documentation technique restaure lui-même les outils locaux avant d'appeler DocFX, la commande documentée suffisant sur un poste neuf ; `dotnet tool exec` écarté (#514).
 * **Exigence de l'utilisateur** : un ticket ou une Pull Request qui ne porte que sur la documentation technique n'a pas de jalon ; la documentation suit chaque version par les Pull Requests qui changent le code, qui gardent le jalon de leur ticket (#510).
 * **Exigence de l'utilisateur** : tout ticket qui porte directement sur la documentation, utilisateur ou technique, reçoit l'étiquette `documentation` ; un ticket de pure documentation technique ne porte que sur un sujet implémenté, la documentation d'un sujet à venir étant l'affaire de la Pull Request qui le réalise (#510).
