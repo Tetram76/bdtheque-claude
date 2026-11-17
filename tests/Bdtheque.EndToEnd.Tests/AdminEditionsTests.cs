@@ -136,6 +136,24 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
 
         Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
         Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // The ISBN, which a line never breaks, ends before the actions: none of it is hidden under them.
+        var isbnEnd = await page.Locator(".row-entry .label-isbn").EvaluateAsync<double>("isbn => isbn.getBoundingClientRect().right");
+        var actionsStart = await page.Locator(".edition-row:not(.edition-row-head) .edition-actions").EvaluateAsync<double>(
+            "actions => Math.min(...[...actions.children].filter(child => child.getClientRects().length > 0).map(child => child.getBoundingClientRect().left))");
+        Assert.True(isbnEnd <= actionsStart, $"{theme} at {width}px: the ISBN ends at {isbnEnd}px, under the actions from {actionsStart}px.");
+        // The page of the album of the edition, one click away: a button beside « Modifier », or, on a smartphone, where a
+        // third button would cut the ISBN, the first item of the menu (visuel/listes/principes-communs.md).
+        var albumButton = page.Locator(".edition-actions > a.button[data-icon-only]");
+        if (width == 414)
+        {
+            await Assertions.Expect(albumButton).ToBeHiddenAsync();
+            await page.Locator(".edition-actions .actions-menu-toggle").ClickAsync();
+            await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Éditions et intentions d'achat de l'album" })).ToBeVisibleAsync();
+        }
+        else if (width == 1440)
+        {
+            await Assertions.Expect(albumButton).ToBeVisibleAsync();
+        }
         // At the width of the mockups' desktop, the table has all its columns, the category and the last modification
         // included.
         if (width == 1440)

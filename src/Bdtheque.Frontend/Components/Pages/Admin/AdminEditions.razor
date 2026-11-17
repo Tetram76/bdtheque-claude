@@ -112,7 +112,14 @@
                         <span class="edition-actions" role="cell">
                             <Button Href="@AppPaths.AdminEditEdition(row.Album.Id, row.Edition.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
                                     IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", label]" />
+                            @* An edition is entered from its album: its page is one click away, as from a row of the albums; on a
+                               smartphone, where a third button would cut the ISBN of the label, the first item of the menu instead
+                               (visuel/listes/principes-communs.md). The styles show one or the other. *@
+                            <Button Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["AlbumEditions"]"
+                                    IconOnly="true" aria-label="@L["AlbumEditions.Label", AlbumLabel(row.Album)]" class="edition-album-button" />
                             <ActionsMenu Id="@($"edition-actions-{row.Edition.Id:N}")" Label="@L["More", label]">
+                                <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Edition" Label="@L["Menu.AlbumEditions"]"
+                                          class="edition-album-item" />
                                 <MenuItem Href="@AppPaths.Album(row.Album.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
                                 <MenuItem Href="@((ListOnly with { Merge = row.Edition.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
                                 <MenuSeparator />

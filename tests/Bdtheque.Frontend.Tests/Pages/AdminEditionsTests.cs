@@ -118,9 +118,19 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
         // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
         Assert.Equal(["Modifier Glénat [2004] - ISBN 978-2-7234-4567-1"], row.QuerySelectorAll($"a[href='{AppPaths.AdminEditEdition(Lunes.Id, id)}']").Select(link => Normalized(link.GetAttribute("aria-label")!)));
-        Assert.Equal("Modifier Glénat [2004] - ISBN 978-2-7234-4567-1", Normalized(row.QuerySelector(".edition-actions a.button")!.GetAttribute("aria-label")!));
+        // « Modifier », then the editions and purchase intents of its album, as a row of the list of the albums
+        // (visuel/listes/principes-communs.md, Actions): an edition is entered from its album.
         Assert.Equal(
             [
+                ("Modifier Glénat [2004] - ISBN 978-2-7234-4567-1", AppPaths.AdminEditEdition(Lunes.Id, id)),
+                ("Éditions et intentions d'achat de ...Et après (Les Lunes de Saturne - T. 1)", AppPaths.AdminAlbumEditions(Lunes.Id)),
+            ],
+            row.QuerySelectorAll(".edition-actions > a.button").Select(button => (Normalized(button.GetAttribute("aria-label")!), button.GetAttribute("href"))));
+        // On a smartphone, the editions and purchase intents of the album lead the menu in place of their button, which the
+        // styles of the page show at one width or the other.
+        Assert.Equal(
+            [
+                ("Éditions et intentions d'achat de l'album", AppPaths.AdminAlbumEditions(Lunes.Id)),
                 ("Voir l'album dans la consultation", AppPaths.Album(Lunes.Id)),
                 ("Fusionner avec une autre édition…", $"{AppPaths.AdminEditions}?q=978&merge={id}"),
                 ("Supprimer…", $"{AppPaths.AdminEditions}?q=978&delete={id}"),
