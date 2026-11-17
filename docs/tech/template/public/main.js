@@ -40,7 +40,7 @@ const palettes = {
 
 export default {
   get mermaid() {
-    const dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const dark = document.documentElement.dataset.bsTheme === 'dark';
     return {
       theme: 'base',
       darkMode: dark,
