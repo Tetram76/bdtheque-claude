@@ -8,7 +8,7 @@ applies_to:
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T10:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T11:10:00Z }
 ---
 
 # Documentation technique
@@ -62,7 +62,7 @@ La documentation change dans la **même Pull Request** que ce qu'elle décrit :
 4. **Avant la livraison** : les contrôles documentaires passent, et texte, diagrammes et liens décrivent l'état livré.
 5. **Refactoring** : renvois, motifs de fichiers et diagrammes suivent le code ; l'obsolète est retiré, les cartes mises à jour.
 
-Une couverture encore partielle est dite telle, avec l'inventaire de ce qui reste à documenter et les tickets qui le portent ; une page vide ou de pure forme n'est jamais présentée comme une documentation.
+Une couverture encore partielle est dite telle, avec l'inventaire de ce qui reste à documenter et les tickets qui le portent ; une page vide ou de pure forme n'est jamais présentée comme une documentation. Un ticket de pure documentation technique ne porte que sur un sujet implémenté : la documentation d'un sujet à venir est l'affaire de la Pull Request qui le réalise, et non d'un ticket ouvert d'avance (exigence de l'utilisateur).
 
 ## Contrôles et leurs limites
 
