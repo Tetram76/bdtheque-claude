@@ -2,6 +2,7 @@
 
 ## 2026-11-17
 
+* **Règle** : le dépôt `Tetram76/.github`, qui porte le template des Pull Requests, est signalé comme public (#519).
 * **Choix** : les diagrammes du site de la documentation technique ont un style commun, déclaré une fois dans un modèle DocFX propre au projet (thème `base` de Mermaid, palette sobre déclinée en clair et en sombre, police du site) ; directives par diagramme et thèmes livrés par Mermaid écartés ; son script est exclu de la couverture de SonarQube Cloud, comme les scripts du frontend (#519).
 * **Exigence de l'utilisateur** : la documentation technique s'adresse d'abord à un lecteur humain : elle est rédigée en vraies phrases, sans style télégraphique, donne le minimum d'explication qu'exige sa compréhension sans le code (rôle, enchaînement, termes définis, cas qui comptent), et chacun de ses diagrammes ne porte qu'une seule nature d'information ; la question d'un diagramme est énoncée en phrase par le texte qui l'introduit. Pages de `docs/tech/` réécrites en conséquence (#519).
 * **Choix** : le schéma de la base est une référence générée de la documentation technique, lu dans le catalogue d'une base migrée et comparé par un test de l'infrastructure, dans le job des tests, la page comptant comme source ; régénéré par le script des références (`-NoDatabaseSchema` l'omet) ; ses relations en un schéma Mermaid par partie. tbls, `pg_dump`, SchemaSpy, une étape du job de la documentation avec sa propre base et un schéma unique des relations écartés (#518).
