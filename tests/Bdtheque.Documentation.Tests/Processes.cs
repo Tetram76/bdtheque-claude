@@ -14,8 +14,9 @@ internal sealed record ProcessResult(int ExitCode, string Output)
 /// </summary>
 internal static class Processes
 {
-    public static Task<ProcessResult> PowerShellAsync(string script, IEnumerable<string> arguments, string workingDirectory, TimeSpan timeout) =>
-        RunAsync("pwsh", ["-NoLogo", "-NoProfile", "-NonInteractive", "-File", script, .. arguments], workingDirectory, timeout);
+    public static Task<ProcessResult> PowerShellAsync(
+        string script, IEnumerable<string> arguments, string workingDirectory, TimeSpan timeout, IReadOnlyDictionary<string, string>? environment = null) =>
+        RunAsync("pwsh", ["-NoLogo", "-NoProfile", "-NonInteractive", "-File", script, .. arguments], workingDirectory, timeout, environment);
 
     public static async Task<string> GitAsync(string repository, params string[] arguments)
     {
@@ -23,7 +24,8 @@ internal static class Processes
         return result.Succeeded ? result.Output : throw new InvalidOperationException($"git {string.Join(' ', arguments)}: {result.Output}");
     }
 
-    public static async Task<ProcessResult> RunAsync(string program, IEnumerable<string> arguments, string workingDirectory, TimeSpan timeout)
+    public static async Task<ProcessResult> RunAsync(
+        string program, IEnumerable<string> arguments, string workingDirectory, TimeSpan timeout, IReadOnlyDictionary<string, string>? environment = null)
     {
         var start = new ProcessStartInfo(program)
         {
@@ -39,6 +41,8 @@ internal static class Processes
             start.ArgumentList.Add(argument);
         // Messages of git and of the scripts in English whatever the machine, for the assertions that read them.
         start.Environment["LC_ALL"] = "C";
+        foreach (var (name, value) in environment ?? new Dictionary<string, string>())
+            start.Environment[name] = value;
 
         using var process = Process.Start(start) ?? throw new InvalidOperationException($"{program} could not be started.");
         var output = new System.Text.StringBuilder();

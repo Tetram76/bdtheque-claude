@@ -27,7 +27,7 @@ internal sealed partial class DocumentationSite : IAsyncDisposable
     // The width of a desktop screen, on which the column of the page is that of a reader at a desk.
     private static readonly ViewportSize Viewport = new() { Width = 1280, Height = 900 };
 
-    private static readonly TimeSpan BuildTimeout = TimeSpan.FromMinutes(3);
+    internal static readonly TimeSpan BuildTimeout = TimeSpan.FromMinutes(3);
 
     // DocFX writes a diagram as a code block, which its script turns into the element Mermaid draws in: every block turned
     // and processed by Mermaid, which marks the element once its drawing, the diagram or else its error, has its final size
