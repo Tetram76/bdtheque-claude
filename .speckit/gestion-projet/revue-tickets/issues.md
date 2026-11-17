@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Issues'
 description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T15:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T15:40:00Z }
 ---
 
 # Issues
@@ -36,7 +36,7 @@ Tout ticket qui porte **directement** sur l'un des sujets ci-dessous reçoit son
 | `documentation` | la documentation, utilisateur ou technique ([Documentation technique](../gouvernance/documentation-technique.md)) : rédaction ou correction de ses pages, références générées, construction, publication ou consultation de son site |
 | `ci` | l'intégration continue ([Intégration continue (CI)](../depot/integration-continue-ci.md)) : workflows GitHub Actions, leurs jobs, leurs étapes et leurs scripts, checks requis, quotas et échecs du CI |
 | `tests` | les tests : leur écriture ou leur correction (test instable compris), leurs projets, leur outillage, leur couverture et leur exécution |
-| `ui` | le visuel de l'application, dans le périmètre de [`visuel/`](../../visuel/index.md), référence visuelle et ergonomique de ses écrans : charte graphique, thèmes, présentation et disposition des écrans, contrôles et leur parcours au clavier, maquettes ; leur contenu (textes, libellés, messages), qui relève de [`fonctionnel/`](../../fonctionnel/index.md), n'en fait pas partie |
+| `ui` | le visuel de l'application, tout ce que présentent ses écrans : charte graphique ([`visuel/`](../../visuel/index.md)), thèmes, présentation et disposition des écrans, contrôles et leur parcours au clavier, textes (libellés, formulations, messages), maquettes |
 
 Seul le sujet propre du ticket compte : un ticket qui change l'application et, au passage, met sa documentation à jour, ajoute ses tests ou adapte un workflow ne reçoit pas l'étiquette correspondante.
 
