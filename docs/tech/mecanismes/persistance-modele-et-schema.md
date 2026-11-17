@@ -41,6 +41,8 @@ Posées une fois dans le contexte, elles valent pour toute entité ; chaque enti
 
 ## Schéma
 
+Le schéma physique que produisent les migrations (tables, colonnes, contraintes, index, relations) est la référence générée [Schéma de la base](../references/schema-de-la-base.md).
+
 - **Une migration unique**, `InitialCreate`, dans [`Migrations/`](../../../src/Bdtheque.Infrastructure/Migrations/), régénérée tant qu'aucun déploiement n'a eu lieu ([Migrations EF Core](../../../.speckit/choix-implementation/persistance/migrations-ef-core.md)). Le job « Build & tests (.NET) » du [CI](../../../.github/workflows/ci.yml) échoue si le modèle a changé sans elle (`dotnet ef migrations has-pending-model-changes`).
 - **Contraintes unique différables** : un index du modèle marqué par `IsUniqueAtCommit()` ([`DeferredUniqueness`](../../../src/Bdtheque.Infrastructure/DeferredUniqueness.cs)) est non unique pour EF Core, et [`BdthequeMigrationsSqlGenerator`](../../../src/Bdtheque.Infrastructure/BdthequeMigrationsSqlGenerator.cs), qui remplace le générateur de Npgsql, le crée en `UNIQUE … DEFERRABLE INITIALLY DEFERRED`. Seul cas aujourd'hui : le nom d'une collection chez son éditeur ([Unicité vérifiée à la validation](../../../.speckit/choix-implementation/persistance/unicite-verifiee-a-la-validation.md)). Les autres unicités sont des index uniques.
 - **Contraintes CHECK** : déclarées dans les configurations, elles doublent en base la partie mono-ligne des règles du domaine (ex. au moins un nom ou un pseudonyme d'auteur, date d'entrée dans la collection liée à la possession) ; les règles sur plusieurs lignes ne sont tenues que par le domaine ([Cohérence entre tables](../../../.speckit/choix-implementation/persistance/coherence-entre-tables.md)).

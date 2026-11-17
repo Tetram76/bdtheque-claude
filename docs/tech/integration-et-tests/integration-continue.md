@@ -43,8 +43,8 @@ Le job `Changed files` compare, sur une Pull Request, le commit de fusion que co
 
 | Sortie | Fichiers qui en relèvent | Étapes qu'elle commande |
 | --- | --- | --- |
-| `sources` | Tout fichier hors de `.speckit/`, `.claude/`, `poc/`, `docs/`, `scripts/`, `docker/`, `.github/`, `tests/Bdtheque.Documentation.Tests/`, des fichiers Markdown de la racine, de `docker-compose.yml`, `.env.example`, `.dockerignore`, `.gitignore` ; plus `ci.yml` lui-même et le contrat OpenAPI versionné (`docs/tech/references/openapi-v1.json`), que comparent les tests de l'API | Contrôle des migrations, tous les tests sans navigateur avec couverture, import de la couverture par l'analyse |
-| `rendering` | Les `sources`, hors des projets de tests sans navigateur (`Bdtheque.Api.Tests`, `Bdtheque.Domain.Tests`, `Bdtheque.Frontend.Tests`, `Bdtheque.Infrastructure.Tests`, `Bdtheque.ValidationData.Tests`) et du contrat OpenAPI versionné | Tous les jobs de bout en bout |
+| `sources` | Tout fichier hors de `.speckit/`, `.claude/`, `poc/`, `docs/`, `scripts/`, `docker/`, `.github/`, `tests/Bdtheque.Documentation.Tests/`, des fichiers Markdown de la racine, de `docker-compose.yml`, `.env.example`, `.dockerignore`, `.gitignore` ; plus `ci.yml` lui-même, le contrat OpenAPI versionné (`docs/tech/references/openapi-v1.json`), que comparent les tests de l'API, et le schéma de la base (`docs/tech/references/schema-de-la-base.md`), que comparent les tests de l'infrastructure | Contrôle des migrations, tous les tests sans navigateur avec couverture, import de la couverture par l'analyse |
+| `rendering` | Les `sources`, hors des projets de tests sans navigateur (`Bdtheque.Api.Tests`, `Bdtheque.Domain.Tests`, `Bdtheque.Frontend.Tests`, `Bdtheque.Infrastructure.Tests`, `Bdtheque.ValidationData.Tests`) et de ces deux références | Tous les jobs de bout en bout |
 | `images` | Tout fichier hors de `.speckit/`, `.claude/`, `poc/`, `docs/`, `scripts/`, `tests/`, `.github/`, `docker/validation-data/`, `docker/validation-docs/`, des fichiers Markdown de la racine, de `docker-compose.yml`, `.env.example`, `.gitignore` ; plus `ci.yml` | Construction et analyse des images |
 | `documentation` | `docs/`, les trois scripts de la documentation, `tests/Bdtheque.Documentation.Tests/`, `tests/Directory.Build.props`, `dotnet-tools.json`, `Directory.Packages.props`, `Directory.Build.props`, `ci.yml` | Construction du site et rendu des diagrammes |
 
@@ -75,7 +75,7 @@ En cas d'échec, le job publie le relevé du réseau et les captures qui diffèr
 ### `Technical documentation`
 
 - **Sur une Pull Request** : historique complet récupéré, pour qu'un commit de la PR puisse porter le *trailer* `Documentation-technique:` ; impact des changements vérifié (`Get-TechnicalDocumentationImpact.ps1 -Check`).
-- **Toujours** : références générées comparées à leurs sources (`Update-TechnicalReferences.ps1 -Check`), le contrat OpenAPI excepté, que comparent les tests de l'API ([Contrat HTTP de l'API](../references/api-http.md#contrat-versionné)).
+- **Toujours** : références générées comparées à leurs sources (`Update-TechnicalReferences.ps1 -Check`), le contrat OpenAPI excepté, que comparent les tests de l'API ([Contrat HTTP de l'API](../references/api-http.md#contrat-versionné)), comme le [schéma de la base](../references/schema-de-la-base.md), que comparent ceux de l'infrastructure.
 - **Si `documentation`** : DocFX restauré, Chromium installé, tests de `Bdtheque.Documentation.Tests` (construction du site, rendu des diagrammes).
 
 Le détail de ces contrôles : [Consulter, construire, vérifier et maintenir](../documentation/consulter-et-maintenir.md#contrôles).

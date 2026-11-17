@@ -10,6 +10,7 @@ code:
   - '.github/workflows/technical-documentation.yml'
   - 'tests/Bdtheque.Documentation.Tests/**'
   - 'tests/Bdtheque.Infrastructure.Tests/TechnicalDocumentation*.cs'
+  - 'tests/Bdtheque.Infrastructure.Tests/DatabaseSchemaReference*.cs'
 ---
 
 # Consulter, construire, vérifier et maintenir
@@ -70,7 +71,7 @@ construit la documentation de la copie de travail et la sert sur `http://localho
    Documentation-technique: sans effet sur les pages listées, renommage interne de variables.
    ```
 
-3. **Référence générée** : après un changement de sa source, `./scripts/Update-TechnicalReferences.ps1`, dont le résultat est commité. Il régénère aussi le contrat OpenAPI, depuis l'hôte de test de l'API : Docker est requis, sauf avec `-NoOpenApiContract`, qui l'omet.
+3. **Référence générée** : après un changement de sa source, `./scripts/Update-TechnicalReferences.ps1`, dont le résultat est commité. Il régénère aussi le contrat OpenAPI, depuis l'hôte de test de l'API, et le [schéma de la base](../references/schema-de-la-base.md), depuis une base qui a reçu les migrations : Docker est requis, sauf avec `-NoOpenApiContract` et `-NoDatabaseSchema`, qui les omettent.
 4. **Refactoring** : liens, motifs `code` et diagrammes suivent les fichiers déplacés ou supprimés ; une page devenue inutile est retirée, avec son entrée de carte.
 5. **Avant de livrer** : les contrôles ci-dessous passent, et ce qui est écrit décrit l'état livré.
 
@@ -80,7 +81,7 @@ construit la documentation de la copie de travail et la sert sur `http://localho
 | --- | --- | --- |
 | Structure : cartes, en-têtes, titres, liens, motifs `code`, symboles cités, question de chaque diagramme | `TechnicalDocumentationStructureTests`, tests du dépôt, à chaque Pull Request | Ce qui se vérifie mécaniquement : rien de cassé ni d'introuvable. |
 | Impact d'un changement | `Get-TechnicalDocumentationImpact.ps1 -Check`, job du CI de la documentation | Une page qui décrit un fichier modifié est modifiée elle aussi, ou un commit dit pourquoi elle n'a pas à l'être. |
-| Références générées | `Update-TechnicalReferences.ps1 -Check`, même job ; pour le contrat OpenAPI, `OpenApiContractTests`, tests de l'API, quand une source ou le contrat change | Les pages générées sont celles que donnent leurs sources : ni modifiée, ni manquante, ni en trop ; le contrat versionné est celui que produisent les endpoints. |
+| Références générées | `Update-TechnicalReferences.ps1 -Check`, même job ; pour le contrat OpenAPI, `OpenApiContractTests`, tests de l'API, et pour le schéma de la base, [`DatabaseSchemaReferenceTests`](../../../tests/Bdtheque.Infrastructure.Tests/DatabaseSchemaReferenceTests.cs), tests de l'infrastructure, quand une source ou la référence change | Les pages générées sont celles que donnent leurs sources : ni modifiée, ni manquante, ni en trop ; le contrat versionné est celui que produisent les endpoints ; le schéma est celui que donne le catalogue d'une base qui a reçu les migrations du commit, un objet du schéma que la page ne sait pas présenter, ou une table placée dans aucun de ses schémas, faisant échouer sa génération. |
 | Site et diagrammes | `Bdtheque.Documentation.Tests`, même job, quand la documentation ou son outillage change | Le site se construit sans avertissement, y compris sur un poste dont les outils locaux n'ont jamais été restaurés ; chaque diagramme écrit est rendu, sans erreur de Mermaid, sans être réduit sous 0,75 de sa taille sur un écran de bureau (texte sous 12 pixels), sans requête hors du poste ; le commit documenté figure sur chaque page. |
 
 **Limites** : aucun contrôle ne dit qu'une page est vraie. Que le texte et les diagrammes décrivent fidèlement le code, que l'impact listé a bien été évalué et que la raison d'un *trailer* est juste, cela reste une obligation de l'auteur du changement et un point de sa revue. La lisibilité d'un diagramme au-delà de sa taille (disposition, croisements, libellés) s'inspecte sur son rendu, par l'auteur qui le crée ou le modifie.
