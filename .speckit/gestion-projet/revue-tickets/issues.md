@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T18:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:45:00Z }
 ---
 
 # Issues
@@ -26,6 +26,39 @@ Tout ticket reçoit, dès sa création, un **type** GitHub (*issue type*), parmi
 - **`Task`** : tout ce qui ne change pas le comportement visible de l'application : ticket de suivi d'un harnais, toujours ; chantier technique (outillage, CI, harnais, déploiement, exploitation, sécurité, montée de version) ; travail technique interne, comme celui de la reprise des données.
 
 Un chantier fonctionnel du plan est un `Bug` ou une `Feature` selon la nature du travail à faire ; un chantier technique du plan est une `Task`. Un sous-ticket reçoit le type de son propre contenu, qui peut différer de celui de son ticket parent.
+
+## Étiquettes de sujet
+
+Tout ticket qui porte **directement** sur l'un des sujets ci-dessous reçoit son étiquette dès sa création (exigences de l'utilisateur). Ces étiquettes se cumulent entre elles et avec l'étiquette d'un harnais (§ Tickets de suivi des harnais), sans tenir lieu du type du ticket : un ticket qui porte directement sur plusieurs sujets les reçoit toutes.
+
+| Étiquette | Sujet du ticket |
+| --- | --- |
+| `documentation` | la documentation, utilisateur ou technique ([Documentation technique](../gouvernance/documentation-technique.md)) : rédaction ou correction de ses pages, références générées, construction, publication ou consultation de son site |
+| `ci` | l'intégration continue ([Intégration continue (CI)](../depot/integration-continue-ci.md)) : workflows GitHub Actions, leurs jobs, leurs étapes et leurs scripts, checks requis, quotas et échecs du CI |
+| `tests` | les tests : leur écriture ou leur correction (test instable compris), leurs projets, leur outillage, leur couverture et leur exécution |
+| `ui` | le visuel de l'application, c'est-à-dire tout ce que son utilisateur voit à l'écran, et non son seul aspect graphique : textes (libellés, formulations, messages), éléments présentés et leur disposition, contrôles et leur parcours au clavier, thèmes, charte graphique, maquettes ([`fonctionnel/`](../../fonctionnel/index.md), [`visuel/`](../../visuel/index.md)) ; un ticket qui ne change que l'API, le domaine ou la base, sans rien changer à ce qui s'affiche, ne la reçoit pas |
+
+Un ticket parent ([Suivi par tickets](suivi-par-tickets.md), découpage au démarrage d'un chantier) porte toutes les étiquettes de ses sous-tickets, et suit celles qu'ils reçoivent (exigence de l'utilisateur).
+
+Seul le sujet propre du ticket compte : un ticket qui change l'application et, au passage, met sa documentation à jour, ajoute ses tests ou adapte un workflow ne reçoit pas l'étiquette correspondante.
+
+## Description des étiquettes
+
+Chaque étiquette que pose le projet porte sur GitHub une description qui résume en une phrase sa règle de pose : qui parcourt la liste des étiquettes, ou en choisit une, sait sans lire ce concept à quels tickets elle va. Elle est en anglais, comme tout contenu technique ([Qualité du code](../gouvernance/qualite-du-code.md), langue des fichiers techniques), et c'est celle-ci :
+
+| Étiquette | Description sur GitHub |
+| --- | --- |
+| `documentation` | `Directly about the user or technical documentation` |
+| `ui` | `Directly about what the user sees on screen: texts, layout, controls, themes` |
+| `tests` | `Directly about the tests: writing, fixing, tooling, coverage, execution` |
+| `ci` | `Directly about CI: workflows and their scripts, required checks, quotas, failures` |
+| `harness` | `Tracking issue of a harness, never any other ticket` |
+| `security-audit` | `Security and dependency-updates harness: tracking issue and tickets opened from it` |
+| `quality-audit` | `Code quality harness: tracking issue and tickets opened from it` |
+| `ergonomy-audit` | `Functional consistency harness: tracking issue and tickets opened from it` |
+
+- **Workflow qui crée une étiquette** : il lui donne la même description. `gh label create --force` réécrit la description d'une étiquette existante à chaque exécution : une autre description, sur GitHub, serait rétablie par le contrôle suivant.
+- Une étiquette ajoutée ou dont la règle change met à jour ce tableau et sa description sur GitHub dans le même mouvement. Les étiquettes par défaut de GitHub, que ce concept ne régit pas, gardent la description que GitHub leur donne.
 
 ## Tickets de suivi des harnais
 

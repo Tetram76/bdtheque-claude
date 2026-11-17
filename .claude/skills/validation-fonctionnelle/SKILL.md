@@ -25,7 +25,7 @@ browser of the agent, no reference captures shown as a validation.
 ## Steps, in this order
 
 1. **Content complete, local checks green** → commit and push the branch, and
-   open the pull request **as a draft** (template of `Tetram76/.github`), right
+   open the pull request **as a draft** (template of `Tetram76/.github` (public)), right
    away. Do not wait for the reference captures: they come after the
    validation (step 5), and a capture failure of the CI does not prevent it.
 2. **Load the validation data the screen needs** (`Bdtheque.ValidationData`),

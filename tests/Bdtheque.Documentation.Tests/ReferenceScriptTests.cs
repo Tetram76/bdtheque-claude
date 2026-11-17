@@ -18,7 +18,8 @@ public sealed class ReferenceScriptTests : IAsyncLifetime
         _repository.Write("src/App/App.csproj",
             "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <ItemGroup>\n    <ProjectReference Include=\"..\\Core\\Core.csproj\" />\n  </ItemGroup>\n</Project>\n");
         _repository.Write("src/Core/Core.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-        var generation = await RunAsync();
+        // A repository without the API, whose contract its tests generate.
+        var generation = await RunAsync("-NoOpenApiContract", "-NoDatabaseSchema");
         Assert.True(generation.Succeeded, generation.Output);
     }
 
@@ -64,6 +65,17 @@ public sealed class ReferenceScriptTests : IAsyncLifetime
         _repository.Write("docs/tech/references/ancienne.md", "---\ntitle: 'Ancienne'\ngenerated: 'scripts/Update-TechnicalReferences.ps1'\n---\n");
 
         await AssertFailsWithAsync("left over: docs/tech/references/ancienne.md");
+    }
+
+    [Fact]
+    public async Task SchemaOfTheDatabase_IsLeftToTheTests()
+    {
+        _repository.Write("docs/tech/references/schema-de-la-base.md",
+            "---\ntitle: 'Schéma de la base'\ngenerated: 'scripts/Update-TechnicalReferences.ps1'\n---\n");
+
+        var result = await RunAsync("-Check");
+
+        Assert.True(result.Succeeded, result.Output);
     }
 
     private async Task AssertFailsWithAsync(string difference)

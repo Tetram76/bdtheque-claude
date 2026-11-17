@@ -1,14 +1,14 @@
 ---
 type: Gouvernance
 title: 'Documentation technique'
-description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), consultation guidée subordonnée au .speckit, profondeur et diagrammes, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
+description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), rien de ce qui n''existe pas, consultation guidée subordonnée au .speckit, site de main publié à chaque fusion, profondeur, rédaction pour un lecteur humain (vraies phrases, minimum d''explication), diagrammes d''une seule nature d''information, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
 tags: [socle]
 applies_to:
   - 'docs/tech/**'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T19:42:27Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T17:04:35Z }
 ---
 
 # Documentation technique
@@ -23,7 +23,8 @@ Le projet tient, à côté de sa spécification, une **documentation technique**
 
 ## Ce qu'elle affirme
 
-- **Le réel, vérifié** : chaque affirmation correspond au code, aux tests et à la configuration présents, vérifiée à son écriture et à chaque mise à jour. Ce que le `.speckit/` prévoit sans qu'il soit réalisé est présenté comme tel (« prévu, non implémenté ») ; un fait présenté comme avéré n'est jamais « non vérifié ».
+- **Le réel, vérifié** : chaque affirmation correspond au code, aux tests et à la configuration présents, vérifiée à son écriture et à chaque mise à jour ; un fait présenté comme avéré n'est jamais « non vérifié ».
+- **Rien de ce qui n'existe pas** : la documentation ne décrit, ni ne mentionne, rien que le code ne réalise, même annoncé comme prévu : ce que le `.speckit/` prévoit sans qu'il soit réalisé n'y entre qu'avec sa réalisation, par la Pull Request qui le réalise (exigence de l'utilisateur).
 - **Un état, pas un historique** : comme un document de référence du `.speckit/`, une page décrit l'état actuel ; un passage devenu faux est corrigé ou retiré.
 - **Divergence avec le code analysée, jamais recopiée** : un écart entre la documentation et le code est examiné ; si le code contrevient au `.speckit/`, c'est le code qui est corrigé, ou la spécification qui évolue selon [Prise de décision](prise-de-decision.md), jamais la documentation qui s'aligne sur un code incorrect.
 - **Une orientation, pas une preuve** : ce qu'une page dit d'une méthode ou d'un workflow se vérifie dans le code, ou par une exécution, dès qu'une réponse ou une modification exige cette précision.
@@ -35,12 +36,20 @@ Le projet tient, à côté de sa spécification, une **documentation technique**
 - **Détail interne, par exception** : un algorithme délicat, une concurrence, un invariant critique, un comportement que le code ne laisse pas deviner.
 - **Critère d'arrêt** : une page cesse de s'approfondir là où le code, les tests ou une référence générée donnent l'information facilement et sûrement. Ni classe par classe, ni méthode par méthode, ni opération courante ; aucun quota de pages ni de diagrammes. Une page devenue inutile après un refactoring est simplifiée ou retirée.
 
+## Rédaction
+
+La documentation technique s'adresse **d'abord à un lecteur humain**, le développeur qui découvre le projet ou le maintient. Qu'un agent s'en serve aussi pour limiter sa lecture du code n'en change ni le ton ni la forme (exigence de l'utilisateur).
+
+- **De vraies phrases** : le texte est rédigé en phrases complètes, avec leurs verbes et leurs articles, reliées par les mots qui disent leur rapport (cause, conséquence, condition, succession). Le style télégraphique est proscrit : suites de groupes nominaux, mot-clé en gras suivi d'un fragment, deux-points enchaînés, information essentielle reléguée entre parenthèses. Listes et tableaux restent admis pour ce qui est réellement une énumération ou une comparaison, et chacun de leurs éléments se lit lui-même comme une phrase (exigence de l'utilisateur).
+- **Un minimum d'explication** : sans tourner au cours ni au tutoriel, une page donne au lecteur ce qu'il lui faut pour la comprendre sans ouvrir le code : à quoi sert le mécanisme et quel problème il résout, comment ses éléments s'enchaînent, ce que signifie un terme technique ou propre au projet à sa première occurrence, et ce qui se passe dans les cas qui comptent. Une énumération de noms de classes ou de fichiers ne tient pas lieu d'explication : elle désigne où lire le code, une fois le mécanisme compris (exigence de l'utilisateur).
+
 ## Diagrammes
 
 La documentation est **visuelle par construction** : un schéma fait saisir une vue ou un mécanisme plus vite que le texte équivalent, que le texte complète (rôles, invariants, exceptions, renvois, points d'entrée).
 
 - **Écrits en texte, versionnés**, rendus de façon reproductible, sans éditeur graphique ni service distant.
-- **Une question par diagramme**, énoncée avec lui, et sa nature : *généré* depuis une source qui fait autorité (préféré dès que la génération est fiable), ou *interprétatif*, tenu à la main, dont le rendu valide la forme, jamais la fidélité au code.
+- **Une question par diagramme**, énoncée en phrase par le texte qui l'introduit, avec sa nature : *généré* depuis une source qui fait autorité (préféré dès que la génération est fiable), ou *interprétatif*, tenu à la main, dont le rendu valide la forme, jamais la fidélité au code.
+- **Une seule nature d'information par diagramme** : un diagramme ne mêle pas des informations de natures différentes, comme la topologie des conteneurs et le parcours d'une requête, ou les actions de l'utilisateur, les appels entre composants et les effets en base. Un sujet qui les réunit se présente en plusieurs diagrammes, un par nature (exigence de l'utilisateur).
 - **Lisible** : intitulés explicites, relations compréhensibles ; découpé quand il ne l'est plus. Le rendu de chaque diagramme est vérifié, pas seulement sa syntaxe, et l'agent inspecte lui-même le rendu de ceux qu'il crée ou modifie ([Qualité du code](qualite-du-code.md), rendu vérifié par l'agent).
 
 ## Consultation
@@ -50,6 +59,7 @@ Subordonnée à la lecture du `.speckit/` qu'impose `AGENTS.md`, qu'elle ne racc
 - **Seulement si le sujet le justifie** (implémentation, analyse technique, chantier qui touche le code) : aucun « socle » technique, aucune lecture de tout `docs/tech/`, de toutes ses cartes, ni de son contenu chargé par un fichier d'instructions, une règle, un skill ou une session.
 - **Guidée** : la carte racine (`docs/tech/index.md`), puis la carte du domaine, puis les seules pages utiles ; une recherche textuelle ciblée si les cartes ne suffisent pas.
 - **Selon l'intention** : question générale, la documentation suffit si elle répond, la réponse disant qu'elle vient d'elle ; question précise ou certitude exigée sur l'état effectif, la documentation oriente vers le code, les tests, la configuration ou une vérification, proportionnés ; modification du code, elle situe les responsabilités et les points d'entrée, puis le code et les tests nécessaires sont lus en entier avant d'écrire.
+- **Site publié, celui de `main`** : la documentation de `main` se consulte aussi en ligne, sans rien lancer sur son poste, sous la forme de son site (navigation, recherche, diagrammes rendus), publié à chaque fusion sur `main` et qui porte le commit documenté (décision de l'utilisateur). Il n'est qu'une autre vue des mêmes pages : agents et développeurs lisent toujours les fichiers de `docs/tech/`, à la version de leur copie de travail, qui fait foi pour leur chantier.
 
 ## Maintenance, à chaque chantier
 
@@ -61,7 +71,7 @@ La documentation change dans la **même Pull Request** que ce qu'elle décrit :
 4. **Avant la livraison** : les contrôles documentaires passent, et texte, diagrammes et liens décrivent l'état livré.
 5. **Refactoring** : renvois, motifs de fichiers et diagrammes suivent le code ; l'obsolète est retiré, les cartes mises à jour.
 
-Une couverture encore partielle est dite telle, avec l'inventaire de ce qui reste à documenter et les tickets qui le portent ; une page vide ou de pure forme n'est jamais présentée comme une documentation.
+Une couverture encore partielle est dite telle, avec l'inventaire de ce qui reste à documenter et les tickets qui le portent ; une page vide ou de pure forme n'est jamais présentée comme une documentation. Un ticket de pure documentation technique ne porte que sur un sujet implémenté : la documentation d'un sujet à venir est l'affaire de la Pull Request qui le réalise, et non d'un ticket ouvert d'avance (exigence de l'utilisateur).
 
 ## Contrôles et leurs limites
 

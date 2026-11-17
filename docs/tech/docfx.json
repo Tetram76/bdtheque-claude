@@ -5,7 +5,12 @@
         "files": [ "**/*.md", "toc.yml" ]
       }
     ],
-    "template": [ "default", "modern" ],
+    "resource": [
+      {
+        "files": [ "references/*.json" ]
+      }
+    ],
+    "template": [ "default", "modern", "template" ],
     "globalMetadata": {
       "_appTitle": "BDthèque — documentation technique",
       "_appName": "BDthèque",

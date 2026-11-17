@@ -26,7 +26,7 @@ Le `.speckit/` est écrit au format [OKF](https://github.com/GoogleCloudPlatform
 
 La spécification dit ce que l'application doit être ; la **documentation technique**, dans [`docs/tech/`](docs/tech/index.md), décrit comment elle est réellement construite : architecture, mécanismes, déploiement, références générées depuis le code, avec leurs diagrammes (Mermaid, que GitHub affiche). Elle se lit à partir de sa [carte](docs/tech/index.md), et se tient à jour dans la même Pull Request que le code qu'elle décrit ; sa forme, ses contrôles et leurs limites sont dans [Consulter, construire, vérifier et maintenir](docs/tech/documentation/consulter-et-maintenir.md).
 
-Son site (navigation, recherche, diagrammes) se construit et se consulte localement, sur `http://localhost:8182` :
+Son site (navigation, recherche, diagrammes), celui de `main`, est publié à chaque fusion sur <https://tetram76.github.io/bdtheque-claude/>. Celui de la copie de travail se construit et se consulte localement, sur `http://localhost:8182` :
 
 ```bash
 pwsh ./scripts/Build-TechnicalDocumentation.ps1 -Serve

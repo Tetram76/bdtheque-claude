@@ -8,8 +8,6 @@ namespace Bdtheque.Infrastructure.Tests;
 /// </summary>
 internal sealed partial class TechnicalDocumentationChecker(string repository)
 {
-    private const string DiagramQuestion = "Question du schéma";
-
     private readonly string _documentation = Path.Combine(repository, "docs", "tech");
 
     public IReadOnlyList<string> Check()
@@ -114,7 +112,7 @@ internal sealed partial class TechnicalDocumentationChecker(string repository)
         }
     }
 
-    // A diagram answers one question, stated just before it, as the generated pages do.
+    // A diagram answers one question, which the paragraph introducing it asks in a sentence.
     private void CheckDiagrams(string markdown, List<string> violations)
     {
         var lines = File.ReadAllLines(markdown);
@@ -123,8 +121,8 @@ internal sealed partial class TechnicalDocumentationChecker(string repository)
             if (!lines[i].TrimStart().StartsWith("```mermaid", StringComparison.Ordinal))
                 continue;
             var before = lines.Take(i).Reverse().SkipWhile(string.IsNullOrWhiteSpace).TakeWhile(line => !string.IsNullOrWhiteSpace(line));
-            if (!before.Any(line => line.Contains(DiagramQuestion, StringComparison.Ordinal)))
-                violations.Add($"{Relative(markdown)}: a diagram is not preceded by its question ('{DiagramQuestion}')");
+            if (!before.Any(line => line.Contains('?', StringComparison.Ordinal)))
+                violations.Add($"{Relative(markdown)}: a diagram is not introduced by a paragraph that asks its question");
         }
     }
 
