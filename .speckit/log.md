@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-17
+
+* **Exigence de l'utilisateur** : la documentation technique ne décrit ni ne mentionne rien que le code ne réalise, même annoncé comme prévu ; ce que le `.speckit/` prévoit y entre avec sa réalisation. La section « Prévu, non implémenté » de la vue d'ensemble et sa consigne sont retirées (#506).
+
 ## 2026-11-16
 
 * **Règle** : le projet tient une documentation technique, descriptive et subordonnée au `.speckit/`, sous `docs/tech/` : trois périmètres distincts (`.speckit/` normatif, documentation technique, aide utilisateur réservée à un chantier à venir), consultation guidée par ses cartes seulement quand le sujet le justifie, profondeur proportionnée et diagrammes avec leur question, mise à jour dans la même Pull Request que le code ou raison donnée par un *trailer* Git, contrôles déterministes distingués des obligations sémantiques. **Choix** : Markdown en cartes et pages, Mermaid, site DocFX, contrôles de structure, d'impact, de références générées et de rendu dans Chromium, job du CI, service de l'environnement de validation ; le CI, les dépendances, l'organisation du code et l'environnement de validation y renvoient (#501).

@@ -52,8 +52,3 @@ flowchart TB
 - Démarrage d'`api` (services, migrations, middlewares, familles de routes) : [`Program.cs` de l'API](../../../src/Bdtheque.Api/Program.cs).
 - Démarrage de `frontend` (rendu, authentification, client de l'API, relais) : [`Program.cs` du frontend](../../../src/Bdtheque.Frontend/Program.cs).
 - Rôle de chaque projet .NET : [Projets de la solution](projets-de-la-solution.md).
-
-## Prévu, non implémenté
-
-- **Conteneur `mcp`**, outil pour agents IA, client de l'API comme `frontend` (Phase 6) : [Outil pour agents IA](../../../.speckit/choix-implementation/agents-ia.md). Aucun projet ni conteneur n'existe encore.
-- **Estimation de la valeur des éditions par ML.NET et taux de change** (Phase 4) : [Versions et bibliothèques](../../../.speckit/choix-implementation/versions-et-bibliotheques.md). Aucun appel sortant d'`api` n'existe encore.
