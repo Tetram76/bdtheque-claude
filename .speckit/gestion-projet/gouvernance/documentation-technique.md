@@ -1,14 +1,14 @@
 ---
 type: Gouvernance
 title: 'Documentation technique'
-description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), consultation guidée subordonnée au .speckit, profondeur et diagrammes, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
+description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), rien de ce qui n'existe pas, consultation guidée subordonnée au .speckit, profondeur et diagrammes, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
 tags: [socle]
 applies_to:
   - 'docs/tech/**'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T10:50:00Z }
 ---
 
 # Documentation technique
@@ -23,7 +23,8 @@ Le projet tient, à côté de sa spécification, une **documentation technique**
 
 ## Ce qu'elle affirme
 
-- **Le réel, vérifié** : chaque affirmation correspond au code, aux tests et à la configuration présents, vérifiée à son écriture et à chaque mise à jour. Ce que le `.speckit/` prévoit sans qu'il soit réalisé est présenté comme tel (« prévu, non implémenté ») ; un fait présenté comme avéré n'est jamais « non vérifié ».
+- **Le réel, vérifié** : chaque affirmation correspond au code, aux tests et à la configuration présents, vérifiée à son écriture et à chaque mise à jour ; un fait présenté comme avéré n'est jamais « non vérifié ».
+- **Rien de ce qui n'existe pas** : la documentation ne décrit, ni ne mentionne, rien que le code ne réalise, même annoncé comme prévu : ce que le `.speckit/` prévoit sans qu'il soit réalisé n'y entre qu'avec sa réalisation, par la Pull Request qui le réalise (exigence de l'utilisateur).
 - **Un état, pas un historique** : comme un document de référence du `.speckit/`, une page décrit l'état actuel ; un passage devenu faux est corrigé ou retiré.
 - **Divergence avec le code analysée, jamais recopiée** : un écart entre la documentation et le code est examiné ; si le code contrevient au `.speckit/`, c'est le code qui est corrigé, ou la spécification qui évolue selon [Prise de décision](prise-de-decision.md), jamais la documentation qui s'aligne sur un code incorrect.
 - **Une orientation, pas une preuve** : ce qu'une page dit d'une méthode ou d'un workflow se vérifie dans le code, ou par une exécution, dès qu'une réponse ou une modification exige cette précision.

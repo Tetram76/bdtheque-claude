@@ -25,7 +25,7 @@ Le fonctionnement de la documentation technique elle-même. Ses règles (ce qu'e
   - `generated`, pour une page générée seulement : le script qui la produit.
 - **Liens** : relatifs, y compris vers le code, les tests, la configuration et le `.speckit/` (`[InternalApiKeyMiddleware](../../../src/...)`). Un lien vers un fichier de code dont le texte est un symbole en code (`` [`LoginThrottle`](…) ``) affirme que ce symbole est dans ce fichier. Un lien vers un fichier compte, pour l'impact d'un changement, comme un motif de `code`.
 - **Diagrammes** : Mermaid, dans un bloc ` ```mermaid `, précédé de la question à laquelle il répond (« Question du schéma : … ») et de sa nature : *interprétatif* (tenu à la main, sa compilation ne prouve pas sa fidélité au code) ou *généré* (reproduit une source qui fait autorité). Un diagramme qui devient illisible se découpe.
-- **État décrit** : ce qui est présent, vérifié contre le code ; ce que le `.speckit/` prévoit sans qu'il soit réalisé, dans une section « Prévu, non implémenté ». Ni historique, ni « non vérifié ».
+- **État décrit** : ce qui est présent, vérifié contre le code, et rien d'autre : ce que le `.speckit/` prévoit sans qu'il soit réalisé n'y figure pas, même annoncé comme tel. Ni historique, ni « non vérifié ».
 
 ## Lire
 
