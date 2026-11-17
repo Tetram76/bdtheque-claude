@@ -1,3 +1,5 @@
 # Mécanismes
 
 * [Authentification et appels internes](authentification-et-appels-internes.md) - Connexion de l'administrateur, protection des pages, appel de l'API avec le secret interne et relais des médias ; pour toucher à la sécurité, à l'administration ou à un appel de `frontend` vers `api`.
+* [Persistance : modèle et schéma](persistance-modele-et-schema.md) - Contexte EF Core et ses conventions (requêtes séparées, énumérations, collations, identifiants, version des racines), schéma et migration unique, contraintes de la base, application du schéma au démarrage d'`api`, base des tests ; pour toucher au modèle, à une configuration EF Core, à une migration ou au démarrage d'`api`.
+* [Persistance : écriture d'un agrégat](persistance-ecriture-d-un-agregat.md) - Transaction, verrou et version de la racine, enregistrement (contributions détachées, journal, dates), contraintes vérifiées au commit, verrous propres à certaines écritures, suppression d'une fiche, traduction des échecs de la base ; pour écrire ou modifier un endpoint qui écrit, ou comprendre un conflit, un verrou ou un refus de la base.
