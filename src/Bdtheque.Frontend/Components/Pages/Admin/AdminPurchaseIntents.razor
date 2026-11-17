@@ -13,7 +13,8 @@
 @* The list of the purchase intents of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the
    albums (visuel/listes/listes-de-l-administration.md). An intent has no record of its own (visuel/listes/saisie-selon-l-entite.md):
    it is set from the page of the editions and intents of its album, which the heading says in place of a creation; its main
-   action confirms the purchase, and its menu converts it or removes it. Rendered statically, its search, its page and its
+   action confirms the purchase, and its menu leads to that page, converts it or removes it, its entry being no link
+   (visuel/listes/principes-communs.md, Entrée en texte simple). Rendered statically, its search, its page and its
    removal dialog are carried by its address (Lists/PurchaseIntentListQuery.cs). Its styles read the contracts of the base
    theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
@@ -61,7 +62,7 @@
                     <div class="intent-row" role="row">
                         <span class="intent-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
                         <span class="intent-main" role="cell">
-                            <a class="intent-label" href="@AppPaths.AdminAlbumEditions(row.Album.Id)">@album</a>
+                            <RowEntry>@album</RowEntry>
                         </span>
                         <span class="intent-meta">
                             @* What the intent targets, told apart at first glance: the whole album, any edition doing, or one
