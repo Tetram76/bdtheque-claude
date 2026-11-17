@@ -155,10 +155,10 @@ jobs:
         run: |
           export LC_ALL=C
           cat vulnerabilities-*.txt | sort -u > current.txt
-          gh label create security-audit --color B60205 --description "Daily security audit" --force
+          gh label create security-audit --color B60205 --description "Security and dependency-updates harness: tracking issue and tickets opened from it" --force
           # Borne by the tracking issue of every harness, and by them only, whereas security-audit also groups
           # the chantiers of the harness: the tracking issue is the one with both (gestion-projet/revue-tickets/issues.md).
-          gh label create harness --color 5319E7 --description "Tracking issue of a harness" --force
+          gh label create harness --color 5319E7 --description "Tracking issue of a harness, never any other ticket" --force
           issue=$(gh issue list --label security-audit --label harness --state all --limit 1 --json number -q '.[0].number')
           if [ -n "$issue" ]; then
             # A single sed, which succeeds whether or not the list is empty (a filtering grep would fail
