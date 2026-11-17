@@ -107,7 +107,7 @@ flowchart TD
 
 ## Échecs de la base
 
-Ils remontent en exception jusqu'à [`ApiExceptionHandler`](../../../src/Bdtheque.Api/Errors/ApiExceptionHandler.cs), qui les classe selon le code d'erreur de PostgreSQL ([Erreurs métier, fonctionnelles et techniques](../../../.speckit/choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md)) :
+Ils remontent en exception jusqu'à [`ApiExceptionHandler`](../../../src/Bdtheque.Api/Errors/ApiExceptionHandler.cs), qui les classe selon le code d'erreur de PostgreSQL ; la suite de leur parcours, jusqu'à leur présentation, est dans [Erreurs, de la règle à leur présentation](erreurs.md) ([Erreurs métier, fonctionnelles et techniques](../../../.speckit/choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md)) :
 
 | Échec | Catégorie |
 | --- | --- |

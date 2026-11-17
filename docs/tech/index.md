@@ -5,6 +5,6 @@ Comment BDthèque est réellement construite et fonctionne : architecture, méca
 Lire cette carte, puis la seule carte du domaine concerné, puis les seules pages utiles : jamais tout le dossier.
 
 * [Architecture](architecture/index.md) - Conteneurs, projets de la solution et déploiement : pour découvrir le système ou situer un changement avant de lire le code.
-* [Mécanismes](mecanismes/index.md) - Processus qui traversent plusieurs composants (authentification, appels internes, persistance…) : pour comprendre ou modifier l'un d'eux.
+* [Mécanismes](mecanismes/index.md) - Processus qui traversent plusieurs composants (authentification, appels internes, persistance, erreurs…) : pour comprendre ou modifier l'un d'eux.
 * [Références générées](references/index.md) - Vues produites depuis les sources qui font autorité (dépendances des projets, contrat HTTP) : pour un fait exact, sans interprétation.
 * [Documentation technique](documentation/index.md) - Consulter, construire, vérifier et maintenir cette documentation ; ce qu'elle couvre et ce qui reste à documenter.
