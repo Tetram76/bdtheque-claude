@@ -21,7 +21,7 @@ public sealed class ListCountTests : BunitContext
 
         Assert.Equal("—", count.Find(".not-set [aria-hidden=true]").TextContent);
         Assert.Equal("Aucun album", count.Find(".not-set .visually-hidden").TextContent);
-        Assert.DoesNotContain("0", count.Markup);
+        Assert.DoesNotContain("0", count.TextContent());
     }
 
     [Fact]
