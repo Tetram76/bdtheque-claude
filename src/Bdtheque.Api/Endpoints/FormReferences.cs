@@ -45,10 +45,10 @@ internal static class FormReferences
     public static async Task<(Publisher? Publisher, PublisherCollection? Collection)> LoadPublisherAsync(
         BdthequeDbContext context, Guid? publisherId, Guid? collectionId, AddedRecords added, CancellationToken cancellationToken)
     {
-        var publisher = publisherId is not { } pid ? null
-            : added.Publishers.TryGetValue(pid, out var created) ? created
-            : await context.Publishers.SingleOrDefaultAsync(p => p.Id == pid, cancellationToken)
-              ?? throw new EntityNotFoundException(typeof(Publisher), pid);
+        Publisher? publisher = null;
+        if (publisherId is { } pid && !added.Publishers.TryGetValue(pid, out publisher))
+            publisher = await context.Publishers.SingleOrDefaultAsync(p => p.Id == pid, cancellationToken)
+                        ?? throw new EntityNotFoundException(typeof(Publisher), pid);
         var collection = collectionId is { } cid
             ? await context.PublisherCollections.SingleOrDefaultAsync(c => c.Id == cid, cancellationToken)
               ?? throw new EntityNotFoundException(typeof(PublisherCollection), cid)
