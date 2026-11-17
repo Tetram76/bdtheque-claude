@@ -55,12 +55,6 @@
     min-inline-size: 0;
 }
 
-.intent-label {
-    color: var(--color-text);
-    font-weight: var(--font-weight-strong);
-    overflow-wrap: anywhere;
-}
-
 /* The tag, then what it targets beside it, wrapping under it when the room lacks. */
 .intent-target {
     grid-area: target;
