@@ -89,7 +89,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
         await PageReadiness.WaitAsync(page);
 
-        var label = await page.Locator(".intent-label").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+        var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
         var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
         Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
@@ -107,7 +107,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         return page;
     }
 
-    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Intentions d'achat" }).Locator(".intent-label");
+    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Intentions d'achat" }).Locator(".row-entry");
 
     private Task<AlbumForm> CreateAlbumAsync(string? title, Guid? seriesId = null, int? volume = null) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
