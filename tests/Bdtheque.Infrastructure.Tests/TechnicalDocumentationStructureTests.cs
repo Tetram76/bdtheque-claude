@@ -135,12 +135,20 @@ public sealed class TechnicalDocumentationStructureTests : IDisposable
     {
         WritePage("Page", "Ce que dit la page.", "Un schéma.\n\n```mermaid\nflowchart LR\n    a --> b\n```");
 
-        Assert.Contains("docs/tech/domaine/page.md: a diagram is not preceded by its question ('Question du schéma')", Check());
+        Assert.Contains("docs/tech/domaine/page.md: a diagram is not introduced by a paragraph that asks its question", Check());
     }
 
     [Fact]
     public void Diagram_PrecededByItsQuestion_IsWellFormed() =>
-        Assert.Empty(CheckWith("Question du schéma : *qui appelle qui ?* Schéma interprétatif.\n\n```mermaid\nflowchart LR\n    a --> b\n```"));
+        Assert.Empty(CheckWith("Ce schéma, tracé à la main, répond à une seule question : quel composant appelle quel autre ?\n\n```mermaid\nflowchart LR\n    a --> b\n```"));
+
+    [Fact]
+    public void Diagram_WhoseQuestionIsNotInItsIntroduction_IsReported()
+    {
+        WritePage("Page", "Ce que dit la page.", "Qui appelle qui ?\n\nLe schéma suit.\n\n```mermaid\nflowchart LR\n    a --> b\n```");
+
+        Assert.Contains("docs/tech/domaine/page.md: a diagram is not introduced by a paragraph that asks its question", Check());
+    }
 
     public void Dispose() => Directory.Delete(_repository, recursive: true);
 

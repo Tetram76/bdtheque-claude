@@ -1,14 +1,14 @@
 ---
 type: Gouvernance
 title: 'Documentation technique'
-description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), rien de ce qui n'existe pas, consultation guidée subordonnée au .speckit, site de main publié à chaque fusion, profondeur et diagrammes, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
+description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), rien de ce qui n''existe pas, consultation guidée subordonnée au .speckit, site de main publié à chaque fusion, profondeur, rédaction pour un lecteur humain (vraies phrases, minimum d''explication), diagrammes d''une seule nature d''information, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
 tags: [socle]
 applies_to:
   - 'docs/tech/**'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T16:00:00Z }
 ---
 
 # Documentation technique
@@ -36,12 +36,20 @@ Le projet tient, à côté de sa spécification, une **documentation technique**
 - **Détail interne, par exception** : un algorithme délicat, une concurrence, un invariant critique, un comportement que le code ne laisse pas deviner.
 - **Critère d'arrêt** : une page cesse de s'approfondir là où le code, les tests ou une référence générée donnent l'information facilement et sûrement. Ni classe par classe, ni méthode par méthode, ni opération courante ; aucun quota de pages ni de diagrammes. Une page devenue inutile après un refactoring est simplifiée ou retirée.
 
+## Rédaction
+
+La documentation technique s'adresse **d'abord à un lecteur humain**, le développeur qui découvre le projet ou le maintient. Qu'un agent s'en serve aussi pour limiter sa lecture du code n'en change ni le ton ni la forme (exigence de l'utilisateur).
+
+- **De vraies phrases** : le texte est rédigé en phrases complètes, avec leurs verbes et leurs articles, reliées par les mots qui disent leur rapport (cause, conséquence, condition, succession). Le style télégraphique est proscrit : suites de groupes nominaux, mot-clé en gras suivi d'un fragment, deux-points enchaînés, information essentielle reléguée entre parenthèses. Listes et tableaux restent admis pour ce qui est réellement une énumération ou une comparaison, et chacun de leurs éléments se lit lui-même comme une phrase (exigence de l'utilisateur).
+- **Un minimum d'explication** : sans tourner au cours ni au tutoriel, une page donne au lecteur ce qu'il lui faut pour la comprendre sans ouvrir le code : à quoi sert le mécanisme et quel problème il résout, comment ses éléments s'enchaînent, ce que signifie un terme technique ou propre au projet à sa première occurrence, et ce qui se passe dans les cas qui comptent. Une énumération de noms de classes ou de fichiers ne tient pas lieu d'explication : elle désigne où lire le code, une fois le mécanisme compris (exigence de l'utilisateur).
+
 ## Diagrammes
 
 La documentation est **visuelle par construction** : un schéma fait saisir une vue ou un mécanisme plus vite que le texte équivalent, que le texte complète (rôles, invariants, exceptions, renvois, points d'entrée).
 
 - **Écrits en texte, versionnés**, rendus de façon reproductible, sans éditeur graphique ni service distant.
-- **Une question par diagramme**, énoncée avec lui, et sa nature : *généré* depuis une source qui fait autorité (préféré dès que la génération est fiable), ou *interprétatif*, tenu à la main, dont le rendu valide la forme, jamais la fidélité au code.
+- **Une question par diagramme**, énoncée en phrase par le texte qui l'introduit, avec sa nature : *généré* depuis une source qui fait autorité (préféré dès que la génération est fiable), ou *interprétatif*, tenu à la main, dont le rendu valide la forme, jamais la fidélité au code.
+- **Une seule nature d'information par diagramme** : un diagramme ne mêle pas des informations de natures différentes, comme la topologie des conteneurs et le parcours d'une requête, ou les actions de l'utilisateur, les appels entre composants et les effets en base. Un sujet qui les réunit se présente en plusieurs diagrammes, un par nature (exigence de l'utilisateur).
 - **Lisible** : intitulés explicites, relations compréhensibles ; découpé quand il ne l'est plus. Le rendu de chaque diagramme est vérifié, pas seulement sa syntaxe, et l'agent inspecte lui-même le rendu de ceux qu'il crée ou modifie ([Qualité du code](qualite-du-code.md), rendu vérifié par l'agent).
 
 ## Consultation

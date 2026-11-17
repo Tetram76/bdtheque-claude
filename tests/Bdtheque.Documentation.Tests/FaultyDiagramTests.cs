@@ -28,7 +28,7 @@ public sealed class FaultySite : IAsyncLifetime
     }
 
     private static string Page(string title, string description, string diagram) =>
-        $"---\ntitle: '{title}'\ndescription: '{description}'\n---\n\n# {title}\n\nQuestion du schéma : *pour le test.*\n\n```mermaid\n{diagram}\n```\n";
+        $"---\ntitle: '{title}'\ndescription: '{description}'\n---\n\n# {title}\n\nQue montre ce schéma, écrit pour le test ?\n\n```mermaid\n{diagram}\n```\n";
 }
 
 /// <summary>
