@@ -24,6 +24,7 @@ public sealed class DatabaseSchemaReferenceTests
             PostgreSqlTestServer.ReleaseConnections(connectionString);
         }
 
+        Assert.DoesNotContain('\r', generated);
         if (Environment.GetEnvironmentVariable(OutputVariable) is { Length: > 0 } output)
             await File.WriteAllTextAsync(output, generated, new System.Text.UTF8Encoding(false));
 

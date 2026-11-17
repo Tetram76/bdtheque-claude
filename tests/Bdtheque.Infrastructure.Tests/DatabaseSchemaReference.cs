@@ -13,7 +13,8 @@ namespace Bdtheque.Infrastructure.Tests;
 /// <remarks>
 /// The output depends on the migrations alone: every list is sorted here, ordinally, never by a collation of the server;
 /// nothing names the server, its version, the database, its owner or the version that ICU gives a collation, all of which
-/// change from one machine or image to the next without the schema changing.
+/// change from one machine or image to the next without the schema changing; its lines end with LF, whatever the line
+/// endings of the checkout.
 /// </remarks>
 internal static partial class DatabaseSchemaReference
 {
@@ -65,7 +66,9 @@ internal static partial class DatabaseSchemaReference
         WriteRelations(page, tables, foreignKeys);
         WriteTables(page, tables, columns, constraints, indexes);
 
-        return page.ToString().TrimEnd('\n') + "\n";
+        // The raw string literals above keep the line endings of this source file, CRLF in a Windows checkout: the page
+        // has LF alone, whatever the checkout.
+        return page.ToString().ReplaceLineEndings("\n").TrimEnd('\n') + "\n";
     }
 
     private static void WriteHeader(StringBuilder page)
