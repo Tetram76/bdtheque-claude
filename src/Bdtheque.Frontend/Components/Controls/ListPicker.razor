@@ -172,10 +172,15 @@
         }
     }
 
-    private Task ChooseActiveAsync() =>
-        _active == 0 ? ChooseAsync(null)
-        : _active <= Options.Count ? ChooseAsync(Options[_active - 1])
-        : CreateAsync();
+    // « None » first, then the options, then the creation.
+    private Task ChooseActiveAsync()
+    {
+        if (_active == 0)
+            return ChooseAsync(null);
+        if (_active <= Options.Count)
+            return ChooseAsync(Options[_active - 1]);
+        return CreateAsync();
+    }
 
     private async Task ChooseAsync(RecordOption? option)
     {
