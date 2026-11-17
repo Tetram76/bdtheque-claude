@@ -31,7 +31,11 @@ that the review started: only if Codex has put no 👀 on the PR description
 2 minutes after marking it ready, request a review with a `@codex review`
 comment.
 
-Requires `gh` authenticated (`gh auth status`) with access to the repo.
+Requires `gh` authenticated (`gh auth status`) with access to the repo, and
+PowerShell 7: every command below runs through the PowerShell tool, from the
+repository root. `Invoke-GhBounded.ps1` (next to this file) stands for Bash's
+`timeout`, which PowerShell lacks: a block that bounds its `gh` calls
+dot-sources it first.
 
 ## Codex budget cooldown — check before any trigger
 
@@ -51,26 +55,28 @@ come most recently updated first, so the first page (100 PRs) holds every PR
 updated within 5 hours: paginating would read every PR of the repo, a cost
 that grows with it (3.5 s measured at 288 PRs, against 2.1 s for one page).
 
-```bash
-set -o pipefail
-window=18000
-cutoff=$(date -u -d "@$(( $(date -u +%s) - window ))" +%FT%TZ)
+```powershell
+. .claude/skills/codex-review-loop/Invoke-GhBounded.ps1
+$window = 18000
+$cutoff = [DateTimeOffset]::UtcNow.AddSeconds(-$window).ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
 # bounds per policy « Calcul du délai maximal »: longest measured duration
 # plus half — PR list 2.1 s → 3.2 s; comments 0.9 s → 1.3 s
-prs=$(timeout 3.2 gh api "repos/{owner}/{repo}/pulls?state=all&sort=updated&direction=desc&per_page=100" \
-        --jq ".[]|select(.updated_at>=\"$cutoff\")|.number") || { echo "query failed: retry"; exit 1; }
-last=""
-for n in $prs; do
-  t=$(timeout 1.3 gh api --paginate "repos/{owner}/{repo}/issues/$n/comments?since=$cutoff&per_page=100" \
-        --jq ".[]|select(.user.login==\"chatgpt-codex-connector[bot]\" and .created_at>=\"$cutoff\" and (.body|test(\"reached your Codex usage limits\")))|.created_at" \
-      | sort | tail -1) || { echo "query failed: retry"; exit 1; }
-  [[ "$t" > "$last" ]] && last=$t
-done
-if [ -n "$last" ]; then
-  echo "blocked until $(date -u -d "@$(( $(date -u -d "$last" +%s) + window ))" +%FT%TZ)"
-else
-  echo "clear (no notice since $cutoff)"
-fi
+try {
+  $prs = Invoke-GhBounded 3.2 'api', 'repos/{owner}/{repo}/pulls?state=all&sort=updated&direction=desc&per_page=100',
+           '--jq', ".[]|select(.updated_at>=""$cutoff"")|.number"
+  $last = ''
+  foreach ($n in $prs) {
+    $t = Invoke-GhBounded 1.3 'api', '--paginate', "repos/{owner}/{repo}/issues/$n/comments?since=$cutoff&per_page=100",
+           '--jq', ".[]|select(.user.login==""chatgpt-codex-connector[bot]"" and .created_at>=""$cutoff"" and (.body|test(""reached your Codex usage limits"")))|.created_at" |
+         Sort-Object | Select-Object -Last 1
+    if ($t -gt $last) { $last = $t }
+  }
+} catch { 'query failed: retry'; exit 1 }
+if ($last) {
+  "blocked until $([DateTimeOffset]::Parse($last, [cultureinfo]::InvariantCulture).AddSeconds($window).UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'"))"
+} else {
+  "clear (no notice since $cutoff)"
+}
 ```
 
 `blocked` → do none of those acts: open the PR as a draft (drafts are out of
@@ -172,7 +178,7 @@ active obligatoire »):
   one for every PR still pending before handing back, with `<HANDLED_UNTIL>`
   set to the time the event was handled.
 
-```bash
+```powershell
 # Two timestamps, because a 👍 is a *state* and a review/comment is an *event*:
 # <LAST_TRIGGER_AT> the push of the head commit, the PR's opening as non-draft
 #                   or its marking as ready for review, or the last
@@ -202,15 +208,17 @@ active obligatoire »):
 # retried, and a lasting one ends the watcher with its own reason.
 # Every gh call is bounded: measured at 0.9 s at most, so 1.3 s (policy:
 # « Calcul du délai maximal »); a hung call counts as a failed query.
-set -o pipefail
+. .claude/skills/codex-review-loop/Invoke-GhBounded.ps1
 # Counts matches across ALL pages (an endpoint returns at most 100 items per
 # page, and reviews come oldest first): the --jq filter must be per-page safe.
-count() { local n; n=$(timeout 1.3 gh api --paginate "$1?per_page=100" --jq "$2" | wc -l) && echo "$n"; }
-bot='.user.login=="chatgpt-codex-connector[bot]"'
+function count([string] $Endpoint, [string] $Filter) {
+  @(Invoke-GhBounded 1.3 'api', '--paginate', "${Endpoint}?per_page=100", '--jq', $Filter).Count
+}
+$bot = '.user.login=="chatgpt-codex-connector[bot]"'
 # approving receipt naming the head: its "Reviewed commit" (abbreviated SHA)
 # must be a prefix of <HEAD_SHA>; a receipt about an older commit is ordinary
 # feedback to read, never an approval
-receipt='((.body|test("codex-review-receipt")) and (.body|test("find any major issues"))
+$receipt = '((.body|test("codex-review-receipt")) and (.body|test("find any major issues"))
   and (([.body|match("Reviewed commit:[*]+ `([0-9a-f]{7,40})`").captures[0].string][0] // "")
   as $s | $s != "" and ("<HEAD_SHA>"|startswith($s))))'
 # A review starts when Codex puts its 👀: none 2 minutes after the trigger is a
@@ -219,67 +227,64 @@ receipt='((.body|test("codex-review-receipt")) and (.body|test("find any major i
 # A 👀 of the head that a stuck review left in place when the review was
 # requested again (one 👀 at most per account) starts the requested review at
 # the request: it has its own 10 minutes.
-epoch() { date -u -d "$1" +%s; }
-trigger=$(epoch "<LAST_TRIGGER_AT>") started=""
-reason=timeout fails=0 saw_old=0
-for i in $(seq 1 18); do
-  # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
-  # an issue for the API), not a ticket's
-  if up=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
-          ".[]|select(.content==\"+1\" and $bot and .created_at>=\"<LAST_TRIGGER_AT>\")") &&
-     old=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions" \
-          ".[]|select(.content==\"eyes\" and $bot and .created_at<\"<HEAD_AT>\")") &&
-     rv=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews" \
-          ".[]|select($bot and .submitted_at>=\"<HANDLED_UNTIL>\")") &&
-     cm=$(count "repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments" \
-          ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\")") &&
-     ic=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
-          ".[]|select($bot and .created_at>=\"<HANDLED_UNTIL>\" and ($receipt|not))") &&
-     rc=$(count "repos/{owner}/{repo}/issues/<PR_NUMBER>/comments" \
-          ".[]|select($bot and $receipt)") &&
-     eyes=$(timeout 1.3 gh api --paginate "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
-          --jq ".[]|select(.content==\"eyes\" and $bot and .created_at>=\"<HEAD_AT>\")|.created_at" | sort | head -1) &&
-     sp=$(timeout 1.3 gh pr view <PR_NUMBER> --json state,headRefOid,statusCheckRollup \
-          -q '"\(.state) \(.headRefOid) \(.statusCheckRollup|length) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"')
-  then
-    fails=0; read -r st head checks pending <<< "$sp"
-    echo "thumbs=$up receipt=$rc old_review=$old reviews=$rv inline=$cm issue=$ic state=$st head=${head:0:7} checks=$checks pending=$pending"
-    if [ "$rv" -ne 0 ] || [ "$cm" -ne 0 ] || [ "$ic" -ne 0 ]; then
-      reason="new Codex feedback"; break
-    fi
-    if [ "$st" != OPEN ]; then reason="PR $st"; break; fi
-    if [ "$head" != "<HEAD_SHA>" ]; then reason="head changed"; break; fi
-    # a receipt names the commit it approves: no need to tie it to the head
-    # through the review's course, unlike the 👍 below
-    if [ "$rc" -ne 0 ] && [ "$checks" -gt 0 ] && [ "$pending" -eq 0 ]; then
-      reason="approved, CI done"; break
-    fi
-    # a review of an older head is still running: keep watching, and remember
-    # it — the 👍 that ends it is about that older head
-    if [ "$old" -ne 0 ]; then saw_old=1; sleep 60; continue; fi
-    if [ "$saw_old" -eq 1 ]; then reason="earlier review ended"; break; fi
-    # approval is terminal only once CI has run: checks registered (an empty
-    # rollup means CI has not started, not that it is done) and all completed
-    if [ "$up" -ne 0 ] && [ "$checks" -gt 0 ] && [ "$pending" -eq 0 ]; then
-      reason="approved, CI done"; break
-    fi
-    # an approval waiting for CI is a verdict: neither timer applies
-    if [ "$up" -eq 0 ] && [ "$rc" -eq 0 ]; then
-      now=$(date -u +%s)
-      if [ -z "$started" ] && [ -n "$eyes" ]; then
-        started=$(epoch "$eyes"); [ "$started" -lt "$trigger" ] && started=$trigger
-      fi
-      if [ -z "$started" ] && [ $((now - trigger)) -ge 120 ]; then reason="review not started"; break; fi
-      if [ -n "$started" ] && [ $((now - started)) -ge 600 ]; then reason="Codex stuck"; break; fi
-    fi
-  else
-    fails=$((fails + 1)); echo "GitHub query failed ($fails in a row)"
-    if [ "$fails" -ge 5 ]; then reason="GitHub queries keep failing"; break; fi
-  fi
-  sleep 60
-done
-echo "exit: $reason"
-timeout 1.3 gh pr view <PR_NUMBER> --json statusCheckRollup -q '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
+function epoch([string] $Time) { [DateTimeOffset]::Parse($Time, [cultureinfo]::InvariantCulture).ToUnixTimeSeconds() }
+$trigger = epoch '<LAST_TRIGGER_AT>'; $started = $null
+$reason = 'timeout'; $fails = 0; $saw_old = $false
+foreach ($i in 1..18) {
+  try {
+    # /issues/<PR_NUMBER>/comments = the PR's own conversation comments (a PR is
+    # an issue for the API), not a ticket's
+    $up = count 'repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions' `
+            ".[]|select(.content==""+1"" and $bot and .created_at>=""<LAST_TRIGGER_AT>"")"
+    $old = count 'repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions' `
+            ".[]|select(.content==""eyes"" and $bot and .created_at<""<HEAD_AT>"")"
+    $rv = count 'repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews' `
+            ".[]|select($bot and .submitted_at>=""<HANDLED_UNTIL>"")"
+    $cm = count 'repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments' `
+            ".[]|select($bot and .created_at>=""<HANDLED_UNTIL>"")"
+    $ic = count 'repos/{owner}/{repo}/issues/<PR_NUMBER>/comments' `
+            ".[]|select($bot and .created_at>=""<HANDLED_UNTIL>"" and ($receipt|not))"
+    $rc = count 'repos/{owner}/{repo}/issues/<PR_NUMBER>/comments' `
+            ".[]|select($bot and $receipt)"
+    $eyes = Invoke-GhBounded 1.3 'api', '--paginate', 'repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100',
+              '--jq', ".[]|select(.content==""eyes"" and $bot and .created_at>=""<HEAD_AT>"")|.created_at" |
+            Sort-Object | Select-Object -First 1
+    $sp = Invoke-GhBounded 1.3 'pr', 'view', '<PR_NUMBER>', '--json', 'state,headRefOid,statusCheckRollup',
+            '-q', '"\(.state) \(.headRefOid) \(.statusCheckRollup|length) \([.statusCheckRollup[]|select(.status!="COMPLETED")]|length)"'
+  } catch {
+    $fails++; "GitHub query failed ($fails in a row): $_"
+    if ($fails -ge 5) { $reason = 'GitHub queries keep failing'; break }
+    Start-Sleep -Seconds 60; continue
+  }
+  $fails = 0; $st, $head, $checks, $pending = "$sp" -split ' '; $checks = [int]$checks; $pending = [int]$pending
+  "thumbs=$up receipt=$rc old_review=$old reviews=$rv inline=$cm issue=$ic state=$st head=$($head.Substring(0, 7)) checks=$checks pending=$pending"
+  if ($rv -ne 0 -or $cm -ne 0 -or $ic -ne 0) { $reason = 'new Codex feedback'; break }
+  if ($st -ne 'OPEN') { $reason = "PR $st"; break }
+  if ($head -ne '<HEAD_SHA>') { $reason = 'head changed'; break }
+  # a receipt names the commit it approves: no need to tie it to the head
+  # through the review's course, unlike the 👍 below
+  if ($rc -ne 0 -and $checks -gt 0 -and $pending -eq 0) { $reason = 'approved, CI done'; break }
+  # a review of an older head is still running: keep watching, and remember
+  # it — the 👍 that ends it is about that older head
+  if ($old -ne 0) { $saw_old = $true; Start-Sleep -Seconds 60; continue }
+  if ($saw_old) { $reason = 'earlier review ended'; break }
+  # approval is terminal only once CI has run: checks registered (an empty
+  # rollup means CI has not started, not that it is done) and all completed
+  if ($up -ne 0 -and $checks -gt 0 -and $pending -eq 0) { $reason = 'approved, CI done'; break }
+  # an approval waiting for CI is a verdict: neither timer applies
+  if ($up -eq 0 -and $rc -eq 0) {
+    $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+    if ($null -eq $started -and $eyes) {
+      $started = epoch $eyes; if ($started -lt $trigger) { $started = $trigger }
+    }
+    if ($null -eq $started -and $now - $trigger -ge 120) { $reason = 'review not started'; break }
+    if ($null -ne $started -and $now - $started -ge 600) { $reason = 'Codex stuck'; break }
+  }
+  Start-Sleep -Seconds 60
+}
+"exit: $reason"
+Invoke-GhBounded 1.3 'pr', 'view', '<PR_NUMBER>', '--json', 'statusCheckRollup',
+  '-q', '[.statusCheckRollup[]|"\(.name) \(.status) \(.conclusion)"]'
 ```
 
 ### Step 1 — Wait for Codex
@@ -344,7 +349,7 @@ data.
 
 List review threads and their resolution state:
 
-```bash
+```powershell
 gh api graphql -f query='
 query{
   repository(owner:"<OWNER>",name:"<REPO>"){
@@ -469,12 +474,13 @@ resolve threads yet.
 
 Never push while a Codex review is running — its 👀 is on the PR:
 
-```bash
-# same all-page counting as the watcher; pipefail, so that a failed query
-# fails the command instead of printing a misleading 0
-set -o pipefail
-gh api --paginate "repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100" \
-  --jq '.[]|select(.content=="eyes" and .user.login=="chatgpt-codex-connector[bot]")' | wc -l
+```powershell
+# same all-page counting as the watcher; the exit code is checked, so that a
+# failed query fails the command instead of printing a misleading 0
+$eyes = gh api --paginate 'repos/{owner}/{repo}/issues/<PR_NUMBER>/reactions?per_page=100' `
+  --jq '.[]|select(.content=="eyes" and .user.login=="chatgpt-codex-connector[bot]")'
+if ($LASTEXITCODE -ne 0) { throw 'query failed: retry' }
+@($eyes).Count
 ```
 
 If the command fails, whether a review is running is unknown: do not push,
@@ -504,9 +510,12 @@ For each thread identified in Step 2:
 (`<COMMENT_ID>` is the `databaseId` of the thread's first comment, from
 Step 2's query):
 
-```bash
-gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
-  -f body="<reply: what was fixed, which ticket or plan note carries the deferred fix, or why the finding was rejected>"
+```powershell
+# single-quoted here-string: backticks and $ in the reply stay literal
+$body = @'
+<reply: what was fixed, which ticket or plan note carries the deferred fix, or why the finding was rejected>
+'@
+gh api 'repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies' -f "body=$body"
 ```
 
 Never write the literal text `@codex` inside this reply. Per Codex's GitHub
@@ -515,21 +524,21 @@ integration, any `@codex` mention followed by anything other than exactly
 attempt) — only the dedicated top-level PR comment in Step 5, containing
 exactly `@codex review` and nothing else, should ever contain that mention.
 The same holds for the PR description and every other comment, even when the
-mention is quoted, in backticks or used to describe a rule: grep each text
-for it right before `gh pr create` / `gh pr edit` / `gh pr comment` / `gh api`.
+mention is quoted, in backticks or used to describe a rule: search each text
+for it (`Select-String`) right before `gh pr create` / `gh pr edit` / `gh pr comment` / `gh api`.
 In chat with the user, never type it either (policy:
 `.speckit/gestion-projet/gouvernance/budget-ia.md`, « Mention de Codex »).
 
 **c'. Rate Codex's comment** — always, as Codex asks in every comment: 👍
 (`+1`) if the finding was useful, 👎 (`-1`) if not:
 
-```bash
-gh api repos/{owner}/{repo}/pulls/comments/<COMMENT_ID>/reactions -f content="+1"
+```powershell
+gh api 'repos/{owner}/{repo}/pulls/comments/<COMMENT_ID>/reactions' -f 'content=+1'
 ```
 
 **d. Resolve the thread**, once its reply is posted:
 
-```bash
+```powershell
 gh api graphql -f query='
 mutation{
   resolveReviewThread(input:{threadId:"<THREAD_ID>"}){ thread{ isResolved } }
