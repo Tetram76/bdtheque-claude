@@ -327,7 +327,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
             NewRecords = new NewRecords(
                 [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
                 [new NewGenre(genre, $"Genre{marker}")],
-                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], []),
+                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], [], []),
         };
 
         var created = await CreateAsync(content);
@@ -351,7 +351,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var updated = await UpdateAsync(created, created.Content with
         {
             GenreIds = [genre],
-            NewRecords = new NewRecords([], [new NewGenre(genre, label)], [], []),
+            NewRecords = new NewRecords([], [new NewGenre(genre, label)], [], [], []),
         });
 
         Assert.Equal(label, Assert.Single(updated.References.Genres).Label);
@@ -367,7 +367,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         {
             Contributions = [new ContributionContent(author, ContributionRole.Scenarist)],
             GenreIds = [genre],
-            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);
@@ -386,7 +386,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var content = Content(UniqueTitle()) with
         {
             GenreIds = [genre],
-            NewRecords = new NewRecords([], [new NewGenre(genre, taken.Label.Replace("Épopée", "EPOPEE"))], [], []),
+            NewRecords = new NewRecords([], [new NewGenre(genre, taken.Label.Replace("Épopée", "EPOPEE"))], [], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);
@@ -413,7 +413,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
             ],
             NewRecords = new NewRecords(
                 [new NewAuthor(added, $"Nouveau {Guid.NewGuid():N}", null, null), new NewAuthor(clashing, taken.LastName!.ToUpperInvariant(), null, null)],
-                [], [], []),
+                [], [], [], []),
         }, created.Version));
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorDisplayNameAlreadyUsed, ["/newRecords/authors/1/lastName"]);
@@ -426,7 +426,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var content = Content(UniqueTitle()) with
         {
             UniverseIds = [universe],
-            NewRecords = new NewRecords([], [], [new NewUniverse(universe, new string('u', 1_000), null)], []),
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, new string('u', 1_000), null)], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);
@@ -445,7 +445,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         {
             SeriesId = series,
             VolumeNumber = 1,
-            NewRecords = new NewRecords([], [], [], [new NewSeries(series, title)]),
+            NewRecords = new NewRecords([], [], [], [new NewSeries(series, title)], []),
         };
 
         var created = await CreateAsync(content);
@@ -467,7 +467,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         {
             SeriesId = series,
             GenreIds = [genre],
-            NewRecords = new NewRecords([], [new NewGenre(genre, label)], [], [new NewSeries(series, " ")]),
+            NewRecords = new NewRecords([], [new NewGenre(genre, label)], [], [new NewSeries(series, " ")], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);

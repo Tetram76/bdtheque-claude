@@ -68,6 +68,10 @@ public sealed record NewEditionForm(
 /// Together with <paramref name="InitialValueCurrency"/>. Requires the edition year or the album's
 /// first publication.
 /// </param>
+/// <param name="NewRecords">
+/// The records the form added on the spot (a publisher), created with the edition: <paramref name="PublisherId"/> cites one by its
+/// key. <c>null</c> for none, as in what a reading returns.
+/// </param>
 public sealed record EditionContent(
     Guid? PublisherId,
     Guid? PublisherCollectionId,
@@ -91,7 +95,8 @@ public sealed record EditionContent(
     decimal? InitialValueAmount,
     string? InitialValueCurrency,
     string? PersonalReference,
-    string? PersonalNotes);
+    string? PersonalNotes,
+    NewRecords? NewRecords = null);
 
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>
 /// <param name="Visuals">The visuals of the new edition, all pending (<see cref="EditionVisualEntry"/>); none, without visuals.</param>

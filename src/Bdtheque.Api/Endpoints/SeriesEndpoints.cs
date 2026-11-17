@@ -304,7 +304,7 @@ internal static class SeriesEndpoints
         series.SetTemplateFormat(EnumMapping.Map<DomainEnums.EditionFormat>(template.Format));
         series.SetTemplateIsColor(template.IsColor);
         var (publisher, collection) = await FormReferences.LoadPublisherAsync(
-            context, template.PublisherId, template.PublisherCollectionId, cancellationToken);
+            context, template.PublisherId, template.PublisherCollectionId, added, cancellationToken);
         series.SetTemplate(publisher, collection);
 
         var genres = await FormReferences.LoadAsync(context.Genres, content.GenreIds, cancellationToken, added.Genres);

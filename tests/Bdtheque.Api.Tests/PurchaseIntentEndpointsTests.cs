@@ -92,6 +92,22 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
     }
 
     [Fact]
+    public async Task Create_OnANewEditionWithAPublisherAddedOnTheSpot_CreatesItWithTheEdition()
+    {
+        // As for an owned edition (visuel/saisie-edition/contenu.md): the publisher is created with the edition targeted.
+        var album = await CreateAlbumAsync();
+        var publisher = Guid.NewGuid();
+        var name = $"Éditeur {Guid.NewGuid():N}";
+
+        var intents = await CreateAsync(album, Edition(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)]) });
+
+        var editionId = Assert.Single(intents.Intents).EditionId!.Value;
+        var created = await _client.GetFromJsonAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{editionId}");
+        Assert.Equal(name, created!.References.Publisher!.Name);
+        Assert.Equal(created.References.Publisher.Id, created.Content.PublisherId);
+    }
+
+    [Fact]
     public async Task Create_OnSeveralNewEditions_KeepsEachIntent()
     {
         var album = await CreateAlbumAsync();

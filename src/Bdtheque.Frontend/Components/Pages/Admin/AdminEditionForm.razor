@@ -55,10 +55,12 @@ else
             <Block Title="@L["Block.Edition"]" Kicker="@L["Kicker.Edition"]">
                 <div class="edition-fields">
                     <div class="edition-publisher">
-                        <Field Id="edition-publisher" Label="@L["Publisher"]" Required Error="@Errors.For("/publisherId")" Context="control">
+                        <Field Id="edition-publisher" Label="@L["Publisher"]" Required
+                               Error="@(Errors.For("/publisherId") ?? (Entry.Publisher is { } chosen ? AddedError(chosen.Id) : null))" Context="control">
                             <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="ChoosePublisherAsync"
-                                          Placeholder="@L["Publisher.Placeholder"]" aria-describedby="@control.DescribedBy"
-                                          aria-invalid="@control.Invalid" />
+                                          Placeholder="@L["Publisher.Placeholder"]" OnCreate="text => _publisherCreation = text"
+                                          CreateLabel="@(text => L["Publisher.Create", text].Value)" Pending="PendingPublishers"
+                                          aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
                         </Field>
                         @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and
                            removed when it changes (choix-implementation/socle/frontend.md, Fiches de saisie). *@
@@ -168,6 +170,11 @@ else
         </ChildContent>
     </EntryForm>
 
+    @if (_publisherCreation is { } publisherName)
+    {
+        <PublisherCreationDialog Id="edition-publisher-creation" Text="@publisherName" OnCreated="PublisherCreatedAsync"
+                                 OnCancel="() => _publisherCreation = null" />
+    }
     @if (_changesShown)
     {
         <ChangesDialog Id="edition-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
@@ -185,6 +192,10 @@ else
     private string? _savedFingerprint;
     private bool _changesShown;
     private int _publisherChoice;
+    // The name typed in the choice of the publisher, while its creation on the spot is being confirmed.
+    private string? _publisherCreation;
+    // The publisher added on the spot that the last saving sent, where its error designates it.
+    private NewRecords? _sentRecords;
 
     /// <summary>The album of the edition, which addresses it.</summary>
     [Parameter]
@@ -404,14 +415,29 @@ else
         Entry.ChoosePublisher(publisher);
         if (!changed)
             return;
-        // None while those of the new one are read.
+        // None while those of the new one are read; none at all for a publisher added on the spot, which does not exist yet.
         (PublisherCollections, CollectionsProblem) = ([], null);
-        if (publisher is null)
+        if (publisher is null || Entry.PublisherIsNew)
             return;
         var read = await CollectionsOfAsync(publisher.Id);
         if (choice == _publisherChoice)
             (PublisherCollections, CollectionsProblem) = read;
     }
+
+    // The publisher added on the spot, created only with the edition when it is saved: cancelling creates none of them. It is
+    // chosen as any publisher.
+    private async Task PublisherCreatedAsync(NewPublisher publisher)
+    {
+        _publisherCreation = null;
+        Entry!.NewPublishers.Add(publisher);
+        await ChoosePublisherAsync(new RecordOption(publisher.Key, publisher.Name, null));
+        await Recorder.RecordActionAsync(Entry.IsPurchaseIntent
+            ? AudienceFunctions.AdminPurchaseIntentPublisherCreated
+            : AudienceFunctions.AdminEditionPublisherCreated);
+    }
+
+    // Suggested again once replaced, rather than created twice, as the search does not know them.
+    private IReadOnlyList<RecordOption> PendingPublishers => [.. Entry!.NewPublishers.Select(p => new RecordOption(p.Key, p.Name, null))];
 
     // The collections of a publisher, by name; none, with the error met, if they cannot be read.
     private async Task<(List<RecordOption> Collections, ApiProblem? Problem)> CollectionsOfAsync(Guid publisherId)
@@ -437,6 +463,7 @@ else
         _saving = true;
         _saveProblem = null;
         var entry = Entry!;
+        _sentRecords = entry.Added();
         try
         {
             if (entry.Id is { } id)
@@ -517,6 +544,9 @@ else
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md); an amount and its
     // currency, entered side by side, are a single field of the form.
     private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
+
+    // A publisher added on the spot that the saving refused, designated by its field (visuel/saisie-album/contenu.md).
+    private string? AddedError(Guid key) => Errors.ForAdded(_sentRecords, key);
 
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-edition/contenu.md).
     // A conflict can always be reloaded: a new edition or intent is written, as a modified one, under the version of its album,

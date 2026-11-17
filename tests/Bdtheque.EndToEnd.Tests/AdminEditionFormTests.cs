@@ -53,6 +53,31 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
     }
 
     [Theory, InEachTheme]
+    public async Task NewEdition_WithItsPublisherAddedOnTheSpot_CreatesBoth(string theme)
+    {
+        // visuel/saisie-edition/contenu.md (decision of the user, #414): its name alone, the publisher created only with the edition.
+        var album = await CreateAlbumAsync();
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+
+        var publisher = page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true });
+        await publisher.PressSequentiallyAsync($"Éditeur{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'éditeur « Éditeur{_marker} »" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel éditeur" });
+        await Assertions.Expect(dialog.GetByLabel("Nom")).ToHaveValueAsync($"Éditeur{_marker}");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter l'éditeur" }).ClickAsync();
+        await Assertions.Expect(dialog).ToHaveCountAsync(0);
+        await Assertions.Expect(publisher).ToHaveValueAsync($"Éditeur{_marker}");
+        await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Achat" });
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'édition" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
+        var edition = Assert.Single((await GetEditionsPageAsync(album.Id)).Editions).Edition;
+        var saved = await GetEditionAsync(album.Id, edition.Id);
+        Assert.Equal($"Éditeur{_marker}", saved.References.Publisher!.Name);
+    }
+
+    [Theory, InEachTheme]
     public async Task Edition_Modified_FreeOnceGiven_IsSaved(string theme)
     {
         var publisher = await CreatePublisherAsync();

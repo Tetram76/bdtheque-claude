@@ -214,6 +214,50 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
     }
 
     [Fact]
+    public async Task Create_WithAPublisherAddedOnTheSpot_CreatesItWithTheEdition()
+    {
+        // A publisher created by its name alone (visuel/saisie-edition/contenu.md), with the edition, in the same transaction.
+        var publisher = Guid.NewGuid();
+        var name = $"Éditeur {Guid.NewGuid():N}";
+
+        var created = await CreateAsync(
+            await CreateAlbumAsync(), Content(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)]) });
+
+        var named = created.References.Publisher!;
+        Assert.Equal((name, null), (named.Name, named.Website));
+        Assert.Equal(named.Id, created.Content.PublisherId);
+        Assert.Null(created.Content.NewRecords);
+    }
+
+    [Fact]
+    public async Task Update_WithAPublisherAddedOnTheSpotWithoutName_DesignatesIt_CreatingNothing()
+    {
+        var created = await CreateAsync(await CreateAlbumAsync(), Content((await CreatePublisherAsync()).Id));
+        var publisher = Guid.NewGuid();
+
+        var response = await _client.PutAsJsonAsync(EditionUri(created), new UpdateEditionRequest(
+            created.Content with { PublisherId = publisher, NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, " ")]) },
+            created.AlbumVersion));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameRequired, ["/newRecords/publishers/0/name"]);
+        Assert.Equal(created.Content, (await GetAsync(created)).Content);
+    }
+
+    [Fact]
+    public async Task Create_WithAPublisherAddedOnTheSpotAlreadyTaken_DesignatesIt_CreatingNothing()
+    {
+        var album = await CreateAlbumAsync();
+        var taken = await CreatePublisherAsync();
+        var publisher = Guid.NewGuid();
+
+        var response = await PostCreateAsync(
+            album, Content(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, taken.Name.ToLowerInvariant())]) });
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed, ["/newRecords/publishers/0/name"]);
+        await AssertNoEditionAsync(album.Id);
+    }
+
+    [Fact]
     public async Task Create_WithTheCollectionOfAnotherPublisher_IsABusinessError()
     {
         var collection = await CreateCollectionAsync(await CreatePublisherAsync());

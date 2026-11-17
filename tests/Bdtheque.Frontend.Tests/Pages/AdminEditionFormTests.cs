@@ -310,6 +310,77 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.True(page.Find("#edition-collection").HasAttribute("disabled"));
     }
 
+    [Fact]
+    public async Task PublisherCreatedOnTheSpot_IsChosen_WithoutCollection_AndCreatedWithTheEdition_WhenItIsSaved()
+    {
+        // visuel/saisie-edition/contenu.md (decision of the user, #414): the name typed, the publisher created only with the edition.
+        var page = OpenNewOwned();
+
+        await CreatePublisherOnTheSpotAsync(page, " Delcourt ");
+
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.Equal("Delcourt", page.Find("#edition-publisher").GetAttribute("value"));
+        Assert.Equal("admin.edition-form.publisher-created", _audience.Functions.Last());
+        Assert.Equal(["—"], page.FindAll("#edition-collection option").Select(option => option.TextContent.Trim()));
+        Assert.DoesNotContain(_api.Requested, path => path.StartsWith("/admin/publishers/", StringComparison.Ordinal) && !path.Contains(Casterman.ToString(), StringComparison.Ordinal));
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned, HttpStatusCode.Created);
+        await page.SubmitAsync("form");
+
+        var content = _api.Written.Single(w => w.Path == $"/admin/albums/{AlbumId}/editions").Body.GetProperty("content");
+        var publisher = content.GetProperty("newRecords").GetProperty("publishers").EnumerateArray().Single();
+        Assert.Equal("Delcourt", publisher.GetProperty("name").GetString());
+        Assert.Equal(publisher.GetProperty("key").GetString(), content.GetProperty("publisherId").GetString());
+    }
+
+    [Fact]
+    public async Task PublisherCreatedOnTheSpot_ForANewPurchaseIntent_IsCreatedWithTheEditionTargeted()
+    {
+        var page = OpenNewIntent();
+        await CreatePublisherOnTheSpotAsync(page, "Delcourt");
+        Assert.Equal("admin.purchase-intent-form.publisher-created", _audience.Functions.Last());
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [], 13), HttpStatusCode.Created);
+        await page.SubmitAsync("form");
+
+        var edition = _api.Written.Single(w => w.Path == $"/admin/albums/{AlbumId}/purchase-intents").Body.GetProperty("edition");
+        var publisher = edition.GetProperty("newRecords").GetProperty("publishers").EnumerateArray().Single();
+        Assert.Equal(("Delcourt", publisher.GetProperty("key").GetString()),
+            (publisher.GetProperty("name").GetString(), edition.GetProperty("publisherId").GetString()));
+    }
+
+    [Fact]
+    public async Task PublisherCreatedOnTheSpot_ThenReplaced_IsNotCreated_ButSuggestedAgain()
+    {
+        var page = OpenOwned();
+        await CreatePublisherOnTheSpotAsync(page, "Delcourt");
+
+        ChoosePublisher(page, new RecordOption(Casterman, "Casterman", null));
+
+        var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
+        Assert.Equal(["Delcourt"], picker.Instance.Pending.Select(p => p.Label));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
+        await page.SubmitAsync("form");
+        Assert.Equal(JsonValueKind.Null,
+            _api.Written.Single(w => w.Method == HttpMethod.Put).Body.GetProperty("content").GetProperty("newRecords").ValueKind);
+    }
+
+    [Fact]
+    public async Task BusinessError_OnAPublisherCreatedOnTheSpot_DesignatesTheFieldOfThePublisher()
+    {
+        var page = OpenOwned();
+        await CreatePublisherOnTheSpotAsync(page, "Dargaud");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Publisher.NameAlreadyUsed", "/newRecords/publishers/0/name");
+
+        await page.SubmitAsync("form");
+
+        var field = page.Find("#edition-publisher");
+        Assert.Equal("true", field.GetAttribute("aria-invalid"));
+        Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
+            id => page.Find($"#{id}").TextContent.Trim().StartsWith("« Dargaud » est déjà pris", StringComparison.Ordinal));
+    }
+
     // Under the field, in the compact form of the single component of the errors, which the field describes itself by; its
     // help stays what it is (#438).
     [Fact]
@@ -947,5 +1018,12 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     {
         var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
         picker.InvokeAsync(() => picker.Instance.ValueChanged.InvokeAsync(publisher)).GetAwaiter().GetResult();
+    }
+
+    private static async Task CreatePublisherOnTheSpotAsync(IRenderedComponent<AdminEditionForm> page, string name)
+    {
+        var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
+        await picker.InvokeAsync(() => picker.Instance.OnCreate.InvokeAsync(name));
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
     }
 }
