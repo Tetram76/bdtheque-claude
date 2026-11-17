@@ -36,7 +36,7 @@ Tout ticket qui porte **directement** sur l'un des sujets ci-dessous reçoit son
 | `documentation` | la documentation, utilisateur ou technique ([Documentation technique](../gouvernance/documentation-technique.md)) : rédaction ou correction de ses pages, références générées, construction, publication ou consultation de son site |
 | `ci` | l'intégration continue ([Intégration continue (CI)](../depot/integration-continue-ci.md)) : workflows GitHub Actions, leurs jobs, leurs étapes et leurs scripts, checks requis, quotas et échecs du CI |
 | `tests` | les tests : leur écriture ou leur correction (test instable compris), leurs projets, leur outillage, leur couverture et leur exécution |
-| `ui` | le visuel de l'application, tout ce que présentent ses écrans : charte graphique ([`visuel/`](../../visuel/index.md)), thèmes, présentation et disposition des écrans, contrôles et leur parcours au clavier, textes (libellés, formulations, messages), maquettes |
+| `ui` | le visuel de l'application, c'est-à-dire tout ce que son utilisateur voit à l'écran, et non son seul aspect graphique : textes (libellés, formulations, messages), éléments présentés et leur disposition, contrôles et leur parcours au clavier, thèmes, charte graphique, maquettes ([`visuel/`](../../visuel/index.md)) |
 
 Seul le sujet propre du ticket compte : un ticket qui change l'application et, au passage, met sa documentation à jour, ajoute ses tests ou adapte un workflow ne reçoit pas l'étiquette correspondante.
 
