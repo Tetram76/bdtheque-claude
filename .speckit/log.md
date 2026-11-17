@@ -2,6 +2,7 @@
 
 ## 2026-11-17
 
+* **Décision de l'utilisateur** : le site de la documentation technique de `main` est publié à chaque fusion sur `main`, consultable sans rien lancer sur son poste. **Choix** : GitHub Pages, publié par un workflow GitHub Actions distinct du CI, dont seul le job du déploiement a les droits de Pages ; branche `gh-pages`, Jekyll, publication par le CI, filtre `paths`, `configure-pages` et hébergement tiers écartés ; Pages réglé sur la source GitHub Actions, environnement `github-pages` limité à `main` (#516).
 * **Choix** : le script de construction de la documentation technique restaure lui-même les outils locaux avant d'appeler DocFX, la commande documentée suffisant sur un poste neuf ; `dotnet tool exec` écarté (#514).
 * **Exigence de l'utilisateur** : un ticket ou une Pull Request qui ne porte que sur la documentation technique n'a pas de jalon ; la documentation suit chaque version par les Pull Requests qui changent le code, qui gardent le jalon de leur ticket (#510).
 * **Exigence de l'utilisateur** : tout ticket qui porte directement sur la documentation, utilisateur ou technique, reçoit l'étiquette `documentation` ; un ticket de pure documentation technique ne porte que sur un sujet implémenté, la documentation d'un sujet à venir étant l'affaire de la Pull Request qui le réalise (#510).
