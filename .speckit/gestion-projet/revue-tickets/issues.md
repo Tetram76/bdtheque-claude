@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquette `documentation`, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T18:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T11:10:00Z }
 ---
 
 # Issues
@@ -26,6 +26,10 @@ Tout ticket reçoit, dès sa création, un **type** GitHub (*issue type*), parmi
 - **`Task`** : tout ce qui ne change pas le comportement visible de l'application : ticket de suivi d'un harnais, toujours ; chantier technique (outillage, CI, harnais, déploiement, exploitation, sécurité, montée de version) ; travail technique interne, comme celui de la reprise des données.
 
 Un chantier fonctionnel du plan est un `Bug` ou une `Feature` selon la nature du travail à faire ; un chantier technique du plan est une `Task`. Un sous-ticket reçoit le type de son propre contenu, qui peut différer de celui de son ticket parent.
+
+## Étiquette `documentation`
+
+Tout ticket qui porte **directement** sur la documentation, utilisateur ou technique ([Documentation technique](../gouvernance/documentation-technique.md)), reçoit l'étiquette `documentation` dès sa création (exigence de l'utilisateur) : rédaction ou correction de ses pages, références générées, construction, publication ou consultation de son site. Un ticket qui change l'application et met sa documentation à jour au passage ne la reçoit pas.
 
 ## Tickets de suivi des harnais
 
