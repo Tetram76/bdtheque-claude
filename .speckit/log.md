@@ -2,6 +2,7 @@
 
 ## 2026-11-17
 
+* **Décision de l'utilisateur** : une édition se crée seulement depuis la page des éditions et intentions d'achat de son album, comme une intention d'achat : « Nouvelle édition » est retiré du menu de l'administration et de la liste des éditions, où une mention le dit à sa place, en tête de page comme dans la liste vide (#419).
 * **Règle** : la clé de signature des commits du dépôt est la clé GPG ed25519 `FA9B32F52135D36C4593E4976FF254ADD108ACB0`, à l'adresse de commit privée de GitHub, déclarée dans la configuration locale du dépôt (#520).
 * **Décision de l'utilisateur** : la Phase 3 compte quatre parties, cinq si nécessaire : partie 2, les fonctions de la consultation hors recherche avancée, à l'issue de laquelle l'application est fonctionnellement complète, hors recherche avancée ; partie 3, la recherche avancée ; partie 4, la documentation utilisateur (pages, liens dans l'application, harnais hebdomadaire, règle qui lie toute fonction visible ajoutée ou modifiée à sa documentation utilisateur) ; partie 5, le reste éventuel, à inventorier ; la première version de l'application est livrable à l'issue de la partie 4, ou de la partie 5 ; la documentation technique renvoie à la partie 4 pour la documentation utilisateur (#502).
 * **Règle** : le dépôt `Tetram76/.github`, qui porte le template des Pull Requests, est signalé comme public (#519).
