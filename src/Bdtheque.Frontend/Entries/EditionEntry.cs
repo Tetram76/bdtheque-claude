@@ -56,6 +56,12 @@ public sealed class EditionEntry
     /// <summary>One of the collections of <see cref="Publisher"/>.</summary>
     public RecordOption? PublisherCollection { get; set; }
 
+    /// <summary>The publishers added on the spot, referenced by their key; only the one still chosen is created with the edition.</summary>
+    public List<NewPublisher> NewPublishers { get; set; } = [];
+
+    /// <summary>Whether the publisher chosen was added on the spot: it does not exist yet, nor any collection of it.</summary>
+    public bool PublisherIsNew => Publisher is { } publisher && NewPublishers.Any(p => p.Key == publisher.Id);
+
     public int? PublicationYear { get; set; }
 
     public string? Isbn { get; set; }
@@ -227,9 +233,16 @@ public sealed class EditionEntry
         InitialValueCurrency = null;
     }
 
+    /// <summary>The publisher added on the spot, if still chosen, to create with the edition; <c>null</c> for none.</summary>
+    public NewRecords? Added()
+    {
+        var added = NewRecords.None with { Publishers = [.. NewPublishers.Where(p => p.Key == Publisher?.Id)] };
+        return added.IsEmpty() ? null : added;
+    }
+
     /// <summary>
-    /// The content to save: the whole form. An amount entered without its currency takes the one the form shows by default;
-    /// a currency without amount is not sent.
+    /// The content to save: the whole form, and the publisher added on the spot that it still cites, to create with the edition.
+    /// An amount entered without its currency takes the one the form shows by default; a currency without amount is not sent.
     /// </summary>
     public EditionContent ToContent() => new(
         Publisher?.Id,
@@ -254,12 +267,13 @@ public sealed class EditionEntry
         InitialValueAmount,
         InitialValueAmount is null ? null : InitialValueCurrency ?? DefaultCurrency,
         PersonalReference,
-        PersonalNotes);
+        PersonalNotes,
+        Added());
 
     /// <summary>The edition targeted by a new purchase intent, with the minimum of fields.</summary>
     public PurchaseIntentEditionContent ToPurchaseIntentContent() => new(
         Publisher?.Id, PublisherCollection?.Id, PublicationYear, Isbn, Binding, Orientation, ReadingDirection, Format, PageCount, Category,
-        IsColor);
+        IsColor, Added());
 
     /// <summary>The visuals as the saving sends them: each kept or pending, with its type, in their order.</summary>
     public List<EditionVisualEntry> VisualEntries() => [.. Visuals.Select(v => new EditionVisualEntry(v.Id, v.PendingId, v.Type))];

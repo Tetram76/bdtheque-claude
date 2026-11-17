@@ -271,8 +271,7 @@ internal static class EditionEndpoints
         var edition = album.Editions.SingleOrDefault(e => e.Id == id) ?? throw new EntityNotFoundException(typeof(Edition), id);
         fields.Place(edition);
         var content = request.Content;
-        var (publisher, collection) = await FormReferences.LoadPublisherAsync(
-            context, content.PublisherId, content.PublisherCollectionId, cancellationToken);
+        var (publisher, collection) = await LoadPublisherAsync(context, fields, content, cancellationToken);
 
         ApplyDetails(edition, content, publisher, collection);
         // Not owned until then, the edition has no amount its year could leave undated.
@@ -292,8 +291,7 @@ internal static class EditionEndpoints
     internal static async Task<Edition> AddEditionAsync(
         BdthequeDbContext context, ContentFields fields, Album album, EditionContent content, CancellationToken cancellationToken)
     {
-        var (publisher, collection) = await FormReferences.LoadPublisherAsync(
-            context, content.PublisherId, content.PublisherCollectionId, cancellationToken);
+        var (publisher, collection) = await LoadPublisherAsync(context, fields, content, cancellationToken);
 
         var edition = fields.Create("", () => new Edition(album, publisher));
         ApplyDetails(edition, content, publisher, collection);
@@ -313,8 +311,7 @@ internal static class EditionEndpoints
         var edition = album.Editions.SingleOrDefault(e => e.Id == id) ?? throw new EntityNotFoundException(typeof(Edition), id);
         fields.Place(edition);
         var content = request.Content;
-        var (publisher, collection) = await FormReferences.LoadPublisherAsync(
-            context, content.PublisherId, content.PublisherCollectionId, cancellationToken);
+        var (publisher, collection) = await LoadPublisherAsync(context, fields, content, cancellationToken);
 
         ApplyDetails(edition, content, publisher, collection);
         edition.SetPublicationYearAndAcquisition(content.PublicationYear, ToAcquisition(content));
@@ -325,6 +322,18 @@ internal static class EditionEndpoints
         // After the commit, as any deletion: a failed one leaves the files intact, a file not deleted is left to the reconciliation.
         storage.Delete(removed);
         return await GetAsync(rootId, id, context, cancellationToken);
+    }
+
+    /// <summary>
+    /// The publisher and the collection of the edition, the publisher created first if the form added it on the spot: it is
+    /// created with the edition, in the same transaction, or not at all
+    /// (choix-implementation/api/organisation-de-l-api.md).
+    /// </summary>
+    private static async Task<(Publisher? Publisher, PublisherCollection? Collection)> LoadPublisherAsync(
+        BdthequeDbContext context, ContentFields fields, EditionContent content, CancellationToken cancellationToken)
+    {
+        var added = await FormReferences.CreateAddedAsync(context, fields, content.NewRecords, cancellationToken);
+        return await FormReferences.LoadPublisherAsync(context, content.PublisherId, content.PublisherCollectionId, added, cancellationToken);
     }
 
     /// <summary>

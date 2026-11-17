@@ -37,6 +37,10 @@ public sealed record NewPurchaseIntentForm(
 /// </summary>
 /// <param name="PublisherId">Required.</param>
 /// <param name="PublisherCollectionId">Must belong to the publisher.</param>
+/// <param name="NewRecords">
+/// The records the form added on the spot (a publisher), created with the edition: <paramref name="PublisherId"/> cites one by its
+/// key. <c>null</c> for none, as in what a reading returns.
+/// </param>
 public sealed record PurchaseIntentEditionContent(
     Guid? PublisherId,
     Guid? PublisherCollectionId,
@@ -48,7 +52,8 @@ public sealed record PurchaseIntentEditionContent(
     EditionFormat? Format,
     int? PageCount,
     EditionCategory? Category,
-    bool IsColor);
+    bool IsColor,
+    NewRecords? NewRecords = null);
 
 /// <param name="Edition">The new edition targeted; <c>null</c> for an intent on the whole album.</param>
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>

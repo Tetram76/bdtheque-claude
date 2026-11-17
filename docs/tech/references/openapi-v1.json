@@ -12443,6 +12443,17 @@
               "null",
               "string"
             ]
+          },
+          "newRecords": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The records the form added on the spot (a publisher), created with the edition: PublisherId cites one by its\nkey. `null` for none, as in what a reading returns.",
+                "$ref": "#/components/schemas/NewRecords"
+              }
+            ]
           }
         },
         "description": "Everything the user edits on an edition, sent to create it, and sent whole to modify it (the form\nalways sends the entire record)."
@@ -13563,6 +13574,23 @@
           }
         }
       },
+      "NewPublisher": {
+        "required": [
+          "key",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "A publisher created by its name alone, without website nor collection, which its own form completes."
+      },
       "NewPurchaseIntentForm": {
         "required": [
           "albumId",
@@ -13617,7 +13645,8 @@
           "authors",
           "genres",
           "universes",
-          "series"
+          "series",
+          "publishers"
         ],
         "type": "object",
         "properties": {
@@ -13644,9 +13673,15 @@
             "items": {
               "$ref": "#/components/schemas/NewSeries"
             }
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewPublisher"
+            }
           }
         },
-        "description": "The records an entry form adds without creating them (authors, genres, universes, series added on the spot): they are created with\nthe record the form saves, in the same transaction, or not at all. The form references each by its `Key`, which it\nchose, in place of an identifier, among the records it cites."
+        "description": "The records an entry form adds without creating them (authors, genres, universes, series, publishers added on the spot): they\nare created with the record the form saves, in the same transaction, or not at all. The form references each by its\n`Key`, which it chose, in place of an identifier, among the records it cites."
       },
       "NewSeries": {
         "required": [
@@ -15301,6 +15336,17 @@
           },
           "isColor": {
             "type": "boolean"
+          },
+          "newRecords": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The records the form added on the spot (a publisher), created with the edition: PublisherId cites one by its\nkey. `null` for none, as in what a reading returns.",
+                "$ref": "#/components/schemas/NewRecords"
+              }
+            ]
           }
         },
         "description": "The edition an intent targets, entered with the minimum of fields: those of the published edition,\nwithout the traits of the copy once owned (condition, second hand, dedication, freeness,\nacquisition, personal reference and notes —\nfonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)."

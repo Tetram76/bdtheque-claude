@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T20:00:00Z }
 ---
 
 # Organisation de l'API
@@ -28,7 +28,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:40:00Z }
 - **Modification par `PUT` de l'état complet du formulaire** ; les champs interdépendants sont appliqués par des **méthodes atomiques du domaine**, plutôt que par des setters dont l'API devrait connaître l'ordre valide ([Valeur d'une édition : mise en œuvre](../domaine/valeur-d-une-edition-mise-en-oeuvre.md)).
   - **Alternative écartée (`PATCH`)** : les formulaires envoient toujours la fiche entière ; un correctif partiel multiplierait les combinaisons à valider, sans cas d'usage.
 - **Un même contenu pour la création et la modification** d'une fiche, associations et contributions comprises, remplacées en bloc, seule la différence étant écrite. Une référence à une fiche supprimée entre-temps est une erreur fonctionnelle.
-- **Fiches ajoutées sur place créées avec la fiche saisie** : le contenu décrit les fiches que le formulaire a ajoutées (auteurs, genres, univers, séries), chacune sous une clé qu'il cite à la place d'un identifiant ; elles sont créées par le domaine dans la transaction de l'enregistrement, avec lui ou pas du tout. Une série ajoutée sur place reçoit les valeurs de départ de toute nouvelle série (ci-dessous), du domaine.
+- **Fiches ajoutées sur place créées avec la fiche saisie** : le contenu décrit les fiches que le formulaire a ajoutées (auteurs, genres, univers, séries, éditeurs), chacune sous une clé qu'il cite à la place d'un identifiant, celui d'une édition, possédée ou visée par une intention d'achat, comme celui d'une série ou d'un album ; elles sont créées par le domaine dans la transaction de l'enregistrement, avec lui ou pas du tout. Une série ajoutée sur place reçoit les valeurs de départ de toute nouvelle série (ci-dessous), du domaine.
 - **La lecture d'une fiche pour sa saisie nomme les fiches qu'elle cite** (série, éditeur et collection, genres, univers avec leurs ancêtres, auteurs) et porte ses dates : le formulaire les présente sans autre requête. Un univers ajouté se lit avec ses ancêtres (`/admin/universes/{id}/hierarchy`), la clé de tri d'un titre se demande au domaine (`/admin/sort-keys/title`).
 - **Valeurs de départ d'une nouvelle série demandées au domaine** (`GET /admin/series/new`) : ses nouvelles éditions proposent ce que toute nouvelle édition se voit proposer ([Série](../../modele-metier/serie.md)), valeurs que tient le domaine, comme le pré-remplissage d'une nouvelle édition. Rien n'est écrit : la série enregistre ce que le formulaire envoie.
   - **Alternative écartée (valeurs écrites dans le frontend)** : une seconde source des valeurs proposées, qui divergerait de celle de la nouvelle édition.

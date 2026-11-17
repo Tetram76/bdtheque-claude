@@ -94,9 +94,13 @@ else
         <Block Title="@L["Block.Publisher"]" Kicker="@L["Kicker.Publisher"]">
             <div class="series-fields">
                 <div class="series-publisher">
-                    <Field Id="series-publisher" Label="@L["Publisher"]" Context="control">
+                    <Field Id="series-publisher" Label="@L["Publisher"]" Error="@(Entry.Publisher is { } chosen ? AddedError(chosen.Id) : null)"
+                           Context="control">
                         <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="ChoosePublisherAsync"
-                                      Placeholder="@L["Publisher.Placeholder"]" aria-describedby="series-publisher-help" />
+                                      Placeholder="@L["Publisher.Placeholder"]" OnCreate="text => _publisherCreation = text"
+                                      CreateLabel="@(text => L["Publisher.Create", text].Value)" Pending="PendingPublishers"
+                                      aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
+                                      aria-invalid="@control.Invalid" />
                     </Field>
                     @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and removed
                        when it changes. *@
@@ -167,6 +171,11 @@ else
         </Block>
     </EntryForm>
 
+    @if (_publisherCreation is { } publisherName)
+    {
+        <PublisherCreationDialog Id="series-publisher-creation" Text="@publisherName" OnCreated="PublisherCreatedAsync"
+                                 OnCancel="() => _publisherCreation = null" />
+    }
     @if (_changesShown)
     {
         <ChangesDialog Id="series-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
@@ -184,6 +193,8 @@ else
     private string? _savedFingerprint;
     private bool _changesShown;
     private int _publisherChoice;
+    // The name typed in the choice of the publisher, while its creation on the spot is being confirmed.
+    private string? _publisherCreation;
 
     /// <summary>The series to modify; none for a new series.</summary>
     [Parameter]
@@ -270,14 +281,27 @@ else
         Entry.ChoosePublisher(publisher);
         if (!changed)
             return;
-        // None while those of the new one are read.
+        // None while those of the new one are read; none at all for a publisher added on the spot, which does not exist yet.
         (PublisherCollections, CollectionsProblem) = ([], null);
-        if (publisher is null)
+        if (publisher is null || Entry.PublisherIsNew)
             return;
         var read = await CollectionsOfAsync(publisher.Id);
         if (choice == _publisherChoice)
             (PublisherCollections, CollectionsProblem) = read;
     }
+
+    // The publisher added on the spot, created only with the series when it is saved: cancelling creates none of them. It is
+    // chosen as any publisher.
+    private async Task PublisherCreatedAsync(NewPublisher publisher)
+    {
+        _publisherCreation = null;
+        Entry!.NewPublishers.Add(publisher);
+        await ChoosePublisherAsync(new RecordOption(publisher.Key, publisher.Name, null));
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesPublisherCreated);
+    }
+
+    // Suggested again once replaced, rather than created twice, as the search does not know them.
+    private IReadOnlyList<RecordOption> PendingPublishers => [.. Entry!.NewPublishers.Select(p => new RecordOption(p.Key, p.Name, null))];
 
     // The collections of a publisher, by name; none, with the error met, if they cannot be read.
     private async Task<(List<RecordOption> Collections, ApiProblem? Problem)> CollectionsOfAsync(Guid publisherId)

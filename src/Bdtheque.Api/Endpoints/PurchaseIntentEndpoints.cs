@@ -184,7 +184,7 @@ internal static class PurchaseIntentEndpoints
                 edition.Orientation, edition.ReadingDirection, edition.Format, edition.PageCount, edition.Category,
                 IsDedicated: false, edition.IsColor, Condition: null, AcquisitionMode: null, IsSecondHand: false, AcquisitionDate: null,
                 AcquisitionAmount: null, AcquisitionCurrency: null, IsFree: false, InitialValueAmount: null, InitialValueCurrency: null,
-                PersonalReference: null, PersonalNotes: null),
+                PersonalReference: null, PersonalNotes: null, edition.NewRecords),
             cancellationToken);
 
     private static PurchaseIntentsForm ToForm(Album album, uint albumVersion) =>

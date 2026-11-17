@@ -151,7 +151,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             NewRecords = new NewRecords(
                 [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
                 [new NewGenre(genre, $"Genre{marker}")],
-                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], []),
+                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], [], []),
         };
 
         var created = await CreateAsync(content);
@@ -175,7 +175,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var updated = await UpdateAsync(created, created.Content with
         {
             Contributions = [new ContributionContent(author, ContributionRole.Colorist)],
-            NewRecords = new NewRecords([new NewAuthor(author, null, null, $"Pseudo{marker}")], [], [], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, null, $"Pseudo{marker}")], [], [], [], []),
         });
 
         Assert.Equal($"Pseudo{marker}", Assert.Single(updated.References.Authors).Pseudonym);
@@ -192,7 +192,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         {
             Contributions = [new ContributionContent(author, ContributionRole.Scenarist)],
             GenreIds = [genre],
-            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], []),
+            NewRecords = new NewRecords([new NewAuthor(author, null, "Jean", null)], [new NewGenre(genre, label)], [], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
@@ -211,12 +211,47 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         var content = Content(UniqueTitle()) with
         {
             UniverseIds = [universe],
-            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)], []),
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/newRecords/universes/0/name"]);
+    }
+
+    [Fact]
+    public async Task Create_WithAPublisherAddedOnTheSpot_CreatesItWithTheSeries_WithoutWebsiteNorCollection()
+    {
+        // A publisher created by its name alone (visuel/saisie-serie/contenu.md), its website and collections entered on its own form.
+        var publisher = Guid.NewGuid();
+        var name = $"Éditeur {Guid.NewGuid():N}";
+        var content = WithTemplate(Content(UniqueTitle()), publisher, null) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)]) };
+
+        var created = await CreateAsync(content);
+
+        var named = created.References.Publisher!;
+        Assert.Equal((name, null), (named.Name, named.Website));
+        Assert.Equal(named.Id, created.Content.EditionTemplate.PublisherId);
+        Assert.Empty((await _client.GetFromJsonAsync<List<PublisherCollectionForm>>($"/admin/publishers/{named.Id}/collections"))!);
+    }
+
+    [Fact]
+    public async Task Update_WithAPublisherAddedOnTheSpotAlreadyTaken_DesignatesIt_KeepingTheSeriesUntouched()
+    {
+        var created = await CreateAsync(Content(UniqueTitle()));
+        var taken = await CreatePublisherAsync();
+        var publisher = Guid.NewGuid();
+
+        var response = await _client.PutAsJsonAsync($"/admin/series/{created.Id}", new UpdateSeriesRequest(
+            WithTemplate(created.Content, publisher, null) with
+            {
+                Title = UniqueTitle(),
+                NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, taken.Name.ToUpperInvariant())]),
+            },
+            created.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherNameAlreadyUsed, ["/newRecords/publishers/0/name"]);
+        Assert.Equal(created, await GetAsync(created.Id), SeriesFormComparer.Instance);
     }
 
     [Fact]
