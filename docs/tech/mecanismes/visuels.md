@@ -22,7 +22,6 @@ Le schéma suivant, tracé à la main d'après le code, ne montre que les états
 
 ```mermaid
 stateDiagram-v2
-    direction LR
     [*] --> EnAttente: fichier reçu,<br/>validé, converti
     EnAttente --> Edition: édition enregistrée<br/>avec ce visuel
     EnAttente --> Expire: 24 heures<br/>écoulées

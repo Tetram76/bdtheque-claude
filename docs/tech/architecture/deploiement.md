@@ -46,7 +46,7 @@ Seule la production est publiée sur Internet, derrière le reverse proxy du NAS
 Le schéma suivant, tracé à la main d'après la procédure du `README.dev.md`, répond à la question : comment le navigateur atteint-il chacune des versions installées sur le NAS ? Les noms des projets y sont des exemples, que rien n'impose.
 
 ```mermaid
-flowchart LR
+flowchart TB
     internet["Navigateur, depuis Internet"]
     local["Navigateur, sur le réseau local"]
     proxy["Reverse proxy du NAS"]

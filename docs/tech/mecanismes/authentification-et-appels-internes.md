@@ -66,10 +66,10 @@ Le schéma suivant, tracé à la main d'après le code, répond à la question :
 ```mermaid
 sequenceDiagram
     autonumber
-    participant page as Page ou composant<br/>de frontend
+    participant page as Page<br/>de frontend
     participant client as ApiClient
-    participant handler as InternalApiKeyHandler
-    participant middleware as InternalApiKeyMiddleware<br/>(api)
+    participant handler as InternalApiKey<br/>Handler
+    participant middleware as InternalApiKey<br/>Middleware (api)
     participant endpoint as Endpoint d'api
 
     page->>client: appelle une méthode

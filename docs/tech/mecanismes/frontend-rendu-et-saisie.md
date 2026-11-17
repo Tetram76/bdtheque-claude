@@ -27,16 +27,16 @@ sequenceDiagram
     actor browser as Navigateur
     participant pipeline as Middlewares
     participant app as App.razor
-    participant page as Composant de la page
+    participant page as Page
     participant api as api
 
     browser->>pipeline: GET /catalog/…
-    pipeline->>pipeline: adresse publique, culture,<br/>authentification, couleurs du jour
+    pipeline->>pipeline: adresse, culture,<br/>authentification,<br/>couleurs du jour
     pipeline->>app: demande le rendu
-    app->>page: choisit la page par Routes
-    page->>api: lit ses données par ApiClient
+    app->>page: choisit la page
+    page->>api: lit ses données
     api-->>page: renvoie les contrats
-    page-->>browser: renvoie le HTML entier et ses scripts
+    page-->>browser: HTML et scripts
 ```
 
 La requête traverse d'abord la chaîne des *middlewares*, les traitements qu'ASP.NET Core applique à chaque requête dans l'ordre où [`Program.cs` du frontend](../../../src/Bdtheque.Frontend/Program.cs) les déclare :
