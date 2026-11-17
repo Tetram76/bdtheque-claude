@@ -18,7 +18,7 @@ Docker Compose relie les conteneurs par deux réseaux privés. Le réseau `front
 Le schéma suivant, tracé à la main d'après `docker-compose.yml`, répond à une seule question : quel conteneur peut joindre quel autre, par quel réseau, et où sont rangées les données ?
 
 ```mermaid
-flowchart LR
+flowchart TB
     host["Machine hôte<br/>(NAS ou poste)"]
     frontend["frontend"]
     api["api"]
@@ -48,19 +48,19 @@ Le schéma suivant, tracé à la main d'après le code, répond à la question :
 ```mermaid
 sequenceDiagram
     participant browser as Navigateur
-    participant proxy as Reverse proxy du NAS
+    participant proxy as Reverse proxy
     participant frontend as frontend
     participant api as api
-    participant db as db (PostgreSQL)
+    participant db as db
 
-    browser->>proxy: requête HTTPS
-    proxy->>frontend: même requête, en HTTP
-    frontend->>api: appel HTTP avec le secret interne
-    api->>db: requêtes SQL
+    browser->>proxy: HTTPS
+    proxy->>frontend: HTTP
+    frontend->>api: HTTP + secret
+    api->>db: SQL
     db-->>api: lignes
-    api-->>frontend: réponse JSON
-    frontend-->>proxy: page HTML
-    proxy-->>browser: page HTML, en HTTPS
+    api-->>frontend: JSON
+    frontend-->>proxy: HTML
+    proxy-->>browser: HTML en HTTPS
 ```
 
 En dehors de ce parcours, `frontend` télécharge lui-même, au démarrage puis chaque jour, les plages de numéros ISBN publiées par l'Agence internationale de l'ISBN, dont il se sert pour présenter un ISBN avec ses tirets ([`Program.cs` du frontend](../../../src/Bdtheque.Frontend/Program.cs), service `IsbnRangesRefresher`). C'est le seul appel que l'application émet vers Internet.

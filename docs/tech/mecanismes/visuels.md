@@ -22,15 +22,21 @@ Le schéma suivant, tracé à la main d'après le code, ne montre que les états
 
 ```mermaid
 stateDiagram-v2
-    [*] --> EnAttente: fichier reçu, validé et converti
-    EnAttente --> Edition: fiche de l'édition enregistrée<br/>avec ce visuel
-    EnAttente --> [*]: 24 heures écoulées,<br/>supprimé par la réconciliation
-    Edition --> Edition: ordre ou type changé
-    Edition --> [*]: retiré de la fiche,<br/>ou supprimé avec son édition
+    direction LR
+    [*] --> EnAttente: fichier reçu,<br/>validé, converti
+    EnAttente --> Edition: édition enregistrée<br/>avec ce visuel
+    EnAttente --> Expire: 24 heures<br/>écoulées
+    Edition --> Retire: retiré de la fiche,<br/>ou édition supprimée
+    Expire --> [*]
+    Retire --> [*]
 
     EnAttente: Visuel en attente
     Edition: Visuel de l'édition
+    Expire: Supprimé par la réconciliation quotidienne
+    Retire: Visuel supprimé
 ```
+
+Changer l'ordre ou le type d'un visuel de l'édition ne change pas son état : il reste un visuel de l'édition, et le schéma ne le montre donc pas.
 
 ## Du fichier choisi au visuel enregistré
 

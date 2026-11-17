@@ -72,11 +72,11 @@ sequenceDiagram
     participant middleware as InternalApiKeyMiddleware<br/>(api)
     participant endpoint as Endpoint d'api
 
-    page->>client: appel d'une méthode du client
+    page->>client: appelle une méthode
     client->>handler: requête HTTP
-    handler->>middleware: requête avec l'en-tête X-Internal-Api-Key
-    middleware->>endpoint: requête acceptée
-    endpoint-->>page: réponse JSON ou ProblemDetails
+    handler->>middleware: ajoute le secret
+    middleware->>endpoint: laisse passer
+    endpoint-->>page: JSON ou ProblemDetails
 ```
 
 Côté `api`, le middleware [`InternalApiKeyMiddleware`](../../../src/Bdtheque.Api/Security/InternalApiKeyMiddleware.cs) examine chaque requête avant tout endpoint. Il laisse passer sans contrôle trois familles de chemins : `/health`, que l'orchestrateur interroge pour savoir si le conteneur est en bonne santé, ainsi que `/openapi` et `/scalar`, la documentation interactive de l'API, qui n'existe que dans les environnements `Development` et `Validation` et doit rester accessible depuis un simple navigateur. Pour toutes les autres requêtes, il répond `401` si l'en-tête est absent ou ne porte pas le secret attendu. Ce contrôle est une défense en profondeur : `api` n'est déjà joignable que par le réseau interne de Docker, et le secret ne sert qu'à refuser un appel direct qui aurait contourné cet isolement.

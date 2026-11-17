@@ -80,13 +80,13 @@ sequenceDiagram
     participant domain as Domaine et base
     participant handler as ApiExceptionHandler
 
-    client->>endpoint: envoie le contenu saisi
-    endpoint->>fields: retient le chemin de chaque fiche
-    endpoint->>domain: applique les opérations et enregistre
+    client->>endpoint: envoie la saisie
+    endpoint->>fields: note les chemins
+    endpoint->>domain: applique, enregistre
     domain-->>handler: lève une exception
-    handler->>fields: demande le champ (fiche, attribut)
-    fields-->>handler: renvoie le pointeur JSON
-    handler-->>client: répond 422 avec fields
+    handler->>fields: demande le champ
+    fields-->>handler: pointeur JSON
+    handler-->>client: 422 avec fields
 ```
 
 [`ContentFields`](../../../src/Bdtheque.Api/Errors/ContentFields.cs) est un service créé pour chaque requête. L'endpoint lui indique, par `Place`, le chemin de chaque fiche qu'il applique ; `Create` fait de même pour une fiche à construire, si bien que la fiche est placée même quand sa construction échoue. Le service retient aussi les attributs saisis sous un autre nom que celui du domaine, comme la clé de tri manuelle d'un album, saisie sous `/manualSortKey`. Enfin, il note à chaque enregistrement les fiches que la requête écrit : une contrainte d'unicité différable n'est vérifiée qu'à la validation de la transaction, moment où ces fiches paraissent déjà inchangées pour EF Core, et cette liste permet malgré tout de savoir qui a été écrit.

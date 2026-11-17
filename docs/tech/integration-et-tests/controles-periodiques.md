@@ -20,7 +20,7 @@ Les deux workflows suivent le même déroulement. Plusieurs jobs de relevé s'ex
 Le schéma suivant, tracé à la main et commun aux deux workflows, répond à une seule question : par où passent les entrées relevées, des jobs de relevé jusqu'au ticket de suivi ?
 
 ```mermaid
-flowchart LR
+flowchart TB
     jobs["Jobs de relevé,<br/>en parallèle"]
     artifacts[("Artefacts<br/>findings-* ou vulnerabilities-*")]
     report["Job Report"]

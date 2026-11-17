@@ -18,7 +18,7 @@ Une fois l'application démarrée, une requête de page entre par `Bdtheque.Fron
 Le schéma suivant, tracé à la main d'après le code, répond à la question : quel projet appelle quel autre pendant le traitement d'une requête, et par quel moyen ?
 
 ```mermaid
-flowchart LR
+flowchart TB
     frontend["Bdtheque.Frontend<br/>pages et client de l'API"]
     api["Bdtheque.Api<br/>endpoints"]
     domain["Bdtheque.Domain<br/>entités et règles"]
