@@ -1,6 +1,6 @@
 ---
 title: 'Dépendances des projets'
-description: 'Références entre les projets de la solution, générées depuis ses fichiers de projet ; pour un fait exact sur qui référence qui.'
+description: 'Cette page, générée depuis les fichiers de projet, montre quel projet de la solution référence quel autre ; à lire pour un fait exact sur les dépendances entre projets.'
 code:
   - 'Bdtheque.slnx'
   - 'src/*/*.csproj'
@@ -10,11 +10,11 @@ generated: 'scripts/Update-TechnicalReferences.ps1'
 
 # Dépendances des projets
 
-Page générée par [`Update-TechnicalReferences.ps1`](../../../scripts/Update-TechnicalReferences.ps1) depuis [`Bdtheque.slnx`](../../../Bdtheque.slnx) et les références (`ProjectReference`) de chaque fichier de projet : elle ne se modifie pas à la main. Le rôle de chaque projet est décrit dans [Projets de la solution](../architecture/projets-de-la-solution.md).
+Cette page est générée par [`Update-TechnicalReferences.ps1`](../../../scripts/Update-TechnicalReferences.ps1), qui lit la liste des projets dans [`Bdtheque.slnx`](../../../Bdtheque.slnx) puis les références de projet (`ProjectReference`) déclarées dans chaque fichier de projet ; elle ne se modifie donc jamais à la main. Le rôle de chaque projet, et la façon dont ils communiquent à l'exécution, sont expliqués dans [Projets de la solution](../architecture/projets-de-la-solution.md).
 
-Schémas générés : ils reproduisent exactement les références directes, sans les références transitives, en deux vues pour rester lisibles.
+Les deux schémas suivants sont générés : ils reproduisent exactement les références directes de chaque projet, sans les références transitives, et séparent les projets de l'application de ceux des tests pour rester lisibles.
 
-Question du schéma : *quel projet de l'application référence directement quel autre ?*
+Le premier répond à une question : quel projet de l'application référence directement quel autre ?
 
 ```mermaid
 flowchart LR
@@ -33,7 +33,7 @@ flowchart LR
     Bdtheque_ValidationData --> Bdtheque_Contracts
 ```
 
-Question du schéma : *quels projets chaque projet de tests référence-t-il directement ?*
+Le second répond à une autre : quels projets chaque projet de tests référence-t-il directement ?
 
 ```mermaid
 flowchart LR

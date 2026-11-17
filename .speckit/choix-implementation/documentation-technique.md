@@ -1,9 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Documentation technique : mise en œuvre'
-description: 'Markdown sous docs/tech en cartes et pages, diagrammes Mermaid, site DocFX publié sur GitHub Pages, contrôles (structure, impact par trailer Git, références générées, rendu dans Chromium), job du CI, service de l''environnement de validation ; à lire pour modifier l''outillage de la documentation technique.'
+description: 'Markdown sous docs/tech en cartes et pages, diagrammes Mermaid et leur style commun, site DocFX publié sur GitHub Pages, contrôles (structure, impact par trailer Git, références générées, rendu dans Chromium), job du CI, service de l''environnement de validation ; à lire pour modifier l''outillage de la documentation technique.'
 applies_to:
   - 'docs/tech/docfx.json'
+  - 'docs/tech/template/**'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
@@ -12,7 +13,7 @@ applies_to:
   - 'tests/Bdtheque.Documentation.Tests/**'
   - 'tests/Bdtheque.Api.Tests/OpenApiContractTests.cs'
   - 'tests/Bdtheque.Infrastructure.Tests/DatabaseSchemaReference*.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T17:00:00Z }
 ---
 
 # Documentation technique : mise en œuvre
@@ -34,6 +35,9 @@ Mise en œuvre de [Documentation technique](../gestion-projet/gouvernance/docume
   - **Alternative écartée (PlantUML)** : rendu par Java et Graphviz, ou par un serveur ; GitHub ne le rend pas.
   - **Alternative écartée (D2)** : non rendu par GitHub, un binaire de plus à épingler.
   - **Alternative écartée (images SVG ou PNG versionnées)** : une seconde source à tenir alignée sur le texte, et un diff illisible.
+- **Style commun des diagrammes, déclaré une fois dans le modèle du site** : le thème `base` de Mermaid, avec une palette sobre déclinée en clair et en sombre et la police du site, passé à Mermaid par l'option `mermaid` du `main.js` d'un modèle propre au projet, que DocFX applique par-dessus `modern` (documentation de DocFX, *Template*). DocFX relit cette option à chaque rendu, y compris au changement de thème du lecteur : la palette suit le mode clair ou sombre. Le thème par défaut de Mermaid, aux nœuds lavande et à la police Trebuchet, détonne sur le site et nuit à la lecture, celle des références générées en particulier.
+  - **Alternative écartée (directive `%%{init: …}%%` ou `classDef` dans chaque diagramme)** : un style à répéter dans chaque diagramme et dans chaque générateur, que rien ne garderait identique, et une palette fixe qui ne suivrait pas le mode sombre.
+  - **Alternative écartée (thèmes livrés par Mermaid, `neutral` ou `forest`)** : `neutral` ne se décline pas en sombre, et aucun ne reprend la police du site.
 
 ## Site
 

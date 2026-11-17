@@ -23,7 +23,7 @@ internal static partial class DatabaseSchemaReference
     private const string Generator = "scripts/Update-TechnicalReferences.ps1";
 
     private const string Description =
-        "Tables, colonnes, contraintes, index, collations et relations de la base, générés depuis une base qui a reçu les migrations ; pour un fait exact sur le schéma physique.";
+        "Cette page, générée depuis une base qui a reçu les migrations, présente les tables de la base avec leurs colonnes, contraintes et index, ainsi que ses collations et ses relations ; à lire pour un fait exact sur le schéma physique.";
 
     // The relations, in one diagram per part of the schema: in a single one, Mermaid shrinks them past legibility. Each
     // table is placed here by hand, which is the only interpretation of the page; a table left out fails the generation.
@@ -85,7 +85,7 @@ internal static partial class DatabaseSchemaReference
 
             # Schéma de la base
 
-            Page générée par [`Update-TechnicalReferences.ps1`](../../../{Generator}), au moyen de [`DatabaseSchemaReference`](../../../tests/Bdtheque.Infrastructure.Tests/DatabaseSchemaReference.cs), depuis le catalogue d'une base PostgreSQL de l'image de production qui a reçu les [migrations](../../../src/Bdtheque.Infrastructure/Migrations/) du commit : elle ne se modifie pas à la main. Elle ne retient rien qui dépende du serveur (version, base, propriétaire, version des collations). Le rôle des conventions et des contraintes, et la façon dont le schéma est appliqué, sont décrits dans [Persistance : modèle et schéma](../mecanismes/persistance-modele-et-schema.md).
+            Cette page est générée par [`Update-TechnicalReferences.ps1`](../../../{Generator}), au moyen de [`DatabaseSchemaReference`](../../../tests/Bdtheque.Infrastructure.Tests/DatabaseSchemaReference.cs). Le script crée une base PostgreSQL avec l'image de production, lui applique les [migrations](../../../src/Bdtheque.Infrastructure/Migrations/) du commit, puis lit son catalogue : la page décrit donc exactement le schéma que produisent les migrations, et ne se modifie jamais à la main. Elle écarte tout ce qui dépend du serveur plutôt que du schéma, comme la version de PostgreSQL, le nom de la base, son propriétaire ou la version des collations, si bien qu'elle ne change qu'avec le schéma lui-même. Le rôle des conventions et des contraintes, et la façon dont le schéma est appliqué au démarrage, sont expliqués dans [Persistance : modèle et schéma](../mecanismes/persistance-modele-et-schema.md).
 
 
             """);
@@ -96,7 +96,7 @@ internal static partial class DatabaseSchemaReference
         page.Append("""
             ## Collations
 
-            Collations créées par les migrations ; les colonnes texte portent en outre `fr-FR-x-icu`, fournie par PostgreSQL.
+            Le tableau suivant liste les collations que créent les migrations. Les colonnes texte utilisent en outre la collation `fr-FR-x-icu`, que PostgreSQL fournit lui-même.
 
             | Collation | Fournisseur | Locale | Déterministe |
             | --- | --- | --- | --- |
@@ -119,18 +119,18 @@ internal static partial class DatabaseSchemaReference
         page.Append("""
             ## Relations
 
-            Schémas générés : chaque clé étrangère y figure, dans le schéma de la table qui la porte, avec la table qu'elle référence. Une clé qui admet `NULL` rend la référence facultative (`|o`) ; une clé sur laquelle porte un index unique, sans condition, ne désigne au plus qu'une ligne (`o|`). Les règles `ON DELETE` sont dans les contraintes de chaque table.
+            Les schémas de cette section sont générés depuis le catalogue de la base. Chaque clé étrangère y figure une fois, dans le schéma de la table qui la porte, reliée à la table qu'elle référence. Une clé qui admet `NULL` rend la référence facultative, ce que note `|o` ; une clé sur laquelle porte un index unique sans condition désigne au plus une ligne, ce que note `o|`. Les règles `ON DELETE` ne figurent pas sur les schémas : elles se lisent dans les contraintes de chaque table, plus bas.
 
 
             """);
         page.Append(CultureInfo.InvariantCulture,
-            $"Tables qui ne référencent aucune autre, et qu'aucune ne référence : {string.Join(", ", Unrelated.Order(StringComparer.Ordinal).Select(Code))}.\n\n");
+            $"Certaines tables ne référencent aucune autre table, et aucune ne les référence ; elles n'apparaissent donc sur aucun schéma : {string.Join(", ", Unrelated.Order(StringComparer.Ordinal).Select(Code))}.\n\n");
 
         foreach (var group in Groups)
         {
             var keys = foreignKeys.Where(key => group.Tables.Contains(key.Table, StringComparer.Ordinal))
                 .OrderBy(key => key.Table, StringComparer.Ordinal).ThenBy(key => key.Columns, StringComparer.Ordinal).ToList();
-            page.Append(CultureInfo.InvariantCulture, $"### {group.Title}\n\nQuestion du schéma : *{group.Question}*\n\n```mermaid\nerDiagram\n    direction {group.Direction}\n");
+            page.Append(CultureInfo.InvariantCulture, $"### {group.Title}\n\nCe schéma généré répond à une question : {group.Question}\n\n```mermaid\nerDiagram\n    direction {group.Direction}\n");
             foreach (var key in keys)
             {
                 var referenced = key.Mandatory ? "||" : "|o";

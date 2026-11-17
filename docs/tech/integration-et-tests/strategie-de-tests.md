@@ -1,6 +1,6 @@
 ---
 title: 'Stratégie de tests'
-description: 'Projets de tests et leurs ressources, job du CI de chacun, tests du dépôt, base PostgreSQL et horloge des tests, thème imposé et répartition par thème, API interdites par le compilateur, captures de référence et leur comparaison sous Linux ; pour écrire un test, choisir son projet ou comprendre l''échec d''un test ou d''une capture.'
+description: 'Cette page explique comment les tests sont organisés en projets, ce dont chacun a besoin pour s''exécuter, et ce qui les rend indépendants de l''heure et du thème tiré au hasard ; à lire pour écrire un test, choisir son projet ou comprendre l''échec d''un test ou d''une capture de référence.'
 code:
   - 'tests/Directory.Build.props'
   - 'tests/*/BannedSymbols.txt'
@@ -16,30 +16,35 @@ code:
 
 # Stratégie de tests
 
-Comment les tests sont organisés, ce dont chacun a besoin pour s'exécuter et ce qui les rend indépendants du moment et du thème. Les règles (TDD, non-régression, tests qui ont un facteur temps, tests indépendants du thème) sont dans [Qualité du code](../../../.speckit/gestion-projet/gouvernance/qualite-du-code.md) ; les choix d'outils et leurs raisons, dans la section « Tests » d'[Outillage de développement](../../../.speckit/choix-implementation/outillage.md). Ce que vérifie chaque projet est résumé dans [Projets de la solution](../architecture/projets-de-la-solution.md#projets-de-tests) ; comment le CI les exécute, dans [Intégration continue](integration-continue.md).
+Cette page explique comment les tests de BDthèque sont répartis entre projets, ce dont chacun a besoin pour s'exécuter, et par quels mécanismes ils restent reproductibles alors que l'application dépend de l'heure et tire au hasard le thème de chaque visite. Les règles que suivent les tests, comme le TDD, la non-régression ou l'exécution dans chaque thème, sont fixées par [Qualité du code](../../../.speckit/gestion-projet/gouvernance/qualite-du-code.md) ; les raisons des outils retenus sont dans la section « Tests » d'[Outillage de développement](../../../.speckit/choix-implementation/outillage.md). Ce que vérifie chaque projet est résumé dans [Projets de la solution](../architecture/projets-de-la-solution.md#projets-de-tests), et la façon dont le CI les exécute dans [Intégration continue](integration-continue.md).
 
-## Projets, ressources et jobs
+## Les projets de tests et ce dont ils ont besoin
 
-Question du schéma : *de quelles ressources chaque projet de tests a-t-il besoin, et quel job du CI l'exécute ?* Schéma interprétatif, d'après les projets de `tests/` et `ci.yml`.
+Tous les tests sont écrits avec xunit. Ils se répartissent en sept projets, que le CI exécute dans trois jobs distincts :
+
+| Projet | Ce qu'il exerce | Job du CI qui l'exécute |
+| --- | --- | --- |
+| `Bdtheque.Domain.Tests` | Les règles du domaine, en mémoire. | `Build & tests (.NET)` |
+| `Bdtheque.Frontend.Tests` | Les composants Blazor, rendus par bUnit, une bibliothèque qui rend un composant sans navigateur. | `Build & tests (.NET)` |
+| `Bdtheque.Infrastructure.Tests` | La persistance sur une vraie base PostgreSQL, ainsi que les tests du dépôt (ci-dessous). | `Build & tests (.NET)` |
+| `Bdtheque.Api.Tests` | Les endpoints de l'API, appelés sur un hôte en mémoire relié à une vraie base. | `Build & tests (.NET)` |
+| `Bdtheque.ValidationData.Tests` | Le chargement des données fictives de l'environnement de validation. | `Build & tests (.NET)` |
+| `Bdtheque.EndToEnd.Tests` | L'application complète, `api` et `frontend`, pilotée dans un navigateur par Playwright. | `End-to-end tests`, un job par thème |
+| `Bdtheque.Documentation.Tests` | Le site de la documentation technique, construit puis ouvert dans un navigateur. | `Technical documentation` |
+
+Certains de ces projets ont besoin de ressources extérieures au processus de test. Le schéma suivant, tracé à la main d'après les projets de `tests/`, répond à une seule question : de quelle ressource extérieure chaque projet a-t-il besoin pour s'exécuter ? Les projets qui n'en demandent aucune, `Domain.Tests` et `Frontend.Tests`, n'y figurent pas.
 
 ```mermaid
 flowchart LR
-    subgraph build["Build & tests (.NET)"]
-        domain["Domain.Tests"]
-        frontend["Frontend.Tests<br/>bUnit"]
-        infra["Infrastructure.Tests<br/>dont les tests du dépôt"]
-        api["Api.Tests"]
-        validation["ValidationData.Tests"]
-    end
-    subgraph e2e["End-to-end tests (thème)"]
-        endtoend["EndToEnd.Tests<br/>Playwright"]
-    end
-    subgraph docjob["Technical documentation"]
-        documentation["Documentation.Tests"]
-    end
-    postgres[("PostgreSQL<br/>Testcontainers")]
-    chromium[["Chromium<br/>sans interface"]]
-    tools[["DocFX, git, pwsh"]]
+    infra["Infrastructure.Tests"]
+    api["Api.Tests"]
+    validation["ValidationData.Tests"]
+    endtoend["EndToEnd.Tests"]
+    documentation["Documentation.Tests"]
+    postgres[("Conteneur PostgreSQL")]
+    chromium[["Chromium sans interface"]]
+    tools[["DocFX, git et PowerShell"]]
+
     infra --> postgres
     api --> postgres
     validation --> postgres
@@ -49,65 +54,74 @@ flowchart LR
     documentation --> tools
 ```
 
-- **Références communes** : [`tests/Directory.Build.props`](../../../tests/Directory.Build.props) ajoute à tout projet dont le nom finit par `.Tests` xunit, son exécuteur, le SDK de test et le collecteur de couverture (coverlet) ; il marque tous les projets de `tests/`, `Bdtheque.Testing` compris, comme code de test pour SonarQube Cloud.
-- **Bibliothèque partagée**, [`Bdtheque.Testing`](../../../tests/Bdtheque.Testing/Bdtheque.Testing.csproj) : le serveur PostgreSQL des tests et ses bases ([Persistance : modèle et schéma](../mecanismes/persistance-modele-et-schema.md#base-des-tests)), l'hôte de l'API en mémoire ([`ApiHostFactory`](../../../tests/Bdtheque.Testing/ApiHostFactory.cs)), l'horloge des tests ([`TestClock`](../../../tests/Bdtheque.Testing/TestClock.cs)).
-- **Docker** est requis par tout test qui touche à PostgreSQL : le conteneur est démarré par Testcontainers, de la même image que `db` dans [`docker-compose.yml`](../../../docker-compose.yml).
+Les tests du dépôt, bien qu'ils fassent partie d'`Infrastructure.Tests`, n'ont besoin d'aucune de ces ressources : ils ne lisent que des fichiers.
+
+Le conteneur PostgreSQL est démarré par Testcontainers, une bibliothèque qui lance un conteneur Docker le temps des tests et le supprime ensuite. Docker est donc requis par tout test qui touche à la base. Le conteneur utilise la même image que le service `db` de [`docker-compose.yml`](../../../docker-compose.yml), si bien que les tests s'exécutent sur le même moteur qu'en production.
+
+Deux éléments communs servent à tous ces projets. D'abord, [`tests/Directory.Build.props`](../../../tests/Directory.Build.props) ajoute à tout projet dont le nom se termine par `.Tests` les références à xunit, à son exécuteur, au SDK de test et au collecteur de couverture coverlet ; il déclare aussi tous les projets de `tests/` comme du code de test auprès de SonarQube Cloud. Ensuite, la bibliothèque partagée [`Bdtheque.Testing`](../../../tests/Bdtheque.Testing/Bdtheque.Testing.csproj) fournit le serveur PostgreSQL des tests, l'hôte de l'API en mémoire ([`ApiHostFactory`](../../../tests/Bdtheque.Testing/ApiHostFactory.cs)) et l'horloge des tests ([`TestClock`](../../../tests/Bdtheque.Testing/TestClock.cs)). Le serveur PostgreSQL applique une seule fois les migrations à une base modèle, puis donne à chaque test sa propre base, clonée de ce modèle : les tests sont isolés les uns des autres sans rejouer toutes les migrations à chaque fois ([Persistance : modèle et schéma](../mecanismes/persistance-modele-et-schema.md)).
 
 ## Tests du dépôt
 
-Les tests de `Bdtheque.Infrastructure.Tests` marqués `[Trait("Category", RepositoryFiles.Category)]` ([`RepositoryFiles`](../../../tests/Bdtheque.Infrastructure.Tests/RepositoryFiles.cs), catégorie `Repository`) confrontent les fichiers du dépôt à leurs règles, sans conteneur ni navigateur ; une Pull Request qui ne modifie aucune source n'exécute qu'eux.
+Les tests du dépôt confrontent les fichiers du dépôt à leurs règles, sans conteneur ni navigateur : la structure du `.speckit/`, celle de cette documentation, la cohérence des Dockerfiles, du fichier Compose et des workflows. Ce sont les tests de `Bdtheque.Infrastructure.Tests` marqués `[Trait("Category", RepositoryFiles.Category)]`, c'est-à-dire de catégorie `Repository` ([`RepositoryFiles`](../../../tests/Bdtheque.Infrastructure.Tests/RepositoryFiles.cs)). Parce qu'ils sont rapides et ne demandent rien, ce sont les seuls tests qu'exécute une Pull Request qui ne modifie aucune source.
 
 | Test | Ce qu'il vérifie |
 | --- | --- |
-| [`SpeckitStructureTests`](../../../tests/Bdtheque.Infrastructure.Tests/SpeckitStructureTests.cs) | Structure du `.speckit/` : en-têtes, cartes, liens, `applies_to`, table des moments d'`AGENTS.md`, ordre de `log.md`. |
-| [`TechnicalDocumentationStructureTests`](../../../tests/Bdtheque.Infrastructure.Tests/TechnicalDocumentationStructureTests.cs) | Structure de cette documentation ([Consulter, construire, vérifier et maintenir](../documentation/consulter-et-maintenir.md#contrôles)). |
-| [`SdkVersionTests`](../../../tests/Bdtheque.Infrastructure.Tests/SdkVersionTests.cs), [`RuntimeImageTests`](../../../tests/Bdtheque.Infrastructure.Tests/RuntimeImageTests.cs) | Même SDK dans les Dockerfiles et les workflows ; même image d'exécution dans les Dockerfiles. |
-| [`DockerHubPullsTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerHubPullsTests.cs) | Aucune image de Docker Hub dans les Dockerfiles ; aucune image publiée lue par l'analyse des images. |
-| [`DockerComposeTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerComposeTests.cs) | Noms, ports et données de `docker-compose.yml` propres à chaque déploiement ; ports de la validation ouverts au seul poste. |
-| [`PostgreSqlTestServerTests`](../../../tests/Bdtheque.Infrastructure.Tests/PostgreSqlTestServerTests.cs) (`Image_MatchesDockerComposeDbService`) | Image PostgreSQL des tests identique à celle de `db`. |
-| [`FrontendWebAssetsTests`](../../../tests/Bdtheque.Infrastructure.Tests/FrontendWebAssetsTests.cs) | Ressources web d'ASP.NET Core exigées par le frontend, quels que soient les fichiers présents à la restauration. |
+| [`SpeckitStructureTests`](../../../tests/Bdtheque.Infrastructure.Tests/SpeckitStructureTests.cs) | Il vérifie la structure du `.speckit/` : en-têtes, cartes, liens, motifs `applies_to`, table des moments d'`AGENTS.md` et ordre de `log.md`. |
+| [`TechnicalDocumentationStructureTests`](../../../tests/Bdtheque.Infrastructure.Tests/TechnicalDocumentationStructureTests.cs) | Il vérifie la structure de cette documentation, comme l'explique [Consulter, construire, vérifier et maintenir](../documentation/consulter-et-maintenir.md#contrôles). |
+| [`SdkVersionTests`](../../../tests/Bdtheque.Infrastructure.Tests/SdkVersionTests.cs), [`RuntimeImageTests`](../../../tests/Bdtheque.Infrastructure.Tests/RuntimeImageTests.cs) | Ils vérifient que les Dockerfiles et les workflows utilisent le même SDK, et que les Dockerfiles utilisent la même image d'exécution. |
+| [`DockerHubPullsTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerHubPullsTests.cs) | Il vérifie qu'aucun Dockerfile ne télécharge d'image de Docker Hub, et que l'analyse des images ne lit aucune image publiée. |
+| [`DockerComposeTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerComposeTests.cs) | Il vérifie que les noms, les ports et les données de `docker-compose.yml` sont propres à chaque déploiement, et que les ports de l'environnement de validation ne sont ouverts qu'au poste. |
+| [`PostgreSqlTestServerTests`](../../../tests/Bdtheque.Infrastructure.Tests/PostgreSqlTestServerTests.cs), méthode `Image_MatchesDockerComposeDbService` | Il vérifie que l'image PostgreSQL des tests est celle du service `db`. |
+| [`FrontendWebAssetsTests`](../../../tests/Bdtheque.Infrastructure.Tests/FrontendWebAssetsTests.cs) | Il vérifie que les ressources web d'ASP.NET Core dont a besoin le frontend sont bien produites, quels que soient les fichiers présents lors de la restauration. |
 
-## Heure et données des tests
+## L'heure dans les tests
 
-- **Horloge de l'application remplacée** : [`TestClock`](../../../tests/Bdtheque.Testing/TestClock.cs) donne soit l'heure du système, pour un test qui fournit lui-même chaque date dont il dépend, soit une heure propre (`StartingAt`), qui part d'un instant fixe et avance d'une milliseconde à chaque lecture. Un test peut fixer `UtcNow`, qui reste en place jusqu'à ce qu'il le change.
-- **Application de bout en bout à heure fixe** : [`ApplicationHost`](../../../tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs) démarre `api` et `frontend` sur la même horloge, à partir de `Origin` (le 15 janvier 2026 à 23 h 20 en temps universel), et ouvre le navigateur dans le fuseau `Europe/Paris`, où il est déjà le lendemain ; il ouvre aussi chaque contexte en mouvement réduit, sauf si le test en demande un autre.
-- **Une application de test par état présenté** pour un écran qui dépend de toute la collection (accueil) : la base partagée par les autres tests changerait son rendu selon leur ordre.
+L'application lit l'heure par une horloge qu'on peut remplacer, et aucun test ne lit l'heure de la machine. Dans les tests, cette horloge est [`TestClock`](../../../tests/Bdtheque.Testing/TestClock.cs), qui fonctionne de deux façons. Un test qui fournit lui-même chaque date dont il dépend utilise l'heure du système. Un test qui a besoin d'une heure reproductible utilise `StartingAt`, qui part d'un instant fixe et avance d'une milliseconde à chaque lecture, de sorte que deux lectures successives ne donnent jamais le même instant. Un test peut aussi fixer `UtcNow`, qui garde alors cette valeur jusqu'à ce qu'il la change.
+
+Les tests de bout en bout vont plus loin. [`ApplicationHost`](../../../tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs) démarre `api` et `frontend` sur la même horloge, à partir de l'instant `Origin`, le 15 janvier 2026 à 23 h 20 en temps universel. Il ouvre le navigateur dans le fuseau `Europe/Paris`, où l'on est déjà le 16 janvier : une date devinée en temps universel au lieu de celle du navigateur s'y voit donc dans tous les tests. Il ouvre aussi chaque contexte du navigateur en mouvement réduit, sauf si un test demande un autre réglage : l'écran d'accueil de la première requête laisse alors place à la page aussitôt, au lieu de retenir chaque test le temps de son animation.
+
+Enfin, un écran qui dépend de toute la collection, comme la page d'accueil, est testé sur une application de test démarrée pour l'état qu'il présente. Sur la base partagée par les autres tests, son rendu changerait selon l'ordre dans lequel ceux-ci s'exécutent.
 
 ## Thème imposé
 
-Chaque test de bout en bout dont le résultat peut dépendre du thème le fixe, et s'exécute dans chaque thème proposé :
+En production, l'application tire au hasard le thème de chaque visite. Un test qui laisserait faire ce tirage s'exécuterait dans un thème différent à chaque fois, et pourrait réussir ou échouer selon le hasard. C'est pourquoi chaque test de bout en bout dont le résultat peut dépendre du thème impose ce thème, et s'exécute une fois dans chaque thème proposé. Le mécanisme repose sur quatre éléments :
 
-- **Lignes du test** : l'attribut `InEachTheme` de [`TestThemes`](../../../tests/Bdtheque.EndToEnd.Tests/TestThemes.cs) fournit une ligne par thème couvert, la clé du thème en premier argument (`[Theory, InEachTheme]`, ou `[InEachTheme(320)]` à la place d'`[InlineData(320)]`) ; `EachTheme` marque une théorie dont les lignes viennent d'ailleurs (les captures, thème par écran par largeur). Les deux posent le trait `Themes=Each`.
-- **Thèmes couverts** : tous les thèmes de `ThemeCatalog.Offered`, ou le seul thème que nomme la variable `BDTHEQUE_TEST_THEME` (une valeur qui ne nomme aucun thème proposé fait échouer le test). Le CI la fixe dans chaque job de bout en bout ; seul le job du premier thème exécute aussi les tests sans le trait.
-- **Thème de la requête** : chaque contexte du navigateur est ouvert par `BrowserTest.NewContextAsync(theme)`, qui envoie l'en-tête `X-Test-Theme` ; [`RequestThemeSelector`](../../../tests/Bdtheque.EndToEnd.Tests/RequestThemeSelector.cs), enregistré par l'hôte des tests seulement, en tire le thème de la page.
-- **Vérification** : [`TestThemesTests`](../../../tests/Bdtheque.EndToEnd.Tests/TestThemesTests.cs) échoue pour une théorie qui prend un paramètre `theme` sans l'un des deux attributs, et pour une matrice du CI qui n'est pas celle des thèmes proposés.
+- La déclaration des lignes d'un test. L'attribut `InEachTheme` de [`TestThemes`](../../../tests/Bdtheque.EndToEnd.Tests/TestThemes.cs) fournit une ligne par thème, avec la clé du thème en premier argument ; on l'écrit `[Theory, InEachTheme]`, ou `[InEachTheme(320)]` à la place d'`[InlineData(320)]`. L'attribut `EachTheme` marque quant à lui une théorie dont les lignes viennent d'ailleurs, comme les captures, qui croisent thème, écran et largeur. Les deux attributs posent le trait `Themes=Each`, qui permet au CI de répartir ces tests entre ses jobs.
+- Le choix des thèmes couverts. Par défaut, un test couvre tous les thèmes de `ThemeCatalog.Offered`. Si la variable d'environnement `BDTHEQUE_TEST_THEME` nomme un thème, il ne couvre que celui-là ; si elle nomme un thème qui n'est pas proposé, le test échoue. Le CI fixe cette variable dans chacun de ses jobs de bout en bout, et seul le job du premier thème exécute aussi les tests dépourvus du trait.
+- La transmission du thème à l'application. Chaque contexte du navigateur est ouvert par `BrowserTest.NewContextAsync(theme)`, qui ajoute à chaque requête l'en-tête `X-Test-Theme`. [`RequestThemeSelector`](../../../tests/Bdtheque.EndToEnd.Tests/RequestThemeSelector.cs), que seul l'hôte des tests enregistre, lit cet en-tête et en tire le thème de la page. Ce mécanisme n'existe donc pas dans l'application de production.
+- Le contrôle. [`TestThemesTests`](../../../tests/Bdtheque.EndToEnd.Tests/TestThemesTests.cs) échoue pour une théorie qui prend un paramètre `theme` sans porter l'un des deux attributs, et pour une matrice du CI qui ne serait pas celle des thèmes proposés.
 
-## API interdites par le compilateur
+## Les API interdites par le compilateur
 
-Trois projets référencent l'analyseur des API interdites (`Microsoft.CodeAnalysis.BannedApiAnalyzers`), avec leur liste et sa raison, symbole par symbole ; un appel interdit ne compile pas :
+Certaines méthodes des outils de test fonctionnent mais conduisent à des tests instables ou laissent le thème au hasard. Plutôt que de compter sur la vigilance de chacun, trois projets référencent l'analyseur des API interdites (`Microsoft.CodeAnalysis.BannedApiAnalyzers`) : chaque projet tient une liste de symboles interdits, avec la raison de chaque interdiction, et un appel à l'un d'eux ne compile pas.
 
-| Projet | Liste | Interdits |
+| Projet | Liste | Ce qui est interdit, et pourquoi |
 | --- | --- | --- |
-| `Bdtheque.Frontend.Tests` | [`BannedSymbols.txt`](../../../tests/Bdtheque.Frontend.Tests/BannedSymbols.txt) | Déclenchements d'évènements de bUnit (synchrones, `TriggerEvent`, `UploadFiles`) : un évènement passe par [`CircuitEvents`](../../../tests/Bdtheque.Frontend.Tests/Controls/CircuitEvents.cs). |
-| `Bdtheque.EndToEnd.Tests` | [`BannedSymbols.txt`](../../../tests/Bdtheque.EndToEnd.Tests/BannedSymbols.txt) | Attentes de Playwright en deux temps (`WaitForLoadStateAsync`, `WaitForURLAsync`, `WaitForNavigationAsync`…) ; ouverture d'un contexte ou d'une page hors de `BrowserTest`, qui laisserait le thème au tirage. |
-| `Bdtheque.Documentation.Tests` | [`BannedSymbols.txt`](../../../tests/Bdtheque.Documentation.Tests/BannedSymbols.txt) | Les mêmes attentes de Playwright. |
+| `Bdtheque.Frontend.Tests` | [`BannedSymbols.txt`](../../../tests/Bdtheque.Frontend.Tests/BannedSymbols.txt) | Les déclenchements d'évènements de bUnit (ses méthodes synchrones, `TriggerEvent`, `UploadFiles`) sont interdits : un évènement passe par [`CircuitEvents`](../../../tests/Bdtheque.Frontend.Tests/Controls/CircuitEvents.cs). |
+| `Bdtheque.EndToEnd.Tests` | [`BannedSymbols.txt`](../../../tests/Bdtheque.EndToEnd.Tests/BannedSymbols.txt) | Les attentes de Playwright en deux temps (`WaitForLoadStateAsync`, `WaitForURLAsync`, `WaitForNavigationAsync`…) sont interdites, de même que l'ouverture d'un contexte ou d'une page hors de `BrowserTest`, qui laisserait le thème au tirage. |
+| `Bdtheque.Documentation.Tests` | [`BannedSymbols.txt`](../../../tests/Bdtheque.Documentation.Tests/BannedSymbols.txt) | Les mêmes attentes de Playwright sont interdites. |
 
-## Captures de référence
+## Les captures de référence
 
-- **Une capture par écran, thème et largeur**, prise une fois la page prête, par les tests de [`Captures/`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/) ; [`CaptureStore`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/CaptureStore.cs) range les références sous `Captures/References/<thème>/<écran>.png`.
-- **Comparaison pixel par pixel** par [`CaptureComparison`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/CaptureComparison.cs), à une unité près par composante de couleur ; une différence de taille échoue sans comparer les pixels. Une capture qui diffère est écrite, avec son image de différence (pixels en cause en magenta sur la référence estompée), sous `TestResults/captures`.
-- **Sous Linux seulement** : [`LinuxTheoryAttribute`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/LinuxTheoryAttribute.cs) saute les captures sur un autre système. Le CI les compare dans les jobs de bout en bout, un thème par job.
-- **En local**, [`Test-Captures.ps1`](../../../scripts/Test-Captures.ps1) les exécute dans l'image officielle de Playwright pour .NET, à la version du package `Microsoft.Playwright`, sur une copie de la copie de travail ; la base des tests y est un conteneur voisin, par le socket Docker du poste. Durées bornées : une minute par test, quatre minutes et demie pour l'ensemble.
+Les tests vérifient la structure et le comportement des écrans, mais ne voient pas leur rendu. Les captures de référence comblent ce manque : ce sont des images des écrans, validées une fois par l'utilisateur et versionnées, auxquelles chaque exécution compare l'écran tel qu'il est rendu.
 
-  ```powershell
-  ./scripts/Test-Captures.ps1                                   # comparer
-  ./scripts/Test-Captures.ps1 -Update                           # remplacer les références
-  ./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
-  ```
+Les tests de [`Captures/`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/) prennent une capture par écran, par thème et par largeur d'écran, une fois la page prête. [`CaptureStore`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/CaptureStore.cs) range les références sous `Captures/References/<thème>/<écran>.png`. [`CaptureComparison`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/CaptureComparison.cs) compare ensuite la capture à sa référence pixel par pixel, en tolérant un écart d'une unité par composante de couleur ; si les deux images n'ont pas la même taille, la comparaison échoue sans examiner les pixels. Une capture qui diffère est écrite sous `TestResults/captures`, avec une image de différence qui montre en magenta les pixels en cause sur la référence estompée.
 
-  `-Update` fixe `BDTHEQUE_UPDATE_CAPTURES=1` : les captures prises deviennent les références, à relire avant de les commiter.
+Les polices ne sont pas rendues de la même façon d'un système d'exploitation à l'autre, si bien que les captures ne se comparent que sous Linux, où les références sont prises : [`LinuxTheoryAttribute`](../../../tests/Bdtheque.EndToEnd.Tests/Captures/LinuxTheoryAttribute.cs) les saute sur tout autre système. Le CI les compare dans ses jobs de bout en bout, un thème par job.
+
+Sur un poste de développement, [`Test-Captures.ps1`](../../../scripts/Test-Captures.ps1) exécute les captures dans l'image officielle de Playwright pour .NET, à la version du package `Microsoft.Playwright`, sur une copie de la copie de travail. La base des tests y tourne dans un conteneur voisin, démarré par le socket Docker du poste. La durée est bornée à une minute par test et à quatre minutes et demie pour l'ensemble.
+
+```powershell
+./scripts/Test-Captures.ps1                                   # comparer
+./scripts/Test-Captures.ps1 -Update                           # remplacer les références
+./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
+```
+
+L'option `-Update` fixe la variable `BDTHEQUE_UPDATE_CAPTURES=1` : les captures prises deviennent alors les nouvelles références, qu'il faut relire avant de les commiter.
 
 ## Exécuter les tests
+
+Les commandes suivantes exécutent respectivement tous les tests, les seuls tests du dépôt, et les tests de bout en bout dépendant du thème dans un thème donné :
 
 ```powershell
 dotnet test Bdtheque.slnx                                                   # tout, Docker requis
@@ -115,11 +129,11 @@ dotnet test tests/Bdtheque.Infrastructure.Tests --filter "Category=Repository"  
 $env:BDTHEQUE_TEST_THEME = 'gazette'; dotnet test tests/Bdtheque.EndToEnd.Tests --filter "Themes=Each"
 ```
 
-Les tests de bout en bout installent eux-mêmes Chromium sans interface s'il manque.
+Les tests de bout en bout installent eux-mêmes Chromium sans interface s'il manque sur le poste.
 
 ## Invariants à préserver
 
 - Aucun test ne lit l'heure de la machine : il lit celle de l'application.
-- Aucun test de bout en bout ne laisse le thème au tirage, hors des tests du tirage lui-même ; une théorie dans chaque thème porte le trait qui la répartit entre les jobs.
+- Aucun test de bout en bout ne laisse le thème au tirage, sauf les tests du tirage lui-même. Une théorie exécutée dans chaque thème porte le trait qui la répartit entre les jobs du CI.
 - Les références des captures ne changent qu'après la validation fonctionnelle du rendu ([Thèmes](../../../.speckit/choix-implementation/socle/themes.md), captures de référence).
-- Toute ressource ouverte par un test (contexte de navigateur, connexion, conteneur) est libérée par lui.
+- Toute ressource qu'ouvre un test, qu'il s'agisse d'un contexte de navigateur, d'une connexion ou d'un conteneur, est libérée par ce test.

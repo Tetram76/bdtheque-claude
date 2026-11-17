@@ -1,114 +1,137 @@
 ---
 title: 'Intégration continue'
-description: 'Workflow CI : déclencheurs, classement des fichiers modifiés, jobs et leurs étapes omises selon ce que change la Pull Request, tests de bout en bout par thème, couverture et analyse SonarQube Cloud, images et Docker Scout, job de la documentation ; pour comprendre un check, un échec du CI ou ce qu''exécute une Pull Request.'
+description: 'Cette page explique ce qu''exécute le workflow CI à chaque Pull Request et sur main, comment il choisit les étapes à exécuter d''après les fichiers modifiés, et ce que fait chacun de ses jobs ; à lire pour comprendre un check, un échec du CI ou ce qu''exécutera une Pull Request.'
 code:
   - '.github/workflows/ci.yml'
 ---
 
 # Intégration continue
 
-Le pipeline de non-régression est un seul workflow, [`ci.yml`](../../../.github/workflows/ci.yml). Ses règles (tests selon ce que modifie la Pull Request, checks requis, quotas) sont dans [Intégration continue (CI)](../../../.speckit/gestion-projet/depot/integration-continue-ci.md) ; ses choix d'outillage et leurs raisons, dans la section « CI » d'[Outillage de développement](../../../.speckit/choix-implementation/outillage.md). Les projets de tests qu'il exécute sont décrits dans [Stratégie de tests](strategie-de-tests.md) ; la publication des images, workflow à part, dans [Déploiement et environnement de validation](../architecture/deploiement.md).
+L'intégration continue de BDthèque tient en un seul workflow GitHub Actions, [`ci.yml`](../../../.github/workflows/ci.yml). Il construit la solution, exécute les tests, vérifie la documentation technique, analyse le code avec SonarQube Cloud et construit les images Docker. C'est le filet de sécurité de la non-régression : une Pull Request ne peut être fusionnée que si chacun de ses jobs a réussi.
 
-## Déclencheurs
+Cette page décrit ce que fait le workflow. Les règles qu'il applique, comme le fait de n'exécuter que les tests qu'une Pull Request peut faire échouer ou la gestion des quotas, sont fixées par [Intégration continue (CI)](../../../.speckit/gestion-projet/depot/integration-continue-ci.md), et les raisons de ses choix d'outillage par la section « CI » d'[Outillage de développement](../../../.speckit/choix-implementation/outillage.md). Les projets de tests qu'il exécute sont présentés dans [Stratégie de tests](strategie-de-tests.md). La publication des images sur Docker Hub est l'affaire d'un autre workflow, décrit dans [Déploiement et environnement de validation](../architecture/deploiement.md).
 
-| Évènement | Fichiers tenus pour modifiés | Exécution annulée par une suivante |
+## Quand le workflow s'exécute
+
+Le workflow se déclenche dans trois cas, résumés ci-dessous. Une Pull Request ne déclenche le CI que si elle vise `main`.
+
+| Évènement | Fichiers que le workflow tient pour modifiés | L'exécution est-elle annulée par une suivante ? |
 | --- | --- | --- |
-| Pull Request vers `main` | Ceux de la Pull Request telle qu'elle serait fusionnée | Oui, celle du commit précédent de la même PR |
-| Push sur `main` | Tous | Non |
-| Lancement à la demande (`workflow_dispatch`), pour l'analyse de `main` après la publication d'une version | Tous | Non |
+| Une Pull Request vers `main` reçoit un commit. | Ceux que modifierait la fusion de la Pull Request dans `main`. | Oui : un nouveau push sur la même Pull Request annule l'exécution du commit précédent, devenue inutile. |
+| Un commit arrive sur `main`, à la fusion d'une Pull Request. | Tous les fichiers. | Non. |
+| L'agent lance le workflow à la demande (`workflow_dispatch`), pour analyser `main` après la publication d'une version. | Tous les fichiers. | Non. |
 
-L'annulation vient du groupe de concurrence du workflow : le numéro de la PR, ou l'empreinte du commit pour `main`.
+L'annulation repose sur le groupe de concurrence du workflow, une notion de GitHub Actions qui empêche deux exécutions d'un même groupe de coexister. Le groupe d'une Pull Request porte son numéro, si bien qu'un push chasse l'exécution précédente et épargne les quotas de Docker Hub et de l'API GitHub. Sur `main`, chaque commit a son propre groupe, si bien qu'aucune exécution n'en annule une autre.
 
-## Jobs et leurs conditions
+## Les jobs et leur enchaînement
 
-Question du schéma : *quels jobs s'exécutent, dans quel ordre, et quelles étapes chacun omet-il selon les fichiers modifiés ?* Schéma interprétatif, d'après `ci.yml`.
+Le workflow compte six jobs, dont deux se démultiplient en matrice, c'est-à-dire en un job par valeur d'un paramètre : un job de bout en bout par thème, un job de construction par image. Le schéma suivant, tracé à la main d'après `ci.yml`, répond à une seule question : quel job attend la fin de quel autre avant de démarrer ?
 
 ```mermaid
 flowchart LR
-    changes["Changed files<br/>sources, rendering,<br/>images, documentation"]
-    changes --> build["Build & tests (.NET)<br/>compilation stricte, toujours<br/>tous les tests si sources,<br/>sinon tests du dépôt"]
-    changes --> e2e["End-to-end tests (thème)<br/>un job par thème proposé<br/>si rendering"]
-    changes --> docs["Technical documentation<br/>impact et références, toujours<br/>site et diagrammes si documentation"]
-    changes --> images["Build Docker image<br/>api, frontend<br/>si images"]
-    build --> sonar["SonarQube Cloud analysis<br/>couverture importée si sources"]
+    changes["Changed files"]
+    build["Build & tests (.NET)"]
+    e2e["End-to-end tests<br/>un job par thème"]
+    docs["Technical documentation"]
+    images["Build Docker image<br/>un job par image"]
+    sonar["SonarQube Cloud analysis"]
+
+    changes --> build
+    changes --> e2e
+    changes --> docs
+    changes --> images
+    build --> sonar
     e2e --> sonar
-    sonar -.-> gate(["Check SonarCloud Code Analysis<br/>publié par SonarQube Cloud"])
 ```
 
-Chaque job s'exécute toujours ; seules ses étapes sont omises (`if:` sur une sortie de `Changed files`). La liste des checks ne dépend donc pas de la Pull Request, ce qui permet au Ruleset de `main` de tous les exiger ([Configuration du repository GitHub](../../../.speckit/gestion-projet/depot/configuration-du-repository-github.md)). Le job de l'analyse attend ceux des tests : si l'un d'eux échoue, l'analyse ne s'exécute pas, et le check de la porte de qualité ne se présente pas.
+Le premier job, `Changed files`, classe les fichiers modifiés. Les quatre jobs suivants démarrent en parallèle dès qu'il a fini. L'analyse SonarQube Cloud attend en outre la fin de tous les jobs de tests, parce qu'elle importe la couverture qu'ils ont mesurée ; si l'un d'eux échoue, l'analyse ne s'exécute pas.
 
-### Classement des fichiers modifiés
+Le verdict de la porte de qualité de SonarQube Cloud n'apparaît pas sur ce schéma, car ce n'est pas un job du workflow : c'est un check à part, `SonarCloud Code Analysis`, que l'application SonarQube Cloud publie elle-même sur le commit une fois l'analyse reçue. Quand l'analyse ne s'exécute pas, ce check ne se présente pas.
 
-Le job `Changed files` compare, sur une Pull Request, le commit de fusion que construit GitHub à son premier parent, la tête de `main` (`git diff --name-only --no-renames HEAD^1 HEAD`) : un fichier déplacé compte à ses deux chemins. Il en tire quatre sorties, chacune vraie si au moins un fichier en relève :
+### Des jobs toujours exécutés, des étapes omises
 
-| Sortie | Fichiers qui en relèvent | Étapes qu'elle commande |
+Chaque job s'exécute à chaque fois ; ce sont ses étapes qui s'omettent selon les fichiers modifiés, grâce à une condition `if:` qui lit les sorties de `Changed files`. Ce détail compte à cause des checks requis. Un check requis est un job dont le Ruleset de `main`, l'ensemble des règles de protection de la branche sur GitHub, exige la réussite avant toute fusion ([Configuration du repository GitHub](../../../.speckit/gestion-projet/depot/configuration-du-repository-github.md)). Si un job était sauté, ou si le workflow ne se déclenchait pas, son check resterait en attente et bloquerait la fusion. En gardant tous les jobs, le workflow présente toujours la même liste de checks, et le Ruleset peut tous les exiger.
+
+## Classement des fichiers modifiés
+
+Le job `Changed files` décide de ce que les autres jobs exécuteront. Sur une Pull Request, il compare le commit de fusion que GitHub construit pour elle à son premier parent, qui est la tête de `main` (`git diff --name-only --no-renames HEAD^1 HEAD`) : leur différence est exactement ce que la fusion apporterait. L'option `--no-renames` fait compter un fichier déplacé à son ancien chemin comme au nouveau.
+
+Il en tire quatre indicateurs, ses sorties, dont chacun est vrai dès qu'au moins un fichier modifié en relève :
+
+| Sortie | Fichiers qui la rendent vraie | Étapes qu'elle déclenche |
 | --- | --- | --- |
-| `sources` | Tout fichier hors de `.speckit/`, `.claude/`, `poc/`, `docs/`, `scripts/`, `docker/`, `.github/`, `tests/Bdtheque.Documentation.Tests/`, des fichiers Markdown de la racine, de `docker-compose.yml`, `.env.example`, `.dockerignore`, `.gitignore` ; plus `ci.yml` lui-même, le contrat OpenAPI versionné (`docs/tech/references/openapi-v1.json`), que comparent les tests de l'API, et le schéma de la base (`docs/tech/references/schema-de-la-base.md`), que comparent les tests de l'infrastructure | Contrôle des migrations, tous les tests sans navigateur avec couverture, import de la couverture par l'analyse |
-| `rendering` | Les `sources`, hors des projets de tests sans navigateur (`Bdtheque.Api.Tests`, `Bdtheque.Domain.Tests`, `Bdtheque.Frontend.Tests`, `Bdtheque.Infrastructure.Tests`, `Bdtheque.ValidationData.Tests`) et de ces deux références | Tous les jobs de bout en bout |
-| `images` | Tout fichier hors de `.speckit/`, `.claude/`, `poc/`, `docs/`, `scripts/`, `tests/`, `.github/`, `docker/validation-data/`, `docker/validation-docs/`, des fichiers Markdown de la racine, de `docker-compose.yml`, `.env.example`, `.gitignore` ; plus `ci.yml` | Construction et analyse des images |
-| `documentation` | `docs/`, les trois scripts de la documentation, `tests/Bdtheque.Documentation.Tests/`, `tests/Directory.Build.props`, `dotnet-tools.json`, `Directory.Packages.props`, `Directory.Build.props`, `ci.yml` | Construction du site et rendu des diagrammes |
+| `sources` | Tout fichier qui n'est pas de la documentation ou un outillage que les tests n'exécutent pas. Sont écartés `.speckit/`, `.claude/`, `poc/`, `docs/`, `scripts/`, `docker/`, `.github/`, `tests/Bdtheque.Documentation.Tests/`, les fichiers Markdown de la racine, `docker-compose.yml`, `.env.example`, `.dockerignore` et `.gitignore`. Trois fichiers comptent pourtant comme sources : `ci.yml` lui-même, le contrat OpenAPI versionné (`docs/tech/references/openapi-v1.json`), que comparent les tests de l'API, et le schéma de la base (`docs/tech/references/schema-de-la-base.md`), que comparent ceux de l'infrastructure. | Le contrôle des migrations, l'exécution de tous les tests sans navigateur avec la mesure de couverture, et l'import de cette couverture par l'analyse. |
+| `rendering` | Les sources qui peuvent changer le rendu d'un écran, c'est-à-dire toutes sauf les projets de tests sans navigateur (`Bdtheque.Api.Tests`, `Bdtheque.Domain.Tests`, `Bdtheque.Frontend.Tests`, `Bdtheque.Infrastructure.Tests`, `Bdtheque.ValidationData.Tests`) et les deux références de `docs/`. | Tous les tests de bout en bout, captures de référence comprises. |
+| `images` | Tout fichier qui entre dans les images `api` et `frontend`. Sont écartés `.speckit/`, `.claude/`, `poc/`, `docs/`, `scripts/`, `tests/`, `.github/`, `docker/validation-data/`, `docker/validation-docs/`, les fichiers Markdown de la racine, `docker-compose.yml`, `.env.example` et `.gitignore`, à l'exception de `ci.yml`, qui construit et analyse ces images. | La construction et l'analyse des images. |
+| `documentation` | Les pages de `docs/`, les trois scripts de la documentation technique, `tests/Bdtheque.Documentation.Tests/`, `tests/Directory.Build.props`, `dotnet-tools.json`, `Directory.Packages.props`, `Directory.Build.props` et `ci.yml`. | La construction du site de la documentation et la vérification du rendu de ses diagrammes. |
 
-Tout fichier qu'aucun motif n'écarte compte : un fichier nouveau, inconnu des motifs, déclenche tout. Hors Pull Request, les quatre sorties sont vraies. Le journal du job liste les fichiers de chaque catégorie.
+Le classement est sûr par défaut : un fichier qu'aucun motif n'écarte compte comme source, comme source du rendu et comme élément des images. Un fichier d'un genre nouveau, que personne n'a encore classé, déclenche donc tout. Hors Pull Request, les quatre sorties sont vraies. Le journal du job liste les fichiers retenus dans chaque catégorie, ce qui permet de comprendre après coup pourquoi une étape s'est exécutée ou non.
+
+## Ce que fait chaque job
 
 ### `Build & tests (.NET)`
 
-- **Toujours** : restauration et compilation de toute la solution en `Release`, avertissements en erreur ([`Directory.Build.props`](../../../Directory.Build.props)).
-- **Si `sources`** :
-  - modèle EF Core comparé aux migrations (`dotnet ef migrations has-pending-model-changes`) : un changement du modèle commité sans sa migration fait échouer le job ;
-  - **seule exécution** des tests sans navigateur, tous les projets sauf `Bdtheque.EndToEnd.Tests` et `Bdtheque.Documentation.Tests`, avec la collecte de couverture (coverlet, format OpenCover), `Bdtheque.Testing` exclu de la mesure ; rapports publiés en artefact `coverage`.
-- **Sinon** : les seuls tests du dépôt, `Category=Repository` de `Bdtheque.Infrastructure.Tests`, qui lisent ses fichiers sans conteneur ni navigateur ([Stratégie de tests](strategie-de-tests.md#tests-du-dépôt)), sans couverture.
+Ce job restaure puis compile toute la solution en configuration `Release`, et il le fait toujours, quels que soient les fichiers modifiés. Les avertissements du compilateur y sont des erreurs ([`Directory.Build.props`](../../../Directory.Build.props)), si bien qu'un avertissement suffit à faire échouer le CI.
 
-Ce job enregistre le cache des packages NuGet, sous une clé tirée de la version du SDK, de `Directory.Packages.props`, des `Directory.Build.props`, des fichiers de projet et de `dotnet-tools.json`, sans clé de repli ; les autres jobs le lisent (l'analyse l'enregistre aussi, sous la même clé).
+Quand une source a changé, le job vérifie ensuite que le modèle EF Core correspond aux migrations (`dotnet ef migrations has-pending-model-changes`) : une modification du modèle commitée sans la migration qui l'accompagne fait échouer le job. Il exécute alors tous les tests sans navigateur, c'est-à-dire tous les projets de tests sauf `Bdtheque.EndToEnd.Tests` et `Bdtheque.Documentation.Tests`. C'est la seule exécution de ces tests du push. Elle mesure la couverture du code avec coverlet, au format OpenCover, en excluant la bibliothèque `Bdtheque.Testing` de la mesure, et publie les rapports dans l'artefact `coverage` pour l'analyse SonarQube Cloud.
+
+Quand aucune source n'a changé, le job n'exécute que les tests du dépôt, ceux de `Bdtheque.Infrastructure.Tests` de catégorie `Repository`, qui vérifient les fichiers du dépôt sans conteneur ni navigateur ([Stratégie de tests](strategie-de-tests.md#tests-du-dépôt)). Aucune couverture n'est alors mesurée.
+
+C'est aussi ce job qui enregistre le cache des packages NuGet que les autres jobs relisent. Sa clé dépend de la version du SDK, de `Directory.Packages.props`, des `Directory.Build.props`, des fichiers de projet et de `dotnet-tools.json`, sans clé de repli : tout changement de ces fichiers repart d'un cache neuf. Le job de l'analyse enregistre le même cache, sous la même clé.
 
 ### `End-to-end tests (<thème>)`
 
-Une matrice `theme: [base, planche, gazette, couverture]`, dans l'ordre de `ThemeCatalog.Offered`, sans arrêt au premier thème en échec. Si `rendering` :
+Les tests de bout en bout pilotent l'application complète dans un navigateur. Ils s'exécutent dans une matrice d'un job par thème proposé, `theme: [base, planche, gazette, couverture]`, dans l'ordre de `ThemeCatalog.Offered`, et un thème en échec n'interrompt pas les autres. Quand le rendu peut avoir changé, chaque job enchaîne les étapes suivantes :
 
-1. compilation du seul projet de bout en bout, packages lus dans le cache ;
-2. installation du seul Chromium sans interface (`playwright.ps1 install --with-deps --only-shell chromium`) ;
-3. interfaces créées par Docker réglées sans adresse IPv6 de lien local (`sysctl … addr_gen_mode=1`), puis relevé des changements d'adresses (`ip monitor`) et des évènements de Docker pendant les tests ;
-4. tests, avec `BDTHEQUE_TEST_THEME` fixé au thème du job : le job `base` exécute tout le projet, les autres le seul trait `Themes=Each` ([Stratégie de tests](strategie-de-tests.md#thème-imposé)) ; couverture publiée en artefact `coverage-end-to-end-<thème>` ;
-5. échec du job si une interface de Docker a gagné ou perdu une adresse pendant les tests, quel que soit leur résultat.
+1. Il compile le seul projet de bout en bout, à partir des packages du cache.
+2. Il installe Chromium dans sa version sans interface (`playwright.ps1 install --with-deps --only-shell chromium`).
+3. Il règle les interfaces réseau que crée Docker pour qu'elles ne reçoivent pas d'adresse IPv6 de lien local (`sysctl … addr_gen_mode=1`), puis il enregistre, pendant toute la durée des tests, les changements d'adresses (`ip monitor`) et les évènements de Docker.
+4. Il exécute les tests en fixant la variable `BDTHEQUE_TEST_THEME` au thème du job. Le job `base` exécute tout le projet, tandis que les autres n'exécutent que les tests marqués du trait `Themes=Each`, ceux dont le résultat dépend du thème ([Stratégie de tests](strategie-de-tests.md#thème-imposé)). La couverture est publiée dans l'artefact `coverage-end-to-end-<thème>`.
+5. Il échoue si une interface de Docker a gagné ou perdu une adresse pendant les tests, même si ceux-ci ont réussi.
 
-En cas d'échec, le job publie le relevé du réseau et les captures qui diffèrent de leur référence, avec leur image de différence (artefact `captures-<thème>`).
+Quand le job échoue, il publie le relevé des changements du réseau, ainsi que les captures qui diffèrent de leur référence accompagnées de leur image de différence, dans l'artefact `captures-<thème>`.
 
 ### `Technical documentation`
 
-- **Sur une Pull Request** : historique complet récupéré, pour qu'un commit de la PR puisse porter le *trailer* `Documentation-technique:` ; impact des changements vérifié (`Get-TechnicalDocumentationImpact.ps1 -Check`).
-- **Toujours** : références générées comparées à leurs sources (`Update-TechnicalReferences.ps1 -Check`), le contrat OpenAPI excepté, que comparent les tests de l'API ([Contrat HTTP de l'API](../references/api-http.md#contrat-versionné)), comme le [schéma de la base](../references/schema-de-la-base.md), que comparent ceux de l'infrastructure.
-- **Si `documentation`** : DocFX restauré, Chromium installé, tests de `Bdtheque.Documentation.Tests` (construction du site, rendu des diagrammes).
+Ce job vérifie la documentation technique ; ses contrôles sont expliqués en détail dans [Consulter, construire, vérifier et maintenir](../documentation/consulter-et-maintenir.md#contrôles).
 
-Le détail de ces contrôles : [Consulter, construire, vérifier et maintenir](../documentation/consulter-et-maintenir.md#contrôles).
+Sur une Pull Request, il récupère tout l'historique de la branche, puis vérifie l'impact des changements (`Get-TechnicalDocumentationImpact.ps1 -Check`) : chaque page qui décrit un fichier modifié doit avoir été mise à jour, ou un commit de la Pull Request doit porter le *trailer* `Documentation-technique:`, une ligne de la forme `Clé: valeur` en fin de message de commit, qui dit pourquoi elle n'a pas à l'être. L'historique complet est nécessaire pour lire ces messages.
+
+Il compare toujours les références générées à leurs sources (`Update-TechnicalReferences.ps1 -Check`). Deux références font exception, parce qu'elles exigent une base PostgreSQL : le contrat OpenAPI, que comparent les tests de l'API ([Contrat HTTP de l'API](../references/api-http.md#contrat-versionné)), et le [schéma de la base](../references/schema-de-la-base.md), que comparent ceux de l'infrastructure.
+
+Quand la documentation ou son outillage a changé, il restaure DocFX, installe Chromium et exécute `Bdtheque.Documentation.Tests`, qui construisent le site et vérifient le rendu de chaque diagramme.
 
 ### `SonarQube Cloud analysis`
 
-Après les jobs de tests, il recompile la solution sous le scanner (`dotnet-sonarscanner`, outil local de [`dotnet-tools.json`](../../../dotnet-tools.json)), sur l'historique complet, sans exécuter aucun test :
+Ce job soumet le code à SonarQube Cloud, le service d'analyse statique du projet. Il démarre après tous les jobs de tests, récupère tout l'historique du dépôt, puis recompile la solution sous le contrôle du scanner (`dotnet-sonarscanner`, outil local de [`dotnet-tools.json`](../../../dotnet-tools.json)) ; il n'exécute lui-même aucun test. Plusieurs réglages accompagnent l'analyse :
 
-- **version** de l'analyse : le dernier tag (`git describe --tags --abbrev=0`), qui fait du code changé depuis la dernière version publiée le nouveau code ;
-- **couverture** : si `sources`, les rapports de tous les jobs de tests (artefacts `coverage*`) réunis dans un dossier et importés ; sinon aucun ;
-- **exclusions** : `.speckit/**`, `poc/**`, les migrations, le dossier des rapports ; exclus de la seule couverture : les scripts PowerShell et ceux de `wwwroot` du frontend ;
-- **jeton** : secret de dépôt `SONAR_TOKEN`.
+- La version déclarée de l'analyse est le dernier tag du dépôt (`git describe --tags --abbrev=0`). SonarQube Cloud tient ainsi pour « nouveau code » tout ce qui a changé depuis la dernière version publiée.
+- Quand une source a changé, le job réunit dans un même dossier les rapports de couverture de tous les jobs de tests, c'est-à-dire les artefacts `coverage*`, et les transmet à l'analyse. Sinon, aucun rapport n'est importé, puisque aucun code mesuré n'a changé.
+- L'analyse ignore `.speckit/**`, `poc/**`, les migrations, que génère EF Core, et le dossier des rapports. Les scripts PowerShell, ceux de `wwwroot` du frontend et celui du modèle du site de la documentation technique sont analysés, mais exclus de la seule couverture, que seuls les tests .NET mesurent.
+- Le job s'authentifie par le secret de dépôt `SONAR_TOKEN`.
 
-Une analyse qui n'aboutit pas fait échouer ce job seul. Le verdict de la porte de qualité est le check `SonarCloud Code Analysis`, que publie l'application SonarQube Cloud après l'analyse ; son traitement sur une Pull Request suit [Analyse SonarQube Cloud](../../../.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md).
+Une analyse qui n'aboutit pas fait échouer ce seul job. La suite à donner à son résultat sur une Pull Request est fixée par [Analyse SonarQube Cloud](../../../.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md).
 
 ### `Build Docker image (<image>)`
 
-Une matrice `image: [api, frontend]`. Si `images` :
+Ce job construit et analyse les deux images de l'application, dans une matrice `image: [api, frontend]`. Quand ce dont elles sont faites a changé, il enchaîne trois étapes :
 
-1. image construite par BuildKit pour `linux/amd64`, comme les images publiées, chargée localement sans être poussée, avec le cache de GitHub Actions propre à chaque image ;
-2. connexion à Docker Hub (compte `tetram76`, secret `DOCKERHUB_TOKEN`), **après** la construction : rien de ce qu'elle télécharge ne compte sous le compte ;
-3. analyse de l'image locale par Docker Scout : le job échoue sur toute vulnérabilité **corrigeable** d'un package NuGet ([Analyse des vulnérabilités des images Docker](../../../.speckit/gestion-projet/revue-tickets/analyse-des-vulnerabilites-des-images-docker.md)).
+1. Il construit l'image avec BuildKit pour `linux/amd64`, la plateforme des images publiées, de sorte qu'une Pull Request ne puisse pas casser leur publication. L'image est chargée localement sans être poussée, et chaque image a son propre cache dans celui de GitHub Actions.
+2. Il se connecte ensuite à Docker Hub, avec le compte `tetram76` et le secret `DOCKERHUB_TOKEN`. La connexion vient après la construction pour que rien de ce que télécharge celle-ci ne compte dans le quota du compte.
+3. Il analyse l'image locale avec Docker Scout, l'outil d'analyse des vulnérabilités de Docker, et échoue sur toute vulnérabilité corrigeable d'un package NuGet ([Analyse des vulnérabilités des images Docker](../../../.speckit/gestion-projet/revue-tickets/analyse-des-vulnerabilites-des-images-docker.md)).
 
-## Tests du dépôt qui lisent ce workflow
+## Les tests qui vérifient ce workflow
 
-- [`SdkVersionTests`](../../../tests/Bdtheque.Infrastructure.Tests/SdkVersionTests.cs) : chaque `dotnet-version` des workflows est celle du SDK des Dockerfiles.
-- [`DockerHubPullsTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerHubPullsTests.cs) : les Dockerfiles ne téléchargent aucune image de Docker Hub, et l'analyse des images de `ci.yml` et de `docker-publish.yml` ne lit aucune image publiée.
-- [`TestThemesTests`](../../../tests/Bdtheque.EndToEnd.Tests/TestThemesTests.cs), parmi les tests de bout en bout : la matrice des thèmes est celle des thèmes proposés, dans leur ordre, le premier exécutant aussi les tests hors trait.
+Plusieurs tests lisent `ci.yml` pour s'assurer qu'il reste cohérent avec le reste du dépôt :
+
+- [`SdkVersionTests`](../../../tests/Bdtheque.Infrastructure.Tests/SdkVersionTests.cs) vérifie que chaque `dotnet-version` des workflows est celle du SDK des Dockerfiles.
+- [`DockerHubPullsTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerHubPullsTests.cs) vérifie que les Dockerfiles ne téléchargent aucune image de Docker Hub, et que l'analyse des images de `ci.yml` et de `docker-publish.yml` ne lit aucune image publiée.
+- [`TestThemesTests`](../../../tests/Bdtheque.EndToEnd.Tests/TestThemesTests.cs), parmi les tests de bout en bout, vérifie que la matrice des thèmes est celle des thèmes proposés, dans le même ordre, et que le premier job exécute aussi les tests sans trait.
 
 ## Invariants à préserver
 
-- Un job ajouté, renommé ou retiré change la liste des checks : le Ruleset de `main` est mis à jour dans le même mouvement.
+- Ajouter, renommer ou retirer un job change la liste des checks : le Ruleset de `main` doit être mis à jour dans le même mouvement, sans quoi un job ajouté n'est pas exigé et un job retiré reste attendu sans jamais se présenter.
 - Aucun job n'est sauté par une condition : seules ses étapes le sont.
-- Les tests ne s'exécutent qu'une fois par push : l'analyse réunit leurs couvertures sans les rejouer.
-- Un fichier qu'aucun motif du classement n'écarte déclenche tout ; un motif ajouté ne doit écarter que ce qu'aucun test, aucune image et aucun écran ne lit.
-- Un thème ajouté au catalogue s'ajoute à la matrice des jobs de bout en bout, ce que vérifie `TestThemesTests`.
+- Les tests ne s'exécutent qu'une fois par push. L'analyse réunit leurs couvertures sans les rejouer.
+- Un fichier qu'aucun motif du classement n'écarte déclenche tout. Un motif ajouté ne doit donc écarter que des fichiers qu'aucun test, aucune image et aucun écran ne lisent.
+- Un thème ajouté au catalogue doit l'être aussi à la matrice des jobs de bout en bout, ce que vérifie `TestThemesTests`.
