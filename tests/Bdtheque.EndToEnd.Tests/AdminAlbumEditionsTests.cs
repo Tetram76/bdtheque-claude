@@ -33,6 +33,24 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
     }
 
     [Theory, InEachTheme]
+    // An edition is entered from its album: a row of the list of the editions leads to its page (visuel/listes/principes-communs.md).
+    public async Task ListOfTheEditions_LeadsToThePageOfTheAlbumOfAnEdition(string theme)
+    {
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Delcourt {_marker}", null, []));
+        var album = await CreateAlbumAsync($"Aldébaran {_marker}");
+        await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions", new CreateEditionRequest(
+            new EditionContent(publisher.Id, null, 1994, null, null, null, null, null, null, null, false, true, null,
+                AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null),
+            album.Version));
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?albumId={album.Id}");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Éditions et intentions d'achat de Aldébaran {_marker}" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
+        await Assertions.Expect(page.Locator(".album-editions-subject")).ToHaveTextAsync($"Aldébaran {_marker}");
+    }
+
+    [Theory, InEachTheme]
     // Nothing is entered for an intent on the whole album: choosing it sets it at once (visuel/editions-album/contenu.md).
     public async Task IntentOnTheAlbum_Chosen_IsSetAtOnce_AndNoOtherIntentIsOffered(string theme)
     {

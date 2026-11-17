@@ -5,14 +5,15 @@
 {
     @* What opens beside the page (a site outside the application, the original of a visual) leaves the page it was opened
        from as it was; a site outside the application says so by the mark of such links, its globe in place of the icon. *@
-    <a class="menu-item" href="@Href" data-variant="@VariantName" target="@(OpensBeside ? "_blank" : null)"
-       rel="@(OpensBeside ? "noopener noreferrer" : null)">@Content</a>
+    <a class="@ClassName" href="@Href" data-variant="@VariantName" target="@(OpensBeside ? "_blank" : null)"
+       rel="@(OpensBeside ? "noopener noreferrer" : null)" @attributes="OtherAttributes">@Content</a>
 }
 else
 {
     @* A submit button submits its form: the page it leads to closes the menu. *@
-    <button type="@Type" class="menu-item" data-variant="@VariantName" popovertarget="@(Type == "submit" ? null : Menu?.Id)"
-            popovertargetaction="@(Type == "submit" ? null : "hide")" aria-pressed="@PressedValue" @onclick="OnClick">
+    <button type="@Type" class="@ClassName" data-variant="@VariantName" popovertarget="@(Type == "submit" ? null : Menu?.Id)"
+            popovertargetaction="@(Type == "submit" ? null : "hide")" aria-pressed="@PressedValue" @onclick="OnClick"
+            @attributes="OtherAttributes">
         @Content
     </button>
 }
@@ -70,6 +71,14 @@ else
     public bool? Pressed { get; set; }
 
     private string? PressedValue => Pressed switch { true => "true", false => "false", null => null };
+
+    /// <summary>A class of the caller (e.g. an item shown at some widths only), added to that of the item.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ClassName => CallerClasses.Merge("menu-item", AdditionalAttributes);
+
+    private IEnumerable<KeyValuePair<string, object>>? OtherAttributes => CallerClasses.Others(AdditionalAttributes);
 
     private string VariantName => Variant.ToString().ToLowerInvariant();
 

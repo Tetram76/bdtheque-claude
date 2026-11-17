@@ -92,9 +92,6 @@ public static class AppPaths
     /// <summary>Search of a record to modify, from the header of the administration.</summary>
     public const string AdminSearch = NotYetImplemented;
 
-    /// <summary>A new edition, which starts with the choice of its album (visuel/administration/en-tete-et-menu.md).</summary>
-    public const string AdminNewEdition = NotYetImplemented;
-
     /// <summary>The list of the albums of the administration (visuel/liste-albums/).</summary>
     public const string AdminAlbums = "/admin/albums";
 

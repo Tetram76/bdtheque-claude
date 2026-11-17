@@ -59,11 +59,11 @@
     /// <summary>The identifier of the menu, which the page uses to stay still while it is open (app.css).</summary>
     public const string MenuId = "admin-menu";
 
-    // The plan of the administration, by groups (visuel/administration/en-tete-et-menu.md). « Nouvelle édition » gives a
-    // direct access to the main action of the administration.
+    // The plan of the administration, by groups (visuel/administration/en-tete-et-menu.md); no creation of an edition, which
+    // is entered from its album (visuel/listes/principes-communs.md).
     private static readonly IReadOnlyList<(string Name, IReadOnlyList<NavigationEntry> Entries)> Groups =
     [
-        ("Home", [new("Admin.Dashboard", AppPaths.AdminHome, Exact: true), new("Admin.NewEdition", AppPaths.AdminNewEdition)]),
+        ("Home", [new("Admin.Dashboard", AppPaths.AdminHome, Exact: true)]),
         ("Collection", [new("Admin.Albums", AppPaths.AdminAlbums), new("Admin.Series", AppPaths.AdminSeries),
             new("Admin.Editions", AppPaths.AdminEditions), new("Admin.PurchaseIntents", AppPaths.AdminPurchaseIntents)]),
         ("AuthorsAndPublishers", [new("Admin.Authors", AppPaths.AdminAuthors), new("Admin.Publishers", AppPaths.AdminPublishers)]),

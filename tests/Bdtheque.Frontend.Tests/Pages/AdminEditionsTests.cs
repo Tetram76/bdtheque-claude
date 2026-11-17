@@ -42,6 +42,8 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
     private static readonly EditionListFilters NoFilters = new(null, null, null, null);
 
+    private const string EnteredFromItsAlbum = "Une édition se saisit depuis la page des éditions et intentions d'achat de son album.";
+
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
     private readonly FakeAdminApi _api;
@@ -69,14 +71,16 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Heading_TheTitleTheNumberOfEditionsAndTheCreation()
+    // An edition is entered from its album, as a purchase intent: the heading says where in place of a creation
+    // (visuel/listes/principes-communs.md, création).
+    public void Heading_TheTitleTheNumberOfEditions_AndWhereAnEditionIsEntered_InPlaceOfACreation()
     {
         var page = Open("");
 
         Assert.Equal(["Administration", "Éditions"], page.FindAll(".breadcrumb li").Select(item => item.TextContent.Trim()));
         Assert.Equal(("Éditions", "2 913"), (page.Find("h1").FirstChild!.TextContent.Trim(), Text(page.Find(".list-heading-count"))));
-        // A new edition starts with the choice of its album, as the entry of the menu of the administration.
-        Assert.Equal(AppPaths.AdminNewEdition, page.Find(".list-heading a.button").GetAttribute("href"));
+        Assert.Empty(page.FindAll(".list-heading a.button"));
+        Assert.Equal(EnteredFromItsAlbum, Text(page.Find(".list-heading-note")));
     }
 
     [Fact]
@@ -114,9 +118,19 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
         // « Modifier » alone opens the record: the entry of the row is no link (visuel/liste-albums/contenu.md, Actions d'une ligne).
         Assert.Equal(["Modifier Glénat [2004] - ISBN 978-2-7234-4567-1"], row.QuerySelectorAll($"a[href='{AppPaths.AdminEditEdition(Lunes.Id, id)}']").Select(link => Normalized(link.GetAttribute("aria-label")!)));
-        Assert.Equal("Modifier Glénat [2004] - ISBN 978-2-7234-4567-1", Normalized(row.QuerySelector(".edition-actions a.button")!.GetAttribute("aria-label")!));
+        // « Modifier », then the editions and purchase intents of its album, as a row of the list of the albums
+        // (visuel/listes/principes-communs.md, Actions): an edition is entered from its album.
         Assert.Equal(
             [
+                ("Modifier Glénat [2004] - ISBN 978-2-7234-4567-1", AppPaths.AdminEditEdition(Lunes.Id, id)),
+                ("Éditions et intentions d'achat de ...Et après (Les Lunes de Saturne - T. 1)", AppPaths.AdminAlbumEditions(Lunes.Id)),
+            ],
+            row.QuerySelectorAll(".edition-actions > a.button").Select(button => (Normalized(button.GetAttribute("aria-label")!), button.GetAttribute("href"))));
+        // On a smartphone, the editions and purchase intents of the album lead the menu in place of their button, which the
+        // styles of the page show at one width or the other.
+        Assert.Equal(
+            [
+                ("Éditions et intentions d'achat de l'album", AppPaths.AdminAlbumEditions(Lunes.Id)),
                 ("Voir l'album dans la consultation", AppPaths.Album(Lunes.Id)),
                 ("Fusionner avec une autre édition…", $"{AppPaths.AdminEditions}?q=978&merge={id}"),
                 ("Supprimer…", $"{AppPaths.AdminEditions}?q=978&delete={id}"),
@@ -181,7 +195,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Empty_ASearchWithoutResult_SaysItAndOffersToClearItOrToCreateAnEdition()
+    public void Empty_ASearchWithoutResult_SaysItAndOffersToClearIt_WithoutCreation()
     {
         Answer([], totalCount: 0);
 
@@ -189,19 +203,20 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
         Assert.Equal("Aucune édition ne correspond à « 978-0 ».", Text(empty.QuerySelector("strong")!));
         Assert.Equal(
-            [("Effacer la recherche", AppPaths.AdminEditions), ("Nouvelle édition", AppPaths.AdminNewEdition)],
+            [("Effacer la recherche", AppPaths.AdminEditions)],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
+
     [Fact]
-    public void Empty_WithoutAnyCriterion_SaysThereIsNoEditionYet_AndOffersToCreateOne_WithNothingToClear()
+    public void Empty_WithoutAnyCriterion_SaysThereIsNoEditionYet_AndWhereAnEditionIsEntered_WithNothingToClearNorCreate()
     {
         Answer([], totalCount: 0);
 
         var empty = Open("").Find(".empty-list");
 
         Assert.Equal("Aucune édition n'est encore enregistrée.", Normalized(empty.QuerySelector("strong")!.TextContent));
-        Assert.Equal([("Nouvelle édition", AppPaths.AdminNewEdition)],
-            empty.QuerySelectorAll("a").Select(link => (Normalized(link.TextContent), link.GetAttribute("href"))));
+        Assert.Equal(EnteredFromItsAlbum, Text(empty.QuerySelector("span")!));
+        Assert.Empty(empty.QuerySelectorAll("a"));
     }
 
     [Fact]

@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la liste des albums : recherche, filtres, navigation, lignes, actions, suppression, fusion.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T18:02:56Z }
 ---
 
 # Contenu
@@ -29,5 +29,5 @@ De haut en bas :
   - sans critère, sous une **entrée** de la navigation par initiale : « Aucun album sous cette entrée. », et « Tous les albums », qui revient à « Toutes » ;
   - **sans critère, sous « Toutes »** : « Aucun album n'est encore enregistré. », et le bouton de création, « Nouvel album ».
 
-  Le rappel de ce sur quoi porte la recherche n'accompagne que le texte cherché. Toutes les listes suivent ces cas, chacune selon les critères qu'elle offre, sauf celle des intentions d'achat, qui rappelle, au lieu de la création, qu'une intention se pose depuis son album ([Principes communs](../listes/principes-communs.md)).
+  Le rappel de ce sur quoi porte la recherche n'accompagne que le texte cherché. Toutes les listes suivent ces cas, chacune selon les critères qu'elle offre, sauf celles des éditions et des intentions d'achat, qui rappellent, au lieu de la création, qu'une édition ou une intention se saisit depuis son album ([Principes communs](../listes/principes-communs.md)).
 - **Smartphone** : chaque ligne tient sur deux lignes, la vignette à gauche : le libellé et les actions (Modifier réduit à son icône, comme Éditions), puis la date, les éditions et l'appartenance à la collection ; la date de modification n'y figure pas. Le panneau des filtres passe sur deux colonnes.

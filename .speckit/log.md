@@ -2,6 +2,7 @@
 
 ## 2026-11-17
 
+* **Décision de l'utilisateur** : une édition se crée seulement depuis la page des éditions et intentions d'achat de son album, comme une intention d'achat : « Nouvelle édition » est retiré du menu de l'administration et de la liste des éditions, où une mention le dit à sa place, en tête de page comme dans la liste vide ; chaque ligne de la liste des éditions porte, après « Modifier », le bouton des éditions et intentions d'achat de son album, comme une ligne de la liste des albums, et, sur smartphone, où un troisième bouton couperait l'ISBN du libellé, en tête du menu « ⋯ » de la ligne (#419).
 * **Décision de l'utilisateur** : un éditeur se crée sur place depuis la saisie d'une série ou d'une édition, édition visée par une intention d'achat comprise, par son nom seul ; créé à l'enregistrement de la fiche qui le cite, il n'a encore aucune collection, et une erreur le désigne sur son champ (#526).
 * **Décision de l'utilisateur** : l'entrée d'une ligne d'une liste de l'administration n'est jamais un lien, dans aucune liste, celle des intentions d'achat comprise : un seul moyen mène depuis la ligne à ce que l'entrée désigne, le bouton de l'action principale pour la fiche, le menu pour la page des éditions et intentions d'achat de l'album visé par une intention (#420).
 * **Règle** : la clé de signature des commits du dépôt est la clé GPG ed25519 `FA9B32F52135D36C4593E4976FF254ADD108ACB0`, à l'adresse de commit privée de GitHub, déclarée dans la configuration locale du dépôt (#520).

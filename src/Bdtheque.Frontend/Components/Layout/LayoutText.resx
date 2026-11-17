@@ -90,9 +90,6 @@
   <data name="Admin.Dashboard" xml:space="preserve">
     <value>Tableau de bord</value>
   </data>
-  <data name="Admin.NewEdition" xml:space="preserve">
-    <value>Nouvelle édition</value>
-  </data>
   <data name="Admin.Albums" xml:space="preserve">
     <value>Albums</value>
   </data>
