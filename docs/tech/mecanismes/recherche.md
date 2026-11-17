@@ -1,6 +1,6 @@
 ---
 title: 'Recherche simple et avancée'
-description: 'Recherche des listes et filtres croisés, recherche avancée (arbre des critères, schéma par entité, traduction en prédicat EF Core, fuseau, univers), recherches enregistrées (critères en texte, variables, fiches désignées, rejeu) ; pour toucher à une liste, à un critère, au schéma de la recherche avancée ou à une recherche enregistrée.'
+description: 'Cette page explique comment `api` cherche des fiches, par le texte et les filtres des listes ou par les critères combinés de la recherche avancée, et comment une recherche enregistrée est conservée puis rejouée ; à lire pour toucher à une liste, à un critère, au schéma de la recherche avancée ou à une recherche enregistrée.'
 code:
   - 'src/Bdtheque.Api/Endpoints/CatalogFilters.cs'
   - 'src/Bdtheque.Api/Endpoints/CatalogExpressions.cs'
@@ -13,52 +13,105 @@ code:
 
 # Recherche simple et avancée
 
-`api` offre deux recherches : celle des listes, par un texte et des filtres, et la recherche avancée, sur toute combinaison de critères, que les recherches enregistrées rejouent. Les deux s'exécutent dans la base, par EF Core. Raisons et règles : [Recherche](../../../.speckit/choix-implementation/api/recherche.md), [Recherche avancée : mise en œuvre](../../../.speckit/choix-implementation/recherche-avancee/recherche-avancee-mise-en-oeuvre.md), [Recherches enregistrées : mise en œuvre](../../../.speckit/choix-implementation/recherche-avancee/recherches-enregistrees-mise-en-oeuvre.md).
+`api` propose deux façons de chercher des fiches. La première est celle des listes : l'utilisateur tape un texte et choisit quelques filtres, et la liste se réduit aux fiches qui y répondent. La seconde est la recherche avancée, qui accepte n'importe quelle combinaison de critères sur les données d'une entité et sur celles des fiches qui lui sont liées ; une recherche avancée peut être enregistrée sous un nom, puis rejouée plus tard avec d'autres valeurs. Dans les deux cas, la recherche est traduite en une requête EF Core que PostgreSQL exécute : aucune fiche n'est chargée en mémoire pour être filtrée. Les raisons de ces choix et les règles qu'ils appliquent sont dans [Recherche](../../../.speckit/choix-implementation/api/recherche.md), [Recherche avancée : mise en œuvre](../../../.speckit/choix-implementation/recherche-avancee/recherche-avancee-mise-en-oeuvre.md) et [Recherches enregistrées : mise en œuvre](../../../.speckit/choix-implementation/recherche-avancee/recherches-enregistrees-mise-en-oeuvre.md).
 
 ## Recherche des listes
 
-- **Texte recherché** : inclusion, comparée avec la collation insensible à la casse et aux accents, posée sur l'expression et non sur la colonne ; sans index dédié. Une fiche se cherche par ce qui l'identifie dans sa liste (titre, nom, nom d'un auteur dans ses deux ordres, série d'un album) ; une édition par son ISBN, séparateurs ignorés des deux côtés.
-- **Filtres croisés** : [`CatalogFilters`](../../../src/Bdtheque.Api/Endpoints/CatalogFilters.cs) et les filtres propres à chaque entité (`AlbumFilters`, `SeriesFilters`, `EditionFilters`). Un filtre sur un univers couvre ses sous-univers, calculés en mémoire sur le référentiel chargé en entier ([`UniverseTree`](../../../src/Bdtheque.Api/Endpoints/UniverseTree.cs)) ; un filtre sur une fiche inexistante donne une liste vide.
-- **Expressions partagées** : [`CatalogExpressions`](../../../src/Bdtheque.Api/Endpoints/CatalogExpressions.cs) écrit une fois les libellés, l'appartenance à la collection, les contributions ou l'ordre des albums, et les insère dans chaque requête par composition d'arbres d'expression (`Expand`).
+Le texte saisi dans une liste est recherché **par inclusion** : une fiche répond s'il apparaît n'importe où dans ce qui l'identifie dans sa liste, c'est-à-dire son titre ou son nom, le nom d'un auteur, dans un ordre comme dans l'autre, ou encore la série d'un album. La comparaison ignore la casse et les accents, parce que la requête applique une collation qui les ignore à l'expression comparée, et non à la colonne elle-même ; aucun index n'est dédié à cette recherche. Une édition se cherche aussi par son ISBN, dont les séparateurs sont retirés aussi bien du texte saisi que de la valeur enregistrée, si bien que « 978-2-… » et « 9782… » se retrouvent.
+
+Les filtres d'une liste se combinent entre eux, et chacun restreint le résultat des autres : ce sont des **filtres croisés**. Ceux qui valent pour plusieurs listes sont écrits une fois dans [`CatalogFilters`](../../../src/Bdtheque.Api/Endpoints/CatalogFilters.cs), les autres dans les filtres propres à chaque entité (`AlbumFilters`, `SeriesFilters`, `EditionFilters`). Un filtre sur un univers retient aussi les fiches rattachées à ses sous-univers : [`UniverseTree`](../../../src/Bdtheque.Api/Endpoints/UniverseTree.cs) charge pour cela la table des univers en entier, qui reste petite, et calcule la descendance en mémoire. Un filtre qui désigne une fiche inexistante donne simplement une liste vide.
+
+Plusieurs expressions reviennent dans de nombreuses requêtes : le libellé d'un album, son appartenance à la collection, ses contributions ou l'ordre des albums d'une série. [`CatalogExpressions`](../../../src/Bdtheque.Api/Endpoints/CatalogExpressions.cs) les écrit une seule fois sous forme d'arbres d'expression, et la méthode `Expand` les insère dans chaque requête qui s'en sert. EF Core voit ainsi une seule expression, qu'il traduit entièrement en SQL, au lieu d'un appel de méthode qu'il ne saurait pas traduire.
 
 ## Recherche avancée
 
-Question du schéma : *comment des critères envoyés par un client deviennent-ils une requête SQL ?* Schéma interprétatif.
+### Les critères, un arbre
+
+Un client décrit sa recherche par un **arbre des critères**, envoyé en JSON et défini dans les contrats par [`SearchCondition`](../../../src/Bdtheque.Contracts/Search/SearchCondition.cs). Chaque nœud de l'arbre est d'une des sortes suivantes, que distingue la propriété `kind` du JSON :
+
+- un **groupe** réunit plusieurs conditions par ET ou par OU ;
+- un **NON** retient les fiches que sa condition n'établit pas ;
+- un **critère** compare une donnée de l'entité à une ou plusieurs valeurs, par exemple « la date de première publication est comprise entre 1990 et 1999 » ;
+- une **comparaison entre deux données** confronte deux données de même type, de la même fiche ou d'une fiche liée ;
+- un **lien** passe aux fiches liées par une relation du modèle, par exemple des albums à leurs éditions, et porte la condition que ces fiches doivent remplir. Quand la relation mène à plusieurs fiches, un **quantificateur** précise combien d'entre elles doivent la remplir : au moins une, toutes, aucune, ou un nombre comparé à une valeur.
+
+Toutes les valeurs sont écrites en texte, selon le type de la donnée : un nombre en chiffres décimaux, une date sous la forme `aaaa`, `aaaa-MM` ou `aaaa-MM-jj` selon la précision voulue, une fiche par son identifiant. Une donnée absente ne satisfait aucune comparaison, sauf « n'est pas renseignée ».
+
+Le schéma suivant, tracé à la main, illustre la structure d'un tel arbre sur un exemple : comment des groupes, des liens et des critères s'emboîtent-ils pour exprimer « albums publiés avant 1980 dont au moins une édition est dans la collection et n'a pas d'ISBN » ?
 
 ```mermaid
 flowchart TD
-    client["Client : POST /catalog/search/{entité}<br/>arbre des critères, fuseau"] --> endpoint["AdvancedSearchEndpoints"]
-    schema["AdvancedSearchSchema<br/>données et liens par entité"] --> translator
-    endpoint --> translator["SearchTranslator<br/>prédicat Expression"]
-    translator --> fields["SearchField, SearchLinkDefinition<br/>comparaisons, liens, quantificateurs"]
-    fields --> query["Requête EF Core<br/>valeurs en paramètres"]
-    query --> db[("PostgreSQL")]
-    db --> page(["Page de résultats,<br/>entrées des listes"])
+    group["Groupe ET"]
+    criterion["Critère sur l'album :<br/>date de première publication<br/>antérieure à 1980"]
+    link["Lien vers les éditions de l'album,<br/>quantificateur « au moins une »"]
+    inner["Groupe ET,<br/>appliqué à chaque édition"]
+    owned["Critère sur l'édition :<br/>dans la collection"]
+    isbn["Critère sur l'édition :<br/>ISBN non renseigné"]
+
+    group --> criterion
+    group --> link
+    link --> inner
+    inner --> owned
+    inner --> isbn
 ```
 
-- **Critères** : un arbre polymorphe en JSON, [`SearchCondition`](../../../src/Bdtheque.Contracts/Search/SearchCondition.cs), dans les contrats : groupe ET/OU, NON, critère sur une donnée, comparaison entre deux données, lien vers des fiches liées (avec son quantificateur s'il est multiple) qui porte sa propre condition. Toute valeur est écrite en texte.
-- **Schéma** : [`AdvancedSearchSchema`](../../../src/Bdtheque.Api/Search/AdvancedSearchSchema.cs) déclare une fois, par entité ([`SearchEntityDefinition`](../../../src/Bdtheque.Api/Search/SearchEntityDefinition.cs)), ses données et ses liens. Il produit à la fois la description exposée aux clients (`GET /catalog/search/schema`, [`SearchSchema`](../../../src/Bdtheque.Contracts/Search/SearchSchema.cs)) et la traduction. Ses clés sont stockées par les recherches enregistrées : elles ne sont jamais renommées.
-- **Traduction** : [`SearchTranslator`](../../../src/Bdtheque.Api/Search/SearchTranslator.cs) construit un prédicat `Expression<Func<T, bool>>` qu'EF Core exécute dans la base, liens compris. [`SearchField`](../../../src/Bdtheque.Api/Search/SearchFields.cs) et ses dérivés, un par type de donnée, traduisent chaque comparaison ; [`SearchLinkDefinition`](../../../src/Bdtheque.Api/Search/SearchLinks.cs) traduit chaque lien et son quantificateur, et [`SearchScope`](../../../src/Bdtheque.Api/Search/SearchLinks.cs) porte le contexte de la traduction, dont la profondeur de la hiérarchie des univers et le fuseau ; [`SearchValues`](../../../src/Bdtheque.Api/Search/SearchValues.cs) lit les valeurs écrites en texte.
-  - **Paramètres** : les valeurs ne sont jamais écrites dans le SQL ; une même forme de critères reste une seule requête en cache.
-  - **Texte** : comparé avec la collation insensible à la casse et aux accents, ou la collation française quand le critère distingue casse et accents, toujours explicite.
-  - **Dates** : comparées comme des périodes ; une date et heure, par son jour dans le fuseau de la requête (paramètre de l'adresse, nom IANA seul, [`SearchTimeZones`](../../../src/Bdtheque.Api/Search/SearchTimeZones.cs)).
-  - **Univers** : la relation d'ancêtre est déroulée sur la profondeur de la hiérarchie, lue dans le même instantané que les résultats.
-- **Exécution** : `POST /catalog/search/{entité}`, les critères dans le corps ; les résultats sont les entrées de la liste de consultation de l'entité, dans son ordre, paginés. Une valeur vide est une erreur métier ; des critères que le schéma ne décrit pas, une erreur technique.
+### Le schéma de la recherche, par entité
+
+Les données et les liens qu'un arbre peut citer sont déclarés une seule fois, entité par entité, dans [`AdvancedSearchSchema`](../../../src/Bdtheque.Api/Search/AdvancedSearchSchema.cs), sous la forme d'une [`SearchEntityDefinition`](../../../src/Bdtheque.Api/Search/SearchEntityDefinition.cs) par entité. Chaque donnée et chaque lien y ont une clé, que l'arbre emploie pour les désigner. Cette déclaration unique sert à deux choses : elle produit la description que les clients lisent pour construire leurs critères, servie par `GET /catalog/search/schema` sous la forme d'un [`SearchSchema`](../../../src/Bdtheque.Contracts/Search/SearchSchema.cs), et elle porte la traduction de chaque donnée et de chaque lien en expression EF Core. Comme les recherches enregistrées conservent ces clés dans leurs critères, une clé n'est jamais renommée.
+
+### Traduction et exécution
+
+Une recherche s'exécute par `POST /catalog/search/{entité}`, l'arbre des critères dans le corps de la requête. Le paramètre d'adresse du fuseau horaire indique, par un nom IANA comme `Europe/Paris`, le fuseau dans lequel interpréter les dates ; [`SearchTimeZones`](../../../src/Bdtheque.Api/Search/SearchTimeZones.cs) le résout. Les résultats sont les entrées de la liste de consultation de l'entité, dans son ordre habituel, et sont paginés.
+
+Le schéma suivant, tracé à la main d'après le code, répond à une seule question : dans quel ordre `api` traite-t-il une requête de recherche avancée, de sa réception à la page de résultats ?
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant client as Client de l'API
+    participant endpoint as Endpoint de recherche
+    participant translator as Traducteur des critères
+    participant db as PostgreSQL
+
+    client->>endpoint: POST /catalog/search/{entité},<br/>arbre des critères et fuseau
+    opt critères qui suivent la hiérarchie des univers
+        endpoint->>db: ouverture d'un instantané,<br/>lecture de la profondeur des univers
+    end
+    endpoint->>translator: arbre, définition de l'entité,<br/>profondeur et fuseau
+    translator-->>endpoint: prédicat EF Core
+    endpoint->>db: requête filtrée, ordonnée, paginée
+    db-->>endpoint: entrées de la page
+    endpoint-->>client: page de résultats
+```
+
+La traduction est le cœur du mécanisme. [`SearchTranslator`](../../../src/Bdtheque.Api/Search/SearchTranslator.cs) parcourt l'arbre et construit un **prédicat EF Core**, c'est-à-dire une expression `Expression<Func<T, bool>>` qui dit si une fiche répond, et qu'EF Core sait traduire en clause `WHERE`. Chaque critère est traduit par la [`SearchField`](../../../src/Bdtheque.Api/Search/SearchFields.cs) de sa donnée, dont il existe une variante par type (texte, nombre, date, montant, énumération…), et chaque lien par sa [`SearchLinkDefinition`](../../../src/Bdtheque.Api/Search/SearchLinks.cs), qui produit un sous-prédicat sur les fiches liées et lui applique le quantificateur. [`SearchScope`](../../../src/Bdtheque.Api/Search/SearchLinks.cs) transporte pendant le parcours ce dont la traduction a besoin, notamment la profondeur de la hiérarchie des univers et le fuseau horaire, et [`SearchValues`](../../../src/Bdtheque.Api/Search/SearchValues.cs) lit les valeurs écrites en texte.
+
+Quelques règles de traduction méritent d'être connues :
+
+- Les valeurs des critères ne sont jamais écrites dans le SQL : elles y entrent comme paramètres. Deux recherches de même forme, qui ne diffèrent que par leurs valeurs, produisent donc la même requête, qu'EF Core ne compile qu'une fois et garde en cache, et aucune valeur ne peut altérer le SQL.
+- Un texte est comparé avec la collation qui ignore la casse et les accents, sauf si le critère demande de les respecter ; la requête utilise alors la collation française. Dans les deux cas, la collation est écrite explicitement dans la requête.
+- Une date est comparée comme une période : « 1985 » couvre toute l'année. Une donnée qui porte une date et une heure est d'abord ramenée à son jour dans le fuseau de la requête.
+- Un critère sur un univers retient aussi ses descendants. Comme une requête SQL ne peut pas parcourir une hiérarchie de profondeur inconnue sans requête récursive, la traduction déroule la relation d'ancêtre sur autant de niveaux que la hiérarchie en compte. Cette profondeur est lue dans le même instantané, de niveau `REPEATABLE READ`, que les résultats : un univers déplacé plus bas entre les deux lectures ne peut donc pas échapper à la recherche.
+
+Une valeur vide dans un critère est refusée comme une erreur métier, que l'utilisateur peut corriger. Des critères qui citent une donnée ou un lien que le schéma ne décrit pas, en revanche, sont une erreur technique, puisqu'un client correct ne les envoie jamais.
 
 ## Recherches enregistrées
 
-- **Critères en texte** : [`SavedSearch`](../../../src/Bdtheque.Domain/Entities/SavedSearch.cs) les garde tels qu'écrits, dans la forme JSON du contrat ([`SearchCriteriaJson`](../../../src/Bdtheque.Api/Search/SearchCriteriaJson.cs)), en `text` et non en `jsonb`. L'API les traduit, sans les exécuter, à chaque écriture : une erreur y est celle qu'aurait l'exécution.
-- **Variables** : chacune désigne par pointeur JSON la constante des critères qu'elle remplace, qui est sa valeur par défaut. Leurs noms se distinguent sans casse ni accents.
-- **Fiches désignées** : [`SearchDesignations`](../../../src/Bdtheque.Api/Search/SearchDesignations.cs) relève, d'après le schéma, les fiches que comparent les critères, à tout niveau de lien. Le domaine les enregistre dans la table `SavedSearchDesignations`, qui porte une colonne générée stockée par entité désignable, chacune avec sa clé étrangère `RESTRICT` ([`SavedSearchDesignationConfiguration`](../../../src/Bdtheque.Infrastructure/Configurations/SavedSearchDesignationConfiguration.cs)) : la base refuse la suppression d'une fiche désignée, quelle que soit l'écriture qui la supprime.
-- **Routes** ([`SavedSearchEndpoints`](../../../src/Bdtheque.Api/Endpoints/SavedSearchEndpoints.cs)) : administration sous `/admin/saved-searches` (lecture, création, modification) ; consultation sous `/catalog/saved-searches` (liste, détail, rejeu par `POST /{id}/results`, avec la valeur des variables par leur nom).
+Une **recherche enregistrée** est une recherche avancée conservée sous un nom, avec l'entité qu'elle cherche et son arbre des critères. L'entité du domaine [`SavedSearch`](../../../src/Bdtheque.Domain/Entities/SavedSearch.cs) garde les critères tels qu'ils ont été écrits, dans la forme JSON du contrat que fixe [`SearchCriteriaJson`](../../../src/Bdtheque.Api/Search/SearchCriteriaJson.cs), dans une colonne `text` et non `jsonb` : PostgreSQL n'a pas à les interpréter, et le texte est restitué exactement tel qu'il a été envoyé. À chaque création ou modification, l'API traduit les critères sans les exécuter ; une erreur y est donc signalée dès l'enregistrement, comme elle l'aurait été à l'exécution.
+
+Une recherche enregistrée peut déclarer des **variables**, pour être rejouée avec d'autres valeurs que celles de ses critères. Chaque variable porte un nom et désigne, par un pointeur JSON (une adresse dans le document, comme `/conditions/0/values/0`), la valeur des critères qu'elle remplace ; cette valeur est aussi sa valeur par défaut. Deux variables d'une même recherche ne peuvent pas avoir des noms qui ne diffèrent que par la casse ou les accents. Au rejeu, par `POST /catalog/saved-searches/{id}/results`, le client donne la valeur de certaines variables par leur nom : la méthode `CriteriaWith` de `SavedSearch` les substitue dans le texte des critères, les autres variables gardant leur valeur par défaut, puis la recherche s'exécute exactement comme une recherche avancée.
+
+Les critères d'une recherche enregistrée peuvent désigner des fiches précises, par exemple « albums de la série *X* ». Si l'une de ces fiches disparaissait, la recherche deviendrait silencieusement fausse. Pour l'empêcher, [`SearchDesignations`](../../../src/Bdtheque.Api/Search/SearchDesignations.cs) relève, d'après le schéma, toutes les fiches que les critères désignent, à n'importe quelle profondeur de lien, et le domaine les enregistre dans la table `SavedSearchDesignations`. Cette table porte une colonne générée par entité désignable, chacune munie d'une clé étrangère `ON DELETE RESTRICT` ([`SavedSearchDesignationConfiguration`](../../../src/Bdtheque.Infrastructure/Configurations/SavedSearchDesignationConfiguration.cs)) : c'est donc la base elle-même qui refuse la suppression d'une fiche désignée, quelle que soit l'écriture qui tente de la supprimer.
+
+Les routes des recherches enregistrées sont déclarées dans [`SavedSearchEndpoints`](../../../src/Bdtheque.Api/Endpoints/SavedSearchEndpoints.cs). L'administration les lit, les crée et les modifie sous `/admin/saved-searches`. La consultation en obtient la liste et le détail sous `/catalog/saved-searches`, et les rejoue par `POST /catalog/saved-searches/{id}/results`.
 
 ## Tests
 
-- **Recherche avancée** : [`AdvancedSearchTests`](../../../tests/Bdtheque.Api.Tests/AdvancedSearchTests.cs), [`SearchParametersTests`](../../../tests/Bdtheque.Api.Tests/SearchParametersTests.cs) (valeurs en paramètres), [`SearchTimeZonesTests`](../../../tests/Bdtheque.Api.Tests/SearchTimeZonesTests.cs).
-- **Recherches enregistrées** : [`SearchCriteriaJsonTests`](../../../tests/Bdtheque.Api.Tests/SearchCriteriaJsonTests.cs) (forme JSON figée), [`SavedSearchEndpointsTests`](../../../tests/Bdtheque.Api.Tests/SavedSearchEndpointsTests.cs), [`SavedSearchDesignationTests`](../../../tests/Bdtheque.Api.Tests/SavedSearchDesignationTests.cs), [`SavedSearchTests`](../../../tests/Bdtheque.Domain.Tests/SavedSearchTests.cs) pour le domaine.
+- [`AdvancedSearchTests`](../../../tests/Bdtheque.Api.Tests/AdvancedSearchTests.cs) vérifie la traduction et l'exécution de la recherche avancée, [`SearchParametersTests`](../../../tests/Bdtheque.Api.Tests/SearchParametersTests.cs) que les valeurs restent des paramètres du SQL, et [`SearchTimeZonesTests`](../../../tests/Bdtheque.Api.Tests/SearchTimeZonesTests.cs) la résolution du fuseau.
+- [`SearchCriteriaJsonTests`](../../../tests/Bdtheque.Api.Tests/SearchCriteriaJsonTests.cs) fige la forme JSON des critères. [`SavedSearchEndpointsTests`](../../../tests/Bdtheque.Api.Tests/SavedSearchEndpointsTests.cs) et [`SavedSearchDesignationTests`](../../../tests/Bdtheque.Api.Tests/SavedSearchDesignationTests.cs) couvrent les routes et la protection des fiches désignées, et [`SavedSearchTests`](../../../tests/Bdtheque.Domain.Tests/SavedSearchTests.cs) les règles du domaine.
 
 ## Invariants à préserver
 
-- Une clé du schéma, un discriminant ou un nom de propriété de la forme JSON des critères n'est jamais renommé : des recherches enregistrées et le journal les stockent.
+- Une clé du schéma, un discriminant `kind` ou un nom de propriété de la forme JSON des critères n'est jamais renommé, parce que les recherches enregistrées et le journal des modifications les conservent.
 - Aucune valeur d'un critère n'est écrite dans le SQL.
-- Une donnée ou un lien ajouté au modèle s'ajoute au schéma, seul endroit qui le décrit et le traduit.
+- Une donnée ou un lien ajouté au modèle, s'il doit être cherchable, s'ajoute au schéma de la recherche, seul endroit qui le décrit et le traduit.
