@@ -2,7 +2,7 @@
 
 ## 2026-11-17
 
-* **Exigence de l'utilisateur** : tout ticket qui porte directement sur l'intégration continue reçoit l'étiquette `ci`, sur les tests l'étiquette `tests`, sur le visuel de l'application l'étiquette `ui` ; avec `documentation`, elles forment les étiquettes de sujet des tickets. Une Pull Request reprend les étiquettes du ticket qu'elle réalise (#511).
+* **Exigence de l'utilisateur** : tout ticket qui porte directement sur l'intégration continue reçoit l'étiquette `ci`, sur les tests l'étiquette `tests`, sur le visuel de l'application l'étiquette `ui` ; avec `documentation`, elles forment les étiquettes de sujet des tickets. Un ticket parent porte toutes les étiquettes de ses sous-tickets. Une Pull Request reprend les étiquettes du ticket qu'elle réalise (#511).
 * **Exigence de l'utilisateur** : un ticket ou une Pull Request qui ne porte que sur la documentation technique n'a pas de jalon ; la documentation suit chaque version par les Pull Requests qui changent le code, qui gardent le jalon de leur ticket (#510).
 * **Exigence de l'utilisateur** : tout ticket qui porte directement sur la documentation, utilisateur ou technique, reçoit l'étiquette `documentation` ; un ticket de pure documentation technique ne porte que sur un sujet implémenté, la documentation d'un sujet à venir étant l'affaire de la Pull Request qui le réalise (#510).
 * **Exigence de l'utilisateur** : la documentation technique ne décrit ni ne mentionne rien que le code ne réalise, même annoncé comme prévu ; ce que le `.speckit/` prévoit y entre avec sa réalisation. La section « Prévu, non implémenté » de la vue d'ensemble et sa consigne sont retirées (#506).

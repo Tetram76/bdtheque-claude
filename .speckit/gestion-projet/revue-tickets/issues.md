@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Issues'
 description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T15:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T16:00:00Z }
 ---
 
 # Issues
@@ -37,6 +37,8 @@ Tout ticket qui porte **directement** sur l'un des sujets ci-dessous reçoit son
 | `ci` | l'intégration continue ([Intégration continue (CI)](../depot/integration-continue-ci.md)) : workflows GitHub Actions, leurs jobs, leurs étapes et leurs scripts, checks requis, quotas et échecs du CI |
 | `tests` | les tests : leur écriture ou leur correction (test instable compris), leurs projets, leur outillage, leur couverture et leur exécution |
 | `ui` | le visuel de l'application, c'est-à-dire tout ce que son utilisateur voit à l'écran, et non son seul aspect graphique : textes (libellés, formulations, messages), éléments présentés et leur disposition, contrôles et leur parcours au clavier, thèmes, charte graphique, maquettes ([`visuel/`](../../visuel/index.md)) |
+
+Un ticket parent ([Suivi par tickets](suivi-par-tickets.md), découpage au démarrage d'un chantier) porte toutes les étiquettes de ses sous-tickets, et suit celles qu'ils reçoivent (exigence de l'utilisateur).
 
 Seul le sujet propre du ticket compte : un ticket qui change l'application et, au passage, met sa documentation à jour, ajoute ses tests ou adapte un workflow ne reçoit pas l'étiquette correspondante.
 
