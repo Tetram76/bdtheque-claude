@@ -1,8 +1,8 @@
 ---
 type: Gouvernance
 title: 'Chantiers en parallèle'
-description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, orchestrateur sans branche ni worktree, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants du jalon en cours (stabilisation du CI exceptée) et ordre de priorité, harnais dus traités à part par une session que l''orchestrateur leur confie, sans être des chantiers du lot, indépendance et dépendances (toute condition préalable, calendrier compris) vérifiées pour chaque candidat, sélection du lot présentée à l''utilisateur à chaque choix, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:30:00Z }
+description: 'Lot de chantiers toujours réalisés en parallèle, chacun dans sa session, orchestrateur sans branche ni worktree, 3 au plus à la fois selon les ressources, nombre du lot fixé par l''utilisateur, choix parmi les tickets existants du jalon en cours (stabilisation du CI exceptée), dans le périmètre éventuel de l''utilisateur, et ordre de priorité, sessions qui préviennent l''orchestrateur de tout évènement majeur, échangent entre elles l''utile et mènent leurs propres surveillances bornées dans le temps, harnais dus traités à part par une session que l''orchestrateur leur confie, sans être des chantiers du lot, indépendance et dépendances (toute condition préalable, calendrier compris) vérifiées pour chaque candidat, sélection du lot présentée à l''utilisateur à chaque choix, ressources évaluées à chaque lancement ; à lire pour lancer un lot ou l''un de ses chantiers.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T20:30:00Z }
 ---
 
 # Chantiers en parallèle
@@ -30,6 +30,22 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:30:00Z }
 - **Suites en tickets** : ce qu'un harnais ouvre en ticket (écart du contrôle de cohérence, montée de version majeure d'une technologie de la stack et revue de l'existant qui la suit, chantier d'amélioration d'une revue de l'existant, report d'une entrée du contrôle qualité…) est un ticket comme un autre : candidat du lot s'il est rattaché au jalon en cours, comme tout ticket de ce jalon (§ Choix des chantiers).
 - **Ressources** : la session des harnais n'occupe pas de place, mais ses exécutions lourdes comptent dans l'évaluation des ressources, comme celles de toute session (§ Ressources).
 
+## Sessions du lot
+
+Ce qui suit vaut pour toute session que lance l'orchestrateur, celle des harnais comprise ; le brief de chacune le lui dit, avec l'identifiant de session de l'orchestrateur et ceux des sessions des autres chantiers en cours.
+
+- **Notification de l'orchestrateur** (exigence de l'utilisateur) : une session prévient l'orchestrateur par un message à chaque **évènement majeur** qui appelle sa réaction (lancer le chantier suivant, solliciter l'utilisateur, ouvrir un ticket), et seulement alors :
+  - la fin de son chantier (Pull Request fusionnée, ticket commenté et verrouillé, branches et worktree nettoyés), avec la Pull Request, le commit fusionné et ce qui reste éventuellement à faire ;
+  - son abandon ;
+  - un problème qui la bloque ou qui dépasse son chantier ;
+  - un découpage de son ticket ou un ticket créé, qui deviennent des candidats du lot (§ Choix des chantiers) ;
+  - une attente de l'utilisateur (décision, validation fonctionnelle).
+
+  Ces messages ne rendent pas compte de l'avancement à intervalle régulier. Ils ne dispensent pas non plus l'orchestrateur de vérifier sur le dépôt ce qu'ils annoncent (ménage, tickets créés) : un message est le rapport d'une session, pas une preuve.
+  - **Alternative écartée (s'en remettre aux seules notes que l'application transmet à la fin de chaque tour d'une session)** : elles ne disent pas si le chantier est terminé, et une session archivée après sa fusion n'en envoie plus ; l'orchestrateur peut alors ignorer qu'une place s'est libérée.
+- **Échanges entre sessions** (exigence de l'utilisateur) : les sessions des chantiers d'un lot peuvent échanger directement entre elles, seulement pour une information **utile** au regard du contexte que leur donne leur brief : coordination d'une exécution lourde ou d'un environnement partagé (§ Ressources), fichier commun aux deux chantiers, constat qui touche le chantier de l'autre. Le reste ne s'échange pas.
+- **Surveillances à la charge de la session** (exigence de l'utilisateur) : les surveillances d'un chantier (CI, revue Codex, analyse SonarQube Cloud…) sont à la charge de sa session ; personne ne les fait pour elle, ni l'orchestrateur, ni l'utilisateur. Chacune est **bornée dans le temps** ([Règles de travail de l'agent](regles-de-travail-de-l-agent.md), durée d'une commande) : à l'expiration de son délai maximal, la session relit elle-même l'état réel (checks, commentaires, réactions), au lieu de se fier au silence du script qui surveille. Un script de surveillance mal écrit peut ne rien détecter sans s'apercevoir qu'il est mal écrit.
+
 ## Choix des chantiers
 
 - **Tickets existants seulement** : un chantier ne s'invente pas. Les chantiers sont choisis parmi les tickets ouverts du dépôt ; l'agent ne fouille ni l'historique du CI ni le code pour en trouver de nouveaux.
@@ -40,12 +56,14 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:30:00Z }
   3. **Jalon en cours** : un autre ticket rattaché à ce jalon.
 
   Plan et jalon se conjuguent : après la stabilisation du CI, ce qui prime est le plan **du jalon en cours** (exigence de l'utilisateur).
+- **Périmètre fixé par l'utilisateur** (exigence de l'utilisateur) : l'utilisateur peut restreindre les chantiers candidats d'un lot (liste de tickets, étiquette, écran, partie du plan…). Seuls les tickets de ce périmètre sont alors candidats, sous-tickets d'un ticket du périmètre compris, dans l'ordre de priorité ci-dessus ; le périmètre s'ajoute aux autres critères (jalon, indépendance, dépendances) sans les lever, sauf pour les tickets que l'utilisateur désigne explicitement (ci-dessous). Un ticket créé pendant le lot hors de ce périmètre n'est pas candidat. Un périmètre dont l'étendue est ambiguë est précisé par l'utilisateur avant le classement des candidats.
 - **Tickets hors du jalon en cours exclus** : un ticket rattaché à un autre jalon ou à aucun, chantier du plan compris, n'est pas candidat ; il le devient s'il est rattaché au jalon en cours, ou si l'utilisateur le demande explicitement pour le lot. Seule fait exception la stabilisation du CI : un ticket qui la porte est candidat quel que soit son jalon (exigence de l'utilisateur). Un harnais n'est jamais candidat, n'étant pas un chantier (§ Harnais).
 - **Indépendance** : un chantier qui modifierait les mêmes fichiers (même écran, même thème, même workflow) qu'un chantier en cours, ou que la Pull Request d'un harnais (§ Harnais), est écarté au profit du suivant, tant que l'autre n'est pas fusionné.
 - **Dépendances** : deux chantiers dont l'un doit voir le résultat de l'autre (ex. deux tickets qui modifient le même workflow, l'un devant partir de ce que l'autre décide) sont menés l'un après l'autre, jamais en même temps.
   - **Toute condition préalable est une dépendance** : est une dépendance toute condition que le ticket, ou la ligne du suivi qui le présente, pose à sa réalisation, pas seulement un autre chantier : un ticket prérequis, une version publiée, une mise en production ([`journal-evenements.md`](../../journal-evenements.md)), un calendrier (« sans objet avant… », « à réaliser avant… »). Un ticket dont une condition n'est pas remplie n'est pas candidat, quel que soit son rang dans l'ordre de priorité, même s'il est listé dans le suivi (ex. #267, sans objet avant la première mise en production).
   - **Vérifiées par l'orchestrateur, pour chaque candidat** : avant de lancer un chantier, l'orchestrateur lit en entier le corps de chaque candidat qu'il envisage, et la ligne du suivi qui le présente, et y vérifie les deux conditions de son choix : l'indépendance (§ ci-dessus) et ses dépendances. L'une sans l'autre ne suffit pas. C'est son travail : il ne le reporte ni sur la session du chantier, ni sur l'utilisateur.
 - **Sélection présentée à l'utilisateur** : à chaque choix des chantiers, au lancement du lot comme à chaque place libérée, l'orchestrateur présente à l'utilisateur la **sélection entière du lot**, et pas seulement les chantiers qu'il lance (exigence de l'utilisateur) : sans elle, l'utilisateur n'a aucun moyen de confirmer le nombre de chantiers à réaliser. La présentation précède le lancement des sessions et donne :
+  - le **périmètre** fixé par l'utilisateur, s'il en a donné un ;
   - le **nombre de chantiers du lot** fixé par l'utilisateur, et le nombre de chantiers que la sélection compte, sous-tickets compris ;
   - chaque chantier sélectionné, par son ticket (numéro et titre), son rang dans l'ordre de priorité et son état : terminé, en cours, lancé maintenant, ou à venir, avec ce qu'il attend (une place libre, une dépendance) ; les chantiers à venir sont ceux que le choix retient à cet instant, que le choix suivant peut changer (§ Choix refait à chaque lancement) ;
   - les candidats écartés, chacun avec sa raison (indépendance, dépendance), et, si la sélection compte moins de chantiers que le lot faute de candidats, ce manque.
