@@ -2,6 +2,7 @@
 
 ## 2026-11-17
 
+* **Exigence de l'utilisateur** : un ticket ou une Pull Request qui ne porte que sur la documentation technique n'a pas de jalon ; la documentation suit chaque version par les Pull Requests qui changent le code, qui gardent le jalon de leur ticket (#510).
 * **Exigence de l'utilisateur** : la documentation technique ne décrit ni ne mentionne rien que le code ne réalise, même annoncé comme prévu ; ce que le `.speckit/` prévoit y entre avec sa réalisation. La section « Prévu, non implémenté » de la vue d'ensemble et sa consigne sont retirées (#506).
 
 ## 2026-11-16
