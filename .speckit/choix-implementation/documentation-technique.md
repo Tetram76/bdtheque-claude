@@ -1,15 +1,16 @@
 ---
 type: Choix d'implémentation
 title: 'Documentation technique : mise en œuvre'
-description: 'Markdown sous docs/tech en cartes et pages, diagrammes Mermaid, site DocFX, contrôles (structure, impact par trailer Git, références générées, rendu dans Chromium), job du CI, service de l''environnement de validation ; à lire pour modifier l''outillage de la documentation technique.'
+description: 'Markdown sous docs/tech en cartes et pages, diagrammes Mermaid, site DocFX publié sur GitHub Pages, contrôles (structure, impact par trailer Git, références générées, rendu dans Chromium), job du CI, service de l''environnement de validation ; à lire pour modifier l''outillage de la documentation technique.'
 applies_to:
   - 'docs/tech/docfx.json'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
   - 'docker/validation-docs/**'
+  - '.github/workflows/technical-documentation.yml'
   - 'tests/Bdtheque.Documentation.Tests/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:25:00Z }
 ---
 
 # Documentation technique : mise en œuvre
@@ -45,6 +46,19 @@ Mise en œuvre de [Documentation technique](../gestion-projet/gouvernance/docume
   - **Alternative écartée (`toc.yml` versionnés)** : une seconde table des matières à tenir alignée sur les cartes.
 - **Liens qui sortent de `docs/tech/` menés au même fichier sur GitHub, au commit documenté**, inscrit au pied de chaque page : le site ne contient que la documentation, et aucun lien n'y mène à une autre version.
   - **Alternative écartée (sources et `.speckit/` copiés dans le site)** : un site plusieurs fois plus gros, pour des fichiers que GitHub présente déjà.
+
+## Site publié
+
+- **GitHub Pages, publié par un workflow GitHub Actions** (`.github/workflows/technical-documentation.yml`), à chaque push sur `main` et à la demande : un job construit le site par le script de construction, comme le CI et l'image de validation, l'autre le déploie dans l'environnement `github-pages`. GitHub Pages est gratuit pour un dépôt public, n'ajoute ni compte ni service, et le site, que DocFX produit en liens relatifs, se sert tel quel sous l'adresse du projet.
+  - **Moindre privilège** : seul le job du déploiement reçoit les droits `pages: write` et `id-token: write` qu'exige le déploiement ; celui de la construction, qui exécute le code du dépôt, ne lit que son contenu. Le workflow ne s'exécute jamais sur une Pull Request.
+  - **Une publication à la fois, jamais interrompue** : une publication en cours se termine, la plus récente attendant son tour, la plus ancienne en attente étant abandonnée.
+  - **Alternative écartée (branche `gh-pages`, que Pages publie)** : une branche persistante de plus, que la [Stratégie de branches](../gestion-projet/depot/strategie-de-branches.md) exclut, et un commit du site généré à chaque fusion, qui alourdit le dépôt de fichiers que personne ne relit.
+  - **Alternative écartée (construction par Pages, Jekyll depuis `docs/`)** : Jekyll ignore les cartes, la navigation, la recherche et le rendu de Mermaid de DocFX, et le site ne serait plus celui que construit et vérifie le script.
+  - **Alternative écartée (publication par le job de la documentation du CI)** : le CI est le check requis des Pull Requests ; il devrait recevoir les droits de déploiement, et l'échec d'une publication ferait échouer celui de `main` pour une raison étrangère à la non-régression ([Intégration continue (CI)](../gestion-projet/depot/integration-continue-ci.md)).
+  - **Alternative écartée (publication limitée aux push qui modifient la documentation, filtre `paths`)** : le commit inscrit au pied des pages, et les liens vers le code qu'il désigne, resteraient en arrière de `main` après chaque fusion de code, qui peut rendre une page fausse sans la modifier ; une publication coûte une minute d'exécuteur, sans quota de Docker Hub ni secret.
+  - **Alternative écartée (action `configure-pages`)** : elle ne sert qu'à donner l'adresse du site aux générateurs qui en ont besoin, ce que DocFX, en liens relatifs, ignore ; et elle ne sait activer Pages qu'avec un jeton autre que celui du workflow. Une action de moins à épingler et à surveiller ([Mises à jour des dépendances](../gestion-projet/depot/mises-a-jour-des-dependances.md)).
+  - **Alternative écartée (hébergement tiers : Read the Docs, Netlify…)** : un compte et un service extérieurs de plus, pour ce que GitHub fait gratuitement.
+  - **Alternative écartée (un site par version ou par Pull Request)** : sans besoin ; la documentation d'une Pull Request se consulte dans son environnement de validation (ci-dessous).
 
 ## Contrôles
 
