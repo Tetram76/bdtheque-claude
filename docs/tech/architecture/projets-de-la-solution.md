@@ -1,6 +1,6 @@
 ---
 title: 'Projets de la solution'
-description: 'Ce que porte chaque projet .NET, qui l''exécute et comment ils communiquent à l''exécution ; pour placer du code ou suivre une requête d''un projet à l''autre.'
+description: 'Cette page explique ce que contient chaque projet .NET de la solution, quel conteneur l''exécute et comment une requête passe de l''un à l''autre ; à lire pour savoir où placer du code ou pour suivre une requête.'
 code:
   - 'Bdtheque.slnx'
   - 'src/*/*.csproj'
@@ -9,57 +9,56 @@ code:
 
 # Projets de la solution
 
-La solution [`Bdtheque.slnx`](../../../Bdtheque.slnx) découpe le code par responsabilité ; les références entre projets imposent les couches à la compilation. Les raisons de ce découpage sont dans [Organisation du code](../../../.speckit/choix-implementation/organisation-du-code.md) ; les références exactes, générées depuis les fichiers de projet, dans [Dépendances des projets](../references/dependances-des-projets.md).
+La solution [`Bdtheque.slnx`](../../../Bdtheque.slnx) découpe le code en projets selon leur responsabilité. Ce découpage n'est pas seulement une convention : un projet ne peut utiliser que les projets qu'il référence, si bien que les règles de dépendance entre couches sont vérifiées par le compilateur. Le domaine, par exemple, ne référence ni EF Core ni ASP.NET Core, et ne peut donc pas en dépendre par mégarde. Les raisons de ce découpage sont données dans [Organisation du code](../../../.speckit/choix-implementation/organisation-du-code.md) ; la liste exacte des références entre projets, générée depuis les fichiers de projet, est dans [Dépendances des projets](../references/dependances-des-projets.md).
 
-## À l'exécution
+## Le trajet d'une requête à travers les projets
 
-Question du schéma : *par où passe une requête, d'un projet à l'autre, une fois l'application démarrée ?* Schéma interprétatif.
+Une fois l'application démarrée, une requête de page entre par `Bdtheque.Frontend`, qui appelle l'API en HTTP. Dans le conteneur `api`, `Bdtheque.Api` reçoit l'appel, confie les règles à `Bdtheque.Domain` et l'accès aux données à `Bdtheque.Infrastructure`, qui s'adresse à PostgreSQL par le pilote Npgsql. Les deux côtés de l'appel HTTP s'entendent sur la forme des messages JSON parce qu'ils compilent tous deux avec `Bdtheque.Contracts`, qui définit ces messages ; ce partage se joue à la compilation et n'apparaît donc pas dans le schéma, qui ne montre que les appels à l'exécution.
+
+Le schéma suivant, tracé à la main d'après le code, répond à la question : quel projet appelle quel autre pendant le traitement d'une requête, et par quel moyen ?
 
 ```mermaid
-flowchart TB
-    subgraph frontend_container["Conteneur frontend"]
-        frontend_project["Bdtheque.Frontend<br/>pages, composants, ApiClient"]
-    end
-    subgraph api_container["Conteneur api"]
-        api_project["Bdtheque.Api<br/>endpoints, erreurs, visuels"]
-        domain["Bdtheque.Domain<br/>entités et règles"]
-        infrastructure["Bdtheque.Infrastructure<br/>DbContext, migrations"]
-    end
-    contracts["Bdtheque.Contracts<br/>contrats d'échange"]
+flowchart LR
+    frontend["Bdtheque.Frontend<br/>pages et client de l'API"]
+    api["Bdtheque.Api<br/>endpoints"]
+    domain["Bdtheque.Domain<br/>entités et règles"]
+    infrastructure["Bdtheque.Infrastructure<br/>contexte EF Core"]
     db[("PostgreSQL")]
 
-    frontend_project -- "HTTP + JSON des contrats" --> api_project
-    api_project --> domain
-    api_project --> infrastructure
-    infrastructure --> domain
-    infrastructure -- "Npgsql" --> db
-    frontend_project -. "compile avec" .-> contracts
-    api_project -. "compile avec" .-> contracts
+    frontend -- "appel HTTP, JSON" --> api
+    api -- "appel en mémoire" --> domain
+    api -- "appel en mémoire" --> infrastructure
+    infrastructure -- "appel en mémoire" --> domain
+    infrastructure -- "SQL, par Npgsql" --> db
 ```
 
 ## Projets de l'application
 
+Chaque projet de l'application a une responsabilité unique, et n'est exécuté que là où elle sert.
+
 | Projet | Ce qu'il porte | Exécuté par | Point d'entrée |
 | --- | --- | --- | --- |
-| `Bdtheque.Domain` | Entités, règles métier, erreurs métier ; ni EF Core ni framework web. | `api` | [`src/Bdtheque.Domain/`](../../../src/Bdtheque.Domain/) |
-| `Bdtheque.Infrastructure` | `BdthequeDbContext`, configurations EF Core, migrations, collations. | `api` | [`BdthequeDbContext`](../../../src/Bdtheque.Infrastructure/BdthequeDbContext.cs) |
-| `Bdtheque.Contracts` | Contrats JSON échangés entre `api` et ses clients, découplés des entités. | `api`, `frontend`, données de validation | [`src/Bdtheque.Contracts/`](../../../src/Bdtheque.Contracts/) |
-| `Bdtheque.Api` | Endpoints Minimal API par famille de routes, gestion des erreurs, stockage des visuels, mesure d'audience, tâches quotidiennes. | `api` | [`Program.cs`](../../../src/Bdtheque.Api/Program.cs), [`RouteGroups`](../../../src/Bdtheque.Api/Endpoints/RouteGroups.cs) |
-| `Bdtheque.Frontend` | Composants Blazor (rendu serveur), thèmes, authentification de l'administrateur, client de l'API, relais des médias. | `frontend` | [`Program.cs`](../../../src/Bdtheque.Frontend/Program.cs), [`ApiClient`](../../../src/Bdtheque.Frontend/Api/ApiClient.cs) |
-| `Bdtheque.HealthProbe` | Sonde du bilan de santé des images, sans shell ni `curl`. | images `api` et `frontend` | [`src/Bdtheque.HealthProbe/`](../../../src/Bdtheque.HealthProbe/) |
-| `Bdtheque.ValidationData` | Données fictives de l'environnement de validation, chargées par l'API d'administration ; jamais déployé. | environnement de validation | [`src/Bdtheque.ValidationData/`](../../../src/Bdtheque.ValidationData/) |
+| `Bdtheque.Domain` | Il contient les entités, les règles métier et les erreurs métier. Il ne dépend ni d'EF Core ni d'un framework web, ce qui permet de tester les règles sans base ni serveur. | `api` | [`src/Bdtheque.Domain/`](../../../src/Bdtheque.Domain/) |
+| `Bdtheque.Infrastructure` | Il contient le contexte EF Core `BdthequeDbContext`, la configuration qui associe les entités aux tables, les migrations du schéma et les collations des colonnes texte. | `api` | [`BdthequeDbContext`](../../../src/Bdtheque.Infrastructure/BdthequeDbContext.cs) |
+| `Bdtheque.Contracts` | Il définit les messages JSON qu'`api` échange avec ses clients. Ces contrats sont distincts des entités, si bien que le domaine peut évoluer sans changer ce que voient les clients. | `api`, `frontend` et le chargeur des données de validation | [`src/Bdtheque.Contracts/`](../../../src/Bdtheque.Contracts/) |
+| `Bdtheque.Api` | Il déclare les endpoints, regroupés par famille de routes (style *Minimal API* d'ASP.NET Core), et porte la gestion des erreurs, le stockage des visuels, la mesure d'audience et les tâches quotidiennes. | `api` | [`Program.cs`](../../../src/Bdtheque.Api/Program.cs), [`RouteGroups`](../../../src/Bdtheque.Api/Endpoints/RouteGroups.cs) |
+| `Bdtheque.Frontend` | Il contient les composants Blazor rendus côté serveur, les thèmes, l'authentification de l'administrateur, le client de l'API et le relais des fichiers des visuels. | `frontend` | [`Program.cs`](../../../src/Bdtheque.Frontend/Program.cs), [`ApiClient`](../../../src/Bdtheque.Frontend/Api/ApiClient.cs) |
+| `Bdtheque.HealthProbe` | C'est un petit programme qui interroge `/health` pour le bilan de santé des images Docker. Il remplace `curl`, absent des images d'exécution, qui n'ont pas non plus de shell. | les images `api` et `frontend` | [`src/Bdtheque.HealthProbe/`](../../../src/Bdtheque.HealthProbe/) |
+| `Bdtheque.ValidationData` | Il charge des données fictives dans l'environnement de validation, en passant par l'API d'administration comme le ferait l'utilisateur. Il n'est jamais déployé en production. | l'environnement de validation | [`src/Bdtheque.ValidationData/`](../../../src/Bdtheque.ValidationData/) |
 
 ## Projets de tests
 
-| Projet | Ce qu'il vérifie | Ressources |
-| --- | --- | --- |
-| `Bdtheque.Domain.Tests` | Règles du domaine. | aucune |
-| `Bdtheque.Infrastructure.Tests` | Persistance (migrations, contraintes) ; tests du dépôt (catégorie `Repository`), qui confrontent ses fichiers à leurs règles, dont la structure du `.speckit/` et de cette documentation. | PostgreSQL (Testcontainers) pour la persistance |
-| `Bdtheque.Api.Tests` | Endpoints sur l'API hébergée en mémoire. | PostgreSQL |
-| `Bdtheque.Frontend.Tests` | Composants Blazor (bUnit), sans navigateur. | aucune |
-| `Bdtheque.EndToEnd.Tests` | Application complète pilotée dans Chromium (Playwright), captures de référence. | PostgreSQL, Chromium |
-| `Bdtheque.ValidationData.Tests` | Chargement des données de validation par l'API. | PostgreSQL |
-| `Bdtheque.Documentation.Tests` | Site de cette documentation : construction, rendu des diagrammes, détection de l'impact documentaire, références générées. | Chromium, `git`, `pwsh` |
-| `Bdtheque.Testing` | Bibliothèque partagée : serveur PostgreSQL de test, hôte de l'API. | — |
+Les tests sont répartis en projets selon ce qu'ils vérifient et les ressources dont ils ont besoin pour s'exécuter : certains se contentent du code, d'autres démarrent un serveur PostgreSQL dans un conteneur (par la bibliothèque Testcontainers) ou pilotent un navigateur Chromium.
 
-Outillage et stratégie de test : [Outillage de développement](../../../.speckit/choix-implementation/outillage.md).
+| Projet | Ce qu'il vérifie | Ressources nécessaires |
+| --- | --- | --- |
+| `Bdtheque.Domain.Tests` | Il vérifie les règles du domaine. | Aucune. |
+| `Bdtheque.Infrastructure.Tests` | Il vérifie la persistance (migrations, contraintes de la base). Il contient aussi les tests du dépôt, de catégorie `Repository`, qui confrontent les fichiers du dépôt à leurs règles, dont la structure du `.speckit/` et celle de cette documentation. | PostgreSQL, pour les tests de persistance seulement. |
+| `Bdtheque.Api.Tests` | Il vérifie les endpoints, sur une API hébergée en mémoire dans le processus du test. | PostgreSQL. |
+| `Bdtheque.Frontend.Tests` | Il vérifie les composants Blazor avec bUnit, qui les rend sans navigateur. | Aucune. |
+| `Bdtheque.EndToEnd.Tests` | Il pilote l'application complète dans Chromium avec Playwright, et compare les captures de référence des écrans. | PostgreSQL et Chromium. |
+| `Bdtheque.ValidationData.Tests` | Il vérifie que les données de validation se chargent par l'API. | PostgreSQL. |
+| `Bdtheque.Documentation.Tests` | Il construit le site de cette documentation, vérifie le rendu de ses diagrammes, la détection de l'impact documentaire et les références générées. | Chromium, `git` et PowerShell (`pwsh`). |
+| `Bdtheque.Testing` | Ce n'est pas un projet de tests, mais la bibliothèque qu'ils partagent : serveur PostgreSQL de test et hôte de l'API. | Sans objet. |
+
+Les choix d'outillage des tests sont expliqués dans [Outillage de développement](../../../.speckit/choix-implementation/outillage.md), et leur organisation dans [Stratégie de tests](../integration-et-tests/strategie-de-tests.md).
