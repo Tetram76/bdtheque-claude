@@ -13591,6 +13591,29 @@
         },
         "description": "A publisher created by its name alone, without website nor collection, which its own form completes."
       },
+      "NewPublisherCollection": {
+        "required": [
+          "key",
+          "publisherId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publisherId": {
+            "type": "string",
+            "description": "Its publisher: an existing one, or the key of a publisher added on the spot by the same form.",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "A collection created by its name alone, in one of the publishers of the form."
+      },
       "NewPurchaseIntentForm": {
         "required": [
           "albumId",
@@ -13646,7 +13669,8 @@
           "genres",
           "universes",
           "series",
-          "publishers"
+          "publishers",
+          "publisherCollections"
         ],
         "type": "object",
         "properties": {
@@ -13679,9 +13703,15 @@
             "items": {
               "$ref": "#/components/schemas/NewPublisher"
             }
+          },
+          "publisherCollections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewPublisherCollection"
+            }
           }
         },
-        "description": "The records an entry form adds without creating them (authors, genres, universes, series, publishers added on the spot): they\nare created with the record the form saves, in the same transaction, or not at all. The form references each by its\n`Key`, which it chose, in place of an identifier, among the records it cites."
+        "description": "The records an entry form adds without creating them (authors, genres, universes, series, publishers and publisher collections\nadded on the spot): they are created with the record the form saves, in the same transaction, or not at all. The form references\neach by its `Key`, which it chose, in place of an identifier, among the records it cites."
       },
       "NewSeries": {
         "required": [

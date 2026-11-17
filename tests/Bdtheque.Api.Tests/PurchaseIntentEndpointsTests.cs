@@ -99,12 +99,35 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
         var publisher = Guid.NewGuid();
         var name = $"Éditeur {Guid.NewGuid():N}";
 
-        var intents = await CreateAsync(album, Edition(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)]) });
+        var intents = await CreateAsync(album, Edition(publisher) with { NewRecords = new NewRecords([], [], [], [], [new NewPublisher(publisher, name)], []) });
 
         var editionId = Assert.Single(intents.Intents).EditionId!.Value;
         var created = await _client.GetFromJsonAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{editionId}");
         Assert.Equal(name, created!.References.Publisher!.Name);
         Assert.Equal(created.References.Publisher.Id, created.Content.PublisherId);
+    }
+
+    [Fact]
+    public async Task Create_WithACollectionAddedOnTheSpotToAPublisherAddedOnTheSpot_CreatesBothWithTheEditionTargeted()
+    {
+        var album = await CreateAlbumAsync();
+        var publisher = Guid.NewGuid();
+        var collection = Guid.NewGuid();
+        var name = $"Collection {Guid.NewGuid():N}";
+
+        var intents = await CreateAsync(album, Edition(publisher) with
+        {
+            PublisherCollectionId = collection,
+            NewRecords = NewRecords.None with
+            {
+                Publishers = [new NewPublisher(publisher, $"Éditeur {Guid.NewGuid():N}")],
+                PublisherCollections = [new NewPublisherCollection(collection, publisher, name)],
+            },
+        });
+
+        var editionId = Assert.Single(intents.Intents).EditionId!.Value;
+        var created = await _client.GetFromJsonAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{editionId}");
+        Assert.Equal((name, created!.References.Publisher!.Id), (created.References.PublisherCollection!.Name, created.References.PublisherCollection.PublisherId));
     }
 
     [Fact]

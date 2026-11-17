@@ -150,6 +150,9 @@
   <data name="Collection.None" xml:space="preserve">
     <value>—</value>
   </data>
+  <data name="Collection.Create" xml:space="preserve">
+    <value>Nouvelle collection…</value>
+  </data>
   <data name="Collection.NoPublisher" xml:space="preserve">
     <value>Choisissez d&apos;abord l&apos;éditeur</value>
   </data>

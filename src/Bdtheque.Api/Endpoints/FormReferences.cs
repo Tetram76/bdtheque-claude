@@ -38,7 +38,7 @@ internal static class FormReferences
 
     /// <summary>
     /// Loads the publisher and the publisher collection a form references, each of which must still
-    /// exist when given, unless the form added the publisher on the spot. Whether the collection belongs to the publisher is
+    /// exist when given, unless the form added it on the spot. Whether the collection belongs to the publisher is
     /// left to the domain operation that receives both: a mismatch is a business error.
     /// </summary>
     /// <exception cref="EntityNotFoundException">The publisher or the collection no longer exists.</exception>
@@ -49,10 +49,10 @@ internal static class FormReferences
         if (publisherId is { } pid && !added.Publishers.TryGetValue(pid, out publisher))
             publisher = await context.Publishers.SingleOrDefaultAsync(p => p.Id == pid, cancellationToken)
                         ?? throw new EntityNotFoundException(typeof(Publisher), pid);
-        var collection = collectionId is { } cid
-            ? await context.PublisherCollections.SingleOrDefaultAsync(c => c.Id == cid, cancellationToken)
-              ?? throw new EntityNotFoundException(typeof(PublisherCollection), cid)
-            : null;
+        PublisherCollection? collection = null;
+        if (collectionId is { } cid && !added.PublisherCollections.TryGetValue(cid, out collection))
+            collection = await context.PublisherCollections.SingleOrDefaultAsync(c => c.Id == cid, cancellationToken)
+                         ?? throw new EntityNotFoundException(typeof(PublisherCollection), cid);
         return (publisher, collection);
     }
 
@@ -86,7 +86,8 @@ internal static class FormReferences
     /// saved with it, or not at all (choix-implementation/api/organisation-de-l-api.md). Each is placed where the content enters
     /// it, so that an error it raises designates it, as any record the request writes
     /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md). A new universe whose parent is given
-    /// takes the hierarchy lock, as any change of parent.
+    /// takes the hierarchy lock, as any change of parent; a new collection of an existing publisher writes a child of the
+    /// aggregate of that publisher, whose root it locks and marks (choix-implementation/persistance/concurrence-d-acces.md).
     /// </summary>
     public static async Task<AddedRecords> CreateAddedAsync(
         BdthequeDbContext context, ContentFields fields, NewRecords? records, CancellationToken cancellationToken)
@@ -120,7 +121,18 @@ internal static class FormReferences
         context.Universes.AddRange(universes.Values);
         context.Series.AddRange(series.Values);
         context.Publishers.AddRange(publishers.Values);
-        return new AddedRecords(authors, genres, universes, series, publishers);
+
+        var collections = new Dictionary<Guid, PublisherCollection>();
+        foreach (var (added, index) in records.PublisherCollections.Select((c, index) => (c, index)))
+        {
+            var publisher = publishers.GetValueOrDefault(added.PublisherId)
+                            ?? await context.LoadOtherAggregateForWriteAsync<Publisher>(added.PublisherId, cancellationToken);
+            var collection = fields.Create($"{AddedPath}/publisherCollections/{index}", () => publisher.AddCollection(added.Name));
+            context.PublisherCollections.Add(collection);
+            collections[added.Key] = collection;
+        }
+
+        return new AddedRecords(authors, genres, universes, series, publishers, collections);
     }
 
     /// <summary>The authors of the contributions, each once, named as the lists name them.</summary>
@@ -156,4 +168,5 @@ internal static class FormReferences
 /// <summary>The records a form added on the spot, created with the record it saves, by the key that stands for their identifier.</summary>
 internal sealed record AddedRecords(
     IReadOnlyDictionary<Guid, Author> Authors, IReadOnlyDictionary<Guid, Genre> Genres, IReadOnlyDictionary<Guid, Universe> Universes,
-    IReadOnlyDictionary<Guid, Series> Series, IReadOnlyDictionary<Guid, Publisher> Publishers);
+    IReadOnlyDictionary<Guid, Series> Series, IReadOnlyDictionary<Guid, Publisher> Publishers,
+    IReadOnlyDictionary<Guid, PublisherCollection> PublisherCollections);

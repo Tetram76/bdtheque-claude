@@ -62,19 +62,17 @@ else
                                           CreateLabel="@(text => L["Publisher.Create", text].Value)" Pending="PendingPublishers"
                                           aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
                         </Field>
-                        @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and
-                           removed when it changes (choix-implementation/socle/frontend.md, Fiches de saisie). *@
-                        <Field Id="edition-collection" Label="@L["Collection"]" Error="@Errors.For("/publisherCollectionId")"
+                        @* One of the collections of the publisher, in the list of them all, which ends with the creation of a new
+                           one: unavailable until one is chosen, and removed when it changes (choix-implementation/socle/frontend.md,
+                           Fiches de saisie). *@
+                        <Field Id="edition-collection" Label="@L["Collection"]"
+                               Error="@(Errors.For("/publisherCollectionId") ?? (Entry.PublisherCollection is { } collection ? AddedError(collection.Id) : null))"
                                Failure="CollectionsProblem" FailureText="@L["Collection.Unread"]" Help="@L["Collection.Help"]" Context="control">
-                            <select id="@control.Id" class="edition-collection" disabled="@(Entry.Publisher is null)"
-                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
-                                    value="@(Entry.PublisherCollection?.Id.ToString() ?? "")" @onchange="ChooseCollection">
-                                <option value="">@(Entry.Publisher is null ? L["Collection.NoPublisher"] : L["None"])</option>
-                                @foreach (var collection in PublisherCollections ?? [])
-                                {
-                                    <option value="@collection.Id">@collection.Label</option>
-                                }
-                            </select>
+                            <ListPicker Id="@control.Id" Label="@L["Collection"]" Options="CollectionOptions" Value="Entry.PublisherCollection"
+                                        ValueChanged="picked => Entry.PublisherCollection = picked" Disabled="@(Entry.Publisher is null)"
+                                        NoneLabel="@(Entry.Publisher is null ? L["Collection.NoPublisher"] : L["None"])"
+                                        CreateLabel="@L["Collection.Create"]" OnCreate="() => _collectionCreation = true"
+                                        aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
                         </Field>
                     </div>
                     <div class="edition-row">
@@ -175,6 +173,11 @@ else
         <PublisherCreationDialog Id="edition-publisher-creation" Text="@publisherName" OnCreated="PublisherCreatedAsync"
                                  OnCancel="() => _publisherCreation = null" />
     }
+    @if (_collectionCreation && Entry.Publisher is { } collectionPublisher)
+    {
+        <PublisherCollectionCreationDialog Id="edition-collection-creation" PublisherId="collectionPublisher.Id" OnCreated="CollectionCreatedAsync"
+                                           OnCancel="() => _collectionCreation = false" />
+    }
     @if (_changesShown)
     {
         <ChangesDialog Id="edition-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
@@ -194,7 +197,9 @@ else
     private int _publisherChoice;
     // The name typed in the choice of the publisher, while its creation on the spot is being confirmed.
     private string? _publisherCreation;
-    // The publisher added on the spot that the last saving sent, where its error designates it.
+    // Whether the creation of a collection on the spot is being confirmed.
+    private bool _collectionCreation;
+    // The publisher and the collection added on the spot that the last saving sent, where its error designates them.
     private NewRecords? _sentRecords;
 
     /// <summary>The album of the edition, which addresses it.</summary>
@@ -453,8 +458,21 @@ else
         }
     }
 
-    private void ChooseCollection(ChangeEventArgs args) =>
-        Entry!.PublisherCollection = Guid.TryParse(args.Value as string, out var id) ? PublisherCollections?.Find(c => c.Id == id) : null;
+    // The collections of the publisher chosen, with those added to it on the spot, which the search does not know.
+    private IReadOnlyList<RecordOption> CollectionOptions =>
+        CollectionChoice.Options(PublisherCollections, Entry!.NewPublisherCollections, Entry.Publisher);
+
+    // The collection added on the spot, created only with the edition when it is saved, in its publisher: cancelling creates none
+    // of them. It is chosen as any collection.
+    private async Task CollectionCreatedAsync(NewPublisherCollection collection)
+    {
+        _collectionCreation = false;
+        Entry!.NewPublisherCollections.Add(collection);
+        Entry.PublisherCollection = new RecordOption(collection.Key, collection.Name, null);
+        await Recorder.RecordActionAsync(Entry.IsPurchaseIntent
+            ? AudienceFunctions.AdminPurchaseIntentCollectionCreated
+            : AudienceFunctions.AdminEditionCollectionCreated);
+    }
 
     private async Task SaveAsync()
     {

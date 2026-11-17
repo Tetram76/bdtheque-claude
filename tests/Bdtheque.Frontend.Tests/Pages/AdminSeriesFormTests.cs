@@ -130,7 +130,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("8", page.Find("#series-volumes").GetAttribute("value"));
         Assert.Equal([false, false, true], page.FindAll("input[type=checkbox]").Select(box => box.HasAttribute("checked")));
         Assert.Equal("Dargaud", page.Find("#series-publisher").GetAttribute("value"));
-        Assert.Equal(Ligne.ToString(), page.Find("#series-collection").GetAttribute("value"));
+        Assert.Equal("Ligne noire", page.Find("#series-collection").TextContent.Trim());
         Assert.Equal("Juan Díaz Canales", page.Find(".role-credits-line .tag").TextContent.Trim());
         Assert.Equal(["Polar"], page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag").Select(tag => tag.TextContent.Trim()));
         Assert.Equal("John Blacksad, détective privé.", page.Find("#series-summary").GetAttribute("value") ?? page.Find("#series-summary").TextContent);
@@ -167,13 +167,16 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         // remembered: the list shows them all.
         var page = OpenSeries();
 
-        Assert.Equal(["—", "Grand angle", "Ligne noire"],
-            page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
-        await page.ChangeAsync("#series-collection", Angle.ToString());
-        Assert.Equal(Angle.ToString(), page.Find("#series-collection").GetAttribute("value"));
-        await page.ChangeAsync("#series-collection", "");
+        Assert.Equal(["—", "Grand angle", "Ligne noire", "Nouvelle collection…"], CollectionOptions(page));
+        await ChooseCollectionAsync(page, 1);
+        Assert.Equal("Grand angle", page.Find("#series-collection").TextContent.Trim());
+        await ChooseCollectionAsync(page, 0);
 
-        Assert.Equal("", page.Find("#series-collection").GetAttribute("value"));
+        Assert.Equal("—", page.Find("#series-collection").TextContent.Trim());
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
+        await page.SubmitAsync("form");
+        var template = _api.Written.Single().Body.GetProperty("content").GetProperty("editionTemplate");
+        Assert.Equal(JsonValueKind.Null, template.GetProperty("publisherCollectionId").ValueKind);
     }
 
     [Fact]
@@ -183,14 +186,15 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
 
         ChoosePublisher(page, new RecordOption(Casterman, "Casterman", null));
 
-        Assert.Equal("", page.Find("#series-collection").GetAttribute("value"));
+        Assert.Equal("—", page.Find("#series-collection").TextContent.Trim());
         Assert.False(page.Find("#series-collection").HasAttribute("disabled"));
-        Assert.Equal(["—", "Écritures"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
+        Assert.Equal(["—", "Écritures", "Nouvelle collection…"], CollectionOptions(page));
 
         ChoosePublisher(page, null);
 
         Assert.True(page.Find("#series-collection").HasAttribute("disabled"));
-        Assert.Equal(["Choisissez d'abord l'éditeur"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
+        Assert.Equal("Choisissez d'abord l'éditeur", page.Find("#series-collection").TextContent.Trim());
+        Assert.Equal(["Choisissez d'abord l'éditeur"], CollectionOptions(page));
     }
 
     [Fact]
@@ -238,7 +242,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("admin.series-form.publisher-created", _audience.Functions.Last());
         // A publisher that does not exist yet has no collection, and is not read.
         Assert.False(page.Find("#series-collection").HasAttribute("disabled"));
-        Assert.Equal(["—"], page.FindAll("#series-collection option").Select(option => option.TextContent.Trim()));
+        Assert.Equal(["—", "Nouvelle collection…"], CollectionOptions(page));
         Assert.DoesNotContain(_api.Requested, path => path.StartsWith("/admin/publishers/", StringComparison.Ordinal) && !path.Contains(Dargaud.ToString(), StringComparison.Ordinal));
 
         _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
@@ -281,6 +285,80 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("true", field.GetAttribute("aria-invalid"));
         Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
             id => page.Find($"#{id}").TextContent.Trim().StartsWith("« Dargaud » est déjà pris", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CollectionCreatedOnTheSpot_ItsNameAlone_IsChosen_AndCreatedInThePublisherWithTheSeries()
+    {
+        // visuel/saisie-serie/contenu.md (decision of the user, #414): « Nouvelle collection… » ends the list, its dialog asks for
+        // the name alone, empty at first, and the collection is created only with the series, in the publisher chosen.
+        var page = OpenSeries();
+
+        await ChooseCollectionAsync(page, 3);
+        Assert.Equal("Nouvelle collection", page.Find("dialog h2").TextContent.Trim());
+        Assert.Equal("", page.Find("#series-collection-creation-name").GetAttribute("value") ?? "");
+        await page.ChangeAsync("#series-collection-creation-name", " Aire libre ");
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
+
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.Equal("Aire libre", page.Find("#series-collection").TextContent.Trim());
+        Assert.Equal(["—", "Aire libre", "Grand angle", "Ligne noire", "Nouvelle collection…"], CollectionOptions(page));
+        Assert.Equal("admin.series-form.collection-created", _audience.Functions.Last());
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
+        await page.SubmitAsync("form");
+
+        var content = _api.Written.Single().Body.GetProperty("content");
+        var collection = content.GetProperty("newRecords").GetProperty("publisherCollections").EnumerateArray().Single();
+        Assert.Equal(("Aire libre", Dargaud.ToString()), (collection.GetProperty("name").GetString(), collection.GetProperty("publisherId").GetString()));
+        Assert.Equal(collection.GetProperty("key").GetString(), content.GetProperty("editionTemplate").GetProperty("publisherCollectionId").GetString());
+    }
+
+    [Fact]
+    public async Task CollectionCreatedOnTheSpot_RemovedWithItsPublisher_IsNotCreated_ButListedAgainWithIt()
+    {
+        var page = OpenSeries();
+        await CreateCollectionOnTheSpotAsync(page, "Aire libre");
+
+        ChoosePublisher(page, new RecordOption(Casterman, "Casterman", null));
+        Assert.Equal(["—", "Écritures", "Nouvelle collection…"], CollectionOptions(page));
+        ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
+
+        Assert.Equal("—", page.Find("#series-collection").TextContent.Trim());
+        Assert.Contains("Aire libre", CollectionOptions(page));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
+        await page.SubmitAsync("form");
+        Assert.Equal(JsonValueKind.Null, _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords").ValueKind);
+    }
+
+    [Fact]
+    public async Task CollectionCreatedOnTheSpot_InAPublisherCreatedOnTheSpot_IsCreatedWithIt()
+    {
+        var page = OpenSeries();
+        await CreatePublisherOnTheSpotAsync(page, "Delcourt");
+
+        await CreateCollectionOnTheSpotAsync(page, "Encrages");
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
+        await page.SubmitAsync("form");
+        var added = _api.Written.Single().Body.GetProperty("content").GetProperty("newRecords");
+        Assert.Equal(added.GetProperty("publishers")[0].GetProperty("key").GetString(),
+            added.GetProperty("publisherCollections")[0].GetProperty("publisherId").GetString());
+    }
+
+    [Fact]
+    public async Task BusinessError_OnACollectionCreatedOnTheSpot_DesignatesTheFieldOfTheCollection()
+    {
+        var page = OpenSeries();
+        await CreateCollectionOnTheSpotAsync(page, "ligne NOIRE");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "PublisherCollection.NameAlreadyUsed", "/newRecords/publisherCollections/0/name");
+
+        await page.SubmitAsync("form");
+
+        var field = page.Find("#series-collection");
+        Assert.Equal("true", field.GetAttribute("aria-invalid"));
+        Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
+            id => page.Find($"#{id}").TextContent.Trim().StartsWith("Ce nom est déjà pris", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -543,6 +621,25 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     {
         var picker = page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher);
         await picker.InvokeAsync(() => picker.Instance.OnCreate.InvokeAsync(name));
+        await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
+    }
+
+    // The options of the list of the collections, its creation last, open or not.
+    private static List<string> CollectionOptions(IRenderedComponent<AdminSeriesForm> page) =>
+        [.. page.FindAll("#series-collection-options [role=option]").Select(option => option.TextContent.Trim())];
+
+    // Opens the list of the collections, and chooses its option at that place: « — » first, its creation last.
+    private static async Task ChooseCollectionAsync(IRenderedComponent<AdminSeriesForm> page, int index)
+    {
+        await page.ClickAsync("#series-collection");
+        await page.ClickAsync($"#series-collection-option-{index}");
+    }
+
+    private static async Task CreateCollectionOnTheSpotAsync(IRenderedComponent<AdminSeriesForm> page, string name)
+    {
+        await page.ClickAsync("#series-collection");
+        await page.ClickAsync("#series-collection-options .option-list-create");
+        await page.ChangeAsync("#series-collection-creation-name", name);
         await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
     }
 }

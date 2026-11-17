@@ -102,7 +102,7 @@ public sealed class RecordPickerTests : BunitContext
 
         Assert.Single(picker.FindAll("[role=option]"));
         // Marked apart: its mention is not read as the end of the name.
-        Assert.True(picker.Find("[role=option]").ClassList.Contains("record-picker-pending"));
+        Assert.True(picker.Find("[role=option]").ClassList.Contains("option-list-pending"));
         await picker.ClickAsync("#f-author-suggestion-0");
         Assert.Equal(pending, chosen);
     }
@@ -118,7 +118,7 @@ public sealed class RecordPickerTests : BunitContext
 
         await TypeAsync(picker, "ti");
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
-        Assert.Empty(picker.FindAll(".record-picker-pending"));
+        Assert.Empty(picker.FindAll(".option-list-pending"));
         await picker.ClickAsync("#f-series-suggestion-1");
 
         Assert.Equal(new RecordOption(Titeuf, "Titeuf", null), chosen);
@@ -165,7 +165,7 @@ public sealed class RecordPickerTests : BunitContext
         var creation = picker.FindAll("[role=option]")[2];
         Assert.Equal("Créer « Jean Nouvel »", creation.TextContent.Trim());
 
-        await picker.ClickAsync(".record-picker-create");
+        await picker.ClickAsync(".option-list-create");
 
         Assert.Equal("Jean Nouvel", created);
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
@@ -198,7 +198,7 @@ public sealed class RecordPickerTests : BunitContext
         await TypeAsync(picker, "ti");
 
         Assert.Equal(2, picker.FindAll("[role=option]").Count);
-        Assert.Empty(picker.FindAll(".record-picker-create"));
+        Assert.Empty(picker.FindAll(".option-list-create"));
     }
 
     [Fact]
@@ -268,7 +268,7 @@ public sealed class RecordPickerTests : BunitContext
         lock (_requests)
             Assert.Empty(_requests);
         // Until then, the suggestions are those of no text: the search of the text shown is under way.
-        Assert.Equal("Recherche…", picker.Find("[role=listbox] .record-picker-status").TextContent.Trim());
+        Assert.Equal("Recherche…", picker.Find("[role=listbox] .option-list-status").TextContent.Trim());
 
         _clock.Advance(TimeSpan.FromMilliseconds(1));
         await Task.WhenAll(keystrokes).EndAsync("The search of the text typed");
@@ -387,7 +387,7 @@ public sealed class RecordPickerTests : BunitContext
 
         await TypeAsync(picker, "zz");
 
-        Assert.Equal("Aucun résultat", picker.Find("[role=listbox] .record-picker-status").TextContent.Trim());
+        Assert.Equal("Aucun résultat", picker.Find("[role=listbox] .option-list-status").TextContent.Trim());
         Assert.Empty(picker.FindAll("[role=option]"));
     }
 
@@ -401,7 +401,7 @@ public sealed class RecordPickerTests : BunitContext
 
         await TypeAsync(picker, "ti");
 
-        var error = picker.Find("[role=listbox] .record-picker-status [role=alert]");
+        var error = picker.Find("[role=listbox] .option-list-status [role=alert]");
         Assert.Equal("technical", error.GetAttribute("data-error-category"));
         Assert.True(error.HasAttribute("data-error-compact"));
         Assert.Equal("La recherche n'a pas abouti. Réessayez dans un instant.", error.QuerySelector("[data-error-text]")!.TextContent.Trim());

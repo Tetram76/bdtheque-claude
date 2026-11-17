@@ -63,7 +63,7 @@ Plusieurs détails de cette méthode comptent pour qui écrit un endpoint :
 - Elle marque la racine comme modifiée, si bien que l'enregistrement réécrit sa ligne et change son `xmin` même lorsque seul un enfant ou une association change, par exemple quand on ajoute un genre à un album. Sans cela, deux écritures concurrentes sur les enfants d'un même agrégat ne seraient pas détectées. La date de modification de la racine change de la même façon.
 - Son paramètre `shape` ajoute au chargement les `Include` dont l'opération a besoin. Les collections de l'album, elles, sont toujours chargées (`AutoInclude`). La méthode `UpdateAsync` d'[`AlbumEndpoints`](../../../src/Bdtheque.Api/Endpoints/AlbumEndpoints.cs) en donne un exemple complet.
 
-La création d'une fiche n'a ni verrou ni version, puisque la fiche n'existe pas encore. L'endpoint ouvre la transaction, construit l'agrégat par le domaine, l'ajoute au contexte par `Add` et enregistre. Certaines fiches peuvent aussi être créées sur place depuis un formulaire, sans quitter la saisie en cours : un genre, un auteur, un univers, une série ou un éditeur. Elles le sont par [`FormReferences.CreateAddedAsync`](../../../src/Bdtheque.Api/Endpoints/FormReferences.cs), dans la même transaction que la fiche qui les cite.
+La création d'une fiche n'a ni verrou ni version, puisque la fiche n'existe pas encore. L'endpoint ouvre la transaction, construit l'agrégat par le domaine, l'ajoute au contexte par `Add` et enregistre. Certaines fiches peuvent aussi être créées sur place depuis un formulaire, sans quitter la saisie en cours : un genre, un auteur, un univers, une série, un éditeur ou une collection d'un éditeur. Elles le sont par [`FormReferences.CreateAddedAsync`](../../../src/Bdtheque.Api/Endpoints/FormReferences.cs), dans la même transaction que la fiche qui les cite.
 
 ## Enregistrement
 
@@ -78,12 +78,13 @@ Une contrainte unique différable n'est vérifiée qu'au `COMMIT`, et non pendan
 
 ## Verrous propres à certaines écritures
 
-Le verrou de la racine suffit à la plupart des écritures. Trois situations demandent un verrou supplémentaire, parce que l'écriture dépend de lignes qu'elle ne modifie pas elle-même. Deux de ces verrous sont des **verrous consultatifs** : des verrous PostgreSQL qui ne portent sur aucune ligne, mais sur un nombre convenu par l'application, et qui servent à sérialiser des traitements entiers.
+Le verrou de la racine suffit à la plupart des écritures. Quatre situations demandent un verrou supplémentaire, parce que l'écriture dépend de lignes qu'elle ne modifie pas elle-même. Deux de ces verrous sont des **verrous consultatifs** : des verrous PostgreSQL qui ne portent sur aucune ligne, mais sur un nombre convenu par l'application, et qui servent à sérialiser des traitements entiers.
 
 | Verrou | Qui le prend | Ce qu'il empêche |
 | --- | --- | --- |
 | Le verrou consultatif de la hiérarchie des univers, pris par [`UniverseHierarchy.LockAsync`](../../../src/Bdtheque.Infrastructure/UniverseHierarchy.cs). | La création ou la modification d'un univers qui a un parent ([`UniverseEndpoints`](../../../src/Bdtheque.Api/Endpoints/UniverseEndpoints.cs)), ainsi que la création sur place d'un univers sous un parent. | Chaque changement de hiérarchie vérifie qu'il ne crée pas de cycle ; le verrou garantit qu'il le vérifie sur une hiérarchie qui inclut les changements précédents. Il est pris avant le verrou de la ligne de l'univers. |
 | Le verrou de la ligne d'une entité, pris par [`LockAsync`](../../../src/Bdtheque.Infrastructure/AggregateWriteExtensions.cs). | Le retrait d'une collection depuis la saisie de son éditeur ([`PublisherEndpoints`](../../../src/Bdtheque.Api/Endpoints/PublisherEndpoints.cs)), après le verrou de la racine, et l'enregistrement d'une utilisation sur une visite de la mesure d'audience ([`AudienceEndpoints`](../../../src/Bdtheque.Api/Endpoints/AudienceEndpoints.cs)). | Dans le premier cas, qu'une édition ou une série se mette à référencer la collection pendant son retrait ; dans le second, que deux utilisations successives d'une même visite s'enregistrent en même temps. |
+| Le verrou de la racine d'un autre agrégat, pris par [`LoadOtherAggregateForWriteAsync`](../../../src/Bdtheque.Infrastructure/AggregateWriteExtensions.cs), qui marque aussi cette racine modifiée. | La création sur place d'une collection d'un éditeur existant, depuis la saisie d'une série ou d'une édition ([`FormReferences.CreateAddedAsync`](../../../src/Bdtheque.Api/Endpoints/FormReferences.cs)), après le verrou de la fiche saisie. | Qu'une saisie de l'éditeur ouverte auparavant enregistre ses collections sans voir la nouvelle : la version de l'éditeur change, et cette saisie est refusée comme périmée. L'éditeur, que la fiche saisie a pu déjà lire, est relu depuis sa ligne verrouillée avant d'être marqué. |
 | Le verrou consultatif de la conservation de l'audience, pris par [`AudienceRetention`](../../../src/Bdtheque.Api/Audience/AudienceRetention.cs). | La clôture quotidienne des mois de la mesure d'audience. | Que deux clôtures simultanées établissent chacune les compteurs des mêmes mois. |
 
 ## Écritures hors agrégat
@@ -162,7 +163,7 @@ Les échecs de la base remontent sous forme d'exception jusqu'à [`ApiExceptionH
 
 ## Invariants à préserver
 
-- Toute écriture sur un agrégat existant passe par `LoadAggregateForWriteAsync`, dans une transaction, avant que le contexte ne suive la moindre entité.
-- Les verrous de ligne se prennent toujours de la racine vers l'enfant, et le verrou de la hiérarchie des univers avant celui de toute ligne d'univers. Deux écritures ne peuvent ainsi jamais s'attendre mutuellement.
+- Toute écriture sur un agrégat existant passe par `LoadAggregateForWriteAsync`, dans une transaction, avant que le contexte ne suive la moindre entité. Seul l'éditeur d'une collection créée sur place depuis une autre fiche est verrouillé ensuite, par `LoadOtherAggregateForWriteAsync`, qui relit sa racine si le contexte la suit déjà.
+- Les verrous de ligne se prennent toujours de la racine vers l'enfant, d'une fiche saisie vers l'éditeur d'une collection qu'elle crée sur place, jamais dans l'autre sens, et le verrou de la hiérarchie des univers avant celui de toute ligne d'univers. Deux écritures ne peuvent ainsi jamais s'attendre mutuellement.
 - Aucune écriture d'une fiche ne passe par du SQL brut, car elle échapperait au journal des modifications et aux dates.
 - Un enregistrement est toujours asynchrone, par `SaveChangesAsync`.

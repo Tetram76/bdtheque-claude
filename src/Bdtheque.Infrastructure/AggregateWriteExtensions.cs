@@ -77,6 +77,33 @@ public static class AggregateWriteExtensions
     }
 
     /// <summary>
+    /// Locks the root row of another aggregate than the one a form writes, a child of which the form adds (e.g. a publisher
+    /// collection created on the spot from the form of a series), then loads the root and marks it modified: its version changes,
+    /// so that a form of that aggregate read before fails as stale, as for any write on it. No version is checked, the form never
+    /// having read that aggregate.
+    /// </summary>
+    /// <remarks>
+    /// Taken after the lock of the aggregate the form writes, which may already have read this root (e.g. the publisher a series
+    /// cites): an instance already tracked is then reloaded from the locked row, which marking it modified writes back, rather than
+    /// the values read before the lock, older maybe than a concurrent modification.
+    /// </remarks>
+    /// <exception cref="EntityNotFoundException">No aggregate has this identifier.</exception>
+    public static async Task<TRoot> LoadOtherAggregateForWriteAsync<TRoot>(
+        this BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
+        where TRoot : EntityBase, IAggregateRoot
+    {
+        await context.LockAsync<TRoot>(id, cancellationToken);
+
+        var tracked = context.ChangeTracker.Entries<TRoot>().SingleOrDefault(e => e.Entity.Id == id);
+        if (tracked is not null)
+            await tracked.ReloadAsync(cancellationToken);
+        var root = tracked?.Entity ?? await context.Set<TRoot>().SingleAsync(r => r.Id == id, cancellationToken);
+
+        context.Entry(root).State = EntityState.Modified;
+        return root;
+    }
+
+    /// <summary>
     /// Locks the row of an entity (<c>SELECT … FOR UPDATE</c>) until the end of the transaction, to serialize the
     /// writes that depend on it without being writes of it (e.g. the next usage of an audience visit, which reads
     /// the latest one).

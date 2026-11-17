@@ -102,19 +102,16 @@ else
                                       aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
                                       aria-invalid="@control.Invalid" />
                     </Field>
-                    @* One of the collections of the publisher, in the list of them all: unavailable until one is chosen, and removed
-                       when it changes. *@
-                    <Field Id="series-collection" Label="@L["Collection"]" Error="@Errors.For("/editionTemplate/publisherCollectionId")"
-                           Failure="CollectionsProblem" FailureText="@L["Collection.Unread"]" Context="control">
-                        <select id="@control.Id" class="series-collection" disabled="@(Entry.Publisher is null)"
-                                aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
-                                aria-invalid="@control.Invalid" value="@(Entry.PublisherCollection?.Id.ToString() ?? "")" @onchange="ChooseCollection">
-                            <option value="">@(Entry.Publisher is null ? L["Collection.NoPublisher"] : L["Collection.None"])</option>
-                            @foreach (var collection in PublisherCollections ?? [])
-                            {
-                                <option value="@collection.Id">@collection.Label</option>
-                            }
-                        </select>
+                    @* One of the collections of the publisher, in the list of them all, which ends with the creation of a new one:
+                       unavailable until one is chosen, and removed when it changes. *@
+                    <Field Id="series-collection" Label="@L["Collection"]" Error="@CollectionError" Failure="CollectionsProblem"
+                           FailureText="@L["Collection.Unread"]" Context="control">
+                        <ListPicker Id="@control.Id" Label="@L["Collection"]" Options="CollectionOptions" Value="Entry.PublisherCollection"
+                                    ValueChanged="collection => Entry.PublisherCollection = collection" Disabled="@(Entry.Publisher is null)"
+                                    NoneLabel="@(Entry.Publisher is null ? L["Collection.NoPublisher"] : L["Collection.None"])"
+                                    CreateLabel="@L["Collection.Create"]" OnCreate="() => _collectionCreation = true"
+                                    aria-describedby="@(control.DescribedBy is { } described ? $"{described} series-publisher-help" : "series-publisher-help")"
+                                    aria-invalid="@control.Invalid" />
                     </Field>
                 </div>
                 <p id="series-publisher-help" class="series-help">@L["Publisher.Help"]</p>
@@ -176,6 +173,11 @@ else
         <PublisherCreationDialog Id="series-publisher-creation" Text="@publisherName" OnCreated="PublisherCreatedAsync"
                                  OnCancel="() => _publisherCreation = null" />
     }
+    @if (_collectionCreation && Entry.Publisher is { } collectionPublisher)
+    {
+        <PublisherCollectionCreationDialog Id="series-collection-creation" PublisherId="collectionPublisher.Id" OnCreated="CollectionCreatedAsync"
+                                           OnCancel="() => _collectionCreation = false" />
+    }
     @if (_changesShown)
     {
         <ChangesDialog Id="series-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
@@ -195,6 +197,8 @@ else
     private int _publisherChoice;
     // The name typed in the choice of the publisher, while its creation on the spot is being confirmed.
     private string? _publisherCreation;
+    // Whether the creation of a collection on the spot is being confirmed.
+    private bool _collectionCreation;
 
     /// <summary>The series to modify; none for a new series.</summary>
     [Parameter]
@@ -317,8 +321,23 @@ else
         }
     }
 
-    private void ChooseCollection(ChangeEventArgs args) =>
-        Entry!.PublisherCollection = Guid.TryParse(args.Value as string, out var id) ? PublisherCollections?.Find(c => c.Id == id) : null;
+    // The collections of the publisher chosen, with those added to it on the spot, which the search does not know.
+    private IReadOnlyList<RecordOption> CollectionOptions =>
+        CollectionChoice.Options(PublisherCollections, Entry!.NewPublisherCollections, Entry.Publisher);
+
+    // The collection added on the spot, created only with the series when it is saved, in its publisher: cancelling creates none
+    // of them. It is chosen as any collection.
+    private async Task CollectionCreatedAsync(NewPublisherCollection collection)
+    {
+        _collectionCreation = false;
+        Entry!.NewPublisherCollections.Add(collection);
+        Entry.PublisherCollection = new RecordOption(collection.Key, collection.Name, null);
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesCollectionCreated);
+    }
+
+    // The collection to correct: the one chosen, or the one added on the spot that the saving refused.
+    private string? CollectionError =>
+        Errors.For("/editionTemplate/publisherCollectionId") ?? (Entry!.PublisherCollection is { } chosen ? AddedError(chosen.Id) : null);
 
     private async Task SaveAsync()
     {

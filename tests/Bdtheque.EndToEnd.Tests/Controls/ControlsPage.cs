@@ -25,11 +25,11 @@ public sealed class ControlsPage : ComponentBase
 
     /// <summary>
     /// Waits for the choice of a record to be interactive. Nothing in the page announces its circuit, but its script is
-    /// imported once the browser has applied its first interactive rendering (<c>RecordPicker.OnAfterRenderAsync</c>), and
-    /// the module is then among the resources of the page: from there, the field answers what is typed in it.
+    /// imported once the browser has applied its first interactive rendering (<c>RecordPicker.OnAfterRenderAsync</c>, as
+    /// <c>ListPicker</c>), and the module is then among the resources of the page: from there, the field answers what is typed in it.
     /// </summary>
     public static Task WaitUntilInteractiveAsync(IPage page) =>
-        page.WaitForFunctionAsync("() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.startsWith('/record-picker'))");
+        page.WaitForFunctionAsync("() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.startsWith('/combobox'))");
 
     /// <summary>Opens the dialog of a deletion, the way a list opens it for the record to delete.</summary>
     [SupplyParameterFromQuery(Name = "dialog")]

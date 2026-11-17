@@ -37,7 +37,9 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" });
         await Assertions.Expect(collectionField).ToBeEnabledAsync();
-        await collectionField.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
+        await collectionField.ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Collection{_marker}", Exact = true }).ClickAsync();
+        await Assertions.Expect(collectionField).ToHaveTextAsync($"Collection{_marker}");
         await page.GetByLabel("Année d'édition").FillAsync("1963");
         await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Achat" });
         await page.GetByLabel("Montant").First.FillAsync("10,95");
@@ -75,6 +77,35 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         var edition = Assert.Single((await GetEditionsPageAsync(album.Id)).Editions).Edition;
         var saved = await GetEditionAsync(album.Id, edition.Id);
         Assert.Equal($"Éditeur{_marker}", saved.References.Publisher!.Name);
+    }
+
+    [Theory, InEachTheme]
+    public async Task NewEdition_WithItsCollectionAddedOnTheSpot_ToItsPublisherAddedOnTheSpot_CreatesBoth(string theme)
+    {
+        // visuel/saisie-edition/contenu.md (decision of the user, #414): « Nouvelle collection… » ends the list of the collections
+        // of the publisher chosen, even one added on the spot; both are created with the edition.
+        var album = await CreateAlbumAsync();
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'éditeur « Éditeur{_marker} »" }).ClickAsync();
+        await page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel éditeur" }).GetByRole(AriaRole.Button, new() { Name = "Ajouter l'éditeur" }).ClickAsync();
+
+        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" });
+        await collection.ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = "Nouvelle collection…" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvelle collection" });
+        await dialog.GetByLabel("Nom").FillAsync($"Collection{_marker}");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter la collection" }).ClickAsync();
+        await Assertions.Expect(collection).ToHaveTextAsync($"Collection{_marker}");
+        await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Achat" });
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'édition" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
+        var edition = Assert.Single((await GetEditionsPageAsync(album.Id)).Editions).Edition;
+        var saved = await GetEditionAsync(album.Id, edition.Id);
+        Assert.Equal(($"Collection{_marker}", saved.References.Publisher!.Id),
+            (saved.References.PublisherCollection!.Name, saved.References.PublisherCollection.PublisherId));
     }
 
     [Theory, InEachTheme]

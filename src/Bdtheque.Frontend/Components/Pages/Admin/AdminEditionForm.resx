@@ -93,6 +93,9 @@
   <data name="Collection.Help" xml:space="preserve">
     <value>Toutes celles de l'éditeur.</value>
   </data>
+  <data name="Collection.Create" xml:space="preserve">
+    <value>Nouvelle collection…</value>
+  </data>
   <data name="Collection.NoPublisher" xml:space="preserve">
     <value>Choisissez d'abord l'éditeur</value>
   </data>

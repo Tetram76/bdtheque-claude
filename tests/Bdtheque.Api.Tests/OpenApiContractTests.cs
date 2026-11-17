@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
@@ -9,7 +10,7 @@ namespace Bdtheque.Api.Tests;
 /// endpoints produce (choix-implementation/documentation-technique.md, références générées): a change to the contract
 /// shows in the diff of its pull request, and a contract left behind fails here.
 /// </summary>
-public sealed class OpenApiContractTests(ApiWebApplicationFactory api) : IClassFixture<ApiWebApplicationFactory>
+public sealed partial class OpenApiContractTests(ApiWebApplicationFactory api) : IClassFixture<ApiWebApplicationFactory>
 {
     /// <summary>Set by scripts/Update-TechnicalReferences.ps1 to the file the generated contract is written to.</summary>
     private const string OutputVariable = "BDTHEQUE_OPENAPI_CONTRACT_OUTPUT";
@@ -38,8 +39,14 @@ public sealed class OpenApiContractTests(ApiWebApplicationFactory api) : IClassF
         var provider = api.Services.GetRequiredKeyedService<IOpenApiDocumentProvider>("v1");
         var document = await provider.GetOpenApiDocumentAsync(CancellationToken.None);
         var json = await document.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_1, CancellationToken.None);
-        return json.ReplaceLineEndings("\n") + "\n";
+        return SourceLineBreaks().Replace(json.ReplaceLineEndings("\n"), @"\n") + "\n";
     }
+
+    // The descriptions are the XML comments of the sources, line breaks included, which a checkout on Windows ends with CRLF and
+    // one on Linux with LF: an escaped CRLF of the JSON is made an escaped LF, so that the contract is the same on either. Only an
+    // escape, not an escaped backslash followed by « r » (an even run of backslashes before it).
+    [GeneratedRegex(@"(?<=(?:^|[^\\])(?:\\\\)*)\\r\\n")]
+    private static partial Regex SourceLineBreaks();
 
     private static string RepositoryRoot()
     {

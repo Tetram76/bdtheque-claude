@@ -62,6 +62,12 @@ public sealed class EditionEntry
     /// <summary>Whether the publisher chosen was added on the spot: it does not exist yet, nor any collection of it.</summary>
     public bool PublisherIsNew => Publisher is { } publisher && NewPublishers.Any(p => p.Key == publisher.Id);
 
+    /// <summary>
+    /// The collections added on the spot, referenced by their key, each in the publisher chosen when it was added; only the one
+    /// still chosen is created with the edition.
+    /// </summary>
+    public List<NewPublisherCollection> NewPublisherCollections { get; set; } = [];
+
     public int? PublicationYear { get; set; }
 
     public string? Isbn { get; set; }
@@ -233,10 +239,14 @@ public sealed class EditionEntry
         InitialValueCurrency = null;
     }
 
-    /// <summary>The publisher added on the spot, if still chosen, to create with the edition; <c>null</c> for none.</summary>
+    /// <summary>The publisher and the collection added on the spot, if still chosen, to create with the edition; <c>null</c> for none.</summary>
     public NewRecords? Added()
     {
-        var added = NewRecords.None with { Publishers = [.. NewPublishers.Where(p => p.Key == Publisher?.Id)] };
+        var added = NewRecords.None with
+        {
+            Publishers = [.. NewPublishers.Where(p => p.Key == Publisher?.Id)],
+            PublisherCollections = [.. NewPublisherCollections.Where(c => c.Key == PublisherCollection?.Id)],
+        };
         return added.IsEmpty() ? null : added;
     }
 

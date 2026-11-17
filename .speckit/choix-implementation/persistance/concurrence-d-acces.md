@@ -5,7 +5,7 @@ description: 'Concurrence optimiste par xmin sur les racines d''agrégat, verrou
 applies_to:
   - 'src/Bdtheque.Infrastructure/AggregateWriteExtensions.cs'
   - 'src/Bdtheque.Domain/Entities/Common/IAggregateRoot.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T21:00:00Z }
 ---
 
 # Concurrence d'accès
@@ -17,3 +17,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 - **Un point d'entrée unique** de toute écriture sur un agrégat existant, dans une transaction (sans elle, le verrou serait relâché dès la fin de la lecture) : verrou, comparaison de version, chargement, marquage.
   - La version est comparée **dès le verrou**, et non à l'enregistrement : un formulaire périmé est signalé comme tel, et non par la première règle métier que ses valeurs obsolètes enfreindraient.
   - Le verrou **ouvre l'unité de travail** : aucune entité n'est encore suivie, toute lecture préalable se faisant sans suivi. EF Core ne rafraîchit jamais une instance déjà suivie : un agrégat lu avant son verrou pourrait porter des valeurs plus anciennes que la ligne verrouillée, que le marquage de la racine réécrirait par-dessus une modification concurrente.
+- **Enfant d'un autre agrégat écrit depuis une fiche** (une collection d'un éditeur créée sur place depuis la saisie d'une série ou d'une édition, [Frontend](../socle/frontend.md)) : la racine de cet agrégat est verrouillée et marquée comme pour toute écriture sur lui, si bien qu'une saisie de l'éditeur ouverte avant échoue comme périmée ; sa version n'est pas comparée, la fiche ne l'ayant jamais lue. Ce verrou suit celui de la fiche saisie, qui a pu lire déjà la racine (l'éditeur que cite une série) : une instance déjà suivie est relue depuis la ligne verrouillée avant d'être marquée.
+  - **Alternative écartée (aucun verrou, la collection insérée seule)** : une saisie concurrente de l'éditeur, qui remplace ses collections en bloc, ne verrait pas la nouvelle et l'écraserait sans conflit.

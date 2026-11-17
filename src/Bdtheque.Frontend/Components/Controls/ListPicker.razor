@@ -1,0 +1,218 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+@* The choice in a list the application draws itself (e.g. the collection of a publisher, chosen among them all:
+   choix-implementation/socle/frontend.md, collection d'un éditeur choisie dans une liste): a select-only combobox of the ARIA,
+   a button that shows the option chosen and opens its list, chosen with the mouse, the finger or the keyboard. A list of the
+   browser (select) cannot end with the creation of a record on the spot that looks as the one of the choice of a record by
+   its name (visuel/saisie-album/contenu.md, création sur place): its options are reduced to their text, and a select styled by
+   the page is not available in every browser supported. Both share their list (OptionList) and their creation (CreationOption).
+   The button looks as a select (themes/base.css). Interactive. *@
+<div class="list-picker">
+    <button @ref="_button" type="button" id="@Id" class="list-picker-button" role="combobox" aria-haspopup="listbox"
+            aria-expanded="@(_open ? "true" : "false")" aria-controls="@ListId" aria-activedescendant="@ActiveOptionId"
+            disabled="@Disabled" @onclick="Toggle" @onkeydown="OnKeyDownAsync" @onblur="Close" @attributes="AdditionalAttributes">
+        @(Value?.Label ?? NoneLabel)
+    </button>
+    <OptionList Id="@ListId" Label="@Label" Hidden="!_open">
+        <li id="@OptionId(0)" class="option-list-option" role="option" aria-selected="@(_active == 0 ? "true" : "false")"
+            @onmousedown:preventDefault @onclick="() => ChooseAsync(null)">@NoneLabel</li>
+        @for (var index = 0; index < Options.Count; index++)
+        {
+            var option = Options[index];
+            <li id="@OptionId(index + 1)" class="option-list-option" role="option" aria-selected="@(_active == index + 1 ? "true" : "false")"
+                @onmousedown:preventDefault @onclick="() => ChooseAsync(option)">@option.Label</li>
+        }
+        @if (CanCreate)
+        {
+            <CreationOption Id="@OptionId(Options.Count + 1)" Label="@(CreateLabel!)" Active="_active == Options.Count + 1" OnChoose="CreateAsync" />
+        }
+    </OptionList>
+</div>
+
+@code {
+    private ElementReference _button;
+    private IJSObjectReference? _module;
+    private bool _open;
+    // The option the keyboard is on, while the list is open: « none » first, then the options, then the creation.
+    private int _active = -1;
+    private string? _revealedOptionId;
+
+    /// <summary>The identifier of the button, unique in the page, which a <see cref="Field"/> labels.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name of the list, as its field labels it.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<RecordOption> Options { get; set; } = [];
+
+    /// <summary>The option chosen; <c>null</c> for none.</summary>
+    [Parameter]
+    public RecordOption? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<RecordOption?> ValueChanged { get; set; }
+
+    /// <summary>What chooses no option, first of the list, and what the button shows without value (e.g. « — »).</summary>
+    [Parameter, EditorRequired]
+    public string NoneLabel { get; set; } = null!;
+
+    /// <summary>
+    /// Unavailable until something else is chosen (e.g. the publisher of the collections): the button is disabled by its own
+    /// attribute, which its look tells apart from a form disabled while it is saved.
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>The label of the creation, last option of the list (e.g. « Nouvelle collection… »). Requires <see cref="OnCreate"/>.</summary>
+    [Parameter]
+    public string? CreateLabel { get; set; }
+
+    /// <summary>Offers to create a record on the spot, which the caller does (e.g. in a dialog) and chooses.</summary>
+    [Parameter]
+    public EventCallback OnCreate { get; set; }
+
+    /// <summary>Set on the button (e.g. the <c>aria-describedby</c> and <c>aria-invalid</c> of its <see cref="Field"/>).</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool CanCreate => OnCreate.HasDelegate && CreateLabel is not null && !Disabled;
+
+    private int LastIndex => Options.Count + (CanCreate ? 1 : 0);
+
+    private string ListId => $"{Id}-options";
+
+    private string? ActiveOptionId => _open && _active >= 0 ? OptionId(_active) : null;
+
+    private string OptionId(int index) => $"{Id}-option-{index}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["combobox.js"]}");
+            await _module.InvokeVoidAsync("keepKeysForTheChoice", _button);
+        }
+
+        // The focus staying on the button, the list does not scroll by itself to the active option.
+        if (ActiveOptionId is not { } active)
+            _revealedOptionId = null;
+        else if (_module is not null && active != _revealedOptionId)
+        {
+            _revealedOptionId = active;
+            await _module.InvokeVoidAsync("reveal", active);
+        }
+    }
+
+    private void Toggle()
+    {
+        if (_open)
+            Close();
+        else
+            Open();
+    }
+
+    // Opened on the option chosen, as a list of the browser.
+    private void Open()
+    {
+        if (Disabled)
+            return;
+        _open = true;
+        _active = Value is { } value ? IndexOf(value) : 0;
+    }
+
+    // The place of an option in the list, after « none »; « none » for an option it no longer lists.
+    private int IndexOf(RecordOption value)
+    {
+        for (var index = 0; index < Options.Count; index++)
+        {
+            if (Options[index].Id == value.Id)
+                return index + 1;
+        }
+
+        return 0;
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (!_open)
+        {
+            if (args.Key is "ArrowDown" or "ArrowUp" or "Enter" or " " or "Home" or "End")
+            {
+                Open();
+                _active = args.Key switch { "Home" => 0, "End" => LastIndex, _ => _active };
+            }
+
+            return;
+        }
+
+        switch (args.Key)
+        {
+            case "ArrowDown":
+                _active = Math.Min(_active + 1, LastIndex);
+                break;
+            case "ArrowUp":
+                _active = Math.Max(_active - 1, 0);
+                break;
+            case "Home":
+                _active = 0;
+                break;
+            case "End":
+                _active = LastIndex;
+                break;
+            case "Enter" or " ":
+                await ChooseActiveAsync();
+                break;
+            case "Escape":
+                Close();
+                break;
+        }
+    }
+
+    // « None » first, then the options, then the creation.
+    private Task ChooseActiveAsync()
+    {
+        if (_active == 0)
+            return ChooseAsync(null);
+        if (_active <= Options.Count)
+            return ChooseAsync(Options[_active - 1]);
+        return CreateAsync();
+    }
+
+    private async Task ChooseAsync(RecordOption? option)
+    {
+        Close();
+        Value = option;
+        await ValueChanged.InvokeAsync(option);
+    }
+
+    private async Task CreateAsync()
+    {
+        Close();
+        await OnCreate.InvokeAsync();
+    }
+
+    private void Close()
+    {
+        _open = false;
+        _active = -1;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            try
+            {
+                await _module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                // The circuit is gone, and the module with it.
+            }
+        }
+    }
+}

@@ -52,7 +52,9 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
         await Assertions.Expect(collectionField).ToBeEnabledAsync();
-        await collectionField.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
+        await collectionField.ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Collection{_marker}", Exact = true }).ClickAsync();
+        await Assertions.Expect(collectionField).ToHaveTextAsync($"Collection{_marker}");
         await page.GetByLabel("Couleur", new() { Exact = true }).SelectOptionAsync("Noir et blanc");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
 
@@ -84,7 +86,10 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         // Not created yet, it has no collection.
         var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
         await Assertions.Expect(collection).ToBeEnabledAsync();
-        await Assertions.Expect(collection.Locator("option")).ToHaveCountAsync(1);
+        await collection.ClickAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Listbox, new() { Name = "Collection éditeur" }).GetByRole(AriaRole.Option))
+            .ToHaveTextAsync(["—", "Nouvelle collection…"]);
+        await collection.PressAsync("Escape");
         using (var api = Application.CreateApiClient())
             Assert.Empty((await api.GetFromJsonAsync<Page<PublisherAdminListItem>>($"/admin/publishers?q={_marker}"))!.Items);
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
@@ -112,15 +117,53 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await publisher.PressSequentiallyAsync($"Premier{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Premier{_marker}", Exact = true }).ClickAsync();
         await Assertions.Expect(collection).ToBeEnabledAsync();
-        await collection.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
-        await Assertions.Expect(collection).ToHaveValueAsync(created.Id.ToString());
+        await collection.ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = created.Name, Exact = true }).ClickAsync();
+        await Assertions.Expect(collection).ToHaveTextAsync(created.Name);
         await page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « Premier{_marker} »" }).ClickAsync();
         await Assertions.Expect(publisher).ToHaveValueAsync("");
         await publisher.PressSequentiallyAsync($"Second{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Second{_marker}", Exact = true }).ClickAsync();
 
         await Assertions.Expect(collection).ToBeEnabledAsync();
-        await Assertions.Expect(collection).ToHaveValueAsync("");
+        await Assertions.Expect(collection).ToHaveTextAsync("—");
+    }
+
+    [Theory, InEachTheme]
+    public async Task Collection_AddedOnTheSpot_ByTheKeyboard_IsCreatedInThePublisherWithTheSeries(string theme)
+    {
+        // visuel/saisie-serie/contenu.md (decision of the user, #414): « Nouvelle collection… » ends the list, its name alone, the
+        // collection created only with the series. The keyboard keeps its keys for the list: Enter does not click the button too.
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditeur{_marker}", null, []));
+        var page = await OpenAsync(theme, AppPaths.AdminNewSeries);
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+        await page.GetByLabel("Titre").FillAsync($"Série {_marker}");
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
+        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
+        await Assertions.Expect(collection).ToBeEnabledAsync();
+
+        await collection.FocusAsync();
+        await collection.PressAsync("ArrowDown");
+        await Assertions.Expect(collection).ToHaveAttributeAsync("aria-expanded", "true");
+        await collection.PressAsync("End");
+        await Assertions.Expect(page.Locator("#series-collection-options [aria-selected=true]")).ToHaveTextAsync("Nouvelle collection…");
+        await collection.PressAsync("Enter");
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvelle collection" });
+        await Assertions.Expect(dialog.GetByLabel("Nom")).ToHaveValueAsync("");
+        await dialog.GetByLabel("Nom").FillAsync($"Collection{_marker}");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter la collection" }).ClickAsync();
+        await Assertions.Expect(dialog).ToHaveCountAsync(0);
+        await Assertions.Expect(collection).ToHaveTextAsync($"Collection{_marker}");
+        using (var api = Application.CreateApiClient())
+            Assert.Empty((await api.GetFromJsonAsync<List<PublisherCollectionForm>>($"/admin/publishers/{publisher.Id}/collections"))!);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
+        using var client = Application.CreateApiClient();
+        var created = Assert.Single((await client.GetFromJsonAsync<List<PublisherCollectionForm>>($"/admin/publishers/{publisher.Id}/collections"))!);
+        var series = Assert.Single((await client.GetFromJsonAsync<SeriesAdminList>($"/admin/series?q={_marker}"))!.Series.Items);
+        Assert.Equal(($"Collection{_marker}", created.Id), (created.Name, (await GetAsync(series.Id)).Content.EditionTemplate.PublisherCollectionId));
     }
 
     [Theory, InEachTheme]
