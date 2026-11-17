@@ -93,8 +93,10 @@ public sealed class ErrorMessageTests : BunitContext
         var message = Render<ErrorMessage>(parameters => parameters.Add(p => p.Problem,
             new ApiProblem(ProblemCategory.Technical, 500, "Leaked.Code", null)));
 
+        // The code is looked for in the markup too, attributes included: no generated value takes its form. A number may
+        // well appear in an attribute (the isolation scope, the path of the icon), so the status is looked for in the text.
         Assert.DoesNotContain("Leaked.Code", message.Markup);
-        Assert.DoesNotContain("500", message.Markup);
+        Assert.DoesNotContain("500", message.TextContent());
     }
 
     // An error presented in a control (a list of suggestions, the line of an upload, under a field): the same category, icon
