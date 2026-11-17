@@ -9,7 +9,7 @@ applies_to:
   - 'scripts/Update-TechnicalReferences.ps1'
   - 'docker/validation-docs/**'
   - 'tests/Bdtheque.Documentation.Tests/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:00:00Z }
 ---
 
 # Documentation technique : mise en œuvre
@@ -39,6 +39,8 @@ Mise en œuvre de [Documentation technique](../gestion-projet/gouvernance/docume
   - **Alternative écartée (Docusaurus, VitePress, Astro Starlight)** : une chaîne Node.js, absente du projet.
   - **Alternative écartée (Hugo)** : Mermaid n'y est pas embarqué, son script serait à fournir et à tenir à jour.
   - **Alternative écartée (docsify, rendu à la volée)** : sans version publiée depuis longtemps.
+- **Outils locaux restaurés par le script de construction**, avant d'appeler DocFX : `dotnet tool run` ne restaure jamais un outil, et refuse de le lancer sur un poste où il ne l'a pas été. La commande documentée suffit ainsi sur un poste neuf ; la restauration est sans effet une fois faite.
+  - **Alternative écartée (`dotnet tool exec`, exécution ponctuelle de .NET 10, qui suit la version du manifeste)** : il ne télécharge que DocFX, mais il est fait pour un outil que le dépôt ne déclare pas ; la restauration est la voie que la documentation de .NET donne pour les outils d'un manifeste, celle du CI et de l'image de validation, et les autres outils qu'elle restaure sont ceux de tout poste de développement du projet.
 - **Navigation générée depuis les cartes**, à chaque construction, sur une copie : les cartes restent la seule table des matières écrite.
   - **Alternative écartée (`toc.yml` versionnés)** : une seconde table des matières à tenir alignée sur les cartes.
 - **Liens qui sortent de `docs/tech/` menés au même fichier sur GitHub, au commit documenté**, inscrit au pied de chaque page : le site ne contient que la documentation, et aucun lien n'y mène à une autre version.

@@ -47,7 +47,7 @@ Le site n'est qu'une autre vue des mêmes fichiers Markdown, construite par DocF
 ./scripts/Build-TechnicalDocumentation.ps1 -Serve
 ```
 
-construit la documentation de la copie de travail et la sert sur `http://localhost:8182`. Un avertissement de DocFX (lien cassé…) fait échouer la construction.
+construit la documentation de la copie de travail et la sert sur `http://localhost:8182`. Le script restaure d'abord les outils locaux (`dotnet tool restore`), si bien que la commande suffit sur un poste neuf, avec le SDK .NET et PowerShell. Un avertissement de DocFX (lien cassé…) fait échouer la construction.
 
 **Environnement de validation** : `./scripts/Start-Validation.ps1 -PullRequest <numéro>` construit et sert la documentation du commit validé sur `http://localhost:8182`, adresse qu'il affiche avec celle de l'application ; `Stop-Validation.ps1` l'arrête avec le reste. Le service `docs`, image construite par [`docker/validation-docs/Dockerfile`](../../../docker/validation-docs/Dockerfile), n'écoute que sur le poste. La documentation interactive de l'API (Scalar) reste servie par `api` lui-même : [Contrat HTTP de l'API](../references/api-http.md).
 
@@ -73,6 +73,6 @@ construit la documentation de la copie de travail et la sert sur `http://localho
 | Structure : cartes, en-têtes, titres, liens, motifs `code`, symboles cités, question de chaque diagramme | `TechnicalDocumentationStructureTests`, tests du dépôt, à chaque Pull Request | Ce qui se vérifie mécaniquement : rien de cassé ni d'introuvable. |
 | Impact d'un changement | `Get-TechnicalDocumentationImpact.ps1 -Check`, job du CI de la documentation | Une page qui décrit un fichier modifié est modifiée elle aussi, ou un commit dit pourquoi elle n'a pas à l'être. |
 | Références générées | `Update-TechnicalReferences.ps1 -Check`, même job | Les pages générées sont celles que donnent leurs sources : ni modifiée, ni manquante, ni en trop. |
-| Site et diagrammes | `Bdtheque.Documentation.Tests`, même job, quand la documentation ou son outillage change | Le site se construit sans avertissement ; chaque diagramme écrit est rendu, sans erreur de Mermaid, sans être réduit sous 0,75 de sa taille sur un écran de bureau (texte sous 12 pixels), sans requête hors du poste ; le commit documenté figure sur chaque page. |
+| Site et diagrammes | `Bdtheque.Documentation.Tests`, même job, quand la documentation ou son outillage change | Le site se construit sans avertissement, y compris sur un poste dont les outils locaux n'ont jamais été restaurés ; chaque diagramme écrit est rendu, sans erreur de Mermaid, sans être réduit sous 0,75 de sa taille sur un écran de bureau (texte sous 12 pixels), sans requête hors du poste ; le commit documenté figure sur chaque page. |
 
 **Limites** : aucun contrôle ne dit qu'une page est vraie. Que le texte et les diagrammes décrivent fidèlement le code, que l'impact listé a bien été évalué et que la raison d'un *trailer* est juste, cela reste une obligation de l'auteur du changement et un point de sa revue. La lisibilité d'un diagramme au-delà de sa taille (disposition, croisements, libellés) s'inspecte sur son rendu, par l'auteur qui le crée ou le modifie.

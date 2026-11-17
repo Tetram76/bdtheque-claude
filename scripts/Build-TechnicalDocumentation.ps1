@@ -13,7 +13,8 @@
       documented, the site holding no other file of the repository.
     The commit is written at the foot of each page, so that a site is never taken for that of another version.
 
-    DocFX is the local .NET tool of dotnet-tools.json; warnings fail the build (a broken link among others).
+    DocFX is the local .NET tool of dotnet-tools.json, restored here first: on a new machine, the .NET SDK and PowerShell
+    are enough. Warnings fail the build (a broken link among others).
 
 .EXAMPLE
     ./scripts/Build-TechnicalDocumentation.ps1 -Serve
@@ -153,9 +154,11 @@ try {
     $Output = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Output)
     if (Test-Path $Output) { Remove-Item $Output -Recurse -Force }
     $footer = "Documentation technique de BDthèque, version $Commit. Elle décrit l'implémentation ; le .speckit fait foi."
-    # The local tool is found from the folder of dotnet-tools.json.
+    # The local tool is found from the folder of dotnet-tools.json. `dotnet tool run` never restores it: on a machine
+    # where it was never restored, it only asks for the restore, which does nothing once done.
     Push-Location $root
     try {
+        dotnet tool restore
         dotnet tool run docfx build (Join-Path $staging 'docfx.json') --output $Output --warningsAsErrors --disableGitFeatures `
             --metadata "_appFooter=$footer"
     }
