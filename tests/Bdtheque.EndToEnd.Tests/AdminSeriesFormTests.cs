@@ -49,7 +49,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         // Its new editions proposing what any new edition is proposed.
         await Assertions.Expect(page.GetByLabel("Reliure")).ToHaveValueAsync(nameof(BindingType.Hardcover));
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
         await Assertions.Expect(collectionField).ToBeEnabledAsync();
         await collectionField.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
@@ -110,14 +110,14 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(collection).ToBeDisabledAsync();
 
         await publisher.PressSequentiallyAsync($"Premier{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Premier{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Premier{_marker}", Exact = true }).ClickAsync();
         await Assertions.Expect(collection).ToBeEnabledAsync();
         await collection.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
         await Assertions.Expect(collection).ToHaveValueAsync(created.Id.ToString());
         await page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « Premier{_marker} »" }).ClickAsync();
         await Assertions.Expect(publisher).ToHaveValueAsync("");
         await publisher.PressSequentiallyAsync($"Second{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Second{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Second{_marker}", Exact = true }).ClickAsync();
 
         await Assertions.Expect(collection).ToBeEnabledAsync();
         await Assertions.Expect(collection).ToHaveValueAsync("");

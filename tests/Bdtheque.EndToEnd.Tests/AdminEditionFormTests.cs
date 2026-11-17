@@ -34,7 +34,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Nouvelle édition");
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" });
         await Assertions.Expect(collectionField).ToBeEnabledAsync();
         await collectionField.SelectOptionAsync(new SelectOptionValue { Label = $"Collection{_marker}" });
@@ -117,7 +117,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         // The minimum of fields: neither copy nor value (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention).
         await Assertions.Expect(page.GetByLabel("Mode d'acquisition")).ToHaveCountAsync(0);
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         await page.GetByLabel("Année d'édition").FillAsync("2013");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'intention d'achat" }).ClickAsync();
 
@@ -144,7 +144,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         var isbn = page.GetByLabel("ISBN");
         await isbn.FillAsync("978-2-203-00120-6");
         await Assertions.Expect(page.Locator("#edition-isbn-help")).ToHaveTextAsync("Chiffre de contrôle correct.");
@@ -167,7 +167,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'édition" }).ClickAsync();
 
         await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("À corriger");
@@ -257,7 +257,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
-        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Offerte" });
         await page.GetByLabel("Choisir des images à ajouter").SetInputFilesAsync(Png("couverture.png", SKColors.SteelBlue));
         await Assertions.Expect(page.Locator(".edition-visuals-count")).ToHaveTextAsync("1 visuel");
