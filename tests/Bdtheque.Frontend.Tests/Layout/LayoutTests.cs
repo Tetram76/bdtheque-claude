@@ -147,7 +147,8 @@ public sealed class LayoutTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void AdminMenu_PresentsThePlanByGroups_TheNewEdition_AndLogsOutLast()
+    // No creation of an edition, which is entered from its album (visuel/administration/en-tete-et-menu.md).
+    public void AdminMenu_PresentsThePlanByGroups_WithoutCreation_AndLogsOutLast()
     {
         var layout = Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body));
 
@@ -155,7 +156,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         Assert.Equal(["Accueil", "Collection", "Auteurs et éditeurs", "Référentiels", "Réglages"],
             plan.QuerySelectorAll(".admin-menu-group-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(
-            ["Tableau de bord", "Nouvelle édition", "Albums", "Séries", "Éditions", "Intentions d'achat", "Auteurs", "Éditeurs",
+            ["Tableau de bord", "Albums", "Séries", "Éditions", "Intentions d'achat", "Auteurs", "Éditeurs",
                 "Genres", "Univers", "Paramétrage", "Statistiques privées"],
             plan.QuerySelectorAll("a > span:first-child").Select(entry => entry.TextContent.Trim()));
         Assert.Equal(AppPaths.AdminHome, plan.QuerySelector("a")?.GetAttribute("href"));
@@ -187,7 +188,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         var layout = Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body));
 
         Assert.Empty(layout.FindAll(".admin-menu-count"));
-        Assert.Equal(12, layout.FindAll("nav[aria-label=\"Plan de l'administration\"] a").Count);
+        Assert.Equal(11, layout.FindAll("nav[aria-label=\"Plan de l'administration\"] a").Count);
     }
 
     [Fact]
