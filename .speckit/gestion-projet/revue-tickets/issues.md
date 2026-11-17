@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Issues'
 description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:45:00Z }
 ---
 
 # Issues
@@ -49,9 +49,9 @@ Chaque étiquette que pose le projet porte sur GitHub une description qui résum
 | Étiquette | Description sur GitHub |
 | --- | --- |
 | `documentation` | `Directly about the user or technical documentation` |
-| `ui` | `About a screen of the application: layout, content, controls, flows` |
-| `tests` | `About the tests themselves, without changing the application` |
-| `ci` | `About the GitHub Actions workflows and their scripts` |
+| `ui` | `Directly about what the user sees on screen: texts, layout, controls, themes` |
+| `tests` | `Directly about the tests: writing, fixing, tooling, coverage, execution` |
+| `ci` | `Directly about CI: workflows and their scripts, required checks, quotas, failures` |
 | `harness` | `Tracking issue of a harness, never any other ticket` |
 | `security-audit` | `Security and dependency-updates harness: tracking issue and tickets opened from it` |
 | `quality-audit` | `Code quality harness: tracking issue and tickets opened from it` |
