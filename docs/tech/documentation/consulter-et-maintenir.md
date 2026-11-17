@@ -3,6 +3,7 @@ title: 'Consulter, construire, vérifier et maintenir'
 description: 'Cette page explique comment cette documentation est écrite et organisée, comment la lire, la construire en site et la consulter en ligne, ce que vérifient ses contrôles automatiques et comment la tenir à jour à chaque changement ; à lire pour écrire ou modifier une page, ou comprendre l''échec d''un contrôle documentaire.'
 code:
   - 'docs/tech/docfx.json'
+  - 'docs/tech/template/**'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
@@ -59,6 +60,8 @@ Pour retrouver les pages qui décrivent les fichiers modifiés de sa branche, on
 ## Construire et consulter le site
 
 Le site n'est qu'une autre présentation des mêmes fichiers Markdown. Il est construit par DocFX, un générateur de sites de documentation installé comme outil .NET local dans [`dotnet-tools.json`](../../../dotnet-tools.json). DocFX y ajoute une navigation générée depuis les cartes, une recherche, et le rendu des diagrammes dans le navigateur par la copie de Mermaid qu'il embarque, sans aucune requête vers Internet. Dans le site, un lien qui sort de `docs/tech/` mène au même fichier sur GitHub, à la version du commit documenté, qu'indique le pied de chaque page.
+
+Le site donne à tous les diagrammes un même style, plus sobre que celui de Mermaid par défaut : une palette déclinée en clair et en sombre, qui suit le thème choisi par le lecteur, et la police du site. Ce style est déclaré une seule fois, dans le modèle propre au projet, `docs/tech/template/public/main.js`, que DocFX applique par-dessus son modèle `modern` ; aucun diagramme n'a donc à porter de directive de style. GitHub, qui rend les diagrammes avec ses propres couleurs, ne le reprend pas.
 
 La commande suivante construit la documentation de la copie de travail et la sert sur `http://localhost:8182` :
 

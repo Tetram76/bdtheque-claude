@@ -10,7 +10,7 @@
         "files": [ "references/*.json" ]
       }
     ],
-    "template": [ "default", "modern" ],
+    "template": [ "default", "modern", "template" ],
     "globalMetadata": {
       "_appTitle": "BDthèque — documentation technique",
       "_appName": "BDthèque",
