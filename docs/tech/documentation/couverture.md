@@ -5,7 +5,7 @@ description: 'Ce que la documentation décrit aujourd''hui, et ce qui reste à d
 
 # Couverture
 
-La documentation technique est **partielle** : elle décrit la vue d'ensemble, l'authentification et les appels internes, la persistance et le parcours des erreurs. Un sujet absent ici n'est pas documenté ; c'est le code, guidé par la [vue d'ensemble](../architecture/vue-d-ensemble.md) et les [projets de la solution](../architecture/projets-de-la-solution.md), qui le décrit. `Get-TechnicalDocumentationImpact.ps1` signale les fichiers modifiés qu'aucune page ne décrit.
+La documentation technique est **partielle** : elle décrit la vue d'ensemble, l'authentification et les appels internes, la persistance, le parcours des erreurs et le frontend. Un sujet absent ici n'est pas documenté ; c'est le code, guidé par la [vue d'ensemble](../architecture/vue-d-ensemble.md) et les [projets de la solution](../architecture/projets-de-la-solution.md), qui le décrit. `Get-TechnicalDocumentationImpact.ps1` signale les fichiers modifiés qu'aucune page ne décrit.
 
 ## Documenté
 
@@ -18,6 +18,8 @@ La documentation technique est **partielle** : elle décrit la vue d'ensemble, l
 | Persistance : contexte EF Core et conventions, schéma et migrations, démarrage d'`api`, base des tests | [Persistance : modèle et schéma](../mecanismes/persistance-modele-et-schema.md) |
 | Persistance : transaction, verrous et version d'un agrégat, enregistrement, suppression, échecs de la base | [Persistance : écriture d'un agrégat](../mecanismes/persistance-ecriture-d-un-agregat.md) |
 | Erreurs : classement par `api`, ProblemDetails, champ en cause, lecture et présentation par `frontend` | [Erreurs, de la règle à leur présentation](../mecanismes/erreurs.md) |
+| Frontend : requête d'une page, rendu statique et îlots interactifs, fiches de saisie, scripts du navigateur, tests | [Frontend : rendu des pages et fiches de saisie](../mecanismes/frontend-rendu-et-saisie.md) |
+| Frontend : écran d'accueil, cookies, visite et thème, couleurs du jour, culture et fuseau, mesure d'audience | [Frontend : visite, thème, culture et mesure d'audience](../mecanismes/frontend-visite-theme-et-culture.md) |
 | Familles de routes et accès au contrat de l'API | [Contrat HTTP de l'API](../references/api-http.md) |
 | La documentation technique elle-même | [Consulter, construire, vérifier et maintenir](consulter-et-maintenir.md) |
 
@@ -27,7 +29,6 @@ Par ordre de priorité : transversalité et risque de régression d'abord.
 
 | Sujet | Ticket |
 | --- | --- |
-| Frontend : rendu, fiches interactives, thèmes, internationalisation, mesure d'audience | [#497](https://github.com/Tetram76/bdtheque-claude/issues/497) |
 | Recherche simple et avancée, visuels, journal des modifications | [#498](https://github.com/Tetram76/bdtheque-claude/issues/498) |
 | Intégration continue et stratégie de tests | [#499](https://github.com/Tetram76/bdtheque-claude/issues/499) |
 
