@@ -10,8 +10,8 @@ public sealed class RowEntryTests : BunitContext
     [Fact]
     public void RowEntry_IsItsTextAlone_NoLink()
     {
-        // « Modifier » alone opens the record (visuel/liste-albums/contenu.md, Actions d'une ligne): the entry is no link,
-        // neither itself nor around nor inside its text.
+        // The entry of a row is no link, in any list (visuel/listes/principes-communs.md, Entrée en texte simple), neither
+        // itself nor around nor inside its text.
         var entry = Render<RowEntry>(parameters => parameters.AddChildContent("Les Bijoux de la Castafiore"));
 
         var element = entry.Find(".row-entry");

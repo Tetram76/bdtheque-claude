@@ -102,7 +102,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
     public void Rows_TheAlbumWhatTheIntentTargetsItsMembershipAndItsDate()
     {
         var rows = Open("").FindAll(".intent-row:not(.intent-row-head)").Select(row => (
-            Text(row.QuerySelector(".intent-label")!),
+            Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".intent-target .tag")!),
             Text(row.QuerySelector(".intent-target-detail")!),
             Text(row.QuerySelector(".intent-collection")!),
@@ -131,7 +131,11 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         var rows = Open("q=Bla").FindAll(".intent-row:not(.intent-row-head)");
         var id = OnAlbum.Id;
 
-        Assert.Equal(AppPaths.AdminAlbumEditions(Blacksad.Id), rows[0].QuerySelector(".intent-label")!.GetAttribute("href"));
+        // The menu alone leads to the editions and intents of the album: the entry of the row is no link
+        // (visuel/listes/principes-communs.md, Entrée en texte simple).
+        Assert.Equal(
+            ["Éditions et intentions d'achat"],
+            rows[0].QuerySelectorAll($"a[href='{AppPaths.AdminAlbumEditions(Blacksad.Id)}']").Select(Text));
         var confirm = rows[0].QuerySelector(".intent-actions a.button")!;
         Assert.Equal(
             ("Confirmer l'achat", "Confirmer l'achat de Blacksad - INT. [1 à 5]", AppPaths.AdminConfirmPurchase(Blacksad.Id, id)),
