@@ -18,7 +18,8 @@ public sealed class ReferenceScriptTests : IAsyncLifetime
         _repository.Write("src/App/App.csproj",
             "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <ItemGroup>\n    <ProjectReference Include=\"..\\Core\\Core.csproj\" />\n  </ItemGroup>\n</Project>\n");
         _repository.Write("src/Core/Core.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-        var generation = await RunAsync();
+        // A repository without the API, whose contract its tests generate.
+        var generation = await RunAsync("-NoOpenApiContract");
         Assert.True(generation.Succeeded, generation.Output);
     }
 

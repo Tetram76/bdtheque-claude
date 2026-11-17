@@ -26,12 +26,11 @@ La documentation technique est **partielle** : elle décrit la vue d'ensemble, l
 | Workflow CI : classement des fichiers modifiés, jobs et leurs conditions, tests de bout en bout par thème, analyse SonarQube Cloud, analyse des images | [Intégration continue](../integration-et-tests/integration-continue.md) |
 | Projets de tests et leurs ressources, tests du dépôt, horloge et thème imposés, API interdites, captures de référence | [Stratégie de tests](../integration-et-tests/strategie-de-tests.md) |
 | Contrôle qualité hebdomadaire, contrôle de sécurité quotidien, relevé des versions | [Contrôles périodiques](../integration-et-tests/controles-periodiques.md) |
-| Familles de routes et accès au contrat de l'API | [Contrat HTTP de l'API](../references/api-http.md) |
+| Familles de routes, contrat OpenAPI de l'API et son accès | [Contrat HTTP de l'API](../references/api-http.md), contrat [`openapi-v1.json`](../references/openapi-v1.json) (généré) |
 | La documentation technique elle-même | [Consulter, construire, vérifier et maintenir](consulter-et-maintenir.md) |
 
 ## Références à générer
 
 | Référence | Raison de son absence | Ticket |
 | --- | --- | --- |
-| Contrat OpenAPI versionné | Consultable exact pour chaque commit en validation ; sa génération à la construction démarre l'hôte de l'API, à mettre au point. | [#493](https://github.com/Tetram76/bdtheque-claude/issues/493) |
 | Schéma physique de la base | Exige une base PostgreSQL migrée par le CI, réservée aux changements du modèle pour ne pas peser sur les autres. | [#494](https://github.com/Tetram76/bdtheque-claude/issues/494) |
