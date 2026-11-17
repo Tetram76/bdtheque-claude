@@ -1,14 +1,14 @@
 ---
 type: Gouvernance
 title: 'Documentation technique'
-description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), rien de ce qui n'existe pas, consultation guidée subordonnée au .speckit, profondeur et diagrammes, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
+description: 'Trois périmètres documentaires (.speckit normatif, documentation technique descriptive de docs/tech, aide utilisateur réservée), rien de ce qui n'existe pas, consultation guidée subordonnée au .speckit, site de main publié à chaque fusion, profondeur et diagrammes, mise à jour dans la même Pull Request que le code, contrôles déterministes et obligations sémantiques ; s''applique à tout chantier qui touche le code, la configuration ou l''outillage.'
 tags: [socle]
 applies_to:
   - 'docs/tech/**'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T11:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:20:00Z }
 ---
 
 # Documentation technique
@@ -51,6 +51,7 @@ Subordonnée à la lecture du `.speckit/` qu'impose `AGENTS.md`, qu'elle ne racc
 - **Seulement si le sujet le justifie** (implémentation, analyse technique, chantier qui touche le code) : aucun « socle » technique, aucune lecture de tout `docs/tech/`, de toutes ses cartes, ni de son contenu chargé par un fichier d'instructions, une règle, un skill ou une session.
 - **Guidée** : la carte racine (`docs/tech/index.md`), puis la carte du domaine, puis les seules pages utiles ; une recherche textuelle ciblée si les cartes ne suffisent pas.
 - **Selon l'intention** : question générale, la documentation suffit si elle répond, la réponse disant qu'elle vient d'elle ; question précise ou certitude exigée sur l'état effectif, la documentation oriente vers le code, les tests, la configuration ou une vérification, proportionnés ; modification du code, elle situe les responsabilités et les points d'entrée, puis le code et les tests nécessaires sont lus en entier avant d'écrire.
+- **Site publié, celui de `main`** : la documentation de `main` se consulte aussi en ligne, sans rien lancer sur son poste, sous la forme de son site (navigation, recherche, diagrammes rendus), publié à chaque fusion sur `main` et qui porte le commit documenté (décision de l'utilisateur). Il n'est qu'une autre vue des mêmes pages : agents et développeurs lisent toujours les fichiers de `docs/tech/`, à la version de leur copie de travail, qui fait foi pour leur chantier.
 
 ## Maintenance, à chaque chantier
 

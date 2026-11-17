@@ -1,8 +1,8 @@
 ---
 type: Gouvernance
 title: 'Configuration du repository GitHub'
-description: 'Réglages du dépôt GitHub, Ruleset de main, sécurité du dépôt, merge fait par l''agent au nom de l''utilisateur, jamais par un collaborateur ; à lire pour toute modification de la configuration GitHub.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T20:05:00Z }
+description: 'Réglages du dépôt GitHub, Ruleset de main, sécurité du dépôt, GitHub Pages, merge fait par l''agent au nom de l''utilisateur, jamais par un collaborateur ; à lire pour toute modification de la configuration GitHub.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:25:00Z }
 ---
 
 # Configuration du repository GitHub
@@ -13,6 +13,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T20:05:00Z }
 - **Fonctionnalités actives** : Issues, Releases
 - **Visibilité** : dépôt **public**.
 - **Fonctionnalités désactivées** : Wiki, Projects, Discussions (aucune interaction communautaire souhaitée)
+- **GitHub Pages** : source *GitHub Actions* (`build_type: workflow`), pour le seul site de la documentation technique de `main`, publié par son workflow ([Documentation technique : mise en œuvre](../../choix-implementation/documentation-technique.md#site-publié)), à l'adresse <https://tetram76.github.io/bdtheque-claude/>, publique comme le dépôt, sans domaine personnalisé. L'environnement `github-pages`, que GitHub crée au premier déploiement, n'accepte que les déploiements depuis `main`.
 - **Protection de `main`** : un **Ruleset** GitHub est configuré (id `17636023`, **actif** — le dépôt étant public) avec les règles suivantes :
   - PR obligatoire avant tout merge
   - Force-push interdit

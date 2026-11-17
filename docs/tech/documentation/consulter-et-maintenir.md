@@ -1,12 +1,13 @@
 ---
 title: 'Consulter, construire, vérifier et maintenir'
-description: 'Forme des pages et des cartes, lecture guidée, construction et consultation du site, contrôles automatiques et leurs limites, mise à jour à chaque changement ; pour écrire ou modifier une page, ou comprendre un échec d''un contrôle documentaire.'
+description: 'Forme des pages et des cartes, lecture guidée, construction et consultation du site, site publié de main, contrôles automatiques et leurs limites, mise à jour à chaque changement ; pour écrire ou modifier une page, ou comprendre un échec d''un contrôle documentaire.'
 code:
   - 'docs/tech/docfx.json'
   - 'scripts/Build-TechnicalDocumentation.ps1'
   - 'scripts/Get-TechnicalDocumentationImpact.ps1'
   - 'scripts/Update-TechnicalReferences.ps1'
   - 'docker/validation-docs/**'
+  - '.github/workflows/technical-documentation.yml'
   - 'tests/Bdtheque.Documentation.Tests/**'
   - 'tests/Bdtheque.Infrastructure.Tests/TechnicalDocumentation*.cs'
 ---
@@ -48,6 +49,13 @@ Le site n'est qu'une autre vue des mêmes fichiers Markdown, construite par DocF
 ```
 
 construit la documentation de la copie de travail et la sert sur `http://localhost:8182`. Le script restaure d'abord les outils locaux (`dotnet tool restore`), si bien que la commande suffit sur un poste neuf, avec le SDK .NET et PowerShell. Un avertissement de DocFX (lien cassé…) fait échouer la construction.
+
+**Site publié** : celui de `main`, sur <https://tetram76.github.io/bdtheque-claude/>, se consulte sans rien lancer. Le workflow [`technical-documentation.yml`](../../../.github/workflows/technical-documentation.yml) le reconstruit par le même script à chaque push sur `main` (ou à la demande, depuis l'onglet *Actions*), puis le déploie sur GitHub Pages ; le commit au pied de chaque page dit de quelle version de `main` il s'agit, et les liens vers le code mènent à ce commit. Une publication en échec laisse en ligne la précédente. Une Pull Request ne publie rien : son site se consulte localement ou dans l'environnement de validation.
+
+| Job | Ce qu'il fait | Droits |
+| --- | --- | --- |
+| `Build the site` | SDK .NET des Dockerfiles, `Build-TechnicalDocumentation.ps1`, site déposé comme artefact de Pages | lecture du dépôt |
+| `Deploy to GitHub Pages` | Déploiement de l'artefact dans l'environnement `github-pages`, sur `main` seulement | `pages: write`, `id-token: write` |
 
 **Environnement de validation** : `./scripts/Start-Validation.ps1 -PullRequest <numéro>` construit et sert la documentation du commit validé sur `http://localhost:8182`, adresse qu'il affiche avec celle de l'application ; `Stop-Validation.ps1` l'arrête avec le reste. Le service `docs`, image construite par [`docker/validation-docs/Dockerfile`](../../../docker/validation-docs/Dockerfile), n'écoute que sur le poste. La documentation interactive de l'API (Scalar) reste servie par `api` lui-même : [Contrat HTTP de l'API](../references/api-http.md).
 
