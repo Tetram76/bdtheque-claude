@@ -543,7 +543,7 @@ class View extends Mockup {
         eds: [owned ? owned + (owned > 1 ? ' éditions' : ' édition') : '', intents ? intents + (intents > 1 ? ' intentions' : ' intention') : ''].filter(Boolean).join(' · ') || '—',
         edsFg: owned + intents === 0 ? t.muted : t.text,
         intent: a.state === 'intent',
-        badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? "Intention d'acquisition" : 'Hors collection'),
+        badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? 'Intention' : 'Hors collection'),
         badgeBg: a.state === 'own' ? t.nBg : 'transparent',
         badgeFg: a.state === 'own' ? t.nFg : t.text,
         badgeB: a.state === 'own' ? '2px solid transparent' : '2px dashed ' + t.line,

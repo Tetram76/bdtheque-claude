@@ -248,8 +248,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        Assert.Equal("Intention d'acquisition", page.FindAll(".album-facts li")[^1].TextContent.Trim());
-        Assert.Equal(("intent", "Intention d'acquisition"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
+        Assert.Equal("Intention", page.FindAll(".album-facts li")[^1].TextContent.Trim());
+        Assert.Equal(("intent", "Intention"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
         // It has no edition: no edition nor visual, nor any mention in their place, and the generic visual as its cover.
         Assert.Empty(page.FindAll(".edition, .edition-visuals, .editions-none"));
         Assert.NotNull(page.Find(".album-cover svg.cover-generic"));
@@ -262,8 +262,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        Assert.Equal("Intention d'acquisition", page.FindAll(".album-facts li")[^1].TextContent.Trim());
-        Assert.Equal(("intent", "Intention d'acquisition"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
+        Assert.Equal("Intention", page.FindAll(".album-facts li")[^1].TextContent.Trim());
+        Assert.Equal(("intent", "Intention"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
         // The edition targeted is an intent, never an edition of the collection, which has none, without any mention.
         Assert.Empty(BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition, .editions-none"));
         Assert.Single(page.FindAll(".album-intents li"));
@@ -598,7 +598,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal(["T. 1", "T. 5", "T. 6", "HS 1"], albums.Select(a => a.QuerySelector(".series-album-volume")!.TextContent.Trim()));
         Assert.Equal(["La Jeunesse", "Lointaines îles du vent", "Les Celtiques", "Hors-série 1"],
             albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));
-        Assert.Equal(["Possédé", "Possédé", "Intention d'acquisition", "Non possédé"],
+        Assert.Equal(["Possédé", "Possédé", "Intention", "Non possédé"],
             albums.Select(a => a.QuerySelector(".tag")!.TextContent.Trim()));
         // The album shown is no link to itself; the others lead to their records.
         Assert.Equal("page", albums[1].QuerySelector(".series-album-title")!.GetAttribute("aria-current"));

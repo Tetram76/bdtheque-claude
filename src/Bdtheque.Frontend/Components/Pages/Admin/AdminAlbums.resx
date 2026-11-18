@@ -64,7 +64,7 @@
     <value>Possédé</value>
   </data>
   <data name="State.PurchaseIntent" xml:space="preserve">
-    <value>Intention d'acquisition</value>
+    <value>Intention</value>
   </data>
   <data name="State.OutsideCollection" xml:space="preserve">
     <value>Non possédé</value>

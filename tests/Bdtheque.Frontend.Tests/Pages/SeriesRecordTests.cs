@@ -269,7 +269,7 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
         var cards = Open().FindAll(".album-card");
 
         Assert.Equal(["Appréciation : Bien, 4 sur 5", null, null, null, null], cards.Select(c => c.QuerySelector("[role='img']")?.GetAttribute("aria-label")));
-        Assert.Equal(["Possédé", "Possédé", "Intention d'acquisition", "Non possédé", "Possédé"],
+        Assert.Equal(["Possédé", "Possédé", "Intention", "Non possédé", "Possédé"],
             cards.Select(c => c.QuerySelector(".tag")!.TextContent.Trim()));
     }
 

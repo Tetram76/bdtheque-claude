@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''un album : visuels, identité, contributions, éditions, intentions, reste de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T15:45:00Z }
 ---
 
 # Contenu
@@ -25,7 +25,7 @@ De haut en bas :
   - une donnée non renseignée du détail d'une édition n'est pas affichée, et un groupe sans aucune donnée non plus : la mention « Non renseigné » alourdirait le détail et rendrait le reste moins lisible ;
   - en pied, les dates de création et de modification de l'édition ; sa date d'entrée dans la collection, posée par l'application, n'y figure pas : à côté de la date d'acquisition, elle se lirait comme une autre date d'acquisition.
   - sous le détail, les **intentions d'acquisition** de l'album, s'il en a, en cadre en tirets, sous la mention « Intention d'acquisition » ou « Intentions d'acquisition » selon leur nombre : chacune par ce qu'elle vise, sans étiquette, le bloc étant celui des éditions — le libellé de l'édition visée, avec en petit dessous sa catégorie, son format, sa reliure et son nombre de pages, ou, pour une intention sur l'album lui-même, « Toute édition de l'album » — puis la date où elle a été posée. Une intention ne se choisit pas comme une édition et n'a pas de visuels à présenter ;
-  - un album sans édition dans la collection n'en présente aucune, sans mention à leur place : son bandeau et son appartenance à la collection le disent déjà. Un album visé par une intention sur lui-même n'a aucune édition ([Intention d'acquisition](../../fonctionnel/regles-metier/intention-d-acquisition.md)) : le bloc ne présente que son intention, la couverture est le visuel générique, et l'appartenance à la collection est « Intention d'acquisition ». Un album qui n'a ni édition ni intention n'a pas ce bloc.
+  - un album sans édition dans la collection n'en présente aucune, sans mention à leur place : son bandeau et son appartenance à la collection le disent déjà. Un album visé par une intention sur lui-même n'a aucune édition ([Intention d'acquisition](../../fonctionnel/regles-metier/intention-d-acquisition.md)) : le bloc ne présente que son intention, la couverture est le visuel générique, et l'appartenance à la collection est « Intention ». Un album qui n'a ni édition ni intention n'a pas ce bloc.
 - **Et le reste de la série ?** : la liste dépliable des albums de la série, dans l'ordre de la série ([Ordre des albums dans une série](../../fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md)), chacun avec son tome, son nom et son appartenance à la collection, l'album affiché étant mis en avant ; et le lien vers la fiche de la série. La série y est évidente : un album sans titre propre est nommé par son tome écrit en entier (« Tome 3 », [Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte)). Cette liste est un **cas particulier** de la règle du tome présenté une seule fois ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md#tome-présenté-une-seule-fois)) :
 
   > Même si l'album n'a pas de titre (ce qui n'arrive quasiment jamais), la colonne Tome contient toujours le numéro de tome ; quand il s'agit d'une intégrale qui n'est pas hors-série, on affiche T. X à T. Y, et on ne met pas l'intervalle dans le nom. (exigence de l'utilisateur)

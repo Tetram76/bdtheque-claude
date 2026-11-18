@@ -31,7 +31,7 @@
     <value>Possédé, en {0} éditions</value>
   </data>
   <data name="Membership.PurchaseIntent" xml:space="preserve">
-    <value>Intention d&apos;acquisition</value>
+    <value>Intention</value>
   </data>
   <data name="Membership.OutOfCollection" xml:space="preserve">
     <value>Non possédé</value>

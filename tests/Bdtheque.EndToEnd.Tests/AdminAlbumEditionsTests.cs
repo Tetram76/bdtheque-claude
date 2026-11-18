@@ -62,7 +62,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         await Assertions.Expect(page.Locator(".intent-row")).ToContainTextAsync("toute édition");
-        await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Intention d'acquisition");
+        await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Intention");
         // An album itself targeted: neither a new edition nor another intent; its first edition comes with the purchase.
         await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Nouvelle édition" })).ToHaveCountAsync(0);
         await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'acquisition" })).ToHaveCountAsync(0);

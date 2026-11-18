@@ -117,9 +117,9 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Blacksad - INT. [1 à 5]", "Album", "toute édition", "Intention d'acquisition", "Posée le 08/10/2026"),
+                ("Blacksad - INT. [1 à 5]", "Album", "toute édition", "Intention", "Posée le 08/10/2026"),
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Édition", "Casterman (Fac-similé) [2013]", "Possédé", "Posée le 08/10/2026"),
-                ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Intention d'acquisition", "Posée le 09/10/2026"),
+                ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Intention", "Posée le 09/10/2026"),
             ],
             rows);
     }
