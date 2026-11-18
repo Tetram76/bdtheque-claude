@@ -144,8 +144,8 @@
                             <input id="@control.Id" type="text" name="@NameName" autofocus="@(Focused == NameField)"
                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryName" />
                         </Field>
-                        <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" NewName="@NewParentName"
-                                             Parent="_parent" NewParent="@SentNewParentName" Error="@ParentError"
+                        <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" NewKeyName="@NewParentKeyName"
+                                             NewName="@NewParentName" Parent="_parent" NewParent="@SentNewParent" Error="@ParentError"
                                              Autofocus="@(Focused == ParentField)" />
                         <Field Id="universe-description" Label="@L["Description"]" Error="@Errors.For(DescriptionField)" Context="control">
                             <textarea id="@control.Id" name="@DescriptionName" rows="5" placeholder="@L["Description.Placeholder"]"
@@ -188,6 +188,7 @@
     private const string NameName = "name";
     private const string DescriptionName = "description";
     private const string ParentName = "parentId";
+    private const string NewParentKeyName = "newParentKey";
     private const string NewParentName = "newParent";
     private const string VersionName = "version";
 
@@ -215,12 +216,16 @@
     [SupplyParameterFromForm(FormName = EntryFormName, Name = ParentName)]
     private Guid? EntryParentId { get; set; }
 
-    /// <summary>The name of the parent created on the spot, sent by the field of the parent; empty for an existing parent, or for none.</summary>
+    /// <summary>The key of the parent created on the spot, sent by the field of the parent; none for an existing parent, or for none.</summary>
+    [SupplyParameterFromForm(FormName = EntryFormName, Name = NewParentKeyName)]
+    private Guid? EntryNewParentKey { get; set; }
+
+    /// <summary>The name of the parent created on the spot, empty if the user emptied it: the saving refuses it.</summary>
     [SupplyParameterFromForm(FormName = EntryFormName, Name = NewParentName)]
     private string? EntryNewParentName { get; set; }
 
-    // The field sends an empty name when the parent is not created on the spot.
-    private string? SentNewParentName => string.IsNullOrEmpty(EntryNewParentName) ? null : EntryNewParentName;
+    // The parent created on the spot, told by its key: an empty name is still one, which the domain refuses, never no parent.
+    private NewUniverse? SentNewParent => EntryNewParentKey is { } key ? new NewUniverse(key, EntryNewParentName ?? "") : null;
 
     /// <summary>The version of the universe changed, as its panel read it.</summary>
     [SupplyParameterFromForm(FormName = EntryFormName, Name = VersionName)]
@@ -345,9 +350,9 @@
 
     private async Task SaveAsync()
     {
-        // A parent created on the spot is sent by its name alone, with a key the universe cites in place of its identifier: it
-        // is created with the universe, in the same transaction, or not at all.
-        var newParent = SentNewParentName is { } name ? new NewUniverse(Guid.NewGuid(), name) : null;
+        // A parent created on the spot is sent by its name alone, under the key the field gave it, which the universe cites in
+        // place of its identifier: it is created with the universe, in the same transaction, or not at all.
+        var newParent = SentNewParent;
         _sentNewRecords = newParent is null ? null : NewRecords.None with { Universes = [newParent] };
         var parentId = newParent?.Key ?? EntryParentId;
         UniverseForm saved;

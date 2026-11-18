@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Text;
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
@@ -54,7 +55,7 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         var field = Open(parent: new UniverseInHierarchy(Pratt, []));
 
         Assert.Equal("Univers Hugo Pratt", field.Find("input[role=combobox]").GetAttribute("value"));
-        Assert.Equal((Pratt.Id.ToString(), ""), Sent(field));
+        Assert.Equal((Pratt.Id.ToString(), "", ""), Sent(field));
     }
 
     [Fact]
@@ -75,8 +76,27 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         Assert.Empty(field.FindAll("dialog"));
         Assert.Equal("Mers du Sud", field.Find("input[role=combobox]").GetAttribute("value"));
         Assert.Equal("Ses séries et albums sont aussi ceux de Mers du Sud.", field.Find(".field-help").TextContent.Trim());
-        // Created only with the universe of the panel: sent by its name, without an identifier.
-        Assert.Equal(("", "Mers du Sud"), Sent(field));
+        // Created only with the universe of the panel: sent by its key and its name, without an identifier.
+        var (parentId, key, name) = Sent(field);
+        Assert.Equal(("", "Mers du Sud"), (parentId, name));
+        Assert.True(Guid.TryParse(key, out _));
+    }
+
+    [Fact]
+    public async Task ACreationWithItsNameEmptied_IsStillSent_ForTheSavingToRefuseIt()
+    {
+        // Told by its key, a parent whose name the user emptied is still a parent created on the spot, never no parent: the
+        // saving refuses its name, rather than leaving the universe without its parent.
+        var field = Open(parent: new UniverseInHierarchy(Pratt, []));
+        await (await field.TypeAsync("input[role=combobox]", "Mers du Sud", _clock)).EndAsync("The search of the text typed");
+        await field.ClickAsync(".option-list-create");
+
+        await field.ChangeAsync("dialog input#universe-parent-creation-name", "  ");
+        await field.ClickAsync("dialog .dialog-actions .button[data-variant=primary]");
+
+        var (parentId, key, name) = Sent(field);
+        Assert.Equal(("", ""), (parentId, name));
+        Assert.True(Guid.TryParse(key, out _));
     }
 
     [Fact]
@@ -89,7 +109,7 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         await field.ClickAsync("dialog [data-dialog-close]");
 
         Assert.Empty(field.FindAll("dialog"));
-        Assert.Equal((Pratt.Id.ToString(), ""), Sent(field));
+        Assert.Equal((Pratt.Id.ToString(), "", ""), Sent(field));
     }
 
     [Fact]
@@ -101,37 +121,41 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         await field.ClickAsync("dialog .dialog-actions .button[data-variant=primary]");
 
         await field.ClickAsync("button.record-picker-clear");
-        Assert.Equal(("", ""), Sent(field));
+        Assert.Equal(("", "", ""), Sent(field));
         await (await field.TypeAsync("input[role=combobox]", "mers", _clock)).EndAsync("The search of the text typed");
         await field.ClickAsync(".option-list-pending");
 
-        Assert.Equal(("", "Mers du Sud"), Sent(field));
+        Assert.Equal(("", "Mers du Sud"), (Sent(field).ParentId, Sent(field).NewParent));
+        Assert.NotEqual("", Sent(field).NewParentKey);
     }
 
     [Fact]
     public void AParentCreatedOnTheSpotThatTheSavingRefused_IsPresentedAgain_WithItsError()
     {
         // The form sent back with the error of its saving: the name of the parent created on the spot, which the page passes back.
-        var field = Open(newParent: "Ombrelune", error: "« Ombrelune » est déjà pris.");
+        var sent = new NewUniverse(Guid.NewGuid(), "Ombrelune");
+        var field = Open(newParent: sent, error: "« Ombrelune » est déjà pris.");
 
         Assert.Equal("Ombrelune", field.Find("input[role=combobox]").GetAttribute("value"));
         Assert.Equal("true", field.Find("input[role=combobox]").GetAttribute("aria-invalid"));
         Assert.Equal("« Ombrelune » est déjà pris.", field.Find(".field-error").TextContent.Trim());
-        Assert.Equal(("", "Ombrelune"), Sent(field));
+        Assert.Equal(("", sent.Key.ToString(), "Ombrelune"), Sent(field));
     }
 
-    private IRenderedComponent<ParentUniverseField> Open(UniverseInHierarchy? parent = null, string? newParent = null, string? error = null) =>
+    private IRenderedComponent<ParentUniverseField> Open(UniverseInHierarchy? parent = null, NewUniverse? newParent = null, string? error = null) =>
         Render<ParentUniverseField>(parameters => parameters
             .Add(p => p.Id, "universe-parent")
             .Add(p => p.Name, "parentId")
+            .Add(p => p.NewKeyName, "newParentKey")
             .Add(p => p.NewName, "newParent")
             .Add(p => p.Parent, parent)
             .Add(p => p.NewParent, newParent)
             .Add(p => p.Error, error));
 
     // What the static form of the panel sends: the identifier of an existing parent, the name of a parent created on the spot.
-    private static (string? ParentId, string? NewParent) Sent(IRenderedComponent<ParentUniverseField> field) =>
-        (field.Find("input[type=hidden][name=parentId]").GetAttribute("value"), field.Find("input[type=hidden][name=newParent]").GetAttribute("value"));
+    private static (string? ParentId, string? NewParentKey, string? NewParent) Sent(IRenderedComponent<ParentUniverseField> field) =>
+        (field.Find("input[type=hidden][name=parentId]").GetAttribute("value"), field.Find("input[type=hidden][name=newParentKey]").GetAttribute("value"),
+            field.Find("input[type=hidden][name=newParent]").GetAttribute("value"));
 
     private sealed class StubHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> answer) : HttpMessageHandler
     {

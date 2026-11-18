@@ -153,6 +153,31 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
     }
 
     [Theory, InEachTheme]
+    public async Task Edit_UnderAParentCreatedOnTheSpotWithItsNameEmptied_IsRefusedOnTheParent_KeepingTheParentSaved(string theme)
+    {
+        // A parent created on the spot whose name the user emptied is still sent, for the saving to refuse it: never taken for
+        // no parent, which would detach the universe from the one it has.
+        var pratt = await CreateUniverseAsync($"Univers Hugo Pratt {_marker}");
+        var corto = await CreateUniverseAsync($"Corto Maltese {_marker}", pratt.Id);
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditUniverse(corto.Id)}&q={_marker}");
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+        await panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).FillAsync("");
+        await panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Mers du Sud {_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'univers « Mers du Sud {_marker} »" }).ClickAsync();
+        var name = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" }).GetByRole(AriaRole.Textbox, new() { Name = "Nom" });
+        await name.FillAsync("");
+        await name.PressAsync("Enter");
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+        await Assertions.Expect(panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" })).ToHaveAttributeAsync("aria-invalid", "true");
+        await Assertions.Expect(panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" })).ToBeFocusedAsync();
+        await Assertions.Expect(page.Locator(".universe-row[data-depth='1']")).ToContainTextAsync($"Corto Maltese {_marker}");
+    }
+
+    [Theory, InEachTheme]
     public async Task Panel_Escape_ClosesItWithoutSaving(string theme)
     {
         var universe = await CreateUniverseAsync($"Les Cités obscures {_marker}");

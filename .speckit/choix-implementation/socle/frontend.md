@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T12:30:00Z }
 ---
 
 # Frontend
@@ -89,7 +89,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T12:00:00Z }
   - **Auteur** : le dialogue reprend le nom tapé, son premier mot en prénom et le reste en nom (un seul mot : le nom), que l'utilisateur corrige ou change en pseudonyme ; un auteur exige son nom ou son pseudonyme, d'où ses trois champs.
   - **Univers** : son nom seul ; créé sans parent, il est de premier niveau, et se rattache ensuite à un parent depuis son panneau, sous un nom provisoire si le sien est déjà pris au premier niveau (décision de l'utilisateur).
     - **Alternative écartée (dialogue qui demande aussi le parent, lui-même créé sur place au besoin)** : des dialogues en chaîne, pour une information que le dialogue d'aucune autre fiche ne demande (décision de l'utilisateur, #414).
-  - **Univers parent**, depuis le panneau d'un univers, formulaire statique (§ Listes de l'administration) : le dialogue d'un univers, son nom seul, ouvert par l'îlot du choix du parent, qui envoie alors le parent par son nom avec le formulaire ; l'enregistrement du panneau le crée au premier niveau, avec l'univers qui le cite par une clé, dans la même transaction.
+  - **Univers parent**, depuis le panneau d'un univers, formulaire statique (§ Listes de l'administration) : le dialogue d'un univers, son nom seul, ouvert par l'îlot du choix du parent, qui envoie alors le parent par sa clé et son nom avec le formulaire, la clé disant le parent créé même sous un nom vide, que l'enregistrement refuse, plutôt que de le confondre avec l'absence de parent (relevé de la revue, #536) ; l'enregistrement du panneau le crée au premier niveau, avec l'univers qui le cite par une clé, dans la même transaction.
   - **Série** : son titre seul ; ses valeurs proposées aux nouvelles éditions sont celles de toute nouvelle série, que tient le domaine ([Série](../../modele-metier/serie.md)). Choisie, elle donne ses auteurs à l'album comme toute série, le domaine les calculant pour une série encore sans auteurs.
   - **Éditeur** : son nom seul ; créé sans site web ni collection, il n'a pas de collections à lire, et la liste des collections ne propose que « — » ([Éditeur](../../modele-metier/editeur.md)). Une édition visée par une intention d'achat le crée de même, son contenu portant les fiches ajoutées sur place comme celui de toute édition.
   - **Collection d'un éditeur**, choisie dans une liste et non en tapant son nom (§ Collection d'un éditeur choisie dans une liste) : son nom seul, vide au départ ; son entrée de création, en fin de liste, a le visuel du « Créer … » d'un choix par le nom (décision de l'utilisateur). Elle est créée chez l'éditeur choisi quand elle a été ajoutée, éditeur créé sur place compris ; ajoutée à un éditeur ensuite remplacé, elle n'est pas créée, mais reste proposée parmi ses collections s'il est choisi de nouveau.
