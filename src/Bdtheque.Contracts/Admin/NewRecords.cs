@@ -20,8 +20,11 @@ public sealed record NewAuthor(Guid Key, string? LastName, string? FirstName, st
 
 public sealed record NewGenre(Guid Key, string Label);
 
-/// <param name="ParentId">An existing universe, if the new one belongs to it.</param>
-public sealed record NewUniverse(Guid Key, string Name, Guid? ParentId);
+/// <summary>
+/// A universe created by its name alone, at the top of the hierarchy: it is attached to a parent from its own panel
+/// (choix-implementation/socle/frontend.md, création sur place).
+/// </summary>
+public sealed record NewUniverse(Guid Key, string Name);
 
 /// <summary>A series created by its title alone, which proposes to its new editions what any new series proposes.</summary>
 public sealed record NewSeries(Guid Key, string Title);

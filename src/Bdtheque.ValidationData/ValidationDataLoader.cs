@@ -89,6 +89,8 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var greyPort = await data.UniverseAsync("Port-Grisé", null, archipelago);
         var watchersCity = await data.UniverseAsync("Cité des Veilleurs", null, ombrelune);
         var wildWest = await data.UniverseAsync("Far West imaginaire", null, null);
+        // At the top of the hierarchy, waiting for a parent, which its panel creates on the spot (visuel/listes/saisie-selon-l-entite.md).
+        await data.UniverseAsync(UnattachedUniverse, "À rattacher à un univers parent.", null);
 
         var lagoon = await data.PublisherAsync("Éditions du Lagon", "https://www.example.org/lagon", "Grand Large", "Escales");
         var bubbles = await data.PublisherAsync("Bulles & Cie", null, "Petit Format");
@@ -279,6 +281,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.RenameGenreAsync(western, "Western spaghetti");
         await data.DeleteGenreAsync(await data.GenreAsync(DeletedGenre));
     }
+
+    /// <summary>A universe at the top of the hierarchy, without series nor album, to attach to a parent created on the spot.</summary>
+    public const string UnattachedUniverse = "Îles du Couchant";
 
     /// <summary>A genre whose label differs from another typed only by its case and its accents.</summary>
     public const string AccentedGenre = "Épopée";

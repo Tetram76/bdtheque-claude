@@ -137,6 +137,65 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
+    public async Task Create_UnderAParentCreatedOnTheSpot_CreatesBoth_TheParentAtTheTop()
+    {
+        // The panel of a universe creates its parent on the spot by its name alone (choix-implementation/socle/frontend.md),
+        // with the universe, which cites it by the key it gave it.
+        var key = Guid.NewGuid();
+        var parentName = $"Parent {Guid.NewGuid():N}";
+
+        var created = await CreateAsync(new CreateUniverseRequest(
+            $"Univers {Guid.NewGuid():N}", null, key, NewRecords.None with { Universes = [new NewUniverse(key, parentName)] }));
+
+        Assert.Equal((parentName, null), (created.Parent!.Universe.Name, created.Parent.Universe.ParentId));
+        Assert.Empty(created.Parent.Ancestors);
+        Assert.NotEqual(key, created.ParentId);
+    }
+
+    [Fact]
+    public async Task Update_UnderAParentCreatedOnTheSpot_MovesTheUniverseUnderIt()
+    {
+        var universe = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var key = Guid.NewGuid();
+        var parentName = $"Parent {Guid.NewGuid():N}";
+
+        var moved = await UpdateAsync(universe, new UpdateUniverseRequest(
+            universe.Name, null, key, universe.Version, NewRecords.None with { Universes = [new NewUniverse(key, parentName)] }));
+
+        Assert.Equal((parentName, null), (moved.Parent!.Universe.Name, moved.Parent.Universe.ParentId));
+    }
+
+    [Fact]
+    public async Task Update_UnderAParentCreatedOnTheSpotWhoseNameIsTakenAtTheTop_DesignatesIt_AndChangesNothing()
+    {
+        // Created at the top of the hierarchy, the parent meets the names of the universes without parent: the error designates
+        // it, not the universe moved under it, and neither is written.
+        var taken = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var universe = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var key = Guid.NewGuid();
+
+        var response = await _client.PutAsJsonAsync($"/admin/universes/{universe.Id}", new UpdateUniverseRequest(
+            universe.Name, null, key, universe.Version, NewRecords.None with { Universes = [new NewUniverse(key, taken.Name.ToUpperInvariant())] }));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/newRecords/universes/0/name"]);
+        Assert.Equal(universe, await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{universe.Id}"));
+    }
+
+    [Fact]
+    public async Task Create_UnderAParentCreatedOnTheSpotWhoseNameIsTakenAtTheTop_DesignatesIt_AndCreatesNeither()
+    {
+        var taken = await CreateAsync($"Univers {Guid.NewGuid():N}");
+        var name = $"Univers {Guid.NewGuid():N}";
+        var key = Guid.NewGuid();
+
+        var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(
+            name, null, key, NewRecords.None with { Universes = [new NewUniverse(key, taken.Name)] }));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/newRecords/universes/0/name"]);
+        Assert.Empty((await _client.GetFromJsonAsync<Page<UniverseListItem>>($"/catalog/universes?q={Uri.EscapeDataString(name)}"))!.Items);
+    }
+
+    [Fact]
     public async Task Create_UnderAnUnknownParent_IsAFunctionalError()
     {
         var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest("Orphelin", null, Guid.CreateVersion7()));
@@ -311,9 +370,11 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         await command.ExecuteNonQueryAsync();
     }
 
-    private async Task<UniverseForm> CreateAsync(string name, Guid? parentId = null)
+    private Task<UniverseForm> CreateAsync(string name, Guid? parentId = null) => CreateAsync(new CreateUniverseRequest(name, null, parentId));
+
+    private async Task<UniverseForm> CreateAsync(CreateUniverseRequest request)
     {
-        var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(name, null, parentId));
+        var response = await _client.PostAsJsonAsync("/admin/universes", request);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<UniverseForm>())!;
     }

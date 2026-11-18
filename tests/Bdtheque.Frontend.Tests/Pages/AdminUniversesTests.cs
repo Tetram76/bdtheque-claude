@@ -165,7 +165,9 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal("(obligatoire)", Text(panel.QuerySelector("label[for='universe-name'] .field-note")!));
         Assert.Equal("Les voyages du marin.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='description']")!).Value);
         Assert.Equal("Univers Hugo Pratt", panel.QuerySelector(".record-picker input[role='combobox']")!.GetAttribute("value"));
+        // An existing parent is sent by its identifier, a parent created on the spot by its name (ParentUniverseFieldTests).
         Assert.Equal(PrattItem.Id.ToString(), panel.QuerySelector("input[type='hidden'][name='parentId']")!.GetAttribute("value"));
+        Assert.Equal("", panel.QuerySelector("input[type='hidden'][name='newParent']")!.GetAttribute("value"));
         Assert.Equal("Ses séries et albums sont aussi ceux de Univers Hugo Pratt.", Text(panel.QuerySelector(".field-help")!));
         // The dates at the top of the panel, above its first field.
         Assert.Equal("Univers créé le 12/01/2026 10:30, modifié le 12/01/2026 10:30.", Text(panel.QuerySelector(".side-panel-body > :first-child")!));

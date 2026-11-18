@@ -333,6 +333,9 @@ public static class AudienceFunctions
     /// <summary>A new universe, once created.</summary>
     public static readonly AudienceFunction AdminUniverseCreated = new("admin.universe.created", AudienceFunctionKind.Action);
 
+    /// <summary>The parent of a universe created on the spot from its panel, once created with it, with the parent created.</summary>
+    public static readonly AudienceFunction AdminUniverseParentCreated = new("admin.universe.parent-created", AudienceFunctionKind.Action);
+
     /// <summary>The page of the editions and purchase intents of an album, with the album it presents (visuel/editions-album/contenu.md).</summary>
     public static readonly AudienceFunction AdminAlbumEditions = new("admin.album-editions", AudienceFunctionKind.Screen);
 
@@ -454,7 +457,7 @@ public static class AudienceFunctions
         AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresPage, AdminGenresDeletion,
         AdminGenresDeleted, AdminGenresMerge, AdminGenresEdit, AdminGenresNew, AdminGenreSaved, AdminGenreCreated, AdminUniverses,
         AdminUniversesSearch, AdminUniversesPage, AdminUniversesDeletion, AdminUniversesDeleted, AdminUniversesMerge, AdminUniversesEdit,
-        AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
+        AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminUniverseParentCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
         AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved,
         AdminAlbumEditionsAlbumIntentSet, AdminEditionForm, AdminNewEditionForm, AdminEditionCreated, AdminEditionSaved, AdminEditionChanges,
         AdminEditionPublisherCreated, AdminEditionCollectionCreated, AdminPurchaseIntentForm, AdminNewPurchaseIntentForm,

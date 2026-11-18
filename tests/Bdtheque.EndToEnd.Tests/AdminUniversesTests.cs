@@ -94,6 +94,62 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
     }
 
     [Theory, InEachTheme]
+    public async Task Edit_UnderAParentCreatedOnTheSpot_CreatesItWithTheUniverse_AtTheTop(string theme)
+    {
+        // A universe created on the spot at the top of the hierarchy, attached from its panel to a parent created there too
+        // (choix-implementation/socle/frontend.md, création sur place, #414), with it, when the panel is saved.
+        var universe = await CreateUniverseAsync($"Les Antilles {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditUniverse(universe.Id)}&q={_marker}");
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+        await panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Mers du Sud {_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'univers « Mers du Sud {_marker} »" }).ClickAsync();
+        var creation = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
+        var name = creation.GetByRole(AriaRole.Textbox, new() { Name = "Nom" });
+        await Assertions.Expect(name).ToHaveValueAsync($"Mers du Sud {_marker}");
+        // Enter adds the universe corrected in the dialog, rather than sending the form of the panel behind it.
+        await name.FillAsync($"Mers australes {_marker}");
+        await name.PressAsync("Enter");
+        await Assertions.Expect(creation).ToHaveCountAsync(0);
+        await Assertions.Expect(panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" })).ToHaveValueAsync($"Mers australes {_marker}");
+        // Created only with the universe, when the panel is saved.
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Les Antilles {_marker}"]);
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminUniverses, $"?q={_marker}"));
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Mers australes {_marker}", $"Les Antilles {_marker}"]);
+        await Assertions.Expect(page.Locator(".universe-row[data-depth='1']")).ToContainTextAsync($"Les Antilles {_marker}");
+    }
+
+    [Theory, InEachTheme]
+    public async Task Edit_UnderAParentCreatedOnTheSpotWhoseNameIsTakenAtTheTop_IsRefusedOnTheParent(string theme)
+    {
+        // Created at the top of the hierarchy, the parent meets the names of the universes without parent: refused at the
+        // saving, it is designated on the field of the parent, which cites it (#414), and nothing is created.
+        await CreateUniverseAsync($"Ombrelune {_marker}");
+        var universe = await CreateUniverseAsync($"Port-Grisé {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditUniverse(universe.Id)}&q={_marker}");
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+        await panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"OMBRELUNE {_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'univers « OMBRELUNE {_marker} »" }).ClickAsync();
+        await page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" }).GetByRole(AriaRole.Button, new() { Name = "Ajouter l'univers" }).ClickAsync();
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+        await Assertions.Expect(panel).ToContainTextAsync(
+            $"« OMBRELUNE {_marker} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.");
+        var parent = panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" });
+        await Assertions.Expect(parent).ToHaveValueAsync($"OMBRELUNE {_marker}");
+        await Assertions.Expect(parent).ToHaveAttributeAsync("aria-invalid", "true");
+        // The field in cause gets the focus, once interactive (visuel/listes/saisie-selon-l-entite.md).
+        await Assertions.Expect(parent).ToBeFocusedAsync();
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Ombrelune {_marker}", $"Port-Grisé {_marker}"]);
+    }
+
+    [Theory, InEachTheme]
     public async Task Panel_Escape_ClosesItWithoutSaving(string theme)
     {
         var universe = await CreateUniverseAsync($"Les Cités obscures {_marker}");

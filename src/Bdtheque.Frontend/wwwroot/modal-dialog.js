@@ -12,7 +12,26 @@ function open(element) {
         event.preventDefault();
         dialog.querySelector("[data-dialog-close]")?.click();
     };
+    dialog.onkeydown = event => {
+        if (submitsThePageBehind(dialog, event)) {
+            event.preventDefault();
+            // The value typed is committed first, as leaving the field for the action with the mouse commits it.
+            event.target.dispatchEvent(new Event("change", { bubbles: true }));
+            dialog.querySelector(".dialog-actions [data-variant='primary']")?.click();
+        }
+    };
     dialog.showModal();
+}
+
+// Enter in a field of the dialog that belongs to a form of the page behind it (the dialog of a record created on the spot,
+// within the form of the record that cites it) would submit that form, saving the record without what the dialog adds: it
+// performs the main action of the dialog instead. A dialog with a form of its own (a confirmation) keeps its submission.
+const fieldsSubmittingOnEnter = "input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=image], [type=file])";
+
+function submitsThePageBehind(dialog, event) {
+    const field = event.target;
+    return event.key === "Enter" && !event.defaultPrevented && !event.isComposing && field.matches?.(fieldsSubmittingOnEnter)
+        && field.form !== null && !dialog.contains(field.form);
 }
 
 customElements.define("app-modal-dialog", class extends HTMLElement {

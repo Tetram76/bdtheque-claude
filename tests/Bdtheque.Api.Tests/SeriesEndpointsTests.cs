@@ -139,8 +139,8 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     [Fact]
     public async Task Create_WithRecordsAddedOnTheSpot_CreatesThemWithTheSeries()
     {
-        // The authors, genres and universes the form added are created when the series is saved, not before.
-        var parent = await CreateUniverseAsync();
+        // The authors, genres and universes the form added are created when the series is saved, not before; a universe at the
+        // top of the hierarchy, attached to a parent from its own panel.
         var (author, genre, universe) = (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
         var marker = Guid.NewGuid().ToString("N");
         var content = Content(UniqueTitle()) with
@@ -151,7 +151,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
             NewRecords = new NewRecords(
                 [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
                 [new NewGenre(genre, $"Genre{marker}")],
-                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], [], [], []),
+                [new NewUniverse(universe, $"Univers{marker}")], [], [], []),
         };
 
         var created = await CreateAsync(content);
@@ -161,7 +161,8 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         Assert.Equal(2, created.Content.Contributions.Count(c => c.AuthorId == references.Authors[0].Id));
         Assert.Equal($"Genre{marker}", Assert.Single(references.Genres).Label);
         var inHierarchy = Assert.Single(references.Universes);
-        Assert.Equal(($"Univers{marker}", parent.Id), (inHierarchy.Universe.Name, Assert.Single(inHierarchy.Ancestors).Id));
+        Assert.Equal(($"Univers{marker}", null), (inHierarchy.Universe.Name, inHierarchy.Universe.ParentId));
+        Assert.Empty(inHierarchy.Ancestors);
         Assert.Null(created.Content.NewRecords);
     }
 
@@ -203,15 +204,15 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
     }
 
     [Fact]
-    public async Task Create_WithAUniverseAddedOnTheSpotAlreadyTakenUnderItsParent_DesignatesIt()
+    public async Task Create_WithAUniverseAddedOnTheSpotAlreadyTakenAtTheTop_DesignatesIt()
     {
-        var parent = await CreateUniverseAsync();
-        var taken = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Monde {Guid.NewGuid():N}", null, parent.Id));
+        // Created at the top of the hierarchy, a universe added on the spot meets the names of the universes without parent.
+        var taken = await CreateUniverseAsync();
         var universe = Guid.NewGuid();
         var content = Content(UniqueTitle()) with
         {
             UniverseIds = [universe],
-            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant(), parent.Id)], [], [], []),
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, taken.Name.ToLowerInvariant())], [], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);

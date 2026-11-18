@@ -156,10 +156,11 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         var universes = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.UniverseAdminListItem>>("/admin/universes?pageSize=100"))!.Items;
 
         // A universe three levels down, in retreat under its ancestors; one whose deletion its sub-universes refuse, and one at
-        // the top whose deletion is accepted.
+        // the top whose deletion is accepted; one at the top with nothing yet, to attach to a parent created on the spot.
         Assert.Contains(universes, universe => universe.Ancestors.Count == 2);
         Assert.Contains(universes, universe => universe.SubUniverseCount > 0);
         Assert.Contains(universes, universe => universe is { ParentId: null, SubUniverseCount: 0 });
+        Assert.Contains(universes, universe => universe is { Name: ValidationDataLoader.UnattachedUniverse, ParentId: null, SeriesCount: 0, AlbumCount: 0 });
     }
 
     [Fact]
