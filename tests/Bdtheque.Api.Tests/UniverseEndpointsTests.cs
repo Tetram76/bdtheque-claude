@@ -107,7 +107,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
 
         var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(name.ToUpperInvariant(), null, null));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/name"]);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseTopLevelNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         var response = await _client.PutAsJsonAsync($"/admin/universes/{universe.Id}", new UpdateUniverseRequest(
             universe.Name, null, key, universe.Version, NewRecords.None with { Universes = [new NewUniverse(key, taken.Name.ToUpperInvariant())] }));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/newRecords/universes/0/name"]);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseTopLevelNameAlreadyUsed, ["/newRecords/universes/0/name"]);
         Assert.Equal(universe, await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{universe.Id}"));
     }
 
@@ -191,7 +191,7 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
         var response = await _client.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(
             name, null, key, NewRecords.None with { Universes = [new NewUniverse(key, taken.Name)] }));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/newRecords/universes/0/name"]);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseTopLevelNameAlreadyUsed, ["/newRecords/universes/0/name"]);
         Assert.Empty((await _client.GetFromJsonAsync<Page<UniverseListItem>>($"/catalog/universes?q={Uri.EscapeDataString(name)}"))!.Items);
     }
 

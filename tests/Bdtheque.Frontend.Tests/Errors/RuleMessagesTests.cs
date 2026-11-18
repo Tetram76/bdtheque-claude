@@ -38,6 +38,7 @@ public sealed class RuleMessagesTests
     [InlineData(DomainRules.PublisherNameAlreadyUsed)]
     [InlineData(DomainRules.PublisherCollectionNameAlreadyUsed)]
     [InlineData(DomainRules.UniverseNameAlreadyUsed)]
+    [InlineData(DomainRules.UniverseTopLevelNameAlreadyUsed)]
     public void EveryNameUniqueRegardlessOfCaseAndAccents_RemindsItInBothItsTexts(string ruleCode)
     {
         var rule = Services.GetRequiredService<IStringLocalizer<RuleMessages>>()[ruleCode];
@@ -45,8 +46,19 @@ public sealed class RuleMessagesTests
 
         Assert.EndsWith("sans tenir compte de la casse ni des accents.", rule.Value);
         Assert.False(field.ResourceNotFound, $"No text under the field for the rule {ruleCode}.");
-        Assert.Contains("est déjà pris : deux ", field.Value);
+        Assert.Matches("est déjà pris( sous ce parent| au premier niveau)? : deux ", field.Value);
         Assert.Contains(" qui ne diffèrent que par la casse ou les accents désignent ", field.Value);
+    }
+
+    // The name of a universe is unique within its parent, the universes without parent being siblings: each text states the
+    // situation of the universe refused, above the form as under the field (decision of the user, #485).
+    [Theory]
+    [InlineData(DomainRules.UniverseNameAlreadyUsed, "de même parent", "sous ce parent")]
+    [InlineData(DomainRules.UniverseTopLevelNameAlreadyUsed, "de premier niveau", "au premier niveau")]
+    public void AUniverseNameAlreadyTaken_StatesTheSituationOfTheUniverse(string ruleCode, string rule, string field)
+    {
+        Assert.Contains($"Deux univers {rule} ", Services.GetRequiredService<IStringLocalizer<RuleMessages>>()[ruleCode].Value);
+        Assert.StartsWith($"« Nom » est déjà pris {field} : ", Services.GetRequiredService<IStringLocalizer<FieldMessages>>()[ruleCode, "Nom"].Value);
     }
 
     [Theory]

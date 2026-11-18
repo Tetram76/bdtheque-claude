@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Api/Errors/**'
   - 'src/Bdtheque.Domain/Common/DomainRule*.cs'
   - 'src/Bdtheque.Contracts/Errors/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T12:10:00Z }
 ---
 
 # Erreurs métier, fonctionnelles et techniques
@@ -27,7 +27,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:30:00Z }
   - **Deux points centraux, et deux seulement**, produisent ces réponses, aucun endpoint n'en construisant : le gestionnaire d'exceptions, et le service ProblemDetails pour toute réponse d'erreur émise sans corps par le framework (liaison de requête, route inconnue), classée technique, le frontend construisant les requêtes. Un `type` hors des trois catégories est remplacé par « technique ».
   - Le gestionnaire journalise lui-même les erreurs techniques : depuis .NET 10, le middleware ne journalise plus une exception déclarée traitée, et la réponse n'en révèle rien.
 - **Violations de contraintes en base classées selon la nature de l'échec**, que distingue le code d'erreur PostgreSQL, et non selon le seul nom de la contrainte (une même clé étrangère échoue côté référençant à une écriture, côté référencé à une suppression), qu'elles soient levées à l'enregistrement ou à la validation de la transaction (contrainte unique différable, [Unicité vérifiée à la validation](../persistance/unicite-verifiee-a-la-validation.md)) :
-  - **index unique** → erreur métier, par une correspondance index → code de règle, qui couvre **tous** les index uniques du modèle, contraintes uniques différables comprises (un test le vérifie dans les deux sens), hors les tables que seule l'application écrit, où une violation révèle une erreur de programmation. Une règle d'unicité ne peut pas être vérifiée par le domaine, qui ne voit pas les autres lignes ;
+  - **index unique** → erreur métier, par une correspondance index → code de règle, précisé selon la situation de la fiche refusée quand le message en dépend (un nom d'univers déjà pris au premier niveau, `Universe.TopLevelNameAlreadyUsed`, plutôt que sous un parent : un seul index couvre les deux cas, la fiche désignée dit lequel), qui couvre **tous** les index uniques du modèle, contraintes uniques différables comprises (un test le vérifie dans les deux sens), hors les tables que seule l'application écrit, où une violation révèle une erreur de programmation. Une règle d'unicité ne peut pas être vérifiée par le domaine, qui ne voit pas les autres lignes ;
   - **texte trop long** → erreur métier : les longueurs maximales ne sont déclarées que dans le schéma, sans copie dans le domaine, et une seule traduction couvre tout champ texte, présent ou futur ;
   - **suppression bloquée par une référence** → refus de suppression avec l'impact recalculé ([Suppression des entités : mise en œuvre](suppression-des-entites-mise-en-oeuvre.md)) ; hors suppression, sur les fiches désignées par une recherche enregistrée, erreur métier que l'utilisateur résout en modifiant d'abord la recherche ([Recherches enregistrées : mise en œuvre](../recherche-avancee/recherches-enregistrees-mise-en-oeuvre.md)) ; ailleurs, un contrôle manquant, donc une erreur technique ;
   - **clé étrangère à une création ou une modification** → erreur fonctionnelle : la fiche référencée a été supprimée entre-temps.

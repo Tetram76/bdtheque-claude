@@ -108,6 +108,12 @@ public static class DomainRules
     public const string PublisherCollectionNameAlreadyUsed = "PublisherCollection.NameAlreadyUsed";
     public const string UniverseNameAlreadyUsed = "Universe.NameAlreadyUsed";
 
+    /// <summary>
+    /// The same rule as <see cref="UniverseNameAlreadyUsed"/>, for a universe at the top of the hierarchy: the universes
+    /// without parent are siblings, whose names its message speaks of, rather than those of a parent.
+    /// </summary>
+    public const string UniverseTopLevelNameAlreadyUsed = "Universe.TopLevelNameAlreadyUsed";
+
     /// <summary>The same author credited twice with the same role on an album, or on a series template.</summary>
     public const string ContributionAlreadyCredited = "Contribution.AlreadyCredited";
 

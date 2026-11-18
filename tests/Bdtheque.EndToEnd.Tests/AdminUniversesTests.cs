@@ -88,7 +88,7 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
 
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
         await Assertions.Expect(panel).ToContainTextAsync(
-            $"« LES MONDES D'ALDEBARAN {_marker} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.");
+            $"« LES MONDES D'ALDEBARAN {_marker} » est déjà pris au premier niveau : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.");
         await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom" })).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Les Mondes d'Aldébaran {_marker}"]);
     }
@@ -139,8 +139,11 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
         panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+        // Each text states the situation of the parent refused, at the top of the hierarchy (decision of the user, #485).
         await Assertions.Expect(panel).ToContainTextAsync(
-            $"« OMBRELUNE {_marker} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.");
+            "Deux univers de premier niveau ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.");
+        await Assertions.Expect(panel).ToContainTextAsync(
+            $"« OMBRELUNE {_marker} » est déjà pris au premier niveau : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.");
         var parent = panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" });
         await Assertions.Expect(parent).ToHaveValueAsync($"OMBRELUNE {_marker}");
         await Assertions.Expect(parent).ToHaveAttributeAsync("aria-invalid", "true");

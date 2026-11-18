@@ -217,7 +217,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
         var response = await _client.PostAsJsonAsync("/admin/series", content);
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseNameAlreadyUsed, ["/newRecords/universes/0/name"]);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.UniverseTopLevelNameAlreadyUsed, ["/newRecords/universes/0/name"]);
     }
 
     [Fact]

@@ -127,7 +127,10 @@
     <value>Trop long : raccourcissez ce texte.</value>
   </data>
   <data name="Universe.NameAlreadyUsed" xml:space="preserve">
-    <value>« {0} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.</value>
+    <value>« {0} » est déjà pris sous ce parent : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.</value>
+  </data>
+  <data name="Universe.TopLevelNameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà pris au premier niveau : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.</value>
   </data>
   <data name="Related" xml:space="preserve">
     <value>Une valeur liée à celle à corriger.</value>

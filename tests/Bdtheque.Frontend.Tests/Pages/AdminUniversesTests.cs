@@ -251,7 +251,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         var panel = page.Find("dialog.side-panel");
         Assert.Equal("true", panel.QuerySelector("input[name='name']")!.GetAttribute("aria-invalid"));
         Assert.Equal(
-            "« star wars » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.",
+            "« star wars » est déjà pris sous ce parent : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.",
             Text(panel.QuerySelector("input[name='name']")!.ParentElement!.QuerySelector(".field-error")!));
         Assert.Equal("À corriger", Text(panel.QuerySelector("[data-error-category='business'] [data-error-label]")!));
     }
