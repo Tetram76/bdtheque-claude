@@ -99,7 +99,7 @@ internal static class PublisherEndpoints
         var publishers = context.Publishers.AsNoTracking().WhereContains(text, p => p.Name);
         if (entry is not null)
             publishers = publishers.Where(p => p.NavigationEntry == entry);
-        return publishers.OrderBy(p => p.Name).ThenBy(p => p.Id);
+        return publishers.OrderByEntry(p => p.NavigationEntry).ThenBy(p => p.Name).ThenBy(p => p.Id);
     }
 
     /// <summary>The collections of all publishers, or of one of them (choix-implementation/api/recherche.md).</summary>

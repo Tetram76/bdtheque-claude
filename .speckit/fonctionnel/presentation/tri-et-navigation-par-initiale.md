@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Tri et navigation par initiale'
-description: 'Clé de tri des titres (article en suffixe) et des artistes, entrées A à Z, # et @, clé auto ou manuelle.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T12:00:00Z }
+description: 'Clé de tri des titres (article en suffixe) et des artistes, entrées #, A à Z et @ et ordre des listes qui suit le leur, clé auto ou manuelle.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T13:00:00Z }
 ---
 
 # Tri et navigation par initiale
@@ -18,6 +18,8 @@ La navigation par initiale propose les entrées **A** à **Z**, une entrée **#*
 - Une initiale qui est une lettre ayant une **lettre de base** de `A` à `Z` dans l'ordre alphabétique (lettre accentuée, en minuscule, ligature…) est rangée sous cette lettre de base en majuscule : `É`, `È`, `Ê` → **E** ; `à` → **A** ; `Ç` → **C** ; `Œ` → **O**. À l'intérieur d'une entrée, l'ordre de tri linguistique habituel s'applique.
 - Une initiale **numérique** (chiffre) est rangée sous **#** (ex. `13`, `2001 Nights`).
 - Toute **autre** initiale (ponctuation, symbole, lettre sans lettre de base de `A` à `Z`, comme celles d'un autre alphabet que le latin) est rangée sous **@** (ex. `...Et après`, `Ωmega`).
+
+La navigation présente ses entrées dans cet ordre : « Toutes », **#**, **A** à **Z**, puis **@**. Toute liste qui la propose est **rangée dans l'ordre de ses entrées** : les éléments sous **#** en tête, puis ceux de **A** à **Z**, puis tous ceux sous **@** en un seul bloc en fin de liste ; à l'intérieur d'une entrée, l'ordre de tri linguistique habituel s'applique (décision de l'utilisateur, #421). Une liste et sa navigation se suivent ainsi toujours : l'ordre linguistique seul placerait la ponctuation avant les chiffres et les autres alphabets après `Z`, coupant **@** en deux.
 
 ## Titres (séries et albums)
 

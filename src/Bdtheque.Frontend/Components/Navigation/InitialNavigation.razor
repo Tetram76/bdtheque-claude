@@ -1,6 +1,6 @@
 @inject IStringLocalizer<InitialNavigation> L
 
-@* The navigation par initiale of a list: « Toutes », A to Z, # and @ (fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale), on a row that scrolls sideways like the menu of the consultation, the current entry marked
+@* The navigation par initiale of a list: « Toutes », #, A to Z, then @, in the order the list follows (fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale), on a row that scrolls sideways like the menu of the consultation, the current entry marked
    (visuel/liste-albums/contenu.md). The list builds the address of each entry, which keeps its other criteria. *@
 <ScrollRow>
     <nav class="initial-navigation" aria-label="@L["Label"]">
@@ -13,7 +13,7 @@
 
 @code {
     /// <summary>The entries of the navigation, as the API names them (<c>entry</c> of the lists).</summary>
-    public static readonly IReadOnlyList<string> Entries = [.. "ABCDEFGHIJKLMNOPQRSTUVWXYZ#@".Select(entry => entry.ToString())];
+    public static readonly IReadOnlyList<string> Entries = [.. "#ABCDEFGHIJKLMNOPQRSTUVWXYZ@".Select(entry => entry.ToString())];
 
     // « Toutes » first: no entry chosen.
     private static readonly IReadOnlyList<string?> AllEntries = [null, .. Entries];

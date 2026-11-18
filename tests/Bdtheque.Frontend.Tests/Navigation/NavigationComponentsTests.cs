@@ -57,9 +57,9 @@ public sealed class NavigationComponentsTests : BunitContext
 
         var links = navigation.FindAll("nav a");
         Assert.Equal("Navigation par initiale", navigation.Find("nav").GetAttribute("aria-label"));
-        Assert.Equal(["Toutes", .. "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select(letter => letter.ToString()), "#", "@"],
+        Assert.Equal(["Toutes", "#", .. "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select(letter => letter.ToString()), "@"],
             links.Select(link => link.TextContent.Trim()));
-        Assert.Equal("/admin/albums?entry=%23", links[^2].GetAttribute("href"));
+        Assert.Equal("/admin/albums?entry=%23", links[1].GetAttribute("href"));
         Assert.Equal(["B"], links.Where(link => link.GetAttribute("aria-current") == "page").Select(link => link.TextContent.Trim()));
         Assert.NotNull(navigation.Find("app-scroll-row nav"));
     }

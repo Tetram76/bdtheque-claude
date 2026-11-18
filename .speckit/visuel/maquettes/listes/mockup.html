@@ -713,7 +713,7 @@ class View extends Mockup {
       filtersBtnFg: filtersOpen ? t.nFg : t.secText,
       toggleFilters: () => this.setState({ filtersOpen: !filtersOpen }),
       filters: e.filters.map((label) => ({ label, value: 'Tous', icon: ICON.search })),
-      entries: [entry('Toutes', '58px'), ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#@'.split('').map((l) => entry(l, '30px'))],
+      entries: [entry('Toutes', '58px'), ...'#ABCDEFGHIJKLMNOPQRSTUVWXYZ@'.split('').map((l) => entry(l, '30px'))],
       rows,
       pages: e.pages.map((p, i) => ({ label: p, current: i === 0 ? 'page' : 'false', bg: i === 0 ? t.acc : 'transparent', fg: i === 0 ? t.onAcc : (p === '…' ? t.muted : t.text) })),
       newValue: duplicate ? 'aventure' : '',

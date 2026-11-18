@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Liste par liste'
 description: 'Visuel, entrée, colonnes et filtres de chaque liste de l''administration.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T11:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T13:00:00Z }
 ---
 
 # Liste par liste
@@ -17,4 +17,4 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T11:30:00Z }
 | Genres | — | libellé | nombre de séries, nombre d'albums, modification | libellé ; navigation par initiale ; par libellé |
 | Univers | — | nom, en retrait sous son parent, chaque univers suivi de ses sous-univers | nombre de séries et d'albums, sous-univers compris, nombre de sous-univers, modification | nom ; selon la hiérarchie |
 
-**Navigation par initiale** ([Tri et navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md)) : toute liste triée par titre, par nom ou par libellé, ou rangée dans l'ordre des albums, la propose, avec les mêmes entrées (A à Z, # et @) et son utilisation suivie par la mesure d'audience ([Mesure d'audience de l'interface web](../../fonctionnel/mesure-audience.md)). Un éditeur est rangé sous l'initiale de son nom, un genre sous celle de son libellé ; une édition ou une intention d'achat, sous l'entrée de navigation de son album, comme dans la liste des albums (décisions de l'utilisateur, #421, #478). Seuls les univers, rangés selon leur hiérarchie, n'en ont pas.
+**Navigation par initiale** ([Tri et navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md)) : toute liste triée par titre, par nom ou par libellé, ou rangée dans l'ordre des albums, la propose, avec les mêmes entrées (#, A à Z, puis @), dans l'ordre desquelles elle est rangée ([Entrées de la navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale), décision de l'utilisateur, #421), et son utilisation suivie par la mesure d'audience ([Mesure d'audience de l'interface web](../../fonctionnel/mesure-audience.md)). Un éditeur est rangé sous l'initiale de son nom, un genre sous celle de son libellé ; une édition ou une intention d'achat, sous l'entrée de navigation de son album, comme dans la liste des albums (décisions de l'utilisateur, #421, #478). Seuls les univers, rangés selon leur hiérarchie, n'en ont pas.

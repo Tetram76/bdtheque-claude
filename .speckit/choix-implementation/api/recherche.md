@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Api/Endpoints/CatalogFilters.cs'
   - 'src/Bdtheque.Api/Endpoints/CatalogExpressions.cs'
   - 'src/Bdtheque.Api/Endpoints/UniverseTree.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T13:00:00Z }
 ---
 
 # Recherche
@@ -19,5 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T12:00:00Z }
   - Un filtre sur un univers couvre ses sous-univers ([Hiérarchie des univers](../../fonctionnel/regles-metier/hierarchie-des-univers.md)), calculés en mémoire sur le référentiel des univers chargé en entier, comme pour son reparentage, sans requête récursive.
   - Un filtre sur une fiche inexistante donne une liste vide, et non une erreur : une liste filtrée n'adresse pas la fiche.
   - La recherche avancée est mise en œuvre à part ([Recherche avancée : mise en œuvre](../recherche-avancee/recherche-avancee-mise-en-oeuvre.md)).
-- **Ordre des listes** : clé de tri (titres, auteurs), nom sinon. Une liste d'albums filtrée sur une série reste une liste de résultats, dans l'ordre alphabétique : l'ordre des albums dans la série ([Ordre des albums dans une série](../../fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md)) est celui de sa fiche.
+- **Ordre des listes** : entrée de navigation, dans l'ordre de la navigation (`#`, `A` à `Z`, `@`, [Entrées de la navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale)), puis clé de tri (titres, auteurs), nom ou libellé sinon ; les résultats de la recherche avancée, présentés comme dans la consultation ([Entités recherchées](../../fonctionnel/recherche-avancee/entites-recherchees.md)), suivent le même ordre. Le rang de l'entrée est une **expression partagée**, calculée à la requête depuis l'entrée stockée ([Navigation par initiale : mise en œuvre](navigation-par-initiale-mise-en-oeuvre.md)).
+  - **Alternative écartée (rang stocké, ou clé de tri préfixée par lui)** : une donnée de plus à tenir cohérente pour un ordre qui se déduit de l'entrée ; trier sur une expression prive la liste entière de l'index (entrée, clé de tri), sans effet sensible sur quelques milliers de lignes, et la navigation sous une entrée le garde.
+- Une liste d'albums filtrée sur une série reste une liste de résultats, dans l'ordre alphabétique : l'ordre des albums dans la série ([Ordre des albums dans une série](../../fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md)) est celui de sa fiche.
 - **Expressions partagées** par les listes et les fiches (libellés, appartenance à la collection, contributions, ordre des albums…) : écrites une fois, et insérées dans chaque requête par composition d'arbres d'expression, EF Core ne traduisant pas l'appel d'une méthode C#.

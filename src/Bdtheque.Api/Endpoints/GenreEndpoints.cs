@@ -91,7 +91,7 @@ internal static class GenreEndpoints
         var genres = context.Genres.AsNoTracking().WhereContains(text, g => g.Label);
         if (entry is not null)
             genres = genres.Where(g => g.NavigationEntry == entry);
-        return genres.OrderBy(g => g.Label).ThenBy(g => g.Id);
+        return genres.OrderByEntry(g => g.NavigationEntry).ThenBy(g => g.Label).ThenBy(g => g.Id);
     }
 
     private static async Task<GenreForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>

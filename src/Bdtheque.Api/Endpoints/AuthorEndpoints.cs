@@ -154,7 +154,7 @@ internal static class AuthorEndpoints
             .WhereContains(text, a => a.LastName, a => a.FirstName, a => a.Pseudonym, a => a.FirstName + " " + a.LastName, a => a.SortKey);
         if (entry is not null)
             authors = authors.Where(a => a.NavigationEntry == entry);
-        return authors.OrderBy(a => a.SortKey).ThenBy(a => a.Id);
+        return authors.OrderByEntry(a => a.NavigationEntry).ThenBy(a => a.SortKey).ThenBy(a => a.Id);
     }
 
     private static async Task<AuthorForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
