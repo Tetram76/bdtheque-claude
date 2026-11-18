@@ -14,8 +14,8 @@
    albums (visuel/listes/listes-de-l-administration.md). An intent has no record of its own (visuel/listes/saisie-selon-l-entite.md):
    it is set from the page of the editions and intents of its album, which the heading says in place of a creation; its main
    action confirms the purchase, and its menu leads to that page, converts it or removes it, its entry being no link
-   (visuel/listes/principes-communs.md, Entrée en texte simple). Rendered statically, its search, its page and its
-   removal dialog are carried by its address (Lists/PurchaseIntentListQuery.cs). Its styles read the contracts of the base
+   (visuel/listes/principes-communs.md, Entrée en texte simple). Rendered statically, its search, the navigation by initial of
+   its albums, its page and its removal dialog are carried by its address (Lists/PurchaseIntentListQuery.cs). Its styles read the contracts of the base
    theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminPurchaseIntents" />
@@ -28,21 +28,33 @@
         <ListSearch Action="@AppPaths.AdminPurchaseIntents" FieldId="intent-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
                     SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
 
-        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.PurchaseIntents" Order="@L["Order"]" />
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
+
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.PurchaseIntents"
+                     Order="@L["Order"]" />
 
         @if (_list!.Items.Count == 0)
         {
-            if (_query is { EmptyReason: EmptyListReason.Search, Text: { } text })
+            @* The intents have no filters: their list is empty under a search, an entry, or nothing. *@
+            switch (_query)
             {
-                <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
-                    <Actions>
-                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                    </Actions>
-                </EmptyList>
-            }
-            else
-            {
-                <EmptyList Message="@L["Empty.None"]" Hint="@L["NoCreation"]" />
+                case { EmptyReason: EmptyListReason.Search, Text: { } text }:
+                    <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
+                        <Actions>
+                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case { EmptyReason: EmptyListReason.Entry }:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminPurchaseIntents" Label="@L["Empty.All"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]" Hint="@L["NoCreation"]" />
+                    break;
             }
         }
         else

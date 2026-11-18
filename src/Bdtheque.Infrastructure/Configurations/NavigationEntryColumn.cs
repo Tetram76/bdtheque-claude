@@ -3,7 +3,7 @@ using Bdtheque.Domain.Common;
 namespace Bdtheque.Infrastructure.Configurations;
 
 /// <summary>
-/// Shared mapping of the stored initial-based navigation entry (series, albums, authors).
+/// Shared mapping of the stored initial-based navigation entry (series, albums, authors, publishers, genres).
 /// </summary>
 internal static class NavigationEntryColumn
 {

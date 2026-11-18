@@ -5,17 +5,19 @@ namespace Bdtheque.Frontend.Lists;
 
 /// <summary>
 /// The criteria of the list of the publishers of the administration (visuel/listes/liste-par-liste.md), which its address
-/// carries (<see cref="AdminListQuery"/>): its search, on the name, without filters nor navigation by initial.
+/// carries (<see cref="AdminListQuery"/>): its search, on the name, and its navigation by initial, without filters.
 /// </summary>
 public sealed record PublisherListQuery(
     string? Text = null,
+    string? Entry = null,
     int Page = 1,
     Guid? Delete = null,
     Guid? Merge = null,
-    string? MergeText = null) : AdminListQuery(Text, Entry: null, Page, FiltersOpen: false, Delete, Merge, MergeText)
+    string? MergeText = null) : AdminListQuery(Text, Entry, Page, FiltersOpen: false, Delete, Merge, MergeText)
 {
     private static readonly ListFunctions PublisherFunctions = new(
-        "publisher", AudienceFunctions.AdminPublishersSearch, Filter: null, Initial: null, AudienceFunctions.AdminPublishersPage,
+        "publisher", AudienceFunctions.AdminPublishersSearch, Filter: null, AudienceFunctions.AdminPublishersInitial,
+        AudienceFunctions.AdminPublishersPage,
         AudienceFunctions.AdminPublishersDeletion, AudienceFunctions.AdminPublishersMerge);
 
     protected override string Path => AppPaths.AdminPublishers;
@@ -30,6 +32,6 @@ public sealed record PublisherListQuery(
     public static PublisherListQuery Parse(string query)
     {
         var address = new Address(query);
-        return new PublisherListQuery(address.Search, address.Page, address.Delete, address.Merge, address.MergeText);
+        return new PublisherListQuery(address.Search, address.Entry, address.Page, address.Delete, address.Merge, address.MergeText);
     }
 }

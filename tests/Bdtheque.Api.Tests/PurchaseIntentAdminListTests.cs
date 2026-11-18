@@ -1,7 +1,9 @@
+using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Errors;
 using SkiaSharp;
 
 namespace Bdtheque.Api.Tests;
@@ -103,10 +105,36 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
         Assert.Equal([firstIntent, last], await IdsAsync(_marker));
     }
 
-    private async Task<IReadOnlyList<PurchaseIntentAdminListItem>> ListAsync(string text) =>
-        (await GetAsync<Page<PurchaseIntentAdminListItem>>($"/admin/purchase-intents?q={Uri.EscapeDataString(text)}")).Items;
+    [Fact]
+    public async Task List_FollowsTheNavigationByInitialOfTheAlbums()
+    {
+        // An intent is filed under the entry of its album (visuel/listes/liste-par-liste.md), an album without a title of its
+        // own under that of its series (modele-metier/album.md).
+        var publisher = await CreatePublisherAsync($"Dupuis {_marker}");
+        var untitled = await CreateAlbumAsync(null, (await CreateSeriesAsync($"Blacksad {_marker}")).Id, 1);
+        var lotus = await CreateAlbumAsync($"Le Lotus bleu {_marker}");
+        var untitledIntent = await CreateAlbumIntentAsync(untitled.Id);
+        await CreateIntendedEditionAsync(lotus.Id, publisher.Id);
+        var lotusIntent = await SingleIntentAsync(lotus.Id);
 
-    private async Task<IReadOnlyList<Guid>> IdsAsync(string text) => [.. (await ListAsync(text)).Select(r => r.Id)];
+        Assert.Equal([untitledIntent], await IdsAsync(_marker, "B"));
+        Assert.Equal([lotusIntent], await IdsAsync(_marker, "L"));
+        Assert.Empty(await IdsAsync(_marker, "@"));
+    }
+
+    [Fact]
+    public async Task Entry_ThatIsNotOneOfTheNavigation_IsATechnicalError()
+    {
+        var response = await _client.GetAsync("/admin/purchase-intents?entry=AB");
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.InternalServerError, ProblemTypes.Technical);
+    }
+
+    private async Task<IReadOnlyList<PurchaseIntentAdminListItem>> ListAsync(string text, string? entry = null) =>
+        (await GetAsync<Page<PurchaseIntentAdminListItem>>(
+            $"/admin/purchase-intents?q={Uri.EscapeDataString(text)}{(entry is null ? "" : $"&entry={Uri.EscapeDataString(entry)}")}")).Items;
+
+    private async Task<IReadOnlyList<Guid>> IdsAsync(string text, string? entry = null) => [.. (await ListAsync(text, entry)).Select(r => r.Id)];
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
 

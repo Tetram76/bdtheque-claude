@@ -10,8 +10,8 @@
 @inject NavigationManager Navigation
 
 @* The list of the publishers of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the
-   albums (visuel/listes/listes-de-l-administration.md): rendered statically, its search, its page and its dialogs are carried
-   by its address (Lists/PublisherListQuery.cs). A publisher has no record in the consultation
+   albums (visuel/listes/listes-de-l-administration.md): rendered statically, its search, its navigation by initial, its page
+   and its dialogs are carried by its address (Lists/PublisherListQuery.cs). A publisher has no record in the consultation
    (fonctionnel/structure-de-l-application.md): its menu leads to its website instead. Its styles read the contracts of the
    base theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
@@ -25,26 +25,38 @@
         <ListSearch Action="@AppPaths.AdminPublishers" FieldId="publisher-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
                     SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
 
-        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Publishers" Order="@L["Order"]" />
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
+
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Publishers"
+                     Order="@L["Order"]" />
 
         @if (_list!.Items.Count == 0)
         {
-            if (_query is { EmptyReason: EmptyListReason.Search, Text: { } text })
+            @* The publishers have no filters: their list is empty under a search, an entry, or nothing. *@
+            switch (_query)
             {
-                <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
-                    <Actions>
-                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                        <Button Href="@AppPaths.NewWithSearched(AppPaths.AdminNewPublisher, text)" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
-                    </Actions>
-                </EmptyList>
-            }
-            else
-            {
-                <EmptyList Message="@L["Empty.None"]">
-                    <Actions>
-                        <Button Href="@AppPaths.AdminNewPublisher" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
-                    </Actions>
-                </EmptyList>
+                case { EmptyReason: EmptyListReason.Search, Text: { } text }:
+                    <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
+                        <Actions>
+                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@AppPaths.NewWithSearched(AppPaths.AdminNewPublisher, text)" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case { EmptyReason: EmptyListReason.Entry }:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminPublishers" Label="@L["Empty.All"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminNewPublisher" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
             }
         }
         else

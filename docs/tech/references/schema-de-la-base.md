@@ -476,6 +476,7 @@ erDiagram
 | --- | --- | --- | --- | --- |
 | `Id` | `uuid` | non |  |  |
 | `Label` | `character varying(200)` | non |  | `fr_case_accent_insensitive` |
+| `NavigationEntry` | `character varying(1)` | non |  | `fr-FR-x-icu` |
 | `CreatedAt` | `timestamp with time zone` | non |  |  |
 | `ModifiedAt` | `timestamp with time zone` | non |  |  |
 
@@ -483,10 +484,12 @@ erDiagram
 | --- | --- |
 | `PK_Genres` | `PRIMARY KEY ("Id")` |
 | `CK_Genres_LabelNotBlank` | `CHECK ((COALESCE(length(TRIM(BOTH FROM "Label")), 0) > 0))` |
+| `CK_Genres_NavigationEntryValid` | `CHECK ((("NavigationEntry")::text = ANY ((ARRAY['A'::character varying, 'B'::character varying, 'C'::character varying, 'D'::character varying, 'E'::character varying, 'F'::character varying, 'G'::character varying, 'H'::character varying, 'I'::character varying, 'J'::character varying, 'K'::character varying, 'L'::character varying, 'M'::character varying, 'N'::character varying, 'O'::character varying, 'P'::character varying, 'Q'::character varying, 'R'::character varying, 'S'::character varying, 'T'::character varying, 'U'::character varying, 'V'::character varying, 'W'::character varying, 'X'::character varying, 'Y'::character varying, 'Z'::character varying, '#'::character varying, '@'::character varying])::text[])))` |
 
 | Index | Unique | Définition |
 | --- | --- | --- |
 | `IX_Genres_Label` | oui | `btree ("Label")` |
+| `IX_Genres_NavigationEntry_Label` | non | `btree ("NavigationEntry", "Label")` |
 
 ### `PendingVisuals`
 
@@ -536,6 +539,7 @@ erDiagram
 | `Id` | `uuid` | non |  |  |
 | `Name` | `character varying(300)` | non |  | `fr_case_accent_insensitive` |
 | `Website` | `character varying(2048)` | oui |  | `fr-FR-x-icu` |
+| `NavigationEntry` | `character varying(1)` | non |  | `fr-FR-x-icu` |
 | `CreatedAt` | `timestamp with time zone` | non |  |  |
 | `ModifiedAt` | `timestamp with time zone` | non |  |  |
 
@@ -543,10 +547,12 @@ erDiagram
 | --- | --- |
 | `PK_Publishers` | `PRIMARY KEY ("Id")` |
 | `CK_Publishers_NameNotBlank` | `CHECK ((COALESCE(length(TRIM(BOTH FROM "Name")), 0) > 0))` |
+| `CK_Publishers_NavigationEntryValid` | `CHECK ((("NavigationEntry")::text = ANY ((ARRAY['A'::character varying, 'B'::character varying, 'C'::character varying, 'D'::character varying, 'E'::character varying, 'F'::character varying, 'G'::character varying, 'H'::character varying, 'I'::character varying, 'J'::character varying, 'K'::character varying, 'L'::character varying, 'M'::character varying, 'N'::character varying, 'O'::character varying, 'P'::character varying, 'Q'::character varying, 'R'::character varying, 'S'::character varying, 'T'::character varying, 'U'::character varying, 'V'::character varying, 'W'::character varying, 'X'::character varying, 'Y'::character varying, 'Z'::character varying, '#'::character varying, '@'::character varying])::text[])))` |
 
 | Index | Unique | Définition |
 | --- | --- | --- |
 | `IX_Publishers_Name` | oui | `btree ("Name")` |
+| `IX_Publishers_NavigationEntry_Name` | non | `btree ("NavigationEntry", "Name")` |
 
 ### `PurchaseIntents`
 

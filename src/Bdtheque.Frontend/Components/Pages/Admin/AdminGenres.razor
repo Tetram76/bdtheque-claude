@@ -13,10 +13,10 @@
 @inject NavigationManager Navigation
 
 @* The list of the genres of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the albums
-   (visuel/listes/listes-de-l-administration.md): rendered statically, its search, its page and its dialogs are carried by its
-   address (Lists/GenreListQuery.cs). A genre is entered in the list itself (visuel/listes/saisie-selon-l-entite.md): changed in
-   its row, added in the dialog of a genre created on the spot, each a form the address opens, whose error is presented in
-   place. Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
+   (visuel/listes/listes-de-l-administration.md): rendered statically, its search, its navigation by initial, its page and its
+   dialogs are carried by its address (Lists/GenreListQuery.cs). A genre is entered in the list itself
+   (visuel/listes/saisie-selon-l-entite.md): changed in its row, added in the dialog of a genre created on the spot, each a form
+   the address opens, whose error is presented in place. Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminGenres" />
 
@@ -28,26 +28,38 @@
         <ListSearch Action="@AppPaths.AdminGenres" FieldId="genre-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
                     SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
 
-        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Genres" Order="@L["Order"]" />
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
+
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Genres"
+                     Order="@L["Order"]" />
 
         @if (_list!.Items.Count == 0 && !StrayEdit)
         {
-            if (_query is { EmptyReason: EmptyListReason.Search, Text: { } searched })
+            @* The genres have no filters: their list is empty under a search, an entry, or nothing. *@
+            switch (_query)
             {
-                <EmptyList Message="@L["Empty.Text", searched]" Hint="@L["Empty.Hint"]">
-                    <Actions>
-                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
-                        <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", searched]" />
-                    </Actions>
-                </EmptyList>
-            }
-            else
-            {
-                <EmptyList Message="@L["Empty.None"]">
-                    <Actions>
-                        <Button Href="@NewHref" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
-                    </Actions>
-                </EmptyList>
+                case { EmptyReason: EmptyListReason.Search, Text: { } searched }:
+                    <EmptyList Message="@L["Empty.Text", searched]" Hint="@L["Empty.Hint"]">
+                        <Actions>
+                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", searched]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case { EmptyReason: EmptyListReason.Entry }:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminGenres" Label="@L["Empty.All"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]">
+                        <Actions>
+                            <Button Href="@NewHref" Variant="ButtonVariant.Primary" Icon="IconName.Add" Label="@L["New"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
             }
         }
         else

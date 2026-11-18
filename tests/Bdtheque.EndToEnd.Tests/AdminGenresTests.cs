@@ -35,6 +35,20 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
     }
 
     [Theory, InEachTheme]
+    public async Task Search_ThenTheNavigationByInitial_NarrowTheList_ByLabel(string theme)
+    {
+        await CreateGenreAsync($"Polar {_marker}");
+        await CreateGenreAsync($"Aventure {_marker}");
+        await CreateGenreAsync($"Animalier {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" }).GetByRole(AriaRole.Link, new() { Name = "A", Exact = true }).ClickAsync();
+
+        await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Animalier {_marker}", $"Aventure {_marker}"]);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres, $"?q={_marker}&entry=A"));
+    }
+
+    [Theory, InEachTheme]
     public async Task Edit_InItsRow_SavesTheLabel_AndLeadsBackToTheList(string theme)
     {
         await CreateGenreAsync($"Polar {_marker}");

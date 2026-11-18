@@ -176,12 +176,36 @@ internal static class CatalogExpressions
         (Expression<Func<TSource, TResult>>)new MarkerExpander().Visit(expression);
 
     /// <summary>
-    /// Sorts in the order of the albums: by sort key, that of the series standing in for an album without
-    /// a title of its own (modele-metier/album.md), then by volume, then by album for a total order.
+    /// Keeps the records whose album is filed under <paramref name="entry"/> of the navigation by initial, an album without
+    /// a title of its own under the current entry of its series (modele-metier/album.md): the lists of the albums, of the
+    /// editions and of the purchase intents, ranged in the order of the albums, share it (visuel/listes/liste-par-liste.md).
+    /// All of them for no entry (« Toutes »).
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
+    public static IQueryable<T> WhereAlbumEntry<T>(this IQueryable<T> source, Expression<Func<T, Album>> album, string? entry)
+    {
+        CatalogFilters.EnsureNavigationEntry(entry);
+        return entry is null ? source : source.Where(Of(album, Compose(AlbumEntry, e => e == entry)));
+    }
+
+    /// <summary>
+    /// Sorts by the entry of the navigation by initial, in the order of the navigation: <c>#</c>, then <c>A</c> to
+    /// <c>Z</c>, then <c>@</c> in a single block (fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale).
+    /// The letters share a rank: the sort key, or the name, that the caller sorts by next, orders them along the French
+    /// collation, from which the entry is computed (choix-implementation/api/recherche.md).
+    /// </summary>
+    public static IOrderedQueryable<T> OrderByEntry<T>(this IQueryable<T> source, Expression<Func<T, string>> entry) =>
+        source.OrderBy(Compose(entry, EntryRank));
+
+    /// <summary>
+    /// Sorts in the order of the albums: by entry of the navigation by initial, then by sort key, those of the series
+    /// standing in for an album without a title of its own (modele-metier/album.md), then by volume, then by album for
+    /// a total order.
     /// </summary>
     public static IOrderedQueryable<T> OrderByAlbum<T>(this IQueryable<T> source, Expression<Func<T, Album>> album) =>
         source
-            .OrderBy(Of(album, a => a.SortKey ?? a.Series!.SortKey))
+            .OrderByEntry(Of(album, AlbumEntry))
+            .ThenBy(Of(album, a => a.SortKey ?? a.Series!.SortKey))
             .ThenBy(Of(album, a => a.VolumeNumber))
             .ThenBy(Of(album, a => a.Id));
 
@@ -202,8 +226,21 @@ internal static class CatalogExpressions
             .ThenBy(a => a.SortKey)
             .ThenBy(a => a.Id);
 
+    // The entry of an album, that of its series for an album without a title of its own (modele-metier/album.md).
+    private static readonly Expression<Func<Album, string>> AlbumEntry = a => a.NavigationEntry ?? a.Series!.NavigationEntry;
+
+    // The rank of an entry in the order of the navigation, the letters sharing theirs.
+    private static readonly Expression<Func<string, int>> EntryRank =
+        e => e == NavigationEntryCalculator.DigitEntry ? 0 : e == NavigationEntryCalculator.OtherEntry ? 2 : 1;
+
     private static Expression<Func<T, TKey>> Of<T, TKey>(Expression<Func<T, Album>> album, Expression<Func<Album, TKey>> key) =>
-        Expression.Lambda<Func<T, TKey>>(ReplacingExpressionVisitor.Replace(key.Parameters[0], album.Body, key.Body), album.Parameters);
+        Compose(album, key);
+
+    // The expression of the result of a value, written once for any expression of that value: EF Core translates the
+    // composed tree, never a call.
+    private static Expression<Func<T, TResult>> Compose<T, TValue, TResult>(
+        Expression<Func<T, TValue>> value, Expression<Func<TValue, TResult>> result) =>
+        Expression.Lambda<Func<T, TResult>>(ReplacingExpressionVisitor.Replace(result.Parameters[0], value.Body, result.Body), value.Parameters);
 
     private static InvalidOperationException NotExpanded() =>
         new($"A marker of {nameof(CatalogExpressions)}, only meaningful in an expression passed to {nameof(Expand)}.");

@@ -48,6 +48,36 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
     }
 
     [Fact]
+    public async Task Lists_AreRangedInTheOrderOfTheNavigation_TheOtherCharactersInASingleBlockLast()
+    {
+        // In the French order alone, "(Auto) …" would come before "13 …", and "Ωmega …" after "Bravo …": the lists
+        // follow the entries of the navigation instead, #, A to Z, then @
+        // (fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale).
+        string[] created = [$"Ωmega {_marker}", $"Bravo {_marker}", $"(Auto) {_marker}", $"13 {_marker}"];
+        string[] ranged = [$"13 {_marker}", $"Bravo {_marker}", $"(Auto) {_marker}", $"Ωmega {_marker}"];
+        var series = new Dictionary<string, Guid>();
+        var albums = new Dictionary<string, Guid>();
+        var authors = new Dictionary<string, Guid>();
+        var publishers = new Dictionary<string, Guid>();
+        var genres = new Dictionary<string, Guid>();
+        foreach (var name in created)
+        {
+            series[name] = (await CreateSeriesAsync(name)).Id;
+            albums[name] = (await CreateAlbumAsync(name)).Id;
+            authors[name] = (await CreateAuthorAsync(null, null, name)).Id;
+            publishers[name] = (await CreatePublisherAsync(name)).Id;
+            genres[name] = (await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest(name))).Id;
+        }
+
+        var query = $"q={_marker}";
+        Assert.Equal(ranged.Select(name => series[name]), Ids(await ListAsync<SeriesListItem>("series", query)));
+        Assert.Equal(ranged.Select(name => albums[name]), Ids(await ListAsync<AlbumSummary>("albums", query)));
+        Assert.Equal(ranged.Select(name => authors[name]), Ids(await ListAsync<AuthorListItem>("authors", query)));
+        Assert.Equal(ranged.Select(name => publishers[name]), Ids(await ListAsync<PublisherListItem>("publishers", query)));
+        Assert.Equal(ranged.Select(name => genres[name]), Ids(await ListAsync<GenreListItem>("genres", query)));
+    }
+
+    [Fact]
     public async Task Search_IgnoresCaseAndAccents()
     {
         var epervier = await CreateSeriesAsync($"L'Épervier {_marker}");
@@ -273,6 +303,9 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
     [InlineData("series")]
     [InlineData("albums")]
     [InlineData("authors")]
+    [InlineData("editions")]
+    [InlineData("publishers")]
+    [InlineData("genres")]
     public async Task List_WithAnUnknownNavigationEntry_IsATechnicalError(string list)
     {
         // The frontend builds the navigation, never the user.

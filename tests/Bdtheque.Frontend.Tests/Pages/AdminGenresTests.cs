@@ -121,6 +121,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         var summary = Open("q=a").Find(".list-summary");
 
         Assert.Equal(("3 genres sur 24", "Triés par libellé"), (Text(summary.Children[0]), Text(summary.Children[1])));
+        Assert.Equal("3 genres sous la lettre A", Text(Open("entry=A").Find(".list-summary").Children[0]));
     }
 
     [Fact]
@@ -397,6 +398,35 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         Open($"q=a&edit={Adventure.Id}", recorded: true);
 
         Assert.Equal(["admin.genres.edit", "admin.genres"], _audience.Functions);
+    }
+
+    [Fact]
+    public void Navigation_ByInitial_KeepsTheSearch_ReturnsToTheFirstPage_AndMarksTheCurrentEntry()
+    {
+        var page = Open("q=a&entry=A&page=2");
+
+        Assert.Equal($"{AppPaths.AdminGenres}?q=a&entry=C", page.Find(".initial-navigation a[href*='entry=C']").GetAttribute("href"));
+        Assert.Equal($"{AppPaths.AdminGenres}?q=a", page.Find(".initial-navigation a:first-child").GetAttribute("href"));
+        Assert.Equal("A", Text(page.Find(".initial-navigation a[aria-current='page']")));
+    }
+
+    [Fact]
+    public void Empty_AnEntryWithoutResult_OffersTheWholeList()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("entry=X").Find(".empty-list");
+
+        Assert.Equal("Aucun genre sous cette entrée.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Tous les genres", AppPaths.AdminGenres)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Audience_TheNavigationByInitial_ThenTheScreen()
+    {
+        Open("q=a&entry=A", recorded: true);
+
+        Assert.Equal(["admin.genres.initial", "admin.genres"], _audience.Functions);
     }
 
     private IRenderedComponent<AdminGenres> Open(string criteria, bool recorded = false)

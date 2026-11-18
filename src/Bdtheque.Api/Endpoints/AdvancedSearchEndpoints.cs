@@ -61,18 +61,18 @@ internal static class AdvancedSearchEndpoints
     {
         new EntitySearch<Album, AlbumSummary>("albums", EntityKind.Album, albums => albums.OrderByAlbum(a => a), AlbumEndpoints.ListItem),
         new EntitySearch<Series, SeriesListItem>(
-            "series", EntityKind.Series, series => series.OrderBy(s => s.SortKey).ThenBy(s => s.Id), s => new SeriesListItem(s.Id, s.Title)),
+            "series", EntityKind.Series, series => series.OrderByEntry(s => s.NavigationEntry).ThenBy(s => s.SortKey).ThenBy(s => s.Id), s => new SeriesListItem(s.Id, s.Title)),
         new EntitySearch<Edition, EditionListItem>("editions", EntityKind.Edition,
             editions => editions.OrderByAlbum(e => e.Album).ThenBy(e => e.PublicationYear).ThenBy(e => e.Id), EditionEndpoints.ListItem),
         new EntitySearch<Author, AuthorListItem>("authors", EntityKind.Author,
-            authors => authors.OrderBy(a => a.SortKey).ThenBy(a => a.Id), a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym)),
+            authors => authors.OrderByEntry(a => a.NavigationEntry).ThenBy(a => a.SortKey).ThenBy(a => a.Id), a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym)),
         new EntitySearch<Publisher, PublisherListItem>("publishers", EntityKind.Publisher,
-            publishers => publishers.OrderBy(p => p.Name).ThenBy(p => p.Id), p => new PublisherListItem(p.Id, p.Name, p.Website)),
+            publishers => publishers.OrderByEntry(p => p.NavigationEntry).ThenBy(p => p.Name).ThenBy(p => p.Id), p => new PublisherListItem(p.Id, p.Name, p.Website)),
         new EntitySearch<PublisherCollection, PublisherCollectionListItem>("publisher-collections", EntityKind.PublisherCollection,
             collections => collections.OrderBy(c => c.Name).ThenBy(c => c.Publisher.Name).ThenBy(c => c.Id),
             c => new PublisherCollectionListItem(c.Id, c.Name, c.PublisherId, c.Publisher.Name)),
         new EntitySearch<Genre, GenreListItem>(
-            "genres", EntityKind.Genre, genres => genres.OrderBy(g => g.Label).ThenBy(g => g.Id), g => new GenreListItem(g.Id, g.Label)),
+            "genres", EntityKind.Genre, genres => genres.OrderByEntry(g => g.NavigationEntry).ThenBy(g => g.Label).ThenBy(g => g.Id), g => new GenreListItem(g.Id, g.Label)),
         new EntitySearch<Universe, UniverseListItem>(
             "universes", EntityKind.Universe, universes => universes.OrderBy(u => u.Name).ThenBy(u => u.Id), UniverseEndpoints.ListItem),
         // The visuals of each edition in their order (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md).
@@ -85,7 +85,8 @@ internal static class AdvancedSearchEndpoints
         // In the order of the albums, the series standing in for the album of a contribution of their own.
         new EntitySearch<Contribution, ContributionListItem>("contributions", EntityKind.Contribution,
             contributions => contributions
-                .OrderBy(c => c.Album != null ? c.Album.SortKey ?? c.Album.Series!.SortKey : c.Series!.SortKey)
+                .OrderByEntry(c => c.Album != null ? c.Album.NavigationEntry ?? c.Album.Series!.NavigationEntry : c.Series!.NavigationEntry)
+                .ThenBy(c => c.Album != null ? c.Album.SortKey ?? c.Album.Series!.SortKey : c.Series!.SortKey)
                 .ThenBy(c => c.Album!.VolumeNumber)
                 .ThenBy(c => c.AlbumId)
                 .ThenBy(c => c.Role)

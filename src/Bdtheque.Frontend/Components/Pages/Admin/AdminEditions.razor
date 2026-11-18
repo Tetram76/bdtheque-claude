@@ -35,12 +35,13 @@
 
         <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
 
-        <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null || _query.ActiveFilterCount > 0)"
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
+
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@(_query.Text is not null || _query.ActiveFilterCount > 0)"
                      WholeCount="_counts?.Editions" Order="@L["Order"]" />
 
         @if (_list!.Editions.Items.Count == 0)
         {
-            @* The editions have no navigation by initial: their list is empty under a search, filters, or nothing. *@
             switch (_query.EmptyReason)
             {
                 case EmptyListReason.Search:
@@ -54,6 +55,13 @@
                     <EmptyList Message="@L["Empty.Criteria"]">
                         <Actions>
                             <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Entry:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.AdminEditions" Label="@L["Empty.All"]" />
                         </Actions>
                     </EmptyList>
                     break;

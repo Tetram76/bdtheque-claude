@@ -14,6 +14,41 @@ public sealed class PublisherTests
         Assert.NotEqual(Guid.Empty, publisher.Id);
     }
 
+    // A publisher is filed under the initial of its name, as it is sorted, article included (visuel/listes/liste-par-liste.md,
+    // navigation par initiale), the entries being those of every navigation
+    // (fonctionnel/presentation/tri-et-navigation-par-initiale.md).
+    [Theory]
+    [InlineData("Dargaud", "D")]
+    [InlineData("Le Lombard", "L")]
+    [InlineData("Éditions Delcourt", "E")]
+    [InlineData("  çà et là", "C")]
+    [InlineData("6 pieds sous terre", "#")]
+    [InlineData("(Æ)Lab", "@")]
+    public void Constructor_ComputesNavigationEntry(string name, string expectedEntry)
+    {
+        Assert.Equal(expectedEntry, new Publisher(name).NavigationEntry);
+    }
+
+    [Fact]
+    public void SetName_RecomputesNavigationEntry()
+    {
+        var publisher = new Publisher("Dargaud");
+
+        publisher.SetName("Glénat");
+
+        Assert.Equal("G", publisher.NavigationEntry);
+    }
+
+    [Fact]
+    public void SetName_Rejected_KeepsNavigationEntry()
+    {
+        var publisher = new Publisher("Dargaud");
+
+        DomainAssert.Violates<Publisher>(DomainRules.PublisherNameRequired, nameof(Publisher.Name), () => publisher.SetName(""));
+
+        Assert.Equal("D", publisher.NavigationEntry);
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]

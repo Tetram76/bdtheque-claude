@@ -117,6 +117,12 @@
   <data name="Empty.None" xml:space="preserve">
     <value>Aucun éditeur n'est encore enregistré.</value>
   </data>
+  <data name="Empty.Entry" xml:space="preserve">
+    <value>Aucun éditeur sous cette entrée.</value>
+  </data>
+  <data name="Empty.All" xml:space="preserve">
+    <value>Tous les éditeurs</value>
+  </data>
   <data name="Deletion.Title" xml:space="preserve">
     <value>Supprimer cet éditeur ?</value>
   </data>

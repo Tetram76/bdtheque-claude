@@ -69,24 +69,19 @@ internal static class PublisherEndpoints
     }
 
     private static Task<Page<PublisherListItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
-        context.Publishers.AsNoTracking()
-            .WhereContains(q, p => p.Name)
-            .OrderBy(p => p.Name)
-            .ThenBy(p => p.Id)
-            .ToPageAsync(page, pageSize, p => new PublisherListItem(p.Id, p.Name, p.Website), cancellationToken);
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        Search(context, q, entry).ToPageAsync(page, pageSize, p => new PublisherListItem(p.Id, p.Name, p.Website), cancellationToken);
 
     /// <summary>
-    /// The list of the publishers of the administration (visuel/listes/liste-par-liste.md): the search on the name and the
-    /// order of the list of the consultation. Each row carries the website of the publisher, its collections, its editions
-    /// in the collection, its modification and its version, which its deletion sends back.
+    /// The list of the publishers of the administration (visuel/listes/liste-par-liste.md): the search, the navigation by
+    /// initial and the order of the list of the consultation. Each row carries the website of the publisher, its collections,
+    /// its editions in the collection, its modification and its version, which its deletion sends back.
     /// </summary>
     private static Task<Page<PublisherAdminListItem>> ListForAdministrationAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
-        context.Publishers.AsNoTracking()
-            .WhereContains(q, p => p.Name)
-            .OrderBy(p => p.Name)
-            .ThenBy(p => p.Id)
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        Search(context, q, entry)
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Publisher p) => new PublisherAdminListItem(
                 p.Id,
                 p.Name,
@@ -95,6 +90,17 @@ internal static class PublisherEndpoints
                 context.Editions.Count(e => e.PublisherId == p.Id && e.IsOwned()),
                 p.ModifiedAt,
                 EF.Property<uint>(p, BdthequeDbContext.VersionProperty))), cancellationToken);
+
+    /// <summary>The publishers found by their name, under the entry of the navigation, by name.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
+    private static IOrderedQueryable<Publisher> Search(BdthequeDbContext context, string? text, string? entry)
+    {
+        CatalogFilters.EnsureNavigationEntry(entry);
+        var publishers = context.Publishers.AsNoTracking().WhereContains(text, p => p.Name);
+        if (entry is not null)
+            publishers = publishers.Where(p => p.NavigationEntry == entry);
+        return publishers.OrderByEntry(p => p.NavigationEntry).ThenBy(p => p.Name).ThenBy(p => p.Id);
+    }
 
     /// <summary>The collections of all publishers, or of one of them (choix-implementation/api/recherche.md).</summary>
     private static Task<Page<PublisherCollectionListItem>> ListAllCollectionsAsync(

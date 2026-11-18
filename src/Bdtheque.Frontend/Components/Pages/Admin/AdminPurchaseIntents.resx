@@ -102,6 +102,12 @@
   <data name="Empty.None" xml:space="preserve">
     <value>Aucune intention d&apos;achat.</value>
   </data>
+  <data name="Empty.Entry" xml:space="preserve">
+    <value>Aucune intention d&apos;achat sous cette entrée.</value>
+  </data>
+  <data name="Empty.All" xml:space="preserve">
+    <value>Toutes les intentions d&apos;achat</value>
+  </data>
   <data name="Removal.Title" xml:space="preserve">
     <value>Retirer cette intention d&apos;achat ?</value>
   </data>

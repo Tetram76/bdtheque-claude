@@ -69,7 +69,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Search_OnTheName_WithoutFiltersNorNavigationByInitial()
+    public void Search_OnTheName_WithoutFilters()
     {
         var page = Open("q=dar");
 
@@ -77,7 +77,6 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         Assert.Equal(AppPaths.AdminPublishers, form.GetAttribute("action"));
         Assert.Equal(("q", "dar"), (form.QuerySelector("input[type='search']")!.GetAttribute("name"), form.QuerySelector("input[type='search']")!.GetAttribute("value")));
         Assert.Null(form.QuerySelector("button[aria-controls]"));
-        Assert.Empty(page.FindAll(".initial-navigation"));
         Assert.Empty(page.FindAll(".active-filters"));
     }
 
@@ -152,8 +151,9 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
 
     [Theory]
     [InlineData("", "3 éditeurs")]
+    [InlineData("entry=D", "3 éditeurs sous la lettre D")]
     [InlineData("q=dar", "3 éditeurs sur 96")]
-    public void Summary_TheCountOutOfAllThePublishers_AndTheOrder(string criteria, string count)
+    public void Summary_TheCountUnderTheEntryOrOutOfAllThePublishers_AndTheOrder(string criteria, string count)
     {
         var summary = Open(criteria).Find(".list-summary");
 
@@ -277,6 +277,35 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
 
         // The action of the list first, which displays the screen.
         Assert.Equal(["admin.publishers.page", "admin.publishers"], _audience.Functions);
+    }
+
+    [Fact]
+    public void Navigation_ByInitial_KeepsTheSearch_ReturnsToTheFirstPage_AndMarksTheCurrentEntry()
+    {
+        var page = Open("q=dar&entry=D&page=2");
+
+        Assert.Equal($"{AppPaths.AdminPublishers}?q=dar&entry=C", page.Find(".initial-navigation a[href*='entry=C']").GetAttribute("href"));
+        Assert.Equal($"{AppPaths.AdminPublishers}?q=dar", page.Find(".initial-navigation a:first-child").GetAttribute("href"));
+        Assert.Equal("D", Text(page.Find(".initial-navigation a[aria-current='page']")));
+    }
+
+    [Fact]
+    public void Empty_AnEntryWithoutResult_OffersTheWholeList()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("entry=X").Find(".empty-list");
+
+        Assert.Equal("Aucun éditeur sous cette entrée.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Tous les éditeurs", AppPaths.AdminPublishers)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Audience_TheNavigationByInitial_ThenTheScreen()
+    {
+        Open("q=dar&entry=D", recorded: true);
+
+        Assert.Equal(["admin.publishers.initial", "admin.publishers"], _audience.Functions);
     }
 
     private IRenderedComponent<AdminPublishers> Open(string criteria, bool recorded = false)

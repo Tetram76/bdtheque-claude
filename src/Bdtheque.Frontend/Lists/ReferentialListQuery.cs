@@ -1,9 +1,9 @@
 namespace Bdtheque.Frontend.Lists;
 
 /// <summary>
-/// The criteria of a list of a referential of the administration, the genres or the universes (visuel/listes/), which its
-/// address carries (<see cref="InListEntryQuery"/>): its search, without filters nor navigation by initial, and the entry of a
-/// record opened over the list.
+/// The criteria of a list of a referential of the administration ranged otherwise than by its name, the universes, after
+/// their hierarchy (visuel/listes/liste-par-liste.md), which its address carries (<see cref="InListEntryQuery"/>): its search,
+/// without filters nor navigation by initial, and the entry of a record opened over the list.
 /// </summary>
 public abstract record ReferentialListQuery(
     string? Text,

@@ -11,6 +11,10 @@ public sealed class Publisher : EntityBase, IAggregateRoot
     public string Name { get; private set; } = string.Empty;
     public string? Website { get; private set; }
 
+    // Stored rather than computed at read time, so that the database can filter the list of the publishers on it and
+    // index it (choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md). Derived from the name, as sorted.
+    public string NavigationEntry { get; private set; } = string.Empty;
+
     // Read-only from outside: a collection is only ever created through AddCollection, so it
     // can never be moved to another publisher (which would silently break the editions and
     // series templates that rely on it belonging to its publisher).
@@ -25,8 +29,11 @@ public sealed class Publisher : EntityBase, IAggregateRoot
         SetName(name);
     }
 
-    public void SetName(string name) =>
+    public void SetName(string name)
+    {
         Name = DomainText.Required(name, DomainRules.PublisherNameRequired, "A publisher must have a name.", this, nameof(Name));
+        NavigationEntry = NavigationEntryCalculator.Compute(Name);
+    }
 
     public PublisherCollection AddCollection(string name)
     {

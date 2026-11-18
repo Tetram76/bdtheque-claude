@@ -467,32 +467,29 @@ const ENTITIES = {
   },
   editions: {
     menu: 'Éditions', title: 'Éditions', total: '2 913', create: 'Nouvelle édition', kind: 'Fiches',
-    searchPh: 'ISBN, avec ou sans tirets…', initials: null,
+    searchPh: 'ISBN, avec ou sans tirets…', initials: 'B',
     filters: ['Album', 'Éditeur', 'Collection éditeur'],
     filtersHelp: 'Seules les éditions de la collection : une édition visée figure parmi les intentions d\'achat. Une édition appartient à un album : « Nouvelle édition » commence par le choix de l\'album, ou par un ISBN.',
-    count: '2 913 éditions', countDetail: '', order: 'Dans l\'ordre des albums, puis par année d\'édition',
-    page: 'Éditions 1 à 50 sur 2 913', pages: ['1', '2', '3', '…', '59'],
+    count: '5 éditions', countDetail: 'sous la lettre B', order: 'Dans l\'ordre des albums, puis par année d\'édition',
+    page: 'Éditions 1 à 5 sur 5', pages: [],
     thumb: 'cover', mainHead: 'Édition',
     cols: [col('Année', '64px'), col('Catégorie', '140px', { hideMd: true }), col('Acquisition', '130px'), col('Modifiée', '104px', { hideMd: true })],
     primary: ['Modifier', ICON.edit],
     rowMenu: menuOf(VIEW('Voir l\'album dans la consultation'), MERGE('Fusionner avec une autre édition…'), DELETE),
     rows: [
-      ['Glénat [2004] - ISBN 978-2-7234-4567-1', '...Et après (Les Lunes de Saturne - T. 1)', ['2004', { text: '—', muted: true }, 'Achat, 2004', '12 janv. 2026'], { cover: true }],
-      ['Dupuis [1983]', '13 (XIII - T. 1)', ['1984', 'Édition originale', 'Achat, 1991', '3 mars 2026'], { cover: true }],
       ['Dupuis (Repérages) [2011] - ISBN 978-2-8001-5123-0', 'Le Bal des vampires (Spirou - HS 2)', ['2011', { text: '—', muted: true }, 'Offerte, 2011', '7 juin 2026'], { cover: false }],
       ['Dargaud [2010] - ISBN 978-2-505-00865-2', 'Barracuda - Tome 1', ['2010', 'Édition originale', 'Achat, 2010', '3 sept. 2026'], { cover: true }],
       ['Casterman [1963]', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['1963', 'Édition originale', 'Achat, 1987', 'hier'], { cover: true }],
       ['Casterman [2007] - ISBN 978-2-203-00120-8', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['2007', { text: '—', muted: true }, 'Offerte, 2008', 'hier'], { cover: true }],
-      ['Casterman (Fac-similé) [2013] - ISBN 978-2-203-03312-4', 'Le Lotus bleu (Tintin - T. 5)', ['2013', 'Édition spéciale', 'Achat, 2014', '2 oct. 2026'], { cover: true }],
       ['Dupuis [1974]', 'Buddy Longway - Tome 2', ['1974', { text: '—', muted: true }, 'Échange', '9 oct. 2026'], { cover: false }]
     ]
   },
   intentions: {
     menu: "Intentions d'achat", title: "Intentions d'achat", total: '18', create: null, kind: 'Fiches',
     noCreate: 'Une intention se pose depuis la page des éditions et intentions d\'achat de son album.',
-    searchPh: 'Titre de l\'album ou de sa série…', initials: null, filters: [],
-    count: '18 intentions', countDetail: '', order: 'Dans l\'ordre des albums',
-    page: 'Intentions 1 à 18 sur 18', pages: [],
+    searchPh: 'Titre de l\'album ou de sa série…', initials: 'B', filters: [],
+    count: '3 intentions', countDetail: 'sous la lettre B', order: 'Dans l\'ordre des albums',
+    page: 'Intentions 1 à 3 sur 3', pages: [],
     thumb: 'cover', mainHead: 'Album visé',
     cols: [col('Porte sur', '330px'), col('Collection', '170px', { hideMd: true }), col('Posée le', '104px')],
     primary: ['Confirmer l\'achat', ICON.check],
@@ -500,9 +497,7 @@ const ENTITIES = {
     rows: [
       ['Blacksad - Intégrale [1 à 5]', '', [{ album: true }, { badge: 'Hors collection', dashed: true }, '8 oct. 2026'], { cover: false }],
       ['Les Bijoux de la Castafiore (Tintin - T. 21)', '', [{ edition: 'Casterman (Fac-similé) [2013]' }, { badge: 'Dans la collection', full: true }, '8 oct. 2026'], { cover: true, noSwap: true }],
-      ['Buddy Longway - Tome 2', '', [{ edition: 'Dupuis [1974]' }, { badge: 'Hors collection', dashed: true }, '9 oct. 2026'], { cover: true, other: 'Viser plutôt l\'album…' }],
-      ['Le Château des étoiles (Le Château des étoiles - T. 4)', '', [{ album: true }, { badge: 'Hors collection', dashed: true }, '1 oct. 2026'], { cover: true }],
-      ['Les Vieux Fourneaux - Tome 8', '', [{ album: true }, { badge: 'Hors collection', dashed: true }, '8 oct. 2026'], { cover: false }]
+      ['Buddy Longway - Tome 2', '', [{ edition: 'Dupuis [1974]' }, { badge: 'Hors collection', dashed: true }, '9 oct. 2026'], { cover: true, other: 'Viser plutôt l\'album…' }]
     ]
   },
   auteurs: {
@@ -526,43 +521,32 @@ const ENTITIES = {
   },
   editeurs: {
     menu: 'Éditeurs', title: 'Éditeurs', total: '96', create: 'Nouvel éditeur', kind: 'Fiches',
-    searchPh: 'Nom de l\'éditeur…', initials: null, filters: [],
-    count: '96 éditeurs', countDetail: '', order: 'Triés par nom',
-    page: 'Éditeurs 1 à 50 sur 96', pages: ['1', '2'],
+    searchPh: 'Nom de l\'éditeur…', initials: 'D', filters: [],
+    count: '3 éditeurs', countDetail: 'sous la lettre D', order: 'Triés par nom',
+    page: 'Éditeurs 1 à 3 sur 3', pages: [],
     thumb: null, mainHead: 'Éditeur',
     cols: [col('Site web', '170px', { hideMd: true }), col('Collections', '96px'), col('Éditions', '96px'), col('Modifié', '104px', { hideMd: true })],
     primary: ['Modifier', ICON.edit],
     rowMenu: menuOf(VIEW('Ouvrir le site web'), MERGE('Fusionner avec un autre éditeur…'), DELETE),
     rows: [
-      ['Casterman', 'Fac-similé, Écritures, Univers d\'auteurs…', [{ link: 'casterman.com' }, '6', '412', 'hier']],
       ['Dargaud', 'Poisson Pilote, Long courrier', [{ link: 'dargaud.com' }, '2', '688', '3 sept. 2026']],
       ['Delcourt', 'Encrages, Mirages, Neopolis…', [{ link: 'editions-delcourt.fr' }, '9', '377', '14 mai 2026']],
-      ['Dupuis', 'Repérages, Aire libre, Expresso…', [{ link: 'dupuis.com' }, '5', '596', '9 oct. 2026']],
-      ['Futuropolis', 'Aucune collection', [{ text: 'Non renseigné', muted: true }, { text: '—', muted: true }, '41', '2 févr. 2026']],
-      ['Glénat', 'Vécu, Treize étrange, Grafica…', [{ link: 'glenat.com' }, '7', '233', '12 janv. 2026']],
-      ['Le Lombard', 'Signé', [{ link: 'lelombard.com' }, '1', '154', '21 juil. 2026']]
+      ['Dupuis', 'Repérages, Aire libre, Expresso…', [{ link: 'dupuis.com' }, '5', '596', '9 oct. 2026']]
     ]
   },
   genres: {
     menu: 'Genres', title: 'Genres', total: '24', create: 'Nouveau genre', kind: 'Référentiel',
     inlineNew: 'Nouveau genre',
-    searchPh: 'Libellé…', initials: null, filters: [],
-    count: '24 genres', countDetail: '', order: 'Triés par libellé',
-    page: 'Genres 1 à 24 sur 24', pages: [],
+    searchPh: 'Libellé…', initials: 'A', filters: [],
+    count: '2 genres', countDetail: 'sous la lettre A', order: 'Triés par libellé',
+    page: 'Genres 1 à 2 sur 2', pages: [],
     thumb: null, mainHead: 'Genre',
     cols: [col('Albums', '96px'), col('Séries', '96px'), col('Modifié', '104px', { hideMd: true })],
     primary: ['Modifier', ICON.edit], inline: true,
     rowMenu: menuOf(VIEW('Voir ses œuvres dans la consultation'), MERGE('Fusionner avec un autre genre…'), DELETE),
     rows: [
       ['Animalier', '', ['142', '31', '8 oct. 2026']],
-      ['Aventure', '', ['612', '118', '12 janv. 2026']],
-      ['Biographie', '', ['37', '9', '2 févr. 2026']],
-      ['Fantastique', '', ['288', '64', '14 mai 2026']],
-      ['Historique', '', ['356', '77', '30 mars 2026']],
-      ['Humour', '', ['701', '139', 'hier']],
-      ['Polar', '', ['198', '42', '3 sept. 2026']],
-      ['Science-fiction', '', ['245', '58', '19 avr. 2026']],
-      ['Western', '', ['121', '26', '8 oct. 2026']]
+      ['Aventure', '', ['612', '118', '12 janv. 2026']]
     ]
   },
   univers: {
@@ -729,7 +713,7 @@ class View extends Mockup {
       filtersBtnFg: filtersOpen ? t.nFg : t.secText,
       toggleFilters: () => this.setState({ filtersOpen: !filtersOpen }),
       filters: e.filters.map((label) => ({ label, value: 'Tous', icon: ICON.search })),
-      entries: [entry('Toutes', '58px'), ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#@'.split('').map((l) => entry(l, '30px'))],
+      entries: [entry('Toutes', '58px'), ...'#ABCDEFGHIJKLMNOPQRSTUVWXYZ@'.split('').map((l) => entry(l, '30px'))],
       rows,
       pages: e.pages.map((p, i) => ({ label: p, current: i === 0 ? 'page' : 'false', bg: i === 0 ? t.acc : 'transparent', fg: i === 0 ? t.onAcc : (p === '…' ? t.muted : t.text) })),
       newValue: duplicate ? 'aventure' : '',

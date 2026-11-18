@@ -162,6 +162,15 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Contains(universes, universe => universe is { ParentId: null, SubUniverseCount: 0 });
     }
 
+    // The entries of the navigation by initial other than a letter (fonctionnel/presentation/tri-et-navigation-par-initiale.md),
+    // in the lists of the publishers and of the genres (visuel/listes/liste-par-liste.md).
+    [Fact]
+    public async Task PublishersAndGenres_UnderTheEntriesOfADigitAndOfAnotherCharacter()
+    {
+        Assert.NotEmpty((await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.PublisherAdminListItem>>("/admin/publishers?entry=%23"))!.Items);
+        Assert.NotEmpty((await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.GenreAdminListItem>>("/admin/genres?entry=%40"))!.Items);
+    }
+
     [Fact]
     public async Task Genres_OneAccentedWithoutAlbum_ThatTheSearchFindsWithoutItsAccents()
     {

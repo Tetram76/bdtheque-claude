@@ -93,6 +93,25 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
     }
 
     [Fact]
+    public async Task List_FollowsTheNavigationByInitialOfTheAlbums_AsTheListOfTheConsultation()
+    {
+        // An edition is filed under the entry of its album (visuel/listes/liste-par-liste.md), an album without a title of its
+        // own under that of its series (modele-metier/album.md).
+        var publisher = await CreatePublisherAsync($"Casterman {_marker}");
+        var lotus = await CreateAlbumAsync($"Le Lotus bleu {_marker}");
+        var untitled = await CreateAlbumAsync(null, (await CreateSeriesAsync($"Blacksad {_marker}")).Id, 1);
+        var other = await CreateAlbumAsync($"Zorglub {_marker}");
+        var lotusEdition = await CreateOwnedEditionAsync(lotus.Id, publisher.Id, Edition(publisher.Id));
+        var untitledEdition = await CreateOwnedEditionAsync(untitled.Id, publisher.Id, Edition(publisher.Id));
+        await CreateOwnedEditionAsync(other.Id, publisher.Id, Edition(publisher.Id));
+
+        Assert.Equal([lotusEdition.Id], await IdsAsync($"publisherId={publisher.Id}&entry=L"));
+        Assert.Equal([untitledEdition.Id], await IdsAsync($"publisherId={publisher.Id}&entry=B"));
+        Assert.Empty(await IdsAsync($"publisherId={publisher.Id}&entry=A"));
+        Assert.Equal(await CatalogOwnedIdsAsync($"publisherId={publisher.Id}&entry=L"), await IdsAsync($"publisherId={publisher.Id}&entry=L"));
+    }
+
+    [Fact]
     public async Task List_FollowsTheSearchAndTheFiltersOfTheConsultation()
     {
         var publisher = await CreatePublisherAsync($"Delcourt {_marker}");

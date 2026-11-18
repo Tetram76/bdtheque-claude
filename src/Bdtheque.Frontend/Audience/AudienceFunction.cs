@@ -202,9 +202,11 @@ public static class AudienceFunctions
     public static readonly AudienceFunction AdminPublishers = new("admin.publishers", AudienceFunctionKind.Screen);
 
     // The actions of the list, each a request of the list whose parameters are its criteria (Lists/PublisherListQuery.cs);
-    // without filters nor navigation by initial.
+    // without filters.
 
     public static readonly AudienceFunction AdminPublishersSearch = new("admin.publishers.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminPublishersInitial = new("admin.publishers.initial", AudienceFunctionKind.Action);
 
     public static readonly AudienceFunction AdminPublishersPage = new("admin.publishers.page", AudienceFunctionKind.Action);
 
@@ -237,10 +239,11 @@ public static class AudienceFunctions
     /// <summary>The list of the editions of the administration (visuel/listes/liste-par-liste.md).</summary>
     public static readonly AudienceFunction AdminEditions = new("admin.editions", AudienceFunctionKind.Screen);
 
-    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/EditionListQuery.cs);
-    // without navigation by initial.
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/EditionListQuery.cs).
 
     public static readonly AudienceFunction AdminEditionsSearch = new("admin.editions.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminEditionsInitial = new("admin.editions.initial", AudienceFunctionKind.Action);
 
     public static readonly AudienceFunction AdminEditionsFilter = new("admin.editions.filter", AudienceFunctionKind.Action);
 
@@ -259,9 +262,11 @@ public static class AudienceFunctions
     public static readonly AudienceFunction AdminPurchaseIntents = new("admin.purchase-intents", AudienceFunctionKind.Screen);
 
     // The actions of the list, each a request of the list whose parameters are its criteria (Lists/PurchaseIntentListQuery.cs);
-    // without filters nor navigation by initial, an intent being no record to merge.
+    // without filters, an intent being no record to merge.
 
     public static readonly AudienceFunction AdminPurchaseIntentsSearch = new("admin.purchase-intents.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminPurchaseIntentsInitial = new("admin.purchase-intents.initial", AudienceFunctionKind.Action);
 
     public static readonly AudienceFunction AdminPurchaseIntentsPage = new("admin.purchase-intents.page", AudienceFunctionKind.Action);
 
@@ -275,9 +280,11 @@ public static class AudienceFunctions
     public static readonly AudienceFunction AdminGenres = new("admin.genres", AudienceFunctionKind.Screen);
 
     // The actions of the list, each a request of the list whose parameters are its criteria (Lists/GenreListQuery.cs);
-    // without filters nor navigation by initial.
+    // without filters.
 
     public static readonly AudienceFunction AdminGenresSearch = new("admin.genres.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminGenresInitial = new("admin.genres.initial", AudienceFunctionKind.Action);
 
     public static readonly AudienceFunction AdminGenresPage = new("admin.genres.page", AudienceFunctionKind.Action);
 
@@ -447,11 +454,11 @@ public static class AudienceFunctions
         AdminSeries, AdminSeriesSearch, AdminSeriesFilter, AdminSeriesInitial, AdminSeriesPage, AdminSeriesDeletion, AdminSeriesDeleted,
         AdminSeriesMerge, AdminSeriesForm, AdminNewSeriesForm, AdminSeriesCreated, AdminSeriesSaved, AdminSeriesAuthorCreated,
         AdminSeriesGenreCreated, AdminSeriesUniverseCreated, AdminSeriesPublisherCreated, AdminSeriesCollectionCreated, AdminSeriesChanges, AdminAuthors, AdminAuthorsSearch, AdminAuthorsInitial, AdminAuthorsPage, AdminAuthorsDeletion, AdminAuthorsDeleted,
-        AdminAuthorsMerge, AdminAuthorsEdit, AdminAuthorsNew, AdminAuthorSaved, AdminAuthorCreated, AdminPublishers, AdminPublishersSearch, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
+        AdminAuthorsMerge, AdminAuthorsEdit, AdminAuthorsNew, AdminAuthorSaved, AdminAuthorCreated, AdminPublishers, AdminPublishersSearch, AdminPublishersInitial, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
         AdminPublishersMerge, AdminPublisherForm, AdminNewPublisherForm, AdminPublisherCreated, AdminPublisherSaved, AdminPublisherChanges,
-        AdminEditions, AdminEditionsSearch, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
-        AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsPage,
-        AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresPage, AdminGenresDeletion,
+        AdminEditions, AdminEditionsSearch, AdminEditionsInitial, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
+        AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsInitial, AdminPurchaseIntentsPage,
+        AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresInitial, AdminGenresPage, AdminGenresDeletion,
         AdminGenresDeleted, AdminGenresMerge, AdminGenresEdit, AdminGenresNew, AdminGenreSaved, AdminGenreCreated, AdminUniverses,
         AdminUniversesSearch, AdminUniversesPage, AdminUniversesDeletion, AdminUniversesDeleted, AdminUniversesMerge, AdminUniversesEdit,
         AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,

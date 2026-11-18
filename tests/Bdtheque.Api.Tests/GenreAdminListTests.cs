@@ -1,7 +1,9 @@
+using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Errors;
 
 namespace Bdtheque.Api.Tests;
 
@@ -62,6 +64,31 @@ public sealed class GenreAdminListTests : IClassFixture<ApiWebApplicationFactory
 
         Assert.Equal([adventure.Id, epic.Id, western.Id], (await ListAsync($"q={_marker}")).Select(r => r.Id));
         Assert.Equal([epic.Id], (await ListAsync($"q=EPOPEE {_marker}")).Select(r => r.Id));
+    }
+
+    [Fact]
+    public async Task List_FollowsTheNavigationByInitial_OnTheLabel_AsTheListOfTheConsultation()
+    {
+        var epic = await CreateGenreAsync($"Épopée {_marker}");
+        var western = await CreateGenreAsync($"Western {_marker}");
+        var adventure = await CreateGenreAsync($"Aventure {_marker}");
+        var animal = await CreateGenreAsync($"Animalier {_marker}");
+
+        Assert.Equal([animal.Id, adventure.Id], (await ListAsync($"q={_marker}&entry=A")).Select(r => r.Id));
+        Assert.Equal([epic.Id], (await ListAsync($"q={_marker}&entry=E")).Select(r => r.Id));
+        Assert.Equal([western.Id], (await ListAsync($"q={_marker}&entry=W")).Select(r => r.Id));
+        Assert.Empty(await ListAsync($"q={_marker}&entry=%40"));
+        Assert.Equal(
+            (await GetAsync<Page<GenreListItem>>($"/catalog/genres?q={_marker}&entry=A")).Items.Select(g => g.Id),
+            (await ListAsync($"q={_marker}&entry=A")).Select(r => r.Id));
+    }
+
+    [Fact]
+    public async Task Entry_ThatIsNotOneOfTheNavigation_IsATechnicalError()
+    {
+        var response = await _client.GetAsync("/admin/genres?entry=AB");
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.InternalServerError, ProblemTypes.Technical);
     }
 
     private async Task<IReadOnlyList<GenreAdminListItem>> ListAsync(string query) =>

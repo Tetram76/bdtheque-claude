@@ -1,7 +1,9 @@
+using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Errors;
 
 namespace Bdtheque.Api.Tests;
 
@@ -67,6 +69,33 @@ public sealed class PublisherAdminListTests : IClassFixture<ApiWebApplicationFac
 
         Assert.Equal([delcourt.Id, glenat.Id, lombard.Id], (await ListAsync($"q={_marker}")).Select(r => r.Id));
         Assert.Equal([glenat.Id], (await ListAsync($"q=GLENAT {_marker}")).Select(r => r.Id));
+    }
+
+    [Fact]
+    public async Task List_FollowsTheNavigationByInitial_OnTheNameAsSorted_AsTheListOfTheConsultation()
+    {
+        // The name as sorted, its article included (visuel/listes/liste-par-liste.md, navigation par initiale).
+        var lombard = await CreatePublisherAsync($"Le Lombard {_marker}");
+        var delcourt = await CreatePublisherAsync($"Éditions Delcourt {_marker}");
+        var dupuis = await CreatePublisherAsync($"Dupuis {_marker}");
+        var sixFeet = await CreatePublisherAsync($"6 pieds sous terre {_marker}");
+
+        Assert.Equal([dupuis.Id], (await ListAsync($"q={_marker}&entry=D")).Select(r => r.Id));
+        Assert.Equal([delcourt.Id], (await ListAsync($"q={_marker}&entry=E")).Select(r => r.Id));
+        Assert.Equal([lombard.Id], (await ListAsync($"q={_marker}&entry=L")).Select(r => r.Id));
+        Assert.Equal([sixFeet.Id], (await ListAsync($"q={_marker}&entry=%23")).Select(r => r.Id));
+        Assert.Empty(await ListAsync($"q={_marker}&entry=Z"));
+        Assert.Equal(
+            (await GetAsync<Page<PublisherListItem>>($"/catalog/publishers?q={_marker}&entry=L")).Items.Select(p => p.Id),
+            (await ListAsync($"q={_marker}&entry=L")).Select(r => r.Id));
+    }
+
+    [Fact]
+    public async Task Entry_ThatIsNotOneOfTheNavigation_IsATechnicalError()
+    {
+        var response = await _client.GetAsync("/admin/publishers?entry=AB");
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.InternalServerError, ProblemTypes.Technical);
     }
 
     private async Task<IReadOnlyList<PublisherAdminListItem>> ListAsync(string query) =>

@@ -163,7 +163,8 @@ internal static class SeriesEndpoints
     {
         var series = await filters.ApplyAsync(context.Series.AsNoTracking(), context, cancellationToken);
         return await series
-            .OrderBy(s => s.SortKey)
+            .OrderByEntry(s => s.NavigationEntry)
+            .ThenBy(s => s.SortKey)
             .ThenBy(s => s.Id)
             .ToPageAsync(page, pageSize, s => new SeriesListItem(s.Id, s.Title), cancellationToken);
     }
@@ -180,7 +181,8 @@ internal static class SeriesEndpoints
     {
         var series = await filters.ApplyAsync(context.Series.AsNoTracking(), context, cancellationToken);
         var rows = await series
-            .OrderBy(s => s.SortKey)
+            .OrderByEntry(s => s.NavigationEntry)
+            .ThenBy(s => s.SortKey)
             .ThenBy(s => s.Id)
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Series s) => new
             {
