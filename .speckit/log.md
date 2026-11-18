@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-18
+
+* **Décision de l'utilisateur** : le dialogue de création sur place d'un univers ne demande que son nom, depuis un album ou une série comme depuis le panneau d'un univers ; l'univers créé est de premier niveau, et se rattache ensuite à un parent depuis son panneau. Le choix du parent, dans le panneau d'un univers, offre « Créer l'univers « … » », le parent n'étant créé qu'à l'enregistrement du panneau, et désigné sur son champ s'il est refusé. **Choix** : parent créé sur place envoyé par son nom avec le formulaire statique du panneau, cité par une clé dans le contenu de l'univers ; Entrée dans un champ d'un dialogue qui appartient au formulaire de la page derrière lui déclenche l'action principale du dialogue, au lieu d'envoyer ce formulaire (#485).
+
 ## 2026-11-17
 
 * **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, l'utilisateur peut restreindre les chantiers candidats à un périmètre, qui s'ajoute aux autres critères ; toute session du lot prévient l'orchestrateur de chaque évènement majeur (fin, abandon, problème, découpage ou ticket créé, attente de l'utilisateur), et seulement alors, jamais de son avancement ; les sessions échangent entre elles l'information utile au regard de leur brief ; chaque session mène elle-même les surveillances de son chantier, bornées dans le temps, l'état réel étant relu à l'expiration de leur délai. Le skill `chantiers-paralleles` les met en œuvre (#528).
