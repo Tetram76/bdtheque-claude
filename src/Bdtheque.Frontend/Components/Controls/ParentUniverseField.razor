@@ -76,7 +76,10 @@
             _parentReceived = Parent;
             _newParentReceived = NewParent;
             _new = NewParent is null ? null : new NewUniverse(Guid.NewGuid(), NewParent);
-            _value = _new is not null ? Option(_new) : Parent is null ? null : Option(Parent);
+            if (_new is not null)
+                _value = Option(_new);
+            else
+                _value = Parent is null ? null : Option(Parent);
         }
         if (Error != _errorReceived)
         {
