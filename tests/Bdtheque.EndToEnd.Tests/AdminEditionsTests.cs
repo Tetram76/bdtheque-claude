@@ -85,15 +85,15 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?filters=open");
         await ControlsPage.WaitUntilInteractiveAsync(page);
 
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" }).PressSequentiallyAsync($"Encrages {_marker}");
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" }).PressSequentiallyAsync($"Encrages {_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Encrages {_marker}" }).ClickAsync();
 
         // The publisher of the collection, set by its choice.
         await Assertions.Expect(page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true })).ToHaveValueAsync($"Delcourt {_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « Encrages {_marker} »" }).ClickAsync();
         // The field emptied by the circuit before typing again, as the user sees it.
-        await Assertions.Expect(page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" })).ToHaveValueAsync("");
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" }).PressSequentiallyAsync("Encrages");
+        await Assertions.Expect(page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" })).ToHaveValueAsync("");
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" }).PressSequentiallyAsync("Encrages");
         // Only the collections of the publisher chosen.
         await Assertions.Expect(page.GetByRole(AriaRole.Option)).ToHaveCountAsync(1);
         await Assertions.Expect(page.GetByRole(AriaRole.Option)).ToContainTextAsync($"Encrages {_marker}");

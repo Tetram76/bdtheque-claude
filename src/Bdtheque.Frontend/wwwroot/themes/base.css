@@ -91,7 +91,7 @@
     --color-text-on-info: #FFFFFF;
     --color-delete: #B42318;
     --color-text-on-delete: #FFFFFF;
-    /* A filled tag (e.g. « Dans la collection », an active filter): its own fill, which a theme sets apart from the accent. */
+    /* A filled tag (e.g. « Possédé », an active filter): its own fill, which a theme sets apart from the accent. */
     --color-tag: #E3E1DA;
     --color-text-on-tag: #1D1D21;
     /* The border of a tag: none to see by default, its fill showing through it. */

@@ -25,16 +25,16 @@
     <value>Paru en {0}</value>
   </data>
   <data name="Membership.InCollection.One" xml:space="preserve">
-    <value>Dans la collection, en {0} édition</value>
+    <value>Possédé, en {0} édition</value>
   </data>
   <data name="Membership.InCollection.Other" xml:space="preserve">
-    <value>Dans la collection, en {0} éditions</value>
+    <value>Possédé, en {0} éditions</value>
   </data>
   <data name="Membership.PurchaseIntent" xml:space="preserve">
     <value>Intention d&apos;achat</value>
   </data>
   <data name="Membership.OutOfCollection" xml:space="preserve">
-    <value>Hors collection</value>
+    <value>Non possédé</value>
   </data>
   <data name="Story.Title" xml:space="preserve">
     <value>Ça raconte quoi ?</value>
