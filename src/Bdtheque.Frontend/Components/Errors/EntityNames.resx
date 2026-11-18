@@ -43,10 +43,10 @@
     <value>{0} visuels</value>
   </data>
   <data name="PublisherCollection.One" xml:space="preserve">
-    <value>{0} collection éditeur</value>
+    <value>{0} collection</value>
   </data>
   <data name="PublisherCollection.Other" xml:space="preserve">
-    <value>{0} collections éditeur</value>
+    <value>{0} collections</value>
   </data>
   <data name="Contribution.One" xml:space="preserve">
     <value>{0} contribution</value>

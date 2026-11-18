@@ -13,12 +13,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="InCollection" xml:space="preserve">
-    <value>Dans la collection</value>
+    <value>Possédé</value>
   </data>
   <data name="PurchaseIntent" xml:space="preserve">
     <value>Intention d'achat</value>
   </data>
   <data name="OutsideCollection" xml:space="preserve">
-    <value>Hors collection</value>
+    <value>Non possédé</value>
   </data>
 </root>

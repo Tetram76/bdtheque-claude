@@ -163,7 +163,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         var form = Open($"filters=open&albumId={Lunes.Id}").Find("form.list-search");
 
         Assert.Equal("true", form.QuerySelector("button[aria-controls]")!.GetAttribute("aria-expanded"));
-        Assert.Equal(["Série", "Album", "Éditeur", "Collection éditeur"], form.QuerySelectorAll(".list-filters label").Select(Text));
+        Assert.Equal(["Série", "Album", "Éditeur", "Collection"], form.QuerySelectorAll(".list-filters label").Select(Text));
         Assert.Equal(
             ["seriesId", "albumId", "publisherId", "publisherCollectionId"],
             form.QuerySelectorAll(".list-filters input[type='hidden']").Select(input => input.GetAttribute("name")));

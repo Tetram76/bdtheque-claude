@@ -110,7 +110,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         Assert.Equal("Les Bijoux de la Castafiore (Tintin - T. 21)", Text(album.QuerySelector(".album-brief-label")!));
         Assert.Equal("Hergé", Text(album.QuerySelector(".album-brief-authors")!));
         Assert.Equal("Première publication : avril 1963", Text(album.QuerySelector(".album-brief-date")!));
-        Assert.Equal("Dans la collection", Text(album.QuerySelector(".tag")!));
+        Assert.Equal("Possédé", Text(album.QuerySelector(".tag")!));
         Assert.Equal(
             "L'album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d'achat.",
             Text(Block(Open(""), "L'album").QuerySelector(".album-editions-help")!));

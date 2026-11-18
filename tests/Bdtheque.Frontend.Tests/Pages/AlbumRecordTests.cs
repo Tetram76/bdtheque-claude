@@ -106,7 +106,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Lointaines îles du vent", page.Find("h1").TextContent.Trim());
         Assert.Equal(AppPaths.SeriesRecord(SeriesId), page.Find(".album-identity a.album-series").GetAttribute("href"));
-        Assert.Equal(["T. 5", "Paru en novembre 1970", "Dans la collection, en 2 éditions"],
+        Assert.Equal(["T. 5", "Paru en novembre 1970", "Possédé, en 2 éditions"],
             page.FindAll(".album-facts li").Select(f => f.TextContent.Trim()));
         // An album of the collection has no banner: only those out of it are marked.
         Assert.Empty(page.FindAll(".collection-status"));
@@ -127,7 +127,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         Assert.Equal("Corto Maltese", page.Find(".album-identity a.album-series").TextContent.Trim());
         Assert.Equal("Tome 5", page.Find("h1").TextContent.Trim());
-        Assert.Equal(["Paru en novembre 1970", "Dans la collection, en 2 éditions"],
+        Assert.Equal(["Paru en novembre 1970", "Possédé, en 2 éditions"],
             page.FindAll(".album-facts li").Select(f => f.TextContent.Trim()));
         Assert.Equal(["Albums", "Corto Maltese", "Tome 5"], page.FindAll("nav.breadcrumb li").Select(l => l.TextContent.Trim()));
     }
@@ -276,8 +276,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        Assert.Equal("Hors collection", page.FindAll(".album-facts li")[^1].TextContent.Trim());
-        Assert.Equal(("out", "Hors collection"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
+        Assert.Equal("Non possédé", page.FindAll(".album-facts li")[^1].TextContent.Trim());
+        Assert.Equal(("out", "Non possédé"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
         // Neither edition nor intent: no block of the editions, which would hold nothing.
         Assert.DoesNotContain(page.FindAll("section.block .block-title"), t => t.TextContent.Trim() == "Dans quelles éditions ?");
     }
@@ -597,7 +597,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         // special case, is always given (visuel/fiche-album/contenu.md).
         Assert.Equal(["T. 1", "T. 5", "T. 6", "HS 1"], albums.Select(a => a.QuerySelector(".series-album-volume")!.TextContent.Trim()));
         Assert.Equal(["La Jeunesse", "Lointaines îles du vent", "Les Celtiques", "Hors-série 1"],
-            albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));        Assert.Equal(["Dans la collection", "Dans la collection", "Intention d'achat", "Hors collection"],
+            albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));
+        Assert.Equal(["Possédé", "Possédé", "Intention d'achat", "Non possédé"],
             albums.Select(a => a.QuerySelector(".tag")!.TextContent.Trim()));
         // The album shown is no link to itself; the others lead to their records.
         Assert.Equal("page", albums[1].QuerySelector(".series-album-title")!.GetAttribute("aria-current"));

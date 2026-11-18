@@ -99,7 +99,7 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur À supprimer {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Supprimer…" }).ClickAsync();
         var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Supprimer cet éditeur ?" });
-        await Assertions.Expect(dialog).ToContainTextAsync("1 collection éditeur");
+        await Assertions.Expect(dialog).ToContainTextAsync("1 collection");
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers, $"?q={_marker}"));

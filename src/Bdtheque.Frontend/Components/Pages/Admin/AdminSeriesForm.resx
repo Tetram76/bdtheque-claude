@@ -67,7 +67,7 @@
     <value>Identification</value>
   </data>
   <data name="Kicker.Progress" xml:space="preserve">
-    <value>Collection</value>
+    <value>Suivi</value>
   </data>
   <data name="Kicker.Computations" xml:space="preserve">
     <value>Réglages</value>
@@ -145,7 +145,7 @@
     <value>Ils décrivent la série et pré-remplissent les nouvelles éditions de ses albums. La collection est l&apos;une de celles de l&apos;éditeur : changer d&apos;éditeur la retire.</value>
   </data>
   <data name="Collection" xml:space="preserve">
-    <value>Collection éditeur</value>
+    <value>Collection</value>
   </data>
   <data name="Collection.None" xml:space="preserve">
     <value>—</value>

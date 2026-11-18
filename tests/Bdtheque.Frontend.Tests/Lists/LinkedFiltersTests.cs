@@ -47,7 +47,7 @@ public sealed class LinkedFiltersTests : BunitContext
     {
         var filters = Open(Dargaud, LuckyLuke);
 
-        Assert.Equal(["Éditeur", "Collection éditeur"], filters.FindAll("label").Select(label => label.TextContent.Trim()));
+        Assert.Equal(["Éditeur", "Collection"], filters.FindAll("label").Select(label => label.TextContent.Trim()));
         Assert.Equal((Dargaud.Id.ToString(), LuckyLuke.Id.ToString()), Sent(filters));
     }
 
@@ -98,7 +98,7 @@ public sealed class LinkedFiltersTests : BunitContext
             .Add(p => p.ParentKind, RecordKind.Publisher).Add(p => p.ParentId, "filter-publisher").Add(p => p.ParentName, "publisherId")
             .Add(p => p.ParentLabel, "Éditeur").Add(p => p.Parent, parent)
             .Add(p => p.ChildKind, RecordKind.PublisherCollection).Add(p => p.ChildId, "filter-collection").Add(p => p.ChildName, "publisherCollectionId")
-            .Add(p => p.ChildLabel, "Collection éditeur").Add(p => p.Child, child)
+            .Add(p => p.ChildLabel, "Collection").Add(p => p.Child, child)
             .Add(p => p.Placeholder, "Tous"));
 
     private static (string? Parent, string? Child) Sent(IRenderedComponent<LinkedFilters> filters) =>

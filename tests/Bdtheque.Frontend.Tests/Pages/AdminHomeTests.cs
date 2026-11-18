@@ -61,11 +61,11 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         // The purchase intents stand apart (#358); the editions are entered from their album, never created here.
         Assert.Equal(
             [
-                ("2 847", "dont 214 hors de la collection", "+ Nouvel album"),
+                ("2 847", "non possédés : 214", "+ Nouvel album"),
                 ("2 913", "saisies depuis leur album, avec leurs visuels", ""),
                 ("412", "dont 28 sans statut", "+ Nouvelle série"),
                 ("1 106", "scénaristes, dessinateurs, coloristes…", "+ Nouvel auteur"),
-                ("96", "collections éditeur : 214", "+ Nouvel éditeur"),
+                ("96", "collections : 214", "+ Nouvel éditeur"),
                 ("24", "référentiel", "+ Nouveau genre"),
                 ("37", "dont 9 sous-univers", "+ Nouvel univers"),
             ],
