@@ -3,8 +3,10 @@
 @code {
     protected override void OnInitialized()
     {
-        // `forceLoad` triggers a full page reload so the login page runs through the
-        // regular ASP.NET Core authentication pipeline instead of an interactive render.
+        // `forceLoad` keeps the login out of any interactive render. Rendered statically, the page asked for answers by an
+        // HTTP redirect, which the browser follows, or the script of Blazor by an enhanced navigation when a link of the
+        // application asked for the page: either way the login is rendered statically, through the authentication
+        // pipeline of ASP.NET Core.
         // The page to return to as the authentication cookie gives it: a path of the application, from its root.
         NavigationManager.NavigateTo(
             $"{AppPaths.AdminLogin}?{AppPaths.ReturnUrlParameter}={Uri.EscapeDataString(new Uri(NavigationManager.Uri).PathAndQuery)}",

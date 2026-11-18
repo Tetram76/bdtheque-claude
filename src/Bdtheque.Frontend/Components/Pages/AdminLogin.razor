@@ -30,7 +30,7 @@
             <AntiforgeryToken />
             <Field Id="admin-login-name" Label="@L["Login"]" Context="field">
                 <input id="@field.Id" name="@nameof(Login)" type="text" value="@Login" autocomplete="username"
-                       autocapitalize="none" spellcheck="false" required autofocus />
+                       autocapitalize="none" spellcheck="false" required autofocus tabindex="0" />
             </Field>
             <Field Id="admin-login-password" Label="@L["Password"]" Context="field">
                 <input id="@field.Id" name="@nameof(Password)" type="password" autocomplete="current-password" required />

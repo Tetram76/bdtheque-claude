@@ -235,7 +235,9 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         await page.SubmitAsync("form.side-panel-form");
 
         var name = page.Find("input[name='name']");
-        Assert.Equal(("true", true), (name.GetAttribute("aria-invalid"), name.HasAttribute("autofocus")));
+        // Its tabindex declared: without it, Blazor, which focuses the field after an enhanced navigation, would take it out
+        // of the keyboard path (#443).
+        Assert.Equal(("true", true, "0"), (name.GetAttribute("aria-invalid"), name.HasAttribute("autofocus"), name.GetAttribute("tabindex")));
         Assert.Equal("Obligatoire.", Text(name.ParentElement!.QuerySelector(".field-error")!));
     }
 

@@ -50,6 +50,27 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Roman noir {_marker}"]);
     }
 
+    // Opened from another page, by the latest changes of the home of the administration: an enhanced navigation to another
+    // path, after which Blazor gives the focus to the field (FocusOnNavigate). The field stays in the keyboard path, as on
+    // a page that the browser loads.
+    [Theory, InEachTheme]
+    public async Task Edit_InItsRow_OpenedFromAnotherPage_KeepsTheLabelInTheKeyboardPath(string theme)
+    {
+        await CreateGenreAsync($"Western {_marker}");
+        var page = await NewPageAsync(theme);
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
+
+        await page.Locator(".admin-change", new() { HasText = $"Western {_marker}" })
+            .GetByRole(AriaRole.Link, new() { Name = "Modifier" }).ClickAsync();
+        var label = page.GetByRole(AriaRole.Textbox, new() { Name = $"Libellé de Western {_marker}" });
+        await Assertions.Expect(label).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Tab");
+        await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" })).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Shift+Tab");
+
+        await Assertions.Expect(label).ToBeFocusedAsync();
+    }
+
     [Theory, InEachTheme]
     public async Task New_InTheDialogOfAGenreCreatedOnTheSpot_AddsTheGenre(string theme)
     {
