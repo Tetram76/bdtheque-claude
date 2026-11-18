@@ -2,7 +2,7 @@
 
 ## 2026-11-18
 
-* **Décision de l'utilisateur** : le dialogue de création sur place d'un univers ne demande que son nom, depuis un album ou une série comme depuis le panneau d'un univers ; l'univers créé est de premier niveau, et se rattache ensuite à un parent depuis son panneau. Le choix du parent, dans le panneau d'un univers, offre « Créer l'univers « … » », le parent n'étant créé qu'à l'enregistrement du panneau, et désigné sur son champ s'il est refusé. **Choix** : parent créé sur place envoyé par son nom avec le formulaire statique du panneau, cité par une clé dans le contenu de l'univers ; Entrée dans un champ d'un dialogue qui appartient au formulaire de la page derrière lui déclenche l'action principale du dialogue, au lieu d'envoyer ce formulaire (#485).
+* **Décision de l'utilisateur** : le dialogue de création sur place d'un univers ne demande que son nom, depuis un album ou une série comme depuis le panneau d'un univers ; l'univers créé est de premier niveau, et se rattache ensuite à un parent depuis son panneau. Le choix du parent, dans le panneau d'un univers, offre « Créer l'univers « … » », le parent n'étant créé qu'à l'enregistrement du panneau, et désigné sur son champ s'il est refusé. **Choix** : parent créé sur place envoyé par son nom avec le formulaire statique du panneau, cité par une clé dans le contenu de l'univers ; Entrée dans un champ d'un dialogue qui appartient au formulaire de la page derrière lui déclenche l'action principale du dialogue, au lieu d'envoyer ce formulaire (#536).
 
 ## 2026-11-17
 
