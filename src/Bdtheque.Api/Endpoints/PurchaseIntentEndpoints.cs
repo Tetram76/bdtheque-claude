@@ -150,13 +150,18 @@ internal static class PurchaseIntentEndpoints
 
     /// <summary>
     /// The list of the intents of the administration (visuel/listes/liste-par-liste.md), found by the title of their album or
-    /// of its series, part of its label (fonctionnel/presentation/libelle-d-un-album.md), in the order of the public list. Each
-    /// row carries the album and what the intent targets, the cover of the album, whether the intent can turn into one on the
-    /// other target, when it was set, and the version of its album, which its removal sends back.
+    /// of its series, part of its label (fonctionnel/presentation/libelle-d-un-album.md), filed under the entry of the navigation
+    /// by initial of their album, in the order of the public list. Each row carries the album and what the intent targets, the
+    /// cover of the album, whether the intent can turn into one on the other target, when it was set, and the version of its
+    /// album, which its removal sends back.
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
     private static Task<Page<PurchaseIntentAdminListItem>> ListForAdministrationAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
-        InListOrder(context.PurchaseIntents.AsNoTracking().WhereContains(q, p => p.Album.Title, p => p.Album.Series!.Title))
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        InListOrder(context.PurchaseIntents.AsNoTracking()
+                .WhereContains(q, p => p.Album.Title, p => p.Album.Series!.Title)
+                .WhereAlbumEntry(p => p.Album, entry))
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((PurchaseIntent p) => new PurchaseIntentAdminListItem(
                 p.Id,
                 p.Album.ToSummary(),

@@ -273,6 +273,9 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
     [InlineData("series")]
     [InlineData("albums")]
     [InlineData("authors")]
+    [InlineData("editions")]
+    [InlineData("publishers")]
+    [InlineData("genres")]
     public async Task List_WithAnUnknownNavigationEntry_IsATechnicalError(string list)
     {
         // The frontend builds the navigation, never the user.

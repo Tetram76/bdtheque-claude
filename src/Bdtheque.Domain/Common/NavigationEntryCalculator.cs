@@ -8,7 +8,8 @@ namespace Bdtheque.Domain.Common;
 /// key, per
 /// fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale.
 /// Shared by
-/// <see cref="Entities.Series"/>, <see cref="Entities.Album"/> and <see cref="Entities.Author"/>.
+/// <see cref="Entities.Series"/>, <see cref="Entities.Album"/> and <see cref="Entities.Author"/>, and by
+/// <see cref="Entities.Publisher"/> and <see cref="Entities.Genre"/>, whose name or label is sorted as it is.
 /// </summary>
 /// <remarks>
 /// The base letter of an initial is the one the French alphabetical order itself assigns: the

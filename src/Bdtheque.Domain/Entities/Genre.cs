@@ -10,6 +10,10 @@ public sealed class Genre : EntityBase, IAggregateRoot
 {
     public string Label { get; private set; } = string.Empty;
 
+    // Stored rather than computed at read time, so that the database can filter the list of the genres on it and index it
+    // (choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md). Derived from the label, as sorted.
+    public string NavigationEntry { get; private set; } = string.Empty;
+
     // EF Core parameterless constructor
     private Genre() { }
 
@@ -18,6 +22,9 @@ public sealed class Genre : EntityBase, IAggregateRoot
         SetLabel(label);
     }
 
-    public void SetLabel(string label) =>
+    public void SetLabel(string label)
+    {
         Label = DomainText.Required(label, DomainRules.GenreLabelRequired, "A genre must have a label.", this, nameof(Label));
+        NavigationEntry = NavigationEntryCalculator.Compute(Label);
+    }
 }

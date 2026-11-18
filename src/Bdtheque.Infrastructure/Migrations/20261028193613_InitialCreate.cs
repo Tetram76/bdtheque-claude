@@ -123,6 +123,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Label = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false, collation: "fr_case_accent_insensitive"),
+                    NavigationEntry = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, collation: "fr-FR-x-icu"),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
@@ -131,6 +132,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Genres", x => x.Id);
                     table.CheckConstraint("CK_Genres_LabelNotBlank", "COALESCE(LENGTH(TRIM(\"Label\")), 0) > 0");
+                    table.CheckConstraint("CK_Genres_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
                 });
 
             migrationBuilder.CreateTable(
@@ -161,6 +163,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false, collation: "fr_case_accent_insensitive"),
                     Website = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true, collation: "fr-FR-x-icu"),
+                    NavigationEntry = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, collation: "fr-FR-x-icu"),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
@@ -169,6 +172,7 @@ namespace Bdtheque.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Publishers", x => x.Id);
                     table.CheckConstraint("CK_Publishers_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
+                    table.CheckConstraint("CK_Publishers_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
                 });
 
             migrationBuilder.CreateTable(
@@ -872,6 +876,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Genres_NavigationEntry_Label",
+                table: "Genres",
+                columns: new[] { "NavigationEntry", "Label" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PendingVisuals_CreatedAt",
                 table: "PendingVisuals",
                 column: "CreatedAt");
@@ -886,6 +895,11 @@ namespace Bdtheque.Infrastructure.Migrations
                 table: "Publishers",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Publishers_NavigationEntry_Name",
+                table: "Publishers",
+                columns: new[] { "NavigationEntry", "Name" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseIntents_AlbumId",

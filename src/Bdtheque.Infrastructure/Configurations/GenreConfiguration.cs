@@ -17,6 +17,11 @@ internal sealed class GenreConfiguration : IEntityTypeConfiguration<Genre>
 
         builder.HasIndex(g => g.Label).IsUnique();
 
+        // The navigation by initial filters on the entry, then orders by label (visuel/listes/liste-par-liste.md).
+        builder.Property(g => g.NavigationEntry).IsRequired().HasMaxLength(NavigationEntryColumn.MaxLength);
+        builder.HasIndex(g => new { g.NavigationEntry, g.Label });
+        builder.ToTable(t => t.HasCheckConstraint("CK_Genres_NavigationEntryValid", NavigationEntryColumn.ValidValuesSql));
+
         // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
         // IsRequired() only enforces NOT NULL, so a raw-SQL write could still persist ''.
         builder.ToTable(t => t.HasCheckConstraint(

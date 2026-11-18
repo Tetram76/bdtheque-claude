@@ -6,19 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The search and cross filters of a list of editions (choix-implementation/api/recherche.md), which the list of the
-/// consultation and that of the administration share, bound as a whole from the query of their request
+/// The search, navigation by initial and cross filters of a list of editions (choix-implementation/api/recherche.md), which
+/// the list of the consultation and that of the administration share, bound as a whole from the query of their request
 /// (<c>[AsParameters]</c>): the search is its parameter <c>q</c>, each other criterion that of its name.
 /// </summary>
-internal sealed record EditionFilters([FromQuery(Name = "q")] string? Text, Guid? SeriesId, Guid? AlbumId, Guid? PublisherId, Guid? PublisherCollectionId)
+internal sealed record EditionFilters(
+    [FromQuery(Name = "q")] string? Text, string? Entry, Guid? SeriesId, Guid? AlbumId, Guid? PublisherId, Guid? PublisherCollectionId)
 {
     /// <summary>
     /// Narrows <paramref name="editions"/>: an edition is found by its ISBN, separators ignored on both sides
-    /// (<see cref="IsbnSearch"/>).
+    /// (<see cref="IsbnSearch"/>), and filed under the entry of its album (visuel/listes/liste-par-liste.md).
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
     public IQueryable<Edition> Apply(IQueryable<Edition> editions)
     {
-        editions = editions.WhereContains(Text is null ? null : IsbnSearch.Normalize(Text), IsbnSearch.Normalized);
+        editions = editions.WhereContains(Text is null ? null : IsbnSearch.Normalize(Text), IsbnSearch.Normalized)
+            .WhereAlbumEntry(e => e.Album, Entry);
         if (SeriesId is not null)
             editions = editions.Where(e => e.Album.SeriesId == SeriesId);
         if (AlbumId is not null)

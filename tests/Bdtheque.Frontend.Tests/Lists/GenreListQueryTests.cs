@@ -6,7 +6,7 @@ namespace Bdtheque.Frontend.Tests.Lists;
 
 /// <summary>
 /// The criteria of the list of the genres of the administration, carried by its address: what differs from the list of the
-/// albums (AlbumListQueryTests), a list without filters nor navigation by initial whose genres are changed in their row and
+/// albums (AlbumListQueryTests), a list without filters, with its navigation by initial, whose genres are changed in their row and
 /// added in a frame above it (visuel/listes/saisie-selon-l-entite.md), its paths and the functions of its actions.
 /// </summary>
 public sealed class GenreListQueryTests
@@ -16,7 +16,8 @@ public sealed class GenreListQueryTests
     [Fact]
     public void Href_CarriesTheSearchThePage_AndTheGenreChangedInItsRowOrTheFrameOfANewOne()
     {
-        Assert.Equal($"{AppPaths.AdminGenres}?q=ave&page=2", new GenreListQuery(Text: "ave", Page: 2).Href());
+        Assert.Equal($"{AppPaths.AdminGenres}?q=ave&entry=A&page=2", new GenreListQuery(Text: "ave", Entry: "A", Page: 2).Href());
+        Assert.Equal($"{AppPaths.AdminGenres}?entry=A&new=open", new GenreListQuery(Entry: "A", Adding: true).Href());
         Assert.Equal($"{AppPaths.AdminGenres}?q=ave&edit={Genre}", new GenreListQuery(Text: "ave", Edit: Genre).Href());
         Assert.Equal($"{AppPaths.AdminGenres}?new=open", new GenreListQuery(Adding: true).Href());
         Assert.Equal(AppPaths.AdminGenres, new GenreListQuery().Href());
@@ -33,24 +34,26 @@ public sealed class GenreListQueryTests
     [Fact]
     public void ApiPath_AsksThePageOfTheListOfTheGenres()
     {
-        var query = new GenreListQuery(Text: "ave", Edit: Genre);
+        var query = new GenreListQuery(Text: "ave", Entry: "A", Edit: Genre);
 
-        Assert.Equal("/admin/genres?q=ave&page=1&pageSize=50", query.ApiPath());
+        Assert.Equal("/admin/genres?q=ave&entry=A&page=1&pageSize=50", query.ApiPath());
         Assert.Equal("/admin/genres?q=ave&pageSize=11", query.MergeCandidatesApiPath("ave", 10));
     }
 
     [Fact]
     public void Parse_ReadsBackTheAddressOfTheList_LeavingOutTheCriteriaOfOtherLists()
     {
-        var query = new GenreListQuery(Text: "ave", Page: 3, Edit: Genre);
+        var query = new GenreListQuery(Text: "ave", Entry: "A", Page: 3, Edit: Genre);
 
         Assert.Equal(query, GenreListQuery.Parse(new Uri($"http://frontend{query.Href()}").Query));
         Assert.Equal(new GenreListQuery(Adding: true), GenreListQuery.Parse("?new=open"));
-        Assert.Equal(new GenreListQuery(), GenreListQuery.Parse($"?entry=B&genreId={Genre}&filters=open&page=0&new=yes&edit=x"));
+        Assert.Equal(new GenreListQuery(), GenreListQuery.Parse($"?entry=AB&genreId={Genre}&filters=open&page=0&new=yes&edit=x"));
     }
 
     [Theory]
     [InlineData("q=ave", "admin.genres.search", "q=ave")]
+    [InlineData("q=ave&entry=A", "admin.genres.initial", "q=ave&entry=A")]
+    [InlineData("entry=A&page=2", "admin.genres.page", "entry=A&page=2")]
     [InlineData("q=ave&page=2", "admin.genres.page", "q=ave&page=2")]
     [InlineData("delete=01900000-0000-7000-8000-000000000003", "admin.genres.deletion", "genre=01900000-0000-7000-8000-000000000003")]
     [InlineData("merge=01900000-0000-7000-8000-000000000003&mergeQ=pol", "admin.genres.merge", "genre=01900000-0000-7000-8000-000000000003&q=pol")]

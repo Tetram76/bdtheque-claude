@@ -140,6 +140,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
     [Theory]
     [InlineData("", "2 913 éditions")]
+    [InlineData("entry=B", "2 913 éditions sous la lettre B")]
     [InlineData("q=978", "2 913 éditions sur 2 913")]
     public void Summary_TheCountOutOfAllTheEditions_AndTheOrder(string criteria, string count)
     {
@@ -147,12 +148,6 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(count, Text(summary.Children[0]));
         Assert.Equal("Dans l'ordre des albums, puis par année d'édition", Text(summary.Children[1]));
-    }
-
-    [Fact]
-    public void Navigation_ByInitial_IsNone()
-    {
-        Assert.Empty(Open("").FindAll(".initial-navigation"));
     }
 
     [Fact]
@@ -288,6 +283,35 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
         // The action of the list first, which displays the screen.
         Assert.Equal(["admin.editions.filter", "admin.editions"], _audience.Functions);
+    }
+
+    [Fact]
+    public void Navigation_ByInitial_KeepsTheSearch_ReturnsToTheFirstPage_AndMarksTheCurrentEntry()
+    {
+        var page = Open("q=978&entry=B&page=2");
+
+        Assert.Equal($"{AppPaths.AdminEditions}?q=978&entry=C", page.Find(".initial-navigation a[href*='entry=C']").GetAttribute("href"));
+        Assert.Equal($"{AppPaths.AdminEditions}?q=978", page.Find(".initial-navigation a:first-child").GetAttribute("href"));
+        Assert.Equal("B", Text(page.Find(".initial-navigation a[aria-current='page']")));
+    }
+
+    [Fact]
+    public void Empty_AnEntryWithoutResult_OffersTheWholeList()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("entry=X").Find(".empty-list");
+
+        Assert.Equal("Aucune édition sous cette entrée.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Toutes les éditions", AppPaths.AdminEditions)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Audience_TheNavigationByInitial_ThenTheScreen()
+    {
+        Open("q=978&entry=B", recorded: true);
+
+        Assert.Equal(["admin.editions.initial", "admin.editions"], _audience.Functions);
     }
 
     private IRenderedComponent<AdminEditions> Open(string criteria, bool recorded = false)

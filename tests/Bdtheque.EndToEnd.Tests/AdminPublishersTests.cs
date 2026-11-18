@@ -49,6 +49,21 @@ public sealed class AdminPublishersTests(ApplicationHost application) : BrowserT
     }
 
     [Theory, InEachTheme]
+    public async Task Search_ThenTheNavigationByInitial_NarrowTheList_ByName(string theme)
+    {
+        // Filed under the initial of the name as sorted, its article included: « Le Lombard » under L.
+        await CreatePublisherAsync($"Le Lombard {_marker}");
+        await CreatePublisherAsync($"Dupuis {_marker}");
+        await CreatePublisherAsync($"Delcourt {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPublishers}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" }).GetByRole(AriaRole.Link, new() { Name = "D", Exact = true }).ClickAsync();
+
+        await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Delcourt {_marker}", $"Dupuis {_marker}"]);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers, $"?q={_marker}&entry=D"));
+    }
+
+    [Theory, InEachTheme]
     public async Task Website_OfAPublisher_OpensBesideTheList(string theme)
     {
         await CreatePublisherAsync($"Dargaud {_marker}", "https://www.dargaud.example/");

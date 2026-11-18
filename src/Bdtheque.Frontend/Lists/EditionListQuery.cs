@@ -5,11 +5,12 @@ namespace Bdtheque.Frontend.Lists;
 
 /// <summary>
 /// The criteria of the list of the editions of the administration (visuel/listes/liste-par-liste.md), which its address
-/// carries (<see cref="AdminListQuery"/>): its search, on the ISBN, and its cross filters, those of the list of the
-/// consultation, without navigation by initial.
+/// carries (<see cref="AdminListQuery"/>): its search, on the ISBN, the navigation by initial of its albums, and its cross
+/// filters, those of the list of the consultation.
 /// </summary>
 public sealed record EditionListQuery(
     string? Text = null,
+    string? Entry = null,
     Guid? SeriesId = null,
     Guid? AlbumId = null,
     Guid? PublisherId = null,
@@ -18,7 +19,7 @@ public sealed record EditionListQuery(
     bool FiltersOpen = false,
     Guid? Delete = null,
     Guid? Merge = null,
-    string? MergeText = null) : AdminListQuery(Text, Entry: null, Page, FiltersOpen, Delete, Merge, MergeText)
+    string? MergeText = null) : AdminListQuery(Text, Entry, Page, FiltersOpen, Delete, Merge, MergeText)
 {
     internal const string SeriesName = "seriesId";
     internal const string AlbumName = "albumId";
@@ -26,7 +27,7 @@ public sealed record EditionListQuery(
     internal const string PublisherCollectionName = "publisherCollectionId";
 
     private static readonly ListFunctions EditionFunctions = new(
-        "edition", AudienceFunctions.AdminEditionsSearch, AudienceFunctions.AdminEditionsFilter, Initial: null,
+        "edition", AudienceFunctions.AdminEditionsSearch, AudienceFunctions.AdminEditionsFilter, AudienceFunctions.AdminEditionsInitial,
         AudienceFunctions.AdminEditionsPage, AudienceFunctions.AdminEditionsDeletion, AudienceFunctions.AdminEditionsMerge);
 
     protected override string Path => AppPaths.AdminEditions;
@@ -39,7 +40,7 @@ public sealed record EditionListQuery(
         [(SeriesName, SeriesId), (AlbumName, AlbumId), (PublisherName, PublisherId), (PublisherCollectionName, PublisherCollectionId)];
 
     /// <summary>The list without its filters, back on its first page: « Tout effacer ».</summary>
-    public EditionListQuery WithoutFilters() => new(Text);
+    public EditionListQuery WithoutFilters() => new(Text, Entry);
 
     /// <inheritdoc cref="AdminListQuery.Address"/>
     public static EditionListQuery Parse(string query)
@@ -47,6 +48,7 @@ public sealed record EditionListQuery(
         var address = new Address(query);
         return new EditionListQuery(
             address.Search,
+            address.Entry,
             address.Id(SeriesName),
             address.Id(AlbumName),
             address.Id(PublisherName),

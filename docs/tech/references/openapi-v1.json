@@ -19,6 +19,13 @@
             }
           },
           {
+            "name": "entry",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -1005,6 +1012,13 @@
         "parameters": [
           {
             "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entry",
             "in": "query",
             "schema": {
               "type": "string"
@@ -3804,6 +3818,13 @@
             }
           },
           {
+            "name": "Entry",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "SeriesId",
             "in": "query",
             "schema": {
@@ -3993,6 +4014,13 @@
         "parameters": [
           {
             "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entry",
             "in": "query",
             "schema": {
               "type": "string"
@@ -7319,6 +7347,13 @@
             }
           },
           {
+            "name": "Entry",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "SeriesId",
             "in": "query",
             "schema": {
@@ -7556,6 +7591,13 @@
             }
           },
           {
+            "name": "entry",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -7706,6 +7748,13 @@
         "parameters": [
           {
             "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entry",
             "in": "query",
             "schema": {
               "type": "string"

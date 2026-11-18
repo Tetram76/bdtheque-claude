@@ -1,3 +1,4 @@
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -96,15 +97,17 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     }
 
     [Theory]
-    [InlineData("Genres", "Label", "'   '", "CK_Genres_LabelNotBlank")]
-    [InlineData("Universes", "Name", "''", "CK_Universes_NameNotBlank")]
-    [InlineData("Publishers", "Name", "'   '", "CK_Publishers_NameNotBlank")]
-    public async Task RequiredTextCheckConstraint_BlankValue_ThrowsAtDatabase(string table, string column, string blankLiteral, string constraint)
+    [InlineData("Genres", "Label", "'   '", "CK_Genres_LabelNotBlank", true)]
+    [InlineData("Universes", "Name", "''", "CK_Universes_NameNotBlank", false)]
+    [InlineData("Publishers", "Name", "'   '", "CK_Publishers_NameNotBlank", true)]
+    public async Task RequiredTextCheckConstraint_BlankValue_ThrowsAtDatabase(
+        string table, string column, string blankLiteral, string constraint, bool hasNavigationEntry)
     {
         // Mirrors AuthorCheckConstraint_*BlankStrings*: IsRequired() alone only enforces
         // NOT NULL, so raw SQL could otherwise persist a blank label/name.
         var id = Guid.CreateVersion7();
-        var sql = $"INSERT INTO \"{table}\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"{column}\") VALUES ({{0}}, now(), now(), {blankLiteral})";
+        var (entryColumn, entryValue) = hasNavigationEntry ? (", \"NavigationEntry\"", ", 'A'") : ("", "");
+        var sql = $"INSERT INTO \"{table}\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"{column}\"{entryColumn}) VALUES ({{0}}, now(), now(), {blankLiteral}{entryValue})";
         await AssertViolatesAsync(constraint, () =>
             _fixture.Context.Database.ExecuteSqlRawAsync(sql, id));
     }
@@ -114,7 +117,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var publisherId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\") VALUES ({0}, now(), now(), 'Casterman')", publisherId);
+            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Casterman', 'C')", publisherId);
 
         var id = Guid.CreateVersion7();
         await AssertViolatesAsync("CK_PublisherCollections_NameNotBlank", () =>
@@ -156,7 +159,7 @@ public sealed class CheckConstraintTests : IAsyncLifetime
         // complexity for a raw-SQL bypass scenario that isn't plausible with a single admin user.
         var publisherId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\") VALUES ({0}, now(), now(), 'Casterman')", publisherId);
+            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Casterman', 'C')", publisherId);
         var collectionId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
             "INSERT INTO \"PublisherCollections\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\", \"PublisherId\") VALUES ({0}, now(), now(), 'Tintin', {1})",
@@ -324,6 +327,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     [InlineData("Series", "CK_Series_NavigationEntryValid")]
     [InlineData("Albums", "CK_Albums_NavigationEntryValid")]
     [InlineData("Authors", "CK_Authors_NavigationEntryValid")]
+    [InlineData("Publishers", "CK_Publishers_NavigationEntryValid")]
+    [InlineData("Genres", "CK_Genres_NavigationEntryValid")]
     public async Task NavigationEntryCheckConstraint_ValueOutsideEntries_ThrowsAtDatabase(string table, string constraint)
     {
         // Lowercase or accented letters are filed under their uppercase base letter: only
@@ -335,6 +340,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
                         "VALUES ({0}, now(), now(), 'Épervier', 'Épervier', false, false, false, false, 'é')",
             "Albums" => "INSERT INTO \"Albums\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Title\", \"SortKey\", \"NavigationEntry\", \"IsManualSortKey\", \"Type\", \"IsSpecialIssue\") " +
                         $"VALUES ({{0}}, now(), now(), 'Épervier', 'Épervier', 'é', false, {(int)AlbumType.Regular}, false)",
+            "Publishers" => "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Éditions', 'é')",
+            "Genres" => "INSERT INTO \"Genres\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Label\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Épopée', 'é')",
             _ => "INSERT INTO \"Authors\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Pseudonym\", \"DisplayName\", \"SortKey\", \"NavigationEntry\") VALUES ({0}, now(), now(), 'Émile', 'Auteur', 'Émile', 'é')",
         };
 
@@ -499,7 +506,8 @@ public sealed class CheckConstraintTests : IAsyncLifetime
     {
         var publisherId = Guid.CreateVersion7();
         await _fixture.Context.Database.ExecuteSqlRawAsync(
-            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\") VALUES ({0}, now(), now(), {1})", publisherId, name);
+            "INSERT INTO \"Publishers\" (\"Id\", \"CreatedAt\", \"ModifiedAt\", \"Name\", \"NavigationEntry\") VALUES ({0}, now(), now(), {1}, {2})",
+            publisherId, name, NavigationEntryCalculator.Compute(name));
         return publisherId;
     }
 

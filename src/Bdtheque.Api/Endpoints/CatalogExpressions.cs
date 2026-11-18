@@ -176,6 +176,19 @@ internal static class CatalogExpressions
         (Expression<Func<TSource, TResult>>)new MarkerExpander().Visit(expression);
 
     /// <summary>
+    /// Keeps the records whose album is filed under <paramref name="entry"/> of the navigation by initial, an album without
+    /// a title of its own under the current entry of its series (modele-metier/album.md): the lists of the albums, of the
+    /// editions and of the purchase intents, ranged in the order of the albums, share it (visuel/listes/liste-par-liste.md).
+    /// All of them for no entry (« Toutes »).
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
+    public static IQueryable<T> WhereAlbumEntry<T>(this IQueryable<T> source, Expression<Func<T, Album>> album, string? entry)
+    {
+        CatalogFilters.EnsureNavigationEntry(entry);
+        return entry is null ? source : source.Where(Of(album, a => (a.NavigationEntry ?? a.Series!.NavigationEntry) == entry));
+    }
+
+    /// <summary>
     /// Sorts in the order of the albums: by sort key, that of the series standing in for an album without
     /// a title of its own (modele-metier/album.md), then by volume, then by album for a total order.
     /// </summary>

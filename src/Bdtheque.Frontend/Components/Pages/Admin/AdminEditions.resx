@@ -129,6 +129,12 @@
   <data name="Empty.None" xml:space="preserve">
     <value>Aucune édition n'est encore enregistrée.</value>
   </data>
+  <data name="Empty.Entry" xml:space="preserve">
+    <value>Aucune édition sous cette entrée.</value>
+  </data>
+  <data name="Empty.All" xml:space="preserve">
+    <value>Toutes les éditions</value>
+  </data>
   <data name="Deletion.Title" xml:space="preserve">
     <value>Supprimer cette édition ?</value>
   </data>

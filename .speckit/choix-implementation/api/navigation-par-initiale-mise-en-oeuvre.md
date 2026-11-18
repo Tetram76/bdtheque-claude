@@ -1,12 +1,12 @@
 ---
 type: Choix d'implémentation
 title: 'Navigation par initiale : mise en œuvre'
-description: 'Entrée de navigation calculée par le domaine selon la collation française, stockée et indexée ; clé de tri des auteurs.'
+description: 'Entrée de navigation calculée par le domaine selon la collation française, stockée et indexée ; clé de tri des auteurs ; éditeurs et genres par leur nom, éditions et intentions d''achat par leur album.'
 applies_to:
   - 'src/Bdtheque.Domain/Common/NavigationEntryCalculator.cs'
   - 'src/Bdtheque.Domain/Common/TitleSortKeyCalculator.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/NavigationEntryColumn.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T12:00:00Z }
 ---
 
 # Navigation par initiale : mise en œuvre
@@ -19,3 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 - Un album **sans titre** n'a ni clé de tri ni entrée stockées : la substitution par sa série ([Album](../../modele-metier/album.md), clé de tri) est résolue **à la lecture**.
   - **Alternative écartée (valeur de la série recopiée sur l'album)** : la copie deviendrait fausse à chaque modification du titre ou de la clé de tri de la série.
 - Les **auteurs** reçoivent la même clé de tri stockée que les titres ([Artistes](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)), calculée par le domaine : sans elle, la base ne pourrait ni trier ni paginer les artistes.
+- Les **éditeurs** et les **genres**, triés par leur nom ou leur libellé tel quel, sans clé de tri, reçoivent la même **entrée stockée**, calculée par le domaine depuis ce nom ou ce libellé, et indexée avec lui ([Liste par liste](../../visuel/listes/liste-par-liste.md)).
+  - **Alternative écartée (clé de tri propre aux éditeurs et aux genres)** : leur liste est triée par nom ; une clé à saisir ou à calculer n'aurait rien d'autre à porter que ce nom.
+- Les **éditions** et les **intentions d'achat** n'ont pas d'entrée propre : elles sont rangées sous celle de leur album, lue à la requête par une **expression unique**, que partage la liste des albums, l'album sans titre prenant celle de sa série.
+  - **Alternative écartée (entrée recopiée sur l'édition ou l'intention)** : la copie deviendrait fausse à chaque modification du titre de l'album ou de sa série, comme pour l'album sans titre.

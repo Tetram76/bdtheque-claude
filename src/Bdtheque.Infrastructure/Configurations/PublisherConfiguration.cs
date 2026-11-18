@@ -17,6 +17,11 @@ internal sealed class PublisherConfiguration : IEntityTypeConfiguration<Publishe
 
         builder.HasIndex(p => p.Name).IsUnique();
 
+        // The navigation by initial filters on the entry, then orders by name (visuel/listes/liste-par-liste.md).
+        builder.Property(p => p.NavigationEntry).IsRequired().HasMaxLength(NavigationEntryColumn.MaxLength);
+        builder.HasIndex(p => new { p.NavigationEntry, p.Name });
+        builder.ToTable(t => t.HasCheckConstraint("CK_Publishers_NavigationEntryValid", NavigationEntryColumn.ValidValuesSql));
+
         // Database-level defence in depth mirroring the domain invariant (see AuthorConfiguration):
         // IsRequired() only enforces NOT NULL, so a raw-SQL write could still persist ''.
         builder.ToTable(t => t.HasCheckConstraint(

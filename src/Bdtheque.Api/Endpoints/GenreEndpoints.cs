@@ -62,24 +62,19 @@ internal static class GenreEndpoints
     }
 
     private static Task<Page<GenreListItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
-        context.Genres.AsNoTracking()
-            .WhereContains(q, g => g.Label)
-            .OrderBy(g => g.Label)
-            .ThenBy(g => g.Id)
-            .ToPageAsync(page, pageSize, g => new GenreListItem(g.Id, g.Label), cancellationToken);
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        Search(context, q, entry).ToPageAsync(page, pageSize, g => new GenreListItem(g.Id, g.Label), cancellationToken);
 
     /// <summary>
-    /// The list of the genres of the administration (visuel/listes/liste-par-liste.md): the search on the label and the order
-    /// of the list of the consultation. Each row counts the albums and series of the genre as the lists filtered on it find
-    /// them, and carries its modification and its version, which its modification and its deletion send back.
+    /// The list of the genres of the administration (visuel/listes/liste-par-liste.md): the search, the navigation by initial
+    /// and the order of the list of the consultation. Each row counts the albums and series of the genre as the lists filtered
+    /// on it find them, and carries its modification and its version, which its modification and its deletion send back.
     /// </summary>
     private static Task<Page<GenreAdminListItem>> ListForAdministrationAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize) =>
-        context.Genres.AsNoTracking()
-            .WhereContains(q, g => g.Label)
-            .OrderBy(g => g.Label)
-            .ThenBy(g => g.Id)
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        Search(context, q, entry)
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Genre g) => new GenreAdminListItem(
                 g.Id,
                 g.Label,
@@ -87,6 +82,17 @@ internal static class GenreEndpoints
                 context.Series.Count(s => s.IsOfGenre(g.Id)),
                 g.ModifiedAt,
                 EF.Property<uint>(g, BdthequeDbContext.VersionProperty))), cancellationToken);
+
+    /// <summary>The genres found by their label, under the entry of the navigation, by label.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
+    private static IOrderedQueryable<Genre> Search(BdthequeDbContext context, string? text, string? entry)
+    {
+        CatalogFilters.EnsureNavigationEntry(entry);
+        var genres = context.Genres.AsNoTracking().WhereContains(text, g => g.Label);
+        if (entry is not null)
+            genres = genres.Where(g => g.NavigationEntry == entry);
+        return genres.OrderBy(g => g.Label).ThenBy(g => g.Id);
+    }
 
     private static async Task<GenreForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
         await context.Genres

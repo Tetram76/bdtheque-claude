@@ -83,6 +83,8 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.GenreAsync("Policier");
         // Accented and without album: the list of the genres refuses « epopee » as already taken (modele-metier/genre.md).
         await data.GenreAsync(AccentedGenre);
+        // Filed under « @ » by the navigation by initial of the genres (visuel/listes/liste-par-liste.md).
+        await data.GenreAsync("(Auto)fiction");
 
         var ombrelune = await data.UniverseAsync("Ombrelune", "Monde imaginaire de lunes et de marées.", null);
         var archipelago = await data.UniverseAsync("Archipel des Brumes", "Îles perdues aux confins d'Ombrelune.", ombrelune);
@@ -97,6 +99,8 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         // it; nothing but a name, whose deletion is accepted; only named by an edition to buy, none in the collection.
         await data.PublisherAsync("Atelier Mistral", "https://www.example.net/atelier-mistral", "Carnets", "Escapades", "Horizons", "Lumières", "Traversées");
         await data.PublisherAsync(UnusedPublisherName, null);
+        // Filed under « # » by the navigation by initial of the publishers (visuel/listes/liste-par-liste.md).
+        await data.PublisherAsync("13 Bulles", null);
         var horizon = await data.PublisherAsync(IntendedPublisherName, "https://www.example.org/horizon");
 
         var arnaud = await data.AuthorAsync("Arnaud", "Émile", nationality: "Française", biography: "Scénariste au long cours, conteur des marées d'Ombrelune.");

@@ -154,6 +154,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
     [Theory]
     [InlineData("", "18 intentions")]
+    [InlineData("entry=B", "18 intentions sous la lettre B")]
     [InlineData("q=Bla", "18 intentions sur 18")]
     public void Summary_TheCountOutOfAllTheIntents_AndTheOrder(string criteria, string count)
     {
@@ -247,6 +248,35 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         // The action of the list first, which displays the screen.
         Assert.Equal(["admin.purchase-intents.search", "admin.purchase-intents"], _audience.Functions);
+    }
+
+    [Fact]
+    public void Navigation_ByInitial_KeepsTheSearch_ReturnsToTheFirstPage_AndMarksTheCurrentEntry()
+    {
+        var page = Open("q=Bla&entry=B&page=2");
+
+        Assert.Equal($"{AppPaths.AdminPurchaseIntents}?q=Bla&entry=C", page.Find(".initial-navigation a[href*='entry=C']").GetAttribute("href"));
+        Assert.Equal($"{AppPaths.AdminPurchaseIntents}?q=Bla", page.Find(".initial-navigation a:first-child").GetAttribute("href"));
+        Assert.Equal("B", Text(page.Find(".initial-navigation a[aria-current='page']")));
+    }
+
+    [Fact]
+    public void Empty_AnEntryWithoutResult_OffersTheWholeList()
+    {
+        Answer([], totalCount: 0);
+
+        var empty = Open("entry=X").Find(".empty-list");
+
+        Assert.Equal("Aucune intention d'achat sous cette entrée.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Toutes les intentions d'achat", AppPaths.AdminPurchaseIntents)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Audience_TheNavigationByInitial_ThenTheScreen()
+    {
+        Open("q=Bla&entry=B", recorded: true);
+
+        Assert.Equal(["admin.purchase-intents.initial", "admin.purchase-intents"], _audience.Functions);
     }
 
     private IRenderedComponent<AdminPurchaseIntents> Open(string criteria, bool recorded = false)

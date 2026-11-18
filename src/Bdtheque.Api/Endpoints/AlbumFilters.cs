@@ -22,10 +22,7 @@ internal sealed record AlbumFilters(
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
     public async Task<IQueryable<Album>> ApplyAsync(IQueryable<Album> albums, BdthequeDbContext context, CancellationToken cancellationToken)
     {
-        CatalogFilters.EnsureNavigationEntry(Entry);
-        albums = albums.WhereContains(Text, a => a.Title, a => a.Series!.Title);
-        if (Entry is not null)
-            albums = albums.Where(a => (a.NavigationEntry ?? a.Series!.NavigationEntry) == Entry);
+        albums = albums.WhereContains(Text, a => a.Title, a => a.Series!.Title).WhereAlbumEntry(a => a, Entry);
         if (SeriesId is not null)
             albums = albums.Where(a => a.SeriesId == SeriesId);
         if (AuthorId is not null)

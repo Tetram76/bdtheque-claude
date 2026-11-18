@@ -712,6 +712,12 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("NavigationEntry")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .UseCollation("fr-FR-x-icu");
+
                     b.Property<uint>("Version")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -723,9 +729,13 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Label")
                         .IsUnique();
 
+                    b.HasIndex("NavigationEntry", "Label");
+
                     b.ToTable("Genres", t =>
                         {
                             t.HasCheckConstraint("CK_Genres_LabelNotBlank", "COALESCE(LENGTH(TRIM(\"Label\")), 0) > 0");
+
+                            t.HasCheckConstraint("CK_Genres_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
                         });
                 });
 
@@ -793,6 +803,12 @@ namespace Bdtheque.Infrastructure.Migrations
                         .HasColumnType("character varying(300)")
                         .UseCollation("fr_case_accent_insensitive");
 
+                    b.Property<string>("NavigationEntry")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .UseCollation("fr-FR-x-icu");
+
                     b.Property<uint>("Version")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -809,9 +825,13 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
+                    b.HasIndex("NavigationEntry", "Name");
+
                     b.ToTable("Publishers", t =>
                         {
                             t.HasCheckConstraint("CK_Publishers_NameNotBlank", "COALESCE(LENGTH(TRIM(\"Name\")), 0) > 0");
+
+                            t.HasCheckConstraint("CK_Publishers_NavigationEntryValid", "\"NavigationEntry\" IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '@')");
                         });
                 });
 

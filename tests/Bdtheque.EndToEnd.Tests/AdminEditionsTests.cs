@@ -54,6 +54,21 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
     }
 
     [Theory, InEachTheme]
+    public async Task Navigation_ByInitialOfTheAlbums_NarrowsTheList_KeepingItsFilters(string theme)
+    {
+        // An edition is filed under the entry of its album: « Le Lotus bleu » under L.
+        var publisher = await CreatePublisherAsync($"Casterman {_marker}");
+        await CreateEditionAsync(await CreateAlbumAsync($"Le Lotus bleu {_marker}"), publisher, null);
+        await CreateEditionAsync(await CreateAlbumAsync($"Zorglub {_marker}"), publisher, null);
+        var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?publisherId={publisher.Id}");
+
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" }).GetByRole(AriaRole.Link, new() { Name = "L", Exact = true }).ClickAsync();
+
+        await Assertions.Expect(Albums(page)).ToHaveTextAsync([$"Le Lotus bleu {_marker}"]);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditions, $"?entry=L&publisherId={publisher.Id}"));
+    }
+
+    [Theory, InEachTheme]
     public async Task Filter_OnAnAlbumChosenByTypingItsTitle_NarrowsTheList_AndItsTagRemovesIt(string theme)
     {
         var publisher = await CreatePublisherAsync($"Dupuis {_marker}");

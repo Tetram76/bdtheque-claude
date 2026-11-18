@@ -51,6 +51,20 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
     }
 
     [Theory, InEachTheme]
+    public async Task Search_ThenTheNavigationByInitialOfTheAlbums_NarrowTheList(string theme)
+    {
+        // An intent is filed under the entry of its album: « Le Lotus bleu » under L.
+        await CreateAlbumIntentAsync(await CreateAlbumAsync($"Le Lotus bleu {_marker}"));
+        await CreateAlbumIntentAsync(await CreateAlbumAsync($"Zorglub {_marker}"));
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Navigation par initiale" }).GetByRole(AriaRole.Link, new() { Name = "Z", Exact = true }).ClickAsync();
+
+        await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Zorglub {_marker}"]);
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents, $"?q={_marker}&entry=Z"));
+    }
+
+    [Theory, InEachTheme]
     public async Task Removal_OfAnIntentOnAnEdition_DoesNotAnnounceTheEditionTargeted_AndTakesTheIntentOutOfTheList(string theme)
     {
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
