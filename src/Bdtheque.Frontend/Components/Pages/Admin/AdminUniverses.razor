@@ -141,14 +141,14 @@
                             </p>
                         }
                         <Field Id="universe-name" Label="@L["Name"]" Required Error="@Errors.For(NameField)" Context="control">
-                            <input id="@control.Id" type="text" name="@NameName" autofocus="@(Focused == NameField)"
+                            <input id="@control.Id" type="text" name="@NameName" autofocus="@(Focused == NameField)" tabindex="0"
                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryName" />
                         </Field>
                         <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" Parent="_parent"
                                              Error="@Errors.For(ParentField)" Autofocus="@(Focused == ParentField)" />
                         <Field Id="universe-description" Label="@L["Description"]" Error="@Errors.For(DescriptionField)" Context="control">
                             <textarea id="@control.Id" name="@DescriptionName" rows="5" placeholder="@L["Description.Placeholder"]"
-                                      autofocus="@(Focused == DescriptionField)" aria-describedby="@control.DescribedBy"
+                                      autofocus="@(Focused == DescriptionField)" tabindex="0" aria-describedby="@control.DescribedBy"
                                       aria-invalid="@control.Invalid">@EntryDescription</textarea>
                         </Field>
                     </ChildContent>

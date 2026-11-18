@@ -2,6 +2,7 @@
 
 ## 2026-11-18
 
+* **Choix** : un champ marqué `autofocus` déclare `tabindex="0"`, que `FocusOnNavigate` ne remplace plus par `-1` après une navigation améliorée ; script réservant `FocusOnNavigate` au titre écarté (#539).
 * **Décision de l'utilisateur** : la possession d'un album s'intitule « Possession », ses états « Possédé », « Intention d'achat » et « Non possédé », partout où elle est présentée, comptée ou filtrée ; « Collection » ne désigne plus, dans les libellés, que la collection d'un éditeur, filtres des listes compris ; colonne « Avancement » de la liste des séries, mention « Suivi » du bloc « Avancement » de la saisie d'une série (#535).
 
 ## 2026-11-17

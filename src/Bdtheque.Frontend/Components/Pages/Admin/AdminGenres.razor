@@ -108,7 +108,7 @@
                 <Dialog Id="genre-new" Title="@Creation["Title"]" Tone="DialogTone.Creation" CloseHref="@ListOnly.Href()">
                     <ChildContent>
                         <Field Id="genre-new-label" Label="@Creation["Label"]" Required Error="@LabelError(_newProblem, NewLabel)" Context="control">
-                            <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
+                            <input id="@control.Id" type="text" name="@LabelName" autofocus tabindex="0" aria-describedby="@control.DescribedBy"
                                    aria-invalid="@control.Invalid" @bind="NewLabel" />
                         </Field>
                         @if (_newProblem is { } problem)
@@ -363,7 +363,7 @@
             <span class="genre-main" role="cell">
                 <Field Id="genre-edit-label" Label="@L["Label.Of", row?.Label ?? EditLabel ?? ""]" LabelHidden="true" Required
                        Error="@LabelError(_editProblem, EditLabel)" Context="control">
-                    <input id="@control.Id" type="text" name="@LabelName" autofocus aria-describedby="@control.DescribedBy"
+                    <input id="@control.Id" type="text" name="@LabelName" autofocus tabindex="0" aria-describedby="@control.DescribedBy"
                            aria-invalid="@control.Invalid" @bind="EditLabel" />
                 </Field>
             </span>
