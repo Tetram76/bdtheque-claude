@@ -733,13 +733,10 @@ erDiagram
 | Contrainte | Définition |
 | --- | --- |
 | `PK_Universes` | `PRIMARY KEY ("Id")` |
+| `IX_Universes_ParentId_Name` | `UNIQUE NULLS NOT DISTINCT ("ParentId", "Name") DEFERRABLE INITIALLY DEFERRED` |
 | `FK_Universes_Universes_ParentId` | `FOREIGN KEY ("ParentId") REFERENCES "Universes"("Id") ON DELETE RESTRICT` |
 | `CK_Universes_NameNotBlank` | `CHECK ((COALESCE(length(TRIM(BOTH FROM "Name")), 0) > 0))` |
 | `CK_Universes_NoSelfParent` | `CHECK ((("ParentId" IS NULL) OR ("ParentId" <> "Id")))` |
-
-| Index | Unique | Définition |
-| --- | --- | --- |
-| `IX_Universes_ParentId_Name` | oui | `btree ("ParentId", "Name") NULLS NOT DISTINCT` |
 
 ### `__EFMigrationsHistory`
 

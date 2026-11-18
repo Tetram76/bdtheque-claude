@@ -1159,7 +1159,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ParentId", "Name")
-                        .IsUnique();
+                        .HasAnnotation("Bdtheque:UniqueAtCommit", true);
 
                     NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("ParentId", "Name"), false);
 

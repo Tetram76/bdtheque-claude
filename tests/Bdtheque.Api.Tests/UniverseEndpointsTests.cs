@@ -166,6 +166,21 @@ public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
+    public async Task Update_RenamedUnderAParentCreatedOnTheSpotUnderItsFormerName_IsAccepted()
+    {
+        // The universe gives its former name to the parent its panel creates on the spot: no duplicate in the final state, which
+        // alone the uniqueness checks, at commit.
+        var name = $"Univers {Guid.NewGuid():N}";
+        var universe = await CreateAsync(name);
+        var key = Guid.NewGuid();
+
+        var moved = await UpdateAsync(universe, new UpdateUniverseRequest(
+            $"{name} : la série", null, key, universe.Version, NewRecords.None with { Universes = [new NewUniverse(key, name)] }));
+
+        Assert.Equal(($"{name} : la série", name), (moved.Name, moved.Parent!.Universe.Name));
+    }
+
+    [Fact]
     public async Task Update_UnderAParentCreatedOnTheSpotWhoseNameIsTakenAtTheTop_DesignatesIt_AndChangesNothing()
     {
         // Created at the top of the hierarchy, the parent meets the names of the universes without parent: the error designates
