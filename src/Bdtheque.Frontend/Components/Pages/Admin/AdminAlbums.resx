@@ -40,7 +40,7 @@
     <value>Éditeur</value>
   </data>
   <data name="Filter.PublisherCollection" xml:space="preserve">
-    <value>Collection éditeur</value>
+    <value>Collection</value>
   </data>
   <data name="Filter.Genre" xml:space="preserve">
     <value>Genre</value>
@@ -49,7 +49,7 @@
     <value>Univers</value>
   </data>
   <data name="Filter.State" xml:space="preserve">
-    <value>Collection</value>
+    <value>Possession</value>
   </data>
   <data name="Filter.Any" xml:space="preserve">
     <value>Tous</value>
@@ -61,13 +61,13 @@
     <value>Tous les albums</value>
   </data>
   <data name="State.InCollection" xml:space="preserve">
-    <value>Dans la collection</value>
+    <value>Possédé</value>
   </data>
   <data name="State.PurchaseIntent" xml:space="preserve">
     <value>Intention d'achat</value>
   </data>
   <data name="State.OutsideCollection" xml:space="preserve">
-    <value>Hors collection</value>
+    <value>Non possédé</value>
   </data>
   <data name="Count.None" xml:space="preserve">
     <value>Aucun album</value>
@@ -94,7 +94,7 @@
     <value>Éditions</value>
   </data>
   <data name="Column.State" xml:space="preserve">
-    <value>Collection</value>
+    <value>Possession</value>
   </data>
   <data name="Column.Modified" xml:space="preserve">
     <value>Modifié</value>

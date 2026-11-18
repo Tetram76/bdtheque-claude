@@ -114,7 +114,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal(["La série", "Avancement", "Calculs", "Les auteurs", "Éditeur et collection", "Genres et univers", "Résumé et notes",
                 "Nouvelles éditions"],
             page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
-        Assert.Equal(["Identification", "Collection", "Réglages", "Contributions", "Publication", "Classement", "Lecture", "Pré-remplissage"],
+        Assert.Equal(["Identification", "Suivi", "Réglages", "Contributions", "Publication", "Classement", "Lecture", "Pré-remplissage"],
             page.FindAll(".block-kicker").Select(kicker => kicker.TextContent.Trim()));
     }
 
@@ -491,7 +491,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[1]);
 
         var changes = page.Find("dialog .changes-dialog-list");
-        Assert.Equal(["Titre", "Statut", "Éditeur", "Collection éditeur", "Reliure"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
+        Assert.Equal(["Titre", "Statut", "Éditeur", "Collection", "Reliure"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
         Assert.Equal(["Blacksad, l'intégrale", "Terminée", "—", "—", "Brochée"], changes.QuerySelectorAll("dd").Select(dd => dd.TextContent));
         Assert.Contains("admin.series-form.changes", _audience.Functions);
     }

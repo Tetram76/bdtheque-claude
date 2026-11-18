@@ -19,7 +19,7 @@
     <value>Cet album est souhaité : aucune de ses éditions n&apos;est encore dans la collection.</value>
   </data>
   <data name="Out" xml:space="preserve">
-    <value>Hors collection</value>
+    <value>Non possédé</value>
   </data>
   <data name="Out.Detail" xml:space="preserve">
     <value>Cet album est catalogué, sans édition dans la collection.</value>

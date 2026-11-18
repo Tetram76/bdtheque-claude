@@ -97,6 +97,13 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Header_NamesTheColumns_ThePossessionOfTheAlbum()
+    {
+        // « Collection » names the collection of a publisher only (fonctionnel/regles-metier/appartenance-a-la-collection.md, #425).
+        Assert.Equal("Possession", Text(Open("").Find(".intent-row-head .intent-collection")));
+    }
+
+    [Fact]
     // What an intent targets is told apart at first glance: the whole album, any edition doing, or one edition, named. Its album is
     // in the collection or wished for, never outside it (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album).
     public void Rows_TheAlbumWhatTheIntentTargetsItsMembershipAndItsDate()
@@ -111,7 +118,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("Blacksad - INT. [1 à 5]", "Album", "toute édition", "Intention d'achat", "Posée le 08/10/2026"),
-                ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Édition", "Casterman (Fac-similé) [2013]", "Dans la collection", "Posée le 08/10/2026"),
+                ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Édition", "Casterman (Fac-similé) [2013]", "Possédé", "Posée le 08/10/2026"),
                 ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Intention d'achat", "Posée le 09/10/2026"),
             ],
             rows);

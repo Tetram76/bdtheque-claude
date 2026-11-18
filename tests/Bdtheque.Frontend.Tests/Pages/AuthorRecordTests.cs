@@ -198,7 +198,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Equal(["Scénario", "Dessin"], album.QuerySelectorAll(".role").Select(r => r.TextContent.Trim()));
         Assert.Equal(["scenarist", "illustrator"], album.QuerySelectorAll(".role").Select(r => r.GetAttribute("data-role")));
         Assert.Equal("Appréciation : Bien, 4 sur 5", album.QuerySelector(".rating-stars[role='img']")!.GetAttribute("aria-label"));
-        Assert.Equal("Hors collection", album.QuerySelector(".tag")!.TextContent.Trim());
+        Assert.Equal("Non possédé", album.QuerySelector(".tag")!.TextContent.Trim());
         // An album has nothing to unfold.
         Assert.Empty(album.QuerySelectorAll("details"));
     }
@@ -281,7 +281,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Null(albums[0].QuerySelector(".entry-meta"));
         Assert.Equal(AppPaths.Album(SangreAlbumId(2)), albums[1].QuerySelector("a.entry-title")!.GetAttribute("href"));
         Assert.Equal(["Dessin", "Couleurs"], albums[0].QuerySelectorAll(".role").Select(r => r.TextContent.Trim()));
-        Assert.Equal("Dans la collection", albums[0].QuerySelector(".tag")!.TextContent.Trim());
+        Assert.Equal("Possédé", albums[0].QuerySelector(".tag")!.TextContent.Trim());
         Assert.Empty(albums[1].QuerySelectorAll(".rating-stars"));
         // The disclosure is named after its series, for assistive technologies.
         Assert.Equal("Albums de la série Sangre", Entries(page)[2].QuerySelector("details.entry-albums > summary")!.TextContent.Trim());

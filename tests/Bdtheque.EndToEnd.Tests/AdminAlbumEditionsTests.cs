@@ -87,7 +87,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         await Assertions.Expect(page.Locator(".album-editions-none").First).ToHaveTextAsync("Aucune édition dans la collection.");
-        await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Hors collection");
+        await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Non possédé");
     }
 
     [Theory, InEachTheme]
